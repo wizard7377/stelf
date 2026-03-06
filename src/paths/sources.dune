@@ -1,0 +1,79 @@
+
+      (rule
+ (mode fallback)
+ (target origins.sig.ml)
+ (action
+  (write-file origins.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target origins.fun.ml)
+ (action
+  (write-file origins.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target origins.sml.ml)
+ (action
+  (write-file origins.sml.ml "")))
+
+(rule
+ (target origins.ml)
+ (deps
+  (:sig origins.sig.ml)
+  (:fun origins.fun.ml)
+  (:sml origins.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target paths_.sig.ml)
+ (action
+  (write-file paths_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target paths_.fun.ml)
+ (action
+  (write-file paths_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target paths_.sml.ml)
+ (action
+  (write-file paths_.sml.ml "")))
+
+(rule
+ (target paths_.ml)
+ (deps
+  (:sig paths_.sig.ml)
+  (:fun paths_.fun.ml)
+  (:sml paths_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

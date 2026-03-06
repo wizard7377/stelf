@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name prover) (modules state search data fill split fixedpoint introduce elim interactive weaken prover_) (libraries tomega lambda global names print index modes typecheck table subordinate solvers opsem trail compile worldcheck formatter timing basis) (flags (:standard -w -A -open Basis  -open Tomega  -open Lambda  -open Global  -open Names  -open Print  -open Index  -open Modes  -open Typecheck  -open Table  -open Subordinate  -open Solvers  -open Opsem  -open Trail  -open Compile  -open Worldcheck  -open Formatter  -open Timing))
+ (wrapped false))

@@ -1,0 +1,79 @@
+
+      (rule
+ (mode fallback)
+ (target timers.sig.ml)
+ (action
+  (write-file timers.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target timers.fun.ml)
+ (action
+  (write-file timers.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target timers.sml.ml)
+ (action
+  (write-file timers.sml.ml "")))
+
+(rule
+ (target timers.ml)
+ (deps
+  (:sig timers.sig.ml)
+  (:fun timers.fun.ml)
+  (:sml timers.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target timing_.sig.ml)
+ (action
+  (write-file timing_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target timing_.fun.ml)
+ (action
+  (write-file timing_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target timing_.sml.ml)
+ (action
+  (write-file timing_.sml.ml "")))
+
+(rule
+ (target timing_.ml)
+ (deps
+  (:sig timing_.sig.ml)
+  (:fun timing_.fun.ml)
+  (:sml timing_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

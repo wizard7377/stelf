@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name subordinate) (modules intset subordinate_) (libraries global table lambda names basis) (flags (:standard -w -A -open Basis  -open Global  -open Table  -open Lambda  -open Names))
+ (wrapped false))

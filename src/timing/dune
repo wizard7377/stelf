@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name timing) (modules timers timing_) (libraries basis) (flags (:standard -w -A -open Basis))
+ (wrapped false))

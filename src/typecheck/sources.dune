@@ -1,0 +1,79 @@
+
+      (rule
+ (mode fallback)
+ (target typecheck_.sig.ml)
+ (action
+  (write-file typecheck_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target typecheck_.fun.ml)
+ (action
+  (write-file typecheck_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target typecheck_.sml.ml)
+ (action
+  (write-file typecheck_.sml.ml "")))
+
+(rule
+ (target typecheck_.ml)
+ (deps
+  (:sig typecheck_.sig.ml)
+  (:fun typecheck_.fun.ml)
+  (:sml typecheck_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target strict.sig.ml)
+ (action
+  (write-file strict.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target strict.fun.ml)
+ (action
+  (write-file strict.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target strict.sml.ml)
+ (action
+  (write-file strict.sml.ml "")))
+
+(rule
+ (target strict.ml)
+ (deps
+  (:sig strict.sig.ml)
+  (:fun strict.fun.ml)
+  (:sml strict.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

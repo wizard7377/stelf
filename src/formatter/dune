@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name formatter) (modules formatter_) (libraries basis) (flags (:standard -w -A -open Basis))
+ (wrapped false))

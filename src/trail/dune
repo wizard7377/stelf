@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name trail) (modules trail_ notrail) (libraries basis) (flags (:standard -w -A -open Basis))
+ (wrapped false))

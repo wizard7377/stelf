@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name thm) (modules thmsyn thmprint thm_) (libraries global lambda names formatter modes paths tabling basis) (flags (:standard -w -A -open Basis  -open Global  -open Lambda  -open Names  -open Formatter  -open Modes  -open Paths  -open Tabling))
+ (wrapped false))

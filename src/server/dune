@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name server) (modules sigint mlton_thread sigint_mlton sigint_smlnj server_) (libraries timing frontend basis) (flags (:standard -w -A -open Basis  -open Timing  -open Frontend))
+ (wrapped false))

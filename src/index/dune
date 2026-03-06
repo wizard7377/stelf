@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name index) (modules index_skolem index_) (libraries lambda table global basis) (flags (:standard -w -A -open Basis  -open Lambda  -open Table  -open Global))
+ (wrapped false))

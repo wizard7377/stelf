@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name tomega) (modules opsem converter typecheck tomegaprint tomeganames unify coverage redundant abstract tomega_) (libraries global lambda worldcheck cover formatter names print typecheck subordinate meta modes trail basis) (flags (:standard -w -A -open Basis  -open Global  -open Lambda  -open Worldcheck  -open Cover  -open Formatter  -open Names  -open Print  -open Typecheck  -open Subordinate  -open Meta  -open Modes  -open Trail))
+ (wrapped false))

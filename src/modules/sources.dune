@@ -1,0 +1,79 @@
+
+      (rule
+ (mode fallback)
+ (target modsyn.sig.ml)
+ (action
+  (write-file modsyn.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target modsyn.fun.ml)
+ (action
+  (write-file modsyn.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target modsyn.sml.ml)
+ (action
+  (write-file modsyn.sml.ml "")))
+
+(rule
+ (target modsyn.ml)
+ (deps
+  (:sig modsyn.sig.ml)
+  (:fun modsyn.fun.ml)
+  (:sml modsyn.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target modules_.sig.ml)
+ (action
+  (write-file modules_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target modules_.fun.ml)
+ (action
+  (write-file modules_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target modules_.sml.ml)
+ (action
+  (write-file modules_.sml.ml "")))
+
+(rule
+ (target modules_.ml)
+ (deps
+  (:sig modules_.sig.ml)
+  (:fun modules_.fun.ml)
+  (:sml modules_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

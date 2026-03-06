@@ -1,0 +1,79 @@
+
+      (rule
+ (mode fallback)
+ (target tabledsyn.sig.ml)
+ (action
+  (write-file tabledsyn.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target tabledsyn.fun.ml)
+ (action
+  (write-file tabledsyn.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target tabledsyn.sml.ml)
+ (action
+  (write-file tabledsyn.sml.ml "")))
+
+(rule
+ (target tabledsyn.ml)
+ (deps
+  (:sig tabledsyn.sig.ml)
+  (:fun tabledsyn.fun.ml)
+  (:sml tabledsyn.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target tabled.sig.ml)
+ (action
+  (write-file tabled.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target tabled.fun.ml)
+ (action
+  (write-file tabled.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target tabled.sml.ml)
+ (action
+  (write-file tabled.sml.ml "")))
+
+(rule
+ (target tabled.ml)
+ (deps
+  (:sig tabled.sig.ml)
+  (:fun tabled.fun.ml)
+  (:sml tabled.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

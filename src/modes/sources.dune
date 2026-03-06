@@ -1,0 +1,235 @@
+
+      (rule
+ (mode fallback)
+ (target modesyn.sig.ml)
+ (action
+  (write-file modesyn.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target modesyn.fun.ml)
+ (action
+  (write-file modesyn.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target modesyn.sml.ml)
+ (action
+  (write-file modesyn.sml.ml "")))
+
+(rule
+ (target modesyn.ml)
+ (deps
+  (:sig modesyn.sig.ml)
+  (:fun modesyn.fun.ml)
+  (:sml modesyn.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target modetable.sig.ml)
+ (action
+  (write-file modetable.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target modetable.fun.ml)
+ (action
+  (write-file modetable.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target modetable.sml.ml)
+ (action
+  (write-file modetable.sml.ml "")))
+
+(rule
+ (target modetable.ml)
+ (deps
+  (:sig modetable.sig.ml)
+  (:fun modetable.fun.ml)
+  (:sml modetable.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target modedec.sig.ml)
+ (action
+  (write-file modedec.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target modedec.fun.ml)
+ (action
+  (write-file modedec.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target modedec.sml.ml)
+ (action
+  (write-file modedec.sml.ml "")))
+
+(rule
+ (target modedec.ml)
+ (deps
+  (:sig modedec.sig.ml)
+  (:fun modedec.fun.ml)
+  (:sml modedec.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target modecheck.sig.ml)
+ (action
+  (write-file modecheck.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target modecheck.fun.ml)
+ (action
+  (write-file modecheck.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target modecheck.sml.ml)
+ (action
+  (write-file modecheck.sml.ml "")))
+
+(rule
+ (target modecheck.ml)
+ (deps
+  (:sig modecheck.sig.ml)
+  (:fun modecheck.fun.ml)
+  (:sml modecheck.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target modeprint.sig.ml)
+ (action
+  (write-file modeprint.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target modeprint.fun.ml)
+ (action
+  (write-file modeprint.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target modeprint.sml.ml)
+ (action
+  (write-file modeprint.sml.ml "")))
+
+(rule
+ (target modeprint.ml)
+ (deps
+  (:sig modeprint.sig.ml)
+  (:fun modeprint.fun.ml)
+  (:sml modeprint.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target modes_.sig.ml)
+ (action
+  (write-file modes_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target modes_.fun.ml)
+ (action
+  (write-file modes_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target modes_.sml.ml)
+ (action
+  (write-file modes_.sml.ml "")))
+
+(rule
+ (target modes_.ml)
+ (deps
+  (:sig modes_.sig.ml)
+  (:fun modes_.fun.ml)
+  (:sml modes_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

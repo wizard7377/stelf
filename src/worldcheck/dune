@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name worldcheck) (modules worldsyn worldify worldcheck_) (libraries global timing table lambda names paths formatter print index subordinate meta solvers basis) (flags (:standard -w -A -open Basis  -open Global  -open Timing  -open Table  -open Lambda  -open Names  -open Paths  -open Formatter  -open Print  -open Index  -open Subordinate  -open Meta  -open Solvers))
+ (wrapped false))

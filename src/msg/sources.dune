@@ -1,0 +1,40 @@
+
+      (rule
+ (mode fallback)
+ (target msg_.sig.ml)
+ (action
+  (write-file msg_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target msg_.fun.ml)
+ (action
+  (write-file msg_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target msg_.sml.ml)
+ (action
+  (write-file msg_.sml.ml "")))
+
+(rule
+ (target msg_.ml)
+ (deps
+  (:sig msg_.sig.ml)
+  (:fun msg_.fun.ml)
+  (:sml msg_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

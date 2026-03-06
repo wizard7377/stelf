@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name solvers) (modules cs_manager cs cs_eq_field cs_ineq_field cs_eq_integers cs_ineq_integers cs_eq_strings cs_eq_bools cs_integers_word solvers_) (libraries trail global domains lambda names modes table print formatter basis) (flags (:standard -w -A -open Basis  -open Trail  -open Global  -open Domains  -open Lambda  -open Names  -open Modes  -open Table  -open Print  -open Formatter))
+ (wrapped false))

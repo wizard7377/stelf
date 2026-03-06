@@ -1,0 +1,118 @@
+
+      (rule
+ (mode fallback)
+ (target worldsyn.sig.ml)
+ (action
+  (write-file worldsyn.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target worldsyn.fun.ml)
+ (action
+  (write-file worldsyn.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target worldsyn.sml.ml)
+ (action
+  (write-file worldsyn.sml.ml "")))
+
+(rule
+ (target worldsyn.ml)
+ (deps
+  (:sig worldsyn.sig.ml)
+  (:fun worldsyn.fun.ml)
+  (:sml worldsyn.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target worldify.sig.ml)
+ (action
+  (write-file worldify.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target worldify.fun.ml)
+ (action
+  (write-file worldify.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target worldify.sml.ml)
+ (action
+  (write-file worldify.sml.ml "")))
+
+(rule
+ (target worldify.ml)
+ (deps
+  (:sig worldify.sig.ml)
+  (:fun worldify.fun.ml)
+  (:sml worldify.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target worldcheck_.sig.ml)
+ (action
+  (write-file worldcheck_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target worldcheck_.fun.ml)
+ (action
+  (write-file worldcheck_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target worldcheck_.sml.ml)
+ (action
+  (write-file worldcheck_.sml.ml "")))
+
+(rule
+ (target worldcheck_.ml)
+ (deps
+  (:sig worldcheck_.sig.ml)
+  (:fun worldcheck_.fun.ml)
+  (:sml worldcheck_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

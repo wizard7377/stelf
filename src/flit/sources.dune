@@ -1,0 +1,79 @@
+
+      (rule
+ (mode fallback)
+ (target flit_old_smlnj_pack.sig.ml)
+ (action
+  (write-file flit_old_smlnj_pack.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target flit_old_smlnj_pack.fun.ml)
+ (action
+  (write-file flit_old_smlnj_pack.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target flit_old_smlnj_pack.sml.ml)
+ (action
+  (write-file flit_old_smlnj_pack.sml.ml "")))
+
+(rule
+ (target flit_old_smlnj_pack.ml)
+ (deps
+  (:sig flit_old_smlnj_pack.sig.ml)
+  (:fun flit_old_smlnj_pack.fun.ml)
+  (:sml flit_old_smlnj_pack.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target flit_.sig.ml)
+ (action
+  (write-file flit_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target flit_.fun.ml)
+ (action
+  (write-file flit_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target flit_.sml.ml)
+ (action
+  (write-file flit_.sml.ml "")))
+
+(rule
+ (target flit_.ml)
+ (deps
+  (:sig flit_.sig.ml)
+  (:fun flit_.fun.ml)
+  (:sml flit_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

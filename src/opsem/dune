@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name opsem) (modules table_param abstract subtree subtree_inst sw_subtree tabled absmachine absmachine_sbt ptrecon trace tmachine swmachine opsem_) (libraries global table lambda names print formatter index typecheck solvers subordinate tabling compile basis) (flags (:standard -w -A -open Basis  -open Global  -open Table  -open Lambda  -open Names  -open Print  -open Formatter  -open Index  -open Typecheck  -open Solvers  -open Subordinate  -open Tabling  -open Compile))
+ (wrapped false))

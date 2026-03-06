@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name typecheck) (modules typecheck_ strict) (libraries lambda print paths names basis) (flags (:standard -w -A -open Basis  -open Lambda  -open Print  -open Paths  -open Names))
+ (wrapped false))

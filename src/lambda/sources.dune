@@ -1,0 +1,508 @@
+
+      (rule
+ (mode fallback)
+ (target fgnopn.sig.ml)
+ (action
+  (write-file fgnopn.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target fgnopn.fun.ml)
+ (action
+  (write-file fgnopn.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target fgnopn.sml.ml)
+ (action
+  (write-file fgnopn.sml.ml "")))
+
+(rule
+ (target fgnopn.ml)
+ (deps
+  (:sig fgnopn.sig.ml)
+  (:fun fgnopn.fun.ml)
+  (:sml fgnopn.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target fgnopntable.sig.ml)
+ (action
+  (write-file fgnopntable.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target fgnopntable.fun.ml)
+ (action
+  (write-file fgnopntable.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target fgnopntable.sml.ml)
+ (action
+  (write-file fgnopntable.sml.ml "")))
+
+(rule
+ (target fgnopntable.ml)
+ (deps
+  (:sig fgnopntable.sig.ml)
+  (:fun fgnopntable.fun.ml)
+  (:sml fgnopntable.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target order.sig.ml)
+ (action
+  (write-file order.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target order.fun.ml)
+ (action
+  (write-file order.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target order.sml.ml)
+ (action
+  (write-file order.sml.ml "")))
+
+(rule
+ (target order.ml)
+ (deps
+  (:sig order.sig.ml)
+  (:fun order.fun.ml)
+  (:sml order.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target intsyn.sig.ml)
+ (action
+  (write-file intsyn.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target intsyn.fun.ml)
+ (action
+  (write-file intsyn.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target intsyn.sml.ml)
+ (action
+  (write-file intsyn.sml.ml "")))
+
+(rule
+ (target intsyn.ml)
+ (deps
+  (:sig intsyn.sig.ml)
+  (:fun intsyn.fun.ml)
+  (:sml intsyn.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target whnf.sig.ml)
+ (action
+  (write-file whnf.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target whnf.fun.ml)
+ (action
+  (write-file whnf.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target whnf.sml.ml)
+ (action
+  (write-file whnf.sml.ml "")))
+
+(rule
+ (target whnf.ml)
+ (deps
+  (:sig whnf.sig.ml)
+  (:fun whnf.fun.ml)
+  (:sml whnf.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target conv.sig.ml)
+ (action
+  (write-file conv.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target conv.fun.ml)
+ (action
+  (write-file conv.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target conv.sml.ml)
+ (action
+  (write-file conv.sml.ml "")))
+
+(rule
+ (target conv.ml)
+ (deps
+  (:sig conv.sig.ml)
+  (:fun conv.fun.ml)
+  (:sml conv.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target tomega.sig.ml)
+ (action
+  (write-file tomega.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target tomega.fun.ml)
+ (action
+  (write-file tomega.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target tomega.sml.ml)
+ (action
+  (write-file tomega.sml.ml "")))
+
+(rule
+ (target tomega.ml)
+ (deps
+  (:sig tomega.sig.ml)
+  (:fun tomega.fun.ml)
+  (:sml tomega.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target constraints.sig.ml)
+ (action
+  (write-file constraints.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target constraints.fun.ml)
+ (action
+  (write-file constraints.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target constraints.sml.ml)
+ (action
+  (write-file constraints.sml.ml "")))
+
+(rule
+ (target constraints.ml)
+ (deps
+  (:sig constraints.sig.ml)
+  (:fun constraints.fun.ml)
+  (:sml constraints.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target unify.sig.ml)
+ (action
+  (write-file unify.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target unify.fun.ml)
+ (action
+  (write-file unify.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target unify.sml.ml)
+ (action
+  (write-file unify.sml.ml "")))
+
+(rule
+ (target unify.ml)
+ (deps
+  (:sig unify.sig.ml)
+  (:fun unify.fun.ml)
+  (:sml unify.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target match.sig.ml)
+ (action
+  (write-file match.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target match.fun.ml)
+ (action
+  (write-file match.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target match.sml.ml)
+ (action
+  (write-file match.sml.ml "")))
+
+(rule
+ (target match.ml)
+ (deps
+  (:sig match.sig.ml)
+  (:fun match.fun.ml)
+  (:sml match.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target abstract.sig.ml)
+ (action
+  (write-file abstract.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target abstract.fun.ml)
+ (action
+  (write-file abstract.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target abstract.sml.ml)
+ (action
+  (write-file abstract.sml.ml "")))
+
+(rule
+ (target abstract.ml)
+ (deps
+  (:sig abstract.sig.ml)
+  (:fun abstract.fun.ml)
+  (:sml abstract.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target approx.sig.ml)
+ (action
+  (write-file approx.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target approx.fun.ml)
+ (action
+  (write-file approx.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target approx.sml.ml)
+ (action
+  (write-file approx.sml.ml "")))
+
+(rule
+ (target approx.ml)
+ (deps
+  (:sig approx.sig.ml)
+  (:fun approx.fun.ml)
+  (:sml approx.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target lambda_.sig.ml)
+ (action
+  (write-file lambda_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target lambda_.fun.ml)
+ (action
+  (write-file lambda_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target lambda_.sml.ml)
+ (action
+  (write-file lambda_.sml.ml "")))
+
+(rule
+ (target lambda_.ml)
+ (deps
+  (:sig lambda_.sig.ml)
+  (:fun lambda_.fun.ml)
+  (:sml lambda_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

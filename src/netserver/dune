@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name netserver) (modules netserver_) (libraries timing frontend msg basis) (flags (:standard -w -A -open Basis  -open Timing  -open Frontend  -open Msg))
+ (wrapped false))

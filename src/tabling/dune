@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name tabling) (modules tabledsyn tabled) (libraries table lambda print names paths index basis) (flags (:standard -w -A -open Basis  -open Table  -open Lambda  -open Print  -open Names  -open Paths  -open Index))
+ (wrapped false))

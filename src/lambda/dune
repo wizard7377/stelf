@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name lambda) (modules fgnopn fgnopntable order intsyn whnf conv tomega constraints unify match abstract approx lambda_) (libraries global trail table basis) (flags (:standard -w -A -open Basis  -open Global  -open Trail  -open Table))
+ (wrapped false))

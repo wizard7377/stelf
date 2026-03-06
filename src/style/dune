@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name style) (modules style_) (libraries global table lambda formatter print names paths index basis) (flags (:standard -w -A -open Basis  -open Global  -open Table  -open Lambda  -open Formatter  -open Print  -open Names  -open Paths  -open Index))
+ (wrapped false))

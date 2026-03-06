@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name domains) (modules field ordered_field integers rationals integers_mod domains_) (libraries int_inf basis) (flags (:standard -w -A -open Basis  -open Int_inf))
+ (wrapped false))

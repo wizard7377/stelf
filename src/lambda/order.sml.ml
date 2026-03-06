@@ -1,0 +1,11 @@
+open! Basis;;
+module Order = (Order)(struct
+                         (*! structure IntSyn' = IntSyn !*);;
+                         module Table = IntRedBlackTree;;
+                         end);;
+(* -bp *);;
+(*
+structure RedOrder = 
+    RedOrder (! structure IntSyn' = IntSyn !
+	      structure Table = IntRedBlackTree); 
+*);;

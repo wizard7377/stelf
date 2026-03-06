@@ -1,0 +1,118 @@
+
+      (rule
+ (mode fallback)
+ (target checking.sig.ml)
+ (action
+  (write-file checking.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target checking.fun.ml)
+ (action
+  (write-file checking.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target checking.sml.ml)
+ (action
+  (write-file checking.sml.ml "")))
+
+(rule
+ (target checking.ml)
+ (deps
+  (:sig checking.sig.ml)
+  (:fun checking.fun.ml)
+  (:sml checking.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target reduces.sig.ml)
+ (action
+  (write-file reduces.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target reduces.fun.ml)
+ (action
+  (write-file reduces.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target reduces.sml.ml)
+ (action
+  (write-file reduces.sml.ml "")))
+
+(rule
+ (target reduces.ml)
+ (deps
+  (:sig reduces.sig.ml)
+  (:fun reduces.fun.ml)
+  (:sml reduces.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target terminate_.sig.ml)
+ (action
+  (write-file terminate_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target terminate_.fun.ml)
+ (action
+  (write-file terminate_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target terminate_.sml.ml)
+ (action
+  (write-file terminate_.sml.ml "")))
+
+(rule
+ (target terminate_.ml)
+ (deps
+  (:sig terminate_.sig.ml)
+  (:fun terminate_.fun.ml)
+  (:sml terminate_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name main) (libraries frontend basis) (flags (:standard -w -A -open Basis  -open Frontend))
+ (wrapped false))

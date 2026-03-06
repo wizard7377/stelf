@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name cover) (modules total cover_) (libraries global lambda names paths table formatter print subordinate modes thm terminate index solvers worldcheck typecheck timing unique basis) (flags (:standard -w -A -open Basis  -open Global  -open Lambda  -open Names  -open Paths  -open Table  -open Formatter  -open Print  -open Subordinate  -open Modes  -open Thm  -open Terminate  -open Index  -open Solvers  -open Worldcheck  -open Typecheck  -open Timing  -open Unique))
+ (wrapped false))

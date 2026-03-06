@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name stream) (modules stream_) (libraries basis) (flags (:standard -w -A -open Basis))
+ (wrapped false))

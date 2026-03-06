@@ -1,0 +1,4 @@
+(include sources.dune)
+(library
+ (name order) (modules order_) (libraries table lambda basis) (flags (:standard -w -A -open Basis  -open Table  -open Lambda))
+ (wrapped false))

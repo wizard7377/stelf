@@ -1,0 +1,4 @@
+(include mlton_regression.sources.dune)
+(library
+ (name mlton_regression) (modules regression runquiet) (libraries twelf_core_mlton basis) (flags (:standard -w -A -open Basis  -open Twelf_core_mlton))
+ (wrapped false))

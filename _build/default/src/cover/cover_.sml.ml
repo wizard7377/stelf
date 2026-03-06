@@ -1,0 +1,37 @@
+open! Basis;;
+module Cover = (Cover)(struct
+                         module Global = Global;;
+                         module Whnf = Whnf;;
+                         module Conv = Conv;;
+                         module Abstract = Abstract;;
+                         module Unify = UnifyTrail;;
+                         module Constraints = Constraints;;
+                         module ModeTable = ModeTable;;
+                         module UniqueTable = UniqueTable;;
+                         module Index = Index;;
+                         module Subordinate = Subordinate;;
+                         module WorldSyn = WorldSyn;;
+                         module Names = Names;;
+                         (*! structure Paths = Paths !*);;
+                         module Print = Print;;
+                         module TypeCheck = TypeCheck;;
+                         (*! structure CSManager = CSManager !*);;
+                         module Timers = Timers;;
+                         end);;
+module Total = (Total)(struct
+                         module Global = Global;;
+                         module Table = IntRedBlackTree;;
+                         (*! structure IntSyn' = IntSyn !*);;
+                         module Whnf = Whnf;;
+                         module Names = Names;;
+                         module ModeTable = ModeTable;;
+                         module ModeCheck = ModeCheck;;
+                         module Index = Index;;
+                         module Subordinate = Subordinate;;
+                         module Order = Order;;
+                         module Reduces = Reduces;;
+                         module Cover = Cover;;
+                         (*! structure Paths = Paths !*);;
+                         module Origins = Origins;;
+                         module Timers = Timers;;
+                         end);;
