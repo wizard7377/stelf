@@ -1,3 +1,8 @@
 CM
 .cm
 src/frontend/buildid.sml
+**.cm*
+!**.cm
+!**.cm_
+_build/ 
+**/_build/
