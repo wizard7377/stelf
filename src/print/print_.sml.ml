@@ -1,10 +1,7 @@
-open! Basis;;
-module SymbolAscii = (SymbolAscii)(struct
-                                     
-                                     end);;
-module SymbolTeX = (SymbolTeX)(struct
-                                 
-                                 end);;
+open! Basis
+module SymbolAscii = Symbol.MakeSymbolAscii (struct end)
+module SymbolTeX = Symbol.MakeSymbolTeX (struct end)
+
 (*
 structure WorldPrint = WorldPrint 
   (structure Global = Global
@@ -12,65 +9,71 @@ structure WorldPrint = WorldPrint
    ! structure Tomega' = Tomega !
    structure WorldSyn' = WorldSyn
    structure Names = Names
-   structure Formatter' = Formatter
+   structure Formatter_param = Formatter
    structure Print = Print);
-*);;
-module Print = (Print)(struct
-                         (*! structure IntSyn' = IntSyn !*);;
-                         module Whnf = Whnf;;
-                         module Abstract = Abstract;;
-                         module Constraints = Constraints;;
-                         module Names = Names;;
-                         module Formatter' = Formatter;;
-                         module Symbol = SymbolAscii;;
-                         end);;
-module ClausePrint = (ClausePrint)(struct
-                                     (*! structure IntSyn' = IntSyn !*);;
-                                     module Whnf = Whnf;;
-                                     module Names = Names;;
-                                     module Formatter' = Formatter;;
-                                     module Print = Print;;
-                                     module Symbol = SymbolAscii;;
-                                     end);;
-module PrintTeX = (Print)(struct
-                            (*! structure IntSyn' = IntSyn !*);;
-                            module Whnf = Whnf;;
-                            module Abstract = Abstract;;
-                            module Constraints = Constraints;;
-                            module Names = Names;;
-                            module Formatter' = Formatter;;
-                            module Symbol = SymbolTeX;;
-                            end);;
-module ClausePrintTeX = (ClausePrint)(struct
-                                        (*! structure IntSyn' = IntSyn !*);;
-                                        module Whnf = Whnf;;
-                                        module Constraints = Constraints;;
-                                        module Names = Names;;
-                                        module Formatter' = Formatter;;
-                                        module Print = PrintTeX;;
-                                        module Symbol = SymbolTeX;;
-                                        end);;
-module PrintTwega = (PrintTwega)(struct
-                                   (*! structure IntSyn' = IntSyn !*);;
-                                   module Whnf = Whnf;;
-                                   module Abstract = Abstract;;
-                                   module Constraints = Constraints;;
-                                   module Names = Names;;
-                                   module Formatter' = Formatter;;
-                                   end);;
-module PrintXML = (PrintXML)(struct
-                               (*! structure IntSyn' = IntSyn !*);;
-                               module Whnf = Whnf;;
-                               module Abstract = Abstract;;
-                               module Constraints = Constraints;;
-                               module Names = Names;;
-                               module Formatter' = Formatter;;
-                               end);;
-module PrintOMDoc = (PrintOMDoc)(struct
-                                   (*! structure IntSyn' = IntSyn !*);;
-                                   module Whnf = Whnf;;
-                                   module Abstract = Abstract;;
-                                   module Constraints = Constraints;;
-                                   module Names = Names;;
-                                   module Formatter' = Formatter;;
-                                   end);;
+*)
+module Print = MakePrint (struct
+  (*! structure IntSyn' = IntSyn !*)
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
+  module Formatter_param = Formatter
+  module Symbol = SymbolAscii
+end)
+
+module ClausePrint = Clause_print.MakeClausePrint (struct
+  (*! structure IntSyn' = IntSyn !*)
+  module Whnf = Whnf
+  module Names = Names
+  module Formatter_param = Formatter
+  module Print = Print
+  module Symbol = SymbolAscii
+end)
+
+module PrintTeX = MakePrint (struct
+  (*! structure IntSyn' = IntSyn !*)
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
+  module Formatter_param = Formatter
+  module Symbol = SymbolTeX
+end)
+
+module ClausePrintTeX = Clause_print.MakeClausePrint (struct
+  (*! structure IntSyn' = IntSyn !*)
+  module Whnf = Whnf
+  module Constraints = Constraints
+  module Names = Names
+  module Formatter_param = Formatter
+  module Print = PrintTeX
+  module Symbol = SymbolTeX
+end)
+
+module PrintTwega = Print_twega.MakePrintTwega (struct
+  (*! structure IntSyn' = IntSyn !*)
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
+  module Formatter_param = Formatter
+end)
+
+module PrintXML = Print_xml.MakePrintXML (struct
+  (*! structure IntSyn' = IntSyn !*)
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
+  module Formatter_param = Formatter
+end)
+
+module PrintOMDoc = Print_omdoc.MakePrintOMDoc (struct
+  (*! structure IntSyn' = IntSyn !*)
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
+  module Formatter_param = Formatter
+end)

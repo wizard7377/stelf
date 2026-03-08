@@ -1,110 +1,98 @@
-open! Basis;;
-(* Printer for Meta Theorems *);;
-(* Author: Carsten Schuermann *);;
-(* Modified: Brigitte Pientka *);;
-module ThmPrint(ThmPrint__0: sig
-                             module ThmSyn' : THMSYN
-                             module Formatter : FORMATTER
-                             end) : THMPRINT
-  =
-  struct
-    module ThmSyn = ThmSyn';;
-    open!
-      struct
-        module L = ThmSyn;;
-        module I = IntSyn;;
-        module F = Formatter;;
-        let rec fmtIds =
-          function 
-                   | [] -> []
-                   | (n :: []) -> [(F.String n)]
-                   | (n :: l_)
-                       -> [(F.String n); (F.String " ")] @ (fmtIds l_);;
-        let rec fmtParams =
-          function 
-                   | [] -> []
-                   | (Some n :: []) -> [(F.String n)]
-                   | (None :: []) -> [(F.String "_")]
-                   | (Some n :: l_)
-                       -> [(F.String n); (F.String " ")] @ (fmtParams l_)
-                   | (None :: l_)
-                       -> [(F.String "_"); (F.String " ")] @ (fmtParams l_);;
-        let rec fmtType (c, l_) =
-          (F.HVbox
-           ([(F.String (I.conDecName (I.sgnLookup c))); (F.String " ")] @
-              (fmtParams l_)));;
-        let rec fmtCallpats =
-          function 
-                   | [] -> []
-                   | (T :: []) -> [(F.String "("); fmtType T; (F.String ")")]
-                   | (T :: l_)
-                       -> [(F.String "("); fmtType T; (F.String ") ")] @
-                            (fmtCallpats l_);;
-        let rec fmtOptions =
-          function 
-                   | ((_ :: []) as l_) -> [(F.HVbox (fmtIds l_))]
-                   | l_
-                       -> [(F.String "("); (F.HVbox (fmtIds l_));
-                           (F.String ") ")];;
-        let rec fmtOrder =
-          function 
-                   | L.Varg l_
-                       -> begin
-                          match l_
-                          with 
-                               | (h_ :: []) -> fmtIds l_
-                               | _
-                                   -> [(F.String "("); (F.HVbox (fmtIds l_));
-                                       (F.String ")")]
-                          end
-                   | L.Lex l_
-                       -> [(F.String "{"); (F.HVbox (fmtOrders l_));
-                           (F.String "}")]
-                   | L.Simul l_
-                       -> [(F.String "["); (F.HVbox (fmtOrders l_));
-                           (F.String "]")]
-        and fmtOrders =
-          function 
-                   | [] -> []
-                   | (o_ :: []) -> fmtOrder o_
-                   | (o_ :: l_)
-                       -> (fmtOrder o_) @ (((F.String " ") :: fmtOrders l_));;
-        let rec tDeclToString (L.TDecl (o_, L.Callpats l_)) =
-          F.makestring_fmt
-          ((F.HVbox ((fmtOrder o_) @ (((F.String " ") :: fmtCallpats l_)))));;
-        let rec callpatsToString (L.Callpats l_) =
-          F.makestring_fmt ((F.HVbox (fmtCallpats l_)));;
-        let rec fmtROrder (L.RedOrder (p_, o_, o'_)) =
-          begin
-          match p_
-          with 
-               | less_
-                   -> (fmtOrder o_) @ (((F.String " < ") :: fmtOrder o'_))
-               | leq_
-                   -> (fmtOrder o_) @ (((F.String " <= ") :: fmtOrder o'_))
-               | eq_ -> (fmtOrder o_) @ (((F.String " = ") :: fmtOrder o'_))
-          end;;
-        let rec rOrderToString_ r_ =
-          F.makestring_fmt ((F.HVbox (fmtROrder r_)));;
-        let rec rDeclToString (L.RDecl (r_, L.Callpats l_)) =
-          F.makestring_fmt
-          ((F.HVbox ((fmtROrder r_) @ (((F.String " ") :: fmtCallpats l_)))));;
-        let rec tabledDeclToString (L.TabledDecl cid) =
-          F.makestring_fmt
-          ((F.HVbox [(F.String (I.conDecName (I.sgnLookup cid)))]));;
-        let rec keepTableDeclToString (L.KeepTableDecl cid) =
-          F.makestring_fmt
-          ((F.HVbox [(F.String (I.conDecName (I.sgnLookup cid)))]));;
-        end;;
-    (* -bp *);;
-    let tDeclToString = tDeclToString;;
-    let callpatsToString = callpatsToString;;
-    let rOrderToString_ = rOrderToString_;;
-    (* -bp *);;
-    let rDeclToString = rDeclToString;;
-    (* -bp *);;
-    let tabledDeclToString = tabledDeclToString;;
-    let keepTableDeclToString = keepTableDeclToString;;
-    end;;
-(* local *);;
-(* functor ThmPrint *);;
+open! Basis
+
+(* Printer for Meta Theorems *)
+(* Author: Carsten Schuermann *)
+(* Modified: Brigitte Pientka *)
+module ThmPrint (ThmPrint__0 : sig
+  module ThmSyn' : THMSYN
+  module Formatter : FORMATTER
+end) : THMPRINT = struct
+  module ThmSyn = ThmPrint__0.ThmSyn'
+
+  open! struct
+    module L = ThmSyn
+    module I = IntSyn
+    module F = ThmPrint__0.Formatter
+
+    let rec fmtIds = function
+      | [] -> []
+      | n :: [] -> [ F.string n ]
+      | n :: l_ -> [ F.string n; F.string " " ] @ fmtIds l_
+
+    let rec fmtParams = function
+      | [] -> []
+      | Some n :: [] -> [ F.string n ]
+      | None :: [] -> [ F.string "_" ]
+      | Some n :: l_ -> [ F.string n; F.string " " ] @ fmtParams l_
+      | None :: l_ -> [ F.string "_"; F.string " " ] @ fmtParams l_
+
+    let rec fmtType (c, l_) =
+      F.hVbox
+        ([ F.string (I.conDecName (I.sgnLookup c)); F.string " " ]
+        @ fmtParams l_)
+
+    let rec fmtCallpats = function
+      | [] -> []
+      | t_ :: [] -> [ F.string "("; fmtType t_; F.string ")" ]
+      | t_ :: l_ -> [ F.string "("; fmtType t_; F.string ") " ] @ fmtCallpats l_
+
+    let rec fmtOptions = function
+      | _ :: [] as l_ -> [ F.hVbox (fmtIds l_) ]
+      | l_ -> [ F.string "("; F.hVbox (fmtIds l_); F.string ") " ]
+
+    let rec fmtOrder = function
+      | L.Varg l_ -> begin
+          match l_ with
+          | h_ :: [] -> fmtIds l_
+          | _ -> [ F.string "("; F.hVbox (fmtIds l_); F.string ")" ]
+        end
+      | L.Lex l_ -> [ F.string "{"; F.hVbox (fmtOrders l_); F.string "}" ]
+      | L.Simul l_ -> [ F.string "["; F.hVbox (fmtOrders l_); F.string "]" ]
+
+    and fmtOrders = function
+      | [] -> []
+      | o_ :: [] -> fmtOrder o_
+      | o_ :: l_ -> fmtOrder o_ @ (F.string " " :: fmtOrders l_)
+
+    let rec tDeclToString (L.TDecl (o_, L.Callpats l_)) =
+      F.makestring_fmt
+        (F.hVbox (fmtOrder o_ @ (F.string " " :: fmtCallpats l_)))
+
+    let rec callpatsToString (L.Callpats l_) =
+      F.makestring_fmt (F.hVbox (fmtCallpats l_))
+
+    let rec fmtROrder (L.RedOrder (p_, o_, o'_)) =
+      begin match p_ with
+      | less_ -> fmtOrder o_ @ (F.string " < " :: fmtOrder o'_)
+      | leq_ -> fmtOrder o_ @ (F.string " <= " :: fmtOrder o'_)
+      | eq_ -> fmtOrder o_ @ (F.string " = " :: fmtOrder o'_)
+      end
+
+    let rec rOrderToString_ r_ = F.makestring_fmt (F.hVbox (fmtROrder r_))
+
+    let rec rDeclToString (L.RDecl (r_, L.Callpats l_)) =
+      F.makestring_fmt
+        (F.hVbox (fmtROrder r_ @ (F.string " " :: fmtCallpats l_)))
+
+    let rec tabledDeclToString (L.TabledDecl cid) =
+      F.makestring_fmt (F.hVbox [ F.string (I.conDecName (I.sgnLookup cid)) ])
+
+    let rec keepTableDeclToString (L.KeepTableDecl cid) =
+      F.makestring_fmt (F.hVbox [ F.string (I.conDecName (I.sgnLookup cid)) ])
+  end
+
+  (* -bp *)
+  let tDeclToString = tDeclToString
+  let callpatsToString = callpatsToString
+  let rOrderToString_ = rOrderToString_
+  let rOrderToString = rOrderToString_
+
+  (* -bp *)
+  let rDeclToString = rDeclToString
+
+  (* -bp *)
+  let tabledDeclToString = tabledDeclToString
+  let keepTableDeclToString = keepTableDeclToString
+end
+(* local *)
+(* functor ThmPrint *)

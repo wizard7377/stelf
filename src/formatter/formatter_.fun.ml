@@ -1,24 +1,25 @@
-open! Basis;;
+open! Basis
+
 (*
 % ForML Version 0.6 - 25 January 1993 - er@cs.cmu.edu
 %************************************************************************
 {\bf File {\tt formatter.fun} defines the functor {\tt Formatter}
   with the formatting and printing routines.}
 %************************************************************************
-*);;
-module Formatter() : FORMATTER =
-  struct
-    (*
+*)
+module Formatter : FORMATTER = struct
+  (*
 \subsection{Setting default values}
-*);;
-    let indent_ = ref 3;;
-    let Skip = ref 1;;
-    let blanks_ = ref 1;;
-    let pagewidth_ = ref 80;;
-    let bailout_ = ref true;;
-    let bailoutIndent_ = ref 0;;
-    let bailoutSpot_ = ref 40;;
-    (*
+*)
+  let indent_ = ref 3
+  let skip = ref 1
+  let blanks_ = ref 1
+  let pagewidth_ = ref 80
+  let bailout_ = ref true
+  let bailoutIndent_ = ref 0
+  let bailoutSpot_ = ref 40
+
+  (*
 %************************************************************************
 \subsection{Auxiliary functions}
 
@@ -27,45 +28,55 @@ places.
 
 \subsubsection{String functions}
 The {\tt Spmod} function is used when {\tt Bailout} is active.
-*);;
-    open!
-      struct
-        let rec spaces'_ arg__0 arg__1 =
-          begin
-          match (arg__0, arg__1)
-          with 
-               | (0, s) -> s
-               | (n, s) -> (Spaces' (n - 1, s ^ " "))
-          end;;
-        let rec spaces_ n = begin if n > 0 then (Spaces' (n, "")) else "" end;;
-        let rec newlines'_ arg__2 arg__3 =
-          begin
-          match (arg__2, arg__3)
-          with 
-               | (0, s) -> s
-               | (n, s) -> (Newlines' (n - 1, s ^ "\n"))
-          end;;
-        let rec newlines_ n = begin if n > 0 then (Newlines' (n, "")) else ""
-          end;;
-        end;;
-    let sp_ = spaces_;;
-    (* return a number of spaces *);;
-    let rec spmod_ n = spaces_ (n mod (! pagewidth_));;
-    let nl_ = newlines_;;
-    (* return a number of newlines *);;
-    let rec np_ () = "\n\012\n";;
-    (* CTRL_L == ""\012"" *);;
-    (*
+*)
+  open! struct
+    let rec spaces'_ arg__0 arg__1 =
+      begin match (arg__0, arg__1) with
+      | 0, s -> s
+      | n, s -> spaces'_ (n - 1) (s ^ " ")
+      end
+
+    let rec spaces_ n =
+      begin if n > 0 then spaces'_ n "" else ""
+      end
+
+    let rec newlines'_ arg__2 arg__3 =
+      begin match (arg__2, arg__3) with
+      | 0, s -> s
+      | n, s -> newlines'_ (n - 1) (s ^ "\n")
+      end
+
+    let rec newlines_ n =
+      begin if n > 0 then newlines'_ n "" else ""
+      end
+  end
+
+  let sp_ = spaces_
+
+  (* return a number of spaces *)
+  let rec spmod_ n = spaces_ (n mod !pagewidth_)
+  let nl_ = newlines_
+
+  (* return a number of newlines *)
+  let rec np_ () = "\n\012\n"
+
+  (* CTRL_L == ""\012"" *)
+  (*
 \subsubsection{Arithmetic functions}
-*);;
-    let rec max_ (x, y) = begin if ((x : int)) > y then x else y end;;
-    let rec sumpair ((a, b), (c, d)) = (((a : int)) + c, ((b : int)) + d);;
-    (*
+*)
+  let rec max_ (x, y) =
+    begin if (x : int) > y then x else y
+    end
+
+  let rec sumpair ((a, b), (c, d)) = ((a : int) + c, (b : int) + d)
+
+  (*
 \subsubsection{Pair functions}
-*);;
-    let rec fst (a, b) = a
-    and snd (a, b) = b;;
-    (*
+*)
+  let rec fst (a, b) = a
+  and snd (a, b) = b
+
+  (*
 %*************************************************************************
 \subsection{The datatype {\ml format}}
 The datatype {\ml format} specifies the data structure into which abstract
@@ -75,54 +86,58 @@ In order to simplify the formatting, we precompute the
 minimum and maximum width of the printed format for each node in the format
 tree. These numbers are independent of the actual page width (but they take
 the actual and default indentation width into account).
-*);;
-    type mode = | Hori 
-                | Vert ;;
-    (* are we in horizontal or vertical mode? *);;
-    type nonrec width = int * int;;
-    (* the minimum/maximum width of boxes *);;
-    type nonrec widthmode = mode * mode;;
-    (* remember mode in which minimum/maximum was gotten *);;
-    type format =
-      | Str of int * string 
-      | Brk of int * int 
-      | Dbk 
-      | Ebk 
-      | Hbx of width * int * format list 
-      | Vbx of width * int * int * format list 
-      | Hvx of (width * widthmode) * int * int * int * format list 
-      | Hov of (width * widthmode) * int * int * int * format list ;;
-    (* length, string *);;
-    (* blanks, indent *);;
-    (* Default Break *);;
-    (* Empty Break *);;
-    (* Width, blanks, ... *);;
-    (* Width, indent, skip, ... *);;
-    (* Width, blanks, indent, skip, ... *);;
-    (* Width, blanks, indent, skip, ... *);;
-    (*
+*)
+  type mode = Hori | Vert
+
+  (* are we in horizontal or vertical mode? *)
+  type nonrec width = int * int
+
+  (* the minimum/maximum width of boxes *)
+  type nonrec widthmode = mode * mode
+
+  (* remember mode in which minimum/maximum was gotten *)
+  type format =
+    | Str of int * string
+    | Brk of int * int
+    | Dbk
+    | Ebk
+    | Hbx of width * int * format list
+    | Vbx of width * int * int * format list
+    | Hvx of (width * widthmode) * int * int * int * format list
+    | Hov of (width * widthmode) * int * int * int * format list
+
+  (* length, string *)
+  (* blanks, indent *)
+  (* Default Break *)
+  (* Empty Break *)
+  (* Width, blanks, ... *)
+  (* Width, indent, skip, ... *)
+  (* Width, blanks, indent, skip, ... *)
+  (* Width, blanks, indent, skip, ... *)
+  (*
 The function {\ml Width0} extracts the minimum and maximum width
 of {\ml formats}.
 The argument {\ml m} is the current mode in effect, {\ml b} is the
 horizontal blanks and {\ml i} is the indent currently in effect.
 These are used to determine the width of breaks and default breaks.
-*);;
-    let rec width0_ =
-      function 
-               | (m, b, i, Str (n, _)) -> (n, n)
-               | (Hori, b, i, Brk (m, _)) -> (m, m)
-               | (Vert, b, i, Brk (_, n)) -> (n, n)
-               | (Hori, b, i, Dbk) -> (b, b)
-               | (Vert, b, i, Dbk) -> (i, i)
-               | (m, b, i, Ebk) -> (0, 0)
-               | (m, b, i, Vbx ((min, max), _, _, _)) -> (min, max)
-               | (m, b, i, Hbx ((min, max), _, _)) -> (min, max)
-               | (m, b, i, Hvx (((min, max), _), _, _, _, _)) -> (min, max)
-               | (m, b, i, Hov (((min, max), _), _, _, _, _)) -> (min, max);;
-    let rec width_ fmt = width0_ (Hori, ! blanks_, ! indent_, fmt);;
-    let unused_ = (-9999);;
-    (* a bad value to mark unused arguments of Width0 *);;
-    (*
+*)
+  let rec width0_ = function
+    | m, b, i, Str (n, _) -> (n, n)
+    | Hori, b, i, Brk (m, _) -> (m, m)
+    | Vert, b, i, Brk (_, n) -> (n, n)
+    | Hori, b, i, Dbk -> (b, b)
+    | Vert, b, i, Dbk -> (i, i)
+    | m, b, i, Ebk -> (0, 0)
+    | m, b, i, Vbx ((min, max), _, _, _) -> (min, max)
+    | m, b, i, Hbx ((min, max), _, _) -> (min, max)
+    | m, b, i, Hvx (((min, max), _), _, _, _, _) -> (min, max)
+    | m, b, i, Hov (((min, max), _), _, _, _, _) -> (min, max)
+
+  let rec width_ fmt = width0_ (Hori, !blanks_, !indent_, fmt)
+  let unused_ = -9999
+
+  (* a bad value to mark unused arguments of Width0 *)
+  (*
 {\bf Caution:}
 The function {\ml Width} assumes horizontal mode.
 This should only make a difference, if you are looking at a break.
@@ -189,46 +204,47 @@ The function that actually determines the width of vertical boxes
 then simply starts the auxiliary function
  with a total maximum width of the list so far as (0,0) and the width in
    the current group so far as (0,0).
-*);;
-    open!
-      struct
-        let rec vlistWidth' =
-          function 
-                   | (i, [], (totmin, totmax), (tmmin, tmmax))
-                       -> (max_ (totmin, tmmin), max_ (totmax, tmmax))
-                   | (i, (Dbk :: t), (totmin, totmax), (tmmin, tmmax))
-                       -> vlistWidth'
-                          (i, t,
-                           (max_ (totmin, tmmin), max_ (totmax, tmmax)),
-                           width0_ (Vert, unused_, i, Dbk))
-                   | (i, ((Brk _ as b) :: t), (totmin, totmax),
-                      (tmmin, tmmax))
-                       -> vlistWidth'
-                          (i, t,
-                           (max_ (totmin, tmmin), max_ (totmax, tmmax)),
-                           width0_ (Vert, unused_, i, b))
-                   | (i, (x :: t), (totmin, totmax), (tmmin, tmmax))
-                       -> vlistWidth'
-                          (i, t, (totmin, totmax),
-                           sumpair
-                           (width0_ (Vert, unused_, i, x), (tmmin, tmmax)));;
-        end;;
-    let rec vlistWidth (l, indent) = vlistWidth' (indent, l, (0, 0), (0, 0));;
-    (*
+*)
+  open! struct
+    let rec vlistWidth' = function
+      | i, [], (totmin, totmax), (tmmin, tmmax) ->
+          (max_ (totmin, tmmin), max_ (totmax, tmmax))
+      | i, Dbk :: t, (totmin, totmax), (tmmin, tmmax) ->
+          vlistWidth'
+            ( i,
+              t,
+              (max_ (totmin, tmmin), max_ (totmax, tmmax)),
+              width0_ (Vert, unused_, i, Dbk) )
+      | i, (Brk _ as b) :: t, (totmin, totmax), (tmmin, tmmax) ->
+          vlistWidth'
+            ( i,
+              t,
+              (max_ (totmin, tmmin), max_ (totmax, tmmax)),
+              width0_ (Vert, unused_, i, b) )
+      | i, x :: t, (totmin, totmax), (tmmin, tmmax) ->
+          vlistWidth'
+            ( i,
+              t,
+              (totmin, totmax),
+              sumpair (width0_ (Vert, unused_, i, x), (tmmin, tmmax)) )
+  end
+
+  let rec vlistWidth (l, indent) = vlistWidth' (indent, l, (0, 0), (0, 0))
+
+  (*
 Now to the purely {\bf horizontal boxes}:
 these are pretty easy --- we merely sum up the widths of all entries.
 However, we also need to take into account the ``default width'' of
 horizontal tabs at the time, which we need to provide as an argument
 to the {\ml Width0} function.
-*);;
-    let rec hlistWidth (l, blanks) =
-      List.foldr
-      (function 
-                | (fmt, (x, y))
-                    -> sumpair (width0_ (Hori, blanks, unused_, fmt), (x, y)))
-      (0, 0)
-      l;;
-    (*
+*)
+  let rec hlistWidth (l, blanks) =
+    List.foldr
+      (function
+        | fmt, (x, y) -> sumpair (width0_ (Hori, blanks, unused_, fmt), (x, y)))
+      (0, 0) l
+
+  (*
 When we have a box that can be treated as a
 {\bf horizontal-or-vertical box}, we need to take both, a horizontal
    {\ml format} and a vertical {\ml format} into account.\\
@@ -244,14 +260,17 @@ of which mode (horizontal or vertical) corresponds to the {\it min}
 entry, and we will always use the horizontal mode for the {\it max}
 entry (if we have enough space left in the page we will always prefer to
 use horizontal mode over vertical mode).
-*);;
-    let rec hovlistWidth (l, blanks, indent) =
-      let (vmin, vmax) = vlistWidth (l, indent)
-      and (hmin, hmax) = hlistWidth (l, blanks)
-        in let (min, mmode) = begin
-             if vmin < hmin then (vmin, Vert) else (hmin, Hori) end
-             in ((min, hmax), (mmode, Hori));;
-    (*
+*)
+  let rec hovlistWidth (l, blanks, indent) =
+    let vmin, vmax = vlistWidth (l, indent)
+    and hmin, hmax = hlistWidth (l, blanks) in
+    let min, mmode =
+      begin if vmin < hmin then (vmin, Vert) else (hmin, Hori)
+      end
+    in
+    ((min, hmax), (mmode, Hori))
+
+  (*
 Lastly we have to treat {\bf horizontal-vertical boxes}, where each break can
 {\em individually}
 be horizontal or vertical in such a manner as to use as
@@ -265,9 +284,10 @@ the available linewidth and thus use fewer lines than
 horizontal-or-vertical boxes.
 By the way: a horizontal-vertical box that contains just one break should
 always behave exactly like the corresponding horizontal-or-vertical box.
-*);;
-    let hvlistWidth = hovlistWidth;;
-    (*
+*)
+  let hvlistWidth = hovlistWidth
+
+  (*
 \subsubsection{Constructing the actual {\ml format}-structure}
 
 The {\ml format} structure that we defined above is very basic.
@@ -286,31 +306,34 @@ Two notes:
  we take the length of the string to be its print length, and
  we can ``emulate'' CAML's {\ml V1box}es by starting a vertical box with a
 break.  This ensures that the first item is indented as much as all the others.
-*);;
-    let break_ = Dbk;;
-    let rec break0_ b i = (Brk (b, i));;
-    let rec string_ s = (Str (size s, s));;
-    let rec string0_ i s = (Str (i, s));;
-    let space_ = (Str (1, sp_ 1));;
-    let rec spaces_ n = (Str (n, sp_ n));;
-    let rec newline_ () = (Str (0, nl_ 1));;
-    let rec newlines_ n = (Str (0, nl_ n));;
-    let rec vbox_ l = (Vbx (vlistWidth (l, ! indent_), ! indent_, ! Skip, l))
-    and vbox0_ i s l = (Vbx (vlistWidth (l, i), i, s, l))
-    and hbox_ l = (Hbx (hlistWidth (l, ! blanks_), ! blanks_, l))
-    and hbox0_ b l = (Hbx (hlistWidth (l, b), b, l))
-    and hVbox_ l =
-      (Hvx
-       (hvlistWidth (l, ! blanks_, ! indent_), ! blanks_, ! indent_, 
-        ! Skip, l))
-    and hVbox0_ b i s l = (Hvx (hvlistWidth (l, b, i), b, i, s, l))
-    and hOVbox_ l =
-      (Hov
-       (hovlistWidth (l, ! blanks_, ! indent_), ! blanks_, ! indent_, 
-        ! Skip, l))
-    and hOVbox0_ b i s l = (Hov (hovlistWidth (l, b, i), b, i, s, l));;
-    let rec newpage_ () = (Str (0, np_ ()));;
-    (*
+*)
+  let break_ = Dbk
+  let rec break0_ b i = Brk (b, i)
+  let rec string_ s = Str (size s, s)
+  let rec string0_ i s = Str (i, s)
+  let space_ = Str (1, sp_ 1)
+  let rec spaces_ n = Str (n, sp_ n)
+  let rec newline_ () = Str (0, nl_ 1)
+  let rec newlines_ n = Str (0, nl_ n)
+
+  let rec vbox_ l = Vbx (vlistWidth (l, !indent_), !indent_, !skip, l)
+  and vbox0_ i s l = Vbx (vlistWidth (l, i), i, s, l)
+  and hbox_ l = Hbx (hlistWidth (l, !blanks_), !blanks_, l)
+  and hbox0_ b l = Hbx (hlistWidth (l, b), b, l)
+
+  and hVbox_ l =
+    Hvx (hvlistWidth (l, !blanks_, !indent_), !blanks_, !indent_, !skip, l)
+
+  and hVbox0_ b i s l = Hvx (hvlistWidth (l, b, i), b, i, s, l)
+
+  and hOVbox_ l =
+    Hov (hovlistWidth (l, !blanks_, !indent_), !blanks_, !indent_, !skip, l)
+
+  and hOVbox0_ b i s l = Hov (hovlistWidth (l, b, i), b, i, s, l)
+
+  let rec newpage_ () = Str (0, np_ ())
+
+  (*
 %***********************************************************************
 \subsection{Printing a {\ml format}-structure}
 
@@ -348,16 +371,16 @@ For summing the maximum widths of the elements of a format list we employ the
 auxiliary function {\ml summaxwidth}. Since the lists of which we want to
 determine the maximum width do not contain breaks, all but the last
  argument to the {\ml Width0} function is actually irrelevant.
-*);;
-    let rec summaxwidth l =
-      List.foldr
-      (function 
-                | (fmt, ysum)
-                    -> let (_, y) = width0_ (Hori, unused_, unused_, fmt)
-                         in y + ysum)
-      0
-      l;;
-    (*
+*)
+  let rec summaxwidth l =
+    List.foldr
+      (function
+        | fmt, ysum ->
+            let _, y = width0_ (Hori, unused_, unused_, fmt) in
+            y + ysum)
+      0 l
+
+  (*
 Let us now define a helper function for horizontal-vertical boxes:
 \begin{ml}
      gh(curr_group, hvbox_list, res)
@@ -388,17 +411,16 @@ For our grouping function we distinguish the following cases:
   \item otherwise the first element is collected into the currently open
     group
 \end{itemize}
-*);;
-    let rec gh =
-      function 
-               | ([], [], _) -> []
-               | (cg, [], res) -> rev (((summaxwidth cg, cg, Ebk) :: res))
-               | (cg, (Dbk :: t), res)
-                   -> gh ([], t, ((summaxwidth cg, cg, Dbk) :: res))
-               | (cg, ((Brk (_, _) as b) :: t), res)
-                   -> gh ([], t, ((summaxwidth cg, cg, b) :: res))
-               | (cg, (h :: t), res) -> gh (cg @ [h], t, res);;
-    (*
+*)
+  let rec gh = function
+    | [], [], _ -> []
+    | cg, [], res -> rev ((summaxwidth cg, cg, Ebk) :: res)
+    | cg, Dbk :: t, res -> gh ([], t, (summaxwidth cg, cg, Dbk) :: res)
+    | cg, (Brk (_, _) as b) :: t, res ->
+        gh ([], t, (summaxwidth cg, cg, b) :: res)
+    | cg, h :: t, res -> gh (cg @ [ h ], t, res)
+
+  (*
 Finally here comes the function {\ml pphv} to print a
 horizontal-vertical box. The format is:
 \begin{ml}
@@ -474,155 +496,167 @@ We thus get:
                is returned by the last printing routine
          \end{itemize}
 \end{itemize}
-*);;
-    let rec pphv =
-      function 
-               | (mw, li, bl, is, ss, mp, ch, lb, [], res)
-                   -> (max_ (mp, ch), res)
-               | (mw, li, bl, is, ss, mp, ch, lb,
-                  ((gpwdth, flist, brk) :: t), res)
-                   -> let (ch1, s1, mp) = begin
-                        if
-                        (lb = Ebk) ||
-                          ((((li + ch) +
-                               (fst (width0_ (Hori, bl, unused_, lb))))
-                              + gpwdth)
-                             <= mw)
-                        then
-                        let (n, s) =
-                          print'p (mw, li, bl, is, ss, Hori, lb, res)
-                          in (ch + n, s, mp)
-                        else
-                        let (n, s) =
-                          print'p (mw, li, bl, is, ss, Vert, lb, res)
-                          in (n, s, max_ (mp, ch))
-                        end
-                        (* OK - group fits within page or has to fit:
-                    horizontal break *)(* group will not fit: vertical break.
+*)
+  let rec pphv = function
+    | mw, li, bl, is, ss, mp, ch, lb, [], res -> (max_ (mp, ch), res)
+    | mw, li, bl, is, ss, mp, ch, lb, (gpwdth, flist, brk) :: t, res ->
+        let ch1, s1, mp =
+          begin if
+            lb = Ebk
+            || li + ch + fst (width0_ (Hori, bl, unused_, lb)) + gpwdth <= mw
+          then
+            let n, s = print'p (mw, li, bl, is, ss, Hori, lb, res) in
+            (ch + n, s, mp)
+          else
+            let n, s = print'p (mw, li, bl, is, ss, Vert, lb, res) in
+            (n, s, max_ (mp, ch))
+          end
+          (* OK - group fits within page or has to fit:
+                    horizontal break *)
+          (* group will not fit: vertical break.
                     Was last line of maximum width? *)
-                        in let (n2, s2) =
-                             pph (mw, li + ch1, bl, is, ss, flist, 0, s1)
-                             in pphv
-                                (mw, li, bl, is, ss, mp, ch1 + n2, brk, t,
-                                 s2)
-                             (* horizontal width, string to print, max print width *)(* Now print the elements of the group using default for horizontal tabs *)(* Now print rest of horizontal-vertical box *)
-    and ppv =
-      function 
-               | (mw, li, ci, bl, is, ss, max, gw, [], res)
-                   -> (max_ (max, gw), res)
-               | (mw, li, ci, bl, is, ss, max, gw, (Dbk :: t), res)
-                   -> let (n, s) =
-                        print'p (mw, li, bl, is, ss, Vert, Dbk, res)
-                        in ppv
-                           (mw, li, li + n, bl, is, ss, max_ (max, gw), n, t,
-                            s)
-               | (mw, li, ci, bl, is, ss, max, gw, ((Brk (_, _) as b) :: t),
-                  res)
-                   -> let (n, s) = print'p (mw, li, bl, is, ss, Vert, b, res)
-                        in ppv
-                           (mw, li, li + n, bl, is, ss, max_ (max, gw), n, t,
-                            s)
-               | (mw, li, ci, bl, is, ss, max, gw, (h :: t), res)
-                   -> let (n, s) = print'p (mw, ci, bl, is, ss, Vert, h, res)
-                        in ppv
-                           (mw, li, ci + n, bl, is, ss, max, gw + n, t, s)
-    and pph =
-      function 
-               | (mw, id, bl, is, ss, [], nres, sres) -> (nres, sres)
-               | (mw, id, bl, is, ss, (h :: t), nres, sres)
-                   -> let (n, s) =
-                        print'p (mw, id, bl, is, ss, Hori, h, sres)
-                        in pph (mw, id + n, bl, is, ss, t, n + nres, s)
-    and print'p =
-      function 
-               | (mw, id, bl, is, ss, mo, Str (n, s), res) -> (n, (s :: res))
-               | (mw, id, bl, is, ss, Hori, Brk (b, i), res)
-                   -> (b,
-                       (begin if ! bailout_ then spmod_ b else sp_ b end
-                        :: res))
-               | (mw, id, bl, is, ss, Vert, Brk (b, i), res)
-                   -> (i,
-                       (begin
-                        if ! bailout_ then spmod_ (id + i) else sp_ (id + i)
-                        end :: nl_ ss :: res))
-               | (mw, id, bl, is, ss, Hori, Dbk, res)
-                   -> (bl,
-                       (begin if ! bailout_ then spmod_ bl else sp_ bl end
-                        :: res))
-               | (mw, id, bl, is, ss, Vert, Dbk, res)
-                   -> (is,
-                       (begin
-                        if ! bailout_ then spmod_ (id + is) else
-                        sp_ (id + is) end :: nl_ ss :: res))
-               | (mw, id, bl, is, ss, mo, Ebk, res) -> (0, res)
-               | (mw, id, bl, is, ss, mo, Hbx ((min, max), blanks, l), res)
-                   -> begin
-                   if
-                   (! bailout_) &&
-                     (((id + min) >= mw) &&
-                        ((id mod (! pagewidth_)) >= (! bailoutSpot_)))
-                   then
-                   pph
-                   (mw + (! pagewidth_), mw + (! bailoutIndent_), blanks, is,
-                    ss, l, 0, (nl_ ss :: res))
-                   else pph (mw, id, blanks, is, ss, l, 0, res) end
-               | (mw, id, bl, is, ss, mo, Vbx ((min, max), indent, skip, l),
-                  res) -> begin
-                   if
-                   (! bailout_) &&
-                     (((id + min) >= mw) &&
-                        ((id mod (! pagewidth_)) >= (! bailoutSpot_)))
-                   then
-                   let id = mw + (! bailoutIndent_)
-                     in ppv
-                        (mw + (! pagewidth_), id, id, bl, indent, skip, 0, 0,
-                         l, (nl_ ss :: res))
-                   else ppv (mw, id, id, bl, indent, skip, 0, 0, l, res) end
-               | (mw, id, bl, is, ss, mo, Hvx
-                  (((min, max), (nmode, xmode)), blanks, indent, skip, l),
-                  res)
-                   -> let gl = gh ([], l, []) in begin
-                        if
-                        (! bailout_) &&
-                          (((id + min) >= mw) &&
-                             ((id mod (! pagewidth_)) >= (! bailoutSpot_)))
-                        then
-                        pphv
-                        (mw + (! pagewidth_), mw + (! bailoutIndent_),
-                         blanks, indent, skip, 0, 0, Ebk, gl,
-                         (nl_ ss :: res))
-                        else
-                        pphv
-                        (mw, id, blanks, indent, skip, 0, 0, Ebk, gl, res)
-                        end
-               | (mw, id, bl, is, ss, mo, Hov
-                  (((min, max), (nmode, xmode)), blanks, indent, skip, l),
-                  res) -> begin
-                   if max <= (mw - id) then begin
-                   if xmode = Hori then
-                   pph (mw, id, blanks, is, ss, l, 0, res) else
-                   ppv (mw, id, id, blanks, indent, skip, 0, 0, l, res) end
-                   else begin
-                   if
-                   (! bailout_) &&
-                     (((id + min) >= mw) &&
-                        ((id mod (! pagewidth_)) >= (! bailoutSpot_)))
-                   then begin
-                   if nmode = Hori then
-                   pph
-                   (mw + (! pagewidth_), mw + (! bailoutIndent_), blanks, is,
-                    ss, l, 0, (nl_ ss :: res))
-                   else
-                   let id = mw + (! bailoutIndent_)
-                     in ppv
-                        (mw + (! pagewidth_), id, id, blanks, indent, skip,
-                         0, 0, l, (nl_ ss :: res))
-                   end else begin
-                   if nmode = Hori then
-                   pph (mw, id, blanks, is, ss, l, 0, res) else
-                   ppv (mw, id, id, blanks, indent, skip, 0, 0, l, res) end
-                   end end;;
-    (*
+        in
+        let n2, s2 = pph (mw, li + ch1, bl, is, ss, flist, 0, s1) in
+        pphv (mw, li, bl, is, ss, mp, ch1 + n2, brk, t, s2)
+  (* horizontal width, string to print, max print width *)
+  (* Now print the elements of the group using default for horizontal tabs *)
+  (* Now print rest of horizontal-vertical box *)
+
+  and ppv = function
+    | mw, li, ci, bl, is, ss, max, gw, [], res -> (max_ (max, gw), res)
+    | mw, li, ci, bl, is, ss, max, gw, Dbk :: t, res ->
+        let n, s = print'p (mw, li, bl, is, ss, Vert, Dbk, res) in
+        ppv (mw, li, li + n, bl, is, ss, max_ (max, gw), n, t, s)
+    | mw, li, ci, bl, is, ss, max, gw, (Brk (_, _) as b) :: t, res ->
+        let n, s = print'p (mw, li, bl, is, ss, Vert, b, res) in
+        ppv (mw, li, li + n, bl, is, ss, max_ (max, gw), n, t, s)
+    | mw, li, ci, bl, is, ss, max, gw, h :: t, res ->
+        let n, s = print'p (mw, ci, bl, is, ss, Vert, h, res) in
+        ppv (mw, li, ci + n, bl, is, ss, max, gw + n, t, s)
+
+  and pph = function
+    | mw, id, bl, is, ss, [], nres, sres -> (nres, sres)
+    | mw, id, bl, is, ss, h :: t, nres, sres ->
+        let n, s = print'p (mw, id, bl, is, ss, Hori, h, sres) in
+        pph (mw, id + n, bl, is, ss, t, n + nres, s)
+
+  and print'p = function
+    | mw, id, bl, is, ss, mo, Str (n, s), res -> (n, s :: res)
+    | mw, id, bl, is, ss, Hori, Brk (b, i), res ->
+        ( b,
+          begin if !bailout_ then spmod_ b else sp_ b
+          end
+          :: res )
+    | mw, id, bl, is, ss, Vert, Brk (b, i), res ->
+        ( i,
+          begin if !bailout_ then spmod_ (id + i) else sp_ (id + i)
+          end
+          :: nl_ ss :: res )
+    | mw, id, bl, is, ss, Hori, Dbk, res ->
+        ( bl,
+          begin if !bailout_ then spmod_ bl else sp_ bl
+          end
+          :: res )
+    | mw, id, bl, is, ss, Vert, Dbk, res ->
+        ( is,
+          begin if !bailout_ then spmod_ (id + is) else sp_ (id + is)
+          end
+          :: nl_ ss :: res )
+    | mw, id, bl, is, ss, mo, Ebk, res -> (0, res)
+    | mw, id, bl, is, ss, mo, Hbx ((min, max), blanks, l), res -> begin
+        if !bailout_ && id + min >= mw && id mod !pagewidth_ >= !bailoutSpot_
+        then
+          pph
+            ( mw + !pagewidth_,
+              mw + !bailoutIndent_,
+              blanks,
+              is,
+              ss,
+              l,
+              0,
+              nl_ ss :: res )
+        else pph (mw, id, blanks, is, ss, l, 0, res)
+      end
+    | mw, id, bl, is, ss, mo, Vbx ((min, max), indent, skip, l), res -> begin
+        if !bailout_ && id + min >= mw && id mod !pagewidth_ >= !bailoutSpot_
+        then
+          let id = mw + !bailoutIndent_ in
+          ppv
+            (mw + !pagewidth_, id, id, bl, indent, skip, 0, 0, l, nl_ ss :: res)
+        else ppv (mw, id, id, bl, indent, skip, 0, 0, l, res)
+      end
+    | ( mw,
+        id,
+        bl,
+        is,
+        ss,
+        mo,
+        Hvx (((min, max), (nmode, xmode)), blanks, indent, skip, l),
+        res ) ->
+        let gl = gh ([], l, []) in
+        begin if
+          !bailout_ && id + min >= mw && id mod !pagewidth_ >= !bailoutSpot_
+        then
+          pphv
+            ( mw + !pagewidth_,
+              mw + !bailoutIndent_,
+              blanks,
+              indent,
+              skip,
+              0,
+              0,
+              Ebk,
+              gl,
+              nl_ ss :: res )
+        else pphv (mw, id, blanks, indent, skip, 0, 0, Ebk, gl, res)
+        end
+    | ( mw,
+        id,
+        bl,
+        is,
+        ss,
+        mo,
+        Hov (((min, max), (nmode, xmode)), blanks, indent, skip, l),
+        res ) -> begin
+        if max <= mw - id then begin
+          if xmode = Hori then pph (mw, id, blanks, is, ss, l, 0, res)
+          else ppv (mw, id, id, blanks, indent, skip, 0, 0, l, res)
+        end
+        else begin
+          if !bailout_ && id + min >= mw && id mod !pagewidth_ >= !bailoutSpot_
+          then begin
+            if nmode = Hori then
+              pph
+                ( mw + !pagewidth_,
+                  mw + !bailoutIndent_,
+                  blanks,
+                  is,
+                  ss,
+                  l,
+                  0,
+                  nl_ ss :: res )
+            else
+              let id = mw + !bailoutIndent_ in
+              ppv
+                ( mw + !pagewidth_,
+                  id,
+                  id,
+                  blanks,
+                  indent,
+                  skip,
+                  0,
+                  0,
+                  l,
+                  nl_ ss :: res )
+          end
+          else begin
+            if nmode = Hori then pph (mw, id, blanks, is, ss, l, 0, res)
+            else ppv (mw, id, id, blanks, indent, skip, 0, 0, l, res)
+          end
+        end
+      end
+
+  (*
 %{\bf Improvements:}
 %Instead of employing the default value {\ml Blanks} use the number of
 %blanks specified in the {\ml Hvbox} by adding an extra argument to this
@@ -680,8 +714,8 @@ And this is how the algorithm works:
               the vertical box
      \end{itemize}
 \end{itemize}
-*);;
-    (*
+*)
+  (*
 \subsubsection{Printing a horizontal box}
 A function to print a horizontal box (this is getting easier all the time)
 \begin{ml}
@@ -708,8 +742,8 @@ The algorithm:
     The length of everything we printed is the sum of the head-length
     and tail-length.
 \end{itemize}
-*);;
-    (*
+*)
+  (*
 \subsubsection{Putting it all together: printing a {\ml format}}
 Now to the main printing routine {\ml print'p} --- this
 one is good for all {\ml format}s:
@@ -777,8 +811,8 @@ $insert~{\tt mod}~ {\tt Pagewidth} \geq BailoutSpot$
 %In order to actually be able to specify different horizontal tabs
 %---at least at the box level--- we need to augment the printing functions
 %with an additional argument.
-*);;
-    (*
+*)
+  (*
 %{\bf Improvements:}
 %The pagewidth does not need to be an explicit argument to the printing
 %functions. Rather it should be realized as a {\ml ref}-value.
@@ -790,38 +824,38 @@ $insert~{\tt mod}~ {\tt Pagewidth} \geq BailoutSpot$
 Finally we have {\ml print\_fmt} and {\ml makestring\_fmt}
    These functions performs the actual printing --- they call on
    {\ml print'p} to do the formatting work.
-*);;
-    let rec makestring_fmt fm =
-      String.concat
+*)
+  let rec makestring_fmt fm =
+    String.concat
       (rev
-       (snd
-        (print'p
-         (! pagewidth_, 0, ! blanks_, ! indent_, ! Skip, Hori, fm, []))));;
-    let rec print_fmt fm =
-      List.foldr
-      (function 
-                | (s, _) -> print s)
+         (snd
+            (print'p (!pagewidth_, 0, !blanks_, !indent_, !skip, Hori, fm, []))))
+
+  let rec print_fmt fm =
+    List.foldr
+      (function s, _ -> print s)
       ()
-      (snd
-       (print'p (! pagewidth_, 0, ! blanks_, ! indent_, ! Skip, Hori, fm, [])));;
-    (*
+      (snd (print'p (!pagewidth_, 0, !blanks_, !indent_, !skip, Hori, fm, [])))
+
+  (*
 \subsubsection{Output functions}
 The output functions work on {\tt fmtstream}s which are just
 packaged-up {\tt outstream}s.
 The functions {\tt file\_open\_fmt} and {\tt with\_open\_fmt} endeavor to
 make the use of {\tt fmtstreams} on files more convenient.
-*);;
-    type fmtstream = | Formatstream of TextIO.outstream ;;
-    let rec open_fmt outs = (Formatstream outs);;
-    let rec close_fmt (Formatstream outs) = outs;;
-    let rec output_fmt (Formatstream outs, fm) =
-      List.foldr
-      (function 
-                | (s, _) -> TextIO.output (outs, s))
+*)
+  type fmtstream = Formatstream of TextIO.outstream
+
+  let rec open_fmt outs = Formatstream outs
+  let rec close_fmt (Formatstream outs) = outs
+
+  let rec output_fmt (Formatstream outs, fm) =
+    List.foldr
+      (function s, _ -> TextIO.output (outs, s))
       ()
-      (snd
-       (print'p (! pagewidth_, 0, ! blanks_, ! indent_, ! Skip, Hori, fm, [])));;
-    (*
+      (snd (print'p (!pagewidth_, 0, !blanks_, !indent_, !skip, Hori, fm, [])))
+
+  (*
       fun debug_output_fmt(Formatstream fs, fm) =
                   let val mw = (!Pagewidth)
                             val (min,max) = Width0(Hori,!Blanks,!Indent,fm)
@@ -837,23 +871,51 @@ make the use of {\tt fmtstreams} on files more convenient.
                                     ""0>>>.>>>>1>>>>.>>>>2>>>>.>>>>3>>>>.>>>>4>>>>.>\n""
                                   )
                           end
-       *);;
-    let rec file_open_fmt filename =
-      let fmt_stream = open_fmt (TextIO.openOut filename)
-        in let close_func =
-             function 
-                      | () -> TextIO.closeOut (close_fmt fmt_stream)
-             in (close_func, fmt_stream);;
-    let rec with_open_fmt filename func =
-      let (close_func, fmt_stream) = file_open_fmt filename
-        in let result =
-             try func fmt_stream
-             with 
-                  | exn -> begin
-                             close_func ();raise exn
-                             end
-             in begin
-                  close_func ();result
-                  end;;
-    end;;
-(* struct *);;
+       *)
+  let rec file_open_fmt filename =
+    let fmt_stream = open_fmt (TextIO.openOut filename) in
+    let close_func = function () -> TextIO.closeOut (close_fmt fmt_stream) in
+    (close_func, fmt_stream)
+
+  let rec with_open_fmt filename func =
+    let close_func, fmt_stream = file_open_fmt filename in
+    let result =
+      try func fmt_stream
+      with exn ->
+        begin
+          close_func ();
+          raise exn
+        end
+    in
+    begin
+      close_func ();
+      result
+    end
+
+  (* Aliases to match FORMATTER signature *)
+  let indent = indent_
+  let blanks = blanks_
+  let pagewidth = pagewidth_
+  let bailout = bailout_
+  let bailoutIndent = bailoutIndent_
+  let bailoutSpot = bailoutSpot_
+  let width = width_
+  let break = break_
+  let break0 = break0_
+  let string = string_
+  let string0 = string0_
+  let space = space_
+  let spaces = spaces_
+  let newline = newline_
+  let newlines = newlines_
+  let newpage = newpage_
+  let vbox = vbox_
+  let vbox0 = vbox0_
+  let hbox = hbox_
+  let hbox0 = hbox0_
+  let hVbox = hVbox_
+  let hVbox0 = hVbox0_
+  let hOVbox = hOVbox_
+  let hOVbox0 = hOVbox0_
+end
+(* struct *)

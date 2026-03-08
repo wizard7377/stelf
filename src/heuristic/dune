@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name heuristic) (modules heuristic_ heuristic_sum) (libraries basis) (flags (:standard -w -A -open Basis))
+ (name heuristic)
+ (public_name twelf.heuristic)
+ (modules heuristic_ heuristic_sum)
+ (libraries basis)
+ (flags
+  (:standard -w -A -open Basis))
  (wrapped false))

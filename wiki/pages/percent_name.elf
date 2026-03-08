@@ -1,0 +1,75 @@
+%%! title: "%name"
+%%! description: "A %name declaration can give Twelf's generated output more structure and clarity"
+
+%{! A **``%name``** declaration allows us to direct Twelf to name unnamed variables in a certain way, which can make it much easier to understand Twelf's output. Using a ``%name`` declaration is never required, but it often makes the task of proving [metatheorem](/wiki/metatheorem/)s significantly easier. More information can be found in the section on <Guide chapter="3" section="5">name preferences</Guide>.
+
+Two examples show the use of ``%name`` - the first shows its use to give a default name for universally quantified variables, and the second example shows its use to give a default name for both universally quantified variables and bound variables.
+
+## Example 1: Natural numbers
+
+We start with a standard presentation of unary numbers and addition: !}%
+    
+nat : type.
+
+z : nat.
+s : nat -> nat.
+
+
+plus : nat -> nat -> nat -> type.
+
+plus/z : plus z N N.
+
+plus/s : plus (s N1) N2 (s N3) <- plus N1 N2 N3.
+
+%{! If we give Twelf a derivation, but do not give it information about the type of that derivation, it will infer the type. In order to return the most general possible type, Twelf considers the second type to be an "anonymous" (or [universally quantified](/wiki/implicit-and-explicit-parameters/)) variable. If Twelf is given no other information, it will automatically name all anonymous variables ``X1``, ``X2``, etc... !}%
+    
+%{!! begin checked !!}%
+_ = plus/s (plus/s plus/z).
+%{!! end checked !!}%
+
+%{! These type reconstructions can become rather complicated, particularly when we are dealing with metatheorems that have multiple types. A good way to deal with this complexity is by giving Twelf a different prefix for anonymous variables of different types using the ``%name`` declaration. !}%
+    
+%name nat N.
+
+%{! This identifier _must_ start with an uppercase letter, and often only a single uppercase letter suffices; however, any identifier starting with an uppercase letter works. Given this information, Twelf will change the prefix of anonymous variables from ``X`` to whatever was defined in the ``%name`` declaration. !}%
+    
+%{!! begin checked !!}%
+_ = plus/s (plus/s plus/z).
+%{!! end checked !!}%
+
+%{! ## Example 2: Call-by-name lambda calculus
+
+We can also use the ``%name`` declaration to define the default name for bound variables. !}%
+
+exp : type. 
+
+lam : (exp -> exp) -> exp.
+app : exp -> exp -> exp.
+
+
+step : exp -> exp -> type.
+
+step/app : step (app E1 E2) (app E1' E2) <- step E1 E1'.
+
+step/appabs : step (app (lam E1) E2) (E1 E2).
+
+%{! The default prefix for universally quantified variables is again ``X``. Also, observe that the default prefix for bound variables is ``x``. !}%
+    
+%{!! begin checked !!}%
+_ = (step/app (step/app step/appabs)).
+%{!! end checked !!}%
+
+%{! This ``%name`` declaration causes no output from Twelf, but it changes the prefixes of universally quantified and bound variables to ``E`` and ``e``, respectively. !}%
+    
+%{!! begin checked !!}%
+%name exp E e.
+
+_ = (step/app (step/app step/appabs)).
+%{!! end checked !!}%
+
+%{! ## See also
+* <Guide chapter="3" section="5">Name preferences</Guide>
+
+<Keyword />
+
+!}%

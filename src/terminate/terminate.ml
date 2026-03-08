@@ -1,9 +1,5 @@
 open! Checking
 module Checking = Checking
-open! Checking
-module Checking = Checking
-open! Reduces
-module Reduces = Reduces
 open! Reduces
 module Reduces = Reduces
 open! Terminate_

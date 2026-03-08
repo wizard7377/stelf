@@ -1,36 +1,39 @@
-open! Basis;;
-(* Indexing *);;
-(* Author: Brigitte Pientka *);;
+open! Basis
+
+(* Indexing *)
+(* Author: Brigitte Pientka *)
 module type MEMOTABLE = sig
-                        (*! structure IntSyn : INTSYN !*)
-                        (*! structure CompSyn : COMPSYN !*)
-                        (*! structure TableParam : TABLEPARAM !*)
-                        (* call check/insert *)
-                        (* callCheck (G, D, U, eqn)
+  (*! structure IntSyn : INTSYN !*)
+  (*! structure CompSyn : COMPSYN !*)
+  (*! structure TableParam : TABLEPARAM !*)
+  (* call check/insert *)
+  (* callCheck (G, D, U, eqn)
    *
    * if D, G |- U & eqn     in table  then RepeatedEntry (entries)
    * if D, G |- U & eqn not in table  then NewEntry (ptrAnswer)
    * SIDE EFFECT: D, G |- U added to table
    *)
-                        val
-                          callCheck : (IntSyn.dctx *
-                                       IntSyn.dctx *
-                                       IntSyn.dctx *
-                                       IntSyn.exp_ *
-                                       TableParam.resEqn_ *
-                                       TableParam.status_) ->
-                                      TableParam.callCheckResult
-                        val
-                          insertIntoTree : (IntSyn.dctx *
-                                            IntSyn.dctx *
-                                            IntSyn.dctx *
-                                            IntSyn.exp_ *
-                                            TableParam.resEqn_ *
-                                            TableParam.answer *
-                                            TableParam.status_) ->
-                                           TableParam.callCheckResult
-                        (* answer check/insert *)
-                        (* answerCheck (G, D, (U,s))
+  val callCheck :
+    IntSyn.dctx
+    * IntSyn.dctx
+    * IntSyn.dctx
+    * IntSyn.exp_
+    * TableParam.resEqn_
+    * TableParam.status_ ->
+    TableParam.callCheckResult
+
+  val insertIntoTree :
+    IntSyn.dctx
+    * IntSyn.dctx
+    * IntSyn.dctx
+    * IntSyn.exp_
+    * TableParam.resEqn_
+    * TableParam.answer
+    * TableParam.status_ ->
+    TableParam.callCheckResult
+
+  (* answer check/insert *)
+  (* answerCheck (G, D, (U,s))
    * 
    * Assupmtion: D, G |- U is in table
    *             and A represents the corresponding solutions
@@ -41,14 +44,13 @@ module type MEMOTABLE = sig
    * If  (Dk, sk) in A then repeated
    *  else new
    *)
-                        val
-                          answerCheck : (IntSyn.sub_ *
-                                         TableParam.answer *
-                                         CompSyn.pskeleton) ->
-                                        TableParam.answState
-                        (* reset table *)
-                        val reset : unit -> unit
-                        (* updateTable 
+  val answerCheck :
+    IntSyn.sub_ * TableParam.answer * CompSyn.pskeleton -> TableParam.answState
+
+  (* reset table *)
+  val reset : unit -> unit
+
+  (* updateTable 
    *
    * SIDE EFFECT: 
    *   for each table entry: 
@@ -58,12 +60,10 @@ module type MEMOTABLE = sig
    *    then updateTable () =  false
    * else updateTable () = true
    *)
-                        val updateTable : unit -> bool
-                        val tableSize : unit -> int
-                        val
-                          memberCtx : ((IntSyn.dctx * IntSyn.exp_) *
-                                       IntSyn.dctx) ->
-                                      IntSyn.dec_
-                                      option
-                        end;;
-(* signature MemoTable *);;
+  val updateTable : unit -> bool
+  val tableSize : unit -> int
+
+  val memberCtx :
+    (IntSyn.dctx * IntSyn.exp_) * IntSyn.dctx -> IntSyn.dec_ option
+end
+(* signature MemoTable *)

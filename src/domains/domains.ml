@@ -4,10 +4,6 @@ open! Ordered_field
 module Ordered_field = Ordered_field
 open! Integers
 module Integers = Integers
-open! Integers
-module Integers = Integers
-open! Rationals
-module Rationals = Rationals
 open! Rationals
 module Rationals = Rationals
 open! Integers_mod

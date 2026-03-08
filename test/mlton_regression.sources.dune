@@ -1,0 +1,79 @@
+
+      (rule
+ (mode fallback)
+ (target regression.sig.ml)
+ (action
+  (write-file regression.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target regression.fun.ml)
+ (action
+  (write-file regression.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target regression.sml.ml)
+ (action
+  (write-file regression.sml.ml "")))
+
+(rule
+ (target regression.ml)
+ (deps
+  (:sig regression.sig.ml)
+  (:fun regression.fun.ml)
+  (:sml regression.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      
+      (rule
+ (mode fallback)
+ (target runquiet.sig.ml)
+ (action
+  (write-file runquiet.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target runquiet.fun.ml)
+ (action
+  (write-file runquiet.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target runquiet.sml.ml)
+ (action
+  (write-file runquiet.sml.ml "")))
+
+(rule
+ (target runquiet.ml)
+ (deps
+  (:sig runquiet.sig.ml)
+  (:fun runquiet.fun.ml)
+  (:sml runquiet.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

@@ -1,3 +1,5 @@
+open! Basis
+(* Commented out: PACK_WORD not available
 open! Basis;;
 module Flit = (Flit)(struct
                        module Global = Global;;
@@ -10,3 +12,4 @@ module Flit = (Flit)(struct
                        module Index = Index;;
                        module Table = IntRedBlackTree;;
                        end);;
+*)

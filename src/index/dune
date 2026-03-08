@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name index) (modules index_skolem index_) (libraries lambda table global basis) (flags (:standard -w -A -open Basis  -open Lambda  -open Table  -open Global))
+ (name index)
+ (public_name twelf.index)
+ (modules index_skolem index_)
+ (libraries lambda table global basis)
+ (flags
+  (:standard -w -A -open Basis -open Lambda_ -open Table_ -open Global_))
  (wrapped false))

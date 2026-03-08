@@ -1,4 +1,57 @@
 (include sources.dune)
+
 (library
- (name unique) (modules unique_) (libraries global lambda names paths table formatter print subordinate modes typecheck index solvers worldcheck timing basis) (flags (:standard -w -A -open Basis  -open Global  -open Lambda  -open Names  -open Paths  -open Table  -open Formatter  -open Print  -open Subordinate  -open Modes  -open Typecheck  -open Index  -open Solvers  -open Worldcheck  -open Timing))
+ (name unique)
+ (public_name twelf.unique)
+ (modules unique_)
+ (libraries
+  global
+  lambda
+  names
+  paths
+  table
+  formatter
+  print
+  subordinate
+  modes
+  typecheck
+  index
+  solvers
+  worldcheck
+  timing
+  basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global_
+   -open
+   Lambda_
+   -open
+   Names_
+   -open
+   Paths_
+   -open
+   Table_
+   -open
+   Formatter_
+   -open
+   Print_
+   -open
+   Subordinate_
+   -open
+   Modes_
+   -open
+   Typecheck_
+   -open
+   Index_
+   -open
+   Solvers_
+   -open
+   Worldcheck_
+   -open
+   Timing_))
  (wrapped false))

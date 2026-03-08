@@ -1,4 +1,66 @@
 (include sources.dune)
+
 (library
- (name cover) (modules total cover_) (libraries global lambda names paths table formatter print subordinate modes thm terminate index solvers worldcheck typecheck timing unique basis) (flags (:standard -w -A -open Basis  -open Global  -open Lambda  -open Names  -open Paths  -open Table  -open Formatter  -open Print  -open Subordinate  -open Modes  -open Thm  -open Terminate  -open Index  -open Solvers  -open Worldcheck  -open Typecheck  -open Timing  -open Unique))
+ (name cover)
+ (public_name twelf.cover)
+ (modules total cover_)
+ (libraries
+  global
+  lambda
+  names
+  paths
+  table
+  formatter
+  print
+  subordinate
+  modes
+  thm
+  terminate
+  index
+  solvers
+  worldcheck
+  typecheck
+  timing
+  unique
+  basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global_
+   -open
+   Lambda_
+   -open
+   Names_
+   -open
+   Paths_
+   -open
+   Table_
+   -open
+   Formatter_
+   -open
+   Print_
+   -open
+   Subordinate_
+   -open
+   Modes_
+   -open
+   Thm_
+   -open
+   Terminate_
+   -open
+   Index_
+   -open
+   Solvers_
+   -open
+   Worldcheck_
+   -open
+   Typecheck_
+   -open
+   Timing_
+   -open
+   Unique_))
  (wrapped false))

@@ -1,0 +1,61 @@
+---
+title: The Twelf Project
+description: Twelf is a language used to specify, implement, and prove properties of deductive systems such as programming languages and logics.
+head:
+  - tag: title
+    content: The Twelf Programming Language and Theorem Prover
+---
+
+import Twelf from '../../components/Twelf.astro';
+
+[Twelf](/wiki/about-the-twelf-project/) is a language used to specify,
+implement, and prove properties of deductive systems such as programming
+languages and logics. [Large research projects using
+Twelf](/wiki/research-projects-using-twelf/) include the TALT typed assembly
+language, a foundational proof-carrying-code system, and a type safety proof
+for Standard ML. Twelf is no longer undergoing active development, but it
+retains a community of users and remains a valuable tool for research.
+
+Here's what it looks like to write Twelf:
+
+<Twelf code={`
+exp : type.
+app : exp -> exp -> exp.
+lam : (exp -> exp) -> exp.
+
+step : exp -> exp -> type.
+step/app : step (app (lam [x] E0 x) E2) (E0 E2).
+`}/>
+
+Here's what it looks like to run Twelf:
+
+<Twelf checked context={`
+exp : type.
+app : exp -> exp -> exp.
+lam : (exp -> exp) -> exp.
+
+step : exp -> exp -> type.
+step/app : step (app (lam [x] E0 x) E2) (E0 E2).
+`} code={`
+omega = app (lam [x] app x x) (lam [x] app x x).
+%query 1 1 step omega E.
+`}/>
+
+Visitors without a technical background are encouraged to read the [general
+description of Twelf](/wiki/general-description-of-twelf/).
+
+- The [installation instructions](/download/) can get you started.
+- [Proving metatheorems with Twelf](/wiki/proving-metatheorems-with-twelf/) is
+  a mini-course on some of the most common ways of using Twelf.
+- The [glossary](/wiki/glossary/) and [documentation hub](/wiki/documentation/)
+  are the most up-to-date documentation for Twelf.
+
+This website is home of Twelf language _and_ the home for lots of Twelf-centric
+tutorials on logic and programming languages. See the [case studies
+hub](/wiki/case-studies/) for more. Don't be shy about
+[contributing](/contributing/) to our documentation or adding your own
+tutorials or case studies!
+
+This website is still in the process of being converted from the "old Twelf 
+wiki," the MediaWiki installation that ran from 2006-2024, and there is 
+[much to do](/todo/). We'd welcome your help!

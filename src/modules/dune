@@ -1,4 +1,26 @@
 (include sources.dune)
+
 (library
- (name modules) (modules modsyn modules_) (libraries global table lambda names paths typecheck basis) (flags (:standard -w -A -open Basis  -open Global  -open Table  -open Lambda  -open Names  -open Paths  -open Typecheck))
+ (name modules)
+ (public_name twelf.modules)
+ (modules modsyn modules_)
+ (libraries global table lambda names paths typecheck basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global_
+   -open
+   Table_
+   -open
+   Lambda_
+   -open
+   Names_
+   -open
+   Paths_
+   -open
+   Typecheck_))
  (wrapped false))

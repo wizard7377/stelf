@@ -1,3 +1,5 @@
+open! Basis
+(* Commented out: PACK_WORD not available
 open! Basis;;
 (* cope with nonstandard old smlnj name of PackWord32Little -jcreed 2006.9.15 *);;
 module Flit = (Flit)(struct
@@ -11,3 +13,4 @@ module Flit = (Flit)(struct
                        module Index = Index;;
                        module Table = IntRedBlackTree;;
                        end);;
+*)

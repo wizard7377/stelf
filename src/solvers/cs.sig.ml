@@ -1,10 +1,11 @@
-open! Basis;;
-(* Constraint Solver *);;
+open! Basis
+
+(* Constraint Solver *)
 module type CS = sig
-                 (*! structure CSManager : CS_MANAGER !*)
-                 (* all a constraint solver must define is a structure
+  (*! structure Cs_manager : CS_MANAGER !*)
+  (* all a constraint solver must define is a structure
      suitable for the constraint solver manager to install.
   *)
-                 val solver : CSManager.solver
-                 end;;
-(* signature CS *);;
+  val solver : Cs_manager.solver
+end
+(* signature CS *)

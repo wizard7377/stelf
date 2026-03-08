@@ -1,9 +1,10 @@
 open! Basis;;
+open Cprint 
 (* Compilation for indexing with substitution trees *);;
 (* Author: Iliano Cervesato *);;
 (* Modified: Jeff Polakow, Carsten Schuermann, Larry Greenfield,
              Roberto Virga, Brigitte Pientka *);;
-module Compile(Compile__0: sig
+module MakeCompile(Compile__0: sig
                            (*! structure IntSyn' : INTSYN !*)
                            (*! structure CompSyn' : COMPSYN !*)
                            (*! sharing CompSyn'.IntSyn = IntSyn' !*)
@@ -11,11 +12,11 @@ module Compile(Compile__0: sig
                            (*! sharing Whnf.IntSyn = IntSyn' !*)
                            module TypeCheck : TYPECHECK
                            (* sharing TypeCheck.IntSyn = IntSyn' !*)
-                           module SubTree : SUBTREE
+                           module SubTree : Subtree.SUBTREE
                            (*! sharing SubTree.IntSyn = IntSyn' !*)
                            (*! sharing SubTree.CompSyn = CompSyn' !*)
                            (* CPrint currently unused *)
-                           module CPrint : CPRINT
+                           module CPrint : Cprint.CPRINT
                            (*! sharing CPrint.IntSyn = IntSyn' !*)
                            (*! sharing CPrint.CompSyn = CompSyn' !*)
                            (* CPrint currently unused *)
@@ -27,11 +28,12 @@ module Compile(Compile__0: sig
   struct
     (* FIX: need to associate errors with occurrences -kw *);;
     exception Error of string ;;
-    open! struct
-            module I = IntSyn;;
-            module T = Tomega;;
-            module C = CompSyn;;
-            end;;
+    module I = IntSyn
+    module T = Tomega;;
+    module C = CompSyn;;
+    module SubTree = Compile__0.SubTree;;
+    module Whnf = Compile__0.Whnf;;
+    module CPrint = Compile__0.CPrint;;
     type duplicates_ = | Bvar of int 
                        | Fgn 
                        | Def of int ;;
@@ -83,8 +85,8 @@ module Compile(Compile__0: sig
 *);;
     let rec etaSpine =
       function 
-               | (nil_, n) -> n = 0
-               | (I.App (I.Root (I.BVar k, nil_), s_), n)
+               | (I.Nil, n) -> n = 0
+               | (I.App (I.Root (I.BVar k, I.Nil), s_), n)
                    -> (k = n) && (etaSpine (s_, n - 1))
                | (I.App (a_, s_), n) -> false;;
     (* collectHead (h, K, Vars, depth) = (K', Vars', replaced)
@@ -114,7 +116,7 @@ module Compile(Compile__0: sig
    *);;
     let rec collectSpine =
       function 
-               | (nil_, k_, vars_, depth) -> (k_, vars_)
+               | (I.Nil, k_, vars_, depth) -> (k_, vars_)
                | (I.App (u_, s_), k_, vars_, depth)
                    -> let (k'_, vars'_) = collectExp (u_, k_, vars_, depth)
                         in collectSpine (s_, k'_, vars'_, depth)
@@ -149,7 +151,7 @@ module Compile(Compile__0: sig
                | ((I.Const k as h), depth, total) -> h
                | ((I.Def k as h), depth, total) -> h
                | ((I.NSDef k as h), depth, total) -> h
-               | ((I.FgnConst k as h), depth, total) -> h
+               | ((I.FgnConst _ as h), depth, total) -> h
                | ((I.Skonst k as h), depth, total) -> h;;
     let rec shiftExp =
       function 
@@ -166,9 +168,9 @@ module Compile(Compile__0: sig
                    -> (I.Pi
                        ((shiftDec (d_, depth, total), p_),
                         shiftExp (u_, depth + 1, total)))
-               | (I.FgnExp csfe, depth, total)
+               | (I.FgnExp (csfe1, csfe2), depth, total)
                    -> I.FgnExpStd.Map.apply
-                      csfe
+                      (csfe1, csfe2)
                       (function 
                                 | u_
                                     -> shiftExp
@@ -176,7 +178,7 @@ module Compile(Compile__0: sig
                                         total))(* Tue Apr  2 12:10:24 2002 -fp -bp *)(* this is overkill and could be very expensive for deeply nested foreign exps *)(* calling normalize here because U may not be normal *)
     and shiftSpine =
       function 
-               | (nil_, _, _) -> I.nil_
+               | (I.Nil, _, _) -> I.Nil
                | (I.App (u_, s_), depth, total)
                    -> (I.App
                        (shiftExp (u_, depth, total),
@@ -235,7 +237,7 @@ module Compile(Compile__0: sig
       function 
                | (gl_, (I.Root ((I.Def k as h), s_) as u_), left, vars_,
                   depth, total, eqns)
-                   -> let n_ = (I.Root ((I.BVar (left + depth)), I.nil_))
+                   -> let n_ = (I.Root ((I.BVar (left + depth)), I.Nil))
                         in let u'_ = shiftExp (u_, depth, total)
                              in (left - 1, vars_, n_,
                                  (C.UnifyEq (gl_, u'_, n_, eqns)))
@@ -245,7 +247,7 @@ module Compile(Compile__0: sig
                         linearHead (gl_, h, s_, left, vars_, depth, total)
                         in begin
                         if replaced then
-                        let n_ = (I.Root (h', I.nil_))
+                        let n_ = (I.Root (h', I.Nil))
                           in let u'_ = shiftExp (u_, depth, total)
                                in (left', vars_, n_,
                                    (C.UnifyEq (gl_, u'_, n_, eqns)))
@@ -264,7 +266,7 @@ module Compile(Compile__0: sig
                              in (left', vars'_, (I.Lam (d'_, u'_)), eqns')
                | (gl_, (I.FgnExp (cs, ops) as u_), left, vars_, depth, total,
                   eqns)
-                   -> let n_ = (I.Root ((I.BVar (left + depth)), I.nil_))
+                   -> let n_ = (I.Root ((I.BVar (left + depth)), I.Nil))
                         in let u'_ = shiftExp (u_, depth, total)
                              in (left - 1, vars_, n_,
                                  (C.UnifyEq (gl_, u'_, n_, eqns)))(*
@@ -273,8 +275,8 @@ module Compile(Compile__0: sig
      *)(* should be impossible  Mon Apr 15 14:54:42 2002 -fp *)
     and linearSpine =
       function 
-               | (gl_, nil_, left, vars_, depth, total, eqns)
-                   -> (left, vars_, I.nil_, eqns)
+               | (gl_, I.Nil, left, vars_, depth, total, eqns)
+                   -> (left, vars_, I.Nil, eqns)
                | (gl_, I.App (u_, s_), left, vars_, depth, total, eqns)
                    -> let (left', vars'_, u'_, eqns') =
                         linearExp (gl_, u_, left, vars_, depth, total, eqns)
@@ -298,7 +300,7 @@ module Compile(Compile__0: sig
       let (k_, _) = collectExp (r_, [], [], 0)
         in let left = List.length k_
              in let (left', _, r'_, eqs_) =
-                  linearExp (I.null_, r_, left, [], 0, left, C.trivial_)
+                  linearExp (I.Null, r_, left, [], 0, left, C.Trivial)
                   in let rec convertKRes =
                        function 
                                 | (resG_, [], 0) -> resG_
@@ -334,7 +336,7 @@ module Compile(Compile__0: sig
       let (k_, _) = collectExp (h_, [], [], 0)
         in let left = List.length k_
              in let (left', _, h'_, eqs_) =
-                  linearExp (I.null_, h_, left, [], 0, left, C.trivial_)
+                  linearExp (I.Null, h_, left, [], 0, left, C.Trivial)
                   in let rec convertKRes =
                        function 
                                 | (g_, [], 0) -> g_
@@ -404,12 +406,12 @@ module Compile(Compile__0: sig
       match (arg__3, arg__4, arg__5)
       with 
            | (fromCS, opt, (g_, (I.Root (h, s_) as r_))) -> begin
-               if opt && ((! optimize) = C.linearHeads_) then
+               if opt && ((! optimize) = C.LinearHeads) then  
                compileLinearHead (g_, r_) else begin
                if (notCS fromCS) && (isConstraint h) then
                raise
                ((Error "Constraint appears in dynamic clause position")) else
-               (C.Eq r_) end end
+               (C.Eq r_) end end 
            | (fromCS, opt, (g_, I.Pi (((I.Dec (_, a1_) as d_), no_), a2_)))
                -> (C.And
                    (compileDClauseN fromCS opt ((I.Decl (g_, d_)), a2_), a1_,
@@ -458,7 +460,7 @@ module Compile(Compile__0: sig
            | (fromCS, g'_,
               (n, I.Decl (stack_, maybe_), I.Decl (g_, I.Dec (_, a1_))))
                -> compileSubgoals fromCS g'_ (n + 1, stack_, g_)
-           | (fromCS, g'_, (n, null_, null_)) -> C.true_
+           | (fromCS, g'_, (n, I.Null, I.Null)) -> C.True
       end;;
     (* compileSClause (Stack, G, A) => (Head, SubGoals) (top-level)
      if A is a type interpreted as a clause and (Head, SubGoals)
@@ -486,22 +488,22 @@ module Compile(Compile__0: sig
               (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), no_), a2_)))
                -> compileSClauseN
                   fromCS
-                  ((I.Decl (stack_, I.no_)), (I.Decl (g_, d_)), a2_)
+                  ((I.Decl (stack_, I.No)), (I.Decl (g_, d_)), a2_)
            | (fromCS,
               (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), meta_), a2_)))
                -> compileSClauseN
                   fromCS
-                  ((I.Decl (stack_, I.meta_)), (I.Decl (g_, d_)), a2_)
+                  ((I.Decl (stack_, I.Meta)), (I.Decl (g_, d_)), a2_)
            | (fromCS,
               (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), maybe_), a2_)))
                -> compileSClauseN
                   fromCS
-                  ((I.Decl (stack_, I.maybe_)), (I.Decl (g_, d_)), a2_)
+                  ((I.Decl (stack_, I.Maybe)), (I.Decl (g_, d_)), a2_)
       end;;
     let rec compileDClause opt (g_, a_) =
-      compileDClauseN I.ordinary_ opt (g_, Whnf.normalize (a_, I.id));;
+      compileDClauseN I.Ordinary opt (g_, Whnf.normalize (a_, I.id));;
     let rec compileGoal (g_, a_) =
-      compileGoalN I.ordinary_ (g_, Whnf.normalize (a_, I.id));;
+      compileGoalN I.Ordinary (g_, Whnf.normalize (a_, I.id));;
     (* compileCtx G = (G, dPool)
 
      Invariants:
@@ -522,12 +524,13 @@ module Compile(Compile__0: sig
                                   (I.Dot
                                    ((I.Exp
                                      ((I.Root
-                                       ((I.Proj ((I.Bidx n), i)), I.nil_)))),
+                                       ((I.Proj ((I.Bidx n), i)), I.Nil)))),
                                     t)),
                                   (n, i + 1)))
         in let rec compileCtx' =
+            let open Compsyn in 
              function 
-                      | null_ -> I.null_
+                      | I.Null -> I.Null
                       | I.Decl (g_, I.Dec (_, a_))
                           -> let ha_ = I.targetHead a_
                                in (I.Decl
@@ -564,12 +567,12 @@ module Compile(Compile__0: sig
                                   (I.Dot
                                    ((I.Exp
                                      ((I.Root
-                                       ((I.Proj ((I.Bidx n), i)), I.nil_)))),
+                                       ((I.Proj ((I.Bidx n), i)), I.Nil)))),
                                     t)),
                                   (n, i + 1)))
         in let rec compileCtx' =
              function 
-                      | null_ -> I.null_
+                      | I.Null -> I.Null
                       | I.Decl (g_, I.Dec (_, a_))
                           -> let ha_ = I.targetHead a_
                                in (I.Decl
@@ -587,7 +590,7 @@ module Compile(Compile__0: sig
                                          (* this is inefficient! -cs *)
              in let rec compilePsi' =
                   function 
-                           | null_ -> I.null_
+                           | I.Null -> I.Null
                            | I.Decl (psi_, T.UDec (I.Dec (_, a_)))
                                -> let ha_ = I.targetHead a_
                                     in (I.Decl
@@ -607,7 +610,7 @@ module Compile(Compile__0: sig
                                                      (l_, s, (n, 1))))))
                                               (* this is inefficient! -cs *)
                            | I.Decl (psi_, T.PDec _)
-                               -> (I.Decl (compilePsi' psi_, CompSyn.pDec_))
+                               -> (I.Decl (compilePsi' psi_, CompSyn.PDec))
                   in (C.DProg (T.coerceCtx psi_, compilePsi' psi_));;
     (* installClause fromCS (a, A) = ()
      Effect: compiles and installs compiled form of A according to
@@ -620,21 +623,21 @@ module Compile(Compile__0: sig
            | no_
                -> C.sProgInstall
                   (a,
-                   (C.SClause (compileDClauseN fromCS true (I.null_, a_))))
+                   (C.SClause (compileDClauseN fromCS true (I.Null, a_))))
            | linearHeads_
                -> C.sProgInstall
                   (a,
-                   (C.SClause (compileDClauseN fromCS true (I.null_, a_))))
+                   (C.SClause (compileDClauseN fromCS true (I.Null, a_))))
            | indexing_
                -> let ((g_, head_), r_) =
                     compileSClauseN
                     fromCS
-                    (I.null_, I.null_, Whnf.normalize (a_, I.id))
+                    (I.Null, I.Null, Whnf.normalize (a_, I.id))
                     in let _ =
                          C.sProgInstall
                          (a,
                           (C.SClause
-                           (compileDClauseN fromCS true (I.null_, a_))))
+                           (compileDClauseN fromCS true (I.Null, a_))))
                          in begin
                             match head_
                             with 
@@ -666,21 +669,21 @@ module Compile(Compile__0: sig
                            -> C.sProgInstall
                               (a,
                                (C.SClause
-                                (compileDClauseN fromCS true (I.null_, a_))))
+                                (compileDClauseN fromCS true (I.Null, a_))))
                        | _
                            -> C.sProgInstall
                               (a,
                                (C.SClause
-                                (compileDClauseN fromCS true (I.null_, a_))))
+                                (compileDClauseN fromCS true (I.Null, a_))))
                   end
            | (clause_, (a, I.ConDef (_, _, _, _, a_, type_, _)))
                -> C.sProgInstall
                   (a,
                    (C.SClause
                     (compileDClauseN
-                     I.clause_
+                     I.Clause
                      true
-                     (I.null_, Whnf.normalize (a_, I.id)))))
+                     (I.Null, Whnf.normalize (a_, I.id)))))
            | (_, _) -> ()
       end(* we don't use substitution tree indexing for skolem constants yet -bp*);;
     let rec install fromCS cid = compileConDec fromCS (cid, I.sgnLookup cid);;

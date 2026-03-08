@@ -1,0 +1,14 @@
+%%! title: "%reduces"
+%%! description: "A %reduces influences the way Twelf performs termination checking"
+
+%{! 
+
+The **``%reduces``** declaration checks a specified subderivation relationship between two derivations in a judgment. Once a ``%reduces`` relationship has been established for a judgment, the termination checker can use that information to verify that inductive calls are always on smaller derivations. Its primary use is for termination checking in inductive proofs that induct on the output of some other judgment, rather than directly on a subderivation.
+
+## See also
+* The case study on [division over the natural numbers](/wiki/division-over-the-natural-numbers/) uses `%reduces`
+* <Guide chapter="8" section="47">%reduces declaration</Guide>
+
+
+<Keyword/>
+!}%

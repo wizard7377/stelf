@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name msg) (modules msg_) (libraries basis) (flags (:standard -w -A -open Basis))
+ (name msg)
+ (public_name twelf.msg)
+ (modules msg_)
+ (libraries basis)
+ (flags
+  (:standard -w -A -open Basis))
  (wrapped false))

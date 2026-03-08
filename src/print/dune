@@ -1,4 +1,17 @@
 (include sources.dune)
+
 (library
- (name print) (modules symbol clause_print print_ traverse print_twega print_xml print_omdoc) (libraries lambda names formatter basis) (flags (:standard -w -A -open Basis  -open Lambda  -open Names  -open Formatter))
+ (name print)
+ (public_name twelf.print)
+ (modules
+  symbol
+  clause_print
+  print_
+  traverse
+  print_twega
+  print_xml
+  print_omdoc)
+ (libraries lambda names formatter basis)
+ (flags
+  (:standard -w -A -open Basis -open Lambda_ -open Names_ -open Formatter_))
  (wrapped false))

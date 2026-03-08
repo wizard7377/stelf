@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name compress) (modules syntax strict sgn reductio compress_ rep) (libraries global lambda basis) (flags (:standard -w -A -open Basis  -open Global  -open Lambda))
+ (name compress)
+ (public_name twelf.compress)
+ (modules syntax strict sgn reductio compress_ rep)
+ (libraries global lambda basis)
+ (flags
+  (:standard -w -A -open Basis -open Global_ -open Lambda_))
  (wrapped false))

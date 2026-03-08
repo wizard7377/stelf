@@ -1,0 +1,27 @@
+%%! title: "Fixity declaration"
+%%! description: "The fixity declarations %infix, %prefix, and %postfix allow for fancy syntax"
+
+%{! The **``%infix``**, **``%prefix``** and **``%postfix``** declarations assign **fixity** and precedence to constants for the purpose of parsing (they have no meaning in the logic). 
+
+_**Higher**_ numbers bind **_tighter_**, and the pretty printer only prints out necessary information. Hence the following example: !}%
+    
+a : type.
+b : a.
+c : a.
+d : a.
+
++ : a -> a -> a. %infix left 1 +.
+* : a -> a -> a. %infix left 2 *.
+    
+%{!! begin checked !!}%
+
+x : a = (b + c) * d. %% The parenthesis are necessary here
+y : a = b + (c * d). %% This means the same thing as b + c * d.
+
+%{!! end checked !!}%
+
+%{! ## See also
+* <Guide chapter="3" section="11">Operator Declaration</Guide>
+
+<Keyword />
+!}%

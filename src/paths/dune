@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name paths) (modules origins paths_) (libraries lambda global table basis) (flags (:standard -w -A -open Basis  -open Lambda  -open Global  -open Table))
+ (name paths)
+ (public_name twelf.paths)
+ (modules origins paths_)
+ (libraries lambda global table basis)
+ (flags
+  (:standard -w -A -open Basis -open Lambda_ -open Global_ -open Table_))
  (wrapped false))

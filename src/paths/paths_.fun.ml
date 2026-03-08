@@ -1,7 +1,7 @@
 open! Basis;;
 (* Paths, Occurrences, and Error Locations *);;
 (* Author: Frank Pfenning *);;
-module Paths() : PATHS =
+module MakePaths() : PATHS =
   struct
     type nonrec pos = int;;
     (* characters, starting at 0 *);;
@@ -252,8 +252,20 @@ module Paths() : PATHS =
            | ((Dec_ _ as d), occ) -> occToRegionDec d occ
            | ((Def_ _ as d), occ) -> occToRegionDef2 d occ
       end;;
+    let top = Top_;;
+    let label occ = Label_ occ;;
+    let body occ = Body_ occ;;
+    let head occ = Head_ occ;;
+    let arg (n, occ) = Arg_ (n, occ);;
+    let leaf r = Leaf_ r;;
+    let bind (r, v, u) = Bind_ (r, v, u);;
+    let root (r, h, i, a, s) = Root_ (r, h, i, a, s);;
+    let app (u, s) = App_ (u, s);;
+    let nils = Nils_;;
+    let dec (n, v) = Dec_ (n, v);;
+    let def (n, u, v) = Def_ (n, u, v);;
     end;;
 (* functor Paths *);;
-module Paths = (Paths)(struct
+module Paths = (MakePaths)(struct
                          
                          end);;

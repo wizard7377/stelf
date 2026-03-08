@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name int_inf) (modules int_inf_sig int_inf_) (libraries basis) (flags (:standard -w -A -open Basis))
+ (name int_inf)
+ (public_name twelf.int_inf)
+ (modules int_inf_sig int_inf_)
+ (libraries basis)
+ (flags
+  (:standard -w -A -open Basis))
  (wrapped false))

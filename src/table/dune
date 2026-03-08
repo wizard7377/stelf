@@ -1,4 +1,20 @@
 (include sources.dune)
+
 (library
- (name table) (modules hash_table string_hash red_black_tree ring queue sparse_array sparse_array2 red_black_set table_) (libraries basis) (flags (:standard -w -A -open Basis))
+ (name table)
+ (public_name twelf.table)
+ (modules
+  hash_table
+  string_hash
+  red_black_tree
+  ring
+  queue
+  sparse_array
+  sparse_array2
+  red_black_set
+  table_
+  table_instances)
+ (libraries basis)
+ (flags
+  (:standard -w -A -open Basis))
  (wrapped false))

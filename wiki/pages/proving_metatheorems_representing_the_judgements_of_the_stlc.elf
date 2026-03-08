@@ -1,0 +1,198 @@
+%%! title: "Representing the judgements of the STLC"
+%%! description: "Describing the static and dynamic semantics of the simply-typed, call-by-value lambda calculus in Twelf (Part of the introduction to proving metatheorems in Twelf)"
+%%! prev: 
+%%!   label: Representing the syntax of the STLC
+%%!   link: /wiki/proving-metatheorems-representing-the-syntax-of-the-stlc/
+%%! next:
+%%!   label: Proving metatheorems about the STLC
+%%!   link: /wiki/proving-metatheorems-proving-metatheorems-about-the-stlc/
+
+%{!
+
+_This page is part of the introduction to [proving metatheorems with Twelf](/wiki/proving-metatheorems-with-twelf/)._
+
+## Static semantics
+
+### Informal definition
+
+The typing rules for the simply typed lambda calculus use a typing context <Math formula="\gamma"/> containing assumptions of the form <Math formula="x : \tau"/>. Such a context is well-formed when all variables in it are distinct.
+
+```math
+{
+    \over
+    \gamma \vdash \langle\rangle : \mathsf{unit}
+}\mathit{of\textit{-}empty}
+\qquad
+{
+    x : \tau \in \gamma
+    \over
+    \gamma \vdash x : \tau 
+}\mathit{of\textit{-}var}
+```
+```math
+{
+    \gamma, x :\tau_2 \vdash e : \tau
+    \over
+    \gamma \vdash \lambda x{:}\tau_2.e : (\tau_2 \rightarrow \tau)
+}\mathit{of\textit{-}lam}
+\qquad
+{
+    \gamma \vdash e_1 : (\tau_2 \rightarrow \tau)
+    \qquad
+    \gamma \vdash e_2 : \tau_2
+    \over
+    \gamma \vdash e_1\,e_2 : \tau
+}\mathit{of\textit{-}app}
+```
+
+This is a _hypothetical judgement_, which means that the following structural properties are true:
+* Hypothesis: if <Math formula="x : \tau"/> is in <Math formula="\gamma"/>, then  <Math formula="\gamma \vdash x : \tau"/>.
+* Weakening: if <Math formula="\gamma \vdash e : \tau"/> and <Math formula="x"/> is fresh then <Math formula="\gamma, x : \tau' \vdash e : \tau"/>.
+* Exchange: if <Math formula="\gamma, x : \tau_1, y : \tau_2, \gamma' \vdash e : \tau"/> then <Math formula="\gamma, y : \tau_2, x : \tau_1, \gamma' \vdash e : \tau"/>.
+* Substitution: if <Math formula="\gamma, x : \tau' \vdash e : \tau"/> and <Math formula="\gamma \vdash e' : \tau'"/> then <Math formula="\gamma \vdash \{ e' / x\}e : \tau"/>
+
+Hypothesis is derivable by the rule <Math formula="\mathit{of\textit{-}var}"/>.  Weakening, exchange, and substitution are admissible.
+
+### LF representation
+
+In the previous section, we used LF binding to represent object-language variables.  In this section, we use LF binding to represent object-language hypothetical judgements.  The following LF signature represents the above judgement <Math formula="\gamma \vdash e : \tau"/> with the LF type family ``of``. !}%
+
+%{!! begin hidden !!}%
+tp    : type.
+unit  : tp.
+arrow : tp -> tp -> tp.
+
+tm    : type.
+empty : tm.
+app   : tm -> tm -> tm.
+lam   : tp -> (tm -> tm) -> tm.
+%{!! end hidden !!}%
+
+of       : tm -> tp -> type.
+of-empty : of empty unit.
+of-lam   : of (lam T2 ([x] E x)) (arrow T2 T)
+            <- ({x: tm} of x T2 -> of (E x) T).
+of-app   : of (app E1 E2) T
+            <- of E1 (arrow T2 T)
+            <- of E2 T2.
+
+%{! The first thing to note is that the type family is indexed by a ``tm`` and a ``tp`` but **not** a representation of the context <Math formula="\gamma"/>.  The reason for this is that we identify the object-language context with the LF context.  Specifically, an object-language assumption <Math formula="x : \tau"/> does two things:
+* It binds the variable <Math formula="x"/>.
+* It declares a typing assumption that <Math formula="x"/> has type <Math formula="\tau"/>.
+
+Thus, an object-language assumption <Math formula="x : \tau"/> is represented by the following two LF assumptions: ``x : tm`` and ``dx : of x T``, where ``T`` is the encoding of <Math formula="\tau"/>.  
+
+The first LF variable represents an object-language term ``x``, as per the encoding of syntax in the previous section.  The second variable represents a derivation that ``of x T``.  Consequently, there is no LF constant corresponding to the rule <Math formula="\mathit{of\textit{-}var}"/> because uses of this rule are represented by uses of the corresponding LF variable ``dx``.
+
+This representation of hypotheses gives rise to the higher-order premise of the constant ``of-lam``, which has type ``{x: tm} of x T2 -> of (E x) T``
+
+An LF term of this type has the form ``([x] [dx: of x T2] M)``, where ``M : of (E x) T`` _in an LF context extended with ``x : tm,  dx : of x T2``_.  Thus, ``M`` is the representation of an object-language derivation under the additional assumption <Math formula="x : \tau"/>>.
+
+The constants ``of-empty`` and ``of-app`` correspond to the informal inference rules of the same name; they are no more complicated than the rules for the judgements on natural numbers from the previous sections.
+
+#### Eta-expansion
+
+As we mentioned [before in the discussion of full LF](/wiki/proving-metatheorems-full-lf/), Twelf permits programmers to write non-eta-expanded terms, which it treats as syntactic sugar for their eta-expansions.  For example, we could equivalently have written:
+
+```twelf    
+of-lam  : of (lam T2 E) (arrow T2 T)
+            <- ...
+```
+
+This version differs from ``of-lam`` above in that the term ``E`` is not eta-expanded.  Some consider it good Twelf style to write terms in a fully eta-expanded ([eta-long](/wiki/eta-equivalence/)) form, because (1) the eta-expanded terms are the canonical forms of LF, and (2) the eta-expansion makes the binding structure apparent in the syntax, without knowing the types of the involved constants.  On the other hand, readers who know the types of the constants may find the eta-short version easier to read.
+
+### Theorems for free
+
+There are several advantages to using this higher-order representation of a hypothetical judgement, as opposed to a first-order representation where the context is treated explicitly.  
+
+First, the representation is quite succinct: there is no need define and work with auxiliary data structures like lists of distinct assumptions.  
+
+More importantly, this representation gives the structural properties of the hypothetical judgement for free: the structural properties for the object language are inherited from the corresponding properties of LF.  For instance, there is no need to prove a substitution lemma about the object language. As an example, we can derive
+
+```
+T : tp, 
+T2 : tp,
+E : tm -> tm,
+E2 : tm,
+D1 : {x : tm} of x T2 -> of (E x) T, 
+D2 : of E2 T2
+    |- D1 E2 D2 : of (E E2) T
+```
+
+The term ``D1 E2 D2`` represents a derivation that the substitution ``(E E2)`` is well-typed.  We call the LF application  ``(E E2)`` a substitution because when ``E`` is substituted by an actual term ``[x] M``, the application will reduce to ``[E2/x]M``.
+
+### Adequacy
+
+The adequacy theorem for typing derivations is as follows:
+
+> There is a compositional bijection between informal derivations of <Math formula="x_1 : \tau_1, \ldots \vdash e : \tau"/> and LF terms ``D`` such that ``x1 : tm, dx1 : of x1 T1, ... |- D : of E T``, where <Math formula="e \gg \mathtt{E}"/>, <Math formula="\tau \gg \mathtt{T}"/>, and <Math formula="\tau_1 \gg \mathtt{T_1}"/>, ...
+
+To prove this adequacy theorem, it is necessary to show that STLC terms and types remain adequately represented when considered in LF contexts of this form.  Intuitively, adding canonical forms of type ``of`` does not change the canonical forms of types ``tp`` and ``tm`` because STLC typing derivations cannot appear in STLC types or terms.  This kind of argument can be made precise using [subordination](/wiki/subordination/), and Harper and Licata's [_Mechanizing Metatheory in a Logical Framework_](https://www.cambridge.org/core/journals/journal-of-functional-programming/article/mechanizing-metatheory-in-a-logical-framework/E4EC2F77CEF3DC56EABCF6F6658B179E) discusses all these details.
+
+## Dynamic semantics
+
+### Informal definition
+
+We define the dynamic semantics of the STLC by a call-by-value, left-to-right structural operational semantics on closed terms.  
+
+The judgement <Math formula="e\,\mathtt{value}"/> identifies the values:
+
+```math
+{
+    \over
+    \langle\rangle\,\mathtt{value}
+}\mathit{value\textit{-}empty}
+\qquad
+{
+    \over
+    \gamma x{:}\tau.e\,\mathtt{value}
+}\mathit{value\textit{-}lam}
+```
+
+Next, we define the operational semantics with a judgement <Math formula="e \mapsto e'"/>:
+
+```math
+{
+    e_1 \mapsto e_1'
+    \over
+    e_1\,e_2 \mapsto e_1'\,e_2
+}\mathit{step\textit{-}app_1}
+\qquad
+{
+    e_1\,\mathtt{value}
+    \qquad
+    e_2 \mapsto e_2'
+    \over
+    e_1\,e_2 \mapsto e_1\,e_2'
+}\mathit{step\textit{-}app_2}
+```
+```math
+{
+    e_2\,\mathtt{value}
+    \over
+    (\lambda x{:}\tau.e)\,e_2 \mapsto e[e_2/x]
+}\mathit{step\textit{-}app\textit{-}beta}
+```
+
+### LF representation
+
+These judgements are represented in LF in the usual fashion.  The closed LF terms of these types adequately represent the above judgements. !}%
+    
+value       : tm -> type.
+value-empty : value empty.
+value-lam   : value (lam T ([x] E x)).
+
+step          : tm -> tm -> type.
+step-app-1    : step (app E1 E2) (app E1' E2)
+                 <- step E1 E1'.
+step-app-2    : step (app E1 E2) (app E1 E2') 
+                 <- value E1
+                 <- step E2 E2'.
+step-app-beta : step (app (lam T2 ([x] E x)) E2) (E E2)
+                 <- value E2.
+
+%{! In ``step-app-beta``, the right-hand term is the application ``E E2``, which represents the substitution on the right-hand side of the informal rule.
+
+And that completes our representation of the STLC in LF.  Now, we can start proving metatheorems about the language using Twelf.
+
+!}%

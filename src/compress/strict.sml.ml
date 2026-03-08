@@ -1,6 +1,7 @@
 open! Basis;;
 module Strict = struct
                   open Syntax;;
+                  open Syntax;;
                   exception EtaContract ;;
                   (* val eta_contract_var : spineelt -> int
       if the spine element given is an ordinary spine element (i.e. an Elt)

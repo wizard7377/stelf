@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name names) (modules names_) (libraries table global lambda basis) (flags (:standard -w -A -open Basis  -open Table  -open Global  -open Lambda))
+ (name names)
+ (public_name twelf.names)
+ (modules names_)
+ (libraries table global lambda basis)
+ (flags
+  (:standard -w -A -open Basis -open Table_ -open Global_ -open Lambda_))
  (wrapped false))

@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name global) (modules global_) (libraries basis) (flags (:standard -w -A -open Basis))
+ (name global)
+ (public_name twelf.global)
+ (modules global_)
+ (libraries basis)
+ (flags
+  (:standard -w -A -open Basis))
  (wrapped false))

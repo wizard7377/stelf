@@ -1,4 +1,62 @@
 (include sources.dune)
+
 (library
- (name opsem) (modules table_param abstract subtree subtree_inst sw_subtree tabled absmachine absmachine_sbt ptrecon trace tmachine swmachine opsem_) (libraries global table lambda names print formatter index typecheck solvers subordinate tabling compile basis) (flags (:standard -w -A -open Basis  -open Global  -open Table  -open Lambda  -open Names  -open Print  -open Formatter  -open Index  -open Typecheck  -open Solvers  -open Subordinate  -open Tabling  -open Compile))
+ (name opsem)
+ (public_name twelf.opsem)
+ (modules
+  table_param
+  abstract
+  subtree
+  subtree_inst
+  sw_subtree
+  tabled
+  absmachine
+  absmachine_sbt
+  ptrecon
+  trace
+  tmachine
+  swmachine
+  opsem_)
+ (libraries
+  global
+  table
+  lambda
+  names
+  print
+  formatter
+  index
+  typecheck
+  solvers
+  subordinate
+  tabling
+  compile
+  basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global_
+   -open
+   Table_
+   -open
+   Lambda_
+   -open
+   Names_
+   -open
+   Print_
+   -open
+   Formatter_
+   -open
+   Index_
+   -open
+   Typecheck_
+   -open
+   Solvers_
+   -open
+   Subordinate_
+   -open
+   Compile_))
  (wrapped false))

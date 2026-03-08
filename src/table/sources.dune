@@ -350,3 +350,41 @@
      (echo "\n")
      (cat %{sml}s))))))
       
+(rule
+ (mode fallback)
+ (target table_instances.sig.ml)
+ (action
+  (write-file table_instances.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target table_instances.fun.ml)
+ (action
+  (write-file table_instances.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target table_instances.sml.ml)
+ (action
+  (write-file table_instances.sml.ml "")))
+
+(rule
+ (target table_instances.ml)
+ (deps
+  (:sig table_instances.sig.ml)
+  (:fun table_instances.fun.ml)
+  (:sml table_instances.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))

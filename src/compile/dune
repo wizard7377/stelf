@@ -1,4 +1,45 @@
 (include sources.dune)
+
 (library
- (name compile) (modules compsyn cprint subtree assign compile_) (libraries global table lambda names print formatter index typecheck solvers subordinate basis) (flags (:standard -w -A -open Basis  -open Global  -open Table  -open Lambda  -open Names  -open Print  -open Formatter  -open Index  -open Typecheck  -open Solvers  -open Subordinate))
+ (name compile)
+ (public_name twelf.compile)
+ (modules compsyn cprint subtree assign compile_)
+ (libraries
+  global
+  table
+  lambda
+  names
+  print
+  formatter
+  index
+  typecheck
+  solvers
+  subordinate
+  basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global_
+   -open
+   Table_
+   -open
+   Lambda_
+   -open
+   Names_
+   -open
+   Print_
+   -open
+   Formatter_
+   -open
+   Index_
+   -open
+   Typecheck_
+   -open
+   Solvers_
+   -open
+   Subordinate_))
  (wrapped false))

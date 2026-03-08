@@ -1,8 +1,10 @@
-open! Basis;;
-module Names = (Names)(struct
-                         module Global = Global;;
-                         (*! structure IntSyn' = IntSyn !*);;
-                         module Constraints = Constraints;;
-                         module HashTable = StringHashTable;;
-                         module StringTree = StringRedBlackTree;;
-                         end);;
+open! Basis
+
+module Names = MakeNames (struct
+  module Global = Global
+
+  (*! structure IntSyn' = IntSyn !*)
+  module Constraints = Constraints
+  module HashTable = Table_instances.StringHashTable
+  module StringTree = Table_instances.StringRedBlackTree
+end)

@@ -1,0 +1,42 @@
+%%! title: "%solve"
+%%! description: "A %solve declaration invokes Twelf's logic programming infrastructure"
+
+%{! A [``%solve``](/wiki/percent-solve/) declaration specifies a type and then uses Twelf's [logic programming](/wiki/logic-programming/) engine to search for an term with that type. It is different from [``%query``](/wiki/percent-query/), both because it can only cause Twelf to search for the _first_ proof it can find and because it can add the result of the search to the [Twelf signature](/wiki/twelf-signature/).
+
+## Example
+
+We can define [natural numbers](/wiki/natural-numbers/) with addition in the standard manner: !}%
+    
+nat : type.
+z : nat.
+s : nat -> nat.
+
+plus : nat -> nat -> nat -> type.
+pz : plus z N N.
+ps : plus N1 N2 N3 -> plus (s N1) N2 (s N3).
+
+%{! Then we can use ``%solve`` and ``%define`` to insert the result of adding two and two to the signature as ``four``, and the derivation itself to the signature as ``deriv``. !}%
+    
+%{!! begin checked !!}%
+
+%define four = N
+%solve deriv : plus (s (s z)) (s (s z)) N.
+
+%{!! end checked !!}%
+
+%{! We can then use ``five`` and ``deriv`` as a defined constants for the rest of the program: !}%
+    
+%{!! begin checked !!}%
+
+six : nat = s (s four).
+deriv2 : plus four (s (s z)) six = ps (ps deriv).
+
+%{!! end checked !!}%
+
+%{! ## See also
+
+* <Guide section="24" chapter="5">Solve Declaration</Guide>
+
+
+<Keyword />
+!}%

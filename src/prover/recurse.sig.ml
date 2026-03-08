@@ -1,12 +1,16 @@
-open! Basis;;
-(* Recurse: Version 1.4 *);;
-(* Author: Carsten Schuermann *);;
+open! Basis
+
+(* Recurse: Version 1.4 *)
+(* Author: Carsten Schuermann *)
 module type RECURSE = sig
-                      module State : STATE
-                      exception Error of string 
-                      type nonrec operator
-                      val expand : State.focus_ -> operator list
-                      val apply : operator -> unit
-                      val menu : operator -> string
-                      end;;
-(* signature RECURSE *);;
+  module State : STATE
+
+  exception Error of string
+
+  type nonrec operator
+
+  val expand : State.focus_ -> operator list
+  val apply : operator -> unit
+  val menu : operator -> string
+end
+(* signature RECURSE *)

@@ -1,0 +1,45 @@
+(library
+ (name twelf)
+ (public_name twelf)
+ (modules Twelf)
+ (libraries
+  compile
+  compress
+  cover
+  domains
+  flit
+  formatter
+  frontend
+  global
+  heuristic
+  index
+  int_inf
+  ; inverse 
+  lambda
+  m2
+  meta
+  modes
+  modules
+  msg
+  names
+  netserver
+  opsem
+  order
+  paths
+  print
+  prover
+  server
+  solvers
+  stream
+  style
+  subordinate
+  table
+  tabling
+  terminate
+  thm
+  timing
+  tomega
+  trail
+  typecheck
+  unique
+  worldcheck))

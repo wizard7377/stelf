@@ -1,0 +1,20 @@
+%%! title: "%subord"
+%%! description: "A %subord declaration directly extends the subordination relation."
+
+%{!
+The **``%subord``** declaration adds edges to the [subordination](/wiki/subordination/) relation. 
+
+## Syntax
+
+The syntax is as follows:
+
+```
+%subord (t1 t1') ... (tn tn').
+```
+
+The type families ``ti'`` will then be treated as being dependent on the type family ``ti``.
+
+
+<Keyword />
+
+!}%

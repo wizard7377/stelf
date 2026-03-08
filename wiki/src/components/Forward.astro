@@ -1,0 +1,26 @@
+<div id="possible-forward"></div>
+<script type="module" is:inline>
+  if (window.location.pathname.startsWith("/wiki/")) {
+    let possibleMediawikiPageName = window.location.pathname
+      .slice(6)
+      .toLowerCase()
+      .replaceAll("%20", "_")
+      .replaceAll(" ", "_");
+    if (possibleMediawikiPageName.endsWith("/")) {
+      possibleMediawikiPageName = possibleMediawikiPageName.slice(
+        0,
+        possibleMediawikiPageName.length - 1
+      );
+    }
+    fetch("/mediawiki-name-recovery-map.json")
+      .then((response) => response.json())
+      .then((response) => {
+        const forward = response[possibleMediawikiPageName];
+        const elem = document.getElementById("possible-forward");
+        if (forward && elem) {
+          elem.innerHTML = `The page you're looking for may be at
+             <a href="/wiki/${forward}/">/wiki/${forward}/</a>.`;
+        }
+      });
+  }
+</script>

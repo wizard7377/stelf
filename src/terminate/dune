@@ -1,4 +1,45 @@
 (include sources.dune)
+
 (library
- (name terminate) (modules checking reduces terminate_) (libraries global trail lambda names print formatter index subordinate paths solvers basis) (flags (:standard -w -A -open Basis  -open Global  -open Trail  -open Lambda  -open Names  -open Print  -open Formatter  -open Index  -open Subordinate  -open Paths  -open Solvers))
+ (name terminate)
+ (public_name twelf.terminate)
+ (modules checking reduces terminate_)
+ (libraries
+  global
+  trail
+  lambda
+  names
+  print
+  formatter
+  index
+  subordinate
+  paths
+  solvers
+  basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global_
+   -open
+   Trail_
+   -open
+   Lambda_
+   -open
+   Names_
+   -open
+   Print_
+   -open
+   Formatter_
+   -open
+   Index_
+   -open
+   Subordinate_
+   -open
+   Paths_
+   -open
+   Solvers_))
  (wrapped false))

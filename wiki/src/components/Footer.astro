@@ -1,0 +1,72 @@
+---
+import type { Props } from "@astrojs/starlight/props";
+import mediawikiPages from "../assets/mediawiki-archive-recovery-map.json";
+import Pagination from "@astrojs/starlight/components/Pagination.astro";
+
+const page: false | string =
+  Astro.props.entry.slug &&
+  Astro.props.entry.slug.startsWith("wiki/") &&
+  Astro.props.entry.slug.slice(5);
+
+function isMediawikiPage(
+  page: string
+): page is keyof typeof mediawikiPages {
+  return mediawikiPages.hasOwnProperty(page);
+}
+
+const archive: false | { timestamp: string; page: string } =
+  !!page && isMediawikiPage(page) && mediawikiPages[page];
+---
+
+<footer>
+  <Pagination {...Astro.props} />
+  <div class="meta">
+    {
+      page && (
+        <div>
+          This page is written in <a href="/wiki-syntax/">Wiki Twelf</a>: it's
+          also valid Twelf! You can{" "}
+          <a
+            href={`https://github.com/standardml/twelf/blob/main/wiki/pages/${page}.elf`}
+          >
+            view
+          </a>
+          or{" "}
+          <a
+            href={`https://github.com/standardml/twelf/edit/main/wiki/pages/${page}.elf`}
+          >
+            edit
+          </a>
+          this page on Github.
+        </div>
+      )
+    }
+    {
+      archive && (
+        <div>
+          This page originally lived on the old Twelf Wiki. You can see the{" "}
+          <a
+            href={`https://web.archive.org/web/${archive.timestamp}/http://twelf.org/wiki/${archive.page}`}
+          >
+            wayback machine's version here
+          </a>
+          .
+        </div>
+      )
+    }
+  </div>
+</footer>
+
+<style>
+  .meta {
+    gap: 0.75rem 3rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-block: 3rem 1.5rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+  .meta > :global(p:only-child) {
+    margin-inline-start: auto;
+  }
+</style>

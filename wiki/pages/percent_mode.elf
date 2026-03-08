@@ -1,0 +1,53 @@
+%%! title: "%mode"
+%%! description: "A %mode declaration checks whether a type family in Twelf can be run as a logic program with well defined inputs and outputs"
+
+%{! The **``%mode``** declaration specifies the way in which a relation is intended to be used, by specifying those arguments that are _inputs_ or _outputs_. Twelf then checks that all constants defining the relation respect the mode specified (are "well-moded").
+
+The ``%mode`` declaration is an important part of the specification of a [totality assertion](/wiki/totality-assertion/). In the "for all/exists" statement about a relation, the "for all" terms are the input arguments to the relation, and the "exists" terms are its outputs.
+
+## Syntax
+
+A mode declaration for the family _id_ with _n_ arguments usually takes the following ("short") form:
+
+```
+%mode id a1 ... an.
+```
+
+Each argument ``ai`` is ``+ID``, ``-ID``, or ``*ID`` for some distinct identifier `ID`.
+
+ - ``+`` indicates that the argument is an input,
+ - ``-`` indicates that the argument is an output, and 
+ - ``*`` indicates that the argument is unrestricted. (The ``*`` mode is rarely used.)
+ 
+ For example, a natural mode for the ``plus`` relation on [natural numbers](/wiki/natural-numbers/) is:
+
+```twelf
+plus : nat -> nat -> nat -> type.
+%mode plus +N1 +N2 -N3.
+```
+
+The names ``N1``..``N3`` are arbitrary, but each must be distinct.
+
+### Full form
+
+The short mode declaration above only specifies the mode for explicit parameters; the modes for implicit parameters are then assigned automatically. Occasionally, one needs to use a "full" form to specify the modes of implicit parameters:
+
+```
+%mode p1 ... pm term.
+```
+
+Each parameter ``pi`` is ``+\{``_ID_`` : term\}``, ``-\{``_ID_`` : term\}``, or ``*\{``_ID_`` : term\}`` for distinct identifiers _ID_. Terms may refer to the variables bound in the previous parameters. For example, the full mode declaration corresponding to the short one above would be:
+
+```twelf
+plus : nat -> nat -> nat -> type.
+%mode +{N1:nat} +{N2:nat} -{N3:nat} plus N1 N2 N3.
+```
+
+## See also
+* <Guide chapter="7" section="41">Modes</Guide>
+* [Troubleshooting mode checking errors](/wiki/debugging-mode-checking-errors/)
+* The section on [mode](/wiki/proving-metatheorems-proving-totality-assertions-about-the-natural-numbers/) in the _Proving metatheorems_ introduction to Twelf
+
+<Keyword />
+
+!}%

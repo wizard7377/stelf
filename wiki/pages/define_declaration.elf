@@ -1,0 +1,52 @@
+%%! title: "%define"
+%%! description: "A %define declaration lets the output of a %solve be used again later in an LF signature"
+
+
+%{! 
+
+The **``%define``** declaration allows the outputs of a successful [``%solve``](/wiki/percent-solve/) declaration to be bound to a name which can be used later on in the context.
+
+## Example
+
+Given a standard declaration of natural numbers and plus with a few constants defined: !}%
+    
+nat : type.
+
+z : nat. 
+s : nat -> nat.
+
+n0 = z.
+n1 = s n0. 
+n2 = s n1. 
+n3 = s n2. 
+n4 = s n3. 
+
+
+
+plus : nat -> nat -> nat -> type.
+%mode plus +N1 +N2 -N3.
+
+plus/z : plus z N N.
+
+plus/s : plus (s N1) N2 (s N3) 
+          <- plus N1 N2 N3.
+
+%{! We can use ``%define`` to define the natural number representing 7 by adding three and four. Note that we don't care about the proof witness in this particular case, just the output of the relation, so we put an underscore instead of an identifier to the left of the colon: !}%
+    
+%{!! begin checked !!}%
+%define n7 = N
+%solve _ : plus n4 n3 N.
+%{!! end checked !!}%
+
+%{! Now `n7` is a definition that can be used again. !}%
+
+%{!! begin checked !!}%
+%solve _ : plus n7 n7 N.
+%{!! end checked !!}%
+
+
+%{! ## See also
+* <Guide chapter="3" section="10">Definitions</Guide>
+
+<Keyword/>
+!}%

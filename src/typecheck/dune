@@ -1,4 +1,22 @@
 (include sources.dune)
+
 (library
- (name typecheck) (modules typecheck_ strict) (libraries lambda print paths names basis) (flags (:standard -w -A -open Basis  -open Lambda  -open Print  -open Paths  -open Names))
+ (name typecheck)
+ (public_name twelf.typecheck)
+ (modules typecheck_ strict)
+ (libraries lambda print paths names basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Lambda_
+   -open
+   Print_
+   -open
+   Paths_
+   -open
+   Names_))
  (wrapped false))

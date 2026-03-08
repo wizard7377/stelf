@@ -1,17 +1,11 @@
 open! Cs_manager
 module Cs_manager = Cs_manager
-open! Cs_manager
-module Cs_manager = Cs_manager
 open! Cs
 module Cs = Cs
 open! Cs_eq_field
 module Cs_eq_field = Cs_eq_field
-open! Cs_eq_field
-module Cs_eq_field = Cs_eq_field
 open! Cs_ineq_field
 module Cs_ineq_field = Cs_ineq_field
-open! Cs_eq_integers
-module Cs_eq_integers = Cs_eq_integers
 open! Cs_eq_integers
 module Cs_eq_integers = Cs_eq_integers
 open! Cs_ineq_integers

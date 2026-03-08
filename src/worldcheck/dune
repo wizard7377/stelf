@@ -1,4 +1,51 @@
 (include sources.dune)
+
 (library
- (name worldcheck) (modules worldsyn worldify worldcheck_) (libraries global timing table lambda names paths formatter print index subordinate meta solvers basis) (flags (:standard -w -A -open Basis  -open Global  -open Timing  -open Table  -open Lambda  -open Names  -open Paths  -open Formatter  -open Print  -open Index  -open Subordinate  -open Meta  -open Solvers))
+ (name worldcheck)
+ (public_name twelf.worldcheck)
+ (modules worldsyn worldify worldcheck_)
+ (libraries
+  global
+  timing
+  table
+  lambda
+  names
+  paths
+  formatter
+  print
+  index
+  subordinate
+  meta
+  solvers
+  basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global_
+   -open
+   Timing_
+   -open
+   Table_
+   -open
+   Lambda_
+   -open
+   Names_
+   -open
+   Paths_
+   -open
+   Formatter_
+   -open
+   Print_
+   -open
+   Index_
+   -open
+   Subordinate_
+   -open
+   Meta_
+   -open
+   Solvers_))
  (wrapped false))

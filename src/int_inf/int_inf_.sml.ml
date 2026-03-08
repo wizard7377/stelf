@@ -1,4 +1,6 @@
-open! Basis;;
+open! Basis
+open Int_inf_sig
+
 (* int-inf.sml
  *
  * COPYRIGHT (c) 1995 by AT&T Bell Laboratories. See COPYRIGHT file for details.
@@ -24,12 +26,54 @@ open! Basis;;
  * importing the basic IntInf, but replacing the scanning functions
  * by more efficient ones based on the functions in NumScan.
  *
- *);;
-module IntInf : INT_INF =
-  struct
-    (* It is not clear what advantage there is to having NumFormat as
-   * a submodule.
-   *);;
+ *)
+(* TODO: IntInf requires Word32 and Int31 which are not yet available in the Basis library.
+   The full implementation is commented out below and replaced with a stub. *)
+module IntInf : INT_INF = struct
+  type nonrec int = int
+
+  let precision = Int.precision
+  let minInt = Int.minInt
+  let maxInt = Int.maxInt
+  let toLarge = Int.toLarge
+  let fromLarge = Int.fromLarge
+  let toInt = Int.toInt
+  let fromInt = Int.fromInt
+  let ( + ) = Int.( + )
+  let ( - ) = Int.( - )
+  let ( * ) = Int.( * )
+  let div = Int.div
+  let mod_ = Int.mod_
+  let quot = Int.quot
+  let rem = Int.rem
+  let ( < ) = Int.( < )
+  let ( > ) = Int.( > )
+  let ( <= ) = Int.( <= )
+  let ( >= ) = Int.( >= )
+  let ( ~- ) = Int.( ~- )
+  let abs = Int.abs
+  let min = Int.min
+  let max = Int.max
+  let sign = Int.sign
+  let sameSign = Int.sameSign
+  let compare (a, b) = if a < b then Less else if a = b then Equal else Greater
+  let toString = Int.toString
+  let scan = Int.scan
+  let fromString = Int.fromString
+  let fmt = Int.fmt
+  let divmod (a, b) = (Int.div (a, b), Int.mod_ (a, b))
+  let quotrem (a, b) = (Int.quot (a, b), Int.rem (a, b))
+
+  let rec pow (base, exp) =
+    if exp = 0 then 1
+    else if exp = 1 then base
+    else
+      let half = pow (base, Int.div (exp, 2)) in
+      if Int.mod_ (exp, 2) = 0 then half * half else half * half * base
+
+  let rec log2 n = if n <= 1 then 0 else 1 + log2 (Int.div (n, 2))
+end
+(*
     module NumScan : sig
                      val skipWS : ((char, 'a) StringCvt.reader) -> 'a -> 'a
                      val
@@ -54,6 +98,7 @@ module IntInf : INT_INF =
         let ( + ) x__op y__op = W.( + ) x__op y__op;;
         let ( - ) x__op y__op = W.( - ) x__op y__op;;
         let ( * ) x__op y__op = W.( * ) x__op y__op;;
+        let ( << ) x__op y__op = W.( x__op << y__op );;
         let largestWordDiv10 : Word32.word = 429496729;;
         (* 2^32-1 divided by 10 *);;
         let largestWordMod10 : Word32.word = 5;;
@@ -141,8 +186,7 @@ module IntInf : INT_INF =
                                                 begin
                                                   chkOverflow w;
                                                   cvt
-                                                  ((W.( + )
-                                                    ((W.( << ) (w, 1)), d)),
+                                                  ((W.( (w << 1) + d )),
                                                    rest')
                                                   
                                                   end
@@ -174,8 +218,7 @@ module IntInf : INT_INF =
                                                 begin
                                                   chkOverflow w;
                                                   cvt
-                                                  ((W.( + )
-                                                    ((W.( << ) (w, 3)), d)),
+                                                  ((W.( (w << 3) + d )),
                                                    rest')
                                                   
                                                   end
@@ -237,8 +280,7 @@ module IntInf : INT_INF =
                                                 begin
                                                   chkOverflow w;
                                                   cvt
-                                                  ((W.( + )
-                                                    ((W.( << ) (w, 4)), d)),
+                                                  ((W.( (w << 4) + d )),
                                                    rest')
                                                   
                                                   end
@@ -295,6 +337,7 @@ module IntInf : INT_INF =
         let ( < ) x__op y__op = W.( < ) x__op y__op;;
         let ( - ) x__op y__op = W.( - ) x__op y__op;;
         let ( * ) x__op y__op = W.( * ) x__op y__op;;
+        let ( >> ) x__op y__op = W.( x__op >> y__op );;
         let div = W.div;;
         let rec mkDigit ((w : Word32.word)) =
           CharVector.sub ("0123456789abcdef", W.toInt w);;
@@ -307,14 +350,14 @@ module IntInf : INT_INF =
                           | (1, n, l) -> ((I.( + ) (n, 1)), ('1' :: l))
                           | (w, n, l)
                               -> f
-                                 ((W.( >> ) (w, 1)), (I.( + ) (n, 1)),
+                                 ((W.( w >> 1 )), (I.( + ) (n, 1)),
                                   (mkBit w :: l))
                  in f (w, 0, []);;
         let rec wordToOct w =
           let rec f (w, n, l) = begin
             if w < 8 then ((I.( + ) (n, 1)), (mkDigit w :: l)) else
             f
-            ((W.( >> ) (w, 3)), (I.( + ) (n, 1)),
+            ((W.( w >> 3 )), (I.( + ) (n, 1)),
              (mkDigit (W.andb (w, 7)) :: l))
             end in f (w, 0, []);;
         let rec wordToDec w =
@@ -327,7 +370,7 @@ module IntInf : INT_INF =
           let rec f (w, n, l) = begin
             if w < 16 then ((I.( + ) (n, 1)), (mkDigit w :: l)) else
             f
-            ((W.( >> ) (w, 4)), (I.( + ) (n, 1)),
+            ((W.( w >> 4 )), (I.( + ) (n, 1)),
              (mkDigit (W.andb (w, 15)) :: l))
             end in f (w, 0, []);;
         let rec fmtW =
@@ -693,8 +736,8 @@ module IntInf : INT_INF =
                       let rec cmp =
                         function 
                                  | ([], []) -> Equal
-                                 | (_, []) -> GREATER
-                                 | ([], _) -> LESS
+                                 | (_, []) -> Greater
+                                 | ([], _) -> Less
                                  | (((i : int) :: ri), (j :: rj))
                                      -> begin
                                         match cmp (ri, rj)
@@ -702,8 +745,8 @@ module IntInf : INT_INF =
                                              | Equal -> begin
                                                  if i = j then Equal else
                                                  begin
-                                                 if i < j then LESS else
-                                                 GREATER end end
+                                                 if i < j then Less else
+                                                 Greater end end
                                              | c -> c
                                         end;;
                       let rec exp =
@@ -1082,27 +1125,27 @@ module IntInf : INT_INF =
     let rec rem arg = (fun (_, r) -> r) (quotrem arg);;
     let rec compare =
       function 
-               | (Bi { sign = Neg}, Bi { sign = Pos}) -> LESS
-               | (Bi { sign = Pos}, Bi { sign = Neg}) -> GREATER
+               | (Bi { sign = Neg}, Bi { sign = Pos}) -> Less
+               | (Bi { sign = Pos}, Bi { sign = Neg}) -> Greater
                | (Bi { sign = Pos; digits = d}, Bi
                   { sign = Pos; digits = d'}) -> BN.cmp (d, d')
                | (Bi { sign = Neg; digits = d}, Bi
                   { sign = Neg; digits = d'}) -> BN.cmp (d', d);;
     let rec ( < ) arg =
       begin match compare arg with 
-                                   | LESS -> true
+                                   | Less -> true
                                    | _ -> false end;;
     let rec ( > ) arg =
       begin match compare arg with 
-                                   | GREATER -> true
+                                   | Greater -> true
                                    | _ -> false end;;
     let rec ( <= ) arg =
       begin match compare arg with 
-                                   | GREATER -> false
+                                   | Greater -> false
                                    | _ -> true end;;
     let rec ( >= ) arg =
       begin match compare arg with 
-                                   | LESS -> false
+                                   | Less -> false
                                    | _ -> true end;;
     let rec abs =
       function 
@@ -1112,14 +1155,14 @@ module IntInf : INT_INF =
       begin
       match compare arg
       with 
-           | GREATER -> (fun (r, _) -> r) arg
+           | Greater -> (fun (r, _) -> r) arg
            | _ -> (fun (_, r) -> r) arg
       end;;
     let rec min arg =
       begin
       match compare arg
       with 
-           | LESS -> (fun (r, _) -> r) arg
+           | Less -> (fun (r, _) -> r) arg
            | _ -> (fun (_, r) -> r) arg
       end;;
     let rec sign =
@@ -1243,3 +1286,4 @@ module IntInf : INT_INF =
 (* local *);;
 (* end case *);;
 (* structure IntInf *);;
+*)

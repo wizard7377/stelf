@@ -1,4 +1,30 @@
 (include sources.dune)
+
 (library
- (name modes) (modules modesyn modetable modedec modecheck modeprint modes_) (libraries global table lambda formatter print names paths index basis) (flags (:standard -w -A -open Basis  -open Global  -open Table  -open Lambda  -open Formatter  -open Print  -open Names  -open Paths  -open Index))
+ (name modes)
+ (public_name twelf.modes)
+ (modules modesyn modetable modedec modecheck modeprint modes_)
+ (libraries global table lambda formatter print names paths index basis)
+ (flags
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global_
+   -open
+   Table_
+   -open
+   Lambda_
+   -open
+   Formatter_
+   -open
+   Print_
+   -open
+   Names_
+   -open
+   Paths_
+   -open
+   Index_))
  (wrapped false))

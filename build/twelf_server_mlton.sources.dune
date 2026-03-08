@@ -1,0 +1,40 @@
+
+      (rule
+ (mode fallback)
+ (target twelf_server_mlton_.sig.ml)
+ (action
+  (write-file twelf_server_mlton_.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target twelf_server_mlton_.fun.ml)
+ (action
+  (write-file twelf_server_mlton_.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target twelf_server_mlton_.sml.ml)
+ (action
+  (write-file twelf_server_mlton_.sml.ml "")))
+
+(rule
+ (target twelf_server_mlton_.ml)
+ (deps
+  (:sig twelf_server_mlton_.sig.ml)
+  (:fun twelf_server_mlton_.fun.ml)
+  (:sml twelf_server_mlton_.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+      

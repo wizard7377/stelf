@@ -2,9 +2,10 @@ open! Whnf;;
 open! Basis;;
 (* Approximate language for term reconstruction *);;
 (* Author: Kevin Watkins *);;
-module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
+module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
   struct
     (*! structure IntSyn = IntSyn' !*);;
+    module Whnf = Approx__0.Whnf;;
     module I = IntSyn;;
     let rec headConDec =
       function 
@@ -73,9 +74,9 @@ module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
      reconstruction.  The invariants established by
      ReconTerm.filterLevel ensure that Hyperkind will never appear
      elsewhere. *);;
-    let Type = (Level 1);;
-    let Kind = (Level 2);;
-    let hyperkind_ = (Level 3);;
+    let type_ = (Level 1);;
+    let kind = (Level 2);;
+    let hyperkind = (Level 3);;
     let rec newLVar () = (LVar (ref None));;
     let rec newCVar () = (CVar (ref None));;
     (* whnfUni (l) = l'
@@ -154,8 +155,8 @@ module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
     (* converting exact terms to approximate terms *);;
     (* uniToApx (L) = L- *);;
     let rec uniToApx = function 
-                                | type_ -> Type
-                                | kind_ -> Kind;;
+                                | I.Type -> type_
+                                | I.Kind -> kind;;
     (* expToApx (U) = (U-, V-)
      if G |- U : V
      or G |- U "":"" V = ""hyperkind"" *);;
@@ -172,7 +173,7 @@ module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
                    -> let (u_, v_, l_) = findByReplacementName name
                         in (u_, v_)
                | I.Root ((h_, _)(* Const/Def/NSDef *))
-                   -> ((Const h_), (Uni Type))
+                   -> ((Const h_), (Uni type_))
                | I.Redex (u_, _) -> expToApx u_
                | I.Lam (_, u_) -> expToApx u_
                | I.EClo (u_, _) -> expToApx u_(* are we sure Skonst/FgnConst are never types or kinds? *)(* must have been created to represent a CVar *);;
@@ -208,8 +209,8 @@ module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
     (* converting approximate terms to exact terms *);;
     (* apxToUni (L-) = L *);;
     let rec apxToUniW = function 
-                                 | Level 1 -> I.type_
-                                 | Level 2 -> I.kind_;;
+                                 | Level 1 -> I.Type
+                                 | Level 2 -> I.Kind;;
     (* others impossible by invariant *);;
     let rec apxToUni l_ = apxToUniW (whnfUni l_);;
     (* apxToClass (G, v, L-, allowed) = V
@@ -223,19 +224,19 @@ module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
                | ((g_, Uni l_, _, allowed)(* Next L *))
                    -> (I.Uni (apxToUni l_))
                | (g_, Arrow (v1_, v2_), l_, allowed)
-                   -> let v1'_ = apxToClass (g_, v1_, Type, allowed)
+                   -> let v1'_ = apxToClass (g_, v1_, type_, allowed)
                         in let d_ = (I.Dec (None, v1'_))
                              in let v2'_ =
                                   apxToClass
                                   ((I.Decl (g_, d_)), v2_, l_, allowed)
-                                  in (I.Pi ((d_, I.maybe_), v2'_))
+                                  in (I.Pi ((d_, I.Maybe), v2'_))
                | ((g_, (CVar r as v_), l_, allowed)(* Type or Kind *))
                    -> let name =
                         getReplacementName (v_, (Uni l_), (Next l_), allowed)
                         in let s = (I.Shift (I.ctxLength g_))
                              in (I.Root
                                  ((I.FVar (name, (I.Uni (apxToUni l_)), s)),
-                                  I.nil_))
+                                  I.Nil))
                | ((g_, Const h_, l_, allowed)(* Type *))
                    -> (I.Root
                        (h_,
@@ -269,7 +270,7 @@ module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
                                 match whnfUni l_
                                 with 
                                      | Level 1
-                                         -> I.newEVar (g_, (I.EClo vs_))
+                                         -> let (vs_e, vs_s) = vs_ in I.newEVar (g_, (I.EClo (vs_e, vs_s)))
                                      | Level 2
                                          -> let name' =
                                               getReplacementName
@@ -277,7 +278,7 @@ module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
                                                allowed)
                                               in let v'_ =
                                                    apxToClass
-                                                   (I.null_, v_, (Level 2),
+                                                   (I.Null, v_, (Level 2),
                                                     allowed)
                                                    in let s' =
                                                         (I.Shift
@@ -286,13 +287,13 @@ module Approx(Approx__0: sig module Whnf : WHNF end) : APPROX =
                                                             ((I.FVar
                                                               (name', v'_,
                                                                s')),
-                                                             I.nil_))
+                                                             I.Nil))
                                                         (* NOTE: V' differs from Vs by a Shift *)(* probably could avoid the following call by removing the
                   substitutions in Vs instead *)
                                 end
                              (* U must be a CVar *)
                | ((g_, u_, vs_, allowed)(* an atomic type, not Def *))
-                   -> I.newEVar (g_, (I.EClo vs_))
+                   -> let (vs_e, vs_s) = vs_ in I.newEVar (g_, (I.EClo (vs_e, vs_s)))
     and apxToExact (g_, u_, vs_, allowed) =
       apxToExactW (g_, u_, Whnf.whnfExpandDef vs_, allowed);;
     (* matching for the approximate language *);;

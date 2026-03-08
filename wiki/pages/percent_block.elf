@@ -1,0 +1,52 @@
+%%! title: "%block"
+%%! description: "A %block declaration describes part of the potential shape of an LF context"
+
+%{! A **``%block``** declaration names a **block**, which is a partial description of an LF context. Blocks are composed into [regular worlds](/wiki/percent-worlds/) with [``%worlds``](/wiki/percent-worlds/) declarations, which describe the complete set of possible contexts for a type family. This description of the context is an important part of the [adequacy](/wiki/adequacy/) of the [metatheorem](/wiki/metatheorem/) established by a [``%total``](/wiki/percent-total/) declaration.
+
+A ``%block`` declaration acts more like a definition than other keywords, which generally cause Twelf to _do_ something rather than _define_ something. The obvious exception to this is [%define](/wiki/define-declaration/).
+
+
+## Sample ``%block`` declarations
+
+These sample ``%block`` declarations are in the context of the definitions of ``exp`` and ``height`` in the [``%worlds``](/wiki/percent-worlds/) article.
+
+Using this block in a ``%worlds`` declaration means that arbitrary variables representing expressions can appear in the context:
+```twelf
+%block var-rand : block {x : exp}.
+```
+Using this block in a ``%worlds`` declaration means that variables representing expressions can appear in the context, but only if they are accompanied by a judgment that defines the height of that variable to be one.
+```twelf
+%block var-height : block {x : exp}{_ : height x (s z)}.
+```
+Using this block in a ``%worlds`` declaration means that variables representing expressions can appear in the context, but only if they are accompanied by a judgment that defines the height of that variable to be some natural number.
+```twelf
+%block var-heightN : some {N: nat} block {x : exp}{_ : height x N}.
+```
+## Block definitions
+
+Block definitions allow multiple blocks to be combined:
+!}%
+
+typ : type.
+exp : typ -> type.
+
+%block typ-var : block {a : typ}.
+%block exp-var : some {T : typ} block {x : exp T}.
+%block vars = (typ-var | exp-var).
+
+%{! Using ``vars`` in a [``%worlds``](/wiki/percent-worlds/) declaration is the same as using ``typ-var | exp-var``, and in fact when Twelf prints out the ``%worlds`` declaration, block definitions will be automatically expanded. !}%
+
+%{!! begin checked !!}%
+%worlds (vars) (exp _).
+%{!! end checked !!}%
+
+%{! ## See also
+
+* [``%worlds``](/wiki/percent-worlds/)
+* [Proving totality assertions in non-empty contexts](/wiki/proving-metatheorems-proving-totality-assertions-in-non-empty-contexts/) in the Proving Metatheorems tutorial
+* [Totality assertion](/wiki/totality-assertion/)
+* <Guide chapter="9" section="53">Regular Worlds</Guide>
+
+<Keyword />
+
+!}%

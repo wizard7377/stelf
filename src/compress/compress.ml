@@ -8,7 +8,5 @@ open! Reductio
 module Reductio = Reductio
 open! Compress_
 module Compress_ = Compress_
-open! Compress_
-module Compress_ = Compress_
 open! Rep
 module Rep = Rep

@@ -1,4 +1,10 @@
 (include sources.dune)
+
 (library
- (name stream) (modules stream_) (libraries basis) (flags (:standard -w -A -open Basis))
+ (name stream)
+ (public_name twelf.stream)
+ (modules stream_)
+ (libraries basis)
+ (flags
+  (:standard -w -A -open Basis))
  (wrapped false))

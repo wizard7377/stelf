@@ -1,4 +1,5 @@
-open! Basis;;
+open! Basis
+(* Commented out: PACK_WORD not available in basis library
 (* Flit DAG generator *);;
 (* Author: Roberto Virga *);;
 module Flit(Flit__0: sig
@@ -752,7 +753,7 @@ module Flit(Flit__0: sig
                           -> begin
                              match cmp (a, b)
                              with 
-                                  | EQUAL -> (a :: b :: merge ta tb)
+                                  | Equal -> (a :: b :: merge ta tb)
                                   | LESS -> (a :: merge ta bb)
                                   | GREATER -> (b :: merge aa tb)
                              end
@@ -1217,3 +1218,4 @@ module Flit(Flit__0: sig
     let dumpSymTable = dumpSymTable;;
     end;;
 (* functor Flit *);;
+*)

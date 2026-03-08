@@ -1,80 +1,66 @@
-open! Basis;;
-module Normalize(Normalize__0: sig
-                               (* Internal syntax for functional proof term calculus *)
-                               (* Author: Carsten Schuermann *)
-                               module IntSyn' : INTSYN
-                               module Tomega' : TOMEGA
-                               module Whnf : WHNF
-                               end) : NORMALIZE
-  =
-  struct
-    module IntSyn = IntSyn';;
-    module Tomega = Tomega';;
-    exception Error of string ;;
-    open!
-      struct
-        module I = IntSyn';;
-        module T = Tomega';;
-        let rec normalizeFor =
-          function 
-                   | (T.All (d_, f_), t)
-                       -> (T.All
-                           (T.decSub (d_, t), normalizeFor (f_, T.dot1 t)))
-                   | (T.Ex (d_, f_), t)
-                       -> (T.Ex
-                           (I.decSub (d_, T.coerceSub t),
-                            normalizeFor (f_, T.dot1 t)))
-                   | (T.And (f1_, f2_), t)
-                       -> (T.And
-                           (normalizeFor (f1_, t), normalizeFor (f2_, t)))
-                   | (T.FClo (f_, t1), t2)
-                       -> normalizeFor (f_, T.comp (t1, t2))
-                   | (T.World (w_, f_), t)
-                       -> (T.World (w_, normalizeFor (f_, t)))
-                   | (true_, _) -> T.true_;;
-        let rec normalizePrg =
-          function 
-                   | ((T.Root (T.Const _, _) as p_), t) -> p_
-                   | ((T.Root (T.Var n, _) as p_), t)
-                       -> normalizePrg (p_, (T.Dot (T.varSub (n, t), T.id)))
-                   | (T.Lam (d_, p'_), t)
-                       -> (T.Lam (d_, normalizePrg (p'_, T.dot1 t)))
-                   | (T.PairExp (u_, p'_), t)
-                       -> (T.PairExp
-                           ((I.EClo
-                             (Whnf.whnf (((u_, T.coerceSub t) : I.eclo)))),
-                            normalizePrg (p'_, t)))
-                   | (T.PairPrg (p1_, p2_), t)
-                       -> (T.PairPrg
-                           (normalizePrg (p1_, t), normalizePrg (p2_, t)))
-                   | (unit_, _) -> T.unit_
-                   | (T.Redex (p_, s_), t)
-                       -> (T.Redex (normalizePrg (p_, t), normalizeSpine s_))
-                   | (T.Rec (d_, p_), t)
-                       -> (T.Rec (d_, normalizePrg (p_, t)))
-                   | ((T.Case _ as p_), t) -> p_
-                   | ((T.EVar (psi_, { contents = Some p'_}, _) as p_), t)
-                       -> normalizePrg (p'_, t)
-        and normalizeSpine =
-          function 
-                   | nil_ -> T.nil_
-                   | T.AppExp (u_, s_) -> (T.AppExp (u_, normalizeSpine s_))
-                   | T.AppPrg (p_, s_)
-                       -> (T.AppPrg
-                           (normalizePrg (p_, T.id), normalizeSpine s_))
-                   | T.AppBlock (b_, s_)
-                       -> (T.AppBlock (b_, normalizeSpine s_));;
-        let rec normalizeSub =
-          function 
-                   | (T.Shift n as s) -> s
-                   | T.Dot (T.Prg p_, s)
-                       -> (T.Dot
-                           ((T.Prg (normalizePrg (p_, T.id))),
-                            normalizeSub s))
-                   | T.Dot (f_, s) -> (T.Dot (f_, normalizeSub s));;
-        end;;
-    (*      | normalizeFor (T.FVar (G, r))   think about it *);;
-    (* normalizePrg (P, t) = (P', t')
+open! Basis
+
+module Normalize (Normalize__0 : sig
+  (* Internal syntax for functional proof term calculus *)
+  (* Author: Carsten Schuermann *)
+  module IntSyn' : INTSYN
+  module Tomega' : TOMEGA
+  module Whnf : WHNF
+end) : NORMALIZE = struct
+  module IntSyn = IntSyn'
+  module Tomega = Tomega'
+
+  exception Error of string
+
+  open! struct
+    module I = IntSyn'
+    module T = Tomega'
+
+    let rec normalizeFor = function
+      | T.All (d_, f_), t ->
+          T.All (T.decSub (d_, t), normalizeFor (f_, T.dot1 t))
+      | T.Ex (d_, f_), t ->
+          T.Ex (I.decSub (d_, T.coerceSub t), normalizeFor (f_, T.dot1 t))
+      | T.And (f1_, f2_), t ->
+          T.And (normalizeFor (f1_, t), normalizeFor (f2_, t))
+      | T.FClo (f_, t1), t2 -> normalizeFor (f_, T.comp (t1, t2))
+      | T.World (w_, f_), t -> T.World (w_, normalizeFor (f_, t))
+      | true_, _ -> T.true_
+
+    let rec normalizePrg = function
+      | (T.Root (T.Const _, _) as p_), t -> p_
+      | (T.Root (T.Var n, _) as p_), t ->
+          normalizePrg (p_, T.Dot (T.varSub (n, t), T.id))
+      | T.Lam (d_, p'_), t -> T.Lam (d_, normalizePrg (p'_, T.dot1 t))
+      | T.PairExp (u_, p'_), t ->
+          T.PairExp
+            ( I.EClo (Whnf.whnf ((u_, T.coerceSub t) : I.eclo)),
+              normalizePrg (p'_, t) )
+      | T.PairPrg (p1_, p2_), t ->
+          T.PairPrg (normalizePrg (p1_, t), normalizePrg (p2_, t))
+      | unit_, _ -> T.unit_
+      | T.Redex (p_, s_), t -> T.Redex (normalizePrg (p_, t), normalizeSpine s_)
+      | T.Rec (d_, p_), t -> T.Rec (d_, normalizePrg (p_, t))
+      | (T.Case _ as p_), t -> p_
+      | (T.EVar (psi_, { contents = Some p'_ }, _) as p_), t ->
+          normalizePrg (p'_, t)
+
+    and normalizeSpine = function
+      | nil_ -> T.nil_
+      | T.AppExp (u_, s_) -> T.AppExp (u_, normalizeSpine s_)
+      | T.AppPrg (p_, s_) ->
+          T.AppPrg (normalizePrg (p_, T.id), normalizeSpine s_)
+      | T.AppBlock (b_, s_) -> T.AppBlock (b_, normalizeSpine s_)
+
+    let rec normalizeSub = function
+      | T.Shift n as s -> s
+      | T.Dot (T.Prg p_, s) ->
+          T.Dot (T.Prg (normalizePrg (p_, T.id)), normalizeSub s)
+      | T.Dot (f_, s) -> T.Dot (f_, normalizeSub s)
+  end
+
+  (*      | normalizeFor (T.FVar (G, r))   think about it *)
+  (* normalizePrg (P, t) = (P', t')
 
        Invariant:
        If   Psi' |- P :: F
@@ -87,17 +73,17 @@ module Normalize(Normalize__0: sig
        and  Psi |- F [t] == F' [t']
        and  Psi |- P [t] == P' [t'] : F [t]
        and  Psi |- P' [t'] :nf: F [t]
-    *);;
-    (*      | normalizePrg (T.PairBlock (B, P'), t) =
-          T.PairBlock (B, normalizePrg P') *);;
-    (* Clearly, the redex should be removed here *);;
-    (*
+    *)
+  (*      | normalizePrg (T.PairBlock (B, P'), t) =
+          T.PairBlock (B, normalizePrg P') *)
+  (* Clearly, the redex should be removed here *)
+  (*
     and normalizeDec (T.UDec D, t) = T.UDec (I.decSub (D, T.coerceSub t))
       | normalizeDec (T.BDec (k, t1), t2) = 
       | normalizeDec (T.PDec (n, F), t) = T.PDec (n, (normalizeFor (F, t)))
-*);;
-    let normalizeFor = normalizeFor;;
-    let normalizePrg = normalizePrg;;
-    let normalizeSpine = normalizeSpine;;
-    let normalizeSub = normalizeSub;;
-    end;;
+*)
+  let normalizeFor = normalizeFor
+  let normalizePrg = normalizePrg
+  let normalizeSpine = normalizeSpine
+  let normalizeSub = normalizeSub
+end

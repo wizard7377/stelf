@@ -306,7 +306,7 @@ module PtRecon(PtRecon__0: sig
                                            | Error msg -> print msg;;
     end;;
 (*! sharing Names.IntSyn = IntSyn' !*);;
-(*! structure CSManager : CS_MANAGER !*);;
-(*! sharing CSManager.IntSyn = IntSyn' !*);;
+(*! structure Cs_manager : CS_MANAGER !*);;
+(*! sharing Cs_manager.IntSyn = IntSyn' !*);;
 (* local ... *);;
 (* functor PtRecon *);;

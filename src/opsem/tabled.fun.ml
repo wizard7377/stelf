@@ -296,7 +296,7 @@ module Tabled(Tabled__0: sig
                                                  in let easub =
                                                       I.comp (asub, esub)
                                                       in begin
-                                                           CSManager.trail
+                                                           Cs_manager.trail
                                                            (function 
                                                                     | 
                                                                     ()
@@ -355,7 +355,7 @@ module Tabled(Tabled__0: sig
                              in let ss = shift (g_, s)
                                   in let ss1 = shift (g_, scomp)
                                        in begin
-                                            CSManager.trail
+                                            Cs_manager.trail
                                             (function 
                                                       | () -> begin
                                                           if
@@ -611,7 +611,7 @@ module Tabled(Tabled__0: sig
                  | ((I.Const c as hc_) :: sgn')
                      -> let C.SClause r = C.sProgLookup (cidFromHead hc_)
                           in begin
-                               CSManager.trail
+                               Cs_manager.trail
                                (function 
                                          | ()
                                              -> rSolve
@@ -632,7 +632,7 @@ module Tabled(Tabled__0: sig
                          k) -> begin
                           if eqHead (ha_, ha'_) then
                           begin
-                            CSManager.trail
+                            Cs_manager.trail
                             (function 
                                       | ()
                                           -> rSolve
@@ -652,7 +652,7 @@ module Tabled(Tabled__0: sig
                           -> matchDProg (g_, dPool', k + 1)(* dynamic program exhausted, try signature *)
              in let rec matchConstraint (Solve_, try_) =
                   let succeeded =
-                    CSManager.trail
+                    Cs_manager.trail
                     (function 
                               | ()
                                   -> begin
@@ -762,7 +762,7 @@ module Tabled(Tabled__0: sig
                  | [] -> ()
                  | ((susp_, s, sc, trail, (asub, answRef), k) :: goals_)
                      -> begin
-                          CSManager.trail
+                          Cs_manager.trail
                           (function 
                                     | ()
                                         -> begin
@@ -800,6 +800,6 @@ module Tabled(Tabled__0: sig
 (*!  sharing Print.IntSyn = IntSyn' !*);;
 (*              structure Names : NAMES *);;
 (*!  sharing Names.IntSyn = IntSyn' !*);;
-(*! structure CSManager : CS_MANAGER !*);;
-(*!  sharing CSManager.IntSyn = IntSyn'!*);;
+(*! structure Cs_manager : CS_MANAGER !*);;
+(*!  sharing Cs_manager.IntSyn = IntSyn'!*);;
 (* functor Tabled *);;

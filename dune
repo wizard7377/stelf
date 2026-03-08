@@ -1,4 +1,9 @@
 (include sources.dune)
+
 (library
- (name main) (libraries frontend basis) (flags (:standard -w -A -open Basis  -open Frontend))
+ (name main)
+ (public_name twelf.main)
+ (libraries frontend basis)
+ (flags
+  (:standard -w -A -open Basis -open Frontend))
  (wrapped false))
