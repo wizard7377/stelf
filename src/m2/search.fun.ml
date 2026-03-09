@@ -1,4 +1,6 @@
 open! Basis
+open Metasyn
+open Meta_global
 
 (* Search (based on abstract machine ) *)
 (* Author: Carsten Schuermann *)
@@ -35,7 +37,8 @@ module OLDSearch (OLDSearch__0 : sig
 
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Names : NAMES
-end) : OLDSEARCH = struct
+end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
+  open OLDSearch__0
   (*! structure IntSyn = IntSyn' !*)
   module MetaSyn = MetaSyn'
 
@@ -45,7 +48,7 @@ end) : OLDSEARCH = struct
   open! struct
     module I = IntSyn
     module M = MetaSyn
-    module C = CompSyn
+    module C = CompSyn.CompSyn
 
     let rec cidFromHead = function
       | I.Const a -> a
@@ -61,20 +64,22 @@ end) : OLDSEARCH = struct
       | (C.Atom p, s), dp, sc, acck -> matchAtom ((p, s), dp, sc, acck)
       | (C.Impl (r, a_, h_, g), s), C.DProg (g_, dPool), sc, acck ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
-          Solve_
+          solve
             ( (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, h_))),
-              function m_, acck' -> (sc (I.Lam (d'_, m_), acck'), acck) )
+              (function m_, acck' -> sc (I.Lam (d'_, m_), acck')),
+              acck )
       | (C.All (d_, g), s), C.DProg (g_, dPool), sc, acck ->
           let d'_ = I.decSub (d_, s) in
-          Solve_
+          solve
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.parameter_)),
-              function m_, acck' -> (sc (I.Lam (d'_, m_), acck'), acck) )
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
+              (function m_, acck' -> sc (I.Lam (d'_, m_), acck')),
+              acck )
 
     and rSolve = function
       | ps', (C.Eq q_, s), C.DProg (g_, dPool), sc, ((acc, k) as acck) -> begin
-          if Unify.unifiable (g_, ps', (q_, s)) then sc (I.nil_, acck) else acc
+          if Unify.unifiable (g_, ps', (q_, s)) then sc (I.Nil, acck) else acc
         end
       | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc, acck ->
           let x_ = I.newEVar (g_, I.EClo (a_, s)) in
@@ -82,20 +87,21 @@ end) : OLDSEARCH = struct
             ( ps',
               (r, I.Dot (I.Exp x_, s)),
               dp,
-              function
+              (function
               | s_, acck' ->
-                  ( Solve_
-                      ( (g, s),
-                        dp,
-                        function
-                        | m_, acck'' -> (
-                            try
-                              begin
-                                Unify.unify (g_, (x_, I.id), (m_, I.id));
-                                sc (I.App (m_, s_), acck'')
-                              end
-                            with Unify.Unify _ -> ([], acck')) ),
-                    acck ) )
+                  solve
+                    ( (g, s),
+                      dp,
+                      (function
+                      | m_, acck'' ->
+                          try
+                            begin
+                              Unify.unify (g_, (x_, I.id), (m_, I.id));
+                              sc (I.App (m_, s_), acck'')
+                            end
+                          with Unify.Unify _ -> fst acck'),
+                      acck )),
+              acck )
       | ( ps',
           (C.Exists (I.Dec (_, a_), r), s),
           (C.DProg (g_, dPool) as dp),
@@ -106,7 +112,8 @@ end) : OLDSEARCH = struct
             ( ps',
               (r, I.Dot (I.Exp x_, s)),
               dp,
-              function s_, acck' -> (sc (I.App (x_, s_), acck'), acck) )
+              (function s_, acck' -> sc (I.App (x_, s_), acck')),
+              acck )
 
     and aSolve ((trivial_, s), dp, sc, acc) = sc ()
 
@@ -126,9 +133,9 @@ end) : OLDSEARCH = struct
                       ( ps',
                         (r, I.id),
                         dp,
-                        function
-                        | s_, acck' ->
-                            (sc (I.Root (hc_, s_), acck'), (acc'', k - 1)) ))
+                        (function
+                        | s_, acck' -> sc (I.Root (hc_, s_), acck')),
+                        (acc'', k - 1) ))
               in
               matchSig' (sgn', acc''')
         in
@@ -144,9 +151,9 @@ end) : OLDSEARCH = struct
                       ( ps',
                         (r, I.comp (s, I.Shift n)),
                         dp,
-                        function
-                        | s_, acck' ->
-                            (sc (I.Root (I.BVar n, s_), acck'), (acc', k - 1))
+                        (function
+                        | s_, acck' -> sc (I.Root (I.BVar n, s_), acck')),
+                        (acc', k - 1)
                       ))
               in
               matchDProg (dPool', n + 1, acc'')
@@ -168,8 +175,8 @@ end) : OLDSEARCH = struct
       | r, (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
       | r, (I.EVar (r', _, v'_, _), s) -> r = r' || occursInExp (r, (v'_, s))
-      | r, (I.FgnExp csfe, s) ->
-          I.FgnExpStd.fold csfe
+        | r, (I.FgnExp (csid_, fge_), s) ->
+          I.FgnExpStd.fold (csid_, fge_)
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
@@ -198,16 +205,16 @@ end) : OLDSEARCH = struct
       begin match (arg__1, arg__2) with
       | max, ([], sc) -> [ sc () ]
       | max, (I.EVar (r, g_, v_, _) :: ge_, sc) ->
-          Solve_
+          solve
             ( (Compile.compileGoal (g_, v_), I.id),
               Compile.compileCtx false g_,
-              function
+              (function
               | u'_, (acc', _) ->
-                  ( begin
-                      Unify.instantiateEVar (r, u'_, []);
-                      searchEx' max (ge_, sc)
-                    end,
-                    ([], max) ) )
+                  begin
+                    Unify.instantiateEVar (r, u'_, []);
+                    searchEx' max (ge_, sc)
+                  end),
+              ([], max) )
       end
 
     let rec deepen f p_ =
@@ -226,36 +233,37 @@ end) : OLDSEARCH = struct
       begin
         begin if !Global.chatter > 5 then print "[Search: " else ()
         end;
-        begin
+        let results =
           deepen searchEx'
             ( selectEVar (ge_, vs_, []),
               function
-              | params_ -> begin
-                  begin if !Global.chatter > 5 then print "OK]\n" else ()
-                  end;
-                  sc params_
-                end );
-          begin
+              | params_ -> sc params_ )
+        in
+        begin match results with
+        | [] ->
             begin if !Global.chatter > 5 then print "FAIL]\n" else ()
             end;
             raise (Error "No object found")
-          end
+        | _ :: _ ->
+            begin if !Global.chatter > 5 then print "OK]\n" else ()
+            end;
+            results
         end
       end
 
     let rec searchAll' = function
       | [], acc, sc -> sc acc
       | I.EVar (r, g_, v_, _) :: ge_, acc, sc ->
-          Solve_
+          solve
             ( (Compile.compileGoal (g_, v_), I.id),
               Compile.compileCtx false g_,
-              function
+              (function
               | u'_, (acc', _) ->
-                  ( begin
-                      Unify.instantiateEVar (r, u'_, []);
-                      searchAll' (ge_, acc', sc)
-                    end,
-                    (acc, !MetaGlobal.maxFill) ) )
+                  begin
+                    Unify.instantiateEVar (r, u'_, []);
+                    searchAll' (ge_, acc', sc)
+                  end),
+              (acc, !MetaGlobal.maxFill) )
 
     let rec searchAll (g_, ge_, vs_, sc) =
       searchAll' (selectEVar (ge_, vs_, []), [], sc)

@@ -15,22 +15,7 @@ module type MEMOTABLE = sig
    * SIDE EFFECT: D, G |- U added to table
    *)
   val callCheck :
-    IntSyn.dctx
-    * IntSyn.dctx
-    * IntSyn.dctx
-    * IntSyn.exp_
-    * TableParam.resEqn_
-    * TableParam.status_ ->
-    TableParam.callCheckResult
-
-  val insertIntoTree :
-    IntSyn.dctx
-    * IntSyn.dctx
-    * IntSyn.dctx
-    * IntSyn.exp_
-    * TableParam.resEqn_
-    * TableParam.answer
-    * TableParam.status_ ->
+    IntSyn.dctx * IntSyn.dctx * IntSyn.dctx * IntSyn.exp_ * TableParam.resEqn_ * TableParam.status_ ->
     TableParam.callCheckResult
 
   (* answer check/insert *)
@@ -63,8 +48,9 @@ module type MEMOTABLE = sig
    *)
   val updateTable : unit -> bool
   val tableSize : unit -> int
-
-  val memberCtx :
-    (IntSyn.dctx * IntSyn.exp_) * IntSyn.dctx -> IntSyn.dec_ option
+  val memberCtx : (IntSyn.dctx * IntSyn.exp_) * IntSyn.dctx -> IntSyn.dec_ option
+  val insertIntoTree :
+    IntSyn.dctx * IntSyn.dctx * IntSyn.dctx * IntSyn.exp_ * TableParam.resEqn_ * TableParam.answer * TableParam.status_ ->
+    TableParam.callCheckResult
 end
 (* signature MemoTable *)

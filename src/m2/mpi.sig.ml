@@ -1,4 +1,5 @@
 open! Basis
+open Metasyn
 
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)

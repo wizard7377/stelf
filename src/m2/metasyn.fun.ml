@@ -2,7 +2,7 @@ open! Basis
 
 (* Meta syntax *)
 (* Author: Carsten Schuermann *)
-module MetaSyn (MetaSyn__0 : sig
+module Make_MetaSyn (MetaSyn__0 : sig
   module Whnf : WHNF
 end) : METASYN = struct
   (*! structure IntSyn = IntSyn' !*)
@@ -39,8 +39,8 @@ end) : METASYN = struct
     let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
 
     and createEVarSpineW = function
-      | g_, ((I.Uni type_, s) as vs_) -> (I.nil_, vs_)
-      | g_, ((I.Root _, s) as vs_) -> (I.nil_, vs_)
+      | g_, ((I.Uni type_, s) as vs_) -> (I.Nil, vs_)
+      | g_, ((I.Root _, s) as vs_) -> (I.Nil, vs_)
       | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
           let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in

@@ -1,4 +1,5 @@
 open! Basis
+open Metasyn
 
 (* Meta printer for proof states *)
 (* Author: Carsten Schuermann *)

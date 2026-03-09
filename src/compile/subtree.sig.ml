@@ -25,7 +25,7 @@ module type SUBTREE = sig
   type nonrec querySubsts =
     (IntSyn.dec_ IntSyn.ctx_ * (typeLabel * IntSyn.exp_)) RBSet.ordSet
 
-  open Compsyn
+  open CompSyn
 
   type cGoal_ =
     | CGoals of CompSyn.auxGoal_ * IntSyn.cid * CompSyn.conjunction_ * int

@@ -106,9 +106,9 @@ end) : SUBTREE = struct
   (* key = int = bvar *)
   type cGoal_ =
     | CGoals of
-        Compsyn.CompSyn.auxGoal_
+        CompSyn.CompSyn.auxGoal_
         * IntSyn.cid
-        * Compsyn.CompSyn.conjunction_
+        * CompSyn.CompSyn.conjunction_
         * int
 
   (* cid of clause *)
@@ -154,7 +154,7 @@ end) : SUBTREE = struct
 
   open! struct
     module I = IntSyn
-    module C = Compsyn.CompSyn
+    module C = CompSyn.CompSyn
     module S = Red_black_set.RBSet
 
     exception Error of string

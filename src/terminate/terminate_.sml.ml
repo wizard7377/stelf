@@ -1,5 +1,6 @@
 open! Basis
-
+open Checking 
+open Reduces
 module Checking = Checking (struct
   module Global = Global
 

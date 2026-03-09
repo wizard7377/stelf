@@ -1,4 +1,5 @@
 open! Basis
+open Red_black_set
 
 (* Global Table parameters *)
 (* Author: Brigitte Pientka *)

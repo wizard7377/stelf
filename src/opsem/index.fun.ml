@@ -36,6 +36,7 @@ module TableIndex (TableIndex__0 : sig
   (*! sharing Names.IntSyn = IntSyn' !*)
   module TypeCheck : TYPECHECK
 end) : TABLEINDEX = struct
+  open TableIndex__0
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
   module Conv = Conv
@@ -111,11 +112,11 @@ end) : TABLEINDEX = struct
     let table : index ref = ref []
 
     let rec concat = function
-      | null_, g'_ -> g'_
+      | I.Null, g'_ -> g'_
       | I.Decl (g_, d_), g'_ -> I.Decl (concat (g_, g'_), d_)
 
     let rec reverse = function
-      | null_, g'_ -> g'_
+      | I.Null, g'_ -> g'_
       | I.Decl (g_, d_), g'_ -> reverse (g_, I.Decl (g'_, d_))
 
     let rec printTable () =
@@ -125,7 +126,7 @@ end) : TABLEINDEX = struct
             try
               print
                 (Print.expToString
-                   ( I.null_,
+                   ( I.Null,
                      A.raiseType
                        ( Names.ctxName d'_,
                          I.EClo (A.raiseType (Names.ctxName g_, u_), s') ) ))
@@ -144,7 +145,7 @@ end) : TABLEINDEX = struct
             | [] -> begin
                 printT T;
                 print
-                  (Print.expToString (I.null_, A.raiseType (concat (g_, d_), u_))
+                  (Print.expToString (I.Null, A.raiseType (concat (g_, d_), u_))
                   ^ ", NONE\n")
               end
             | a :: answ -> begin
@@ -152,7 +153,7 @@ end) : TABLEINDEX = struct
                 begin
                   print
                     (Print.expToString
-                       (I.null_, A.raiseType (concat (g_, d_), u_))
+                       (I.Null, A.raiseType (concat (g_, d_), u_))
                     ^ ", [\n\t");
                   begin
                     proofTerms (g_, d_, u_, rev s_);
@@ -181,7 +182,7 @@ end) : TABLEINDEX = struct
         | ((k, g_, d_, u_), { solutions = s_; lookup = i }) :: T -> begin
             printT T;
             print
-              (((Print.expToString (I.null_, A.raiseType (concat (g_, d_), u_))
+              (((Print.expToString (I.Null, A.raiseType (concat (g_, d_), u_))
                 ^ "\n Access Counter : ")
                ^ Int.toString !k)
               ^ " \n")
@@ -201,7 +202,7 @@ end) : TABLEINDEX = struct
       end
 
     let rec lengthSpine = function
-      | nil_ -> 0
+      | I.Nil -> 0
       | I.SClo (s_, s') -> 1 + lengthSpine s_
 
     let rec exceedsTermDepth i =
@@ -273,16 +274,16 @@ end) : TABLEINDEX = struct
       | ctr, (I.FgnExp (cs, ops) as f_) -> ctr
 
     and countSpine = function
-      | ctrDepth, nil_ -> ctrDepth
+      | ctrDepth, I.Nil -> ctrDepth
       | ctr, I.SClo (s_, s') -> countSpine (ctr, s_)
       | ctrDepth, I.App (u_, s_) ->
           let ctrDepth' = count (0, u_) in
           countSpine (max (ctrDepth', ctrDepth), s_)
 
     let rec reinstSub = function
-      | g_, null_, s -> s
+      | g_, I.Null, s -> s
       | g_, I.Decl (d_, I.Dec (_, a_)), s ->
-          let x_ = I.newEVar (I.null_, a_) in
+          let x_ = I.newEVar (I.Null, a_) in
           I.Dot (I.Exp x_, reinstSub (g_, d_, s))
 
     let rec variant (us_, us'_) = Conv.conv (us_, us'_)
@@ -309,7 +310,7 @@ end) : TABLEINDEX = struct
     let rec equalSub1 (I.Dot (ms, s), I.Dot (ms', s')) = equalSub (s, s')
 
     let rec equalCtx = function
-      | null_, null_ -> true
+      | I.Null, I.Null -> true
       | I.Decl (dk_, I.Dec (_, a_)), I.Decl (d1_, I.Dec (_, a1_)) ->
           Conv.conv ((a_, I.id), (a1_, I.id)) && equalCtx (dk_, d1_)
 
@@ -322,7 +323,7 @@ end) : TABLEINDEX = struct
             begin
               begin if !Global.chatter >= 5 then begin
                 print "\n \n Added ";
-                print (Print.expToString (I.null_, upi_) ^ "\n to Table \n")
+                print (Print.expToString (I.Null, upi_) ^ "\n to Table \n")
               end
               else ()
               end;
@@ -332,7 +333,7 @@ end) : TABLEINDEX = struct
                   if exceeds (A.raiseType (g_, u_)) then begin
                     begin if !Global.chatter >= 5 then
                       print
-                        (("\n term " ^ Print.expToString (I.null_, upi_))
+                        (("\n term " ^ Print.expToString (I.Null, upi_))
                         ^ " exceeds depth or length \n")
                     else ()
                     end;
@@ -354,7 +355,7 @@ end) : TABLEINDEX = struct
               begin
                 begin if !Global.chatter >= 5 then
                   print
-                    (("call " ^ Print.expToString (I.null_, upi_))
+                    (("call " ^ Print.expToString (I.Null, upi_))
                     ^ " found in table \n ")
                 else ()
                 end;
@@ -376,7 +377,7 @@ end) : TABLEINDEX = struct
                 print
                   (("Added "
                    ^ Print.expToString
-                       (I.null_, A.raiseType (concat (g_, d_), u_)))
+                       (I.Null, A.raiseType (concat (g_, d_), u_)))
                   ^ " to Table \n")
               else ()
               end;
@@ -387,7 +388,7 @@ end) : TABLEINDEX = struct
                     print
                       (("\n term "
                        ^ Print.expToString
-                           (I.null_, A.raiseType (concat (g_, d_), u_)))
+                           (I.Null, A.raiseType (concat (g_, d_), u_)))
                       ^ " exceeds depth or length \n")
                   else ()
                   end;
@@ -404,7 +405,7 @@ end) : TABLEINDEX = struct
                 print
                   (("call "
                    ^ Print.expToString
-                       (I.null_, A.raiseType (concat (g_, d_), u_)))
+                       (I.Null, A.raiseType (concat (g_, d_), u_)))
                   ^ "found in table \n ")
               else ()
               end;
@@ -432,11 +433,11 @@ end) : TABLEINDEX = struct
           print "\n AnswCheckInsert: ";
           begin
             print
-              (Print.expToString (I.null_, I.EClo (A.raiseType (g_, u_), s))
+              (Print.expToString (I.Null, I.EClo (A.raiseType (g_, u_), s))
               ^ "\n");
             begin
               print "\n Table Index : ";
-              print (Print.expToString (I.null_, upi_) ^ "\n")
+              print (Print.expToString (I.Null, upi_) ^ "\n")
             end
           end
         end
@@ -447,7 +448,7 @@ end) : TABLEINDEX = struct
         begin match (arg__1, arg__2, arg__3) with
         | (g_, d_, u_, s), [], T -> begin
             print
-              (Print.expToString (I.null_, I.EClo (A.raiseType (g_, u_), s))
+              (Print.expToString (I.Null, I.EClo (A.raiseType (g_, u_), s))
               ^ " call should always be already in the table !\n");
             Repeated
           end
@@ -472,12 +473,12 @@ end) : TABLEINDEX = struct
                     begin
                       print
                         (Print.expToString
-                           (I.null_, I.EClo (A.raiseType (g'_, u'_), s)));
+                           (I.Null, I.EClo (A.raiseType (g'_, u'_), s)));
                       begin
                         print "\n solution added  -- ";
                         print
                           (Print.expToString
-                             ( I.null_,
+                             ( I.Null,
                                A.raiseType
                                  ( Names.ctxName dk_,
                                    I.EClo (A.raiseType (g'_, u'_), sk) ) ))
@@ -524,7 +525,7 @@ end) : TABLEINDEX = struct
       let _ =
         begin if !Global.chatter >= 4 then begin
           print "\n AnswCheckInsert (subsumes): ";
-          print (Print.expToString (I.null_, I.EClo (upi_, s)) ^ "\n")
+          print (Print.expToString (I.Null, I.EClo (upi_, s)) ^ "\n")
         end
         else ()
         end
@@ -551,13 +552,13 @@ end) : TABLEINDEX = struct
                     begin
                       print
                         (Print.expToString
-                           (I.null_, A.raiseType (concat (g'_, d'_), u'_))
+                           (I.Null, A.raiseType (concat (g'_, d'_), u'_))
                         ^ "\n");
                       begin
                         print "\n answer added \n";
                         print
                           (Print.expToString
-                             ( I.null_,
+                             ( I.Null,
                                A.raiseType
                                  (dk_, I.EClo (A.raiseType (g_, u_), sk)) )
                           ^ "\n")
@@ -578,7 +579,7 @@ end) : TABLEINDEX = struct
                       print "\n1 unification successful !\n";
                       print
                         (Print.expToString
-                           ( I.null_,
+                           ( I.Null,
                              A.raiseType
                                (dk_, I.EClo (A.raiseType (g'_, u'_), s')) )
                         ^ "\n")
@@ -599,21 +600,21 @@ end) : TABLEINDEX = struct
                         begin
                           print
                             (Print.expToString
-                               (I.null_, I.EClo (A.raiseType (g1_, u1_), s1))
+                               (I.Null, I.EClo (A.raiseType (g1_, u1_), s1))
                             ^ " \n");
                           begin
                             print "Answer in table: ";
                             begin
                               print
                                 (Print.expToString
-                                   ( I.null_,
+                                   ( I.Null,
                                      A.raiseType
                                        (dk_, I.EClo (A.raiseType (g'_, u'_), s'))
                                    )
                                 ^ " : \n");
                               print
                                 (Print.expToString
-                                   ( I.null_,
+                                   ( I.Null,
                                      I.EClo
                                        ( A.raiseType
                                            ( dk_,
@@ -638,7 +639,7 @@ end) : TABLEINDEX = struct
                               let w =
                                 begin if !strengthen then
                                   Subordinate.weaken
-                                    ( I.null_,
+                                    ( I.Null,
                                       IntSyn.targetFam (I.EClo (u1_, s1)) )
                                 else I.id
                                 end
@@ -662,14 +663,14 @@ end) : TABLEINDEX = struct
                         begin
                           print
                             (Print.expToString
-                               (I.null_, I.EClo (A.raiseType (g_, u_), s))
+                               (I.Null, I.EClo (A.raiseType (g_, u_), s))
                             ^ "\n");
                           begin
                             print "\n \n solution (deref) was: \n";
                             begin
                               print
                                 (Print.expToString
-                                   ( I.null_,
+                                   ( I.Null,
                                      A.raiseType
                                        (dk_, I.EClo (A.raiseType (g_, u_), sk))
                                    )
@@ -679,7 +680,7 @@ end) : TABLEINDEX = struct
                                 begin
                                   print
                                     (Print.expToString
-                                       ( I.null_,
+                                       ( I.Null,
                                          A.raiseType
                                            ( dk'_,
                                              I.EClo (A.raiseType (g'_, u'_), s')
@@ -690,7 +691,7 @@ end) : TABLEINDEX = struct
                                       "\n solution added (dereferenced) --- ";
                                     print
                                       (Print.expToString
-                                         ( I.null_,
+                                         ( I.Null,
                                            A.raiseType
                                              ( dk'_,
                                                I.EClo

@@ -1,12 +1,16 @@
 open! Basis
+open Metasyn
+open Meta_abstract
+open Meta_print
+open Modetable
 
 (* Splitting *)
 (* Author: Carsten Schuermann *)
 module Splitting (Splitting__0 : sig
   module Global : GLOBAL
   module MetaSyn' : METASYN
-  module MetaAbstract : METAABSTRACT
-  module MetaPrint : METAPRINT
+  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
+  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
   module ModeTable : MODETABLE
 
   (*! sharing ModeSyn.IntSyn = MetaSyn'.IntSyn !*)
@@ -20,8 +24,9 @@ module Splitting (Splitting__0 : sig
 
   (*! sharing Print.IntSyn = MetaSyn'.IntSyn !*)
   module Unify : UNIFY
-end) : SPLITTING = struct
-  module MetaSyn = MetaSyn'
+end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
+  open Splitting__0
+  module MetaSyn = MetaAbstract.MetaSyn
 
   exception Error of string
 
@@ -110,8 +115,8 @@ end) : SPLITTING = struct
       | k, I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExp (k + 1, v_)
       | k, I.Root (c_, s_) -> occursInCon (k, c_) || occursInSpine (k, s_)
       | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
-      | k, I.FgnExp csfe ->
-          I.FgnExpStd.fold csfe
+      | k, I.FgnExp (csid_, fge_) ->
+          I.FgnExpStd.fold (csid_, fge_)
             (function
               | u_, b_ -> b_ || occursInExp (k, Whnf.normalize (u_, I.id)))
             false
@@ -134,28 +139,28 @@ end) : SPLITTING = struct
     let rec isIndexFail (d_, isIndex) k = isIndex (k + 1)
 
     let rec checkVar = function
-      | I.Decl (m_, top_), 1 -> true
-      | I.Decl (m_, bot_), 1 -> false
+      | I.Decl (m_, M.Top), 1 -> true
+      | I.Decl (m_, M.Bot), 1 -> false
       | I.Decl (m_, _), k -> checkVar (m_, k - 1)
 
     let rec checkExp = function
       | m_, I.Uni _ -> true
       | m_, I.Pi ((d_, p_), v_) ->
-          checkDec (m_, d_) && checkExp (I.Decl (m_, M.top_), v_)
+          checkDec (m_, d_) && checkExp (I.Decl (m_, M.Top), v_)
       | m_, I.Lam (d_, v_) ->
-          checkDec (m_, d_) && checkExp (I.Decl (m_, M.top_), v_)
+          checkDec (m_, d_) && checkExp (I.Decl (m_, M.Top), v_)
       | m_, I.Root (I.BVar k, s_) -> checkVar (m_, k) && checkSpine (m_, s_)
       | m_, I.Root (_, s_) -> checkSpine (m_, s_)
 
     and checkSpine = function
-      | m_, nil_ -> true
+      | m_, I.Nil -> true
       | m_, I.App (u_, s_) -> checkExp (m_, u_) && checkSpine (m_, s_)
 
     and checkDec (m_, I.Dec (_, v_)) = checkExp (m_, v_)
 
     let rec modeEq = function
-      | ModeSyn.Marg (plus_, _), top_ -> true
-      | ModeSyn.Marg (minus_, _), bot_ -> true
+      | ModeSyn.Marg (plus_, _), M.Top -> true
+      | ModeSyn.Marg (minus_, _), M.Bot -> true
       | _ -> false
 
     let rec inheritBelow = function
@@ -238,7 +243,7 @@ end) : SPLITTING = struct
           inheritBelow (b - 1, k', v'_, (b'_, d - 1, d'))
 
     and inheritSpine = function
-      | b_, k, nil_, k', nil_, bdd'_ -> bdd'_
+      | b_, k, I.Nil, k', I.Nil, bdd'_ -> bdd'_
       | b_, k, I.App (u_, s_), k', I.App (u'_, s'_), bdd'_ ->
           inheritSpine
             (b_, k, s_, k', s'_, inheritExp (b_, k, u_, k', u'_, bdd'_))
@@ -249,9 +254,9 @@ end) : SPLITTING = struct
     let rec inheritDTop = function
       | ( b_,
           k,
-          I.Pi ((I.Dec (_, v1_), no_), v2_),
+          I.Pi ((I.Dec (_, v1_), I.No), v2_),
           k',
-          I.Pi ((I.Dec (_, v1'_), no_), v2'_),
+          I.Pi ((I.Dec (_, v1'_), I.No), v2'_),
           bdd'_ ) ->
           inheritG
             ( b_,
@@ -267,20 +272,20 @@ end) : SPLITTING = struct
           (I.Root (I.Const cid', s'_) as v'_),
           bdd'_ ) ->
           let mS = valOf (ModeTable.modeLookup cid) in
-          inheritSpineMode (M.top_, mS, b_, k, s_, k', s'_, bdd'_)
+          inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd'_)
 
     and inheritDBot = function
       | ( b_,
           k,
-          I.Pi ((I.Dec (_, v1_), no_), v2_),
+          I.Pi ((I.Dec (_, v1_), I.No), v2_),
           k',
-          I.Pi ((I.Dec (_, v1'_), no_), v2'_),
+          I.Pi ((I.Dec (_, v1'_), I.No), v2'_),
           bdd'_ ) ->
           inheritDBot (b_, k + 1, v2_, k' + 1, v2'_, bdd'_)
       | b_, k, I.Root (I.Const cid, s_), k', I.Root (I.Const cid', s'_), bdd'_
         ->
           let mS = valOf (ModeTable.modeLookup cid) in
-          inheritSpineMode (M.bot_, mS, b_, k, s_, k', s'_, bdd'_)
+          inheritSpineMode (M.Bot, mS, b_, k, s_, k', s'_, bdd'_)
 
     and inheritG
         ( b_,
@@ -291,17 +296,17 @@ end) : SPLITTING = struct
           bdd'_ ) =
       let mS = valOf (ModeTable.modeLookup cid) in
       inheritSpineMode
-        ( M.bot_,
+        ( M.Bot,
           mS,
           b_,
           k,
           s_,
           k',
           s'_,
-          inheritSpineMode (M.top_, mS, b_, k, s_, k', s'_, bdd'_) )
+          inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd'_) )
 
     and inheritSpineMode = function
-      | mode, mnil_, b_, k, nil_, k', nil_, bdd'_ -> bdd'_
+      | mode, ModeSyn.Mnil, b_, k, I.Nil, k', I.Nil, bdd'_ -> bdd'_
       | ( mode,
           ModeSyn.Mapp (m, mS),
           b_,
@@ -358,9 +363,9 @@ end) : SPLITTING = struct
     let rec makeAddressCont makeAddress k = makeAddress (k + 1)
 
     let rec expand' = function
-      | M.Prefix (null_, null_, null_), isIndex, abstract, makeAddress ->
-          (M.Prefix (I.null_, I.null_, I.null_), I.id, [])
-      | ( M.Prefix (I.Decl (g_, d_), I.Decl (m_, (top_ as mode)), I.Decl (b_, b)),
+      | M.Prefix (I.Null, I.Null, I.Null), isIndex, abstract, makeAddress ->
+        (M.Prefix (I.Null, I.Null, I.Null), I.id, [])
+      | ( M.Prefix (I.Decl (g_, d_), I.Decl (m_, (M.Top as mode)), I.Decl (b_, b)),
           isIndex,
           abstract,
           makeAddress ) ->
@@ -382,7 +387,7 @@ end) : SPLITTING = struct
             end
           in
           (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'), ops')
-      | ( M.Prefix (I.Decl (g_, d_), I.Decl (m_, (bot_ as mode)), I.Decl (b_, b)),
+        | ( M.Prefix (I.Decl (g_, d_), I.Decl (m_, (M.Bot as mode)), I.Decl (b_, b)),
           isIndex,
           abstract,
           makeAddress ) ->
@@ -395,7 +400,7 @@ end) : SPLITTING = struct
           in
           ( M.Prefix
               ( I.Decl (g'_, I.decSub (d_, s')),
-                I.Decl (m'_, M.bot_),
+                I.Decl (m'_, M.Bot),
                 I.Decl (b'_, b) ),
             I.dot1 s',
             ops )

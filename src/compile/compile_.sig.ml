@@ -1,5 +1,5 @@
 open! Basis
-open Compsyn
+open CompSyn
 
 (* Compiler *)
 (* Author: Iliano Cervesato *)

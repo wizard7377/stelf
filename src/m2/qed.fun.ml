@@ -1,11 +1,13 @@
 open! Basis
+open Metasyn
 
 (* QED *)
 (* Author: Carsten Schuermann *)
 module Qed (Qed__0 : sig
   module Global : GLOBAL
   module MetaSyn' : METASYN
-end) : QED = struct
+end) : QED with module MetaSyn = Qed__0.MetaSyn' = struct
+  open Qed__0
   module MetaSyn = MetaSyn'
 
   exception Error of string

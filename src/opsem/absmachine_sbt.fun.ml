@@ -31,6 +31,7 @@ module AbsMachineSbt (AbsMachineSbt__0 : sig
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Names : NAMES
 end) : ABSMACHINESBT = struct
+  open AbsMachineSbt__0
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
   open! struct
@@ -53,11 +54,11 @@ end) : ABSMACHINESBT = struct
       | _ -> false
 
     let rec compose' = function
-      | null_, g_ -> g_
+      | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
     let rec shift = function
-      | null_, s -> s
+      | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
     let rec invShiftN (n, s) =
@@ -66,8 +67,8 @@ end) : ABSMACHINESBT = struct
       end
 
     let rec raiseType = function
-      | null_, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.maybe_), v_))
+      | I.Null, v_ -> v_
+      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
 
     let rec printSub = function
       | IntSyn.Shift n -> print (("Shift " ^ Int.toString n) ^ "\n")
@@ -101,7 +102,7 @@ end) : ABSMACHINESBT = struct
         end
 
     let rec ctxToEVarSub = function
-      | gglobal_, null_, s -> s
+      | gglobal_, I.Null, s -> s
       | gglobal_, I.Decl (g_, I.Dec (_, a_)), s ->
           let s' = ctxToEVarSub (gglobal_, g_, s) in
           let x_ = I.newEVar (gglobal_, I.EClo (a_, s')) in
@@ -124,7 +125,7 @@ end) : ABSMACHINESBT = struct
           let d'_ = Names.decLUName (g_, I.decSub (d_, s)) in
           solve'
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.parameter_)),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
               sc )
 
     and rSolve = function
@@ -211,7 +212,7 @@ end) : ABSMACHINESBT = struct
     and matchAtom
         (((I.Root (ha_, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
       let rec matchDProg = function
-        | null_, _ -> ( ! ) mSig (ps', dp, sc)
+        | I.Null, _ -> ( ! ) mSig (ps', dp, sc)
         | I.Decl (dPool', C.Dec (r, s, ha'_)), k -> begin
             if eqHead (ha_, ha'_) then begin
               Cs_manager.trail (function () ->
@@ -226,10 +227,10 @@ end) : ABSMACHINESBT = struct
           end
         | I.Decl (dPool', parameter_), k -> matchDProg (dPool', k + 1)
       in
-      let rec matchConstraint (Solve_, try_) =
+      let rec matchConstraint (solve_fn, try_) =
         let succeeded =
           Cs_manager.trail (function () ->
-              begin match Solve_ (g_, I.SClo (s_, s), try_) with
+              begin match solve_fn (g_, I.SClo (s_, s), try_) with
               | Some u_ -> begin
                   sc [ C.Csolver u_ ];
                   true
@@ -237,11 +238,11 @@ end) : ABSMACHINESBT = struct
               | None -> false
               end)
         in
-        begin if succeeded then matchConstraint (Solve_, try_ + 1) else ()
+        begin if succeeded then matchConstraint (solve_fn, try_ + 1) else ()
         end
       in
       begin match I.constStatus (cidFromHead ha_) with
-      | I.Constraint (cs, Solve_) -> matchConstraint (Solve_, 0)
+      | I.Constraint (cs, solve_fn) -> matchConstraint (solve_fn, 0)
       | _ -> matchDProg (dPool, 1)
       end
   end
@@ -344,15 +345,15 @@ end) : ABSMACHINESBT = struct
   (* trail to undo EVar instantiations *)
   let rec solve args =
     begin match !CompSyn.optimize with
-    | no_ -> begin
+    | CompSyn.No -> begin
         mSig := matchSig;
         solve' args
       end
-    | linearHeads_ -> begin
+    | CompSyn.LinearHeads -> begin
         mSig := matchSig;
         solve' args
       end
-    | indexing_ -> begin
+    | CompSyn.Indexing -> begin
         mSig := matchIndexSig;
         solve' args
       end

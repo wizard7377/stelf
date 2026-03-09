@@ -3,7 +3,7 @@ open! Basis
 (* Printer for Compiled Syntax *)
 (* Author: Iliano Cervesato *)
 module type CPRINT = sig
-  open Compsyn
+  open CompSyn
 
   (*! structure IntSyn : INTSYN !*)
   (*! structure CompSyn : COMPSYN !*)

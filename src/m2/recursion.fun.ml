@@ -1,12 +1,18 @@
 open! Lemma
 open! Filling
 open! Basis
+open Metasyn
+open Meta_global
+open Modetable
+open Meta_print
+open Meta_abstract
 
 (* Recursion *)
 (* Author: Carsten Schuermann *)
 (* See [Rohwedder,Pfenning ESOP'96] *)
 module Recursion (Recursion__0 : sig
   module Global : GLOBAL
+  module MetaGlobal : METAGLOBAL
   module MetaSyn' : METASYN
   module Whnf : WHNF
 
@@ -32,12 +38,13 @@ module Recursion (Recursion__0 : sig
   module ModeTable : MODETABLE
 
   (*! sharing ModeSyn.IntSyn = MetaSyn'.IntSyn !*)
-  module Lemma : LEMMA
-  module Filling : FILLING
-  module MetaPrint : METAPRINT
-  module MetaAbstract : METAABSTRACT
+  module Lemma : LEMMA with module MetaSyn = MetaSyn'
+  module Filling : FILLING with module MetaSyn = MetaSyn'
+  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
+  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
   module Formatter : FORMATTER
-end) : RECURSION = struct
+end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
+  open Recursion__0
   module MetaSyn = MetaSyn'
 
   exception Error of string
@@ -57,19 +64,19 @@ end) : RECURSION = struct
       let rec fmtOrder = function
         | Order.Arg (us_, vs_) ->
             [
-              F.String (Print.expToString (g_, I.EClo us_));
-              F.String ":";
-              F.String (Print.expToString (g_, I.EClo vs_));
+              F.string (Print.expToString (g_, I.EClo (fst us_, snd us_)));
+              F.string ":";
+              F.string (Print.expToString (g_, I.EClo (fst vs_, snd vs_)));
             ]
-        | Order.Lex l_ -> [ F.String "{"; F.HVbox (fmtOrders l_); F.String "}" ]
+        | Order.Lex l_ -> [ F.string "{"; F.hVbox (fmtOrders l_); F.string "}" ]
         | Order.Simul l_ ->
-            [ F.String "["; F.HVbox (fmtOrders l_); F.String "]" ]
+            [ F.string "["; F.hVbox (fmtOrders l_); F.string "]" ]
       and fmtOrders = function
         | [] -> []
         | o_ :: [] -> fmtOrder o_
-        | o_ :: l_ -> fmtOrder o_ @ (F.String " " :: fmtOrders l_)
+        | o_ :: l_ -> fmtOrder o_ @ (F.string " " :: fmtOrders l_)
       in
-      F.makestring_fmt (F.HVbox (fmtOrder o_))
+      F.makestring_fmt (F.hVbox (fmtOrder o_))
 
     let rec vector (c, (s_, s)) =
       let vid_ = (I.constType c, I.id) in
@@ -102,7 +109,7 @@ end) : RECURSION = struct
                   begin if
                     Unify.unifiable (g_, (v_, I.id), (v'_, I.id))
                     && Unify.unifiable
-                         (g_, (x_, I.id), (I.Root (I.BVar k', I.nil_), I.id))
+                      (g_, (x_, I.id), (I.Root (I.BVar k', I.Nil), I.id))
                   then sc ops'
                   else ops'
                   end)
@@ -263,7 +270,8 @@ end) : RECURSION = struct
             ( g_,
               o_,
               o'_,
-              function ops'' -> (ordltLex (g_, l_, l'_, sc, ops''), ops') )
+              (function ops'' -> ordltLex (g_, l_, l'_, sc, ops'')),
+              ops' )
 
     and ordltSimul = function
       | g_, [], [], sc, ops -> ops
@@ -274,14 +282,16 @@ end) : RECURSION = struct
                   ( g_,
                     o_,
                     o'_,
-                    function ops' -> (ordleSimul (g_, l_, l'_, sc, ops'), ops)
+                    (function ops' -> ordleSimul (g_, l_, l'_, sc, ops')),
+                    ops
                   ))
           in
           ordeq
             ( g_,
               o_,
               o'_,
-              function ops' -> (ordltSimul (g_, l_, l'_, sc, ops'), ops'') )
+              (function ops' -> ordltSimul (g_, l_, l'_, sc, ops')),
+              ops'' )
 
     and ordleSimul = function
       | g_, [], [], sc, ops -> sc ops
@@ -290,7 +300,8 @@ end) : RECURSION = struct
             ( g_,
               o_,
               o'_,
-              function ops' -> (ordleSimul (g_, l_, l'_, sc, ops'), ops) )
+              (function ops' -> ordleSimul (g_, l_, l'_, sc, ops')),
+              ops )
 
     and ordeq = function
       | g_, O.Arg (us_, vs_), O.Arg (us'_, vs'_), sc, ops -> begin
@@ -308,7 +319,8 @@ end) : RECURSION = struct
             ( g_,
               o_,
               o'_,
-              function ops' -> (ordeqs (g_, l_, l'_, sc, ops'), ops) )
+              (function ops' -> ordeqs (g_, l_, l'_, sc, ops')),
+              ops )
 
     and ordle (g_, o_, o'_, sc, ops) =
       let ops' =
@@ -317,18 +329,18 @@ end) : RECURSION = struct
       ordlt (g_, o_, o'_, sc, ops')
 
     let rec createEVars = function
-      | M.Prefix (null_, null_, null_) ->
-          (M.Prefix (I.null_, I.null_, I.null_), I.id)
-      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, top_), I.Decl (b_, b)) ->
+      | M.Prefix (I.Null, I.Null, I.Null) ->
+          (M.Prefix (I.Null, I.Null, I.Null), I.id)
+      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, M.Top), I.Decl (b_, b)) ->
           let M.Prefix (g'_, m'_, b'_), s' =
             createEVars (M.Prefix (g_, m_, b_))
           in
           ( M.Prefix
               ( I.Decl (g'_, I.decSub (d_, s')),
-                I.Decl (m'_, M.top_),
+                I.Decl (m'_, M.Top),
                 I.Decl (b'_, b) ),
             I.dot1 s' )
-      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, bot_), I.Decl (b_, _))
+      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, M.Bot), I.Decl (b_, _))
         ->
           let M.Prefix (g'_, m'_, b'_), s' =
             createEVars (M.Prefix (g_, m_, b_))
@@ -361,12 +373,12 @@ end) : RECURSION = struct
       ( g''_,
         vector (a1, (s1_, s1)),
         vector (a2, (s2_, s2)),
-        function
-        | ops' ->
-            ( MetaAbstract.abstract
+        (function
+          | ops' ->
+              MetaAbstract.abstract
                 (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
-              :: ops',
-              ops ) )
+              :: ops'),
+        ops )
 
     let rec expandLazy' = function
       | s_, empty_, ops -> ops

@@ -1,6 +1,6 @@
 open! Basis
 
-module TableParam = TableParam (struct
+module TableParam = MakeTableParam (struct
   module Global = Global
 end)
 (*! structure IntSyn' = IntSyn !*)

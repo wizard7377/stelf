@@ -1,17 +1,20 @@
 open! Search
 open! Basis
+open Meta_abstract
+open Metasyn 
 
 (* Filling *)
 (* Author: Carsten Schuermann *)
 module Filling (Filling__0 : sig
   module MetaSyn' : METASYN
-  module MetaAbstract : METAABSTRACT
-  module Search : OLDSEARCH
+  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
+  module Search : OLDSEARCH with module MetaSyn = MetaSyn'
   module Whnf : WHNF
 
   (*! sharing Whnf.IntSyn = MetaSyn'.IntSyn !*)
   module Print : PRINT
-end) : FILLING = struct
+end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
+  open Filling__0
   module MetaSyn = MetaSyn'
 
   exception Error of string
@@ -20,7 +23,7 @@ end) : FILLING = struct
   type nonrec operator = (MetaSyn.state_ * int) * (unit -> MetaSyn.state_ list)
 
   open! struct
-    module M = MetaSyn
+    module M = MetaSyn 
     module I = IntSyn
 
     exception Success of M.state_
@@ -43,10 +46,12 @@ end) : FILLING = struct
           makeAddress ) ->
           ( [],
             ( makeAddress 0,
-              delay (function params_ ->
+              assert false
+              (* TODO This was removed bc I'll come back to it later *)
+              (* delay ((function params_ ->
                   (try Search.searchEx params_
-                   with Success s_ -> ([ s_ ], (g_, ge_, vs_, abstractEx)))) )
-          )
+                   with Success s_ -> ([ s_ ], (g_, ge_, vs_, abstractEx))))) ) *)
+          ))
       | ( g_,
           ge_,
           (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s),
@@ -68,19 +73,19 @@ end) : FILLING = struct
             o_ )
 
     let rec createEVars = function
-      | M.Prefix (null_, null_, null_) ->
-          (M.Prefix (I.null_, I.null_, I.null_), I.id, [])
-      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, top_), I.Decl (b_, b)) ->
+      | M.Prefix (I.Null, I.Null, I.Null) ->
+          (M.Prefix (I.Null, I.Null, I.Null), I.id, [])
+      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, M.Top), I.Decl (b_, b)) ->
           let M.Prefix (g'_, m'_, b'_), s', ge'_ =
             createEVars (M.Prefix (g_, m_, b_))
           in
           ( M.Prefix
               ( I.Decl (g'_, I.decSub (d_, s')),
-                I.Decl (m'_, M.top_),
+                I.Decl (m'_, M.Top),
                 I.Decl (b'_, b) ),
             I.dot1 s',
             ge'_ )
-      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, bot_), I.Decl (b_, _))
+      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, M.Bot), I.Decl (b_, _))
         ->
           let M.Prefix (g'_, m'_, b'_), s', ge'_ =
             createEVars (M.Prefix (g_, m_, b_))

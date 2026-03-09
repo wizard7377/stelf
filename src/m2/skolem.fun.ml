@@ -1,4 +1,7 @@
 open! Basis
+open Metasyn
+open Modetable
+open Timers
 
 module Skolem (Skolem__0 : sig
   (* Skolem constant administration *)
@@ -27,6 +30,7 @@ module Skolem (Skolem__0 : sig
   module Timers : TIMERS
   module Names : NAMES
 end) : SKOLEM = struct
+  open Skolem__0
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 
@@ -36,8 +40,8 @@ end) : SKOLEM = struct
 
     let rec installSkolem (name, imp, (v_, mS), l_) =
       let rec spine = function
-        | 0 -> I.nil_
-        | n -> I.App (I.Root (I.BVar n, I.nil_), spine (n - 1))
+        | 0 -> I.Nil
+        | n -> I.App (I.Root (I.BVar n, I.Nil), spine (n - 1))
       in
       let rec installSkolem' = function
         | d, (I.Pi ((d_, dp_), v_), mS), s, k -> begin
@@ -51,7 +55,7 @@ end) : SKOLEM = struct
                     | v_ ->
                         k
                           (Abstract.piDepend
-                             ((Whnf.normalizeDec (d_, s), I.meta_), v_)) )
+                             ((Whnf.normalizeDec (d_, s), I.Meta), v_)) )
             | M.Mapp (M.Marg (minus_, _), mS') ->
                 let (I.Dec (_, v'_)) = d_ in
                 let v''_ = k (Whnf.normalize (v'_, s)) in
@@ -59,10 +63,10 @@ end) : SKOLEM = struct
                 let sd_ = I.SkoDec (name', None, imp, v''_, l_) in
                 let sk = I.sgnAdd sd_ in
                 let h_ = I.Skonst sk in
-                let _ = IndexSkolem.install I.ordinary_ h_ in
+                let _ = IndexSkolem.install I.Ordinary h_ in
                 let _ = Names.installConstName sk in
                 let _ =
-                  Timers.time Timers.compiling Compile.install I.ordinary_ sk
+                  Timers.time Timers.compiling Compile.install I.Ordinary sk
                 in
                 let s_ = spine d in
                 let _ =
@@ -83,7 +87,7 @@ end) : SKOLEM = struct
       | a :: aL ->
           let (I.ConDec (name, _, imp, _, v_, l_)) = I.sgnLookup a in
           let (Some mS) = ModeTable.modeLookup a in
-          let _ = installSkolem (name, imp, (v_, mS), I.type_) in
+          let _ = installSkolem (name, imp, (v_, mS), I.Type) in
           install aL
   end
 

@@ -1,25 +1,33 @@
 open! Strategy
+open! Filling
+open! Splitting
+open! Recursion
 open! Qed
 open! Init
 open! Basis
+open Metasyn
+open Meta_global
+open Meta_print
+open Timers
 
 (* Meta Prover *)
 (* Author: Carsten Schuermann *)
 module Prover (Prover__0 : sig
   module MetaGlobal : METAGLOBAL
   module MetaSyn' : METASYN
-  module Init : INIT
-  module Strategy : STRATEGY
-  module Filling : FILLING
-  module Splitting : SPLITTING
-  module Recursion : RECURSION
-  module Qed : QED
-  module MetaPrint : METAPRINT
+  module Init : INIT with module MetaSyn = MetaSyn'
+  module Strategy : STRATEGY with module MetaSyn = MetaSyn'
+  module Filling : FILLING with module MetaSyn = MetaSyn'
+  module Splitting : SPLITTING with module MetaSyn = MetaSyn'
+  module Recursion : RECURSION with module MetaSyn = MetaSyn'
+  module Qed : QED with module MetaSyn = MetaSyn'
+  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
   module Names : NAMES
 
   (*! sharing Names.IntSyn = MetaSyn'.IntSyn !*)
   module Timers : TIMERS
 end) : PROVER = struct
+  open Prover__0
   (*! structure IntSyn = MetaSyn'.IntSyn !*)
   exception Error of string
 
@@ -71,7 +79,7 @@ end) : PROVER = struct
 
     let rec auto () =
       let _ = print "M2.Prover.auto\n" in
-      let Open, solvedStates' =
+      let open', solvedStates' =
         try Strategy.run !openStates with
         | Splitting.Error s -> error ("Splitting Error: " ^ s)
         | Filling.Error s ->
@@ -80,7 +88,7 @@ end) : PROVER = struct
         | timeOut_ ->
             error "A proof could not be found -- Exceeding Time Limit\n"
       in
-      let _ = openStates := Open in
+      let _ = openStates := open' in
       let _ = solvedStates := !solvedStates @ solvedStates' in
       begin if List.length !openStates > 0 then
         raise (Error "A proof could not be found")
@@ -89,21 +97,21 @@ end) : PROVER = struct
 
     let rec makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
       let rec makeConDec' = function
-        | null_, v_, k -> I.ConDec (name, None, k, I.normal_, v_, I.type_)
+        | I.Null, v_, k -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
         | I.Decl (g_, d_), v_, k ->
-            makeConDec' (g_, I.Pi ((d_, I.maybe_), v_), k + 1)
+            makeConDec' (g_, I.Pi ((d_, I.Maybe), v_), k + 1)
       in
       makeConDec' (g_, v_, 0)
 
     let rec makeSignature = function
-      | [] -> M.sgnEmpty_
+      | [] -> M.SgnEmpty
       | s_ :: sl_ -> M.ConDec (makeConDec s_, makeSignature sl_)
 
     let rec install installConDec =
       let rec install' = function
-        | sgnEmpty_ -> ()
+        | M.SgnEmpty -> ()
         | M.ConDec (e, s_) -> begin
-            installConDec e;
+            let _ = installConDec e in
             install' s_
           end
       in

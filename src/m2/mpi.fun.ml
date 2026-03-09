@@ -6,26 +6,32 @@ open! Lemma
 open! Init
 open! Filling
 open! Basis
+open Metasyn
+open Meta_global
+open Meta_print
+open Timers
+open Ring
 
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
 module Mpi (Mpi__0 : sig
   module MetaGlobal : METAGLOBAL
   module MetaSyn' : METASYN
-  module Init : INIT
-  module Filling : FILLING
-  module Splitting : SPLITTING
-  module Recursion : RECURSION
-  module Lemma : LEMMA
-  module Strategy : STRATEGY
-  module Qed : QED
-  module MetaPrint : METAPRINT
+  module Init : INIT with module MetaSyn = MetaSyn'
+  module Filling : FILLING with module MetaSyn = MetaSyn'
+  module Splitting : SPLITTING with module MetaSyn = MetaSyn'
+  module Recursion : RECURSION with module MetaSyn = MetaSyn'
+  module Lemma : LEMMA with module MetaSyn = MetaSyn'
+  module Strategy : STRATEGY with module MetaSyn = MetaSyn'
+  module Qed : QED with module MetaSyn = MetaSyn'
+  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
   module Names : NAMES
 
   (*! sharing Names.IntSyn = MetaSyn'.IntSyn !*)
   module Timers : TIMERS
   module Ring : RING
-end) : MPI = struct
+end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
+  open Mpi__0
   module MetaSyn = MetaSyn'
 
   exception Error of string
@@ -39,21 +45,21 @@ end) : MPI = struct
       | Recursion of Recursion.operator
       | Splitting of Splitting.operator
 
-    let Open : MetaSyn.state_ Ring.ring ref = ref (Ring.init [])
-    let Solved : MetaSyn.state_ Ring.ring ref = ref (Ring.init [])
+    let openRing : MetaSyn.state_ Ring.ring ref = ref (Ring.init [])
+    let solvedRing : MetaSyn.state_ Ring.ring ref = ref (Ring.init [])
 
     let history_ :
         (MetaSyn.state_ Ring.ring * MetaSyn.state_ Ring.ring) list ref =
       ref []
 
     let menu_ : menuItem_ list option ref = ref None
-    let rec initOpen () = Open := Ring.init []
-    let rec initSolved () = Solved := Ring.init []
-    let rec empty () = Ring.empty !Open
-    let rec current () = Ring.current !Open
-    let rec delete () = Open := Ring.delete !Open
-    let rec insertOpen s_ = Open := Ring.insert (!Open, s_)
-    let rec insertSolved s_ = Solved := Ring.insert (!Solved, s_)
+    let rec initOpen () = openRing := Ring.init []
+    let rec initSolved () = solvedRing := Ring.init []
+    let rec empty () = Ring.empty !openRing
+    let rec current () = Ring.current !openRing
+    let rec delete () = openRing := Ring.delete !openRing
+    let rec insertOpen s_ = openRing := Ring.insert (!openRing, s_)
+    let rec insertSolved s_ = solvedRing := Ring.insert (!solvedRing, s_)
 
     let rec insert s_ =
       begin if Qed.subgoal s_ then begin
@@ -69,10 +75,11 @@ end) : MPI = struct
       else insertOpen s_
       end
 
-    let rec collectOpen () = Ring.foldr ( :: ) [] !Open
-    let rec collectSolved () = Ring.foldr ( :: ) [] !Solved
-    let rec nextOpen () = Open := Ring.next !Open
-    let rec pushHistory () = history_ := (!Open, !Solved) :: !history_
+    let rec collectOpen () = Ring.foldr (fun (x, acc) -> x :: acc) [] !openRing
+    let rec collectSolved () =
+      Ring.foldr (fun (x, acc) -> x :: acc) [] !solvedRing
+    let rec nextOpen () = openRing := Ring.next !openRing
+    let rec pushHistory () = history_ := (!openRing, !solvedRing) :: !history_
 
     let rec popHistory () =
       begin match !history_ with
@@ -80,8 +87,8 @@ end) : MPI = struct
       | (open'_, solved'_) :: history'_ -> begin
           history_ := history'_;
           begin
-            Open := open'_;
-            Solved := solved'_
+            openRing := open'_; 
+            solvedRing := solved'_
           end
         end
       end
@@ -159,21 +166,21 @@ end) : MPI = struct
 
     let rec makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
       let rec makeConDec' = function
-        | null_, v_, k -> I.ConDec (name, None, k, I.normal_, v_, I.type_)
+        | I.Null, v_, k -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
         | I.Decl (g_, d_), v_, k ->
-            makeConDec' (g_, I.Pi ((d_, I.maybe_), v_), k + 1)
+            makeConDec' (g_, I.Pi ((d_, I.Maybe), v_), k + 1)
       in
       makeConDec' (g_, v_, 0)
 
     let rec makeSignature = function
-      | [] -> M.sgnEmpty_
+      | [] -> M.SgnEmpty
       | s_ :: sl_ -> M.ConDec (makeConDec s_, makeSignature sl_)
 
     let rec extract () =
       begin if empty () then makeSignature (collectSolved ())
       else begin
         print "[Error: Proof not completed yet]\n";
-        M.sgnEmpty_
+          M.SgnEmpty
       end
       end
 
@@ -213,7 +220,7 @@ end) : MPI = struct
       let _ = reset () in
       let cL' = try Order.closure c with Order.Error _ -> cL in
       begin if equiv (cL, cL') then
-        map (function s_ -> insert s_) (Init.init cL)
+        List.app (function s_ -> insert s_) (Init.init cL)
       else
         raise
           (Error
@@ -391,7 +398,7 @@ end) : MPI = struct
   let next = next
   let lemma = lemma
   let reset = reset
-  let Solve_ = Solve_
+  let solve = solve
   let auto = auto
   let extract = extract
   let show = show

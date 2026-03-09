@@ -1,4 +1,5 @@
 open! Basis
+open Metasyn
 
 (* Lemma *)
 (* Author: Carsten Schuermann *)

@@ -1,10 +1,12 @@
 open! Basis
 
-module AbsMachine = AbsMachine (struct
+module TabledSyn = Tabled.TabledSyn
+
+module AbsMachine = Absmachine.AbsMachine (struct
   (*! structure IntSyn' = IntSyn !*)
   (*! structure CompSyn' = CompSyn !*)
   module Unify = UnifyTrail
-  module Assign = Assign
+  module Assign = Assign__
   module Index = Index
   module CPrint = CPrint
   module Print = Print
@@ -12,7 +14,7 @@ module AbsMachine = AbsMachine (struct
 end)
 
 (*! structure Cs_manager = Cs_manager !*)
-module AbstractTabled = AbstractTabled (struct
+module AbstractTabled = Abstract_tabled.AbstractTabled (struct
   (*! structure IntSyn' = IntSyn !*)
   module Print = Print
   module Whnf = Whnf
@@ -22,10 +24,9 @@ module AbstractTabled = AbstractTabled (struct
 
   (*! structure TableParam = TableParam !*)
   module Conv = Conv
-  module Print = Print
 end)
 
-module MemoTable = MemoTable (struct
+module MemoTable = Memo_table.MemoTable (struct
   (*! structure IntSyn' = IntSyn !*)
   (*! structure CompSyn' = CompSyn !*)
   module Conv = Conv
@@ -38,13 +39,13 @@ module MemoTable = MemoTable (struct
 end)
 
 (*! structure RBSet = RBSet!*)
-module MemoTableInst = MemoTableInst (struct
+module MemoTableInst = Subtree_inst.MemoTableInst (struct
   (*! structure IntSyn' = IntSyn !*)
   (*! structure CompSyn' = CompSyn !*)
   module Conv = Conv
   module Whnf = Whnf
   module Match = Match
-  module Assign = Assign
+  module Assign = Assign__
   module Print = Print
 
   (*! structure TableParam = TableParam !*)
@@ -53,19 +54,19 @@ module MemoTableInst = MemoTableInst (struct
 end)
 
 (*! structure RBSet = RBSet!*)
-module SwMemoTable = SwMemoTable (struct
+module SwMemoTable = Sw_subtree.SwMemoTable (struct
   (*! structure TableParam = TableParam !*)
   module MemoTable = MemoTable
   module MemoTableInst = MemoTableInst
 end)
 
-module Tabled = Tabled (struct
+module Tabled_ = Tabled_machine.Tabled (struct
   (*! structure IntSyn' = IntSyn !*)
   (*! structure CompSyn' = CompSyn !*)
   module Unify = UnifyTrail
   module Match = Match
   module TabledSyn = TabledSyn
-  module Assign = Assign
+  module Assign = Assign__
   module Index = Index
   module Queue = Queue
 
@@ -80,21 +81,21 @@ end)
 (*	  structure Names = Names*)
 (*! structure Cs_manager = Cs_manager !*)
 (*	  structure Subordinate = Subordinate*)
-module PtRecon = PtRecon (struct
+module PtRecon = Ptrecon.PtRecon (struct
   (*! structure IntSyn' = IntSyn !*)
   (*! structure CompSyn' = CompSyn !*)
   module Unify = UnifyTrail
 
   (*! structure TableParam = TableParam !*)
   module MemoTable = SwMemoTable
-  module Assign = Assign
+  module Assign = Assign__
   module Index = Index
   module CPrint = CPrint
   module Names = Names
 end)
 
 (*! structure Cs_manager = Cs_manager !*)
-module Trace = Trace (struct
+module Trace = Trace.Trace (struct
   (*! structure IntSyn' = IntSyn !*)
   module Names = Names
   module Whnf = Whnf
@@ -102,12 +103,12 @@ module Trace = Trace (struct
   module Print = Print
 end)
 
-module AbsMachineSbt = AbsMachineSbt (struct
+module AbsMachineSbt = Absmachine_sbt.AbsMachineSbt (struct
   module IntSyn' = IntSyn
   module CompSyn' = CompSyn
   module SubTree = SubTree
   module Unify = UnifyTrail
-  module Assign = Assign
+  module Assign = Assign__
   module Index = Index
   module CPrint = CPrint
   module Print = Print
@@ -115,19 +116,19 @@ module AbsMachineSbt = AbsMachineSbt (struct
   module Cs_manager = Cs_manager
 end)
 
-module TMachine = TMachine (struct
+module TMachine = Tmachine.TMachine (struct
   (*! structure IntSyn' = IntSyn !*)
   (*! structure CompSyn' = CompSyn !*)
   module Unify = UnifyTrail
   module Index = Index
-  module Assign = Assign
+  module Assign = Assign__
   module CPrint = CPrint
   module Names = Names
   module Trace = Trace
 end)
 
 (*! structure Cs_manager = Cs_manager !*)
-module SwMachine = SwMachine (struct
+module SwMachine = Swmachine.SwMachine (struct
   module Trace = Trace
   module AbsMachine = AbsMachine
   module TMachine = TMachine

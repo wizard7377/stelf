@@ -2,7 +2,7 @@ open! Basis
 
 (* Table parameters *)
 (* Author: Brigitte Pientka *)
-module TableParam (TableParam__0 : sig
+module MakeTableParam (TableParam__0 : sig
   module Global : GLOBAL
 end) : TABLEPARAM = struct
   (*! structure IntSyn = IntSyn' !*)

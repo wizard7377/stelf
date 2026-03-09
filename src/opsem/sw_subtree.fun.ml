@@ -5,6 +5,7 @@ module SwMemoTable (SwMemoTable__0 : sig
   module MemoTable : MEMOTABLE
   module MemoTableInst : MEMOTABLE
 end) : MEMOTABLE = struct
+  open SwMemoTable__0
   (*! structure IntSyn = MemoTable.IntSyn !*)
   (*! structure CompSyn = MemoTable.CompSyn !*)
   (*! structure TableParam = MemoTable.TableParam !*)

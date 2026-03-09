@@ -1,22 +1,28 @@
 open! Splitting
 open! Recursion
+open! Lemma
 open! Qed
 open! Filling
 open! Basis
-
+open Metasyn
+open Meta_global
+open Meta_print
+open Timers
+open Time_limit
 (* Strategy *)
 (* Author: Carsten Schuermann *)
 module StrategyFRS (StrategyFRS__0 : sig
   module MetaGlobal : METAGLOBAL
   module MetaSyn' : METASYN
-  module Filling : FILLING
-  module Splitting : SPLITTING
-  module Recursion : RECURSION
-  module Lemma : LEMMA
-  module Qed : QED
-  module MetaPrint : METAPRINT
+  module Filling : FILLING with module MetaSyn = MetaSyn'
+  module Splitting : SPLITTING with module MetaSyn = MetaSyn'
+  module Recursion : RECURSION with module MetaSyn = MetaSyn'
+  module Lemma : LEMMA with module MetaSyn = MetaSyn'
+  module Qed : QED with module MetaSyn = MetaSyn'
+  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
   module Timers : TIMERS
-end) : STRATEGY = struct
+end) : STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
+  open StrategyFRS__0
   module MetaSyn = MetaSyn'
 
   open! struct
@@ -129,7 +135,7 @@ end) : STRATEGY = struct
           with timeOut_ ->
             begin
               print "\n----------- TIME OUT ---------------\n";
-              raise Filling.timeOut_
+              raise Filling.TimeOut
             end)
 
     let rec run givenStates =
@@ -178,14 +184,15 @@ end
 module StrategyRFS (StrategyRFS__1 : sig
   module MetaGlobal : METAGLOBAL
   module MetaSyn' : METASYN
-  module Filling : FILLING
-  module Splitting : SPLITTING
-  module Recursion : RECURSION
-  module Lemma : LEMMA
-  module Qed : QED
-  module MetaPrint : METAPRINT
+  module Filling : FILLING with module MetaSyn = MetaSyn'
+  module Splitting : SPLITTING with module MetaSyn = MetaSyn'
+  module Recursion : RECURSION with module MetaSyn = MetaSyn'
+  module Lemma : LEMMA with module MetaSyn = MetaSyn'
+  module Qed : QED with module MetaSyn = MetaSyn'
+  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
   module Timers : TIMERS
-end) : STRATEGY = struct
+end) : STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
+  open StrategyRFS__1
   module MetaSyn = MetaSyn'
 
   open! struct
@@ -343,9 +350,10 @@ end
 module Strategy (Strategy__2 : sig
   module MetaGlobal : METAGLOBAL
   module MetaSyn' : METASYN
-  module StrategyFRS : STRATEGY
-  module StrategyRFS : STRATEGY
-end) : STRATEGY = struct
+  module StrategyFRS : STRATEGY with module MetaSyn = MetaSyn'
+  module StrategyRFS : STRATEGY with module MetaSyn = MetaSyn'
+end) : STRATEGY with module MetaSyn = Strategy__2.MetaSyn' = struct
+  open Strategy__2
   module MetaSyn = MetaSyn'
 
   let rec run sl_ =

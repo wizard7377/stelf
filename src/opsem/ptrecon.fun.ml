@@ -1,5 +1,6 @@
 open! Index;;
 open! Basis;;
+open Memo_table;;
 (* Abstract Machine execution guided by proof skeleton *);;
 (* Author: Brigitte Pientka *);;
 (* Modified: Jeff Polakow, Frank Pfenning, Larry Greenfield, Roberto Virga, Brigitte Pientka *);;
@@ -25,6 +26,8 @@ module PtRecon(PtRecon__0: sig
                            end) : PTRECON
   =
   struct
+    open PtRecon__0;;
+    open! Table_param;;
     (*! structure IntSyn = IntSyn' !*);;
     (*! structure CompSyn = CompSyn' !*);;
     (*! structure TableParam = TableParam !*);;
@@ -45,12 +48,12 @@ module PtRecon(PtRecon__0: sig
                | _ -> false;;
     let rec compose' =
       function 
-               | (null_, g_) -> g_
+               | (I.Null, g_) -> g_
                | (IntSyn.Decl (g_, d_), g'_)
                    -> (IntSyn.Decl (compose' (g_, g'_), d_));;
     let rec shift =
       function 
-               | (null_, s) -> s
+               | (I.Null, s) -> s
                | (IntSyn.Decl (g_, d_), s) -> I.dot1 (shift (g_, s));;
     (* We write
        G |- M : g
@@ -128,21 +131,21 @@ module PtRecon(PtRecon__0: sig
                            (o_, (g, I.dot1 s),
                             (C.DProg
                              ((I.Decl (g_, d'_)),
-                              (I.Decl (dPool, C.parameter_)))),
+                              (I.Decl (dPool, C.Parameter)))),
                             function 
                                      | (o_, m_) -> sc (o_, (I.Lam (d'_, m_))))
                         (* val D' = I.decSub (D, s) *)
     and rSolve =
       function 
                | (o_, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc) -> begin
-                   if Unify.unifiable (g_, (q_, s), ps') then sc (o_, I.nil_)
+                   if Unify.unifiable (g_, (q_, s), ps') then sc (o_, I.Nil)
                    else
                    let _ =
                      begin
                        print "Unification Failed -- SHOULD NEVER HAPPEN!\n";
                        begin
                          print
-                         ((Print.expToString (g_, (I.EClo ps'))) ^ " unify ");
+                         ((Print.expToString (g_, (I.EClo (fst ps', snd ps')))) ^ " unify ");
                          print
                          ((Print.expToString (g_, (I.EClo (q_, s)))) ^ "\n")
                          end
@@ -158,7 +161,7 @@ module PtRecon(PtRecon__0: sig
                       with 
                            | Some cnstr -> begin
                                if aSolve ((eqns, s), dp, cnstr) then
-                               sc (o_, I.nil_) else
+                               sc (o_, I.Nil) else
                                print
                                "aSolve cnstr not solvable -- SHOULD NEVER HAPPEN\n"
                                end
@@ -234,7 +237,7 @@ module PtRecon(PtRecon__0: sig
                      else matchSig (sgn', k) end(* should not happen *)
         in let rec matchDProg =
              function 
-                      | (null_, i, k)
+                      | (I.Null, i, k)
                           -> raise
                              ((Error
                                "\n selected dynamic clause number does not exist in current dynamic clause pool!\n"))

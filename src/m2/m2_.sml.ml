@@ -1,13 +1,26 @@
 open! Basis
 
-module MetaSyn = MetaSyn (struct
+open Meta_print
+open Init
+open Search
+open Lemma
+open Splitting
+open Filling
+open Recursion
+open Qed
+open Strategy
+open Prover
+open Mpi
+open Skolem
+
+module MetaSyn = Metasyn.Make_MetaSyn (struct
   (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf
 end)
 
-module MetaAbstract = MetaAbstract (struct
+module MetaAbstract = Meta_abstract.MetaAbstract (struct
   module Global = Global
-  module MetaSyn' = MetaSyn
-  module MetaGlobal = MetaGlobal
+  module MetaSyn = MetaSyn
+  module MetaGlobal = Meta_global.MetaGlobal
   module Abstract = Abstract
   module ModeTable = ModeTable
   module Whnf = Whnf
@@ -34,7 +47,7 @@ module Init = Init (struct
 end)
 
 module OLDSearch = OLDSearch (struct
-  module MetaGlobal = MetaGlobal
+  module MetaGlobal = Meta_global.MetaGlobal
   module Conv = Conv
   module MetaSyn' = MetaSyn
 
@@ -42,7 +55,7 @@ module OLDSearch = OLDSearch (struct
   module Compile = Compile
   module Whnf = Whnf
   module Unify = UnifyTrail
-  module Index = IndexSkolem
+  module Index = Index
 
   (* structure Assign = Assign *)
   module CPrint = CPrint
@@ -75,11 +88,12 @@ module Filling = Filling (struct
   module MetaAbstract = MetaAbstract
   module Print = Print
   module Search = OLDSearch
-  module Whnf = Whnf
-end)
+  module Whnf = Whnf 
+end) 
 
 module Recursion = Recursion (struct
   module Global = Global
+  module MetaGlobal = Meta_global.MetaGlobal
   module MetaSyn' = MetaSyn
   module MetaPrint = MetaPrint
   module Whnf = Whnf
@@ -103,7 +117,7 @@ module Qed = Qed (struct
 end)
 
 module StrategyFRS = StrategyFRS (struct
-  module MetaGlobal = MetaGlobal
+  module MetaGlobal = Meta_global.MetaGlobal
   module MetaSyn' = MetaSyn
   module MetaAbstract = MetaAbstract
   module Lemma = Lemma
@@ -112,11 +126,11 @@ module StrategyFRS = StrategyFRS (struct
   module Splitting = Splitting
   module Qed = Qed
   module MetaPrint = MetaPrint
-  module Timers = Timers
+  module Timers = Timers.Timers
 end)
 
 module StrategyRFS = StrategyRFS (struct
-  module MetaGlobal = MetaGlobal
+  module MetaGlobal = Meta_global.MetaGlobal
   module MetaSyn' = MetaSyn
   module MetaAbstract = MetaAbstract
   module Lemma = Lemma
@@ -125,18 +139,18 @@ module StrategyRFS = StrategyRFS (struct
   module Splitting = Splitting
   module Qed = Qed
   module MetaPrint = MetaPrint
-  module Timers = Timers
+  module Timers = Timers.Timers
 end)
 
 module Strategy = Strategy (struct
-  module MetaGlobal = MetaGlobal
+  module MetaGlobal = Meta_global.MetaGlobal
   module MetaSyn' = MetaSyn
   module StrategyFRS = StrategyFRS
   module StrategyRFS = StrategyRFS
 end)
 
 module Prover = Prover (struct
-  module MetaGlobal = MetaGlobal
+  module MetaGlobal = Meta_global.MetaGlobal
   module MetaSyn' = MetaSyn
   module MetaAbstract = MetaAbstract
   module MetaPrint = MetaPrint
@@ -147,11 +161,11 @@ module Prover = Prover (struct
   module Strategy = Strategy
   module Qed = Qed
   module Names = Names
-  module Timers = Timers
+  module Timers = Timers.Timers
 end)
 
 module Mpi = Mpi (struct
-  module MetaGlobal = MetaGlobal
+  module MetaGlobal = Meta_global.MetaGlobal
   module MetaSyn' = MetaSyn
   module MetaAbstract = MetaAbstract
   module Init = Init
@@ -163,8 +177,13 @@ module Mpi = Mpi (struct
   module Qed = Qed
   module MetaPrint = MetaPrint
   module Names = Names
-  module Timers = Timers
-  module Ring = Ring
+  module Timers = Timers.Timers
+  module Ring = Ring.Ring
+end)
+
+module IndexSkolem = Index_skolem.MakeIndexSkolem (struct
+  module Global = Global
+  module Queue = Queue
 end)
 
 module Skolem = Skolem (struct
@@ -176,7 +195,7 @@ module Skolem = Skolem (struct
   module IndexSkolem = IndexSkolem
   module ModeTable = ModeTable
   module Print = Print
-  module Timers = Timers
+  module Timers = Timers.Timers
   module Compile = Compile
   module Names = Names
 end)

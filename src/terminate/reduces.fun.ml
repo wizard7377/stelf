@@ -44,8 +44,8 @@ end) : REDUCES = struct
     module P = Paths
     module N = Names
     module F = Print.Formatter
-    module R = Order
-    module C : Checking.CHECKING = Reduces__0.Checking
+    module C = Reduces__0.Checking
+    module R = C.Order
 
     exception Error' of P.occ * string
 
@@ -114,8 +114,8 @@ end) : REDUCES = struct
 
     let rec select (c, (s_, s)) =
       let so_ = R.selLookup c in
-      let vid_ = (I.constType c, I.id) in
-      let rec select'' (n, (ss'_, vs''_)) =
+      let vid_ : I.eclo = (I.constType c, I.id) in
+      let rec select'' (n, (ss'_, vs''_)) : I.eclo * I.eclo =
         select''W (n, (ss'_, Whnf.whnf vs''_))
       and select''W = function
         | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''_), _), _), s'')) ->
@@ -145,8 +145,8 @@ end) : REDUCES = struct
                ^ N.qidToString (N.constQid c) ))
 
     let rec selectROrder (c, (s_, s)) =
-      let vid_ = (I.constType c, I.id) in
-      let rec select'' (n, (ss'_, vs''_)) =
+      let vid_ : I.eclo = (I.constType c, I.id) in
+      let rec select'' (n, (ss'_, vs''_)) : I.eclo * I.eclo =
         select''W (n, (ss'_, Whnf.whnf vs''_))
       and select''W = function
         | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''_), _), _), s'')) ->
@@ -255,9 +255,9 @@ end) : REDUCES = struct
                 if f a then a's else lookup (a's', f)
               end
           in
-          let p_ = selectOcc (a, (s_, s), occ) in
-          let p'_ = select (a', (s'_, s')) in
-          let a's = Order.mutLookup a in
+          let p_ : (I.eclo * I.eclo) R.order_ = selectOcc (a, (s_, s), occ) in
+          let p'_ : (I.eclo * I.eclo) R.order_ = select (a', (s'_, s')) in
+          let a's = R.mutLookup a in
           begin match lookup (a's, function x' -> x' = a') with
           | empty_ -> ()
           | R.Le _ -> begin
@@ -333,11 +333,11 @@ end) : REDUCES = struct
             end
           in
           checkSubgoals (g0_, q0_, rl'_, vs_, n + 1, (g_, q_))
-      | g0_, q0_, rl_, vs_, n, (I.Decl (g_, d_), I.Decl (q_, exist_)) ->
+      | g0_, q0_, rl_, vs_, n, (I.Decl (g_, d_), I.Decl (q_, C.Exist)) ->
           checkSubgoals (g0_, q0_, rl_, vs_, n + 1, (g_, q_))
-      | g0_, q0_, rl_, vs_, n, (I.Decl (g_, d_), I.Decl (q_, all_)) ->
+      | g0_, q0_, rl_, vs_, n, (I.Decl (g_, d_), I.Decl (q_, C.All)) ->
           checkSubgoals (g0_, q0_, rl_, vs_, n + 1, (g_, q_))
-      | g0_, q0_, rl_, vs_, n, (null_, null_) -> ()
+      | g0_, q0_, rl_, vs_, n, (_, _) -> ()
 
     and checkClause (gqr_, g_, q_, vs_, occ) =
       checkClauseW (gqr_, g_, q_, Whnf.whnf vs_, occ)
@@ -347,7 +347,7 @@ end) : REDUCES = struct
           checkClause
             ( gqr_,
               I.Decl (g_, N.decEName (g_, I.decSub (d_, s))),
-              I.Decl (q_, C.exist_),
+              I.Decl (q_, C.Exist),
               (v_, I.dot1 s),
               P.body occ )
       | gqr_, g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s), occ ->
@@ -411,7 +411,7 @@ end) : REDUCES = struct
       | g_, q_, rl_, (I.Pi ((d'_, maybe_), v'_), s'), (v_, s), occ ->
           checkRImp
             ( I.Decl (g_, N.decEName (g_, I.decSub (d'_, s'))),
-              I.Decl (q_, C.exist_),
+              I.Decl (q_, C.Exist),
               C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
               (v'_, I.dot1 s'),
               (v_, I.comp (s, I.shift)),
@@ -447,13 +447,13 @@ end) : REDUCES = struct
       | g_, q_, rl_, (I.Pi ((d_, maybe_), v_), s), occ ->
           checkRClause
             ( I.Decl (g_, N.decEName (g_, I.decSub (d_, s))),
-              I.Decl (q_, C.exist_),
+              I.Decl (q_, C.Exist),
               C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
               (v_, I.dot1 s),
               P.body occ )
       | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s), occ ->
           let g'_ = I.Decl (g_, I.decSub (d_, s)) in
-          let q'_ = I.Decl (q_, C.exist_) in
+          let q'_ = I.Decl (q_, C.Exist) in
           let rl'_ = C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)) in
           let rl''_ =
             begin match
@@ -597,7 +597,7 @@ end) : REDUCES = struct
               end;
               begin try checkClause' ((I.constType b, I.id), P.top) with
               | Error' (occ, msg) -> error (b, occ, msg)
-              | Order.Error msg ->
+              | R.Error msg ->
                   raise (Error msg);
                   checkFam' bs
               end
@@ -617,7 +617,7 @@ end) : REDUCES = struct
               end;
               begin try checkClause' ((I.constType d, I.id), P.top) with
               | Error' (occ, msg) -> error (d, occ, msg)
-              | Order.Error msg ->
+              | R.Error msg ->
                   raise (Error msg);
                   checkFam' bs
               end

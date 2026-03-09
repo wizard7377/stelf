@@ -27,6 +27,7 @@ module AbsMachine (AbsMachine__0 : sig
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Names : NAMES
 end) : ABSMACHINE = struct
+  open AbsMachine__0
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
   open! struct
@@ -41,41 +42,41 @@ end) : ABSMACHINE = struct
       | _ -> false
 
     let rec compose = function
-      | g_, null_ -> g_
+      | g_, I.Null -> g_
       | g_, IntSyn.Decl (g'_, d_) -> IntSyn.Decl (compose (g_, g'_), d_)
 
     let rec shiftSub = function
-      | null_, s -> s
+      | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shiftSub (g_, s))
 
     let rec raiseType = function
-      | null_, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.maybe_), v_))
+      | I.Null, v_ -> v_
+      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
 
     let rec solve = function
       | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
           matchAtom ((p, s), dp, sc)
       | (C.Impl (r, a_, ha_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
-          Solve_
+          solve
             ( (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
               function m_ -> sc (I.Lam (d'_, m_)) )
       | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = Names.decLUName (g_, I.decSub (d_, s)) in
-          Solve_
+          solve
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.parameter_)),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
               function m_ -> sc (I.Lam (d'_, m_)) )
 
     and rSolve = function
       | ps', (C.Eq q_, s), C.DProg (g_, dPool), sc -> begin
-          if Unify.unifiable (g_, (q_, s), ps') then sc I.nil_ else ()
+          if Unify.unifiable (g_, (q_, s), ps') then sc I.Nil else ()
         end
       | ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc -> begin
           match Assign.assignable (g_, ps', (q_, s)) with
           | Some cnstr ->
-              aSolve ((eqns, s), dp, cnstr, function () -> sc I.nil_)
+              aSolve ((eqns, s), dp, cnstr, function () -> sc I.Nil)
           | None -> ()
         end
       | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
@@ -85,7 +86,7 @@ end) : ABSMACHINE = struct
               (r, I.Dot (I.Exp x_, s)),
               dp,
               function
-              | s_ -> Solve_ ((g, s), dp, function m_ -> sc (I.App (m_, s_))) )
+              | s_ -> solve ((g, s), dp, function m_ -> sc (I.App (m_, s_))) )
       | ps', (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp), sc
         ->
           let x_ = I.newEVar (g_, I.EClo (a_, s)) in
@@ -147,7 +148,7 @@ end) : ABSMACHINE = struct
             with SucceedOnce s_ -> sc (I.Root (hc_, s_)))
       in
       let rec matchDProg = function
-        | null_, _ -> begin
+        | I.Null, _ -> begin
             if deterministic then matchSigDet (Index.lookup (cidFromHead ha_))
             else matchSig (Index.lookup (cidFromHead ha_))
           end
@@ -292,7 +293,7 @@ end) : ABSMACHINE = struct
   (* trail to undo EVar instantiations *)
   (* #succeeds >= 1 -- allows backtracking *)
   (* trail to undo EVar instantiations *)
-  let Solve_ = Solve_
+  let solve = solve
 end
 (*! sharing Names.IntSyn = IntSyn' !*)
 (*! structure Cs_manager : CS_MANAGER !*)

@@ -528,7 +528,7 @@ module MakeCompile(Compile__0: sig
                                     t)),
                                   (n, i + 1)))
         in let rec compileCtx' =
-            let open Compsyn in 
+            let open CompSyn in 
              function 
                       | I.Null -> I.Null
                       | I.Decl (g_, I.Dec (_, a_))

@@ -1,12 +1,15 @@
 open! Basis
+open Metasyn
+open Meta_abstract
 
 (* Lemma *)
 (* Author: Carsten Schuermann *)
 module Lemma (Lemma__0 : sig
   module MetaSyn' : METASYN
-  module MetaAbstract : METAABSTRACT
-end) : LEMMA = struct
-  module MetaSyn = MetaSyn'
+  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
+end) : LEMMA with module MetaSyn = Lemma__0.MetaSyn' = struct
+  open Lemma__0
+  module MetaSyn = MetaAbstract.MetaSyn
 
   exception Error of string
 
@@ -16,18 +19,18 @@ end) : LEMMA = struct
     module I = IntSyn
 
     let rec createEVars = function
-      | M.Prefix (null_, null_, null_) ->
-          (M.Prefix (I.null_, I.null_, I.null_), I.id)
-      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, top_), I.Decl (b_, b)) ->
+      | M.Prefix (I.Null, I.Null, I.Null) ->
+          (M.Prefix (I.Null, I.Null, I.Null), I.id)
+      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, M.Top), I.Decl (b_, b)) ->
           let M.Prefix (g'_, m'_, b'_), s' =
             createEVars (M.Prefix (g_, m_, b_))
           in
           ( M.Prefix
               ( I.Decl (g'_, I.decSub (d_, s')),
-                I.Decl (m'_, M.top_),
+                I.Decl (m'_, M.Top),
                 I.Decl (b'_, b) ),
             I.dot1 s' )
-      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, bot_), I.Decl (b_, _))
+      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, M.Bot), I.Decl (b_, _))
         ->
           let M.Prefix (g'_, m'_, b'_), s' =
             createEVars (M.Prefix (g_, m_, b_))
@@ -42,7 +45,7 @@ end) : LEMMA = struct
         (M.State
            ( name,
              gm'_,
-             I.Pi ((I.Dec (None, u'_), I.no_), I.EClo (v_, I.comp (s', I.shift)))
+             I.Pi ((I.Dec (None, u'_), I.No), I.EClo (v_, I.comp (s', I.shift)))
            ))
   end
 

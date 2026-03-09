@@ -1,10 +1,13 @@
 open! Basis
+open Metasyn
+open Meta_global
+open Modetable
 
 (* Meta Abstraction *)
 (* Author: Carsten Schuermann *)
 module MetaAbstract (MetaAbstract__0 : sig
   module Global : GLOBAL
-  module MetaSyn' : METASYN
+  module MetaSyn : METASYN
   module MetaGlobal : METAGLOBAL
   module Abstract : ABSTRACT
 
@@ -31,15 +34,15 @@ module MetaAbstract (MetaAbstract__0 : sig
 
   (*! sharing TypeCheck.IntSyn = MetaSyn'.IntSyn !*)
   module Subordinate : SUBORDINATE
-end) : METAABSTRACT = struct
-  module MetaSyn = MetaSyn'
+end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
+  open MetaAbstract__0
+  module MetaSyn = MetaAbstract__0.MetaSyn
 
   exception Error of string
 
   open! struct
     module I = IntSyn
     module S = Stream
-    module M = MetaSyn
     module C = Constraints
 
     type var_ = Ev of I.exp_ option ref * I.exp_ * MetaSyn.mode_ | Bv
@@ -52,8 +55,8 @@ end) : METAABSTRACT = struct
           | _ -> raise (Error "Unresolved constraints")
         end
 
-    let rec typecheck (M.Prefix (g_, m_, b_), v_) =
-      TypeCheck.typeCheck (g_, (v_, I.Uni I.type_))
+    let rec typecheck (MetaSyn.Prefix (g_, m_, b_), v_) =
+      TypeCheck.typeCheck (g_, (v_, I.Uni I.Type))
 
     let rec modeEq = function
       | ModeSyn.Marg (plus_, _), top_ -> true
@@ -70,7 +73,7 @@ end) : METAABSTRACT = struct
     let rec raiseType = function
       | 0, g_, v_ -> v_
       | depth, I.Decl (g_, d_), v_ ->
-          raiseType (depth - 1, g_, I.Pi ((d_, I.maybe_), v_))
+          raiseType (depth - 1, g_, I.Pi ((d_, I.Maybe), v_))
 
     let rec weaken = function
       | 0, g_, a -> I.id
@@ -149,8 +152,8 @@ end) : METAABSTRACT = struct
               let lGp' = countPi v_ in
               collectSub (lG0, g_, lGp', s, mode, adepth_)
         end
-      | lGO, g_, (I.FgnExp csfe, s), mode, adepth_ ->
-          I.FgnExpStd.fold csfe
+      | lGO, g_, (I.FgnExp (csid_, fge_), s), mode, adepth_ ->
+          I.FgnExpStd.fold (csid_, fge_)
             (function
               | u_, adepth'_ -> collectExp (lGO, g_, (u_, s), mode, adepth'_))
             adepth_
@@ -215,10 +218,10 @@ end) : METAABSTRACT = struct
       collectModeW
         ( lG0,
           g_,
-          M.bot_,
-          M.top_,
+          MetaSyn.Bot,
+          MetaSyn.Top,
           vs_,
-          collectModeW (lG0, g_, M.top_, M.bot_, vs_, adepth_) )
+          collectModeW (lG0, g_, MetaSyn.Top, MetaSyn.Bot, vs_, adepth_) )
 
     let rec collectDTop (lG0, g_, vs_, adepth_) =
       collectDTopW (lG0, g_, Whnf.whnf vs_, adepth_)
@@ -233,7 +236,7 @@ end) : METAABSTRACT = struct
                 (lG0, I.Decl (g_, I.decSub (d_, s)), (v2_, I.dot1 s), adepth_)
             )
       | lG0, g_, ((I.Root _, s) as vs_), adepth_ ->
-          collectModeW (lG0, g_, M.top_, M.top_, vs_, adepth_)
+          collectModeW (lG0, g_, MetaSyn.Top, MetaSyn.Top, vs_, adepth_)
 
     let rec collectDBot (lG0, g_, vs_, adepth_) =
       collectDBotW (lG0, g_, Whnf.whnf vs_, adepth_)
@@ -243,9 +246,9 @@ end) : METAABSTRACT = struct
           collectDBot
             (lG0, I.Decl (g_, I.decSub (d_, s)), (v_, I.dot1 s), adepth_)
       | lG0, g_, ((I.Root _, s) as vs_), adepth_ ->
-          collectModeW (lG0, g_, M.bot_, M.bot_, vs_, adepth_)
+          collectModeW (lG0, g_, MetaSyn.Bot, MetaSyn.Bot, vs_, adepth_)
 
-    let rec collect (M.Prefix (g_, m_, b_), v_) =
+    let rec collect (MetaSyn.Prefix (g_, m_, b_), v_) =
       let lG0 = I.ctxLength g_ in
       let a_, k =
         collectDBot
@@ -300,16 +303,16 @@ end) : METAABSTRACT = struct
           I.Root
             ( I.BVar (k + depth),
               abstractSub
-                (a_, g_, depth, (vraised_, I.id), s, I.targetFam v_, I.nil_) )
-      | a_, g_, depth, (I.FgnExp csfe, s) ->
-          I.FgnExpStd.Map.apply csfe (function u_ ->
+                (a_, g_, depth, (vraised_, I.id), s, I.targetFam v_, I.Nil) )
+        | a_, g_, depth, (I.FgnExp (csid_, fge_), s) ->
+          I.FgnExpStd.Map.apply (csid_, fge_) (function u_ ->
               abstractExp (a_, g_, depth, (u_, s)))
 
     and abstractExp (a_, g_, depth, us_) =
       abstractExpW (a_, g_, depth, Whnf.whnf us_)
 
     and abstractSpine = function
-      | a_, g_, depth, (nil_, _) -> I.nil_
+      | a_, g_, depth, (nil_, _) -> I.Nil
       | a_, g_, depth, (I.App (u_, s_), s) ->
           I.App
             ( abstractExp (a_, g_, depth, (u_, s)),
@@ -337,7 +340,7 @@ end) : METAABSTRACT = struct
                 (xv'_, I.dot1 t),
                 s,
                 b,
-                I.App (I.Root (I.BVar (k' + depth), I.nil_), s_) )
+                I.App (I.Root (I.BVar (k' + depth), I.Nil), s_) )
           else
             abstractSub
               ( a_,
@@ -346,7 +349,7 @@ end) : METAABSTRACT = struct
                 (xv'_, I.dot1 t),
                 s,
                 b,
-                I.App (I.Root (I.BVar k, I.nil_), s_) )
+                I.App (I.Root (I.BVar k, I.Nil), s_) )
           end
       | a_, g_, depth, ((I.Pi (_, xv'_), t) as xVt_), I.Dot (I.Exp u_, s), b, s_
         ->
@@ -363,35 +366,35 @@ end) : METAABSTRACT = struct
       I.Dec (xOpt, abstractExp (a_, g_, depth, (v_, s)))
 
     let rec abstractCtx = function
-      | null_, (M.Prefix (null_, null_, null_) as gm_) -> (gm_, I.null_)
+      | I.Null, (MetaSyn.Prefix (I.Null, I.Null, I.Null) as gm_) -> (gm_, I.Null)
       | ( I.Decl (a_, Bv),
-          M.Prefix (I.Decl (g_, d_), I.Decl (m_, marg), I.Decl (b_, b)) ) ->
-          let M.Prefix (g'_, m'_, b'_), lG' =
-            abstractCtx (a_, M.Prefix (g_, m_, b_))
+          MetaSyn.Prefix (I.Decl (g_, d_), I.Decl (m_, marg), I.Decl (b_, b)) ) ->
+          let MetaSyn.Prefix (g'_, m'_, b'_), lG' =
+            abstractCtx (a_, MetaSyn.Prefix (g_, m_, b_))
           in
           let d'_ = abstractDec (a_, g_, 0, (d_, I.id)) in
           let (I.Dec (_, v_)) = d'_ in
           let _ =
             begin if !Global.doubleCheck then
-              typecheck (M.Prefix (g'_, m'_, b'_), v_)
+              typecheck (MetaSyn.Prefix (g'_, m'_, b'_), v_)
             else ()
             end
           in
-          ( M.Prefix
+          ( MetaSyn.Prefix
               ( I.Decl (g'_, Names.decName (g'_, d'_)),
                 I.Decl (m'_, marg),
                 I.Decl (b'_, b) ),
             I.Decl (lG', d'_) )
       | I.Decl (a_, Ev (r, v_, m)), gm_ ->
-          let M.Prefix (g'_, m'_, b'_), lG' = abstractCtx (a_, gm_) in
+          let MetaSyn.Prefix (g'_, m'_, b'_), lG' = abstractCtx (a_, gm_) in
           let v''_ = abstractExp (a_, lG', 0, (v_, I.id)) in
           let _ =
             begin if !Global.doubleCheck then
-              typecheck (M.Prefix (g'_, m'_, b'_), v''_)
+              typecheck (MetaSyn.Prefix (g'_, m'_, b'_), v''_)
             else ()
             end
           in
-          ( M.Prefix
+          ( MetaSyn.Prefix
               ( I.Decl (g'_, Names.decName (g'_, I.Dec (None, v''_))),
                 I.Decl (m'_, m),
                 I.Decl
@@ -402,13 +405,13 @@ end) : METAABSTRACT = struct
                     end ) ),
             lG' )
 
-    let rec abstract (M.State (name, (M.Prefix (g_, m_, b_) as gm_), v_) as s_)
+    let rec abstract (MetaSyn.State (name, (MetaSyn.Prefix (g_, m_, b_) as gm_), v_) as s_)
         =
       let _ = Names.varReset I.null_ in
       let a_ = collect (gm_, v_) in
       let gm'_, _ = abstractCtx (a_, gm_) in
       let v'_ = abstractExp (a_, g_, 0, (v_, I.id)) in
-      let s_ = M.State (name, gm'_, v'_) in
+      let s_ = MetaSyn.State (name, gm'_, v'_) in
       let _ =
         begin if !Global.doubleCheck then typecheck (gm'_, v'_) else ()
         end

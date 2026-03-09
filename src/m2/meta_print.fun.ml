@@ -1,4 +1,6 @@
 open! Basis
+open Metasyn
+open Clause_print
 
 (* Meta printer for proof states *)
 (* Author: Carsten Schuermann *)
@@ -10,13 +12,14 @@ module MetaPrint (MetaPrint__0 : sig
 
   (*! sharing Print.IntSyn = MetaSyn'.IntSyn !*)
   module ClausePrint : CLAUSEPRINT
-end) : METAPRINT = struct
+end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
+  open MetaPrint__0
   module MetaSyn = MetaSyn'
 
   open! struct
     module M = MetaSyn
     module I = IntSyn
-    module F = Formatter
+    module F = Print.Formatter
 
     let rec modeToString = function top_ -> "+" | bot_ -> "-"
 
@@ -26,30 +29,30 @@ end) : METAPRINT = struct
 
     let rec fmtPrefix gm_ =
       let rec fmtPrefix' = function
-        | M.Prefix (null_, null_, null_), fmt_ -> fmt_
+        | M.Prefix (Null, Null, Null), fmt_ -> fmt_
         | ( M.Prefix
-              (I.Decl (null_, d_), I.Decl (null_, mode), I.Decl (null_, b)),
+              (I.Decl (Null, d_), I.Decl (Null, mode), I.Decl (Null, b)),
             fmt_ ) ->
             [
-              F.String (depthToString b);
-              F.String (modeToString mode);
-              Print.formatDec (I.null_, d_);
+              F.string (depthToString b);
+              F.string (modeToString mode);
+              Print.formatDec (I.Null, d_);
             ]
             @ fmt_
         | M.Prefix (I.Decl (g_, d_), I.Decl (m_, mode), I.Decl (b_, b)), fmt_ ->
             fmtPrefix'
               ( M.Prefix (g_, m_, b_),
                 [
-                  F.String ",";
-                  F.space_;
-                  F.break_;
-                  F.String (depthToString b);
-                  F.String (modeToString mode);
+                  F.string ",";
+                  F.space;
+                  F.break;
+                  F.string (depthToString b);
+                  F.string (modeToString mode);
                   Print.formatDec (g_, d_);
                 ]
                 @ fmt_ )
       in
-      F.HVbox (fmtPrefix' (gm_, []))
+      F.hVbox (fmtPrefix' (gm_, []))
 
     let rec prefixToString gm_ = F.makestring_fmt (fmtPrefix gm_)
 

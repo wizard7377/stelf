@@ -14,6 +14,7 @@ module Trace (Trace__0 : sig
   (*! sharing Abstract.IntSyn = IntSyn' !*)
   module Print : PRINT
 end) : TRACE = struct
+  open Trace__0
   (*! structure IntSyn = IntSyn' !*)
   open! struct
     module I = IntSyn
@@ -36,8 +37,8 @@ end) : TRACE = struct
   let rec newline () = print "\n"
 
   let rec printCtx = function
-    | null_ -> print "No hypotheses or parameters. "
-    | I.Decl (null_, d_) -> print (decToString (I.null_, d_))
+    | I.Null -> print "No hypotheses or parameters. "
+    | I.Decl (I.Null, d_) -> print (decToString (I.Null, d_))
     | I.Decl (g_, d_) -> begin
         printCtx g_;
         begin
@@ -87,7 +88,7 @@ end) : TRACE = struct
 
   let detail = ref 1
 
-  let rec setDetail = function
+  let rec setDetail : int option -> unit = function
     | None -> print "Trace warning: detail is not a valid integer\n"
     | Some n -> begin
         if 0 <= n then detail := n
@@ -147,14 +148,14 @@ end) : TRACE = struct
        v X1 ... Xn - variables --- show instantiation of X1 ... Xn\n\
        ? for help"
 
-  let currentGoal : (I.dctx * I.exp_) ref = ref (I.null_, I.Uni I.type_)
+  let currentGoal : (I.dctx * I.exp_) ref = ref (I.Null, I.Uni I.Type)
 
   (* dummy initialization *)
   let currentEVarInst : (I.exp_ * string) list ref = ref []
 
   let rec setEVarInst xs_ =
     currentEVarInst :=
-      List.map (function x_ -> (x_, N.evarName (I.null_, x_))) xs_
+      List.map (function x_ -> (x_, N.evarName (I.Null, x_))) xs_
 
   let rec setGoal (g_, v_) =
     begin
@@ -164,9 +165,9 @@ end) : TRACE = struct
 
   type nonrec goalTag = int option
 
-  let tag : goalTag ref = ref None
+  let tag : goalTag ref = ref (None : goalTag)
 
-  let rec tagGoal () =
+  let rec tagGoal () : goalTag =
     begin match !tag with
     | None -> None
     | Some n -> begin
@@ -175,7 +176,7 @@ end) : TRACE = struct
       end
     end
 
-  let watchForTag : goalTag ref = ref None
+  let watchForTag : goalTag ref = ref (None : goalTag)
 
   let rec initTag () =
     begin
@@ -186,13 +187,13 @@ end) : TRACE = struct
       end
     end
 
-  let rec setWatchForTag = function
+  let rec setWatchForTag : goalTag -> unit = function
     | None -> watchForTag := !tag
     | Some n -> watchForTag := Some n
 
   let rec breakAction g_ =
     let _ = print " " in
-    let line = Compat.inputLine97 TextIO.stdIn in
+    let line = input_line stdin in
     begin match String.sub (line, 0) with
     | '\n' -> ()
     | 'n' -> breakTSpec := All
@@ -427,14 +428,14 @@ end) : TRACE = struct
           signal (g_, e)
         end
         else begin
-          monitorTrace (!traceTSpec, g_, e);
+          ignore (monitorTrace (!traceTSpec, g_, e));
           ()
         end
       end
       else begin
         if monitorBreak (!breakTSpec, g_, e) then ()
         else begin
-          monitorTrace (!traceTSpec, g_, e);
+          ignore (monitorTrace (!traceTSpec, g_, e));
           ()
         end
       end (* stops, continues after input *)

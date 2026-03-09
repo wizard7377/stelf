@@ -14,7 +14,7 @@ module Make_CPrint (CPrint__0 : sig
 end) : CPRINT = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
-  open! Compsyn.CompSyn
+  open! CompSyn.CompSyn
 
   let rec compose = function
     | null_, g_ -> g_
@@ -118,7 +118,7 @@ end) : CPRINT = struct
     | DProg (Null, Null) -> ""
     | DProg
         ( IntSyn.Decl (g_, IntSyn.Dec (Some x, _)),
-          IntSyn.Decl (dPool, Compsyn.CompSyn.Dec (r, _, _)) ) ->
+          IntSyn.Decl (dPool, CompSyn.CompSyn.Dec (r, _, _)) ) ->
         (((dProgToString (DProg (g_, dPool)) ^ "\nClause    ") ^ x) ^ ":\n")
         ^ clauseToString "\t" (g_, r)
     | DProg
