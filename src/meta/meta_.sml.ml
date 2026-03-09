@@ -22,7 +22,7 @@ module FunNames = FunNames (struct
   module Global = Global
 
   (*! structure FunSyn' = FunSyn !*)
-  module HashTable = StringHashTable
+  module HashTable = Table_instances.StringHashTable
 end)
 
 module FunPrint = FunPrint (struct

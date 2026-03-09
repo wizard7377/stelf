@@ -40,28 +40,28 @@
       
       (rule
  (mode fallback)
- (target abstract.sig.ml)
+ (target abstract_tabled.sig.ml)
  (action
-  (write-file abstract.sig.ml "")))
+  (write-file abstract_tabled.sig.ml "")))
 
 (rule
  (mode fallback)
- (target abstract.fun.ml)
+ (target abstract_tabled.fun.ml)
  (action
-  (write-file abstract.fun.ml "")))
+  (write-file abstract_tabled.fun.ml "")))
 
 (rule
  (mode fallback)
- (target abstract.sml.ml)
+ (target abstract_tabled.sml.ml)
  (action
-  (write-file abstract.sml.ml "")))
+  (write-file abstract_tabled.sml.ml "")))
 
 (rule
- (target abstract.ml)
+ (target abstract_tabled.ml)
  (deps
-  (:sig abstract.sig.ml)
-  (:fun abstract.fun.ml)
-  (:sml abstract.sml.ml))
+  (:sig abstract_tabled.sig.ml)
+  (:fun abstract_tabled.fun.ml)
+  (:sml abstract_tabled.sml.ml))
  (action
   (progn
    (concurrent
@@ -79,28 +79,28 @@
       
       (rule
  (mode fallback)
- (target subtree.sig.ml)
+ (target memo_table.sig.ml)
  (action
-  (write-file subtree.sig.ml "")))
+  (write-file memo_table.sig.ml "")))
 
 (rule
  (mode fallback)
- (target subtree.fun.ml)
+ (target memo_table.fun.ml)
  (action
-  (write-file subtree.fun.ml "")))
+  (write-file memo_table.fun.ml "")))
 
 (rule
  (mode fallback)
- (target subtree.sml.ml)
+ (target memo_table.sml.ml)
  (action
-  (write-file subtree.sml.ml "")))
+  (write-file memo_table.sml.ml "")))
 
 (rule
- (target subtree.ml)
+ (target memo_table.ml)
  (deps
-  (:sig subtree.sig.ml)
-  (:fun subtree.fun.ml)
-  (:sml subtree.sml.ml))
+  (:sig memo_table.sig.ml)
+  (:fun memo_table.fun.ml)
+  (:sml memo_table.sml.ml))
  (action
   (progn
    (concurrent
@@ -196,28 +196,28 @@
       
       (rule
  (mode fallback)
- (target tabled.sig.ml)
+ (target tabled_machine.sig.ml)
  (action
-  (write-file tabled.sig.ml "")))
+  (write-file tabled_machine.sig.ml "")))
 
 (rule
  (mode fallback)
- (target tabled.fun.ml)
+ (target tabled_machine.fun.ml)
  (action
-  (write-file tabled.fun.ml "")))
+  (write-file tabled_machine.fun.ml "")))
 
 (rule
  (mode fallback)
- (target tabled.sml.ml)
+ (target tabled_machine.sml.ml)
  (action
-  (write-file tabled.sml.ml "")))
+  (write-file tabled_machine.sml.ml "")))
 
 (rule
- (target tabled.ml)
+ (target tabled_machine.ml)
  (deps
-  (:sig tabled.sig.ml)
-  (:fun tabled.fun.ml)
-  (:sml tabled.sml.ml))
+  (:sig tabled_machine.sig.ml)
+  (:fun tabled_machine.fun.ml)
+  (:sml tabled_machine.sml.ml))
  (action
   (progn
    (concurrent

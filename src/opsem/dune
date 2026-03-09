@@ -5,11 +5,11 @@
  (public_name twelf.opsem)
  (modules
   table_param
-  abstract
-  subtree
+  abstract_tabled
+  memo_table
   subtree_inst
   sw_subtree
-  tabled
+  tabled_machine
   absmachine
   absmachine_sbt
   ptrecon
@@ -58,5 +58,9 @@
    -open
    Subordinate_
    -open
-   Compile_))
+   Compile_
+   -open
+   CompSyn
+   -open
+   Assign))
  (wrapped false))

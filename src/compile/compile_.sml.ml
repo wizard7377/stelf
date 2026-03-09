@@ -48,6 +48,8 @@ module Assign__ = Assign.Assign (struct
   module Print = Print
 end)
 
-(* Re-export module types that would otherwise be shadowed in downstream libraries *)
+(* Re-export module types for downstream libraries *)
 module type SUBTREE = Subtree.SUBTREE
 module type CPRINT = Cprint.CPRINT
+module type COMPSYN = COMPSYN
+module type ASSIGN = Assign.ASSIGN

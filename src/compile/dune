@@ -3,7 +3,7 @@
 (library
  (name compile)
  (public_name twelf.compile)
- (modules compsyn cprint subtree assign compile_)
+ (modules compSyn cprint subtree assign compile_)
  (libraries
   global
   table

@@ -157,28 +157,28 @@
       
       (rule
  (mode fallback)
- (target weaken.sig.ml)
+ (target mtp_weaken.sig.ml)
  (action
-  (write-file weaken.sig.ml "")))
+  (write-file mtp_weaken.sig.ml "")))
 
 (rule
  (mode fallback)
- (target weaken.fun.ml)
+ (target mtp_weaken.fun.ml)
  (action
-  (write-file weaken.fun.ml "")))
+  (write-file mtp_weaken.fun.ml "")))
 
 (rule
  (mode fallback)
- (target weaken.sml.ml)
+ (target mtp_weaken.sml.ml)
  (action
-  (write-file weaken.sml.ml "")))
+  (write-file mtp_weaken.sml.ml "")))
 
 (rule
- (target weaken.ml)
+ (target mtp_weaken.ml)
  (deps
-  (:sig weaken.sig.ml)
-  (:fun weaken.fun.ml)
-  (:sml weaken.sml.ml))
+  (:sig mtp_weaken.sig.ml)
+  (:fun mtp_weaken.fun.ml)
+  (:sml mtp_weaken.sml.ml))
  (action
   (progn
    (concurrent
@@ -352,28 +352,28 @@
       
       (rule
  (mode fallback)
- (target abstract.sig.ml)
+ (target mtp_abstract.sig.ml)
  (action
-  (write-file abstract.sig.ml "")))
+  (write-file mtp_abstract.sig.ml "")))
 
 (rule
  (mode fallback)
- (target abstract.fun.ml)
+ (target mtp_abstract.fun.ml)
  (action
-  (write-file abstract.fun.ml "")))
+  (write-file mtp_abstract.fun.ml "")))
 
 (rule
  (mode fallback)
- (target abstract.sml.ml)
+ (target mtp_abstract.sml.ml)
  (action
-  (write-file abstract.sml.ml "")))
+  (write-file mtp_abstract.sml.ml "")))
 
 (rule
- (target abstract.ml)
+ (target mtp_abstract.ml)
  (deps
-  (:sig abstract.sig.ml)
-  (:fun abstract.fun.ml)
-  (:sml abstract.sml.ml))
+  (:sig mtp_abstract.sig.ml)
+  (:fun mtp_abstract.fun.ml)
+  (:sml mtp_abstract.sml.ml))
  (action
   (progn
    (concurrent
@@ -391,28 +391,28 @@
       
       (rule
  (mode fallback)
- (target init.sig.ml)
+ (target mtp_init.sig.ml)
  (action
-  (write-file init.sig.ml "")))
+  (write-file mtp_init.sig.ml "")))
 
 (rule
  (mode fallback)
- (target init.fun.ml)
+ (target mtp_init.fun.ml)
  (action
-  (write-file init.fun.ml "")))
+  (write-file mtp_init.fun.ml "")))
 
 (rule
  (mode fallback)
- (target init.sml.ml)
+ (target mtp_init.sml.ml)
  (action
-  (write-file init.sml.ml "")))
+  (write-file mtp_init.sml.ml "")))
 
 (rule
- (target init.ml)
+ (target mtp_init.ml)
  (deps
-  (:sig init.sig.ml)
-  (:fun init.fun.ml)
-  (:sml init.sml.ml))
+  (:sig mtp_init.sig.ml)
+  (:fun mtp_init.fun.ml)
+  (:sml mtp_init.sml.ml))
  (action
   (progn
    (concurrent
@@ -430,28 +430,28 @@
       
       (rule
  (mode fallback)
- (target filling.sig.ml)
+ (target mtp_filling.sig.ml)
  (action
-  (write-file filling.sig.ml "")))
+  (write-file mtp_filling.sig.ml "")))
 
 (rule
  (mode fallback)
- (target filling.fun.ml)
+ (target mtp_filling.fun.ml)
  (action
-  (write-file filling.fun.ml "")))
+  (write-file mtp_filling.fun.ml "")))
 
 (rule
  (mode fallback)
- (target filling.sml.ml)
+ (target mtp_filling.sml.ml)
  (action
-  (write-file filling.sml.ml "")))
+  (write-file mtp_filling.sml.ml "")))
 
 (rule
- (target filling.ml)
+ (target mtp_filling.ml)
  (deps
-  (:sig filling.sig.ml)
-  (:fun filling.fun.ml)
-  (:sml filling.sml.ml))
+  (:sig mtp_filling.sig.ml)
+  (:fun mtp_filling.fun.ml)
+  (:sml mtp_filling.sml.ml))
  (action
   (progn
    (concurrent
@@ -469,28 +469,28 @@
       
       (rule
  (mode fallback)
- (target global.sig.ml)
+ (target mtp_global.sig.ml)
  (action
-  (write-file global.sig.ml "")))
+  (write-file mtp_global.sig.ml "")))
 
 (rule
  (mode fallback)
- (target global.fun.ml)
+ (target mtp_global.fun.ml)
  (action
-  (write-file global.fun.ml "")))
+  (write-file mtp_global.fun.ml "")))
 
 (rule
  (mode fallback)
- (target global.sml.ml)
+ (target mtp_global.sml.ml)
  (action
-  (write-file global.sml.ml "")))
+  (write-file mtp_global.sml.ml "")))
 
 (rule
- (target global.ml)
+ (target mtp_global.ml)
  (deps
-  (:sig global.sig.ml)
-  (:fun global.fun.ml)
-  (:sml global.sml.ml))
+  (:sig mtp_global.sig.ml)
+  (:fun mtp_global.fun.ml)
+  (:sml mtp_global.sml.ml))
  (action
   (progn
    (concurrent
@@ -508,28 +508,28 @@
       
       (rule
  (mode fallback)
- (target data.sig.ml)
+ (target mtp_data.sig.ml)
  (action
-  (write-file data.sig.ml "")))
+  (write-file mtp_data.sig.ml "")))
 
 (rule
  (mode fallback)
- (target data.fun.ml)
+ (target mtp_data.fun.ml)
  (action
-  (write-file data.fun.ml "")))
+  (write-file mtp_data.fun.ml "")))
 
 (rule
  (mode fallback)
- (target data.sml.ml)
+ (target mtp_data.sml.ml)
  (action
-  (write-file data.sml.ml "")))
+  (write-file mtp_data.sml.ml "")))
 
 (rule
- (target data.ml)
+ (target mtp_data.ml)
  (deps
-  (:sig data.sig.ml)
-  (:fun data.fun.ml)
-  (:sml data.sml.ml))
+  (:sig mtp_data.sig.ml)
+  (:fun mtp_data.fun.ml)
+  (:sml mtp_data.sml.ml))
  (action
   (progn
    (concurrent
@@ -547,28 +547,28 @@
       
       (rule
  (mode fallback)
- (target mpi.sig.ml)
+ (target mtp_mpi.sig.ml)
  (action
-  (write-file mpi.sig.ml "")))
+  (write-file mtp_mpi.sig.ml "")))
 
 (rule
  (mode fallback)
- (target mpi.fun.ml)
+ (target mtp_mpi.fun.ml)
  (action
-  (write-file mpi.fun.ml "")))
+  (write-file mtp_mpi.fun.ml "")))
 
 (rule
  (mode fallback)
- (target mpi.sml.ml)
+ (target mtp_mpi.sml.ml)
  (action
-  (write-file mpi.sml.ml "")))
+  (write-file mtp_mpi.sml.ml "")))
 
 (rule
- (target mpi.ml)
+ (target mtp_mpi.ml)
  (deps
-  (:sig mpi.sig.ml)
-  (:fun mpi.fun.ml)
-  (:sml mpi.sml.ml))
+  (:sig mtp_mpi.sig.ml)
+  (:fun mtp_mpi.fun.ml)
+  (:sml mtp_mpi.sml.ml))
  (action
   (progn
    (concurrent
@@ -586,28 +586,28 @@
       
       (rule
  (mode fallback)
- (target recursion.sig.ml)
+ (target mtp_recursion.sig.ml)
  (action
-  (write-file recursion.sig.ml "")))
+  (write-file mtp_recursion.sig.ml "")))
 
 (rule
  (mode fallback)
- (target recursion.fun.ml)
+ (target mtp_recursion.fun.ml)
  (action
-  (write-file recursion.fun.ml "")))
+  (write-file mtp_recursion.fun.ml "")))
 
 (rule
  (mode fallback)
- (target recursion.sml.ml)
+ (target mtp_recursion.sml.ml)
  (action
-  (write-file recursion.sml.ml "")))
+  (write-file mtp_recursion.sml.ml "")))
 
 (rule
- (target recursion.ml)
+ (target mtp_recursion.ml)
  (deps
-  (:sig recursion.sig.ml)
-  (:fun recursion.fun.ml)
-  (:sml recursion.sml.ml))
+  (:sig mtp_recursion.sig.ml)
+  (:fun mtp_recursion.fun.ml)
+  (:sml mtp_recursion.sml.ml))
  (action
   (progn
    (concurrent
@@ -625,28 +625,28 @@
       
       (rule
  (mode fallback)
- (target search.sig.ml)
+ (target mtp_search.sig.ml)
  (action
-  (write-file search.sig.ml "")))
+  (write-file mtp_search.sig.ml "")))
 
 (rule
  (mode fallback)
- (target search.fun.ml)
+ (target mtp_search.fun.ml)
  (action
-  (write-file search.fun.ml "")))
+  (write-file mtp_search.fun.ml "")))
 
 (rule
  (mode fallback)
- (target search.sml.ml)
+ (target mtp_search.sml.ml)
  (action
-  (write-file search.sml.ml "")))
+  (write-file mtp_search.sml.ml "")))
 
 (rule
- (target search.ml)
+ (target mtp_search.ml)
  (deps
-  (:sig search.sig.ml)
-  (:fun search.fun.ml)
-  (:sml search.sml.ml))
+  (:sig mtp_search.sig.ml)
+  (:fun mtp_search.fun.ml)
+  (:sml mtp_search.sml.ml))
  (action
   (progn
    (concurrent
@@ -703,28 +703,28 @@
       
       (rule
  (mode fallback)
- (target splitting.sig.ml)
+ (target mtp_splitting.sig.ml)
  (action
-  (write-file splitting.sig.ml "")))
+  (write-file mtp_splitting.sig.ml "")))
 
 (rule
  (mode fallback)
- (target splitting.fun.ml)
+ (target mtp_splitting.fun.ml)
  (action
-  (write-file splitting.fun.ml "")))
+  (write-file mtp_splitting.fun.ml "")))
 
 (rule
  (mode fallback)
- (target splitting.sml.ml)
+ (target mtp_splitting.sml.ml)
  (action
-  (write-file splitting.sml.ml "")))
+  (write-file mtp_splitting.sml.ml "")))
 
 (rule
- (target splitting.ml)
+ (target mtp_splitting.ml)
  (deps
-  (:sig splitting.sig.ml)
-  (:fun splitting.fun.ml)
-  (:sml splitting.sml.ml))
+  (:sig mtp_splitting.sig.ml)
+  (:fun mtp_splitting.fun.ml)
+  (:sml mtp_splitting.sml.ml))
  (action
   (progn
    (concurrent
@@ -820,28 +820,28 @@
       
       (rule
  (mode fallback)
- (target strategy.sig.ml)
+ (target mtp_strategy.sig.ml)
  (action
-  (write-file strategy.sig.ml "")))
+  (write-file mtp_strategy.sig.ml "")))
 
 (rule
  (mode fallback)
- (target strategy.fun.ml)
+ (target mtp_strategy.fun.ml)
  (action
-  (write-file strategy.fun.ml "")))
+  (write-file mtp_strategy.fun.ml "")))
 
 (rule
  (mode fallback)
- (target strategy.sml.ml)
+ (target mtp_strategy.sml.ml)
  (action
-  (write-file strategy.sml.ml "")))
+  (write-file mtp_strategy.sml.ml "")))
 
 (rule
- (target strategy.ml)
+ (target mtp_strategy.ml)
  (deps
-  (:sig strategy.sig.ml)
-  (:fun strategy.fun.ml)
-  (:sml strategy.sml.ml))
+  (:sig mtp_strategy.sig.ml)
+  (:fun mtp_strategy.fun.ml)
+  (:sml mtp_strategy.sml.ml))
  (action
   (progn
    (concurrent
@@ -859,28 +859,28 @@
       
       (rule
  (mode fallback)
- (target print.sig.ml)
+ (target mtp_print.sig.ml)
  (action
-  (write-file print.sig.ml "")))
+  (write-file mtp_print.sig.ml "")))
 
 (rule
  (mode fallback)
- (target print.fun.ml)
+ (target mtp_print.fun.ml)
  (action
-  (write-file print.fun.ml "")))
+  (write-file mtp_print.fun.ml "")))
 
 (rule
  (mode fallback)
- (target print.sml.ml)
+ (target mtp_print.sml.ml)
  (action
-  (write-file print.sml.ml "")))
+  (write-file mtp_print.sml.ml "")))
 
 (rule
- (target print.ml)
+ (target mtp_print.ml)
  (deps
-  (:sig print.sig.ml)
-  (:fun print.fun.ml)
-  (:sml print.sml.ml))
+  (:sig mtp_print.sig.ml)
+  (:fun mtp_print.fun.ml)
+  (:sml mtp_print.sml.ml))
  (action
   (progn
    (concurrent
@@ -898,28 +898,28 @@
       
       (rule
  (mode fallback)
- (target prover.sig.ml)
+ (target mtp_prover.sig.ml)
  (action
-  (write-file prover.sig.ml "")))
+  (write-file mtp_prover.sig.ml "")))
 
 (rule
  (mode fallback)
- (target prover.fun.ml)
+ (target mtp_prover.fun.ml)
  (action
-  (write-file prover.fun.ml "")))
+  (write-file mtp_prover.fun.ml "")))
 
 (rule
  (mode fallback)
- (target prover.sml.ml)
+ (target mtp_prover.sml.ml)
  (action
-  (write-file prover.sml.ml "")))
+  (write-file mtp_prover.sml.ml "")))
 
 (rule
- (target prover.ml)
+ (target mtp_prover.ml)
  (deps
-  (:sig prover.sig.ml)
-  (:fun prover.fun.ml)
-  (:sml prover.sml.ml))
+  (:sig mtp_prover.sig.ml)
+  (:fun mtp_prover.fun.ml)
+  (:sml mtp_prover.sml.ml))
  (action
   (progn
    (concurrent

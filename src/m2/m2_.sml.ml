@@ -199,3 +199,5 @@ module Skolem = Skolem (struct
   module Compile = Compile
   module Names = Names
 end)
+
+module type PROVER = PROVER

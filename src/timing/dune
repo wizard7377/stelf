@@ -3,7 +3,7 @@
 (library
  (name timing)
  (public_name twelf.timing)
- (modules timers timing_)
+ (modules timers timing_ time_limit)
  (libraries basis)
  (flags
   (:standard -w -A -open Basis))

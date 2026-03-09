@@ -1,5 +1,4 @@
 open! Basis
-open Table_
 open String_hash
 open Hash_table
 open Red_black_tree

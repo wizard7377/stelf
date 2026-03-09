@@ -8,26 +8,26 @@
   funnames
   funtypecheck
   funprint
-  weaken
+  mtp_weaken
   funweaken
   relfun
   interpret
   meta_
-  abstract
-  init
-  filling
-  global
-  data
-  mpi
-  recursion
-  search
+  mtp_abstract
+  mtp_init
+  mtp_filling
+  mtp_global
+  mtp_data
+  mtp_mpi
+  mtp_recursion
+  mtp_search
   uniquesearch
-  splitting
+  mtp_splitting
   inference
   statesyn
-  strategy
-  print
-  prover)
+  mtp_strategy
+  mtp_print
+  mtp_prover)
  (libraries
   global
   trail
