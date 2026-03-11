@@ -1,4 +1,7 @@
 open! Basis
+open Funprint
+open Funsyn
+open Statesyn
 
 (* Type checking for functional proof term calculus *)
 (* Author: Carsten Schuermann *)

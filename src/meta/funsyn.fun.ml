@@ -3,7 +3,7 @@ open! Basis
 
 (* Internal syntax for functional proof term calculus *)
 (* Author: Carsten Schuermann *)
-module FunSyn (FunSyn__0 : sig
+module Make_FunSyn (FunSyn__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   module Whnf : WHNF
 
@@ -309,7 +309,7 @@ end
 
 (*! sharing Conv.IntSyn = IntSyn' !*)
 (* functor FunSyn *)
-module FunSyn = FunSyn (struct
+module FunSyn = Make_FunSyn (struct
   (*! structure IntSyn' = IntSyn !*)
   module Whnf = Whnf
   module Conv = Conv

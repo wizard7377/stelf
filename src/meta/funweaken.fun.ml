@@ -7,6 +7,7 @@ module FunWeaken (FunWeaken__0 : sig
   module Weaken : WEAKEN
 end) : FUNWEAKEN = struct
   (*! structure FunSyn = FunSyn' !*)
+  open FunWeaken__0
   open! struct
     module F = FunSyn
     module I = IntSyn

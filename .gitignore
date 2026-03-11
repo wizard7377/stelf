@@ -377,3 +377,8 @@ TSWLatexianTemp*
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
+.claude/skills/ocaml-module-scope-fixes/SKILL.md
+.github/copilot-instructions.md
+deps.dot
+deps_verb.dot
+deps_verbose.svg

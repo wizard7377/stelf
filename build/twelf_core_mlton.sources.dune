@@ -3004,28 +3004,28 @@
       
       (rule
  (mode fallback)
- (target compsyn.sig.ml)
+ (target compSyn.sig.ml)
  (action
-  (write-file compsyn.sig.ml "")))
+  (write-file compSyn.sig.ml "")))
 
 (rule
  (mode fallback)
- (target compsyn.fun.ml)
+ (target compSyn.fun.ml)
  (action
-  (write-file compsyn.fun.ml "")))
+  (write-file compSyn.fun.ml "")))
 
 (rule
  (mode fallback)
- (target compsyn.sml.ml)
+ (target compSyn.sml.ml)
  (action
-  (write-file compsyn.sml.ml "")))
+  (write-file compSyn.sml.ml "")))
 
 (rule
- (target compsyn.ml)
+ (target compSyn.ml)
  (deps
-  (:sig compsyn.sig.ml)
-  (:fun compsyn.fun.ml)
-  (:sml compsyn.sml.ml))
+  (:sig compSyn.sig.ml)
+  (:fun compSyn.fun.ml)
+  (:sml compSyn.sml.ml))
  (action
   (progn
    (concurrent

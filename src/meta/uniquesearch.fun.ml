@@ -48,6 +48,7 @@ module UniqueSearch (UniqueSearch__0 : sig
 end) : UNIQUESEARCH = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure FunSyn = FunSyn' !*)
+  open UniqueSearch__0
   module StateSyn = StateSyn'
 
   (*! structure CompSyn = CompSyn' !*)
@@ -57,7 +58,7 @@ end) : UNIQUESEARCH = struct
 
   open! struct
     module I = IntSyn
-    module C = CompSyn
+    module C = CompSyn.CompSyn
 
     let rec isInstantiated = function
       | I.Root (I.Const cid, _) -> true
@@ -94,8 +95,8 @@ end) : UNIQUESEARCH = struct
       | r, (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
       | r, (I.EVar (r', _, v'_, _), s) -> r = r' || occursInExp (r, (v'_, s))
-      | r, (I.FgnExp csfe, s) ->
-          I.FgnExpStd.fold csfe
+      | r, (I.FgnExp (csid_, csfe), s) ->
+          I.FgnExpStd.fold (csid_, csfe)
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
@@ -142,24 +143,26 @@ end) : UNIQUESEARCH = struct
           matchAtom (max, depth, (p, s), dp, sc, acc)
       | max, depth, (C.Impl (r, a_, h_, g), s), C.DProg (g_, dPool), sc, acc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
-          Solve_
+          solve
             ( max,
               depth + 1,
               (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, h_))),
-              function m_, acc' -> (sc (I.Lam (d'_, m_), acc'), acc) )
+              (fun (m_, acc') -> sc (I.Lam (d'_, m_), acc')),
+              acc )
       | max, depth, (C.All (d_, g), s), C.DProg (g_, dPool), sc, acc ->
           let d'_ = I.decSub (d_, s) in
-          Solve_
+          solve
             ( max,
               depth + 1,
               (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.parameter_)),
-              function m_, acc' -> (sc (I.Lam (d'_, m_), acc'), acc) )
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
+              (fun (m_, acc') -> sc (I.Lam (d'_, m_), acc')),
+              acc )
 
     and rSolve = function
       | max, depth, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc, acc -> begin
-          if Unify.unifiable (g_, ps', (q_, s)) then sc (I.nil_, acc) else acc
+          if Unify.unifiable (g_, ps', (q_, s)) then sc (I.Nil, acc) else acc
         end
       | ( max,
           depth,
@@ -171,7 +174,7 @@ end) : UNIQUESEARCH = struct
           match Assign.assignable (g_, ps', (q_, s)) with
           | Some cnstr ->
               aSolve
-                ((eqns, s), dp, cnstr, function () -> (sc (I.nil_, acc), acc))
+                ((eqns, s), dp, cnstr, (fun () -> sc (I.Nil, acc)), acc)
           | None -> acc
         end
       | ( max,
@@ -188,16 +191,15 @@ end) : UNIQUESEARCH = struct
               ps',
               (r, I.Dot (I.Exp x_, s)),
               dp,
-              function
-              | s_, acc' ->
-                  ( Solve_
-                      ( max,
-                        depth,
-                        (g, s),
-                        dp,
-                        function
-                        | m_, acc'' -> (sc (I.App (m_, s_), acc''), acc') ),
-                    acc ) )
+              (fun (s_, acc') ->
+                solve
+                  ( max,
+                    depth,
+                    (g, s),
+                    dp,
+                    (fun (m_, acc'') -> sc (I.App (m_, s_), acc'')),
+                    acc' )),
+              acc )
       | ( max,
           depth,
           ps',
@@ -218,25 +220,21 @@ end) : UNIQUESEARCH = struct
               ps',
               (r, I.Dot (I.Exp x'_, s)),
               dp,
-              function
-              | s_, acc' ->
-                  ( begin if isInstantiated x_ then sc (I.App (x'_, s_), acc')
-                    else
-                      Solve_
-                        ( max,
-                          0,
-                          (g, s'),
-                          C.DProg (g0_, dPool0),
-                          function
-                          | m_, acc'' -> (
-                              try
-                                begin
-                                  Unify.unify (g0_, (x_, I.id), (m_, I.id));
-                                  sc (I.App (I.EClo (m_, w), s_), acc'')
-                                end
-                              with Unify.Unify _ -> (acc'', acc')) )
-                    end,
-                    acc ) )
+              (fun (s_, acc') ->
+                if isInstantiated x_ then sc (I.App (x'_, s_), acc')
+                else
+                  solve
+                    ( max,
+                      0,
+                      (g, s'),
+                      C.DProg (g0_, dPool0),
+                      (fun (m_, acc'') ->
+                        try
+                          Unify.unify (g0_, (x_, I.id), (m_, I.id));
+                          sc (I.App (I.EClo (m_, w), s_), acc'')
+                        with Unify.Unify _ -> acc''),
+                      acc' )),
+              acc )
       | ( max,
           depth,
           ps',
@@ -251,7 +249,8 @@ end) : UNIQUESEARCH = struct
               ps',
               (r, I.Dot (I.Exp x_, s)),
               dp,
-              function s_, acc' -> (sc (I.App (x_, s_), acc'), acc) )
+              (fun (s_, acc') -> sc (I.App (x_, s_), acc')),
+              acc )
       | ( max,
           depth,
           ps',
@@ -305,8 +304,8 @@ end) : UNIQUESEARCH = struct
                           ps',
                           (r, I.id),
                           dp,
-                          function
-                          | s_, acc'' -> (sc (I.Root (hc_, s_), acc''), acc') ))
+                          (fun (s_, acc'') -> sc (I.Root (hc_, s_), acc'')),
+                          acc' ))
                 in
                 matchSig' (sgn', acc''')
           in
@@ -322,9 +321,8 @@ end) : UNIQUESEARCH = struct
                             ps',
                             (r, I.comp (s, I.Shift n)),
                             dp,
-                            function
-                            | s_, acc'' ->
-                                (sc (I.Root (I.BVar n, s_), acc''), acc') ))
+                            (fun (s_, acc'') -> sc (I.Root (I.BVar n, s_), acc'')),
+                            acc' ))
                   in
                   matchDProg (dPool', n + 1, acc''')
                 else matchDProg (dPool', n + 1, acc')
@@ -338,19 +336,17 @@ end) : UNIQUESEARCH = struct
       begin match (arg__1, arg__2) with
       | max, ([], sc, acc) -> sc acc
       | max, ((I.EVar (r, g_, v_, _) as x_) :: ge_, sc, acc) ->
-          Solve_
+          solve
             ( max,
               0,
               (Compile.compileGoal (g_, v_), I.id),
               Compile.compileCtx false g_,
-              function
-              | u'_, acc' -> (
-                  try
-                    begin
-                      Unify.unify (g_, (x_, I.id), (u'_, I.id));
-                      searchEx' max (ge_, sc, acc')
-                    end
-                  with Unify.Unify _ -> (acc', acc)) )
+              (fun (u'_, acc') ->
+                try
+                  Unify.unify (g_, (x_, I.id), (u'_, I.id));
+                  searchEx' max (ge_, sc, acc')
+                with Unify.Unify _ -> acc'),
+              acc )
       end
 
     let rec searchEx (it, depth) (ge_, sc, acc) =
@@ -359,27 +355,24 @@ end) : UNIQUESEARCH = struct
         end;
         searchEx' depth
           ( selectEVar ge_,
-            function
-            | acc' ->
-                ( begin
-                    begin if !Global.chatter > 5 then print "OK]\n" else ()
-                    end;
-                    let ge'_ =
-                      foldr
-                        (function
-                          | (I.EVar (_, g_, _, _) as x_), l_ ->
-                              Abstract.collectEVars (g_, (x_, I.id), l_))
-                        [] ge_
-                    in
-                    let gE' = List.length ge'_ in
-                    begin if gE' > 0 then begin
-                      if it > 0 then searchEx (it - 1, depth) (ge'_, sc, acc')
-                      else raise (Error "not found")
-                    end
-                    else sc acc'
-                    end
-                  end,
-                  acc ) )
+            (fun acc' ->
+                begin if !Global.chatter > 5 then print "OK]\n" else ()
+                end;
+                let ge'_ =
+                  foldr
+                    (function
+                      | (I.EVar (_, g_, _, _) as x_), l_ ->
+                          Abstract.collectEVars (g_, (x_, I.id), l_))
+                    [] ge_
+                in
+                let gE' = List.length ge'_ in
+                begin if gE' > 0 then begin
+                  if it > 0 then searchEx (it - 1, depth) (ge'_, sc, acc')
+                  else raise (Error "not found")
+                end
+                else sc acc'
+                end),
+            acc )
       end
 
     let rec search (maxFill, ge_, sc) = searchEx (1, maxFill) (ge_, sc, [])

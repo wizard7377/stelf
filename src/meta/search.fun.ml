@@ -43,6 +43,7 @@ module MTPSearch (MTPSearch__0 : sig
   module Names : NAMES
 end) : MTPSEARCH = struct
   (*! structure IntSyn = IntSyn' !*)
+  open MTPSearch__0
   module StateSyn = StateSyn'
 
   (*! structure CompSyn = CompSyn' !*)
@@ -50,7 +51,7 @@ end) : MTPSEARCH = struct
 
   open! struct
     module I = IntSyn
-    module C = CompSyn
+    module C = CompSyn.CompSyn
 
     let rec isInstantiated = function
       | I.Root (I.Const cid, _) -> true
@@ -72,7 +73,7 @@ end) : MTPSEARCH = struct
 
     let rec raiseType = function
       | null_, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.maybe_), v_))
+      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
 
     let rec exists p_ k_ =
       let rec exists' = function
@@ -91,8 +92,8 @@ end) : MTPSEARCH = struct
       | r, (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
       | r, (I.EVar (r', _, v'_, _), s) -> r = r' || occursInExp (r, (v'_, s))
-      | r, (I.FgnExp csfe, s) ->
-          I.FgnExpStd.fold csfe
+      | r, (I.FgnExp (csid_, csfe), s) ->
+          I.FgnExpStd.fold (csid_, csfe)
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
@@ -139,7 +140,7 @@ end) : MTPSEARCH = struct
           matchAtom (max, depth, (p, s), dp, sc)
       | max, depth, (C.Impl (r, a_, ha_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
-          Solve_
+          solve
             ( max,
               depth + 1,
               (g, I.dot1 s),
@@ -147,16 +148,16 @@ end) : MTPSEARCH = struct
               function m_ -> sc (I.Lam (d'_, m_)) )
       | max, depth, (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.decSub (d_, s) in
-          Solve_
+          solve
             ( max,
               depth + 1,
               (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.parameter_)),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
               function m_ -> sc (I.Lam (d'_, m_)) )
 
     and rSolve = function
       | max, depth, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc -> begin
-          if Unify.unifiable (g_, ps', (q_, s)) then sc I.nil_ else ()
+          if Unify.unifiable (g_, ps', (q_, s)) then sc I.Nil else ()
         end
       | ( max,
           depth,
@@ -166,7 +167,7 @@ end) : MTPSEARCH = struct
           sc ) -> begin
           match Assign.assignable (g_, ps', (q_, s)) with
           | Some cnstr ->
-              aSolve ((eqns, s), dp, cnstr, function () -> sc I.nil_)
+              aSolve ((eqns, s), dp, cnstr, function () -> sc I.Nil)
           | None -> ()
         end
       | max, depth, ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc
@@ -180,7 +181,7 @@ end) : MTPSEARCH = struct
               dp,
               function
               | s_ ->
-                  Solve_
+                  solve
                     ( max,
                       depth,
                       (g, s),
@@ -205,7 +206,7 @@ end) : MTPSEARCH = struct
               | s_ -> begin
                   if isInstantiated x_ then sc (I.App (x'_, s_))
                   else
-                    Solve_
+                    solve
                       ( max,
                         0,
                         (g, s'),
@@ -311,7 +312,7 @@ end) : MTPSEARCH = struct
       begin match (arg__1, arg__2) with
       | max, ([], sc) -> sc max
       | max, ((I.EVar (r, g_, v_, _) as x_) :: ge_, sc) ->
-          Solve_
+          solve
             ( max,
               0,
               (Compile.compileGoal (g_, v_), I.id),

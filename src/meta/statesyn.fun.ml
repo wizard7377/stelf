@@ -86,7 +86,7 @@ end) : STATESYN = struct
     let rec splitDepth (Splits k) = k
 
     let rec normalizeTag = function
-      | (Parameter _ as t_), _ -> T
+      | (Parameter _ as t_), _ -> t_
       | Lemma k_, s -> Lemma k_
   end
 

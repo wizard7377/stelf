@@ -1,4 +1,5 @@
 open! Basis
+open Funsyn
 
 (* Operational semantics *)
 (* Author: Carsten Schuermann *)

@@ -1,4 +1,5 @@
 open! Basis
+open Funsyn
 
 (* State definition for Proof Search *)
 (* Author: Carsten Schuermann *)

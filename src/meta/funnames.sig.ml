@@ -1,4 +1,5 @@
 open! Basis
+open Funsyn
 
 (* Names of Constants and Variables *)
 (* Author: Carsten Schuermann *)

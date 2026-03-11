@@ -1,4 +1,10 @@
 open! Basis
+open Mtp_global
+open Funtypecheck
+open Uniquesearch
+open Funprint
+open Funsyn
+open Statesyn
 
 (* Inference: Version 1.3 *)
 (* Author: Carsten Schuermann *)

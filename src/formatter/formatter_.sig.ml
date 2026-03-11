@@ -61,6 +61,8 @@ These may may be changed by the user.
   val hOVbox0 : int -> int -> int -> format list -> format
 
   (* blanks, indent, skip *)
+  val break_ : format
+
   (*
 \subsection{Output routines}
 *)

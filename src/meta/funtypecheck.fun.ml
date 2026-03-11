@@ -34,6 +34,7 @@ module FunTypeCheck (FunTypeCheck__0 : sig
   module FunPrint : FUNPRINT
 end) : FUNTYPECHECK = struct
   (*! structure FunSyn = FunSyn' !*)
+  open FunTypeCheck__0
   module StateSyn = StateSyn'
 
   exception Error of string
@@ -46,7 +47,7 @@ end) : FUNTYPECHECK = struct
     let rec conv (gs_, gs'_) =
       let exception Conv in
       let rec conv = function
-        | (null_, s), (null_, s') -> (s, s')
+        | (I.Null, s), (I.Null, s') -> (s, s')
         | (I.Decl (g_, I.Dec (_, v_)), s), (I.Decl (g'_, I.Dec (_, v'_)), s') ->
             let s1, s1' = conv ((g_, s), (g'_, s')) in
             let ((s2, s2') as ps) = (I.dot1 s1, I.dot1 s1') in
@@ -56,7 +57,7 @@ end) : FUNTYPECHECK = struct
       in
       try
         begin
-          conv (gs_, gs'_);
+          ignore (conv (gs_, gs'_));
           true
         end
       with Conv -> false
@@ -92,13 +93,13 @@ end) : FUNTYPECHECK = struct
         | n', a, s_ ->
             let (I.Dec (_, v_)) = I.ctxDec (g_, n') in
             begin if Subordinate.belowEq (I.targetFam v_, a) then
-              args (n' - 1, a, I.App (I.Root (I.BVar n', I.nil_), s_))
+              args (n' - 1, a, I.App (I.Root (I.BVar n', I.Nil), s_))
             else args (n' - 1, a, s_)
             end
       in
       let rec term m' =
         let (I.Dec (_, v_)) = I.ctxDec (psi'_, m') in
-        I.Exp (I.Root (I.BVar (n + m'), args (n, I.targetFam v_, I.nil_)))
+        I.Exp (I.Root (I.BVar (n + m'), args (n, I.targetFam v_, I.Nil)))
       in
       let rec raiseSub'' = function
         | 0, s -> s
@@ -115,7 +116,7 @@ end) : FUNTYPECHECK = struct
         | null_, vn_, a -> vn_
         | I.Decl (g'_, (I.Dec (_, v'_) as d_)), vn_, a -> begin
             if Subordinate.belowEq (I.targetFam v'_, a) then
-              raiseType'' (g'_, Abstract.piDepend ((d_, I.maybe_), vn_), a)
+              raiseType'' (g'_, Abstract.piDepend ((d_, I.Maybe), vn_), a)
             else raiseType'' (g'_, Weaken.strengthenExp (vn_, I.shift), a)
           end
       in
@@ -222,7 +223,7 @@ end) : FUNTYPECHECK = struct
           let _ =
             TypeCheck.typeCheck
               ( F.makectx (I.Decl (psi_, F.Block b_)),
-                (I.Uni I.type_, I.Uni I.kind_) )
+                (I.Uni I.Type, I.Uni I.Kind) )
           in
           let psi'_, delta'_, s' =
             assume (I.Decl (psi_, F.Block b_), shiftBlock (b_, delta_), ds_)
@@ -294,12 +295,12 @@ end) : FUNTYPECHECK = struct
           (psi'_, F.mdecSub (dd_, s') :: delta'_, s')
 
     and checkSub = function
-      | null_, I.Shift 0, null_ -> ()
-      | I.Decl (psi_, F.Prim d_), I.Shift k, null_ -> begin
+      | I.Null, I.Shift 0, I.Null -> ()
+      | I.Decl (psi_, F.Prim d_), I.Shift k, I.Null -> begin
           if k > 0 then checkSub (psi_, I.Shift (k - 1), I.null_)
           else raise (Error "Substitution not well-typed")
         end
-      | I.Decl (psi_, F.Block (F.CtxBlock (_, g_))), I.Shift k, null_ ->
+      | I.Decl (psi_, F.Block (F.CtxBlock (_, g_))), I.Shift k, I.Null ->
           let g = I.ctxLength g_ in
           begin if k >= g then checkSub (psi_, I.Shift (k - g), I.null_)
           else raise (Error "Substitution not well-typed")
@@ -328,7 +329,7 @@ end) : FUNTYPECHECK = struct
           I.Decl (psi_, F.Block (F.CtxBlock (l1, g_))) ) ->
           let F.Block (F.CtxBlock (l2, g'_)), w = F.lfctxLFDec (psi'_, k) in
           let rec checkSub' = function
-            | (null_, w1), s1, null_, _ -> s1
+            | (I.Null, w1), s1, I.Null, _ -> s1
             | ( (I.Decl (g'_, I.Dec (_, v'_)), w1),
                 I.Dot (I.Idx k', s1),
                 I.Decl (g_, I.Dec (_, v_)),
@@ -353,7 +354,7 @@ end) : FUNTYPECHECK = struct
           end
         end
 
-    let rec checkRec (p_, T) = check (I.null_, I.null_, p_, (T, I.id))
+    let rec checkRec (p_, t_) = check (I.null_, I.null_, p_, (t_, I.id))
 
     let rec isFor = function
       | g_, F.All (F.Prim d_, f_) -> (
@@ -363,22 +364,22 @@ end) : FUNTYPECHECK = struct
               isFor (I.Decl (g_, d_), f_)
             end
           with
-          | TypeCheck.Error msg -> raise (Error msg)
-          | g_, F.All (F.Block (F.CtxBlock (_, g1_)), f_) ->
-              isForBlock (g_, F.ctxToList g1_, f_)
-          | g_, F.Ex (d_, f_) -> (
-              try
-                begin
-                  TypeCheck.checkDec (g_, (d_, I.id));
-                  isFor (I.Decl (g_, d_), f_)
-                end
-              with
-              | TypeCheck.Error msg -> raise (Error msg)
-              | g_, true_ -> ()
-              | g_, F.And (f1_, f2_) -> begin
-                  isFor (g_, f1_);
-                  isFor (g_, f2_)
-                end))
+          | TypeCheck.Error msg -> raise (Error msg))
+      | g_, F.All (F.Block (F.CtxBlock (_, g1_)), f_) ->
+          isForBlock (g_, F.ctxToList g1_, f_)
+      | g_, F.Ex (d_, f_) -> (
+          try
+            begin
+              TypeCheck.checkDec (g_, (d_, I.id));
+              isFor (I.Decl (g_, d_), f_)
+            end
+          with
+          | TypeCheck.Error msg -> raise (Error msg))
+      | g_, true_ -> ()
+      | g_, F.And (f1_, f2_) -> begin
+          isFor (g_, f1_);
+          isFor (g_, f2_)
+        end
 
     and isForBlock = function
       | g_, [], f_ -> isFor (g_, f_)
@@ -390,10 +391,10 @@ end) : FUNTYPECHECK = struct
       | _ -> raise Domain
 
     let rec checkTags = function
-      | null_, null_ -> ()
-      | I.Decl (g_, I.Dec (_, v_)), I.Decl (b_, T) -> begin
+      | I.Null, I.Null -> ()
+      | I.Decl (g_, I.Dec (_, v_)), I.Decl (b_, t_) -> begin
           checkTags (g_, b_);
-          begin match T with S.Lemma _ -> () | _ -> ()
+          begin match t_ with S.Lemma _ -> () | _ -> ()
           end
         end
 
@@ -408,7 +409,7 @@ end) : FUNTYPECHECK = struct
             else ()
             end;
             begin
-              map (function n', f'_ -> isFor (g_, f'_)) h_;
+              ignore (map (function n', f'_ -> isFor (g_, f'_)) h_);
               isFor (g_, f_)
             end
           end

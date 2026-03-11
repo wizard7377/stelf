@@ -917,5 +917,6 @@ make the use of {\tt fmtstreams} on files more convenient.
   let hVbox0 = hVbox0_
   let hOVbox = hOVbox_
   let hOVbox0 = hOVbox0_
+  let break_ = break_
 end
 (* struct *)

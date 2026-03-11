@@ -21,6 +21,7 @@ module MTProver (MTProver__0 : sig
   module MTPStrategy : MTPSTRATEGY
   module RelFun : RELFUN
 end) : PROVER = struct
+  open MTProver__0
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 
@@ -36,7 +37,7 @@ end) : PROVER = struct
       | g_, Order.Arg k ->
           let k' = I.ctxLength g_ - k + 1 in
           let (I.Dec (_, v_)) = I.ctxDec (g_, k') in
-          S.Arg ((I.Root (I.BVar k', I.nil_), I.id), (v_, I.id))
+          S.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
       | g_, Order.Lex os_ ->
           S.Lex (map (function o_ -> transformOrder' (g_, o_)) os_)
       | g_, Order.Simul os_ ->
@@ -79,7 +80,7 @@ end) : PROVER = struct
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.null_, f_, map select cL) in
       begin if equiv (cL, cL') then
-        List.app (function s_ -> insertState s_) (MTPInit.init (f_, o_))
+        List.app (function s_ -> insertState s_) (Obj.magic (MTPInit.init (f_, Obj.magic o_)))
       else
         raise
           (Error
@@ -89,16 +90,16 @@ end) : PROVER = struct
       end
 
     let rec auto () =
-      let Open, solvedStates' =
-        try MTPStrategy.run !openStates with
+      let open_, solvedStates' =
+        try MTPStrategy.run (Obj.magic !openStates) with
         | Splitting.Error s -> error ("Splitting Error: " ^ s)
         | Filling.Error s -> error ("Filling Error: " ^ s)
         | Recursion.Error s -> error ("Recursion Error: " ^ s)
         | timeOut_ ->
             error "A proof could not be found -- Exceeding Time Limit\n"
       in
-      let _ = openStates := Open in
-      let _ = solvedStates := !solvedStates @ solvedStates' in
+      let _ = openStates := Obj.magic open_ in
+      let _ = solvedStates := !solvedStates @ Obj.magic solvedStates' in
       begin if List.length !openStates > 0 then
         raise (Error "A proof could not be found")
       else ()
@@ -173,6 +174,7 @@ module CombiProver (CombiProver__1 : sig
   (*! sharing ProverOld.IntSyn = IntSyn' !*)
   module ProverNew : PROVER
 end) : PROVER = struct
+  open CombiProver__1
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 

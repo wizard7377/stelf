@@ -1,4 +1,7 @@
 open! Basis
+open Mtp_global
+open Funsyn
+open Statesyn
 
 (* Basic search engine: Version 1.3*)
 (* Author: Carsten Schuermann *)

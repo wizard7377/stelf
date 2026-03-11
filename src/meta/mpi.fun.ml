@@ -1,5 +1,4 @@
 open! Print
-open! Inference
 open! Global
 open! Basis
 
@@ -48,6 +47,7 @@ module MTPi (MTPi__0 : sig
   module Timers : TIMERS
   module Ring : RING
 end) : MTPI = struct
+  open MTPi__0
   exception Error of string
 
   (*! structure FunSyn = FunSyn' !*)
@@ -65,26 +65,26 @@ end) : MTPI = struct
       | Splitting of MTPSplitting.operator
       | Inference of Inference.operator
 
-    let Open : StateSyn.state_ Ring.ring ref = ref (Ring.init [])
-    let Solved : StateSyn.state_ Ring.ring ref = ref (Ring.init [])
+    let open_ : StateSyn.state_ Ring.ring ref = ref (Ring.init [])
+    let solved_ : StateSyn.state_ Ring.ring ref = ref (Ring.init [])
 
     let history_ :
         (StateSyn.state_ Ring.ring * StateSyn.state_ Ring.ring) list ref =
       ref []
 
     let menu_ : menuItem_ list option ref = ref None
-    let rec initOpen () = Open := Ring.init []
-    let rec initSolved () = Solved := Ring.init []
-    let rec empty () = Ring.empty !Open
-    let rec current () = Ring.current !Open
-    let rec delete () = Open := Ring.delete !Open
-    let rec insertOpen s_ = Open := Ring.insert (!Open, s_)
-    let rec insertSolved s_ = Solved := Ring.insert (!Solved, s_)
+    let rec initOpen () = open_ := Ring.init []
+    let rec initSolved () = solved_ := Ring.init []
+    let rec empty () = Ring.empty !open_
+    let rec current () = Ring.current !open_
+    let rec delete () = open_ := Ring.delete !open_
+    let rec insertOpen s_ = open_ := Ring.insert (!open_, s_)
+    let rec insertSolved s_ = solved_ := Ring.insert (!solved_, s_)
     let rec insert s_ = insertOpen s_
-    let rec collectOpen () = Ring.foldr ( :: ) [] !Open
-    let rec collectSolved () = Ring.foldr ( :: ) [] !Solved
-    let rec nextOpen () = Open := Ring.next !Open
-    let rec pushHistory () = history_ := (!Open, !Solved) :: !history_
+    let rec collectOpen () = Ring.foldr (fun (a, b) -> a :: b) [] !open_
+    let rec collectSolved () = Ring.foldr (fun (a, b) -> a :: b) [] !solved_
+    let rec nextOpen () = open_ := Ring.next !open_
+    let rec pushHistory () = history_ := (!open_, !solved_) :: !history_
 
     let rec popHistory () =
       begin match !history_ with
@@ -92,8 +92,8 @@ end) : MTPI = struct
       | (open'_, solved'_) :: history'_ -> begin
           history_ := history'_;
           begin
-            Open := open'_;
-            Solved := solved'_
+            open_ := open'_;
+            solved_ := solved'_
           end
         end
       end
@@ -121,20 +121,23 @@ end) : MTPI = struct
       | c :: [] -> I.conDecName (I.sgnLookup c)
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
+    let printFmt (f : Print.Formatter.format) : Fmt.format =
+      Fmt.string (Print.Formatter.makestring_fmt f)
+
     let rec printFillResult (_, p_) =
       let rec formatTuple (g_, p_) =
         let rec formatTuple' = function
           | unit_ -> []
-          | F.Inx (m_, unit_) -> [ Print.formatExp (g_, m_) ]
+          | F.Inx (m_, unit_) -> [ printFmt (Print.formatExp (g_, m_)) ]
           | F.Inx (m_, p'_) ->
-              Print.formatExp (g_, m_)
-              :: Fmt.String "," :: Fmt.break_ :: formatTuple' p'_
+              printFmt (Print.formatExp (g_, m_))
+              :: Fmt.string "," :: Fmt.break_ :: formatTuple' p'_
         in
         begin match p_ with
-        | F.Inx (_, unit_) -> Fmt.Hbox (formatTuple' p_)
+        | F.Inx (_, unit_) -> Fmt.hbox (formatTuple' p_)
         | _ ->
-            Fmt.HVbox0
-              (1, 1, 1, (Fmt.String "(" :: formatTuple' p_) @ [ Fmt.String ")" ])
+            Fmt.hVbox0
+              1 1 1 ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
         end
       in
       let (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) = current () in
@@ -155,10 +158,10 @@ end) : MTPI = struct
       begin if empty () then menu_ := None
       else
         let s_ = current () in
-        let splitO_ = MTPSplitting.expand s_ in
-        let infO_ = Inference.expand s_ in
-        let recO_ = MTPRecursion.expand s_ in
-        let fillO_ = MTPFilling.expand s_ in
+        let splitO_ = MTPSplitting.expand (Obj.magic s_) in
+        let infO_ = Inference.expand (Obj.magic s_) in
+        let recO_ = MTPRecursion.expand (Obj.magic s_) in
+        let fillO_ = MTPFilling.expand (Obj.magic s_) in
         menu_ :=
           Some
             (fillingToMenu_
@@ -233,13 +236,13 @@ end) : MTPI = struct
       else
         let s_ = current () in
         let _ =
-          begin if !Global.doubleCheck then FunTypeCheck.isState s_ else ()
+          begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_) else ()
           end
         in
         begin
           print "\n";
           begin
-            print (MTPrint.stateToString s_);
+            print (MTPrint.stateToString (Obj.magic s_));
             begin
               print "\nSelect from the following menu:\n";
               begin
@@ -262,7 +265,7 @@ end) : MTPI = struct
       | g_, Order.Arg k ->
           let k' = I.ctxLength g_ - k + 1 in
           let (I.Dec (_, v_)) = I.ctxDec (g_, k') in
-          S.Arg ((I.Root (I.BVar k', I.nil_), I.id), (v_, I.id))
+          S.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
       | g_, Order.Lex os_ ->
           S.Lex (map (function o_ -> transformOrder' (g_, o_)) os_)
       | g_, Order.Simul os_ ->
@@ -288,14 +291,14 @@ end) : MTPI = struct
       let _ = reset () in
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.null_, f_, map select cL) in
-      let slist_ = MTPInit.init (f_, o_) in
+      let slist_ = MTPInit.init (f_, Obj.magic o_) in
       let _ =
         begin if List.length slist_ = 0 then raise Domain else ()
         end
       in
       try
         begin
-          map (function s_ -> insert (MTPrint.nameState s_)) slist_;
+          ignore (map (function s_ -> insert (Obj.magic (MTPrint.nameState (Obj.magic s_)))) slist_);
           begin
             menu ();
             printMenu ()
@@ -315,7 +318,7 @@ end) : MTPI = struct
             let s'_ = Timers.time Timers.splitting MTPSplitting.apply o_ in
             let _ = pushHistory () in
             let _ = delete () in
-            let _ = map (function s_ -> insert (MTPrint.nameState s_)) s'_ in
+            let _ = ignore (map (function s_ -> insert (Obj.magic (MTPrint.nameState (Obj.magic s_)))) s'_) in
             begin
               menu ();
               printMenu ()
@@ -324,7 +327,7 @@ end) : MTPI = struct
             let s'_ = Timers.time Timers.recursion MTPRecursion.apply o_ in
             let _ = pushHistory () in
             let _ = delete () in
-            let _ = insert (MTPrint.nameState s'_) in
+            let _ = insert (Obj.magic (MTPrint.nameState (Obj.magic s'_))) in
             begin
               menu ();
               printMenu ()
@@ -333,7 +336,7 @@ end) : MTPI = struct
             let s'_ = Timers.time Timers.recursion Inference.apply o_ in
             let _ = pushHistory () in
             let _ = delete () in
-            let _ = insert (MTPrint.nameState s'_) in
+            let _ = insert (Obj.magic (MTPrint.nameState (Obj.magic s'_))) in
             begin
               menu ();
               printMenu ()
@@ -371,7 +374,7 @@ end) : MTPI = struct
       else
         let s_ = current () in
         let open'_, solved'_ =
-          try MTPStrategy.run [ s_ ] with
+          try MTPStrategy.run [ Obj.magic s_ ] with
           | MTPSplitting.Error s -> abort ("MTPSplitting. Error: " ^ s)
           | MTPFilling.Error s -> abort ("Filling Error: " ^ s)
           | MTPRecursion.Error s -> abort ("Recursion Error: " ^ s)
@@ -380,8 +383,8 @@ end) : MTPI = struct
         in
         let _ = pushHistory () in
         let _ = delete () in
-        let _ = map insertOpen open'_ in
-        let _ = map insertSolved solved'_ in
+        let _ = ignore (map insertOpen (Obj.magic open'_)) in
+        let _ = ignore (map insertSolved (Obj.magic solved'_)) in
         begin
           menu ();
           printMenu ()
@@ -392,12 +395,12 @@ end) : MTPI = struct
       begin if empty () then raise (Error "Nothing to check")
       else
         let s_ = current () in
-        FunTypeCheck.isState s_
+        FunTypeCheck.isState (Obj.magic s_)
       end
 
     let rec auto () =
       let open'_, solved'_ =
-        try MTPStrategy.run (collectOpen ()) with
+        try MTPStrategy.run (Obj.magic (collectOpen ())) with
         | MTPSplitting.Error s -> abort ("MTPSplitting. Error: " ^ s)
         | MTPFilling.Error s -> abort ("Filling Error: " ^ s)
         | MTPRecursion.Error s -> abort ("Recursion Error: " ^ s)
@@ -406,8 +409,8 @@ end) : MTPI = struct
       in
       let _ = pushHistory () in
       let _ = initOpen () in
-      let _ = map insertOpen open'_ in
-      let _ = map insertSolved solved'_ in
+      let _ = ignore (map insertOpen (Obj.magic open'_)) in
+      let _ = ignore (map insertSolved (Obj.magic solved'_)) in
       begin
         menu ();
         printMenu ()
@@ -437,7 +440,7 @@ end) : MTPI = struct
   let print = printMenu
   let next = next
   let reset = reset
-  let Solve_ = Solve_
+  let solve = solve
   let auto = auto
   let check = check
   let undo = undo

@@ -155,6 +155,47 @@
      (echo "\n")
      (cat %{sml}s))))))
       
+
+(rule
+ (mode fallback)
+ (target weaken.sig.ml)
+ (action
+  (write-file weaken.sig.ml "")))
+
+(rule
+ (mode fallback)
+ (target weaken.fun.ml)
+ (action
+  (write-file weaken.fun.ml "")))
+
+(rule
+ (mode fallback)
+ (target weaken.sml.ml)
+ (action
+  (write-file weaken.sml.ml "")))
+
+(rule
+ (target weaken.ml)
+ (deps
+  (:sig weaken.sig.ml)
+  (:fun weaken.fun.ml)
+  (:sml weaken.sml.ml))
+ (action
+  (progn
+   (concurrent
+    (copy# %{sig} %{sig}s)
+    (copy# %{fun} %{fun}s)
+    (copy# %{sml} %{sml}s))
+   (with-stdout-to
+    %{target}
+    (progn
+     (cat %{sig}s)
+     (echo "\n")
+     (cat %{fun}s)
+     (echo "\n")
+     (cat %{sml}s))))))
+
+
       (rule
  (mode fallback)
  (target mtp_weaken.sig.ml)
@@ -371,8 +412,8 @@
 (rule
  (target mtp_abstract.ml)
  (deps
-  (:sig mtp_abstract.sig.ml)
-  (:fun mtp_abstract.fun.ml)
+  (:sig abstract.sig.ml)
+  (:fun abstract.fun.ml)
   (:sml mtp_abstract.sml.ml))
  (action
   (progn
@@ -410,8 +451,8 @@
 (rule
  (target mtp_init.ml)
  (deps
-  (:sig mtp_init.sig.ml)
-  (:fun mtp_init.fun.ml)
+  (:sig init.sig.ml)
+  (:fun init.fun.ml)
   (:sml mtp_init.sml.ml))
  (action
   (progn
@@ -449,8 +490,8 @@
 (rule
  (target mtp_filling.ml)
  (deps
-  (:sig mtp_filling.sig.ml)
-  (:fun mtp_filling.fun.ml)
+  (:sig filling.sig.ml)
+  (:fun filling.fun.ml)
   (:sml mtp_filling.sml.ml))
  (action
   (progn
@@ -488,8 +529,8 @@
 (rule
  (target mtp_global.ml)
  (deps
-  (:sig mtp_global.sig.ml)
-  (:fun mtp_global.fun.ml)
+  (:sig global.sig.ml)
+  (:fun global.fun.ml)
   (:sml mtp_global.sml.ml))
  (action
   (progn
@@ -527,8 +568,8 @@
 (rule
  (target mtp_data.ml)
  (deps
-  (:sig mtp_data.sig.ml)
-  (:fun mtp_data.fun.ml)
+  (:sig data.sig.ml)
+  (:fun data.fun.ml)
   (:sml mtp_data.sml.ml))
  (action
   (progn
@@ -566,8 +607,8 @@
 (rule
  (target mtp_mpi.ml)
  (deps
-  (:sig mtp_mpi.sig.ml)
-  (:fun mtp_mpi.fun.ml)
+  (:sig mpi.sig.ml)
+  (:fun mpi.fun.ml)
   (:sml mtp_mpi.sml.ml))
  (action
   (progn
@@ -605,8 +646,8 @@
 (rule
  (target mtp_recursion.ml)
  (deps
-  (:sig mtp_recursion.sig.ml)
-  (:fun mtp_recursion.fun.ml)
+  (:sig recursion.sig.ml)
+  (:fun recursion.fun.ml)
   (:sml mtp_recursion.sml.ml))
  (action
   (progn
@@ -644,8 +685,8 @@
 (rule
  (target mtp_search.ml)
  (deps
-  (:sig mtp_search.sig.ml)
-  (:fun mtp_search.fun.ml)
+  (:sig search.sig.ml)
+  (:fun search.fun.ml)
   (:sml mtp_search.sml.ml))
  (action
   (progn
@@ -722,8 +763,8 @@
 (rule
  (target mtp_splitting.ml)
  (deps
-  (:sig mtp_splitting.sig.ml)
-  (:fun mtp_splitting.fun.ml)
+  (:sig splitting.sig.ml)
+  (:fun splitting.fun.ml)
   (:sml mtp_splitting.sml.ml))
  (action
   (progn
@@ -839,8 +880,8 @@
 (rule
  (target mtp_strategy.ml)
  (deps
-  (:sig mtp_strategy.sig.ml)
-  (:fun mtp_strategy.fun.ml)
+  (:sig strategy.sig.ml)
+  (:fun strategy.fun.ml)
   (:sml mtp_strategy.sml.ml))
  (action
   (progn
@@ -878,8 +919,8 @@
 (rule
  (target mtp_print.ml)
  (deps
-  (:sig mtp_print.sig.ml)
-  (:fun mtp_print.fun.ml)
+  (:sig print.sig.ml)
+  (:fun print.fun.ml)
   (:sml mtp_print.sml.ml))
  (action
   (progn
@@ -917,8 +958,8 @@
 (rule
  (target mtp_prover.ml)
  (deps
-  (:sig mtp_prover.sig.ml)
-  (:fun mtp_prover.fun.ml)
+  (:sig prover.sig.ml)
+  (:fun prover.fun.ml)
   (:sml mtp_prover.sml.ml))
  (action
   (progn

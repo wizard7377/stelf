@@ -25,6 +25,7 @@ module MTPInit (MTPInit__0 : sig
   module FunPrint : FUNPRINT
 end) : MTPINIT = struct
   (*! structure FunSyn = FunSyn' !*)
+  open MTPInit__0
   module StateSyn = StateSyn'
 
   exception Error of string

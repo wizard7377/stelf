@@ -1,4 +1,11 @@
 open! Basis
+open Funsyn
+open Statesyn
+open Mtp_global
+open Mtp_abstract
+open Mtp_print
+open Funtypecheck
+open Funprint
 
 (* Recursion: Version 1.3 *)
 (* Author: Carsten Schuermann *)

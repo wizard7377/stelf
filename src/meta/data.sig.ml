@@ -1,4 +1,5 @@
 open! Basis
+open Mtp_global
 
 (* Data aquired during proof search *)
 (* Author: Carsten Schuermann *)

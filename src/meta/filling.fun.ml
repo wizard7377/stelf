@@ -24,6 +24,7 @@ module MTPFilling (MTPFilling__0 : sig
   module Whnf : WHNF
 end) : MTPFILLING = struct
   (*! structure FunSyn = FunSyn' !*)
+  open MTPFilling__0
   module StateSyn = StateSyn'
 
   exception Error of string
@@ -39,7 +40,7 @@ end) : MTPFILLING = struct
     exception Success of int
 
     let rec createEVars = function
-      | g_, (true_, s) -> ([], F.unit_)
+      | g_, (true_, s) -> ([], F.Unit)
       | g_, (F.Ex (I.Dec (_, v_), f_), s) ->
           let x_ = I.newEVar (g_, I.EClo (v_, s)) in
           let x'_ = Whnf.lowerEVar x_ in
@@ -61,14 +62,14 @@ end) : MTPFILLING = struct
                   xs_,
                   function
                   | max -> begin
-                      begin if !Global.doubleCheck then
+                      ignore (begin if !Global.doubleCheck then
                         map
                           (function
                             | I.EVar (_, g'_, v_, _) as x_ ->
                                 TypeCheck.typeCheck (g'_, (x_, v_)))
                           xs_
                       else []
-                      end;
+                      end);
                       raise (Success max)
                     end );
               raise (Error "Filling unsuccessful")

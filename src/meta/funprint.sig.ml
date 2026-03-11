@@ -1,4 +1,5 @@
 open! Basis
+open Funsyn
 
 (* Printing of functional proof terms *)
 (* Author: Carsten Schuermann *)

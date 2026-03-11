@@ -1,4 +1,19 @@
 open! Basis
+open Funsyn
+open Statesyn
+open Mtp_global
+open Relfun
+open Funtypecheck
+open Mtp_data
+open Mtp_init
+open Mtp_filling
+open Inference
+open Mtp_splitting
+open Mtp_recursion
+open Mtp_strategy
+open Mtp_print
+open Timers
+open Ring
 
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)

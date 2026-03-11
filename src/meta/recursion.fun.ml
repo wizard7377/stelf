@@ -51,6 +51,7 @@ module MTPRecursion (MTPRecursion__0 : sig
   module Formatter : FORMATTER
   module FunPrint : FUNPRINT
 end) : MTPRECURSION = struct
+  open MTPRecursion__0
   module StateSyn = StateSyn'
 
   exception Error of string
@@ -75,8 +76,8 @@ end) : MTPRECURSION = struct
         end
 
     let rec spine = function
-      | 0 -> I.nil_
-      | n -> I.App (I.Root (I.BVar n, I.nil_), spine (n - 1))
+      | 0 -> I.Nil
+      | n -> I.App (I.Root (I.BVar n, I.Nil), spine (n - 1))
 
     let rec someEVars = function
       | g_, [], s -> s
@@ -88,9 +89,9 @@ end) : MTPRECURSION = struct
       | d_ :: g_, s -> I.decSub (d_, s) :: ctxSub (g_, I.dot1 s)
 
     let rec appendCtx = function
-      | gb1_, T, [] -> gb1_
-      | (g1_, b1_), T, d_ :: g2_ ->
-          appendCtx ((I.Decl (g1_, d_), I.Decl (b1_, T)), T, g2_)
+      | gb1_, t_, [] -> gb1_
+      | (g1_, b1_), t_, d_ :: g2_ ->
+          appendCtx ((I.Decl (g1_, d_), I.Decl (b1_, t_)), t_, g2_)
 
     let rec createCtx = function
       | (g_, b_), [], s -> ((g_, b_), s, function af_ -> af_)
@@ -189,7 +190,7 @@ end) : MTPRECURSION = struct
     and set_parameter
         (((g1_, b1_) as gb_), (I.EVar (r, _, v_, _) as x_), k, sc, ac, ds_) =
       let rec set_parameter' = function
-        | (null_, null_), _, ds_ -> ds_
+        | (I.Null, I.Null), _, ds_ -> ds_
         | (I.Decl (g_, d_), I.Decl (b_, S.Parameter _)), k, ds_ ->
             let (I.Dec (_, v'_) as d'_) = I.decSub (d_, I.Shift k) in
             let ds'_ =
@@ -197,7 +198,7 @@ end) : MTPRECURSION = struct
                   begin if
                     Unify.unifiable (g1_, (v_, I.id), (v'_, I.id))
                     && Unify.unifiable
-                         (g1_, (x_, I.id), (I.Root (I.BVar k, I.nil_), I.id))
+                         (g1_, (x_, I.id), (I.Root (I.BVar k, I.Nil), I.id))
                   then sc ds_
                   else ds_
                   end)
@@ -373,8 +374,8 @@ end) : MTPRECURSION = struct
           lt (gb_, k, (us_, vs_), (us'_, vs'_), sc, ac, ds_)
 
     and ordlt = function
-      | gb_, S.Arg usVs_, S.Arg usVs'_, sc, ac, ds_ ->
-          ltinit (gb_, 0, usVs_, usVs'_, sc, ac, ds_)
+      | gb_, S.Arg (usVs_a, usVs_b), S.Arg (usVs'_a, usVs'_b), sc, ac, ds_ ->
+          ltinit (gb_, 0, (usVs_a, usVs_b), (usVs'_a, usVs'_b), sc, ac, ds_)
       | gb_, S.Lex l_, S.Lex l'_, sc, ac, ds_ ->
           ordltLex (gb_, l_, l'_, sc, ac, ds_)
       | gb_, S.Simul l_, S.Simul l'_, sc, ac, ds_ ->
@@ -390,8 +391,9 @@ end) : MTPRECURSION = struct
             ( gb_,
               o_,
               o'_,
-              function
-              | ds''_ -> (ordltLex (gb_, l_, l'_, sc, ac, ds''_), ac, ds'_) )
+              (fun ds''_ -> ordltLex (gb_, l_, l'_, sc, ac, ds''_)),
+              ac,
+              ds'_ )
 
     and ordltSimul = function
       | gb_, [], [], sc, ac, ds_ -> ds_
@@ -402,16 +404,17 @@ end) : MTPRECURSION = struct
                   ( gb_,
                     o_,
                     o'_,
-                    function
-                    | ds'_ -> (ordleSimul (gb_, l_, l'_, sc, ac, ds'_), ac, ds_)
-                  ))
+                    (fun ds'_ -> ordleSimul (gb_, l_, l'_, sc, ac, ds'_)),
+                    ac,
+                    ds_ ))
           in
           ordeq
             ( gb_,
               o_,
               o'_,
-              function
-              | ds'_ -> (ordltSimul (gb_, l_, l'_, sc, ac, ds'_), ac, ds''_) )
+              (fun ds'_ -> ordltSimul (gb_, l_, l'_, sc, ac, ds'_)),
+              ac,
+              ds''_ )
 
     and ordleSimul = function
       | gb_, [], [], sc, ac, ds_ -> sc ds_
@@ -420,8 +423,9 @@ end) : MTPRECURSION = struct
             ( gb_,
               o_,
               o'_,
-              function
-              | ds'_ -> (ordleSimul (gb_, l_, l'_, sc, ac, ds'_), ac, ds_) )
+              (fun ds'_ -> ordleSimul (gb_, l_, l'_, sc, ac, ds'_)),
+              ac,
+              ds_ )
 
     and ordeq = function
       | (g_, b_), S.Arg (us_, vs_), S.Arg (us'_, vs'_), sc, ac, ds_ -> begin
@@ -441,7 +445,9 @@ end) : MTPRECURSION = struct
             ( gb_,
               o_,
               o'_,
-              function ds'_ -> (ordeqs (gb_, l_, l'_, sc, ac, ds'_), ac, ds_) )
+              (fun ds'_ -> ordeqs (gb_, l_, l'_, sc, ac, ds'_)),
+              ac,
+              ds_ )
 
     and ordle (gb_, o_, o'_, sc, ac, ds_) =
       let ds'_ =
@@ -461,20 +467,18 @@ end) : MTPRECURSION = struct
               | s, de' -> (
                   let s', v'_, f'_ = sc (s, de') in
                   ( I.dot1 s',
-                    function
-                    | v_ ->
-                        ( v'_
-                            (Abstract.piDepend
-                               ( (Whnf.normalizeDec (d_, s'), I.meta_),
-                                 Whnf.normalize (v_, I.id) )),
-                          function
-                          | f_ -> f'_ (F.All (F.Prim (I.decSub (d_, s')), f_))
-                        ) )) )
+                    (fun v_ ->
+                        v'_
+                          (Abstract.piDepend
+                             ( (Whnf.normalizeDec (d_, s'), I.Meta),
+                               Whnf.normalize (v_, I.id) ))),
+                    (fun f_ -> f'_ (F.All (F.Prim (I.decSub (d_, s')), f_)))
+                  )) )
       | (du, de), (g_, b_), w, F.Ex (I.Dec (name, v_), f_), sc ->
           let s', v'_, f'_ = sc (w, de) in
           let v1_ = I.EClo (v_, s') in
           let v2_ = Whnf.normalize (v'_ v1_, I.id) in
-          let f1_ = F.Ex (I.Dec (name, v1_), F.true_) in
+          let f1_ = F.Ex (I.Dec (name, v1_), F.True) in
           let f2_ = f'_ f1_ in
           let _ =
             begin if !Global.doubleCheck then FunTypeCheck.isFor (g_, f2_)
@@ -484,7 +488,7 @@ end) : MTPRECURSION = struct
           let d2_ = I.Dec (None, v2_) in
           let t2_ =
             begin match f2_ with
-            | F.All _ -> S.Lemma S.rl_
+            | F.All _ -> S.Lemma S.Rl
             | _ -> S.Lemma (S.Splits !MTPGlobal.maxSplit)
             end
           in
@@ -512,7 +516,7 @@ end) : MTPRECURSION = struct
                 I.id,
                 F.forSub (frl'_, s),
                 function
-                | s', _ -> (s', function v'_ -> (v'_, function f'_ -> f'_)) )
+                | s', _ -> (s', (fun v'_ -> v'_), (fun f'_ -> f'_)) )
           in
           let s'' = I.comp (s, s') in
           updateState
@@ -546,7 +550,7 @@ end) : MTPRECURSION = struct
 
     let rec expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
       let _ =
-        begin if !Global.doubleCheck then FunTypeCheck.isState s_ else ()
+        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_) else ()
         end
       in
       let _, s'_ = selectFormula (1, (I.null_, ih_, oh_), s_) in
@@ -554,7 +558,7 @@ end) : MTPRECURSION = struct
 
     let rec apply s_ =
       begin
-        begin if !Global.doubleCheck then FunTypeCheck.isState s_ else ()
+        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_) else ()
         end;
         s_
       end

@@ -1,4 +1,25 @@
 open! Basis
+open Mtp_global
+open Meta_global
+open Statesyn
+open Funnames
+open Funprint
+open Funweaken
+open Funtypecheck
+open Relfun
+open Mtp_data
+open Mtp_abstract
+open Mtp_init
+open Mtp_print
+open Mtp_search
+open Mtp_filling
+open Mtp_splitting
+open Uniquesearch
+open Inference
+open Mtp_recursion
+open Mtp_strategy
+open Mtp_prover
+open Mtp_mpi
 
 module MTPGlobal = MTPGlobal (struct
   module MetaGlobal = MetaGlobal
@@ -33,7 +54,7 @@ module FunPrint = FunPrint (struct
 end)
 
 (* moves eventually into the Twelf core *)
-module Weaken = Weaken (struct
+module Weaken = Weaken.Make_Weaken (struct
   (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf
 end)
 
@@ -129,7 +150,7 @@ module MTPSearch = MTPSearch (struct
   module Whnf = Whnf
   module Unify = UnifyTrail
   module Index = IndexSkolem
-  module Assign = Assign
+  module Assign = Assign__
   module CPrint = CPrint
   module Print = Print
   module Names = Names
@@ -147,7 +168,6 @@ module MTPFilling = MTPFilling (struct
   module Abstract = Abstract
   module TypeCheck = TypeCheck
   module Search = MTPSearch
-  module Whnf = Whnf
 end)
 
 module MTPSplitting = MTPSplitting (struct
@@ -186,7 +206,7 @@ module UniqueSearch = UniqueSearch (struct
   (*! structure CompSyn' = CompSyn !*)
   module Whnf = Whnf
   module Unify = UnifyTrail
-  module Assign = Assign
+  module Assign = Assign__
   module Index = Index
   module Compile = Compile
   module CPrint = CPrint
@@ -242,7 +262,7 @@ module MTPStrategy = MTPStrategy (struct
   module MTPSplitting = MTPSplitting
   module MTPRecursion = MTPRecursion
   module Inference = Inference
-  module Timers = Timers
+  module Timers = Timers.Timers
 end)
 
 module MTProver = MTProver (struct
@@ -286,6 +306,6 @@ module MTPi = MTPi (struct
   module MTPStrategy = MTPStrategy
   module Names = Names
   module Order = Order
-  module Timers = Timers
-  module Ring = Ring
+  module Timers = Timers.Timers
+  module Ring = Ring.Ring
 end)

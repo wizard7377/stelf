@@ -1,4 +1,3 @@
-open! Inference
 open! Global
 open! Basis
 
@@ -15,6 +14,7 @@ module MTPStrategy (MTPStrategy__0 : sig
   module MTPrint : MTPRINT
   module Timers : TIMERS
 end) : MTPSTRATEGY = struct
+  open MTPStrategy__0
   module StateSyn = StateSyn'
 
   open! struct
@@ -104,25 +104,24 @@ end) : MTPSTRATEGY = struct
               (function
                 | s_ ->
                     Timers.time Timers.recursion MTPRecursion.apply
-                      (MTPRecursion.expand s_))
-              sl_
-          in
+                      (MTPRecursion.expand (Obj.magic s_)))
+              sl_ in
           let _ = printInference () in
           let sl''_ =
             map
               (function
                 | s_ ->
                     Timers.time Timers.inference Inference.apply
-                      (Inference.expand s_))
+                      (Inference.expand (Obj.magic s_)))
               sl'_
           in
-          fill (sl''_ @ givenStates, os)
+          fill (Obj.magic sl''_ @ givenStates, os)
       end
 
     and fill = function
       | [], os -> os
       | s_ :: givenStates, ((openStates, solvedStates) as os) -> begin
-          match Timers.time Timers.recursion MTPFilling.expand s_ with
+          match Timers.time Timers.recursion MTPFilling.expand (Obj.magic s_) with
           | fillingOp -> (
               try
                 let _ = printFilling () in
@@ -136,16 +135,16 @@ end) : MTPSTRATEGY = struct
               with MTPFilling.Error _ -> split (s_ :: givenStates, os))
         end
 
-    let rec run givenStates =
+    let rec run (givenStates : S.state_ list) =
       let _ = printInit () in
-      let openStates, solvedStates = fill (givenStates, ([], [])) in
-      let openStates' = map MTPrint.nameState openStates in
-      let solvedStates' = map MTPrint.nameState solvedStates in
+      let openStates, solvedStates = fill (Obj.magic givenStates, ([], [])) in
+      let openStates' = map MTPrint.nameState (Obj.magic openStates) in
+      let solvedStates' = map MTPrint.nameState (Obj.magic solvedStates) in
       let _ =
         begin match openStates with [] -> printQed () | _ -> ()
         end
       in
-      (openStates', solvedStates')
+      (Obj.magic openStates' : S.state_ list), (Obj.magic solvedStates' : S.state_ list)
   end
 
   (* if !Global.chatter > 5 then print (""["" ^ MTPSplitting.menu splitOp) *)

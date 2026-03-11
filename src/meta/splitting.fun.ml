@@ -48,6 +48,7 @@ module MTPSplitting (MTPSplitting__0 : sig
   (*! sharing Print.IntSyn = IntSyn !*)
   module Unify : UNIFY
 end) : MTPSPLITTING = struct
+  open MTPSplitting__0
   module StateSyn = StateSyn'
 
   exception Error of string
@@ -93,7 +94,7 @@ end) : MTPSPLITTING = struct
               { sd = n; ind = i_; c = List.length l_; m; r = 0; p = g + 1 } )
 
     let rec aux = function
-      | null_, null_ -> I.null_
+      | I.Null, I.Null -> I.null_
       | I.Decl (g_, d_), I.Decl (b_, S.Lemma _) ->
           I.Decl (aux (g_, b_), F.Prim d_)
       | (I.Decl (_, d_) as g_), (I.Decl (_, S.Parameter (Some l)) as b_) ->
@@ -110,7 +111,7 @@ end) : MTPSPLITTING = struct
     let rec conv (gs_, gs'_) =
       let exception Conv in
       let rec conv = function
-        | (null_, s), (null_, s') -> (s, s')
+        | (I.Null, s), (I.Null, s') -> (s, s')
         | (I.Decl (g_, I.Dec (_, v_)), s), (I.Decl (g'_, I.Dec (_, v'_)), s') ->
             let s1, s1' = conv ((g_, s), (g'_, s')) in
             let ((s2, s2') as ps) = (I.dot1 s1, I.dot1 s1') in
@@ -120,7 +121,7 @@ end) : MTPSPLITTING = struct
       in
       try
         begin
-          conv (gs_, gs'_);
+          ignore (conv (gs_, gs'_));
           true
         end
       with Conv -> false
@@ -128,8 +129,8 @@ end) : MTPSPLITTING = struct
     let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
 
     and createEVarSpineW = function
-      | g_, ((I.Uni type_, s) as vs_) -> (I.nil_, vs_)
-      | g_, ((I.Root _, s) as vs_) -> (I.nil_, vs_)
+      | g_, ((I.Uni type_, s) as vs_) -> (I.Nil, vs_)
+      | g_, ((I.Root _, s) as vs_) -> (I.Nil, vs_)
       | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
           let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
@@ -272,7 +273,8 @@ end) : MTPSPLITTING = struct
             ( I.Decl (g_, d'_),
               k + 1,
               (v_, I.dot1 s'),
-              function u_ -> (abstract (I.Lam (d'_, u_)), cases) )
+              (fun u_ -> abstract (I.Lam (d'_, u_))),
+              cases )
 
     let rec abstractErrorLeft ((g_, b_), s) =
       raise (MTPAbstract.Error "Cannot split left of parameters")
@@ -280,20 +282,20 @@ end) : MTPSPLITTING = struct
     let rec abstractErrorRight ((g_, b_), s) =
       raise (MTPAbstract.Error "Cannot split right of parameters")
 
-    let rec split (((I.Dec (_, v_) as d_), T), sc, abstract) =
+    let rec split (((I.Dec (_, v_) as d_), t_), sc, abstract) =
       let rec split' (n, cases) =
         begin if n < 0 then
           let (g'_, b'_), s', (g0_, b0_), _ = sc (I.null_, I.null_) in
           let rec abstract' u'_ =
-            let (g''_, b''_), s'' =
-              MTPAbstract.abstractSub'
-                ((g'_, b'_), I.Dot (I.Exp u'_, s'), I.Decl (b0_, T))
+            let ((g''_, b''_), s'') : (I.dctx * S.tag_ I.ctx_) * I.sub_ =
+              Obj.magic (MTPAbstract.abstractSub'
+                ((g'_, b'_), I.Dot (I.Exp u'_, s'), I.Decl (b0_, t_)))
             in
             let _ =
               begin if !Global.doubleCheck then
                 let psi''_ = aux (g''_, b''_) in
                 let _ = TypeCheck.typeCheckCtx (F.makectx psi''_) in
-                let psi_ = aux (I.Decl (g0_, d_), I.Decl (b0_, T)) in
+                let psi_ = aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0_, t_))) in
                 let _ = TypeCheck.typeCheckCtx (F.makectx psi_) in
                 FunTypeCheck.checkSub (psi''_, s'', psi_)
               else ()
@@ -316,15 +318,15 @@ end) : MTPSPLITTING = struct
             begin if p then
               raise (MTPAbstract.Error "Cannot split right of parameters")
             else
-              let (g''_, b''_), s'' =
-                MTPAbstract.abstractSub
-                  (t, b1_, (g'_, b'_), I.Dot (I.Exp u'_, s'), I.Decl (b0_, T))
+              let ((g''_, b''_), s'') : (I.dctx * S.tag_ I.ctx_) * I.sub_ =
+                Obj.magic ((Obj.magic MTPAbstract.abstractSub)
+                  (t, b1_, (g'_, b'_), I.Dot (I.Exp u'_, s'), I.Decl (b0_, t_)))
               in
               let _ =
                 begin if !Global.doubleCheck then
                   let psi''_ = aux (g''_, b''_) in
                   let _ = TypeCheck.typeCheckCtx (F.makectx psi''_) in
-                  let psi_ = aux (I.Decl (g0_, d_), I.Decl (b0_, T)) in
+                  let psi_ = aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0_, t_))) in
                   let _ = TypeCheck.typeCheckCtx (F.makectx psi_) in
                   FunTypeCheck.checkSub (psi''_, s'', psi_)
                 else ()
@@ -347,8 +349,8 @@ end) : MTPSPLITTING = struct
       | k, I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExp (k + 1, v_)
       | k, I.Root (c_, s_) -> occursInCon (k, c_) || occursInSpine (k, s_)
       | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
-      | k, I.FgnExp csfe ->
-          I.FgnExpStd.fold csfe
+      | k, I.FgnExp (csid_, csfe) ->
+          I.FgnExpStd.fold (csid_, csfe)
             (function
               | u_, b_ -> b_ || occursInExp (k, Whnf.normalize (u_, I.id)))
             false
@@ -392,10 +394,10 @@ end) : MTPSPLITTING = struct
         end
       end
 
-    let rec abstractCont ((d_, T), abstract) ((g_, b_), s) =
+    let rec abstractCont ((d_, t_), abstract) ((g_, b_), s) =
       abstract
         ( ( I.Decl (g_, Whnf.normalizeDec (d_, s)),
-            I.Decl (b_, S.normalizeTag (T, s)) ),
+            I.Decl (b_, S.normalizeTag (t_, s)) ),
           I.dot1 s )
 
     let rec makeAddressInit s_ k = (s_, k)
@@ -419,10 +421,9 @@ end) : MTPSPLITTING = struct
     let rec inductionCont induction k = induction (k + 1)
 
     let rec expand' = function
-      | ((null_, null_) as gb_), isIndex, abstract, makeAddress, induction -> (
-          function
-          | gp_, bp_ -> (((gp_, bp_), I.Shift (I.ctxLength gp_), gb_, false), [])
-          )
+      | ((I.Null, I.Null) as gb_), isIndex, abstract, makeAddress, induction ->
+          ((fun (gp_, bp_) -> ((gp_, bp_), I.Shift (I.ctxLength gp_), gb_, false)),
+           [])
       | ( ((I.Decl (g_, d_), I.Decl (b_, (S.Lemma (S.Splits _ as k_) as t_))) as
            gb_),
           isIndex,
@@ -433,7 +434,7 @@ end) : MTPSPLITTING = struct
             expand'
               ( (g_, b_),
                 isIndexSucc (d_, isIndex),
-                abstractCont ((d_, T), abstract),
+                abstractCont ((d_, t_), abstract),
                 makeAddressCont makeAddress,
                 inductionCont induction )
           in
@@ -443,7 +444,7 @@ end) : MTPSPLITTING = struct
             let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
             ( (g'_, b'_),
               I.Dot (I.Exp x_, s'),
-              (I.Decl (g0_, d_), I.Decl (b0_, T)),
+              (I.Decl (g0_, d_), I.Decl (b0_, t_)),
               p' )
           in
           let ops' =
@@ -451,7 +452,7 @@ end) : MTPSPLITTING = struct
               let a = I.targetFam v_ in
               makeOperator
                 ( makeAddress 1,
-                  split ((d_, T), sc, abstract),
+                  split ((d_, Obj.magic t_), Obj.magic sc, abstract),
                   k_,
                   I.ctxLength g_,
                   induction 1,
@@ -471,7 +472,7 @@ end) : MTPSPLITTING = struct
             expand'
               ( (g_, b_),
                 isIndexSucc (d_, isIndex),
-                abstractCont ((d_, T), abstract),
+                abstractCont ((d_, t_), abstract),
                 makeAddressCont makeAddress,
                 inductionCont induction )
           in
@@ -481,7 +482,7 @@ end) : MTPSPLITTING = struct
             let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
             ( (g'_, b'_),
               I.Dot (I.Exp x_, s'),
-              (I.Decl (g0_, d_), I.Decl (b0_, T)),
+              (I.Decl (g0_, d_), I.Decl (b0_, t_)),
               p' )
           in
           (sc', ops)
@@ -494,7 +495,7 @@ end) : MTPSPLITTING = struct
             expand'
               ( (g_, b_),
                 isIndexSucc (d_, isIndex),
-                abstractCont ((d_, T), abstract),
+                abstractCont ((d_, t_), abstract),
                 makeAddressCont makeAddress,
                 inductionCont induction )
           in
@@ -504,7 +505,7 @@ end) : MTPSPLITTING = struct
             let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
             ( (g'_, b'_),
               I.Dot (I.Exp x_, s'),
-              (I.Decl (g0_, d_), I.Decl (b0_, T)),
+              (I.Decl (g0_, d_), I.Decl (b0_, t_)),
               p' )
           in
           (sc', ops)
@@ -525,16 +526,16 @@ end) : MTPSPLITTING = struct
           let rec sc' (gp_, bp_) =
             let (g'_, b'_), s', (g0_, b0_), _ = sc (gp_, bp_) in
             ( ( I.Decl (g'_, Names.decName (g'_, I.decSub (d_, s'))),
-                I.Decl (b'_, T) ),
+                I.Decl (b'_, t_) ),
               I.dot1 s',
-              (I.Decl (g0_, d_), I.Decl (b0_, T)),
+              (I.Decl (g0_, d_), I.Decl (b0_, t_)),
               true )
           in
           (sc', ops)
 
     let rec expand (S.State (n, (g0_, b0_), _, _, o_, _, _) as s0_) =
       let _ =
-        begin if !Global.doubleCheck then FunTypeCheck.isState s0_ else ()
+        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s0_) else ()
         end
       in
       let _, ops =
@@ -561,7 +562,7 @@ end) : MTPSPLITTING = struct
       map
         (function
           | Active s_ -> begin
-              begin if !Global.doubleCheck then FunTypeCheck.isState s_ else ()
+              begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_ : FunTypeCheck.StateSyn.state_) else ()
               end;
               s_
             end
@@ -750,7 +751,7 @@ end) : MTPSPLITTING = struct
        and  G' |- s' : G
        then |- S' = (n, (G', B'), (IH, OH), d, O[s'], H[s'], F[s']) state
     *)
-  (* abstractCont ((x:V, T), abstract) = abstract'
+  (* abstractCont ((x:V, t_), abstract) = abstract'
 
        Invariant:
        If   |- G ctx

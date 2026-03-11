@@ -31,11 +31,12 @@ module Inference (Inference__0 : sig
   module Whnf : WHNF
 end) : INFERENCE = struct
   (*! structure FunSyn = FunSyn' !*)
+  open Inference__0
   module StateSyn = StateSyn'
 
   exception Error of string
 
-  type nonrec operator = unit -> StateSyn'.state_
+  type nonrec operator = unit -> StateSyn.state_
 
   open! struct
     module S = StateSyn
@@ -56,7 +57,7 @@ end) : INFERENCE = struct
       | g_, b_, (I.Pi ((_, meta_), _) as v_) -> (
           let _ =
             begin if !Global.doubleCheck then
-              TypeCheck.typeCheck (g_, (v_, I.Uni I.type_))
+              TypeCheck.typeCheck (g_, (v_, I.Uni I.Type))
             else ()
             end
           in
@@ -74,11 +75,11 @@ end) : INFERENCE = struct
             | [] -> None
             end
           with
-          | UniqueSearch.Error _ -> None
-          | g_, b_, v_ -> None)
+          | UniqueSearch.Error _ -> None)
+      | g_, b_, v_ -> None
 
     let rec expand' = function
-      | (g0_, b0_), (null_, null_), n ->
+      | (g0_, b0_), (I.Null, I.Null), n ->
           ((I.null_, I.null_), function (g'_, b'_), w' -> ((g'_, b'_), w'))
       | ( (g0_, b0_),
           (I.Decl (g_, (I.Dec (_, v_) as d_)), I.Decl (b_, (S.Lemma rl_ as t_))),
@@ -87,9 +88,9 @@ end) : INFERENCE = struct
           let s = I.Shift (n + 1) in
           let vs_ = Whnf.normalize (v_, s) in
           begin match forward (g0_, b0_, vs_) with
-          | None -> ((I.Decl (g0'_, d_), I.Decl (b0'_, T)), sc')
+          | None -> ((I.Decl (g0'_, d_), I.Decl (b0'_, t_)), sc')
           | Some v'_ ->
-              ( (I.Decl (g0'_, d_), I.Decl (b0'_, S.Lemma S.rLdone_)),
+              ( (I.Decl (g0'_, d_), I.Decl (b0'_, S.Lemma S.RLdone)),
                 function
                 | (g'_, b'_), w' ->
                     let v''_ = Whnf.normalize (v'_, w') in
@@ -99,9 +100,9 @@ end) : INFERENCE = struct
                         ),
                         I.comp (w', I.shift) ) )
           end
-      | gb0_, (I.Decl (g_, d_), I.Decl (b_, T)), n ->
+      | gb0_, (I.Decl (g_, d_), I.Decl (b_, t_)), n ->
           let (g0'_, b0'_), sc' = expand' (gb0_, (g_, b_), n + 1) in
-          ((I.Decl (g0'_, d_), I.Decl (b0'_, T)), sc')
+          ((I.Decl (g0'_, d_), I.Decl (b0'_, t_)), sc')
 
     let rec expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
       let _ =
@@ -126,7 +127,7 @@ end) : INFERENCE = struct
             F.forSub (f_, w') )
       in
       let _ =
-        begin if !Global.doubleCheck then FunTypeCheck.isState s'_ else ()
+        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s'_) else ()
         end
       in
       function () -> s'_

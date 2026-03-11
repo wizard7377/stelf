@@ -1,4 +1,8 @@
 open! Basis
+open Modetable
+open Funweaken
+open Funnames
+open Funsyn
 
 (* Converter from relational representation to a functional
    representation of proof terms *)

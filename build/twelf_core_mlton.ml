@@ -296,10 +296,10 @@ open! Red_black_set
 module Red_black_set = Red_black_set
 open! Red_black_set
 module Red_black_set = Red_black_set
-open! Compsyn
-module Compsyn = Compsyn
-open! Compsyn
-module Compsyn = Compsyn
+open! CompSyn
+module CompSyn = CompSyn
+open! CompSyn
+module CompSyn = CompSyn
 open! Cprint
 module Cprint = Cprint
 open! Cprint

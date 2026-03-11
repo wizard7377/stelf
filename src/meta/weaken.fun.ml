@@ -2,7 +2,7 @@ open! Basis
 
 (* Weakening substitutions *)
 (* Author: Carsten Schuermann *)
-module Weaken (Weaken__0 : sig
+module Make_Weaken (Weaken__0 : sig
   module Whnf : WHNF
 end) : WEAKEN = struct
   (*! structure IntSyn = IntSyn' !*)
@@ -23,7 +23,7 @@ end) : WEAKEN = struct
     let rec strengthenSub (s, t) = Whnf.compInv (s, t)
 
     let rec strengthenSpine = function
-      | nil_, t -> I.nil_
+      | I.Nil, t -> I.Nil
       | I.App (u_, s_), t ->
           I.App (strengthenExp (u_, t), strengthenSpine (s_, t))
   end
@@ -58,3 +58,7 @@ end
 (*! structure IntSyn' : INTSYN !*)
 (*! sharing Whnf.IntSyn = IntSyn' !*)
 (* functor Weaken *)
+
+module Weaken = Make_Weaken (struct
+  module Whnf = Whnf
+end)

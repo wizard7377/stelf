@@ -81,7 +81,7 @@
   thmprint
   thm
   red_black_set
-  compsyn
+  compSyn
   cprint
   assign
   compile

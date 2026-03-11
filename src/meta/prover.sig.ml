@@ -1,4 +1,10 @@
 open! Basis
+open Funsyn
+open Statesyn
+open Mtp_global
+open Mtp_init
+open Mtp_strategy
+open Relfun
 
 (* Meta Prover Version 1.3 *)
 (* Author: Carsten Schuermann *)

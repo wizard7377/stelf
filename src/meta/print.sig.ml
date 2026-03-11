@@ -1,4 +1,7 @@
 open! Basis
+open Funsyn
+open Statesyn
+open Funprint
 
 (* Meta Printer Version 1.3 *)
 (* Author: Carsten Schuermann *)

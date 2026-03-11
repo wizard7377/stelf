@@ -1,4 +1,5 @@
 open! Basis
+open Funsyn
 
 (* Weakening substitutions for meta substitutions *)
 (* Author: Carsten Schuermann *)
