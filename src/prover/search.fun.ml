@@ -8,7 +8,7 @@ module Search (Search__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
   (*! sharing Tomega'.IntSyn = IntSyn' !*)
-  module State' : STATE
+  module State' : State.STATE
 
   (*! sharing State'.IntSyn = IntSyn' !*)
   (*! sharing State'.Tomega = Tomega' !*)
@@ -16,7 +16,7 @@ module Search (Search__0 : sig
 
   (*! sharing Abstract.IntSyn = IntSyn' !*)
   (*! sharing Abstract.Tomega = Tomega' !*)
-  module Data : DATA
+  module Data : Data.DATA
   module CompSyn' : COMPSYN
 
   (*! sharing CompSyn'.IntSyn = IntSyn' !*)
@@ -46,18 +46,22 @@ module Search (Search__0 : sig
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn' !*)
-  module Cs_manager : CS_MANAGER
+  module Cs_manager : Cs_manager.CS_MANAGER
 end) : SEARCH = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  module State = State'
+  module State = Search__0.State'
 
   (*! structure CompSyn = CompSyn' !*)
   exception Error of string
 
   open! struct
     module I = IntSyn
-    module C = CompSyn
+    module C = CompSyn.CompSyn
+    module Unify = Search__0.Unify
+    module Assign = Search__0.Assign
+    module Compile = Search__0.Compile
+    module Cs_manager = Search__0.Cs_manager
 
     let rec isInstantiated = function
       | I.Root (I.Const cid, _) -> true
@@ -138,7 +142,7 @@ end) : SEARCH = struct
           matchAtom (max, depth, (p, s), dp, sc)
       | max, depth, (C.Impl (r, a_, ha_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
-          Solve_
+          solve
             ( max,
               depth + 1,
               (g, I.dot1 s),
@@ -146,16 +150,16 @@ end) : SEARCH = struct
               function m_ -> sc (I.Lam (d'_, m_)) )
       | max, depth, (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.decSub (d_, s) in
-          Solve_
+          solve
             ( max,
               depth + 1,
               (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.parameter_)),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
               function m_ -> sc (I.Lam (d'_, m_)) )
 
     and rSolve = function
       | max, depth, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc -> begin
-          if Unify.unifiable (g_, ps', (q_, s)) then sc I.nil_ else ()
+          if Unify.unifiable (g_, ps', (q_, s)) then sc I.Nil else ()
         end
       | ( max,
           depth,
@@ -165,7 +169,7 @@ end) : SEARCH = struct
           sc ) -> begin
           match Assign.assignable (g_, ps', (q_, s)) with
           | Some cnstr ->
-              aSolve ((eqns, s), dp, cnstr, function () -> sc I.nil_)
+              aSolve ((eqns, s), dp, cnstr, function () -> sc I.Nil)
           | None -> ()
         end
       | max, depth, ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc
@@ -179,7 +183,7 @@ end) : SEARCH = struct
               dp,
               function
               | s_ ->
-                  Solve_
+                  solve
                     ( max,
                       depth,
                       (g, s),
@@ -204,7 +208,7 @@ end) : SEARCH = struct
               | s_ -> begin
                   if isInstantiated x_ then sc (I.App (x'_, s_))
                   else
-                    Solve_
+                    solve
                       ( max,
                         0,
                         (g, s'),
@@ -334,7 +338,7 @@ end) : SEARCH = struct
       begin match (arg__1, arg__2) with
       | max, ([], sc) -> sc max
       | max, ((I.EVar (r, g_, v_, _) as x_) :: ge_, sc) ->
-          Solve_
+          solve
             ( max,
               0,
               (Compile.compileGoal (g_, v_), I.id),

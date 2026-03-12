@@ -3,7 +3,7 @@ open! Basis
 (* ELIM: Version 1.4 *)
 (* Author: Carsten Schuermann *)
 module type ELIM = sig
-  module State : STATE
+  module State : State.STATE
 
   exception Error of string
 

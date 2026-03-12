@@ -4,12 +4,12 @@ open! Basis
 (* Author: Carsten Schuermann *)
 (* Date: Thu Mar 16 13:39:26 2006 *)
 module Elim (Elim__0 : sig
-  module Data : DATA
+  module Data : Data.DATA
 
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
   (*! sharing Tomega'.IntSyn = IntSyn' !*)
-  module State' : STATE
+  module State' : State.STATE
 
   (*! sharing State'.IntSyn = IntSyn' !*)
   (*! sharing State'.Tomega = Tomega' !*)
@@ -24,10 +24,10 @@ module Elim (Elim__0 : sig
 
   (*! sharing Whnf.IntSyn = IntSyn' !*)
   module Unify : UNIFY
-end) : ELIM = struct
+  end) : ELIM with module State = Elim__0.State' = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  module State = State'
+  module State = Elim__0.State'
 
   exception Error of string
 
@@ -77,7 +77,7 @@ end) : ELIM = struct
               let psi'_ = I.Decl (psi_, d_) in
               let y_ = T.newEVar (strip psi'_, T.forSub (g_, T.shift)) in
               r :=
-                Some (T.Let (d_, T.Redex (T.Var n, T.AppExp (x_, T.nil_)), y_))
+                Some (T.Let (d_, T.Redex (T.Var n, T.AppExp (x_, T.Nil)), y_))
           | T.Ex ((d1_, _), f_) ->
               let d1'_ = Names.decName (T.coerceCtx psi_, d1_) in
               let psi'_ = I.Decl (psi_, T.UDec d1'_) in

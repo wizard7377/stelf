@@ -4,23 +4,22 @@ open! Basis
 (* Author: Carsten Schuermann *)
 (* Date: Thu Mar 16 13:08:33 2006 *)
 module Fill (Fill__0 : sig
-  module Data : DATA
+  module Data : Data.DATA
 
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
   (*! sharing Tomega'.IntSyn = IntSyn' !*)
-  module State' : STATE
+  module State' : State.STATE
 
   (*! sharing State'.IntSyn = IntSyn' !*)
   (*! sharing State'.Tomega = Tomega' !*)
   module Abstract : ABSTRACT
-
   (*! sharing Abstract.IntSyn = IntSyn' !*)
   (*! sharing Abstract.Tomega = Tomega' !*)
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
-  module Search : SEARCH
+  module Search : Psearch.SEARCH
 
   (*! sharing Search.IntSyn = IntSyn' !*)
   (*! sharing Search.Tomega = Tomega' !*)
@@ -28,10 +27,10 @@ module Fill (Fill__0 : sig
 
   (*! sharing Whnf.IntSyn = IntSyn' !*)
   module Unify : UNIFY
-end) : FILL = struct
+  end) : FILL with module State = Fill__0.State' = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  module State = State'
+  module State = Fill__0.State'
 
   exception Error of string
 
@@ -44,6 +43,7 @@ end) : FILL = struct
            Sigma |- c : W
            and VX and W are unifiable
        *)
+    module Unify = Fill__0.Unify
   (* Representation Invariant:  FillWithBVar (X, n) :
            X is an evar GX |- X : VX
            GX |- n : W
@@ -68,12 +68,11 @@ end) : FILL = struct
                     o_ :: fs_
                   end)
             with
-            | Unify.Unify _ -> fs_
-            | (I.Pi ((I.Dec (_, v1_), _), v2_), s), fs_, o_ ->
-                let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
-                try_ ((v2_, I.Dot (I.Exp x_, s)), fs_, o_)
-            | (I.EClo (v_, s'), s), fs_, o_ ->
-                try_ ((v_, I.comp (s', s)), fs_, o_))
+            | Unify.Unify _ -> fs_)
+        | (I.Pi ((I.Dec (_, v1_), _), v2_), s), fs_, o_ ->
+            let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
+            try_ ((v2_, I.Dot (I.Exp x_, s)), fs_, o_)
+        | (I.EClo (v_, s'), s), fs_, o_ -> try_ ((v_, I.comp (s', s)), fs_, o_)
       in
       let rec matchCtx = function
         | null_, _, fs_ -> fs_
@@ -97,7 +96,7 @@ end) : FILL = struct
           let rec doit = function
             | ((I.Root _, _) as vs_), k -> begin
                 Unify.unify (g_, vs_, (v_, I.id));
-                k I.nil_
+                k I.Nil
               end
             | (I.Pi ((I.Dec (_, v1_), _), v2_), s), k ->
                 let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
@@ -116,7 +115,7 @@ end) : FILL = struct
           let rec doit = function
             | ((I.Root _, _) as vs_), k -> begin
                 Unify.unify (g0_, vs_, (v_, I.id));
-                k I.nil_
+                k I.Nil
               end
             | (I.Pi ((I.Dec (_, v1_), _), v2_), s), k ->
                 let x_ = I.newEVar (g0_, I.EClo (v1_, s)) in

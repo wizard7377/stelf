@@ -8,7 +8,7 @@ module StatePrint (StatePrint__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
   (*! sharing Tomega'.IntSyn = IntSyn' !*)
-  module State' : STATE
+  module State' : State.STATE
 
   (*! sharing State'.IntSyn = IntSyn' !*)
   (*! sharing State'.Tomega = Tomega' !*)
@@ -21,18 +21,18 @@ module StatePrint (StatePrint__0 : sig
   (*! sharing Print.IntSyn = IntSyn' !*)
   module TomegaPrint : TOMEGAPRINT
 end) : STATEPRINT = struct
-  module Formatter = Formatter'
+  module Formatter = StatePrint__0.Formatter'
 
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  module State = State'
+  module State = StatePrint__0.State'
 
   exception Error of string
 
   open! struct
     module I = IntSyn
     module T = Tomega
-    module S = State'
+    module S = StatePrint__0.State'
     module N = Names
     module Fmt = Formatter
 

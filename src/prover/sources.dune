@@ -57,7 +57,7 @@
   (write-file search.sml.ml "")))
 
 (rule
- (target search.ml)
+ (target psearch.ml)
  (deps
   (:sig search.sig.ml)
   (:fun search.fun.ml)
@@ -369,7 +369,7 @@
   (write-file weaken.sml.ml "")))
 
 (rule
- (target weaken.ml)
+ (target pweaken.ml)
  (deps
   (:sig weaken.sig.ml)
   (:fun weaken.fun.ml)

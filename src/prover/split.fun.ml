@@ -1,4 +1,3 @@
-open! State
 open! Basis
 
 module Split (Split__0 : sig
@@ -9,7 +8,7 @@ module Split (Split__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
   (*! sharing Tomega'.IntSyn = IntSyn' !*)
-  module State' : STATE
+  module State' : State.STATE
 
   (*! sharing State'.IntSyn = IntSyn' !*)
   (*! sharing State'.Tomega = Tomega' !*)
@@ -36,19 +35,19 @@ module Split (Split__0 : sig
 
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
   module Subordinate : SUBORDINATE
-end) : SPLIT = struct
+  end) : SPLIT with module State = Split__0.State' = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  module State = State'
+  module State = Split__0.State'
 
   exception Error of string
+  type operator_ = Split of Tomega.prg_ option ref * Tomega.prg_ * string
 
   open! struct
     module T = Tomega
     module I = IntSyn
-    module S = State'
-
-    type operator_ = Split of T.prg_ option ref * T.prg_ * string
+    module S = Split__0.State'
+    module Unify = Split__0.Unify
 
     let rec weaken = function
       | null_, a -> I.id
@@ -88,7 +87,7 @@ end) : SPLIT = struct
     let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
 
     and createEVarSpineW = function
-      | g_, ((I.Root _, s) as vs_) -> (I.nil_, vs_)
+      | g_, ((I.Root _, s) as vs_) -> (I.Nil, vs_)
       | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
           let x_ = createEVar (g_, I.EClo (v1_, s)) in
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
@@ -156,7 +155,7 @@ end) : SPLIT = struct
                 begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
                 end)
           in
-          let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.nil_)), t) in
+          let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.Nil)), t) in
           blockCases' (g_, vs_, (lvar, i + 1), (t', piDecs), sc)
 
     let rec worldCases = function
@@ -190,9 +189,8 @@ end) : SPLIT = struct
       | null_ -> T.id
       | I.Decl (psi_, T.UDec (I.Dec (xOpt, v1_))) ->
           let t' = createSub psi_ in
-          let x_ =
-            I.newEVar (I.null_, I.EClo (Whnf.whnf (v1_, T.coerceSub t')))
-          in
+          let v1'_, s'_ = Whnf.whnf (v1_, T.coerceSub t') in
+          let x_ = I.newEVar (I.null_, I.EClo (v1'_, s'_)) in
           T.Dot (T.Exp x_, t')
       | I.Decl (psi_, T.UDec (I.BDec (_, (l, s)))) ->
           let t' = createSub psi_ in

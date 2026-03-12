@@ -3,7 +3,7 @@ open! Basis
 (* Recurse: Version 1.4 *)
 (* Author: Carsten Schuermann *)
 module type RECURSE = sig
-  module State : STATE
+  module State : State.STATE
 
   exception Error of string
 

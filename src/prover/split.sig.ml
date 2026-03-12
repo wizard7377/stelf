@@ -5,7 +5,7 @@ open! Basis
 module type SPLIT = sig
   (*! structure IntSyn : INTSYN !*)
   (*! structure Tomega : TOMEGA !*)
-  module State : STATE
+  module State : State.STATE
 
   exception Error of string
 

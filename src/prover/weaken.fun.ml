@@ -23,7 +23,7 @@ end) : WEAKEN = struct
     let rec strengthenSub (s, t) = Whnf.compInv (s, t)
 
     let rec strengthenSpine = function
-      | nil_, t -> I.nil_
+      | I.Nil, t -> I.Nil
       | I.App (u_, s_), t ->
           I.App (strengthenExp (u_, t), strengthenSpine (s_, t))
   end

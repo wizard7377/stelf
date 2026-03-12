@@ -3,14 +3,14 @@ open! Basis
 (* Fixed Point *)
 (* Author: Carsten Schuermann *)
 module FixedPoint (FixedPoint__0 : sig
-  module State' : STATE
-end) : FIXEDPOINT = struct
+  module State' : State.STATE
+  end) : FIXEDPOINT with module State = FixedPoint__0.State' = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  module State = State'
+  module State = FixedPoint__0.State'
 
   open! struct
-    module S = State'
+    module S = FixedPoint__0.State'
     module T = Tomega
     module I = IntSyn
 

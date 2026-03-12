@@ -1,4 +1,4 @@
-open! Weaken
+open! Pweaken
 open! Split
 open! Introduce
 open! Fill
@@ -13,13 +13,13 @@ module Interactive (Interactive__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
   (*! sharing Tomega'.IntSyn = IntSyn' !*)
-  module State' : STATE
+  module State' : State.STATE
 
   (*! sharing State'.IntSyn = IntSyn' !*)
   (*! sharing State'.Tomega = Tomega' !*)
   module Formatter : FORMATTER
   module Trail : TRAIL
-  module Ring : RING
+  module Ring : Ring.RING
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn' !*)
@@ -32,29 +32,36 @@ module Interactive (Interactive__0 : sig
 
   (*! sharing WorldSyn.IntSyn = IntSyn' !*)
   (*! sharing WorldSyn.Tomega = Tomega' !*)
-  module Introduce : INTRODUCE
+  module Introduce : INTRODUCE with module State = State'
 
   (*! sharing Introduce.IntSyn = IntSyn' !*)
   (*! sharing Introduce.Tomega = Tomega' !*)
-  module Elim : ELIM
+  module Elim : ELIM with module State = State'
 
   (*! sharing Elim.IntSyn = IntSyn' !*)
   (*! sharing Elim.Tomega = Tomega' !*)
-  module Split : SPLIT
+  module Split : SPLIT with module State = State'
 
   (*! sharing Split.IntSyn = IntSyn' !*)
   (*! sharing Split.Tomega = Tomega' !*)
-  module FixedPoint : FIXEDPOINT
+  module FixedPoint : Fixedpoint.FIXEDPOINT with module State = State'
 
   (*! sharing FixedPoint.IntSyn = IntSyn' !*)
   (*! sharing FixedPoint.Tomega = Tomega' !*)
-  module Fill : FILL
+  module Fill : FILL with module State = State'
 end) : INTERACTIVE = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  module State = State'
+  module State = Interactive__0.State'
+  module Weaken = Interactive__0.Weaken
+  module Introduce = Interactive__0.Introduce
+  module Elim = Interactive__0.Elim
+  module Split = Interactive__0.Split
+  module FixedPoint = Interactive__0.FixedPoint
+  module Fill = Interactive__0.Fill
+  module Timers = Timers.Timers
 
-  exception Error = State'.Error
+  exception Error = Interactive__0.State'.Error
 
   open! struct
     module I = IntSyn
@@ -87,18 +94,18 @@ end) : INTERACTIVE = struct
             let f'_, f''_ =
               convertFor' (v_, mS, I.dot1 w1, I.Dot (I.Idx n, w2), n - 1)
             in
-            function
-            | f_ ->
-                ( T.All
-                    ( (T.UDec (Weaken.strengthenDec (d_, w1)), T.explicit_),
-                      f'_ f_ ),
-                  f''_ ))
+            ( (function
+              | f_ ->
+                  T.All
+                    ( (T.UDec (Weaken.strengthenDec (d_, w1)), T.Explicit),
+                      f'_ f_ )),
+              f''_ ))
         | I.Pi ((d_, _), v_), M.Mapp (M.Marg (M.Minus, _), mS), w1, w2, n ->
             let f'_, f''_ =
               convertFor' (v_, mS, I.comp (w1, I.shift), I.dot1 w2, n + 1)
             in
-            (f'_, T.Ex ((I.decSub (d_, w2), T.explicit_), f''_))
-        | I.Uni type_, M.Mnil, _, _, _ -> ( function f_ -> (f_, T.true_))
+            (f'_, T.Ex ((I.decSub (d_, w2), T.Explicit), f''_))
+        | I.Uni type_, M.Mnil, _, _, _ -> ((function | f_ -> f_), T.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
       let rec shiftPlus mS =
@@ -266,7 +273,7 @@ end) : INTERACTIVE = struct
           let f2_ = map (function y_ -> S.FocusLF y_) ys_ in
           let rec splitMenu = function
             | [] -> []
-            | operators :: l -> map Split operators @ splitMenu l
+            | operators :: l -> map (function o_ -> Split o_) operators @ splitMenu l
           in
           let _ = Global.doubleCheck := true in
           let rec introMenu = function
@@ -283,7 +290,7 @@ end) : INTERACTIVE = struct
           in
           let rec elimMenu = function
             | [] -> []
-            | operators :: l -> map Elim operators @ elimMenu l
+            | operators :: l -> map (function o_ -> Elim o_) operators @ elimMenu l
           in
           let elim = elimMenu (map Elim.expand f1_) in
           let split = splitMenu (map Split.expand f1_) in

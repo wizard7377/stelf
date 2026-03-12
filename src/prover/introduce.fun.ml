@@ -6,15 +6,16 @@ module Introduce (Introduce__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
   (*! sharing Tomega'.IntSyn = IntSyn' !*)
-  module State' : STATE
-  module TomegaNames : TOMEGANAMES
-end) : INTRODUCE = struct
+  module State' : State.STATE
+  module TomegaNames : Tomeganames.TOMEGANAMES
+  end) : INTRODUCE with module State = Introduce__0.State' = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  module State = State'
+  module State = Introduce__0.State'
+  module TomegaNames = Introduce__0.TomegaNames
 
   open! struct
-    module S = State'
+    module S = Introduce__0.State'
     module T = Tomega
     module I = IntSyn
 
@@ -50,7 +51,7 @@ end) : INTRODUCE = struct
           let y_ = T.newEVar (psi_, T.forSub (f_, T.Dot (T.Exp x_, T.id))) in
           Some (r_, T.PairExp (x_, y_))
       | S.Focus ((T.EVar (psi_, r, true_, None, None, _) as r_), w_) ->
-          Some (r_, T.unit_)
+          Some (r_, T.Unit)
       | S.Focus (T.EVar (psi_, r, T.FClo (f_, s), tc1_, tc2_, x_), w_) ->
           expand
             (S.Focus (T.EVar (psi_, r, T.forSub (f_, s), tc1_, tc2_, x_), w_))

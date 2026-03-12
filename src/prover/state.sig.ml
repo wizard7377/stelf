@@ -7,7 +7,7 @@ module type STATE = sig
 
   type state_ =
     | State of
-        Tomega.worlds_ * Tomegas.dec_ IntSyn.ctx_ * Tomega.prg_ * Tomega.for_
+        Tomega.worlds_ * Tomega.dec_ IntSyn.ctx_ * Tomega.prg_ * Tomega.for_
     | StateLF of IntSyn.exp_
 
   type focus_ = Focus of Tomega.prg_ * Tomega.worlds_ | FocusLF of IntSyn.exp_

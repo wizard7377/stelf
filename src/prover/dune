@@ -5,7 +5,7 @@
  (public_name twelf.prover)
  (modules
   state
-  search
+  psearch
   data
   fill
   split
@@ -13,7 +13,7 @@
   introduce
   elim
   interactive
-  weaken
+  pweaken
   prover_)
  (libraries
   tomega
