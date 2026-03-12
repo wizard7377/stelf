@@ -1,17 +1,17 @@
 open! Basis
 
-module UniqueTable = ModeTable (struct
-  module Table = IntRedBlackTree
+module UniqueTable = Modetable.MakeModeTable (struct
+  module Table = Table_instances.IntRedBlackTree
 end)
 
-module UniqueCheck = ModeCheck (struct
+module UniqueCheck = Modecheck.MakeModeCheck (struct
   module ModeTable = UniqueTable
   module Whnf = Whnf
   module Index = Index
   module Origins = Origins
 end)
 
-module Unique = Unique (struct
+include Unique (struct
   module Global = Global
   module Whnf = Whnf
   module Abstract = Abstract
@@ -25,5 +25,5 @@ module Unique = Unique (struct
   module Names = Names
   module Print = Print
   module TypeCheck = TypeCheck
-  module Timers = Timers
+  module Timers = Timers.Timers
 end)

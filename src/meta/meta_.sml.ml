@@ -21,6 +21,8 @@ open Mtp_strategy
 open Mtp_prover
 open Mtp_mpi
 
+module type WEAKEN = Weaken.WEAKEN
+
 module MTPGlobal = MTPGlobal (struct
   module MetaGlobal = MetaGlobal
 end)

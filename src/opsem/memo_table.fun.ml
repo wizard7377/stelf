@@ -29,6 +29,7 @@ module MemoTable (MemoTable__0 : sig
 end) : MEMOTABLE = struct
   open MemoTable__0
   module I = IntSyn
+
   (*! structure IntSyn = IntSyn' !*)
   (* ---------------------------------------------------------------------- *)
   (* Linear substitution tree for linear terms *)
@@ -587,9 +588,9 @@ end) : MEMOTABLE = struct
                   match insert (childRef_, drho2_, gr_) () with
                   | _, T.NewEntry answRef -> checkCandidates (l_, sCands_)
                   | f, T.RepeatedEntry (asub, answRef, status) ->
-                      (fun () -> (f, T.RepeatedEntry (asub, answRef, status)))
+                      fun () -> (f, T.RepeatedEntry (asub, answRef, status))
                   | f, T.DivergingEntry (asub, answRef) ->
-                      (fun () -> (f, T.DivergingEntry (asub, answRef)))
+                      fun () -> (f, T.DivergingEntry (asub, answRef))
                 end
             in
             checkCandidates (variantCand_, splitCand_)

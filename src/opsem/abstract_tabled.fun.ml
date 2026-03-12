@@ -23,6 +23,7 @@ module AbstractTabled (AbstractTabled__0 : sig
   module Conv : CONV
 end) : ABSTRACTTABLED = struct
   open AbstractTabled__0
+
   (*! structure IntSyn = IntSyn' !*)
   (*! structure TableParam = TableParam !*)
   exception Error of string

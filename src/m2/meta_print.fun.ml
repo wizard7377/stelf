@@ -30,8 +30,7 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
     let rec fmtPrefix gm_ =
       let rec fmtPrefix' = function
         | M.Prefix (Null, Null, Null), fmt_ -> fmt_
-        | ( M.Prefix
-              (I.Decl (Null, d_), I.Decl (Null, mode), I.Decl (Null, b)),
+        | ( M.Prefix (I.Decl (Null, d_), I.Decl (Null, mode), I.Decl (Null, b)),
             fmt_ ) ->
             [
               F.string (depthToString b);

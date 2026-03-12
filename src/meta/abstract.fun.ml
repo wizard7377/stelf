@@ -169,8 +169,8 @@ end) : MTPABSTRACT = struct
                 g_,
                 I.comp (w, s),
                 I.Decl
-                  (collectExp (tag_, d, gp_, (v'_, I.id), k_), Ev (r', v'_, tag_, d))
-              )
+                  ( collectExp (tag_, d, gp_, (v'_, I.id), k_),
+                    Ev (r', v'_, tag_, d) ) )
         end
       | tag_, d, g_, (I.FgnExp (csid_, csfe), s), k_ ->
           I.FgnExpStd.fold (csid_, csfe)
@@ -185,7 +185,8 @@ end) : MTPABSTRACT = struct
       | tag_, d, g_, (I.SClo (s_, s'), s), k_ ->
           collectSpine (tag_, d, g_, (s_, I.comp (s', s)), k_)
       | tag_, d, g_, (I.App (u_, s_), s), k_ ->
-          collectSpine (tag_, d, g_, (s_, s), collectExp (tag_, d, g_, (u_, s), k_))
+          collectSpine
+            (tag_, d, g_, (s_, s), collectExp (tag_, d, g_, (u_, s), k_))
 
     and collectDec (tag_, d, g_, (I.Dec (_, v_), s), k_) =
       collectExp (tag_, d, g_, (v_, s), k_)
@@ -330,7 +331,8 @@ end) : MTPABSTRACT = struct
               s,
               b_,
               function
-              | d, k_ -> collect (d, collectExp (tag_, d, g0_, (u_, I.id), k_)) )
+              | d, k_ -> collect (d, collectExp (tag_, d, g0_, (u_, I.id), k_))
+            )
 
     and skip = function
       | g0_, 0, s, b_, collect -> collectGlobalSub (g0_, s, b_, collect)
@@ -421,9 +423,7 @@ end) : MTPABSTRACT = struct
       | null_, v_ -> v_
       | I.Decl (g_, d_), v_ ->
           raiseType
-            ( g_,
-              Abstract.piDepend ((Whnf.normalizeDec (d_, I.id), I.Maybe), v_)
-            )
+            (g_, Abstract.piDepend ((Whnf.normalizeDec (d_, I.id), I.Maybe), v_))
 
     let rec raiseFor = function
       | k, gorig_, (true_ as f_), w, sc -> f_

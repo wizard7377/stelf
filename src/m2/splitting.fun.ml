@@ -364,8 +364,9 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
 
     let rec expand' = function
       | M.Prefix (I.Null, I.Null, I.Null), isIndex, abstract, makeAddress ->
-        (M.Prefix (I.Null, I.Null, I.Null), I.id, [])
-      | ( M.Prefix (I.Decl (g_, d_), I.Decl (m_, (M.Top as mode)), I.Decl (b_, b)),
+          (M.Prefix (I.Null, I.Null, I.Null), I.id, [])
+      | ( M.Prefix
+            (I.Decl (g_, d_), I.Decl (m_, (M.Top as mode)), I.Decl (b_, b)),
           isIndex,
           abstract,
           makeAddress ) ->
@@ -387,7 +388,8 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
             end
           in
           (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'), ops')
-        | ( M.Prefix (I.Decl (g_, d_), I.Decl (m_, (M.Bot as mode)), I.Decl (b_, b)),
+      | ( M.Prefix
+            (I.Decl (g_, d_), I.Decl (m_, (M.Bot as mode)), I.Decl (b_, b)),
           isIndex,
           abstract,
           makeAddress ) ->

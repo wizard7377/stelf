@@ -36,6 +36,7 @@ end) : RELFUN = struct
   exception Error of string
 
   open RelFun__0
+
   open! struct
     module F = FunSyn
     module I = IntSyn
@@ -65,8 +66,8 @@ end) : RELFUN = struct
             let f'_, f''_ =
               convertFor' (v_, mS, I.dot1 w1, I.Dot (I.Idx n, w2), n - 1)
             in
-            ((fun f_ ->
-                F.All (F.Prim (Weaken.strengthenDec (d_, w1)), f'_ f_)), f''_)
+            ( (fun f_ -> F.All (F.Prim (Weaken.strengthenDec (d_, w1)), f'_ f_)),
+              f''_ )
         | I.Pi ((d_, _), v_), M.Mapp (M.Marg (minus_, _), mS), w1, w2, n ->
             let f'_, f''_ =
               convertFor' (v_, mS, I.comp (w1, I.shift), I.dot1 w2, n + 1)
@@ -251,11 +252,11 @@ end) : RELFUN = struct
         end
       in
       let rec abstract' = function
-        | (_, mnil_), w -> (fun p -> p)
+        | (_, mnil_), w -> fun p -> p
         | (I.Pi ((d_, _), v2_), M.Mapp (M.Marg (plus_, _), mS)), w ->
             let d'_ = Weaken.strengthenDec (d_, w) in
             let p_ = abstract' ((v2_, mS), I.dot1 w) in
-            (fun p -> F.Lam (F.Prim d'_, p_ p))
+            fun p -> F.Lam (F.Prim d'_, p_ p)
         | (I.Pi (_, v2_), M.Mapp (M.Marg (minus_, _), mS)), w ->
             abstract' ((v2_, mS), I.comp (w, I.shift))
       in
@@ -322,16 +323,14 @@ end) : RELFUN = struct
       in
       let rec raiseType (g_, u_, a) =
         let rec raiseType' = function
-          | null_, n -> (I.id, (function x -> x), (function s_ -> s_))
+          | null_, n -> (I.id, (function x -> x), function s_ -> s_)
           | I.Decl (g_, (I.Dec (_, v_) as d_)), n ->
               let w, k, k' = raiseType' (g_, n + 1) in
               begin if Subordinate.belowEq (I.targetFam v_, a) then
                 ( I.dot1 w,
                   (function
-                  | x ->
-                      k (I.Pi ((Weaken.strengthenDec (d_, w), I.Maybe), x))),
-                  (function s_ -> I.App (I.Root (I.BVar n, I.Nil), s_))
-                )
+                  | x -> k (I.Pi ((Weaken.strengthenDec (d_, w), I.Maybe), x))),
+                  function s_ -> I.App (I.Root (I.BVar n, I.Nil), s_) )
               else (I.comp (w, I.shift), k, k')
               end
         in
@@ -348,7 +347,7 @@ end) : RELFUN = struct
       in
       let rec transformDec' = function
         | d, (nil_, mnil_), I.Uni type_, (z1, z2), (w, t) ->
-            (w, t, (d, (fun (k, ds_) -> ds_ k), (fun _ -> F.Empty)))
+            (w, t, (d, (fun (k, ds_) -> ds_ k), fun _ -> F.Empty))
         | ( d,
             (I.App (u_, s_), M.Mapp (M.Marg (minus_, _), mS)),
             I.Pi ((I.Dec (_, v1_), dp_), v2_),
@@ -395,9 +394,8 @@ end) : RELFUN = struct
             in
             ( w'',
               t'',
-              ( d',
-                (fun (k, ds_) -> F.App ((k, u'_), dplus_ (1, ds_))),
-                dminus_ ) )
+              (d', (fun (k, ds_) -> F.App ((k, u'_), dplus_ (1, ds_))), dminus_)
+            )
       in
       let w'', t'', (d', dplus_, dminus_) =
         transformDec'
@@ -496,7 +494,7 @@ end) : RELFUN = struct
                   ( w',
                     1,
                     ( (fun p -> (psi'_, s'', p)),
-                      (fun wf -> transformConc ((c', s'_), wf)) ) ),
+                      fun wf -> transformConc ((c', s'_), wf) ) ),
                 l_ )
             else (None, l_)
           end

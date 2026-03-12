@@ -15,6 +15,7 @@ module Trace (Trace__0 : sig
   module Print : PRINT
 end) : TRACE = struct
   open Trace__0
+
   (*! structure IntSyn = IntSyn' !*)
   open! struct
     module I = IntSyn

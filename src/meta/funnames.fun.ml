@@ -10,6 +10,7 @@ module FunNames (FunNames__0 : sig
   module HashTable : TABLE with type key = string
 end) : FUNNAMES = struct
   open FunNames__0
+
   (*! structure FunSyn = FunSyn' !*)
   exception Error of string
 

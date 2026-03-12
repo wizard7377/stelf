@@ -10,17 +10,20 @@ module Unique (Unique__0 : sig
 
   (* must be trailing! *)
   module Constraints : CONSTRAINTS
-  module UniqueTable : MODETABLE
-  module UniqueCheck : MODECHECK
+  module UniqueTable : Modetable.MODETABLE
+  module UniqueCheck : Modecheck.MODECHECK
   module Index : INDEX
   module Subordinate : SUBORDINATE
   module WorldSyn : WORLDSYN
   module Names : NAMES
   module Print : PRINT
   module TypeCheck : TYPECHECK
-  module Timers : TIMERS
+  module Timers : Timers.TIMERS
 end) : UNIQUE = struct
   exception Error of string
+
+  module Unify = Unique__0.Unify
+  module UniqueCheck = Unique__0.UniqueCheck
 
   open! struct
     module I = IntSyn
@@ -59,7 +62,7 @@ end) : UNIQUE = struct
       Unify.unifiable (g_, (u_, s), (u'_, s'))
 
     let rec unifiableSpines = function
-      | g_, (nil_, s), (nil_, s'), M.Mnil -> true
+      | g_, (I.Nil, s), (I.Nil, s'), M.Mnil -> true
       | ( g_,
           (I.App (u1_, s2_), s),
           (I.App (u1'_, s2'_), s'),

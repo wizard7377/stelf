@@ -1,11 +1,23 @@
-open! Cover
 open! Basis
 
 (* Total Declarations *)
 (* Author: Frank Pfenning *)
+
+(* COVER module type inlined here to avoid dependency cycle with cover_ *)
+module type COVER = sig
+  exception Error of string
+
+  val checkNoDef : IntSyn.cid -> unit
+  val checkOut : IntSyn.dctx * IntSyn.eclo -> unit
+  val checkCovers : IntSyn.cid * ModeSyn.modeSpine_ -> unit
+
+  val coverageCheckCases :
+    Tomega.worlds_ * (IntSyn.dctx * IntSyn.sub_) list * IntSyn.dctx -> unit
+end
+
 module Total (Total__0 : sig
   module Global : GLOBAL
-  module Table : TABLE
+  module Table : TABLE with type key = int
 
   (*! structure IntSyn' : INTSYN !*)
   module Whnf : WHNF
@@ -14,10 +26,10 @@ module Total (Total__0 : sig
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn' !*)
-  module ModeTable : MODETABLE
+  module ModeTable : Modetable.MODETABLE
 
   (*! sharing ModeSyn.IntSyn = IntSyn' !*)
-  module ModeCheck : MODECHECK
+  module ModeCheck : Modecheck.MODECHECK
   module Index : INDEX
 
   (*! sharing Index.IntSyn = IntSyn' !*)
@@ -33,14 +45,23 @@ module Total (Total__0 : sig
   module Cover : COVER
 
   (*! structure Paths : PATHS !*)
-  module Origins : ORIGINS
+  module Origins : Origins.ORIGINS
 
   (*! sharing Origins.Paths = Paths !*)
   (*! sharing Origins.IntSyn = IntSyn' !*)
-  module Timers : TIMERS
+  module Timers : Timers.TIMERS
 end) : TOTAL = struct
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
+
+  module Table = Total__0.Table
+  module Cover = Total__0.Cover
+  module Order = Total__0.Order
+  module Reduces = Total__0.Reduces
+  module ModeTable = Total__0.ModeTable
+  module ModeCheck = Total__0.ModeCheck
+  module Origins = Total__0.Origins
+  module Timers = Total__0.Timers
 
   open! struct
     module I = IntSyn

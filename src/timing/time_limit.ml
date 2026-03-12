@@ -11,7 +11,9 @@ module TimeLimit : sig
   val timeLimit : Time.time option -> ('a -> 'b) -> 'a -> 'b
 end = struct
   exception TimeOut
-  let rec timeLimit = assert false (* TODO deal with this some time *)
+
+  let rec timeLimit = assert false
+  (* TODO deal with this some time *)
   (*
   let rec timeLimit arg__0 arg__1 arg__2 =
     begin match (arg__0, arg__1, arg__2) with

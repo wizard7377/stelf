@@ -6,11 +6,11 @@ module TomegaCoverage (TomegaCoverage__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
   (*! sharing Tomega'.IntSyn = IntSyn' !*)
-  module TomegaPrint : TOMEGAPRINT
+  module TomegaPrint : Tomegaprint.TOMEGAPRINT
 
   (*! sharing TomegaPrint.IntSyn = IntSyn' !*)
   (*! sharing TomegaPrint.Tomega = Tomega' !*)
-  module TomegaTypeCheck : TOMEGATYPECHECK
+  module TomegaTypeCheck : Tomega_typecheck.TOMEGATYPECHECK
 
   (*! sharing TomegaTypeCheck.IntSyn = IntSyn' !*)
   (*! sharing TomegaTypeCheck.Tomega = Tomega' !*)
@@ -23,6 +23,7 @@ end) : TOMEGACOVERAGE = struct
   open! struct
     module I = IntSyn
     module T = Tomega
+    module TomegaTypeCheck = TomegaCoverage__0.TomegaTypeCheck
 
     let rec chatter chlev f =
       begin if !Global.chatter >= chlev then print ("[coverage] " ^ f ())
@@ -41,23 +42,23 @@ end) : TOMEGACOVERAGE = struct
       | (T.Shift k as t), psi_ -> (t, psi_, T.id)
       | T.Dot (T.Prg p_, t), I.Decl (psi_, T.PDec (_, T.All _, _, _)) ->
           let t', psi'_, s' = purifyCtx (t, psi_) in
-          (t', psi'_, T.Dot (T.undef_, s'))
+          (t', psi'_, T.Dot (T.Undef, s'))
       | T.Dot (T.Prg (T.Var _), t), I.Decl (psi_, T.PDec (_, _, _, _)) ->
           let t', psi'_, s' = purifyCtx (t, psi_) in
-          (t', psi'_, T.Dot (T.undef_, s'))
+          (t', psi'_, T.Dot (T.Undef, s'))
       | T.Dot (T.Prg (T.Const _), t), I.Decl (psi_, T.PDec (_, _, _, _)) ->
           let t', psi'_, s' = purifyCtx (t, psi_) in
-          (t', psi'_, T.Dot (T.undef_, s'))
+          (t', psi'_, T.Dot (T.Undef, s'))
       | T.Dot (T.Prg (T.PairPrg (_, _)), t), I.Decl (psi_, T.PDec (_, _, _, _))
         ->
           let t', psi'_, s' = purifyCtx (t, psi_) in
-          (t', psi'_, T.Dot (T.undef_, s'))
+          (t', psi'_, T.Dot (T.Undef, s'))
       | T.Dot (T.Prg p_, t), I.Decl (psi_, T.PDec (_, f_, _, _)) ->
           let t', psi'_, s' = purifyCtx (t, psi_) in
           let t'', psi''_, s'' =
             purifyFor ((p_, t'), (psi'_, T.forSub (f_, s')), s')
           in
-          (t'', psi''_, T.Dot (T.undef_, s''))
+          (t'', psi''_, T.Dot (T.Undef, s''))
       | T.Dot (f_, t), I.Decl (psi_, T.UDec d_) ->
           let t', psi'_, s' = purifyCtx (t, psi_) in
           ( T.Dot (f_, t'),

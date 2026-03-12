@@ -74,8 +74,7 @@ end) : INFERENCE = struct
             | vf''_ :: [] -> Some vf''_
             | [] -> None
             end
-          with
-          | UniqueSearch.Error _ -> None)
+          with UniqueSearch.Error _ -> None)
       | g_, b_, v_ -> None
 
     let rec expand' = function
@@ -127,7 +126,8 @@ end) : INFERENCE = struct
             F.forSub (f_, w') )
       in
       let _ =
-        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s'_) else ()
+        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s'_)
+        else ()
         end
       in
       function () -> s'_

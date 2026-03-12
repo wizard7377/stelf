@@ -48,6 +48,7 @@ module MTPi (MTPi__0 : sig
   module Ring : RING
 end) : MTPI = struct
   open MTPi__0
+
   exception Error of string
 
   (*! structure FunSyn = FunSyn' !*)
@@ -136,8 +137,8 @@ end) : MTPI = struct
         begin match p_ with
         | F.Inx (_, unit_) -> Fmt.hbox (formatTuple' p_)
         | _ ->
-            Fmt.hVbox0
-              1 1 1 ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
+            Fmt.hVbox0 1 1 1
+              ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
         end
       in
       let (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) = current () in
@@ -236,7 +237,8 @@ end) : MTPI = struct
       else
         let s_ = current () in
         let _ =
-          begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_) else ()
+          begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
+          else ()
           end
         in
         begin
@@ -298,7 +300,11 @@ end) : MTPI = struct
       in
       try
         begin
-          ignore (map (function s_ -> insert (Obj.magic (MTPrint.nameState (Obj.magic s_)))) slist_);
+          ignore
+            (map
+               (function
+                 | s_ -> insert (Obj.magic (MTPrint.nameState (Obj.magic s_))))
+               slist_);
           begin
             menu ();
             printMenu ()
@@ -318,7 +324,14 @@ end) : MTPI = struct
             let s'_ = Timers.time Timers.splitting MTPSplitting.apply o_ in
             let _ = pushHistory () in
             let _ = delete () in
-            let _ = ignore (map (function s_ -> insert (Obj.magic (MTPrint.nameState (Obj.magic s_)))) s'_) in
+            let _ =
+              ignore
+                (map
+                   (function
+                     | s_ ->
+                         insert (Obj.magic (MTPrint.nameState (Obj.magic s_))))
+                   s'_)
+            in
             begin
               menu ();
               printMenu ()

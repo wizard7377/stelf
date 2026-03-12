@@ -132,15 +132,15 @@
   funtypecheck
   relfun
   meta
-  worldsyn
+  worldSyn
   worldify
   worldcheck
   unique
   total
   cover
-  abstract
+  tomega_abstract
   tomegaprint
-  typecheck
+  tomega_typecheck
   opsem
   redundant
   converter

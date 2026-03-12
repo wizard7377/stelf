@@ -105,7 +105,8 @@ end) : MTPSTRATEGY = struct
                 | s_ ->
                     Timers.time Timers.recursion MTPRecursion.apply
                       (MTPRecursion.expand (Obj.magic s_)))
-              sl_ in
+              sl_
+          in
           let _ = printInference () in
           let sl''_ =
             map
@@ -121,7 +122,9 @@ end) : MTPSTRATEGY = struct
     and fill = function
       | [], os -> os
       | s_ :: givenStates, ((openStates, solvedStates) as os) -> begin
-          match Timers.time Timers.recursion MTPFilling.expand (Obj.magic s_) with
+          match
+            Timers.time Timers.recursion MTPFilling.expand (Obj.magic s_)
+          with
           | fillingOp -> (
               try
                 let _ = printFilling () in
@@ -144,7 +147,8 @@ end) : MTPSTRATEGY = struct
         begin match openStates with [] -> printQed () | _ -> ()
         end
       in
-      (Obj.magic openStates' : S.state_ list), (Obj.magic solvedStates' : S.state_ list)
+      ( (Obj.magic openStates' : S.state_ list),
+        (Obj.magic solvedStates' : S.state_ list) )
   end
 
   (* if !Global.chatter > 5 then print (""["" ^ MTPSplitting.menu splitOp) *)

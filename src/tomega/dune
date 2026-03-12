@@ -6,13 +6,14 @@
  (modules
   opsem
   converter
-  typecheck
+  tomega_typecheck
   tomegaprint
   tomeganames
-  unify
+  tomega_unify
+  normalize
   coverage
   redundant
-  abstract
+  tomega_abstract
   tomega_)
  (libraries
   global

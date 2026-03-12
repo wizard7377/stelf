@@ -1,13 +1,16 @@
 open! Basis
 
-module MemoTable = HashTable (struct
+module type WORLDIFY = Worldify.WORLDIFY
+module type WORLDSYN = WorldSyn.WORLDSYN
+
+module MemoTable = Hash_table.HashTable (struct
   type nonrec key' = int * int
 
   let hash = function n, m -> (7 * n) + m
   let eq (x__op, y__op) = x__op = y__op
 end)
 
-module WorldSyn = WorldSyn (struct
+module WorldSyn = WorldSyn.WorldSyn (struct
   module Global = Global
   module Whnf = Whnf
   module Names = Names
@@ -19,13 +22,12 @@ module WorldSyn = WorldSyn (struct
   (*! structure Cs_manager = Cs_manager !*)
   module Subordinate = Subordinate
   module Print = Print
-  module Table = IntRedBlackTree
-  module Paths = Paths
+  module Table = Table_instances.IntRedBlackTree
   module Origins = Origins
-  module Timers = Timers
+  module Timers = Timers.Timers
 end)
 
-module Worldify = Worldify (struct
+module Worldify = Worldify.Worldify (struct
   module Global = Global
 
   (*! structure IntSyn = IntSyn !*)
@@ -41,9 +43,9 @@ module Worldify = Worldify (struct
   module Cs_manager = Cs_manager
   module Subordinate = Subordinate
   module Print = Print
-  module Table = IntRedBlackTree
+  module Table = Table_instances.IntRedBlackTree
   module MemoTable = MemoTable
-  module IntSet = IntSet
+  module IntSet = Intset.IntSet
 
   (*! structure Paths = Paths !*)
   module Origins = Origins

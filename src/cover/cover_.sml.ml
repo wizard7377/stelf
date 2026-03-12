@@ -1,6 +1,6 @@
 open! Basis
 
-module Cover = Cover (struct
+module Cover = MakeCover (struct
   module Global = Global
   module Whnf = Whnf
   module Conv = Conv
@@ -19,12 +19,12 @@ module Cover = Cover (struct
   module TypeCheck = TypeCheck
 
   (*! structure Cs_manager = Cs_manager !*)
-  module Timers = Timers
+  module Timers = Timers.Timers
 end)
 
-module Total = Total (struct
+module Total = Total.Total (struct
   module Global = Global
-  module Table = IntRedBlackTree
+  module Table = Table_instances.IntRedBlackTree
 
   (*! structure IntSyn' = IntSyn !*)
   module Whnf = Whnf
@@ -39,5 +39,5 @@ module Total = Total (struct
 
   (*! structure Paths = Paths !*)
   module Origins = Origins
-  module Timers = Timers
+  module Timers = Timers.Timers
 end)

@@ -11,6 +11,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
      *);;
     module T = Tomega;;
     module I = IntSyn;;
+    module Opsem = Redundant__0.Opsem;;
     let rec optionRefEqual (r1, r2, func) = begin
       if r1 = r2 then true else
       begin
@@ -30,7 +31,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                | T.PairBlock (rho, p_) -> (T.PairBlock (rho, convert p_))
                | T.PairPrg (p1_, p2_)
                    -> (T.PairPrg (convert p1_, convert p2_))
-               | unit_ -> T.unit_
+               | T.Unit -> T.Unit
                | T.Var x -> (T.Var x)
                | T.Const x -> (T.Const x)
                | T.Redex (p_, s_) -> (T.Redex (convert p_, convertSpine s_))
@@ -41,7 +42,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                    -> (T.Let (d_, convert p1_, convert p2_))
     and convertSpine =
       function 
-               | nil_ -> T.nil_
+               | T.Nil -> T.Nil
                | T.AppExp (i_, s_) -> (T.AppExp (i_, convertSpine s_))
                | T.AppBlock (i_, s_) -> (T.AppBlock (i_, convertSpine s_))
                | T.AppPrg (p_, s_)
@@ -94,7 +95,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                | _ -> false(* Recall that we (Psi2, t2, P2)[tAfter] = (Psi2, (tAfterInv \circ t2), P2) *)
     and spineEqual =
       function 
-               | (nil_, (nil_, t2)) -> true
+               | (T.Nil, (T.Nil, t2)) -> true
                | (T.AppExp (e1_, s1_), (T.AppExp (e2_, s2_), t2))
                    -> (Conv.conv ((e1_, I.id), (e2_, T.coerceSub t2))) &&
                         (spineEqual (s1_, (s2_, t2)))
@@ -124,7 +125,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                | (T.PairPrg (p1a_, p1b_), (T.PairPrg (p2a_, p2b_), t2))
                    -> (prgEqual (p1a_, (p2a_, t2))) &&
                         (prgEqual (p1b_, (p2b_, t2)))
-               | (unit_, (unit_, t2)) -> true
+               | (T.Unit, (T.Unit, t2)) -> true
                | (T.Const lemma1, (T.Const lemma2, _)) -> lemma1 = lemma2
                | (T.Var x1, (T.Var x2, t2))
                    -> begin
@@ -177,11 +178,11 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                | T.Prg p_ -> getPrgIndex p_
                | T.Exp u_ -> getExpIndex u_
                | T.Block b_ -> getBlockIndex b_
-               | undef_ -> None
+               | T.Undef -> None
     and getPrgIndex =
       function 
                | T.Var k -> (Some k)
-               | T.Redex (p_, nil_) -> getPrgIndex p_
+               | T.Redex (p_, T.Nil) -> getPrgIndex p_
                | T.PClo (p_, t)
                    -> begin
                       match getPrgIndex p_
@@ -192,8 +193,8 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                | _ -> None(* it is possible in the matchSub that we will get PClo under a sub (usually id) *)
     and getExpIndex =
       function 
-               | I.Root (I.BVar k, nil_) -> (Some k)
-               | I.Redex (u_, nil_) -> getExpIndex u_
+               | I.Root (I.BVar k, I.Nil) -> (Some k)
+               | I.Redex (u_, I.Nil) -> getExpIndex u_
                | I.EClo (u_, t)
                    -> begin
                       match getExpIndex u_
@@ -233,7 +234,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                        end) && (isSubRenamingOnly_ s1)
     and mergeSpines =
       function 
-               | (nil_, (nil_, t2)) -> T.nil_
+               | (T.Nil, (T.Nil, t2)) -> T.Nil
                | (T.AppExp (e1_, s1_), (T.AppExp (e2_, s2_), t2)) -> begin
                    if Conv.conv ((e1_, I.id), (e2_, T.coerceSub t2)) then
                    (T.AppExp (e1_, mergeSpines (s1_, (s2_, t2)))) else
@@ -279,7 +280,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                    if prgEqual (p1a_, (p2a_, t2)) then
                    (T.PairPrg (p1a_, mergePrgs (p1b_, (p2b_, t2)))) else
                    raise ((Error "cannot merge PairPrg")) end
-               | (unit_, (unit_, t2)) -> T.unit_
+               | (T.Unit, (T.Unit, t2)) -> T.Unit
                | (T.Const lemma1, (T.Const lemma2, _)) -> begin
                    if lemma1 = lemma2 then (T.Const lemma1) else
                    raise ((Error "Constants do not match.")) end
@@ -349,7 +350,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
       let rec lookup =
         function 
                  | (n, T.Shift _, p) -> None
-                 | (n, T.Dot (undef_, s'), p) -> lookup (n + 1, s', p)
+                 | (n, T.Dot (T.Undef, s'), p) -> lookup (n + 1, s', p)
                  | (n, T.Dot (ft_, s'), p)
                      -> begin
                         match getFrontIndex ft_
@@ -371,7 +372,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                                          (p - 1, (T.Dot ((T.Idx k), si)))
                                   | None
                                       -> invertSub''
-                                         (p - 1, (T.Dot (T.undef_, si)))
+                                         (p - 1, (T.Dot (T.Undef, si)))
                              end
              in let rec invertSub' =
                   function 
@@ -406,7 +407,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                    -> begin
                         print "BLOCK (DOT) ";printSub s
                         end
-               | T.Dot (undef_, s)
+               | T.Dot (T.Undef, s)
                    -> begin
                         print "UNDEF. (DOT) ";printSub s
                         end

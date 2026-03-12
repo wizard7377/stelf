@@ -62,14 +62,15 @@ end) : MTPFILLING = struct
                   xs_,
                   function
                   | max -> begin
-                      ignore (begin if !Global.doubleCheck then
-                        map
-                          (function
-                            | I.EVar (_, g'_, v_, _) as x_ ->
-                                TypeCheck.typeCheck (g'_, (x_, v_)))
-                          xs_
-                      else []
-                      end);
+                      ignore
+                        begin if !Global.doubleCheck then
+                          map
+                            (function
+                              | I.EVar (_, g'_, v_, _) as x_ ->
+                                  TypeCheck.typeCheck (g'_, (x_, v_)))
+                            xs_
+                        else []
+                        end;
                       raise (Success max)
                     end );
               raise (Error "Filling unsuccessful")

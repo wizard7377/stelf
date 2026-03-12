@@ -37,6 +37,7 @@ module TableIndex (TableIndex__0 : sig
   module TypeCheck : TYPECHECK
 end) : TABLEINDEX = struct
   open TableIndex__0
+
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
   module Conv = Conv
@@ -639,8 +640,7 @@ end) : TABLEINDEX = struct
                               let w =
                                 begin if !strengthen then
                                   Subordinate.weaken
-                                    ( I.Null,
-                                      IntSyn.targetFam (I.EClo (u1_, s1)) )
+                                    (I.Null, IntSyn.targetFam (I.EClo (u1_, s1)))
                                 else I.id
                                 end
                               in

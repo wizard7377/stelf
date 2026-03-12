@@ -109,7 +109,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
                   begin if
                     Unify.unifiable (g_, (v_, I.id), (v'_, I.id))
                     && Unify.unifiable
-                      (g_, (x_, I.id), (I.Root (I.BVar k', I.Nil), I.id))
+                         (g_, (x_, I.id), (I.Root (I.BVar k', I.Nil), I.id))
                   then sc ops'
                   else ops'
                   end)
@@ -283,8 +283,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
                     o_,
                     o'_,
                     (function ops' -> ordleSimul (g_, l_, l'_, sc, ops')),
-                    ops
-                  ))
+                    ops ))
           in
           ordeq
             ( g_,
@@ -374,10 +373,10 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
         vector (a1, (s1_, s1)),
         vector (a2, (s2_, s2)),
         (function
-          | ops' ->
-              MetaAbstract.abstract
-                (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
-              :: ops'),
+        | ops' ->
+            MetaAbstract.abstract
+              (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
+            :: ops'),
         ops )
 
     let rec expandLazy' = function

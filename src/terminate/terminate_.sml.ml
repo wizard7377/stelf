@@ -1,6 +1,10 @@
 open! Basis
-open Checking 
+open Checking
 open Reduces
+
+module type CHECKING = CHECKING
+module type REDUCES = REDUCES
+
 module Checking = Checking (struct
   module Global = Global
 

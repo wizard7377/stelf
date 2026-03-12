@@ -28,6 +28,7 @@ module Prover (Prover__0 : sig
   module Timers : TIMERS
 end) : PROVER = struct
   open Prover__0
+
   (*! structure IntSyn = MetaSyn'.IntSyn !*)
   exception Error of string
 

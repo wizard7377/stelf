@@ -22,6 +22,7 @@ module MTProver (MTProver__0 : sig
   module RelFun : RELFUN
 end) : PROVER = struct
   open MTProver__0
+
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 
@@ -80,7 +81,9 @@ end) : PROVER = struct
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.null_, f_, map select cL) in
       begin if equiv (cL, cL') then
-        List.app (function s_ -> insertState s_) (Obj.magic (MTPInit.init (f_, Obj.magic o_)))
+        List.app
+          (function s_ -> insertState s_)
+          (Obj.magic (MTPInit.init (f_, Obj.magic o_)))
       else
         raise
           (Error
@@ -175,6 +178,7 @@ module CombiProver (CombiProver__1 : sig
   module ProverNew : PROVER
 end) : PROVER = struct
   open CombiProver__1
+
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 

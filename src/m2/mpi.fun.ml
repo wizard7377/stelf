@@ -76,8 +76,10 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       end
 
     let rec collectOpen () = Ring.foldr (fun (x, acc) -> x :: acc) [] !openRing
+
     let rec collectSolved () =
       Ring.foldr (fun (x, acc) -> x :: acc) [] !solvedRing
+
     let rec nextOpen () = openRing := Ring.next !openRing
     let rec pushHistory () = history_ := (!openRing, !solvedRing) :: !history_
 
@@ -87,7 +89,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | (open'_, solved'_) :: history'_ -> begin
           history_ := history'_;
           begin
-            openRing := open'_; 
+            openRing := open'_;
             solvedRing := solved'_
           end
         end
@@ -180,7 +182,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       begin if empty () then makeSignature (collectSolved ())
       else begin
         print "[Error: Proof not completed yet]\n";
-          M.SgnEmpty
+        M.SgnEmpty
       end
       end
 

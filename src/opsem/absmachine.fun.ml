@@ -28,6 +28,7 @@ module AbsMachine (AbsMachine__0 : sig
   module Names : NAMES
 end) : ABSMACHINE = struct
   open AbsMachine__0
+
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
   open! struct

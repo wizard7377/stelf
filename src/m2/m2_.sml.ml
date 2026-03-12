@@ -1,5 +1,4 @@
 open! Basis
-
 open Meta_print
 open Init
 open Search
@@ -88,8 +87,8 @@ module Filling = Filling (struct
   module MetaAbstract = MetaAbstract
   module Print = Print
   module Search = OLDSearch
-  module Whnf = Whnf 
-end) 
+  module Whnf = Whnf
+end)
 
 module Recursion = Recursion (struct
   module Global = Global

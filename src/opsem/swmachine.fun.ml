@@ -8,6 +8,7 @@ module SwMachine (SwMachine__0 : sig
   module TMachine : ABSMACHINE
 end) : ABSMACHINE = struct
   open SwMachine__0
+
   (*! structure IntSyn = AbsMachine.IntSyn !*)
   (*! structure CompSyn = AbsMachine.CompSyn !*)
   let rec solve args =

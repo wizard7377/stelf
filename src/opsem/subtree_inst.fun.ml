@@ -33,6 +33,7 @@ end) : MEMOTABLE = struct
   open MemoTableInst__0
   open! Red_black_set
   open! Table_param
+
   (*! structure IntSyn = IntSyn' !*)
   (* ---------------------------------------------------------------------- *)
   (* Linear substitution tree for linear terms *)
@@ -600,16 +601,18 @@ end) : MEMOTABLE = struct
                         assign (d, dec1_, t_v, u_, asub)
                       end
                 end
-              | Some (x, (I.ADec (n, d') as dec1_)), None -> (
-                  fun asub -> begin
+              | Some (x, (I.ADec (n, d') as dec1_)), None ->
+                  fun asub ->
+                    begin
                       ac asub;
                       assign (d, dec1_, t_v, u_, asub)
-                    end)
-              | Some (x, dec1_), None -> (
-                  fun asub -> begin
+                    end
+              | Some (x, dec1_), None ->
+                  fun asub ->
+                    begin
                       ac asub;
                       assign (d, dec1_, t_v, u_, asub)
-                    end)
+                    end
               | _, _ -> raise (Instance "Impossible\n")
               end
             else raise (Instance "Bound variable mismatch\n")
@@ -620,16 +623,18 @@ end) : MEMOTABLE = struct
             ac ) -> begin
             match isExists (d, I.BVar k, d_t_) with
             | None -> raise (Instance "Impossible\n")
-            | Some (x, (I.ADec (_, _) as dec1_)) -> (
-                fun asub -> begin
+            | Some (x, (I.ADec (_, _) as dec1_)) ->
+                fun asub ->
+                  begin
                     ac asub;
                     assign (d, dec1_, t_v, u_, asub)
-                  end)
-            | Some (x, dec1_) -> (
-                fun asub -> begin
+                  end
+            | Some (x, dec1_) ->
+                fun asub ->
+                  begin
                     ac asub;
                     assign (d, dec1_, t_v, u_, asub)
-                  end)
+                  end
           end
         | ( d,
             (I.Root ((I.BVar k as h1_), s1_) as t_),
@@ -637,16 +642,18 @@ end) : MEMOTABLE = struct
             ac ) -> begin
             match isExists (d, I.BVar k, d_t_) with
             | None -> raise (Instance "Impossible\n")
-            | Some (x, (I.ADec (_, _) as dec1_)) -> (
-                fun asub -> begin
+            | Some (x, (I.ADec (_, _) as dec1_)) ->
+                fun asub ->
+                  begin
                     ac asub;
                     assign (d, dec1_, t_v, u_, asub)
-                  end)
-            | Some (x, dec1_) -> (
-                fun asub -> begin
+                  end
+            | Some (x, dec1_) ->
+                fun asub ->
+                  begin
                     ac asub;
                     assign (d, dec1_, t_v, u_, asub)
-                  end)
+                  end
           end
         | depth, (I.Root (h1_, s1_) as t_), (I.Root (I.Def k', s2_) as u_), ac
           ->
@@ -712,7 +719,8 @@ end) : MEMOTABLE = struct
         end
       | (d_1_, h1_), (d_2_, h2_) -> false
 
-    let rec compatible' ((d_t_, (dt, t_v)), (d_u_, (du, u_)), ds_, rho_t, rho_u) =
+    let rec compatible' ((d_t_, (dt, t_v)), (d_u_, (du, u_)), ds_, rho_t, rho_u)
+        =
       let rec genNVar ((rho_t, t_v), (rho_u, u_)) =
         begin
           S.insert rho_t (!nctr + 1, t_v);
@@ -1174,9 +1182,9 @@ end) : MEMOTABLE = struct
                   match (insert (childRef_, drho2_, gr_)) () with
                   | _, T.NewEntry answRef -> checkCandidates (l_, sCands_)
                   | _, T.RepeatedEntry (asub, answRef, status) ->
-                      (fun () -> ((), T.RepeatedEntry (asub, answRef, status)))
+                      fun () -> ((), T.RepeatedEntry (asub, answRef, status))
                   | _, T.DivergingEntry (asub, answRef) ->
-                      (fun () -> ((), T.DivergingEntry (asub, answRef)))
+                      fun () -> ((), T.DivergingEntry (asub, answRef))
                 end
             in
             checkCandidates (variantCand_, splitCand_)

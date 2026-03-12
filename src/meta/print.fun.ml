@@ -44,8 +44,8 @@ end) : MTPRINT = struct
 
     let rec formatOrder = function
       | g_, S.Arg (us_, vs_) ->
-          let (u1_, s1_) = us_ in
-          let (u2_, s2_) = vs_ in
+          let u1_, s1_ = us_ in
+          let u2_, s2_ = vs_ in
           [
             printFmt (Print.formatExp (g_, I.EClo (u1_, s1_)));
             Fmt.string ":";
@@ -76,8 +76,8 @@ end) : MTPRINT = struct
       | g_, S.Parameter l -> [ Fmt.string "<p>" ]
       | g_, S.Lemma (S.Splits k) ->
           [ Fmt.string "<i"; Fmt.string (Int.toString k); Fmt.string ">" ]
-      | g_, S.Lemma (S.Rl) -> [ Fmt.string "<i >" ]
-      | g_, S.Lemma (S.RLdone) -> [ Fmt.string "<i*>" ]
+      | g_, S.Lemma S.Rl -> [ Fmt.string "<i >" ]
+      | g_, S.Lemma S.RLdone -> [ Fmt.string "<i*>" ]
 
     let rec formatCtx = function
       | null_, b_ -> []
@@ -96,7 +96,8 @@ end) : MTPRINT = struct
             @ [ Fmt.string ","; Fmt.break_; Fmt.break_ ]
             @ [
                 Fmt.hVbox
-                  (formatTag (g_, t_) @ [ Fmt.break_; printFmt (Print.formatDec (g_, d_)) ]);
+                  (formatTag (g_, t_)
+                  @ [ Fmt.break_; printFmt (Print.formatDec (g_, d_)) ]);
               ]
           else
             formatCtx (g_, b_)
@@ -106,17 +107,19 @@ end) : MTPRINT = struct
 
     let rec formatState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
       Fmt.vbox0 0 1
-          [
-            Fmt.hVbox0 1 0 1 (formatOrder (g_, o_));
-            Fmt.break_;
-            Fmt.string "========================";
-            Fmt.break_;
-            Fmt.hVbox0 1 0 1 (formatCtx (g_, b_));
-            Fmt.break_;
-            Fmt.string "------------------------";
-            Fmt.break_;
-            Fmt.string (FunPrint.Formatter.makestring_fmt (FunPrint.formatForBare (g_, f_)));
-          ]
+        [
+          Fmt.hVbox0 1 0 1 (formatOrder (g_, o_));
+          Fmt.break_;
+          Fmt.string "========================";
+          Fmt.break_;
+          Fmt.hVbox0 1 0 1 (formatCtx (g_, b_));
+          Fmt.break_;
+          Fmt.string "------------------------";
+          Fmt.break_;
+          Fmt.string
+            (FunPrint.Formatter.makestring_fmt
+               (FunPrint.formatForBare (g_, f_)));
+        ]
 
     let rec stateToString s_ = Fmt.makestring_fmt (formatState s_)
   end

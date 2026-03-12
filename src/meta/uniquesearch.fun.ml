@@ -173,8 +173,7 @@ end) : UNIQUESEARCH = struct
           acc ) -> begin
           match Assign.assignable (g_, ps', (q_, s)) with
           | Some cnstr ->
-              aSolve
-                ((eqns, s), dp, cnstr, (fun () -> sc (I.Nil, acc)), acc)
+              aSolve ((eqns, s), dp, cnstr, (fun () -> sc (I.Nil, acc)), acc)
           | None -> acc
         end
       | ( max,
@@ -321,7 +320,8 @@ end) : UNIQUESEARCH = struct
                             ps',
                             (r, I.comp (s, I.Shift n)),
                             dp,
-                            (fun (s_, acc'') -> sc (I.Root (I.BVar n, s_), acc'')),
+                            (fun (s_, acc'') ->
+                              sc (I.Root (I.BVar n, s_), acc'')),
                             acc' ))
                   in
                   matchDProg (dPool', n + 1, acc''')
@@ -356,22 +356,22 @@ end) : UNIQUESEARCH = struct
         searchEx' depth
           ( selectEVar ge_,
             (fun acc' ->
-                begin if !Global.chatter > 5 then print "OK]\n" else ()
-                end;
-                let ge'_ =
-                  foldr
-                    (function
-                      | (I.EVar (_, g_, _, _) as x_), l_ ->
-                          Abstract.collectEVars (g_, (x_, I.id), l_))
-                    [] ge_
-                in
-                let gE' = List.length ge'_ in
-                begin if gE' > 0 then begin
-                  if it > 0 then searchEx (it - 1, depth) (ge'_, sc, acc')
-                  else raise (Error "not found")
-                end
-                else sc acc'
-                end),
+              begin if !Global.chatter > 5 then print "OK]\n" else ()
+              end;
+              let ge'_ =
+                foldr
+                  (function
+                    | (I.EVar (_, g_, _, _) as x_), l_ ->
+                        Abstract.collectEVars (g_, (x_, I.id), l_))
+                  [] ge_
+              in
+              let gE' = List.length ge'_ in
+              begin if gE' > 0 then begin
+                if it > 0 then searchEx (it - 1, depth) (ge'_, sc, acc')
+                else raise (Error "not found")
+              end
+              else sc acc'
+              end),
             acc )
       end
 

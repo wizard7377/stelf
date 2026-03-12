@@ -1,21 +1,24 @@
 open! Basis
 
-module TomegaAbstract = TomegaAbstract (struct
+module TomegaAbstract = Tomega_abstract.TomegaAbstract (struct
   module Global = Global
-  module Abstract = Abstract
+
+  let abstract_raiseType = Abstract.raiseType
+  let abstract_raiseTerm = Abstract.raiseTerm
+
   module Whnf = Whnf
   module Subordinate = Subordinate
 end)
 
-module TomegaPrint = TomegaPrint (struct
+module TomegaPrint = Tomegaprint.TomegaPrint (struct
   (*! structure IntSyn' = IntSyn !*)
   (*! structure Tomega' = Tomega !*)
-  module Formatter = Formatter
-  module Names = Names
-  module Print = Print
+  module Formatter = Print_.Print.Formatter
+  module Names = Names_.Names
+  module Print : PRINT with module Formatter = Formatter = Print_.Print
 end)
 
-module TomegaTypeCheck = TomegaTypeCheck (struct
+module TomegaTypeCheck = Tomega_typecheck.TomegaTypeCheck (struct
   module Global = Global
 
   (*! structure IntSyn' = IntSyn !*)
@@ -46,7 +49,7 @@ end)
    structure Print = Print
    structure Weaken = Weaken);
 *)
-module Opsem = Opsem (struct
+module Opsem = Opsem.Opsem (struct
   module Global = Global
   module IntSyn' = IntSyn
   module Abstract = Abstract
@@ -79,11 +82,11 @@ structure Opsem = OpsemCont
    structure TomegaTypeCheck = TomegaTypeCheck
    structure Weaken = Weaken);
 *)
-module Redundant = Redundant (struct
+module Redundant = Redundant.Redundant (struct
   module Opsem = Opsem
 end)
 
-module Converter = Converter (struct
+module Converter = Converter.Converter (struct
   module Global = Global
   module IntSyn' = IntSyn
   module Abstract = Abstract
@@ -105,7 +108,7 @@ module Converter = Converter (struct
   module Weaken = Weaken
 end)
 
-module TomegaCoverage = TomegaCoverage (struct
+module TomegaCoverage = Coverage.TomegaCoverage (struct
   module Global = Global
   module IntSyn' = IntSyn
   module Tomega' = Tomega

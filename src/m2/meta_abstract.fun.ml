@@ -304,7 +304,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
             ( I.BVar (k + depth),
               abstractSub
                 (a_, g_, depth, (vraised_, I.id), s, I.targetFam v_, I.Nil) )
-        | a_, g_, depth, (I.FgnExp (csid_, fge_), s) ->
+      | a_, g_, depth, (I.FgnExp (csid_, fge_), s) ->
           I.FgnExpStd.Map.apply (csid_, fge_) (function u_ ->
               abstractExp (a_, g_, depth, (u_, s)))
 
@@ -368,7 +368,8 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     let rec abstractCtx = function
       | I.Null, (MetaSyn.Prefix (I.Null, I.Null, I.Null) as gm_) -> (gm_, I.Null)
       | ( I.Decl (a_, Bv),
-          MetaSyn.Prefix (I.Decl (g_, d_), I.Decl (m_, marg), I.Decl (b_, b)) ) ->
+          MetaSyn.Prefix (I.Decl (g_, d_), I.Decl (m_, marg), I.Decl (b_, b)) )
+        ->
           let MetaSyn.Prefix (g'_, m'_, b'_), lG' =
             abstractCtx (a_, MetaSyn.Prefix (g_, m_, b_))
           in
@@ -405,8 +406,8 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
                     end ) ),
             lG' )
 
-    let rec abstract (MetaSyn.State (name, (MetaSyn.Prefix (g_, m_, b_) as gm_), v_) as s_)
-        =
+    let rec abstract
+        (MetaSyn.State (name, (MetaSyn.Prefix (g_, m_, b_) as gm_), v_) as s_) =
       let _ = Names.varReset I.null_ in
       let a_ = collect (gm_, v_) in
       let gm'_, _ = abstractCtx (a_, gm_) in

@@ -15,7 +15,7 @@ module TomegaUnify (TomegaUnify__0 : sig
   module Conv : CONV
 
   (*! sharing Conv.IntSyn = IntSyn' !*)
-  module Normalize : NORMALIZE
+  module Normalize : Normalize.NORMALIZE
 
   (*! sharing Normalize.IntSyn = IntSyn' !*)
   (*! sharing Normalize.Tomega = Tomega' !*)
@@ -25,7 +25,7 @@ module TomegaUnify (TomegaUnify__0 : sig
   module Print : PRINT
 
   (*! sharing Print.IntSyn = IntSyn' !*)
-  module TomegaPrint : TOMEGAPRINT
+  module TomegaPrint : Tomegaprint.TOMEGAPRINT
 
   (*! sharing TomegaPrint.IntSyn = IntSyn' !*)
   (*! sharing TomegaPrint.Tomega = Tomega' !*)
@@ -46,7 +46,7 @@ end) : TOMEGAUNIFY = struct
       unifyForN (psi_, T.forSub (f1_, T.id), T.forSub (f2_, T.id))
 
     and unifyForN = function
-      | psi_, true_, true_ -> ()
+      | psi_, T.True, T.True -> ()
       | psi_, T.Ex ((d1_, _), f1_), T.Ex ((d2_, _), f2_) -> begin
           unifyDec (psi_, T.UDec d1_, T.UDec d2_);
           unifyFor (I.Decl (psi_, T.UDec d1_), f1_, f2_)
@@ -64,7 +64,8 @@ end) : TOMEGAUNIFY = struct
           if Conv.convDec ((d1_, I.id), (d2_, I.id)) then ()
           else raise (Unify "Declaration mismatch")
         end
-      | psi_, T.PDec (_, f1_), T.PDec (_, f2_) -> unifyFor (psi_, f1_, f2_)
+      | psi_, T.PDec (_, f1_, _, _), T.PDec (_, f2_, _, _) ->
+          unifyFor (psi_, f1_, f2_)
   end
 
   (* unifyFor (Psi, F1, F2) = R

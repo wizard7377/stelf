@@ -1,7 +1,7 @@
 open! Search
 open! Basis
 open Meta_abstract
-open Metasyn 
+open Metasyn
 
 (* Filling *)
 (* Author: Carsten Schuermann *)
@@ -23,7 +23,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
   type nonrec operator = (MetaSyn.state_ * int) * (unit -> MetaSyn.state_ list)
 
   open! struct
-    module M = MetaSyn 
+    module M = MetaSyn
     module I = IntSyn
 
     exception Success of M.state_
@@ -51,7 +51,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
               (* delay ((function params_ ->
                   (try Search.searchEx params_
                    with Success s_ -> ([ s_ ], (g_, ge_, vs_, abstractEx))))) ) *)
-          ))
+            ) )
       | ( g_,
           ge_,
           (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s),

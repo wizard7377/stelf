@@ -1,5 +1,4 @@
 open! Basis
-
 module TabledSyn = Tabled.TabledSyn
 
 module AbsMachine = Absmachine.AbsMachine (struct

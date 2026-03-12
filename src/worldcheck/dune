@@ -3,7 +3,7 @@
 (library
  (name worldcheck)
  (public_name twelf.worldcheck)
- (modules worldsyn worldify worldcheck_)
+ (modules worldSyn worldify worldcheck_)
  (libraries
   global
   timing

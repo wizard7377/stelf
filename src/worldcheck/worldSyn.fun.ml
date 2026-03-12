@@ -1,4 +1,7 @@
 open! Basis
+open Origins
+open Timers
+open Table_
 
 (* World Checking *)
 (* Author: Carsten Schuermann *)
@@ -31,7 +34,7 @@ module WorldSyn (WorldSyn__0 : sig
   module Print : PRINT
 
   (*! sharing Print.IntSyn = IntSyn !*)
-  module Table : TABLE
+  module Table : TABLE with type key = int
 
   (*! structure Paths : PATHS !*)
   module Origins : ORIGINS
@@ -44,6 +47,8 @@ end) : WORLDSYN = struct
   module T = Tomega
   module P = Paths
   module F = Print.Formatter
+  module Table = WorldSyn__0.Table
+  module Unify = WorldSyn__0.Unify
 
   exception Error of string
   exception Error' of P.occ * string
@@ -89,7 +94,7 @@ end) : WORLDSYN = struct
       end
 
     type reg_ =
-      | Block of I.dctx * dlist
+      | Block of (I.dctx * dlist)
       | Seq of dlist * I.sub_
       | Star of reg_
       | Plus of reg_ * reg_
@@ -101,36 +106,36 @@ end) : WORLDSYN = struct
       begin match r with
       | Block (g_, dl) -> Print.formatDecList (g_, dl)
       | Seq (dl, s) -> Print.formatDecList' (I.null_, (dl, s))
-      | Star r -> F.Hbox [ F.String "("; formatReg r; F.String ")*" ]
+      | Star r -> F.hbox [ F.string "("; formatReg r; F.string ")*" ]
       | Plus (r1, r2) ->
-          F.HVbox
+          F.hVbox
             [
-              F.String "(";
+              F.string "(";
               formatReg r1;
-              F.String ")";
+              F.string ")";
               F.break_;
-              F.String "|";
-              F.space_;
-              F.String "(";
+              F.string "|";
+              F.space;
+              F.string "(";
               formatReg r2;
-              F.String ")";
+              F.string ")";
             ]
-      | One -> F.String "1"
+      | One -> F.string "1"
       end
 
     let rec formatSubsump msg (g_, dl, rb_, b) =
-      F.HVbox
+      F.hVbox
         [
-          F.String msg;
-          F.space_;
-          F.String "for family";
-          F.space_;
-          F.String (Names.qidToString (Names.constQid b) ^ ":");
+          F.string msg;
+          F.space;
+          F.string "for family";
+          F.space;
+          F.string (Names.qidToString (Names.constQid b) ^ ":");
           F.break_;
           Print.formatDecList (g_, dl);
           F.break_;
-          F.String "</:";
-          F.space_;
+          F.string "</:";
+          F.space;
           formatReg rb_;
         ]
 
@@ -160,7 +165,7 @@ end) : WORLDSYN = struct
       end
 
     let rec formatD (g_, d_) =
-      F.Hbox [ F.String "{"; Print.formatDec (g_, d_); F.String "}" ]
+      F.hbox [ F.string "{"; Print.formatDec (g_, d_); F.string "}" ]
 
     let rec formatDList = function
       | g_, [], t -> []
@@ -175,28 +180,28 @@ end) : WORLDSYN = struct
 
     let rec wGoalToString ((g_, l_), Seq (piDecs, t)) =
       F.makestring_fmt
-        (F.HVbox
+        (F.hVbox
            [
-             F.HVbox (formatDList (g_, l_, I.id));
+             F.hVbox (formatDList (g_, l_, I.id));
              F.break_;
-             F.String "<|";
+             F.string "<|";
              F.break_;
-             F.HVbox (formatDList (g_, piDecs, t));
+             F.hVbox (formatDList (g_, piDecs, t));
            ])
 
     let rec worldToString (g_, Seq (piDecs, t)) =
-      F.makestring_fmt (F.HVbox (formatDList (g_, piDecs, t)))
+      F.makestring_fmt (F.hVbox (formatDList (g_, piDecs, t)))
 
     let rec hypsToString (g_, l_) =
-      F.makestring_fmt (F.HVbox (formatDList (g_, l_, I.id)))
+      F.makestring_fmt (F.hVbox (formatDList (g_, l_, I.id)))
 
     let rec mismatchToString (g_, (v1_, s1), (v2_, s2)) =
       F.makestring_fmt
-        (F.HVbox
+        (F.hVbox
            [
              Print.formatExp (g_, I.EClo (v1_, s1));
              F.break_;
-             F.String "<>";
+             F.string "<>";
              F.break_;
              Print.formatExp (g_, I.EClo (v2_, s2));
            ])
@@ -463,10 +468,10 @@ end) : WORLDSYN = struct
 
     let rec conDecBlock = function
       | I.BlockDec (_, _, gsome_, lpi_) -> (gsome_, lpi_)
-      | Condec_ ->
+      | condec_ ->
           raise
             (Error
-               (("Identifier " ^ I.conDecName Condec_) ^ " is not a block label"))
+               (("Identifier " ^ I.conDecName condec_) ^ " is not a block label"))
 
     let rec constBlock cid = conDecBlock (I.sgnLookup cid)
 

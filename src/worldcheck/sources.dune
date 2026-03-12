@@ -1,28 +1,28 @@
 
       (rule
  (mode fallback)
- (target worldsyn.sig.ml)
+ (target worldSyn.sig.ml)
  (action
-  (write-file worldsyn.sig.ml "")))
+  (write-file worldSyn.sig.ml "")))
 
 (rule
  (mode fallback)
- (target worldsyn.fun.ml)
+ (target worldSyn.fun.ml)
  (action
-  (write-file worldsyn.fun.ml "")))
+  (write-file worldSyn.fun.ml "")))
 
 (rule
  (mode fallback)
- (target worldsyn.sml.ml)
+ (target worldSyn.sml.ml)
  (action
-  (write-file worldsyn.sml.ml "")))
+  (write-file worldSyn.sml.ml "")))
 
 (rule
- (target worldsyn.ml)
+ (target worldSyn.ml)
  (deps
-  (:sig worldsyn.sig.ml)
-  (:fun worldsyn.fun.ml)
-  (:sml worldsyn.sml.ml))
+  (:sig worldSyn.sig.ml)
+  (:fun worldSyn.fun.ml)
+  (:sml worldSyn.sml.ml))
  (action
   (progn
    (concurrent

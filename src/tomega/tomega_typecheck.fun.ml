@@ -9,10 +9,10 @@ module TomegaTypeCheck (TomegaTypeCheck__0 : sig
   module Conv : CONV
   module Whnf : WHNF
   module Print : PRINT
-  module TomegaPrint : TOMEGAPRINT
+  module TomegaPrint : Tomegaprint.TOMEGAPRINT
   module Subordinate : SUBORDINATE
   module Weaken : WEAKEN
-  module TomegaAbstract : TOMEGAABSTRACT
+  module TomegaAbstract : Tomega_abstract.TOMEGAABSTRACT
 end) : TOMEGATYPECHECK = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
@@ -22,7 +22,7 @@ end) : TOMEGATYPECHECK = struct
     module I = IntSyn
     module T = Tomega
     module S = Subordinate
-    module TA = TomegaAbstract
+    module TA = TomegaTypeCheck__0.TomegaAbstract
 
     let rec chatter chlev f =
       begin if !Global.chatter >= chlev then print (f ()) else ()
@@ -63,25 +63,25 @@ end) : TOMEGATYPECHECK = struct
     and inferPrg = function
       | psi_, T.Lam (d_, p_) ->
           let f_ = inferPrg (I.Decl (psi_, d_), p_) in
-          T.All ((d_, T.explicit_), f_)
+          T.All ((d_, T.Explicit), f_)
       | psi_, T.New p_ ->
           let (T.All ((T.UDec (I.BDec _ as d_), _), f_)) =
             inferPrg (psi_, p_)
           in
-          TA.raiseF (I.Decl (I.null_, d_), (f_, I.id))
+          TA.raiseF (I.Decl (I.Null, d_), (f_, I.id))
       | psi_, T.PairExp (u_, p_) ->
           let v_ = TypeCheck.infer' (T.coerceCtx psi_, u_) in
           let f_ = inferPrg (psi_, p_) in
-          T.Ex ((I.Dec (None, v_), T.explicit_), f_)
+          T.Ex ((I.Dec (None, v_), T.Explicit), f_)
       | psi_, T.PairBlock (I.Bidx k, p_) ->
           let d_ = I.ctxLookup (T.coerceCtx psi_, k) in
           let f_ = inferPrg (psi_, p_) in
-          T.Ex ((d_, T.explicit_), f_)
+          T.Ex ((d_, T.Explicit), f_)
       | psi_, T.PairPrg (p1_, p2_) ->
           let f1_ = inferPrg (psi_, p1_) in
           let f2_ = inferPrg (psi_, p2_) in
           T.And (f1_, f2_)
-      | psi_, unit_ -> T.true_
+      | psi_, unit_ -> T.True
       | psi_, T.Var k -> begin
           match T.ctxDec (psi_, k) with T.PDec (_, f'_, _, _) -> f'_
         end
@@ -171,7 +171,7 @@ end) : TOMEGATYPECHECK = struct
           let _ = chatter 5 (function () -> "[new1...") in
           let (T.All ((T.UDec d''_, _), f'_)) = inferPrg (psi_, p'_) in
           let _ = chatter 5 (function () -> "][new2...") in
-          let f''_ = TA.raiseF (I.Decl (I.null_, d_), (f'_, I.id)) in
+          let f''_ = TA.raiseF (I.Decl (I.Null, d_), (f'_, I.id)) in
           begin
             convFor (psi_, (f''_, T.id), (f_, t));
             chatter 5 (function () -> "]\n")
@@ -197,7 +197,7 @@ end) : TOMEGATYPECHECK = struct
           (T.All ((T.PDec (_, f1_, _, _), _), f2_), t),
           (f'_, t') ) -> begin
           checkPrgW (psi_, (p_, (f1_, t)));
-          checkSpine (psi_, s_, (f2_, T.Dot (T.undef_, t)), (f'_, t'))
+          checkSpine (psi_, s_, (f2_, T.Dot (T.Undef, t)), (f'_, t'))
         end
       | psi_, T.AppExp (u_, s_), (T.FClo (f_, t1), t), (f'_, t') ->
           checkSpine (psi_, T.AppExp (u_, s_), (f_, T.comp (t1, t)), (f'_, t'))
@@ -228,7 +228,7 @@ end) : TOMEGATYPECHECK = struct
       convForW (psi_, T.whnfFor ft1_, T.whnfFor ft2_)
 
     and convForW = function
-      | _, (true_, _), (true_, _) -> ()
+      | _, (T.True, _), (T.True, _) -> ()
       | ( psi_,
           (T.All (((T.UDec (I.Dec (_, a1_)) as d_), _), f1_), t1),
           (T.All ((T.UDec (I.Dec (_, a2_)), _), f2_), t2) ) ->
@@ -236,8 +236,8 @@ end) : TOMEGATYPECHECK = struct
           let s1 = T.coerceSub t1 in
           let s2 = T.coerceSub t2 in
           let _ = Conv.conv ((a1_, s1), (a2_, s2)) in
-          let _ = TypeCheck.typeCheck (g_, (I.EClo (a1_, s1), I.Uni I.type_)) in
-          let _ = TypeCheck.typeCheck (g_, (I.EClo (a2_, s2), I.Uni I.type_)) in
+          let _ = TypeCheck.typeCheck (g_, (I.EClo (a1_, s1), I.Uni I.Type)) in
+          let _ = TypeCheck.typeCheck (g_, (I.EClo (a2_, s2), I.Uni I.Type)) in
           let d'_ = T.decSub (d_, t1) in
           let _ =
             convFor (I.Decl (psi_, d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2))
@@ -270,8 +270,8 @@ end) : TOMEGATYPECHECK = struct
           let s1 = T.coerceSub t1 in
           let s2 = T.coerceSub t2 in
           let _ = Conv.conv ((a1_, s1), (a2_, s2)) in
-          let _ = TypeCheck.typeCheck (g_, (I.EClo (a1_, s1), I.Uni I.type_)) in
-          let _ = TypeCheck.typeCheck (g_, (I.EClo (a2_, s2), I.Uni I.type_)) in
+          let _ = TypeCheck.typeCheck (g_, (I.EClo (a1_, s1), I.Uni I.Type)) in
+          let _ = TypeCheck.typeCheck (g_, (I.EClo (a2_, s2), I.Uni I.Type)) in
           let d'_ = I.decSub (d_, s1) in
           let _ =
             convFor
@@ -371,14 +371,14 @@ end) : TOMEGATYPECHECK = struct
           T.Dot (T.Idx k1, s1),
           T.Dot (T.Exp m2_, s2),
           I.Decl (g'_, T.UDec (I.Dec (_, a_))) ) ->
-          let _ = TypeCheck.checkConv (I.Root (I.BVar k1, I.nil_), m2_) in
+          let _ = TypeCheck.checkConv (I.Root (I.BVar k1, I.Nil), m2_) in
           let _ = TypeCheck.typeCheck (T.coerceCtx g_, (m2_, a_)) in
           convSub (g_, s1, s2, g'_)
       | ( g_,
           T.Dot (T.Exp m1_, s1),
           T.Dot (T.Idx k2, s2),
           I.Decl (g'_, T.UDec (I.Dec (_, a_))) ) ->
-          let _ = TypeCheck.checkConv (m1_, I.Root (I.BVar k2, I.nil_)) in
+          let _ = TypeCheck.checkConv (m1_, I.Root (I.BVar k2, I.Nil)) in
           let _ = TypeCheck.typeCheck (T.coerceCtx g_, (m1_, a_)) in
           convSub (g_, s1, s2, g'_)
       | ( g_,
@@ -420,7 +420,7 @@ end) : TOMEGATYPECHECK = struct
       | psi_, (T.World (w_, f_), t) -> checkFor (psi_, (f_, t))
 
     and checkCtx = function
-      | null_ -> ()
+      | I.Null -> ()
       | I.Decl (psi_, T.UDec d_) -> begin
           checkCtx psi_;
           TypeCheck.checkDec (T.coerceCtx psi_, (d_, I.id))
@@ -431,9 +431,9 @@ end) : TOMEGATYPECHECK = struct
         end
 
     and checkSub = function
-      | null_, T.Shift 0, null_ -> ()
-      | I.Decl (g_, d_), T.Shift k, null_ -> begin
-          if k > 0 then checkSub (g_, T.Shift (k - 1), I.null_)
+      | I.Null, T.Shift 0, I.Null -> ()
+      | I.Decl (g_, d_), T.Shift k, I.Null -> begin
+          if k > 0 then checkSub (g_, T.Shift (k - 1), I.Null)
           else raise (Error "Sub is not well typed!")
         end
       | g_, T.Shift k, g'_ ->
@@ -473,7 +473,7 @@ end) : TOMEGATYPECHECK = struct
           let g_, l_ = I.constBlock c in
           let _ = TypeCheck.typeCheckSub (T.coerceCtx psi'_, s2, g_) in
           checkBlock (psi_, (b_, (c, I.comp (s2, T.coerceSub t))))
-      | psi_, T.Dot _, null_ -> raise (Error "Sub is not well typed")
+      | psi_, T.Dot _, I.Null -> raise (Error "Sub is not well typed")
 
     and checkBlock = function
       | psi_, (I.Bidx v, (c2, s2)) ->

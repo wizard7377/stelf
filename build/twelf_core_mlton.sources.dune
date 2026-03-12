@@ -4993,28 +4993,28 @@
       
       (rule
  (mode fallback)
- (target worldsyn.sig.ml)
+ (target worldSyn.sig.ml)
  (action
-  (write-file worldsyn.sig.ml "")))
+  (write-file worldSyn.sig.ml "")))
 
 (rule
  (mode fallback)
- (target worldsyn.fun.ml)
+ (target worldSyn.fun.ml)
  (action
-  (write-file worldsyn.fun.ml "")))
+  (write-file worldSyn.fun.ml "")))
 
 (rule
  (mode fallback)
- (target worldsyn.sml.ml)
+ (target worldSyn.sml.ml)
  (action
-  (write-file worldsyn.sml.ml "")))
+  (write-file worldSyn.sml.ml "")))
 
 (rule
- (target worldsyn.ml)
+ (target worldSyn.ml)
  (deps
-  (:sig worldsyn.sig.ml)
-  (:fun worldsyn.fun.ml)
-  (:sml worldsyn.sml.ml))
+  (:sig worldSyn.sig.ml)
+  (:fun worldSyn.fun.ml)
+  (:sml worldSyn.sml.ml))
  (action
   (progn
    (concurrent
@@ -5227,28 +5227,28 @@
       
       (rule
  (mode fallback)
- (target abstract.sig.ml)
+ (target tomega_abstract.sig.ml)
  (action
-  (write-file abstract.sig.ml "")))
+  (write-file tomega_abstract.sig.ml "")))
 
 (rule
  (mode fallback)
- (target abstract.fun.ml)
+ (target tomega_abstract.fun.ml)
  (action
-  (write-file abstract.fun.ml "")))
+  (write-file tomega_abstract.fun.ml "")))
 
 (rule
  (mode fallback)
- (target abstract.sml.ml)
+ (target tomega_abstract.sml.ml)
  (action
-  (write-file abstract.sml.ml "")))
+  (write-file tomega_abstract.sml.ml "")))
 
 (rule
- (target abstract.ml)
+ (target tomega_abstract.ml)
  (deps
-  (:sig abstract.sig.ml)
-  (:fun abstract.fun.ml)
-  (:sml abstract.sml.ml))
+  (:sig tomega_abstract.sig.ml)
+  (:fun tomega_abstract.fun.ml)
+  (:sml tomega_abstract.sml.ml))
  (action
   (progn
    (concurrent
@@ -5305,28 +5305,28 @@
       
       (rule
  (mode fallback)
- (target typecheck.sig.ml)
+ (target tomega_typecheck.sig.ml)
  (action
-  (write-file typecheck.sig.ml "")))
+  (write-file tomega_typecheck.sig.ml "")))
 
 (rule
  (mode fallback)
- (target typecheck.fun.ml)
+ (target tomega_typecheck.fun.ml)
  (action
-  (write-file typecheck.fun.ml "")))
+  (write-file tomega_typecheck.fun.ml "")))
 
 (rule
  (mode fallback)
- (target typecheck.sml.ml)
+ (target tomega_typecheck.sml.ml)
  (action
-  (write-file typecheck.sml.ml "")))
+  (write-file tomega_typecheck.sml.ml "")))
 
 (rule
- (target typecheck.ml)
+ (target tomega_typecheck.ml)
  (deps
-  (:sig typecheck.sig.ml)
-  (:fun typecheck.fun.ml)
-  (:sml typecheck.sml.ml))
+  (:sig tomega_typecheck.sig.ml)
+  (:fun tomega_typecheck.fun.ml)
+  (:sml tomega_typecheck.sml.ml))
  (action
   (progn
    (concurrent

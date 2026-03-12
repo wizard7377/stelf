@@ -2,7 +2,7 @@ open! Basis
 
 (* Coverage Checking *)
 (* Author: Frank Pfenning *)
-module Cover (Cover__0 : sig
+module MakeCover (Cover__0 : sig
   module Global : GLOBAL
   module Whnf : WHNF
   module Conv : CONV
@@ -18,8 +18,8 @@ module Cover (Cover__0 : sig
   module Constraints : CONSTRAINTS
 
   (*! sharing Constraints.IntSyn = IntSyn' !*)
-  module ModeTable : MODETABLE
-  module UniqueTable : MODETABLE
+  module ModeTable : Modetable.MODETABLE
+  module UniqueTable : Modetable.MODETABLE
   module Index : INDEX
 
   (*! sharing Index.IntSyn = IntSyn' !*)
@@ -39,1022 +39,1009 @@ module Cover (Cover__0 : sig
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
   (*! structure Cs_manager : CS_MANAGER !*)
   (*! sharing Cs_manager.IntSyn = IntSyn' !*)
-  module Timers : TIMERS
+  module Timers : Timers.TIMERS
 end) : COVER = struct
   exception Error of string
 
-  open! struct
-    module I = IntSyn
-    module T = Tomega
-    module M = ModeSyn
-    module W = WorldSyn
-    module P = Paths
-    module F = Print.Formatter
-    module N = Names
+  module Unify = Cover__0.Unify
+  module ModeTable = Cover__0.ModeTable
+  module UniqueTable = Cover__0.UniqueTable
+  module TypeCheck = Cover__0.TypeCheck
+  module Timers = Cover__0.Timers
 
-    let rec weaken = function
-      | null_, a -> I.id
-      | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
-          let w' = weaken (g'_, a) in
-          begin if Subordinate.belowEq (I.targetFam v_, a) then I.dot1 w'
-          else I.comp (w', I.shift)
-          end
+  type caseLabel = Top | Child of caseLabel * int
 
-    let rec createEVar (g_, v_) =
-      let w = weaken (g_, I.targetFam v_) in
-      let iw = Whnf.invert w in
-      let g'_ = Whnf.strengthen (iw, g_) in
-      let x'_ = Whnf.newLoweredEVar (g'_, (v_, iw)) in
-      let x_ = I.EClo (x'_, w) in
-      x_
+  let rec labToString = function
+    | Top -> "^"
+    | Child (lab, n) -> (labToString lab ^ ".") ^ Int.toString n
 
-    type coverInst_ = Match of coverInst_ | Skip of coverInst_ | Cnil
+  module I = IntSyn
+  module T = Tomega
+  module M = ModeSyn
+  module W = WorldSyn
+  module P = Paths
+  module F = Print.Formatter
+  module N = Names
 
-    let rec inCoverInst = function
-      | mnil_ -> Cnil
-      | M.Mapp (M.Marg (plus_, x), ms') -> Match (inCoverInst ms')
-      | M.Mapp (M.Marg (minus_, x), ms') -> Skip (inCoverInst ms')
-      | M.Mapp (M.Marg (star_, x), ms') -> Skip (inCoverInst ms')
+  let rec weaken = function
+    | null_, a -> I.id
+    | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
+        let w' = weaken (g'_, a) in
+        begin if Subordinate.belowEq (I.targetFam v_, a) then I.dot1 w'
+        else I.comp (w', I.shift)
+        end
 
-    let rec outCoverInst = function
-      | mnil_ -> Cnil
-      | M.Mapp (M.Marg (plus_, x), ms') -> Skip (outCoverInst ms')
-      | M.Mapp (M.Marg (minus_, x), ms') -> Match (outCoverInst ms')
+  let rec createEVar (g_, v_) =
+    let w = weaken (g_, I.targetFam v_) in
+    let iw = Whnf.invert w in
+    let g'_ = Whnf.strengthen (iw, g_) in
+    let x'_ = Whnf.newLoweredEVar (g'_, (v_, iw)) in
+    let x_ = I.EClo (x'_, w) in
+    x_
 
-    type caseLabel = Top | Child of caseLabel * int
+  type coverInst_ = Match of coverInst_ | Skip of coverInst_ | Cnil
 
-    let rec labToString = function
-      | Top -> "^"
-      | Child (lab, n) -> (labToString lab ^ ".") ^ Int.toString n
+  let rec inCoverInst = function
+    | mnil_ -> Cnil
+    | M.Mapp (M.Marg (plus_, x), ms') -> Match (inCoverInst ms')
+    | M.Mapp (M.Marg (minus_, x), ms') -> Skip (inCoverInst ms')
+    | M.Mapp (M.Marg (star_, x), ms') -> Skip (inCoverInst ms')
 
-    let rec chatter chlev f =
-      begin if !Global.chatter >= chlev then print (f ()) else ()
-      end
+  let rec outCoverInst = function
+    | mnil_ -> Cnil
+    | M.Mapp (M.Marg (plus_, x), ms') -> Skip (outCoverInst ms')
+    | M.Mapp (M.Marg (minus_, x), ms') -> Match (outCoverInst ms')
 
-    let rec pluralize = function 1, s -> s | n, s -> s ^ "s"
-    let rec abbrevCSpine (s_, ci) = s_
+  let rec chatter chlev f =
+    begin if !Global.chatter >= chlev then print (f ()) else ()
+    end
 
-    let rec abbrevCGoal = function
-      | g_, v_, 0, ci -> (g_, abbrevCGoal' (g_, v_, ci))
-      | g_, I.Pi ((d_, p_), v_), p, ci ->
-          let d'_ = N.decEName (g_, d_) in
-          abbrevCGoal (I.Decl (g_, d'_), v_, p - 1, ci)
+  let rec pluralize = function 1, s -> s | n, s -> s ^ "s"
+  let rec abbrevCSpine (s_, ci) = s_
 
-    and abbrevCGoal' = function
-      | g_, I.Pi ((d_, p_), v_), ci ->
-          let d'_ = N.decUName (g_, d_) in
-          I.Pi ((d'_, p_), abbrevCGoal' (I.Decl (g_, d'_), v_, ci))
-      | g_, I.Root (a, s_), ci -> I.Root (a, abbrevCSpine (s_, ci))
+  let rec abbrevCGoal = function
+    | g_, v_, 0, ci -> (g_, abbrevCGoal' (g_, v_, ci))
+    | g_, I.Pi ((d_, p_), v_), p, ci ->
+        let d'_ = N.decEName (g_, d_) in
+        abbrevCGoal (I.Decl (g_, d'_), v_, p - 1, ci)
 
-    let rec formatCGoal (v_, p, ci) =
-      let _ = N.varReset I.null_ in
-      let g_, v'_ = abbrevCGoal (I.null_, v_, p, ci) in
-      F.HVbox
+  and abbrevCGoal' = function
+    | g_, I.Pi ((d_, p_), v_), ci ->
+        let d'_ = N.decUName (g_, d_) in
+        I.Pi ((d'_, p_), abbrevCGoal' (I.Decl (g_, d'_), v_, ci))
+    | g_, I.Root (a, s_), ci -> I.Root (a, abbrevCSpine (s_, ci))
+
+  let rec formatCGoal (v_, p, ci) =
+    let _ = N.varReset I.Null in
+    let g_, v'_ = abbrevCGoal (I.Null, v_, p, ci) in
+    F.hVbox
+      [
+        Print.formatCtx (I.Null, g_);
+        F.break_;
+        F.string "|-";
+        F.space;
+        Print.formatExp (g_, v'_);
+      ]
+
+  let rec formatCGoals = function
+    | (v_, p) :: [], ci -> [ formatCGoal (v_, p, ci) ]
+    | (v_, p) :: vs_, ci ->
+        formatCGoal (v_, p, ci)
+        :: F.string "," :: F.break_
+        :: formatCGoals (vs_, ci)
+
+  let rec missingToString (vs_, ci) =
+    F.makestring_fmt
+      (F.hbox [ F.vbox0 0 1 (formatCGoals (vs_, ci)); F.string "." ])
+
+  let rec showSplitVar (v_, p, k, ci) =
+    let _ = N.varReset I.Null in
+    let g_, v'_ = abbrevCGoal (I.Null, v_, p, ci) in
+    let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
+    (("Split " ^ x) ^ " in ") ^ Print.expToString (g_, v'_)
+
+  let rec showPendingGoal (v_, p, ci, lab) =
+    F.makestring_fmt
+      (F.hbox
+         [
+           F.string (labToString lab);
+           F.space;
+           F.string "?- ";
+           formatCGoal (v_, p, ci);
+           F.string ".";
+         ])
+
+  let rec buildSpine = function
+    | 0 -> I.Nil
+    | n -> I.App (I.Root (I.BVar n, I.Nil), buildSpine (n - 1))
+
+  let rec initCGoal' = function
+    | a, k, g_, I.Pi ((d_, p_), v_) ->
+        let d'_ = N.decEName (g_, d_) in
+        let v'_, p = initCGoal' (a, k + 1, I.Decl (g_, d'_), v_) in
+        (I.Pi ((d'_, I.Maybe), v'_), p)
+    | a, k, g_, I.Uni type_ -> (I.Root (a, buildSpine k), k)
+
+  let rec initCGoal a = initCGoal' (I.Const a, 0, I.Null, I.constType a)
+
+  type coverClauses_ = Input of I.exp_ list | Output of I.exp_ * int
+  type equation_ = Eqn of I.dctx * I.eclo * I.eclo
+
+  let rec equationToString (Eqn (g_, us1_, us2_)) =
+    let g'_ = Names.ctxLUName g_ in
+    let fmt =
+      F.hVbox
         [
-          Print.formatCtx (I.null_, g_);
+          Print.formatCtx (I.Null, g'_);
           F.break_;
-          F.String "|-";
-          F.space_;
-          Print.formatExp (g_, v'_);
+          F.string "|-";
+          F.space;
+          Print.formatExp (g'_, I.EClo (fst us1_, snd us1_));
+          F.break_;
+          F.string "=";
+          F.space;
+          Print.formatExp (g'_, I.EClo (fst us2_, snd us2_));
         ]
+    in
+    F.makestring_fmt fmt
 
-    let rec formatCGoals = function
-      | (v_, p) :: [], ci -> [ formatCGoal (v_, p, ci) ]
-      | (v_, p) :: vs_, ci ->
-          formatCGoal (v_, p, ci)
-          :: F.String "," :: F.break_
-          :: formatCGoals (vs_, ci)
+  let rec eqnsToString = function
+    | [] -> ".\n"
+    | eqn :: eqns -> (equationToString eqn ^ ",\n") ^ eqnsToString eqns
 
-    let rec missingToString (vs_, ci) =
-      F.makestring_fmt
-        (F.Hbox [ F.Vbox0 (0, 1, formatCGoals (vs_, ci)); F.String "." ])
+  type candidates_ = Eqns of equation_ list | Cands of int list | Fail
 
-    let rec showSplitVar (v_, p, k, ci) =
-      let _ = N.varReset I.null_ in
-      let g_, v'_ = abbrevCGoal (I.null_, v_, p, ci) in
-      let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
-      (("Split " ^ x) ^ " in ") ^ Print.expToString (g_, v'_)
+  let rec candsToString = function
+    | Fail -> "Fail"
+    | Cands ks ->
+        "Cands ["
+        ^ List.foldl (function k, str -> (Int.toString k ^ ",") ^ str) "]" ks
+    | Eqns eqns -> ("Eqns [\n" ^ eqnsToString eqns) ^ "]"
 
-    let rec showPendingGoal (v_, p, ci, lab) =
-      F.makestring_fmt
-        (F.Hbox
-           [
-             F.String (labToString lab);
-             F.space_;
-             F.String "?- ";
-             formatCGoal (v_, p, ci);
-             F.String ".";
-           ])
+  let rec fail msg =
+    begin
+      chatter 7 (function () -> msg ^ "\n");
+      Fail
+    end
 
-    let rec buildSpine = function
-      | 0 -> I.nil_
-      | n -> I.App (I.Root (I.BVar n, I.nil_), buildSpine (n - 1))
+  let rec failAdd = function
+    | k, Eqns _ -> Cands [ k ]
+    | k, Cands ks -> Cands (k :: ks)
+    | k, Fail -> Fail
 
-    let rec initCGoal' = function
-      | a, k, g_, I.Pi ((d_, p_), v_) ->
-          let d'_ = N.decEName (g_, d_) in
-          let v'_, p = initCGoal' (a, k + 1, I.Decl (g_, d'_), v_) in
-          (I.Pi ((d'_, I.maybe_), v'_), p)
-      | a, k, g_, I.Uni type_ -> (I.Root (a, buildSpine k), k)
+  let rec addEqn = function
+    | e, Eqns es -> Eqns (e :: es)
+    | e, (Cands ks as cands) -> cands
+    | e, Fail -> Fail
 
-    let rec initCGoal a = initCGoal' (I.Const a, 0, I.null_, I.constType a)
+  let rec unifiable (g_, us1_, us2_) = Unify.unifiable (g_, us1_, us2_)
 
-    type coverClauses_ = Input of I.exp_ list | Output of I.exp_ * int
-    type equation_ = Eqn of I.dctx * I.eclo * I.eclo
+  let rec matchEqns = function
+    | [] -> true
+    | Eqn (g_, us1_, ((u2_, s2) as us2_)) :: es ->
+        begin match Whnf.makePatSub s2 with
+        | None -> unifiable (g_, us1_, us2_)
+        | Some s2' -> unifiable (g_, us1_, (u2_, s2'))
+        end
+        && matchEqns es
 
-    let rec equationToString (Eqn (g_, us1_, us2_)) =
-      let g'_ = Names.ctxLUName g_ in
-      let fmt =
-        F.HVbox
-          [
-            Print.formatCtx (I.null_, g'_);
-            F.break_;
-            F.String "|-";
-            F.space_;
-            Print.formatExp (g'_, I.EClo us1_);
-            F.break_;
-            F.String "=";
-            F.space_;
-            Print.formatExp (g'_, I.EClo us2_);
-          ]
-      in
-      F.makestring_fmt fmt
+  let rec resolveCands = function
+    | Eqns es -> begin if matchEqns (List.rev es) then Eqns [] else Fail end
+    | Cands ks -> Cands ks
+    | Fail -> Fail
 
-    let rec eqnsToString = function
-      | [] -> ".\n"
-      | eqn :: eqns -> (equationToString eqn ^ ",\n") ^ eqnsToString eqns
+  let rec collectConstraints = function
+    | [] -> []
+    | I.EVar (_, _, _, { contents = [] }) :: xs_ -> collectConstraints xs_
+    | I.EVar (_, _, _, { contents = constrs }) :: xs_ ->
+        constrs @ collectConstraints xs_
 
-    type candidates_ = Eqns of equation_ list | Cands of int list | Fail
+  let rec checkConstraints = function
+    | g_, qs_, Cands ks -> Cands ks
+    | g_, qs_, Fail -> Fail
+    | g_, qs_, Eqns _ ->
+        let xs_ = Abstract.collectEVars (g_, qs_, []) in
+        let constrs = collectConstraints xs_ in
+        begin match constrs with [] -> Eqns [] | _ -> Fail
+        end
 
-    let rec candsToString = function
-      | Fail -> "Fail"
-      | Cands ks ->
-          "Cands ["
-          ^ List.foldl
-              (function k, str -> (Int.toString k ^ ",") ^ str)
-              "]" ks
-      | Eqns eqns -> ("Eqns [\n" ^ eqnsToString eqns) ^ "]"
+  type candList_ = Covered | CandList of candidates_ list
 
-    let rec fail msg =
-      begin
-        chatter 7 (function () -> msg ^ "\n");
-        Fail
+  let rec addKs = function
+    | (Cands ks as ccs), CandList klist -> CandList (ccs :: klist)
+    | (Eqns [] as ces), CandList klist -> Covered
+    | (Fail as cfl), CandList klist -> CandList (cfl :: klist)
+
+  let rec matchExp (g_, d, us1_, us2_, cands) =
+    matchExpW (g_, d, Whnf.whnf us1_, Whnf.whnf us2_, cands)
+
+  and matchExpW = function
+    | ( g_,
+        d,
+        ((I.Root (h1_, s1_), s1) as us1_),
+        ((I.Root (h2_, s2_), s2) as us2_),
+        cands ) -> begin
+        match (h1_, h2_) with
+        | I.BVar k1, I.BVar k2 -> begin
+            if k1 = k2 then matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
+            else begin
+              if k1 > d then failAdd (k1 - d, cands)
+              else fail "local variable / variable clash"
+            end
+          end
+        | I.Const c1, I.Const c2 -> begin
+            if c1 = c2 then matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
+            else fail "constant / constant clash"
+          end
+        | I.Def d1, I.Def d2 -> begin
+            if d1 = d2 then matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
+            else
+              matchExpW (g_, d, Whnf.expandDef us1_, Whnf.expandDef us2_, cands)
+          end
+        | I.Def d1, _ -> matchExpW (g_, d, Whnf.expandDef us1_, us2_, cands)
+        | _, I.Def d2 -> matchExpW (g_, d, us1_, Whnf.expandDef us2_, cands)
+        | I.BVar k1, I.Const _ -> begin
+            if k1 > d then failAdd (k1 - d, cands)
+            else fail "local variable / constant clash"
+          end
+        | I.Const _, I.BVar _ -> fail "constant / local variable clash"
+        | I.Proj (I.Bidx k1, i1), I.Proj (I.Bidx k2, i2) -> begin
+            if k1 = k2 && i1 = i2 then
+              matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
+            else fail "block index / block index clash"
+          end
+        | I.Proj (I.Bidx k1, i1), I.Proj (I.LVar (r2, I.Shift k2, (l2, t2)), i2)
+          ->
+            let (I.BDec (bOpt, (l1, t1))) = I.ctxDec (g_, k1) in
+            begin if l1 <> l2 || i1 <> i2 then
+              fail "block index / block variable clash"
+            else
+              let cands2 =
+                matchSub (g_, d, t1, I.comp (t2, I.Shift k2), cands)
+              in
+              let _ = Unify.instantiateLVar (r2, I.Bidx (k1 - k2)) in
+              matchSpine (g_, d, (s1_, s1), (s2_, s2), cands2)
+            end
+        | I.BVar k1, I.Proj _ -> begin
+            if k1 > d then failAdd (k1 - d, cands)
+            else fail "local variable / block projection clash"
+          end
+        | I.Const _, I.Proj _ -> fail "constant / block projection clash"
+        | I.Proj _, I.Const _ -> fail "block projection / constant clash"
+        | I.Proj _, I.BVar _ -> fail "block projection / local variable clash"
       end
+    | g_, d, (I.Lam (d1_, u1_), s1), (I.Lam (d2_, u2_), s2), cands ->
+        matchExp
+          ( I.Decl (g_, I.decSub (d1_, s1)),
+            d + 1,
+            (u1_, I.dot1 s1),
+            (u2_, I.dot1 s2),
+            cands )
+    | g_, d, (I.Lam (d1_, u1_), s1), (u2_, s2), cands ->
+        matchExp
+          ( I.Decl (g_, I.decSub (d1_, s1)),
+            d + 1,
+            (u1_, I.dot1 s1),
+            ( I.Redex
+                (I.EClo (u2_, I.shift), I.App (I.Root (I.BVar 1, I.Nil), I.Nil)),
+              I.dot1 s2 ),
+            cands )
+    | g_, d, (u1_, s1), (I.Lam (d2_, u2_), s2), cands ->
+        matchExp
+          ( I.Decl (g_, I.decSub (d2_, s2)),
+            d + 1,
+            ( I.Redex
+                (I.EClo (u1_, I.shift), I.App (I.Root (I.BVar 1, I.Nil), I.Nil)),
+              I.dot1 s1 ),
+            (u2_, I.dot1 s2),
+            cands )
+    | g_, d, us1_, ((I.EVar _, s2) as us2_), cands ->
+        addEqn (Eqn (g_, us1_, us2_), cands)
 
-    let rec failAdd = function
-      | k, Eqns _ -> Cands [ k ]
-      | k, Cands ks -> Cands (k :: ks)
-      | k, Fail -> Fail
+  and matchSpine = function
+    | g_, d, (I.Nil, _), (I.Nil, _), cands -> cands
+    | g_, d, (I.SClo (s1_, s1'), s1), ss2_, cands ->
+        matchSpine (g_, d, (s1_, I.comp (s1', s1)), ss2_, cands)
+    | g_, d, ss1_, (I.SClo (s2_, s2'), s2), cands ->
+        matchSpine (g_, d, ss1_, (s2_, I.comp (s2', s2)), cands)
+    | g_, d, (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2), cands ->
+        let cands' = matchExp (g_, d, (u1_, s1), (u2_, s2), cands) in
+        matchSpine (g_, d, (s1_, s1), (s2_, s2), cands')
 
-    let rec addEqn = function
-      | e, Eqns es -> Eqns (e :: es)
-      | e, (Cands ks as cands) -> cands
-      | e, Fail -> Fail
+  and matchDec (g_, d, (I.Dec (_, v1_), s1), (I.Dec (_, v2_), s2), cands) =
+    matchExp (g_, d, (v1_, s1), (v2_, s2), cands)
 
-    let rec unifiable (g_, us1_, us2_) = Unify.unifiable (g_, us1_, us2_)
-
-    let rec matchEqns = function
-      | [] -> true
-      | Eqn (g_, us1_, ((u2_, s2) as us2_)) :: es ->
-          begin match Whnf.makePatSub s2 with
-          | None -> unifiable (g_, us1_, us2_)
-          | Some s2' -> unifiable (g_, us1_, (u2_, s2'))
-          end
-          && matchEqns es
-
-    let rec resolveCands = function
-      | Eqns es -> begin if matchEqns (List.rev es) then Eqns [] else Fail end
-      | Cands ks -> Cands ks
-      | Fail -> Fail
-
-    let rec collectConstraints = function
-      | [] -> []
-      | I.EVar (_, _, _, { contents = [] }) :: xs_ -> collectConstraints xs_
-      | I.EVar (_, _, _, { contents = constrs }) :: xs_ ->
-          constrs @ collectConstraints xs_
-
-    let rec checkConstraints = function
-      | g_, qs_, Cands ks -> Cands ks
-      | g_, qs_, Fail -> Fail
-      | g_, qs_, Eqns _ ->
-          let xs_ = Abstract.collectEVars (g_, qs_, []) in
-          let constrs = collectConstraints xs_ in
-          begin match constrs with [] -> Eqns [] | _ -> Fail
-          end
-
-    type candList_ = Covered | CandList of candidates_ list
-
-    let rec addKs = function
-      | (Cands ks as ccs), CandList klist -> CandList (ccs :: klist)
-      | (Eqns [] as ces), CandList klist -> Covered
-      | (Fail as cfl), CandList klist -> CandList (cfl :: klist)
-
-    let rec matchExp (g_, d, us1_, us2_, cands) =
-      matchExpW (g_, d, Whnf.whnf us1_, Whnf.whnf us2_, cands)
-
-    and matchExpW = function
-      | ( g_,
-          d,
-          ((I.Root (h1_, s1_), s1) as us1_),
-          ((I.Root (h2_, s2_), s2) as us2_),
-          cands ) -> begin
-          match (h1_, h2_) with
-          | I.BVar k1, I.BVar k2 -> begin
-              if k1 = k2 then matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
+  and matchSub = function
+    | g_, d, I.Shift n1, I.Shift n2, cands -> cands
+    | g_, d, I.Shift n, (I.Dot _ as s2), cands ->
+        matchSub (g_, d, I.Dot (I.Idx (n + 1), I.Shift (n + 1)), s2, cands)
+    | g_, d, (I.Dot _ as s1), I.Shift m, cands ->
+        matchSub (g_, d, s1, I.Dot (I.Idx (m + 1), I.Shift (m + 1)), cands)
+    | g_, d, I.Dot (ft1_, s1), I.Dot (ft2_, s2), cands ->
+        let cands1 =
+          begin match (ft1_, ft2_) with
+          | I.Idx n1, I.Idx n2 -> begin
+              if n1 = n2 then cands
               else begin
-                if k1 > d then failAdd (k1 - d, cands)
-                else fail "local variable / variable clash"
+                if n1 > d then failAdd (n1 - d, cands)
+                else
+                  fail "local variable / local variable clash in block instance"
               end
             end
-          | I.Const c1, I.Const c2 -> begin
-              if c1 = c2 then matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
-              else fail "constant / constant clash"
-            end
-          | I.Def d1, I.Def d2 -> begin
-              if d1 = d2 then matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
-              else
-                matchExpW
-                  (g_, d, Whnf.expandDef us1_, Whnf.expandDef us2_, cands)
-            end
-          | I.Def d1, _ -> matchExpW (g_, d, Whnf.expandDef us1_, us2_, cands)
-          | _, I.Def d2 -> matchExpW (g_, d, us1_, Whnf.expandDef us2_, cands)
-          | I.BVar k1, I.Const _ -> begin
-              if k1 > d then failAdd (k1 - d, cands)
-              else fail "local variable / constant clash"
-            end
-          | I.Const _, I.BVar _ -> fail "constant / local variable clash"
-          | I.Proj (I.Bidx k1, i1), I.Proj (I.Bidx k2, i2) -> begin
-              if k1 = k2 && i1 = i2 then
-                matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
-              else fail "block index / block index clash"
-            end
-          | ( I.Proj (I.Bidx k1, i1),
-              I.Proj (I.LVar (r2, I.Shift k2, (l2, t2)), i2) ) ->
-              let (I.BDec (bOpt, (l1, t1))) = I.ctxDec (g_, k1) in
-              begin if l1 <> l2 || i1 <> i2 then
-                fail "block index / block variable clash"
-              else
-                let cands2 =
-                  matchSub (g_, d, t1, I.comp (t2, I.Shift k2), cands)
-                in
-                let _ = Unify.instantiateLVar (r2, I.Bidx (k1 - k2)) in
-                matchSpine (g_, d, (s1_, s1), (s2_, s2), cands2)
-              end
-          | I.BVar k1, I.Proj _ -> begin
-              if k1 > d then failAdd (k1 - d, cands)
-              else fail "local variable / block projection clash"
-            end
-          | I.Const _, I.Proj _ -> fail "constant / block projection clash"
-          | I.Proj _, I.Const _ -> fail "block projection / constant clash"
-          | I.Proj _, I.BVar _ -> fail "block projection / local variable clash"
-        end
-      | g_, d, (I.Lam (d1_, u1_), s1), (I.Lam (d2_, u2_), s2), cands ->
-          matchExp
-            ( I.Decl (g_, I.decSub (d1_, s1)),
-              d + 1,
-              (u1_, I.dot1 s1),
-              (u2_, I.dot1 s2),
-              cands )
-      | g_, d, (I.Lam (d1_, u1_), s1), (u2_, s2), cands ->
-          matchExp
-            ( I.Decl (g_, I.decSub (d1_, s1)),
-              d + 1,
-              (u1_, I.dot1 s1),
-              ( I.Redex
-                  ( I.EClo (u2_, I.shift),
-                    I.App (I.Root (I.BVar 1, I.nil_), I.nil_) ),
-                I.dot1 s2 ),
-              cands )
-      | g_, d, (u1_, s1), (I.Lam (d2_, u2_), s2), cands ->
-          matchExp
-            ( I.Decl (g_, I.decSub (d2_, s2)),
-              d + 1,
-              ( I.Redex
-                  ( I.EClo (u1_, I.shift),
-                    I.App (I.Root (I.BVar 1, I.nil_), I.nil_) ),
-                I.dot1 s1 ),
-              (u2_, I.dot1 s2),
-              cands )
-      | g_, d, us1_, ((I.EVar _, s2) as us2_), cands ->
-          addEqn (Eqn (g_, us1_, us2_), cands)
-
-    and matchSpine = function
-      | g_, d, (nil_, _), (nil_, _), cands -> cands
-      | g_, d, (I.SClo (s1_, s1'), s1), ss2_, cands ->
-          matchSpine (g_, d, (s1_, I.comp (s1', s1)), ss2_, cands)
-      | g_, d, ss1_, (I.SClo (s2_, s2'), s2), cands ->
-          matchSpine (g_, d, ss1_, (s2_, I.comp (s2', s2)), cands)
-      | g_, d, (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2), cands ->
-          let cands' = matchExp (g_, d, (u1_, s1), (u2_, s2), cands) in
-          matchSpine (g_, d, (s1_, s1), (s2_, s2), cands')
-
-    and matchDec (g_, d, (I.Dec (_, v1_), s1), (I.Dec (_, v2_), s2), cands) =
-      matchExp (g_, d, (v1_, s1), (v2_, s2), cands)
-
-    and matchSub = function
-      | g_, d, I.Shift n1, I.Shift n2, cands -> cands
-      | g_, d, I.Shift n, (I.Dot _ as s2), cands ->
-          matchSub (g_, d, I.Dot (I.Idx (n + 1), I.Shift (n + 1)), s2, cands)
-      | g_, d, (I.Dot _ as s1), I.Shift m, cands ->
-          matchSub (g_, d, s1, I.Dot (I.Idx (m + 1), I.Shift (m + 1)), cands)
-      | g_, d, I.Dot (ft1_, s1), I.Dot (ft2_, s2), cands ->
-          let cands1 =
-            begin match (ft1_, ft2_) with
-            | I.Idx n1, I.Idx n2 -> begin
-                if n1 = n2 then cands
-                else begin
-                  if n1 > d then failAdd (n1 - d, cands)
-                  else
-                    fail
-                      "local variable / local variable clash in block instance"
-                end
-              end
-            | I.Exp u1_, I.Exp u2_ ->
-                matchExp (g_, d, (u1_, I.id), (u2_, I.id), cands)
-            | I.Exp u1_, I.Idx n2 ->
-                matchExp
-                  (g_, d, (u1_, I.id), (I.Root (I.BVar n2, I.nil_), I.id), cands)
-            | I.Idx n1, I.Exp u2_ ->
-                matchExp
-                  (g_, d, (I.Root (I.BVar n1, I.nil_), I.id), (u2_, I.id), cands)
-            end
-          in
-          matchSub (g_, d, s1, s2, cands1)
-
-    let rec matchTop (g_, d, us1_, us2_, ci, cands) =
-      matchTopW (g_, d, Whnf.whnf us1_, Whnf.whnf us2_, ci, cands)
-
-    and matchTopW = function
-      | ( g_,
-          d,
-          (I.Root (I.Const c1, s1_), s1),
-          (I.Root (I.Const c2, s2_), s2),
-          ci,
-          cands ) -> begin
-          if c1 = c2 then matchTopSpine (g_, d, (s1_, s1), (s2_, s2), ci, cands)
-          else fail "type family clash"
-        end
-      | g_, d, (I.Pi ((d1_, _), v1_), s1), (I.Pi ((d2_, _), v2_), s2), ci, cands
-        ->
-          matchTopW
-            ( I.Decl (g_, d1_),
-              d + 1,
-              (v1_, I.dot1 s1),
-              (v2_, I.dot1 s2),
-              ci,
-              cands )
-
-    and matchTopSpine = function
-      | g_, d, (nil_, _), (nil_, _), Cnil, cands -> cands
-      | g_, d, (I.SClo (s1_, s1'), s1), ss2_, ci, cands ->
-          matchTopSpine (g_, d, (s1_, I.comp (s1', s1)), ss2_, ci, cands)
-      | g_, d, ss1_, (I.SClo (s2_, s2'), s2), ci, cands ->
-          matchTopSpine (g_, d, ss1_, (s2_, I.comp (s2', s2)), ci, cands)
-      | g_, d, (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2), Match ci', cands
-        ->
-          let cands' = matchExp (g_, d, (u1_, s1), (u2_, s2), cands) in
-          matchTopSpine (g_, d, (s1_, s1), (s2_, s2), ci', cands')
-      | g_, d, (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2), Skip ci', cands
-        ->
-          matchTopSpine (g_, d, (s1_, s1), (s2_, s2), ci', cands)
-
-    let rec matchClause = function
-      | g_, ps', ((I.Root (_, _), s) as qs), ci ->
-          checkConstraints
-            (g_, qs, resolveCands (matchTop (g_, 0, ps', qs, ci, Eqns [])))
-      | g_, ps', (I.Pi ((I.Dec (_, v1_), _), v2_), s), ci ->
-          let x1_ = Whnf.newLoweredEVar (g_, (v1_, s)) in
-          matchClause (g_, ps', (v2_, I.Dot (I.Exp x1_, s)), ci)
-
-    let rec matchSig = function
-      | g_, ps', [], ci, klist -> klist
-      | g_, ps', v_ :: ccs', ci, klist ->
-          let cands =
-            Cs_manager.trail (function () ->
-                matchClause (g_, ps', (v_, I.id), ci))
-          in
-          matchSig' (g_, ps', ccs', ci, addKs (cands, klist))
-
-    and matchSig' = function
-      | g_, ps', ccs, ci, Covered -> Covered
-      | g_, ps', ccs, ci, CandList klist ->
-          matchSig (g_, ps', ccs, ci, CandList klist)
-
-    let rec matchBlocks = function
-      | g_, s', [], v_, k, i, ci, klist -> klist
-      | g_, s', I.Dec (_, v'_) :: piDecs, v_, k, i, ci, klist ->
-          let cands =
-            Cs_manager.trail (function () ->
-                matchClause (g_, (v_, I.id), (v'_, s'), ci))
-          in
-          let s'' = I.Dot (I.Exp (I.Root (I.Proj (I.Bidx k, i), I.nil_)), s') in
-          matchBlocks' (g_, s'', piDecs, v_, k, i + 1, ci, addKs (cands, klist))
-
-    and matchBlocks' = function
-      | g_, s', piDecs, v_, k, i, ci, Covered -> Covered
-      | g_, s', piDecs, v_, k, i, ci, klist ->
-          matchBlocks (g_, s', piDecs, v_, k, i, ci, klist)
-
-    let rec matchCtx = function
-      | g_, s', null_, v_, k, ci, klist -> klist
-      | g_, s', I.Decl (g''_, I.Dec (_, v'_)), v_, k, ci, klist ->
-          let s'' = I.comp (I.shift, s') in
-          let cands =
-            Cs_manager.trail (function () ->
-                matchClause (g_, (v_, I.id), (v'_, s''), ci))
-          in
-          matchCtx' (g_, s'', g''_, v_, k + 1, ci, addKs (cands, klist))
-      | g_, s', I.Decl (g''_, I.BDec (_, (cid, s))), v_, k, ci, klist ->
-          let gsome_, piDecs = I.constBlock cid in
-          let s'' = I.comp (I.shift, s') in
-          let klist' =
-            matchBlocks (g_, I.comp (s, s''), piDecs, v_, k, 1, ci, klist)
-          in
-          matchCtx' (g_, s'', g''_, v_, k + 1, ci, klist')
-
-    and matchCtx' = function
-      | g_, s', g'_, v_, k, ci, Covered -> Covered
-      | g_, s', g'_, v_, k, ci, CandList klist ->
-          matchCtx (g_, s', g'_, v_, k, ci, CandList klist)
-
-    let rec matchOut = function
-      | g_, v_, ci, (v'_, s'), 0 ->
-          let cands = matchTop (g_, 0, (v_, I.id), (v'_, s'), ci, Eqns []) in
-          let cands' = resolveCands cands in
-          let cands'' = checkConstraints (g_, (v'_, s'), cands') in
-          addKs (cands'', CandList [])
-      | g_, v_, ci, ((I.Pi ((I.Dec (_, v1'_), _), v2'_) as v'_), s'), p ->
-          let x1_ = Whnf.newLoweredEVar (g_, (v1'_, s')) in
-          matchOut (g_, v_, ci, (v2'_, I.Dot (I.Exp x1_, s')), p - 1)
-
-    let rec match_ = function
-      | g_, (I.Root (I.Const a, s_) as v_), 0, ci, Input ccs ->
-          matchCtx'
-            ( g_,
-              I.id,
-              g_,
-              v_,
-              1,
-              ci,
-              matchSig (g_, (v_, I.id), ccs, ci, CandList []) )
-      | g_, v_, 0, ci, Output (v'_, q) ->
-          matchOut (g_, v_, ci, (v'_, I.Shift (I.ctxLength g_)), q)
-      | g_, I.Pi ((d_, _), v'_), p, ci, ccs ->
-          match_ (I.Decl (g_, d_), v'_, p - 1, ci, ccs)
-
-    let rec insert = function
-      | k, [] -> [ (k, 1) ]
-      | k, ((k', n') :: ksn' as ksn) -> begin
-          match Int.compare (k, k') with
-          | Less -> (k, 1) :: ksn
-          | Equal -> (k', n' + 1) :: ksn'
-          | Greater -> (k', n') :: insert (k, ksn')
-        end
-
-    let rec join = function
-      | [], ksn -> ksn
-      | k :: ks, ksn -> join (ks, insert (k, ksn))
-
-    let rec selectCand = function
-      | Covered -> None
-      | CandList klist -> selectCand' (klist, [])
-
-    and selectCand' = function
-      | [], ksn -> Some ksn
-      | Fail :: klist, ksn -> selectCand' (klist, ksn)
-      | Cands [] :: klist, ksn -> selectCand' (klist, ksn)
-      | Cands ks :: klist, ksn -> selectCand' (klist, join (ks, ksn))
-
-    let rec instEVars (vs_, p, xsRev_) = instEVarsW (Whnf.whnf vs_, p, xsRev_)
-
-    and instEVarsW = function
-      | vs_, 0, xsRev_ -> (vs_, xsRev_)
-      | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev_ ->
-          let x1_ = Whnf.newLoweredEVar (I.null_, (v1_, s)) in
-          instEVars ((v2_, I.Dot (I.Exp x1_, s)), p - 1, Some x1_ :: xsRev_)
-      | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev_ ->
-          let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
-          instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev_)
-
-    open! struct
-      let caseList : (I.exp_ * int) list ref = ref []
-    end
-
-    let rec resetCases () = caseList := []
-    let rec addCase (v_, p) = caseList := (v_, p) :: !caseList
-    let rec getCases () = !caseList
-
-    let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
-
-    and createEVarSpineW = function
-      | g_, ((I.Root _, s) as vs_) -> (I.nil_, vs_)
-      | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
-          let x_ = createEVar (g_, I.EClo (v1_, s)) in
-          let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
-          (I.App (x_, s_), vs_)
-
-    let rec createAtomConst (g_, (I.Const cid as h_)) =
-      let v_ = I.constType cid in
-      let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
-      (I.Root (h_, s_), vs_)
-
-    let rec createAtomBVar (g_, k) =
-      let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
-      let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
-      (I.Root (I.BVar k, s_), vs_)
-
-    let rec createAtomProj (g_, h_, (v_, s)) =
-      let s_, vs'_ = createEVarSpine (g_, (v_, s)) in
-      (I.Root (h_, s_), vs'_)
-
-    let rec constCases = function
-      | g_, vs_, [], sc -> ()
-      | g_, vs_, I.Const c :: sgn', sc ->
-          let u_, vs'_ = createAtomConst (g_, I.Const c) in
-          let _ =
-            Cs_manager.trail (function () ->
-                begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
-                end)
-          in
-          constCases (g_, vs_, sgn', sc)
-
-    let rec paramCases = function
-      | g_, vs_, 0, sc -> ()
-      | g_, vs_, k, sc ->
-          let u_, vs'_ = createAtomBVar (g_, k) in
-          let _ =
-            Cs_manager.trail (function () ->
-                begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
-                end)
-          in
-          paramCases (g_, vs_, k - 1, sc)
-
-    let rec createEVarSub = function
-      | null_ -> I.id
-      | I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
-          let s = createEVarSub g'_ in
-          let x_ = Whnf.newLoweredEVar (I.null_, (v_, s)) in
-          I.Dot (I.Exp x_, s)
-
-    let rec blockName cid = I.conDecName (I.sgnLookup cid)
-
-    let rec blockCases (g_, vs_, cid, (gsome_, piDecs), sc) =
-      let t = createEVarSub gsome_ in
-      let sk = I.Shift (I.ctxLength g_) in
-      let t' = I.comp (t, sk) in
-      let lvar = I.newLVar (sk, (cid, t)) in
-      blockCases' (g_, vs_, (lvar, 1), (t', piDecs), sc)
-
-    and blockCases' = function
-      | g_, vs_, (lvar, i), (t, []), sc -> ()
-      | g_, vs_, (lvar, i), (t, I.Dec (_, v'_) :: piDecs), sc ->
-          let u_, vs'_ = createAtomProj (g_, I.Proj (lvar, i), (v'_, t)) in
-          let _ =
-            Cs_manager.trail (function () ->
-                begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
-                end)
-          in
-          let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.nil_)), t) in
-          blockCases' (g_, vs_, (lvar, i + 1), (t', piDecs), sc)
-
-    let rec worldCases = function
-      | g_, vs_, T.Worlds [], sc -> ()
-      | g_, vs_, T.Worlds (cid :: cids), sc -> begin
-          blockCases (g_, vs_, cid, I.constBlock cid, sc);
-          worldCases (g_, vs_, T.Worlds cids, sc)
-        end
-
-    let rec lowerSplitW = function
-      | (I.EVar (_, g_, v_, _) as x_), w_, sc ->
-          let sc' = function
-            | u_ -> begin
-                if Unify.unifiable (g_, (x_, I.id), (u_, I.id)) then sc ()
-                else ()
-              end
-          in
-          let _ = paramCases (g_, (v_, I.id), I.ctxLength g_, sc') in
-          let _ = worldCases (g_, (v_, I.id), w_, sc') in
-          let _ =
-            constCases (g_, (v_, I.id), Index.lookup (I.targetFam v_), sc')
-          in
-          ()
-      | I.Lam (d_, u_), w_, sc -> lowerSplitW (u_, w_, sc)
-
-    let rec splitEVar (x_, w_, sc) = lowerSplitW (x_, w_, sc)
-
-    let rec abstract (v_, s) =
-      let i, v'_ = Abstract.abstractDecImp (I.EClo (v_, s)) in
-      let _ =
-        begin if !Global.doubleCheck then
-          TypeCheck.typeCheck (I.null_, (v'_, I.Uni I.type_))
-        else ()
-        end
-      in
-      (v'_, i)
-
-    let rec splitVar (v_, p, k, (w_, ci)) =
-      try
-        let _ =
-          chatter 6 (function () -> showSplitVar (v_, p, k, ci) ^ "\n")
+          | I.Exp u1_, I.Exp u2_ ->
+              matchExp (g_, d, (u1_, I.id), (u2_, I.id), cands)
+          | I.Exp u1_, I.Idx n2 ->
+              matchExp
+                (g_, d, (u1_, I.id), (I.Root (I.BVar n2, I.Nil), I.id), cands)
+          | I.Idx n1, I.Exp u2_ ->
+              matchExp
+                (g_, d, (I.Root (I.BVar n1, I.Nil), I.id), (u2_, I.id), cands)
+          end
         in
-        let (v1_, s), xsRev_ = instEVars ((v_, I.id), p, []) in
-        let (Some x_) = List.nth (xsRev_, k - 1) in
-        let _ = resetCases () in
-        let _ =
-          splitEVar (x_, w_, function () -> addCase (abstract (v1_, s)))
+        matchSub (g_, d, s1, s2, cands1)
+
+  let rec matchTop (g_, d, us1_, us2_, ci, cands) =
+    matchTopW (g_, d, Whnf.whnf us1_, Whnf.whnf us2_, ci, cands)
+
+  and matchTopW = function
+    | ( g_,
+        d,
+        (I.Root (I.Const c1, s1_), s1),
+        (I.Root (I.Const c2, s2_), s2),
+        ci,
+        cands ) -> begin
+        if c1 = c2 then matchTopSpine (g_, d, (s1_, s1), (s2_, s2), ci, cands)
+        else fail "type family clash"
+      end
+    | g_, d, (I.Pi ((d1_, _), v1_), s1), (I.Pi ((d2_, _), v2_), s2), ci, cands
+      ->
+        matchTopW
+          ( I.Decl (g_, d1_),
+            d + 1,
+            (v1_, I.dot1 s1),
+            (v2_, I.dot1 s2),
+            ci,
+            cands )
+
+  and matchTopSpine = function
+    | g_, d, (I.Nil, _), (I.Nil, _), Cnil, cands -> cands
+    | g_, d, (I.SClo (s1_, s1'), s1), ss2_, ci, cands ->
+        matchTopSpine (g_, d, (s1_, I.comp (s1', s1)), ss2_, ci, cands)
+    | g_, d, ss1_, (I.SClo (s2_, s2'), s2), ci, cands ->
+        matchTopSpine (g_, d, ss1_, (s2_, I.comp (s2', s2)), ci, cands)
+    | g_, d, (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2), Match ci', cands ->
+        let cands' = matchExp (g_, d, (u1_, s1), (u2_, s2), cands) in
+        matchTopSpine (g_, d, (s1_, s1), (s2_, s2), ci', cands')
+    | g_, d, (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2), Skip ci', cands ->
+        matchTopSpine (g_, d, (s1_, s1), (s2_, s2), ci', cands)
+
+  let rec matchClause = function
+    | g_, ps', ((I.Root (_, _), s) as qs), ci ->
+        checkConstraints
+          (g_, qs, resolveCands (matchTop (g_, 0, ps', qs, ci, Eqns [])))
+    | g_, ps', (I.Pi ((I.Dec (_, v1_), _), v2_), s), ci ->
+        let x1_ = Whnf.newLoweredEVar (g_, (v1_, s)) in
+        matchClause (g_, ps', (v2_, I.Dot (I.Exp x1_, s)), ci)
+
+  let rec matchSig = function
+    | g_, ps', [], ci, klist -> klist
+    | g_, ps', v_ :: ccs', ci, klist ->
+        let cands =
+          Cs_manager.trail (function () ->
+              matchClause (g_, ps', (v_, I.id), ci))
         in
-        Some (getCases ())
-      with Constraints.Error constrs ->
-        begin
-          chatter 7 (function () ->
-              ("Inactive split:\n" ^ Print.cnstrsToString constrs) ^ "\n");
-          None
-        end
+        matchSig' (g_, ps', ccs', ci, addKs (cands, klist))
 
-    let rec occursInExp = function
-      | k, I.Uni _ -> false
-      | k, I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExp (k + 1, v_)
-      | k, I.Root (h_, s_) -> occursInHead (k, h_) || occursInSpine (k, s_)
-      | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
-      | k, I.FgnExp (cs, ops) -> false
+  and matchSig' = function
+    | g_, ps', ccs, ci, Covered -> Covered
+    | g_, ps', ccs, ci, CandList klist ->
+        matchSig (g_, ps', ccs, ci, CandList klist)
 
-    and occursInHead = function k, I.BVar k' -> k = k' | k, _ -> false
+  let rec matchBlocks = function
+    | g_, s', [], v_, k, i, ci, klist -> klist
+    | g_, s', I.Dec (_, v'_) :: piDecs, v_, k, i, ci, klist ->
+        let cands =
+          Cs_manager.trail (function () ->
+              matchClause (g_, (v_, I.id), (v'_, s'), ci))
+        in
+        let s'' = I.Dot (I.Exp (I.Root (I.Proj (I.Bidx k, i), I.Nil)), s') in
+        matchBlocks' (g_, s'', piDecs, v_, k, i + 1, ci, addKs (cands, klist))
 
-    and occursInSpine = function
-      | _, nil_ -> false
-      | k, I.App (u_, s_) -> occursInExp (k, u_) || occursInSpine (k, s_)
+  and matchBlocks' = function
+    | g_, s', piDecs, v_, k, i, ci, Covered -> Covered
+    | g_, s', piDecs, v_, k, i, ci, klist ->
+        matchBlocks (g_, s', piDecs, v_, k, i, ci, klist)
 
-    and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
-    and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
+  let rec matchCtx = function
+    | g_, s', null_, v_, k, ci, klist -> klist
+    | g_, s', I.Decl (g''_, I.Dec (_, v'_)), v_, k, ci, klist ->
+        let s'' = I.comp (I.shift, s') in
+        let cands =
+          Cs_manager.trail (function () ->
+              matchClause (g_, (v_, I.id), (v'_, s''), ci))
+        in
+        matchCtx' (g_, s'', g''_, v_, k + 1, ci, addKs (cands, klist))
+    | g_, s', I.Decl (g''_, I.BDec (_, (cid, s))), v_, k, ci, klist ->
+        let gsome_, piDecs = I.constBlock cid in
+        let s'' = I.comp (I.shift, s') in
+        let klist' =
+          matchBlocks (g_, I.comp (s, s''), piDecs, v_, k, 1, ci, klist)
+        in
+        matchCtx' (g_, s'', g''_, v_, k + 1, ci, klist')
 
-    let rec occursInMatchPos = function
-      | k, I.Pi (dp_, v_), ci -> occursInMatchPos (k + 1, v_, ci)
-      | k, I.Root (h_, s_), ci -> occursInMatchPosSpine (k, s_, ci)
+  and matchCtx' = function
+    | g_, s', g'_, v_, k, ci, Covered -> Covered
+    | g_, s', g'_, v_, k, ci, CandList klist ->
+        matchCtx (g_, s', g'_, v_, k, ci, CandList klist)
 
-    and occursInMatchPosSpine = function
-      | k, nil_, Cnil -> false
-      | k, I.App (u_, s_), Match ci ->
-          occursInExp (k, u_) || occursInMatchPosSpine (k, s_, ci)
-      | k, I.App (u_, s_), Skip ci -> occursInMatchPosSpine (k, s_, ci)
+  let rec matchOut = function
+    | g_, v_, ci, (v'_, s'), 0 ->
+        let cands = matchTop (g_, 0, (v_, I.id), (v'_, s'), ci, Eqns []) in
+        let cands' = resolveCands cands in
+        let cands'' = checkConstraints (g_, (v'_, s'), cands') in
+        addKs (cands'', CandList [])
+    | g_, v_, ci, ((I.Pi ((I.Dec (_, v1'_), _), v2'_) as v'_), s'), p ->
+        let x1_ = Whnf.newLoweredEVar (g_, (v1'_, s')) in
+        matchOut (g_, v_, ci, (v2'_, I.Dot (I.Exp x1_, s')), p - 1)
 
-    let rec instEVarsSkip (vs_, p, xsRev_, ci) =
-      instEVarsSkipW_ (Whnf.whnf vs_, p, xsRev_, ci)
+  let rec match_ = function
+    | g_, (I.Root (I.Const a, s_) as v_), 0, ci, Input ccs ->
+        matchCtx'
+          ( g_,
+            I.id,
+            g_,
+            v_,
+            1,
+            ci,
+            matchSig (g_, (v_, I.id), ccs, ci, CandList []) )
+    | g_, v_, 0, ci, Output (v'_, q) ->
+        matchOut (g_, v_, ci, (v'_, I.Shift (I.ctxLength g_)), q)
+    | g_, I.Pi ((d_, _), v'_), p, ci, ccs ->
+        match_ (I.Decl (g_, d_), v'_, p - 1, ci, ccs)
 
-    and instEVarsSkipW_ = function
-      | vs_, 0, xsRev_, ci -> (vs_, xsRev_)
-      | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev_, ci ->
-          let x1_ = Whnf.newLoweredEVar (I.null_, (v1_, s)) in
-          let eVarOpt_ =
-            begin if occursInMatchPos (1, v2_, ci) then Some x1_ else None
-            end
-          in
-          instEVarsSkip
-            ((v2_, I.Dot (I.Exp x1_, s)), p - 1, eVarOpt_ :: xsRev_, ci)
-      | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev_, ci ->
-          let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
-          instEVarsSkip
-            ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev_, ci)
-
-    let rec targetBelowEq = function
-      | a, I.EVar ({ contents = None }, gy_, vy_, { contents = [] }) ->
-          Subordinate.belowEq (a, I.targetFam vy_)
-      | a, I.EVar ({ contents = None }, gy_, vy_, { contents = _ :: _ }) -> true
-
-    let rec recursive = function
-      | I.EVar ({ contents = Some u_ }, gx_, vx_, _) as x_ ->
-          let a = I.targetFam vx_ in
-          let ys_ = Abstract.collectEVars (gx_, (x_, I.id), []) in
-          let recp = List.exists (function y_ -> targetBelowEq (a, y_)) ys_ in
-          recp
-      | I.Lam (d_, u_) -> recursive u_
-
-    open! struct
-      let counter = ref 0
-    end
-
-    let rec resetCount () = counter := 0
-    let rec incCount () = counter := !counter + 1
-    let rec getCount () = !counter
-
-    exception NotFinitary
-
-    let rec finitary1 (x_, k, w_, f, cands) =
-      begin
-        resetCount ();
-        begin
-          chatter 7 (function () ->
-              (("Trying " ^ Print.expToString (I.null_, x_)) ^ " : ") ^ ".\n");
-          try
-            begin
-              splitEVar
-                ( x_,
-                  w_,
-                  function
-                  | () -> begin
-                      f ();
-                      begin if recursive x_ then raise NotFinitary
-                      else incCount ()
-                      end
-                    end );
-              begin
-                chatter 7 (function () ->
-                    ("Finitary with " ^ Int.toString (getCount ()))
-                    ^ " candidates.\n");
-                (k, getCount ()) :: cands
-              end
-            end
-          with
-          | NotFinitary -> begin
-              chatter 7 (function () -> "Not finitary.\n");
-              cands
-            end
-          | Constraints.Error constrs -> begin
-              chatter 7 (function () -> "Inactive finitary split.\n");
-              cands
-            end
-        end
+  let rec insert = function
+    | k, [] -> [ (k, 1) ]
+    | k, ((k', n') :: ksn' as ksn) -> begin
+        match Int.compare (k, k') with
+        | Less -> (k, 1) :: ksn
+        | Equal -> (k', n' + 1) :: ksn'
+        | Greater -> (k', n') :: insert (k, ksn')
       end
 
-    let rec finitarySplits = function
-      | [], k, w_, f, cands -> cands
-      | None :: xs_, k, w_, f, cands -> finitarySplits (xs_, k + 1, w_, f, cands)
-      | Some x_ :: xs_, k, w_, f, cands ->
-          finitarySplits
-            ( xs_,
-              k + 1,
-              w_,
-              f,
-              Cs_manager.trail (function () -> finitary1 (x_, k, w_, f, cands))
-            )
+  let rec join = function
+    | [], ksn -> ksn
+    | k :: ks, ksn -> join (ks, insert (k, ksn))
 
-    let rec finitary (v_, p, w_, ci) =
-      let _ =
-        begin if !Global.doubleCheck then
-          TypeCheck.typeCheck (I.null_, (v_, I.Uni I.type_))
-        else ()
-        end
-      in
-      let (v1_, s), xsRev_ = instEVarsSkip ((v_, I.id), p, [], ci) in
-      finitarySplits (xsRev_, 1, w_, function () -> (abstract (v1_, s), []))
+  let rec selectCand = function
+    | Covered -> None
+    | CandList klist -> selectCand' (klist, [])
 
-    let rec eqExp (us_, us'_) = Conv.conv (us_, us'_)
+  and selectCand' = function
+    | [], ksn -> Some ksn
+    | Fail :: klist, ksn -> selectCand' (klist, ksn)
+    | Cands [] :: klist, ksn -> selectCand' (klist, ksn)
+    | Cands ks :: klist, ksn -> selectCand' (klist, join (ks, ksn))
 
-    let rec eqInpSpine = function
-      | ms, (I.SClo (s1_, s1'), s1), ss2_ ->
-          eqInpSpine (ms, (s1_, I.comp (s1', s1)), ss2_)
-      | ms, ss1_, (I.SClo (s2_, s2'), s2) ->
-          eqInpSpine (ms, ss1_, (s2_, I.comp (s2', s2)))
-      | mnil_, (nil_, s), (nil_, s') -> true
-      | ( M.Mapp (M.Marg (plus_, _), ms'),
-          (I.App (u_, s_), s),
-          (I.App (u'_, s'_), s') ) ->
-          eqExp ((u_, s), (u'_, s')) && eqInpSpine (ms', (s_, s), (s'_, s'))
-      | M.Mapp (_, ms'), (I.App (u_, s_), s), (I.App (u'_, s'_), s') ->
-          eqInpSpine (ms', (s_, s), (s'_, s'))
+  let rec instEVars (vs_, p, xsRev_) = instEVarsW (Whnf.whnf vs_, p, xsRev_)
 
-    let rec eqInp = function
-      | null_, k, a, ss_, ms -> []
-      | I.Decl (g'_, I.Dec (_, I.Root (I.Const a', s'_))), k, a, ss_, ms ->
-        begin
-          if a = a' && eqInpSpine (ms, (s'_, I.Shift k), ss_) then
-            k :: eqInp (g'_, k + 1, a, ss_, ms)
-          else eqInp (g'_, k + 1, a, ss_, ms)
-        end
-      | I.Decl (g'_, I.Dec (_, I.Pi _)), k, a, ss_, ms ->
-          eqInp (g'_, k + 1, a, ss_, ms)
-      | I.Decl (g'_, I.NDec _), k, a, ss_, ms -> eqInp (g'_, k + 1, a, ss_, ms)
-      | I.Decl (g'_, I.BDec (_, (b, t))), k, a, ss_, ms ->
-          eqInp (g'_, k + 1, a, ss_, ms)
+  and instEVarsW = function
+    | vs_, 0, xsRev_ -> (vs_, xsRev_)
+    | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev_ ->
+        let x1_ = Whnf.newLoweredEVar (I.Null, (v1_, s)) in
+        instEVars ((v2_, I.Dot (I.Exp x1_, s)), p - 1, Some x1_ :: xsRev_)
+    | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev_ ->
+        let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
+        instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev_)
 
-    let rec contractionCands = function
-      | null_, k -> []
-      | I.Decl (g'_, I.Dec (_, I.Root (I.Const a, s_))), k -> begin
-          match UniqueTable.modeLookup a with
-          | None -> contractionCands (g'_, k + 1)
-          | Some ms -> begin
-              match eqInp (g'_, k + 1, a, (s_, I.Shift k), ms) with
-              | [] -> contractionCands (g'_, k + 1)
-              | ns -> (k :: ns) :: contractionCands (g'_, k + 1)
-            end
-        end
-      | I.Decl (g'_, I.Dec (_, I.Pi _)), k -> contractionCands (g'_, k + 1)
-      | I.Decl (g'_, I.NDec _), k -> contractionCands (g'_, k + 1)
-      | I.Decl (g'_, I.BDec (_, (b, t))), k -> contractionCands (g'_, k + 1)
-
-    let rec isolateSplittable = function
-      | g_, v_, 0 -> (g_, v_)
-      | g_, I.Pi ((d_, _), v'_), p ->
-          isolateSplittable (I.Decl (g_, d_), v'_, p - 1)
-
-    let rec unifyUOutSpine = function
-      | ms, (I.SClo (s1_, s1'), s1), ss2_ ->
-          unifyUOutSpine (ms, (s1_, I.comp (s1', s1)), ss2_)
-      | ms, ss1_, (I.SClo (s2_, s2'), s2) ->
-          unifyUOutSpine (ms, ss1_, (s2_, I.comp (s2', s2)))
-      | mnil_, (nil_, s1), (nil_, s2) -> true
-      | ( M.Mapp (M.Marg (minus1_, _), ms'),
-          (I.App (u1_, s1_), s1),
-          (I.App (u2_, s2_), s2) ) ->
-          Unify.unifiable (I.null_, (u1_, s1), (u2_, s2))
-          && unifyUOutSpine (ms', (s1_, s1), (s2_, s2))
-      | M.Mapp (_, ms'), (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2) ->
-          unifyUOutSpine (ms', (s1_, s1), (s2_, s2))
-
-    let rec unifyUOutType (v1_, v2_) =
-      unifyUOutTypeW (Whnf.whnf (v1_, I.id), Whnf.whnf (v2_, I.id))
-
-    and unifyUOutTypeW
-        ((I.Root (I.Const a1, s1_), s1), (I.Root (I.Const a2, s2_), s2)) =
-      let (Some ms) = UniqueTable.modeLookup a1 in
-      unifyUOutSpine (ms, (s1_, s1), (s2_, s2))
-
-    let rec unifyUOutEVars
-        (Some (I.EVar (_, g1_, v1_, _)), Some (I.EVar (_, g2_, v2_, _))) =
-      unifyUOutType (v1_, v2_)
-
-    let rec unifyUOut2 (xsRev_, k1, k2) =
-      unifyUOutEVars (List.nth (xsRev_, k1 - 1), List.nth (xsRev_, k2 - 1))
-
-    let rec unifyUOut1 = function
-      | xsRev_, [] -> true
-      | xsRev_, k1 :: [] -> true
-      | xsRev_, k1 :: k2 :: ks ->
-          unifyUOut2 (xsRev_, k1, k2) && unifyUOut1 (xsRev_, k2 :: ks)
-
-    let rec unifyUOut = function
-      | xsRev_, [] -> true
-      | xsRev_, ks :: kss -> unifyUOut1 (xsRev_, ks) && unifyUOut (xsRev_, kss)
-
-    let rec contractAll (v_, p, ucands) =
-      let (v1_, s), xsRev_ = instEVars ((v_, I.id), p, []) in
-      begin if unifyUOut (xsRev_, ucands) then Some (abstract (v1_, s))
-      else None
-      end
-
-    let rec contract (v_, p, ci, lab) =
-      let g_, _ = isolateSplittable (I.null_, v_, p) in
-      let ucands = contractionCands (g_, 1) in
-      let n = List.length ucands in
-      let _ =
-        begin if n > 0 then
-          chatter 6 (function () ->
-              ((("Found " ^ Int.toString n) ^ " contraction ")
-              ^ pluralize (n, "candidate"))
-              ^ "\n")
-        else ()
-        end
-      in
-      let vpOpt'_ =
-        begin if n > 0 then
-          try contractAll (v_, p, ucands)
-          with Constraints.Error _ ->
-            begin
-              chatter 6 (function () ->
-                  "Contraction failed due to constraints\n");
-              Some (v_, p)
-            end
-        else Some (v_, p)
-        end
-      in
-      let _ =
-        begin match vpOpt'_ with
-        | None ->
-            chatter 6 (function () ->
-                "Case impossible: conflicting unique outputs\n")
-        | Some (v'_, p') ->
-            chatter 6 (function () -> showPendingGoal (v'_, p', ci, lab) ^ "\n")
-        end
-      in
-      vpOpt'_
-
-    let rec findMin ((k, n) :: kns) = findMin' ((k, n), kns)
-
-    and findMin' = function
-      | (k0, n0), [] -> (k0, n0)
-      | (k0, n0), (k', n') :: kns -> begin
-          if n' < n0 then findMin' ((k', n'), kns) else findMin' ((k0, n0), kns)
-        end
-
-    let rec cover (v_, p, ((w_, ci) as wci), ccs, lab, missing) =
-      begin
-        chatter 6 (function () -> showPendingGoal (v_, p, ci, lab) ^ "\n");
-        cover' (contract (v_, p, ci, lab), wci, ccs, lab, missing)
-      end
-
-    and cover' = function
-      | Some (v_, p), ((w_, ci) as wci), ccs, lab, missing ->
-          split
-            ( v_,
-              p,
-              selectCand (match_ (I.null_, v_, p, ci, ccs)),
-              wci,
-              ccs,
-              lab,
-              missing )
-      | None, wci, ccs, lab, missing -> begin
-          chatter 6 (function () -> "Covered\n");
-          missing
-        end
-
-    and split = function
-      | v_, p, None, wci, ccs, lab, missing -> begin
-          chatter 6 (function () -> "Covered\n");
-          missing
-        end
-      | v_, p, Some [], ((w_, ci) as wci), ccs, lab, missing -> begin
-          chatter 6 (function () ->
-              "No strong candidates---calculating weak candidates\n");
-          splitWeak (v_, p, finitary (v_, p, w_, ci), wci, ccs, lab, missing)
-        end
-      | v_, p, Some ((k, _) :: ksn), ((w_, ci) as wci), ccs, lab, missing ->
-        begin
-          match splitVar (v_, p, k, wci) with
-          | Some cases -> covers (cases, wci, ccs, lab, missing)
-          | None -> split (v_, p, Some ksn, wci, ccs, lab, missing)
-        end
-
-    and splitWeak = function
-      | v_, p, [], wci, ccs, lab, missing -> begin
-          chatter 6 (function () ->
-              ("No weak candidates---case " ^ labToString lab)
-              ^ " not covered\n");
-          (v_, p) :: missing
-        end
-      | v_, p, ksn, wci, ccs, lab, missing ->
-          split (v_, p, Some [ findMin ksn ], wci, ccs, lab, missing)
-
-    and covers (cases, wci, ccs, lab, missing) =
-      begin
-        chatter 6 (function () ->
-            (("Found " ^ Int.toString (List.length cases))
-            ^ pluralize (List.length cases, " case"))
-            ^ "\n");
-        covers' (cases, 1, wci, ccs, lab, missing)
-      end
-
-    and covers' = function
-      | [], n, wci, ccs, lab, missing -> begin
-          chatter 6 (function () ->
-              ("All subcases of " ^ labToString lab) ^ " considered\n");
-          missing
-        end
-      | (v_, p) :: cases', n, wci, ccs, lab, missing ->
-          covers'
-            ( cases',
-              n + 1,
-              wci,
-              ccs,
-              lab,
-              cover (v_, p, wci, ccs, Child (lab, n), missing) )
-
-    let rec constsToTypes = function
-      | [] -> []
-      | I.Const c :: cs' -> I.constType c :: constsToTypes cs'
-      | I.Def d :: cs' -> I.constType d :: constsToTypes cs'
-
-    let rec createCoverClause = function
-      | I.Decl (g_, d_), v_, p ->
-          createCoverClause (g_, I.Pi ((d_, I.maybe_), v_), p + 1)
-      | null_, v_, p -> (Whnf.normalize (v_, I.id), p)
-
-    let rec createCoverGoal (g_, vs_, p, ms) =
-      createCoverGoalW (g_, Whnf.whnf vs_, p, ms)
-
-    and createCoverGoalW = function
-      | g_, (I.Pi ((d1_, p1_), v2_), s), 0, ms ->
-          let d1'_ = I.decSub (d1_, s) in
-          let v2'_ =
-            createCoverGoal (I.Decl (g_, d1'_), (v2_, I.dot1 s), 0, ms)
-          in
-          I.Pi ((d1'_, p1_), v2'_)
-      | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s), p, ms ->
-          let x_ = Whnf.newLoweredEVar (g_, (v1_, s)) in
-          createCoverGoal (g_, (v2_, I.Dot (I.Exp x_, s)), p - 1, ms)
-      | g_, (I.Root ((I.Const cid as a), s_), s), p, ms ->
-          I.Root (a, createCoverSpine (g_, (s_, s), (I.constType cid, I.id), ms))
-
-    and createCoverSpine = function
-      | g_, (nil_, s), _, mnil_ -> I.nil_
-      | ( g_,
-          (I.App (u1_, s2_), s),
-          (I.Pi ((I.Dec (_, v1_), _), v2_), s'),
-          M.Mapp (M.Marg (minus_, x), ms') ) ->
-          let x_ = createEVar (g_, I.EClo (v1_, s')) in
-          let s2'_ =
-            createCoverSpine (g_, (s2_, s), (v2_, I.Dot (I.Exp x_, s')), ms')
-          in
-          I.App (x_, s2'_)
-      | g_, (I.App (u1_, s2_), s), (I.Pi (_, v2_), s'), M.Mapp (_, ms') ->
-          I.App
-            ( I.EClo (u1_, s),
-              createCoverSpine
-                ( g_,
-                  (s2_, s),
-                  Whnf.whnf (v2_, I.Dot (I.Exp (I.EClo (u1_, s)), s')),
-                  ms' ) )
-      | g_, (I.SClo (s_, s'), s), vs_, ms ->
-          createCoverSpine (g_, (s_, I.comp (s', s)), vs_, ms)
+  open! struct
+    let caseList : (I.exp_ * int) list ref = ref []
   end
+
+  let rec resetCases () = caseList := []
+  let rec addCase (v_, p) = caseList := (v_, p) :: !caseList
+  let rec getCases () = !caseList
+
+  let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
+
+  and createEVarSpineW = function
+    | g_, ((I.Root _, s) as vs_) -> (I.Nil, vs_)
+    | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
+        let x_ = createEVar (g_, I.EClo (v1_, s)) in
+        let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
+        (I.App (x_, s_), vs_)
+
+  let rec createAtomConst (g_, (I.Const cid as h_)) =
+    let v_ = I.constType cid in
+    let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
+    (I.Root (h_, s_), vs_)
+
+  let rec createAtomBVar (g_, k) =
+    let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
+    let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
+    (I.Root (I.BVar k, s_), vs_)
+
+  let rec createAtomProj (g_, h_, (v_, s)) =
+    let s_, vs'_ = createEVarSpine (g_, (v_, s)) in
+    (I.Root (h_, s_), vs'_)
+
+  let rec constCases = function
+    | g_, vs_, [], sc -> ()
+    | g_, vs_, I.Const c :: sgn', sc ->
+        let u_, vs'_ = createAtomConst (g_, I.Const c) in
+        let _ =
+          Cs_manager.trail (function () ->
+              begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+              end)
+        in
+        constCases (g_, vs_, sgn', sc)
+
+  let rec paramCases = function
+    | g_, vs_, 0, sc -> ()
+    | g_, vs_, k, sc ->
+        let u_, vs'_ = createAtomBVar (g_, k) in
+        let _ =
+          Cs_manager.trail (function () ->
+              begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+              end)
+        in
+        paramCases (g_, vs_, k - 1, sc)
+
+  let rec createEVarSub = function
+    | null_ -> I.id
+    | I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
+        let s = createEVarSub g'_ in
+        let x_ = Whnf.newLoweredEVar (I.Null, (v_, s)) in
+        I.Dot (I.Exp x_, s)
+
+  let rec blockName cid = I.conDecName (I.sgnLookup cid)
+
+  let rec blockCases (g_, vs_, cid, (gsome_, piDecs), sc) =
+    let t = createEVarSub gsome_ in
+    let sk = I.Shift (I.ctxLength g_) in
+    let t' = I.comp (t, sk) in
+    let lvar = I.newLVar (sk, (cid, t)) in
+    blockCases' (g_, vs_, (lvar, 1), (t', piDecs), sc)
+
+  and blockCases' = function
+    | g_, vs_, (lvar, i), (t, []), sc -> ()
+    | g_, vs_, (lvar, i), (t, I.Dec (_, v'_) :: piDecs), sc ->
+        let u_, vs'_ = createAtomProj (g_, I.Proj (lvar, i), (v'_, t)) in
+        let _ =
+          Cs_manager.trail (function () ->
+              begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+              end)
+        in
+        let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.Nil)), t) in
+        blockCases' (g_, vs_, (lvar, i + 1), (t', piDecs), sc)
+
+  let rec worldCases = function
+    | g_, vs_, T.Worlds [], sc -> ()
+    | g_, vs_, T.Worlds (cid :: cids), sc -> begin
+        blockCases (g_, vs_, cid, I.constBlock cid, sc);
+        worldCases (g_, vs_, T.Worlds cids, sc)
+      end
+
+  let rec lowerSplitW = function
+    | (I.EVar (_, g_, v_, _) as x_), w_, sc ->
+        let sc' = function
+          | u_ -> begin
+              if Unify.unifiable (g_, (x_, I.id), (u_, I.id)) then sc () else ()
+            end
+        in
+        let _ = paramCases (g_, (v_, I.id), I.ctxLength g_, sc') in
+        let _ = worldCases (g_, (v_, I.id), w_, sc') in
+        let _ =
+          constCases (g_, (v_, I.id), Index.lookup (I.targetFam v_), sc')
+        in
+        ()
+    | I.Lam (d_, u_), w_, sc -> lowerSplitW (u_, w_, sc)
+
+  let rec splitEVar (x_, w_, sc) = lowerSplitW (x_, w_, sc)
+
+  let rec abstract (v_, s) =
+    let i, v'_ = Abstract.abstractDecImp (I.EClo (v_, s)) in
+    let _ =
+      begin if !Global.doubleCheck then
+        TypeCheck.typeCheck (I.Null, (v'_, I.Uni I.Type))
+      else ()
+      end
+    in
+    (v'_, i)
+
+  let rec splitVar (v_, p, k, (w_, ci)) =
+    try
+      let _ = chatter 6 (function () -> showSplitVar (v_, p, k, ci) ^ "\n") in
+      let (v1_, s), xsRev_ = instEVars ((v_, I.id), p, []) in
+      let (Some x_) = List.nth (xsRev_, k - 1) in
+      let _ = resetCases () in
+      let _ =
+        splitEVar (x_, w_, function () -> addCase (abstract (v1_, s)))
+      in
+      Some (getCases ())
+    with Constraints.Error constrs ->
+      begin
+        chatter 7 (function () ->
+            ("Inactive split:\n" ^ Print.cnstrsToString constrs) ^ "\n");
+        None
+      end
+
+  let rec occursInExp = function
+    | k, I.Uni _ -> false
+    | k, I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExp (k + 1, v_)
+    | k, I.Root (h_, s_) -> occursInHead (k, h_) || occursInSpine (k, s_)
+    | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
+    | k, I.FgnExp (cs, ops) -> false
+
+  and occursInHead = function k, I.BVar k' -> k = k' | k, _ -> false
+
+  and occursInSpine = function
+    | _, nil_ -> false
+    | k, I.App (u_, s_) -> occursInExp (k, u_) || occursInSpine (k, s_)
+
+  and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
+  and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
+
+  let rec occursInMatchPos = function
+    | k, I.Pi (dp_, v_), ci -> occursInMatchPos (k + 1, v_, ci)
+    | k, I.Root (h_, s_), ci -> occursInMatchPosSpine (k, s_, ci)
+
+  and occursInMatchPosSpine = function
+    | k, nil_, Cnil -> false
+    | k, I.App (u_, s_), Match ci ->
+        occursInExp (k, u_) || occursInMatchPosSpine (k, s_, ci)
+    | k, I.App (u_, s_), Skip ci -> occursInMatchPosSpine (k, s_, ci)
+
+  let rec instEVarsSkip (vs_, p, xsRev_, ci) =
+    instEVarsSkipW_ (Whnf.whnf vs_, p, xsRev_, ci)
+
+  and instEVarsSkipW_ = function
+    | vs_, 0, xsRev_, ci -> (vs_, xsRev_)
+    | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev_, ci ->
+        let x1_ = Whnf.newLoweredEVar (I.Null, (v1_, s)) in
+        let eVarOpt_ =
+          begin if occursInMatchPos (1, v2_, ci) then Some x1_ else None
+          end
+        in
+        instEVarsSkip
+          ((v2_, I.Dot (I.Exp x1_, s)), p - 1, eVarOpt_ :: xsRev_, ci)
+    | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev_, ci ->
+        let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
+        instEVarsSkip ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev_, ci)
+
+  let rec targetBelowEq = function
+    | a, I.EVar ({ contents = None }, gy_, vy_, { contents = [] }) ->
+        Subordinate.belowEq (a, I.targetFam vy_)
+    | a, I.EVar ({ contents = None }, gy_, vy_, { contents = _ :: _ }) -> true
+
+  let rec recursive = function
+    | I.EVar ({ contents = Some u_ }, gx_, vx_, _) as x_ ->
+        let a = I.targetFam vx_ in
+        let ys_ = Abstract.collectEVars (gx_, (x_, I.id), []) in
+        let recp = List.exists (function y_ -> targetBelowEq (a, y_)) ys_ in
+        recp
+    | I.Lam (d_, u_) -> recursive u_
+
+  open! struct
+    let counter = ref 0
+  end
+
+  let rec resetCount () = counter := 0
+  let rec incCount () = counter := !counter + 1
+  let rec getCount () = !counter
+
+  exception NotFinitary
+
+  let rec finitary1 (x_, k, w_, f, cands) =
+    begin
+      resetCount ();
+      begin
+        chatter 7 (function () ->
+            (("Trying " ^ Print.expToString (I.Null, x_)) ^ " : ") ^ ".\n");
+        try
+          begin
+            splitEVar
+              ( x_,
+                w_,
+                function
+                | () -> begin
+                    f ();
+                    begin if recursive x_ then raise NotFinitary
+                    else incCount ()
+                    end
+                  end );
+            begin
+              chatter 7 (function () ->
+                  ("Finitary with " ^ Int.toString (getCount ()))
+                  ^ " candidates.\n");
+              (k, getCount ()) :: cands
+            end
+          end
+        with
+        | NotFinitary -> begin
+            chatter 7 (function () -> "Not finitary.\n");
+            cands
+          end
+        | Constraints.Error constrs -> begin
+            chatter 7 (function () -> "Inactive finitary split.\n");
+            cands
+          end
+      end
+    end
+
+  let rec finitarySplits = function
+    | [], k, w_, f, cands -> cands
+    | None :: xs_, k, w_, f, cands -> finitarySplits (xs_, k + 1, w_, f, cands)
+    | Some x_ :: xs_, k, w_, f, cands ->
+        finitarySplits
+          ( xs_,
+            k + 1,
+            w_,
+            f,
+            Cs_manager.trail (function () -> finitary1 (x_, k, w_, f, cands)) )
+
+  let rec finitary (v_, p, w_, ci) =
+    let _ =
+      begin if !Global.doubleCheck then
+        TypeCheck.typeCheck (I.Null, (v_, I.Uni I.Type))
+      else ()
+      end
+    in
+    let (v1_, s), xsRev_ = instEVarsSkip ((v_, I.id), p, [], ci) in
+    finitarySplits
+      (xsRev_, 1, w_, (function () -> ignore (abstract (v1_, s))), [])
+
+  let rec eqExp (us_, us'_) = Conv.conv (us_, us'_)
+
+  let rec eqInpSpine = function
+    | ms, (I.SClo (s1_, s1'), s1), ss2_ ->
+        eqInpSpine (ms, (s1_, I.comp (s1', s1)), ss2_)
+    | ms, ss1_, (I.SClo (s2_, s2'), s2) ->
+        eqInpSpine (ms, ss1_, (s2_, I.comp (s2', s2)))
+    | M.Mnil, (I.Nil, s), (I.Nil, s') -> true
+    | ( M.Mapp (M.Marg (plus_, _), ms'),
+        (I.App (u_, s_), s),
+        (I.App (u'_, s'_), s') ) ->
+        eqExp ((u_, s), (u'_, s')) && eqInpSpine (ms', (s_, s), (s'_, s'))
+    | M.Mapp (_, ms'), (I.App (u_, s_), s), (I.App (u'_, s'_), s') ->
+        eqInpSpine (ms', (s_, s), (s'_, s'))
+
+  let rec eqInp = function
+    | null_, k, a, ss_, ms -> []
+    | I.Decl (g'_, I.Dec (_, I.Root (I.Const a', s'_))), k, a, ss_, ms -> begin
+        if a = a' && eqInpSpine (ms, (s'_, I.Shift k), ss_) then
+          k :: eqInp (g'_, k + 1, a, ss_, ms)
+        else eqInp (g'_, k + 1, a, ss_, ms)
+      end
+    | I.Decl (g'_, I.Dec (_, I.Pi _)), k, a, ss_, ms ->
+        eqInp (g'_, k + 1, a, ss_, ms)
+    | I.Decl (g'_, I.NDec _), k, a, ss_, ms -> eqInp (g'_, k + 1, a, ss_, ms)
+    | I.Decl (g'_, I.BDec (_, (b, t))), k, a, ss_, ms ->
+        eqInp (g'_, k + 1, a, ss_, ms)
+
+  let rec contractionCands = function
+    | null_, k -> []
+    | I.Decl (g'_, I.Dec (_, I.Root (I.Const a, s_))), k -> begin
+        match UniqueTable.modeLookup a with
+        | None -> contractionCands (g'_, k + 1)
+        | Some ms -> begin
+            match eqInp (g'_, k + 1, a, (s_, I.Shift k), ms) with
+            | [] -> contractionCands (g'_, k + 1)
+            | ns -> (k :: ns) :: contractionCands (g'_, k + 1)
+          end
+      end
+    | I.Decl (g'_, I.Dec (_, I.Pi _)), k -> contractionCands (g'_, k + 1)
+    | I.Decl (g'_, I.NDec _), k -> contractionCands (g'_, k + 1)
+    | I.Decl (g'_, I.BDec (_, (b, t))), k -> contractionCands (g'_, k + 1)
+
+  let rec isolateSplittable = function
+    | g_, v_, 0 -> (g_, v_)
+    | g_, I.Pi ((d_, _), v'_), p ->
+        isolateSplittable (I.Decl (g_, d_), v'_, p - 1)
+
+  let rec unifyUOutSpine = function
+    | ms, (I.SClo (s1_, s1'), s1), ss2_ ->
+        unifyUOutSpine (ms, (s1_, I.comp (s1', s1)), ss2_)
+    | ms, ss1_, (I.SClo (s2_, s2'), s2) ->
+        unifyUOutSpine (ms, ss1_, (s2_, I.comp (s2', s2)))
+    | M.Mnil, (I.Nil, s1), (I.Nil, s2) -> true
+    | ( M.Mapp (M.Marg (minus1_, _), ms'),
+        (I.App (u1_, s1_), s1),
+        (I.App (u2_, s2_), s2) ) ->
+        Unify.unifiable (I.Null, (u1_, s1), (u2_, s2))
+        && unifyUOutSpine (ms', (s1_, s1), (s2_, s2))
+    | M.Mapp (_, ms'), (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2) ->
+        unifyUOutSpine (ms', (s1_, s1), (s2_, s2))
+
+  let rec unifyUOutType (v1_, v2_) =
+    unifyUOutTypeW (Whnf.whnf (v1_, I.id), Whnf.whnf (v2_, I.id))
+
+  and unifyUOutTypeW
+      ((I.Root (I.Const a1, s1_), s1), (I.Root (I.Const a2, s2_), s2)) =
+    let (Some ms) = UniqueTable.modeLookup a1 in
+    unifyUOutSpine (ms, (s1_, s1), (s2_, s2))
+
+  let rec unifyUOutEVars
+      (Some (I.EVar (_, g1_, v1_, _)), Some (I.EVar (_, g2_, v2_, _))) =
+    unifyUOutType (v1_, v2_)
+
+  let rec unifyUOut2 (xsRev_, k1, k2) =
+    unifyUOutEVars (List.nth (xsRev_, k1 - 1), List.nth (xsRev_, k2 - 1))
+
+  let rec unifyUOut1 = function
+    | xsRev_, [] -> true
+    | xsRev_, k1 :: [] -> true
+    | xsRev_, k1 :: k2 :: ks ->
+        unifyUOut2 (xsRev_, k1, k2) && unifyUOut1 (xsRev_, k2 :: ks)
+
+  let rec unifyUOut = function
+    | xsRev_, [] -> true
+    | xsRev_, ks :: kss -> unifyUOut1 (xsRev_, ks) && unifyUOut (xsRev_, kss)
+
+  let rec contractAll (v_, p, ucands) =
+    let (v1_, s), xsRev_ = instEVars ((v_, I.id), p, []) in
+    begin if unifyUOut (xsRev_, ucands) then Some (abstract (v1_, s)) else None
+    end
+
+  let rec contract (v_, p, ci, lab) =
+    let g_, _ = isolateSplittable (I.Null, v_, p) in
+    let ucands = contractionCands (g_, 1) in
+    let n = List.length ucands in
+    let _ =
+      begin if n > 0 then
+        chatter 6 (function () ->
+            ((("Found " ^ Int.toString n) ^ " contraction ")
+            ^ pluralize (n, "candidate"))
+            ^ "\n")
+      else ()
+      end
+    in
+    let vpOpt'_ =
+      begin if n > 0 then
+        try contractAll (v_, p, ucands)
+        with Constraints.Error _ ->
+          begin
+            chatter 6 (function () -> "Contraction failed due to constraints\n");
+            Some (v_, p)
+          end
+      else Some (v_, p)
+      end
+    in
+    let _ =
+      begin match vpOpt'_ with
+      | None ->
+          chatter 6 (function () ->
+              "Case impossible: conflicting unique outputs\n")
+      | Some (v'_, p') ->
+          chatter 6 (function () -> showPendingGoal (v'_, p', ci, lab) ^ "\n")
+      end
+    in
+    vpOpt'_
+
+  let rec findMin ((k, n) :: kns) = findMin' ((k, n), kns)
+
+  and findMin' = function
+    | (k0, n0), [] -> (k0, n0)
+    | (k0, n0), (k', n') :: kns -> begin
+        if n' < n0 then findMin' ((k', n'), kns) else findMin' ((k0, n0), kns)
+      end
+
+  let rec cover (v_, p, ((w_, ci) as wci), ccs, lab, missing) =
+    begin
+      chatter 6 (function () -> showPendingGoal (v_, p, ci, lab) ^ "\n");
+      cover' (contract (v_, p, ci, lab), wci, ccs, lab, missing)
+    end
+
+  and cover' = function
+    | Some (v_, p), ((w_, ci) as wci), ccs, lab, missing ->
+        split
+          ( v_,
+            p,
+            selectCand (match_ (I.Null, v_, p, ci, ccs)),
+            wci,
+            ccs,
+            lab,
+            missing )
+    | None, wci, ccs, lab, missing -> begin
+        chatter 6 (function () -> "Covered\n");
+        missing
+      end
+
+  and split = function
+    | v_, p, None, wci, ccs, lab, missing -> begin
+        chatter 6 (function () -> "Covered\n");
+        missing
+      end
+    | v_, p, Some [], ((w_, ci) as wci), ccs, lab, missing -> begin
+        chatter 6 (function () ->
+            "No strong candidates---calculating weak candidates\n");
+        splitWeak (v_, p, finitary (v_, p, w_, ci), wci, ccs, lab, missing)
+      end
+    | v_, p, Some ((k, _) :: ksn), ((w_, ci) as wci), ccs, lab, missing -> begin
+        match splitVar (v_, p, k, wci) with
+        | Some cases -> covers (cases, wci, ccs, lab, missing)
+        | None -> split (v_, p, Some ksn, wci, ccs, lab, missing)
+      end
+
+  and splitWeak = function
+    | v_, p, [], wci, ccs, lab, missing -> begin
+        chatter 6 (function () ->
+            ("No weak candidates---case " ^ labToString lab) ^ " not covered\n");
+        (v_, p) :: missing
+      end
+    | v_, p, ksn, wci, ccs, lab, missing ->
+        split (v_, p, Some [ findMin ksn ], wci, ccs, lab, missing)
+
+  and covers (cases, wci, ccs, lab, missing) =
+    begin
+      chatter 6 (function () ->
+          (("Found " ^ Int.toString (List.length cases))
+          ^ pluralize (List.length cases, " case"))
+          ^ "\n");
+      covers' (cases, 1, wci, ccs, lab, missing)
+    end
+
+  and covers' = function
+    | [], n, wci, ccs, lab, missing -> begin
+        chatter 6 (function () ->
+            ("All subcases of " ^ labToString lab) ^ " considered\n");
+        missing
+      end
+    | (v_, p) :: cases', n, wci, ccs, lab, missing ->
+        covers'
+          ( cases',
+            n + 1,
+            wci,
+            ccs,
+            lab,
+            cover (v_, p, wci, ccs, Child (lab, n), missing) )
+
+  let rec constsToTypes = function
+    | [] -> []
+    | I.Const c :: cs' -> I.constType c :: constsToTypes cs'
+    | I.Def d :: cs' -> I.constType d :: constsToTypes cs'
+
+  let rec createCoverClause = function
+    | I.Decl (g_, d_), v_, p ->
+        createCoverClause (g_, I.Pi ((d_, I.Maybe), v_), p + 1)
+    | null_, v_, p -> (Whnf.normalize (v_, I.id), p)
+
+  let rec createCoverGoal (g_, vs_, p, ms) =
+    createCoverGoalW (g_, Whnf.whnf vs_, p, ms)
+
+  and createCoverGoalW = function
+    | g_, (I.Pi ((d1_, p1_), v2_), s), 0, ms ->
+        let d1'_ = I.decSub (d1_, s) in
+        let v2'_ =
+          createCoverGoal (I.Decl (g_, d1'_), (v2_, I.dot1 s), 0, ms)
+        in
+        I.Pi ((d1'_, p1_), v2'_)
+    | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s), p, ms ->
+        let x_ = Whnf.newLoweredEVar (g_, (v1_, s)) in
+        createCoverGoal (g_, (v2_, I.Dot (I.Exp x_, s)), p - 1, ms)
+    | g_, (I.Root ((I.Const cid as a), s_), s), p, ms ->
+        I.Root (a, createCoverSpine (g_, (s_, s), (I.constType cid, I.id), ms))
+
+  and createCoverSpine = function
+    | g_, (nil_, s), _, mnil_ -> I.Nil
+    | ( g_,
+        (I.App (u1_, s2_), s),
+        (I.Pi ((I.Dec (_, v1_), _), v2_), s'),
+        M.Mapp (M.Marg (minus_, x), ms') ) ->
+        let x_ = createEVar (g_, I.EClo (v1_, s')) in
+        let s2'_ =
+          createCoverSpine (g_, (s2_, s), (v2_, I.Dot (I.Exp x_, s')), ms')
+        in
+        I.App (x_, s2'_)
+    | g_, (I.App (u1_, s2_), s), (I.Pi (_, v2_), s'), M.Mapp (_, ms') ->
+        I.App
+          ( I.EClo (u1_, s),
+            createCoverSpine
+              ( g_,
+                (s2_, s),
+                Whnf.whnf (v2_, I.Dot (I.Exp (I.EClo (u1_, s)), s')),
+                ms' ) )
+    | g_, (I.SClo (s_, s'), s), vs_, ms ->
+        createCoverSpine (g_, (s_, I.comp (s', s)), vs_, ms)
 
   (*****************)
   (* Strengthening *)
@@ -1868,7 +1855,7 @@ val _ = pr ()
     let v0_, p = initCGoal a in
     let _ =
       begin if !Global.doubleCheck then
-        TypeCheck.typeCheck (I.null_, (v0_, I.Uni I.type_))
+        TypeCheck.typeCheck (I.Null, (v0_, I.Uni I.Type))
       else ()
       end
     in
@@ -1877,9 +1864,9 @@ val _ = pr ()
     let cs = Index.lookup a in
     let ccs = constsToTypes cs in
     let w_ = W.lookup a in
-    let v0_ = createCoverGoal (I.null_, (v0_, I.id), p, ms) in
+    let v0_ = createCoverGoal (I.Null, (v0_, I.id), p, ms) in
     let v0_, p = abstract (v0_, I.id) in
-    let missing = cover (v0_, p, (w_, cIn), input_ ccs, Top, []) in
+    let missing = cover (v0_, p, (w_, cIn), Input ccs, Top, []) in
     let _ =
       begin match missing with
       | [] -> ()
@@ -1912,14 +1899,14 @@ val _ = pr ()
     let v'_, q = createCoverClause (g_, I.EClo (v_, s), 0) in
     let _ =
       begin if !Global.doubleCheck then
-        TypeCheck.typeCheck (I.null_, (v'_, I.Uni I.type_))
+        TypeCheck.typeCheck (I.Null, (v'_, I.Uni I.Type))
       else ()
       end
     in
-    let v0_ = createCoverGoal (I.null_, (v'_, I.id), q, ms) in
+    let v0_ = createCoverGoal (I.Null, (v'_, I.id), q, ms) in
     let v0'_, p = abstract (v0_, I.id) in
     let w_ = W.lookup a in
-    let missing = cover (v0'_, p, (w_, cOut), output_ (v'_, q), Top, []) in
+    let missing = cover (v0'_, p, (w_, cOut), Output (v'_, q), Top, []) in
     let _ =
       begin match missing with
       | [] -> ()
@@ -1951,37 +1938,37 @@ val _ = pr ()
   type coverClause_ = CClause of I.dctx * I.spine_
 
   let rec formatCGoal (CGoal (g_, s_)) =
-    let _ = N.varReset I.null_ in
-    F.HVbox
+    let _ = N.varReset I.Null in
+    F.hVbox
       ([
-         Print.formatCtx (I.null_, g_);
+         Print.formatCtx (I.Null, g_);
          F.break_;
          F.break_;
-         F.String "|-";
-         F.space_;
+         F.string "|-";
+         F.space;
        ]
       @ Print.formatSpine (g_, s_))
 
   let rec showPendingCGoal (CGoal (g_, s_), lab) =
     F.makestring_fmt
-      (F.Hbox
+      (F.hbox
          [
-           F.String (labToString lab);
-           F.space_;
-           F.String "?- ";
+           F.string (labToString lab);
+           F.space;
+           F.string "?- ";
            formatCGoal (CGoal (g_, s_));
-           F.String ".";
+           F.string ".";
          ])
 
   let rec showCClause (CClause (g_, s_)) =
-    let _ = N.varReset I.null_ in
-    F.makestring_fmt (F.HVbox ([ F.String "!- " ] @ Print.formatSpine (g_, s_)))
+    let _ = N.varReset I.Null in
+    F.makestring_fmt (F.hVbox ([ F.string "!- " ] @ Print.formatSpine (g_, s_)))
 
   let rec showSplitVar (CGoal (g_, s_), k) =
-    let _ = N.varReset I.null_ in
+    let _ = N.varReset I.Null in
     let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
     (("Split " ^ x) ^ " in ")
-    ^ F.makestring_fmt (F.HVbox (Print.formatSpine (g_, s_)))
+    ^ F.makestring_fmt (F.hVbox (Print.formatSpine (g_, s_)))
 
   (* newEVarSubst (G, G') = s
        Invariant:   If G = xn:Vn,...,x1:V1
@@ -1998,7 +1985,7 @@ val _ = pr ()
                  val X = I.newEVar (G, V') Mon Feb 28 15:34:31 2011 -cs *)
     | g_, I.Decl (g'_, (I.NDec _ as d_)) ->
         let s' = newEVarSubst (g_, g'_) in
-        I.Dot (I.undef_, s')
+        I.Dot (I.Undef, s')
     | g_, I.Decl (g'_, (I.BDec (_, (b, t)) as d_)) ->
         let s' = newEVarSubst (g_, g'_) in
         let l1_ = I.newLVar (s', (b, t)) in
@@ -2023,13 +2010,13 @@ val _ = pr ()
   (* This ignores LVars, because collectEVars does *)
   (* Why is that OK?  Sun Dec 16 09:01:40 2001 -fp !!! *)
   let rec checkConstraints = function
-    | g_, (si_, ti), Cands ks -> cands_ ks
+    | g_, (si_, ti), Cands ks -> Cands ks
     | g_, (si_, ti), Fail -> Fail
     | g_, (si_, ti), Eqns _ ->
         let xs_ = Abstract.collectEVarsSpine (g_, (si_, ti), []) in
         let constrs = collectConstraints xs_ in
         begin match constrs with
-        | [] -> eqns_ []
+        | [] -> Eqns []
         | _ -> fail "Remaining constraints"
         end
 
@@ -2041,7 +2028,7 @@ val _ = pr ()
        yields splitting candidates klist
     *)
   let rec matchClause (CGoal (g_, s_), (si_, ti)) =
-    let cands1 = matchSpine (g_, 0, (s_, I.id), (si_, ti), eqns_ []) in
+    let cands1 = matchSpine (g_, 0, (s_, I.id), (si_, ti), Eqns []) in
     let cands2 = resolveCands cands1 in
     let cands3 = checkConstraints (g_, (si_, ti), cands2) in
     cands3
@@ -2068,7 +2055,7 @@ val _ = pr ()
        yields candidates klist
     *)
   let rec match_ (CGoal (g_, s_), ccs) =
-    matchClauses (CGoal (g_, s_), ccs, candList_ [])
+    matchClauses (CGoal (g_, s_), ccs, CandList [])
 
   (* abstractSpine (S, s) = CGoal (G, S')
        Invariant: G abstracts all EVars in S[s]
@@ -2132,7 +2119,7 @@ val _ = pr ()
   let rec splitVar ((CGoal (g_, s_) as cg), k, w) =
     try
       let _ = chatter 6 (function () -> showSplitVar (cg, k) ^ "\n") in
-      let s = newEVarSubst (I.null_, g_) in
+      let s = newEVarSubst (I.Null, g_) in
       let x_ = kthSub (s, k) in
       let _ = resetCases () in
       let _ =
@@ -2155,9 +2142,10 @@ val _ = pr ()
        where ki are indices of splittable variables in G with ni possibilities
     *)
   let rec finitary (CGoal (g_, s_), w) =
-    let s = newEVarSubst (I.null_, g_) in
+    let s = newEVarSubst (I.Null, g_) in
     let xsRev_ = subToXsRev s in
-    finitarySplits (xsRev_, 1, w, function () -> (abstractSpine (s_, s), []))
+    finitarySplits
+      (xsRev_, 1, w, (function () -> ignore (abstractSpine (s_, s))), [])
 
   (* G = xn:Vn,...,x1:V1 *)
   (* for splitting, EVars are always global *)
@@ -2169,7 +2157,7 @@ val _ = pr ()
   (***************)
   (* for explanation, see contract and contractAll above *)
   let rec contractAll (CGoal (g_, s_), ucands) =
-    let s = newEVarSubst (I.null_, g_) in
+    let s = newEVarSubst (I.Null, g_) in
     let xsRev_ = subToXsRev s in
     begin if unifyUOut (xsRev_, ucands) then Some (abstractSpine (s_, s))
     else None
@@ -2297,7 +2285,7 @@ val _ = pr ()
         missing
       end
     | cg :: cases', n, w, ccs, lab, missing ->
-        let missing1 = cover (cg, w, ccs, child_ (lab, n), missing) in
+        let missing1 = cover (cg, w, ccs, Child (lab, n), missing) in
         covers' (cases', n + 1, w, ccs, lab, missing1)
 
   (* substToSpine' (s, G, T) = S @ T
@@ -2314,9 +2302,9 @@ val _ = pr ()
         substToSpine' (s, g_, I.App (u_, t_))
     | I.Dot (I.Idx n, s), I.Decl (g_, I.Dec (_, v_)), t_ ->
         let us_, _ =
-          Whnf.whnfEta ((I.Root (I.BVar n, I.nil_), I.id), (v_, I.id))
+          Whnf.whnfEta ((I.Root (I.BVar n, I.Nil), I.id), (v_, I.id))
         in
-        substToSpine' (s, g_, I.App (I.EClo us_, t_))
+        substToSpine' (s, g_, I.App (I.EClo (fst us_, snd us_), t_))
     | I.Dot (_, s), I.Decl (g_, I.BDec (_, (l_, t))), t_ ->
         substToSpine' (s, g_, t_)
 
@@ -2337,17 +2325,17 @@ val _ = pr ()
 
        Note: {{G}} erases void declarations in G
      *)
-  let rec substToSpine (s, g_) = substToSpine' (s, g_, I.nil_)
+  let rec substToSpine (s, g_) = substToSpine' (s, g_, I.Nil)
 
   (* purify' G = (G', s) where all NDec's have been erased from G
        If    |- G ctx
        then  |- G ctx and  G' |- s : G
     *)
   let rec purify' = function
-    | null_ -> (I.null_, I.id)
+    | null_ -> (I.Null, I.id)
     | I.Decl (g_, I.NDec _) ->
         let g'_, s = purify' g_ in
-        (g'_, I.Dot (I.undef_, s))
+        (g'_, I.Dot (I.Undef, s))
         (* G' |- s : G *)
         (* G' |- _.s : G,_ *)
     | I.Decl (g_, (I.Dec _ as d_)) ->
@@ -2361,7 +2349,7 @@ val _ = pr ()
         (* G', D[s] |- 1.s o ^ : G, D *)
     | I.Decl (g_, (I.BDec _ as d_)) ->
         let g'_, s = purify' g_ in
-        (g'_, I.Dot (I.undef_, s))
+        (g'_, I.Dot (I.Undef, s))
 
   (* G' |- s : G *)
   (* G' |- _.s : G,_ *)

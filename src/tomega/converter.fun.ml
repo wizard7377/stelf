@@ -1,5 +1,6 @@
 open! Redundant
 open! Basis
+open Worldcheck_
 
 module Converter (Converter__0 : sig
   (* Converter from relational representation to a functional
@@ -13,7 +14,7 @@ module Converter (Converter__0 : sig
   module Abstract : ABSTRACT
 
   (*! sharing Abstract.IntSyn = IntSyn' !*)
-  module ModeTable : MODETABLE
+  module ModeTable : Modetable.MODETABLE
 
   (*! sharing ModeSyn.IntSyn = IntSyn' !*)
   module Names : NAMES
@@ -28,11 +29,11 @@ module Converter (Converter__0 : sig
   module Print : PRINT
 
   (*! sharing Print.IntSyn = IntSyn' !*)
-  module TomegaPrint : TOMEGAPRINT
+  module TomegaPrint : Tomegaprint.TOMEGAPRINT
 
   (*! sharing TomegaPrint.IntSyn = IntSyn' !*)
   (*! sharing TomegaPrint.Tomega = Tomega' !*)
-  module WorldSyn : WORLDSYN
+  module WorldSyn : Worldcheck_.WORLDSYN
 
   (*! sharing WorldSyn.IntSyn = IntSyn' !*)
   (*! sharing WorldSyn.Tomega = Tomega' !*)
@@ -40,18 +41,18 @@ module Converter (Converter__0 : sig
 
   (*! sharing Worldify.IntSyn = IntSyn' !*)
   (*! sharing Worldify.Tomega = Tomega' !*)
-  module TomegaTypeCheck : TOMEGATYPECHECK
+  module TomegaTypeCheck : Tomega_typecheck.TOMEGATYPECHECK
 
   (*! sharing TomegaTypeCheck.IntSyn = IntSyn' !*)
   (*! sharing TomegaTypeCheck.Tomega = Tomega' !*)
   module Subordinate : SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn' !*)
-  module TypeCheck : TYPECHECK
+  module TypeCheck : Typecheck_.TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
   module Redundant : REDUNDANT
-  module TomegaAbstract : TOMEGAABSTRACT
+  module TomegaAbstract : Tomega_abstract.TOMEGAABSTRACT
 end) : CONVERTER = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
@@ -64,7 +65,8 @@ end) : CONVERTER = struct
     module M = ModeSyn
     module S = Subordinate
     module A = Abstract
-    module TA = TomegaAbstract
+    module TomegaTypeCheck = Converter__0.TomegaTypeCheck
+    module TA = Converter__0.TomegaAbstract
 
     let rec isIdx1 = function I.Idx 1 -> true | _ -> false
 
@@ -98,13 +100,13 @@ end) : CONVERTER = struct
       | I.BDec (name, (l_, t)), s -> I.BDec (name, (l_, strengthenSub (t, s)))
 
     let rec strengthenCtx = function
-      | null_, s -> (I.null_, s)
+      | null_, s -> (I.Null, s)
       | I.Decl (g_, d_), s ->
           let g'_, s' = strengthenCtx (g_, s) in
           (I.Decl (g'_, strengthenDec (d_, s')), I.dot1 s')
 
     let rec strengthenFor = function
-      | true_, s -> T.true_
+      | True, s -> T.True
       | T.And (f1_, f2_), s ->
           T.And (strengthenFor (f1_, s), strengthenFor (f2_, s))
       | T.All ((T.UDec d_, q_), f_), s ->
@@ -129,12 +131,12 @@ end) : CONVERTER = struct
           T.Abs (strengthenDec (d_, s), strengthenTC (tc_, I.dot1 s))
 
     let rec strengthenSpine = function
-      | nil_, t -> I.nil_
+      | nil_, t -> I.Nil
       | I.App (u_, s_), t ->
           I.App (strengthenExp (u_, t), strengthenSpine (s_, t))
 
     let rec strengthenPsi = function
-      | null_, s -> (I.null_, s)
+      | null_, s -> (I.Null, s)
       | I.Decl (psi_, T.UDec d_), s ->
           let psi'_, s' = strengthenPsi (psi_, s) in
           (I.Decl (psi'_, T.UDec (strengthenDec (d_, s'))), I.dot1 s')
@@ -152,7 +154,7 @@ end) : CONVERTER = struct
           (T.UDec d'_ :: psi''_, s'')
 
     let rec ctxSub = function
-      | null_, s -> (I.null_, s)
+      | null_, s -> (I.Null, s)
       | I.Decl (g_, d_), s ->
           let g'_, s' = ctxSub (g_, s) in
           (I.Decl (g'_, I.decSub (d_, s')), I.dot1 s)
@@ -173,7 +175,7 @@ end) : CONVERTER = struct
           in
           begin
             TypeCheck.typeCheck
-              (T.coerceCtx (append (psi0_, T.embedCtx g_)), (v_, I.Uni I.type_));
+              (T.coerceCtx (append (psi0_, T.embedCtx g_)), (v_, I.Uni I.Type));
             validSig (psi0_, sig_)
           end
 
@@ -192,20 +194,20 @@ end) : CONVERTER = struct
       in
       let _ = validMode mS in
       let rec convertFor' = function
-        | I.Pi ((d_, _), v_), M.Mapp (M.Marg (M.Plus, _), mS), w1, w2, n -> (
+        | I.Pi ((d_, _), v_), M.Mapp (M.Marg (M.Plus, _), mS), w1, w2, n ->
             let f'_, f''_ =
               convertFor' (v_, mS, I.dot1 w1, I.Dot (I.Idx n, w2), n - 1)
             in
-            function
-            | f_ ->
-                ( T.All ((T.UDec (strengthenDec (d_, w1)), T.explicit_), f'_ f_),
-                  f''_ ))
+            ( (function
+              | f_ ->
+                  T.All ((T.UDec (strengthenDec (d_, w1)), T.Explicit), f'_ f_)),
+              f''_ )
         | I.Pi ((d_, _), v_), M.Mapp (M.Marg (M.Minus, _), mS), w1, w2, n ->
             let f'_, f''_ =
               convertFor' (v_, mS, I.comp (w1, I.shift), I.dot1 w2, n + 1)
             in
-            (f'_, T.Ex ((I.decSub (d_, w2), T.explicit_), f''_))
-        | I.Uni type_, M.Mnil, _, _, _ -> ( function f_ -> (f_, T.true_))
+            (f'_, T.Ex ((I.decSub (d_, w2), T.Explicit), f''_))
+        | I.Uni type_, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
       let rec shiftPlus mS =
@@ -241,8 +243,8 @@ end) : CONVERTER = struct
       | k, I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExpN (k + 1, v_)
       | k, I.Root (h_, s_) -> occursInHead (k, h_) || occursInSpine (k, s_)
       | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExpN (k + 1, v_)
-      | k, I.FgnExp csfe ->
-          I.FgnExpStd.fold csfe
+      | k, I.FgnExp (csid_, csfe) ->
+          I.FgnExpStd.fold (csid_, csfe)
             (function
               | u_, dp_ -> dp_ || occursInExp (k, Whnf.normalize (u_, I.id)))
             false
@@ -272,7 +274,7 @@ end) : CONVERTER = struct
     let rec peeln = function 0, w -> w | n, w -> peeln (n - 1, peel w)
 
     let rec popn = function
-      | 0, psi_ -> (psi_, I.null_)
+      | 0, psi_ -> (psi_, I.Null)
       | n, I.Decl (psi_, T.UDec d_) ->
           let psi'_, g'_ = popn (n - 1, psi_) in
           (psi'_, I.Decl (g'_, d_))
@@ -340,14 +342,14 @@ end) : CONVERTER = struct
           end
       in
       let rec blockSub = function
-        | null_, w -> (I.null_, w)
+        | null_, w -> (I.Null, w)
         | I.Decl (g_, I.Dec (name, v_)), w ->
             let g'_, w' = blockSub (g_, w) in
             let v'_ = strengthenExp (v_, w') in
             (I.Decl (g'_, I.Dec (name, v'_)), I.dot1 w')
       in
       let rec strengthen' = function
-        | null_, psi2_, l_, w1 -> (I.null_, I.id, I.id)
+        | null_, psi2_, l_, w1 -> (I.Null, I.id, I.id)
         | I.Decl (psi1_, (T.UDec (I.Dec (name, v_)) as ld_)), psi2_, l_, w1 ->
           begin
             if isIdx1 (I.bvarSub (1, w1)) then
@@ -428,7 +430,7 @@ end) : CONVERTER = struct
 
     let rec transformConc ((a, s_), w) =
       let rec transformConc' = function
-        | nil_, M.Mnil -> T.unit_
+        | nil_, M.Mnil -> T.Unit
         | I.App (u_, s'_), M.Mapp (M.Marg (M.Plus, _), mS') ->
             transformConc' (s'_, mS')
         | I.App (u_, s'_), M.Mapp (M.Marg (M.Minus, _), mS') ->
@@ -447,12 +449,14 @@ end) : CONVERTER = struct
     and renameDec f (I.Dec (x, v_)) = I.Dec (x, renameExp f v_)
 
     and renameHead arg__3 arg__4 =
-      begin match (arg__3, arg__4) with f, I.Proj bi -> f bi | f, h_ -> h_
+      begin match (arg__3, arg__4) with
+      | f, I.Proj (bi, i) -> f (bi, i)
+      | f, h_ -> h_
       end
 
     and renameSpine arg__5 arg__6 =
       begin match (arg__5, arg__6) with
-      | f, nil_ -> I.nil_
+      | f, nil_ -> I.Nil
       | f, I.App (u_, s_) -> I.App (renameExp f u_, renameSpine f s_)
       end
 
@@ -466,7 +470,7 @@ end) : CONVERTER = struct
             else makeSubst (n, g_, I.comp (s, I.shift), l_, f)
           end
       in
-      let g'_, f = makeSubst (1, g_, s, l_, function x -> I.Proj x) in
+      let g'_, f = makeSubst (1, g_, s, l_, function x, i -> I.Proj (x, i)) in
       (g_, renameExp f v_)
 
     let rec append = function
@@ -493,7 +497,7 @@ end) : CONVERTER = struct
           with
           | Some (w', pq'_) ->
               traversePos (l_, wmap, projs)
-                ((psi0_, psi_, I.null_), v1_, Some (peel w', pq'_))
+                ((psi0_, psi_, I.Null), v1_, Some (peel w', pq'_))
         end
       | (l_, wmap, projs), ((psi0_, psi_), I.Root (I.Const a, s_), w) ->
           let psi1_ = append (psi0_, psi_) in
@@ -502,7 +506,8 @@ end) : CONVERTER = struct
           let w'', s'' = transformInit (psi'_, l_, (a, s_), w') in
           let _ = TomegaTypeCheck.checkCtx psi'_ in
           Some
-            (w', function p_ -> ((psi'_, s'', p_), transformConc ((a, s_), w)))
+            ( w',
+              ((function p_ -> (psi'_, s'', p_)), transformConc ((a, s_), w)) )
       end
 
     and traversePos arg__9 arg__10 =
@@ -564,17 +569,13 @@ end) : CONVERTER = struct
               end
             | (b :: [], Some (lemma :: []), f_), a -> begin
                 if a = b then
-                  let p_ =
-                    T.Redex (T.Const lemma, T.AppPrg (T.Var n, T.nil_))
-                  in
+                  let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Var n, T.Nil)) in
                   (p_, f_)
                 else lookupbase a
               end
             | (b :: l_, Some (lemma :: lemmas), T.And (f1_, f2_)), a -> begin
                 if a = b then
-                  let p_ =
-                    T.Redex (T.Const lemma, T.AppPrg (T.Var n, T.nil_))
-                  in
+                  let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Var n, T.Nil)) in
                   (p_, f1_)
                 else lookup ((l_, Some lemmas, f2_), a)
               end
@@ -588,7 +589,7 @@ end) : CONVERTER = struct
           in
           let rec apply ((s_, mS), ft_) = applyW ((s_, mS), T.whnfFor ft_)
           and applyW = function
-            | (nil_, M.Mnil), ft'_ -> (T.nil_, T.forSub ft'_)
+            | (nil_, M.Mnil), ft'_ -> (T.Nil, T.forSub ft'_)
             | ( (I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS)),
                 (T.All (d_, f'_), t') ) ->
                 let u'_ = strengthenExp (u_, w1) in
@@ -611,7 +612,7 @@ end) : CONVERTER = struct
           let b'_, _ = strengthenCtx (b_, w1') in
           let n' = n - I.ctxLength b'_ in
           let rec subCtx = function
-            | null_, s -> (I.null_, s)
+            | null_, s -> (I.Null, s)
             | I.Decl (g_, d_), s ->
                 let g'_, s' = subCtx (g_, s) in
                 (I.Decl (g'_, I.decSub (d_, s')), I.dot1 s')
@@ -631,7 +632,7 @@ end) : CONVERTER = struct
           let rec lift = function
             | null_, p_ -> p_
             | I.Decl (g_, d_), p_ ->
-                let bint_, _ = T.deblockify (I.Decl (I.null_, d_)) in
+                let bint_, _ = T.deblockify (I.Decl (I.Null, d_)) in
                 lift (g_, T.New (T.Lam (T.UDec d_, p_)))
           in
           let p'''_ = lift (b'_, p''_) in
@@ -659,14 +660,14 @@ end) : CONVERTER = struct
           let t = T.Dot (T.Prg pat_, T.embedSub z3) in
           Some
             ( w3,
-              function
-              | p ->
-                  ( p_
+              ( (function
+                | p ->
+                    p_
                       (T.Let
                          ( T.PDec (None, f'''_, None, None),
                            p'''_,
-                           T.Case (T.Cases [ (psi2_, t, p) ]) )),
-                    q_ ) )
+                           T.Case (T.Cases [ (psi2_, t, p) ]) ))),
+                q_ ) )
       end
 
     let rec traverse (psi0_, l_, sig_, wmap, projs) =
@@ -674,7 +675,7 @@ end) : CONVERTER = struct
         | [] -> []
         | (g_, v_) :: sig_ -> begin
             TypeCheck.typeCheck
-              (append (T.coerceCtx psi0_, g_), (v_, I.Uni I.type_));
+              (append (T.coerceCtx psi0_, g_), (v_, I.Uni I.Type));
             begin match
               traverseNeg (l_, wmap, projs) ((psi0_, T.embedCtx g_), v_, I.id)
             with
@@ -727,11 +728,11 @@ end) : CONVERTER = struct
               ( g_,
                 n + 1,
                 l_,
-                I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, n), I.nil_)), w),
+                I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, n), I.Nil)), w),
                 sig'_ )
       in
       let rec mediateSub = function
-        | null_ -> (I.null_, I.Shift (I.ctxLength psi0_))
+        | null_ -> (I.Null, I.Shift (I.ctxLength psi0_))
         | I.Decl (g_, d_) ->
             let g0_, s' = mediateSub g_ in
             let d'_ = I.decSub (d_, s') in
@@ -752,7 +753,7 @@ end) : CONVERTER = struct
     let rec staticSig = function
       | psi0_, [] -> []
       | psi0_, I.ConDec (name, _, _, _, v_, type_) :: sig_ ->
-          (I.null_, Whnf.normalize (v_, I.Shift (I.ctxLength psi0_)))
+          (I.Null, Whnf.normalize (v_, I.Shift (I.ctxLength psi0_)))
           :: staticSig (psi0_, sig_)
 
     let rec name = function
@@ -762,7 +763,7 @@ end) : CONVERTER = struct
     let rec convertPrg (l_, projs) =
       let name, f0_ = createIH l_ in
       let d0_ = T.PDec (Some name, f0_, None, None) in
-      let psi0_ = I.Decl (I.null_, d0_) in
+      let psi0_ = I.Decl (I.Null, d0_) in
       let prec_ = function p -> T.Rec (d0_, p) in
       let rec convertWorlds = function
         | a :: [] ->
@@ -843,29 +844,27 @@ end) : CONVERTER = struct
                 f'_ ))
 
     let rec installProjection = function
-      | [], _, f_, Proj -> []
-      | cid :: cids, n, f_, Proj ->
-          let p'_, f'_ = Proj n in
+      | [], _, f_, proj -> []
+      | cid :: cids, n, f_, proj ->
+          let p'_, f'_ = proj n in
           let p_ = T.Lam (T.PDec (None, f_, None, None), p'_) in
-          let f''_ =
-            T.All ((T.PDec (None, f_, None, None), T.explicit_), f'_)
-          in
+          let f''_ = T.All ((T.PDec (None, f_, None, None), T.Explicit), f'_) in
           let name = I.conDecName (I.sgnLookup cid) in
-          let _ = TomegaTypeCheck.checkPrg (I.null_, (p_, f''_)) in
+          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f''_)) in
           let lemma = T.lemmaAdd (T.ValDec ("#" ^ name, p_, f''_)) in
-          lemma :: installProjection (cids, n - 1, f_, Proj)
+          lemma :: installProjection (cids, n - 1, f_, proj)
 
     let rec installSelection = function
       | cid :: [], lemma :: [], f1_, main ->
-          let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Const main, T.nil_)) in
+          let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Const main, T.Nil)) in
           let name = I.conDecName (I.sgnLookup cid) in
-          let _ = TomegaTypeCheck.checkPrg (I.null_, (p_, f1_)) in
+          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f1_)) in
           let lemma' = T.lemmaAdd (T.ValDec (name, p_, f1_)) in
           [ lemma' ]
       | cid :: cids, lemma :: lemmas, T.And (f1_, f2_), main ->
-          let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Const main, T.nil_)) in
+          let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Const main, T.Nil)) in
           let name = I.conDecName (I.sgnLookup cid) in
-          let _ = TomegaTypeCheck.checkPrg (I.null_, (p_, f1_)) in
+          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f1_)) in
           let lemma' = T.lemmaAdd (T.ValDec (name, p_, f1_)) in
           lemma' :: installSelection (cids, lemmas, f2_, main)
 
@@ -874,14 +873,14 @@ end) : CONVERTER = struct
           let f_ = convertFor [ cid ] in
           let p_ = convertPrg ([ cid ], None) in
           let name = I.conDecName (I.sgnLookup cid) in
-          let _ = TomegaTypeCheck.checkPrg (I.null_, (p_, f_)) in
+          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f_)) in
           let _ =
             begin if !Global.chatter >= 4 then
               print "[Redundancy Checker (factoring) ..."
             else ()
             end
           in
-          let factP = Redundant.convert p_ in
+          let factP = Converter__0.Redundant.convert p_ in
           let _ =
             begin if !Global.chatter >= 4 then print "done]\n" else ()
             end
@@ -890,19 +889,19 @@ end) : CONVERTER = struct
           (lemma, [], [])
       | cids ->
           let f_ = convertFor cids in
-          let _ = TomegaTypeCheck.checkFor (I.null_, f_) in
-          let Proj = createProjection (I.null_, 0, f_, T.Var 1) in
-          let projs = installProjection (cids, depthConj f_, f_, Proj) in
+          let _ = TomegaTypeCheck.checkFor (I.Null, f_) in
+          let proj = createProjection (I.Null, 0, f_, T.Var 1) in
+          let projs = installProjection (cids, depthConj f_, f_, proj) in
           let p_ = convertPrg (cids, Some projs) in
           let s = name cids in
-          let _ = TomegaTypeCheck.checkPrg (I.null_, (p_, f_)) in
+          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f_)) in
           let _ =
             begin if !Global.chatter >= 4 then
               print "[Redundancy Checker (factoring) ..."
             else ()
             end
           in
-          let factP = Redundant.convert p_ in
+          let factP = Converter__0.Redundant.convert p_ in
           let _ =
             begin if !Global.chatter >= 4 then print "done]\n" else ()
             end
@@ -912,8 +911,8 @@ end) : CONVERTER = struct
           (lemma, projs, sels)
 
     let rec mkResult = function
-      | 0 -> T.unit_
-      | n -> T.PairExp (I.Root (I.BVar n, I.nil_), mkResult (n - 1))
+      | 0 -> T.Unit
+      | n -> T.PairExp (I.Root (I.BVar n, I.Nil), mkResult (n - 1))
 
     let rec convertGoal (g_, v_) =
       let a = I.targetFam v_ in
@@ -921,12 +920,12 @@ end) : CONVERTER = struct
       let w'_, wmap = transformWorlds ([ a ], w_) in
       let (Some (_, (p'_, q'_))) =
         traversePos ([], wmap, None)
-          ( (I.null_, g_, I.null_),
+          ( (I.Null, g_, I.Null),
             v_,
             Some
               ( I.Shift (I.ctxLength g_),
-                function p_ -> ((I.null_, T.id, p_), mkResult (I.ctxLength g_))
-              ) )
+                ( (function p_ -> (I.Null, T.id, p_)),
+                  mkResult (I.ctxLength g_) ) ) )
       in
       let _, _, p''_ = p'_ q'_ in
       p''_

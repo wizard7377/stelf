@@ -464,16 +464,15 @@ end) : MTPRECURSION = struct
               w,
               f_,
               function
-              | s, de' -> (
+              | s, de' ->
                   let s', v'_, f'_ = sc (s, de') in
                   ( I.dot1 s',
                     (fun v_ ->
-                        v'_
-                          (Abstract.piDepend
-                             ( (Whnf.normalizeDec (d_, s'), I.Meta),
-                               Whnf.normalize (v_, I.id) ))),
-                    (fun f_ -> f'_ (F.All (F.Prim (I.decSub (d_, s')), f_)))
-                  )) )
+                      v'_
+                        (Abstract.piDepend
+                           ( (Whnf.normalizeDec (d_, s'), I.Meta),
+                             Whnf.normalize (v_, I.id) ))),
+                    fun f_ -> f'_ (F.All (F.Prim (I.decSub (d_, s')), f_)) ) )
       | (du, de), (g_, b_), w, F.Ex (I.Dec (name, v_), f_), sc ->
           let s', v'_, f'_ = sc (w, de) in
           let v1_ = I.EClo (v_, s') in
@@ -515,8 +514,7 @@ end) : MTPRECURSION = struct
                 (g_, b_),
                 I.id,
                 F.forSub (frl'_, s),
-                function
-                | s', _ -> (s', (fun v'_ -> v'_), (fun f'_ -> f'_)) )
+                function s', _ -> (s', (fun v'_ -> v'_), fun f'_ -> f'_) )
           in
           let s'' = I.comp (s, s') in
           updateState
@@ -550,7 +548,8 @@ end) : MTPRECURSION = struct
 
     let rec expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
       let _ =
-        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_) else ()
+        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
+        else ()
         end
       in
       let _, s'_ = selectFormula (1, (I.null_, ih_, oh_), s_) in
@@ -558,7 +557,8 @@ end) : MTPRECURSION = struct
 
     let rec apply s_ =
       begin
-        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_) else ()
+        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
+        else ()
         end;
         s_
       end

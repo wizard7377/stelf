@@ -9,7 +9,7 @@ module Worldify (Worldify__0 : sig
   (*! structure IntSyn : INTSYN !*)
   (*! structure Tomega : TOMEGA !*)
   (*! sharing Tomega.IntSyn = IntSyn !*)
-  module WorldSyn : WORLDSYN
+  module WorldSyn : WorldSyn.WORLDSYN
 
   (*! sharing WorldSyn.IntSyn = IntSyn !*)
   (*! sharing WorldSyn.Tomega = Tomega !*)
@@ -31,7 +31,7 @@ module Worldify (Worldify__0 : sig
   module Constraints : CONSTRAINTS
 
   (*! sharing Constraints.IntSyn = IntSyn !*)
-  module Cs_manager : CS_MANAGER
+  module Cs_manager : Cs_manager.CS_MANAGER
 
   (*! sharing Cs_manager.IntSyn = IntSyn !*)
   module Subordinate : SUBORDINATE
@@ -42,10 +42,10 @@ module Worldify (Worldify__0 : sig
   (*! sharing Print.IntSyn = IntSyn !*)
   module Table : TABLE
   module MemoTable : TABLE
-  module IntSet : INTSET
+  module IntSet : Intset.INTSET
 
   (*! structure Paths : PATHS !*)
-  module Origins : ORIGINS
+  module Origins : Origins.ORIGINS
 end) : WORLDIFY = struct
   (*! structure IntSyn = IntSyn !*)
   (*! structure Tomega = Tomega !*)
@@ -53,6 +53,9 @@ end) : WORLDIFY = struct
   module T = Tomega
   module P = Paths
   module F = Print.Formatter
+  module Unify = Worldify__0.Unify
+  module Cs_manager = Worldify__0.Cs_manager
+  module WorldSyn = Worldify__0.WorldSyn
 
   exception Error of string
   exception Error' of P.occ * string
@@ -119,7 +122,7 @@ end) : WORLDIFY = struct
       end
 
     let rec formatD (g_, d_) =
-      F.Hbox [ F.String "{"; Print.formatDec (g_, d_); F.String "}" ]
+      F.hbox [ F.string "{"; Print.formatDec (g_, d_); F.string "}" ]
 
     let rec formatDList = function
       | g_, [], t -> []
@@ -134,28 +137,28 @@ end) : WORLDIFY = struct
 
     let rec wGoalToString ((g_, l_), Seq (_, piDecs, t)) =
       F.makestring_fmt
-        (F.HVbox
+        (F.hVbox
            [
-             F.HVbox (formatDList (g_, l_, I.id));
+             F.hVbox (formatDList (g_, l_, I.id));
              F.break_;
-             F.String "<|";
+             F.string "<|";
              F.break_;
-             F.HVbox (formatDList (g_, piDecs, t));
+             F.hVbox (formatDList (g_, piDecs, t));
            ])
 
     let rec worldToString (g_, Seq (_, piDecs, t)) =
-      F.makestring_fmt (F.HVbox (formatDList (g_, piDecs, t)))
+      F.makestring_fmt (F.hVbox (formatDList (g_, piDecs, t)))
 
     let rec hypsToString (g_, l_) =
-      F.makestring_fmt (F.HVbox (formatDList (g_, l_, I.id)))
+      F.makestring_fmt (F.hVbox (formatDList (g_, l_, I.id)))
 
     let rec mismatchToString (g_, (v1_, s1), (v2_, s2)) =
       F.makestring_fmt
-        (F.HVbox
+        (F.hVbox
            [
              Print.formatExp (g_, I.EClo (v1_, s1));
              F.break_;
-             F.String "<>";
+             F.string "<>";
              F.break_;
              Print.formatExp (g_, I.EClo (v2_, s2));
            ])
@@ -242,7 +245,7 @@ end) : WORLDIFY = struct
       | a, (t, (I.Dec (_, v_) as d_) :: l_) -> begin
           if Subordinate.below (I.targetFam v_, a) then
             I.decSub (d_, t) :: strengthen a (I.dot1 t, l_)
-          else strengthen a (I.Dot (I.undef_, t), l_)
+          else strengthen a (I.Dot (I.Undef, t), l_)
         end
       end
 
@@ -266,7 +269,7 @@ end) : WORLDIFY = struct
       subsumedBlocks a w1_ w2_
 
     let rec eqCtx = function
-      | null_, null_ -> true
+      | I.Null, I.Null -> true
       | I.Decl (g1_, d1_), I.Decl (g2_, d2_) ->
           eqCtx (g1_, g2_) && Conv.convDec ((d1_, I.id), (d2_, I.id))
       | _ -> false
@@ -362,46 +365,43 @@ end) : WORLDIFY = struct
               ( (decUName (g_, I.BDec (None, (c, t))), (v_, I.comp (s, I.shift))),
                 Seq (1, piDecs, I.comp (t, I.shift)),
                 k' )
-          with
-          | Success v_ ->
-              raise
-                (Success
-                   (Whnf.normalize
-                      (I.Pi ((I.BDec (None, (c, t)), I.maybe_), v_), I.id)))
-          | ( (g_, ((I.Pi (((I.Dec (_, v1_) as d_), _), v2_) as v_), s)),
-              (Seq (j, I.Dec (_, v1'_) :: l2'_, t) as l'_),
-              k ) -> begin
-              if Unify.unifiable (g_, (v1_, s), (v1'_, t)) then
-                accR
-                  ( ( g_,
-                      ( v2_,
-                        I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, j), I.nil_)), s)
-                      ) ),
-                    Seq
-                      ( j + 1,
-                        l2'_,
-                        I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, j), I.nil_)), t)
-                      ),
-                    k )
-              else begin
-                Trace.mismatch (g_, (v1_, I.id), (v1'_, t));
-                ()
-              end
-            end
-          | gVs_, Seq (_, [], t), k -> k gVs_
-          | ((g_, (I.Root _, s)) as gVs_), (Seq (_, l'_, t) as r_), k -> begin
-              Trace.missing (g_, r_);
-              ()
-            end
-          | gVs_, Plus (r1, r2), k -> begin
-              Cs_manager.trail (function () -> accR (gVs_, r1, k));
-              accR (gVs_, r2, k)
-            end
-          | gVs_, Star One, k -> k gVs_
-          | gVs_, (Star r' as r), k -> begin
-              Cs_manager.trail (function () -> k gVs_);
-              accR (gVs_, r', function gVs'_ -> accR (gVs'_, r, k))
-            end)
+          with Success v_ ->
+            raise
+              (Success
+                 (Whnf.normalize
+                    (I.Pi ((I.BDec (None, (c, t)), I.Maybe), v_), I.id))))
+      | ( (g_, ((I.Pi (((I.Dec (_, v1_) as d_), _), v2_) as v_), s)),
+          (Seq (j, I.Dec (_, v1'_) :: l2'_, t) as l'_),
+          k ) -> begin
+          if Unify.unifiable (g_, (v1_, s), (v1'_, t)) then
+            accR
+              ( ( g_,
+                  (v2_, I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, j), I.Nil)), s))
+                ),
+                Seq
+                  ( j + 1,
+                    l2'_,
+                    I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, j), I.Nil)), t) ),
+                k )
+          else begin
+            Trace.mismatch (g_, (v1_, I.id), (v1'_, t));
+            ()
+          end
+        end
+      | gVs_, Seq (_, [], t), k -> k gVs_
+      | ((g_, (I.Root _, s)) as gVs_), (Seq (_, l'_, t) as r_), k -> begin
+          Trace.missing (g_, r_);
+          ()
+        end
+      | gVs_, Plus (r1, r2), k -> begin
+          Cs_manager.trail (function () -> accR (gVs_, r1, k));
+          accR (gVs_, r2, k)
+        end
+      | gVs_, Star One, k -> k gVs_
+      | gVs_, (Star r' as r), k -> begin
+          Cs_manager.trail (function () -> k gVs_);
+          accR (gVs_, r', function gVs'_ -> accR (gVs'_, r, k))
+        end
 
     let rec worldifyGoal (g_, v_, (T.Worlds cids as w_), occ) =
       try
@@ -420,11 +420,11 @@ end) : WORLDIFY = struct
           let _ = print "{" in
           let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
           let _ = print "}" in
-          I.Pi ((I.Dec (x, v1_), I.maybe_), w2_)
+          I.Pi ((I.Dec (x, v1_), I.Maybe), w2_)
       | g_, I.Pi (((I.Dec (x, v1_) as d_), no_), v2_), w_, occ ->
           let w1_ = worldifyGoal (g_, v1_, w_, P.label occ) in
           let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
-          I.Pi ((I.Dec (x, w1_), I.no_), w2_)
+          I.Pi ((I.Dec (x, w1_), I.No), w2_)
 
     let rec worldifyConDec w_ (c, I.ConDec (s, m, k, status, v_, l_)) =
       begin
@@ -489,9 +489,9 @@ end) : WORLDIFY = struct
       let _ =
         map
           (function
-            | Condec_ -> begin
+            | condec_ -> begin
                 print "#";
-                checkConDec w_ Condec_
+                checkConDec w_ condec_
               end)
           condecs
       in

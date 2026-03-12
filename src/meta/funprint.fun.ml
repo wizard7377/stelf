@@ -203,8 +203,8 @@ end) : FUNPRINT = struct
         begin match p_ with
         | F.Inx (_, unit_) -> Fmt.hbox (formatTuple' p_)
         | _ ->
-            Fmt.hVbox0
-              1 1 1 ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
+            Fmt.hVbox0 1 1 1
+              ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
         end
       in
       let rec formatSplitArgs (psi_, l_) =
@@ -217,11 +217,8 @@ end) : FUNPRINT = struct
         in
         begin if List.length l_ = 1 then Fmt.hbox (formatSplitArgs' l_)
         else
-          Fmt.hVbox0
-            1
-              1
-              1
-              ((Fmt.string "(" :: formatSplitArgs' l_) @ [ Fmt.string ")" ])
+          Fmt.hVbox0 1 1 1
+            ((Fmt.string "(" :: formatSplitArgs' l_) @ [ Fmt.string ")" ])
         end
       in
       let rec frontToExp = function
@@ -294,22 +291,20 @@ end) : FUNPRINT = struct
         | psi_, F.Let (ds_, F.Case (F.Opts ((psi1_, s1, p1_) :: []))), fmts ->
             let psi1'_ = psiName (psi1_, s1, psi_, numberOfSplits ds_) in
             let fmt = formatDecs (0, psi_, ds_, (psi1'_, s1)) in
-            Fmt.vbox0
-              0
-                1
-                [
-                  Fmt.string "let";
-                  Fmt.break_;
-                  Fmt.spaces 2;
-                  Fmt.vbox0 0 1 (fmts @ [ fmt ]);
-                  Fmt.break_;
-                  Fmt.string "in";
-                  Fmt.break_;
-                  Fmt.spaces 2;
-                  formatPro3 (psi1'_, p1_);
-                  Fmt.break_;
-                  Fmt.string "end";
-                ]
+            Fmt.vbox0 0 1
+              [
+                Fmt.string "let";
+                Fmt.break_;
+                Fmt.spaces 2;
+                Fmt.vbox0 0 1 (fmts @ [ fmt ]);
+                Fmt.break_;
+                Fmt.string "in";
+                Fmt.break_;
+                Fmt.spaces 2;
+                formatPro3 (psi1'_, p1_);
+                Fmt.break_;
+                Fmt.string "end";
+              ]
       and formatPro3 = function
         | psi_, (unit_ as p_) -> formatTuple (psi_, p_)
         | psi_, (F.Inx _ as p_) -> formatTuple (psi_, p_)
@@ -342,36 +337,30 @@ end) : FUNPRINT = struct
               end
             in
             [
-              Fmt.hVbox0
-                1
-                  5
-                  1
-                  [
-                    Fmt.string fhead;
-                    formatHead (index, psi''_, s, psi_);
-                    Fmt.space;
-                    Fmt.string "=";
-                    Fmt.break_;
-                    formatPro3 (psi''_, p_);
-                  ];
+              Fmt.hVbox0 1 5 1
+                [
+                  Fmt.string fhead;
+                  formatHead (index, psi''_, s, psi_);
+                  Fmt.space;
+                  Fmt.string "=";
+                  Fmt.break_;
+                  formatPro3 (psi''_, p_);
+                ];
               Fmt.break_;
             ]
         | index, psi_, (psi'_, s, p_) :: o_ ->
             let psi''_ = psiName (psi'_, s, psi_, 0) in
             formatPro2 (index, psi_, o_)
             @ [
-                Fmt.hVbox0
-                  1
-                    5
-                    1
-                    [
-                      Fmt.string "  |";
-                      formatHead (index, psi''_, s, psi_);
-                      Fmt.space;
-                      Fmt.string "=";
-                      Fmt.break_;
-                      formatPro3 (psi''_, p_);
-                    ];
+                Fmt.hVbox0 1 5 1
+                  [
+                    Fmt.string "  |";
+                    formatHead (index, psi''_, s, psi_);
+                    Fmt.space;
+                    Fmt.string "=";
+                    Fmt.break_;
+                    formatPro3 (psi''_, p_);
+                  ];
                 Fmt.break_;
               ]
       in
@@ -391,14 +380,12 @@ end) : FUNPRINT = struct
       end
 
     let rec formatLemmaDec (F.LemmaDec (names, p_, f_)) =
-      Fmt.vbox0
-        0
-          1
-          [
-            formatFor (I.null_, f_) names;
-            Fmt.break_;
-            formatPro (I.null_, p_) names;
-          ]
+      Fmt.vbox0 0 1
+        [
+          formatFor (I.null_, f_) names;
+          Fmt.break_;
+          formatPro (I.null_, p_) names;
+        ]
 
     let rec forToString args_ names = Fmt.makestring_fmt (formatFor args_ names)
     let rec proToString args_ names = Fmt.makestring_fmt (formatPro args_ names)

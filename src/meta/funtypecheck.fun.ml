@@ -363,8 +363,7 @@ end) : FUNTYPECHECK = struct
               TypeCheck.checkDec (g_, (d_, I.id));
               isFor (I.Decl (g_, d_), f_)
             end
-          with
-          | TypeCheck.Error msg -> raise (Error msg))
+          with TypeCheck.Error msg -> raise (Error msg))
       | g_, F.All (F.Block (F.CtxBlock (_, g1_)), f_) ->
           isForBlock (g_, F.ctxToList g1_, f_)
       | g_, F.Ex (d_, f_) -> (
@@ -373,8 +372,7 @@ end) : FUNTYPECHECK = struct
               TypeCheck.checkDec (g_, (d_, I.id));
               isFor (I.Decl (g_, d_), f_)
             end
-          with
-          | TypeCheck.Error msg -> raise (Error msg))
+          with TypeCheck.Error msg -> raise (Error msg))
       | g_, true_ -> ()
       | g_, F.And (f1_, f2_) -> begin
           isFor (g_, f1_);

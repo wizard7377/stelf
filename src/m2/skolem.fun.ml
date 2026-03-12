@@ -31,6 +31,7 @@ module Skolem (Skolem__0 : sig
   module Names : NAMES
 end) : SKOLEM = struct
   open Skolem__0
+
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 

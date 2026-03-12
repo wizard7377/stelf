@@ -6,8 +6,8 @@ module Opsem(Opsem__0: sig
                        module Whnf : WHNF
                        module Abstract : ABSTRACT
                        module Subordinate : SUBORDINATE
-                       module TomegaTypeCheck : TOMEGATYPECHECK
-                       module TomegaPrint : TOMEGAPRINT
+                       module TomegaTypeCheck : Tomega_typecheck.TOMEGATYPECHECK
+                       module TomegaPrint : Tomegaprint.TOMEGAPRINT
                        module Unify : UNIFY
                        end) : OPSEM
   =
@@ -16,6 +16,8 @@ module Opsem(Opsem__0: sig
     module I = IntSyn;;
     module S = Subordinate;;
     module A = Abstract;;
+    module Unify = Opsem__0.Unify;;
+    module TomegaPrint = Opsem__0.TomegaPrint;;
     exception Error of string ;;
     exception Abort ;;
     (*  local -- removed ABP 1/19/03 *);;
@@ -39,7 +41,7 @@ module Opsem(Opsem__0: sig
       matchVal (psi_, (p1_, T.id), T.normalizePrg (p2_, T.id))
     and matchVal =
       function 
-               | (psi_, (unit_, _), unit_) -> ()
+               | (psi_, (T.Unit, _), T.Unit) -> ()
                | (psi_, (T.PairPrg (p1_, p1'_), t1), T.PairPrg (p2_, p2'_))
                    -> begin
                         matchVal (psi_, (p1_, t1), p2_);
@@ -86,11 +88,11 @@ module Opsem(Opsem__0: sig
        and there are some embedded under PClo... *);;
     let rec append =
       function 
-               | (g1_, null_) -> g1_
+               | (g1_, I.Null) -> g1_
                | (g1_, I.Decl (g2_, d_)) -> (I.Decl (append (g1_, g2_), d_))
     and raisePrg =
       function 
-               | (psi_, g_, unit_) -> T.unit_
+               | (psi_, g_, T.Unit) -> T.Unit
                | (psi_, g_, T.PairPrg (p1_, p2_))
                    -> let p1'_ = raisePrg (psi_, g_, p1_)
                         in let p2'_ = raisePrg (psi_, g_, p2_)
@@ -113,7 +115,7 @@ module Opsem(Opsem__0: sig
    *)(* G  |- w  : G'    *)(* G' |- iw : G     *)(* Psi0, G' |- B'' ctx *)
     and evalPrg =
       function 
-               | (psi_, (unit_, t)) -> T.unit_
+               | (psi_, (T.Unit, t)) -> T.Unit
                | (psi_, (T.PairExp (m_, p_), t))
                    -> (T.PairExp
                        ((I.EClo (m_, T.coerceSub t)),
@@ -169,7 +171,7 @@ module Opsem(Opsem__0: sig
                                         (p_, T.dot1 t))
                                        in let b_ =
                                             T.coerceCtx
-                                            ((I.Decl (I.null_, d'''_)))
+                                            ((I.Decl (I.Null, d'''_)))
                                             in let (g_, t') = T.deblockify b_
                                                  in let newP =
                                                       raisePrg
@@ -182,29 +184,29 @@ module Opsem(Opsem__0: sig
                | (psi_, (T.Choose p_, t))
                    -> let rec substToSpine' =
                         function 
-                                 | (I.Shift n, null_, T) -> T
-                                 | (I.Shift n, (I.Decl _ as g_), T)
+                                 | (I.Shift n, I.Null, t_acc) -> t_acc
+                                 | (I.Shift n, (I.Decl _ as g_), t_acc)
                                      -> substToSpine'
                                         ((I.Dot
                                           ((I.Idx (n + 1)),
                                            (I.Shift (n + 1)))),
-                                         g_, T)
-                                 | (I.Dot (I.Exp u_, s), I.Decl (g_, v_), T)
+                                         g_, t_acc)
+                                 | (I.Dot (I.Exp u_, s), I.Decl (g_, v_), t_acc)
                                      -> substToSpine'
-                                        (s, g_, (T.AppExp (u_, T)))
+                                        (s, g_, (T.AppExp (u_, t_acc)))
                                  | (I.Dot (I.Idx n, s), I.Decl
-                                    (g_, I.Dec (_, v_)), T)
+                                    (g_, I.Dec (_, v_)), t_acc)
                                      -> let (us_, _) =
                                           Whnf.whnfEta
-                                          (((I.Root ((I.BVar n), I.nil_)),
+                                          (((I.Root ((I.BVar n), I.Nil)),
                                             I.id),
                                            (v_, I.id))
                                           in substToSpine'
                                              (s, g_,
-                                              (T.AppExp ((I.EClo us_), T)))(* Eta-expand *)
+                                               (let (u_eta, s_eta) = us_ in T.AppExp ((I.EClo (u_eta, s_eta)), t_acc)))(* Eta-expand *)
                         in let rec choose =
                              function 
-                                      | (k, null_) -> raise Abort
+                                      | (k, I.Null) -> raise Abort
                                       | (k, I.Decl (psi'_, T.PDec _))
                                           -> choose (k + 1, psi'_)
                                       | (k, I.Decl (psi'_, T.UDec (I.Dec _)))
@@ -218,7 +220,7 @@ module Opsem(Opsem__0: sig
                                                     substToSpine'
                                                     (s1, gsome_,
                                                      (T.AppBlock
-                                                      ((I.Bidx k), T.nil_)))
+                                                      ((I.Bidx k), T.Nil)))
                                                     in try evalPrg
                                                            (psi_,
                                                             ((T.Redex
@@ -245,20 +247,20 @@ module Opsem(Opsem__0: sig
                | (psi_, t1, T.Cases (((psi'_, t2, p_) :: c_)))
                    -> let t = createVarSub (psi_, psi'_)
                         in let t' = T.comp (t2, t)
-                             in try begin
+                             in (try begin
                                       matchSub (psi_, t1, t');
                                       evalPrg
                                       (psi_, (p_, t) (*T.normalizeSub*))
                                       end
                                 with 
                                      | NoMatch
-                                         -> match_ (psi_, t1, (T.Cases c_))
+                                         -> match_ (psi_, t1, (T.Cases c_)))
                              (* val I.Null = Psi *)(* Psi |- t : Psi' *)(* Psi' |- t2 . shift(k) : Psi'' *)(* Note that since we are missing the shift(k), it is possible
            * that t' has extra DOTs in there that weren't removed *)
                | (psi_, t1, T.Cases []) -> raise Abort
     and createVarSub =
       function 
-               | (psi_, null_) -> (T.Shift (I.ctxLength psi_))
+               | (psi_, I.Null) -> (T.Shift (I.ctxLength psi_))
                | (psi_,
                   (I.Decl (psi'_, T.PDec (name, f_, None, None)) as psi''_))
                    -> let t = createVarSub (psi_, psi'_)
@@ -305,7 +307,7 @@ module Opsem(Opsem__0: sig
                         matchSub (psi_, t1, t2);
                         try Unify.unify
                             (T.coerceCtx psi_, (u1_, I.id),
-                             ((I.Root ((I.BVar k), I.nil_)), I.id))
+                             ((I.Root ((I.BVar k), I.Nil)), I.id))
                         with 
                              | Unify.Unify _ -> raise NoMatch
                         
@@ -315,7 +317,7 @@ module Opsem(Opsem__0: sig
                         matchSub (psi_, t1, t2);
                         try Unify.unify
                             (T.coerceCtx psi_,
-                             ((I.Root ((I.BVar k), I.nil_)), I.id),
+                             ((I.Root ((I.BVar k), I.Nil)), I.id),
                              (u2_, I.id))
                         with 
                              | Unify.Unify _ -> raise NoMatch
@@ -351,7 +353,7 @@ module Opsem(Opsem__0: sig
                              in matchSub (psi_, t1, t2)(* By Invariant *)
     and evalRedex =
       function 
-               | (psi_, v_, (nil_, _)) -> v_
+               | (psi_, v_, (T.Nil, _)) -> v_
                | (psi_, v_, (T.SClo (s_, t1), t2))
                    -> evalRedex (psi_, v_, (s_, T.comp (t1, t2)))
                | (psi_, T.Lam (T.UDec (I.Dec (_, a_)), p'_),
@@ -451,7 +453,7 @@ module Opsem(Opsem__0: sig
     *);;
     let rec topLevel =
       function 
-               | (psi_, d, (unit_, t)) -> ()
+               | (psi_, d, (T.Unit, t)) -> ()
                | (psi_, d, (T.Let (d'_, p1_, T.Case cs_), t))
                    -> let rec printLF arg__1 arg__2 =
                         begin
@@ -527,8 +529,8 @@ module Opsem(Opsem__0: sig
                                        in v'_(* function definition *)(* new declaration *)(* lf value definition *);;
     (* in -- removed local *);;
     let evalPrg = function 
-                           | p_ -> evalPrg (I.null_, (p_, T.id));;
+                           | p_ -> evalPrg (I.Null, (p_, T.id));;
     let topLevel = function 
-                            | p_ -> topLevel (I.null_, 0, (p_, T.id));;
+                            | p_ -> topLevel (I.Null, 0, (p_, T.id));;
     end;;
 (* end -- removed local *);;
