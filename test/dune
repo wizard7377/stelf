@@ -1,6 +1,15 @@
-; (include mlton_regression.sources.dune)
-(include sources.dune)
-(test 
+; (include sources.dune)
+
+(test
  (name regression)
- (libraries twelf basis alcotest)
- (flags (:standard -w -A -open Basis)))
+ (libraries twelf alcotest basis)
+ (deps
+  regression.txt
+  (source_tree ../examples)
+  (source_tree ../examples_clp))
+ (action
+  (chdir
+   %{workspace_root}/test
+   (run %{exe:regression.exe} regression.txt)))
+ (flags
+  (:standard -w -A -open Basis)))

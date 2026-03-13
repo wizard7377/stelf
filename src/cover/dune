@@ -1,4 +1,4 @@
-(include sources.dune)
+; (include sources.dune)
 
 (library
  (name cover)
@@ -24,5 +24,79 @@
   unique
   basis)
  (flags
-  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Paths -open Paths.Paths_ -open Table -open Table.Table_ -open Formatter -open Formatter.Formatter_ -open Print -open Print.Print_ -open Subordinate -open Subordinate.Subordinate_ -open Modes -open Modes.Modes_ -open Thm -open Thm.Thm_ -open Terminate -open Terminate.Terminate_ -open Index -open Index.Index_ -open Solvers -open Solvers.Solvers_ -open Worldcheck -open Worldcheck.Worldcheck_ -open Typecheck -open Typecheck.Typecheck_ -open Timing -open Timing.Timing_ -open Unique -open Unique.Unique_))
- (wrapped true))
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global
+   -open
+   Global.Global_
+   -open
+   Lambda
+   -open
+   Lambda.Lambda_
+   -open
+   Names
+   -open
+   Names.Names_
+   -open
+   Paths
+   -open
+   Paths.Paths_
+   -open
+   Table
+   -open
+   Table.Table_
+   -open
+   Formatter
+   -open
+   Formatter.Formatter_
+   -open
+   Print
+   -open
+   Print.Print_
+   -open
+   Subordinate
+   -open
+   Subordinate.Subordinate_
+   -open
+   Modes
+   -open
+   Modes.Modes_
+   -open
+   Thm
+   -open
+   Thm.Thm_
+   -open
+   Terminate
+   -open
+   Terminate.Terminate_
+   -open
+   Index
+   -open
+   Index.Index_
+   -open
+   Solvers
+   -open
+   Solvers.Solvers_
+   -open
+   Worldcheck
+   -open
+   Worldcheck.Worldcheck_
+   -open
+   Typecheck
+   -open
+   Typecheck.Typecheck_
+   -open
+   Timing
+   -open
+   Timing.Timing_
+   -open
+   Unique
+   -open
+   Unique.Unique_))
+ (wrapped true)
+ (preprocess (staged_pps ppx_import ppx_deriving.show))
+)

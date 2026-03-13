@@ -22,7 +22,11 @@
  (name twelf)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml basis)
+ (depends
+   ocaml 
+   basis
+   lwt
+ )
  (tags
   ("add topics" "to describe" your project)))
 

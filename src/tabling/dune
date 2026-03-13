@@ -1,4 +1,4 @@
-(include sources.dune)
+; (include sources.dune)
 
 (library
  (name tabling)
@@ -6,5 +6,33 @@
  (modules tabledsyn tabled)
  (libraries table lambda print names paths index basis)
  (flags
-  (:standard -w -A -open Basis -open Table -open Table.Table_ -open Lambda -open Lambda.Lambda_ -open Print -open Print.Print_ -open Names -open Names.Names_ -open Paths -open Paths.Paths_ -open Index -open Index.Index_))
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Table
+   -open
+   Table.Table_
+   -open
+   Lambda
+   -open
+   Lambda.Lambda_
+   -open
+   Print
+   -open
+   Print.Print_
+   -open
+   Names
+   -open
+   Names.Names_
+   -open
+   Paths
+   -open
+   Paths.Paths_
+   -open
+   Index
+   -open
+   Index.Index_))
  (wrapped true))

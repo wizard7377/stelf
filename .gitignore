@@ -388,3 +388,6 @@ deps_verbose.svg
 !examples-clp/**/*.thm
 !test/**/*.thm
 .github/agents/ocaml-doc-converter.agent.md
+bin/dune~
+bin/main.ml~
+bin_old

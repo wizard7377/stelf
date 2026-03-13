@@ -1,4 +1,4 @@
-(include sources.dune)
+; (include sources.dune)
 
 (library
  (name subordinate)
@@ -6,5 +6,25 @@
  (modules intset subordinate_)
  (libraries global table lambda names basis)
  (flags
-  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Table -open Table.Table_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_))
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global
+   -open
+   Global.Global_
+   -open
+   Table
+   -open
+   Table.Table_
+   -open
+   Lambda
+   -open
+   Lambda.Lambda_
+   -open
+   Names
+   -open
+   Names.Names_))
  (wrapped true))

@@ -1,4 +1,4 @@
-(include sources.dune)
+; (include sources.dune)
 
 (library
  (name compile)
@@ -17,5 +17,49 @@
   subordinate
   basis)
  (flags
-  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Table -open Table.Table_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Print -open Print.Print_ -open Formatter -open Formatter.Formatter_ -open Index -open Index.Index_ -open Typecheck -open Typecheck.Typecheck_ -open Solvers -open Solvers.Solvers_ -open Subordinate -open Subordinate.Subordinate_))
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global
+   -open
+   Global.Global_
+   -open
+   Table
+   -open
+   Table.Table_
+   -open
+   Lambda
+   -open
+   Lambda.Lambda_
+   -open
+   Names
+   -open
+   Names.Names_
+   -open
+   Print
+   -open
+   Print.Print_
+   -open
+   Formatter
+   -open
+   Formatter.Formatter_
+   -open
+   Index
+   -open
+   Index.Index_
+   -open
+   Typecheck
+   -open
+   Typecheck.Typecheck_
+   -open
+   Solvers
+   -open
+   Solvers.Solvers_
+   -open
+   Subordinate
+   -open
+   Subordinate.Subordinate_))
  (wrapped true))

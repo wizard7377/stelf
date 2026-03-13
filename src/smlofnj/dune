@@ -1,4 +1,3 @@
-
 (library
  (name smlofnj)
  (public_name twelf.smlofnj)

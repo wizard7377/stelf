@@ -1,4 +1,4 @@
-(include sources.dune)
+; (include sources.dune)
 
 (library
  (name solvers)
@@ -26,5 +26,45 @@
   formatter
   basis)
  (flags
-  (:standard -w -A -open Basis -open Trail -open Trail.Trail_ -open Global -open Global.Global_ -open Domains -open Domains.Domains_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Modes -open Modes.Modes_ -open Table -open Table.Table_ -open Print -open Print.Print_ -open Formatter -open Formatter.Formatter_))
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Trail
+   -open
+   Trail.Trail_
+   -open
+   Global
+   -open
+   Global.Global_
+   -open
+   Domains
+   -open
+   Domains.Domains_
+   -open
+   Lambda
+   -open
+   Lambda.Lambda_
+   -open
+   Names
+   -open
+   Names.Names_
+   -open
+   Modes
+   -open
+   Modes.Modes_
+   -open
+   Table
+   -open
+   Table.Table_
+   -open
+   Print
+   -open
+   Print.Print_
+   -open
+   Formatter
+   -open
+   Formatter.Formatter_))
  (wrapped true))

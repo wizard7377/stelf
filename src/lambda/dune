@@ -1,4 +1,4 @@
-(include sources.dune)
+; (include sources.dune)
 
 (library
  (name lambda)
@@ -19,5 +19,21 @@
   lambda_)
  (libraries global trail table basis)
  (flags
-  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Trail -open Trail.Trail_ -open Table -open Table.Table_))
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global
+   -open
+   Global.Global_
+   -open
+   Trail
+   -open
+   Trail.Trail_
+   -open
+   Table
+   -open
+   Table.Table_))
  (wrapped true))

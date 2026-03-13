@@ -1,4 +1,4 @@
-(include sources.dune)
+; (include sources.dune)
 
 (library
  (name thm)
@@ -6,5 +6,35 @@
  (modules thmsyn thmprint thm_)
  (libraries global lambda names formatter modes paths tabling basis)
  (flags
-  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Formatter -open Formatter.Formatter_ -open Modes -open Modes.Modes_ -open Paths -open Paths.Paths_ -open Tabling))
+  (:standard
+   -w
+   -A
+   -open
+   Basis
+   -open
+   Global
+   -open
+   Global.Global_
+   -open
+   Lambda
+   -open
+   Lambda.Lambda_
+   -open
+   Names
+   -open
+   Names.Names_
+   -open
+   Formatter
+   -open
+   Formatter.Formatter_
+   -open
+   Modes
+   -open
+   Modes.Modes_
+   -open
+   Paths
+   -open
+   Paths.Paths_
+   -open
+   Tabling))
  (wrapped true))

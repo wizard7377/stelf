@@ -1,0 +1,5 @@
+(executable
+ (name main)
+ (public_name twelf.main)
+ (modules main)
+ (libraries twelf))
