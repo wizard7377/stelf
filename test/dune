@@ -4,7 +4,7 @@
  (name mlton_regression)
  (public_name twelf.mlton_regression)
  (modules regression runquiet)
- (libraries twelf twelf_core_mlton basis)
+ (libraries frontend basis)
  (flags
   (:standard -w -A -open Basis))
  (wrapped false))

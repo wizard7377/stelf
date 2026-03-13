@@ -5,7 +5,7 @@ open! Basis
 (* Author: Robert J. Simmons *)
 module RegressionTest = struct
   open! struct
-    let _ = Twelf.chatter := 0
+    let _ = Frontend_.Twelf.chatter := 0
     let errors = ref 0
 
     let rec reportError file =
@@ -17,25 +17,25 @@ module RegressionTest = struct
 
   let rec test file =
     let _ = print ("Test:        " ^ file) in
-    let stat = try Twelf.make file with _ -> Twelf.abort_ in
+    let stat = try Frontend_.Twelf.make file with _ -> Frontend_.Twelf.Abort in
     begin match stat with
-    | ok_ -> Twelf.ok_
-    | abort_ -> begin
+    | Frontend_.Twelf.Ok -> Frontend_.Twelf.Ok
+    | Frontend_.Twelf.Abort -> begin
         reportError file;
-        Twelf.abort_
+        Frontend_.Twelf.Abort
       end
     end
 
   let rec testUnsafe file =
     let _ = print ("Test Unsafe: " ^ file) in
-    let _ = Twelf.unsafe := true in
-    let stat = try Twelf.make file with e -> Twelf.abort_ in
-    let _ = Twelf.unsafe := false in
+    let _ = Frontend_.Twelf.unsafe := true in
+    let stat = try Frontend_.Twelf.make file with e -> Frontend_.Twelf.Abort in
+    let _ = Frontend_.Twelf.unsafe := false in
     begin match stat with
-    | ok_ -> Twelf.ok_
-    | abort_ -> begin
+    | Frontend_.Twelf.Ok -> Frontend_.Twelf.Ok
+    | Frontend_.Twelf.Abort -> begin
         reportError file;
-        Twelf.abort_
+        Frontend_.Twelf.Abort
       end
     end
 
@@ -80,13 +80,12 @@ module RegressionTest = struct
     let rec getstatus (status, msg) =
       begin match status with
       | None -> ()
-      | Some ok_ -> print ("..." ^ msg)
-      | Some abort_ ->
-          print
-            begin
-              "...ABORT!\n";
-              raise Aborted
-            end
+      | Some Frontend_.Twelf.Ok -> print ("..." ^ msg)
+      | Some Frontend_.Twelf.Abort ->
+          begin
+            print "...ABORT!\n";
+            raise Aborted
+          end
       end
     in
     let rec readfile () =
@@ -98,11 +97,11 @@ module RegressionTest = struct
       | Some s -> (
           try
             begin
-              Twelf.doubleCheck := false;
+              Frontend_.Twelf.doubleCheck := false;
               begin
                 getstatus (runline s, "OK.\n");
                 begin
-                  Twelf.doubleCheck := true;
+                  Frontend_.Twelf.doubleCheck := true;
                   begin
                     getstatus (runline s, "Double checked.\n");
                     readfile ()

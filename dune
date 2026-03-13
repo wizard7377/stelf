@@ -3,7 +3,8 @@
 (library
  (name main)
  (public_name twelf.main)
+ (modules main)
  (libraries frontend basis)
  (flags
-  (:standard -w -A -open Basis -open Frontend))
+  (:standard -w -A -open Basis -open Frontend_))
  (wrapped false))

@@ -17,6 +17,10 @@ structure Parsing =
   Parsing (structure Stream' = Stream
 	   structure Lexer' = Lexer);
 *)
+(* Re-export module type before Twelf name shadowing. *)
+module type LEXER = Lexer.LEXER
+module type TWELF = Twelf.TWELF
+
 module ReconTerm = Recon_term.ReconTerm (struct
   (*! structure IntSyn' = IntSyn !*)
   module Names = Names

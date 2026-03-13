@@ -1,7 +1,8 @@
 open! Basis
 
-module SigINT : SIGINT = struct
-  let rec interruptLoop (loop : unit -> unit) =
+module SigINT : Sigint.SIGINT = struct 
+  (* TODO *)
+  (* let rec interruptLoop (loop : unit -> unit) =
     begin
       SMLofNJ.Cont.callcc (function k ->
           begin
@@ -17,5 +18,8 @@ module SigINT : SIGINT = struct
           end);
       loop ()
     end
+    *)
+  let rec interruptLoop (loop : unit -> unit) =
+    loop ()
 end
 (* structure SigINT *)

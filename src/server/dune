@@ -4,7 +4,7 @@
  (name server)
  (public_name twelf.server)
  (modules sigint mlton_thread sigint_mlton sigint_smlnj server_)
- (libraries timing frontend basis)
+ (libraries timing frontend basis smlofnj)
  (flags
-  (:standard -w -A -open Basis -open Timing_ -open Frontend_))
+  (:standard -w -A -open Basis -open Timing_ -open Frontend_ -open Smlofnj))
  (wrapped false))
