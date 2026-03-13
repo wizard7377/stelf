@@ -19,5 +19,5 @@
   lambda_)
  (libraries global trail table basis)
  (flags
-  (:standard -w -A -open Basis -open Global_ -open Trail_ -open Table_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Trail -open Trail.Trail_ -open Table -open Table.Table_))
+ (wrapped true))

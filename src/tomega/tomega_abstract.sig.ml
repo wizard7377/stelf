@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 (* Abstraction mechanisms form programs and formulas *)
 (* Author: Carsten Schuermann *)

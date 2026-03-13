@@ -17,29 +17,5 @@
   subordinate
   basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Global_
-   -open
-   Table_
-   -open
-   Lambda_
-   -open
-   Names_
-   -open
-   Print_
-   -open
-   Formatter_
-   -open
-   Index_
-   -open
-   Typecheck_
-   -open
-   Solvers_
-   -open
-   Subordinate_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Table -open Table.Table_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Print -open Print.Print_ -open Formatter -open Formatter.Formatter_ -open Index -open Index.Index_ -open Typecheck -open Typecheck.Typecheck_ -open Solvers -open Solvers.Solvers_ -open Subordinate -open Subordinate.Subordinate_))
+ (wrapped true))

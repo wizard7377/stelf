@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 module type REDUNDANT = sig
   exception Error of string

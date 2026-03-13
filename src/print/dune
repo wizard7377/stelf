@@ -13,5 +13,5 @@
   print_omdoc)
  (libraries lambda names formatter basis)
  (flags
-  (:standard -w -A -open Basis -open Lambda_ -open Names_ -open Formatter_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Formatter -open Formatter.Formatter_))
+ (wrapped true))

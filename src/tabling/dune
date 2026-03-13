@@ -6,21 +6,5 @@
  (modules tabledsyn tabled)
  (libraries table lambda print names paths index basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Table_
-   -open
-   Lambda_
-   -open
-   Print_
-   -open
-   Names_
-   -open
-   Paths_
-   -open
-   Index_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Table -open Table.Table_ -open Lambda -open Lambda.Lambda_ -open Print -open Print.Print_ -open Names -open Names.Names_ -open Paths -open Paths.Paths_ -open Index -open Index.Index_))
+ (wrapped true))

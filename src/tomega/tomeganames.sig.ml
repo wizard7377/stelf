@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 (* Naming *)
 (* Author: Carsten Schuermann *)

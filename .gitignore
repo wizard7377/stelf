@@ -382,3 +382,9 @@ TSWLatexianTemp*
 deps.dot
 deps_verb.dot
 deps_verbose.svg
+
+# Twelf .thm files are theorem declarations (not LaTeX amsthm output)
+!examples/**/*.thm
+!examples-clp/**/*.thm
+!test/**/*.thm
+.github/agents/ocaml-doc-converter.agent.md

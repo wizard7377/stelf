@@ -6,5 +6,5 @@
  (modules syntax strict sgn reductio compress_ rep)
  (libraries global lambda basis)
  (flags
-  (:standard -w -A -open Basis -open Global_ -open Lambda_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Lambda -open Lambda.Lambda_))
+ (wrapped true))

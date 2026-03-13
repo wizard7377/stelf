@@ -6,5 +6,5 @@
  (modules sigint mlton_thread sigint_mlton sigint_smlnj server_)
  (libraries timing frontend basis smlofnj)
  (flags
-  (:standard -w -A -open Basis -open Timing_ -open Frontend_ -open Smlofnj))
- (wrapped false))
+  (:standard -w -A -open Basis -open Timing -open Timing.Timing_ -open Frontend -open Frontend.Frontend_ -open Smlofnj))
+ (wrapped true))

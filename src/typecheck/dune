@@ -6,17 +6,5 @@
  (modules typecheck_ strict)
  (libraries lambda print paths names basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Lambda_
-   -open
-   Print_
-   -open
-   Paths_
-   -open
-   Names_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Lambda -open Lambda.Lambda_ -open Print -open Print.Print_ -open Paths -open Paths.Paths_ -open Names -open Names.Names_))
+ (wrapped true))

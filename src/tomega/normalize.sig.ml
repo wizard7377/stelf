@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 (* Normalizer for Delphin meta level *)
 (* Author: Carsten Schuermann *)

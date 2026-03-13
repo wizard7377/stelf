@@ -1,5 +1,5 @@
 open! Basis
-open Table_instances
+open Table.Table_instances
 
 module Order = MakeOrder (struct
   (*! structure IntSyn' = IntSyn !*) module Table = IntRedBlackTree

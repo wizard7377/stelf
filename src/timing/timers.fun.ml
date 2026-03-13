@@ -1,4 +1,4 @@
-open! Timing
+open! Timing_
 open! Basis
 
 (* Timers collecting statistics about Twelf *)

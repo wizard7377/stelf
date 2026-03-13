@@ -41,45 +41,5 @@
   solvers
   basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Stream_
-   -open
-   Global_
-   -open
-   Lambda_
-   -open
-   Names_
-   -open
-   Modes_
-   -open
-   Paths_
-   -open
-   Formatter_
-   -open
-   Print_
-   -open
-   Typecheck_
-   -open
-   Terminate_
-   -open
-   Index_
-   -open
-   Thm_
-   -open
-   Opsem_
-   -open
-   Compile_
-   -open
-   Subordinate_
-   -open
-   Table_
-   -open
-   Timing_
-   -open
-   Solvers_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Stream -open Stream.Stream_ -open Global -open Global.Global_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Modes -open Modes.Modes_ -open Paths -open Paths.Paths_ -open Formatter -open Formatter.Formatter_ -open Print -open Print.Print_ -open Typecheck -open Typecheck.Typecheck_ -open Terminate -open Terminate.Terminate_ -open Index -open Index.Index_ -open Thm -open Thm.Thm_ -open Opsem -open Opsem.Opsem_ -open Compile -open Compile.Compile_ -open Subordinate -open Subordinate.Subordinate_ -open Table -open Table.Table_ -open Timing -open Timing.Timing_ -open Solvers -open Solvers.Solvers_))
+ (wrapped true))

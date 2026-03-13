@@ -1,5 +1,6 @@
 open! Basis
 open Timing_
+module Timing = Timing_.Timing
 
 (* Timers collecting statistics about Twelf *)
 (* Author: Frank Pfenning *)

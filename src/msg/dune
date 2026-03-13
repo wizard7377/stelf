@@ -7,4 +7,4 @@
  (libraries basis)
  (flags
   (:standard -w -A -open Basis))
- (wrapped false))
+ (wrapped true))

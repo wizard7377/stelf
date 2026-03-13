@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 (* Printing of functional proof terms *)
 (* Author: Carsten Schuermann *)

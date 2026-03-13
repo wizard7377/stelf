@@ -1,10 +1,6 @@
-(include mlton_regression.sources.dune)
-
-(library
- (name mlton_regression)
- (public_name twelf.mlton_regression)
- (modules regression runquiet)
- (libraries frontend basis)
- (flags
-  (:standard -w -A -open Basis))
- (wrapped false))
+; (include mlton_regression.sources.dune)
+(include sources.dune)
+(test 
+ (name regression)
+ (libraries twelf basis alcotest)
+ (flags (:standard -w -A -open Basis)))

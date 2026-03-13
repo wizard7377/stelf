@@ -1,5 +1,6 @@
 open! Basis
 open Intsyn
+open Table.Table_
 
 (* Terminiation and Reduction Order *)
 (* Author: Carsten Schuermann *)

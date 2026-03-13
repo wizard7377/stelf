@@ -16,7 +16,7 @@
   pweaken
   prover_)
  (libraries
-  tomega
+  tomega_lib
   lambda
   global
   names
@@ -35,43 +35,5 @@
   timing
   basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Tomega_
-   -open
-   Lambda_
-   -open
-   Global_
-   -open
-   Names_
-   -open
-   Print_
-   -open
-   Index_
-   -open
-   Modes_
-   -open
-   Typecheck_
-   -open
-   Table_
-   -open
-   Subordinate_
-   -open
-   Solvers_
-   -open
-   Opsem_
-   -open
-   Trail_
-   -open
-   Compile_
-   -open
-   Worldcheck_
-   -open
-   Formatter_
-   -open
-   Timing_))
- (wrapped false))
+   (:standard -w -A -open Basis -open Tomega_lib -open Tomega_lib.Tomega_ -open Lambda -open Lambda.Lambda_ -open Global -open Global.Global_ -open Names -open Names.Names_ -open Print -open Print.Print_ -open Index -open Index.Index_ -open Modes -open Modes.Modes_ -open Typecheck -open Typecheck.Typecheck_ -open Table -open Table.Table_ -open Subordinate -open Subordinate.Subordinate_ -open Solvers -open Solvers.Solvers_ -open Opsem -open Trail -open Trail.Trail_ -open Compile -open Compile.Compile_ -open Worldcheck -open Worldcheck.Worldcheck_ -open Formatter -open Formatter.Formatter_ -open Timing -open Timing.Timing_))
+ (wrapped true))

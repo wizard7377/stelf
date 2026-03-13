@@ -1,5 +1,6 @@
 open! Basis
 open Paths_
+module Paths = Paths_.Paths
 
 (* Origins of Declarations *)
 (* Author: Frank Pfenning *)

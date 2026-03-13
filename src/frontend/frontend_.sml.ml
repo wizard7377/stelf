@@ -19,7 +19,7 @@ structure Parsing =
 *)
 (* Re-export module type before Twelf name shadowing. *)
 module type LEXER = Lexer.LEXER
-module type TWELF = Twelf.TWELF
+module type TWELF = Twelf_.TWELF
 
 module ReconTerm = Recon_term.ReconTerm (struct
   (*! structure IntSyn' = IntSyn !*)
@@ -241,7 +241,7 @@ module Fquery = Fquery.Fquery (struct
   module Print = Print
 end)
 
-module Twelf = Twelf.Twelf (struct
+module Twelf = Twelf_.Twelf (struct
   module Global = Global
   module Timers = Timers.Timers
 

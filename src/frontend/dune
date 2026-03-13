@@ -26,7 +26,7 @@
   fquery
   buildid
   version
-  twelf
+  twelf_
   frontend_)
  (libraries
   timing
@@ -55,71 +55,11 @@
   worldcheck
   unique
   cover
-  tomega
+  tomega_lib
   prover
   flit
   msg
   basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Timing_
-   -open
-   Stream_
-   -open
-   Global_
-   -open
-   Table_
-   -open
-   Lambda_
-   -open
-   Names_
-   -open
-   Paths_
-   -open
-   Print_
-   -open
-   Typecheck_
-   -open
-   Style_
-   -open
-   Modes_
-   -open
-   Terminate_
-   -open
-   Index_
-   -open
-   Thm_
-   -open
-   M2_
-   -open
-   Compile_
-   -open
-   Opsem_
-   -open
-   Subordinate_
-   -open
-   Modules_
-   -open
-   Meta_
-   -open
-   Solvers_
-   -open
-   Worldcheck_
-   -open
-   Unique_
-   -open
-   Cover_
-   -open
-   Tomega_
-   -open
-   Prover_
-   -open
-   Flit_
-   -open
-   Msg_))
- (wrapped false))
+   (:standard -w -A -open Basis -open Timing -open Timing.Timing_ -open Stream -open Stream.Stream_ -open Global -open Global.Global_ -open Table -open Table.Table_ -open Tabling -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Paths -open Paths.Paths_ -open Print -open Print.Print_ -open Typecheck -open Typecheck.Typecheck_ -open Style -open Style.Style_ -open Modes -open Modes.Modes_ -open Terminate -open Terminate.Terminate_ -open Index -open Index.Index_ -open Thm -open Thm.Thm_ -open M2 -open M2.M2_ -open Compile -open Compile.Compile_ -open Opsem -open Opsem.Opsem_ -open Subordinate -open Subordinate.Subordinate_ -open Modules -open Modules.Modules_ -open Meta -open Meta.Meta_ -open Solvers -open Solvers.Solvers_ -open Worldcheck -open Worldcheck.Worldcheck_ -open Unique -open Unique.Unique_ -open Cover -open Cover.Cover_ -open Tomega_lib -open Tomega_lib.Tomega_ -open Prover -open Flit -open Flit.Flit_ -open Msg -open Msg.Msg_))
+ (wrapped true))

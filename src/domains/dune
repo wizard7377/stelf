@@ -6,5 +6,5 @@
  (modules field ordered_field integers rationals integers_mod domains_)
  (libraries int_inf basis)
  (flags
-  (:standard -w -A -open Basis -open Int_inf_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Int_inf -open Int_inf.Int_inf_))
+ (wrapped true))

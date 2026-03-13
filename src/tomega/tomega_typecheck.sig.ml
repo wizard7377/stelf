@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 (* Type checking for functional proof term calculus *)
 (* Author: Carsten Schuermann *)

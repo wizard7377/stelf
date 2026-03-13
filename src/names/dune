@@ -6,5 +6,5 @@
  (modules names_)
  (libraries table global lambda basis)
  (flags
-  (:standard -w -A -open Basis -open Table_ -open Global_ -open Lambda_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Table -open Table.Table_ -open Global -open Global.Global_ -open Lambda -open Lambda.Lambda_))
+ (wrapped true))

@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 (* Operational Semantics for Delphin *)
 (* Author: Carsten Schuermann *)

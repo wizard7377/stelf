@@ -6,21 +6,5 @@
  (modules modsyn modules_)
  (libraries global table lambda names paths typecheck basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Global_
-   -open
-   Table_
-   -open
-   Lambda_
-   -open
-   Names_
-   -open
-   Paths_
-   -open
-   Typecheck_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Table -open Table.Table_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Paths -open Paths.Paths_ -open Typecheck -open Typecheck.Typecheck_))
+ (wrapped true))

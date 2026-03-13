@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 module TomegaAbstract = Tomega_abstract.TomegaAbstract (struct
   module Global = Global

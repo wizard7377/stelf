@@ -17,29 +17,5 @@
   solvers
   basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Global_
-   -open
-   Trail_
-   -open
-   Lambda_
-   -open
-   Names_
-   -open
-   Print_
-   -open
-   Formatter_
-   -open
-   Index_
-   -open
-   Subordinate_
-   -open
-   Paths_
-   -open
-   Solvers_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Trail -open Trail.Trail_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Print -open Print.Print_ -open Formatter -open Formatter.Formatter_ -open Index -open Index.Index_ -open Subordinate -open Subordinate.Subordinate_ -open Paths -open Paths.Paths_ -open Solvers -open Solvers.Solvers_))
+ (wrapped true))

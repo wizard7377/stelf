@@ -6,21 +6,5 @@
  (modules thmsyn thmprint thm_)
  (libraries global lambda names formatter modes paths tabling basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Global_
-   -open
-   Lambda_
-   -open
-   Names_
-   -open
-   Formatter_
-   -open
-   Modes_
-   -open
-   Paths_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Formatter -open Formatter.Formatter_ -open Modes -open Modes.Modes_ -open Paths -open Paths.Paths_ -open Tabling))
+ (wrapped true))

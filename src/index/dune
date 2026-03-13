@@ -6,5 +6,5 @@
  (modules index_skolem index_)
  (libraries lambda table global basis)
  (flags
-  (:standard -w -A -open Basis -open Lambda_ -open Table_ -open Global_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Lambda -open Lambda.Lambda_ -open Table -open Table.Table_ -open Global -open Global.Global_))
+ (wrapped true))

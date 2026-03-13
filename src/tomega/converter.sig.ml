@@ -1,4 +1,5 @@
 open! Basis
+module Tomega = Lambda_.Tomega
 
 (* Converter from relational representation to a functional
    representation of proof terms *)

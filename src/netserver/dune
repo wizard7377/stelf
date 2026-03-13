@@ -6,5 +6,5 @@
  (modules netserver_)
  (libraries timing frontend msg basis)
  (flags
-  (:standard -w -A -open Basis -open Timing_ -open Frontend_ -open Msg_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Timing -open Timing.Timing_ -open Frontend -open Frontend.Frontend_ -open Msg -open Msg.Msg_))
+ (wrapped true))

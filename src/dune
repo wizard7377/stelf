@@ -1,7 +1,6 @@
 (library
  (name twelf)
  (public_name twelf)
- (modules Twelf)
  (libraries
   compile
   compress
@@ -38,7 +37,7 @@
   terminate
   thm
   timing
-  tomega
+  tomega_lib
   trail
   typecheck
   unique

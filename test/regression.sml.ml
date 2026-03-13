@@ -5,7 +5,7 @@ open! Basis
 (* Author: Robert J. Simmons *)
 module RegressionTest = struct
   open! struct
-    let _ = Frontend_.Twelf.chatter := 0
+    let _ = Frontend.Frontend_.Twelf.chatter := 0
     let errors = ref 0
 
     let rec reportError file =
@@ -17,25 +17,29 @@ module RegressionTest = struct
 
   let rec test file =
     let _ = print ("Test:        " ^ file) in
-    let stat = try Frontend_.Twelf.make file with _ -> Frontend_.Twelf.Abort in
+    let stat =
+      try Frontend.Frontend_.Twelf.make file with _ -> Frontend.Frontend_.Twelf.Abort
+    in
     begin match stat with
-    | Frontend_.Twelf.Ok -> Frontend_.Twelf.Ok
-    | Frontend_.Twelf.Abort -> begin
+    | Frontend.Frontend_.Twelf.Ok -> Frontend.Frontend_.Twelf.Ok
+    | Frontend.Frontend_.Twelf.Abort -> begin
         reportError file;
-        Frontend_.Twelf.Abort
+        Frontend.Frontend_.Twelf.Abort
       end
     end
 
   let rec testUnsafe file =
     let _ = print ("Test Unsafe: " ^ file) in
-    let _ = Frontend_.Twelf.unsafe := true in
-    let stat = try Frontend_.Twelf.make file with e -> Frontend_.Twelf.Abort in
-    let _ = Frontend_.Twelf.unsafe := false in
+    let _ = Frontend.Frontend_.Twelf.unsafe := true in
+    let stat =
+      try Frontend.Frontend_.Twelf.make file with e -> Frontend.Frontend_.Twelf.Abort
+    in
+    let _ = Frontend.Frontend_.Twelf.unsafe := false in
     begin match stat with
-    | Frontend_.Twelf.Ok -> Frontend_.Twelf.Ok
-    | Frontend_.Twelf.Abort -> begin
+    | Frontend.Frontend_.Twelf.Ok -> Frontend.Frontend_.Twelf.Ok
+    | Frontend.Frontend_.Twelf.Abort -> begin
         reportError file;
-        Frontend_.Twelf.Abort
+        Frontend.Frontend_.Twelf.Abort
       end
     end
 
@@ -80,12 +84,11 @@ module RegressionTest = struct
     let rec getstatus (status, msg) =
       begin match status with
       | None -> ()
-      | Some Frontend_.Twelf.Ok -> print ("..." ^ msg)
-      | Some Frontend_.Twelf.Abort ->
-          begin
-            print "...ABORT!\n";
-            raise Aborted
-          end
+      | Some Frontend.Frontend_.Twelf.Ok -> print ("..." ^ msg)
+      | Some Frontend.Frontend_.Twelf.Abort -> begin
+          print "...ABORT!\n";
+          raise Aborted
+        end
       end
     in
     let rec readfile () =
@@ -97,11 +100,11 @@ module RegressionTest = struct
       | Some s -> (
           try
             begin
-              Frontend_.Twelf.doubleCheck := false;
+              Frontend.Frontend_.Twelf.doubleCheck := false;
               begin
                 getstatus (runline s, "OK.\n");
                 begin
-                  Frontend_.Twelf.doubleCheck := true;
+                  Frontend.Frontend_.Twelf.doubleCheck := true;
                   begin
                     getstatus (runline s, "Double checked.\n");
                     readfile ()

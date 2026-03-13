@@ -1,7 +1,7 @@
 (include sources.dune)
 
 (library
- (name tomega)
+ (name tomega_lib)
  (public_name twelf.tomega)
  (modules
   opsem
@@ -30,33 +30,5 @@
   trail
   basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Global_
-   -open
-   Lambda_
-   -open
-   Worldcheck_
-   -open
-   Cover_
-   -open
-   Formatter_
-   -open
-   Names_
-   -open
-   Print_
-   -open
-   Typecheck_
-   -open
-   Subordinate_
-   -open
-   Meta_
-   -open
-   Modes_
-   -open
-   Trail_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Lambda -open Lambda.Lambda_ -open Worldcheck -open Worldcheck.Worldcheck_ -open Cover -open Cover.Cover_ -open Formatter -open Formatter.Formatter_ -open Names -open Names.Names_ -open Print -open Print.Print_ -open Typecheck -open Typecheck.Typecheck_ -open Subordinate -open Subordinate.Subordinate_ -open Meta -open Meta.Meta_ -open Modes -open Modes.Modes_ -open Trail -open Trail.Trail_))
+ (wrapped true))

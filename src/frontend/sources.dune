@@ -859,28 +859,28 @@
       
       (rule
  (mode fallback)
- (target twelf.sig.ml)
+ (target twelf_.sig.ml)
  (action
-  (write-file twelf.sig.ml "")))
+  (write-file twelf_.sig.ml "")))
 
 (rule
  (mode fallback)
- (target twelf.fun.ml)
+ (target twelf_.fun.ml)
  (action
-  (write-file twelf.fun.ml "")))
+  (write-file twelf_.fun.ml "")))
 
 (rule
  (mode fallback)
- (target twelf.sml.ml)
+ (target twelf_.sml.ml)
  (action
-  (write-file twelf.sml.ml "")))
+  (write-file twelf_.sml.ml "")))
 
 (rule
- (target twelf.ml)
+ (target twelf_.ml)
  (deps
-  (:sig twelf.sig.ml)
-  (:fun twelf.fun.ml)
-  (:sml twelf.sml.ml))
+  (:sig twelf_.sig.ml)
+  (:fun twelf_.fun.ml)
+  (:sml twelf_.sml.ml))
  (action
   (progn
    (concurrent

@@ -49,43 +49,5 @@
   m2
   basis)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Basis
-   -open
-   Global_
-   -open
-   Trail_
-   -open
-   Table_
-   -open
-   Lambda_
-   -open
-   Names_
-   -open
-   Formatter_
-   -open
-   Print_
-   -open
-   Subordinate_
-   -open
-   Modes_
-   -open
-   Typecheck_
-   -open
-   Index_
-   -open
-   Opsem_
-   -open
-   Compile_
-   -open
-   Heuristic_
-   -open
-   Timing_
-   -open
-   Solvers_
-   -open
-   M2_))
- (wrapped false))
+  (:standard -w -A -open Basis -open Global -open Global.Global_ -open Trail -open Trail.Trail_ -open Table -open Table.Table_ -open Lambda -open Lambda.Lambda_ -open Names -open Names.Names_ -open Formatter -open Formatter.Formatter_ -open Print -open Print.Print_ -open Subordinate -open Subordinate.Subordinate_ -open Modes -open Modes.Modes_ -open Typecheck -open Typecheck.Typecheck_ -open Index -open Index.Index_ -open Opsem -open Opsem.Opsem_ -open Compile -open Compile.Compile_ -open Heuristic -open Heuristic.Heuristic_ -open Timing -open Timing.Timing_ -open Solvers -open Solvers.Solvers_ -open M2 -open M2.M2_))
+ (wrapped true))
