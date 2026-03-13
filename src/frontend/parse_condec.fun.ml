@@ -5,15 +5,16 @@ open! Basis
 (* Author: Frank Pfenning *)
 module ParseConDec (ParseConDec__0 : sig
   (*! structure Parsing' : PARSING !*)
-  module ExtConDec' : EXTCONDEC
-  module ParseTerm : PARSE_TERM
-end) : PARSE_CONDEC = struct
+  module ExtConDec' : Recon_condec.EXTCONDEC
+  module ParseTerm : Parse_term.PARSE_TERM with module ExtSyn = ExtConDec'.ExtSyn
+end) : PARSE_CONDEC with module ExtConDec = ParseConDec__0.ExtConDec' = struct
   (*! structure Parsing = Parsing' !*)
-  module ExtConDec = ExtConDec'
+  module ExtConDec = ParseConDec__0.ExtConDec'
+  module ParseTerm = ParseConDec__0.ParseTerm
 
   open! struct
-    module L = Lexer
-    module LS = Lexer.Stream
+    module L = Parsing.Lexer
+    module LS = Parsing.Stream
 
     let rec parseConDec3 (optName, optTm, s) =
       let tm', f' = ParseTerm.parseTerm' (LS.expose s) in

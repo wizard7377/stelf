@@ -1,4 +1,5 @@
 open! Basis
+open! Parsing
 
 (* Parsing Fixity Declarations *)
 (* Author: Frank Pfenning *)

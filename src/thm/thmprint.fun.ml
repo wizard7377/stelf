@@ -6,7 +6,7 @@ open! Basis
 module ThmPrint (ThmPrint__0 : sig
   module ThmSyn' : THMSYN
   module Formatter : FORMATTER
-end) : THMPRINT = struct
+end) : THMPRINT with module ThmSyn = ThmPrint__0.ThmSyn' = struct
   module ThmSyn = ThmPrint__0.ThmSyn'
 
   open! struct

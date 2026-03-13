@@ -15,7 +15,7 @@ module ThmSyn (ThmSyn__0 : sig
   (*! sharing Whnf.IntSyn = IntSyn !*)
   (*! structure Paths' : PATHS !*)
   module Names' : NAMES
-end) : THMSYN = struct
+end) : THMSYN with module Names = ThmSyn__0.Names' = struct
   (*! structure IntSyn = IntSyn !*)
   (*! structure ModeSyn = ModeSyn' *)
   (*! structure Paths = Paths' !*)

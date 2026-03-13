@@ -8,18 +8,19 @@ module ParseThm (ParseThm__0 : sig
   (*! structure Paths : PATHS *)
   (*! structure Parsing' : PARSING !*)
   (*! sharing Parsing'.Lexer.Paths = Paths !*)
-  module ThmExtSyn' : THMEXTSYN
+  module ThmExtSyn' : Recon_thm.THMEXTSYN
 
   (*! sharing ThmExtSyn'.Paths = Paths !*)
   (*! sharing ThmExtSyn'.ExtSyn.Paths = Paths !*)
-  module ParseTerm : PARSE_TERM
-end) : PARSE_THM = struct
+  module ParseTerm : Parse_term.PARSE_TERM with module ExtSyn = ThmExtSyn'.ExtSyn
+end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
   (*! structure Parsing = Parsing' !*)
-  module ThmExtSyn = ThmExtSyn'
+  module ThmExtSyn = ParseThm__0.ThmExtSyn'
+  module ParseTerm = ParseThm__0.ParseTerm
 
   open! struct
-    module L = Lexer
-    module LS = Lexer.Stream
+    module L = Parsing.Lexer
+    module LS = Parsing.Stream
     module E = ThmExtSyn
     module P = Paths
 
@@ -167,13 +168,13 @@ end) : PARSE_THM = struct
       (dec, f'')
 
     and parseDecs' = function
-      | drs_, LS.Cons (((lbrace_, r), s') as bs_) ->
+      | drs_, (LS.Cons ((lbrace_, r), s') as bs_) ->
           let dr_, f' = parseDec (r, LS.expose s') in
           parseDecs' (E.decl (drs_, dr_), f')
       | drs_ -> drs_
 
     and parseDecs = function
-      | LS.Cons (((lbrace_, r), s') as bs_) ->
+      | (LS.Cons ((lbrace_, r), s') as bs_) ->
           let dr_, f' = parseDec (r, LS.expose s') in
           parseDecs' (E.decl (E.null, dr_), f')
       | LS.Cons ((t, r), s') ->

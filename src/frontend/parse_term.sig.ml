@@ -1,10 +1,11 @@
 open! Basis
+open! Parsing
 
 (* Parsing Terms and Declarations *)
 (* Author: Frank Pfenning *)
 module type PARSE_TERM = sig
   (*! structure Parsing : PARSING !*)
-  module ExtSyn : EXTSYN
+  module ExtSyn : Recon_term.EXTSYN
 
   val parseQualId' : (string list * Parsing.lexResult) Parsing.parser
   val parseQualIds' : (string list * string) list Parsing.parser

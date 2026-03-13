@@ -10,19 +10,21 @@ module ReconModule (ReconModule__0 : sig
 
   (*! sharing Names.IntSyn = IntSyn !*)
   (*! structure Paths' : PATHS !*)
-  module ReconTerm' : RECON_TERM
+  module ReconTerm' : Recon_term.RECON_TERM
 
   (*! sharing ReconTerm'.IntSyn = IntSyn !*)
   (*! sharing ReconTerm'.Paths = Paths' !*)
-  module ModSyn' : MODSYN
+  module ModSyn' : Modsyn.MODSYN with module Names = Names
 
   (*! sharing ModSyn'.IntSyn = IntSyn !*)
-  module IntTree : TABLE
-end) : RECON_MODULE = struct
-  module ExtSyn = ReconTerm'
+  module IntTree : TABLE with type key = IntSyn.cid
+end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
+  module ExtSyn = ReconModule__0.ReconTerm'
+  module Names = ReconModule__0.Names
+  module IntTree = ReconModule__0.IntTree
 
   (*! structure Paths = Paths' !*)
-  module ModSyn = ModSyn'
+  module ModSyn = ReconModule__0.ModSyn'
 
   exception Error of string
 
@@ -45,58 +47,58 @@ end) : RECON_MODULE = struct
 
   type inst_ = External of ExtSyn.term | Internal of IntSyn.cid
   type nonrec eqn = IntSyn.cid * inst_ * Paths.region
-  type nonrec inst = Names.namespace * eqn list -> eqn list
+  type nonrec inst = ModSyn.Names.namespace * eqn list -> eqn list
 
-  let rec coninst ((ids, id, r1), tm, r2) (ns, eqns) =
-    let qid = Names.Qid (ids, id) in
-    begin match Names.constLookupIn (ns, qid) with
+  let rec coninst ((ids, id, r1), tm, r2) : inst = fun (ns, eqns) ->
+    let qid = ModSyn.Names.Qid (ids, id) in
+    begin match ModSyn.Names.constLookupIn (ns, qid) with
     | None ->
         error
           ( r1,
             "Undeclared identifier "
-            ^ Names.qidToString (valOf (Names.constUndefIn (ns, qid))) )
+            ^ ModSyn.Names.qidToString (valOf (ModSyn.Names.constUndefIn (ns, qid))) )
     | Some cid -> (cid, External tm, r2) :: eqns
     (* this is wrong because constants in the sig being instantiated might incorrectly appear in tm -kw *)
     end
 
   let rec addStructEqn (rEqns, r1, r2, ids, mid1, mid2) =
-    let ns1 = Names.getComponents mid1 in
-    let ns2 = Names.getComponents mid2 in
+    let ns1 = ModSyn.Names.getComponents mid1 in
+    let ns2 = ModSyn.Names.getComponents mid2 in
     let rec push eqn = rEqns := eqn :: !rEqns in
     let rec doConst (name, cid1) =
-      begin match Names.constLookupIn (ns2, Names.Qid ([], name)) with
+      begin match ModSyn.Names.constLookupIn (ns2, ModSyn.Names.Qid ([], name)) with
       | None ->
           error
             ( r1,
               "Instantiating structure lacks component "
-              ^ Names.qidToString (Names.Qid (rev ids, name)) )
+              ^ Names.qidToString (ModSyn.Names.Qid (rev ids, name)) )
       | Some cid2 -> push (cid1, Internal cid2, r2)
       end
     in
     let rec doStruct (name, mid1) =
-      begin match Names.structLookupIn (ns2, Names.Qid ([], name)) with
+      begin match ModSyn.Names.structLookupIn (ns2, ModSyn.Names.Qid ([], name)) with
       | None ->
           error
             ( r1,
               "Instantiating structure lacks component "
-              ^ Names.qidToString (Names.Qid (rev ids, name)) )
+              ^ Names.qidToString (ModSyn.Names.Qid (rev ids, name)) )
       | Some mid2 -> addStructEqn (rEqns, r1, r2, name :: ids, mid1, mid2)
       end
     in
     begin
-      Names.appConsts doConst ns1;
-      Names.appStructs doStruct ns1
+      ModSyn.Names.appConsts doConst ns1;
+      ModSyn.Names.appStructs doStruct ns1
     end
 
-  let rec strinst ((ids, id, r1), strexp, r3) (ns, eqns) =
-    let qid = Names.Qid (ids, id) in
+  let rec strinst ((ids, id, r1), strexp, r3) : inst = fun (ns, eqns) ->
+    let qid = ModSyn.Names.Qid (ids, id) in
     let mid1 =
-      begin match Names.structLookupIn (ns, qid) with
+      begin match ModSyn.Names.structLookupIn (ns, qid) with
       | None ->
           error
             ( r1,
               "Undeclared structure "
-              ^ Names.qidToString (valOf (Names.structUndefIn (ns, qid))) )
+              ^ Names.qidToString (valOf (ModSyn.Names.structUndefIn (ns, qid))) )
       | Some mid1 -> mid1
       end
     in
@@ -107,7 +109,7 @@ end) : RECON_MODULE = struct
       !rEqns
     end
 
-  type nonrec whereclause = Names.namespace -> eqn list
+  type nonrec whereclause = ModSyn.Names.namespace -> eqn list
 
   type nonrec sigexp =
     ModSyn.module_ option -> ModSyn.module_ * whereclause list
@@ -120,7 +122,7 @@ end) : RECON_MODULE = struct
     | Some module_ -> (module_, [])
     end
 
-  let rec wheresig (sigexp, instList) moduleOpt =
+  let rec wheresig (sigexp, instList) : sigexp = fun moduleOpt ->
     let module_, wherecls = sigexp moduleOpt in
     let rec wherecl ns =
       foldr (function inst, eqns -> inst (ns, eqns)) [] instList
@@ -167,29 +169,32 @@ end) : RECON_MODULE = struct
     in
     let _ = List.app add eqns in
     let rec doInst = function
-      | (Internal cid, r), Condec_ -> (
-          try
-            ModSyn.strictify
-              (ExtSyn.internalInst
-                 (Condec_, ModSyn.abbrevify (cid, IntSyn.sgnLookup cid), r))
-          with
-          | ExtSyn.Error msg ->
-              raise
-                (ExtSyn.Error
-                   ((msg ^ "\nin instantiation generated for ")
-                   ^ Names.qidToString (Names.constQid cid)))
-          | (External tm, r), Condec_ ->
-              ModSyn.strictify (ExtSyn.externalInst (Condec_, tm, r)))
+      | (Internal cid, r), conDec_ ->
+          begin
+            try
+              ModSyn.strictify
+                (ExtSyn.internalInst
+                   (conDec_, ModSyn.abbrevify (cid, IntSyn.sgnLookup cid), r))
+            with
+            | ExtSyn.Error msg ->
+                raise
+                  (ExtSyn.Error
+                     ((msg ^ "\nin instantiation generated for ")
+                     ^ Names.qidToString (Names.constQid cid)))
+          end
+      | (External tm, r), conDec_ ->
+          ModSyn.strictify (ExtSyn.externalInst (conDec_, tm, r))
     in
-    let rec transformConDec (cid, Condec_) =
+    let rec transformConDec (cid, conDec_) =
       begin match IntTree.lookup table cid with
-      | None -> Condec_
-      | Some { contents = l } -> List.foldr doInst Condec_ l
+      | None -> conDec_
+      | Some { contents = l } -> List.foldr doInst conDec_ l
       end
     in
     transformConDec
 
-  let rec moduleWhere (module_, wherecl) =
+  let rec moduleWhere : ModSyn.module_ * whereclause -> ModSyn.module_ = function
+    | module_, wherecl ->
     let mark, markStruct = IntSyn.sgnSize () in
     let module' = ModSyn.instantiateModule (module_, applyEqns wherecl) in
     let _ = Names.resetFrom (mark, markStruct) in

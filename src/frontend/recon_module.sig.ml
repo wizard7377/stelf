@@ -3,7 +3,7 @@ open! Basis
 (* External syntax for module expressions *)
 (* Author: Kevin Watkins *)
 module type MODEXTSYN = sig
-  module ExtSyn : EXTSYN
+  module ExtSyn : Recon_term.EXTSYN
 
   (*! structure Paths : PATHS !*)
   type nonrec strexp
@@ -36,7 +36,7 @@ end
 
 module type RECON_MODULE = sig
   include MODEXTSYN
-  module ModSyn : MODSYN
+  module ModSyn : Modsyn.MODSYN
 
   exception Error of string
 

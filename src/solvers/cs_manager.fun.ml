@@ -10,7 +10,7 @@ module MakeCs_manager (CSManager__0 : sig
 
   (*! sharing Unify.IntSyn = IntSyn !*)
   module Fixity : FIXITY
-end) : CS_MANAGER = struct
+end) : CS_MANAGER with module Fixity = CSManager__0.Fixity = struct
   module IntSyn = IntSyn
   module Fixity = CSManager__0.Fixity
 

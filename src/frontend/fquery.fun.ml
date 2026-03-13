@@ -5,11 +5,13 @@ open! Basis
 module Fquery (Fquery__0 : sig
   module Global : GLOBAL
   module Names : NAMES
-  module ReconQuery : RECON_QUERY
-  module Timers : TIMERS
+  module ReconQuery : Recon_query.RECON_QUERY
+  module Timers : Timers.TIMERS
   module Print : PRINT
-end) : FQUERY = struct
-  module ExtQuery = ReconQuery
+end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
+  module ExtQuery = Fquery__0.ReconQuery
+  module ReconQuery = Fquery__0.ReconQuery
+  module Timers = Fquery__0.Timers
 
   exception AbortQuery of string
 
@@ -62,7 +64,7 @@ end) : FQUERY = struct
     let a = I.targetFam v2_ in
     let w_ = W.lookup a in
     let v3_ = Worldify.worldifyGoal (g_, v2_) in
-    let _ = TypeCheck.typeCheck (g_, (v3_, I.Uni I.type_)) in
+    let _ = TypeCheck.typeCheck (g_, (v3_, I.Uni I.Type)) in
     let p_ = Converter.convertGoal (T.embedCtx g_, v3_) in
     let v_ = Timers.time Timers.delphin Opsem.evalPrg p_ in
     print (("Delphin: " ^ TomegaPrint.prgToString (I.null_, v_)) ^ "\n")

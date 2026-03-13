@@ -1,10 +1,11 @@
 open! Basis
+open! Parsing
 
 (* Parsing Theorems *)
 (* Author: Carsten Schuermann *)
 module type PARSE_THM = sig
   (*! structure Parsing : PARSING !*)
-  module ThmExtSyn : THMEXTSYN
+  module ThmExtSyn : Recon_thm.THMEXTSYN
 
   val parseTotal' : ThmExtSyn.tdecl Parsing.parser
 

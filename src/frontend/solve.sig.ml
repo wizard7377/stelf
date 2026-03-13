@@ -5,7 +5,7 @@ open! Basis
 module type SOLVE = sig
   (*! structure IntSyn : INTSYN !*)
   (*! structure Paths : PATHS !*)
-  module ExtQuery : EXTQUERY
+  module ExtQuery : Recon_query.EXTQUERY
 
   exception AbortQuery of string
 

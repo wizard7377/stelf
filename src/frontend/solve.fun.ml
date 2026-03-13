@@ -11,12 +11,16 @@ module Solve (Solve__0 : sig
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn' !*)
-  module Parser : PARSER
-  module ReconQuery : RECON_QUERY
+  module ReconQuery : Recon_query.RECON_QUERY
+  module Parser :
+    PARSER
+      with type ExtQuery.query = ReconQuery.query
+       and type ExtQuery.define = ReconQuery.define
+       and type ExtQuery.solve = ReconQuery.solve
 
   (*! sharing ReconQuery.IntSyn = IntSyn' !*)
   (* sharing type ReconQuery.Paths.occConDec = Origins.Paths.occConDec *)
-  module Timers : TIMERS
+  module Timers : Timers.TIMERS
 
   (*! structure CompSyn : COMPSYN !*)
   (*! sharing CompSyn.IntSyn = IntSyn' !*)
@@ -30,20 +34,20 @@ module Solve (Solve__0 : sig
   (*! sharing CPrint.CompSyn = CompSyn !*)
   (*! structure Cs_manager : CS_MANAGER !*)
   (*! sharing Cs_manager.IntSyn = IntSyn' !*)
-  module AbsMachine : ABSMACHINE
+  module AbsMachine : Absmachine.ABSMACHINE
 
   (*! sharing AbsMachine.IntSyn = IntSyn' !*)
   (*! sharing AbsMachine.CompSyn = CompSyn !*)
-  module AbsMachineSbt : ABSMACHINESBT
+  module AbsMachineSbt : Absmachine_sbt.ABSMACHINESBT
 
   (*! sharing AbsMachineSbt.IntSyn = IntSyn' !*)
   (*! sharing AbsMachineSbt.CompSyn = CompSyn!*)
-  module PtRecon : PTRECON
+  module PtRecon : Ptrecon.PTRECON
 
   (*! sharing PtRecon.IntSyn = IntSyn' !*)
   (*! sharing PtRecon.CompSyn = CompSyn !*)
   (*! structure TableParam : TABLEPARAM !*)
-  module Tabled : TABLED
+  module Tabled : Tabled_machine.TABLED
 
   (*! sharing Tabled.IntSyn = IntSyn' !*)
   (*! sharing Tabled.CompSyn = CompSyn !*)
@@ -53,12 +57,31 @@ module Solve (Solve__0 : sig
 
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Msg : MSG
-end) : SOLVE = struct
+end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (*! structure IntSyn = IntSyn' !*)
+  module Global = Solve__0.Global
+  module Names = Solve__0.Names
+  module Parser = Solve__0.Parser
+  module ReconQuery = Solve__0.ReconQuery
+  module Timers = Solve__0.Timers
+  module TimeLimit = Time_limit.TimeLimit
+  module Compile = Solve__0.Compile
+  module CompSyn = CompSyn.CompSyn
+  module CPrint = Solve__0.CPrint
+  module AbsMachine = Solve__0.AbsMachine
+  module AbsMachineSbt = Solve__0.AbsMachineSbt
+  module PtRecon = Solve__0.PtRecon
+  module Tabled = Solve__0.Tabled
+  module TableParam = Table_param.TableParam
+  module Print = Solve__0.Print
+  module Msg = Solve__0.Msg
   module ExtQuery = ReconQuery
 
   (*! structure Paths = ReconQuery.Paths !*)
   module S = Parser.Stream
+
+  let rec inputLine97 instream =
+    begin match TextIO.inputLine instream with Some s -> s | None -> "" end
 
   (* evarInstToString Xs = msg
      formats instantiated EVars as a substitution.
@@ -143,7 +166,7 @@ end) : SOLVE = struct
   let rec moreSolutions () =
     begin
       print "More? ";
-      begin match String.sub (Compat.inputLine97 TextIO.stdIn, 0) with
+      begin match String.sub (inputLine97 TextIO.stdIn, 0) with
       | 'y' -> true
       | 'Y' -> true
       | ';' -> true
@@ -173,9 +196,9 @@ end) : SOLVE = struct
      error messages and finally returning the status (either OK or
      ABORT).
   *)
-  let rec solve' (defines, Solve_, Paths.Loc (fileName, r)) =
+  let rec solve' (defines, solve_, Paths.Loc (fileName, r)) =
     let a_, finish =
-      ReconQuery.solveToSolve (defines, Solve_, Paths.Loc (fileName, r))
+      ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
     in
     let _ =
       begin if !Global.chatter >= 3 then Msg.message "%solve " else ()
@@ -230,9 +253,9 @@ end) : SOLVE = struct
   -- this version can be used to produce oracles, however no user
   directive is added yet.
 *)
-  let rec solveSbt (defines, Solve_, Paths.Loc (fileName, r)) =
+  let rec solveSbt (defines, solve_, Paths.Loc (fileName, r)) =
     let a_, finish =
-      ReconQuery.solveToSolve (defines, Solve_, Paths.Loc (fileName, r))
+      ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
     in
     let _ =
       begin if !Global.chatter >= 3 then Msg.message "%solve " else ()
@@ -880,9 +903,9 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
 
   and qLoops' = function
     | empty_ -> true
-    | S.Cons (Query_, s') ->
+    | S.Cons (query_, s') ->
         let a_, optName, xs_ =
-          ReconQuery.queryToQuery (Query_, Paths.Loc ("stdIn", Paths.Reg (0, 0)))
+          ReconQuery.queryToQuery (query_, Paths.Loc ("stdIn", Paths.Reg (0, 0)))
         in
         let g =
           Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
@@ -934,7 +957,8 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
               ( (g, IntSyn.id),
                 CompSyn.DProg (IntSyn.null_, IntSyn.null_),
                 scInit );
-            Msg.message "No more solutions\n"
+            Msg.message "No more solutions\n";
+            qLoop ()
           end
           (* scInit is timed into solving! *)
         with Done ->
@@ -959,10 +983,10 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
 
   and qLoopsT' = function
     | empty_ -> true
-    | S.Cons (Query_, s') ->
+    | S.Cons (query_, s') ->
         let solExists = ref false in
         let a_, optName, xs_ =
-          ReconQuery.queryToQuery (Query_, Paths.Loc ("stdIn", Paths.Reg (0, 0)))
+          ReconQuery.queryToQuery (query_, Paths.Loc ("stdIn", Paths.Reg (0, 0)))
         in
         let g =
           Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
@@ -1029,6 +1053,8 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
               begin if !solExists then Msg.message "No more solutions\n"
               else Msg.message "the query has no solution\n"
               end
+            ;
+            qLoopT ()
           end
           (* scInit is timed into solving! *)
         with Done ->

@@ -14,7 +14,7 @@ module ReconQuery (ReconQuery__0 : sig
 
   (*! sharing Abstract.IntSyn = IntSyn' !*)
   (*! structure Paths' : PATHS !*)
-  module ReconTerm' : RECON_TERM
+  module ReconTerm' : Recon_term.RECON_TERM
 
   (*! sharing ReconTerm'.IntSyn = IntSyn' !*)
   (*! sharing ReconTerm'.Paths = Paths' !*)
@@ -25,13 +25,14 @@ module ReconQuery (ReconQuery__0 : sig
 
   (*! sharing Strict.IntSyn = IntSyn' !*)
   (*! sharing Strict.Paths = Paths' !*)
-  module Timers : TIMERS
+  module Timers : Timers.TIMERS
   module Print : PRINT
 end) : RECON_QUERY = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Paths = Paths' !*)
-  module ExtSyn = ReconTerm'
-  module T = ReconTerm'
+  module Timers = ReconQuery__0.Timers
+  module ExtSyn = ReconQuery__0.ReconTerm'
+  module T = ReconQuery__0.ReconTerm'
 
   exception Error of string
 
@@ -43,9 +44,14 @@ end) : RECON_QUERY = struct
   (* Queries, with optional proof term variable *)
   type query = Query_ of name option * T.term
 
+  let rec query (nameOpt, tm) = Query_ (nameOpt, tm)
+
   (* define := <constant name> option * <def body> * <type> option *)
   type define = Define_ of string option * T.term * T.term option
   type solve = Solve_ of string option * T.term * Paths.region
+
+  let rec define (nameOpt, tm1, tm2Opt) = Define_ (nameOpt, tm1, tm2Opt)
+  let rec solve (nameOpt, tm, r) = Solve_ (nameOpt, tm, r)
 
   (* freeVar (XOpt, [(X1,""X1""),...,(Xn,""Xn"")]) = true
      iff XOpt = SOME(""Xi""), false otherwise
@@ -148,10 +154,10 @@ end) : RECON_QUERY = struct
         begin
           Strict.check ((u'_, v'_), None);
           IntSyn.ConDef
-            (name, None, i, u'_, v'_, IntSyn.type_, IntSyn.ancestor u'_)
+            (name, None, i, u'_, v'_, IntSyn.Type, IntSyn.ancestor u'_)
         end
       with Strict.Error _ ->
-        IntSyn.AbbrevDef (name, None, i, u'_, v'_, IntSyn.type_)
+        IntSyn.AbbrevDef (name, None, i, u'_, v'_, IntSyn.Type)
     in
     let cd = Names.nameConDec cd in
     let _ =
@@ -163,7 +169,7 @@ end) : RECON_QUERY = struct
     let _ =
       begin if !Global.doubleCheck then begin
         Timers.time Timers.checking TypeCheck.check
-          (v'_, IntSyn.Uni IntSyn.type_);
+          (v'_, IntSyn.Uni IntSyn.Type);
         Timers.time Timers.checking TypeCheck.check (u'_, v'_)
       end
       else ()
@@ -211,17 +217,17 @@ end) : RECON_QUERY = struct
       | m_, [], _ -> begin
           match finishSolve (sol, m_, v_) with
           | None -> []
-          | Some Condec_ -> [ (Condec_, None) ]
+          | Some conDec_ -> [ (conDec_, None) ]
         end
       | m_, def :: defs, T.JAnd (T.JTerm ((u_, oc1), v_, l_), f) -> begin
           match finishDefine (def, ((u_, oc1), (v_, None), l_)) with
           | None, _ -> sc (m_, defs, f)
-          | Some Condec_, ocdOpt -> (Condec_, ocdOpt) :: sc (m_, defs, f)
+          | Some conDec_, ocdOpt -> (conDec_, ocdOpt) :: sc (m_, defs, f)
         end
       | m_, def :: defs, T.JAnd (T.JOf ((u_, oc1), (v_, oc2), l_), f) -> begin
           match finishDefine (def, ((u_, oc1), (v_, Some oc2), l_)) with
           | None, _ -> sc (m_, defs, f)
-          | Some Condec_, ocdOpt -> (Condec_, ocdOpt) :: sc (m_, defs, f)
+          | Some conDec_, ocdOpt -> (conDec_, ocdOpt) :: sc (m_, defs, f)
         end
     in
     (v_, function m_ -> sc (m_, defines, defines'))

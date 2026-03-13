@@ -3,7 +3,7 @@ open! Basis
 (* External Syntax for meta theorems *)
 (* Author: Carsten Schuermann *)
 module type THMEXTSYN = sig
-  module ExtSyn : EXTSYN
+  module ExtSyn : Recon_term.EXTSYN
 
   (*! structure Paths : PATHS  !*)
   type nonrec order
@@ -72,7 +72,7 @@ end
 (*  val wdecl : (decs * decs) list * callpats -> wdecl *)
 (* signature THMEXTSYN *)
 module type RECON_THM = sig
-  module ThmSyn : THMSYN
+  module ThmSyn : Thmsyn.THMSYN
   include THMEXTSYN
 
   exception Error of string

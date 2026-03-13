@@ -1,0 +1,5 @@
+
+(library
+ (name smlofnj)
+ (public_name twelf.smlofnj)
+ (libraries basis))

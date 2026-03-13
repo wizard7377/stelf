@@ -1,10 +1,11 @@
 open! Basis
+open! Parsing
 
 (* Parsing modules *)
 (* Author: Kevin Watkins *)
 module type PARSE_MODULE = sig
   (*! structure Parsing : PARSING !*)
-  module ModExtSyn : MODEXTSYN
+  module ModExtSyn : Recon_module.MODEXTSYN
 
   (* val parseSigExp' : ModExtSyn.sigexp Parsing.recparser *)
   val parseSigDef' : ModExtSyn.sigdef Parsing.recparser

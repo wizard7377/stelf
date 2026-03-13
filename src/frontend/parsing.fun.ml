@@ -1,9 +1,11 @@
 open! Basis
 
-module Parsing (Parsing__0 : sig
+module MakeParsing (Parsing__0 : sig
   module Stream' : STREAM
+  module Lexer' : Lexer.LEXER
 end) : PARSING = struct
-  module Stream = Stream'
+  module Stream = Parsing__0.Stream'
+  module Lexer = Parsing__0.Lexer'
 
   (*! structure Lexer = Lexer' !*)
   type nonrec lexResult = Lexer.token_ * Paths.region
@@ -29,7 +31,8 @@ end
 (*! structure Lexer' : LEXER !*)
 (*! sharing Lexer'.Stream = Stream' !*)
 (* functor Parsing *)
-module Parsing = Parsing (struct
+module Parsing = MakeParsing (struct
   module Stream' = Stream
+  module Lexer' = Lexer.Lexer
 end)
 (*! structure Lexer' = Lexer !*)

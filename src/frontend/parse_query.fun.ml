@@ -5,17 +5,18 @@ open! Basis
 (* Author: Frank Pfenning *)
 module ParseQuery (ParseQuery__0 : sig
   (*! structure Parsing' : PARSING !*)
-  module ExtQuery' : EXTQUERY
+  module ExtQuery' : Recon_query.EXTQUERY
 
   (*! sharing ExtQuery'.Paths = Parsing'.Lexer.Paths !*)
-  module ParseTerm : PARSE_TERM
-end) : PARSE_QUERY = struct
+  module ParseTerm : Parse_term.PARSE_TERM with module ExtSyn = ExtQuery'.ExtSyn
+end) : PARSE_QUERY with module ExtQuery = ParseQuery__0.ExtQuery' = struct
   (*! structure Parsing = Parsing' !*)
-  module ExtQuery = ExtQuery'
+  module ExtQuery = ParseQuery__0.ExtQuery'
+  module ParseTerm = ParseQuery__0.ParseTerm
 
   open! struct
-    module L = Lexer
-    module LS = Lexer.Stream
+    module L = Parsing.Lexer
+    module LS = Parsing.Stream
     module P = Paths
 
     let rec returnQuery (optName, (tm, f)) = (ExtQuery.query (optName, tm), f)

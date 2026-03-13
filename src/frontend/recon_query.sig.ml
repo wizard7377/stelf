@@ -3,7 +3,7 @@ open! Basis
 (* External Syntax for queries *)
 (* Author: Frank Pfenning *)
 module type EXTQUERY = sig
-  module ExtSyn : EXTSYN
+  module ExtSyn : Recon_term.EXTSYN
 
   (*! structure Paths : PATHS !*)
   type nonrec query

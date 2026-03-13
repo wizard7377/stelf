@@ -7,18 +7,19 @@ module ParseMode (ParseMode__0 : sig
   (*! structure Paths : PATHS !*)
   (*! structure Parsing' : PARSING !*)
   (*! sharing Parsing'.Lexer.Paths = Paths !*)
-  module ExtModes' : EXTMODES
+  module ExtModes' : Recon_mode.EXTMODES
 
   (*! sharing ExtModes'.Paths = Paths !*)
   (*! sharing ExtModes'.ExtSyn.Paths = Paths !*)
-  module ParseTerm : PARSE_TERM
-end) : PARSE_MODE = struct
+  module ParseTerm : Parse_term.PARSE_TERM with module ExtSyn = ExtModes'.ExtSyn
+end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
   (*! structure Parsing = Parsing' !*)
-  module ExtModes = ExtModes'
+  module ExtModes = ParseMode__0.ExtModes'
+  module ParseTerm = ParseMode__0.ParseTerm
 
   open! struct
-    module L = Lexer
-    module LS = Lexer.Stream
+    module L = Parsing.Lexer
+    module LS = Parsing.Stream
     module E = ExtModes
     module P = Paths
 
@@ -89,9 +90,9 @@ end) : PARSE_MODE = struct
               in
               let t', f''' = parseFull (f'', r1) in
               (E.Full.mpi (m, dec, t'), f''')
-          | LS.Cons ts_ ->
+          | LS.Cons _ as ts_ ->
               let t', (LS.Cons ((_, r), s') as f') =
-                ParseTerm.parseTerm' (LS.Cons (t0, LS.cons ts_))
+                ParseTerm.parseTerm' (LS.Cons (t0, LS.delay (function () -> ts_)))
               in
               (E.Full.mroot (t', P.join (r, r1)), f')
         end
@@ -103,8 +104,8 @@ end) : PARSE_MODE = struct
           Parsing.error (r, "Expected mode or identifier, found " ^ L.toString t)
 
     let rec parseMode2 = function
-      | lexid, LS.Cons (((lbrace_, r), s') as bs_), r1 ->
-          let t', f' = parseFull (LS.Cons (lexid, LS.cons bs_), r1) in
+      | lexid, (LS.Cons ((lbrace_, r), s') as bs_), r1 ->
+          let t', f' = parseFull (LS.Cons (lexid, LS.delay (function () -> bs_)), r1) in
           (E.Full.toModedec t', f')
       | (L.Id (_, name), r), f, _ ->
           let mS', f' = parseShortSpine f in

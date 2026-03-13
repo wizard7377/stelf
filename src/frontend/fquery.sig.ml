@@ -3,7 +3,7 @@ open! Basis
 (* fquery: Executing logic programs via functional interpretation *)
 (* Author: Carsten Schuermann *)
 module type FQUERY = sig
-  module ExtQuery : EXTQUERY
+  module ExtQuery : Recon_query.EXTQUERY
 
   exception AbortQuery of string
 

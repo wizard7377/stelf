@@ -13,14 +13,14 @@ module ReconMode (ReconMode__0 : sig
   module Names : NAMES
 
   (*! sharing Names.IntSyn = ModeSyn'.IntSyn !*)
-  module ModePrint : MODEPRINT
+  module ModePrint : Modeprint.MODEPRINT
 
   (*! sharing ModePrint.ModeSyn = ModeSyn' !*)
-  module ModeDec : MODEDEC
-  module ReconTerm' : RECON_TERM
+  module ModeDec : Modedec.MODEDEC
+  module ReconTerm' : Recon_term.RECON_TERM
 end) : RECON_MODE = struct
   (*! structure ModeSyn = ModeSyn' !*)
-  module ExtSyn = ReconTerm'
+  module ExtSyn = ReconMode__0.ReconTerm'
 
   (*! structure Paths = Paths' !*)
   exception Error of string
@@ -30,15 +30,15 @@ end) : RECON_MODE = struct
   open! struct
     module M = ModeSyn
     module I = IntSyn
-    module T = ExtSyn
+    module T = ReconMode__0.ReconTerm'
     module P = Paths
 
     type nonrec mode = M.mode_ * P.region
 
-    let rec plus r = (M.plus_, r)
-    let rec star r = (M.star_, r)
-    let rec minus r = (M.minus_, r)
-    let rec minus1 r = (M.minus1_, r)
+    let rec plus r = (M.Plus, r)
+    let rec star r = (M.Star, r)
+    let rec minus r = (M.Minus, r)
+    let rec minus1 r = (M.Minus1, r)
 
     type nonrec modedec = (I.cid * M.modeSpine_) * P.region
 
@@ -46,7 +46,7 @@ end) : RECON_MODE = struct
       type nonrec mterm = (I.cid * M.modeSpine_) * P.region
       type nonrec mspine = M.modeSpine_ * P.region
 
-      let rec mnil r = (M.mnil_, r)
+      let rec mnil r = (M.Mnil, r)
 
       let rec mapp (((m, r1), name), (mS, r2)) =
         (M.Mapp (M.Marg (m, name), mS), P.join (r1, r2))
@@ -79,7 +79,7 @@ end) : RECON_MODE = struct
         in
         let _ = T.checkErrors r in
         let rec convertSpine = function
-          | nil_ -> M.mnil_
+          | nil_ -> M.Mnil
           | I.App (u_, s_) ->
               let k =
                 try Whnf.etaContract u_

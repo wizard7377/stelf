@@ -3,7 +3,7 @@ open! Basis
 (* External Syntax of Mode Declarations *)
 (* Author: Carsten Schuermann *)
 module type EXTMODES = sig
-  module ExtSyn : EXTSYN
+  module ExtSyn : Recon_term.EXTSYN
 
   (*! structure Paths : PATHS  !*)
   type nonrec mode

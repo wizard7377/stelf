@@ -3,7 +3,7 @@ open! Basis
 (* External Syntax for signature entries *)
 (* Author: Frank Pfenning *)
 module type EXTCONDEC = sig
-  module ExtSyn : EXTSYN
+  module ExtSyn : Recon_term.EXTSYN
 
   (*! structure Paths : PATHS !*)
   type nonrec condec

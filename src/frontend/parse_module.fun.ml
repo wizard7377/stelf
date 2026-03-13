@@ -7,15 +7,16 @@ module ParseModule (ParseModule__0 : sig
   (*! structure Paths : PATHS !*)
   (*! structure Parsing' : PARSING !*)
   (*! sharing Parsing'.Lexer.Paths = Paths !*)
-  module ModExtSyn' : MODEXTSYN
+  module ModExtSyn' : Recon_module.MODEXTSYN
 
   (*! sharing ModExtSyn'.Paths = Paths !*)
-  module ParseTerm : PARSE_TERM
-end) : PARSE_MODULE = struct
+  module ParseTerm : Parse_term.PARSE_TERM with module ExtSyn = ModExtSyn'.ExtSyn
+end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
   (*! structure Parsing = Parsing' !*)
-  module ModExtSyn = ModExtSyn'
+  module ModExtSyn = ParseModule__0.ModExtSyn'
+  module ParseTerm = ParseModule__0.ParseTerm
   module L = Lexer
-  module LS = Lexer.Stream
+  module LS = Parsing.Stream
   module E = ModExtSyn
 
   let rec parseStructExp' = function

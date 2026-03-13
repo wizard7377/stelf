@@ -5,13 +5,13 @@ open! Basis
 module type PARSER = sig
   (*! structure Parsing : PARSING !*)
   module Stream : STREAM
-  module ExtSyn : EXTSYN
+  module ExtSyn : Recon_term.EXTSYN
   module Names : NAMES
-  module ExtConDec : EXTCONDEC
-  module ExtQuery : EXTQUERY
-  module ExtModes : EXTMODES
-  module ThmExtSyn : THMEXTSYN
-  module ModExtSyn : MODEXTSYN
+  module ExtConDec : Recon_condec.EXTCONDEC
+  module ExtQuery : Recon_query.EXTQUERY
+  module ExtModes : Recon_mode.EXTMODES
+  module ThmExtSyn : Recon_thm.THMEXTSYN
+  module ModExtSyn : Recon_module.MODEXTSYN
 
   type fileParseResult =
     | ConDec of ExtConDec.condec

@@ -8,44 +8,59 @@ module Parser (Parser__0 : sig
   module Stream' : STREAM
 
   (* result stream *)
-  module ExtSyn' : EXTSYN
+  module ExtSyn' : Recon_term.EXTSYN
 
   (*! sharing ExtSyn'.Paths = Parsing'.Lexer.Paths !*)
   module Names' : NAMES
-  module ExtConDec' : EXTCONDEC
-  module ExtQuery' : EXTQUERY
-  module ExtModes' : EXTMODES
-  module ThmExtSyn' : THMEXTSYN
-  module ModExtSyn' : MODEXTSYN
-  module ParseConDec : PARSE_CONDEC
+  module ExtConDec' : Recon_condec.EXTCONDEC
+  module ExtQuery' : Recon_query.EXTQUERY
+  module ExtModes' : Recon_mode.EXTMODES
+  module ThmExtSyn' : Recon_thm.THMEXTSYN
+  module ModExtSyn' : Recon_module.MODEXTSYN
+  module ParseConDec :
+    Parse_condec.PARSE_CONDEC with module ExtConDec = ExtConDec'
 
   (*! sharing ParseConDec.Lexer = Parsing'.Lexer !*)
-  module ParseQuery : PARSE_QUERY
+  module ParseQuery : Parse_query.PARSE_QUERY with module ExtQuery = ExtQuery'
 
   (*! sharing ParseQuery.Lexer = Parsing'.Lexer !*)
-  module ParseFixity : PARSE_FIXITY
+  module ParseFixity : Parse_fixity.PARSE_FIXITY with module Names = Names'
 
   (*! sharing ParseFixity.Lexer = Parsing'.Lexer !*)
-  module ParseMode : PARSE_MODE
+  module ParseMode : Parse_mode.PARSE_MODE with module ExtModes = ExtModes'
 
   (*! sharing ParseMode.Lexer = Parsing'.Lexer !*)
-  module ParseThm : PARSE_THM
+  module ParseThm : Parse_thm.PARSE_THM with module ThmExtSyn = ThmExtSyn'
 
   (*! sharing ParseThm.Lexer = Parsing'.Lexer !*)
-  module ParseModule : PARSE_MODULE
+  module ParseModule : Parse_module.PARSE_MODULE with module ModExtSyn = ModExtSyn'
 
   (*! sharing ParseModule.Parsing = Parsing' !*)
-  module ParseTerm : PARSE_TERM
-end) : PARSER = struct
+  module ParseTerm : Parse_term.PARSE_TERM with module ExtSyn = ExtSyn'
+end) : PARSER with module ExtQuery = Parser__0.ExtQuery'
+               and module Names = Parser__0.Names'
+               and module ExtConDec = Parser__0.ExtConDec'
+               and module ExtModes = Parser__0.ExtModes'
+               and module ThmExtSyn = Parser__0.ThmExtSyn'
+               and module ModExtSyn = Parser__0.ModExtSyn'
+               and module Stream = Parser__0.Stream'
+               and module ExtSyn = Parser__0.ExtSyn' = struct
   (*! structure Parsing = Parsing' !*)
-  module Stream = Stream'
-  module ExtSyn = ExtSyn'
-  module Names = Names'
-  module ExtConDec = ExtConDec'
-  module ExtQuery = ExtQuery'
-  module ExtModes = ExtModes'
-  module ThmExtSyn = ThmExtSyn'
-  module ModExtSyn = ModExtSyn'
+  module Stream = Parser__0.Stream'
+  module ExtSyn = Parser__0.ExtSyn'
+  module Names = Parser__0.Names'
+  module ExtConDec = Parser__0.ExtConDec'
+  module ExtQuery = Parser__0.ExtQuery'
+  module ExtModes = Parser__0.ExtModes'
+  module ThmExtSyn = Parser__0.ThmExtSyn'
+  module ModExtSyn = Parser__0.ModExtSyn'
+  module ParseConDec = Parser__0.ParseConDec
+  module ParseQuery = Parser__0.ParseQuery
+  module ParseFixity = Parser__0.ParseFixity
+  module ParseMode = Parser__0.ParseMode
+  module ParseThm = Parser__0.ParseThm
+  module ParseModule = Parser__0.ParseModule
+  module ParseTerm = Parser__0.ParseTerm
 
   type fileParseResult =
     | ConDec of ExtConDec.condec
@@ -97,8 +112,8 @@ end) : PARSER = struct
   (* enter/leave a new context *)
   (* Further pragmas to be added later here *)
   open! struct
-    module L = Lexer
-    module LS = Lexer.Stream
+    module L = Parsing.Lexer
+    module LS = Parsing.Stream
 
     let rec stripDot = function
       | LS.Cons ((dot_, r), s) -> s
@@ -119,12 +134,10 @@ end) : PARSER = struct
           | Overflow -> Parsing.error (r, "Bound too large")
           | L.NotDigit _ ->
               Parsing.error
-                (r, ("Bound `" ^ name) ^ "' neither `*' nor a natural number")
-          | LS.Cons ((t, r), s') ->
-              Parsing.error
-                ( r,
-                  "Expected bound `*' or natural number, found " ^ L.toString t
-                ))
+                (r, ("Bound `" ^ name) ^ "' neither `*' nor a natural number"))
+      | LS.Cons ((t, r), s') ->
+          Parsing.error
+            (r, "Expected bound `*' or natural number, found " ^ L.toString t)
 
     let rec recParse (s, recparser, theSigParser, sc) =
       Stream.delay (function () ->
@@ -162,7 +175,10 @@ end) : PARSER = struct
             ParseFixity.parseNamePref' f
           in
           let r = Paths.join (r1, r2) in
-          Stream.Cons ((NamePref namePref, r), parseStream (stripDot f', sc))
+          let namePrefQid, namePrefStrings = namePref in
+          Stream.Cons
+            ( (NamePref (namePrefQid, namePrefStrings), r),
+              parseStream (stripDot f', sc) )
       | (LS.Cons ((define_, r), s') as f), sc -> parseSolve' (f, sc)
       | (LS.Cons ((solve_, r), s') as f), sc -> parseSolve' (f, sc)
       | LS.Cons ((query_, r0), s'), sc ->
@@ -243,12 +259,16 @@ end) : PARSER = struct
     and parseFixity' ((LS.Cons ((_, r0), _) as f), sc) =
       let fdec, (LS.Cons ((_, r'), _) as f') = ParseFixity.parseFixity' f in
       let r = Paths.join (r0, r') in
-      Stream.Cons ((FixDec fdec, r), parseStream (stripDot f', sc))
+      let fixQid, fixity = fdec in
+      Stream.Cons
+        ((FixDec (fixQid, fixity), r), parseStream (stripDot f', sc))
 
     and parseSolve' ((LS.Cons ((_, r0), _) as f), sc) =
       let defnssolve, (LS.Cons ((_, r'), _) as f') = ParseQuery.parseSolve' f in
       let r = Paths.join (r0, r') in
-      Stream.Cons ((Solve defnssolve, r), parseStream (stripDot f', sc))
+      let defs, solve = defnssolve in
+      Stream.Cons
+        ((Solve (defs, solve), r), parseStream (stripDot f', sc))
 
     and parseMode' ((LS.Cons ((_, r0), _) as f), sc) =
       let mdecs, (LS.Cons ((_, r'), _) as f') = ParseMode.parseMode' f in
@@ -328,7 +348,11 @@ end) : PARSER = struct
       in
       let r = Paths.join (r0, r') in
       let qidpairs =
-        map (function qid1, qid2 -> (Names.Qid qid1, Names.Qid qid2)) qidpairs
+        map
+          (function
+            | (ids1, name1), (ids2, name2) ->
+                (Names.Qid (ids1, name1), Names.Qid (ids2, name2)))
+          qidpairs
       in
       Stream.Cons ((SubordDec qidpairs, r), parseStream (stripDot f', sc))
 
@@ -337,7 +361,7 @@ end) : PARSER = struct
         ParseTerm.parseFreeze' (LS.expose s)
       in
       let r = Paths.join (r0, r') in
-      let qids = map Names.qid_ qids in
+      let qids = map (function ids, name -> Names.Qid (ids, name)) qids in
       Stream.Cons ((FreezeDec qids, r), parseStream (stripDot f', sc))
 
     and parseThaw' ((LS.Cons ((_, r0), s) as f), sc) =
@@ -345,7 +369,7 @@ end) : PARSER = struct
         ParseTerm.parseThaw' (LS.expose s)
       in
       let r = Paths.join (r0, r') in
-      let qids = map Names.qid_ qids in
+      let qids = map (function ids, name -> Names.Qid (ids, name)) qids in
       Stream.Cons ((ThawDec qids, r), parseStream (stripDot f', sc))
 
     and parseDeterministic' ((LS.Cons ((_, r0), s) as f), sc) =
@@ -353,7 +377,7 @@ end) : PARSER = struct
         ParseTerm.parseDeterministic' (LS.expose s)
       in
       let r = Paths.join (r0, r') in
-      let qids = map Names.qid_ qids in
+      let qids = map (function ids, name -> Names.Qid (ids, name)) qids in
       Stream.Cons ((DeterministicDec qids, r), parseStream (stripDot f', sc))
 
     and parseCompile' ((LS.Cons ((_, r0), s) as f), sc) =
@@ -361,7 +385,7 @@ end) : PARSER = struct
         ParseTerm.parseCompile' (LS.expose s)
       in
       let r = Paths.join (r0, r') in
-      let qids = map Names.qid_ qids in
+      let qids = map (function ids, name -> Names.Qid (ids, name)) qids in
       Stream.Cons ((Compile qids, r), parseStream (stripDot f', sc))
 
     and parseSigDef' ((LS.Cons ((_, r1), _) as f), sc) =
@@ -405,12 +429,18 @@ end) : PARSER = struct
       let query, f' = ParseQuery.parseQuery' f in
       Stream.Cons (query, parseQ (stripDot f'))
 
+    let rec lexStreamToParsing s =
+      LS.delay (function () ->
+          match L.Stream.expose s with
+          | L.Stream.Empty -> LS.Empty
+          | L.Stream.Cons (x, s') -> LS.Cons (x, lexStreamToParsing s'))
+
     let rec parseTLStream instream =
       let rec finish = function
-        | LS.Cons ((eof_, r), s) -> Stream.empty_
+        | LS.Cons ((eof_, r), s) -> Stream.Empty
         | LS.Cons ((rbrace_, r), s) -> Parsing.error (r, "Unmatched `}'")
       in
-      parseStream (L.lexStream instream, finish)
+      parseStream (lexStreamToParsing (L.lexStream instream), finish)
   end
 
   (* Everything else should be impossible *)
@@ -432,7 +462,7 @@ end) : PARSER = struct
   (* -fp *)
   (* ABP 4/4/03 *)
   let parseStream = parseTLStream
-  let rec parseTerminalQ prompts = parseQ (L.lexTerminal prompts)
+  let rec parseTerminalQ prompts = parseQ (lexStreamToParsing (L.lexTerminal prompts))
 end
 (*! sharing ParseTerm.Lexer = Parsing'.Lexer !*)
 (* local ... in *)

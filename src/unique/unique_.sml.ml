@@ -11,7 +11,7 @@ module UniqueCheck = Modecheck.MakeModeCheck (struct
   module Origins = Origins
 end)
 
-include Unique (struct
+module Unique = MakeUnique (struct
   module Global = Global
   module Whnf = Whnf
   module Abstract = Abstract

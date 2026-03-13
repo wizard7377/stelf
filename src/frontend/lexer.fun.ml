@@ -3,10 +3,10 @@ open! Basis
 (* Lexer *)
 (* Author: Frank Pfenning *)
 (* Modified: Brigitte Pientka *)
-module Lexer (Lexer__0 : sig
+module MakeLexer (Lexer__0 : sig
   module Stream' : STREAM
 end) : LEXER = struct
-  module Stream = Stream'
+  module Stream = Lexer__0.Stream'
 
   (*! structure Paths = Paths' !*)
   open! struct
@@ -50,12 +50,12 @@ end) : LEXER = struct
     | Covers
     | Total
     | Terminates
+    | Block
+    | Worlds
     | Reduces
     | Tabled
     | Keeptable
     | Theorem
-    | Block
-    | Worlds
     | Prove
     | Establish
     | Assert
@@ -448,17 +448,21 @@ end) : LEXER = struct
   (* functions lexing delimited comments below take nesting level l *)
 
   (* fun lex (inputFun) = let ... in ... end *)
-  let rec lexStream instream = lex (function i -> Compat.inputLine97 instream)
+  let rec inputLine97 instream =
+    begin match TextIO.inputLine instream with Some s -> s | None -> ""
+    end
+
+  let rec lexStream instream = lex (function i -> inputLine97 instream)
 
   let rec lexTerminal (prompt0, prompt1) =
     lex (function
       | 0 -> begin
           print prompt0;
-          Compat.inputLine97 TextIO.stdIn
+          inputLine97 TextIO.stdIn
         end
       | i -> begin
           print prompt1;
-          Compat.inputLine97 TextIO.stdIn
+          inputLine97 TextIO.stdIn
         end)
 
   let rec toString' = function
@@ -561,7 +565,7 @@ end
 (*! structure Paths' : PATHS !*)
 (* local ... *)
 (* functor Lexer *)
-module Lexer = Lexer (struct
+module Lexer = MakeLexer (struct
   module Stream' = Stream
 end)
 (*! structure Paths' = Paths !*)

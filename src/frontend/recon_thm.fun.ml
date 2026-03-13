@@ -15,17 +15,17 @@ module ReconThm (ReconThm__0 : sig
 
   (*! sharing Names.IntSyn = IntSyn !*)
   (*! structure Paths' : PATHS !*)
-  module ThmSyn' : THMSYN
-  module ReconTerm' : RECON_TERM
+  module ThmSyn' : Thmsyn.THMSYN with module Names = Names
+  module ReconTerm' : Recon_term.RECON_TERM
 
   (*! sharing ReconTerm'.IntSyn = IntSyn !*)
   (*! sharing ReconTerm'.Paths = Paths'  !*)
   module Print : PRINT
-end) : RECON_THM = struct
-  module ThmSyn = ThmSyn'
+end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
+  module ThmSyn = ReconThm__0.ThmSyn'
 
   (*! structure Paths = Paths' !*)
-  module ExtSyn = ReconTerm'
+  module ExtSyn = ReconThm__0.ReconTerm'
 
   exception Error of string
 
@@ -34,7 +34,7 @@ end) : RECON_THM = struct
     module I = IntSyn
     module L = ThmSyn
     module P = Paths
-    module T = ReconTerm'
+    module T = ReconThm__0.ReconTerm'
 
     let rec error (r, msg) = raise (Error (P.wrap (r, msg)))
 
@@ -120,9 +120,9 @@ end) : RECON_THM = struct
     type nonrec predicate = ThmSyn.predicate_ * Paths.region
 
     let rec predicate = function
-      | "LESS", r -> (ThmSyn.less_, r)
-      | "LEQ", r -> (ThmSyn.leq_, r)
-      | "EQUAL", r -> (ThmSyn.eq_, r)
+      | "LESS", r -> (ThmSyn.Less, r)
+      | "LEQ", r -> (ThmSyn.Leq, r)
+      | "EQUAL", r -> (ThmSyn.Eq, r)
 
     type nonrec rdecl = ThmSyn.rDecl_ * (Paths.region * Paths.region list)
 
@@ -183,7 +183,7 @@ end) : RECON_THM = struct
     type nonrec decs = ExtSyn.dec I.ctx_
 
     let null = I.null_
-    let decl = I.decl_
+    let decl (g, d) = I.Decl (g, d)
 
     type nonrec labeldec = decs * decs
 
@@ -259,21 +259,21 @@ end) : RECON_THM = struct
       t
         ( gBs_,
           ctxAppend (g, g'),
-          ctxAppend (m_, ctxMap (function _ -> M.minus_) g'),
+          ctxAppend (m_, ctxMap (function _ -> M.Minus) g'),
           k )
 
     let rec forall (g', t) (gBs_, g, m_, k) =
       t
         ( gBs_,
           ctxAppend (g, g'),
-          ctxAppend (m_, ctxMap (function _ -> M.plus_) g'),
+          ctxAppend (m_, ctxMap (function _ -> M.Plus) g'),
           k )
 
     let rec forallStar (g', t) (gBs_, g, m_, _) =
       t
         ( gBs_,
           ctxAppend (g, g'),
-          ctxAppend (m_, ctxMap (function _ -> M.plus_) g'),
+          ctxAppend (m_, ctxMap (function _ -> M.Plus) g'),
           I.ctxLength g' )
 
     let rec forallG (gbs, (t : thm -> thm)) (_ : thm) =
@@ -289,7 +289,7 @@ end) : RECON_THM = struct
     let rec theoremDecToTheoremDec (name, t) = (name, theoremToTheorem t)
 
     let rec abstractWDecl w_ =
-      let w'_ = List.map Names.qid_ w_ in
+      let w'_ = List.map (fun (ids, id) -> ThmSyn.Names.Qid (ids, id)) w_ in
       w'_
 
     type nonrec wdecl = ThmSyn.wDecl_ * Paths.region list
@@ -379,7 +379,7 @@ end) : RECON_THM = struct
 
   type nonrec theoremdec = theoremdec
 
-  let Dec_ = Dec_
+  let dec (name, t) = (name, t)
   let theoremDecToTheoremDec = theoremDecToTheoremDec
 
   type nonrec wdecl = wdecl

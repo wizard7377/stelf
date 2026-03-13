@@ -4,6 +4,7 @@ open! Basis
 (* Author: Frank Pfenning *)
 module type PARSING = sig
   module Stream : STREAM
+  module Lexer : Lexer.LEXER
 
   (*
   structure Lexer : LEXER

@@ -5,17 +5,17 @@ open! Basis
 (* Author: Frank Pfenning *)
 module ParseTerm (ParseTerm__0 : sig
   (*! structure Parsing' : PARSING !*)
-  module ExtSyn' : EXTSYN
+  module ExtSyn' : Recon_term.EXTSYN
 
   (*! sharing Parsing'.Lexer.Paths = ExtSyn'.Paths !*)
   module Names : NAMES
-end) : PARSE_TERM = struct
+end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
   (*! structure Parsing = Parsing' !*)
-  module ExtSyn = ExtSyn'
+  module ExtSyn = ParseTerm__0.ExtSyn'
 
   open! struct
     module L = Lexer
-    module LS = Lexer.Stream
+    module LS = Stream
     module FX = Names.Fixity
 
     type 'a operator =
@@ -24,10 +24,10 @@ end) : PARSE_TERM = struct
       | Prefix of FX.precedence * ('a -> 'a)
       | Postfix of FX.precedence * ('a -> 'a)
 
-    let juxOp = Infix ((FX.inc FX.maxPrec, FX.left_), ExtSyn.app)
-    let arrowOp = Infix ((FX.dec FX.minPrec, FX.right_), ExtSyn.arrow)
-    let backArrowOp = Infix ((FX.dec FX.minPrec, FX.left_), ExtSyn.backarrow)
-    let colonOp = Infix ((FX.dec (FX.dec FX.minPrec), FX.left_), ExtSyn.hastype)
+    let juxOp = Infix ((FX.inc FX.maxPrec, FX.Left), ExtSyn.app)
+    let arrowOp = Infix ((FX.dec FX.minPrec, FX.Right), ExtSyn.arrow)
+    let backArrowOp = Infix ((FX.dec FX.minPrec, FX.Left), ExtSyn.backarrow)
+    let colonOp = Infix ((FX.dec (FX.dec FX.minPrec), FX.Left), ExtSyn.hastype)
 
     let rec infixOp (infixity, tm) =
       Infix
@@ -99,8 +99,8 @@ end) : PARSE_TERM = struct
             match (FX.compare (prec, prec'), assoc, assoc') with
             | Greater, _, _ -> shift (r, opr, p)
             | Less, _, _ -> resolve (r, opr, reduce p)
-            | Equal, left_, left_ -> resolve (r, opr, reduce p)
-            | Equal, right_, right_ -> shift (r, opr, p)
+            | Equal, FX.Left, FX.Left -> resolve (r, opr, reduce p)
+            | Equal, FX.Right, FX.Right -> shift (r, opr, p)
             | _ ->
                 Parsing.error
                   (r, "Ambiguous: infix following infix of identical precedence")
@@ -242,8 +242,8 @@ end) : PARSE_TERM = struct
           else begin
             match Names.fixityLookup (Names.Qid (ids, name)) with
             | nonfix_ -> parseExp' (f', P.shiftAtom (tm, p))
-            | FX.Infix infixity ->
-                parseExp' (f', P.resolve (r, infixOp (infixity, tm), p))
+            | FX.Infix (prec, assoc) ->
+              parseExp' (f', P.resolve (r, infixOp ((prec, assoc), tm), p))
             | FX.Prefix prec ->
                 parseExp' (f', P.resolve (r, prefixOp (prec, tm), p))
             | FX.Postfix prec ->
@@ -324,7 +324,7 @@ end) : PARSE_TERM = struct
           in
           let tm, f' = parseExp (s, []) in
           parseExp' (f', P.shiftAtom (ExtSyn.pi (dec, tm), p))
-      | r0, (_, LS.Cons ((_, r), s)), p ->
+      | r0, (dec, LS.Cons ((_, r), s)), p ->
           Parsing.error (Paths.join (r0, r), "Unmatched open brace")
 
     and decideRBracket = function
@@ -357,7 +357,7 @@ end) : PARSE_TERM = struct
       (d, f'')
 
     let rec parseCtx = function
-      | b, ds, LS.Cons (((lbrace_, r), s') as bs_) ->
+      | b, ds, (LS.Cons ((lbrace_, r), s') as bs_) ->
           let d, f' = parseBracedDec (r, LS.expose s') in
           parseCtx (false, d :: ds, f')
       | b, ds, (LS.Cons ((t, r), s') as f) -> begin

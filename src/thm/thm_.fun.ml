@@ -12,7 +12,7 @@ module Make_Thm (Thm__0 : sig
 
   (*! sharing Order.IntSyn = ThmSyn'.ModeSyn.IntSyn !*)
   module ThmPrint : Thmprint.THMPRINT
-end) : THM = struct
+end) : THM with module ThmSyn = Thm__0.ThmSyn' = struct
   open Thm__0
   module ThmSyn = ThmSyn'
 

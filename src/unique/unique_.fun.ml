@@ -2,7 +2,7 @@ open! Basis
 
 (* Uniqueness Checking *)
 (* Author: Frank Pfenning *)
-module Unique (Unique__0 : sig
+module MakeUnique (Unique__0 : sig
   module Global : GLOBAL
   module Whnf : WHNF
   module Abstract : ABSTRACT

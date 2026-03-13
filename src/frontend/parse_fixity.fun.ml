@@ -5,13 +5,13 @@ open! Basis
 (* Author: Frank Pfenning *)
 module ParseFixity (ParseFixity__0 : sig
   module Names' : NAMES
-end) : PARSE_FIXITY = struct
+end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
   (*! structure Parsing = Parsing' !*)
-  module Names = Names'
+  module Names = ParseFixity__0.Names'
 
   open! struct
-    module L = Lexer
-    module LS = Lexer.Stream
+    module L = Parsing.Lexer
+    module LS = Parsing.Stream
     module FX = Names.Fixity
 
     let rec fixToString (FX.Strength p) = Int.toString p
@@ -39,26 +39,26 @@ end) : PARSE_FIXITY = struct
             (r, "Expected identifier to assign fixity, found " ^ L.toString t)
 
     let rec parseFixPrec = function
-      | fixity, LS.Cons ((L.Id id, r), s') ->
-          parseFixCon (fixity (idToPrec (r, id)), LS.expose s')
+      | fixity, LS.Cons ((L.Id (id_case, name), r), s') ->
+        parseFixCon (fixity (idToPrec (r, (id_case, name))), LS.expose s')
       | fixity, LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected precedence, found " ^ L.toString t)
 
     let rec parseInfix = function
       | LS.Cons ((L.Id (lower_, "none"), r), s') ->
-          parseFixPrec (function p -> (FX.Infix (p, FX.none_), LS.expose s'))
+        parseFixPrec ((fun p -> FX.Infix (p, FX.None)), LS.expose s')
       | LS.Cons ((L.Id (lower_, "left"), r), s') ->
-          parseFixPrec (function p -> (FX.Infix (p, FX.left_), LS.expose s'))
+        parseFixPrec ((fun p -> FX.Infix (p, FX.Left)), LS.expose s')
       | LS.Cons ((L.Id (lower_, "right"), r), s') ->
-          parseFixPrec (function p -> (FX.Infix (p, FX.right_), LS.expose s'))
+        parseFixPrec ((fun p -> FX.Infix (p, FX.Right)), LS.expose s')
       | LS.Cons ((t, r), s') ->
           Parsing.error
             ( r,
               "Expected associatitivy `left', `right', or `none', found "
               ^ L.toString t )
 
-    let rec parsePrefix f = parseFixPrec (FX.prefix_, f)
-    let rec parsePostfix f = parseFixPrec (FX.postfix_, f)
+    let rec parsePrefix f = parseFixPrec ((fun p -> FX.Prefix p), f)
+    let rec parsePostfix f = parseFixPrec ((fun p -> FX.Postfix p), f)
 
     let rec parseFixity' = function
       | LS.Cons ((infix_, r), s') -> parseInfix (LS.expose s')

@@ -14,7 +14,7 @@ module ReconConDec (ReconConDec__0 : sig
 
   (*! sharing Abstract.IntSyn = IntSyn' !*)
   (*! structure Paths' : PATHS !*)
-  module ReconTerm' : RECON_TERM
+  module ReconTerm' : Recon_term.RECON_TERM
 
   (*! sharing ReconTerm'.IntSyn = IntSyn' !*)
   (*! sharing ReconTerm'.Paths = Paths' !*)
@@ -28,7 +28,7 @@ module ReconConDec (ReconConDec__0 : sig
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
-  module Timers : TIMERS
+  module Timers : Timers.TIMERS
   module Print : PRINT
 
   (*! sharing Print.IntSyn = IntSyn' !*)
@@ -36,7 +36,8 @@ module ReconConDec (ReconConDec__0 : sig
 end) : RECON_CONDEC = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Paths = Paths' !*)
-  module ExtSyn = ReconTerm'
+  module Timers = ReconConDec__0.Timers
+  module ExtSyn = ReconConDec__0.ReconTerm'
 
   exception Error of string
 
@@ -51,6 +52,11 @@ end) : RECON_CONDEC = struct
     | Condef_ of name option * ExtSyn.term * ExtSyn.term option
     | Blockdef_ of string * (string list * string) list
     | Blockdec_ of name * ExtSyn.dec list * ExtSyn.dec list
+
+  let rec condec (name, tm) = Condec_ (name, tm)
+  let rec blockdec (name, ds1, ds2) = Blockdec_ (name, ds1, ds2)
+  let rec blockdef (name, worlds) = Blockdef_ (name, worlds)
+  let rec condef (nameOpt, tm1, tm2Opt) = Condef_ (nameOpt, tm1, tm2Opt)
 
   (* condecToConDec (condec, r) = (SOME(cd), SOME(ocd))
      if condec is a named constant declaration with occurrence tree ocd,
@@ -78,7 +84,7 @@ end) : RECON_CONDEC = struct
         in
         let cd =
           Names.nameConDec
-            (IntSyn.ConDec (name, None, i, IntSyn.normal_, v'_, l_))
+            (IntSyn.ConDec (name, None, i, IntSyn.Normal, v'_, l_))
         in
         let ocd = Paths.dec (i, oc) in
         let _ =
@@ -236,7 +242,7 @@ end) : RECON_CONDEC = struct
         (Some bd, None)
         (* closed nf *)
     | Blockdef_ (name, w_), Paths.Loc (fileName, r), abbFlag ->
-        let w'_ = List.map Names.qid_ w_ in
+        let w'_ = List.map (fun (ids, id) -> Names.Qid (ids, id)) w_ in
         let w''_ =
           List.map
             (function

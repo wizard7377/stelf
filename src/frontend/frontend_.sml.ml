@@ -17,7 +17,7 @@ structure Parsing =
   Parsing (structure Stream' = Stream
 	   structure Lexer' = Lexer);
 *)
-module ReconTerm = ReconTerm (struct
+module ReconTerm = Recon_term.ReconTerm (struct
   (*! structure IntSyn' = IntSyn !*)
   module Names = Names
 
@@ -29,11 +29,11 @@ module ReconTerm = ReconTerm (struct
   module Print = Print
 
   (*! structure Cs_manager = Cs_manager !*)
-  module StringTree = StringRedBlackTree
+  module StringTree = Table_instances.StringRedBlackTree
   module Msg = Msg
 end)
 
-module ReconConDec = ReconConDec (struct
+module ReconConDec = Recon_condec.ReconConDec (struct
   module Global = Global
 
   (*! structure IntSyn' = IntSyn !*)
@@ -45,12 +45,12 @@ module ReconConDec = ReconConDec (struct
   module Constraints = Constraints
   module Strict = Strict
   module TypeCheck = TypeCheck
-  module Timers = Timers
+  module Timers = Timers.Timers
   module Print = Print
   module Msg = Msg
 end)
 
-module ReconQuery = ReconQuery (struct
+module ReconQuery = Recon_query.ReconQuery (struct
   module Global = Global
 
   (*! structure IntSyn' = IntSyn !*)
@@ -61,11 +61,11 @@ module ReconQuery = ReconQuery (struct
   module ReconTerm' = ReconTerm
   module TypeCheck = TypeCheck
   module Strict = Strict
-  module Timers = Timers
+  module Timers = Timers.Timers
   module Print = Print
 end)
 
-module ReconMode = ReconMode (struct
+module ReconMode = Recon_mode.ReconMode (struct
   module Global = Global
 
   (*! structure ModeSyn' = ModeSyn !*)
@@ -78,7 +78,7 @@ module ReconMode = ReconMode (struct
   module ReconTerm' = ReconTerm
 end)
 
-module ReconThm = ReconThm (struct
+module ReconThm = Recon_thm.ReconThm (struct
   module Global = Global
   module IntSyn = IntSyn
   module Abstract = Abstract
@@ -93,65 +93,100 @@ module ReconThm = ReconThm (struct
   module Print = Print
 end)
 
-module ReconModule = ReconModule (struct
+module ReconModule = Recon_module.ReconModule (struct
   module Global = Global
   module IntSyn = IntSyn
-  module Names = Names
 
   (*! structure Paths' = Paths !*)
   module ReconTerm' = ReconTerm
   module ModSyn' = ModSyn
-  module IntTree = IntRedBlackTree
+  module Names = ModSyn'.Names
+  module IntTree = Table_instances.IntRedBlackTree
 end)
 
-module ParseTerm = ParseTerm (struct
+module ParseTerm = Parse_term.ParseTerm (struct
   (*! structure Parsing' = Parsing !*)
   module ExtSyn' = ReconTerm
   module Names = Names
 end)
 
-module ParseConDec = ParseConDec (struct
+module ParseTermConDec :
+  Parse_term.PARSE_TERM with module ExtSyn = ReconConDec.ExtSyn =
+  Parse_term.ParseTerm (struct
+    module ExtSyn' = ReconConDec.ExtSyn
+    module Names = Names
+  end)
+
+module ParseTermQuery :
+  Parse_term.PARSE_TERM with module ExtSyn = ReconQuery.ExtSyn =
+  Parse_term.ParseTerm (struct
+    module ExtSyn' = ReconQuery.ExtSyn
+    module Names = Names
+  end)
+
+module ParseTermMode :
+  Parse_term.PARSE_TERM with module ExtSyn = ReconMode.ExtSyn =
+  Parse_term.ParseTerm (struct
+    module ExtSyn' = ReconMode.ExtSyn
+    module Names = Names
+  end)
+
+module ParseTermThm :
+  Parse_term.PARSE_TERM with module ExtSyn = ReconThm.ExtSyn =
+  Parse_term.ParseTerm (struct
+    module ExtSyn' = ReconThm.ExtSyn
+    module Names = Names
+  end)
+
+module ParseTermModule :
+  Parse_term.PARSE_TERM with module ExtSyn = ReconModule.ExtSyn =
+  Parse_term.ParseTerm (struct
+    module ExtSyn' = ReconModule.ExtSyn
+    module Names = Names
+  end)
+
+module ParseConDec = Parse_condec.ParseConDec (struct
   (*! structure Parsing' = Parsing !*)
   module ExtConDec' = ReconConDec
-  module ParseTerm = ParseTerm
+  module ParseTerm = ParseTermConDec
 end)
 
-module ParseQuery = ParseQuery (struct
+module ParseQuery = Parse_query.ParseQuery (struct
   (*! structure Parsing' = Parsing !*)
   module ExtQuery' = ReconQuery
-  module ParseTerm = ParseTerm
+  module ParseTerm = ParseTermQuery
 end)
 
-module ParseFixity = ParseFixity (struct
+module ParseFixity = Parse_fixity.ParseFixity (struct
   (*! structure Parsing' = Parsing !*) module Names' = Names
 end)
 
-module ParseMode = ParseMode (struct
+module ParseMode = Parse_mode.ParseMode (struct
   (*! structure Parsing' = Parsing !*)
   module ExtModes' = ReconMode
 
   (*! structure Paths = Paths !*)
-  module ParseTerm = ParseTerm
+  module ParseTerm = ParseTermMode
 end)
 
-module ParseThm = ParseThm (struct
+module ParseThm = Parse_thm.ParseThm (struct
   (*! structure Parsing' = Parsing !*)
   module ThmExtSyn' = ReconThm
-  module ParseTerm = ParseTerm
+  module ParseTerm = ParseTermThm
 end)
 
 (*! structure Paths = Paths !*)
-module ParseModule = ParseModule (struct
+module ParseModule = Parse_module.ParseModule (struct
   (*! structure Parsing' = Parsing !*)
   module ModExtSyn' = ReconModule
-  module ParseTerm = ParseTerm
+  module ParseTerm = ParseTermModule
 end)
 
 (*! structure Paths = Paths !*)
-module Parser = Parser (struct
+module Parser = Parser.Parser (struct
   (*! structure Parsing' = Parsing !*)
   module Stream' = Stream
-  module ExtSyn' = ReconTerm
+  module ExtSyn' = ParseTerm.ExtSyn
   module Names' = Names
   module ExtConDec' = ReconConDec
   module ExtQuery' = ReconQuery
@@ -167,14 +202,14 @@ module Parser = Parser (struct
   module ParseTerm = ParseTerm
 end)
 
-module Solve = Solve (struct
+module Solve = Solve.Solve (struct
   module Global = Global
 
   (*! structure IntSyn' = IntSyn !*)
   module Names = Names
   module Parser = Parser
   module ReconQuery = ReconQuery
-  module Timers = Timers
+  module Timers = Timers.Timers
 
   (*! structure CompSyn = CompSyn !*)
   module Compile = Compile
@@ -184,10 +219,9 @@ module Solve = Solve (struct
   module AbsMachine = SwMachine
   module PtRecon = PtRecon
   module AbsMachineSbt = AbsMachineSbt
-  module PtRecon = PtRecon
 
   (*! structure TableParam = TableParam !*)
-  module Tabled = Tabled
+  module Tabled = Tabled_
 
   (*	 structure TableIndex = TableIndex *)
   (*	 structure MemoTable = MemoTable *)
@@ -195,17 +229,17 @@ module Solve = Solve (struct
   module Msg = Msg
 end)
 
-module Fquery = Fquery (struct
+module Fquery = Fquery.Fquery (struct
   module Global = Global
   module Names = Names
   module ReconQuery = ReconQuery
-  module Timers = Timers
+  module Timers = Timers.Timers
   module Print = Print
 end)
 
-module Twelf = Twelf (struct
+module Twelf = Twelf.Twelf (struct
   module Global = Global
-  module Timers = Timers
+  module Timers = Timers.Timers
 
   (*! structure IntSyn' = IntSyn !*)
   module Whnf = Whnf
@@ -214,7 +248,7 @@ module Twelf = Twelf (struct
 
   (*! structure Paths = Paths !*)
   module Origins = Origins
-  module Lexer = Lexer
+  module Lexer = Lexer.Lexer
 
   (*! structure Parsing = Parsing !*)
   module Parser = Parser
@@ -249,7 +283,7 @@ module Twelf = Twelf (struct
   module AbsMachine = SwMachine
 
   (*! structure TableParam = TableParam !*)
-  module Tabled = Tabled
+  module Tabled = Tabled_
   module Solve = Solve
   module Fquery = Fquery
   module StyleCheck = StyleCheck
@@ -264,7 +298,7 @@ module Twelf = Twelf (struct
   module Worldify = Worldify
   module ModSyn = ModSyn
   module ReconModule = ReconModule
-  module MetaGlobal = MetaGlobal
+  module MetaGlobal = Meta_global.MetaGlobal
 
   (*! structure FunSyn = FunSyn !*)
   module Skolem = Skolem
@@ -278,6 +312,6 @@ module Twelf = Twelf (struct
 
   (* unused -- creates necessary CM dependency *)
   module Compat = Compat
-  module UnknownExn = UnknownExn
+  module UnknownExn = Unknownexn_smlnj.UnknownExn
   module Msg = Msg
 end)
