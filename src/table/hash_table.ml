@@ -25,14 +25,14 @@ end) : TABLE with type key = HashTable__0.key' = struct
   type 'a bucket = Nil | Cons of 'a ref * 'a bucket ref
   type nonrec 'a table_ = (int * 'a entry) bucket array * int
 
-  let rec new_ n = (Array.array (n, Nil), n)
+  let new_ n = (Array.array (n, Nil), n)
 
-  let rec insertShadow (a, n) ((key, datum) as e) =
+  let insertShadow (a, n) ((key, _datum) as e) =
     let hashVal = hash key in
     let index = hashVal mod n in
     let bucket = Array.sub (a, index) in
     let rec insertB
-        (Cons (({ contents = hash', ((key', datum') as e') } as r'), br')) =
+        (Cons (({ contents = hash', ((key', _datum') as e') } as r'), br')) =
       begin if hashVal = hash' && eq (key, key') then begin
         r' := (hashVal, e);
         Some e'
@@ -46,7 +46,7 @@ end) : TABLE with type key = HashTable__0.key' = struct
         end
       | br -> insertB !br
     in
-    let rec insertA = function
+    let insertA = function
       | Nil -> begin
           Array.update (a, index, Cons (ref (hashVal, e), ref Nil));
           None
@@ -55,12 +55,12 @@ end) : TABLE with type key = HashTable__0.key' = struct
     in
     insertA bucket
 
-  let rec insert h e =
+  let insert h e =
     begin
       ignore (insertShadow h e)
     end
 
-  let rec lookup (a, n) key =
+  let lookup (a, n) key =
     let hashVal = hash key in
     let rec lookup' = function
       | Cons ({ contents = hash1, (key1, datum1) }, br) -> begin
@@ -71,7 +71,7 @@ end) : TABLE with type key = HashTable__0.key' = struct
     let bucket = Array.sub (a, hashVal mod n) in
     lookup' bucket
 
-  let rec delete (a, n) key =
+  let delete (a, n) key =
     let hashVal = hash key in
     let index = hashVal mod n in
     let bucket = Array.sub (a, index) in
@@ -80,9 +80,9 @@ end) : TABLE with type key = HashTable__0.key' = struct
         begin
           if hashVal = hash1 && eq (key, key1) then br := !br1 else deleteBR br1
         end
-      | br -> ()
+      | _br -> ()
     in
-    let rec deleteA = function
+    let deleteA = function
       | Nil -> ()
       | Cons ({ contents = hash1, (key1, _) }, br1) -> begin
           if hashVal = hash1 && eq (key, key1) then Array.update (a, index, !br1)
@@ -91,17 +91,17 @@ end) : TABLE with type key = HashTable__0.key' = struct
     in
     deleteA bucket
 
-  let rec clear (a, n) = Array.modify (function _ -> Nil) a
+  let clear (a, _n) = Array.modify (function _ -> Nil) a
 
   let rec appBucket arg__1 arg__2 =
     begin match (arg__1, arg__2) with
-    | f, Nil -> ()
+    | _f, Nil -> ()
     | f, Cons ({ contents = _, e }, br) -> begin
         f e;
         appBucket f !br
       end
     end
 
-  let rec app f (a, n) = Array.app (appBucket f) a
+  let app f (a, _n) = Array.app (appBucket f) a
 end
 (* functor HashTable *)

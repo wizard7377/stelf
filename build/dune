@@ -175,7 +175,7 @@
   server)
  (libraries basis)
  (flags
-  (:standard -w -A -open Basis))
+  (:standard -open Basis))
  (wrapped true))
 
 (include twelf_server_mlton.sources.dune)
@@ -186,5 +186,5 @@
  (modules twelf_server_mlton_)
  (libraries twelf_core_mlton basis)
  (flags
-  (:standard -w -A -open Basis))
+  (:standard -open Basis))
  (wrapped true))

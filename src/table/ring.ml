@@ -39,15 +39,15 @@ module Ring : RING = struct
      [a1,...,ai,ai+1,...,an] wrapping around
   *)
   (* empty q = true if q = [], false otherwise *)
-  let rec empty = function [], [] -> true | _ -> false
+  let empty = function [], [] -> true | _ -> false
 
   (* init l = l (as ring) *)
-  let rec init l = ([], l)
+  let init l = ([], l)
 
   (* insert ([], x) = [x]
      insert ([a1, a2 ... an], x) = [x, a1, a2, ... an]
   *)
-  let rec insert ((r, l), y) = (r, y :: l)
+  let insert ((r, l), y) = (r, y :: l)
 
   (* current [] = raise Empty
      current [a1, a2 ... an] = a1
@@ -79,12 +79,12 @@ module Ring : RING = struct
   let rec delete = function
     | [], [] -> raise Empty
     | r, [] -> delete ([], rev r)
-    | r, x :: l -> (r, l)
+    | r, _x :: l -> (r, l)
 
   (* foldr is inefficient *)
-  let rec foldr f i (r, l) = List.foldr f i (l @ rev r)
+  let foldr f i (r, l) = List.foldr f i (l @ rev r)
 
   (* order of map is undefined.  relevant? *)
-  let rec map f (r, l) = (List.map f r, List.map f l)
+  let map f (r, l) = (List.map f r, List.map f l)
 end
 (* structure Ring *)

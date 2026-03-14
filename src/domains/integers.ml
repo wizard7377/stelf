@@ -23,7 +23,7 @@ module Integers (Integer : INTEGER) : INTEGERS = struct
   let zero = fromInt 0
   let one = fromInt 1
 
-  let rec solve_gcd (m, n) =
+  let solve_gcd (m, n) =
     let rec solve' (m, n) =
       let q = quot (m, n) in
       let r = rem (m, n) in
@@ -42,14 +42,14 @@ module Integers (Integer : INTEGER) : INTEGERS = struct
     else (function x, y -> (sm * y, sn * x)) (solve' (an, am))
     end
 
-  let rec gcd (m, n) =
+  let gcd (m, n) =
     let x, y = solve_gcd (m, n) in
     (m * x) + (n * y)
 
-  let rec lcm (m, n) = quot (m * n, gcd (m, n))
+  let lcm (m, n) = quot (m * n, gcd (m, n))
 
-  let rec fromString str =
-    let rec check = function
+  let fromString str =
+    let check = function
       | c :: chars' as chars -> begin
           if c = '~' then List.all Char.isDigit chars'
           else List.all Char.isDigit chars

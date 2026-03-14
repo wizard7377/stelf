@@ -70,18 +70,18 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
             (r, "Expected simple mode, found mode followed by identifier " ^ id)
 
     let rec stripRParen = function
-      | LS.Cons ((rparen_, r), s') -> (LS.expose s', r)
+      | LS.Cons ((L.Rparen, r), s') -> (LS.expose s', r)
       | LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected closing `)', found " ^ L.toString t)
 
     let rec stripRBrace = function
-      | LS.Cons ((rbrace_, r), s') -> (LS.expose s', r)
+      | LS.Cons ((L.Rbrace, r), s') -> (LS.expose s', r)
       | LS.Cons ((t, r), _) ->
           Parsing.error (r, "Expected `}', found " ^ L.toString t)
 
     let rec parseShortSpine = function
-      | LS.Cons ((dot_, r), s') as f -> (E.Short.mnil r, f)
-      | LS.Cons ((rparen_, r), s') as f -> (E.Short.mnil r, f)
+      | LS.Cons ((L.Dot, r), s') as f -> (E.Short.mnil r, f)
+      | LS.Cons ((L.Rparen, r), s') as f -> (E.Short.mnil r, f)
       | LS.Cons ((L.Id (_, id), r), s') ->
           let mId = validateMArg (r, splitModeId (r, id)) in
           let mS', f' = parseShortSpine (LS.expose s') in
@@ -92,7 +92,7 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
     let rec parseFull = function
       | LS.Cons (((L.Id (c, id), r0) as t0), s'), r1 -> begin
           match LS.expose s' with
-          | LS.Cons ((lbrace_, r), s'') ->
+          | LS.Cons ((L.Lbrace, r), s'') ->
               let mId = splitModeId (r0, id) in
               let m = validateMode (r0, mId) in
               let (x, yOpt), f' = ParseTerm.parseDec' (LS.expose s'') in
@@ -112,7 +112,7 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
               in
               (E.Full.mroot (t', P.join (r, r1)), f')
         end
-      | LS.Cons ((lparen_, r0), s'), r1 ->
+      | LS.Cons ((L.Lparen, r0), s'), r1 ->
           let t', f' = ParseTerm.parseTerm' (LS.expose s') in
           let f'', r' = stripRParen f' in
           (E.Full.mroot (t', P.join (r', r1)), f'')
@@ -120,7 +120,7 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
           Parsing.error (r, "Expected mode or identifier, found " ^ L.toString t)
 
     let rec parseMode2 = function
-      | lexid, (LS.Cons ((lbrace_, r), s') as bs_), r1 ->
+      | lexid, (LS.Cons ((L.Lbrace, r), s') as bs_), r1 ->
           let t', f' =
             parseFull (LS.Cons (lexid, LS.delay (function () -> bs_)), r1)
           in
@@ -141,21 +141,21 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
     let rec parseMode1 = function
       | LS.Cons (((L.Id _, r) as lexid), s') ->
           parseModeNext (parseMode2 (lexid, LS.expose s', r))
-      | LS.Cons ((lparen_, r), s') ->
+      | LS.Cons ((L.Lparen, r), s') ->
           parseModeNext (parseModeParen (LS.expose s', r))
       | LS.Cons ((t, r), _) ->
           Parsing.error (r, "Expected identifier or mode, found " ^ L.toString t)
 
     and parseModeNext = function
-      | modedec, (LS.Cons ((dot_, _), s') as f) -> ([ modedec ], f)
+      | modedec, (LS.Cons ((L.Dot, _), s') as f) -> ([ modedec ], f)
       | modedec, f ->
           let mdecs, f' = parseMode1 f in
           (modedec :: mdecs, f')
 
     let rec parseMode' = function
-      | LS.Cons ((mode_, r), s') -> parseMode1 (LS.expose s')
-      | LS.Cons ((unique_, r), s') -> parseMode1 (LS.expose s')
-      | LS.Cons ((covers_, r), s') -> parseMode1 (LS.expose s')
+      | LS.Cons ((L.Mode, r), s') -> parseMode1 (LS.expose s')
+      | LS.Cons ((L.Unique, r), s') -> parseMode1 (LS.expose s')
+      | LS.Cons ((L.Covers, r), s') -> parseMode1 (LS.expose s')
   end
 
   (* extract (s, i) = substring of s starting at index i

@@ -43,7 +43,7 @@ module Rationals (Integers : INTEGERS) :
 
     exception Div
 
-    let rec normalize = function
+    let normalize = function
       | Fract (0, _, _) -> zero
       | Fract (s, n, d) ->
           let rec gcd (m, n) =
@@ -60,9 +60,9 @@ module Rationals (Integers : INTEGERS) :
           let g = gcd (n, d) in
           Fract (s, I.div (n, g), I.div (d, g))
 
-    let rec ( ~- ) (Fract (s, n, d)) = Fract (Int.( ~- ) s, n, d)
+    let ( ~- ) (Fract (s, n, d)) = Fract (Int.( ~- ) s, n, d)
 
-    let rec add_ (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
+    let add_ (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
       let n =
         I.( + )
           (I.( * ) (I.( * ) (I.fromInt s1) n1) d2)
@@ -72,7 +72,7 @@ module Rationals (Integers : INTEGERS) :
 
     let ( + ) a b = add_ (a, b)
 
-    let rec sub_ (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
+    let sub_ (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
       let n =
         I.( - )
           (I.( * ) (I.( * ) (I.fromInt s1) n1) d2)
@@ -82,41 +82,41 @@ module Rationals (Integers : INTEGERS) :
 
     let ( - ) a b = sub_ (a, b)
 
-    let rec mul_ (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
+    let mul_ (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
       normalize (Fract (Int.( * ) s1 s2, I.( * ) n1 n2, I.( * ) d1 d2))
 
     let ( * ) a b = mul_ (a, b)
 
-    let rec inverse = function
+    let inverse = function
       | Fract (0, _, _) -> raise Div
       | Fract (s, n, d) -> Fract (s, d, n)
 
-    let rec sign (Fract (s, n, d)) = s
-    let rec numerator (Fract (s, n, d)) = n
-    let rec denominator (Fract (s, n, d)) = d
-    let rec abs (Fract (s, n, d)) = Fract (Int.abs s, n, d)
+    let sign (Fract (s, _n, _d)) = s
+    let numerator (Fract (_s, n, _d)) = n
+    let denominator (Fract (_s, _n, d)) = d
+    let abs (Fract (s, n, d)) = Fract (Int.abs s, n, d)
 
     (* Workaround: I.compare returns wrong order path *)
-    let rec compare (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
+    let compare (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
       let a = I.( * ) (I.( * ) (I.fromInt s1) n1) d2 in
       let b = I.( * ) (I.( * ) (I.fromInt s2) n2) d1 in
       I.compare (a, b)
 
-    let rec ( > ) q1 q2 = compare (q1, q2) = Greater
-    let rec ( < ) q1 q2 = compare (q1, q2) = Less
-    let rec ( >= ) q1 q2 = q1 = q2 || q1 > q2
-    let rec ( <= ) q1 q2 = q1 = q2 || q1 < q2
-    let rec fromInt n = Fract (Int.sign n, I.fromInt (Int.abs n), I.fromInt 1)
+    let ( > ) q1 q2 = compare (q1, q2) = Greater
+    let ( < ) q1 q2 = compare (q1, q2) = Less
+    let ( >= ) q1 q2 = q1 = q2 || q1 > q2
+    let ( <= ) q1 q2 = q1 = q2 || q1 < q2
+    let fromInt n = Fract (Int.sign n, I.fromInt (Int.abs n), I.fromInt 1)
 
-    let rec fromString str =
-      let rec check_numerator = function
+    let fromString str =
+      let check_numerator = function
         | c :: chars' as chars -> begin
             if c = '~' then List.all Char.isDigit chars'
             else List.all Char.isDigit chars
           end
         | [] -> false
       in
-      let rec check_denominator chars = List.all Char.isDigit chars in
+      let check_denominator chars = List.all Char.isDigit chars in
       let fields = String.fields (function c -> c = '/') str in
       begin if List.length fields = 1 then
         let numerator = List.nth (fields, 0) in
@@ -145,13 +145,13 @@ module Rationals (Integers : INTEGERS) :
       end
       end
 
-    let rec toString (Fract (s, n, d)) =
+    let toString (Fract (s, n, d)) =
       let nStr = I.toString (I.( * ) (I.fromInt s) n) in
       let dStr = I.toString d in
       begin if d = I.fromInt 1 then nStr else (nStr ^ "/") ^ dStr
       end
 
-    let rec fromInteger n = Fract (I.sign n, I.abs n, I.fromInt 1)
+    let fromInteger n = Fract (I.sign n, I.abs n, I.fromInt 1)
 
     let rec floor (Fract (s, n, d) as q) =
       begin if Int.( >= ) s 0 then I.quot (n, d)

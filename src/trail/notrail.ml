@@ -11,12 +11,12 @@ open Trail_
 module NoTrail : TRAIL = struct
   type nonrec 'a trail = unit
 
-  let rec trail () = ()
-  let rec suspend ((), copy) = ()
-  let rec resume ((), (), reset) = ()
-  let rec reset () = ()
-  let rec mark () = ()
-  let rec unwind ((), undo) = ()
-  let rec log ((), action) = ()
+  let trail () = ()
+  let suspend ((), _copy) = ()
+  let resume ((), (), _reset) = ()
+  let reset () = ()
+  let mark () = ()
+  let unwind ((), _undo) = ()
+  let log ((), _action) = ()
 end
 (* structure NoTrail *)

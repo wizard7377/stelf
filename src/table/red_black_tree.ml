@@ -36,7 +36,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
         black nodes, called the black height of the tree.
   *)
   open! struct
-    let rec lookup dict key =
+    let lookup dict key =
       let rec lk = function
         | Empty -> None
         | Red (e, left, right) -> lk' (e, left, right)
@@ -50,7 +50,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
       in
       lk dict
 
-    let rec restore_right = function
+    let restore_right = function
       | Black (e, Red lt, Red ((_, Red _, _) as rt)) ->
           Red (e, Black lt, Black rt)
       | Black (e, Red lt, Red ((_, _, Red _) as rt)) ->
@@ -61,7 +61,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
           Black (re, Red (e, l, rl), rr)
       | dict -> dict
 
-    let rec restore_left = function
+    let restore_left = function
       | Black (e, Red ((_, Red _, _) as lt), Red rt) ->
           Red (e, Black lt, Black rt)
       | Black (e, Red ((_, _, Red _) as lt), Red rt) ->
@@ -72,16 +72,16 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
           Black (lre, Red (le, ll, lrl), Red (e, lrr, r))
       | dict -> dict
 
-    let rec insert (dict, ((key, datum) as entry)) =
+    let insert (dict, ((key, _datum) as entry)) =
       let rec ins = function
         | Empty -> Red (entry, Empty, Empty)
-        | Red (((key1, datum1) as entry1), left, right) -> begin
+        | Red (((key1, _datum1) as entry1), left, right) -> begin
             match compare (key, key1) with
             | Equal -> Red (entry, left, right)
             | Less -> Red (entry1, ins left, right)
             | Greater -> Red (entry1, left, ins right)
           end
-        | Black (((key1, datum1) as entry1), left, right) -> begin
+        | Black (((key1, _datum1) as entry1), left, right) -> begin
             match compare (key, key1) with
             | Equal -> Black (entry, left, right)
             | Less -> restore_left (Black (entry1, ins left, right))
@@ -105,7 +105,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
         | Rightr of 'a dict * 'a entry * 'a zipper
     end
 
-    let rec delete t key =
+    let delete t key =
       let rec zip = function
         | Top, t -> t
         | Leftb (x, b, z), a -> zip (z, Black (x, a, b))
@@ -139,7 +139,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             bbZip (Rightr (Black (w, c, Red (y, d, e)), x, z), b)
         | Rightb (Black (y, c, Red (w, d, e)), x, z), b ->
             (false, zip (z, Black (y, c, Black (x, Red (w, d, e), b))))
-        | Rightr (Black (y, c, Red (w, d, e)), x, z), b ->
+        | Rightr (Black (y, c, Red (w, d, e)), _x, z), b ->
             (false, zip (z, Red (y, c, Black (w, Red (w, d, e), b))))
         | Rightr (Black (y, c, d), x, z), b ->
             (false, zip (z, Black (x, Red (y, c, d), b)))
@@ -154,7 +154,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
         | Red (y, a, b), z -> delMin (a, Leftr (y, b, z))
         | Empty, _ -> raise Match
       in
-      let rec joinRed = function
+      let joinRed = function
         | Empty, Empty, z -> zip (z, Empty)
         | a, b, z ->
             let x, (needB, b') = delMin (b, Top) in
@@ -162,7 +162,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             else zip (z, Red (x, a, b'))
             end
       in
-      let rec joinBlack = function
+      let joinBlack = function
         | a, Empty, z -> (fun (_, r) -> r) (bbZip (z, a))
         | Empty, b, z -> (fun (_, r) -> r) (bbZip (z, b))
         | a, b, z ->
@@ -172,14 +172,14 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             end
       in
       let rec del = function
-        | Empty, z -> raise NotFound
-        | Black (((key1, datum1) as entry1), a, b), z -> begin
+        | Empty, _z -> raise NotFound
+        | Black (((key1, _datum1) as entry1), a, b), z -> begin
             match compare (key, key1) with
             | Equal -> joinBlack (a, b, z)
             | Less -> del (a, Leftb (entry1, b, z))
             | Greater -> del (b, Rightb (a, entry1, z))
           end
-        | Red (((key1, datum1) as entry1), a, b), z -> begin
+        | Red (((key1, _datum1) as entry1), a, b), z -> begin
             match compare (key, key1) with
             | Equal -> joinRed (a, b, z)
             | Less -> del (a, Leftr (entry1, b, z))
@@ -193,11 +193,11 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
         end
       with NotFound -> false
 
-    let rec insertShadow (dict, ((key, datum) as entry)) =
+    let insertShadow (dict, ((key, _datum) as entry)) =
       let oldEntry = ref None in
       let rec ins = function
         | Empty -> Red (entry, Empty, Empty)
-        | Red (((key1, datum1) as entry1), left, right) -> begin
+        | Red (((key1, _datum1) as entry1), left, right) -> begin
             match compare (key, key1) with
             | Equal -> begin
                 oldEntry := Some entry1;
@@ -206,7 +206,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             | Less -> Red (entry1, ins left, right)
             | Greater -> Red (entry1, left, ins right)
           end
-        | Black (((key1, datum1) as entry1), left, right) -> begin
+        | Black (((key1, _datum1) as entry1), left, right) -> begin
             match compare (key, key1) with
             | Equal -> begin
                 oldEntry := Some entry1;
@@ -226,7 +226,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
           !oldEntry )
       end
 
-    let rec app f dict =
+    let app f dict =
       let rec ap = function
         | Empty -> ()
         | Red (e, left, right) -> ap' (e, left, right)
@@ -297,7 +297,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
   (* : 'a entry option ref *)
   (* re-color *)
   (* re-color *)
-  let rec new_ n = ref Empty
+  let new_ _n = ref Empty
 
   (* ignore size hint *)
   let insert = function

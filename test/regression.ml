@@ -9,21 +9,30 @@ open! Basis
 (* Does not call ""use"", exits when it is done: suitable for mlton or sml/nj *)
 (* Author: Robert J. Simmons *)
 module RegressionTest = struct
+  type make_result =
+    | Ok
+    | Abort
+    | Exn of exn
+
   type command =
     | Test of string
     | TestUnsafe of string
 
+  let () = Printexc.record_backtrace true
   let _ = Frontend.Frontend_.Twelf.chatter := 0
 
   let run_make ~unsafe file =
     let previous_unsafe = !(Frontend.Frontend_.Twelf.unsafe) in
     Frontend.Frontend_.Twelf.unsafe := unsafe;
-    let stat =
-      try Frontend.Frontend_.Twelf.make file
-      with _ -> Frontend.Frontend_.Twelf.Abort
+    let result =
+      try
+        match Frontend.Frontend_.Twelf.make file with
+        | Frontend.Frontend_.Twelf.Ok -> Ok
+        | Frontend.Frontend_.Twelf.Abort -> Abort
+      with exn -> Exn exn
     in
     Frontend.Frontend_.Twelf.unsafe := previous_unsafe;
-    stat
+    result
 
   let parse_command str =
     if String.isPrefix "#" str then None
@@ -33,10 +42,15 @@ module RegressionTest = struct
       Some (Test (String.extract (str, 5, Some (String.size str - 6))))
     else None
 
-  let fail_if_abort phase file = function
-    | Frontend.Frontend_.Twelf.Ok -> ()
-    | Frontend.Frontend_.Twelf.Abort ->
-        Alcotest.fail (phase ^ " failed for " ^ file)
+  let fail_if_not_ok phase file = function
+    | Ok -> ()
+    | Abort ->
+        Alcotest.fail (phase ^ " failed for " ^ file ^ " (returned Abort)")
+    | Exn exn ->
+        let msg = Printf.sprintf "%s failed for %s (exception: %s\n%s)"
+          phase file (Printexc.to_string exn) (Printexc.get_backtrace ())
+        in
+        Alcotest.fail msg
 
   let run_case cmd =
     let file, unsafe =
@@ -44,11 +58,11 @@ module RegressionTest = struct
       | Test file -> (file, false)
       | TestUnsafe file -> (file, true)
     in
-    
+
     Frontend.Frontend_.Twelf.doubleCheck := false;
-    fail_if_abort "check" file (run_make ~unsafe file);
+    fail_if_not_ok "check" file (run_make ~unsafe file);
     Frontend.Frontend_.Twelf.doubleCheck := true;
-    fail_if_abort "double-check" file (run_make ~unsafe file)
+    fail_if_not_ok "double-check" file (run_make ~unsafe file)
 
   let test_case_of_command line_no cmd =
     let title =

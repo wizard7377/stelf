@@ -40,11 +40,11 @@ module Global : GLOBAL = struct
   (* !!!reconsider later!!! Thu Mar 10 09:42:28 2005 *)
   let timeLimit = ref (None : Time.time option)
 
-  let rec chPrint n s =
+  let chPrint n s =
     begin if !chatter >= n then print (s ()) else ()
     end
 
-  let rec chMessage n s f =
+  let chMessage n s f =
     begin if !chatter >= n then f (s ()) else ()
     end
 end

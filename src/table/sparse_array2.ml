@@ -55,7 +55,7 @@ end) : SPARSE_ARRAY2 = struct
 
   let size = 29
 
-  let rec fromInt code =
+  let fromInt code =
     let rec fromInt' r =
       let code' = (r + 1) * (r + 2) / 2 in
       begin if code < code' then
@@ -66,47 +66,47 @@ end) : SPARSE_ARRAY2 = struct
     in
     fromInt' 0
 
-  let rec toInt (m, n) =
+  let toInt (m, n) =
     let sum = m + n in
     (sum * (sum + 1) / 2) + n
 
-  let rec unsafeSub ({ table; default }, i, j) =
+  let unsafeSub ({ table; default }, i, j) =
     begin match IntTable.lookup table (toInt (i, j)) with
     | None -> default
     | Some v -> v
     end
 
-  let rec unsafeUpdate ({ table; default }, i, j, v) =
+  let unsafeUpdate ({ table; default = _default }, i, j, v) =
     IntTable.insert table (toInt (i, j), v)
 
-  let rec checkRegion { base; row; col; nrows; ncols } =
+  let checkRegion { base = _base; row; col; nrows; ncols } =
     row >= 0 && col >= 0 && nrows >= 0 && ncols >= 0
 
-  let rec array default = { default; table = IntTable.new_ size }
+  let array default = { default; table = IntTable.new_ size }
 
-  let rec sub (array, i, j) =
+  let sub (array, i, j) =
     begin if i >= 0 && j >= 0 then unsafeSub (array, i, j)
     else raise General.Subscript
     end
 
-  let rec update (array, i, j, v) =
+  let update (array, i, j, v) =
     begin if i >= 0 && j >= 0 then unsafeUpdate (array, i, j, v)
     else raise General.Subscript
     end
 
-  let rec row (array, i, (j, len)) =
+  let row (array, i, (j, len)) =
     begin if i >= 0 && j >= 0 && len >= 0 then
       Vector.tabulate (len, function off -> unsafeSub (array, i, j + off))
     else raise General.Subscript
     end
 
-  let rec column (array, j, (i, len)) =
+  let column (array, j, (i, len)) =
     begin if j >= 0 && i >= 0 && len >= 0 then
       Vector.tabulate (len, function off -> unsafeSub (array, i + off, j))
     else raise General.Subscript
     end
 
-  let rec app traversal f ({ base; row; col; nrows; ncols } as region) =
+  let app traversal f ({ base; row; col; nrows; ncols } as region) =
     begin if checkRegion region then
       let rmax = row + nrows in
       let cmax = col + ncols in
@@ -139,7 +139,7 @@ end) : SPARSE_ARRAY2 = struct
     else raise General.Subscript
     end
 
-  let rec fold traversal f init ({ base; row; col; nrows; ncols } as region) =
+  let fold traversal f init ({ base; row; col; nrows; ncols } as region) =
     begin if checkRegion region then
       let rmax = row + nrows in
       let cmax = col + ncols in
@@ -168,7 +168,7 @@ end) : SPARSE_ARRAY2 = struct
     else raise General.Subscript
     end
 
-  let rec modify traversal f ({ base; row; col; nrows; ncols } as region) =
+  let modify traversal f ({ base; row; col; nrows; ncols } as region) =
     begin if checkRegion region then
       let rmax = row + nrows in
       let cmax = col + ncols in

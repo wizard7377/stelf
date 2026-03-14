@@ -208,13 +208,13 @@ end) : Cs.CS = struct
     let rec clearArray2Row (array, i, (j, len)) =
       ignore
         (Vector.mapi
-           (function j, value -> Array2.update (array, i, j, zero))
+           (function j, _value -> Array2.update (array, i, j, zero))
            (Array2.row (array, i, (j, len))))
 
     let rec clearArray2Col (array, j, (i, len)) =
       ignore
         (Vector.mapi
-           (function i, value -> Array2.update (array, i, j, zero))
+           (function i, _value -> Array2.update (array, i, j, zero))
            (Array2.column (array, j, (i, len))))
 
     let rec label = function Row i -> rlabel i | Col j -> clabel j
@@ -236,11 +236,13 @@ end) : Cs.CS = struct
       | Col j -> Array.update (tableau.clabels, j, new_)
       end
 
-    let rec ownerContext = function Var (g_, mon) -> g_ | Exp (g_, sum) -> g_
+    let rec ownerContext = function
+      | Var (g_, _mon) -> g_
+      | Exp (g_, _sum) -> g_
 
     let rec ownerSum = function
-      | Var (g_, mon) -> Sum (zero, [ mon ])
-      | Exp (g_, sum) -> sum
+      | Var (_g_, mon) -> Sum (zero, [ mon ])
+      | Exp (_g_, sum) -> sum
 
     let rec displayPos = function
       | Row row -> print (("row " ^ Int.toString row) ^ "\n")
@@ -260,7 +262,7 @@ end) : Cs.CS = struct
         end
 
     let rec display () =
-      let rec printLabel (col, (l : label)) =
+      let rec printLabel (_col, (l : label)) =
         begin
           print "\t";
           begin
@@ -276,7 +278,7 @@ end) : Cs.CS = struct
         end
       in
       let rec printRow (row, (l : label)) =
-        let rec printCol (col, (d : number)) =
+        let rec printCol (_col, (d : number)) =
           begin
             print "\t";
             print (toString d)
@@ -341,7 +343,7 @@ end) : Cs.CS = struct
       let exception Found of int in
       let rec find (i, (l : label)) =
         begin match l.owner with
-        | Var (g_, mon') -> begin
+        | Var (_g_, mon') -> begin
             if compatibleMon (mon, mon') then raise (Found i) else ()
           end
         | _ -> ()
@@ -398,7 +400,7 @@ end) : Cs.CS = struct
             (tableau.rlabels, 0, nRows ())
         in
         let rec filter = function
-          | j, l, [] -> []
+          | _j, _l, [] -> []
           | j, (l : label), candidates -> begin
               if not (dead l) then
                 List.filter
@@ -446,8 +448,8 @@ end) : Cs.CS = struct
     let rec findPivot row =
       let rec compareScore = function
         | Some d, Some d' -> compare (d, d')
-        | Some d, None -> Less
-        | None, Some d' -> Greater
+        | Some _d, None -> Less
+        | None, Some _d' -> Greater
         | None, None -> Equal
       in
       let rec findPivotCol (j, (l : label), ((score, champs) as result)) =
@@ -556,10 +558,10 @@ end) : Cs.CS = struct
       else Positive
       end
 
-    let rec delayMon (Mon (n, usL_), cnstr) =
+    let rec delayMon (Mon (_n, usL_), cnstr) =
       List.app (function us_ -> Unify.delay (us_, cnstr)) usL_
 
-    let rec unifyRestr (Restr (g_, proof, strict), proof') =
+    let rec unifyRestr (Restr (g_, proof, _strict), proof') =
       begin if Unify.unifiable (g_, (proof, id), (proof', id)) then ()
       else raise Error
       end
@@ -824,14 +826,14 @@ end) : Cs.CS = struct
                   match isSubsumed row with Some pos' -> update (g_, pos', sum)
                 end
               end
-            | Col col -> unifySum (g_, sum, zero)
+            | Col _col -> unifySum (g_, sum, zero)
           end
           else
             let rec isVar = function
               | Sum (m, (Mon (n, _) as mon) :: []) -> begin
                   if m = zero && n = one then Some mon else None
                 end
-              | sum -> None
+              | _sum -> None
             in
             begin match isVar sum with
             | Some mon -> begin
@@ -1003,7 +1005,7 @@ end) : Cs.CS = struct
       | SClo (s_, s'), s -> fst (s_, comp (s', s))
 
     let rec snd = function
-      | App (u1_, s_), s -> fst (s_, s)
+      | App (_u1_, s_), s -> fst (s_, s)
       | SClo (s_, s'), s -> snd (s_, comp (s', s))
 
     let rec isConstantExp u_ =
@@ -1045,7 +1047,7 @@ end) : Cs.CS = struct
               Some (gtAdd (w_, constant zero, u2_, proof))
             end
           with Error -> None)
-      | g_, s_, n -> None
+      | _g_, _s_, _n -> None
 
     let rec solveGeq = function
       | g_, s_, 0 -> (
@@ -1076,7 +1078,7 @@ end) : Cs.CS = struct
               Some (geqAdd (w_, constant zero, u2_, proof))
             end
           with Error -> None)
-      | g_, s_, n -> None
+      | _g_, _s_, _n -> None
 
     let rec pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
     let rec arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)

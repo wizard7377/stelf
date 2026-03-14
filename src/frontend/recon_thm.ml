@@ -165,21 +165,21 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     type nonrec callpats = ThmSyn.callpats_ * Paths.region list
 
     let rec checkArgNumber = function
-      | 0, I.Uni type_, [], r -> ()
+      | 0, I.Uni I.Type, [], r -> ()
       | 0, I.Pi (_, v2_), arg :: args, r -> checkArgNumber (0, v2_, args, r)
       | 0, I.Pi (_, v2_), [], r -> error (r, "Missing arguments in call pattern")
-      | 0, I.Uni type_, arg :: args, r ->
+      | 0, I.Uni I.Type, arg :: args, r ->
           error (r, "Extraneous arguments in call pattern")
       | i, I.Pi (_, v2_), args, r -> checkArgNumber (i - 1, v2_, args, r)
 
     let rec checkCallPat = function
-      | I.ConDec (_, _, i, normal_, v_, kind_), p_, r ->
+      | I.ConDec (_, _, i, I.Normal, v_, I.Kind), p_, r ->
           checkArgNumber (i, v_, p_, r)
       | I.ConDec (a, _, _, I.Constraint _, _, _), p_, r ->
           error (r, ("Illegal constraint constant " ^ a) ^ " in call pattern")
       | I.ConDec (a, _, _, I.Foreign _, _, _), p_, r ->
           error (r, ("Illegal foreign constant " ^ a) ^ " in call pattern")
-      | I.ConDec (a, _, _, _, _, type_), p_, r ->
+      | I.ConDec (a, _, _, _, _, I.Type), p_, r ->
           error (r, ("Constant " ^ a) ^ " in call pattern not a type family")
       | I.ConDef (a, _, _, _, _, _, _), p_, r ->
           error (r, ("Illegal defined constant " ^ a) ^ " in call pattern")
@@ -296,12 +296,12 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     let rec dec (name, t) = (name, t)
 
     let rec ctxAppend = function
-      | g_, null_ -> g_
+      | g_, I.Null -> g_
       | g_, I.Decl (g'_, d_) -> I.Decl (ctxAppend (g_, g'_), d_)
 
     let rec ctxMap arg__1 arg__2 =
       begin match (arg__1, arg__2) with
-      | f, null_ -> I.null_
+      | f, I.Null -> I.null_
       | f, I.Decl (g_, d_) -> I.Decl (ctxMap f g_, f d_)
       end
 
@@ -312,14 +312,14 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       let g2'_ = Names.ctxLUName g2_ in
       (((Print.ctxToString (I.null_, g0'_) ^ "\n")
        ^ begin match g1'_ with
-       | null_ -> ""
+       | I.Null -> ""
        | _ -> ("some " ^ Print.ctxToString (g0'_, g1'_)) ^ "\n"
        end)
       ^ "pi ")
       ^ Print.ctxToString (ctxAppend (g0'_, g1'_), g2'_)
 
     let rec checkFreevars = function
-      | null_, (g1_, g2_), r -> ()
+      | I.Null, (g1_, g2_), r -> ()
       | g0_, (g1_, g2_), r ->
           let _ = Names.varReset I.null_ in
           let g0'_ = Names.ctxName g0_ in

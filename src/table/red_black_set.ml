@@ -100,9 +100,9 @@ module RBSet : RBSET = struct
 
   type nonrec 'a ordSet = 'a set ref
 
-  let rec isEmpty = function Set (_, Empty) -> true | Set (_, _) -> false
+  let isEmpty = function Set (_, Empty) -> true | Set (_, _) -> false
   let empty = Set (0, Empty)
-  let rec singleton x = Set (1, Red (x, Empty, Empty))
+  let singleton x = Set (1, Red (x, Empty, Empty))
   let compare = Int.compare
 
   (* Representation Invariants *)
@@ -117,7 +117,7 @@ module RBSet : RBSET = struct
         black nodes, called the black height of the tree.
   *)
   open! struct
-    let rec lookup (Set (n, dict)) key =
+    let lookup (Set (_n, dict)) key =
       let rec lk = function
         | Empty -> None
         | Red (e, left, right) -> lk' (e, left, right)
@@ -131,9 +131,9 @@ module RBSet : RBSET = struct
       in
       lk dict
 
-    let rec last (Set (n, dict)) = (n, valOf (lookup (Set (n, dict)) n))
+    let last (Set (n, dict)) = (n, valOf (lookup (Set (n, dict)) n))
 
-    let rec restore_right = function
+    let restore_right = function
       | Black (e, Red lt, Red ((_, Red _, _) as rt)) ->
           Red (e, Black lt, Black rt)
       | Black (e, Red lt, Red ((_, _, Red _) as rt)) ->
@@ -144,7 +144,7 @@ module RBSet : RBSET = struct
           Black (re, Red (e, l, rl), rr)
       | dict -> dict
 
-    let rec restore_left = function
+    let restore_left = function
       | Black (e, Red ((_, Red _, _) as lt), Red rt) ->
           Red (e, Black lt, Black rt)
       | Black (e, Red ((_, _, Red _) as lt), Red rt) ->
@@ -155,20 +155,20 @@ module RBSet : RBSET = struct
           Black (lre, Red (le, ll, lrl), Red (e, lrr, r))
       | dict -> dict
 
-    let rec insert (Set (n, dict), ((key, datum) as entry)) =
+    let insert (Set (n, dict), ((key, _datum) as entry)) =
       let nItems = ref n in
       let rec ins = function
         | Empty -> begin
             nItems := n + 1;
             Red (entry, Empty, Empty)
           end
-        | Red (((key1, datum1) as entry1), left, right) -> begin
+        | Red (((key1, _datum1) as entry1), left, right) -> begin
             match compare (key, key1) with
             | Equal -> Red (entry1, left, right)
             | Less -> Red (entry1, ins left, right)
             | Greater -> Red (entry1, left, ins right)
           end
-        | Black (((key1, datum1) as entry1), left, right) -> begin
+        | Black (((key1, _datum1) as entry1), left, right) -> begin
             match compare (key, key1) with
             | Equal -> Black (entry1, left, right)
             | Less -> restore_left (Black (entry1, ins left, right))
@@ -188,15 +188,15 @@ module RBSet : RBSET = struct
       | s_, [] -> s_
       | s_, e :: list -> insertList (insert (s_, e), list)
 
-    let rec insertLast (Set (n, dict), datum) =
+    let insertLast (Set (n, dict), datum) =
       let (Set (n', dic')) = insert (Set (n, dict), (n + 1, datum)) in
       Set (n', dic')
 
-    let rec insertShadow (Set (n, dict), ((key, datum) as entry)) =
+    let insertShadow (Set (n, dict), ((key, _datum) as entry)) =
       let oldEntry = ref None in
       let rec ins = function
         | Empty -> Red (entry, Empty, Empty)
-        | Red (((key1, datum1) as entry1), left, right) -> begin
+        | Red (((key1, _datum1) as entry1), left, right) -> begin
             match compare (key, key1) with
             | Equal -> begin
                 oldEntry := Some entry1;
@@ -205,7 +205,7 @@ module RBSet : RBSET = struct
             | Less -> Red (entry1, ins left, right)
             | Greater -> Red (entry1, left, ins right)
           end
-        | Black (((key1, datum1) as entry1), left, right) -> begin
+        | Black (((key1, _datum1) as entry1), left, right) -> begin
             match compare (key, key1) with
             | Equal -> begin
                 oldEntry := Some entry1;
@@ -215,7 +215,7 @@ module RBSet : RBSET = struct
             | Greater -> restore_right (Black (entry1, left, ins right))
           end
       in
-      let dict', oldEntry' =
+      let dict', _oldEntry' =
         begin
           oldEntry := None;
           ( begin match ins dict with
@@ -239,7 +239,7 @@ module RBSet : RBSET = struct
         | RightBlack of 'a dict * 'a entry * 'a zipper
     end
 
-    let rec delete (Set (nItems, t), k) =
+    let delete (Set (nItems, t), k) =
       let rec zip = function
         | Top, t -> t
         | LeftRed (x, b, z), a -> zip (z, Red (x, a, b))
@@ -289,7 +289,7 @@ module RBSet : RBSET = struct
         | Red (y, a, b), z -> delMin (a, LeftRed (y, b, z))
         | Black (y, a, b), z -> delMin (a, LeftBlack (y, b, z))
       in
-      let rec joinBlack = function
+      let joinBlack = function
         | a, Empty, z -> (fun (_, r) -> r) (bbZip (z, a))
         | Empty, b, z -> (fun (_, r) -> r) (bbZip (z, b))
         | a, b, z ->
@@ -298,7 +298,7 @@ module RBSet : RBSET = struct
             else zip (z, Black (x, a, b'))
             end
       in
-      let rec joinRed = function
+      let joinRed = function
         | Empty, Empty, z -> zip (z, Empty)
         | a, b, z ->
             let x, (needB, b') = delMin (b, Top) in
@@ -307,7 +307,7 @@ module RBSet : RBSET = struct
             end
       in
       let rec del = function
-        | Empty, z -> raise (Error "not found\n")
+        | Empty, _z -> raise (Error "not found\n")
         | Red (((k', _) as y), a, b), z -> begin
             match compare (k, k') with
             | Less -> del (a, LeftRed (y, b, z))
@@ -323,7 +323,7 @@ module RBSet : RBSET = struct
       in
       Set (nItems - 1, del (t, Top))
 
-    let rec app f (Set (n, dict)) =
+    let app f (Set (_n, dict)) =
       let rec ap = function
         | Empty -> ()
         | Red (e, left, right) -> ap' (e, left, right)
@@ -339,7 +339,7 @@ module RBSet : RBSET = struct
       in
       ap dict
 
-    let rec update f (Set (n, dict)) =
+    let update f (Set (n, dict)) =
       let rec upd = function
         | Empty -> Empty
         | Red (e, left, right) -> Red (upd' (e, left, right))
@@ -352,7 +352,7 @@ module RBSet : RBSET = struct
       in
       Set (n, upd dict)
 
-    let rec forall (Set (n, dict)) f =
+    let forall (Set (_n, dict)) f =
       let rec ap = function
         | Empty -> ()
         | Red (e, left, right) -> ap' (e, left, right)
@@ -368,7 +368,7 @@ module RBSet : RBSET = struct
       in
       ap dict
 
-    let rec existsOpt (Set (n, dict)) f =
+    let existsOpt (Set (_n, dict)) f =
       let rec ap = function
         | Empty -> None
         | Red (e, left, right) -> ap' (e, left, right)
@@ -387,7 +387,7 @@ module RBSet : RBSET = struct
       in
       ap dict
 
-    let rec exists (Set (n, dict)) f =
+    let exists (Set (_n, dict)) f =
       let rec ap = function
         | Empty -> false
         | Red (e, left, right) -> ap' (e, left, right)
@@ -401,7 +401,7 @@ module RBSet : RBSET = struct
       in
       ap dict
 
-    let rec setsize (Set (n, _)) = n
+    let setsize (Set (n, _)) = n
 
     let rec next = function
       | (Red (_, _, b) as t) :: rest -> (t, left (b, rest))
@@ -413,14 +413,14 @@ module RBSet : RBSET = struct
       | (Red (_, a, _) as t), rest -> left (a, t :: rest)
       | (Black (_, a, _) as t), rest -> left (a, t :: rest)
 
-    let rec start m = left (m, [])
+    let start m = left (m, [])
 
     type 'a digit =
       | Zero
       | One of 'a entry * 'a dict * 'a digit
       | Two of 'a entry * 'a dict * 'a entry * 'a dict * 'a digit
 
-    let rec addItem (a, l) =
+    let addItem (a, l) =
       let rec incr = function
         | a, t, Zero -> One (a, t, Zero)
         | a1, t1, One (a2, t2, r) -> Two (a1, t1, a2, t2, r)
@@ -429,7 +429,7 @@ module RBSet : RBSET = struct
       in
       incr (a, Empty, l)
 
-    let rec linkAll t =
+    let linkAll t =
       let rec link = function
         | t, Zero -> t
         | t1, One (a, t2, r) -> link (Black (a, t2, t1), r)
@@ -437,9 +437,9 @@ module RBSet : RBSET = struct
       in
       link (Empty, t)
 
-    let rec getEntry = function Red (x, _, _) -> x | Black (x, _, _) -> x
+    let getEntry = function Red (x, _, _) -> x | Black (x, _, _) -> x
 
-    let rec union (Set (n1, s1), Set (n2, s2)) =
+    let union (Set (n1, s1), Set (n2, s2)) =
       let rec ins = function
         | (Empty, _), n, result -> (n, result)
         | (Red (x, _, _), r), n, result ->
@@ -453,8 +453,8 @@ module RBSet : RBSET = struct
         | (Empty, _), t2 -> ins (t2, n, result)
         | t1, (Empty, _) -> ins (t1, n, result)
         | (tree1, r1), (tree2, r2) ->
-            let ((x, d1) as e1) = getEntry tree1 in
-            let ((y, d2) as e2) = getEntry tree2 in
+            let ((x, _d1) as e1) = getEntry tree1 in
+            let ((y, _d2) as e2) = getEntry tree2 in
             begin match compare (x, y) with
             | Less -> union' (r1, t2, n + 1, addItem (e1, result))
             | Equal -> union' (r1, r2, n + 1, addItem (e1, result))
@@ -473,14 +473,14 @@ module RBSet : RBSET = struct
         end
       end
 
-    let rec intersection (Set (_, s1), Set (_, s2)) =
+    let intersection (Set (_, s1), Set (_, s2)) =
       let rec intersect (t1, t2, n, result) =
         begin match (next t1, next t2) with
-        | (Empty, r), (tree, r') -> (n, result)
-        | (tree, r), (Empty, r') -> (n, result)
+        | (Empty, _r), (_tree, _r') -> (n, result)
+        | (_tree, _r), (Empty, _r') -> (n, result)
         | (tree1, r1), (tree2, r2) ->
-            let ((x, d1) as e1) = getEntry tree1 in
-            let ((y, d2) as e2) = getEntry tree2 in
+            let ((x, _d1) as e1) = getEntry tree1 in
+            let ((y, _d2) as _e2) = getEntry tree2 in
             begin match compare (x, y) with
             | Less -> intersect (r1, t2, n, result)
             | Equal -> intersect (r1, r2, n + 1, addItem (e1, result))
@@ -491,7 +491,7 @@ module RBSet : RBSET = struct
       let n, result = intersect (start s1, start s2, 0, Zero) in
       Set (n, linkAll result)
 
-    let rec difference (Set (_, s1), Set (_, s2)) =
+    let difference (Set (_, s1), Set (_, s2)) =
       let rec ins = function
         | (Empty, _), n, result -> (n, result)
         | (Red (x, _, _), r), n, result ->
@@ -504,8 +504,8 @@ module RBSet : RBSET = struct
         | (Empty, _), _ -> (n, result)
         | t1, (Empty, _) -> ins (t1, n, result)
         | (tree1, r1), (tree2, r2) ->
-            let ((x, d1) as e1) = getEntry tree1 in
-            let ((y, d2) as e2) = getEntry tree2 in
+            let ((x, _d1) as e1) = getEntry tree1 in
+            let ((y, _d2) as e2) = getEntry tree2 in
             begin match compare (x, y) with
             | Less -> diff (r1, t2, n + 1, addItem (e1, result))
             | Equal -> diff (r1, r2, n, result)
@@ -516,7 +516,7 @@ module RBSet : RBSET = struct
       let n, result = diff (start s1, start s2, 0, Zero) in
       Set (n, linkAll result)
 
-    let rec difference2 (Set (_, s1), Set (_, s2)) =
+    let difference2 (Set (_, s1), Set (_, s2)) =
       let rec ins = function
         | (Empty, _), n, result -> (n, result)
         | (Red (x, _, _), r), n, result ->
@@ -529,8 +529,8 @@ module RBSet : RBSET = struct
         | (Empty, _), t2 -> ((n1, result1), ins (t2, n2, result2))
         | t1, (Empty, _) -> (ins (t1, n1, result1), (n2, result2))
         | (tree1, r1), (tree2, r2) ->
-            let ((x, d1) as e1) = getEntry tree1 in
-            let ((y, d2) as e2) = getEntry tree2 in
+            let ((x, _d1) as e1) = getEntry tree1 in
+            let ((y, _d2) as e2) = getEntry tree2 in
             begin match compare (x, y) with
             | Less ->
                 diff (r1, t2, (n1 + 1, addItem (e1, result1)), (n2, result2))
@@ -545,7 +545,7 @@ module RBSet : RBSET = struct
       in
       (Set (n1, linkAll result1), Set (n2, linkAll result2))
 
-    let rec diffMod f_ (Set (_, s1), Set (_, s2)) =
+    let diffMod f_ (Set (_, s1), Set (_, s2)) =
       let rec ins = function
         | (Empty, _), n, result -> (n, result)
         | (Red (x, _, _), r), n, result ->
@@ -577,7 +577,7 @@ module RBSet : RBSET = struct
       in
       (Set (n1, linkAll result1), Set (n2, linkAll result2))
 
-    let rec splitSets f_ (Set (_, s1), Set (_, s2)) =
+    let splitSets f_ (Set (_, s1), Set (_, s2)) =
       let rec ins = function
         | (Empty, _), n, result -> (n, result)
         | (Red (x, _, _), r), n, result ->
@@ -704,10 +704,10 @@ module RBSet : RBSET = struct
       for all (x, d1) in S1 
         and (x, d2) in S2, d1 ~ d2
     *)
-  let rec new_ () = ref empty
+  let new_ () = ref empty
 
   (* ignore size hint *)
-  let rec copy s_ =
+  let copy s_ =
     let s'_ = new_ () in
     begin
       s'_ := !s_;
@@ -744,7 +744,7 @@ module RBSet : RBSET = struct
   let forall = function ordSet -> ( function f -> forall !ordSet f)
   let exists = function ordSet -> ( function f -> exists !ordSet f)
   let existsOpt = function ordSet -> ( function f -> existsOpt !ordSet f)
-  let rec size s_ = setsize !s_
+  let size s_ = setsize !s_
 
   let difference = function
     | set1 -> (

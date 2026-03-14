@@ -64,30 +64,30 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | L.NotDigit _ -> Parsing.error (r, "Identifier not a natural number")
 
     let rec stripRParen = function
-      | LS.Cons ((rparen_, r), s') -> LS.expose s'
+      | LS.Cons ((L.Rparen, r), s') -> LS.expose s'
       | LS.Cons ((t, r), _) ->
           Parsing.error (r, "Expected `)', found " ^ L.toString t)
 
     let rec decideRBrace = function
-      | r0, (orders, LS.Cons ((rbrace_, r), s')) ->
+      | r0, (orders, LS.Cons ((L.Rbrace, r), s')) ->
           (Some (E.lex (r0, orders)), LS.expose s')
       | r0, (order, LS.Cons ((t, r), _)) ->
           Parsing.error (P.join (r0, r), "Expected `}', found " ^ L.toString t)
 
     let rec decideRBracket = function
-      | r0, (orders, LS.Cons ((rbracket_, r), s')) ->
+      | r0, (orders, LS.Cons ((L.Rbracket, r), s')) ->
           (Some (E.simul (r0, orders)), LS.expose s')
       | r0, (order, LS.Cons ((t, r), _)) ->
           Parsing.error (P.join (r0, r), "Expected `]', found " ^ L.toString t)
 
     let rec decideRParen = function
-      | r0, (ids, LS.Cons ((rparen_, r), s')) ->
+      | r0, (ids, LS.Cons ((L.Rparen, r), s')) ->
           (Some (E.varg (r, ids)), LS.expose s')
       | r0, (order, LS.Cons ((t, r), _)) ->
           Parsing.error (P.join (r0, r), "Expected `)', found " ^ L.toString t)
 
     let rec parseIds = function
-      | LS.Cons ((L.Id (upper_, id), r), s') ->
+      | LS.Cons ((L.Id (L.Upper, id), r), s') ->
           let ids, f' = parseIds (LS.expose s') in
           (id :: ids, f')
       | LS.Cons (((L.Id (_, id) as t), r), s') ->
@@ -96,12 +96,12 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | f -> ([], f)
 
     let rec parseArgPat = function
-      | LS.Cons ((L.Id (upper_, id), r), s') ->
+      | LS.Cons ((L.Id (L.Upper, id), r), s') ->
           let idOpts, f' = parseArgPat (LS.expose s') in
           (Some id :: idOpts, f')
       | LS.Cons ((L.Id (_, id), r), s') ->
           Parsing.error (r, "Expected upper case identifier, found " ^ id)
-      | LS.Cons ((underscore_, r), s') ->
+      | LS.Cons ((L.Underscore, r), s') ->
           let idOpts, f' = parseArgPat (LS.expose s') in
           (None :: idOpts, f')
       | f -> ([], f)
@@ -116,22 +116,22 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
           Parsing.error (r, "Expected call pattern, found token " ^ L.toString t)
 
     let rec parseCallPats = function
-      | LS.Cons ((lparen_, r), s') ->
+      | LS.Cons ((L.Lparen, r), s') ->
           let cpat, f' = parseCallPat (LS.expose s') in
           let cpats, f'' = parseCallPats (stripRParen f') in
           (cpat :: cpats, f'')
-      | LS.Cons ((dot_, r), s') as f -> ([], f)
+      | LS.Cons ((L.Dot, r), s') as f -> ([], f)
       | LS.Cons ((t, r), s) ->
           Parsing.error
             (r, "Expected call patterns, found token " ^ L.toString t)
 
     let rec parseOrderOpt = function
-      | LS.Cons ((lparen_, r), s') -> decideRParen (r, parseIds (LS.expose s'))
-      | LS.Cons ((lbrace_, r), s') ->
+      | LS.Cons ((L.Lparen, r), s') -> decideRParen (r, parseIds (LS.expose s'))
+      | LS.Cons ((L.Lbrace, r), s') ->
           decideRBrace (r, parseOrders (LS.expose s'))
-      | LS.Cons ((lbracket_, r), s') ->
+      | LS.Cons ((L.Lbracket, r), s') ->
           decideRBracket (r, parseOrders (LS.expose s'))
-      | LS.Cons ((L.Id (upper_, id), r), s') ->
+      | LS.Cons ((L.Id (L.Upper, id), r), s') ->
           (Some (E.varg (r, [ id ])), LS.expose s')
       | LS.Cons (_, s') as f -> (None, f)
 
@@ -155,10 +155,10 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       let callpats, f'' = parseCallPats f' in
       (E.tdecl (order, E.callpats callpats), f'')
 
-    let rec parseTerminates' (LS.Cons ((terminates_, r), s')) =
+    let rec parseTerminates' (LS.Cons ((L.Terminates, r), s')) =
       parseTDecl (LS.expose s')
 
-    let rec parseTotal' (LS.Cons ((total_, r), s')) = parseTDecl (LS.expose s')
+    let rec parseTotal' (LS.Cons ((L.Total, r), s')) = parseTDecl (LS.expose s')
 
     let rec parsePDecl = function
       | LS.Cons ((L.Id (_, id), r), s') ->
@@ -168,7 +168,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected theorem identifier, found " ^ L.toString t)
 
-    let rec parseProve' (LS.Cons ((prove_, r), s')) = parsePDecl (LS.expose s')
+    let rec parseProve' (LS.Cons ((L.Prove, r), s')) = parsePDecl (LS.expose s')
 
     let rec parseEDecl = function
       | LS.Cons ((L.Id (_, id), r), s') ->
@@ -178,15 +178,15 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected theorem identifier, found " ^ L.toString t)
 
-    let rec parseEstablish' (LS.Cons ((establish_, r), s')) =
+    let rec parseEstablish' (LS.Cons ((L.Establish, r), s')) =
       parseEDecl (LS.expose s')
 
-    let rec parseAssert' (LS.Cons ((assert_, r), s')) =
+    let rec parseAssert' (LS.Cons ((L.Assert, r), s')) =
       let callpats, f'' = parseCallPats (LS.expose s') in
       (E.assert_ (E.callpats callpats), f'')
 
     let rec stripRBrace = function
-      | LS.Cons ((rbrace_, r), s') -> (LS.expose s', r)
+      | LS.Cons ((L.Rbrace, r), s') -> (LS.expose s', r)
       | LS.Cons ((t, r), _) ->
           Parsing.error (r, "Expected `}', found " ^ L.toString t)
 
@@ -202,13 +202,13 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       (dec, f'')
 
     and parseDecs' = function
-      | drs_, (LS.Cons ((lbrace_, r), s') as bs_) ->
+      | drs_, (LS.Cons ((L.Lbrace, r), s') as bs_) ->
           let dr_, f' = parseDec (r, LS.expose s') in
           parseDecs' (E.decl (drs_, dr_), f')
       | drs_ -> drs_
 
     and parseDecs = function
-      | LS.Cons ((lbrace_, r), s') as bs_ ->
+      | LS.Cons ((L.Lbrace, r), s') as bs_ ->
           let dr_, f' = parseDec (r, LS.expose s') in
           parseDecs' (E.decl (E.null, dr_), f')
       | LS.Cons ((t, r), s') ->
@@ -227,20 +227,20 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | gbs, (LS.Cons ((L.Id (_, "pi"), r), s') as f) ->
           let g2, f' = parsePi f in
           parseSome' ((E.null, g2) :: gbs, f')
-      | gbs, (LS.Cons ((rparen_, r), s') as f) -> (gbs, f)
+      | gbs, (LS.Cons ((L.Rparen, r), s') as f) -> (gbs, f)
       | gbs, LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected `some' or `pi', found " ^ L.toString t)
 
     and parseSome' = function
-      | gbs, (LS.Cons ((rparen_, r), s') as f) -> (gbs, f)
+      | gbs, (LS.Cons ((L.Rparen, r), s') as f) -> (gbs, f)
       | gbs, LS.Cons ((L.Id (_, "|"), r), s') -> parseSome (gbs, LS.expose s')
       | gbs, LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected `)' or `|', found " ^ L.toString t)
 
-    let rec stripParen (gbs, LS.Cons ((rparen_, r), s')) = (gbs, LS.expose s')
+    let rec stripParen (gbs, LS.Cons ((L.Rparen, r), s')) = (gbs, LS.expose s')
 
     let rec parseGBs = function
-      | LS.Cons ((lparen_, r), s') -> stripParen (parseSome ([], LS.expose s'))
+      | LS.Cons ((L.Lparen, r), s') -> stripParen (parseSome ([], LS.expose s'))
       | LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected `(', found " ^ L.toString t)
 
@@ -315,7 +315,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
                found " ^ L.toString t )
 
     let rec parseColon = function
-      | LS.Cons ((colon_, r), s') -> parseCtxScheme (LS.expose s')
+      | LS.Cons ((L.Colon, r), s') -> parseCtxScheme (LS.expose s')
       | LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected `:', found " ^ L.toString t)
 
@@ -326,7 +326,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected theorem identifier, found " ^ L.toString t)
 
-    let rec parseTheoremDec' (LS.Cons ((theorem_, r), s')) =
+    let rec parseTheoremDec' (LS.Cons ((L.Theorem, r), s')) =
       parseThDec (LS.expose s')
 
     let rec parsePredicate = function
@@ -334,7 +334,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
           (E.predicate ("LESS", r), LS.expose s')
       | LS.Cons ((L.Id (_, "<="), r), s') ->
           (E.predicate ("LEQ", r), LS.expose s')
-      | LS.Cons ((equal_, r), s') -> (E.predicate ("EQUAL", r), LS.expose s')
+      | LS.Cons ((L.Equal, r), s') -> (E.predicate ("EQUAL", r), LS.expose s')
       | LS.Cons ((t, r), s') ->
           Parsing.error
             (r, "Expected reduction predicate <, = or <=, found " ^ L.toString t)
@@ -346,25 +346,25 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       let callpats, f4 = parseCallPats f3 in
       (E.rdecl (p, oOut, oIn, E.callpats callpats), f4)
 
-    let rec parseReduces' (LS.Cons ((reduces_, r), s')) =
+    let rec parseReduces' (LS.Cons ((L.Reduces, r), s')) =
       parseRDecl (LS.expose s')
 
     let rec parseTabledDecl (LS.Cons ((L.Id (_, id), r), s') as f) =
       begin match LS.expose s' with
-      | LS.Cons ((dot_, r'), s) as f -> (E.tableddecl (id, r), f)
+      | LS.Cons ((L.Dot, r'), s) as f -> (E.tableddecl (id, r), f)
       | _ -> Parsing.error (r, "Expected .")
       end
 
-    let rec parseTabled' (LS.Cons ((tabled_, r), s')) =
+    let rec parseTabled' (LS.Cons ((L.Tabled, r), s')) =
       parseTabledDecl (LS.expose s')
 
     let rec parseKeepTableDecl (LS.Cons ((L.Id (_, id), r), s') as f) =
       begin match LS.expose s' with
-      | LS.Cons ((dot_, r'), s) as f -> (E.keepTabledecl (id, r), f)
+      | LS.Cons ((L.Dot, r'), s) as f -> (E.keepTabledecl (id, r), f)
       | _ -> Parsing.error (r, "Expected .")
       end
 
-    let rec parseKeepTable' (LS.Cons ((keeptable_, r), s')) =
+    let rec parseKeepTable' (LS.Cons ((L.Keeptable, r), s')) =
       parseKeepTableDecl (LS.expose s')
 
     let rec parseWDecl f =
@@ -372,7 +372,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       let callpats, f2 = parseCallPats f1 in
       (E.wdecl (qids, E.callpats callpats), f2)
 
-    let rec parseWorlds' (LS.Cons ((worlds_, r), s')) =
+    let rec parseWorlds' (LS.Cons ((L.Worlds, r), s')) =
       parseWDecl (LS.expose s')
   end
 

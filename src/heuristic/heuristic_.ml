@@ -44,7 +44,7 @@ module Heuristic : HEURISTIC = struct
     let int_compare (a, b) =
       if a < b then Less else if a = b then Equal else Greater
 
-    let rec compare = function
+    let compare = function
       | ( { sd = k1; ind = None; c = c1; m = m1; r = r1; p = p1 },
           { sd = k2; ind = None; c = c2; m = m2; r = r2; p = p2 } ) -> begin
           match
@@ -58,15 +58,16 @@ module Heuristic : HEURISTIC = struct
           | Equal, result, _, _ -> result
           | result, _, _, _ -> result
         end
-      | ( { sd = k1; ind = None; c = c1; m = m1; r = r1; p = p1 },
-          { sd = k2; ind = Some i2; c = c2; m = m2; r = r2; p = p2 } ) -> begin
+      | ( { sd = _k1; ind = None; c = c1; m = m1; r = _r1; p = _p1 },
+          { sd = _k2; ind = Some _i2; c = c2; m = m2; r = _r2; p = _p2 } ) ->
+        begin
           match int_compare (c1 * m2, c2 * m1) with
           | Less -> Less
           | Equal -> Greater
           | Greater -> Greater
         end
-      | ( { sd = k1; ind = Some i1; c = c1; m = m1; r = r1; p = p1 },
-          { sd = k2; ind = None; c = c2; m = m2; r = r2; p = p2 } ) -> begin
+      | ( { sd = _k1; ind = Some _i1; c = c1; m = m1; r = _r1; p = _p1 },
+          { sd = _k2; ind = None; c = c2; m = m2; r = _r2; p = _p2 } ) -> begin
           match int_compare (c1 * m2, c2 * m1) with
           | Less -> Less
           | Equal -> Less
@@ -88,25 +89,25 @@ module Heuristic : HEURISTIC = struct
           | result, _, _, _, _ -> result
         end
 
-    let rec recToString = function 0 -> "non-rec" | 1 -> "rec"
+    let recToString = function 0 -> "non-rec" | 1 -> "rec"
 
     (* TODO: Real.fmt not available in Basis *)
-    let rec realFmt r = Printf.sprintf "%.2f" r
+    let realFmt r = Printf.sprintf "%.2f" r
 
     (* NOTE: Real.( + ) and Real.( / ) are int->int->int due to basis bug; use Stdlib float ops *)
-    let rec ratio (c, m) = Real.fromInt c /. Real.fromInt m
+    let ratio (c, m) = Real.fromInt c /. Real.fromInt m
 
-    let rec sum = function
-      | { sd = k1; ind = None; c = c1; m = m1; r = r1; p = p1 } ->
+    let sum = function
+      | { sd = k1; ind = None; c = c1; m = m1; r = r1; p = _p1 } ->
           realFmt (Real.fromInt k1 +. ratio (m1, c1) +. Real.fromInt r1)
-      | { sd = k1; ind = Some i1; c = c1; m = m1; r = r1; p = p1 } ->
+      | { sd = k1; ind = Some i1; c = c1; m = m1; r = r1; p = _p1 } ->
           realFmt
             (Real.fromInt k1
             +. ratio (1, i1)
             +. ratio (m1, c1)
             +. Real.fromInt r1)
 
-    let rec indexToString = function
+    let indexToString = function
       | { sd = s1; ind = None; c = c1; m = m1; r = r1; p = p1 } ->
           ((((((((((((("(c/m=" ^ Int.toString c1) ^ "/") ^ Int.toString m1)
                    ^ "=")

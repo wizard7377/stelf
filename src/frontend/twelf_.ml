@@ -455,7 +455,7 @@ end) : TWELF = struct
     type 'a result_ = Value of 'a | Exception of exn
 
     let rec withOpenIn fileName scope =
-      let instream = TextIO.openIn fileName in
+      let instream = TextIO.openIn (Stdlib.String.trim fileName) in
       let _ = fileOpenMsg fileName in
       let result = try Value (scope instream) with exn -> Exception exn in
       let _ = fileCloseMsg fileName in

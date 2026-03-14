@@ -39,7 +39,7 @@ module Timing : TIMING = struct
   type nonrec cpuTime = __0
   type nonrec realTime = Time.time
 
-  let rec init () = ()
+  let init () = ()
 
   type 'a result = Value of 'a | Exception of exn
   type nonrec center = string * (cpuTime * realTime) ref
@@ -47,15 +47,13 @@ module Timing : TIMING = struct
 
   let zero = { usr = Time.zeroTime; sys = Time.zeroTime; gc = Time.zeroTime }
 
-  let rec minus
-      ({ usr = t1; sys = t2; gc = t3 }, { usr = s1; sys = s2; gc = s3 }) =
+  let minus ({ usr = t1; sys = t2; gc = t3 }, { usr = s1; sys = s2; gc = s3 }) =
     { usr = Time.( - ) t1 s1; sys = Time.( - ) t2 s2; gc = Time.( - ) t3 s3 }
 
-  let rec plus ({ usr = t1; sys = t2; gc = t3 }, { usr = s1; sys = s2; gc = s3 })
-      =
+  let plus ({ usr = t1; sys = t2; gc = t3 }, { usr = s1; sys = s2; gc = s3 }) =
     { usr = Time.( + ) t1 s1; sys = Time.( + ) t2 s2; gc = Time.( + ) t3 s3 }
 
-  let rec sum { usr = t1; sys = t2; gc = t3 } = Time.( + ) t1 t2
+  let sum { usr = t1; sys = t2; gc = _t3 } = Time.( + ) t1 t2
 
   open! struct end
 
@@ -63,10 +61,10 @@ module Timing : TIMING = struct
   (* val CPUTimer = Timer.startCPUTimer () *)
   (* val realTimer = Timer.startRealTimer () *)
   (* newCenter (name) = new center, initialized to 0 *)
-  let rec newCenter name = (name, ref (zero, Time.zeroTime))
+  let newCenter name = (name, ref (zero, Time.zeroTime))
 
   (* reset (center) = (), reset center to 0 as effect *)
-  let rec reset (_, counters) = counters := (zero, Time.zeroTime)
+  let reset (_, counters) = counters := (zero, Time.zeroTime)
 
   (* time center f x = y
        runs f on x and adds its time to center.
@@ -77,9 +75,9 @@ module Timing : TIMING = struct
     *)
   (* TODO: Timer module is not directly accessible via open Basis.
        Stub the timer-dependent functions until Timer is properly available. *)
-  let rec checkCPUAndGCTimer _timer = zero
+  let checkCPUAndGCTimer _timer = zero
 
-  let rec time (_, counters) (f : 'a -> 'b) (x : 'a) =
+  let time (_, _counters) (f : 'a -> 'b) (x : 'a) =
     let result = try Value (f x) with exn -> Exception exn in
     begin match result with Value v -> v | Exception e -> raise e
     end
@@ -89,11 +87,11 @@ module Timing : TIMING = struct
 
        Warning: the centers should not overlap!
     *)
-  let rec sumCenter (name, l) = (name, l)
-  let rec stdTime (n, time) = StringCvt.padLeft ' ' n (Time.toString time)
+  let sumCenter (name, l) = (name, l)
+  let stdTime (n, time) = StringCvt.padLeft ' ' n (Time.toString time)
 
-  let rec timesToString
-      (name, (({ usr = t1; sys = t2; gc = t3 } as cPUTime_), realTime)) =
+  let timesToString
+      (name, (({ usr = t1; sys = _t2; gc = t3 } as cPUTime_), realTime)) =
     ((((((((((((name ^ ": ") ^ "Real = ") ^ stdTime (7, realTime)) ^ ", ")
            ^ "Run = ")
           ^ stdTime (7, sum cPUTime_))
@@ -107,10 +105,10 @@ module Timing : TIMING = struct
   (* ^ stdTime (5, t2) ^ "" sys, "" ^ *)
   (* elide sys time *)
 
-  let rec toString (name, { contents = cPUTime_, realTime }) =
+  let toString (name, { contents = cPUTime_, realTime }) =
     timesToString (name, (cPUTime_, realTime))
 
-  let rec sumToString (name, centers) =
+  let sumToString (name, centers) =
     let rec sumup = function
       | [], (cPUTime_, realTime) -> timesToString (name, (cPUTime_, realTime))
       | (_, { contents = c_, r_ }) :: centers, (cPUTime_, realTime) ->
@@ -129,19 +127,19 @@ module Counting : TIMING = struct
   type nonrec center = string * int ref
   type nonrec sum = string * center list
 
-  let rec init () = ()
-  let rec newCenter name = (name, ref 0)
-  let rec reset (_, counters) = counters := 0
+  let init () = ()
+  let newCenter name = (name, ref 0)
+  let reset (_, counters) = counters := 0
 
-  let rec time (_, counters) (f : 'a -> 'b) (x : 'a) =
+  let time (_, counters) (f : 'a -> 'b) (x : 'a) =
     let _ = counters := !counters + 1 in
     f x
 
-  let rec sumCenter (name, l) = (name, l)
-  let rec toString' (name, n) = ((name ^ ": ") ^ Int.toString n) ^ "\n"
-  let rec toString (name, { contents = n }) = toString' (name, n)
+  let sumCenter (name, l) = (name, l)
+  let toString' (name, n) = ((name ^ ": ") ^ Int.toString n) ^ "\n"
+  let toString (name, { contents = n }) = toString' (name, n)
 
-  let rec sumToString (name, centers) =
+  let sumToString (name, centers) =
     let rec sumup = function
       | [], total -> toString' (name, total)
       | (_, { contents = n }) :: centers, total -> sumup (centers, total + n)

@@ -6,5 +6,5 @@
  (modules int_inf_sig int_inf_)
  (libraries basis)
  (flags
-  (:standard -w -A -open Basis))
+  (:standard -open Basis))
  (wrapped true))

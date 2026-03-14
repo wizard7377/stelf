@@ -27,10 +27,10 @@ module Trail : TRAIL = struct
   type 'a trail_ = Cons of 'a * 'a trail_ | Mark of 'a trail_ | Nil
   type nonrec 'a trail = 'a trail_ ref
 
-  let rec trail () = ref Nil
-  let rec reset trail = trail := Nil
+  let trail () = ref Nil
+  let reset trail = trail := Nil
 
-  let rec suspend (trail, copy) =
+  let suspend (trail, copy) =
     let rec suspend' = function
       | Nil -> Nil
       | Mark trail -> suspend' trail
@@ -39,7 +39,7 @@ module Trail : TRAIL = struct
     let ftrail = suspend' !trail in
     ref ftrail
 
-  let rec resume (ftrail, trail, reset) =
+  let resume (ftrail, trail, reset) =
     let rec resume' = function
       | Nil -> Nil
       | Mark ftrail -> resume' ftrail
@@ -48,9 +48,9 @@ module Trail : TRAIL = struct
     let trail' = resume' !ftrail in
     trail := trail'
 
-  let rec mark trail = trail := Mark !trail
+  let mark trail = trail := Mark !trail
 
-  let rec unwind (trail, undo) =
+  let unwind (trail, undo) =
     let rec unwind' = function
       | Nil -> Nil
       | Mark trail -> trail
@@ -61,7 +61,7 @@ module Trail : TRAIL = struct
     in
     trail := unwind' !trail
 
-  let rec log (trail, action) = trail := Cons (action, !trail)
+  let log (trail, action) = trail := Cons (action, !trail)
   (*	  | suspend' (Mark trail) = (Mark (suspend' trail))*)
   (*	  | resume' (Mark ftrail) = (Mark (resume' ftrail)) *)
 end

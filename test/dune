@@ -12,4 +12,4 @@
    %{workspace_root}/test
    (run %{exe:regression.exe} regression.txt)))
  (flags
-  (:standard -w -A -open Basis)))
+  (:standard -open Basis)))

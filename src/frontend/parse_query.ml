@@ -38,12 +38,12 @@ end) : PARSE_QUERY with module ExtQuery = ParseQuery__0.ExtQuery' = struct
     let rec returnQuery (optName, (tm, f)) = (ExtQuery.query (optName, tm), f)
 
     let rec parseQuery1 = function
-      | name, f, LS.Cons ((colon_, r), s') ->
+      | name, f, LS.Cons ((L.Colon, r), s') ->
           returnQuery (Some name, ParseTerm.parseTerm' (LS.expose s'))
       | name, f, _ -> returnQuery (None, ParseTerm.parseTerm' f)
 
     let rec parseQuery' = function
-      | LS.Cons ((L.Id (upper_, name), r), s') as f ->
+      | LS.Cons ((L.Id (L.Upper, name), r), s') as f ->
           parseQuery1 (name, f, LS.expose s')
       | f -> returnQuery (None, ParseTerm.parseTerm' f)
 
@@ -54,27 +54,27 @@ end) : PARSE_QUERY with module ExtQuery = ParseQuery__0.ExtQuery' = struct
       (ExtQuery.define (optName, tm', optT), f')
 
     let rec parseDefine3 = function
-      | optName, (tm, LS.Cons ((equal_, r), s')) ->
+      | optName, (tm, LS.Cons ((L.Equal, r), s')) ->
           parseDefine4 (optName, Some tm, s')
       | _, (tm, LS.Cons ((t, r), _)) ->
           Parsing.error (r, "Expected `=', found " ^ L.toString t)
 
     let rec parseDefine2 = function
-      | optName, LS.Cons ((colon_, r), s') ->
+      | optName, LS.Cons ((L.Colon, r), s') ->
           parseDefine3 (optName, ParseTerm.parseTerm' (LS.expose s'))
-      | optName, LS.Cons ((equal_, r), s') -> parseDefine4 (optName, None, s')
+      | optName, LS.Cons ((L.Equal, r), s') -> parseDefine4 (optName, None, s')
       | _, LS.Cons ((t, r), _) ->
           Parsing.error (r, "Expected `:' or `=', found " ^ L.toString t)
 
     let rec parseDefine1 = function
       | LS.Cons ((L.Id (idCase, name), r), s') ->
           parseDefine2 (Some name, LS.expose s')
-      | LS.Cons ((underscore_, r), s') -> parseDefine2 (None, LS.expose s')
+      | LS.Cons ((L.Underscore, r), s') -> parseDefine2 (None, LS.expose s')
       | LS.Cons ((t, r), _) ->
           Parsing.error (r, "Expected identifier or `_', found " ^ L.toString t)
 
     let rec parseSolve3 = function
-      | defns, nameOpt, LS.Cons ((colon_, r), s'), r0 ->
+      | defns, nameOpt, LS.Cons ((L.Colon, r), s'), r0 ->
           let tm, (LS.Cons ((_, r), _) as f') =
             ParseTerm.parseTerm' (LS.expose s')
           in
@@ -83,7 +83,7 @@ end) : PARSE_QUERY with module ExtQuery = ParseQuery__0.ExtQuery' = struct
           Parsing.error (r, "Expected `:', found " ^ L.toString t)
 
     let rec parseSolve2 = function
-      | defns, LS.Cons ((underscore_, r), s'), r0 ->
+      | defns, LS.Cons ((L.Underscore, r), s'), r0 ->
           parseSolve3 (defns, None, LS.expose s', r0)
       | defns, LS.Cons ((L.Id (_, name), r), s'), r0 ->
           parseSolve3 (defns, Some name, LS.expose s', r0)
@@ -91,9 +91,9 @@ end) : PARSE_QUERY with module ExtQuery = ParseQuery__0.ExtQuery' = struct
           Parsing.error (r, "Expected identifier or `_', found " ^ L.toString t)
 
     and parseSolve1 = function
-      | defns, LS.Cons ((solve_, r0), s') ->
+      | defns, LS.Cons ((L.Solve, r0), s') ->
           parseSolve2 (defns, LS.expose s', r0)
-      | defns, LS.Cons ((define_, r0), s') ->
+      | defns, LS.Cons ((L.Define, r0), s') ->
           let defn, f' = parseDefine1 (LS.expose s') in
           parseSolve1 (defn :: defns, f')
       | defns, LS.Cons ((t, r), s) ->

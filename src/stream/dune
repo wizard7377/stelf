@@ -6,5 +6,5 @@
  (modules stream_)
  (libraries basis)
  (flags
-  (:standard -w -A -open Basis))
+  (:standard -open Basis))
  (wrapped true))

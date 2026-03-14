@@ -64,11 +64,11 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
           Parsing.error (r, "Expected precedence, found " ^ L.toString t)
 
     let rec parseInfix = function
-      | LS.Cons ((L.Id (lower_, "none"), r), s') ->
+      | LS.Cons ((L.Id (L.Lower, "none"), r), s') ->
           parseFixPrec ((fun p -> FX.Infix (p, FX.None)), LS.expose s')
-      | LS.Cons ((L.Id (lower_, "left"), r), s') ->
+      | LS.Cons ((L.Id (L.Lower, "left"), r), s') ->
           parseFixPrec ((fun p -> FX.Infix (p, FX.Left)), LS.expose s')
-      | LS.Cons ((L.Id (lower_, "right"), r), s') ->
+      | LS.Cons ((L.Id (L.Lower, "right"), r), s') ->
           parseFixPrec ((fun p -> FX.Infix (p, FX.Right)), LS.expose s')
       | LS.Cons ((t, r), s') ->
           Parsing.error
@@ -80,9 +80,9 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
     let rec parsePostfix f = parseFixPrec ((fun p -> FX.Postfix p), f)
 
     let rec parseFixity' = function
-      | LS.Cons ((infix_, r), s') -> parseInfix (LS.expose s')
-      | LS.Cons ((prefix_, r), s') -> parsePrefix (LS.expose s')
-      | LS.Cons ((postfix_, r), s') -> parsePostfix (LS.expose s')
+      | LS.Cons ((L.Infix, r), s') -> parseInfix (LS.expose s')
+      | LS.Cons ((L.Prefix, r), s') -> parsePrefix (LS.expose s')
+      | LS.Cons ((L.Postfix, r), s') -> parsePostfix (LS.expose s')
 
     let rec parseFixity s = parseFixity' (LS.expose s)
 
@@ -91,7 +91,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
         ->
           parseName5
             (name, r0, prefENames, prefUNames @ [ prefUName ], LS.expose s')
-      | name, r0, prefENames, prefUNames, LS.Cons ((rparen_, r), s') ->
+      | name, r0, prefENames, prefUNames, LS.Cons ((L.Rparen, r), s') ->
           (((Names.Qid ([], name), r0), (prefENames, prefUNames)), LS.expose s')
       | name, r0, prefENames, prefUNames, LS.Cons ((t, r), s') ->
           Parsing.error
@@ -101,7 +101,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
       | name, r0, prefEName, LS.Cons ((L.Id (_, prefUName), r), s') ->
           ( ((Names.Qid ([], name), r0), (prefEName, [ prefUName ])),
             LS.expose s' )
-      | name, r0, prefEName, LS.Cons ((lparen_, r), s') ->
+      | name, r0, prefEName, LS.Cons ((L.Lparen, r), s') ->
           parseName5 (name, r0, prefEName, [], LS.expose s')
       | name, r0, prefEName, f ->
           (((Names.Qid ([], name), r0), (prefEName, [])), f)
@@ -113,7 +113,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
           else
             Parsing.error (r, "Expected uppercase identifer, found " ^ prefEName)
         end
-      | name, r0, prefENames, LS.Cons ((rparen_, r), s') ->
+      | name, r0, prefENames, LS.Cons ((L.Rparen, r), s') ->
           parseName3 (name, r0, prefENames, LS.expose s')
       | name, r0, prefENames, LS.Cons ((t, r), s') ->
           Parsing.error
@@ -126,7 +126,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
           else
             Parsing.error (r, "Expected uppercase identifer, found " ^ prefEName)
         end
-      | name, r0, LS.Cons ((lparen_, r), s') ->
+      | name, r0, LS.Cons ((L.Lparen, r), s') ->
           parseName4 (name, r0, [], LS.expose s')
       | name, r0, LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected name preference, found " ^ L.toString t)
@@ -139,7 +139,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
               "Expected identifer to assign name preference, found "
               ^ L.toString t )
 
-    let rec parseNamePref' (LS.Cons ((name_, r), s')) =
+    let rec parseNamePref' (LS.Cons ((L.Name, r), s')) =
       parseName1 (LS.expose s')
 
     let rec parseNamePref s = parseNamePref' (LS.expose s)

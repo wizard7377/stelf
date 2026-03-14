@@ -15,8 +15,8 @@ open! Basis
 (* String Hash Table *)
 (* Author: Frank Pfenning *)
 module StringHash : STRING_HASH = struct
-  let rec stringHash s =
-    let rec num i = Char.ord (String.sub (s, i)) mod 128 in
+  let stringHash s =
+    let num i = Char.ord (String.sub (s, i)) mod 128 in
     let n = String.size s in
     begin if n = 0 then 0
     else

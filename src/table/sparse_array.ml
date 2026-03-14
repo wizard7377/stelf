@@ -50,28 +50,30 @@ end) : SPARSE_ARRAY = struct
 
   let size = 29
 
-  let rec unsafeSub ({ table; default }, i) =
+  let unsafeSub ({ table; default }, i) =
     begin match IntTable.lookup table i with None -> default | Some v -> v
     end
 
-  let rec unsafeUpdate ({ table; default }, i, v) = IntTable.insert table (i, v)
-  let rec array default = { default; table = IntTable.new_ size }
+  let unsafeUpdate ({ table; default = _default }, i, v) =
+    IntTable.insert table (i, v)
 
-  let rec sub (array, i) =
+  let array default = { default; table = IntTable.new_ size }
+
+  let sub (array, i) =
     begin if i >= 0 then unsafeSub (array, i) else raise Subscript
     end
 
-  let rec update (array, i, v) =
+  let update (array, i, v) =
     begin if i >= 0 then unsafeUpdate (array, i, v) else raise Subscript
     end
 
-  let rec extract (array, i, len) =
+  let extract (array, i, len) =
     begin if i >= 0 && len >= 0 then
       Vector.tabulate (len, function off -> unsafeSub (array, i + off))
     else raise Subscript
     end
 
-  let rec copyVec { src; si; len; dst; di } =
+  let copyVec { src; si; len; dst; di } =
     begin if di >= 0 then
       VectorSlice.appi
         (function i, v -> unsafeUpdate (dst, i, v))
@@ -79,7 +81,7 @@ end) : SPARSE_ARRAY = struct
     else raise Subscript
     end
 
-  let rec app f (array, i, len) =
+  let app f (array, i, len) =
     begin if i >= 0 && len >= 0 then
       let imax = i + len in
       let rec app' i' =
@@ -94,7 +96,7 @@ end) : SPARSE_ARRAY = struct
     else raise Subscript
     end
 
-  let rec foldl f init (array, i, len) =
+  let foldl f init (array, i, len) =
     begin if i >= 0 && len >= 0 then
       let rec foldl' i' =
         begin if i' >= i then f (i', unsafeSub (array, i'), foldl' (i' - 1))
@@ -105,7 +107,7 @@ end) : SPARSE_ARRAY = struct
     else raise Subscript
     end
 
-  let rec foldr f init (array, i, len) =
+  let foldr f init (array, i, len) =
     begin if i >= 0 && len >= 0 then
       let imax = i + len in
       let rec foldr' i' =
@@ -117,7 +119,7 @@ end) : SPARSE_ARRAY = struct
     else raise Subscript
     end
 
-  let rec modify f (array, i, len) =
+  let modify f (array, i, len) =
     begin if i >= 0 && len >= 0 then
       let imax = i + len in
       let rec modify' i' =

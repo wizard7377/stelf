@@ -38,16 +38,16 @@ module Queue : QUEUE = struct
   type nonrec 'a queue = 'a list * 'a list
 
   let empty = ([], [])
-  let rec insert (x, (inp, out)) = (x :: inp, out)
+  let insert (x, (inp, out)) = (x :: inp, out)
 
   let rec delete = function
     | [], [] -> None
     | inp, x :: out -> Some (x, (inp, out))
     | inp, [] -> delete ([], List.rev inp)
 
-  let rec insertFront (x, (inp, out)) = (inp, x :: out)
+  let insertFront (x, (inp, out)) = (inp, x :: out)
 
-  let rec deleteEnd = function
+  let deleteEnd = function
     | [], [] -> None
     | x :: inp, out -> Some (x, (inp, out))
     | [], out -> delete (List.rev out, [])
@@ -55,7 +55,7 @@ module Queue : QUEUE = struct
   (* toList q ==> (l, NONE)  means q == l and toList is constant time *)
   (* toList q ==> (l, SOME(q')) means q == l == q' *)
   (* and toList q' is constant time *)
-  let rec toList = function
+  let toList = function
     | [], out -> (out, None)
     | inp, out ->
         let out' = out @ List.rev inp in

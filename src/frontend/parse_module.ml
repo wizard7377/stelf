@@ -49,9 +49,9 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
           (r, "Expected structure identifier, found token " ^ L.toString t)
 
   let rec parseColonEqual' = function
-    | LS.Cons ((colon_, r1), s') -> begin
+    | LS.Cons ((L.Colon, r1), s') -> begin
         match LS.expose s' with
-        | LS.Cons ((equal_, _), s'') -> ((), LS.expose s'')
+        | LS.Cons ((L.Equal, _), s'') -> ((), LS.expose s'')
         | LS.Cons ((t, r2), s'') ->
             Parsing.error (r2, "Expected `=', found token " ^ L.toString t)
       end
@@ -59,7 +59,7 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
         Parsing.error (r, "Expected `:=', found token " ^ L.toString t)
 
   let rec parseDot' = function
-    | LS.Cons ((dot_, r), s') -> (r, LS.expose s')
+    | LS.Cons ((L.Dot, r), s') -> (r, LS.expose s')
     | LS.Cons ((t, r), s') ->
         Parsing.error (r, "Expected `.', found token " ^ L.toString t)
 
@@ -86,7 +86,7 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
           (r, "Expected structure identifier, found token " ^ L.toString t)
 
   let rec parseStrInst' = function
-    | LS.Cons ((struct_, r), s') -> parseStrInst2' (r, LS.expose s')
+    | LS.Cons ((L.Struct, r), s') -> parseStrInst2' (r, LS.expose s')
     | LS.Cons ((t, r), s') ->
         Parsing.error (r, "Expected `%struct', found token " ^ L.toString t)
 
@@ -95,22 +95,22 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
         let inst, f' = parseConInst' f in
         let insts, f'' = parseInsts' f' in
         (inst :: insts, f'')
-    | LS.Cons ((struct_, _), _) as f ->
+    | LS.Cons ((L.Struct, _), _) as f ->
         let inst, f' = parseStrInst' f in
         let insts, f'' = parseInsts' f' in
         (inst :: insts, f'')
-    | LS.Cons ((rbrace_, _), s') -> ([], LS.expose s')
+    | LS.Cons ((L.Rbrace, _), s') -> ([], LS.expose s')
     | LS.Cons ((t, r), s') ->
         Parsing.error
           (r, "Expected identifier or `%struct', found token " ^ L.toString t)
 
   let rec parseInstantiate' = function
-    | LS.Cons ((lbrace_, _), s') as f -> parseInsts' (LS.expose s')
+    | LS.Cons ((L.Lbrace, _), s') as f -> parseInsts' (LS.expose s')
     | LS.Cons ((t, r), s') ->
         Parsing.error (r, "Expected `{', found token " ^ L.toString t)
 
   let rec parseWhereClauses' = function
-    | (LS.Cons ((where_, _), s') as f), sigexp ->
+    | (LS.Cons ((L.Where, _), s') as f), sigexp ->
         let insts, f' = parseInstantiate' (LS.expose s') in
         parseWhereClauses' (f', E.wheresig (sigexp, insts))
     | f, sigexp -> (sigexp, f)
@@ -119,7 +119,7 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
     | LS.Cons ((L.Id (_, id), r), s) ->
         let sigexp, f' = parseWhereClauses' (LS.expose s, E.sigid (id, r)) in
         (Parsing.Done sigexp, f')
-    | LS.Cons ((lbrace_, r), _) as f ->
+    | LS.Cons ((L.Lbrace, r), _) as f ->
         ( Parsing.Continuation
             (function
             | f' ->
@@ -133,7 +133,7 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
           )
 
   let rec parseSgEqual' = function
-    | idOpt, LS.Cons ((equal_, r), s') ->
+    | idOpt, LS.Cons ((L.Equal, r), s') ->
         Parsing.recwith
           (parseSigExp', function sigexp -> E.sigdef (idOpt, sigexp))
           (LS.expose s')
@@ -142,19 +142,19 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
 
   let rec parseSgDef' = function
     | LS.Cons ((L.Id (_, id), r), s') -> parseSgEqual' (Some id, LS.expose s')
-    | LS.Cons ((underscore_, r), s') -> parseSgEqual' (None, LS.expose s')
+    | LS.Cons ((L.Underscore, r), s') -> parseSgEqual' (None, LS.expose s')
     | LS.Cons ((t, r), s') ->
         Parsing.error
           (r, "Expected signature identifier, found token " ^ L.toString t)
 
-  let rec parseSigDef' (LS.Cons ((sig_, r), s')) = parseSgDef' (LS.expose s')
+  let rec parseSigDef' (LS.Cons ((L.Sig, r), s')) = parseSgDef' (LS.expose s')
 
   let rec parseStrDec2' = function
-    | idOpt, LS.Cons ((colon_, r), s') ->
+    | idOpt, LS.Cons ((L.Colon, r), s') ->
         Parsing.recwith
           (parseSigExp', function sigexp -> E.structdec (idOpt, sigexp))
           (LS.expose s')
-    | idOpt, LS.Cons ((equal_, r), s') ->
+    | idOpt, LS.Cons ((L.Equal, r), s') ->
         let strexp, f' = parseStructExp' (LS.expose s') in
         (Parsing.Done (E.structdef (idOpt, strexp)), f')
     | idOpt, LS.Cons ((t, r), s') ->
@@ -162,18 +162,18 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
 
   let rec parseStrDec' = function
     | LS.Cons ((L.Id (_, id), r), s') -> parseStrDec2' (Some id, LS.expose s')
-    | LS.Cons ((underscore_, r), s') -> parseStrDec2' (None, LS.expose s')
+    | LS.Cons ((L.Underscore, r), s') -> parseStrDec2' (None, LS.expose s')
     | LS.Cons ((t, r), s') ->
         Parsing.error
           (r, "Expected structure identifier, found token " ^ L.toString t)
 
-  let rec parseStructDec' (LS.Cons ((struct_, r), s')) =
+  let rec parseStructDec' (LS.Cons ((L.Struct, r), s')) =
     parseStrDec' (LS.expose s')
 
-  let rec parseInclude' (LS.Cons ((include_, r), s')) =
+  let rec parseInclude' (LS.Cons ((L.Include, r), s')) =
     parseSigExp' (LS.expose s')
 
-  let rec parseOpen' (LS.Cons ((open_, r), s')) = parseStructExp' (LS.expose s')
+  let rec parseOpen' (LS.Cons ((L.Open, r), s')) = parseStructExp' (LS.expose s')
 end
 (*! sharing ParseTerm.Lexer = Parsing'.Lexer !*)
 

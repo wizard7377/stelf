@@ -6,5 +6,5 @@
  (modules main)
  (libraries frontend basis)
  (flags
-  (:standard -w -A -open Basis -open Frontend -open Frontend.Frontend_))
+  (:standard -open Basis -open Frontend -open Frontend.Frontend_))
  (wrapped true))

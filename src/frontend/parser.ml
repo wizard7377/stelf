@@ -195,14 +195,14 @@ end) :
     module LS = Parsing.Stream
 
     let rec stripDot = function
-      | LS.Cons ((dot_, r), s) -> s
-      | LS.Cons ((rparen_, r), s) ->
+      | LS.Cons ((L.Dot, r), s) -> s
+      | LS.Cons ((L.Rparen, r), s) ->
           Parsing.error (r, "Unexpected right parenthesis")
-      | LS.Cons ((rbrace_, r), s) -> Parsing.error (r, "Unexpected right brace")
-      | LS.Cons ((rbracket_, r), s) ->
+      | LS.Cons ((L.Rbrace, r), s) -> Parsing.error (r, "Unexpected right brace")
+      | LS.Cons ((L.Rbracket, r), s) ->
           Parsing.error (r, "Unexpected right bracket")
-      | LS.Cons ((eof_, r), s) -> Parsing.error (r, "Unexpected end of file")
-      | LS.Cons ((equal_, r), s) -> Parsing.error (r, "Unexpected `='")
+      | LS.Cons ((L.Eof, r), s) -> Parsing.error (r, "Unexpected end of file")
+      | LS.Cons ((L.Equal, r), s) -> Parsing.error (r, "Unexpected `='")
       | LS.Cons ((t, r), s) ->
           Parsing.error (r, "Expected `.', found " ^ L.toString t)
 
@@ -225,9 +225,9 @@ end) :
     and recParse' (f, recparser, theSigParser, sc) =
       begin match recparser f with
       | Parsing.Done x, f' -> sc (x, f')
-      | Parsing.Continuation k, LS.Cons ((lbrace_, r1), s') ->
+      | Parsing.Continuation k, LS.Cons ((L.Lbrace, r1), s') ->
           let rec finish = function
-            | LS.Cons ((rbrace_, r2), s'') ->
+            | LS.Cons ((L.Rbrace, r2), s'') ->
                 Stream.Cons
                   ((EndSubsig, r2), recParse (s'', k, theSigParser, sc))
             | LS.Cons ((t, r), _) ->
@@ -244,12 +244,12 @@ end) :
     and parseStream' = function
       | (LS.Cons ((L.Id (idCase, name), r0), s') as f), sc ->
           parseConDec' (f, sc)
-      | (LS.Cons ((abbrev_, r), s') as f), sc -> parseAbbrev' (f, sc)
-      | (LS.Cons ((underscore_, r), s') as f), sc -> parseConDec' (f, sc)
-      | (LS.Cons ((infix_, r), s') as f), sc -> parseFixity' (f, sc)
-      | (LS.Cons ((prefix_, r), s') as f), sc -> parseFixity' (f, sc)
-      | (LS.Cons ((postfix_, r), s') as f), sc -> parseFixity' (f, sc)
-      | (LS.Cons ((name_, r1), s') as f), sc ->
+      | (LS.Cons ((L.Abbrev, r), s') as f), sc -> parseAbbrev' (f, sc)
+      | (LS.Cons ((L.Underscore, r), s') as f), sc -> parseConDec' (f, sc)
+      | (LS.Cons ((L.Infix, r), s') as f), sc -> parseFixity' (f, sc)
+      | (LS.Cons ((L.Prefix, r), s') as f), sc -> parseFixity' (f, sc)
+      | (LS.Cons ((L.Postfix, r), s') as f), sc -> parseFixity' (f, sc)
+      | (LS.Cons ((L.Name, r1), s') as f), sc ->
           let namePref, (LS.Cons ((_, r2), _) as f') =
             ParseFixity.parseNamePref' f
           in
@@ -258,9 +258,9 @@ end) :
           Stream.Cons
             ( (NamePref (namePrefQid, namePrefStrings), r),
               parseStream (stripDot f', sc) )
-      | (LS.Cons ((define_, r), s') as f), sc -> parseSolve' (f, sc)
-      | (LS.Cons ((solve_, r), s') as f), sc -> parseSolve' (f, sc)
-      | LS.Cons ((query_, r0), s'), sc ->
+      | (LS.Cons ((L.Define, r), s') as f), sc -> parseSolve' (f, sc)
+      | (LS.Cons ((L.Solve, r), s') as f), sc -> parseSolve' (f, sc)
+      | LS.Cons ((L.Query, r0), s'), sc ->
           let expected, s1 = parseBound' (LS.expose s') in
           let try_, s2 = parseBound' (LS.expose s1) in
           let query, (LS.Cons ((_, r'), _) as f3) =
@@ -269,13 +269,13 @@ end) :
           let r = Paths.join (r0, r') in
           Stream.Cons
             ((Query (expected, try_, query), r), parseStream (stripDot f3, sc))
-      | LS.Cons ((fquery_, r0), s'), sc ->
+      | LS.Cons ((L.Fquery, r0), s'), sc ->
           let query, (LS.Cons ((_, r'), _) as f3) =
             ParseQuery.parseQuery' (LS.expose s')
           in
           let r = Paths.join (r0, r') in
           Stream.Cons ((FQuery query, r), parseStream (stripDot f3, sc))
-      | LS.Cons ((querytabled_, r0), s'), sc ->
+      | LS.Cons ((L.Querytabled, r0), s'), sc ->
           let numSol, s1 = parseBound' (LS.expose s') in
           let try_, s2 = parseBound' (LS.expose s1) in
           let query, (LS.Cons ((_, r'), _) as f3) =
@@ -285,35 +285,35 @@ end) :
           Stream.Cons
             ( (Querytabled (numSol, try_, query), r),
               parseStream (stripDot f3, sc) )
-      | (LS.Cons ((mode_, r), s') as f), sc -> parseMode' (f, sc)
-      | (LS.Cons ((unique_, r), s') as f), sc -> parseUnique' (f, sc)
-      | (LS.Cons ((covers_, r), s') as f), sc -> parseCovers' (f, sc)
-      | (LS.Cons ((total_, r), s') as f), sc -> parseTotal' (f, sc)
-      | (LS.Cons ((terminates_, r), s') as f), sc -> parseTerminates' (f, sc)
-      | (LS.Cons ((block_, r), s') as f), sc -> parseConDec' (f, sc)
-      | (LS.Cons ((worlds_, r), s') as f), sc -> parseWorlds' (f, sc)
-      | (LS.Cons ((reduces_, r), s') as f), sc -> parseReduces' (f, sc)
-      | (LS.Cons ((tabled_, r), s') as f), sc -> parseTabled' (f, sc)
-      | (LS.Cons ((keeptable_, r), s') as f), sc -> parseKeepTable' (f, sc)
-      | (LS.Cons ((theorem_, r), s') as f), sc -> parseTheorem' (f, sc)
-      | (LS.Cons ((prove_, r), s') as f), sc -> parseProve' (f, sc)
-      | (LS.Cons ((establish_, r), s') as f), sc -> parseEstablish' (f, sc)
-      | (LS.Cons ((assert_, r), s') as f), sc -> parseAssert' (f, sc)
-      | (LS.Cons ((trustme_, r), s') as f), sc -> parseTrustMe' (f, sc)
-      | (LS.Cons ((freeze_, r), s') as f), sc -> parseFreeze' (f, sc)
-      | (LS.Cons ((subord_, r), s') as f), sc -> parseSubord' (f, sc)
-      | (LS.Cons ((thaw_, r), s') as f), sc -> parseThaw' (f, sc)
-      | (LS.Cons ((deterministic_, r), s') as f), sc ->
+      | (LS.Cons ((L.Mode, r), s') as f), sc -> parseMode' (f, sc)
+      | (LS.Cons ((L.Unique, r), s') as f), sc -> parseUnique' (f, sc)
+      | (LS.Cons ((L.Covers, r), s') as f), sc -> parseCovers' (f, sc)
+      | (LS.Cons ((L.Total, r), s') as f), sc -> parseTotal' (f, sc)
+      | (LS.Cons ((L.Terminates, r), s') as f), sc -> parseTerminates' (f, sc)
+      | (LS.Cons ((L.Block, r), s') as f), sc -> parseConDec' (f, sc)
+      | (LS.Cons ((L.Worlds, r), s') as f), sc -> parseWorlds' (f, sc)
+      | (LS.Cons ((L.Reduces, r), s') as f), sc -> parseReduces' (f, sc)
+      | (LS.Cons ((L.Tabled, r), s') as f), sc -> parseTabled' (f, sc)
+      | (LS.Cons ((L.Keeptable, r), s') as f), sc -> parseKeepTable' (f, sc)
+      | (LS.Cons ((L.Theorem, r), s') as f), sc -> parseTheorem' (f, sc)
+      | (LS.Cons ((L.Prove, r), s') as f), sc -> parseProve' (f, sc)
+      | (LS.Cons ((L.Establish, r), s') as f), sc -> parseEstablish' (f, sc)
+      | (LS.Cons ((L.Assert, r), s') as f), sc -> parseAssert' (f, sc)
+      | (LS.Cons ((L.Trustme, r), s') as f), sc -> parseTrustMe' (f, sc)
+      | (LS.Cons ((L.Freeze, r), s') as f), sc -> parseFreeze' (f, sc)
+      | (LS.Cons ((L.Subord, r), s') as f), sc -> parseSubord' (f, sc)
+      | (LS.Cons ((L.Thaw, r), s') as f), sc -> parseThaw' (f, sc)
+      | (LS.Cons ((L.Deterministic, r), s') as f), sc ->
           parseDeterministic' (f, sc)
-      | (LS.Cons ((compile_, r), s') as f), sc -> parseCompile' (f, sc)
-      | (LS.Cons ((clause_, r), s') as f), sc -> parseClause' (f, sc)
-      | (LS.Cons ((sig_, r), s') as f), sc -> parseSigDef' (f, sc)
-      | (LS.Cons ((struct_, r), s') as f), sc -> parseStructDec' (f, sc)
-      | (LS.Cons ((include_, r), s') as f), sc -> parseInclude' (f, sc)
-      | (LS.Cons ((open_, r), s') as f), sc -> parseOpen' (f, sc)
-      | (LS.Cons ((use_, r), s') as f), sc -> parseUse' (LS.expose s', sc)
-      | (LS.Cons ((eof_, _), _) as f), sc -> sc f
-      | (LS.Cons ((rbrace_, _), _) as f), sc -> sc f
+      | (LS.Cons ((L.Compile, r), s') as f), sc -> parseCompile' (f, sc)
+      | (LS.Cons ((L.Clause, r), s') as f), sc -> parseClause' (f, sc)
+      | (LS.Cons ((L.Sig, r), s') as f), sc -> parseSigDef' (f, sc)
+      | (LS.Cons ((L.Struct, r), s') as f), sc -> parseStructDec' (f, sc)
+      | (LS.Cons ((L.Include, r), s') as f), sc -> parseInclude' (f, sc)
+      | (LS.Cons ((L.Open, r), s') as f), sc -> parseOpen' (f, sc)
+      | (LS.Cons ((L.Use, r), s') as f), sc -> parseUse' (LS.expose s', sc)
+      | (LS.Cons ((L.Eof, _), _) as f), sc -> sc f
+      | (LS.Cons ((L.Rbrace, _), _) as f), sc -> sc f
       | LS.Cons ((t, r), s'), sc ->
           Parsing.error
             ( r,
@@ -514,8 +514,8 @@ end) :
 
     let rec parseTLStream instream =
       let rec finish = function
-        | LS.Cons ((eof_, r), s) -> Stream.Empty
-        | LS.Cons ((rbrace_, r), s) -> Parsing.error (r, "Unmatched `}'")
+        | LS.Cons ((L.Eof, r), s) -> Stream.Empty
+        | LS.Cons ((L.Rbrace, r), s) -> Parsing.error (r, "Unmatched `}'")
       in
       parseStream (lexStreamToParsing (L.lexStream instream), finish)
   end

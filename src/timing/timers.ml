@@ -148,9 +148,9 @@ end) : TIMERS = struct
 
   let total = Timing.sumCenter ("Total         ", centers)
   let time = Timing.time
-  let rec reset () = List.app Timing.reset centers
+  let reset () = List.app Timing.reset centers
 
-  let rec check () =
+  let check () =
     begin
       List.app (fun x -> print (Timing.toString x)) centers;
       begin
@@ -159,7 +159,7 @@ end) : TIMERS = struct
       end
     end
 
-  let rec show () =
+  let show () =
     begin
       check ();
       reset ()

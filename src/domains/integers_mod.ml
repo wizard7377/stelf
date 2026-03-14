@@ -15,18 +15,18 @@ end) : FIELD = struct
 
   type nonrec number = int
 
-  let rec normalize n = n mod p
+  let normalize n = n mod p
   let zero = 0
   let one = 1
 
   exception Div
 
-  let rec ( ~- ) n = Int.( - ) p n
-  let rec ( + ) m n = normalize (Int.( + ) m n)
-  let rec ( - ) m n = normalize (Int.( - ) m n)
-  let rec ( * ) m n = normalize (Int.( * ) m n)
+  let ( ~- ) n = Int.( - ) p n
+  let ( + ) m n = normalize (Int.( + ) m n)
+  let ( - ) m n = normalize (Int.( - ) m n)
+  let ( * ) m n = normalize (Int.( * ) m n)
 
-  let rec inverse = function
+  let inverse = function
     | 0 -> raise Div
     | n ->
         let rec inverse' i =
@@ -37,9 +37,9 @@ end) : FIELD = struct
         inverse' 1
   (* alternative: compute n^(p-2) *)
 
-  let rec fromInt n = normalize n
+  let fromInt n = normalize n
 
-  let rec fromString str =
+  let fromString str =
     let check = List.all Char.isDigit in
     begin if check (String.explode str) then begin
       match Int.fromString str with

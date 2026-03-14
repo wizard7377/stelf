@@ -126,7 +126,7 @@ end) : RECON_QUERY = struct
     in
     let _ = T.checkErrors r in
     let _ =
-      begin match l_ with type_ -> () | _ -> error (r, "Query was not a type")
+      begin match l_ with IntSyn.Type -> () | _ -> error (r, "Query was not a type")
       end
     in
     let xs_ = Names.namedEVars () in
@@ -256,7 +256,7 @@ end) : RECON_QUERY = struct
     in
     let _ = T.checkErrors r in
     let _ =
-      begin match l_ with type_ -> () | _ -> error (r0, "Query was not a type")
+      begin match l_ with IntSyn.Type -> () | _ -> error (r0, "Query was not a type")
       end
     in
     let rec sc = function

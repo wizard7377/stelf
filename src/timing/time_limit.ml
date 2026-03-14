@@ -12,7 +12,7 @@ module TimeLimit : sig
 end = struct
   exception TimeOut
 
-  let rec timeLimit = function None -> fun f x -> f x
+  let timeLimit = function None -> fun f x -> f x
   (* TODO deal with this some time *)
   (*
   let rec timeLimit arg__0 arg__1 arg__2 =

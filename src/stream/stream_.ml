@@ -25,10 +25,10 @@ module BasicStream : BASIC_STREAM = struct
   type 'a stream = Stream of (unit -> 'a front)
   and 'a front = Empty | Cons of 'a * 'a stream
 
-  let rec delay d = Stream d
-  let rec expose (Stream d) = d ()
+  let delay d = Stream d
+  let expose (Stream d) = d ()
   let empty = Stream (function () -> Empty)
-  let rec cons (x, s) = Stream (function () -> Cons (x, s))
+  let cons (x, s) = Stream (function () -> Cons (x, s))
 end
 
 (* Note that this implementation is NOT semantically *)
@@ -40,11 +40,11 @@ module BasicMemoStream : BASIC_STREAM = struct
 
   exception Uninitialized
 
-  let rec expose (Stream d) = d ()
+  let expose (Stream d) = d ()
 
-  let rec delay d =
+  let delay d =
     let memo = ref (function () -> raise Uninitialized) in
-    let rec memoFun () =
+    let memoFun () =
       try
         let r = d () in
         begin
@@ -63,7 +63,7 @@ module BasicMemoStream : BASIC_STREAM = struct
     end
 
   let empty = Stream (function () -> Empty)
-  let rec cons (x, s) = Stream (function () -> Cons (x, s))
+  let cons (x, s) = Stream (function () -> Cons (x, s))
 end
 
 (* STREAM extends BASIC_STREAMS by operations *)
@@ -99,16 +99,16 @@ end) : STREAM = struct
   and null' = function Empty -> true | Cons _ -> false
 
   let rec hd s = hd' (expose s)
-  and hd' = function Empty -> raise EmptyStream | Cons (x, s) -> x
+  and hd' = function Empty -> raise EmptyStream | Cons (x, _s) -> x
 
   let rec tl s = tl' (expose s)
-  and tl' = function Empty -> raise EmptyStream | Cons (x, s) -> s
+  and tl' = function Empty -> raise EmptyStream | Cons (_x, s) -> s
 
   let rec map f s = delay (function () -> map' f (expose s))
 
   and map' arg__1 arg__2 =
     begin match (arg__1, arg__2) with
-    | f, Empty -> Empty
+    | _f, Empty -> Empty
     | f, Cons (x, s) -> Cons (f x, map f s)
     end
 
@@ -116,7 +116,7 @@ end) : STREAM = struct
 
   and filter' arg__3 arg__4 =
     begin match (arg__3, arg__4) with
-    | p, Empty -> Empty
+    | _p, Empty -> Empty
     | p, Cons (x, s) -> begin
         if p x then Cons (x, filter p s) else filter' p (expose s)
       end
@@ -126,17 +126,17 @@ end) : STREAM = struct
 
   and exists' arg__5 arg__6 =
     begin match (arg__5, arg__6) with
-    | p, Empty -> false
+    | _p, Empty -> false
     | p, Cons (x, s) -> p x || exists p s
     end
 
-  let rec takePos = function s, 0 -> [] | s, n -> take' (expose s, n)
+  let rec takePos = function _s, 0 -> [] | s, n -> take' (expose s, n)
 
   and take' = function
     | Empty, _ -> []
     | Cons (x, s), n -> x :: takePos (s, n - 1)
 
-  let rec take (s, n) =
+  let take (s, n) =
     begin if n < 0 then raise Subscript else takePos (s, n)
     end
 
@@ -146,9 +146,12 @@ end) : STREAM = struct
   and toList' = function Empty -> [] | Cons (x, s) -> x :: toList s
 
   let rec dropPos = function s, 0 -> s | s, n -> drop' (expose s, n)
-  and drop' = function Empty, _ -> empty | Cons (x, s), n -> dropPos (s, n - 1)
 
-  let rec drop (s, n) =
+  and drop' = function
+    | Empty, _ -> empty
+    | Cons (_x, s), n -> dropPos (s, n - 1)
+
+  let drop (s, n) =
     begin if n < 0 then raise Subscript else dropPos (s, n)
     end
 

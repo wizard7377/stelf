@@ -1,0 +1,5 @@
+(lang dune 3.2)
+(context default)
+(env
+ (_ (flags (:standard -warn-error -8-26-27-32..37)))
+)
