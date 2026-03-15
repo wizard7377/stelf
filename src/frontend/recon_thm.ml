@@ -162,7 +162,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       let os_, r1 = simul' l_ in
       (ThmSyn.Simul os_, r1)
 
-    type nonrec callpats = ThmSyn.callpats_ * Paths.region list
+    type nonrec callpats = (string * string option list * Paths.region) list
 
     let rec checkArgNumber = function
       | 0, I.Uni I.Type, [], r -> ()
@@ -190,32 +190,42 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       | I.SkoDec (a, _, _, _, _), p_, r ->
           error (r, ("Illegal Skolem constant " ^ a) ^ " in call pattern")
 
-    let rec callpats l_ =
+    let rec resolveCallPat = function
+      | name, p_, r ->
+          let qid = Names.Qid ([], name) in
+          begin match Names.constLookup qid with
+          | None ->
+              error
+                ( r,
+                  ("Undeclared identifier "
+                  ^ Names.qidToString (valOf (Names.constUndef qid)))
+                  ^ " in call pattern" )
+          | Some cid ->
+              checkCallPat (I.sgnLookup cid, p_, r);
+              ((cid, p_), r)
+          end
+
+    let rec resolveCallpats l_ =
       let rec callpats' = function
         | [] -> ([], [])
-        | (name, p_, r) :: l_ ->
+        | cp :: l_ ->
             let cps, rs = callpats' l_ in
-            let qid = Names.Qid ([], name) in
-            begin match Names.constLookup qid with
-            | None ->
-                error
-                  ( r,
-                    ("Undeclared identifier "
-                    ^ Names.qidToString (valOf (Names.constUndef qid)))
-                    ^ " in call pattern" )
-            | Some cid -> begin
-                checkCallPat (I.sgnLookup cid, p_, r);
-                ((cid, p_) :: cps, r :: rs)
-              end
-            end
+            let cp', r = resolveCallPat cp in
+            (cp' :: cps, r :: rs)
       in
       let cps, rs = callpats' l_ in
       (ThmSyn.Callpats cps, rs)
 
-    type nonrec tdecl = ThmSyn.tDecl_ * (Paths.region * Paths.region list)
+    let rec callpats l_ = l_
 
-    let rec tdecl ((o_, r), (c_, rs)) = (ThmSyn.TDecl (o_, c_), (r, rs))
-    let rec tdeclTotDecl t_ = t_
+    type nonrec tdecl = (ThmSyn.order_ * callpats) * Paths.region
+
+    let rec tdecl ((o_, r), c_) = ((o_, c_), r)
+
+    let rec tdeclTotDecl = function
+      | (o_, c_), r ->
+          let c'_, rs = resolveCallpats c_ in
+          (ThmSyn.TDecl (o_, c'_), (r, rs))
 
     type nonrec predicate = ThmSyn.predicate_ * Paths.region
 
@@ -224,61 +234,74 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       | "LEQ", r -> (ThmSyn.Leq, r)
       | "EQUAL", r -> (ThmSyn.Eq, r)
 
-    type nonrec rdecl = ThmSyn.rDecl_ * (Paths.region * Paths.region list)
+    type nonrec rdecl =
+      (ThmSyn.predicate_ * ThmSyn.order_ * ThmSyn.order_ * callpats)
+      * Paths.region
 
-    let rec rdecl ((p_, r0), (o1_, r1), (o2_, r2), (c_, rs)) =
+    let rec rdecl ((p_, r0), (o1_, r1), (o2_, r2), c_) =
       let r = Paths.join (r1, r2) in
-      ( ThmSyn.RDecl (ThmSyn.RedOrder (p_, o1_, o2_), c_),
-        (Paths.join (r0, r), rs) )
+      ((p_, o1_, o2_, c_), Paths.join (r0, r))
 
-    let rec rdeclTorDecl t_ = t_
+    let rec rdeclTorDecl = function
+      | (p_, o1_, o2_, c_), r ->
+          let c'_, rs = resolveCallpats c_ in
+          ( ThmSyn.RDecl (ThmSyn.RedOrder (p_, o1_, o2_), c'_),
+            (r, rs) )
 
-    type nonrec tableddecl = ThmSyn.tabledDecl_ * Paths.region
+    type nonrec tableddecl = string * Paths.region
 
-    let rec tableddecl (name, r) =
-      let qid = Names.Qid ([], name) in
-      begin match Names.constLookup qid with
-      | None ->
-          error
-            ( r,
-              ("Undeclared identifier "
-              ^ Names.qidToString (valOf (Names.constUndef qid)))
-              ^ " in call pattern" )
-      | Some cid -> (ThmSyn.TabledDecl cid, r)
-      end
+    let rec tableddecl t_ = t_
 
-    let rec tableddeclTotabledDecl t_ = t_
+    let rec tableddeclTotabledDecl = function
+      | name, r ->
+          let qid = Names.Qid ([], name) in
+          begin match Names.constLookup qid with
+          | None ->
+              error
+                ( r,
+                  ("Undeclared identifier "
+                  ^ Names.qidToString (valOf (Names.constUndef qid)))
+                  ^ " in call pattern" )
+          | Some cid -> (ThmSyn.TabledDecl cid, r)
+          end
 
-    type nonrec keepTabledecl = ThmSyn.keepTableDecl_ * Paths.region
+    type nonrec keepTabledecl = string * Paths.region
 
-    let rec keepTabledecl (name, r) =
-      let qid = Names.Qid ([], name) in
-      begin match Names.constLookup qid with
-      | None ->
-          error
-            ( r,
-              ("Undeclared identifier "
-              ^ Names.qidToString (valOf (Names.constUndef qid)))
-              ^ " in call pattern" )
-      | Some cid -> (ThmSyn.KeepTableDecl cid, r)
-      end
+    let rec keepTabledecl t_ = t_
 
-    let rec keepTabledeclToktDecl t_ = t_
+    let rec keepTabledeclToktDecl = function
+      | name, r ->
+          let qid = Names.Qid ([], name) in
+          begin match Names.constLookup qid with
+          | None ->
+              error
+                ( r,
+                  ("Undeclared identifier "
+                  ^ Names.qidToString (valOf (Names.constUndef qid)))
+                  ^ " in call pattern" )
+          | Some cid -> (ThmSyn.KeepTableDecl cid, r)
+          end
 
     type nonrec prove = ThmSyn.pDecl_ * (Paths.region * Paths.region list)
 
-    let rec prove (n, (td, rrs)) = (ThmSyn.PDecl (n, td), rrs)
+    let rec prove (n, td) =
+      let td_, rrs = tdeclTotDecl td in
+      (ThmSyn.PDecl (n, td_), rrs)
+
     let rec proveToProve p_ = p_
 
     type nonrec establish = ThmSyn.pDecl_ * (Paths.region * Paths.region list)
 
-    let rec establish (n, (td, rrs)) = (ThmSyn.PDecl (n, td), rrs)
+    let rec establish (n, td) =
+      let td_, rrs = tdeclTotDecl td in
+      (ThmSyn.PDecl (n, td_), rrs)
+
     let rec establishToEstablish p_ = p_
 
-    type nonrec assert_ = ThmSyn.callpats_ * Paths.region list
+    type nonrec assert_ = callpats
 
-    let rec assert_ (cp, rs) = (cp, rs)
-    let rec assertToAssert p_ = p_
+    let rec assert_ cp = cp
+    let rec assertToAssert cp = resolveCallpats cp
 
     type nonrec decs = ExtSyn.dec I.ctx_
 
@@ -392,10 +415,14 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       let w'_ = List.map (fun (ids, id) -> ThmSyn.Names.Qid (ids, id)) w_ in
       w'_
 
-    type nonrec wdecl = ThmSyn.wDecl_ * Paths.region list
+    type nonrec wdecl = (string list * string) list * callpats
 
-    let rec wdecl (w_, (cp, rs)) = (ThmSyn.WDecl (abstractWDecl w_, cp), rs)
-    let rec wdeclTowDecl t_ = t_
+    let rec wdecl t_ = t_
+
+    let rec wdeclTowDecl = function
+      | w_, cp ->
+          let cp'_, rs = resolveCallpats cp in
+          (ThmSyn.WDecl (abstractWDecl w_, cp'_), rs)
   end
 
   (* everything else should be impossible! *)

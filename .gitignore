@@ -391,3 +391,4 @@ deps_verbose.svg
 bin/dune~
 bin/main.ml~
 bin_old
+test.elf

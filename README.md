@@ -1,53 +1,62 @@
-Twelf
-=====
-[![run tests](https://github.com/standardml/twelf/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/standardml/twelf/actions/workflows/run-tests.yml)
+# STELF (Simple Theorems in the Edinburgh Logical Framework)
+
+STELF is a port of the [Twelf](https://twelf.org) project, originally in [SML](https://smlfamily.github.io/), to [OCaml](https://ocaml.org/), as well as modernization efforts, such as improving the IDE interface, the build interface, the interlopability, among other efforts.
+
+> [!NOTE]
+> This is currently a work in progress, and is not yet fully functional
+
+Note that port in this case does mean a literal *port*, using the [Shibboleth](https://github.com/wizard7377/shibboleth) converter, we copied over the source litteraly, then fixed out kinks manually and used a [port](https://github.com/wizard7377/basis) of the SML Basis library.
+Only after this is working (which has not yet happended) do we intend to make any subsantitive changes to the project itself.
+
+## Goals of the Project
+
+Of the goals, there are some more short and longer term ones that are listed here:
+
+### Short term goals
+
+- [ ] Get the Twelf/Stelf server as is working correctly
+- [ ] Get the testing infrastructure working, also add expected output and expected failure tests
+- [ ] Change references of Twelf to Stelf
+  
+### Medium Term Goals
+
+- [ ] Port the wiki to a easier to use format (likely either `mld`, `typ`, `tex`, or some combination)
+- [ ] Port the documentation to odoc style
+
+### Long Term Goals
+
+- [ ] Reimplement the lexer and parser to be easier to understand and more efficient
+- [ ] Make the frontend OOP based, and make it more modular
+- [ ] Split up the concrete syntax and abstract syntax into completely different libraries (ie, one that deals with the internals and another that deals with parsing)
+- [ ] Make the server output nicer (add REPL)
+- [ ] Make better IDE support (Perhaps using LSP?)
+- [ ] [Future plans](./FUTURE.md)
+
+
+## Credits
+
+While I actually was the one to convert the project, a translator is nothing without a work to translate.
+As such, credit is in large part due to the original writers of the Twelf project; per the [README](old/README.md)
+
+### Original Twelf Source Code
 
 Copyright (C) 1997-2011, Frank Pfenning and Carsten Schuermann
 
-Authors: 
- - Frank Pfenning
- - Carsten Schuermann
+Authors:
+
+    Frank Pfenning
+    Carsten Schuermann
 
 With contributions by:
- - Brigitte Pientka
- - Roberto Virga
- - Kevin Watkins
- - Jason Reed
 
-Twelf is an implementation of
+    Brigitte Pientka
+    Roberto Virga
+    Kevin Watkins
+    Jason Reed
 
- - the LF logical framework, including type reconstruction
- - the Elf constraint logic programming language
- - a meta-theorem prover for LF (very preliminary)
- - a set of expansion modules to deal natively with numbers and strings
- - an Emacs interface
+### STELF Proper
 
-Installing
-==========
+Copyright (C) 2026, Asher Frost
 
-For complete installation instructions, see http://twelf.org/
+[^1]: A number of ideas stolen from a similar project, [ELPI](https://github.com/LPCIC/elpi/blob/master/ELPI.md)
 
-Twelf can be compiled and installed under Unix, either as a separate
-"Twelf Server" intended primarily as an inferior process to Emacs, or as
-a structure Twelf embedded in Standard ML.
-
-To build with SML of New Jersey type "make smlnj." To build with MLton type
-"make mlton." If you are building Twelf through SML of New Jersey, you may need
-to run "make buildid" first.
-
-Files
-=====
-
-    README.md         --- this file
-    Makefile          --- enables make
-    server.cm         --- used to build Twelf Server
-    sources.cm        --- used to build Twelf SML
-    bin/              --- utility scripts, heaps, binaries
-    build/            --- build files (type "make" to see options)
-    doc/              --- (Outdated) Twelf user's guide
-    emacs/            --- Emacs interface for Twelf
-    examples/         --- various case studies
-    examples-clp/     --- examples of use of the numbers and strings extensions
-    src/              --- the SML sources for Twelf
-    tex/              --- TeX macros and style files
-    vim/              --- Vim interface for Twelf

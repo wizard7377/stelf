@@ -89,10 +89,11 @@ end) : RECON_MODE = struct
     let rec minus r = (M.Minus, r)
     let rec minus1 r = (M.Minus1, r)
 
-    type nonrec modedec = (I.cid * M.modeSpine_) * P.region
+    type nonrec modedec =
+      (I.cid option * (string list * string) option * M.modeSpine_) * P.region
 
     module Short = struct
-      type nonrec mterm = (I.cid * M.modeSpine_) * P.region
+      type nonrec mterm = modedec
       type nonrec mspine = M.modeSpine_ * P.region
 
       let rec mnil r = (M.Mnil, r)
@@ -102,16 +103,7 @@ end) : RECON_MODE = struct
 
       let rec mroot (ids, id, r1, (mS, r2)) =
         let r = P.join (r1, r2) in
-        let qid = Names.Qid (ids, id) in
-        begin match Names.constLookup qid with
-        | None ->
-            error
-              ( r,
-                ("Undeclared identifier "
-                ^ Names.qidToString (valOf (Names.constUndef qid)))
-                ^ " in mode declaration" )
-        | Some cid -> ((cid, ModeDec.shortToFull (cid, mS, r)), r)
-        end
+        (((None, Some (ids, id), mS), r) : mterm)
 
       let rec toModedec nmS = nmS
     end
@@ -155,11 +147,24 @@ end) : RECON_MODE = struct
 
       let rec toModedec t =
         let _ = Names.varReset I.null_ in
-        let t' = t (I.null_, I.null_) in
-        t'
+        let ((a, mS), r) = t (I.null_, I.null_) in
+        ((Some a, None, mS), r)
     end
 
-    let rec modeToMode (m, r) = (m, r)
+    let rec modeToMode = function
+      | (Some a, None, mS), r -> ((a, mS), r)
+      | (None, Some (ids, id), mS), r ->
+          let qid = Names.Qid (ids, id) in
+          begin match Names.constLookup qid with
+          | None ->
+              error
+                ( r,
+                  ("Undeclared identifier "
+                  ^ Names.qidToString (valOf (Names.constUndef qid)))
+                  ^ " in mode declaration" )
+          | Some cid -> ((cid, ModeDec.shortToFull (cid, mS, r)), r)
+          end
+      | _ -> error (Paths.Reg (0, 0), "Internal mode declaration state")
   end
 
   (* structure Short *)

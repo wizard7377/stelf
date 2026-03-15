@@ -7,4 +7,5 @@
  (libraries basis)
  (flags
   (:standard -open Basis))
- (wrapped true))
+ (wrapped true)
+(preprocess (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

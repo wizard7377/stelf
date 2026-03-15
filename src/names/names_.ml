@@ -327,6 +327,7 @@ end) : NAMES = struct
       end
 
   let rec stringToQid name =
+    let name = Stdlib.String.trim name in
     validateQualName (rev (String.fields (function c -> c = '.') name))
 
   let rec unqualified = function Qid ([], id) -> Some id | _ -> None

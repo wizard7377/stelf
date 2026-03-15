@@ -75,7 +75,7 @@ module Server : SERVER = struct
 
   (* Identifiers, used as a constant *)
   let rec getId = function
-    | id :: [] -> id
+    | id :: [] -> Stdlib.String.trim id
     | [] -> error "Missing identifier"
     | ts -> error "Extraneous arguments"
 

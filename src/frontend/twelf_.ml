@@ -551,11 +551,6 @@ end) : TWELF = struct
       | Converter.Error msg -> abortFileMsg chlev (fileName, msg)
       | Cs_manager.Error msg ->
           abort chlev (("Constraint Solver Manager error: " ^ msg) ^ "\n")
-      | exn -> begin
-          let _ = abort 0 (UnknownExn.unknownExn exn) in
-          raise exn
-        end
-
     let context : ModSyn.Names.namespace option ref = ref None
 
     let rec installConst fromCS (cid, fileNameocOpt) =

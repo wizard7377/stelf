@@ -369,6 +369,8 @@ end) : LEXER = struct
     let rec lexInitial = function
       | '\n', i -> lexInitial (char i, i + 1)
       | '\r', i -> lexInitial (char i, i + 1)
+      | '\t', i -> lexInitial (char i, i + 1) 
+      | ' ', i -> lexInitial (char i, i + 1)
       | ':', i -> (Colon, P.Reg (i - 1, i))
       | '.', i -> (Dot, P.Reg (i - 1, i))
       | '(', i -> (Lparen, P.Reg (i - 1, i))

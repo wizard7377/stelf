@@ -178,4 +178,7 @@
    Msg
    -open
    Msg.Msg_))
- (wrapped true))
+ (wrapped true)
+ (preprocess
+  (pps
+   ppx_deriving.show)))

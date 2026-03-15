@@ -2,14 +2,13 @@
 
 (test
  (name regression)
- (libraries twelf alcotest basis)
+ (libraries twelf alcotest basis regression_cases)
  (deps
-  regression.txt
   (source_tree ../examples)
   (source_tree ../examples_clp))
  (action
   (chdir
    %{workspace_root}/test
-   (run %{exe:regression.exe} regression.txt)))
+   (run %{exe:regression.exe})))
  (flags
   (:standard -open Basis)))
