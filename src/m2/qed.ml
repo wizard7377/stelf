@@ -9,7 +9,7 @@ module type QED = sig
 
   exception Error of string
 
-  val subgoal : MetaSyn.state_ -> bool
+  val subgoal : MetaSyn.state -> bool
 end
 (* signature QED *)
 

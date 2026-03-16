@@ -2,14 +2,15 @@
 open! Basis
 
 (* Style Checking *)
-(* Author: Carsten Schuermann *)
+
+(** Author: Carsten Schuermann *)
 module type STYLECHECK = sig
   exception Error of string
 
   val check : unit -> unit
 
-  (* raises Error (msg) *)
   val checkConDec : IntSyn.cid -> unit
+  (** raises Error (msg) *)
 end
 (* signature STYLECHECK *)
 
@@ -34,8 +35,10 @@ end) : STYLECHECK = struct
     module I = IntSyn
     module P = Paths
 
-    type polarity = Plus | Minus
+    type polarity = Plus | Minus [@@deriving eq, ord, show]
+
     type info = Correct | Incorrect of string list * string
+    [@@deriving eq, ord, show]
 
     let rec toggle = function Plus -> Minus | Minus -> Plus
 

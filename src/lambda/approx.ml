@@ -6,42 +6,42 @@ open Intsyn
 (* Author: Kevin Watkins *)
 module type APPROX = sig
   (*! structure IntSyn : INTSYN !*)
-  type uni_ = Level of int | Next of uni_ | LVar of uni_ option ref
+  type uni = Level of int | Next of uni | LVar of uni option ref
 
   (* 1 = type, 2 = kind, 3 = hyperkind, etc. *)
-  type exp_ =
-    | Uni of uni_
-    | Arrow of exp_ * exp_
-    | Const of IntSyn.head_
-    | CVar of exp_ option ref
+  type exp =
+    | Uni of uni
+    | Arrow of exp * exp
+    | Const of IntSyn.head
+    | CVar of exp option ref
     | Undefined
 
   (* Const/Def/NSDef *)
-  val type_ : uni_
-  val kind : uni_
-  val hyperkind : uni_
+  val type_ : uni
+  val kind : uni
+  val hyperkind : uni
 
   (* resets names of undetermined type/kind variables chosen for printing *)
   val varReset : unit -> unit
-  val newLVar : unit -> uni_
-  val newCVar : unit -> exp_
-  val whnfUni : uni_ -> uni_
-  val whnf : exp_ -> exp_
-  val uniToApx : IntSyn.uni_ -> uni_
-  val classToApx : IntSyn.exp_ -> exp_ * uni_
-  val exactToApx : IntSyn.exp_ * IntSyn.exp_ -> exp_ * exp_ * uni_
+  val newLVar : unit -> uni
+  val newCVar : unit -> exp
+  val whnfUni : uni -> uni
+  val whnf : exp -> exp
+  val uniToApx : IntSyn.uni -> uni
+  val classToApx : IntSyn.exp -> exp * uni
+  val exactToApx : IntSyn.exp * IntSyn.exp -> exp * exp * uni
 
   exception Ambiguous
 
-  val apxToUni : uni_ -> IntSyn.uni_
-  val apxToClass : IntSyn.dctx * exp_ * uni_ * bool -> IntSyn.exp_
-  val apxToExact : IntSyn.dctx * exp_ * IntSyn.eclo * bool -> IntSyn.exp_
+  val apxToUni : uni -> IntSyn.uni
+  val apxToClass : IntSyn.dctx * exp * uni * bool -> IntSyn.exp
+  val apxToExact : IntSyn.dctx * exp * IntSyn.eclo * bool -> IntSyn.exp
 
   exception Unify of string
 
-  val matchUni : uni_ * uni_ -> unit
-  val match_ : exp_ * exp_ -> unit
-  val makeGroundUni : uni_ -> bool
+  val matchUni : uni * uni -> unit
+  val match_ : exp * exp -> unit
+  val makeGroundUni : uni -> bool
 end
 
 (* # 1 "src/lambda/approx.fun.ml" *)
@@ -102,15 +102,15 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
      well-formed G there are most general U, V such that G |- U : V
      and U- = u and V- = v.  *);;
     (* The approximate language *);;
-    type uni_ = | Level of int 
-                | Next of uni_ 
-                | LVar of uni_ option ref ;;
+    type uni = | Level of int 
+                | Next of uni 
+                | LVar of uni option ref ;;
     (* 1 = type, 2 = kind, 3 = hyperkind, etc. *);;
-    type exp_ =
-      | Uni of uni_ 
-      | Arrow of exp_ * exp_ 
-      | Const of I.head_ 
-      | CVar of exp_ option ref 
+    type exp =
+      | Uni of uni 
+      | Arrow of exp * exp 
+      | Const of I.head 
+      | CVar of exp option ref 
       | Undefined ;;
     (* Const/Def/NSDef *);;
     (* Because approximate type reconstruction uses the pattern G |- U
@@ -146,7 +146,7 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
                             | v_ -> v_;;
     open!
       struct
-        type nonrec varEntry = (exp_ * exp_ * uni_) * string;;
+        type nonrec varEntry = (exp * exp * uni) * string;;
         let varList : varEntry list ref = ref [];;
         end;;
     (* just a little list since these are only for printing errors *);;

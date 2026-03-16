@@ -1,7 +1,7 @@
 (* # 1 "src/table/red_black_tree.sig.ml" *)
 
 (* # 1 "src/table/red_black_tree.fun.ml" *)
-open! Basis
+open Basis
 open Table_
 
 (* Red/Black Trees *)
@@ -22,7 +22,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
     | Black of ('a entry * 'a dict * 'a dict)
 
   (* considered black *)
-  type nonrec 'a table_ = 'a dict ref
+  type nonrec 'a table = 'a dict ref
 
   (* Representation Invariants *)
   (*

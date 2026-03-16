@@ -46,8 +46,8 @@ end) : MEMOTABLE = struct
 
    *)
   (* property: linear *)
-  type nonrec normalSubsts = (int * IntSyn.exp_) RBSet.ordSet (* local depth *)
-  type nonrec exSubsts = IntSyn.front_ RBSet.ordSet
+  type nonrec normalSubsts = (int * IntSyn.exp) RBSet.ordSet (* local depth *)
+  type nonrec exSubsts = IntSyn.front RBSet.ordSet
 
   let nid : unit -> normalSubsts = RBSet.new_
   let asid : unit -> exSubsts = RBSet.new_
@@ -56,7 +56,7 @@ end) : MEMOTABLE = struct
 
   (* ---------------------------------------------------------------------- *)
   (* Context for existential variable *)
-  type nonrec ctx = (int * IntSyn.dec_) list ref
+  type nonrec ctx = (int * IntSyn.dec) list ref
 
   (* functions for handling context for existential variables *)
   let rec emptyCtx () = (ref [] : ctx)
@@ -99,30 +99,30 @@ end) : MEMOTABLE = struct
      This allows us to maintain invariant, that every occurrence of an evar is
      defined in its evar-ctx
   *)
-  type tree_ =
+  type tree =
     | Leaf of
         (ctx * normalSubsts)
         * ((int * int)
           * ctx
           * IntSyn.dctx
-          * TableParam.resEqn_
+          * TableParam.resEqn
           * TableParam.answer
           * int
-          * TableParam.status_)
+          * TableParam.status)
           list
           ref
     (* G *)
     (* D *)
     (* #G *)
     (* #EVar *)
-    | Node of (ctx * normalSubsts) * tree_ ref list
+    | Node of (ctx * normalSubsts) * tree ref list
 
   let rec makeTree () = ref (Node ((emptyCtx (), nid ()), []))
   let rec noChildren c_ = c_ = []
 
-  type retrieval_ = Variant of int * IntSyn.exp_ | NotCompatible
+  type retrieval = Variant of int * IntSyn.exp | NotCompatible
 
-  type compSub_ =
+  type compSub =
     | SplitSub of
         (ctx * normalSubsts) * (ctx * normalSubsts) * (ctx * normalSubsts)
     (* rho2 *)
@@ -1215,15 +1215,15 @@ end) : MEMOTABLE = struct
         nctr := 1;
         Array.modify
           (function
-            | n, tree_ -> begin
+            | n, tree -> begin
                 n := 0;
                 begin
-                  tree_ := !(makeTree ());
+                  tree := !(makeTree ());
                   begin
                     answList := [];
                     begin
                       added := false;
-                      (n, tree_)
+                      (n, tree)
                     end
                   end
                 end
@@ -1239,7 +1239,7 @@ end) : MEMOTABLE = struct
         end
 
     let rec callCheck (a, dAVars_, dEVars_, g_, u_, eqn, status) =
-      let n, tree_ = Array.sub (indexArray, a) in
+      let n, tree = Array.sub (indexArray, a) in
       let sq = S.new_ () in
       let dAEVars_ = compose (dEVars_, dAVars_) in
       let dq_ = emptyCtx () in
@@ -1252,8 +1252,8 @@ end) : MEMOTABLE = struct
       in
       let gr'_ = ((dEVars_, dAVars_), g_, eqn, !TableParam.stageCtr, status) in
       let result =
-        try retrieveInst (tree_, (dq_, sq), asid (), gr'_)
-        with Instance msg -> insert (tree_, (dq_, sq), gr_)
+        try retrieveInst (tree, (dq_, sq), asid (), gr'_)
+        with Instance msg -> insert (tree, (dq_, sq), gr_)
       in
       begin match result () with
       | _, T.NewEntry answRef -> begin
@@ -1273,7 +1273,7 @@ end) : MEMOTABLE = struct
       end
 
     let rec insertIntoTree (a, dAVars_, dEVars_, g_, u_, eqn, answRef, status) =
-      let n, tree_ = Array.sub (indexArray, a) in
+      let n, tree = Array.sub (indexArray, a) in
       let sq = S.new_ () in
       let dAEVars_ = compose (dEVars_, dAVars_) in
       let dq_ = emptyCtx () in
@@ -1286,7 +1286,7 @@ end) : MEMOTABLE = struct
       in
       let result =
         insert
-          ( tree_,
+          ( tree,
             (dq_, sq),
             ((l, n + 1), g_, eqn, answRef, !TableParam.stageCtr, status) )
       in

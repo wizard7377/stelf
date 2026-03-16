@@ -1,15 +1,12 @@
 open! Basis
 
-type make_result =
-  | Ok
-  | Abort
-  | Exn of exn
+type make_result = Ok | Abort | Exn of exn
 
 let () = Printexc.record_backtrace true
 let _ = Frontend.Frontend_.Twelf.chatter := 0
 
 let run_make ~unsafe file =
-  let previous_unsafe = !(Frontend.Frontend_.Twelf.unsafe) in
+  let previous_unsafe = !Frontend.Frontend_.Twelf.unsafe in
   Frontend.Frontend_.Twelf.unsafe := unsafe;
   let result =
     try
@@ -22,16 +19,20 @@ let run_make ~unsafe file =
   result
 
 let fail_if ?(should_fail = false) phase file = function
+  | Ok when should_fail ->
+      Alcotest.fail
+        (phase ^ " succeeded for " ^ file ^ " but should have failed")
   | Ok -> ()
   | Abort ->
       if should_fail then ()
       else Alcotest.fail (phase ^ " failed for " ^ file ^ " (returned Abort)")
   | Exn exn ->
-      let msg = Printf.sprintf "%s failed for %s (exception: %s\n%s)"
-        phase file (Printexc.to_string exn) (Printexc.get_backtrace ())
+      let msg =
+        Printf.sprintf "%s failed for %s (exception: %s\n%s)" phase file
+          (Printexc.to_string exn)
+          (Printexc.get_backtrace ())
       in
-      if should_fail then ()
-      else Alcotest.fail msg
+      if should_fail then () else Alcotest.fail msg
 
 let run_case ~unsafe ~success file =
   Frontend.Frontend_.Twelf.doubleCheck := false;
@@ -43,7 +44,7 @@ let test ?(unsafe = false) ?(success = true) ?title file =
   let test_title =
     match title with
     | Some title -> title
-    | None ->
-        if unsafe then "testUnsafe " ^ file else "test " ^ file
+    | None -> if unsafe then "testUnsafe " ^ file else "test " ^ file
   in
-  Alcotest.test_case test_title `Quick (fun () -> run_case ~unsafe ~success file)
+  Alcotest.test_case test_title `Quick (fun () ->
+      run_case ~unsafe ~success file)

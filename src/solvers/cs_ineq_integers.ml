@@ -85,23 +85,23 @@ struct
       else None
       end
 
-    type position_ = Row of int | Col of int
-    type owner_ = Var of IntSyn.dctx * mon_ | Exp of IntSyn.dctx * sum_
-    type restriction_ = Restr of IntSyn.dctx * IntSyn.exp_
+    type position = Row of int | Col of int
+    type owner = Var of IntSyn.dctx * mon_ | Exp of IntSyn.dctx * sum_
+    type restriction = Restr of IntSyn.dctx * IntSyn.exp
 
     type nonrec label = {
-      owner : owner_;
+      owner : owner;
       tag : int ref;
-      restr : restriction_ option ref;
+      restr : restriction option ref;
       dead : bool ref;
     }
 
-    type operation_ =
-      | Insert of position_
+    type operation =
+      | Insert of position
       | Pivot of int * int
-      | Kill of position_
-      | Restrict of position_
-      | UpdateOwner of position_ * owner_ * int ref
+      | Kill of position
+      | Restrict of position
+      | UpdateOwner of position * owner * int ref
 
     type nonrec tableau = {
       rlabels : label Array.array;
@@ -110,7 +110,7 @@ struct
       coeffs : number Array2.array;
       nrows : int ref;
       ncols : int ref;
-      trail : operation_ Trail.trail;
+      trail : operation Trail.trail;
     }
 
     exception MyFgnCnstrRep of int ref
@@ -542,17 +542,17 @@ struct
       else raise Error
       end
 
-    type nonrec decomp = number * (number * position_) list
+    type nonrec decomp = number * (number * position) list
 
     let rec unaryMinusDecomp (d, wposL) =
       (-d, List.map (function d, pos -> (-d, pos)) wposL)
 
-    type maximizeResult_ = Nonnegative of number | Unbounded of int
+    type maximizeResult = Nonnegative of number | Unbounded of int
 
-    type branchResult_ =
+    type branchResult =
       | BranchSucceed of int option
       | BranchFail
-      | BranchDivide of int * branchResult_ * branchResult_
+      | BranchDivide of int * branchResult * branchResult
 
     let rec decomposeSum (g_, Sum (m, monL)) =
       let rec monToWPos (Mon (n, usL_) as mon) =

@@ -8,26 +8,26 @@ module type FUNSYN = sig
   (* make abstract *)
   type nonrec label = int
   type nonrec lemma = int
-  type labelDec_ = LabelDec of string * IntSyn.dec_ list * IntSyn.dec_ list
+  type labelDec = LabelDec of string * IntSyn.dec list * IntSyn.dec list
 
   (* ContextBody                *)
   (* BB ::= l: SOME Theta. Phi  *)
-  type ctxBlock_ = CtxBlock of label option * IntSyn.dctx
+  type ctxBlock = CtxBlock of label option * IntSyn.dctx
 
   (* ContextBlocks              *)
   (* B ::= l : Phi              *)
-  type lFDec_ = Prim of IntSyn.dec_ | Block of ctxBlock_
+  type lFDec = Prim of IntSyn.dec | Block of ctxBlock
 
   (* Contexts                   *)
   (* LD ::= x :: A              *)
   (*      | B                   *)
   (* ??? *)
-  type nonrec lfctx = lFDec_ IntSyn.ctx_
+  type nonrec lfctx = lFDec IntSyn.ctx
 
   (* Psi ::= . | Psi, LD        *)
   type for_ =
-    | All of lFDec_ * for_
-    | Ex of IntSyn.dec_ * for_
+    | All of lFDec * for_
+    | Ex of IntSyn.dec * for_
     | True
     | And of for_ * for_
 
@@ -36,27 +36,27 @@ module type FUNSYN = sig
   (*     | Ex  D. F             *)
   (*     | T                    *)
   (*     | F1 ^ F2              *)
-  type pro_ =
-    | Lam of lFDec_ * pro_
-    | Inx of IntSyn.exp_ * pro_
+  type pro =
+    | Lam of lFDec * pro
+    | Inx of IntSyn.exp * pro
     | Unit
-    | Rec of mDec_ * pro_
-    | Let of decs_ * pro_
-    | Case of opts_
-    | Pair of pro_ * pro_
+    | Rec of mDec * pro
+    | Let of decs * pro
+    | Case of opts
+    | Pair of pro * pro
 
-  and opts_ = Opts of (lfctx * IntSyn.sub_ * pro_) list
-  and mDec_ = MDec of string option * for_
+  and opts = Opts of (lfctx * IntSyn.sub * pro) list
+  and mDec = MDec of string option * for_
 
-  and decs_ =
+  and decs =
     | Empty
-    | Split of int * decs_
-    | New of ctxBlock_ * decs_
-    | App of (int * IntSyn.exp_) * decs_
-    | PApp of (int * int) * decs_
-    | Lemma of lemma * decs_
-    | Left of int * decs_
-    | Right of int * decs_
+    | Split of int * decs
+    | New of ctxBlock * decs
+    | App of (int * IntSyn.exp) * decs
+    | PApp of (int * int) * decs
+    | Lemma of lemma * decs
+    | Left of int * decs
+    | Right of int * decs
 
   (* Programs                   *)
   (* P ::= lam LD. P            *)
@@ -79,31 +79,31 @@ module type FUNSYN = sig
   (*      | xx = cc, Ds         *)
   (*      | xx = pi1 yy, Ds     *)
   (*      | xx = pi2 yy, Ds     *)
-  type lemmaDec_ = LemmaDec of string list * pro_ * for_
+  type lemmaDec = LemmaDec of string list * pro * for_
 
   (* Lemmas                     *)
   (* L ::= c:F = P              *)
   (* ??? *)
-  type nonrec mctx = mDec_ IntSyn.ctx_
+  type nonrec mctx = mDec IntSyn.ctx
 
   (* Delta ::= . | Delta, xx : F*)
-  val labelLookup : label -> labelDec_
-  val labelAdd : labelDec_ -> label
+  val labelLookup : label -> labelDec
+  val labelAdd : labelDec -> label
   val labelSize : unit -> int
   val labelReset : unit -> unit
-  val lemmaLookup : lemma -> lemmaDec_
-  val lemmaAdd : lemmaDec_ -> lemma
+  val lemmaLookup : lemma -> lemmaDec
+  val lemmaAdd : lemmaDec -> lemma
   val lemmaSize : unit -> int
-  val mdecSub : mDec_ * IntSyn.sub_ -> mDec_
+  val mdecSub : mDec * IntSyn.sub -> mDec
   val makectx : lfctx -> IntSyn.dctx
   val lfctxLength : lfctx -> int
-  val lfctxLFDec : lfctx * int -> lFDec_ * IntSyn.sub_
-  val dot1n : IntSyn.dctx * IntSyn.sub_ -> IntSyn.sub_
-  val convFor : (for_ * IntSyn.sub_) * (for_ * IntSyn.sub_) -> bool
-  val forSub : for_ * IntSyn.sub_ -> for_
-  val normalizeFor : for_ * IntSyn.sub_ -> for_
-  val listToCtx : IntSyn.dec_ list -> IntSyn.dctx
-  val ctxToList : IntSyn.dctx -> IntSyn.dec_ list
+  val lfctxLFDec : lfctx * int -> lFDec * IntSyn.sub
+  val dot1n : IntSyn.dctx * IntSyn.sub -> IntSyn.sub
+  val convFor : (for_ * IntSyn.sub) * (for_ * IntSyn.sub) -> bool
+  val forSub : for_ * IntSyn.sub -> for_
+  val normalizeFor : for_ * IntSyn.sub -> for_
+  val listToCtx : IntSyn.dec list -> IntSyn.dctx
+  val ctxToList : IntSyn.dctx -> IntSyn.dec list
 end
 (* Signature FUNSYN *)
 
@@ -126,26 +126,26 @@ end) : FUNSYN = struct
   type nonrec label = int
   type nonrec name = string
   type nonrec lemma = int
-  type nonrec dlist = IntSyn.dec_ list
-  type labelDec_ = LabelDec of name * dlist * dlist
+  type nonrec dlist = IntSyn.dec list
+  type labelDec = LabelDec of name * dlist * dlist
 
   (* ContextBody                *)
   (* BB ::= l: SOME Theta. Phi  *)
-  type ctxBlock_ = CtxBlock of label option * IntSyn.dctx
+  type ctxBlock = CtxBlock of label option * IntSyn.dctx
 
   (* ContextBlocks              *)
   (* B ::= l : Phi              *)
-  type lFDec_ = Prim of IntSyn.dec_ | Block of ctxBlock_
+  type lFDec = Prim of IntSyn.dec | Block of ctxBlock
 
   (* Contexts                   *)
   (* LD ::= x :: A              *)
   (*      | B                   *)
-  type nonrec lfctx = lFDec_ IntSyn.ctx_
+  type nonrec lfctx = lFDec IntSyn.ctx
 
   (* Psi ::= . | Psi, LD        *)
   type for_ =
-    | All of lFDec_ * for_
-    | Ex of IntSyn.dec_ * for_
+    | All of lFDec * for_
+    | Ex of IntSyn.dec * for_
     | True
     | And of for_ * for_
 
@@ -154,27 +154,27 @@ end) : FUNSYN = struct
   (*     | Ex  D. F             *)
   (*     | T                    *)
   (*     | F1 ^ F2              *)
-  type pro_ =
-    | Lam of lFDec_ * pro_
-    | Inx of IntSyn.exp_ * pro_
+  type pro =
+    | Lam of lFDec * pro
+    | Inx of IntSyn.exp * pro
     | Unit
-    | Rec of mDec_ * pro_
-    | Let of decs_ * pro_
-    | Case of opts_
-    | Pair of pro_ * pro_
+    | Rec of mDec * pro
+    | Let of decs * pro
+    | Case of opts
+    | Pair of pro * pro
 
-  and opts_ = Opts of (lfctx * IntSyn.sub_ * pro_) list
-  and mDec_ = MDec of name option * for_
+  and opts = Opts of (lfctx * IntSyn.sub * pro) list
+  and mDec = MDec of name option * for_
 
-  and decs_ =
+  and decs =
     | Empty
-    | Split of int * decs_
-    | New of ctxBlock_ * decs_
-    | App of (int * IntSyn.exp_) * decs_
-    | PApp of (int * int) * decs_
-    | Lemma of lemma * decs_
-    | Left of int * decs_
-    | Right of int * decs_
+    | Split of int * decs
+    | New of ctxBlock * decs
+    | App of (int * IntSyn.exp) * decs
+    | PApp of (int * int) * decs
+    | Lemma of lemma * decs
+    | Left of int * decs
+    | Right of int * decs
 
   (* Programs                   *)
   (* P ::= lam LD. P            *)
@@ -197,11 +197,11 @@ end) : FUNSYN = struct
   (*      | xx = cc, Ds         *)
   (*      | xx = pi1 yy, Ds     *)
   (*      | xx = pi2 yy, Ds     *)
-  type lemmaDec_ = LemmaDec of name list * pro_ * for_
+  type lemmaDec = LemmaDec of name list * pro * for_
 
   (* Lemmas                     *)
   (* L ::= c:F = P              *)
-  type nonrec mctx = mDec_ IntSyn.ctx_
+  type nonrec mctx = mDec IntSyn.ctx
 
   (* Delta ::= . | Delta, xx : F*)
   open! struct
@@ -211,14 +211,13 @@ end) : FUNSYN = struct
     let maxLemma = Global.maxCid
 
     let labelArray =
-      (Array.array (maxLabel + 1, LabelDec ("", [], []))
-        : labelDec_ Array.array)
+      (Array.array (maxLabel + 1, LabelDec ("", [], [])) : labelDec Array.array)
 
     let nextLabel = ref 0
 
     let lemmaArray =
       (Array.array (maxLemma + 1, LemmaDec ([], Unit, True))
-        : lemmaDec_ Array.array)
+        : lemmaDec Array.array)
 
     let nextLemma = ref 0
     let rec labelLookup label = Array.sub (labelArray, label)

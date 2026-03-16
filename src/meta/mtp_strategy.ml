@@ -17,7 +17,7 @@ open Time_limit
 module type MTPSTRATEGY = sig
   module StateSyn : STATESYN
 
-  val run : StateSyn.state_ list -> StateSyn.state_ list * StateSyn.state_ list
+  val run : StateSyn.state list -> StateSyn.state list * StateSyn.state list
 end
 
 (* open cases -> remaining cases * solved cases *)
@@ -164,7 +164,7 @@ end) : MTPSTRATEGY = struct
               with MTPFilling.Error _ -> split (s_ :: givenStates, os))
         end
 
-    let rec run (givenStates : S.state_ list) =
+    let rec run (givenStates : S.state list) =
       let _ = printInit () in
       let openStates, solvedStates = fill (Obj.magic givenStates, ([], [])) in
       let openStates' = map MTPrint.nameState (Obj.magic openStates) in
@@ -173,8 +173,8 @@ end) : MTPSTRATEGY = struct
         begin match openStates with [] -> printQed () | _ -> ()
         end
       in
-      ( (Obj.magic openStates' : S.state_ list),
-        (Obj.magic solvedStates' : S.state_ list) )
+      ( (Obj.magic openStates' : S.state list),
+        (Obj.magic solvedStates' : S.state list) )
   end
 
   (* if !Global.chatter > 5 then print (""["" ^ MTPSplitting.menu splitOp) *)

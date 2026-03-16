@@ -9,15 +9,15 @@ module type MODECHECK = sig
   exception Error of string
 
   (* for new declarations *)
-  val checkD : IntSyn.conDec_ * string * Paths.occConDec option -> unit
+  val checkD : IntSyn.conDec * string * Paths.occConDec option -> unit
 
   (* raises Error (msg) *)
   (* for prior declarations *)
-  val checkMode : IntSyn.cid * ModeSyn.modeSpine_ -> unit
+  val checkMode : IntSyn.cid * ModeSyn.modeSpine -> unit
 
   (* raises Error(msg) *)
   (* for output coverage of prior declarations *)
-  val checkFreeOut : IntSyn.cid * ModeSyn.modeSpine_ -> unit
+  val checkFreeOut : IntSyn.cid * ModeSyn.modeSpine -> unit
 end
 
 (* raises Error(msg) *)
@@ -61,9 +61,13 @@ end) : MODECHECK = struct
     module M = ModeSyn
     module P = Paths
 
-    type uniqueness_ = Unique | Ambig
-    type info_ = Free | Unknown | Ground of uniqueness_
-    type status_ = Existential of info_ * string option | Universal
+    type uniqueness = Unique | Ambig [@@deriving eq, ord, show]
+
+    type info = Free | Unknown | Ground of uniqueness
+    [@@deriving eq, ord, show]
+
+    type status = Existential of info * string option | Universal
+    [@@deriving eq, ord, show]
 
     let checkFree = ref false
 

@@ -12,7 +12,7 @@ module type SPLIT = sig
 
   type nonrec operator
 
-  val expand : State.focus_ -> operator list
+  val expand : State.focus -> operator list
   val apply : operator -> unit
   val menu : operator -> string
 end
@@ -63,7 +63,7 @@ end) : SPLIT with module State = Split__0.State' = struct
 
   exception Error of string
 
-  type operator_ = Split of Tomega.prg_ option ref * Tomega.prg_ * string
+  type operator_ = Split of Tomega.prg option ref * Tomega.prg * string
 
   open! struct
     module T = Tomega
@@ -99,7 +99,7 @@ end) : SPLIT with module State = Split__0.State' = struct
           instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev_)
 
     open! struct
-      let caseList : (T.dec_ I.ctx_ * T.sub_) list ref = ref []
+      let caseList : (T.dec I.ctx * T.sub) list ref = ref []
     end
 
     let rec resetCases () = caseList := []

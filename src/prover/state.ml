@@ -6,20 +6,19 @@ open! Basis
 module type STATE = sig
   exception Error of string
 
-  type state_ =
-    | State of
-        Tomega.worlds_ * Tomega.dec_ IntSyn.ctx_ * Tomega.prg_ * Tomega.for_
-    | StateLF of IntSyn.exp_
+  type state =
+    | State of Tomega.worlds * Tomega.dec IntSyn.ctx * Tomega.prg * Tomega.for_
+    | StateLF of IntSyn.exp
 
-  type focus_ = Focus of Tomega.prg_ * Tomega.worlds_ | FocusLF of IntSyn.exp_
+  type focus = Focus of Tomega.prg * Tomega.worlds | FocusLF of IntSyn.exp
 
   (* Focus (EVar, W) *)
   (* focus EVar *)
-  val init : Tomega.for_ * Tomega.worlds_ -> state_
-  val close : state_ -> bool
-  val collectT : Tomega.prg_ -> Tomega.prg_ list
-  val collectLF : Tomega.prg_ -> IntSyn.exp_ list
-  val collectLFSub : Tomega.sub_ -> IntSyn.exp_ list
+  val init : Tomega.for_ * Tomega.worlds -> state
+  val close : state -> bool
+  val collectT : Tomega.prg -> Tomega.prg list
+  val collectLF : Tomega.prg -> IntSyn.exp list
+  val collectLFSub : Tomega.sub -> IntSyn.exp list
 end
 
 (* # 1 "src/prover/state.fun.ml" *)
@@ -34,13 +33,12 @@ end) : STATE = struct
   (*! structure Tomega = Tomega' !*)
   module Formatter = Formatter
 
-  type state_ =
-    | State of
-        Tomega.worlds_ * Tomega.dec_ IntSyn.ctx_ * Tomega.prg_ * Tomega.for_
-    | StateLF of IntSyn.exp_
+  type state =
+    | State of Tomega.worlds * Tomega.dec IntSyn.ctx * Tomega.prg * Tomega.for_
+    | StateLF of IntSyn.exp
 
   (* StateLF X, X is always lowered *)
-  type focus_ = Focus of Tomega.prg_ * Tomega.worlds_ | FocusLF of IntSyn.exp_
+  type focus = Focus of Tomega.prg * Tomega.worlds | FocusLF of IntSyn.exp
 
   (* datatype State
     = State of (Tomega.Dec IntSyn.Ctx * Tomega.For) * Tomega.Worlds

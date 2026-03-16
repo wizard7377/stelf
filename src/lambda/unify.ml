@@ -18,9 +18,9 @@ module type UNIFY = sig
   val unwind : unit -> unit
 
   val instantiateEVar :
-    IntSyn.exp_ option ref * IntSyn.exp_ * IntSyn.cnstr list -> unit
+    IntSyn.exp option ref * IntSyn.exp * IntSyn.cnstr list -> unit
 
-  val instantiateLVar : IntSyn.block_ option ref * IntSyn.block_ -> unit
+  val instantiateLVar : IntSyn.block option ref * IntSyn.block -> unit
   val resetAwakenCnstrs : unit -> unit
   val nextCnstr : unit -> IntSyn.cnstr option
   val addConstraint : IntSyn.cnstr list ref * IntSyn.cnstr -> unit
@@ -28,7 +28,7 @@ module type UNIFY = sig
   val delay : IntSyn.eclo * IntSyn.cnstr -> unit
 
   (* unification *)
-  val intersection : IntSyn.sub_ * IntSyn.sub_ -> IntSyn.sub_
+  val intersection : IntSyn.sub * IntSyn.sub -> IntSyn.sub
 
   exception Unify of string
 
@@ -38,18 +38,17 @@ module type UNIFY = sig
   val unifyW : IntSyn.dctx * IntSyn.eclo * IntSyn.eclo -> unit
 
   (* raises Unify *)
-  val unifyBlock : IntSyn.dctx * IntSyn.block_ * IntSyn.block_ -> unit
+  val unifyBlock : IntSyn.dctx * IntSyn.block * IntSyn.block -> unit
 
   (* raises Unify *)
-  val unifySub : IntSyn.dctx * IntSyn.sub_ * IntSyn.sub_ -> unit
+  val unifySub : IntSyn.dctx * IntSyn.sub * IntSyn.sub -> unit
 
   (* raises Unify *)
   val invertible :
-    IntSyn.dctx * IntSyn.eclo * IntSyn.sub_ * IntSyn.exp_ option ref -> bool
+    IntSyn.dctx * IntSyn.eclo * IntSyn.sub * IntSyn.exp option ref -> bool
 
   val invertSub :
-    IntSyn.dctx * IntSyn.sub_ * IntSyn.sub_ * IntSyn.exp_ option ref ->
-    IntSyn.sub_
+    IntSyn.dctx * IntSyn.sub * IntSyn.sub * IntSyn.exp option ref -> IntSyn.sub
 
   (* unifiable (G, Us,Us') will instantiate EVars as an effect *)
   val unifiable : IntSyn.dctx * IntSyn.eclo * IntSyn.eclo -> bool
@@ -81,26 +80,26 @@ end) : UNIFY = struct
   exception Unify of string
   exception NotInvertible
 
-  type fAction_ =
-    | BindExp of IntSyn.exp_ option ref * IntSyn.exp_ option
-    | BindBlock of IntSyn.block_ option ref * IntSyn.block_ option
-    | BindAdd of IntSyn.cnstr list ref * cAction_ list
+  type fAction =
+    | BindExp of IntSyn.exp option ref * IntSyn.exp option
+    | BindBlock of IntSyn.block option ref * IntSyn.block option
+    | BindAdd of IntSyn.cnstr list ref * cAction list
     | FSolve of IntSyn.cnstr_ ref * IntSyn.cnstr_ * IntSyn.cnstr_
 
-  and cAction_ = BindCnstr of IntSyn.cnstr_ ref * IntSyn.cnstr_
+  and cAction = BindCnstr of IntSyn.cnstr_ ref * IntSyn.cnstr_
 
-  type nonrec unifTrail = fAction_ Trail.trail
+  type nonrec unifTrail = fAction Trail.trail
 
   open! struct
     open IntSyn
 
-    type action_ =
-      | Instantiate of exp_ option ref
-      | InstantiateBlock of block_ option ref
+    type action =
+      | Instantiate of exp option ref
+      | InstantiateBlock of block option ref
       | Add of cnstr list ref
       | Solve of cnstr * cnstr_
 
-    let globalTrail = (Trail.trail () : action_ Trail.trail)
+    let globalTrail = (Trail.trail () : action Trail.trail)
 
     let rec copyCnstr = function
       | [] -> []

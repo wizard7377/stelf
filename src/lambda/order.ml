@@ -8,45 +8,45 @@ module type ORDER = sig
   (*! structure IntSyn : INTSYN !*)
   exception Error of string
 
-  type 'a order_ = Arg of 'a | Lex of 'a order_ list | Simul of 'a order_ list
+  type 'a order = Arg of 'a | Lex of 'a order list | Simul of 'a order list
+  [@@deriving eq, ord, show]
 
   (* Orders                     *)
   (* O ::= x                    *)
   (*     | {O1 .. On}           *)
   (*     | [O1 .. On]           *)
-  type predicate_ =
-    | Less of int order_ * int order_
-    | Leq of int order_ * int order_
-    | Eq of int order_ * int order_
+  type predicate =
+    | Less of int order * int order
+    | Leq of int order * int order
+    | Eq of int order * int order
+  [@@deriving eq, ord, show]
 
   (* Reduction Order            *)
   (* O < O'                     *)
   (* O <= O'                    *)
   (* O = O'                     *)
-  type mutual_ =
-    | Empty
-    | Le of IntSyn.cid * mutual_
-    | Lt of IntSyn.cid * mutual_
+  type mutual = Empty | Le of IntSyn.cid * mutual | Lt of IntSyn.cid * mutual
+  [@@deriving eq, ord, show]
 
   (* Termination ordering       *)
   (* O ::= No order specified   *)
   (*     | mutual dependencies  *)
   (*     | lex order for  -     *)
-  type tDec_ = TDec of int order_ * mutual_
+  type tDec = TDec of int order * mutual [@@deriving eq, ord, show]
 
   (* Termination declaration *)
-  type rDec_ = RDec of predicate_ * mutual_
+  type rDec = RDec of predicate * mutual [@@deriving eq, ord, show]
 
   (* Reduction declaration      *)
   val reset : unit -> unit
   val resetROrder : unit -> unit
-  val install : IntSyn.cid * tDec_ -> unit
+  val install : IntSyn.cid * tDec -> unit
   val uninstall : IntSyn.cid -> bool
-  val installROrder : IntSyn.cid * rDec_ -> unit
+  val installROrder : IntSyn.cid * rDec -> unit
   val uninstallROrder : IntSyn.cid -> bool
-  val selLookup : IntSyn.cid -> int order_
-  val selLookupROrder : IntSyn.cid -> predicate_
-  val mutLookup : IntSyn.cid -> mutual_
+  val selLookup : IntSyn.cid -> int order
+  val selLookupROrder : IntSyn.cid -> predicate
+  val mutLookup : IntSyn.cid -> mutual
   val closure : IntSyn.cid -> IntSyn.cid list
 end
 (* signature ORDER *)
@@ -67,16 +67,18 @@ end) : ORDER = struct
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 
-  type 'a order_ = Arg of 'a | Lex of 'a order_ list | Simul of 'a order_ list
+  type 'a order = Arg of 'a | Lex of 'a order list | Simul of 'a order list
+  [@@deriving eq, ord, show]
 
   (* Orders                     *)
   (* O ::= x                    *)
   (*     | {O1 .. On}           *)
   (*     | [O1 .. On]           *)
-  type predicate_ =
-    | Less of int order_ * int order_
-    | Leq of int order_ * int order_
-    | Eq of int order_ * int order_
+  type predicate =
+    | Less of int order * int order
+    | Leq of int order * int order
+    | Eq of int order * int order
+  [@@deriving eq, ord, show]
 
   (* Mutual dependencies in call patterns:                            *)
   (* A call pattern   (a1 P1) .. (ai Pi) .. (an Pn)   expresses       *)
@@ -85,28 +87,26 @@ end) : ORDER = struct
   (* and to                                                           *)
   (*   ih a(i+1) .. an as long as the arguments are smaller or equal  *)
   (* then the ones of ai.                                             *)
-  type mutual_ =
-    | Empty
-    | Le of IntSyn.cid * mutual_
-    | Lt of IntSyn.cid * mutual_
+  type mutual = Empty | Le of IntSyn.cid * mutual | Lt of IntSyn.cid * mutual
+  [@@deriving eq, ord, show]
 
   (* Mutual dependencies        *)
   (* C ::= .                    *)
   (*     |  <= (a) C            *)
   (*     |  > (a) C             *)
-  type tDec_ = TDec of int order_ * mutual_
+  type tDec = TDec of int order * mutual [@@deriving eq, ord, show]
 
   (* Termination declaration    *)
   (* TDec ::= (O, C)            *)
-  type rDec_ = RDec of predicate_ * mutual_
+  type rDec = RDec of predicate * mutual [@@deriving eq, ord, show]
 
   (* Reduction declaration      *)
   (* RDec ::= (P, C)            *)
   open! struct
     module I = IntSyn
 
-    let orderTable_ : tDec_ Table.table_ = Table.new_ 0
-    let redOrderTable_ : rDec_ Table.table_ = Table.new_ 0
+    let orderTable_ : tDec Table.table = Table.new_ 0
+    let redOrderTable_ : rDec Table.table = Table.new_ 0
     let rec reset () = Table.clear orderTable_
     let rec resetROrder () = Table.clear redOrderTable_
     let rec install (cid, o_) = Table.insert orderTable_ (cid, o_)

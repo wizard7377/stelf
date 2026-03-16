@@ -42,9 +42,9 @@ end) : Cs.CS = struct
     module FX = Cs_manager.Fixity
     module MS = ModeSyn
 
-    exception MyFgnCnstrRepPlus of dctx * exp_ * exp_ * exp_ * exp_
-    exception MyFgnCnstrRepTimes of dctx * exp_ * exp_ * exp_ * exp_
-    exception MyFgnCnstrRepQuot of dctx * exp_ * exp_ * exp_ * exp_
+    exception MyFgnCnstrRepPlus of dctx * exp * exp * exp * exp
+    exception MyFgnCnstrRepTimes of dctx * exp * exp * exp * exp
+    exception MyFgnCnstrRepQuot of dctx * exp * exp * exp * exp
 
     let wordSize' = Int.min (CSIntWord__0.wordSize, W.wordSize)
     let zero = W.fromInt 0
@@ -206,12 +206,12 @@ end) : Cs.CS = struct
         end
       end
 
-    type fixTerm_ =
+    type fixTerm =
       | Num of W.word
       | PlusPf of W.word * W.word
       | TimesPf of W.word * W.word
       | QuotPf of W.word * W.word
-      | Expr of (exp_ * sub_)
+      | Expr of (exp * sub)
 
     let rec fromExpW = function
       | (Root (FgnConst (cs, conDec), _), _) as us_ -> begin

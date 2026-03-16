@@ -5,32 +5,32 @@ open! Basis
 (* Author: Carsten Schuermann *)
 module type METASYN = sig
   (*! structure IntSyn : INTSYN !*)
-  type mode_ = Bot | Top
+  type mode = Bot | Top [@@deriving eq, ord, show]
 
   (* Mode                       *)
   (* M ::= Bot                  *)
   (*     | Top                  *)
-  type prefix_ = Prefix of IntSyn.dctx * mode_ IntSyn.ctx_ * int IntSyn.ctx_
+  type prefix = Prefix of IntSyn.dctx * mode IntSyn.ctx * int IntSyn.ctx
 
   (* Mtx modes                  *)
   (* G   declarations           *)
 
   (* Prefix P := *)
   (* Btx splitting depths       *)
-  type state_ = State of string * prefix_ * IntSyn.exp_
+  type state = State of string * prefix * IntSyn.exp
 
   (*             G; Mtx; Btx    *)
   (*             [name]         *)
 
   (* State S :=                 *)
   (*             |- V           *)
-  type sgn_ = SgnEmpty | ConDec of IntSyn.conDec_ * sgn_
+  type sgn = SgnEmpty | ConDec of IntSyn.conDec * sgn
 
   (* Interface signature        *)
   (* IS ::= .                   *)
   (*      | c:V, IS             *)
-  val createAtomConst : IntSyn.dctx * IntSyn.head_ -> IntSyn.exp_ * IntSyn.eclo
-  val createAtomBVar : IntSyn.dctx * int -> IntSyn.exp_ * IntSyn.eclo
+  val createAtomConst : IntSyn.dctx * IntSyn.head -> IntSyn.exp * IntSyn.eclo
+  val createAtomBVar : IntSyn.dctx * int -> IntSyn.exp * IntSyn.eclo
 end
 (* signature METASYN *)
 
@@ -45,27 +45,27 @@ end) : METASYN = struct
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 
-  type nonrec var_ = int
-  type mode_ = Bot | Top
+  type nonrec var = int
+  type mode = Bot | Top [@@deriving eq, ord, show]
 
   (* Mode                       *)
   (* M ::= Bot                  *)
   (*     | Top                  *)
-  type prefix_ = Prefix of IntSyn.dctx * mode_ IntSyn.ctx_ * int IntSyn.ctx_
+  type prefix = Prefix of IntSyn.dctx * mode IntSyn.ctx * int IntSyn.ctx
 
   (* Mtx modes                  *)
   (* G   declarations           *)
 
   (* Prefix P := *)
   (* Btx splitting depths       *)
-  type state_ = State of string * prefix_ * IntSyn.exp_
+  type state = State of string * prefix * IntSyn.exp
 
   (*             G; Mtx; Btx    *)
   (*             [name]         *)
 
   (* State S :=                 *)
   (*             |- V           *)
-  type sgn_ = SgnEmpty | ConDec of IntSyn.conDec_ * sgn_
+  type sgn = SgnEmpty | ConDec of IntSyn.conDec * sgn
 
   (* Interface signature        *)
   (* IS ::= .                   *)

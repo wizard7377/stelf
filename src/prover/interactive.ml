@@ -152,15 +152,15 @@ end) : INTERACTIVE = struct
       | a :: [] -> convertOneFor a
       | a :: l_ -> T.And (convertOneFor a, convertFor l_)
 
-    type menuItem_ =
+    type menuItem =
       | Split of Split.operator
       | Fill of Fill.operator
       | Introduce of Introduce.operator
       | Fix of FixedPoint.operator
       | Elim of Elim.operator
 
-    let focus_ : S.state_ list ref = ref []
-    let menu_ : menuItem_ list option ref = ref None
+    let focus_ : S.state list ref = ref []
+    let menu_ : menuItem list option ref = ref None
     let rec splittingToMenu_ (o_, a_) = Split o_ :: a_
     let rec initFocus () = focus_ := []
 

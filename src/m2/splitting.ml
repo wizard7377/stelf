@@ -11,8 +11,8 @@ module type SPLITTING = sig
 
   type nonrec operator
 
-  val expand : MetaSyn.state_ -> operator list
-  val apply : operator -> MetaSyn.state_ list
+  val expand : MetaSyn.state -> operator list
+  val apply : operator -> MetaSyn.state list
   val var : operator -> int
   val menu : operator -> string
   val index : operator -> int
@@ -65,8 +65,8 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
      Consequence: Only those splitting operators can be
      applied which do not generate inactive cases.
   *)
-  type 'a flag = Active of 'a | InActive
-  type nonrec operator = (MetaSyn.state_ * int) * MetaSyn.state_ flag list
+  type 'a flag = Active of 'a | InActive [@@deriving eq, ord, show]
+  type nonrec operator = (MetaSyn.state * int) * MetaSyn.state flag list
 
   open! struct
     module M = MetaSyn

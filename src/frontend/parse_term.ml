@@ -176,13 +176,14 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
         | r, opr, p -> shift (r, opr, p)
     end
 
-    let rec parseQualId' = function (LS.Cons (((L.Id (_, id) as t), r), s') as f) ->
-      begin match LS.expose s' with
-      | LS.Cons ((L.Pathsep, _), s'') ->
-          let (ids, (t, r)), f' = parseQualId' (LS.expose s'') in
-          ((id :: ids, (t, r)), f')
-      | f' -> (([], (t, r)), f')
-      end
+    let rec parseQualId' = function
+      | LS.Cons (((L.Id (_, id) as t), r), s') as f -> begin
+          match LS.expose s' with
+          | LS.Cons ((L.Pathsep, _), s'') ->
+              let (ids, (t, r)), f' = parseQualId' (LS.expose s'') in
+              ((id :: ids, (t, r)), f')
+          | f' -> (([], (t, r)), f')
+        end
       | LS.Empty -> assert false (* TODO *)
 
     let rec stripBar = function
@@ -282,7 +283,8 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           end
       | LS.Cons ((L.Underscore, r), s), p ->
           parseExp (s, P.shiftAtom (ExtSyn.omitted r, p))
-      | LS.Cons ((L.Type, r), s), p -> parseExp (s, P.shiftAtom (ExtSyn.typ r, p))
+      | LS.Cons ((L.Type, r), s), p ->
+          parseExp (s, P.shiftAtom (ExtSyn.typ r, p))
       | LS.Cons ((L.Colon, r), s), p -> parseExp (s, P.resolve (r, colonOp, p))
       | LS.Cons ((L.Backarrow, r), s), p ->
           parseExp (s, P.resolve (r, backArrowOp, p))

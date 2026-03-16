@@ -17,8 +17,8 @@ module type MTPRECURSION = sig
 
   type nonrec operator
 
-  val expand : StateSyn.state_ -> operator
-  val apply : operator -> StateSyn.state_
+  val expand : StateSyn.state -> operator
+  val apply : operator -> StateSyn.state
   val menu : operator -> string
 end
 (* signature MTPRECURSION *)
@@ -82,7 +82,7 @@ end) : MTPRECURSION = struct
 
   exception Error of string
 
-  type nonrec operator = StateSyn.state_
+  type nonrec operator = StateSyn.state
 
   open! struct
     module I = IntSyn
@@ -92,7 +92,7 @@ end) : MTPRECURSION = struct
     module Fmt = Formatter
     module A = MTPAbstract
 
-    type dec_ = Lemma of int * F.for_
+    type dec = Lemma of int * F.for_
 
     let rec closedCtx = function
       | null_ -> ()

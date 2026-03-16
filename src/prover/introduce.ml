@@ -12,7 +12,7 @@ module type INTRODUCE = sig
 
   type nonrec operator
 
-  val expand : State.focus_ -> operator option
+  val expand : State.focus -> operator option
   val apply : operator -> unit
   val menu : operator -> string
 end
@@ -42,7 +42,7 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
 
     exception Error = S.Error
 
-    type nonrec operator = T.prg_ * T.prg_
+    type nonrec operator = T.prg * T.prg
 
     let rec stripTC tc_ = tc_
 

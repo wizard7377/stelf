@@ -1,7 +1,9 @@
 (* # 1 "src/domains/integers_mod.sig.ml" *)
 
 (* # 1 "src/domains/integers_mod.fun.ml" *)
-open! Basis
+open Basis
+open Int_inf
+open Int_inf.Int_inf_
 open Field
 
 (* Integers Modulo a Prime Number *)

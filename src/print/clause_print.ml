@@ -7,10 +7,10 @@ module type CLAUSEPRINT = sig
   (*! structure IntSyn : INTSYN !*)
   module Formatter : FORMATTER
 
-  val formatClause : IntSyn.dctx * IntSyn.exp_ -> Formatter.format
-  val formatConDec : IntSyn.conDec_ -> Formatter.format
-  val clauseToString : IntSyn.dctx * IntSyn.exp_ -> string
-  val conDecToString : IntSyn.conDec_ -> string
+  val formatClause : IntSyn.dctx * IntSyn.exp -> Formatter.format
+  val formatConDec : IntSyn.conDec -> Formatter.format
+  val clauseToString : IntSyn.dctx * IntSyn.exp -> string
+  val conDecToString : IntSyn.conDec -> string
   val printSgn : unit -> unit
 end
 (* signature CLAUSEPRINT *)
@@ -41,10 +41,10 @@ module MakeClausePrint (ClausePrint__0 : sig
   module Print : sig
     module Formatter : FORMATTER
 
-    val formatDec : IntSyn.dctx * IntSyn.dec_ -> Formatter.format
-    val formatExp : IntSyn.dctx * IntSyn.exp_ -> Formatter.format
-    val formatSpine : IntSyn.dctx * IntSyn.spine_ -> Formatter.format list
-    val formatConDec : IntSyn.conDec_ -> Formatter.format
+    val formatDec : IntSyn.dctx * IntSyn.dec -> Formatter.format
+    val formatExp : IntSyn.dctx * IntSyn.exp -> Formatter.format
+    val formatSpine : IntSyn.dctx * IntSyn.spine -> Formatter.format list
+    val formatConDec : IntSyn.conDec -> Formatter.format
     val implicit : bool ref
   end
 

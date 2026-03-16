@@ -24,7 +24,7 @@ include Tomega
 module Whnf = Whnf__
 module Conv = Conv__
 
-type nonrec spine_ = IntSyn.spine_
+type nonrec spine = IntSyn.spine
 
 (* Now in intsyn.fun *)
 (*

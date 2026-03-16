@@ -1,4 +1,4 @@
-open! Basis
+open Basis
 
 (* time-limit.sml
  *

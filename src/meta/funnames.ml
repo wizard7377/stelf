@@ -68,7 +68,7 @@ end) : FUNNAMES = struct
     let nameArray =
       (Array.array (maxCid + 1, NameInfo "") : nameInfo Array.array)
 
-    let sgnHashTable : IntSyn.cid HashTable.table_ = HashTable.new_ 4096
+    let sgnHashTable : IntSyn.cid HashTable.table = HashTable.new_ 4096
     let hashInsert = HashTable.insertShadow sgnHashTable
     let hashLookup = HashTable.lookup sgnHashTable
     let rec hashClear () = HashTable.clear sgnHashTable

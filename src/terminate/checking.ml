@@ -9,32 +9,32 @@ module type CHECKING = sig
 
   (*! structure Paths : PATHS !*)
   (* If Q marks all parameters in a context G we write   G : Q  *)
-  type quantifier_ = All | Exist | And of Paths.occ
+  type quantifier = All | Exist | And of Paths.occ
 
   (* Quantifier to mark parameters *)
   (* Q ::= All                     *)
   (*     | Exist                     *)
   (*     | And                     *)
-  type 'a predicate_ =
+  type 'a predicate =
     | Less of 'a * 'a
     | Leq of 'a * 'a
     | Eq of 'a * 'a
-    | Pi of IntSyn.dec_ * 'a predicate_
+    | Pi of IntSyn.dec * 'a predicate
 
-  type nonrec order = (IntSyn.eclo * IntSyn.eclo) Order.order_
+  type nonrec order = (IntSyn.eclo * IntSyn.eclo) Order.order
 
   (* reduction predicate context (unordered) *)
-  type nonrec rctx = order predicate_ list
+  type nonrec rctx = order predicate list
 
   (* mixed-prefix context *)
-  type nonrec qctx = quantifier_ IntSyn.ctx_
+  type nonrec qctx = quantifier IntSyn.ctx
 
-  val shiftRCtx : rctx -> (IntSyn.sub_ -> IntSyn.sub_) -> rctx
+  val shiftRCtx : rctx -> (IntSyn.sub -> IntSyn.sub) -> rctx
 
   val shiftPred :
-    order predicate_ -> (IntSyn.sub_ -> IntSyn.sub_) -> order predicate_
+    order predicate -> (IntSyn.sub -> IntSyn.sub) -> order predicate
 
-  val deduce : IntSyn.dctx * qctx * rctx * order predicate_ -> bool
+  val deduce : IntSyn.dctx * qctx * rctx * order predicate -> bool
 end
 (* signature CHECKING *)
 
@@ -80,27 +80,27 @@ end) : CHECKING = struct
   module Order = Order
 
   (*! structure Paths = Paths !*)
-  type quantifier_ = All | Exist | And of Paths.occ
+  type quantifier = All | Exist | And of Paths.occ
 
   (* Quantifier to mark parameters *)
   (* Q ::= All                     *)
   (*     | Exist                   *)
   (*     | And                     *)
   (* If Q marks all parameters in a context G we write   G : Q               *)
-  type 'a predicate_ =
+  type 'a predicate =
     | Less of 'a * 'a
     | Leq of 'a * 'a
     | Eq of 'a * 'a
-    | Pi of IntSyn.dec_ * 'a predicate_
+    | Pi of IntSyn.dec * 'a predicate
 
   (* Abbreviation *)
-  type nonrec order = (IntSyn.eclo * IntSyn.eclo) Order.order_
+  type nonrec order = (IntSyn.eclo * IntSyn.eclo) Order.order
 
   (* reduction order assumptions (unordered) *)
-  type nonrec rctx = order predicate_ list
+  type nonrec rctx = order predicate list
 
   (* mixed prefix order contex *)
-  type nonrec qctx = quantifier_ IntSyn.ctx_
+  type nonrec qctx = quantifier IntSyn.ctx
 
   open! struct
     module I = IntSyn

@@ -177,7 +177,8 @@
  (flags
   (:standard -open Basis))
  (wrapped true)
-(preprocess (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+ (preprocess
+  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
 
 (include twelf_server_mlton.sources.dune)
 
@@ -189,4 +190,5 @@
  (flags
   (:standard -open Basis))
  (wrapped true)
-(preprocess (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+ (preprocess
+  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

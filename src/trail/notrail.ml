@@ -3,7 +3,7 @@
 (* # 1 "src/trail/notrail.fun.ml" *)
 
 (* # 1 "src/trail/notrail.sml.ml" *)
-open! Basis
+open Basis
 open Trail_
 
 (* Not Trailing Abstract Operations *)

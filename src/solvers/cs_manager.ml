@@ -9,11 +9,11 @@ module type CS_MANAGER = sig
 
   (*! structure ModeSyn : MODESYN !*)
   type nonrec sigEntry =
-    IntSyn.conDec_ * Fixity.fixity option * ModeSyn.modeSpine_ list
+    IntSyn.conDec * Fixity.fixity option * ModeSyn.modeSpine list
 
   (* global signature entry *)
   (* constant declaration plus optional precedence and mode information *)
-  type nonrec __0 = { parse : string -> IntSyn.conDec_ option }
+  type nonrec __0 = { parse : string -> IntSyn.conDec option }
   type nonrec fgnConDec = __0
 
   (* foreign constant declaration *)
@@ -40,7 +40,7 @@ module type CS_MANAGER = sig
   val useSolver : string -> unit
 
   (* parsing foreign constatnts *)
-  val parse : string -> (IntSyn.csid * IntSyn.conDec_) option
+  val parse : string -> (IntSyn.csid * IntSyn.conDec) option
 
   (* trailing operations *)
   val reset : unit -> unit
@@ -67,11 +67,11 @@ end) : CS_MANAGER with module Fixity = CSManager__0.Fixity = struct
 
   (* structure ModeSyn = ModeSyn *)
   type nonrec sigEntry =
-    IntSyn.conDec_ * Fixity.fixity option * ModeSyn.modeSpine_ list
+    IntSyn.conDec * Fixity.fixity option * ModeSyn.modeSpine list
 
   (* global signature entry *)
   (* constant declaration plus optional precedence and mode information *)
-  type nonrec __0 = { parse : string -> IntSyn.conDec_ option }
+  type nonrec __0 = { parse : string -> IntSyn.conDec option }
   type nonrec fgnConDec = __0
 
   (* foreign constant declaration *)
@@ -209,7 +209,7 @@ end) : CS_MANAGER with module Fixity = CSManager__0.Fixity = struct
       end
 
     let rec parse string =
-      let exception Parsed of IntSyn.csid * IntSyn.conDec_ in
+      let exception Parsed of IntSyn.csid * IntSyn.conDec in
       let rec parse' (cs, (solver : solver)) =
         begin match (fun r -> r.fgnConst) solver with
         | None -> ()

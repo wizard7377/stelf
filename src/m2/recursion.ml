@@ -11,9 +11,9 @@ module type RECURSION = sig
 
   type nonrec operator
 
-  val expandLazy : MetaSyn.state_ -> operator list
-  val expandEager : MetaSyn.state_ -> operator list
-  val apply : operator -> MetaSyn.state_
+  val expandLazy : MetaSyn.state -> operator list
+  val expandEager : MetaSyn.state -> operator list
+  val apply : operator -> MetaSyn.state
   val menu : operator -> string
 end
 (* signature RECURSION *)
@@ -70,7 +70,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
 
   exception Error of string
 
-  type nonrec operator = MetaSyn.state_
+  type nonrec operator = MetaSyn.state
 
   open! struct
     module M = MetaSyn
@@ -79,7 +79,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     module N = Names
     module F = Formatter
 
-    type quantifier_ = Universal | Existential
+    type quantifier = Universal | Existential
 
     let rec vectorToString (g_, o_) =
       let rec fmtOrder = function

@@ -8,34 +8,32 @@ open Tomega
 module type ABSTRACT = sig
   exception Error of string
 
-  val piDepend : (IntSyn.dec_ * IntSyn.depend_) * IntSyn.exp_ -> IntSyn.exp_
-  val closedDec : IntSyn.dec_ IntSyn.ctx_ * (IntSyn.dec_ * IntSyn.sub_) -> bool
-  val closedSub : IntSyn.dec_ IntSyn.ctx_ * IntSyn.sub_ -> bool
-  val closedExp : IntSyn.dec_ IntSyn.ctx_ * (IntSyn.exp_ * IntSyn.sub_) -> bool
-  val closedCtx : IntSyn.dec_ IntSyn.ctx_ -> bool
-  val closedCTX : Tomega.dec_ IntSyn.ctx_ -> bool
-  val abstractDecImp : IntSyn.exp_ -> int * IntSyn.exp_
-
-  val abstractDef :
-    IntSyn.exp_ * IntSyn.exp_ -> int * (IntSyn.exp_ * IntSyn.exp_)
+  val piDepend : (IntSyn.dec * IntSyn.depend) * IntSyn.exp -> IntSyn.exp
+  val closedDec : IntSyn.dec IntSyn.ctx * (IntSyn.dec * IntSyn.sub) -> bool
+  val closedSub : IntSyn.dec IntSyn.ctx * IntSyn.sub -> bool
+  val closedExp : IntSyn.dec IntSyn.ctx * (IntSyn.exp * IntSyn.sub) -> bool
+  val closedCtx : IntSyn.dec IntSyn.ctx -> bool
+  val closedCTX : Tomega.dec IntSyn.ctx -> bool
+  val abstractDecImp : IntSyn.exp -> int * IntSyn.exp
+  val abstractDef : IntSyn.exp * IntSyn.exp -> int * (IntSyn.exp * IntSyn.exp)
 
   val abstractCtxs :
-    IntSyn.dec_ IntSyn.ctx_ list ->
-    IntSyn.dec_ IntSyn.ctx_ * IntSyn.dec_ IntSyn.ctx_ list
+    IntSyn.dec IntSyn.ctx list ->
+    IntSyn.dec IntSyn.ctx * IntSyn.dec IntSyn.ctx list
 
-  val abstractTomegaSub : Tomega.sub_ -> Tomega.dec_ IntSyn.ctx_ * Tomega.sub_
-  val abstractTomegaPrg : Tomega.prg_ -> Tomega.dec_ IntSyn.ctx_ * Tomega.prg_
-  val abstractSpine : IntSyn.spine_ * IntSyn.sub_ -> IntSyn.dctx * IntSyn.spine_
+  val abstractTomegaSub : Tomega.sub -> Tomega.dec IntSyn.ctx * Tomega.sub
+  val abstractTomegaPrg : Tomega.prg -> Tomega.dec IntSyn.ctx * Tomega.prg
+  val abstractSpine : IntSyn.spine * IntSyn.sub -> IntSyn.dctx * IntSyn.spine
 
   val collectEVars :
-    IntSyn.dctx * IntSyn.eclo * IntSyn.exp_ list -> IntSyn.exp_ list
+    IntSyn.dctx * IntSyn.eclo * IntSyn.exp list -> IntSyn.exp list
 
   val collectEVarsSpine :
-    IntSyn.dctx * (IntSyn.spine_ * IntSyn.sub_) * IntSyn.exp_ list ->
-    IntSyn.exp_ list
+    IntSyn.dctx * (IntSyn.spine * IntSyn.sub) * IntSyn.exp list ->
+    IntSyn.exp list
 
-  val raiseTerm : IntSyn.dctx * IntSyn.exp_ -> IntSyn.exp_
-  val raiseType : IntSyn.dctx * IntSyn.exp_ -> IntSyn.exp_
+  val raiseTerm : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
+  val raiseType : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
 end
 (* signature ABSTRACT *)
 
@@ -72,11 +70,11 @@ end) : ABSTRACT = struct
     module C = Constraints
     module O = Order
 
-    type eFLVar_ =
-      | Ev of I.exp_
-      | Fv of string * I.exp_
-      | Lv of I.block_
-      | Pv of T.prg_
+    type eFLVar =
+      | Ev of I.exp
+      | Fv of string * I.exp
+      | Lv of I.block
+      | Pv of T.prg
 
     let rec collectConstraints = function
       | I.Null -> []

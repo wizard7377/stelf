@@ -7,10 +7,10 @@ open Metasyn
 module type METAPRINT = sig
   module MetaSyn : METASYN
 
-  val stateToString : MetaSyn.state_ -> string
-  val sgnToString : MetaSyn.sgn_ -> string
-  val modeToString : MetaSyn.mode_ -> string
-  val conDecToString : IntSyn.conDec_ -> string
+  val stateToString : MetaSyn.state -> string
+  val sgnToString : MetaSyn.sgn -> string
+  val modeToString : MetaSyn.mode -> string
+  val conDecToString : IntSyn.conDec -> string
 end
 (* signature METAPRINT *)
 

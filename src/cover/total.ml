@@ -32,10 +32,10 @@ module type COVER = sig
 
   val checkNoDef : IntSyn.cid -> unit
   val checkOut : IntSyn.dctx * IntSyn.eclo -> unit
-  val checkCovers : IntSyn.cid * ModeSyn.modeSpine_ -> unit
+  val checkCovers : IntSyn.cid * ModeSyn.modeSpine -> unit
 
   val coverageCheckCases :
-    Tomega.worlds_ * (IntSyn.dctx * IntSyn.sub_) list * IntSyn.dctx -> unit
+    Tomega.worlds * (IntSyn.dctx * IntSyn.sub) list * IntSyn.dctx -> unit
 end
 
 module Total (Total__0 : sig
@@ -92,7 +92,7 @@ end) : TOTAL = struct
     module M = ModeSyn
     module N = Names
 
-    let totalTable : unit Table.table_ = Table.new_ 0
+    let totalTable : unit Table.table = Table.new_ 0
     let rec reset () = Table.clear totalTable
     let rec install cid = Table.insert totalTable (cid, ())
     let rec lookup cid = Table.lookup totalTable cid

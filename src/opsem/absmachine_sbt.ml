@@ -9,9 +9,9 @@ module type ABSMACHINESBT = sig
   (*! structure IntSyn  : INTSYN !*)
   (*! structure CompSyn : COMPSYN !*)
   val solve :
-    (CompSyn.goal_ * IntSyn.sub_)
-    * CompSyn.dProg_
-    * (CompSyn.flatterm_ list -> unit) ->
+    (CompSyn.goal * IntSyn.sub)
+    * CompSyn.dProg
+    * (CompSyn.flatterm list -> unit) ->
     unit
 end
 (* signature ABSMACHINESBT *)
@@ -59,9 +59,9 @@ end) : ABSMACHINESBT = struct
     module C = CompSyn
 
     let mSig :
-        ((IntSyn.exp_ * IntSyn.sub_)
-         * CompSyn.dProg_
-         * (CompSyn.flatterm_ list -> unit) ->
+        ((IntSyn.exp * IntSyn.sub)
+         * CompSyn.dProg
+         * (CompSyn.flatterm list -> unit) ->
         unit)
         ref =
       ref (function ps, dp, sc -> ())

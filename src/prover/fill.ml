@@ -12,7 +12,7 @@ module type FILL = sig
 
   type nonrec operator
 
-  val expand : State.focus_ -> operator list
+  val expand : State.focus -> operator list
   val apply : operator -> unit
   val menu : operator -> string
 end
@@ -57,8 +57,8 @@ end) : FILL with module State = Fill__0.State' = struct
   exception Error of string
 
   type operator_ =
-    | FillWithConst of IntSyn.exp_ * IntSyn.cid
-    | FillWithBVar of IntSyn.exp_ * int
+    | FillWithConst of IntSyn.exp * IntSyn.cid
+    | FillWithBVar of IntSyn.exp * int
 
   (* Representation Invariant:  FillWithConst (X, c) :
            X is an evar GX |- X : VX

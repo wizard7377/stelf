@@ -11,7 +11,7 @@ module type SEARCH = sig
   exception Error of string
 
   val searchEx :
-    int * IntSyn.exp_ list * (int -> unit) ->
+    int * IntSyn.exp list * (int -> unit) ->
     unit (*      * (StateSyn.FunSyn.IntSyn.Exp * StateSyn.FunSyn.IntSyn.Sub) *)
 end
 (* signature SEARCH *)

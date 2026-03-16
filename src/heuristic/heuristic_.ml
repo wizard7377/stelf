@@ -1,8 +1,10 @@
 (* # 1 "src/heuristic/heuristic_.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* Heuristics : Version 1.3 *)
-(* Author: Carsten Schuermann *)
+
+(** Author: Carsten Schuermann *)
 module type HEURISTIC = sig
   type nonrec __0 = {
     sd : int;
@@ -15,14 +17,14 @@ module type HEURISTIC = sig
 
   type nonrec index = __0
 
-  (* Position (left to right) *)
   val compare : index * index -> order
+  (** Position (left to right) *)
+
   val indexToString : index -> string
 end
 (* signature HEURISTIC *)
 
 (* # 1 "src/heuristic/heuristic_.fun.ml" *)
-open! Basis
 
 (* Heuristics : Version 1.3 *)
 (* Author: Carsten Schuermann *)

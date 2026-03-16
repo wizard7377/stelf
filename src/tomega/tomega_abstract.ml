@@ -8,16 +8,11 @@ module type TOMEGAABSTRACT = sig
   exception Error of string
 
   val raiseFor :
-    IntSyn.dec_ IntSyn.ctx_ * (Tomega.for_ * IntSyn.sub_) -> Tomega.for_
+    IntSyn.dec IntSyn.ctx * (Tomega.for_ * IntSyn.sub) -> Tomega.for_
 
-  val raisePrg :
-    IntSyn.dec_ IntSyn.ctx_ * Tomega.prg_ * Tomega.for_ -> Tomega.prg_
-
-  val raiseP :
-    IntSyn.dec_ IntSyn.ctx_ * Tomega.prg_ * Tomega.for_ -> Tomega.prg_
-
-  val raiseF :
-    IntSyn.dec_ IntSyn.ctx_ * (Tomega.for_ * IntSyn.sub_) -> Tomega.for_
+  val raisePrg : IntSyn.dec IntSyn.ctx * Tomega.prg * Tomega.for_ -> Tomega.prg
+  val raiseP : IntSyn.dec IntSyn.ctx * Tomega.prg * Tomega.for_ -> Tomega.prg
+  val raiseF : IntSyn.dec IntSyn.ctx * (Tomega.for_ * IntSyn.sub) -> Tomega.for_
 end
 (* Signature TOMEGAABSTRACT *)
 
@@ -30,8 +25,8 @@ module TomegaAbstract (TomegaAbstract__0 : sig
   (* Author: Carsten Schuermann *)
   module Global : GLOBAL
 
-  val abstract_raiseType : IntSyn.dctx * IntSyn.exp_ -> IntSyn.exp_
-  val abstract_raiseTerm : IntSyn.dctx * IntSyn.exp_ -> IntSyn.exp_
+  val abstract_raiseType : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
+  val abstract_raiseTerm : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
 
   module Whnf : WHNF
   module Subordinate : SUBORDINATE

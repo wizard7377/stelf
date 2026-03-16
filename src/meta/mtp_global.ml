@@ -5,9 +5,9 @@ open Meta_global
 (* Global parameters *)
 (* Author: Carsten Schuermann *)
 module type MTPGLOBAL = sig
-  type proverType_ = New | Old
+  type proverType = New | Old [@@deriving eq, ord, show]
 
-  val prover : proverType_ ref
+  val prover : proverType ref
   val maxFill : int ref
   val maxSplit : int ref
   val maxRecurse : int ref
@@ -22,7 +22,7 @@ open! Basis
 module MTPGlobal (MTPGlobal__0 : sig
   module MetaGlobal : METAGLOBAL
 end) : MTPGLOBAL = struct
-  type proverType_ = New | Old
+  type proverType = New | Old [@@deriving eq, ord, show]
 
   let prover = ref New
   let maxFill = MetaGlobal.maxFill

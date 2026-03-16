@@ -12,13 +12,13 @@ module type FILLING = sig
 
   type nonrec operator
 
-  val expand : MetaSyn.state_ -> operator list * operator
+  val expand : MetaSyn.state -> operator list * operator
 
   (*
     gets a list of operators, which fill in several non index variables
     on one level simultaneously
   *)
-  val apply : operator -> MetaSyn.state_ list
+  val apply : operator -> MetaSyn.state list
 
   (*
     in the case of an induction hypothesis, an operator can transform a
@@ -52,13 +52,13 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
   exception Error of string
   exception TimeOut
 
-  type nonrec operator = (MetaSyn.state_ * int) * (unit -> MetaSyn.state_ list)
+  type nonrec operator = (MetaSyn.state * int) * (unit -> MetaSyn.state list)
 
   open! struct
     module M = MetaSyn
     module I = IntSyn
 
-    exception Success of M.state_
+    exception Success of M.state
 
     let rec delay (search, params_) () =
       try search params_ with Search.Error s -> raise (Error s)

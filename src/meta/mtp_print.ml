@@ -12,9 +12,9 @@ module type MTPRINT = sig
 
   exception Error of string
 
-  val nameState : StateSyn.state_ -> StateSyn.state_
-  val formatState : StateSyn.state_ -> Formatter.format
-  val stateToString : StateSyn.state_ -> string
+  val nameState : StateSyn.state -> StateSyn.state
+  val formatState : StateSyn.state -> Formatter.format
+  val stateToString : StateSyn.state -> string
 end
 (* signature MTPRINT *)
 

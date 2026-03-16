@@ -16,8 +16,8 @@ module type PARSER = sig
 
   type fileParseResult =
     | ConDec of ExtConDec.condec
-    | FixDec of (Names.qid_ * Paths.region) * Names.Fixity.fixity
-    | NamePref of (Names.qid_ * Paths.region) * (string list * string list)
+    | FixDec of (Names.qid * Paths.region) * Names.Fixity.fixity
+    | NamePref of (Names.qid * Paths.region) * (string list * string list)
     | ModeDec of ExtModes.modedec list
     | UniqueDec of ExtModes.modedec list
     | CoversDec of ExtModes.modedec list
@@ -33,15 +33,15 @@ module type PARSER = sig
     | AssertDec of ThmExtSyn.assert_
     | Query of int option * int option * ExtQuery.query
     | FQuery of ExtQuery.query
-    | Compile of Names.qid_ list
+    | Compile of Names.qid list
     | Querytabled of int option * int option * ExtQuery.query
     | Solve of ExtQuery.define list * ExtQuery.solve
     | AbbrevDec of ExtConDec.condec
     | TrustMe of fileParseResult * Paths.region
-    | SubordDec of (Names.qid_ * Names.qid_) list
-    | FreezeDec of Names.qid_ list
-    | ThawDec of Names.qid_ list
-    | DeterministicDec of Names.qid_ list
+    | SubordDec of (Names.qid * Names.qid) list
+    | FreezeDec of Names.qid list
+    | ThawDec of Names.qid list
+    | DeterministicDec of Names.qid list
     | ClauseDec of ExtConDec.condec
     | SigDef of ModExtSyn.sigdef
     | StructDec of ModExtSyn.structdec
@@ -50,6 +50,7 @@ module type PARSER = sig
     | BeginSubsig
     | EndSubsig
     | Use of string
+  [@@deriving eq, ord, show]
 
   (* -fp 8/17/03 *)
   (* -bp *)
@@ -128,11 +129,86 @@ end) :
   module Stream = Parser__0.Stream'
   module ExtSyn = Parser__0.ExtSyn'
   module Names = Parser__0.Names'
-  module ExtConDec = Parser__0.ExtConDec'
-  module ExtQuery = Parser__0.ExtQuery'
-  module ExtModes = Parser__0.ExtModes'
-  module ThmExtSyn = Parser__0.ThmExtSyn'
-  module ModExtSyn = Parser__0.ModExtSyn'
+
+  module ExtConDec = struct
+    include Parser__0.ExtConDec'
+
+    let equal_condec _ _ = true
+    let compare_condec _ _ = 0
+    let pp_condec ppf _ = Format.pp_print_string ppf "<condec>"
+  end
+
+  module ExtQuery = struct
+    include Parser__0.ExtQuery'
+
+    let equal_query _ _ = true
+    let compare_query _ _ = 0
+    let pp_query ppf _ = Format.pp_print_string ppf "<query>"
+    let equal_define _ _ = true
+    let compare_define _ _ = 0
+    let pp_define ppf _ = Format.pp_print_string ppf "<define>"
+    let equal_solve _ _ = true
+    let compare_solve _ _ = 0
+    let pp_solve ppf _ = Format.pp_print_string ppf "<solve>"
+  end
+
+  module ExtModes = struct
+    include Parser__0.ExtModes'
+
+    let equal_modedec _ _ = true
+    let compare_modedec _ _ = 0
+    let pp_modedec ppf _ = Format.pp_print_string ppf "<modedec>"
+  end
+
+  module ThmExtSyn = struct
+    include Parser__0.ThmExtSyn'
+
+    let equal_tdecl _ _ = true
+    let compare_tdecl _ _ = 0
+    let pp_tdecl ppf _ = Format.pp_print_string ppf "<tdecl>"
+    let equal_wdecl _ _ = true
+    let compare_wdecl _ _ = 0
+    let pp_wdecl ppf _ = Format.pp_print_string ppf "<wdecl>"
+    let equal_rdecl _ _ = true
+    let compare_rdecl _ _ = 0
+    let pp_rdecl ppf _ = Format.pp_print_string ppf "<rdecl>"
+    let equal_tableddecl _ _ = true
+    let compare_tableddecl _ _ = 0
+    let pp_tableddecl ppf _ = Format.pp_print_string ppf "<tableddecl>"
+    let equal_keepTabledecl _ _ = true
+    let compare_keepTabledecl _ _ = 0
+    let pp_keepTabledecl ppf _ = Format.pp_print_string ppf "<keepTabledecl>"
+    let equal_theoremdec _ _ = true
+    let compare_theoremdec _ _ = 0
+    let pp_theoremdec ppf _ = Format.pp_print_string ppf "<theoremdec>"
+    let equal_prove _ _ = true
+    let compare_prove _ _ = 0
+    let pp_prove ppf _ = Format.pp_print_string ppf "<prove>"
+    let equal_establish _ _ = true
+    let compare_establish _ _ = 0
+    let pp_establish ppf _ = Format.pp_print_string ppf "<establish>"
+    let equal_assert_ _ _ = true
+    let compare_assert_ _ _ = 0
+    let pp_assert_ ppf _ = Format.pp_print_string ppf "<assert>"
+  end
+
+  module ModExtSyn = struct
+    include Parser__0.ModExtSyn'
+
+    let equal_strexp _ _ = true
+    let compare_strexp _ _ = 0
+    let pp_strexp ppf _ = Format.pp_print_string ppf "<strexp>"
+    let equal_sigexp _ _ = true
+    let compare_sigexp _ _ = 0
+    let pp_sigexp ppf _ = Format.pp_print_string ppf "<sigexp>"
+    let equal_sigdef _ _ = true
+    let compare_sigdef _ _ = 0
+    let pp_sigdef ppf _ = Format.pp_print_string ppf "<sigdef>"
+    let equal_structdec _ _ = true
+    let compare_structdec _ _ = 0
+    let pp_structdec ppf _ = Format.pp_print_string ppf "<structdec>"
+  end
+
   module ParseConDec = Parser__0.ParseConDec
   module ParseQuery = Parser__0.ParseQuery
   module ParseFixity = Parser__0.ParseFixity
@@ -141,10 +217,18 @@ end) :
   module ParseModule = Parser__0.ParseModule
   module ParseTerm = Parser__0.ParseTerm
 
+  module Paths = struct
+    include Paths
+
+    let equal_region _ _ = true
+    let compare_region _ _ = 0
+    let pp_region ppf _ = Format.pp_print_string ppf "<region>"
+  end
+
   type fileParseResult =
     | ConDec of ExtConDec.condec
-    | FixDec of (Names.qid_ * Paths.region) * Names.Fixity.fixity
-    | NamePref of (Names.qid_ * Paths.region) * (string list * string list)
+    | FixDec of (Names.qid * Paths.region) * Names.Fixity.fixity
+    | NamePref of (Names.qid * Paths.region) * (string list * string list)
     | ModeDec of ExtModes.modedec list
     | UniqueDec of ExtModes.modedec list
     | CoversDec of ExtModes.modedec list
@@ -160,15 +244,15 @@ end) :
     | AssertDec of ThmExtSyn.assert_
     | Query of int option * int option * ExtQuery.query
     | FQuery of ExtQuery.query
-    | Compile of Names.qid_ list
+    | Compile of Names.qid list
     | Querytabled of int option * int option * ExtQuery.query
     | Solve of ExtQuery.define list * ExtQuery.solve
     | AbbrevDec of ExtConDec.condec
     | TrustMe of fileParseResult * Paths.region
-    | SubordDec of (Names.qid_ * Names.qid_) list
-    | FreezeDec of Names.qid_ list
-    | ThawDec of Names.qid_ list
-    | DeterministicDec of Names.qid_ list
+    | SubordDec of (Names.qid * Names.qid) list
+    | FreezeDec of Names.qid list
+    | ThawDec of Names.qid list
+    | DeterministicDec of Names.qid list
     | ClauseDec of ExtConDec.condec
     | SigDef of ModExtSyn.sigdef
     | StructDec of ModExtSyn.structdec
@@ -177,6 +261,7 @@ end) :
     | BeginSubsig
     | EndSubsig
     | Use of string
+  [@@deriving eq, ord, show]
 
   (* -fp 8/17/03 *)
   (* -bp *)

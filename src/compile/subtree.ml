@@ -20,40 +20,38 @@ module type SUBTREE = sig
   (* depth of locally bound variables *)
   (* normal (linear) substitutions *)
   (*  type normalSubsts = (IntSyn.Dec IntSyn.Ctx * IntSyn.Exp) RBSet.ordSet *)
-  type typeLabel = TypeLabel | Body
-  type nonrec normalSubsts = (typeLabel * IntSyn.exp_) RBSet.ordSet
+  type typeLabel = TypeLabel | Body [@@deriving eq, ord, show]
+  type nonrec normalSubsts = (typeLabel * IntSyn.exp) RBSet.ordSet
 
   type nonrec querySubsts =
-    (IntSyn.dec_ IntSyn.ctx_ * (typeLabel * IntSyn.exp_)) RBSet.ordSet
+    (IntSyn.dec IntSyn.ctx * (typeLabel * IntSyn.exp)) RBSet.ordSet
 
   open CompSyn
 
-  type cGoal_ =
-    | CGoals of CompSyn.auxGoal_ * IntSyn.cid * CompSyn.conjunction_ * int
+  type cGoal =
+    | CGoals of CompSyn.auxGoal * IntSyn.cid * CompSyn.conjunction * int
 
   (* assignable (linear) subsitutions *)
-  type assSub_ = Assign of IntSyn.dec_ IntSyn.ctx_ * IntSyn.exp_
-  type nonrec assSubsts = assSub_ RBSet.ordSet
+  type assSub = Assign of IntSyn.dec IntSyn.ctx * IntSyn.exp
+  type nonrec assSubsts = assSub RBSet.ordSet
 
   (* key = int = bvar *)
-  type cnstr_ = Eqn of IntSyn.dec_ IntSyn.ctx_ * IntSyn.exp_ * IntSyn.exp_
+  type cnstr = Eqn of IntSyn.dec IntSyn.ctx * IntSyn.exp * IntSyn.exp
 
-  type tree_ =
-    | Leaf of normalSubsts * IntSyn.dec_ IntSyn.ctx_ * cGoal_
-    | Node of normalSubsts * tree_ RBSet.ordSet
+  type tree =
+    | Leaf of normalSubsts * IntSyn.dec IntSyn.ctx * cGoal
+    | Node of normalSubsts * tree RBSet.ordSet
 
   (*  type candidate = assSubsts * normalSubsts * cnstrSubsts * Cnstr * IntSyn.Dec IntSyn.Ctx * CGoal *)
-  val indexArray : (int ref * tree_ ref) Array.array
+  val indexArray : (int ref * tree ref) Array.array
   val sProgReset : unit -> unit
-
-  val sProgInstall :
-    IntSyn.cid * CompSyn.compHead_ * CompSyn.conjunction_ -> unit
+  val sProgInstall : IntSyn.cid * CompSyn.compHead * CompSyn.conjunction -> unit
 
   val matchSig :
     IntSyn.cid
-    * IntSyn.dec_ IntSyn.ctx_
+    * IntSyn.dec IntSyn.ctx
     * IntSyn.eclo
-    * ((CompSyn.conjunction_ * IntSyn.sub_) * IntSyn.cid -> unit) ->
+    * ((CompSyn.conjunction * IntSyn.sub) * IntSyn.cid -> unit) ->
     unit
 end
 
@@ -149,45 +147,40 @@ end) : SUBTREE = struct
    indexing and existential variables and nvars will be instantiated
    during assignment
  *)
-  type typeLabel = TypeLabel | Body
-
-  type nonrec normalSubsts =
-    (typeLabel * IntSyn.exp_) Red_black_set.RBSet.ordSet
+  type typeLabel = TypeLabel | Body [@@deriving eq, ord, show]
+  type nonrec normalSubsts = (typeLabel * IntSyn.exp) Red_black_set.RBSet.ordSet
 
   (* key = int = bvar *)
-  type assSub_ = Assign of IntSyn.dec_ IntSyn.ctx_ * IntSyn.exp_
-  type nonrec assSubsts = assSub_ Red_black_set.RBSet.ordSet
+  type assSub = Assign of IntSyn.dec IntSyn.ctx * IntSyn.exp
+  type nonrec assSubsts = assSub Red_black_set.RBSet.ordSet
 
   (* key = int = bvar *)
   type nonrec querySubsts =
-    (IntSyn.dec_ IntSyn.ctx_ * (typeLabel * IntSyn.exp_))
+    (IntSyn.dec IntSyn.ctx * (typeLabel * IntSyn.exp))
     Red_black_set.RBSet.ordSet
 
-  type cnstr_ = Eqn of IntSyn.dec_ IntSyn.ctx_ * IntSyn.exp_ * IntSyn.exp_
-  type nonrec cnstrSubsts = IntSyn.exp_ Red_black_set.RBSet.ordSet
+  type cnstr = Eqn of IntSyn.dec IntSyn.ctx * IntSyn.exp * IntSyn.exp
+  type nonrec cnstrSubsts = IntSyn.exp Red_black_set.RBSet.ordSet
 
   (* key = int = bvar *)
-  type cGoal_ =
+  type cGoal =
     | CGoals of
-        CompSyn.CompSyn.auxGoal_
-        * IntSyn.cid
-        * CompSyn.CompSyn.conjunction_
-        * int
+        CompSyn.CompSyn.auxGoal * IntSyn.cid * CompSyn.CompSyn.conjunction * int
 
   (* cid of clause *)
-  type genType = Top | Regular
+  type genType = Top | Regular [@@deriving eq, ord, show]
 
-  type tree_ =
-    | Leaf of normalSubsts * IntSyn.dec_ IntSyn.ctx_ * cGoal_
-    | Node of normalSubsts * tree_ Red_black_set.RBSet.ordSet
+  type tree =
+    | Leaf of normalSubsts * IntSyn.dec IntSyn.ctx * cGoal
+    | Node of normalSubsts * tree Red_black_set.RBSet.ordSet
 
   type nonrec candidate =
     assSubsts
     * normalSubsts
     * cnstrSubsts
-    * cnstr_
-    * IntSyn.dec_ IntSyn.ctx_
-    * cGoal_
+    * cnstr
+    * IntSyn.dec IntSyn.ctx
+    * cGoal
 
   (* Initialization of substitutions *)
   let nid : unit -> normalSubsts = Red_black_set.RBSet.new_
@@ -583,7 +576,7 @@ end) : SUBTREE = struct
               | TypeLabel -> cnstr
               | Body -> begin
                   match us1_ with
-                  | I.EVar (r, _, v_, cnstr_), s ->
+                  | I.EVar (r, _, v_, cnstrs), s ->
                       let u2'_ = normalizeNExp (u2_, csub) in
                       Eqn (glocal_u1_, I.EClo (fst us1_, snd us1_), u2'_)
                       :: cnstr
@@ -637,7 +630,7 @@ end) : SUBTREE = struct
         | ( nvaronly,
             depth,
             glocal_u1_,
-            ((I.EVar (r, _, v_, cnstr_), s) as us1_),
+            ((I.EVar (r, _, v_, cnstrs), s) as us1_),
             u2_,
             cnstr ) ->
             let u2'_ = normalizeNExp (u2_, csub) in
@@ -806,10 +799,10 @@ end) : SUBTREE = struct
 
     let rec solveCnstr = function
       | gquery_, gclause_, [], s -> true
-      | gquery_, gclause_, Eqn (glocal_, u1_, u2_) :: cnstr_, s ->
+      | gquery_, gclause_, Eqn (glocal_, u1_, u2_) :: cnstr, s ->
           Unify.unifiable
             (compose' (gquery_, glocal_), (u1_, I.id), (u2_, shift (glocal_, s)))
-          && solveCnstr (gquery_, gclause_, cnstr_, s)
+          && solveCnstr (gquery_, gclause_, cnstr, s)
 
     let rec solveResiduals
         (gquery_, gclause_, CGoals (auxG_, cid, conjGoals_, i), asub, cnstr', sc)
@@ -961,36 +954,35 @@ end) : SUBTREE = struct
       end
 
     let rec matchSig (a, g_, ((I.Root (ha_, s_), s) as ps), sc) =
-      let n, tree_ = Array.sub (indexArray, a) in
-      retrieveCandidates (n, !tree_, g_, I.EClo (fst ps, snd ps), sc)
+      let n, tree = Array.sub (indexArray, a) in
+      retrieveCandidates (n, !tree, g_, I.EClo (fst ps, snd ps), sc)
 
     let rec matchSigIt (a, g_, ((I.Root (ha_, s_), s) as ps), sc) =
-      let n, tree_ = Array.sub (indexArray, a) in
-      retrieval (n, !tree_, g_, I.EClo (fst ps, snd ps), sc)
+      let n, tree = Array.sub (indexArray, a) in
+      retrieval (n, !tree, g_, I.EClo (fst ps, snd ps), sc)
 
     let rec sProgReset () =
       begin
         nctr := 1;
         Array.modify
           (function
-            | n, tree_ -> begin
+            | n, tree -> begin
                 n := 0;
                 begin
-                  tree_ := !(makeTree ());
-                  (n, tree_)
+                  tree := !(makeTree ());
+                  (n, tree)
                 end
               end)
           indexArray
       end
 
     let rec sProgInstall (a, C.Head (e_, g_, eqs_, cid), r_) =
-      let n, tree_ = Array.sub (indexArray, a) in
+      let n, tree = Array.sub (indexArray, a) in
       let nsub_goal = S.new_ () in
       begin
         S.insert nsub_goal (1, (Body, e_));
         begin
-          tree_ :=
-            insert (!tree_, nsub_goal, (g_, CGoals (eqs_, cid, r_, !n + 1)));
+          tree := insert (!tree, nsub_goal, (g_, CGoals (eqs_, cid, r_, !n + 1)));
           n := !n + 1
         end
       end

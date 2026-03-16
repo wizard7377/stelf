@@ -3,7 +3,8 @@ open! Basis
 
 (* Printing *)
 (* Author: Frank Pfenning *)
-(* Modified: Jeff Polakow *)
+
+(** Modified: Jeff Polakow *)
 module type PRINT = sig
   (*! structure IntSyn : INTSYN !*)
   module Formatter : FORMATTER
@@ -13,30 +14,31 @@ module type PRINT = sig
   val printDepth : int option ref
   val printLength : int option ref
   val noShadow : bool ref
-  val formatDec : IntSyn.dctx * IntSyn.dec_ -> Formatter.format
-  val formatDecList : IntSyn.dctx * IntSyn.dec_ list -> Formatter.format
+  val formatDec : IntSyn.dctx * IntSyn.dec -> Formatter.format
+  val formatDecList : IntSyn.dctx * IntSyn.dec list -> Formatter.format
 
   val formatDecList' :
-    IntSyn.dctx * (IntSyn.dec_ list * IntSyn.sub_) -> Formatter.format
+    IntSyn.dctx * (IntSyn.dec list * IntSyn.sub) -> Formatter.format
 
-  val formatExp : IntSyn.dctx * IntSyn.exp_ -> Formatter.format
-  val formatSpine : IntSyn.dctx * IntSyn.spine_ -> Formatter.format list
-  val formatConDec : IntSyn.conDec_ -> Formatter.format
-  val formatConDecI : IntSyn.conDec_ -> Formatter.format
+  val formatExp : IntSyn.dctx * IntSyn.exp -> Formatter.format
+  val formatSpine : IntSyn.dctx * IntSyn.spine -> Formatter.format list
+  val formatConDec : IntSyn.conDec -> Formatter.format
+  val formatConDecI : IntSyn.conDec -> Formatter.format
   val formatCnstr : IntSyn.cnstr_ -> Formatter.format
   val formatCtx : IntSyn.dctx * IntSyn.dctx -> Formatter.format
-  val decToString : IntSyn.dctx * IntSyn.dec_ -> string
-  val expToString : IntSyn.dctx * IntSyn.exp_ -> string
-  val conDecToString : IntSyn.conDec_ -> string
+  val decToString : IntSyn.dctx * IntSyn.dec -> string
+  val expToString : IntSyn.dctx * IntSyn.exp -> string
+  val conDecToString : IntSyn.conDec -> string
   val cnstrToString : IntSyn.cnstr_ -> string
   val cnstrsToString : IntSyn.cnstr list -> string
 
-  (* assigns names in contexts *)
   val ctxToString : IntSyn.dctx * IntSyn.dctx -> string
-  val evarInstToString : (IntSyn.exp_ * string) list -> string
-  val evarCnstrsToStringOpt : (IntSyn.exp_ * string) list -> string option
-  val formatWorlds : Tomega.worlds_ -> Formatter.format
-  val worldsToString : Tomega.worlds_ -> string
+  (** assigns names in contexts *)
+
+  val evarInstToString : (IntSyn.exp * string) list -> string
+  val evarCnstrsToStringOpt : (IntSyn.exp * string) list -> string option
+  val formatWorlds : Tomega.worlds -> Formatter.format
+  val worldsToString : Tomega.worlds -> string
   val printSgn : unit -> unit
 end
 (* signature PRINT *)
@@ -99,7 +101,7 @@ end) : PRINT = struct
     module F = Formatter
     module T = Tomega
 
-    let lvars : I.block_ option ref list ref = ref []
+    let lvars : I.block option ref list ref = ref []
 
     let rec lookuplvar l =
       let _ =
@@ -138,10 +140,7 @@ end) : PRINT = struct
       in
       sTS (s, I.Nil)
 
-    type argStatus_ =
-      | TooFew
-      | Exact of I.spine_
-      | TooMany of I.spine_ * I.spine_
+    type argStatus = TooFew | Exact of I.spine | TooMany of I.spine * I.spine
 
     let rec sclo' = function
       | TooFew, s -> TooFew
@@ -175,8 +174,8 @@ end) : PRINT = struct
     type ctxt = Ctxt of FX.fixity * F.format list * int
 
     type opargs =
-      | OpArgs of FX.fixity * F.format list * I.spine_
-      | EtaLong of I.exp_
+      | OpArgs of FX.fixity * F.format list * I.spine
+      | EtaLong of I.exp
 
     let noCtxt =
       Ctxt (FX.Prefix (FX.dec (FX.dec (FX.dec (FX.dec FX.minPrec)))), [], 0)

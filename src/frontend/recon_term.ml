@@ -77,32 +77,30 @@ module type RECON_TERM = sig
   (* filename -fp *)
   val checkErrors : Paths.region -> unit
 
-  type traceMode_ = Progressive | Omniscient
+  type traceMode = Progressive | Omniscient
 
   val trace : bool ref
-  val traceMode : traceMode_ ref
+  val traceMode : traceMode ref
 
   (* Reconstruction jobs *)
   type nonrec job
 
   val jnothing : job
   val jand : job * job -> job
-  val jwithctx : dec IntSyn.ctx_ * job -> job
+  val jwithctx : dec IntSyn.ctx * job -> job
   val jterm : term -> job
   val jclass : term -> job
   val jof : term * term -> job
-  val jof' : term * IntSyn.exp_ -> job
+  val jof' : term * IntSyn.exp -> job
 
   type job_ =
     | JNothing
     | JAnd of job_ * job_
-    | JWithCtx of IntSyn.dec_ IntSyn.ctx_ * job_
-    | JTerm of (IntSyn.exp_ * Paths.occExp) * IntSyn.exp_ * IntSyn.uni_
-    | JClass of (IntSyn.exp_ * Paths.occExp) * IntSyn.uni_
+    | JWithCtx of IntSyn.dec IntSyn.ctx * job_
+    | JTerm of (IntSyn.exp * Paths.occExp) * IntSyn.exp * IntSyn.uni
+    | JClass of (IntSyn.exp * Paths.occExp) * IntSyn.uni
     | JOf of
-        (IntSyn.exp_ * Paths.occExp)
-        * (IntSyn.exp_ * Paths.occExp)
-        * IntSyn.uni_
+        (IntSyn.exp * Paths.occExp) * (IntSyn.exp * Paths.occExp) * IntSyn.uni
 
   val recon : job -> job_
   val reconQuery : job -> job_
@@ -110,7 +108,7 @@ module type RECON_TERM = sig
   val reconQueryWithCtx : IntSyn.dctx * job -> job_
   val termRegion : term -> Paths.region
   val decRegion : dec -> Paths.region
-  val ctxRegion : dec IntSyn.ctx_ -> Paths.region option
+  val ctxRegion : dec IntSyn.ctx -> Paths.region option
 
   (* unimplemented for the moment *)
   val internalInst : 'a -> 'b
@@ -268,7 +266,7 @@ end) : RECON_TERM = struct
   let hyperkind_ = Apx.hyperkind
   let rec next_ l_ = Apx.Next l_
 
-  let rec headConDec (h_ : IntSyn.head_) =
+  let rec headConDec (h_ : IntSyn.head) =
     begin match h_ with
     | IntSyn.Const c -> IntSyn.sgnLookup c
     | IntSyn.Skonst c -> IntSyn.sgnLookup c
@@ -298,9 +296,9 @@ end) : RECON_TERM = struct
 
   (* open IntSyn *)
   open! struct
-    let evarApxTable : Apx.exp_ StringTree.table_ = StringTree.new_ 0
-    let fvarApxTable : Apx.exp_ StringTree.table_ = StringTree.new_ 0
-    let fvarTable : IntSyn.exp_ StringTree.table_ = StringTree.new_ 0
+    let evarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
+    let fvarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
+    let fvarTable : IntSyn.exp StringTree.table = StringTree.new_ 0
   end
 
   let rec varReset () =
@@ -371,8 +369,8 @@ end) : RECON_TERM = struct
 
   (* External syntax of terms *)
   type term =
-    | Internal_ of IntSyn.exp_ * IntSyn.exp_ * Paths.region
-    | Constant_ of IntSyn.head_ * Paths.region
+    | Internal_ of IntSyn.exp * IntSyn.exp * Paths.region
+    | Constant_ of IntSyn.head * Paths.region
     | Bvar_ of int * Paths.region
     | Evar_ of string * Paths.region
     | Fvar_ of string * Paths.region
@@ -388,8 +386,8 @@ end) : RECON_TERM = struct
     | Ucid_ of string list * string * Paths.region
     | Quid_ of string list * string * Paths.region
     | Scon_ of string * Paths.region
-    | Omitapx_ of Apx.exp_ * Apx.exp_ * Apx.uni_ * Paths.region
-    | Omitexact_ of IntSyn.exp_ * IntSyn.exp_ * Paths.region
+    | Omitapx_ of Apx.exp * Apx.exp * Apx.uni * Paths.region
+    | Omitexact_ of IntSyn.exp * IntSyn.exp * Paths.region
 
   and dec = Dec_ of string option * term * Paths.region
 
@@ -426,11 +424,11 @@ end) : RECON_TERM = struct
   type job =
     | Jnothing_
     | Jand_ of job * job
-    | Jwithctx_ of dec IntSyn.ctx_ * job
+    | Jwithctx_ of dec IntSyn.ctx * job
     | Jterm_ of term
     | Jclass_ of term
     | Jof_ of term * term
-    | Jof'_ of term * IntSyn.exp_
+    | Jof'_ of term * IntSyn.exp
 
   let jnothing = Jnothing_
   let rec jand (j1, j2) = Jand_ (j1, j2)
@@ -471,8 +469,8 @@ end) : RECON_TERM = struct
     | null_, r -> Some r
     | IntSyn.Decl (g, tm), r -> ctxRegion' (g, Paths.join (r, decRegion tm))
 
-  type apx_dec_ = Dec of string option * Apx.exp_ | NDec of string option
-  type apx_ctx_ = apx_dec_ IntSyn.ctx_
+  type apx_dec = Dec of string option * Apx.exp | NDec of string option
+  type apx_ctx = apx_dec IntSyn.ctx
 
   open Apx
 
@@ -858,20 +856,18 @@ end) : RECON_TERM = struct
   type job_ =
     | JNothing
     | JAnd of job_ * job_
-    | JWithCtx of IntSyn.dec_ IntSyn.ctx_ * job_
-    | JTerm of (IntSyn.exp_ * Paths.occExp) * IntSyn.exp_ * IntSyn.uni_
-    | JClass of (IntSyn.exp_ * Paths.occExp) * IntSyn.uni_
+    | JWithCtx of IntSyn.dec IntSyn.ctx * job_
+    | JTerm of (IntSyn.exp * Paths.occExp) * IntSyn.exp * IntSyn.uni
+    | JClass of (IntSyn.exp * Paths.occExp) * IntSyn.uni
     | JOf of
-        (IntSyn.exp_ * Paths.occExp)
-        * (IntSyn.exp_ * Paths.occExp)
-        * IntSyn.uni_
+        (IntSyn.exp * Paths.occExp) * (IntSyn.exp * Paths.occExp) * IntSyn.uni
 
   (* This little datatype makes it easier to work with eta-expanded terms
      The idea is that Elim E represents a term U if
        E (s, S) = U[s] @ S *)
-  type bidi_ =
-    | Elim of (IntSyn.sub_ * IntSyn.spine_ -> IntSyn.exp_)
-    | Intro of IntSyn.exp_
+  type bidi =
+    | Elim of (IntSyn.sub * IntSyn.spine -> IntSyn.exp)
+    | Intro of IntSyn.exp
 
   let rec elimSub (e_, s) = function s', s_ -> e_ (IntSyn.comp (s, s'), s_)
 
@@ -1028,7 +1024,7 @@ end) : RECON_TERM = struct
   (* this reset should be unnecessary -- for safety only *)
 
   (* tracing code *)
-  type traceMode_ = Progressive | Omniscient
+  type traceMode = Progressive | Omniscient
 
   let trace = ref false
   let traceMode = ref Omniscient

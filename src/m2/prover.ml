@@ -10,7 +10,7 @@ module type PROVER = sig
   val init : int * IntSyn.cid list -> unit
   val auto : unit -> unit
   val print : unit -> unit
-  val install : (IntSyn.conDec_ -> IntSyn.cid) -> unit
+  val install : (IntSyn.conDec -> IntSyn.cid) -> unit
 end
 (* signature PROVER *)
 
@@ -54,8 +54,8 @@ end) : PROVER = struct
     module M = MetaSyn
     module I = IntSyn
 
-    let openStates : MetaSyn.state_ list ref = ref []
-    let solvedStates : MetaSyn.state_ list ref = ref []
+    let openStates : MetaSyn.state list ref = ref []
+    let solvedStates : MetaSyn.state list ref = ref []
     let rec error s = raise (Error s)
 
     let rec reset () =

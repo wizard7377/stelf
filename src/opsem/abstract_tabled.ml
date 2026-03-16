@@ -10,16 +10,16 @@ module type ABSTRACTTABLED = sig
   exception Error of string
 
   val abstractEVarCtx :
-    CompSyn.dProg_ * IntSyn.exp_ * IntSyn.sub_ ->
+    CompSyn.dProg * IntSyn.exp * IntSyn.sub ->
     IntSyn.dctx
     * IntSyn.dctx
     * IntSyn.dctx
-    * IntSyn.exp_
-    * TableParam.resEqn_
-    * IntSyn.sub_
+    * IntSyn.exp
+    * TableParam.resEqn
+    * IntSyn.sub
 
-  val abstractAnswSub : IntSyn.sub_ -> IntSyn.dctx * IntSyn.sub_
-  val raiseType : IntSyn.dctx * IntSyn.exp_ -> IntSyn.exp_
+  val abstractAnswSub : IntSyn.sub -> IntSyn.dctx * IntSyn.sub
+  val raiseType : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
 end
 (* signature ABSTRACTTABLED *)
 
@@ -58,9 +58,9 @@ end) : ABSTRACTTABLED = struct
     module I = IntSyn
     module C = CompSyn
 
-    type duplicates_ = Av of I.exp_ * int | Fgn of int
-    type seenIn = TypeLabel | Body
-    type existVars_ = Ev of I.exp_
+    type duplicates = Av of I.exp * int | Fgn of int
+    type seenIn = TypeLabel | Body [@@deriving eq, ord, show]
+    type existVars = Ev of I.exp
 
     let rec lengthSub = function
       | I.Shift n -> 0

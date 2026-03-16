@@ -15,7 +15,7 @@ module type MTPINIT = sig
   exception Error of string
 
   (* Current restriction to non-mutual inductive theorems ! *)
-  val init : FunSyn.for_ * StateSyn.order_ -> StateSyn.state_ list
+  val init : FunSyn.for_ * StateSyn.order -> StateSyn.state list
 end
 (* signature MTPINIT *)
 

@@ -5,7 +5,7 @@ module Tomega = Lambda_.Tomega
 module type REDUNDANT = sig
   exception Error of string
 
-  val convert : Tomega.prg_ -> Tomega.prg_
+  val convert : Tomega.prg -> Tomega.prg
 end
 
 (* # 1 "src/tomega/redundant.fun.ml" *)
@@ -60,15 +60,15 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                    -> (T.AppPrg (convert p_, convertSpine s_))
                | T.SClo (s_, t) -> raise ((Error "SClo should not exist"))
     and expEqual (e1_, e2_) = Conv.conv ((e1_, I.id), (e2_, I.id))
-    and isubEqual_ (sub1, sub2) = Conv.convSub (sub1, sub2)
+    and isubEqual (sub1, sub2) = Conv.convSub (sub1, sub2)
     and blockEqual =
       function 
                | (I.Bidx x, I.Bidx x') -> x = x'
                | (I.LVar (r, sub1, (cid, sub2)), I.LVar
                   (r', sub1', (cid', sub2')))
                    -> (optionRefEqual (r, r', blockEqual)) &&
-                        ((isubEqual_ (sub1, sub1')) &&
-                           ((cid = cid') && (isubEqual_ (sub1', sub2'))))
+                        ((isubEqual (sub1, sub1')) &&
+                           ((cid = cid') && (isubEqual (sub1', sub2'))))
                | _ -> false(* Should not occur -- ap 2/18/03 *)
     and decEqual =
       function 
@@ -95,7 +95,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                                        if doMatch then
                                        let newT = T.normalizeSub t
                                          in let stillMatch =
-                                              isSubRenamingOnly_ newT
+                                              isSubRenamingOnly newT
                                               in stillMatch &&
                                                    (prgEqual
                                                     (p1_,
@@ -233,7 +233,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                            | Some index
                                -> (T.Dot ((T.Idx index), cleanSub s1))
                       end
-    and isSubRenamingOnly_ =
+    and isSubRenamingOnly =
       function 
                | T.Shift n -> true
                | T.Dot (ft1_, s1)
@@ -242,7 +242,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                        with 
                             | None -> false
                             | Some _ -> true
-                       end) && (isSubRenamingOnly_ s1)
+                       end) && (isSubRenamingOnly s1)
     and mergeSpines =
       function 
                | (T.Nil, (T.Nil, t2)) -> T.Nil
@@ -443,7 +443,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                                             if doMatch then
                                             let newT = T.normalizeSub t
                                               in let stillMatch =
-                                                   isSubRenamingOnly_ newT
+                                                   isSubRenamingOnly newT
                                                    in begin
                                                    if stillMatch then
                                                    ((psi1_, t1,
@@ -494,7 +494,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
                   in begin
                   if not doMatch then [c_; c'_] else
                   let newT = T.normalizeSub t in begin
-                    if isSubRenamingOnly_ newT then
+                    if isSubRenamingOnly newT then
                     try [(psi1_, s1, mergePrgs (p1_, (p2_, cleanSub newT)))]
                     with 
                          | Error s

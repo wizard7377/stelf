@@ -16,9 +16,9 @@ module type MTPSPLITTING = sig
 
   type nonrec operator
 
-  val expand : StateSyn.state_ -> operator list
+  val expand : StateSyn.state -> operator list
   val applicable : operator -> bool
-  val apply : operator -> StateSyn.state_ list
+  val apply : operator -> StateSyn.state list
   val menu : operator -> string
   val index : operator -> int
   val compare : operator * operator -> order
@@ -95,11 +95,11 @@ end) : MTPSPLITTING = struct
      applied which do not generate inactive cases (this
      can be checked for a given operator by applicable)
   *)
-  type 'a flag = Active of 'a | InActive
+  type 'a flag = Active of 'a | InActive [@@deriving eq, ord, show]
 
   type operator_ =
     | Operator of
-        (StateSyn.state_ * int) * StateSyn.state_ flag list * Heuristic.index
+        (StateSyn.state * int) * StateSyn.state flag list * Heuristic.index
 
   type nonrec operator = operator_
 
@@ -315,7 +315,7 @@ end) : MTPSPLITTING = struct
         begin if n < 0 then
           let (g'_, b'_), s', (g0_, b0_), _ = sc (I.null_, I.null_) in
           let rec abstract' u'_ =
-            let ((g''_, b''_), s'') : (I.dctx * S.tag_ I.ctx_) * I.sub_ =
+            let ((g''_, b''_), s'') : (I.dctx * S.tag I.ctx) * I.sub =
               Obj.magic
                 (MTPAbstract.abstractSub'
                    ((g'_, b'_), I.Dot (I.Exp u'_, s'), I.Decl (b0_, t_)))
@@ -349,7 +349,7 @@ end) : MTPSPLITTING = struct
             begin if p then
               raise (MTPAbstract.Error "Cannot split right of parameters")
             else
-              let ((g''_, b''_), s'') : (I.dctx * S.tag_ I.ctx_) * I.sub_ =
+              let ((g''_, b''_), s'') : (I.dctx * S.tag I.ctx) * I.sub =
                 Obj.magic
                   ((Obj.magic MTPAbstract.abstractSub)
                      ( t,
@@ -604,7 +604,7 @@ end) : MTPSPLITTING = struct
           | Active s_ -> begin
               begin if !Global.doubleCheck then
                 FunTypeCheck.isState
-                  (Obj.magic s_ : FunTypeCheck.StateSyn.state_)
+                  (Obj.magic s_ : FunTypeCheck.StateSyn.state)
               else ()
               end;
               s_

@@ -1,47 +1,55 @@
 (* # 1 "src/formatter/formatter_.sig.ml" *)
-open! Basis
 
-(*
+open Basis
+
+(**
 % ForML Version 0.6 - 25 January 1993 - er@cs.cmu.edu
 %*********************************************************************
 {\bf File {\tt formatter.sig} with signature {\tt FORMATTER}.}
 %*********************************************************************
 *)
 module type FORMATTER = sig
-  (*
+  val indent : int ref
+  (**
 \subsection{Default values}
 These may may be changed by the user.
 *)
-  val indent : int ref
+
   val blanks : int ref
   val skip : int ref
   val pagewidth : int ref
 
-  (* flag specifying whether bailouts should occur when page too narrow *)
   val bailout : bool ref
+  (** flag specifying whether bailouts should occur when page too narrow *)
+
   val bailoutIndent : int ref
   val bailoutSpot : int ref
 
   (*
 \subsection{Formats}
 *)
-  (* The Format datatype *)
-  type nonrec format
 
-  (* return the minimum/maximum width of a format *)
+  type nonrec format
+  (** The Format datatype *)
+
   val width : format -> int * int
+  (** return the minimum/maximum width of a format *)
 
   (* routines to create a format *)
-  (* Note: the xxxx0 functions take extra arguments *)
+
   val break : format
+  (** Note: the xxxx0 functions take extra arguments *)
+
   val break0 : int -> int -> format
 
-  (* blanks, indent *)
   val string : string -> format
+  (** blanks, indent *)
+
   val string0 : int -> string -> format
 
-  (* output width *)
   val space : format
+  (** output width *)
+
   val spaces : int -> format
   val newline : unit -> format
   val newlines : int -> format
@@ -49,25 +57,29 @@ These may may be changed by the user.
   val vbox : format list -> format
   val vbox0 : int -> int -> format list -> format
 
-  (* indent, skip *)
   val hbox : format list -> format
+  (** indent, skip *)
+
   val hbox0 : int -> format list -> format
 
-  (* blanks *)
   val hVbox : format list -> format
+  (** blanks *)
+
   val hVbox0 : int -> int -> int -> format list -> format
 
-  (* blanks, indent, skip *)
   val hOVbox : format list -> format
+  (** blanks, indent, skip *)
+
   val hOVbox0 : int -> int -> int -> format list -> format
 
-  (* blanks, indent, skip *)
   val break_ : format
+  (** blanks, indent, skip *)
 
-  (*
+  val makestring_fmt : format -> string
+  (**
 \subsection{Output routines}
 *)
-  val makestring_fmt : format -> string
+
   val print_fmt : format -> unit
 
   type nonrec fmtstream
@@ -80,7 +92,6 @@ These may may be changed by the user.
 end
 
 (* # 1 "src/formatter/formatter_.fun.ml" *)
-open! Basis
 
 (*
 % ForML Version 0.6 - 25 January 1993 - er@cs.cmu.edu
@@ -399,19 +410,19 @@ break.  This ensures that the first item is indented as much as all the others.
   let newlines_ n = Str (0, nl_ n)
 
   let vbox_ l = Vbx (vlistWidth (l, !indent_), !indent_, !skip, l)
-  and vbox0_ i s l = Vbx (vlistWidth (l, i), i, s, l)
-  and hbox_ l = Hbx (hlistWidth (l, !blanks_), !blanks_, l)
-  and hbox0_ b l = Hbx (hlistWidth (l, b), b, l)
+  and vbox0 i s l = Vbx (vlistWidth (l, i), i, s, l)
+  and hbox l = Hbx (hlistWidth (l, !blanks_), !blanks_, l)
+  and hbox0 b l = Hbx (hlistWidth (l, b), b, l)
 
-  and hVbox_ l =
+  and hVbox l =
     Hvx (hvlistWidth (l, !blanks_, !indent_), !blanks_, !indent_, !skip, l)
 
-  and hVbox0_ b i s l = Hvx (hvlistWidth (l, b, i), b, i, s, l)
+  and hVbox0 b i s l = Hvx (hvlistWidth (l, b, i), b, i, s, l)
 
-  and hOVbox_ l =
+  and hOVbox l =
     Hov (hovlistWidth (l, !blanks_, !indent_), !blanks_, !indent_, !skip, l)
 
-  and hOVbox0_ b i s l = Hov (hovlistWidth (l, b, i), b, i, s, l)
+  and hOVbox0 b i s l = Hov (hovlistWidth (l, b, i), b, i, s, l)
 
   let newpage_ () = Str (0, np_ ())
 
@@ -992,16 +1003,15 @@ make the use of {\tt fmtstreams} on files more convenient.
   let newlines = newlines_
   let newpage = newpage_
   let vbox = vbox_
-  let vbox0 = vbox0_
-  let hbox = hbox_
-  let hbox0 = hbox0_
-  let hVbox = hVbox_
-  let hVbox0 = hVbox0_
-  let hOVbox = hOVbox_
-  let hOVbox0 = hOVbox0_
+  let vbox0 = vbox0
+  let hbox = hbox
+  let hbox0 = hbox0
+  let hVbox = hVbox
+  let hVbox0 = hVbox0
+  let hOVbox = hOVbox
+  let hOVbox0 = hOVbox0
   let break_ = break_
 end
 (* struct *)
 
 (* # 1 "src/formatter/formatter_.sml.ml" *)
-open! Basis

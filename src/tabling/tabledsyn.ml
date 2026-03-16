@@ -35,7 +35,7 @@ end) : TABLEDSYN = struct
 
   exception Error of string
 
-  type tabled_ = Yes_ | No_
+  type tabled = Yes_ | No_ [@@deriving eq, ord, show]
 
   (*  datatype ModeSpine = Mnil | Mapp of Marg * ModeSpine
   and  Marg = Marg of Mode * string option
@@ -43,7 +43,7 @@ end) : TABLEDSYN = struct
   open! struct
     module I = IntSyn
 
-    let tabledSignature : bool Table.table_ = Table.new_ 0
+    let tabledSignature : bool Table.table = Table.new_ 0
     let rec reset () = Table.clear tabledSignature
     let rec installTabled a = Table.insert tabledSignature (a, false)
 

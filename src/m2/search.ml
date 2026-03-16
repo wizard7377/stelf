@@ -11,17 +11,17 @@ module type OLDSEARCH = sig
 
   val searchEx :
     IntSyn.dctx
-    * IntSyn.exp_ list
-    * (IntSyn.exp_ * IntSyn.sub_)
-    * (unit -> MetaSyn.state_) ->
-    MetaSyn.state_ list
+    * IntSyn.exp list
+    * (IntSyn.exp * IntSyn.sub)
+    * (unit -> MetaSyn.state) ->
+    MetaSyn.state list
 
   val searchAll :
     IntSyn.dctx
-    * IntSyn.exp_ list
-    * (IntSyn.exp_ * IntSyn.sub_)
-    * (MetaSyn.state_ list -> MetaSyn.state_ list) ->
-    MetaSyn.state_ list
+    * IntSyn.exp list
+    * (IntSyn.exp * IntSyn.sub)
+    * (MetaSyn.state list -> MetaSyn.state list) ->
+    MetaSyn.state list
 end
 (* signature SEARCH *)
 

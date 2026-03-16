@@ -15,7 +15,6 @@ module SMLofNJ : SML_OF_NJ = struct
     match Printexc.backtrace_slots raw with
     | None -> []
     | Some slots ->
-      Array.to_list slots |> List.filter_map (fun slot ->
-        Printexc.Slot.format 0 slot
-      )
+        Array.to_list slots
+        |> List.filter_map (fun slot -> Printexc.Slot.format 0 slot)
 end

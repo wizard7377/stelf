@@ -10,23 +10,23 @@ open! Basis
 (* Modified: Frank Pfenning, Roberto Virga *)
 module type MODESYN = sig
   (*! structure IntSyn : INTSYN !*)
-  type mode_ = Plus | Star | Minus | Minus1
+  type mode = Plus | Star | Minus | Minus1 [@@deriving eq, ord, show]
 
-  type modeSpine_ = Mnil | Mapp of marg_ * modeSpine_
-  and marg_ = Marg of mode_ * string option
+  type modeSpine = Mnil | Mapp of marg * modeSpine
+  and marg = Marg of mode * string option [@@deriving eq, ord, show]
 
-  val modeEqual : mode_ * mode_ -> bool
-  val modeToString : mode_ -> string
+  val modeEqual : mode * mode -> bool
+  val modeToString : mode -> string
 end
 
 (* signature MODESYN *)
 module ModeSyn : MODESYN = struct
   exception Error of string
 
-  type mode_ = Plus | Star | Minus | Minus1
+  type mode = Plus | Star | Minus | Minus1 [@@deriving eq, ord, show]
 
-  type modeSpine_ = Mnil | Mapp of marg_ * modeSpine_
-  and marg_ = Marg of mode_ * string option
+  type modeSpine = Mnil | Mapp of marg * modeSpine
+  and marg = Marg of mode * string option [@@deriving eq, ord, show]
 
   (* modeEqual (M1, M2) = true iff M1 = M2 *)
   let rec modeEqual = function

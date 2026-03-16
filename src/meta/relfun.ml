@@ -13,7 +13,7 @@ module type RELFUN = sig
   exception Error of string
 
   val convertFor : IntSyn.cid list -> FunSyn.for_
-  val convertPro : IntSyn.cid list -> FunSyn.pro_
+  val convertPro : IntSyn.cid list -> FunSyn.pro
 end
 (* Signature RELFUN *)
 

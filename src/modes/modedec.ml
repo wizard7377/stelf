@@ -9,10 +9,10 @@ module type MODEDEC = sig
   exception Error of string
 
   val shortToFull :
-    IntSyn.cid * ModeSyn.modeSpine_ * Paths.region -> ModeSyn.modeSpine_
+    IntSyn.cid * ModeSyn.modeSpine * Paths.region -> ModeSyn.modeSpine
 
-  val checkFull : IntSyn.cid * ModeSyn.modeSpine_ * Paths.region -> unit
-  val checkPure : (IntSyn.cid * ModeSyn.modeSpine_) * Paths.region -> unit
+  val checkFull : IntSyn.cid * ModeSyn.modeSpine * Paths.region -> unit
+  val checkPure : (IntSyn.cid * ModeSyn.modeSpine) * Paths.region -> unit
 end
 (* signature MODEDEC *)
 
@@ -32,7 +32,7 @@ module MakeModeDec () : MODEDEC = struct
     module I = IntSyn
     module P = Paths
 
-    type arg_ = Implicit | Explicit | Local
+    type arg = Implicit | Explicit | Local [@@deriving eq, ord, show]
 
     let rec error (r, msg) = raise (Error (P.wrap (r, msg)))
 

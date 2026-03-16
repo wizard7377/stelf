@@ -11,16 +11,16 @@ module type PARSING = sig
   structure Lexer : LEXER
     sharing Lexer.Stream = Stream
   *)
-  type nonrec lexResult = Lexer.token_ * Paths.region
+  type nonrec lexResult = Lexer.token * Paths.region
   type nonrec 'a parser = lexResult Stream.front -> 'a * lexResult Stream.front
 
   (* recursive parser (allows parsing functions that need to parse
      a signature expression to temporarily suspend themselves) *)
-  type 'a recParseResult_ =
+  type 'a recParseResult =
     | Done of 'a
-    | Continuation of 'a recParseResult_ parser
+    | Continuation of 'a recParseResult parser
 
-  type nonrec 'a recparser = 'a recParseResult_ parser
+  type nonrec 'a recparser = 'a recParseResult parser
 
   (* useful combinator for recursive parsers *)
   val recwith : 'a recparser * ('a -> 'b) -> 'b recparser
@@ -44,14 +44,14 @@ end) : PARSING = struct
   module Lexer = Parsing__0.Lexer'
 
   (*! structure Lexer = Lexer' !*)
-  type nonrec lexResult = Lexer.token_ * Paths.region
+  type nonrec lexResult = Lexer.token * Paths.region
   type nonrec 'a parser = lexResult Stream.front -> 'a * lexResult Stream.front
 
-  type 'a recParseResult_ =
+  type 'a recParseResult =
     | Done of 'a
-    | Continuation of 'a recParseResult_ parser
+    | Continuation of 'a recParseResult parser
 
-  type nonrec 'a recparser = 'a recParseResult_ parser
+  type nonrec 'a recparser = 'a recParseResult parser
 
   let rec recwith (recparser, func) f =
     begin match recparser f with

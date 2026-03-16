@@ -15,7 +15,7 @@ module type MTPROVER = sig
 
   exception Error of string
 
-  val init : FunSyn.for_ * StateSyn.order_ -> unit
+  val init : FunSyn.for_ * StateSyn.order -> unit
 end
 (* signature MTPROVER *)
 
@@ -53,8 +53,8 @@ end) : PROVER = struct
     module F = FunSyn
     module S = StateSyn
 
-    let openStates : S.state_ list ref = ref []
-    let solvedStates : S.state_ list ref = ref []
+    let openStates : S.state list ref = ref []
+    let solvedStates : S.state list ref = ref []
 
     let rec transformOrder' = function
       | g_, Order.Arg k ->

@@ -1,4 +1,4 @@
-open! Basis
+open Basis
 open String_hash
 open Hash_table
 open Red_black_tree

@@ -10,14 +10,14 @@ module type MODETABLE = sig
   val reset : unit -> unit
 
   (* single mode installation and lookup *)
-  val installMode : IntSyn.cid * ModeSyn.modeSpine_ -> unit
-  val modeLookup : IntSyn.cid -> ModeSyn.modeSpine_ option
+  val installMode : IntSyn.cid * ModeSyn.modeSpine -> unit
+  val modeLookup : IntSyn.cid -> ModeSyn.modeSpine option
   val uninstallMode : IntSyn.cid -> bool
 
   (* true: was declared, false: not *)
   (* multiple mode installation and lookup *)
-  val installMmode : IntSyn.cid * ModeSyn.modeSpine_ -> unit
-  val mmodeLookup : IntSyn.cid -> ModeSyn.modeSpine_ list
+  val installMmode : IntSyn.cid * ModeSyn.modeSpine -> unit
+  val mmodeLookup : IntSyn.cid -> ModeSyn.modeSpine list
 end
 (* signature MODETABLE *)
 
@@ -39,7 +39,7 @@ end) : MODETABLE = struct
     module I = IntSyn
     module M = ModeSyn
 
-    let modeSignature : M.modeSpine_ list Table.table_ = Table.new_ 0
+    let modeSignature : M.modeSpine list Table.table = Table.new_ 0
     let rec reset () = Table.clear modeSignature
 
     let rec modeLookup a =

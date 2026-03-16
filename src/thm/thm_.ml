@@ -5,7 +5,8 @@ open Thmprint
 
 (* Theorem Declarations *)
 (* Author: Carsten Schuermann *)
-(* Modified: Brigitte Pientka, Frank Pfenning *)
+
+(** Modified: Brigitte Pientka, Frank Pfenning *)
 module type THM = sig
   module ThmSyn : THMSYN
 
@@ -13,22 +14,22 @@ module type THM = sig
   exception Error of string
 
   val installTotal :
-    ThmSyn.tDecl_ * (Paths.region * Paths.region list) -> IntSyn.cid list
+    ThmSyn.tDecl * (Paths.region * Paths.region list) -> IntSyn.cid list
 
   val uninstallTotal : IntSyn.cid -> bool
 
   val installTerminates :
-    ThmSyn.tDecl_ * (Paths.region * Paths.region list) -> IntSyn.cid list
+    ThmSyn.tDecl * (Paths.region * Paths.region list) -> IntSyn.cid list
 
   val uninstallTerminates : IntSyn.cid -> bool
 
-  (* true: was declared, false not *)
   val installReduces :
-    ThmSyn.rDecl_ * (Paths.region * Paths.region list) -> IntSyn.cid list
+    ThmSyn.rDecl * (Paths.region * Paths.region list) -> IntSyn.cid list
+  (** true: was declared, false not *)
 
   val uninstallReduces : IntSyn.cid -> bool
-  val installTabled : ThmSyn.tabledDecl_ -> unit
-  val installKeepTable : ThmSyn.keepTableDecl_ -> unit
+  val installTabled : ThmSyn.tabledDecl -> unit
+  val installKeepTable : ThmSyn.keepTableDecl -> unit
 end
 (* signature THM *)
 
@@ -55,7 +56,8 @@ end) : THM with module ThmSyn = Thm__0.ThmSyn' = struct
   module TabledSyn = TabledSyn
 
   (* -bp *)
-  type order_ = Varg | Lex of order_ list | Simul of order_ list
+  type order = Varg | Lex of order list | Simul of order list
+  [@@deriving eq, ord, show]
 
   exception Error of string
 
@@ -342,7 +344,7 @@ end) : THM with module ThmSyn = Thm__0.ThmSyn' = struct
             ( r,
               ("Reduction Order ("
               ^ P.rOrderToString
-                  (Obj.magic (L.RedOrder (pred_, o_, o'_)) : P.ThmSyn.redOrder_)
+                  (Obj.magic (L.RedOrder (pred_, o_, o'_)) : P.ThmSyn.redOrder)
               )
               ^ ") requires both orders to be of the same type." )
         end

@@ -8,12 +8,12 @@ module type LEXER = sig
   module Stream : STREAM
 
   (*! structure Paths : PATHS !*)
-  type idCase_ = Upper | Lower | Quoted
+  type idCase = Upper | Lower | Quoted
 
   (* [A-Z]<id> or _<id> *)
   (* any other <id> *)
   (* '<id>', currently unused *)
-  type token_ =
+  type token =
     | Eof
     | Dot
     | Pathsep
@@ -28,7 +28,7 @@ module type LEXER = sig
     | Arrow
     | Type
     | Equal
-    | Id of idCase_ * string
+    | Id of idCase * string
     | Underscore
     | Infix
     | Prefix
@@ -132,9 +132,9 @@ module type LEXER = sig
   exception Error of string
 
   (* lexer returns an infinite stream, terminated by EOF token *)
-  val lexStream : TextIO.instream -> (token_ * Paths.region) Stream.stream
-  val lexTerminal : string * string -> (token_ * Paths.region) Stream.stream
-  val toString : token_ -> string
+  val lexStream : TextIO.instream -> (token * Paths.region) Stream.stream
+  val lexTerminal : string * string -> (token * Paths.region) Stream.stream
+  val toString : token -> string
 
   (* Utilities *)
   exception NotDigit of char
@@ -160,12 +160,12 @@ end) : LEXER = struct
     module P = Paths
   end
 
-  type idCase_ = Upper | Lower | Quoted
+  type idCase = Upper | Lower | Quoted
 
   (* [A-Z]<id> or _<id> *)
   (* any other <id> *)
   (* '<id>', currently unused *)
-  type token_ =
+  type token =
     | Eof
     | Dot
     | Pathsep
@@ -180,7 +180,7 @@ end) : LEXER = struct
     | Arrow
     | Type
     | Equal
-    | Id of idCase_ * string
+    | Id of idCase * string
     | Underscore
     | Infix
     | Prefix
@@ -369,7 +369,7 @@ end) : LEXER = struct
     let rec lexInitial = function
       | '\n', i -> lexInitial (char i, i + 1)
       | '\r', i -> lexInitial (char i, i + 1)
-      | '\t', i -> lexInitial (char i, i + 1) 
+      | '\t', i -> lexInitial (char i, i + 1)
       | ' ', i -> lexInitial (char i, i + 1)
       | ':', i -> (Colon, P.Reg (i - 1, i))
       | '.', i -> (Dot, P.Reg (i - 1, i))

@@ -32,15 +32,14 @@ module type RECON_QUERY = sig
 
   val queryToQuery :
     query * Paths.location ->
-    IntSyn.exp_ * string option * (IntSyn.exp_ * string) list
+    IntSyn.exp * string option * (IntSyn.exp * string) list
 
   (* (A, SOME(""X""), [(Y1, ""Y1""),...] *)
   (* where A is query type, X the optional proof term variable name *)
   (* Yi the EVars in the query and ""Yi"" their names *)
   val solveToSolve :
     define list * solve * Paths.location ->
-    IntSyn.exp_
-    * (IntSyn.exp_ -> (IntSyn.conDec_ * Paths.occConDec option) list)
+    IntSyn.exp * (IntSyn.exp -> (IntSyn.conDec * Paths.occConDec option) list)
 end
 (* signature RECON_QUERY *)
 
@@ -126,7 +125,9 @@ end) : RECON_QUERY = struct
     in
     let _ = T.checkErrors r in
     let _ =
-      begin match l_ with IntSyn.Type -> () | _ -> error (r, "Query was not a type")
+      begin match l_ with
+      | IntSyn.Type -> ()
+      | _ -> error (r, "Query was not a type")
       end
     in
     let xs_ = Names.namedEVars () in
@@ -256,7 +257,9 @@ end) : RECON_QUERY = struct
     in
     let _ = T.checkErrors r in
     let _ =
-      begin match l_ with IntSyn.Type -> () | _ -> error (r0, "Query was not a type")
+      begin match l_ with
+      | IntSyn.Type -> ()
+      | _ -> error (r0, "Query was not a type")
       end
     in
     let rec sc = function

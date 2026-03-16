@@ -9,8 +9,7 @@ module type ABSMACHINE = sig
   (*! structure IntSyn : INTSYN !*)
   (*! structure CompSyn : COMPSYN !*)
   val solve :
-    (CompSyn.goal_ * IntSyn.sub_) * CompSyn.dProg_ * (IntSyn.exp_ -> unit) ->
-    unit
+    (CompSyn.goal * IntSyn.sub) * CompSyn.dProg * (IntSyn.exp -> unit) -> unit
 end
 (* signature ABSMACHINE *)
 
@@ -137,7 +136,7 @@ end) : ABSMACHINE = struct
     and matchAtom
         (((I.Root (ha_, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
       let deterministic = C.detTableCheck (cidFromHead ha_) in
-      let exception SucceedOnce of I.spine_ in
+      let exception SucceedOnce of I.spine in
       let rec matchSig = function
         | [] -> ()
         | hc_ :: sgn' ->

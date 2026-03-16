@@ -7,17 +7,17 @@ module type WORLDSYN = sig
   exception Error of string
 
   val reset : unit -> unit
-  val install : IntSyn.cid * Tomega.worlds_ -> unit
-  val lookup : IntSyn.cid -> Tomega.worlds_
+  val install : IntSyn.cid * Tomega.worlds -> unit
+  val lookup : IntSyn.cid -> Tomega.worlds
 
   (* raises Error if undeclared *)
   val uninstall : IntSyn.cid -> bool
 
   (* true if declared *)
-  val worldcheck : Tomega.worlds_ -> IntSyn.cid -> unit
-  val ctxToList : IntSyn.dec_ IntSyn.ctx_ -> IntSyn.dec_ list
-  val isSubsumed : Tomega.worlds_ -> IntSyn.cid -> unit
-  val getWorlds : IntSyn.cid -> Tomega.worlds_
+  val worldcheck : Tomega.worlds -> IntSyn.cid -> unit
+  val ctxToList : IntSyn.dec IntSyn.ctx -> IntSyn.dec list
+  val isSubsumed : Tomega.worlds -> IntSyn.cid -> unit
+  val getWorlds : IntSyn.cid -> Tomega.worlds
 end
 (* signature WORLDSYN *)
 
@@ -90,10 +90,10 @@ end) : WORLDSYN = struct
             ^ msg )
     end
 
-  type nonrec dlist = IntSyn.dec_ list
+  type nonrec dlist = IntSyn.dec list
 
   open! struct
-    let worldsTable : T.worlds_ Table.table_ = Table.new_ 0
+    let worldsTable : T.worlds Table.table = Table.new_ 0
     let rec reset () = Table.clear worldsTable
     let rec insert (cid, w_) = Table.insert worldsTable (cid, w_)
 
@@ -107,7 +107,7 @@ end) : WORLDSYN = struct
       | Some wb_ -> wb_
       end
 
-    let subsumedTable : unit Table.table_ = Table.new_ 0
+    let subsumedTable : unit Table.table = Table.new_ 0
     let rec subsumedReset () = Table.clear subsumedTable
     let rec subsumedInsert cid = Table.insert subsumedTable (cid, ())
 
@@ -117,11 +117,11 @@ end) : WORLDSYN = struct
       | Some _ -> true
       end
 
-    type reg_ =
+    type reg =
       | Block of (I.dctx * dlist)
-      | Seq of dlist * I.sub_
-      | Star of reg_
-      | Plus of reg_ * reg_
+      | Seq of dlist * I.sub
+      | Star of reg
+      | Plus of reg * reg
       | One
 
     exception Success
@@ -233,9 +233,9 @@ end) : WORLDSYN = struct
     module Trace : sig
       val clause : I.cid -> unit
       val constraintsRemain : unit -> unit
-      val matchBlock : (I.dctx * dlist) * reg_ -> unit
+      val matchBlock : (I.dctx * dlist) * reg -> unit
       val unmatched : I.dctx * dlist -> unit
-      val missing : I.dctx * reg_ -> unit
+      val missing : I.dctx * reg -> unit
       val mismatch : I.dctx * I.eclo * I.eclo -> unit
       val success : unit -> unit
     end = struct

@@ -173,7 +173,8 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
   let rec parseInclude' (LS.Cons ((L.Include, r), s')) =
     parseSigExp' (LS.expose s')
 
-  let rec parseOpen' (LS.Cons ((L.Open, r), s')) = parseStructExp' (LS.expose s')
+  let rec parseOpen' (LS.Cons ((L.Open, r), s')) =
+    parseStructExp' (LS.expose s')
 end
 (*! sharing ParseTerm.Lexer = Parsing'.Lexer !*)
 

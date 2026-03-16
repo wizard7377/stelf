@@ -1,5 +1,6 @@
 (* # 1 "src/table/string_hash.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* String Hash Table *)
 (* Author: Frank Pfenning *)
@@ -10,7 +11,6 @@ end
 (* # 1 "src/table/string_hash.fun.ml" *)
 
 (* # 1 "src/table/string_hash.sml.ml" *)
-open! Basis
 
 (* String Hash Table *)
 (* Author: Frank Pfenning *)

@@ -2,18 +2,20 @@
 open! Basis
 
 (* Coverage Checking *)
-(* Author: Frank Pfenning *)
+
+(** Author: Frank Pfenning *)
 module type COVER = sig
   exception Error of string
 
   val checkNoDef : IntSyn.cid -> unit
 
-  (* raises Error(msg) *)
   val checkOut : IntSyn.dctx * IntSyn.eclo -> unit
-  val checkCovers : IntSyn.cid * ModeSyn.modeSpine_ -> unit
+  (** raises Error(msg) *)
+
+  val checkCovers : IntSyn.cid * ModeSyn.modeSpine -> unit
 
   val coverageCheckCases :
-    Tomega.worlds_ * (IntSyn.dctx * IntSyn.sub_) list * IntSyn.dctx -> unit
+    Tomega.worlds * (IntSyn.dctx * IntSyn.sub) list * IntSyn.dctx -> unit
 end
 (* signature COVER *)
 
@@ -99,7 +101,7 @@ end) : COVER = struct
     let x_ = I.EClo (x'_, w) in
     x_
 
-  type coverInst_ = Match of coverInst_ | Skip of coverInst_ | Cnil
+  type coverInst = Match of coverInst | Skip of coverInst | Cnil
 
   let rec inCoverInst = function
     | mnil_ -> Cnil
@@ -184,8 +186,8 @@ end) : COVER = struct
 
   let rec initCGoal a = initCGoal' (I.Const a, 0, I.Null, I.constType a)
 
-  type coverClauses_ = Input of I.exp_ list | Output of I.exp_ * int
-  type equation_ = Eqn of I.dctx * I.eclo * I.eclo
+  type coverClauses = Input of I.exp list | Output of I.exp * int
+  type equation = Eqn of I.dctx * I.eclo * I.eclo
 
   let rec equationToString (Eqn (g_, us1_, us2_)) =
     let g'_ = Names.ctxLUName g_ in
@@ -209,7 +211,7 @@ end) : COVER = struct
     | [] -> ".\n"
     | eqn :: eqns -> (equationToString eqn ^ ",\n") ^ eqnsToString eqns
 
-  type candidates_ = Eqns of equation_ list | Cands of int list | Fail
+  type candidates_ = Eqns of equation list | Cands of int list | Fail
 
   let rec candsToString = function
     | Fail -> "Fail"
@@ -265,7 +267,7 @@ end) : COVER = struct
         begin match constrs with [] -> Eqns [] | _ -> Fail
         end
 
-  type candList_ = Covered | CandList of candidates_ list
+  type candList = Covered | CandList of candidates_ list
 
   let rec addKs = function
     | (Cands ks as ccs), CandList klist -> CandList (ccs :: klist)
@@ -554,7 +556,7 @@ end) : COVER = struct
         instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev_)
 
   open! struct
-    let caseList : (I.exp_ * int) list ref = ref []
+    let caseList : (I.exp * int) list ref = ref []
   end
 
   let rec resetCases () = caseList := []
@@ -712,9 +714,9 @@ end) : COVER = struct
     | k, I.App (u_, s_), Skip ci -> occursInMatchPosSpine (k, s_, ci)
 
   let rec instEVarsSkip (vs_, p, xsRev_, ci) =
-    instEVarsSkipW_ (Whnf.whnf vs_, p, xsRev_, ci)
+    instEVarsSkipW (Whnf.whnf vs_, p, xsRev_, ci)
 
-  and instEVarsSkipW_ = function
+  and instEVarsSkipW = function
     | vs_, 0, xsRev_, ci -> (vs_, xsRev_)
     | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev_, ci ->
         let x1_ = Whnf.newLoweredEVar (I.Null, (v1_, s)) in
@@ -1952,10 +1954,10 @@ val _ = pr ()
   (* First version Tue Nov 26 19:29:12 2002 -fp *)
   (**********************************************)
   (* cg = CGoal (G, S)  with G |- S : {{G'}} type *)
-  type coverGoal_ = CGoal of I.dctx * I.spine_
+  type coverGoal = CGoal of I.dctx * I.spine
 
   (* cc = CClause (Gi, Si) with  Gi |- Si : {{G}} type *)
-  type coverClause_ = CClause of I.dctx * I.spine_
+  type coverClause = CClause of I.dctx * I.spine
 
   let rec formatCGoal (CGoal (g_, s_)) =
     let _ = N.varReset I.Null in
@@ -2115,7 +2117,7 @@ val _ = pr ()
        can be updated in the success continuation.
     *)
   open! struct
-    let caseList : coverGoal_ list ref = ref []
+    let caseList : coverGoal list ref = ref []
   end
 
   let rec resetCases () = caseList := []

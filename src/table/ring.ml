@@ -1,5 +1,6 @@
 (* # 1 "src/table/ring.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* Rings (aka cyclic lists) *)
 (* Author: Carsten Schuermann *)
@@ -25,7 +26,6 @@ end
 (* # 1 "src/table/ring.fun.ml" *)
 
 (* # 1 "src/table/ring.sml.ml" *)
-open! Basis
 
 (* Rings (aka cyclic lists) *)
 (* Author: Carsten Schuermann *)

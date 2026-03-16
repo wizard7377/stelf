@@ -28,15 +28,14 @@ module type RECON_CONDEC = sig
 
   val condecToConDec :
     condec * Paths.location * bool ->
-    IntSyn.conDec_ option * Paths.occConDec option
+    IntSyn.conDec option * Paths.occConDec option
 
   (* optional ConDec is absent for anonymous definitions *)
   (* bool = true means that condec is an abbreviation *)
   val internalInst :
-    IntSyn.conDec_ * IntSyn.conDec_ * Paths.region -> IntSyn.conDec_
+    IntSyn.conDec * IntSyn.conDec * Paths.region -> IntSyn.conDec
 
-  val externalInst :
-    IntSyn.conDec_ * ExtSyn.term * Paths.region -> IntSyn.conDec_
+  val externalInst : IntSyn.conDec * ExtSyn.term * Paths.region -> IntSyn.conDec
 end
 (* signature RECON_CONDEC *)
 

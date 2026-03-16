@@ -1,5 +1,6 @@
 (* # 1 "src/table/red_black_set.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* Sets *)
 (* Author: Brigitte Pientka *)
@@ -62,7 +63,6 @@ end
 (* # 1 "src/table/red_black_set.fun.ml" *)
 
 (* # 1 "src/table/red_black_set.sml.ml" *)
-open! Basis
 open Table_
 
 (* redblack-set.sml

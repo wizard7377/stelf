@@ -2,11 +2,12 @@
 open! Basis
 
 (* Uniqueness Checking *)
-(* Author: Frank Pfenning *)
+
+(** Author: Frank Pfenning *)
 module type UNIQUE = sig
   exception Error of string
 
-  val checkUnique : IntSyn.cid * ModeSyn.modeSpine_ -> unit
+  val checkUnique : IntSyn.cid * ModeSyn.modeSpine -> unit
 end
 
 (* raises Error(msg) *)

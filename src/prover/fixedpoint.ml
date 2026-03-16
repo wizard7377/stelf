@@ -12,7 +12,7 @@ module type FIXEDPOINT = sig
 
   type nonrec operator
 
-  val expand : State.focus_ * Tomega.tC_ -> operator
+  val expand : State.focus * Tomega.tC -> operator
   val apply : operator -> unit
   val menu : operator -> string
 end
@@ -37,7 +37,7 @@ end) : FIXEDPOINT with module State = FixedPoint__0.State' = struct
 
     exception Error = S.Error
 
-    type nonrec operator = T.prg_ option ref * T.prg_
+    type nonrec operator = T.prg option ref * T.prg
 
     let rec expand (S.Focus (T.EVar (psi_, r, f_, _, tCs_, _), w_), o_) =
       let (I.NDec x) = Names.decName (T.coerceCtx psi_, I.NDec None) in

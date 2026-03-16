@@ -1,5 +1,7 @@
 (* # 1 "src/domains/ordered_field.sig.ml" *)
-open! Basis
+open Basis
+open Int_inf
+open Int_inf.Int_inf_
 open Field
 
 (* Ordered Field *)

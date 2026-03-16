@@ -1,5 +1,5 @@
 (* # 1 "src/timing/timers.sig.ml" *)
-open! Basis
+open Basis
 open Timing_
 module Timing = Timing_.Timing
 
@@ -93,7 +93,6 @@ end
 
 (* # 1 "src/timing/timers.fun.ml" *)
 open! Timing_
-open! Basis
 
 (* Timers collecting statistics about Twelf *)
 (* Author: Frank Pfenning *)
@@ -168,7 +167,6 @@ end
 (* functor Timers *)
 
 (* # 1 "src/timing/timers.sml.ml" *)
-open! Basis
 
 (* Timers *)
 (* Author: Frank Pfenning *)

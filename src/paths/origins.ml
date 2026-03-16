@@ -30,7 +30,7 @@ end) : ORIGINS = struct
   open! struct
     module Table = Origins__0.Table
 
-    let linesInfoTable : Paths.linesInfo Table.table_ = Table.new_ 31
+    let linesInfoTable : Paths.linesInfo Table.table = Table.new_ 31
     let rec reset () = Table.clear linesInfoTable
 
     let rec install (string, linesInfo) =

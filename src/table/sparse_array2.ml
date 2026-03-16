@@ -1,5 +1,6 @@
 (* # 1 "src/table/sparse_array2.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* Sparse 2-Dimensional Arrays *)
 (* Author: Roberto Virga *)
@@ -15,7 +16,7 @@ module type SPARSE_ARRAY2 = sig
   }
 
   type nonrec 'a region = 'a __0
-  type traversal = RowMajor | ColMajor
+  type traversal = RowMajor | ColMajor [@@deriving eq, ord, show]
 
   val array : 'a -> 'a array
   val sub : 'a array * int * int -> 'a
@@ -29,7 +30,6 @@ end
 (* signature SPARSE_ARRAY2 *)
 
 (* # 1 "src/table/sparse_array2.fun.ml" *)
-open! Basis
 open Table_
 
 (* Sparse 2-Dimensional Arrays *)
@@ -39,7 +39,7 @@ module SparseArray2 (SparseArray2__0 : sig
 end) : SPARSE_ARRAY2 = struct
   open SparseArray2__0
 
-  type nonrec 'a __1 = { default : 'a; table : 'a IntTable.table_ }
+  type nonrec 'a __1 = { default : 'a; table : 'a IntTable.table }
   type nonrec 'a array = 'a __1
 
   type nonrec 'a __0 = {
@@ -51,7 +51,7 @@ end) : SPARSE_ARRAY2 = struct
   }
 
   type nonrec 'a region = 'a __0
-  type traversal = RowMajor | ColMajor
+  type traversal = RowMajor | ColMajor [@@deriving eq, ord, show]
 
   let size = 29
 

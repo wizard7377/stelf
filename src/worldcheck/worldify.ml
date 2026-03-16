@@ -8,8 +8,8 @@ module type WORLDIFY = sig
   (*! structure Tomega : TOMEGA !*)
   exception Error of string
 
-  val worldify : IntSyn.cid -> IntSyn.conDec_ list
-  val worldifyGoal : IntSyn.dec_ IntSyn.ctx_ * IntSyn.exp_ -> IntSyn.exp_
+  val worldify : IntSyn.cid -> IntSyn.conDec list
+  val worldifyGoal : IntSyn.dec IntSyn.ctx * IntSyn.exp -> IntSyn.exp
 end
 
 (*  val check : Tomega.Worlds -> IntSyn.cid list -> unit
@@ -101,19 +101,19 @@ end) : WORLDIFY = struct
             (("Block " ^ Names.qidToString (Names.constQid c)) ^ ":") ^ msg )
     end
 
-  type nonrec dlist = IntSyn.dec_ list
+  type nonrec dlist = IntSyn.dec list
 
   open! struct
     module W = WorldSyn
 
-    type reg_ =
+    type reg =
       | Block of I.cid * (I.dctx * dlist)
-      | Seq of int * dlist * I.sub_
-      | Star of reg_
-      | Plus of reg_ * reg_
+      | Seq of int * dlist * I.sub
+      | Star of reg
+      | Plus of reg * reg
       | One
 
-    exception Success of I.exp_
+    exception Success of I.exp
 
     let rec createEVarSub = function
       | g_, null_ -> I.Shift (I.ctxLength g_)
@@ -185,9 +185,9 @@ end) : WORLDIFY = struct
     module Trace : sig
       val clause : I.cid -> unit
       val constraintsRemain : unit -> unit
-      val matchBlock : (I.dctx * dlist) * reg_ -> unit
+      val matchBlock : (I.dctx * dlist) * reg -> unit
       val unmatched : I.dctx * dlist -> unit
-      val missing : I.dctx * reg_ -> unit
+      val missing : I.dctx * reg -> unit
       val mismatch : I.dctx * I.eclo * I.eclo -> unit
       val success : unit -> unit
     end = struct

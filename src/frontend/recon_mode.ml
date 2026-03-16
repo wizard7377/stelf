@@ -42,7 +42,7 @@ module type RECON_MODE = sig
 
   exception Error of string
 
-  val modeToMode : modedec -> (IntSyn.cid * ModeSyn.modeSpine_) * Paths.region
+  val modeToMode : modedec -> (IntSyn.cid * ModeSyn.modeSpine) * Paths.region
 end
 (* signature RECON_MODE *)
 
@@ -82,7 +82,7 @@ end) : RECON_MODE = struct
     module T = ReconMode__0.ReconTerm'
     module P = Paths
 
-    type nonrec mode = M.mode_ * P.region
+    type nonrec mode = M.mode * P.region
 
     let rec plus r = (M.Plus, r)
     let rec star r = (M.Star, r)
@@ -90,11 +90,11 @@ end) : RECON_MODE = struct
     let rec minus1 r = (M.Minus1, r)
 
     type nonrec modedec =
-      (I.cid option * (string list * string) option * M.modeSpine_) * P.region
+      (I.cid option * (string list * string) option * M.modeSpine) * P.region
 
     module Short = struct
       type nonrec mterm = modedec
-      type nonrec mspine = M.modeSpine_ * P.region
+      type nonrec mspine = M.modeSpine * P.region
 
       let rec mnil r = (M.Mnil, r)
 
@@ -110,7 +110,7 @@ end) : RECON_MODE = struct
 
     module Full = struct
       type nonrec mterm =
-        T.dec I.ctx_ * M.mode_ I.ctx_ -> (I.cid * M.modeSpine_) * P.region
+        T.dec I.ctx * M.mode I.ctx -> (I.cid * M.modeSpine) * P.region
 
       let rec mpi ((m, _), d, t) (g, d_) = t (I.Decl (g, d), I.Decl (d_, m))
 
@@ -147,7 +147,7 @@ end) : RECON_MODE = struct
 
       let rec toModedec t =
         let _ = Names.varReset I.null_ in
-        let ((a, mS), r) = t (I.null_, I.null_) in
+        let (a, mS), r = t (I.null_, I.null_) in
         ((Some a, None, mS), r)
     end
 

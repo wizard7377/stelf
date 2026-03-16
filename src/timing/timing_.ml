@@ -3,7 +3,8 @@
 (* # 1 "src/timing/timing_.fun.ml" *)
 
 (* # 1 "src/timing/timing_.sml.ml" *)
-open! Basis
+
+open Basis
 
 (* Timing utilities based on SML'97 Standard Library *)
 (* Author: Frank Pfenning *)

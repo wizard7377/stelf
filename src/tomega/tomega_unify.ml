@@ -9,7 +9,7 @@ module type TOMEGAUNIFY = sig
   (*! structure Tomega : TOMEGA !*)
   exception Unify of string
 
-  val unifyFor : Tomega.dec_ IntSyn.ctx_ * Tomega.for_ * Tomega.for_ -> unit
+  val unifyFor : Tomega.dec IntSyn.ctx * Tomega.for_ * Tomega.for_ -> unit
 end
 (* Signature TOMEGATYPECHECK *)
 

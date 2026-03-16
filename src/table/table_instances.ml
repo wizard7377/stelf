@@ -3,7 +3,7 @@
 (* # 1 "src/table/table_instances.fun.ml" *)
 
 (* # 1 "src/table/table_instances.sml.ml" *)
-open! Basis
+open Basis
 open String_hash
 open Hash_table
 open Red_black_tree

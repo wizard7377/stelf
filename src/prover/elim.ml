@@ -10,7 +10,7 @@ module type ELIM = sig
 
   type nonrec operator
 
-  val expand : State.focus_ -> operator list
+  val expand : State.focus -> operator list
   val apply : operator -> unit
   val menu : operator -> string
 end
@@ -50,7 +50,7 @@ end) : ELIM with module State = Elim__0.State' = struct
 
   exception Error of string
 
-  type operator_ = Local of Tomega.prg_ * int
+  type operator_ = Local of Tomega.prg * int
   type nonrec operator = operator_
 
   open! struct

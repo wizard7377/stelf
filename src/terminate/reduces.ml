@@ -271,8 +271,8 @@ end) : REDUCES = struct
                 if f a then a's else lookup (a's', f)
               end
           in
-          let p_ : (I.eclo * I.eclo) R.order_ = selectOcc (a, (s_, s), occ) in
-          let p'_ : (I.eclo * I.eclo) R.order_ = select (a', (s'_, s')) in
+          let p_ : (I.eclo * I.eclo) R.order = selectOcc (a, (s_, s), occ) in
+          let p'_ : (I.eclo * I.eclo) R.order = select (a', (s'_, s')) in
           let a's = R.mutLookup a in
           begin match lookup (a's, function x' -> x' = a') with
           | empty_ -> ()

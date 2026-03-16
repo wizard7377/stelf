@@ -1,37 +1,41 @@
-(* # 1 "src/table/table_.sig.ml" *)
-open! Basis
+(* # 1 "src/table/table.sig.ml" *)
+
+open Basis
 
 (* Hash Tables *)
 (* Author: Frank Pfenning *)
 (* Modified: Roberto Virga *)
 (* This provides a common interface to hash tables *)
-(* red/black trees and similar data structures *)
+
+(** red/black trees and similar data structures *)
 module type TABLE = sig
   type nonrec key
 
-  (* parameter *)
   type nonrec 'a entry = key * 'a
-  type nonrec 'a table_
+  (** parameter *)
 
-  val new_ : int -> 'a table_
+  type nonrec 'a table
 
-  (* size hint for some implementations *)
-  val insert : 'a table_ -> 'a entry -> unit
+  val new_ : int -> 'a table
 
-  (* insert entry, return shadowed entry if there is one *)
-  val insertShadow : 'a table_ -> 'a entry -> 'a entry option
-  val lookup : 'a table_ -> key -> 'a option
-  val delete : 'a table_ -> key -> unit
-  val clear : 'a table_ -> unit
+  val insert : 'a table -> 'a entry -> unit
+  (** size hint for some implementations *)
 
-  (* Apply function to all entries in unpredictable order *)
-  val app : ('a entry -> unit) -> 'a table_ -> unit
+  val insertShadow : 'a table -> 'a entry -> 'a entry option
+  (** insert entry, return shadowed entry if there is one *)
+
+  val lookup : 'a table -> key -> 'a option
+  val delete : 'a table -> key -> unit
+  val clear : 'a table -> unit
+
+  val app : ('a entry -> unit) -> 'a table -> unit
+  (** Apply function to all entries in unpredictable order *)
 end
 (* signature TABLE *)
 
-(* # 1 "src/table/table_.fun.ml" *)
+(* # 1 "src/table/table.fun.ml" *)
 
-(* # 1 "src/table/table_.sml.ml" *)
+(* # 1 "src/table/table.sml.ml" *)
 (* Re-export Queue sig and module that would otherwise be shadowed by stdlib Queue *)
 module type QUEUE = Queue.QUEUE
 

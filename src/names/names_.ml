@@ -3,10 +3,11 @@ open! Basis
 
 (* Names of Constants and Variables *)
 (* Author: Frank Pfenning *)
-(* Modified: Jeff Polakow *)
+
+(** Modified: Jeff Polakow *)
 module type FIXITY = sig
-  type associativity = Left | Right | None
-  type precedence = Strength of int
+  type associativity = Left | Right | None [@@deriving eq, ord, show]
+  type precedence = Strength of int [@@deriving eq, ord, show]
 
   val maxPrec : precedence
   val minPrec : precedence
@@ -21,15 +22,17 @@ module type FIXITY = sig
     | Infix of precedence * associativity
     | Prefix of precedence
     | Postfix of precedence
+  [@@deriving eq, ord, show]
 
   val prec : fixity -> precedence
   val toString : fixity -> string
 
-  (* returns integer for precedence such that lower values correspond to higher precedence, useful for exports *)
   val precToIntAsc : fixity -> int
+  (** returns integer for precedence such that lower values correspond to higher
+      precedence, useful for exports *)
 end
 
-(* signature FIXITY *)
+(** signature FIXITY *)
 module type NAMES = sig
   (*! structure IntSyn : INTSYN !*)
   exception Error of string
@@ -37,110 +40,117 @@ module type NAMES = sig
 
   module Fixity : FIXITY
 
-  (* Constant names and fixities *)
-  type qid_ = Qid of string list * string
+  (** Constant names and fixities *)
+  type qid = Qid of string list * string [@@deriving eq, ord, show]
 
-  val qidToString : qid_ -> string
-  val stringToQid : string -> qid_ option
-  val unqualified : qid_ -> string option
+  val qidToString : qid -> string
+  val stringToQid : string -> qid option
+  val unqualified : qid -> string option
 
   type nonrec namespace
 
   val newNamespace : unit -> namespace
   val insertConst : namespace * IntSyn.cid -> unit
 
-  (* shadowing disallowed *)
   val insertStruct : namespace * IntSyn.mid -> unit
+  (** shadowing disallowed *)
 
-  (* shadowing disallowed *)
   val appConsts : (string * IntSyn.cid -> unit) -> namespace -> unit
+  (** shadowing disallowed *)
+
   val appStructs : (string * IntSyn.mid -> unit) -> namespace -> unit
   val reset : unit -> unit
   val resetFrom : IntSyn.cid * IntSyn.mid -> unit
 
-  (* The following functions have to do with the mapping from names
-     to cids/mids only. *)
   val installConstName : IntSyn.cid -> unit
+  (** The following functions have to do with the mapping from names to
+      cids/mids only. *)
+
   val installStructName : IntSyn.mid -> unit
-  val constLookup : qid_ -> IntSyn.cid option
-  val structLookup : qid_ -> IntSyn.mid option
-  val constUndef : qid_ -> qid_ option
+  val constLookup : qid -> IntSyn.cid option
+  val structLookup : qid -> IntSyn.mid option
+  val constUndef : qid -> qid option
 
-  (* shortest undefined prefix of Qid *)
-  val structUndef : qid_ -> qid_ option
-  val constLookupIn : namespace * qid_ -> IntSyn.cid option
-  val structLookupIn : namespace * qid_ -> IntSyn.mid option
-  val constUndefIn : namespace * qid_ -> qid_ option
-  val structUndefIn : namespace * qid_ -> qid_ option
+  val structUndef : qid -> qid option
+  (** shortest undefined prefix of Qid *)
 
-  (* This function maps cids/mids to names.  It uses the information in
-     the IntSyn.ConDec or IntSyn.StrDec entries only, and only considers
-     the name->cid/mid mapping defined above in order to tell whether a
-     name is shadowed (any constant or structure whose canonical name
-     would map to something else, or to nothing at all, in the case of
-     an anonymous structure, is shadowed). *)
-  val conDecQid : IntSyn.conDec_ -> qid_
-  val constQid : IntSyn.cid -> qid_
+  val constLookupIn : namespace * qid -> IntSyn.cid option
+  val structLookupIn : namespace * qid -> IntSyn.mid option
+  val constUndefIn : namespace * qid -> qid option
+  val structUndefIn : namespace * qid -> qid option
 
-  (* will mark if shadowed *)
-  val structQid : IntSyn.mid -> qid_
+  val conDecQid : IntSyn.conDec -> qid
+  (** This function maps cids/mids to names. It uses the information in the
+      IntSyn.ConDec or IntSyn.StrDec entries only, and only considers the
+      name->cid/mid mapping defined above in order to tell whether a name is
+      shadowed (any constant or structure whose canonical name would map to
+      something else, or to nothing at all, in the case of an anonymous
+      structure, is shadowed). *)
 
-  (* will mark if shadowed *)
+  val constQid : IntSyn.cid -> qid
+
+  val structQid : IntSyn.mid -> qid
+  (** will mark if shadowed *)
+
   val installFixity : IntSyn.cid * Fixity.fixity -> unit
+  (** will mark if shadowed *)
+
   val getFixity : IntSyn.cid -> Fixity.fixity
-  val fixityLookup : qid_ -> Fixity.fixity
+  val fixityLookup : qid -> Fixity.fixity
 
   (* Nonfix if undefined *)
-  (* Name preferences for anonymous variables: a, EPref, UPref *)
+
   val installNamePref : IntSyn.cid * (string list * string list) -> unit
+  (** Name preferences for anonymous variables: a, EPref, UPref *)
+
   val getNamePref : IntSyn.cid -> (string list * string list) option
   val installComponents : IntSyn.mid * namespace -> unit
   val getComponents : IntSyn.mid -> namespace
 
-  (* EVar and BVar name choices *)
   val varReset : IntSyn.dctx -> unit
+  (** EVar and BVar name choices *)
 
-  (* context in which EVars are created *)
-  val addEVar : IntSyn.exp_ * string -> unit
+  val addEVar : IntSyn.exp * string -> unit
+  (** context in which EVars are created *)
 
-  (* assumes name not already used *)
-  val getEVarOpt : string -> IntSyn.exp_ option
+  val getEVarOpt : string -> IntSyn.exp option
+  (** assumes name not already used *)
 
-  (* NONE, if undefined or not EVar *)
-  val evarName : IntSyn.dctx * IntSyn.exp_ -> string
+  val evarName : IntSyn.dctx * IntSyn.exp -> string
+  (** NONE, if undefined or not EVar *)
 
-  (* create, if undefined *)
   val bvarName : IntSyn.dctx * int -> string
+  (** create, if undefined *)
 
-  (* raises Unprintable if undefined *)
-  val decName : IntSyn.dctx * IntSyn.dec_ -> IntSyn.dec_
+  val decName : IntSyn.dctx * IntSyn.dec -> IntSyn.dec
+  (** raises Unprintable if undefined *)
 
-  (* status unknown, like decEName *)
-  val decEName : IntSyn.dctx * IntSyn.dec_ -> IntSyn.dec_
+  val decEName : IntSyn.dctx * IntSyn.dec -> IntSyn.dec
+  (** status unknown, like decEName *)
 
-  (* assign existential name *)
-  val decUName : IntSyn.dctx * IntSyn.dec_ -> IntSyn.dec_
+  val decUName : IntSyn.dctx * IntSyn.dec -> IntSyn.dec
+  (** assign existential name *)
 
-  (* assign universal name *)
-  val decLUName : IntSyn.dctx * IntSyn.dec_ -> IntSyn.dec_
+  val decLUName : IntSyn.dctx * IntSyn.dec -> IntSyn.dec
+  (** assign universal name *)
 
-  (* assign local universal name *)
   val ctxName : IntSyn.dctx -> IntSyn.dctx
+  (** assign local universal name *)
 
-  (* assign global existential names *)
   val ctxLUName : IntSyn.dctx -> IntSyn.dctx
+  (** assign global existential names *)
 
-  (* assign local universal names *)
-  val nameConDec : IntSyn.conDec_ -> IntSyn.conDec_
+  val nameConDec : IntSyn.conDec -> IntSyn.conDec
+  (** assign local universal names *)
 
-  (* Skolem constants *)
   val skonstName : string -> string
+  (** Skolem constants *)
 
-  (* Named EVars, used for queries *)
-  val namedEVars : unit -> (IntSyn.exp_ * string) list
+  val namedEVars : unit -> (IntSyn.exp * string) list
+  (** Named EVars, used for queries *)
 
-  (* Uninstantiated named EVars with constraints *)
-  val evarCnstr : unit -> (IntSyn.exp_ * string) list
+  val evarCnstr : unit -> (IntSyn.exp * string) list
+  (** Uninstantiated named EVars with constraints *)
 end
 (* signature NAMES *)
 
@@ -185,10 +195,10 @@ end) : NAMES = struct
                | right   e.g. `->'
                | none    e.g. `==' from some object language
     *)
-    type associativity = Left | Right | None
+    type associativity = Left | Right | None [@@deriving eq, ord, show]
 
     (* Operator Precedence *)
-    type precedence = Strength of int
+    type precedence = Strength of int [@@deriving eq, ord, show]
 
     (* Maximal and minimal precedence which can be declared explicitly *)
     let maxPrecInt = 9999
@@ -213,6 +223,7 @@ end) : NAMES = struct
       | Infix of precedence * associativity
       | Prefix of precedence
       | Postfix of precedence
+    [@@deriving eq, ord, show]
 
     (* returns integer for precedence such that lower values correspond to higher precedence, useful for exports *)
     let rec precToIntAsc = function
@@ -314,7 +325,7 @@ end) : NAMES = struct
      There are global invariants which state the mappings must be
      consistent with each other.
   *)
-  type qid_ = Qid of string list * string
+  type qid = Qid of string list * string [@@deriving eq, ord, show]
 
   let rec qidToString (Qid (ids, name)) =
     List.foldr (function id, s -> (id ^ ".") ^ s) name ids
@@ -333,7 +344,7 @@ end) : NAMES = struct
   let rec unqualified = function Qid ([], id) -> Some id | _ -> None
 
   type nonrec namespace =
-    IntSyn.mid StringTree.table_ * IntSyn.cid StringTree.table_
+    IntSyn.mid StringTree.table * IntSyn.cid StringTree.table
 
   let rec newNamespace () = ((StringTree.new_ 0, StringTree.new_ 0) : namespace)
 
@@ -390,7 +401,7 @@ end) : NAMES = struct
       Array.array (maxCid + 1, None)
 
     let rec namePrefClear () = Array.modify (function _ -> None) namePrefArray
-    let topNamespace : IntSyn.cid HashTable.table_ = HashTable.new_ 4096
+    let topNamespace : IntSyn.cid HashTable.table = HashTable.new_ 4096
     let topInsert = HashTable.insertShadow topNamespace
     let topLookup = HashTable.lookup topNamespace
     let topDelete = HashTable.delete topNamespace
@@ -410,7 +421,7 @@ end) : NAMES = struct
     let rec componentsClear () =
       Array.modify (function _ -> dummyNamespace) componentsArray
 
-    let topStructNamespace : IntSyn.mid HashTable.table_ = HashTable.new_ 4096
+    let topStructNamespace : IntSyn.mid HashTable.table = HashTable.new_ 4096
     let topStructInsert = HashTable.insertShadow topStructNamespace
     let topStructLookup = HashTable.lookup topStructNamespace
     let topStructDelete = HashTable.delete topStructNamespace
@@ -767,8 +778,8 @@ end) : NAMES = struct
   (* local names are more easily re-used: they don't increment the
        counter associated with a name
     *)
-  type extent_ = Local | Global
-  type role_ = Exist | Univ of extent_
+  type extent = Local | Global [@@deriving eq, ord, show]
+  type role = Exist | Univ of extent [@@deriving eq, ord, show]
 
   let rec extent = function Exist -> Global | Univ ext -> ext
 
@@ -839,14 +850,14 @@ end) : NAMES = struct
      EVars and FVars are local.
   *)
   open! struct
-    type varEntry = Evar of IntSyn.exp_
+    type varEntry = Evar of IntSyn.exp
 
-    let varTable : varEntry StringTree.table_ = StringTree.new_ 0
+    let varTable : varEntry StringTree.table = StringTree.new_ 0
     let varInsert = StringTree.insert varTable
     let varLookup = StringTree.lookup varTable
     let rec varClear () = StringTree.clear varTable
     let varContext : IntSyn.dctx ref = ref IntSyn.Null
-    let evarList : (IntSyn.exp_ * string) list ref = ref []
+    let evarList : (IntSyn.exp * string) list ref = ref []
     let rec evarReset () = evarList := []
 
     let rec evarLookup x_ =
@@ -878,7 +889,7 @@ end) : NAMES = struct
       | _ :: l, acc -> evarCnstr' (l, acc)
 
     let rec evarCnstr () = evarCnstr' (!evarList, [])
-    let indexTable : int StringTree.table_ = StringTree.new_ 0
+    let indexTable : int StringTree.table = StringTree.new_ 0
     let indexInsert = StringTree.insert indexTable
     let indexLookup = StringTree.lookup indexTable
     let rec indexClear () = StringTree.clear indexTable

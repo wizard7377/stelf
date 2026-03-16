@@ -7,10 +7,10 @@ module type TABLED = sig
   (*! structure IntSyn : INTSYN !*)
   (*! structure CompSyn : COMPSYN !*)
   val solve :
-    (CompSyn.goal_ * IntSyn.sub_) * CompSyn.dProg_ * (CompSyn.pskeleton -> unit) ->
+    (CompSyn.goal * IntSyn.sub) * CompSyn.dProg * (CompSyn.pskeleton -> unit) ->
     unit
 
-  val updateGlobalTable : CompSyn.goal_ * bool -> unit
+  val updateGlobalTable : CompSyn.goal * bool -> unit
   val keepTable : IntSyn.cid -> bool
   val fillTable : unit -> unit
   val nextStage : unit -> bool
@@ -89,15 +89,15 @@ module Tabled(Tabled__0: sig
                    current program state
 
     *);;
-    type suspType_ =
+    type suspType =
       | Loop 
-      | Divergence of (IntSyn.exp_ * IntSyn.sub_) * CompSyn.dProg_ ;;
+      | Divergence of (IntSyn.exp * IntSyn.sub) * CompSyn.dProg ;;
     let suspGoals_
-      : (suspType_ *
-         (IntSyn.dctx * IntSyn.exp_ * IntSyn.sub_) *
+      : (suspType *
+         (IntSyn.dctx * IntSyn.exp * IntSyn.sub) *
          (CompSyn.pskeleton -> unit) *
          Unify.unifTrail *
-         ((IntSyn.sub_ * IntSyn.sub_) * T.answer) *
+         ((IntSyn.sub * IntSyn.sub) * T.answer) *
          int
          ref)
       list ref = ref [];;
@@ -432,7 +432,7 @@ module Tabled(Tabled__0: sig
      Effects: instantiation of EVars in g, s, and dp
      any effect  sc M  might have
      *);;
-    let solve_fn_ref : ((CompSyn.goal_ * IntSyn.sub_) * CompSyn.dProg_ * (CompSyn.pskeleton -> unit) -> unit) ref =
+    let solve_fn_ref : ((CompSyn.goal * IntSyn.sub) * CompSyn.dProg * (CompSyn.pskeleton -> unit) -> unit) ref =
       ref (fun _ -> failwith "solve_fn not yet initialized");;
     let rec solve =
       function 

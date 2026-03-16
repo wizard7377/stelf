@@ -43,7 +43,7 @@ module type RECON_MODULE = sig
 
   type nonrec whereclause
 
-  type structDec_ =
+  type structDec =
     | StructDec of string option * ModSyn.module_ * whereclause list
     | StructDef of string option * IntSyn.mid
 
@@ -56,7 +56,7 @@ module type RECON_MODULE = sig
     sigdef * ModSyn.module_ option ->
     string option * ModSyn.module_ * whereclause list
 
-  val structdecToStructDec : structdec * ModSyn.module_ option -> structDec_
+  val structdecToStructDec : structdec * ModSyn.module_ option -> structDec
   val moduleWhere : ModSyn.module_ * whereclause -> ModSyn.module_
 end
 
@@ -212,11 +212,11 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
 
   let rec sigdefToSigdef (sigdef, moduleOpt) = sigdef moduleOpt
 
-  type structDec_ =
+  type structDec =
     | StructDec of string option * ModSyn.module_ * whereclause list
     | StructDef of string option * IntSyn.mid
 
-  type nonrec structdec = ModSyn.module_ option -> structDec_
+  type nonrec structdec = ModSyn.module_ option -> structDec
 
   let rec structdec (idOpt, sigexp) moduleOpt =
     let module_, inst = sigexp moduleOpt in
@@ -228,7 +228,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
 
   let rec structdecToStructDec (structdec, moduleOpt) = structdec moduleOpt
 
-  type nonrec eqnTable = (inst_ * Paths.region) list ref IntTree.table_
+  type nonrec eqnTable = (inst_ * Paths.region) list ref IntTree.table
 
   let rec applyEqns wherecl namespace =
     let eqns = wherecl namespace in

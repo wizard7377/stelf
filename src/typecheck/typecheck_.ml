@@ -2,21 +2,22 @@
 open! Basis
 
 (* Type Checking *)
-(* Author: Carsten Schuermann *)
+
+(** Author: Carsten Schuermann *)
 module type TYPECHECK = sig
   (*! structure IntSyn : INTSYN !*)
   exception Error of string
 
-  val check : IntSyn.exp_ * IntSyn.exp_ -> unit
-  val checkDec : IntSyn.dctx * (IntSyn.dec_ * IntSyn.sub_) -> unit
-  val checkConv : IntSyn.exp_ * IntSyn.exp_ -> unit
-  val infer : IntSyn.exp_ -> IntSyn.exp_
-  val infer' : IntSyn.dctx * IntSyn.exp_ -> IntSyn.exp_
-  val typeCheck : IntSyn.dctx * (IntSyn.exp_ * IntSyn.exp_) -> unit
+  val check : IntSyn.exp * IntSyn.exp -> unit
+  val checkDec : IntSyn.dctx * (IntSyn.dec * IntSyn.sub) -> unit
+  val checkConv : IntSyn.exp * IntSyn.exp -> unit
+  val infer : IntSyn.exp -> IntSyn.exp
+  val infer' : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
+  val typeCheck : IntSyn.dctx * (IntSyn.exp * IntSyn.exp) -> unit
   val typeCheckCtx : IntSyn.dctx -> unit
 
-  (* val typeCheckSpine : IntSyn.dctx * IntSyn.Spine -> unit *)
-  val typeCheckSub : IntSyn.dctx * IntSyn.sub_ * IntSyn.dctx -> unit
+  val typeCheckSub : IntSyn.dctx * IntSyn.sub * IntSyn.dctx -> unit
+  (** val typeCheckSpine : IntSyn.dctx * IntSyn.Spine -> unit *)
 end
 (* signature TYPECHECK *)
 
@@ -49,12 +50,12 @@ end) : TYPECHECK = struct
       | g_, I.Dot (I.Exp u_, s) ->
           (("(" ^ Print.expToString (g_, u_)) ^ ").") ^ subToString (g_, s)
       | g_, I.Dot (I.Block (I.LVar _ as l_), s) ->
-          (lVarToString_ (g_, l_) ^ ".") ^ subToString (g_, s)
+          (lVarToString (g_, l_) ^ ".") ^ subToString (g_, s)
       | g_, I.Shift n -> "^" ^ Int.toString n
 
-    and lVarToString_ = function
+    and lVarToString = function
       | g_, I.LVar ({ contents = Some b_ }, sk, (l, t)) ->
-          lVarToString_ (g_, I.blockSub (b_, sk))
+          lVarToString (g_, I.blockSub (b_, sk))
       | g_, I.LVar ({ contents = None }, sk, (cid, t)) ->
           ((("#" ^ I.conDecName (I.sgnLookup cid)) ^ "[") ^ subToString (g_, t))
           ^ "]"

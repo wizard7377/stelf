@@ -1,8 +1,10 @@
 (* # 1 "src/trail/trail_.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* Trailing Abstract Operations *)
-(* Author: Roberto Virga *)
+
+(** Author: Roberto Virga *)
 module type TRAIL = sig
   type nonrec 'a trail
 
@@ -19,7 +21,6 @@ end
 (* # 1 "src/trail/trail_.fun.ml" *)
 
 (* # 1 "src/trail/trail_.sml.ml" *)
-open! Basis
 
 (* Trailing Abstract Operations *)
 (* Author: Roberto Virga *)

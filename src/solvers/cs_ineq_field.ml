@@ -96,23 +96,23 @@ end) : Cs.CS = struct
       else None
       end
 
-    type position_ = Row of int | Col of int
-    type owner_ = Var of IntSyn.dctx * mon_ | Exp of IntSyn.dctx * sum_
-    type restriction_ = Restr of IntSyn.dctx * IntSyn.exp_ * bool
+    type position = Row of int | Col of int
+    type owner = Var of IntSyn.dctx * mon_ | Exp of IntSyn.dctx * sum_
+    type restriction = Restr of IntSyn.dctx * IntSyn.exp * bool
 
     type nonrec label = {
-      owner : owner_;
+      owner : owner;
       tag : int ref;
-      restr : restriction_ option ref;
+      restr : restriction option ref;
       dead : bool ref;
     }
 
-    type operation_ =
-      | Insert of position_
+    type operation =
+      | Insert of position
       | Pivot of int * int
-      | Kill of position_
-      | Restrict of position_
-      | UpdateOwner of position_ * owner_ * int ref
+      | Kill of position
+      | Restrict of position
+      | UpdateOwner of position * owner * int ref
 
     type nonrec tableau = {
       rlabels : label Array.array;
@@ -121,7 +121,7 @@ end) : Cs.CS = struct
       coeffs : number Array2.array;
       nrows : int ref;
       ncols : int ref;
-      trail : operation_ Trail.trail;
+      trail : operation Trail.trail;
     }
 
     exception MyFgnCnstrRep of int ref
@@ -537,7 +537,7 @@ end) : Cs.CS = struct
         end
       end
 
-    type maximizeResult_ = Positive | Maximized of number | Unbounded of int
+    type maximizeResult = Positive | Maximized of number | Unbounded of int
 
     let rec maximizeRow row =
       let value = const row in
@@ -571,7 +571,7 @@ end) : Cs.CS = struct
       else raise Error
       end
 
-    type nonrec decomp = number * (number * position_) list
+    type nonrec decomp = number * (number * position) list
 
     let rec unaryMinusDecomp (d, wposL) =
       (-d, List.map (function d, pos -> (-d, pos)) wposL)

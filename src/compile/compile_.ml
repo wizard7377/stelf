@@ -6,22 +6,22 @@ open CompSyn
 (* Author: Iliano Cervesato *)
 (* Modified: Jeff Polakow *)
 (* Modified: Carsten Schuermann *)
-(* Modified: Frank Pfenning *)
+(** Modified: Frank Pfenning *)
 module type COMPILE = sig
   (*! structure IntSyn: INTSYN !*)
   (*! structure CompSyn: COMPSYN !*)
   exception Error of string
 
-  type opt_ = CompSyn.opt_
+  type opt = CompSyn.opt
 
-  val optimize : opt_ ref
-  val install : IntSyn.conDecForm_ -> IntSyn.cid -> unit
+  val optimize : opt ref
+  val install : IntSyn.conDecForm -> IntSyn.cid -> unit
   val sProgReset : unit -> unit
-  val compileCtx : bool -> IntSyn.dec_ IntSyn.ctx_ -> CompSyn.dProg_
-  val compileGoal : IntSyn.dec_ IntSyn.ctx_ * IntSyn.exp_ -> CompSyn.goal_
+  val compileCtx : bool -> IntSyn.dec IntSyn.ctx -> CompSyn.dProg
+  val compileGoal : IntSyn.dec IntSyn.ctx * IntSyn.exp -> CompSyn.goal
 
-  (* for the meta theorem prover  --cs *)
-  val compilePsi : bool -> Tomega.dec_ IntSyn.ctx_ -> CompSyn.dProg_
+  (** for the meta theorem prover  --cs *)
+  val compilePsi : bool -> Tomega.dec IntSyn.ctx -> CompSyn.dProg
 end
 (* signature COMPILE *)
 
@@ -62,13 +62,13 @@ module MakeCompile(Compile__0: sig
     module SubTree = Compile__0.SubTree;;
     module Whnf = Compile__0.Whnf;;
     module CPrint = Compile__0.CPrint;;
-    type duplicates_ = | Bvar of int 
+    type duplicates = | Bvar of int 
                        | Fgn 
                        | Def of int ;;
     let rec notCS = function 
                              | fromCS_ -> false
                              | _ -> true;;
-    type opt_ = CompSyn.opt_;;
+    type opt = CompSyn.opt;;
     let optimize = CompSyn.optimize;;
     let rec cidFromHead = function 
                                    | I.Const c -> c

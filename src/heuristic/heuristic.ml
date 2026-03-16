@@ -1,3 +1,4 @@
+open Basis
 open! Heuristic_
 module Heuristic_ = Heuristic_
 open! Heuristic_sum

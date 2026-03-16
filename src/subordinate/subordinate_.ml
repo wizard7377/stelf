@@ -3,7 +3,8 @@ open! Basis
 
 (* Subordination *)
 (* Author: Carsten Schuermann *)
-(* Modified: Frank Pfenning *)
+
+(** Modified: Frank Pfenning *)
 module type SUBORDINATE = sig
   (*! structure IntSyn : INTSYN !*)
   exception Error of string
@@ -14,36 +15,39 @@ module type SUBORDINATE = sig
   val installBlock : IntSyn.cid -> unit
 
   (* val installFrozen : IntSyn.cid list -> unit *)
-  (* superseded by freeze *)
+
   val freeze : IntSyn.cid list -> IntSyn.cid list
+  (** superseded by freeze *)
 
-  (* transitive freeze, returns frozen cids *)
   val thaw : IntSyn.cid list -> IntSyn.cid list
+  (** transitive freeze, returns frozen cids *)
 
-  (* reverse transitive thaw, returns thawed cids *)
   val frozen : IntSyn.cid list -> bool
+  (** reverse transitive thaw, returns thawed cids *)
 
-  (* any cid in list frozen? *)
   val addSubord : IntSyn.cid * IntSyn.cid -> unit
+  (** any cid in list frozen? *)
+
   val below : IntSyn.cid * IntSyn.cid -> bool
 
-  (* transitive closure *)
   val belowEq : IntSyn.cid * IntSyn.cid -> bool
+  (** transitive closure *)
 
-  (* refl. transitive closure *)
   val equiv : IntSyn.cid * IntSyn.cid -> bool
+  (** refl. transitive closure *)
 
-  (* mutual dependency *)
   val respects : IntSyn.dctx * IntSyn.eclo -> unit
+  (** mutual dependency *)
 
-  (* respects current subordination? *)
-  val respectsN : IntSyn.dctx * IntSyn.exp_ -> unit
+  val respectsN : IntSyn.dctx * IntSyn.exp -> unit
+  (** respects current subordination? *)
 
-  (* respectsN(G, V), V in nf *)
   val checkNoDef : IntSyn.cid -> unit
+  (** respectsN(G, V), V in nf *)
 
-  (* not involved in type-level definition? *)
-  val weaken : IntSyn.dctx * IntSyn.cid -> IntSyn.sub_
+  val weaken : IntSyn.dctx * IntSyn.cid -> IntSyn.sub
+  (** not involved in type-level definition? *)
+
   val show : unit -> unit
   val showDef : unit -> unit
 end
@@ -82,12 +86,12 @@ end) : SUBORDINATE = struct
   open! struct
     module I = IntSyn
 
-    let soGraph : IntSet.intset Table.table_ = Table.new_ 32
+    let soGraph : IntSet.intset Table.table = Table.new_ 32
     let insert = Table.insert soGraph
     let rec adjNodes a = valOf (Table.lookup soGraph a)
     let rec insertNewFam a = Table.insert soGraph (a, IntSet.empty)
     let updateFam = Table.insert soGraph
-    let memoTable : (bool * int) MemoTable.table_ = MemoTable.new_ 2048
+    let memoTable : (bool * int) MemoTable.table = MemoTable.new_ 2048
     let memoInsert = MemoTable.insert memoTable
     let memoLookup = MemoTable.lookup memoTable
     let memoClear = function () -> MemoTable.clear memoTable
@@ -132,7 +136,7 @@ end) : SUBORDINATE = struct
         end
       end
 
-    let fTable : bool Table.table_ = Table.new_ 32
+    let fTable : bool Table.table = Table.new_ 32
     let fLookup = Table.lookup fTable
     let fInsert = Table.insert fTable
 
@@ -258,7 +262,7 @@ end) : SUBORDINATE = struct
       let _ = List.app (function b -> fSet (b, false)) !aboveList in
       !aboveList
 
-    let defGraph : IntSet.intset Table.table_ = Table.new_ 32
+    let defGraph : IntSet.intset Table.table = Table.new_ 32
 
     let rec occursInDef a =
       begin match Table.lookup defGraph a with None -> false | Some _ -> true

@@ -78,22 +78,22 @@ module type RECON_THM = sig
 
   exception Error of string
 
-  val tdeclTotDecl : tdecl -> ThmSyn.tDecl_ * (Paths.region * Paths.region list)
-  val rdeclTorDecl : rdecl -> ThmSyn.rDecl_ * (Paths.region * Paths.region list)
-  val tableddeclTotabledDecl : tableddecl -> ThmSyn.tabledDecl_ * Paths.region
+  val tdeclTotDecl : tdecl -> ThmSyn.tDecl * (Paths.region * Paths.region list)
+  val rdeclTorDecl : rdecl -> ThmSyn.rDecl * (Paths.region * Paths.region list)
+  val tableddeclTotabledDecl : tableddecl -> ThmSyn.tabledDecl * Paths.region
 
   val keepTabledeclToktDecl :
-    keepTabledecl -> ThmSyn.keepTableDecl_ * Paths.region
+    keepTabledecl -> ThmSyn.keepTableDecl * Paths.region
 
-  val theoremToTheorem : theorem -> ThmSyn.thDecl_
-  val theoremDecToTheoremDec : theoremdec -> string * ThmSyn.thDecl_
-  val proveToProve : prove -> ThmSyn.pDecl_ * (Paths.region * Paths.region list)
+  val theoremToTheorem : theorem -> ThmSyn.thDecl
+  val theoremDecToTheoremDec : theoremdec -> string * ThmSyn.thDecl
+  val proveToProve : prove -> ThmSyn.pDecl * (Paths.region * Paths.region list)
 
   val establishToEstablish :
-    establish -> ThmSyn.pDecl_ * (Paths.region * Paths.region list)
+    establish -> ThmSyn.pDecl * (Paths.region * Paths.region list)
 
-  val assertToAssert : assert_ -> ThmSyn.callpats_ * Paths.region list
-  val wdeclTowDecl : wdecl -> ThmSyn.wDecl_ * Paths.region list
+  val assertToAssert : assert_ -> ThmSyn.callpats * Paths.region list
+  val wdeclTowDecl : wdecl -> ThmSyn.wDecl * Paths.region list
 end
 (* signature RECON_THM *)
 
@@ -138,7 +138,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let rec error (r, msg) = raise (Error (P.wrap (r, msg)))
 
-    type nonrec order = ThmSyn.order_ * Paths.region
+    type nonrec order = ThmSyn.order * Paths.region
 
     let rec varg (r, l_) = (ThmSyn.Varg l_, r)
 
@@ -218,7 +218,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let rec callpats l_ = l_
 
-    type nonrec tdecl = (ThmSyn.order_ * callpats) * Paths.region
+    type nonrec tdecl = (ThmSyn.order * callpats) * Paths.region
 
     let rec tdecl ((o_, r), c_) = ((o_, c_), r)
 
@@ -227,7 +227,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
           let c'_, rs = resolveCallpats c_ in
           (ThmSyn.TDecl (o_, c'_), (r, rs))
 
-    type nonrec predicate = ThmSyn.predicate_ * Paths.region
+    type nonrec predicate = ThmSyn.predicate * Paths.region
 
     let rec predicate = function
       | "LESS", r -> (ThmSyn.Less, r)
@@ -235,8 +235,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       | "EQUAL", r -> (ThmSyn.Eq, r)
 
     type nonrec rdecl =
-      (ThmSyn.predicate_ * ThmSyn.order_ * ThmSyn.order_ * callpats)
-      * Paths.region
+      (ThmSyn.predicate * ThmSyn.order * ThmSyn.order * callpats) * Paths.region
 
     let rec rdecl ((p_, r0), (o1_, r1), (o2_, r2), c_) =
       let r = Paths.join (r1, r2) in
@@ -245,8 +244,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     let rec rdeclTorDecl = function
       | (p_, o1_, o2_, c_), r ->
           let c'_, rs = resolveCallpats c_ in
-          ( ThmSyn.RDecl (ThmSyn.RedOrder (p_, o1_, o2_), c'_),
-            (r, rs) )
+          (ThmSyn.RDecl (ThmSyn.RedOrder (p_, o1_, o2_), c'_), (r, rs))
 
     type nonrec tableddecl = string * Paths.region
 
@@ -282,7 +280,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
           | Some cid -> (ThmSyn.KeepTableDecl cid, r)
           end
 
-    type nonrec prove = ThmSyn.pDecl_ * (Paths.region * Paths.region list)
+    type nonrec prove = ThmSyn.pDecl * (Paths.region * Paths.region list)
 
     let rec prove (n, td) =
       let td_, rrs = tdeclTotDecl td in
@@ -290,7 +288,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let rec proveToProve p_ = p_
 
-    type nonrec establish = ThmSyn.pDecl_ * (Paths.region * Paths.region list)
+    type nonrec establish = ThmSyn.pDecl * (Paths.region * Paths.region list)
 
     let rec establish (n, td) =
       let td_, rrs = tdeclTotDecl td in
@@ -303,7 +301,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     let rec assert_ cp = cp
     let rec assertToAssert cp = resolveCallpats cp
 
-    type nonrec decs = ExtSyn.dec I.ctx_
+    type nonrec decs = ExtSyn.dec I.ctx
 
     let null = I.null_
     let decl (g, d) = I.Decl (g, d)
@@ -311,7 +309,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     type nonrec labeldec = decs * decs
 
     type nonrec thm =
-      labeldec list * ExtSyn.dec I.ctx_ * ModeSyn.mode_ I.ctx_ * int
+      labeldec list * ExtSyn.dec I.ctx * ModeSyn.mode I.ctx * int
 
     type nonrec theorem = thm -> thm
     type nonrec theoremdec = string * theorem

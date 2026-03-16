@@ -123,4 +123,5 @@
    -open
    M2.M2_))
  (wrapped true)
-(preprocess (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+ (preprocess
+  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

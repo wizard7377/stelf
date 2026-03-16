@@ -20,7 +20,7 @@ end) : Cs.CS = struct
 
   (* Set                        *)
   type sum_ = Sum of bool * mon_ set
-  and mon_ = Mon of (IntSyn.exp_ * IntSyn.sub_) set
+  and mon_ = Mon of (IntSyn.exp * IntSyn.sub) set
 
   (* Sum :                      *)
   (* Sum ::= m + M1 + ...       *)

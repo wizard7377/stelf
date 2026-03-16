@@ -191,7 +191,7 @@ end) : ABSMACHINE = struct
         T.signal (g_, T.SolveGoal (tag, ha_, I.EClo (fst ps', snd ps')))
       in
       let deterministic = C.detTableCheck (cidFromHead ha_) in
-      let exception SucceedOnce of I.spine_ in
+      let exception SucceedOnce of I.spine in
       let rec matchSig = function
         | [] -> begin
             T.signal (g_, T.FailGoal (tag, ha_, I.EClo (fst ps', snd ps')));

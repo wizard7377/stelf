@@ -7,12 +7,12 @@ open Funsyn
 module type STATESYN = sig
   (*! structure IntSyn : INTSYN !*)
   (*! structure FunSyn : FUNSYN !*)
-  type order_ =
-    | Arg of (IntSyn.exp_ * IntSyn.sub_) * (IntSyn.exp_ * IntSyn.sub_)
-    | Lex of order_ list
-    | Simul of order_ list
-    | All of IntSyn.dec_ * order_
-    | And of order_ * order_
+  type order =
+    | Arg of (IntSyn.exp * IntSyn.sub) * (IntSyn.exp * IntSyn.sub)
+    | Lex of order list
+    | Simul of order list
+    | All of IntSyn.dec * order
+    | And of order * order
 
   (* Orders                     *)
   (* O ::= U[s] : V[s]          *)
@@ -20,16 +20,16 @@ module type STATESYN = sig
   (*     | {O1 .. On}           *)
   (*     | {{D}} O              *)
   (*     | O1 ^ O2              *)
-  type info_ = Splits of int | Rl | RLdone
-  type tag_ = Parameter of FunSyn.label option | Lemma of info_ | None
+  type info = Splits of int | Rl | RLdone
+  type tag = Parameter of FunSyn.label option | Lemma of info | None
 
-  type state_ =
+  type state =
     | State of
         int
-        * (IntSyn.dctx * tag_ IntSyn.ctx_)
-        * (FunSyn.for_ * order_)
+        * (IntSyn.dctx * tag IntSyn.ctx)
+        * (FunSyn.for_ * order)
         * int
-        * order_
+        * order
         * (int * FunSyn.for_) list
         * FunSyn.for_
 
@@ -43,12 +43,12 @@ module type STATESYN = sig
 
   (* S = <n, (G, B), (IH, OH), d, O, H, F> *)
   (* Formula *)
-  val orderSub : order_ * IntSyn.sub_ -> order_
-  val decrease : tag_ -> tag_
-  val splitDepth : info_ -> int
-  val normalizeOrder : order_ -> order_
-  val convOrder : order_ * order_ -> bool
-  val normalizeTag : tag_ * IntSyn.sub_ -> tag_
+  val orderSub : order * IntSyn.sub -> order
+  val decrease : tag -> tag
+  val splitDepth : info -> int
+  val normalizeOrder : order -> order
+  val convOrder : order * order -> bool
+  val normalizeTag : tag * IntSyn.sub -> tag
 end
 (* signature STATESYN *)
 
@@ -68,12 +68,12 @@ module StateSyn (StateSyn__0 : sig
 end) : STATESYN = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure FunSyn = FunSyn' !*)
-  type order_ =
-    | Arg of (IntSyn.exp_ * IntSyn.sub_) * (IntSyn.exp_ * IntSyn.sub_)
-    | Lex of order_ list
-    | Simul of order_ list
-    | All of IntSyn.dec_ * order_
-    | And of order_ * order_
+  type order =
+    | Arg of (IntSyn.exp * IntSyn.sub) * (IntSyn.exp * IntSyn.sub)
+    | Lex of order list
+    | Simul of order list
+    | All of IntSyn.dec * order
+    | And of order * order
 
   (* Orders                     *)
   (* O ::= U[s] : V[s]          *)
@@ -81,16 +81,16 @@ end) : STATESYN = struct
   (*     | {O1 .. On}           *)
   (*     | {{D}} O              *)
   (*     | O1 ^ O2              *)
-  type info_ = Splits of int | Rl | RLdone
-  type tag_ = Parameter of FunSyn.label option | Lemma of info_ | None
+  type info = Splits of int | Rl | RLdone
+  type tag = Parameter of FunSyn.label option | Lemma of info | None
 
-  type state_ =
+  type state =
     | State of
         int
-        * (IntSyn.dctx * tag_ IntSyn.ctx_)
-        * (FunSyn.for_ * order_)
+        * (IntSyn.dctx * tag IntSyn.ctx)
+        * (FunSyn.for_ * order)
         * int
-        * order_
+        * order
         * (int * FunSyn.for_) list
         * FunSyn.for_
 

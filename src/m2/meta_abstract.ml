@@ -9,7 +9,7 @@ module type METAABSTRACT = sig
 
   exception Error of string
 
-  val abstract : MetaSyn.state_ -> MetaSyn.state_
+  val abstract : MetaSyn.state -> MetaSyn.state
 end
 (* signature METAABSTRACT *)
 
@@ -61,7 +61,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     module S = Stream
     module C = Constraints
 
-    type var_ = Ev of I.exp_ option ref * I.exp_ * MetaSyn.mode_ | Bv
+    type var = Ev of I.exp option ref * I.exp * MetaSyn.mode | Bv
 
     let rec checkEmpty = function
       | [] -> ()

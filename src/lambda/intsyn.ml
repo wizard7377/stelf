@@ -6,233 +6,235 @@ open Fgnopn
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
 module type INTSYN = sig
-  type nonrec cid = int
+  (** Constant identifier        *)
+  type cid = int [@@deriving eq, ord, show]
 
-  (* Constant identifier        *)
-  type nonrec mid = int
+  (** Structure identifier       *)
+  type mid = int [@@deriving eq, ord, show]
 
-  (* Structure identifier       *)
-  type nonrec csid = int
+  (** CS module identifier       *)
+  type csid = int [@@deriving eq, ord, show]
 
-  (* CS module identifier       *)
-  type nonrec fgnExp_ = exn
+  (** foreign expression representation *)
+  type nonrec fgnExp = exn
 
   (* foreign expression representation *)
-  exception UnexpectedFgnExp of fgnExp_
+  exception UnexpectedFgnExp of fgnExp
 
-  (* raised by a constraint solver
-					   if passed an incorrect arg *)
-  type nonrec fgnCnstr_ = exn
+  (** raised by a constraint solver
+ 					   if passed an incorrect arg *)
+  (** foreign constraint representation *)
+  type nonrec fgnCnstr = exn
 
   (* foreign constraint representation *)
-  exception UnexpectedFgnCnstr of fgnCnstr_
+  exception UnexpectedFgnCnstr of fgnCnstr
 
-  (* raised by a constraint solver
-                                           if passed an incorrect arg *)
-  (* Contexts *)
-  type 'a ctx_ = Null | Decl of 'a ctx_ * 'a
+  (** raised by a constraint solver
+                                            if passed an incorrect arg *)
+  (** Contexts *)
+  type 'a ctx = Null | Decl of 'a ctx * 'a
 
-  val null_ : 'a ctx_
+  val null_ : 'a ctx
 
   (* Contexts                   *)
   (* G ::= .                    *)
   (*     | G, D                 *)
-  val ctxPop : 'a ctx_ -> 'a ctx_
-  val ctxLookup : 'a ctx_ * int -> 'a
-  val ctxLength : 'a ctx_ -> int
+  val ctxPop : 'a ctx -> 'a ctx
+  val ctxLookup : 'a ctx * int -> 'a
+  val ctxLength : 'a ctx -> int
 
-  type depend_ = No | Maybe | Meta
+  (** Dependency information     *)
+  (** P ::= No                   *)
+  (**     | Maybe                *)
+  (**     | Meta                 *)
+  type depend = No | Maybe | Meta [@@deriving eq, ord, show]
 
-  (* Dependency information     *)
-  (* P ::= No                   *)
-  (*     | Maybe                *)
-  (*     | Meta                 *)
-  (* expressions *)
-  type uni_ = Kind | Type
+  (** expressions *)
+  (** Universes:                 *)
+  (** L ::= Kind                 *)
+  (**     | Type                 *)
+  type uni = Kind | Type [@@deriving eq, ord, show]
+  (** Expressions:               *)
+  (** U ::= L                    *)
+  (**     | Pi (D, P). V         *)
+  (**     | H @ S                *)
+  (**     | U @ S                *)
+  (**     | lam D. U             *)
+  (**     | X<I> : G|-V, Cnstr   *)
+  (**     | U[s]                 *)
+  (**     | A<I>                 *)
+  (**     | (foreign expression) *)
+  (**     | n (linear, 
+                                               fully applied variable
+                                               used in indexing       *)
+  (** Head:                      *)
+  (** H ::= k                    *)
+  (**     | c                    *)
+  (**     | #k(b)                *)
+  (**     | c#                   *)
+  (**     | d (strict)           *)
+  (**     | d (non strict)       *)
+  (**     | F[s]                 *)
+  (**     | (foreign constant)   *)
+  (** Spines:                    *)
+  (** S ::= Nil                  *)
+  (**     | U ; S                *)
+  (**     | S[s]                 *)
+  (** Explicit substitutions:    *)
+  (** s ::= ^n                   *)
+  (**     | Ft.s                 *)
+  (** Fronts:                    *)
+  (** Ft ::= k                   *)
+  (**     | U                    *)
+  (**     | U                    *)
+  (**     | _x                   *)
+  (**     | _                    *)
+  (** Declarations:              *)
+  (** D ::= x:V                  *)
+  (**     | v:l[s]               *)
+  (**     | v[^-d]               *)
+  (** Blocks:                    *)
+  (** b ::= v                    *)
+  (**     | L(l[^k],t)           *)
+  (**     | U1, ..., Un          *)
+  (** It would be better to consider having projections count
+     like substitutions, then we could have Inst of Sub here, 
+     which would simplify a lot of things.  
 
-  (* Universes:                 *)
-  (* L ::= Kind                 *)
-  (*     | Type                 *)
-  type exp_ =
-    | Uni of uni_
-    | Pi of (dec_ * depend_) * exp_
-    | Root of head_ * spine_
-    | Redex of exp_ * spine_
-    | Lam of dec_ * exp_
-    | EVar of exp_ option ref * dec_ ctx_ * exp_ * cnstr_ ref list ref
-    | EClo of exp_ * sub_
-    | AVar of exp_ option ref
-    | FgnExp of csid * fgnExp_
+     I suggest however to wait until the next big overhaul 
+     of the system -- cs *)
+  (**  | BClo of Block * Sub                      | b[s]                  *)
+  (** constraints *)
+  (** Constraint:                *)
+  (** Cnstr ::= solved           *)
+  (**         | G|-(U1 == U2)    *)
+  (**         | (foreign)        *)
+  (** Status of a constant:      *)
+  (**   inert                    *)
+  (**   acts as constraint       *)
+  (**   is converted to foreign  *)
+  (** Result of foreign unify    *)
+  (** succeed with a list of residual operations *)
+  (** perform the assignment G |- X = U [ss] *)
+  (** delay cnstr, associating it with all the rigid EVars in U  *)
+  (** Global signature *)
+  (** Constant declaration       *)
+  (** c : A : type               *)
+  (** Ancestor info for d or a   *)
+  (** d = M : A : type           *)
+  (** %block l = (l1 | ... | ln) *)
+  (** sc: A : type               *)
+  (** Ancestor of d or a         *)
+  (** head(expand(d)), height, head(expand[height](d)) *)
+  (** NONE means expands to {x:A}B *)
+  type exp =
+    | Uni of uni
+    | Pi of (dec * depend) * exp
+    | Root of head * spine
+    | Redex of exp * spine
+    | Lam of dec * exp
+    | EVar of exp option ref * dec ctx * exp * cnstr_ ref list ref
+    | EClo of exp * sub
+    | AVar of exp option ref
+    | FgnExp of csid * fgnExp
     | NVar of int
 
-  and head_ =
+  and head =
     | BVar of int
     | Const of cid
-    | Proj of block_ * int
+    | Proj of block * int
     | Skonst of cid
     | Def of cid
     | NSDef of cid
-    | FVar of string * exp_ * sub_
-    | FgnConst of csid * conDec_
+    | FVar of string * exp * sub
+    | FgnConst of csid * conDec
 
-  and spine_ = Nil | App of exp_ * spine_ | SClo of spine_ * sub_
-  and sub_ = Shift of int | Dot of front_ * sub_
+  and spine = Nil | App of exp * spine | SClo of spine * sub
+  and sub = Shift of int | Dot of front * sub
 
-  and front_ =
+  and front =
     | Idx of int
-    | Exp of exp_
-    | Axp of exp_
-    | Block of block_
+    | Exp of exp
+    | Axp of exp
+    | Block of block
     | Undef
 
-  and dec_ =
-    | Dec of string option * exp_
-    | BDec of string option * (cid * sub_)
+  and dec =
+    | Dec of string option * exp
+    | BDec of string option * (cid * sub)
     | ADec of string option * int
     | NDec of string option
 
-  and block_ =
+  and block =
     | Bidx of int
-    | LVar of block_ option ref * sub_ * (cid * sub_)
-    | Inst of exp_ list
+    | LVar of block option ref * sub * (cid * sub)
+    | Inst of exp list
 
   and cnstr_ =
     | Solved
-    | Eqn of dec_ ctx_ * exp_ * exp_
-    | FgnCnstr of csid * fgnCnstr_
+    | Eqn of dec ctx * exp * exp
+    | FgnCnstr of csid * fgnCnstr
 
-  and status_ =
+  and status =
     | Normal
-    | Constraint of csid * (dec_ ctx_ * spine_ * int -> exp_ option)
-    | Foreign of csid * (spine_ -> exp_)
+    | Constraint of csid * (dec ctx * spine * int -> exp option)
+    | Foreign of csid * (spine -> exp)
 
-  and fgnUnify_ = Succeed of fgnUnifyResidual_ list | Fail
+  and fgnUnify = Succeed of fgnUnifyResidual list | Fail
 
-  and fgnUnifyResidual_ =
-    | Assign of dec_ ctx_ * exp_ * exp_ * sub_
-    | Delay of exp_ * cnstr_ ref
+  and fgnUnifyResidual =
+    | Assign of dec ctx * exp * exp * sub
+    | Delay of exp * cnstr_ ref
 
-  and conDec_ =
+  and conDec =
     | ConDec of
         string
         * mid option
         * int
-        * status_
-        * exp_
-        * uni_ (* a : K : kind  or           *)
-    | ConDef of string * mid option * int * exp_ * exp_ * uni_ * ancestor_
+        * status
+        * exp
+        * uni (* a : K : kind  or           *)
+    | ConDef of string * mid option * int * exp * exp * uni * ancestor
     (* d = M : A : type           *)
     (* a = A : K : kind  or       *)
     | AbbrevDef of
         string
         * mid option
         * int
-        * exp_
-        * exp_
-        * uni_ (* a = A : K : kind  or       *)
+        * exp
+        * exp
+        * uni (* a = A : K : kind  or       *)
     | BlockDec of
         string
         * mid option
-        * dec_ ctx_
-        * dec_ list (* %block l : SOME G1 PI G2   *)
+        * dec ctx
+        * dec list (* %block l : SOME G1 PI G2   *)
     | BlockDef of string * mid option * cid list
     | SkoDec of
-        string * mid option * int * exp_ * uni_ (* sa: K : kind  or           *)
+        string * mid option * int * exp * uni (* sa: K : kind  or           *)
 
-  and ancestor_ = Anc of cid option * int * cid option
+  and ancestor = Anc of cid option * int * cid option
 
-  (* Expressions:               *)
-  (* U ::= L                    *)
-  (*     | Pi (D, P). V         *)
-  (*     | H @ S                *)
-  (*     | U @ S                *)
-  (*     | lam D. U             *)
-  (*     | X<I> : G|-V, Cnstr   *)
-  (*     | U[s]                 *)
-  (*     | A<I>                 *)
-  (*     | (foreign expression) *)
-  (*     | n (linear, 
-                                               fully applied variable
-                                               used in indexing       *)
-  (* Head:                      *)
-  (* H ::= k                    *)
-  (*     | c                    *)
-  (*     | #k(b)                *)
-  (*     | c#                   *)
-  (*     | d (strict)           *)
-  (*     | d (non strict)       *)
-  (*     | F[s]                 *)
-  (*     | (foreign constant)   *)
-  (* Spines:                    *)
-  (* S ::= Nil                  *)
-  (*     | U ; S                *)
-  (*     | S[s]                 *)
-  (* Explicit substitutions:    *)
-  (* s ::= ^n                   *)
-  (*     | Ft.s                 *)
-  (* Fronts:                    *)
-  (* Ft ::= k                   *)
-  (*     | U                    *)
-  (*     | U                    *)
-  (*     | _x                   *)
-  (*     | _                    *)
-  (* Declarations:              *)
-  (* D ::= x:V                  *)
-  (*     | v:l[s]               *)
-  (*     | v[^-d]               *)
-  (* Blocks:                    *)
-  (* b ::= v                    *)
-  (*     | L(l[^k],t)           *)
-  (*     | U1, ..., Un          *)
-  (* It would be better to consider having projections count
-     like substitutions, then we could have Inst of Sub here, 
-     which would simplify a lot of things.  
+  (** Structure declaration      *)
+  type strDec = StrDec of string * mid option [@@deriving eq, ord, show]
 
-     I suggest however to wait until the next big overhaul 
-     of the system -- cs *)
-  (*  | BClo of Block * Sub                      | b[s]                  *)
-  (* constraints *)
-  (* Constraint:                *)
-  (* Cnstr ::= solved           *)
-  (*         | G|-(U1 == U2)    *)
-  (*         | (foreign)        *)
-  (* Status of a constant:      *)
-  (*   inert                    *)
-  (*   acts as constraint       *)
-  (*   is converted to foreign  *)
-  (* Result of foreign unify    *)
-  (* succeed with a list of residual operations *)
-  (* perform the assignment G |- X = U [ss] *)
-  (* delay cnstr, associating it with all the rigid EVars in U  *)
-  (* Global signature *)
-  (* Constant declaration       *)
-  (* c : A : type               *)
-  (* Ancestor info for d or a   *)
-  (* d = M : A : type           *)
-  (* %block l = (l1 | ... | ln) *)
-  (* sc: A : type               *)
-  (* Ancestor of d or a         *)
-  (* head(expand(d)), height, head(expand[height](d)) *)
-  (* NONE means expands to {x:A}B *)
-  type strDec_ = StrDec of string * mid option
+  (** Form of constant declaration *)
+  (** from constraint domain *)
+  (** ordinary declaration *)
+  (** %clause declaration *)
+  type conDecForm = FromCS | Ordinary | Clause [@@deriving eq, ord, show]
 
-  (* Structure declaration      *)
-  (* Form of constant declaration *)
-  type conDecForm_ = FromCS | Ordinary | Clause
+  (** Type abbreviations *)
+  (** G = . | G,D                *)
+  type nonrec dctx = dec ctx
 
-  (* from constraint domain *)
-  (* ordinary declaration *)
-  (* %clause declaration *)
-  (* Type abbreviations *)
-  type nonrec dctx = dec_ ctx_
+  (** Us = U[s]                  *)
+  type nonrec eclo = exp * sub
 
-  (* G = . | G,D                *)
-  type nonrec eclo = exp_ * sub_
+  (** {m Bs = B_s m}                  *)
+  type nonrec bclo = block * sub
 
-  (* Us = U[s]                  *)
-  type nonrec bclo = block_ * sub_
-
-  (* Bs = B[s]                  *)
+  (** constraints *)
   type nonrec cnstr = cnstr_ ref
 
   exception Error of string
@@ -241,30 +243,30 @@ module type INTSYN = sig
   (* standard operations on foreign expressions *)
   module FgnExpStd : sig
     (* convert to internal syntax *)
-    module ToInternal : FGN_OPN with type arg = unit and type result = exp_
+    module ToInternal : FGN_OPN with type arg = unit and type result = exp
 
     (* apply function to subterms *)
-    module Map : FGN_OPN with type arg = exp_ -> exp_ and type result = exp_
+    module Map : FGN_OPN with type arg = exp -> exp and type result = exp
 
     (* apply function to subterms, for effect *)
-    module App : FGN_OPN with type arg = exp_ -> unit and type result = unit
+    module App : FGN_OPN with type arg = exp -> unit and type result = unit
 
     (* test for equality *)
-    module EqualTo : FGN_OPN with type arg = exp_ and type result = bool
+    module EqualTo : FGN_OPN with type arg = exp and type result = bool
 
     (* unify with another term *)
     module UnifyWith :
-      FGN_OPN with type arg = dec_ ctx_ * exp_ and type result = fgnUnify_
+      FGN_OPN with type arg = dec ctx * exp and type result = fgnUnify
 
     (* fold a function over the subterms *)
-    val fold : csid * fgnExp_ -> (exp_ * 'a -> 'a) -> 'a -> 'a
+    val fold : csid * fgnExp -> (exp * 'a -> 'a) -> 'a -> 'a
   end
 
   (* standard operations on foreign constraints *)
   module FgnCnstrStd : sig
     (* convert to internal syntax *)
     module ToInternal :
-      FGN_OPN with type arg = unit and type result = (dec_ ctx_ * exp_) list
+      FGN_OPN with type arg = unit and type result = (dec ctx * exp) list
 
     (* awake *)
     module Awake : FGN_OPN with type arg = unit and type result = bool
@@ -273,102 +275,102 @@ module type INTSYN = sig
     module Simplify : FGN_OPN with type arg = unit and type result = bool
   end
 
-  val arrow_ : exp_ * exp_ -> exp_
-  val conDecName : conDec_ -> string
-  val conDecParent : conDec_ -> mid option
-  val conDecImp : conDec_ -> int
-  val conDecStatus : conDec_ -> status_
-  val conDecType : conDec_ -> exp_
-  val conDecBlock : conDec_ -> dctx * dec_ list
-  val conDecUni : conDec_ -> uni_
-  val strDecName : strDec_ -> string
-  val strDecParent : strDec_ -> mid option
+  val arrow_ : exp * exp -> exp
+  val conDecName : conDec -> string
+  val conDecParent : conDec -> mid option
+  val conDecImp : conDec -> int
+  val conDecStatus : conDec -> status
+  val conDecType : conDec -> exp
+  val conDecBlock : conDec -> dctx * dec list
+  val conDecUni : conDec -> uni
+  val strDecName : strDec -> string
+  val strDecParent : strDec -> mid option
   val sgnReset : unit -> unit
   val sgnSize : unit -> cid * mid
-  val sgnAdd : conDec_ -> cid
-  val sgnLookup : cid -> conDec_
+  val sgnAdd : conDec -> cid
+  val sgnLookup : cid -> conDec
   val sgnApp : (cid -> unit) -> unit
-  val sgnStructAdd : strDec_ -> mid
-  val sgnStructLookup : mid -> strDec_
-  val constType : cid -> exp_
+  val sgnStructAdd : strDec -> mid
+  val sgnStructLookup : mid -> strDec
+  val constType : cid -> exp
 
   (* type of c or d             *)
-  val constDef : cid -> exp_
+  val constDef : cid -> exp
 
   (* definition of d            *)
   val constImp : cid -> int
-  val constStatus : cid -> status_
-  val constUni : cid -> uni_
-  val constBlock : cid -> dctx * dec_ list
+  val constStatus : cid -> status
+  val constUni : cid -> uni
+  val constBlock : cid -> dctx * dec list
 
   (* Declaration Contexts *)
-  val ctxDec : dctx * int -> dec_
+  val ctxDec : dctx * int -> dec
 
   (* get variable declaration   *)
-  val blockDec : dctx * block_ * int -> dec_
+  val blockDec : dctx * block * int -> dec
 
   (* Explicit substitutions *)
-  val id : sub_
+  val id : sub
 
   (* id                         *)
-  val shift : sub_
+  val shift : sub
 
   (* ^                          *)
-  val invShift : sub_
+  val invShift : sub
 
   (* ^-1                        *)
-  val bvarSub : int * sub_ -> front_
+  val bvarSub : int * sub -> front
 
   (* k[s]                       *)
-  val frontSub : front_ * sub_ -> front_
+  val frontSub : front * sub -> front
 
   (* H[s]                       *)
-  val decSub : dec_ * sub_ -> dec_
+  val decSub : dec * sub -> dec
 
   (* x:V[s]                     *)
-  val blockSub : block_ * sub_ -> block_
+  val blockSub : block * sub -> block
 
   (* B[s]                       *)
-  val comp : sub_ * sub_ -> sub_
+  val comp : sub * sub -> sub
 
   (* s o s'                     *)
-  val dot1 : sub_ -> sub_
+  val dot1 : sub -> sub
 
   (* 1 . (s o ^)                *)
-  val invDot1 : sub_ -> sub_
+  val invDot1 : sub -> sub
 
   (* (^ o s) o ^-1)             *)
   (* EVar related functions *)
-  val newEVar : dctx * exp_ -> exp_
+  val newEVar : dctx * exp -> exp
 
   (* creates X:G|-V, []         *)
-  val newAVar : unit -> exp_
+  val newAVar : unit -> exp
 
   (* creates A (bare)           *)
-  val newTypeVar : dctx -> exp_
+  val newTypeVar : dctx -> exp
 
   (* creates X:G|-type, []      *)
-  val newLVar : sub_ * (cid * sub_) -> block_
+  val newLVar : sub * (cid * sub) -> block
 
   (* creates B:(l[^k],t)        *)
   (* Definition related functions *)
-  val headOpt : exp_ -> head_ option
-  val ancestor : exp_ -> ancestor_
-  val defAncestor : cid -> ancestor_
+  val headOpt : exp -> head option
+  val ancestor : exp -> ancestor
+  val defAncestor : cid -> ancestor
 
   (* Type related functions *)
   (* Not expanding type definitions *)
-  val targetHeadOpt : exp_ -> head_ option
+  val targetHeadOpt : exp -> head option
 
   (* target type family or NONE *)
-  val targetHead : exp_ -> head_
+  val targetHead : exp -> head
 
   (* target type family         *)
   (* Expanding type definitions *)
-  val targetFamOpt : exp_ -> cid option
+  val targetFamOpt : exp -> cid option
 
   (* target type family or NONE *)
-  val targetFam : exp_ -> cid
+  val targetFam : exp -> cid
 
   (* target type family         *)
   (* Used in Flit *)
@@ -387,20 +389,20 @@ open Fgnopntable
 module MakeIntSyn (IntSyn__0 : sig
   module Global : GLOBAL
 end) : INTSYN = struct
-  type nonrec cid = int
+  (** Constant identifier        *)
+  type cid = int [@@deriving eq, ord, show]
 
-  (* Constant identifier        *)
+  (** Variable name              *)
   type nonrec name = string
 
-  (* Variable name              *)
-  type nonrec mid = int
+  (** Structure identifier       *)
+  type mid = int [@@deriving eq, ord, show]
 
-  (* Structure identifier       *)
-  type nonrec csid = int
+  (** CS module identifier       *)
+  type csid = int [@@deriving eq, ord, show]
 
-  (* CS module identifier       *)
-  (* Contexts *)
-  type 'a ctx_ = Null | Decl of 'a ctx_ * 'a
+  (** Contexts *)
+  type 'a ctx = Null | Decl of 'a ctx * 'a
 
   let null_ = Null
 
@@ -432,233 +434,234 @@ end) : INTSYN = struct
     in
     ctxLength' (g_, 0)
 
-  type nonrec fgnExp_ = exn
+  (** foreign expression representation *)
+  type nonrec fgnExp = exn
 
   (* foreign expression representation *)
-  exception UnexpectedFgnExp of fgnExp_
+  exception UnexpectedFgnExp of fgnExp
 
-  (* raised by a constraint solver
-                                           if passed an incorrect arg *)
-  type nonrec fgnCnstr_ = exn
-
-  (* foreign unification constraint
+  (** raised by a constraint solver
+                                            if passed an incorrect arg *)
+  (** foreign unification constraint
                                            representation *)
-  exception UnexpectedFgnCnstr of fgnCnstr_
+  type nonrec fgnCnstr = exn
 
-  (* raised by a constraint solver
-                                           if passed an incorrect arg *)
-  type depend_ = No | Maybe | Meta
+  exception UnexpectedFgnCnstr of fgnCnstr
 
-  (* Dependency information     *)
-  (* P ::= No                   *)
-  (*     | Maybe                *)
-  (*     | Meta                 *)
-  (* Expressions *)
-  type uni_ = Kind | Type
+  (** raised by a constraint solver
+                                            if passed an incorrect arg *)
+  (** Dependency information     *)
+  (** P ::= No                   *)
+  (**     | Maybe                *)
+  (**     | Meta                 *)
+  type depend = No | Maybe | Meta [@@deriving eq, ord, show]
 
-  (* Universes:                 *)
-  (* L ::= Kind                 *)
-  (*     | Type                 *)
-  type exp_ =
-    | Uni of uni_
-    | Pi of (dec_ * depend_) * exp_
-    | Root of head_ * spine_
-    | Redex of exp_ * spine_
-    | Lam of dec_ * exp_
-    | EVar of exp_ option ref * dec_ ctx_ * exp_ * cnstr_ ref list ref
-    | EClo of exp_ * sub_
-    | AVar of exp_ option ref
-    | FgnExp of csid * fgnExp_
+  (** Expressions *)
+  (** Universes:                 *)
+  (** L ::= Kind                 *)
+  (**     | Type                 *)
+  type uni = Kind | Type [@@deriving eq, ord, show]
+  (** Expressions:               *)
+  (** U ::= L                    *)
+  (**     | bPi (D, P). V         *)
+  (**     | C @ S                *)
+  (**     | U @ S                *)
+  (**     | lam D. U             *)
+  (**     | X<I> : G|-V, Cnstr   *)
+  (**     | U[s]                 *)
+  (**     | A<I>                 *)
+  (**     | n (linear, fully applied) *)
+  (** grafting variable *)
+  (**     | (foreign expression) *)
+  (** Heads:                     *)
+  (** H ::= k                    *)
+  (**     | c                    *)
+  (**     | #k(b)                *)
+  (**     | c#                   *)
+  (**     | d                    *)
+  (**     | d (non strict)       *)
+  (**     | F[s]                 *)
+  (**     | (foreign constant)   *)
+  (** Spines:                    *)
+  (** S ::= Nil                  *)
+  (**     | U ; S                *)
+  (**     | S[s]                 *)
+  (** Explicit substitutions:    *)
+  (** s ::= ^n                   *)
+  (**     | Ft.s                 *)
+  (** Fronts:                    *)
+  (** Ft ::= k                   *)
+  (**     | U                    *)
+  (**     | U (assignable)       *)
+  (**     | _x                   *)
+  (**     | _                    *)
+  (** Declarations:              *)
+  (** D ::= x:V                  *)
+  (**     | v:l[s]               *)
+  (**     | v[^-d]               *)
+  (** Blocks:                    *)
+  (** b ::= v                    *)
+  (**     | L(l[^k],t)           *)
+  (**     | u1, ..., Un          *)
+  (** Constraints *)
+  (** Constraint:                *)
+  (** Cnstr ::= solved           *)
+  (**         | G|-(U1 == U2)    *)
+  (**         | (foreign)        *)
+  (** Status of a constant:      *)
+  (**   inert                    *)
+  (**   acts as constraint       *)
+  (**   is converted to foreign  *)
+  (** Result of foreign unify    *)
+  (** succeed with a list of residual operations *)
+  (** Residual of foreign unify  *)
+  (** perform the assignment G |- X = U [ss] *)
+  (** delay cnstr, associating it with all the rigid EVars in U  *)
+  (** Global signature *)
+  (** Constant declaration       *)
+  (** c : A : type               *)
+  (** Ancestor info for d or a   *)
+  (** d = M : A : type           *)
+  (** %block l = (l1 | ... | ln) *)
+  (** sc: A : type               *)
+  (** Ancestor of d or a         *)
+  (** head(expand(d)), height, head(expand[height](d)) *)
+  (** NONE means expands to {x:A}B *)
+  type exp =
+    | Uni of uni
+    | Pi of (dec * depend) * exp
+    | Root of head * spine
+    | Redex of exp * spine
+    | Lam of dec * exp
+    | EVar of exp option ref * dec ctx * exp * cnstr_ ref list ref
+    | EClo of exp * sub
+    | AVar of exp option ref
+    | FgnExp of csid * fgnExp
     | NVar of int
 
-  and head_ =
+  and head =
     | BVar of int
     | Const of cid
-    | Proj of block_ * int
+    | Proj of block * int
     | Skonst of cid
     | Def of cid
     | NSDef of cid
-    | FVar of name * exp_ * sub_
-    | FgnConst of csid * conDec_
+    | FVar of name * exp * sub
+    | FgnConst of csid * conDec
 
-  and spine_ = Nil | App of exp_ * spine_ | SClo of spine_ * sub_
-  and sub_ = Shift of int | Dot of front_ * sub_
+  and spine = Nil | App of exp * spine | SClo of spine * sub
+  and sub = Shift of int | Dot of front * sub
 
-  and front_ =
+  and front =
     | Idx of int
-    | Exp of exp_
-    | Axp of exp_
-    | Block of block_
+    | Exp of exp
+    | Axp of exp
+    | Block of block
     | Undef
 
-  and dec_ =
-    | Dec of name option * exp_
-    | BDec of name option * (cid * sub_)
+  and dec =
+    | Dec of name option * exp
+    | BDec of name option * (cid * sub)
     | ADec of name option * int
     | NDec of name option
 
-  and block_ =
+  and block =
     | Bidx of int
-    | LVar of block_ option ref * sub_ * (cid * sub_)
-    | Inst of exp_ list
+    | LVar of block option ref * sub * (cid * sub)
+    | Inst of exp list
 
   and cnstr_ =
     | Solved
-    | Eqn of dec_ ctx_ * exp_ * exp_
-    | FgnCnstr of csid * fgnCnstr_
+    | Eqn of dec ctx * exp * exp
+    | FgnCnstr of csid * fgnCnstr
 
-  and status_ =
+  and status =
     | Normal
-    | Constraint of csid * (dec_ ctx_ * spine_ * int -> exp_ option)
-    | Foreign of csid * (spine_ -> exp_)
+    | Constraint of csid * (dec ctx * spine * int -> exp option)
+    | Foreign of csid * (spine -> exp)
 
-  and fgnUnify_ = Succeed of fgnUnifyResidual_ list | Fail
+  and fgnUnify = Succeed of fgnUnifyResidual list | Fail
 
-  and fgnUnifyResidual_ =
-    | Assign of dec_ ctx_ * exp_ * exp_ * sub_
-    | Delay of exp_ * cnstr_ ref
+  and fgnUnifyResidual =
+    | Assign of dec ctx * exp * exp * sub
+    | Delay of exp * cnstr_ ref
 
-  and conDec_ =
+  and conDec =
     | ConDec of
         string
         * mid option
         * int
-        * status_
-        * exp_
-        * uni_ (* a : K : kind  or           *)
-    | ConDef of string * mid option * int * exp_ * exp_ * uni_ * ancestor_
+        * status
+        * exp
+        * uni (* a : K : kind  or           *)
+    | ConDef of string * mid option * int * exp * exp * uni * ancestor
     (* d = M : A : type           *)
     (* a = A : K : kind  or       *)
     | AbbrevDef of
         string
         * mid option
         * int
-        * exp_
-        * exp_
-        * uni_ (* a = A : K : kind  or       *)
+        * exp
+        * exp
+        * uni (* a = A : K : kind  or       *)
     | BlockDec of
         string
         * mid option
-        * dec_ ctx_
-        * dec_ list (* %block l : SOME G1 PI G2   *)
+        * dec ctx
+        * dec list (* %block l : SOME G1 PI G2   *)
     | BlockDef of string * mid option * cid list
     | SkoDec of
-        string * mid option * int * exp_ * uni_ (* sa: K : kind  or           *)
+        string * mid option * int * exp * uni (* sa: K : kind  or           *)
 
-  and ancestor_ = Anc of cid option * int * cid option
+  and ancestor = Anc of cid option * int * cid option
 
-  (* Expressions:               *)
-  (* U ::= L                    *)
-  (*     | bPi (D, P). V         *)
-  (*     | C @ S                *)
-  (*     | U @ S                *)
-  (*     | lam D. U             *)
-  (*     | X<I> : G|-V, Cnstr   *)
-  (*     | U[s]                 *)
-  (*     | A<I>                 *)
-  (*     | n (linear, fully applied) *)
-  (* grafting variable *)
-  (*     | (foreign expression) *)
-  (* Heads:                     *)
-  (* H ::= k                    *)
-  (*     | c                    *)
-  (*     | #k(b)                *)
-  (*     | c#                   *)
-  (*     | d                    *)
-  (*     | d (non strict)       *)
-  (*     | F[s]                 *)
-  (*     | (foreign constant)   *)
-  (* Spines:                    *)
-  (* S ::= Nil                  *)
-  (*     | U ; S                *)
-  (*     | S[s]                 *)
-  (* Explicit substitutions:    *)
-  (* s ::= ^n                   *)
-  (*     | Ft.s                 *)
-  (* Fronts:                    *)
-  (* Ft ::= k                   *)
-  (*     | U                    *)
-  (*     | U (assignable)       *)
-  (*     | _x                   *)
-  (*     | _                    *)
-  (* Declarations:              *)
-  (* D ::= x:V                  *)
-  (*     | v:l[s]               *)
-  (*     | v[^-d]               *)
-  (* Blocks:                    *)
-  (* b ::= v                    *)
-  (*     | L(l[^k],t)           *)
-  (*     | u1, ..., Un          *)
-  (* Constraints *)
-  (* Constraint:                *)
-  (* Cnstr ::= solved           *)
-  (*         | G|-(U1 == U2)    *)
-  (*         | (foreign)        *)
-  (* Status of a constant:      *)
-  (*   inert                    *)
-  (*   acts as constraint       *)
-  (*   is converted to foreign  *)
-  (* Result of foreign unify    *)
-  (* succeed with a list of residual operations *)
-  (* Residual of foreign unify  *)
-  (* perform the assignment G |- X = U [ss] *)
-  (* delay cnstr, associating it with all the rigid EVars in U  *)
-  (* Global signature *)
-  (* Constant declaration       *)
-  (* c : A : type               *)
-  (* Ancestor info for d or a   *)
-  (* d = M : A : type           *)
-  (* %block l = (l1 | ... | ln) *)
-  (* sc: A : type               *)
-  (* Ancestor of d or a         *)
-  (* head(expand(d)), height, head(expand[height](d)) *)
-  (* NONE means expands to {x:A}B *)
-  type strDec_ = StrDec of string * mid option
+  (** Structure declaration      *)
+  type strDec = StrDec of string * mid option [@@deriving eq, ord, show]
 
-  (* Structure declaration      *)
-  (* Form of constant declaration *)
-  type conDecForm_ = FromCS | Ordinary | Clause
+  (** Form of constant declaration *)
+  (** from constraint domain *)
+  (** ordinary declaration *)
+  (** %clause declaration *)
+  type conDecForm = FromCS | Ordinary | Clause [@@deriving eq, ord, show]
 
-  (* from constraint domain *)
-  (* ordinary declaration *)
-  (* %clause declaration *)
-  (* Type abbreviations *)
-  type nonrec dctx = dec_ ctx_
+  (** Type abbreviations *)
+  (** G = . | G,D                *)
+  type nonrec dctx = dec ctx
 
-  (* G = . | G,D                *)
-  type nonrec eclo = exp_ * sub_
+  (** Us = U[s]                  *)
+  type nonrec eclo = exp * sub
 
-  (* Us = U[s]                  *)
-  type nonrec bclo = block_ * sub_
+  (** Bs = B[s]                  *)
+  type nonrec bclo = block * sub
 
-  (* Bs = B[s]                  *)
+  (** constraints *)
   type nonrec cnstr = cnstr_ ref
 
   (*  exception Error of string              raised if out of space      *)
   module FgnExpStd = struct
     module ToInternal = FgnOpnTable (struct
       type nonrec arg = unit
-      type nonrec result = exp_
+      type nonrec result = exp
     end)
 
     module Map = FgnOpnTable (struct
-      type nonrec arg = exp_ -> exp_
-      type nonrec result = exp_
+      type nonrec arg = exp -> exp
+      type nonrec result = exp
     end)
 
     module App = FgnOpnTable (struct
-      type nonrec arg = exp_ -> unit
+      type nonrec arg = exp -> unit
       type nonrec result = unit
     end)
 
     module EqualTo = FgnOpnTable (struct
-      type nonrec arg = exp_
+      type nonrec arg = exp
       type nonrec result = bool
     end)
 
     module UnifyWith = FgnOpnTable (struct
-      type nonrec arg = dec_ ctx_ * exp_
-      type nonrec result = fgnUnify_
+      type nonrec arg = dec ctx * exp
+      type nonrec result = fgnUnify
     end)
 
     let rec fold csfe f b =
@@ -673,7 +676,7 @@ end) : INTSYN = struct
   module FgnCnstrStd = struct
     module ToInternal = FgnOpnTable (struct
       type nonrec arg = unit
-      type nonrec result = (dec_ ctx_ * exp_) list
+      type nonrec result = (dec ctx * exp) list
     end)
 
     module Awake = FgnOpnTable (struct
@@ -765,12 +768,12 @@ end) : INTSYN = struct
   open! struct
     let maxCid = Global.maxCid
     let dummyEntry = ConDec ("", None, 0, Normal, Uni Kind, Kind)
-    let sgnArray = (Array.array (maxCid + 1, dummyEntry) : conDec_ Array.array)
+    let sgnArray = (Array.array (maxCid + 1, dummyEntry) : conDec Array.array)
     let nextCid = ref 0
     let maxMid = Global.maxMid
 
     let sgnStructArray =
-      (Array.array (maxMid + 1, StrDec ("", None)) : strDec_ Array.array)
+      (Array.array (maxMid + 1, StrDec ("", None)) : strDec Array.array)
 
     let nextMid = ref 0
   end

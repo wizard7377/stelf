@@ -1,5 +1,6 @@
 (* # 1 "src/table/sparse_array.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* Sparse 1-Dimensional Arrays *)
 (* Author: Roberto Virga *)
@@ -28,7 +29,6 @@ end
 (* signature SPARSE_ARRAY *)
 
 (* # 1 "src/table/sparse_array.fun.ml" *)
-open! Basis
 open Table_
 
 (* Sparse 1-Dimensional Arrays *)
@@ -38,7 +38,7 @@ module SparseArray (SparseArray__0 : sig
 end) : SPARSE_ARRAY = struct
   open SparseArray__0
 
-  type nonrec 'a array = { default : 'a; table : 'a IntTable.table_ }
+  type nonrec 'a array = { default : 'a; table : 'a IntTable.table }
 
   type nonrec 'a __0 = {
     src : 'a Vector.vector;

@@ -9,13 +9,13 @@ module type OPSEM = sig
   (*! structure Tomega : TOMEGA !*)
   exception NoMatch
 
-  val evalPrg : Tomega.prg_ -> Tomega.prg_
-  val topLevel : Tomega.prg_ -> unit
+  val evalPrg : Tomega.prg -> Tomega.prg
+  val topLevel : Tomega.prg -> unit
 
   val createVarSub :
-    Tomega.dec_ IntSyn.ctx_ * Tomega.dec_ IntSyn.ctx_ -> Tomega.sub_
+    Tomega.dec IntSyn.ctx * Tomega.dec IntSyn.ctx -> Tomega.sub
 
-  val matchSub : Tomega.dec_ IntSyn.ctx_ * Tomega.sub_ * Tomega.sub_ -> unit
+  val matchSub : Tomega.dec IntSyn.ctx * Tomega.sub * Tomega.sub -> unit
 end
 
 (* # 1 "src/tomega/opsem.fun.ml" *)

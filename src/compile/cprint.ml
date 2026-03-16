@@ -8,11 +8,11 @@ module type CPRINT = sig
 
   (*! structure IntSyn : INTSYN !*)
   (*! structure CompSyn : COMPSYN !*)
-  val goalToString : string -> IntSyn.dctx * CompSyn.goal_ -> string
-  val clauseToString : string -> IntSyn.dctx * CompSyn.resGoal_ -> string
+  val goalToString : string -> IntSyn.dctx * CompSyn.goal -> string
+  val clauseToString : string -> IntSyn.dctx * CompSyn.resGoal -> string
   val sProgToString : unit -> string
-  val dProgToString : CompSyn.dProg_ -> string
-  val subgoalsToString : string -> IntSyn.dctx * CompSyn.conjunction_ -> string
+  val dProgToString : CompSyn.dProg -> string
+  val subgoalsToString : string -> IntSyn.dctx * CompSyn.conjunction -> string
 end
 (* signature CPRINT *)
 

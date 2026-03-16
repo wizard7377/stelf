@@ -6,31 +6,31 @@ open! Basis
 (* Modified: Jeff Polakow *)
 module type COMPSYN = sig
   (*! structure IntSyn : INTSYN !*)
-  type opt_ = No | LinearHeads | Indexing
+  type opt = No | LinearHeads | Indexing [@@deriving eq, ord, show]
 
-  val optimize : opt_ ref
+  val optimize : opt ref
 
-  type goal_ =
-    | Atom of IntSyn.exp_
+  type goal =
+    | Atom of IntSyn.exp
     | Impl of
-        resGoal_
-        * IntSyn.exp_
-        * IntSyn.head_
-        * goal_ (*     | (r,A,a) => g         *)
-    | All of IntSyn.dec_ * goal_
+        resGoal
+        * IntSyn.exp
+        * IntSyn.head
+        * goal (*     | (r,A,a) => g         *)
+    | All of IntSyn.dec * goal
 
-  and resGoal_ =
-    | Eq of IntSyn.exp_
-    | Assign of IntSyn.exp_ * auxGoal_
-    | And of resGoal_ * IntSyn.exp_ * goal_ (*     | r & (A,g)            *)
-    | In of resGoal_ * IntSyn.exp_ * goal_ (*     | r virt& (A,g)        *)
-    | Exists of IntSyn.dec_ * resGoal_
-    | Axists of IntSyn.dec_ * resGoal_
+  and resGoal =
+    | Eq of IntSyn.exp
+    | Assign of IntSyn.exp * auxGoal
+    | And of resGoal * IntSyn.exp * goal (*     | r & (A,g)            *)
+    | In of resGoal * IntSyn.exp * goal (*     | r virt& (A,g)        *)
+    | Exists of IntSyn.dec * resGoal
+    | Axists of IntSyn.dec * resGoal
 
-  and auxGoal_ =
+  and auxGoal =
     | Trivial
     | UnifyEq of
-        IntSyn.dctx * IntSyn.exp_ * IntSyn.exp_ * auxGoal_ (* call unify *)
+        IntSyn.dctx * IntSyn.exp * IntSyn.exp * auxGoal (* call unify *)
 
   (* Goals                      *)
   (* g ::= p                    *)
@@ -45,37 +45,37 @@ module type COMPSYN = sig
   (*     | exists x:_. r        *)
   (* trivially done *)
   (* Static programs -- compiled version for substitution trees *)
-  type conjunction_ = True | Conjunct of goal_ * IntSyn.exp_ * conjunction_
+  type conjunction = True | Conjunct of goal * IntSyn.exp * conjunction
 
-  type compHead_ =
-    | Head of IntSyn.exp_ * IntSyn.dec_ IntSyn.ctx_ * auxGoal_ * IntSyn.cid
+  type compHead =
+    | Head of IntSyn.exp * IntSyn.dec IntSyn.ctx * auxGoal * IntSyn.cid
 
   (* pskeleton instead of proof term *)
-  type flatterm_ = Pc of int | Dc of int | Csolver of IntSyn.exp_
-  type nonrec pskeleton = flatterm_ list
+  type flatterm = Pc of int | Dc of int | Csolver of IntSyn.exp
+  type nonrec pskeleton = flatterm list
 
   (* The dynamic clause pool --- compiled version of the context *)
   (* type dpool = (ResGoal * IntSyn.Sub * IntSyn.cid) option IntSyn.Ctx *)
   (* Compiled Declarations *)
   (* added Thu Jun 13 13:41:32 EDT 2002 -cs *)
-  type comDec_ =
+  type comDec =
     | Parameter
-    | Dec of resGoal_ * IntSyn.sub_ * IntSyn.head_
-    | BDec of (resGoal_ * IntSyn.sub_ * IntSyn.head_) list
+    | Dec of resGoal * IntSyn.sub * IntSyn.head
+    | BDec of (resGoal * IntSyn.sub * IntSyn.head) list
     | PDec
 
   (* Dynamic programs: context with synchronous clause pool *)
-  type dProg_ = DProg of IntSyn.dctx * comDec_ IntSyn.ctx_
+  type dProg = DProg of IntSyn.dctx * comDec IntSyn.ctx
 
   (* Programs --- compiled version of the signature (no direct head access) *)
-  type conDec_ = SClause of resGoal_ | Void
+  type conDec = SClause of resGoal | Void
 
   (* Compiled constant declaration *)
   (* c : A  -- static clause (residual goal) *)
   (* Other declarations are ignored  *)
   (* Install Programs (without indexing) *)
-  val sProgInstall : IntSyn.cid * conDec_ -> unit
-  val sProgLookup : IntSyn.cid -> conDec_
+  val sProgInstall : IntSyn.cid * conDec -> unit
+  val sProgLookup : IntSyn.cid -> conDec
   val sProgReset : unit -> unit
 
   (* Deterministic flag *)
@@ -84,8 +84,8 @@ module type COMPSYN = sig
   val detTableReset : unit -> unit
 
   (* Explicit Substitutions *)
-  val goalSub : goal_ * IntSyn.sub_ -> goal_
-  val resGoalSub : resGoal_ * IntSyn.sub_ -> resGoal_
+  val goalSub : goal * IntSyn.sub -> goal
+  val resGoalSub : resGoal * IntSyn.sub -> resGoal
   val pskeletonToString : pskeleton -> string
 end
 (* signature COMPSYN *)
@@ -110,31 +110,31 @@ end) : COMPSYN = struct
   open CompSyn__0
 
   (*! structure IntSyn = IntSyn' !*)
-  type opt_ = No | LinearHeads | Indexing
+  type opt = No | LinearHeads | Indexing [@@deriving eq, ord, show]
 
   let optimize = ref LinearHeads
 
-  type goal_ =
-    | Atom of IntSyn.exp_
+  type goal =
+    | Atom of IntSyn.exp
     | Impl of
-        resGoal_
-        * IntSyn.exp_
-        * IntSyn.head_
-        * goal_ (*     | (r,A,a) => g         *)
-    | All of IntSyn.dec_ * goal_
+        resGoal
+        * IntSyn.exp
+        * IntSyn.head
+        * goal (*     | (r,A,a) => g         *)
+    | All of IntSyn.dec * goal
 
-  and resGoal_ =
-    | Eq of IntSyn.exp_
-    | Assign of IntSyn.exp_ * auxGoal_
-    | And of resGoal_ * IntSyn.exp_ * goal_ (*     | r & (A,g)            *)
-    | In of resGoal_ * IntSyn.exp_ * goal_ (*     | r && (A,g)           *)
-    | Exists of IntSyn.dec_ * resGoal_
-    | Axists of IntSyn.dec_ * resGoal_
+  and resGoal =
+    | Eq of IntSyn.exp
+    | Assign of IntSyn.exp * auxGoal
+    | And of resGoal * IntSyn.exp * goal (*     | r & (A,g)            *)
+    | In of resGoal * IntSyn.exp * goal (*     | r && (A,g)           *)
+    | Exists of IntSyn.dec * resGoal
+    | Axists of IntSyn.dec * resGoal
 
-  and auxGoal_ =
+  and auxGoal =
     | Trivial
     | UnifyEq of
-        IntSyn.dctx * IntSyn.exp_ * IntSyn.exp_ * auxGoal_ (* call unify *)
+        IntSyn.dctx * IntSyn.exp * IntSyn.exp * auxGoal (* call unify *)
 
   (* Goals                      *)
   (* g ::= p                    *)
@@ -152,18 +152,14 @@ end) : COMPSYN = struct
                                            they do not have a type -bp *)
   (* trivially done *)
   (* Static programs -- compiled version for substitution trees *)
-  type conjunction_ = True | Conjunct of goal_ * IntSyn.exp_ * conjunction_
+  type conjunction = True | Conjunct of goal * IntSyn.exp * conjunction
 
-  type compHead_ =
-    | Head of IntSyn.exp_ * IntSyn.dec_ IntSyn.ctx_ * auxGoal_ * IntSyn.cid
+  type compHead =
+    | Head of IntSyn.exp * IntSyn.dec IntSyn.ctx * auxGoal * IntSyn.cid
 
   (* proof skeletons instead of proof term *)
-  type flatterm_ =
-    | Pc of IntSyn.cid
-    | Dc of IntSyn.cid
-    | Csolver of IntSyn.exp_
-
-  type nonrec pskeleton = flatterm_ list
+  type flatterm = Pc of IntSyn.cid | Dc of IntSyn.cid | Csolver of IntSyn.exp
+  type nonrec pskeleton = flatterm list
 
   (* Representation invariants for compiled syntax:
      Judgments:
@@ -215,33 +211,33 @@ end) : COMPSYN = struct
 
   *)
   (* Static programs --- compiled version of the signature (no indexing) *)
-  type conDec_ = SClause of resGoal_ | Void
+  type conDec = SClause of resGoal | Void
 
   (* Compiled constant declaration           *)
   (* c : A  -- static clause (residual goal) *)
   (* Other declarations are ignored          *)
   (* Static programs --- compiled version of the signature (indexed by first argument) *)
-  type conDecDirect_ = HeadGoals of compHead_ * conjunction_ | Null
+  type conDecDirect = HeadGoals of compHead * conjunction | Null
 
   (* Compiled constant declaration     *)
   (* static clause with direct head access   *)
   (* Other declarations are ignored          *)
   (* Compiled Declarations *)
   (* added Thu Jun 13 13:41:32 EDT 2002 -cs *)
-  type comDec_ =
+  type comDec =
     | Parameter
-    | Dec of resGoal_ * IntSyn.sub_ * IntSyn.head_
-    | BDec of (resGoal_ * IntSyn.sub_ * IntSyn.head_) list
+    | Dec of resGoal * IntSyn.sub * IntSyn.head
+    | BDec of (resGoal * IntSyn.sub * IntSyn.head) list
     | PDec
 
   (* The dynamic clause pool --- compiled version of the context *)
   (* Dynamic programs: context with synchronous clause pool *)
-  type dProg_ = DProg of IntSyn.dctx * comDec_ IntSyn.ctx_
+  type dProg = DProg of IntSyn.dctx * comDec IntSyn.ctx
 
   open! struct
     let maxCid = Global.maxCid
-    let sProgArray = (Array.array (maxCid + 1, Void) : conDec_ Array.array)
-    let detTable : bool Table.table_ = Table.new_ 32
+    let sProgArray = (Array.array (maxCid + 1, Void) : conDec Array.array)
+    let detTable : bool Table.table = Table.new_ 32
   end
 
   (* program array indexed by clause names (no direct head access) *)

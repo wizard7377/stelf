@@ -11,28 +11,27 @@ module type TABLEPARAM = sig
   exception Error of string
 
   (* Residual equation *)
-  type resEqn_ =
+  type resEqn =
     | Trivial
-    | Unify of
-        IntSyn.dctx * IntSyn.exp_ * IntSyn.exp_ * resEqn_ (* call unify *)
+    | Unify of IntSyn.dctx * IntSyn.exp * IntSyn.exp * resEqn (* call unify *)
 
   (* trivially done *)
   type nonrec __0 = {
-    solutions : ((IntSyn.dctx * IntSyn.sub_) * CompSyn.pskeleton) list;
+    solutions : ((IntSyn.dctx * IntSyn.sub) * CompSyn.pskeleton) list;
     lookup : int;
   }
 
   type nonrec answer = __0 ref
-  type status_ = Complete | Incomplete
+  type status = Complete | Incomplete
 
   val globalTable :
     (IntSyn.dctx
     * IntSyn.dctx
     * IntSyn.dctx
-    * IntSyn.exp_
-    * resEqn_
+    * IntSyn.exp
+    * resEqn
     * answer
-    * status_)
+    * status)
     list
     ref
 
@@ -41,32 +40,32 @@ module type TABLEPARAM = sig
 
   (* destructively updates answers *)
   val addSolution :
-    ((IntSyn.dctx * IntSyn.sub_) * CompSyn.pskeleton) * answer -> unit
+    ((IntSyn.dctx * IntSyn.sub) * CompSyn.pskeleton) * answer -> unit
 
   val updateAnswLookup : int * answer -> unit
 
   val solutions :
-    answer -> ((IntSyn.dctx * IntSyn.sub_) * CompSyn.pskeleton) list
+    answer -> ((IntSyn.dctx * IntSyn.sub) * CompSyn.pskeleton) list
 
   val lookup : answer -> int
   val noAnswers : answer -> bool
 
   (* ---------------------------------------------------------------------- *)
-  type nonrec asub = IntSyn.exp_ RBSet.ordSet
+  type nonrec asub = IntSyn.exp RBSet.ordSet
 
   val aid : unit -> asub
 
   type callCheckResult =
     | NewEntry of answer
-    | RepeatedEntry of (IntSyn.sub_ * IntSyn.sub_) * answer * status_
-    | DivergingEntry of IntSyn.sub_ * answer
+    | RepeatedEntry of (IntSyn.sub * IntSyn.sub) * answer * status
+    | DivergingEntry of IntSyn.sub * answer
 
   type answState = New_ | Repeated_
 
   (* ---------------------------------------------------------------------- *)
-  type strategy_ = Variant | Subsumption
+  type strategy = Variant | Subsumption
 
-  val strategy : strategy_ ref
+  val strategy : strategy ref
   val stageCtr : int ref
   val divHeuristic : bool ref
   val termDepth : int option ref
@@ -89,31 +88,30 @@ end) : TABLEPARAM = struct
   (*! structure RBSet = RBSet !*)
   exception Error of string
 
-  type strategy_ = Variant | Subsumption
+  type strategy = Variant | Subsumption
 
-  type resEqn_ =
+  type resEqn =
     | Trivial
-    | Unify of
-        IntSyn.dctx * IntSyn.exp_ * IntSyn.exp_ * resEqn_ (* call unify *)
+    | Unify of IntSyn.dctx * IntSyn.exp * IntSyn.exp * resEqn (* call unify *)
 
   (* trivially done *)
   type nonrec __0 = {
-    solutions : ((IntSyn.dctx * IntSyn.sub_) * CompSyn.pskeleton) list;
+    solutions : ((IntSyn.dctx * IntSyn.sub) * CompSyn.pskeleton) list;
     lookup : int;
   }
 
   type nonrec answer = __0 ref
-  type status_ = Complete | Incomplete
+  type status = Complete | Incomplete
 
   (* globalTable stores the queries whose solution we want to keep *)
   let globalTable :
       (IntSyn.dctx
       * IntSyn.dctx
       * IntSyn.dctx
-      * IntSyn.exp_
-      * resEqn_
+      * IntSyn.exp
+      * resEqn
       * answer
-      * status_)
+      * status)
       list
       ref =
     ref []
@@ -139,14 +137,14 @@ end) : TABLEPARAM = struct
     end
   (*solutions(answ) *)
 
-  type nonrec asub = IntSyn.exp_ RBSet.ordSet
+  type nonrec asub = IntSyn.exp RBSet.ordSet
 
   let aid : unit -> asub = RBSet.new_
 
   type callCheckResult =
     | NewEntry of answer
-    | RepeatedEntry of (IntSyn.sub_ * IntSyn.sub_) * answer * status_
-    | DivergingEntry of IntSyn.sub_ * answer
+    | RepeatedEntry of (IntSyn.sub * IntSyn.sub) * answer * status
+    | DivergingEntry of IntSyn.sub * answer
 
   type answState = New_ | Repeated_
 

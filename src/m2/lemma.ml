@@ -9,7 +9,7 @@ module type LEMMA = sig
 
   exception Error of string
 
-  val apply : MetaSyn.state_ * IntSyn.cid -> MetaSyn.state_
+  val apply : MetaSyn.state * IntSyn.cid -> MetaSyn.state
 end
 (* signature LEMMA *)
 

@@ -41,7 +41,7 @@ module type TRAVERSE = sig
 
   exception Error of string
 
-  val fromConDec : IntSyn.conDec_ -> Traverser.condec option
+  val fromConDec : IntSyn.conDec -> Traverser.condec option
   val const : string -> Traverser.condec
 end
 (* signature TRAVERSE *)

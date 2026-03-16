@@ -48,8 +48,8 @@ end) : Cs.CS = struct
 
     let rec solveString (g_, s_, k) = Some (stringExp (Int.toString k))
 
-    type concat_ = Concat of atom_ list
-    and atom_ = String of string | Exp of IntSyn.eclo
+    type concat_ = Concat of atom list
+    and atom = String of string | Exp of IntSyn.eclo
 
     exception MyIntsynRep of concat_
 
@@ -115,8 +115,8 @@ end) : Cs.CS = struct
       in
       List.app appAtom al_
 
-    type split_ = Split of string * string
-    type decomp_ = Decomp of string * string list
+    type split = Split of string * string
+    type decomp = Decomp of string * string list
 
     let rec index (str1, str2) =
       let max = String.size str2 - String.size str1 in
@@ -184,9 +184,9 @@ end) : Cs.CS = struct
           sameSub (Dot (Idx (k1 + 1), Shift (k1 + 1)), s2)
       | _ -> false
 
-    type stringUnify_ =
-      | MultAssign of (dec_ ctx_ * exp_ * exp_ * sub_) list
-      | MultDelay of exp_ list * cnstr_ ref
+    type stringUnify =
+      | MultAssign of (dec ctx * exp * exp * sub) list
+      | MultDelay of exp list * cnstr_ ref
       | Failure
 
     let rec toFgnUnify = function

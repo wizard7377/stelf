@@ -7,18 +7,18 @@ open Thmsyn
 module type THMPRINT = sig
   module ThmSyn : THMSYN
 
-  val tDeclToString : ThmSyn.tDecl_ -> string
-  val callpatsToString : ThmSyn.callpats_ -> string
-  val rDeclToString : ThmSyn.rDecl_ -> string
+  val tDeclToString : ThmSyn.tDecl -> string
+  val callpatsToString : ThmSyn.callpats -> string
+  val rDeclToString : ThmSyn.rDecl -> string
 
   (* -bp *)
-  val rOrderToString : ThmSyn.redOrder_ -> string
+  val rOrderToString : ThmSyn.redOrder -> string
 
   (* -bp *)
-  val tabledDeclToString : ThmSyn.tabledDecl_ -> string
+  val tabledDeclToString : ThmSyn.tabledDecl -> string
 
   (* -bp *)
-  val keepTableDeclToString : ThmSyn.keepTableDecl_ -> string
+  val keepTableDeclToString : ThmSyn.keepTableDecl -> string
 end
 
 (* -bp *)

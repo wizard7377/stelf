@@ -12,7 +12,7 @@ module type SOLVE = sig
 
   val solve :
     ExtQuery.define list * ExtQuery.solve * Paths.location ->
-    (IntSyn.conDec_ * Paths.occConDec option) list
+    (IntSyn.conDec * Paths.occConDec option) list
 
   val query :
     (int option * int option * ExtQuery.query) * Paths.location -> unit
@@ -224,7 +224,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
      is raised when M : A is the generalized form of a solution to the
      query A', where imp is the number of implicitly quantified arguments.
   *)
-  exception Solution of IntSyn.exp_
+  exception Solution of IntSyn.exp
   exception SolutionSkel of CompSyn.pskeleton
 
   (* readfile (fileName) = status

@@ -17,7 +17,7 @@ module type MPI = sig
   val solve : unit -> unit
   val lemma : string -> unit
   val reset : unit -> unit
-  val extract : unit -> MetaSyn.sgn_
+  val extract : unit -> MetaSyn.sgn
   val show : unit -> unit
   val undo : unit -> unit
 end
@@ -66,19 +66,19 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    type menuItem_ =
+    type menuItem =
       | Filling of Filling.operator
       | Recursion of Recursion.operator
       | Splitting of Splitting.operator
 
-    let openRing : MetaSyn.state_ Ring.ring ref = ref (Ring.init [])
-    let solvedRing : MetaSyn.state_ Ring.ring ref = ref (Ring.init [])
+    let openRing : MetaSyn.state Ring.ring ref = ref (Ring.init [])
+    let solvedRing : MetaSyn.state Ring.ring ref = ref (Ring.init [])
 
-    let history_ :
-        (MetaSyn.state_ Ring.ring * MetaSyn.state_ Ring.ring) list ref =
+    let history_ : (MetaSyn.state Ring.ring * MetaSyn.state Ring.ring) list ref
+        =
       ref []
 
-    let menu_ : menuItem_ list option ref = ref None
+    let menu_ : menuItem list option ref = ref None
     let rec initOpen () = openRing := Ring.init []
     let rec initSolved () = solvedRing := Ring.init []
     let rec empty () = Ring.empty !openRing

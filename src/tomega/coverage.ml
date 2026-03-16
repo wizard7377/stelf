@@ -10,7 +10,7 @@ module type TOMEGACOVERAGE = sig
   exception Error of string
 
   val coverageCheckPrg :
-    Tomega.worlds_ * Tomega.dec_ IntSyn.ctx_ * Tomega.prg_ -> unit
+    Tomega.worlds * Tomega.dec IntSyn.ctx * Tomega.prg -> unit
 end
 (* Signature TOMEGACOVERAGE *)
 

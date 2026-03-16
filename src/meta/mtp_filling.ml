@@ -17,8 +17,8 @@ module type MTPFILLING = sig
 
   type nonrec operator
 
-  val expand : StateSyn.state_ -> operator
-  val apply : operator -> int * FunSyn.pro_
+  val expand : StateSyn.state -> operator
+  val apply : operator -> int * FunSyn.pro
   val menu : operator -> string
 end
 (* signature MTPFILLING *)
@@ -56,7 +56,7 @@ end) : MTPFILLING = struct
   exception Error of string
   exception TimeOut
 
-  type nonrec operator = unit -> int * FunSyn.pro_
+  type nonrec operator = unit -> int * FunSyn.pro
 
   open! struct
     module S = StateSyn

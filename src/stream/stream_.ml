@@ -3,7 +3,8 @@
 (* # 1 "src/stream/stream_.fun.ml" *)
 
 (* # 1 "src/stream/stream_.sml.ml" *)
-open! Basis
+
+open Basis
 
 (* Stream Library *)
 (* Author: Frank Pfenning *)

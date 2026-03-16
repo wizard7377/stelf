@@ -13,10 +13,10 @@ module type UNIQUESEARCH = sig
 
   exception Error of string
 
-  type nonrec acctype = IntSyn.exp_
+  type nonrec acctype = IntSyn.exp
 
   val searchEx :
-    int * IntSyn.exp_ list * (acctype list -> acctype list) -> acctype list
+    int * IntSyn.exp list * (acctype list -> acctype list) -> acctype list
 end
 (* signature SEARCH *)
 
@@ -77,7 +77,7 @@ end) : UNIQUESEARCH = struct
   (*! structure CompSyn = CompSyn' !*)
   exception Error of string
 
-  type nonrec acctype = IntSyn.exp_
+  type nonrec acctype = IntSyn.exp
 
   open! struct
     module I = IntSyn

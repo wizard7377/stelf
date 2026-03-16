@@ -2,31 +2,32 @@
 open! Basis
 
 (* Flit DAG generator *)
-(* Author: Roberto Virga *)
+
+(** Author: Roberto Virga *)
 module type FLIT = sig
-  (* init (sym_table_file) *)
   val init : string -> unit
+  (** init (sym_table_file) *)
 
-  (* initForText () *)
   val initForText : unit -> unit
+  (** initForText () *)
 
-  (* dump (symbol, dag_file) *)
   val dump : string * string -> int
+  (** dump (symbol, dag_file) *)
 
-  (* dumpText (outputSemant, outputChecker) *)
   val dumpText : string * string -> unit
+  (** dumpText (outputSemant, outputChecker) *)
 
-  (* setFlag () *)
   val setFlag : unit -> unit
+  (** setFlag () *)
 
-  (* setEndTcb () *)
   val setEndTcb : unit -> unit
+  (** setEndTcb () *)
 
-  (* dumpFlagged (dag_file) *)
   val dumpFlagged : string -> unit
+  (** dumpFlagged (dag_file) *)
 
-  (* dumpSynTable (start_sym, end_sym, sym_table_file) *)
   val dumpSymTable : string * string * string -> unit
+  (** dumpSynTable (start_sym, end_sym, sym_table_file) *)
 end
 (* signature FLIT *)
 
@@ -162,13 +163,13 @@ module Flit(Flit__0: sig
         let startSemant : int option ref = ref None;;
         let tuples : int ref = ref 0;;
         let out : BinIO.outstream option ref = ref None;;
-        let symTable : W.word Table.table_ = Table.new_ 32;;
-        let printTable : unit Table.table_ = Table.new_ 32;;
-        let shadowTable : int SHT.table_ = SHT.new_ 32;;
-        let depTable : unit IHT.table_ IHT.table_ = IHT.new_ 32;;
-        let recordTable : unit IHT.table_ = IHT.new_ 32;;
-        let imitatesTable : int IHT.table_ = IHT.new_ 32;;
-        let replaceTable : string IHT.table_ = IHT.new_ 32;;
+        let symTable : W.word Table.table = Table.new_ 32;;
+        let printTable : unit Table.table = Table.new_ 32;;
+        let shadowTable : int SHT.table = SHT.new_ 32;;
+        let depTable : unit IHT.table IHT.table = IHT.new_ 32;;
+        let recordTable : unit IHT.table = IHT.new_ 32;;
+        let imitatesTable : int IHT.table = IHT.new_ 32;;
+        let replaceTable : string IHT.table = IHT.new_ 32;;
         let rec cname cid = I.conDecName (I.sgnLookup cid);;
         let rec clookup name =
           let size = (fun (r, _) -> r) (I.sgnSize ())

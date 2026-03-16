@@ -9,7 +9,7 @@ module type INIT = sig
 
   exception Error of string
 
-  val init : IntSyn.cid list -> MetaSyn.state_ list
+  val init : IntSyn.cid list -> MetaSyn.state list
 end
 (* signature INIT *)
 

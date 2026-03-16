@@ -102,20 +102,20 @@ end) : MTPI = struct
     module S = StateSyn
     module Fmt = Formatter
 
-    type menuItem_ =
+    type menuItem =
       | Filling of MTPFilling.operator
       | Recursion of MTPRecursion.operator
       | Splitting of MTPSplitting.operator
       | Inference of Inference.operator
 
-    let open_ : StateSyn.state_ Ring.ring ref = ref (Ring.init [])
-    let solved_ : StateSyn.state_ Ring.ring ref = ref (Ring.init [])
+    let open_ : StateSyn.state Ring.ring ref = ref (Ring.init [])
+    let solved_ : StateSyn.state Ring.ring ref = ref (Ring.init [])
 
     let history_ :
-        (StateSyn.state_ Ring.ring * StateSyn.state_ Ring.ring) list ref =
+        (StateSyn.state Ring.ring * StateSyn.state Ring.ring) list ref =
       ref []
 
-    let menu_ : menuItem_ list option ref = ref None
+    let menu_ : menuItem list option ref = ref None
     let rec initOpen () = open_ := Ring.init []
     let rec initSolved () = solved_ := Ring.init []
     let rec empty () = Ring.empty !open_

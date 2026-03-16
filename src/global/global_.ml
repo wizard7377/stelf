@@ -1,8 +1,10 @@
 (* # 1 "src/global/global_.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* Global parameters *)
-(* Author: Frank Pfenning *)
+
+(** Author: Frank Pfenning *)
 module type GLOBAL = sig
   val chatter : int ref
   val style : int ref
@@ -23,7 +25,6 @@ end
 (* # 1 "src/global/global_.fun.ml" *)
 
 (* # 1 "src/global/global_.sml.ml" *)
-open! Basis
 
 (* Global parameters *)
 (* Author: Frank Pfenning *)

@@ -1,5 +1,6 @@
 (* # 1 "src/table/queue.sig.ml" *)
-open! Basis
+
+open Basis
 
 (* Queues *)
 (* Author: Frank Pfenning *)
@@ -21,7 +22,6 @@ end
 (* # 1 "src/table/queue.fun.ml" *)
 
 (* # 1 "src/table/queue.sml.ml" *)
-open! Basis
 
 (* Queues *)
 (* Author: Frank Pfenning *)

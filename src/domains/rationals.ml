@@ -1,5 +1,7 @@
 (* # 1 "src/domains/rationals.sig.ml" *)
-open! Basis
+open Basis
+open Int_inf
+open Int_inf.Int_inf_
 open Ordered_field
 open Integers
 
@@ -21,7 +23,6 @@ end
 (* signature RATIONALS *)
 
 (* # 1 "src/domains/rationals.fun.ml" *)
-open! Basis
 
 (* Rationals *)
 (* Author: Roberto Virga *)

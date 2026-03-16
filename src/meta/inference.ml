@@ -17,8 +17,8 @@ module type INFERENCE = sig
 
   type nonrec operator
 
-  val expand : StateSyn.state_ -> operator
-  val apply : operator -> StateSyn.state_
+  val expand : StateSyn.state -> operator
+  val apply : operator -> StateSyn.state
   val menu : operator -> string
 end
 (* signature Inference *)
@@ -62,7 +62,7 @@ end) : INFERENCE = struct
 
   exception Error of string
 
-  type nonrec operator = unit -> StateSyn.state_
+  type nonrec operator = unit -> StateSyn.state
 
   open! struct
     module S = StateSyn

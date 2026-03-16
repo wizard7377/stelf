@@ -3,9 +3,10 @@
 (* # 1 "src/domains/domains_.fun.ml" *)
 
 (* # 1 "src/domains/domains_.sml.ml" *)
-open! Basis
-open Integers_mod
+open Basis
 open Int_inf
+open Int_inf.Int_inf_
+open Integers_mod
 module Integers_ = Integers.Integers (Int_inf_.IntInf)
 module Rationals_ = Rationals.Rationals (Integers_)
 

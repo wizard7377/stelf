@@ -1,5 +1,8 @@
 (* # 1 "src/domains/integers.sig.ml" *)
-open! Basis
+
+open Basis
+open Int_inf
+open Int_inf.Int_inf_
 
 (* Integers *)
 (* Author: Roberto Virga *)
@@ -13,7 +16,6 @@ end
 (* signature INTEGERS *)
 
 (* # 1 "src/domains/integers.fun.ml" *)
-open! Basis
 
 (* Rationals *)
 (* Author: Roberto Virga *)

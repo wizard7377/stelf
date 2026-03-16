@@ -13,9 +13,9 @@ module type PTRECON = sig
 
   val solve :
     CompSyn.pskeleton
-    * (CompSyn.goal_ * IntSyn.sub_)
-    * CompSyn.dProg_
-    * (CompSyn.pskeleton * IntSyn.exp_ -> unit) ->
+    * (CompSyn.goal * IntSyn.sub)
+    * CompSyn.dProg
+    * (CompSyn.pskeleton * IntSyn.exp -> unit) ->
     unit
 end
 (* signature PTRECON *)

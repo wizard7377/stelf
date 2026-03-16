@@ -3,7 +3,8 @@
 (* # 1 "src/msg/msg_.fun.ml" *)
 
 (* # 1 "src/msg/msg_.sml.ml" *)
-open! Basis
+
+open Basis
 
 module type MSG = sig
   val message : string -> unit

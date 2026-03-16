@@ -13,31 +13,31 @@ module type MTPABSTRACT = sig
 
   exception Error of string
 
-  type approxFor_ =
-    | Head of IntSyn.dctx * (FunSyn.for_ * IntSyn.sub_) * int
-    | Block of (IntSyn.dctx * IntSyn.sub_ * int * IntSyn.dec_ list) * approxFor_
+  type approxFor =
+    | Head of IntSyn.dctx * (FunSyn.for_ * IntSyn.sub) * int
+    | Block of (IntSyn.dctx * IntSyn.sub * int * IntSyn.dec list) * approxFor
 
   (* Approximat formula *)
   (* AF ::= F [s] *)
   (*  | (t, G2), AF *)
-  val weaken : IntSyn.dctx * IntSyn.cid -> IntSyn.sub_
-  val raiseType : IntSyn.dctx * IntSyn.exp_ -> IntSyn.exp_
+  val weaken : IntSyn.dctx * IntSyn.cid -> IntSyn.sub
+  val raiseType : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
 
   val abstractSub :
-    IntSyn.sub_
-    * StateSyn.tag_ IntSyn.ctx_
-    * (IntSyn.dctx * StateSyn.tag_ IntSyn.ctx_)
-    * IntSyn.sub_
-    * StateSyn.tag_ IntSyn.ctx_ ->
-    (IntSyn.dctx * StateSyn.tag_ IntSyn.ctx_) * IntSyn.sub_
+    IntSyn.sub
+    * StateSyn.tag IntSyn.ctx
+    * (IntSyn.dctx * StateSyn.tag IntSyn.ctx)
+    * IntSyn.sub
+    * StateSyn.tag IntSyn.ctx ->
+    (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
 
   val abstractSub' :
-    (IntSyn.dctx * StateSyn.tag_ IntSyn.ctx_)
-    * IntSyn.sub_
-    * StateSyn.tag_ IntSyn.ctx_ ->
-    (IntSyn.dctx * StateSyn.tag_ IntSyn.ctx_) * IntSyn.sub_
+    (IntSyn.dctx * StateSyn.tag IntSyn.ctx)
+    * IntSyn.sub
+    * StateSyn.tag IntSyn.ctx ->
+    (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
 
-  val abstractApproxFor : approxFor_ -> FunSyn.for_
+  val abstractApproxFor : approxFor -> FunSyn.for_
 end
 (* signature MTPABSTRACT *)
 
@@ -81,9 +81,9 @@ end) : MTPABSTRACT = struct
 
   exception Error of string
 
-  type approxFor_ =
-    | Head of IntSyn.dctx * (FunSyn.for_ * IntSyn.sub_) * int
-    | Block of (IntSyn.dctx * IntSyn.sub_ * int * IntSyn.dec_ list) * approxFor_
+  type approxFor =
+    | Head of IntSyn.dctx * (FunSyn.for_ * IntSyn.sub) * int
+    | Block of (IntSyn.dctx * IntSyn.sub * int * IntSyn.dec list) * approxFor
 
   (* Approximat formula *)
   (* AF ::= F [s] *)
@@ -94,9 +94,9 @@ end) : MTPABSTRACT = struct
     module S = StateSyn
     module C = Constraints
 
-    type eBVar_ =
-      | Ev of I.exp_ option ref * I.exp_ * S.tag_ * int
-      | Bv of I.dec_ * S.tag_
+    type eBVar =
+      | Ev of I.exp option ref * I.exp * S.tag * int
+      | Bv of I.dec * S.tag
 
     let rec checkEmpty = function
       | [] -> ()

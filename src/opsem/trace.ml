@@ -8,26 +8,26 @@ module type TRACE = sig
 
   val tagGoal : unit -> goalTag
 
-  type event_ =
-    | IntroHyp of IntSyn.head_ * IntSyn.dec_
-    | DischargeHyp of IntSyn.head_ * IntSyn.dec_
-    | IntroParm of IntSyn.head_ * IntSyn.dec_
-    | DischargeParm of IntSyn.head_ * IntSyn.dec_
-    | Resolved of IntSyn.head_ * IntSyn.head_
-    | Subgoal of (IntSyn.head_ * IntSyn.head_) * (unit -> int)
-    | SolveGoal of goalTag * IntSyn.head_ * IntSyn.exp_
-    | SucceedGoal of goalTag * (IntSyn.head_ * IntSyn.head_) * IntSyn.exp_
-    | CommitGoal of goalTag * (IntSyn.head_ * IntSyn.head_) * IntSyn.exp_
-    | RetryGoal of goalTag * (IntSyn.head_ * IntSyn.head_) * IntSyn.exp_
-    | FailGoal of goalTag * IntSyn.head_ * IntSyn.exp_
-    | Unify of (IntSyn.head_ * IntSyn.head_) * IntSyn.exp_ * IntSyn.exp_
-    | FailUnify of (IntSyn.head_ * IntSyn.head_) * string
+  type event =
+    | IntroHyp of IntSyn.head * IntSyn.dec
+    | DischargeHyp of IntSyn.head * IntSyn.dec
+    | IntroParm of IntSyn.head * IntSyn.dec
+    | DischargeParm of IntSyn.head * IntSyn.dec
+    | Resolved of IntSyn.head * IntSyn.head
+    | Subgoal of (IntSyn.head * IntSyn.head) * (unit -> int)
+    | SolveGoal of goalTag * IntSyn.head * IntSyn.exp
+    | SucceedGoal of goalTag * (IntSyn.head * IntSyn.head) * IntSyn.exp
+    | CommitGoal of goalTag * (IntSyn.head * IntSyn.head) * IntSyn.exp
+    | RetryGoal of goalTag * (IntSyn.head * IntSyn.head) * IntSyn.exp
+    | FailGoal of goalTag * IntSyn.head * IntSyn.exp
+    | Unify of (IntSyn.head * IntSyn.head) * IntSyn.exp * IntSyn.exp
+    | FailUnify of (IntSyn.head * IntSyn.head) * string
 
   (* resolved with clause c, fam a *)
   (* clause c, fam a, nth subgoal *)
   (* clause head == goal *)
   (* failure message *)
-  val signal : IntSyn.dctx * event_ -> unit
+  val signal : IntSyn.dctx * event -> unit
   val init : unit -> unit
 
   (* initialize trace, break and tag *)
@@ -35,10 +35,10 @@ module type TRACE = sig
 
   (* currently tracing or using breakpoints *)
   (* User interface *)
-  type 'a spec_ = None | Some of 'a list | All
+  type 'a spec = None | Some of 'a list | All
 
-  val trace : string spec_ -> unit
-  val break : string spec_ -> unit
+  val trace : string spec -> unit
+  val break : string spec -> unit
   val detail : int ref
 
   (* 0 = none, 1 = default, 2 = unify *)
@@ -126,10 +126,10 @@ end) : TRACE = struct
   let rec printVarstring line =
     printVars (List.tl (String.tokens Char.isSpace line))
 
-  type 'a spec_ = None | Some of 'a list | All
+  type 'a spec = None | Some of 'a list | All
 
-  let traceSpec : string spec_ ref = ref None
-  let breakSpec : string spec_ ref = ref None
+  let traceSpec : string spec ref = ref None
+  let breakSpec : string spec ref = ref None
 
   let rec trace = function
     | None -> traceSpec := None
@@ -151,8 +151,8 @@ end) : TRACE = struct
       end
   (* andalso n <= 2 *)
 
-  let traceTSpec : I.cid spec_ ref = ref None
-  let breakTSpec : I.cid spec_ ref = ref None
+  let traceTSpec : I.cid spec ref = ref None
+  let breakTSpec : I.cid spec ref = ref None
 
   let rec toCids = function
     | [] -> []
@@ -203,10 +203,10 @@ end) : TRACE = struct
        v X1 ... Xn - variables --- show instantiation of X1 ... Xn\n\
        ? for help"
 
-  let currentGoal : (I.dctx * I.exp_) ref = ref (I.Null, I.Uni I.Type)
+  let currentGoal : (I.dctx * I.exp) ref = ref (I.Null, I.Uni I.Type)
 
   (* dummy initialization *)
-  let currentEVarInst : (I.exp_ * string) list ref = ref []
+  let currentEVarInst : (I.exp * string) list ref = ref []
 
   let rec setEVarInst xs_ =
     currentEVarInst :=
@@ -310,20 +310,20 @@ end) : TRACE = struct
       end
     end
 
-  type event_ =
-    | IntroHyp of IntSyn.head_ * IntSyn.dec_
-    | DischargeHyp of IntSyn.head_ * IntSyn.dec_
-    | IntroParm of IntSyn.head_ * IntSyn.dec_
-    | DischargeParm of IntSyn.head_ * IntSyn.dec_
-    | Resolved of IntSyn.head_ * IntSyn.head_
-    | Subgoal of (IntSyn.head_ * IntSyn.head_) * (unit -> int)
-    | SolveGoal of goalTag * IntSyn.head_ * IntSyn.exp_
-    | SucceedGoal of goalTag * (IntSyn.head_ * IntSyn.head_) * IntSyn.exp_
-    | CommitGoal of goalTag * (IntSyn.head_ * IntSyn.head_) * IntSyn.exp_
-    | RetryGoal of goalTag * (IntSyn.head_ * IntSyn.head_) * IntSyn.exp_
-    | FailGoal of goalTag * IntSyn.head_ * IntSyn.exp_
-    | Unify of (IntSyn.head_ * IntSyn.head_) * IntSyn.exp_ * IntSyn.exp_
-    | FailUnify of (IntSyn.head_ * IntSyn.head_) * string
+  type event =
+    | IntroHyp of IntSyn.head * IntSyn.dec
+    | DischargeHyp of IntSyn.head * IntSyn.dec
+    | IntroParm of IntSyn.head * IntSyn.dec
+    | DischargeParm of IntSyn.head * IntSyn.dec
+    | Resolved of IntSyn.head * IntSyn.head
+    | Subgoal of (IntSyn.head * IntSyn.head) * (unit -> int)
+    | SolveGoal of goalTag * IntSyn.head * IntSyn.exp
+    | SucceedGoal of goalTag * (IntSyn.head * IntSyn.head) * IntSyn.exp
+    | CommitGoal of goalTag * (IntSyn.head * IntSyn.head) * IntSyn.exp
+    | RetryGoal of goalTag * (IntSyn.head * IntSyn.head) * IntSyn.exp
+    | FailGoal of goalTag * IntSyn.head * IntSyn.exp
+    | Unify of (IntSyn.head * IntSyn.head) * IntSyn.exp * IntSyn.exp
+    | FailUnify of (IntSyn.head * IntSyn.head) * string
 
   (* resolved with clause c, fam a *)
   (* clause c, fam a, nth subgoal *)

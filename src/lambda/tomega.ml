@@ -9,74 +9,74 @@ module type TOMEGA = sig
   (* make abstract *)
   type nonrec label = int
   type nonrec lemma = int
-  type worlds_ = Worlds of IntSyn.cid list
-  type quantifier_ = Implicit | Explicit
+  type worlds = Worlds of IntSyn.cid list
+  type quantifier = Implicit | Explicit
 
-  type tC_ =
-    | Abs of IntSyn.dec_ * tC_
-    | Conj of tC_ * tC_
+  type tC =
+    | Abs of IntSyn.dec * tC
+    | Conj of tC * tC
     | Base of
-        ((IntSyn.exp_ * IntSyn.sub_) * (IntSyn.exp_ * IntSyn.sub_)) Order.order_
+        ((IntSyn.exp * IntSyn.sub) * (IntSyn.exp * IntSyn.sub)) Order.order
 
   (* Terminiation Condition     *)
   (* T ::= {{D}} O              *)
   (*     | O1 ^ O2              *)
   type for_ =
-    | World of worlds_ * for_
-    | All of (dec_ * quantifier_) * for_
-    | Ex of (IntSyn.dec_ * quantifier_) * for_
+    | World of worlds * for_
+    | All of (dec * quantifier) * for_
+    | Ex of (IntSyn.dec * quantifier) * for_
     | True
     | And of for_ * for_
-    | FClo of for_ * sub_
-    | FVar of dec_ IntSyn.ctx_ * for_ option ref
+    | FClo of for_ * sub
+    | FVar of dec IntSyn.ctx * for_ option ref
 
-  and dec_ =
-    | UDec of IntSyn.dec_
-    | PDec of string option * for_ * tC_ option * tC_ option
+  and dec =
+    | UDec of IntSyn.dec
+    | PDec of string option * for_ * tC option * tC option
 
-  and prg_ =
-    | Box of worlds_ * prg_
-    | Lam of dec_ * prg_
-    | New of prg_
-    | Choose of prg_
-    | PairExp of IntSyn.exp_ * prg_
-    | PairBlock of IntSyn.block_ * prg_
-    | PairPrg of prg_ * prg_
+  and prg =
+    | Box of worlds * prg
+    | Lam of dec * prg
+    | New of prg
+    | Choose of prg
+    | PairExp of IntSyn.exp * prg
+    | PairBlock of IntSyn.block * prg
+    | PairPrg of prg * prg
     | Unit
-    | Redex of prg_ * spine_
-    | Rec of dec_ * prg_
-    | Case of cases_
-    | PClo of prg_ * sub_
-    | Let of dec_ * prg_ * prg_
+    | Redex of prg * spine
+    | Rec of dec * prg
+    | Case of cases
+    | PClo of prg * sub
+    | Let of dec * prg * prg
     | EVar of
-        dec_ IntSyn.ctx_
-        * prg_ option ref
+        dec IntSyn.ctx
+        * prg option ref
         * for_
-        * tC_ option
-        * tC_ option
-        * IntSyn.exp_
+        * tC option
+        * tC option
+        * IntSyn.exp
     | Const of lemma
     | Var of int
-    | LetPairExp of IntSyn.dec_ * dec_ * prg_ * prg_
-    | LetUnit of prg_ * prg_
+    | LetPairExp of IntSyn.dec * dec * prg * prg
+    | LetUnit of prg * prg
 
-  and spine_ =
+  and spine =
     | Nil
-    | AppExp of IntSyn.exp_ * spine_
-    | AppBlock of IntSyn.block_ * spine_
-    | AppPrg of prg_ * spine_
-    | SClo of spine_ * sub_
+    | AppExp of IntSyn.exp * spine
+    | AppBlock of IntSyn.block * spine
+    | AppPrg of prg * spine
+    | SClo of spine * sub
 
-  and sub_ = Shift of int | Dot of front_ * sub_
+  and sub = Shift of int | Dot of front * sub
 
-  and front_ =
+  and front =
     | Idx of int
-    | Prg of prg_
-    | Exp of IntSyn.exp_
-    | Block of IntSyn.block_
+    | Prg of prg
+    | Exp of IntSyn.exp
+    | Block of IntSyn.block
     | Undef
 
-  and cases_ = Cases of (dec_ IntSyn.ctx_ * sub_ * prg_) list
+  and cases = Cases of (dec IntSyn.ctx * sub * prg) list
 
   (* Formulas                   *)
   (* F ::= World l1...ln. F     *)
@@ -123,60 +123,58 @@ module type TOMEGA = sig
   (*     | _                    *)
   (* Cases                      *)
   (* C ::= (Psi' |> s |-> P)    *)
-  type conDec_ = ForDec of string * for_ | ValDec of string * prg_ * for_
+  type conDec = ForDec of string * for_ | ValDec of string * prg * for_
 
   (* ConDec                     *)
   (* CD ::= f :: F              *)
   (*      | f == P              *)
   exception NoMatch
 
-  val coerceSub : sub_ -> IntSyn.sub_
-  val embedSub : IntSyn.sub_ -> sub_
-  val coerceCtx : dec_ IntSyn.ctx_ -> IntSyn.dec_ IntSyn.ctx_
-  val strengthenCtx : dec_ IntSyn.ctx_ -> IntSyn.dec_ IntSyn.ctx_ * sub_ * sub_
-  val embedCtx : IntSyn.dec_ IntSyn.ctx_ -> dec_ IntSyn.ctx_
-  val weakenSub : dec_ IntSyn.ctx_ -> sub_
-  val invertSub : sub_ -> sub_
-  val id : sub_
-  val shift : sub_
-  val dot1 : sub_ -> sub_
-  val dotEta : front_ * sub_ -> sub_
-  val comp : sub_ * sub_ -> sub_
-  val varSub : int * sub_ -> front_
-  val decSub : dec_ * sub_ -> dec_
-  val forSub : for_ * sub_ -> for_
-  val whnfFor : for_ * sub_ -> for_ * sub_
-  val normalizePrg : prg_ * sub_ -> prg_
-  val normalizeSub : sub_ -> sub_
-  val derefPrg : prg_ -> prg_
-  val lemmaLookup : lemma -> conDec_
+  val coerceSub : sub -> IntSyn.sub
+  val embedSub : IntSyn.sub -> sub
+  val coerceCtx : dec IntSyn.ctx -> IntSyn.dec IntSyn.ctx
+  val strengthenCtx : dec IntSyn.ctx -> IntSyn.dec IntSyn.ctx * sub * sub
+  val embedCtx : IntSyn.dec IntSyn.ctx -> dec IntSyn.ctx
+  val weakenSub : dec IntSyn.ctx -> sub
+  val invertSub : sub -> sub
+  val id : sub
+  val shift : sub
+  val dot1 : sub -> sub
+  val dotEta : front * sub -> sub
+  val comp : sub * sub -> sub
+  val varSub : int * sub -> front
+  val decSub : dec * sub -> dec
+  val forSub : for_ * sub -> for_
+  val whnfFor : for_ * sub -> for_ * sub
+  val normalizePrg : prg * sub -> prg
+  val normalizeSub : sub -> sub
+  val derefPrg : prg -> prg
+  val lemmaLookup : lemma -> conDec
   val lemmaName : string -> lemma
-  val lemmaAdd : conDec_ -> lemma
+  val lemmaAdd : conDec -> lemma
   val lemmaSize : unit -> int
-  val lemmaDef : lemma -> prg_
+  val lemmaDef : lemma -> prg
   val lemmaFor : lemma -> for_
-  val eqWorlds : worlds_ * worlds_ -> bool
-  val convFor : (for_ * sub_) * (for_ * sub_) -> bool
-  val newEVar : dec_ IntSyn.ctx_ * for_ -> prg_
-  val newEVarTC : dec_ IntSyn.ctx_ * for_ * tC_ option * tC_ option -> prg_
+  val eqWorlds : worlds * worlds -> bool
+  val convFor : (for_ * sub) * (for_ * sub) -> bool
+  val newEVar : dec IntSyn.ctx * for_ -> prg
+  val newEVarTC : dec IntSyn.ctx * for_ * tC option * tC option -> prg
 
   (* Below are added by Yu Liao *)
-  val ctxDec : dec_ IntSyn.ctx_ * int -> dec_
-  val revCoerceSub : IntSyn.sub_ -> sub_
-  val revCoerceCtx : IntSyn.dec_ IntSyn.ctx_ -> dec_ IntSyn.ctx_
+  val ctxDec : dec IntSyn.ctx * int -> dec
+  val revCoerceSub : IntSyn.sub -> sub
+  val revCoerceCtx : IntSyn.dec IntSyn.ctx -> dec IntSyn.ctx
 
   (* Added references by ABP *)
-  val coerceFront : front_ -> IntSyn.front_
-  val revCoerceFront : IntSyn.front_ -> front_
-  val deblockify : IntSyn.dec_ IntSyn.ctx_ -> IntSyn.dec_ IntSyn.ctx_ * sub_
+  val coerceFront : front -> IntSyn.front
+  val revCoerceFront : IntSyn.front -> front
+  val deblockify : IntSyn.dec IntSyn.ctx -> IntSyn.dec IntSyn.ctx * sub
 
   (* Stuff that has to do with termination conditions *)
-  val tCSub : tC_ * IntSyn.sub_ -> tC_
-  val normalizeTC : tC_ -> tC_
-  val convTC : tC_ * tC_ -> bool
-
-  val transformTC :
-    IntSyn.dec_ IntSyn.ctx_ * for_ * int Order.order_ list -> tC_
+  val tCSub : tC * IntSyn.sub -> tC
+  val normalizeTC : tC -> tC
+  val convTC : tC * tC -> bool
+  val transformTC : IntSyn.dec IntSyn.ctx * for_ * int Order.order list -> tC
 end
 (* Signature TOMEGA *)
 
@@ -200,74 +198,74 @@ end) : TOMEGA = struct
 
   type nonrec label = int
   type nonrec lemma = int
-  type worlds_ = Worlds of IntSyn.cid list
-  type quantifier_ = Implicit | Explicit
+  type worlds = Worlds of IntSyn.cid list
+  type quantifier = Implicit | Explicit
 
-  type tC_ =
-    | Abs of IntSyn.dec_ * tC_
-    | Conj of tC_ * tC_
+  type tC =
+    | Abs of IntSyn.dec * tC
+    | Conj of tC * tC
     | Base of
-        ((IntSyn.exp_ * IntSyn.sub_) * (IntSyn.exp_ * IntSyn.sub_)) Order.order_
+        ((IntSyn.exp * IntSyn.sub) * (IntSyn.exp * IntSyn.sub)) Order.order
 
   (* Terminiation Condition     *)
   (* T ::= {{D}} O              *)
   (*     | O1 ^ O2              *)
   type for_ =
-    | World of worlds_ * for_
-    | All of (dec_ * quantifier_) * for_
-    | Ex of (IntSyn.dec_ * quantifier_) * for_
+    | World of worlds * for_
+    | All of (dec * quantifier) * for_
+    | Ex of (IntSyn.dec * quantifier) * for_
     | True
     | And of for_ * for_
-    | FClo of for_ * sub_
-    | FVar of dec_ IntSyn.ctx_ * for_ option ref
+    | FClo of for_ * sub
+    | FVar of dec IntSyn.ctx * for_ option ref
 
-  and dec_ =
-    | UDec of IntSyn.dec_
-    | PDec of string option * for_ * tC_ option * tC_ option
+  and dec =
+    | UDec of IntSyn.dec
+    | PDec of string option * for_ * tC option * tC option
 
-  and prg_ =
-    | Box of worlds_ * prg_
-    | Lam of dec_ * prg_
-    | New of prg_
-    | Choose of prg_
-    | PairExp of IntSyn.exp_ * prg_
-    | PairBlock of IntSyn.block_ * prg_
-    | PairPrg of prg_ * prg_
+  and prg =
+    | Box of worlds * prg
+    | Lam of dec * prg
+    | New of prg
+    | Choose of prg
+    | PairExp of IntSyn.exp * prg
+    | PairBlock of IntSyn.block * prg
+    | PairPrg of prg * prg
     | Unit
-    | Redex of prg_ * spine_
-    | Rec of dec_ * prg_
-    | Case of cases_
-    | PClo of prg_ * sub_
-    | Let of dec_ * prg_ * prg_
+    | Redex of prg * spine
+    | Rec of dec * prg
+    | Case of cases
+    | PClo of prg * sub
+    | Let of dec * prg * prg
     | EVar of
-        dec_ IntSyn.ctx_
-        * prg_ option ref
+        dec IntSyn.ctx
+        * prg option ref
         * for_
-        * tC_ option
-        * tC_ option
-        * IntSyn.exp_
+        * tC option
+        * tC option
+        * IntSyn.exp
     | Const of lemma
     | Var of int
-    | LetPairExp of IntSyn.dec_ * dec_ * prg_ * prg_
-    | LetUnit of prg_ * prg_
+    | LetPairExp of IntSyn.dec * dec * prg * prg
+    | LetUnit of prg * prg
 
-  and spine_ =
+  and spine =
     | Nil
-    | AppExp of IntSyn.exp_ * spine_
-    | AppBlock of IntSyn.block_ * spine_
-    | AppPrg of prg_ * spine_
-    | SClo of spine_ * sub_
+    | AppExp of IntSyn.exp * spine
+    | AppBlock of IntSyn.block * spine
+    | AppPrg of prg * spine
+    | SClo of spine * sub
 
-  and sub_ = Shift of int | Dot of front_ * sub_
+  and sub = Shift of int | Dot of front * sub
 
-  and front_ =
+  and front =
     | Idx of int
-    | Prg of prg_
-    | Exp of IntSyn.exp_
-    | Block of IntSyn.block_
+    | Prg of prg
+    | Exp of IntSyn.exp
+    | Block of IntSyn.block
     | Undef
 
-  and cases_ = Cases of (dec_ IntSyn.ctx_ * sub_ * prg_) list
+  and cases = Cases of (dec IntSyn.ctx * sub * prg) list
 
   (* Formulas                   *)
   (* F ::= World l1...ln. F     *)
@@ -313,7 +311,7 @@ end) : TOMEGA = struct
   (*     | _                    *)
   (* Cases                      *)
   (* C ::= (Psi' |> s |-> P)    *)
-  type conDec_ = ForDec of string * for_ | ValDec of string * prg_ * for_
+  type conDec = ForDec of string * for_ | ValDec of string * prg * for_
 
   (* ConDec                     *)
   (* CD ::= f :: F              *)
@@ -327,7 +325,7 @@ end) : TOMEGA = struct
     let maxLemma = Global.maxCid
 
     let lemmaArray =
-      (Array.array (maxLemma + 1, ForDec ("", True)) : conDec_ Array.array)
+      (Array.array (maxLemma + 1, ForDec ("", True)) : conDec Array.array)
 
     let nextLemma = ref 0
     let rec lemmaLookup lemma = Array.sub (lemmaArray, lemma)

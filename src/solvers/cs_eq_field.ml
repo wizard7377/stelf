@@ -13,24 +13,24 @@ module type CS_EQ_FIELD = sig
 
   (* MultiSet                   *)
   type sum_ = Sum of Field.number * mon_ mset
-  and mon_ = Mon of Field.number * (IntSyn.exp_ * IntSyn.sub_) mset
+  and mon_ = Mon of Field.number * (IntSyn.exp * IntSyn.sub) mset
 
   (* Sum :                      *)
   (* Sum ::= m + M1 + ...       *)
   (* Monomials:                 *)
   (* Mon ::= n * U1[s1] * ...   *)
   val fromExp : IntSyn.eclo -> sum_
-  val toExp : sum_ -> IntSyn.exp_
+  val toExp : sum_ -> IntSyn.exp
   val normalize : sum_ -> sum_
   val compatibleMon : mon_ * mon_ -> bool
 
   (* Internal expressions constructors *)
-  val number : unit -> IntSyn.exp_
-  val unaryMinus : IntSyn.exp_ -> IntSyn.exp_
-  val plus : IntSyn.exp_ * IntSyn.exp_ -> IntSyn.exp_
-  val minus : IntSyn.exp_ * IntSyn.exp_ -> IntSyn.exp_
-  val times : IntSyn.exp_ * IntSyn.exp_ -> IntSyn.exp_
-  val constant : Field.number -> IntSyn.exp_
+  val number : unit -> IntSyn.exp
+  val unaryMinus : IntSyn.exp -> IntSyn.exp
+  val plus : IntSyn.exp * IntSyn.exp -> IntSyn.exp
+  val minus : IntSyn.exp * IntSyn.exp -> IntSyn.exp
+  val times : IntSyn.exp * IntSyn.exp -> IntSyn.exp
+  val constant : Field.number -> IntSyn.exp
 end
 (* signature CS_EQ_FIELD *)
 
@@ -57,7 +57,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
 
   (* MultiSet                   *)
   type sum_ = Sum of Field.number * mon_ mset
-  and mon_ = Mon of Field.number * (IntSyn.exp_ * IntSyn.sub_) mset
+  and mon_ = Mon of Field.number * (IntSyn.exp * IntSyn.sub) mset
 
   (* Sum :                      *)
   (* Sum ::= m + M1 + ...       *)

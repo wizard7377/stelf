@@ -10,53 +10,50 @@ module type THMSYN = sig
   exception Error of string
 
   (*! type Param = string option !*)
-  type order_ =
-    | Varg of string list
-    | Lex of order_ list
-    | Simul of order_ list
+  type order = Varg of string list | Lex of order list | Simul of order list
 
   (* -bp *)
-  type predicate_ = Less | Leq | Eq
-  type redOrder_ = RedOrder of predicate_ * order_ * order_
-  type callpats_ = Callpats of (IntSyn.cid * string option list) list
+  type predicate = Less | Leq | Eq
+  type redOrder = RedOrder of predicate * order * order
+  type callpats = Callpats of (IntSyn.cid * string option list) list
 
   (* Termination declaration *)
-  type tDecl_ = TDecl of order_ * callpats_
+  type tDecl = TDecl of order * callpats
 
   (* -bp *)
   (* Reduction declaration *)
-  type rDecl_ = RDecl of redOrder_ * callpats_
+  type rDecl = RDecl of redOrder * callpats
 
   (* Tabled declaration *)
-  type tabledDecl_ = TabledDecl of IntSyn.cid
+  type tabledDecl = TabledDecl of IntSyn.cid
 
   (* KeepTable declaration *)
-  type keepTableDecl_ = KeepTableDecl of IntSyn.cid
+  type keepTableDecl = KeepTableDecl of IntSyn.cid
 
   (* Theorem declaration  *)
-  type thDecl_ =
+  type thDecl =
     | ThDecl of
-        (IntSyn.dec_ IntSyn.ctx_ * IntSyn.dec_ IntSyn.ctx_) list
-        * IntSyn.dec_ IntSyn.ctx_
-        * ModeSyn.mode_ IntSyn.ctx_
+        (IntSyn.dec IntSyn.ctx * IntSyn.dec IntSyn.ctx) list
+        * IntSyn.dec IntSyn.ctx
+        * ModeSyn.mode IntSyn.ctx
         * int
 
   (* Proof declaration *)
-  type pDecl_ = PDecl of int * tDecl_
+  type pDecl = PDecl of int * tDecl
 
   (* World declaration *)
   (*  datatype WDecl = 
     WDecl of (IntSyn.Dec IntSyn.Ctx * 
 	      IntSyn.Dec IntSyn.Ctx) list * Callpats
 *)
-  type wDecl_ = WDecl of Names.qid_ list * callpats_
+  type wDecl = WDecl of Names.qid list * callpats
 
   val theoremDecToConDec :
-    (string * thDecl_) * Paths.region ->
-    (IntSyn.dec_ IntSyn.ctx_ * IntSyn.dec_ IntSyn.ctx_) list * IntSyn.conDec_
+    (string * thDecl) * Paths.region ->
+    (IntSyn.dec IntSyn.ctx * IntSyn.dec IntSyn.ctx) list * IntSyn.conDec
 
   val theoremDecToModeSpine :
-    (string * thDecl_) * Paths.region -> ModeSyn.modeSpine_
+    (string * thDecl) * Paths.region -> ModeSyn.modeSpine
 end
 (* signature THMSYN *)
 
@@ -88,47 +85,43 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
 
   let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
-  type nonrec param_ = string option
-
-  type order_ =
-    | Varg of string list
-    | Lex of order_ list
-    | Simul of order_ list
+  type nonrec param = string option
+  type order = Varg of string list | Lex of order list | Simul of order list
 
   (* -bp *)
-  type predicate_ = Less | Leq | Eq
-  type redOrder_ = RedOrder of predicate_ * order_ * order_
-  type callpats_ = Callpats of (IntSyn.cid * param_ list) list
+  type predicate = Less | Leq | Eq
+  type redOrder = RedOrder of predicate * order * order
+  type callpats = Callpats of (IntSyn.cid * param list) list
 
   (* Termination declaration *)
-  type tDecl_ = TDecl of order_ * callpats_
+  type tDecl = TDecl of order * callpats
 
   (* -bp *)
   (* Reduction declaration *)
-  type rDecl_ = RDecl of redOrder_ * callpats_
+  type rDecl = RDecl of redOrder * callpats
 
   (* Tabled declaration *)
-  type tabledDecl_ = TabledDecl of IntSyn.cid
+  type tabledDecl = TabledDecl of IntSyn.cid
 
   (* KeepTable declaration *)
-  type keepTableDecl_ = KeepTableDecl of IntSyn.cid
+  type keepTableDecl = KeepTableDecl of IntSyn.cid
 
   (* Theorem declaration *)
-  type thDecl_ =
+  type thDecl =
     | ThDecl of
-        (IntSyn.dec_ IntSyn.ctx_ * IntSyn.dec_ IntSyn.ctx_) list
-        * IntSyn.dec_ IntSyn.ctx_
-        * ModeSyn.mode_ IntSyn.ctx_
+        (IntSyn.dec IntSyn.ctx * IntSyn.dec IntSyn.ctx) list
+        * IntSyn.dec IntSyn.ctx
+        * ModeSyn.mode IntSyn.ctx
         * int
 
   (* Proof declaration *)
-  type pDecl_ = PDecl of int * tDecl_
+  type pDecl = PDecl of int * tDecl
 
   (* World declaration *)
   (*  datatype WDecl =
     WDecl of (IntSyn.Dec IntSyn.Ctx *
               IntSyn.Dec IntSyn.Ctx) list * Callpats *)
-  type wDecl_ = WDecl of Names.qid_ list * callpats_
+  type wDecl = WDecl of Names.qid list * callpats
 
   open! struct
     module I = IntSyn

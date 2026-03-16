@@ -30,7 +30,7 @@ Of the goals, there are some more short and longer term ones that are listed her
 - [ ] Split up the concrete syntax and abstract syntax into completely different libraries (ie, one that deals with the internals and another that deals with parsing)
 - [ ] Make the server output nicer (add REPL)
 - [ ] Make better IDE support (Perhaps using LSP?)
-- [ ] [Future plans](./FUTURE.md)
+- [ ] [Future plans](./FUTURE.typ)
 
 
 ## Credits

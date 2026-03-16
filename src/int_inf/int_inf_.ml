@@ -3,7 +3,7 @@
 (* # 1 "src/int_inf/int_inf_.fun.ml" *)
 
 (* # 1 "src/int_inf/int_inf_.sml.ml" *)
-open! Basis
+open Basis
 open Int_inf_sig
 
 (* int-inf.sml

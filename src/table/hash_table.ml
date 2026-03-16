@@ -3,7 +3,7 @@
 (* # 1 "src/table/hash_table.fun.ml" *)
 
 (* # 1 "src/table/hash_table.sml.ml" *)
-open! Basis
+open Basis
 open Table_
 
 (* Hash Table *)
@@ -23,7 +23,7 @@ end) : TABLE with type key = HashTable__0.key' = struct
   (* A hashtable bucket is a linked list of mutable elements *)
   (* A hashtable is an array of buckets containing entries paired with hash values *)
   type 'a bucket = Nil | Cons of 'a ref * 'a bucket ref
-  type nonrec 'a table_ = (int * 'a entry) bucket array * int
+  type nonrec 'a table = (int * 'a entry) bucket array * int
 
   let new_ n = (Array.array (n, Nil), n)
 

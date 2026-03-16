@@ -17,7 +17,7 @@ end) : Index_.INDEX = struct
 
     let rec cidFromHead = function I.Const c -> c | I.Def c -> c
 
-    let indexArray : IntSyn.head_ Queue.queue Array.array =
+    let indexArray : IntSyn.head Queue.queue Array.array =
       Array.array (Global.maxCid + 1, Queue.empty)
 
     let rec reset () = Array.modify (function _ -> Queue.empty) indexArray

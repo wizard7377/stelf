@@ -10,8 +10,8 @@ module type MODSYN = sig
   (*! structure Paths : PATHS !*)
   exception Error of string
 
-  val abbrevify : IntSyn.cid * IntSyn.conDec_ -> IntSyn.conDec_
-  val strictify : IntSyn.conDec_ -> IntSyn.conDec_
+  val abbrevify : IntSyn.cid * IntSyn.conDec -> IntSyn.conDec
+  val strictify : IntSyn.conDec -> IntSyn.conDec
 
   type nonrec module_
 
@@ -20,7 +20,7 @@ module type MODSYN = sig
   type transform = IntSyn.cid * IntSyn.ConDec -> IntSyn.ConDec
   *)
   val installStruct :
-    IntSyn.strDec_
+    IntSyn.strDec
     * module_
     * Names.namespace option
     * (IntSyn.cid * (string * Paths.occConDec option) -> unit)
@@ -35,7 +35,7 @@ module type MODSYN = sig
     unit (* action *)
 
   val instantiateModule :
-    module_ * (Names.namespace -> IntSyn.cid * IntSyn.conDec_ -> IntSyn.conDec_) ->
+    module_ * (Names.namespace -> IntSyn.cid * IntSyn.conDec -> IntSyn.conDec) ->
     module_ (* Names.namespace -> transform *)
 
   (* Extract some entries of the current global signature table in order
@@ -87,14 +87,14 @@ end) : MODSYN = struct
 
   exception Error of string
 
-  type constInfo_ =
+  type constInfo =
     | ConstInfo of
-        IntSyn.conDec_
+        IntSyn.conDec
         * Names.Fixity.fixity
         * (string list * string list) option
         * (string * Paths.occConDec option)
 
-  type structInfo_ = StructInfo of IntSyn.strDec_
+  type structInfo = StructInfo of IntSyn.strDec
 
   (* A module consists of:
      1. a map from cids to constant entries containing
@@ -106,10 +106,10 @@ end) : MODSYN = struct
           b. the namespace of the structure
      3. the top-level namespace of the module *)
   type nonrec module_ =
-    structInfo_ IntTree.table_ * constInfo_ IntTree.table_ * Names.namespace
+    structInfo IntTree.table * constInfo IntTree.table * Names.namespace
 
   type nonrec action = IntSyn.cid * (string * Paths.occConDec option) -> unit
-  type nonrec transform = IntSyn.cid * IntSyn.conDec_ -> IntSyn.conDec_
+  type nonrec transform = IntSyn.cid * IntSyn.conDec -> IntSyn.conDec
 
   (* invariant: U in nf, result in nf *)
   let rec mapExpConsts f u_ =
@@ -214,8 +214,8 @@ end) : MODSYN = struct
         nsOpt,
         installAction,
         transformConDec ) =
-    let structMap : IntSyn.mid IntTree.table_ = IntTree.new_ 0 in
-    let constMap : IntSyn.cid IntTree.table_ = IntTree.new_ 0 in
+    let structMap : IntSyn.mid IntTree.table = IntTree.new_ 0 in
+    let constMap : IntSyn.cid IntTree.table = IntTree.new_ 0 in
     let rec mapStruct mid = valOf (IntTree.lookup structMap mid) in
     let rec mapParent = function
       | None -> topOpt
@@ -320,8 +320,8 @@ end) : MODSYN = struct
     installModule (module_, None, nsOpt, installAction, transformConDec)
 
   let rec abstractModule (namespace, topOpt) =
-    let structTable : structInfo_ IntTree.table_ = IntTree.new_ 0 in
-    let constTable : constInfo_ IntTree.table_ = IntTree.new_ 0 in
+    let structTable : structInfo IntTree.table = IntTree.new_ 0 in
+    let constTable : constInfo IntTree.table = IntTree.new_ 0 in
     let mapParent =
       begin match topOpt with
       | None -> fun parent -> parent
@@ -371,7 +371,7 @@ end) : MODSYN = struct
   open! struct
     let defList : string list ref = ref []
     let defCount : int ref = ref 0
-    let defs : module_ HashTable.table_ = HashTable.new_ 4096
+    let defs : module_ HashTable.table = HashTable.new_ 4096
     let rec defsClear () = HashTable.clear defs
     let defsInsert = HashTable.insertShadow defs
     let defsLookup = HashTable.lookup defs

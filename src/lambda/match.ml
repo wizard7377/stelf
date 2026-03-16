@@ -15,10 +15,10 @@ module type MATCH = sig
   val matchW : IntSyn.dctx * IntSyn.eclo * IntSyn.eclo -> unit
 
   (* raises Unify *)
-  val matchBlock : IntSyn.dctx * IntSyn.block_ * IntSyn.block_ -> unit
+  val matchBlock : IntSyn.dctx * IntSyn.block * IntSyn.block -> unit
 
   (* raises Unify *)
-  val matchSub : IntSyn.dctx * IntSyn.sub_ * IntSyn.sub_ -> unit
+  val matchSub : IntSyn.dctx * IntSyn.sub * IntSyn.sub -> unit
 
   (* raises Unify *)
   (* instance (G, Us,Us') will instantiate EVars as an effect 
