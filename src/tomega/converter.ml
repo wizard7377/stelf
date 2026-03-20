@@ -104,13 +104,13 @@ end) : CONVERTER = struct
 
     let rec typeOf a =
       begin match I.sgnLookup a with
-      | I.ConDec (name, _, _, _, v_, kind_) -> v_
+      | I.ConDec (name, _, _, _, v_, I.Kind) -> v_
       | _ -> raise (Error "Type Constant declaration expected")
       end
 
     let rec nameOf a =
       begin match I.sgnLookup a with
-      | I.ConDec (name, _, _, _, v_, kind_) -> name
+      | I.ConDec (name, _, _, _, v_, I.Kind) -> name
       | _ -> raise (Error "Type Constant declaration expected")
       end
 
@@ -126,7 +126,7 @@ end) : CONVERTER = struct
       | I.BDec (name, (l_, t)), s -> I.BDec (name, (l_, strengthenSub (t, s)))
 
     let rec strengthenCtx = function
-      | null_, s -> (I.Null, s)
+      | I.Null, s -> (I.Null, s)
       | I.Decl (g_, d_), s ->
           let g'_, s' = strengthenCtx (g_, s) in
           (I.Decl (g'_, strengthenDec (d_, s')), I.dot1 s')
@@ -162,7 +162,7 @@ end) : CONVERTER = struct
           I.App (strengthenExp (u_, t), strengthenSpine (s_, t))
 
     let rec strengthenPsi = function
-      | null_, s -> (I.Null, s)
+      | I.Null, s -> (I.Null, s)
       | I.Decl (psi_, T.UDec d_), s ->
           let psi'_, s' = strengthenPsi (psi_, s) in
           (I.Decl (psi'_, T.UDec (strengthenDec (d_, s'))), I.dot1 s')
@@ -180,7 +180,7 @@ end) : CONVERTER = struct
           (T.UDec d'_ :: psi''_, s'')
 
     let rec ctxSub = function
-      | null_, s -> (I.Null, s)
+      | I.Null, s -> (I.Null, s)
       | I.Decl (g_, d_), s ->
           let g'_, s' = ctxSub (g_, s) in
           (I.Decl (g'_, I.decSub (d_, s')), I.dot1 s)
@@ -196,7 +196,7 @@ end) : CONVERTER = struct
       | psi0_, [] -> ()
       | psi0_, (g_, v_) :: sig_ ->
           let rec append = function
-            | g_, null_ -> g_
+            | g_, I.Null -> g_
             | g_, I.Decl (g'_, d_) -> I.Decl (append (g_, g'_), d_)
           in
           begin
@@ -208,7 +208,7 @@ end) : CONVERTER = struct
     let rec convertOneFor cid =
       let v_ =
         begin match I.sgnLookup cid with
-        | I.ConDec (name, _, _, _, v_, kind_) -> v_
+        | I.ConDec (name, _, _, _, v_, I.Kind) -> v_
         | _ -> raise (Error "Type Constant declaration expected")
         end
       in
@@ -233,7 +233,7 @@ end) : CONVERTER = struct
               convertFor' (v_, mS, I.comp (w1, I.shift), I.dot1 w2, n + 1)
             in
             (f'_, T.Ex ((I.decSub (d_, w2), T.Explicit), f''_))
-        | I.Uni type_, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
+        | I.Uni I.Type, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
       let rec shiftPlus mS =
@@ -307,7 +307,7 @@ end) : CONVERTER = struct
 
     let rec domain = function
       | g_, I.Dot (I.Idx _, s) -> domain (g_, s) + 1
-      | null_, I.Shift 0 -> 0
+      | I.Null, I.Shift 0 -> 0
       | (I.Decl _ as g_), I.Shift 0 -> domain (g_, I.Dot (I.Idx 1, I.Shift 1))
       | I.Decl (g_, _), I.Shift n -> domain (g_, I.Shift (n - 1))
 
@@ -338,7 +338,7 @@ end) : CONVERTER = struct
             let (I.BlockDec (_, _, g_, _)) = I.sgnLookup cid in
             occursInSub (n, s, g_) || occursInPsi (n + 1, (psi1_, l_))
       and occursInSub = function
-        | _, _, null_ -> false
+        | _, _, I.Null -> false
         | n, I.Shift k, g_ ->
             occursInSub (n, I.Dot (I.Idx (k + 1), I.Shift (k + 1)), g_)
         | n, I.Dot (I.Idx k, s), I.Decl (g_, _) ->
@@ -347,35 +347,35 @@ end) : CONVERTER = struct
             occursInExp (n, u_) || occursInSub (n, s, g_)
         | n, I.Dot (I.Block _, s), I.Decl (g_, _) -> occursInSub (n, s, g_)
       and occursInG = function
-        | n, null_, k -> k n
+        | n, I.Null, k -> k n
         | n, I.Decl (g_, I.Dec (_, v_)), k ->
             occursInG
               (n, g_, function n' -> occursInExp (n', v_) || k (n' + 1))
       in
       let rec occursBlock (g_, (psi2_, l_)) =
         let rec occursBlock = function
-          | null_, n -> false
+          | I.Null, n -> false
           | I.Decl (g_, d_), n ->
               occursInPsi (n, (psi2_, l_)) || occursBlock (g_, n + 1)
         in
         occursBlock (g_, 1)
       in
       let rec inBlock = function
-        | null_, (bw, w1) -> (bw, w1)
+        | I.Null, (bw, w1) -> (bw, w1)
         | I.Decl (g_, d_), (bw, w1) -> begin
             if isIdx1 (I.bvarSub (1, w1)) then inBlock (g_, (true, dot1inv w1))
             else inBlock (g_, (bw, strengthenSub (w1, I.shift)))
           end
       in
       let rec blockSub = function
-        | null_, w -> (I.Null, w)
+        | I.Null, w -> (I.Null, w)
         | I.Decl (g_, I.Dec (name, v_)), w ->
             let g'_, w' = blockSub (g_, w) in
             let v'_ = strengthenExp (v_, w') in
             (I.Decl (g'_, I.Dec (name, v'_)), I.dot1 w')
       in
       let rec strengthen' = function
-        | null_, psi2_, l_, w1 -> (I.Null, I.id, I.id)
+        | I.Null, psi2_, l_, w1 -> (I.Null, I.id, I.id)
         | I.Decl (psi1_, (T.UDec (I.Dec (name, v_)) as ld_)), psi2_, l_, w1 ->
           begin
             if isIdx1 (I.bvarSub (1, w1)) then
@@ -436,7 +436,7 @@ end) : CONVERTER = struct
       let mS = modeSpine a in
       let v_ = typeOf a in
       let rec transformInit' = function
-        | (nil_, M.Mnil), I.Uni type_, (w, s) -> (w, s)
+        | (nil_, M.Mnil), I.Uni I.Type, (w, s) -> (w, s)
         | ( (I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS)),
             I.Pi (_, v2_),
             (w, s) ) ->
@@ -500,7 +500,7 @@ end) : CONVERTER = struct
       (g_, renameExp f v_)
 
     let rec append = function
-      | g_, null_ -> g_
+      | g_, I.Null -> g_
       | g_, I.Decl (g'_, d_) -> I.Decl (append (g_, g'_), d_)
 
     let rec traverseNeg arg__7 arg__8 =
@@ -638,7 +638,7 @@ end) : CONVERTER = struct
           let b'_, _ = strengthenCtx (b_, w1') in
           let n' = n - I.ctxLength b'_ in
           let rec subCtx = function
-            | null_, s -> (I.Null, s)
+            | I.Null, s -> (I.Null, s)
             | I.Decl (g_, d_), s ->
                 let g'_, s' = subCtx (g_, s) in
                 (I.Decl (g'_, I.decSub (d_, s')), I.dot1 s')
@@ -656,7 +656,7 @@ end) : CONVERTER = struct
           let rr_ = T.forSub (f''_, iota) in
           let f'''_ = TA.raiseFor (gb'_, (rr_, I.id)) in
           let rec lift = function
-            | null_, p_ -> p_
+            | I.Null, p_ -> p_
             | I.Decl (g_, d_), p_ ->
                 let bint_, _ = T.deblockify (I.Decl (I.Null, d_)) in
                 lift (g_, T.New (T.Lam (T.UDec d_, p_)))
@@ -758,7 +758,7 @@ end) : CONVERTER = struct
                 sig'_ )
       in
       let rec mediateSub = function
-        | null_ -> (I.Null, I.Shift (I.ctxLength psi0_))
+        | I.Null -> (I.Null, I.Shift (I.ctxLength psi0_))
         | I.Decl (g_, d_) ->
             let g0_, s' = mediateSub g_ in
             let d'_ = I.decSub (d_, s') in
@@ -778,7 +778,7 @@ end) : CONVERTER = struct
 
     let rec staticSig = function
       | psi0_, [] -> []
-      | psi0_, I.ConDec (name, _, _, _, v_, type_) :: sig_ ->
+      | psi0_, I.ConDec (name, _, _, _, v_, I.Type) :: sig_ ->
           (I.Null, Whnf.normalize (v_, I.Shift (I.ctxLength psi0_)))
           :: staticSig (psi0_, sig_)
 

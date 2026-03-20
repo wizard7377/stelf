@@ -161,11 +161,11 @@ end) : STATE = struct
       end
 
     let rec init (f_, w_) =
-      let x_ = T.newEVar (I.null_, f_) in
-      State (w_, I.null_, x_, f_)
+      let x_ = T.newEVar (I.Null, f_) in
+      State (w_, I.Null, x_, f_)
 
     let rec close (State (w_, _, p_, _)) =
-      begin match (findPrg p_, findExp (I.null_, p_) []) with
+      begin match (findPrg p_, findExp (I.Null, p_) []) with
       | [], [] -> true
       | _ -> false
       end
@@ -196,8 +196,8 @@ end) : STATE = struct
   let close = close
   let init = init
   let collectT = findPrg
-  let collectLF = function p_ -> findExp (I.null_, p_) []
-  let collectLFSub = function s -> findExpSub (I.null_, s) []
+  let collectLF = function p_ -> findExp (I.Null, p_) []
+  let collectLFSub = function s -> findExpSub (I.Null, s) []
 end
 
 (* # 1 "src/prover/state.sml.ml" *)

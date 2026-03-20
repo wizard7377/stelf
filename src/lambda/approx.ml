@@ -6,7 +6,7 @@ open Intsyn
 (* Author: Kevin Watkins *)
 module type APPROX = sig
   (*! structure IntSyn : INTSYN !*)
-  type uni = Level of int | Next of uni | LVar of uni option ref
+  type uni = Level of int | Next of uni | LVar of uni option ref [@@deriving eq, show]
 
   (* 1 = type, 2 = kind, 3 = hyperkind, etc. *)
   type exp =
@@ -15,6 +15,7 @@ module type APPROX = sig
     | Const of IntSyn.head
     | CVar of exp option ref
     | Undefined
+    [@@deriving eq, show]
 
   (* Const/Def/NSDef *)
   val type_ : uni
@@ -104,14 +105,16 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
     (* The approximate language *);;
     type uni = | Level of int 
                 | Next of uni 
-                | LVar of uni option ref ;;
+                | LVar of uni option ref 
+                [@@deriving eq, show]
     (* 1 = type, 2 = kind, 3 = hyperkind, etc. *);;
     type exp =
       | Uni of uni 
       | Arrow of exp * exp 
       | Const of I.head 
       | CVar of exp option ref 
-      | Undefined ;;
+      | Undefined 
+      [@@deriving eq, show]
     (* Const/Def/NSDef *);;
     (* Because approximate type reconstruction uses the pattern G |- U
      ~:~ V ~:~ L and universe unification on L, if U is to be an
@@ -197,7 +200,8 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
          then u : v : l *);;
     let rec findByReplacementName name =
       begin match varLookupName name with 
-                                          | Some (uvl_, _) -> uvl_ end
+                                        | Some (uvl_, _) -> uvl_
+                                        | None -> Logs.debug (fun m -> m "Failed to find name") ; raise (Fail "Name not found") end
       (* must be in list by invariant *);;
     (* converting exact terms to approximate terms *);;
     (* uniToApx (L) = L- *);;
@@ -325,7 +329,7 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
                                                allowed)
                                               in let v'_ =
                                                    apxToClass
-                                                   (I.Null, v_, (Level 2),
+                                                   (Null, v_, (Level 2),
                                                     allowed)
                                                    in let s' =
                                                         (I.Shift
@@ -387,16 +391,20 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
        otherwise raises Unify *);;
     let rec occurW =
       function 
+                | (r, _) when !r == None -> false
                | (r, Arrow (v1_, v2_))
                    -> begin
-                        occur (r, v1_);occur (r, v2_)
+                        occur' (r, v1_) || occur' (r, v2_)
                         end
                | (r, CVar r') -> begin
                    if r = r' then
-                   raise ((Unify "Type/kind variable occurrence")) else ()
+                   raise ((Unify ("Type/kind variable occurrence"))) else false 
                    end
-               | (r, _) -> ()
-    and occur (r, u_) = occurW (r, whnf u_);;
+               | (r, _) -> false
+    and occur' (r, u_) =
+       occurW (r, whnf u_);;
+
+    let occur = ignore occur' ;;
     (* match (u1, u2) = ()
        iff u1<I> = u2<I> : v for some most general instantiation I
        effect: applies I
@@ -425,11 +433,11 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
                    (* strictness is irrelevant to matching on approximate types *)(* others cannot occur by invariant *)
                | (Arrow (v1_, v2_), Arrow (v3_, v4_))
                    -> begin
-                        try match_ (v1_, v3_)
-                        with 
+                        (try match_ (v1_, v3_)
+                        with
                              | e -> begin
                                       match_ (v2_, v4_);raise e
-                                      end;
+                                      end);
                         match_ (v2_, v4_)
                         end
                | ((Arrow _ as v1_), Const (I.Def d2))
@@ -444,13 +452,20 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
                    if r1 = r2 then () else r1 := ((Some u2_)) end
                | (CVar r1, u2_)
                    -> begin
-                        occurW (r1, u2_);r1 := ((Some u2_))
+                        ignore @@ occurW (r1, u2_); r1 := ((Some u2_))
                         end
                | (u1_, CVar r2)
                    -> begin
-                        occurW (r2, u1_);r2 := ((Some u1_))
+                        ignore @@ occurW (r2, u1_); r2 := ((Some u1_))
                         end
-               | _ -> raise ((Unify "Type/kind expression clash"))
+               | u -> begin 
+                  Debug.(msg Group.approx Level.Debug @@ Fmt.concat Fmt.[
+                    const string "Failed to match" ;
+                    using fst pp_exp ; 
+                    const string "with" ; 
+                    using snd pp_exp]) u;
+                  raise ((Unify "Type/kind expression clash"))
+               end
     and match_ (u1_, u2_) = matchW (whnf u1_, whnf u2_);;
     let rec matchable (u1_, u2_) =
       try begin

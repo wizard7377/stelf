@@ -46,9 +46,9 @@ end) : INDEX = struct
 
     let rec install fromCS (I.Const c as h_) =
       begin match (fromCS, I.sgnLookup c) with
-      | _, I.ConDec (_, _, _, _, a_, type_) ->
+      | _, I.ConDec (_, _, _, _, a_, I.Type) ->
           update (cidFromHead (I.targetHead a_), h_)
-      | clause_, I.ConDef (_, _, _, _, a_, type_, _) ->
+      | clause_, I.ConDef (_, _, _, _, a_, I.Type, _) ->
           update (cidFromHead (I.targetHead a_), I.Def c)
       | _ -> ()
       end
@@ -63,9 +63,9 @@ end) : INDEX = struct
 
     let rec uninstall cid =
       begin match I.sgnLookup cid with
-      | I.ConDec (_, _, _, _, a_, type_) ->
+      | I.ConDec (_, _, _, _, a_, I.Type) ->
           remove (cidFromHead (I.targetHead a_), cid)
-      | I.ConDef (_, _, _, _, a_, type_, _) ->
+      | I.ConDef (_, _, _, _, a_, I.Type, _) ->
           remove (cidFromHead (I.targetHead a_), cid)
       | _ -> ()
       end

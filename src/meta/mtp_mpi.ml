@@ -334,7 +334,7 @@ end) : MTPI = struct
       let _ = MTPGlobal.maxFill := k in
       let _ = reset () in
       let f_ = RelFun.convertFor cL in
-      let o_ = transformOrder (I.null_, f_, map select cL) in
+      let o_ = transformOrder (I.Null, f_, map select cL) in
       let slist_ = MTPInit.init (f_, Obj.magic o_) in
       let _ =
         begin if List.length slist_ = 0 then raise Domain else ()

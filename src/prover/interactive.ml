@@ -106,7 +106,7 @@ end) : INTERACTIVE = struct
     let rec convertOneFor cid =
       let v_ =
         begin match I.sgnLookup cid with
-        | I.ConDec (name, _, _, _, v_, kind_) -> v_
+        | I.ConDec (name, _, _, _, v_, I.Kind) -> v_
         | _ -> raise (Error "Type Constant declaration expected")
         end
       in
@@ -132,7 +132,7 @@ end) : INTERACTIVE = struct
               convertFor' (v_, mS, I.comp (w1, I.shift), I.dot1 w2, n + 1)
             in
             (f'_, T.Ex ((I.decSub (d_, w2), T.Explicit), f''_))
-        | I.Uni type_, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
+        | I.Uni I.Type, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
       let rec shiftPlus mS =
@@ -255,7 +255,7 @@ end) : INTERACTIVE = struct
           begin
             print "\n=== THEOREM PROVER ====\n";
             begin
-              print (Print.ctxToString (I.null_, g_));
+              print (Print.ctxToString (I.Null, g_));
               begin
                 print "\n-----------------------\n";
                 begin
@@ -289,7 +289,7 @@ end) : INTERACTIVE = struct
             map
               (function
                 | T.EVar (psi_, r, f_, tc_, tCs_, x_) -> begin
-                    Names.varReset I.null_;
+                    Names.varReset I.Null;
                     S.Focus
                       ( T.EVar (TomegaPrint.nameCtx psi_, r, f_, tc_, tCs_, x_),
                         w_ )
@@ -325,7 +325,7 @@ end) : INTERACTIVE = struct
           let split = splitMenu (map Split.expand f1_) in
           menu_ := Some (intro @ split @ fill @ elim)
       | S.StateLF y_ :: _ ->
-          let ys_ = Abstract.collectEVars (I.null_, (y_, I.id), []) in
+          let ys_ = Abstract.collectEVars (I.Null, (y_, I.id), []) in
           let f2_ = map (function y_ -> S.FocusLF y_) ys_ in
           let fill =
             foldr
@@ -373,7 +373,7 @@ end) : INTERACTIVE = struct
       let f_ = convertFor cL in
       let ws_ = map W.lookup cL in
       let rec select c = try Order.selLookup c with _ -> Order.Lex [] in
-      let tc_ = Tomega.transformTC (I.null_, f_, map select cL) in
+      let tc_ = Tomega.transformTC (I.Null, f_, map select cL) in
       let (w_ :: _) = ws_ in
       let _ = focus_ := [ S.init (f_, w_) ] in
       let p_ =
@@ -387,7 +387,7 @@ end) : INTERACTIVE = struct
         map
           (function
             | T.EVar (psi_, r, f_, tc_, tCs_, x_) -> begin
-                Names.varReset I.null_;
+                Names.varReset I.Null;
                 S.Focus
                   (T.EVar (TomegaPrint.nameCtx psi_, r, f_, tc_, tCs_, x_), w_)
               end)

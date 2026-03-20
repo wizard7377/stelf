@@ -131,7 +131,7 @@ end) : CLAUSEPRINT = struct
           fmtClauseI (i - 1, I.Decl (g_, Names.decEName (g_, d_)), v_)
 
     let rec fmtConDec = function
-      | I.ConDec (id, parent, i, _, v_, type_) ->
+      | I.ConDec (id, parent, i, _, v_, I.Type) ->
           let _ = Names.varReset IntSyn.Null in
           let vfmt_ = fmtClauseI (i, I.Null, v_) in
           F.hVbox

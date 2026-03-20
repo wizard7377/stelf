@@ -418,7 +418,7 @@ end) : Cs.CS = struct
       in
       let rec isSubsumedByCol () =
         begin if constRow = zero then
-          let nonNull =
+          let non_null =
             Array.foldl
               (function
                 | j, (l : label), rest -> begin
@@ -431,7 +431,7 @@ end) : Cs.CS = struct
               []
               (tableau.clabels, 0, nCols ())
           in
-          begin match nonNull with
+          begin match non_null with
           | (j, value) :: [] -> begin if value = one then Some j else None end
           | _ -> None
           end
@@ -731,7 +731,7 @@ end) : Cs.CS = struct
             match restriction l with
             | Some (Restr (_, proof', _)) -> unifyRestr (restr, proof')
             | None ->
-                let nonNull =
+                let non_null =
                   Array.foldl
                     (function
                       | i, (l : label), rest -> begin
@@ -744,7 +744,7 @@ end) : Cs.CS = struct
                     []
                     (tableau.rlabels, 0, nRows ())
                 in
-                begin match nonNull with
+                begin match non_null with
                 | row :: _ -> begin
                     Trail.log (tableau.trail, Pivot (row, col));
                     begin
@@ -1293,7 +1293,7 @@ end) : Cs.CS = struct
          const[i] = zero
          coeff[i,j] = zero
        for i >= !nrows or j > !ncols, where ""vacuous"" is the vacuous label:
-          #owner(vacuous) = Exp (Null, Sum (zero, nil))
+          #owner(vacuous) = Exp (I.Null, Sum (zero, nil))
           #restr(vacuous) = ref NONE
           #dead(vacuous) = ref true
     *)

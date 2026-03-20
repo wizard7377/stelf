@@ -86,7 +86,7 @@ end) : COVER = struct
   module N = Names
 
   let rec weaken = function
-    | null_, a -> I.id
+    | I.Null, a -> I.id
     | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
         let w' = weaken (g'_, a) in
         begin if Subordinate.belowEq (I.targetFam v_, a) then I.dot1 w'
@@ -182,7 +182,7 @@ end) : COVER = struct
         let d'_ = N.decEName (g_, d_) in
         let v'_, p = initCGoal' (a, k + 1, I.Decl (g_, d'_), v_) in
         (I.Pi ((d'_, I.Maybe), v'_), p)
-    | a, k, g_, I.Uni type_ -> (I.Root (a, buildSpine k), k)
+    | a, k, g_, I.Uni I.Type -> (I.Root (a, buildSpine k), k)
 
   let rec initCGoal a = initCGoal' (I.Const a, 0, I.Null, I.constType a)
 
@@ -475,7 +475,7 @@ end) : COVER = struct
         matchBlocks (g_, s', piDecs, v_, k, i, ci, klist)
 
   let rec matchCtx = function
-    | g_, s', null_, v_, k, ci, klist -> klist
+    | g_, s', I.Null, v_, k, ci, klist -> klist
     | g_, s', I.Decl (g''_, I.Dec (_, v'_)), v_, k, ci, klist ->
         let s'' = I.comp (I.shift, s') in
         let cands =
@@ -609,7 +609,7 @@ end) : COVER = struct
         paramCases (g_, vs_, k - 1, sc)
 
   let rec createEVarSub = function
-    | null_ -> I.id
+    | I.Null -> I.id
     | I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
         let s = createEVarSub g'_ in
         let x_ = Whnf.newLoweredEVar (I.Null, (v_, s)) in
@@ -828,7 +828,7 @@ end) : COVER = struct
         eqInpSpine (ms', (s_, s), (s'_, s'))
 
   let rec eqInp = function
-    | null_, k, a, ss_, ms -> []
+    | I.Null, k, a, ss_, ms -> []
     | I.Decl (g'_, I.Dec (_, I.Root (I.Const a', s'_))), k, a, ss_, ms -> begin
         if a = a' && eqInpSpine (ms, (s'_, I.Shift k), ss_) then
           k :: eqInp (g'_, k + 1, a, ss_, ms)
@@ -841,7 +841,7 @@ end) : COVER = struct
         eqInp (g'_, k + 1, a, ss_, ms)
 
   let rec contractionCands = function
-    | null_, k -> []
+    | I.Null, k -> []
     | I.Decl (g'_, I.Dec (_, I.Root (I.Const a, s_))), k -> begin
         match UniqueTable.modeLookup a with
         | None -> contractionCands (g'_, k + 1)
@@ -1025,7 +1025,7 @@ end) : COVER = struct
   let rec createCoverClause = function
     | I.Decl (g_, d_), v_, p ->
         createCoverClause (g_, I.Pi ((d_, I.Maybe), v_), p + 1)
-    | null_, v_, p -> (Whnf.normalize (v_, I.id), p)
+    | I.Null, v_, p -> (Whnf.normalize (v_, I.id), p)
 
   let rec createCoverGoal (g_, vs_, p, ms) =
     createCoverGoalW (g_, Whnf.whnf vs_, p, ms)
@@ -1746,7 +1746,7 @@ val _ = pr ()
          Both types start with the same a, a must have a uniqueness mode
        Effect: Evars may be instantiated by unification
     *)
-  (* G1 = G2 = Null *)
+  (* G1 = G2 = I.Null *)
   (* unifyUOut2 ([X1,...,Xp], k1, k2) = (see unifyOutEvars (X{k1}, X{k2})) *)
   (* unifyOut1 ([X1,...,Xp], [k1, k2, ..., kn] = true
        if X{k1} ""=="" X{k2} ""=="" ... ""=="" X{kn} according to unifyOutEvars
@@ -1998,7 +1998,7 @@ val _ = pr ()
                      G |- s : G'
     *)
   let rec newEVarSubst = function
-    | g_, null_ -> I.Shift (I.ctxLength g_)
+    | g_, I.Null -> I.Shift (I.ctxLength g_)
     | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
         let s' = newEVarSubst (g_, g'_) in
         let x_ = Whnf.newLoweredEVar (g_, (v_, s')) in
@@ -2316,7 +2316,7 @@ val _ = pr ()
        {{G}} erases void declarations in G
     *)
   let rec substToSpine' = function
-    | I.Shift n, null_, t_ -> t_
+    | I.Shift n, I.Null, t_ -> t_
     | I.Shift n, (I.Decl _ as g_), t_ ->
         substToSpine' (I.Dot (I.Idx (n + 1), I.Shift (n + 1)), g_, t_)
     | I.Dot (_, s), I.Decl (g_, I.NDec _), t_ -> substToSpine' (s, g_, t_)
@@ -2354,7 +2354,7 @@ val _ = pr ()
        then  |- G ctx and  G' |- s : G
     *)
   let rec purify' = function
-    | null_ -> (I.Null, I.id)
+    | I.Null -> (I.Null, I.id)
     | I.Decl (g_, I.NDec _) ->
         let g'_, s = purify' g_ in
         (g'_, I.Dot (I.Undef, s))

@@ -73,7 +73,7 @@ struct
   let rec xlate_kind = function
     | I.Pi ((I.Dec (_, e1), _), e2) ->
         S.KPi (S.Minus, xlate_type e1, xlate_kind e2)
-    | I.Uni type_ -> S.Type
+    | I.Uni I.Type -> S.Type
 
   open! struct
     open Syntax
@@ -89,7 +89,7 @@ struct
 
   let rec simplify_knd = function
     | KPi (_, t1, k2) -> Arrow (simplify_tp t1, simplify_knd k2)
-    | type_ -> Base
+    | S.Type -> Base
 
   (* hereditarily perform some eta-expansions on
      a (term, type, spine, etc.) in a context
@@ -146,7 +146,7 @@ struct
 
   and eta_expand_knd arg__11 arg__12 =
     begin match (arg__11, arg__12) with
-    | g_, type_ -> type_
+    | g_, S.Type -> S.Type
     | g_, KPi (m, a, b) ->
         KPi (m, eta_expand_tp g_ a, eta_expand_knd (simplify_tp a :: g_) b)
     end
@@ -299,40 +299,40 @@ struct
     | g_, (Some (m :: ms), S.KPi (_, a, k)) ->
         S.KPi
           (m, compress_type g_ (None, a), compress_kind (a :: g_) (Some ms, k))
-    | g_, (Some [], type_) -> S.Type
-    | g_, (None, type_) -> S.Type
+    | g_, (Some [], S.Type) -> S.Type
+    | g_, (None, S.Type) -> S.Type
     end
 
   (* compress : cid * IntSyn.ConDec -> ConDec *)
   let rec compress = function
-    | cid, IntSyn.ConDec (name, None, _, normal_, a, type_) ->
+    | cid, IntSyn.ConDec (name, None, _, normal_, a, I.Type) ->
         let x = xlate_type a in
         let x = eta_expand_tp [] x in
         let modes = Sgn.get_modes cid in
         Sgn.condec (name, compress_type [] (modes, x), x)
-    | cid, IntSyn.ConDec (name, None, _, normal_, k, kind_) ->
+    | cid, IntSyn.ConDec (name, None, _, normal_, k, IntSyn.Kind) ->
         let x = xlate_kind k in
         let modes = Sgn.get_modes cid in
         Sgn.tycondec (name, compress_kind [] (modes, x), x)
-    | cid, IntSyn.ConDef (name, None, _, m, a, type_, _) ->
+    | cid, IntSyn.ConDef (name, None, _, m, a, I.Type, _) ->
         let m = xlate_term m in
         let a = xlate_type a in
         let astar = compress_type [] (None, a) in
         let mstar = compress_term [] (m, a) in
         Sgn.defn (name, astar, a, mstar, m)
-    | cid, IntSyn.ConDef (name, None, _, a, k, kind_, _) ->
+    | cid, IntSyn.ConDef (name, None, _, a, k, IntSyn.Kind, _) ->
         let a = xlate_type a in
         let k = xlate_kind k in
         let kstar = compress_kind [] (None, k) in
         let astar = compress_type (Syntax.explodeKind kstar) (None, a) in
         Sgn.tydefn (name, kstar, k, astar, a)
-    | cid, IntSyn.AbbrevDef (name, None, _, m, a, type_) ->
+    | cid, IntSyn.AbbrevDef (name, None, _, m, a, I.Type) ->
         let m = xlate_term m in
         let a = xlate_type a in
         let astar = compress_type [] (None, a) in
         let mstar = compress_term [] (m, a) in
         Sgn.abbrev (name, astar, a, mstar, m)
-    | cid, IntSyn.AbbrevDef (name, None, _, a, k, kind_) ->
+    | cid, IntSyn.AbbrevDef (name, None, _, a, k, IntSyn.Kind) ->
         let a = xlate_type a in
         let k = xlate_kind k in
         let kstar = compress_kind [] (None, k) in

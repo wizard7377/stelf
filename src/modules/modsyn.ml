@@ -174,7 +174,7 @@ end) : MODSYN = struct
   (* reconstruct Anc?? -fp *)
 
   let rec strictify = function
-    | IntSyn.AbbrevDef (name, parent, i, u_, v_, type_) as condec -> (
+    | IntSyn.AbbrevDef (name, parent, i, u_, v_, I.Type) as condec -> (
         try
           begin
             Strict.check ((u_, v_), None);

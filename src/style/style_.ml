@@ -225,7 +225,7 @@ end) : STYLECHECK = struct
           end;
           checkType' c ((I.Null, I.Null), implicit, u_, P.top) P.occToRegionDec
         end
-      | c, I.ConDef (_, _, implicit, u_, v_, type_, _) -> begin
+      | c, I.ConDef (_, _, implicit, u_, v_, I.Type, _) -> begin
           begin if !Global.chatter > 3 then
             print (Names.qidToString (Names.constQid c) ^ " ")
           else ()
@@ -233,7 +233,7 @@ end) : STYLECHECK = struct
           checkType' c ((I.Null, I.Null), implicit, v_, P.top) P.occToRegionDef2
           @ checkDef c ((I.Null, I.Null), implicit, u_, P.top) P.occToRegionDef1
         end
-      | c, I.AbbrevDef (_, _, implicit, u_, v_, type_) -> begin
+      | c, I.AbbrevDef (_, _, implicit, u_, v_, I.Type) -> begin
           begin if !Global.chatter > 3 then
             print (Names.qidToString (Names.constQid c) ^ " ")
           else ()

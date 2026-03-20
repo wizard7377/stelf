@@ -67,7 +67,7 @@ end) : UNIQUE = struct
       | g_, ((I.Root _, _) as vs_) -> vs_
 
     let rec createEVarSub = function
-      | g_, null_ -> I.Shift (I.ctxLength g_)
+      | g_, I.Null -> I.Shift (I.ctxLength g_)
       | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
           let s = createEVarSub (g_, g'_) in
           let v'_ = I.EClo (v_, s) in
@@ -113,11 +113,11 @@ end) : UNIQUE = struct
         chatter 6 (function () ->
             ((("?- " ^ cName cid) ^ " ~ ") ^ cName cid') ^ "\n")
       in
-      let vs_ = instEVars (I.null_, (I.constType cid, I.id)) in
-      let vs'_ = instEVars (I.null_, (I.constType cid', I.id)) in
+      let vs_ = instEVars (I.Null, (I.constType cid, I.id)) in
+      let vs'_ = instEVars (I.Null, (I.constType cid', I.id)) in
       let _ =
         Cs_manager.trail (function () ->
-            begin if unifiableRoots (I.null_, vs_, vs'_, ms) then
+            begin if unifiableRoots (I.Null, vs_, vs'_, ms) then
               raise
                 (Error
                    (((("Constants " ^ cName cid) ^ " and ") ^ cName cid')
@@ -184,8 +184,8 @@ end) : UNIQUE = struct
             (I.Decl (g_, d_), (I.dot1 t, piDecs), (a, ms), b)
 
     let rec checkUniqueBlockInternal ((gsome_, piDecs), (a, ms), b) =
-      let t = createEVarSub (I.null_, gsome_) in
-      checkUniqueBlockInternal' (I.null_, (t, piDecs), (a, ms), b)
+      let t = createEVarSub (I.Null, gsome_) in
+      checkUniqueBlockInternal' (I.Null, (t, piDecs), (a, ms), b)
 
     let rec checkUniqueBlockConsts = function
       | g_, vs_, [], ms, bx -> ()
@@ -257,8 +257,8 @@ end) : UNIQUE = struct
             (I.Decl (g_, d_), (I.dot1 t, piDecs), bs, cs, (a, ms), b)
 
     let rec checkUniqueBlock ((gsome_, piDecs), bs, cs, (a, ms), b) =
-      let t = createEVarSub (I.null_, gsome_) in
-      checkUniqueBlock' (I.null_, (t, piDecs), bs, cs, (a, ms), b)
+      let t = createEVarSub (I.Null, gsome_) in
+      checkUniqueBlock' (I.Null, (t, piDecs), bs, cs, (a, ms), b)
 
     let rec checkUniqueWorlds = function
       | [], cs, (a, ms) -> ()

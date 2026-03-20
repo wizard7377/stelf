@@ -77,11 +77,7 @@ module Timing : TIMING = struct
   (* TODO: Timer module is not directly accessible via open Basis.
        Stub the timer-dependent functions until Timer is properly available. *)
   let checkCPUAndGCTimer _timer = zero
-
-  let time (_, _counters) (f : 'a -> 'b) (x : 'a) =
-    let result = try Value (f x) with exn -> Exception exn in
-    begin match result with Value v -> v | Exception e -> raise e
-    end
+  let time (_, _counters) (f : 'a -> 'b) (x : 'a) = f x
 
   (* sumCenter (name, centers) = sc
        where sc is a new sum which contains the sum of the timings of centers.

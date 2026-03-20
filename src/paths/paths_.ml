@@ -4,7 +4,8 @@ open! Basis
 (* Paths, Occurrences, and Error Locations *)
 (** Author: Frank Pfenning *)
 module type PATHS = sig
-  type region = Reg of int * int
+  type region = Reg of int * int [@@deriving show]
+
 
   (** r ::= (i,j) is interval [i,j) *)
   type location = Loc of string * region
@@ -118,11 +119,11 @@ open! Basis;;
 (* Author: Frank Pfenning *);;
 module MakePaths() : PATHS =
   struct
-    type nonrec pos = int;;
+    type pos = int [@@deriving show];;
     (* characters, starting at 0 *);;
-    type region = | Reg of pos * pos ;;
+    type region = | Reg of pos * pos [@@deriving show] ;;
     (* r ::= (i,j) is interval [i,j) *);;
-    type location = | Loc of string * region ;;
+    type location = | Loc of string * region [@@deriving show] ;;
     (* loc ::= (filename, region) *);;
     type nonrec linesInfo = pos list;;
     let rec posToLineCol' (linesInfo, i) =

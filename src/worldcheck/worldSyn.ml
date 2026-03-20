@@ -129,7 +129,7 @@ end) : WORLDSYN = struct
     let rec formatReg r =
       begin match r with
       | Block (g_, dl) -> Print.formatDecList (g_, dl)
-      | Seq (dl, s) -> Print.formatDecList' (I.null_, (dl, s))
+      | Seq (dl, s) -> Print.formatDecList' (I.Null, (dl, s))
       | Star r -> F.hbox [ F.string "("; formatReg r; F.string ")*" ]
       | Plus (r1, r2) ->
           F.hVbox
@@ -164,7 +164,7 @@ end) : WORLDSYN = struct
         ]
 
     let rec createEVarSub = function
-      | g_, null_ -> I.Shift (I.ctxLength g_)
+      | g_, I.Null -> I.Shift (I.ctxLength g_)
       | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
           let s = createEVarSub (g_, g'_) in
           let v'_ = I.EClo (v_, s) in
@@ -446,7 +446,7 @@ end) : WORLDSYN = struct
             begin
               begin if !Global.chatter > 4 then Trace.clause c else ()
               end;
-              begin try checkClause (I.null_, I.constType c, w_, P.top)
+              begin try checkClause (I.Null, I.constType c, w_, P.top)
               with Error' (occ, msg) ->
                 raise (Error (wrapMsg (c, occ, msg)));
                 checkAll clist
@@ -461,7 +461,7 @@ end) : WORLDSYN = struct
             begin
               begin if !Global.chatter > 4 then Trace.clause d else ()
               end;
-              begin try checkClause (I.null_, I.constType d, w_, P.top)
+              begin try checkClause (I.Null, I.constType d, w_, P.top)
               with Error' (occ, msg) ->
                 raise (Error (wrapMsg (d, occ, msg)));
                 checkAll clist
@@ -477,7 +477,7 @@ end) : WORLDSYN = struct
       ()
 
     let rec ctxAppend = function
-      | g_, null_ -> g_
+      | g_, I.Null -> g_
       | g_, I.Decl (g'_, d_) -> I.Decl (ctxAppend (g_, g'_), d_)
 
     let rec checkSubordBlock (g_, g'_, l_) =
@@ -504,7 +504,7 @@ end) : WORLDSYN = struct
       | cid :: cids ->
           let someDecs, piDecs = constBlock cid in
           begin
-            checkSubordBlock (I.null_, someDecs, piDecs);
+            checkSubordBlock (I.Null, someDecs, piDecs);
             checkSubordWorlds cids
           end
 
@@ -528,7 +528,7 @@ end) : WORLDSYN = struct
 
     let rec ctxToList gin_ =
       let rec ctxToList' = function
-        | null_, g_ -> g_
+        | I.Null, g_ -> g_
         | I.Decl (g_, d_), g'_ -> ctxToList' (g_, d_ :: g'_)
       in
       ctxToList' (gin_, [])

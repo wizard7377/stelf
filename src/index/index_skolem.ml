@@ -29,15 +29,15 @@ end) : Index_.INDEX = struct
       begin match (arg__1, arg__2) with
       | fromCS, (I.Const c as h_) -> begin
           match (fromCS, I.sgnLookup c) with
-          | _, I.ConDec (_, _, _, _, a_, type_) ->
+          | _, I.ConDec (_, _, _, _, a_, I.Type) ->
               update (cidFromHead (I.targetHead a_), h_)
-          | clause_, I.ConDef (_, _, _, _, a_, type_, _) ->
+          | clause_, I.ConDef (_, _, _, _, a_, I.Type, _) ->
               update (cidFromHead (I.targetHead a_), I.Def c)
           | _ -> ()
         end
       | fromCS, (I.Skonst c as h_) -> begin
           match I.sgnLookup c with
-          | I.SkoDec (_, _, _, a_, type_) ->
+          | I.SkoDec (_, _, _, a_, I.Type) ->
               update (cidFromHead (I.targetHead a_), h_)
           | _ -> ()
         end
@@ -56,9 +56,9 @@ end) : Index_.INDEX = struct
 
     let rec uninstall cid =
       begin match I.sgnLookup cid with
-      | I.ConDec (_, _, _, _, a_, type_) ->
+      | I.ConDec (_, _, _, _, a_, I.Type) ->
           remove (cidFromHead (I.targetHead a_), cid)
-      | I.SkoDec (_, _, _, a_, type_) ->
+      | I.SkoDec (_, _, _, a_, I.Type) ->
           remove (cidFromHead (I.targetHead a_), cid)
       | _ -> ()
       end

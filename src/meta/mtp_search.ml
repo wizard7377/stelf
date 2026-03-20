@@ -84,20 +84,20 @@ end) : MTPSEARCH = struct
       | _ -> false
 
     let rec compose' = function
-      | null_, g_ -> g_
+      | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
     let rec shift = function
-      | null_, s -> s
+      | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
     let rec raiseType = function
-      | null_, v_ -> v_
+      | I.Null, v_ -> v_
       | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
 
     let rec exists p_ k_ =
       let rec exists' = function
-        | null_ -> false
+        | I.Null -> false
         | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
       in
       exists' k_
@@ -308,7 +308,7 @@ end) : MTPSEARCH = struct
                 matchSig' sgn'
           in
           let rec matchDProg = function
-            | null_, _ -> matchSig' (Index.lookup (cidFromHead ha_))
+            | I.Null, _ -> matchSig' (Index.lookup (cidFromHead ha_))
             | I.Decl (dPool', C.Dec (r, s, ha'_)), n -> begin
                 if eqHead (ha_, ha'_) then
                   let _ =

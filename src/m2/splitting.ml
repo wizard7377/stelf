@@ -126,7 +126,7 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     let rec split (M.Prefix (g_, m_, b_), ((I.Dec (_, v_) as d_), s), abstract)
         =
       lowerSplitDest
-        ( I.null_,
+        ( I.Null,
           (v_, s),
           function
           | name', u'_ ->
@@ -359,7 +359,7 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       let v'_ = Whnf.normalize (v'_, I.id) in
       let b''_, 0, 0 =
         inheritDBot
-          (b_, 0, v_, 0, v'_, inheritDTop (b_, 0, v_, 0, v'_, (I.null_, d, d')))
+          (b_, 0, v_, 0, v'_, inheritDTop (b_, 0, v_, 0, v'_, (I.Null, d, d')))
       in
       M.State (name', M.Prefix (g'_, m'_, b''_), v'_)
 

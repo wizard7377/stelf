@@ -952,7 +952,7 @@ end) : TOMEGA = struct
   (* ctxDec' (G'', k') = x:V
              where G |- ^(k-k') : G'', 1 <= k' <= k
            *)
-  (* ctxDec' (Null, k')  should not occur by invariant *)
+  (* ctxDec' (I.Null, k')  should not occur by invariant *)
   (* mkInst (n) = iota
 
         Invariant:

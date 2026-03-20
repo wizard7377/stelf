@@ -59,7 +59,7 @@ end) : MTPRINT = struct
     let printFmt f = Fmt.string (PrintFmt.makestring_fmt f)
 
     let rec nameState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
-      let _ = Names.varReset I.null_ in
+      let _ = Names.varReset I.Null in
       let g'_ = Names.ctxName g_ in
       S.State (n, (g'_, b_), (ih_, oh_), d, o_, h_, f_)
 
@@ -101,15 +101,15 @@ end) : MTPRINT = struct
       | g_, S.Lemma S.RLdone -> [ Fmt.string "<i*>" ]
 
     let rec formatCtx = function
-      | null_, b_ -> []
+      | I.Null, b_ -> []
       | I.Decl (I.Null, d_), I.Decl (I.Null, t_) -> begin
           if !Global.chatter >= 4 then
             [
               Fmt.hVbox
-                (formatTag (I.null_, t_)
-                @ [ Fmt.break_; printFmt (Print.formatDec (I.null_, d_)) ]);
+                (formatTag (I.Null, t_)
+                @ [ Fmt.break_; printFmt (Print.formatDec (I.Null, d_)) ]);
             ]
-          else [ printFmt (Print.formatDec (I.null_, d_)) ]
+          else [ printFmt (Print.formatDec (I.Null, d_)) ]
         end
       | I.Decl (g_, d_), I.Decl (b_, t_) -> begin
           if !Global.chatter >= 4 then

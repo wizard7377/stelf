@@ -76,7 +76,7 @@ end) : METASYN = struct
     let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
 
     and createEVarSpineW = function
-      | g_, ((I.Uni type_, s) as vs_) -> (I.Nil, vs_)
+      | g_, ((I.Uni I.Type, s) as vs_) -> (I.Nil, vs_)
       | g_, ((I.Root _, s) as vs_) -> (I.Nil, vs_)
       | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
           let x_ = I.newEVar (g_, I.EClo (v1_, s)) in

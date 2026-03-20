@@ -241,7 +241,7 @@ end) : TOTAL = struct
         begin
           begin if !Global.chatter >= 6 then print "\n" else ()
           end;
-          begin try checkClause (I.null_, (I.constType c, I.id), P.top)
+          begin try checkClause (I.Null, (I.constType c, I.id), P.top)
           with Error' (occ, msg) ->
             error (c, occ, msg);
             checkOutCover cs
@@ -256,7 +256,7 @@ end) : TOTAL = struct
         begin
           begin if !Global.chatter >= 6 then print "\n" else ()
           end;
-          begin try checkClause (I.null_, (I.constType d, I.id), P.top)
+          begin try checkClause (I.Null, (I.constType d, I.id), P.top)
           with Error' (occ, msg) ->
             error (d, occ, msg);
             checkOutCover cs

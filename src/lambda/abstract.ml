@@ -241,7 +241,7 @@ end) : ABSTRACT = struct
         end
 
     let rec collectCtx = function
-      | g0_, null_, k_ -> (g0_, k_)
+      | g0_, I.Null, k_ -> (g0_, k_)
       | g0_, I.Decl (g_, d_), k_ ->
           let g0'_, k'_ = collectCtx (g0_, g_, k_) in
           let k''_ = collectDec (g0'_, (d_, I.id), k'_) in
@@ -339,7 +339,7 @@ end) : ABSTRACT = struct
           I.Dot (I.Block (abstractLVar (k_, 0, l_)), abstractSOME (k_, s))
 
     let rec abstractCtx = function
-      | k_, depth, null_ -> (I.Null, depth)
+      | k_, depth, I.Null -> (I.Null, depth)
       | k_, depth, I.Decl (g_, d_) ->
           let g'_, depth' = abstractCtx (k_, depth, g_) in
           let d'_ = abstractDec (k_, depth', (d_, I.id)) in
@@ -353,7 +353,7 @@ end) : ABSTRACT = struct
           g'_ :: gs'_
 
     let rec abstractKPi = function
-      | null_, v_ -> v_
+      | I.Null, v_ -> v_
       | I.Decl (k'_, Ev (I.EVar (_, gx_, vx_, _))), v_ ->
           let v'_ = raiseType (gx_, vx_) in
           let v''_ = abstractExp (k'_, 0, (v'_, I.id)) in

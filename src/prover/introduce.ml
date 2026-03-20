@@ -55,7 +55,7 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
       | T.PDec (name, f_, tc1_, tc2_) -> T.PDec (name, f_, tc1_, stripTCOpt tc2_)
 
     let rec strip = function
-      | null_ -> I.null_
+      | I.Null -> I.Null
       | I.Decl (psi_, d_) -> I.Decl (strip psi_, stripDec d_)
 
     let rec expand = function

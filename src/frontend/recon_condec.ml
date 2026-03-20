@@ -113,7 +113,7 @@ end) : RECON_CONDEC = struct
   (* Wed May 20 08:08:50 1998 -fp *)
   let rec condecToConDec = function
     | Condec_ (name, tm), Paths.Loc (fileName, r), abbFlag ->
-        let _ = Names.varReset IntSyn.null_ in
+        let _ = Names.varReset IntSyn.Null in
         let _ = ExtSyn.resetErrors fileName in
         let (ExtSyn.JClass ((v_, oc), l_)) =
           Timers.time Timers.recon ExtSyn.recon (ExtSyn.jclass tm)
@@ -144,7 +144,7 @@ end) : RECON_CONDEC = struct
         in
         (Some cd, Some ocd)
     | Condef_ (optName, tm1, tm2Opt), Paths.Loc (fileName, r), abbFlag ->
-        let _ = Names.varReset IntSyn.null_ in
+        let _ = Names.varReset IntSyn.Null in
         let _ = ExtSyn.resetErrors fileName in
         let f =
           begin match tm2Opt with
@@ -206,34 +206,34 @@ end) : RECON_CONDEC = struct
         (optConDec, Some ocd)
     | Blockdec_ (name, lsome_, lblock_), Paths.Loc (fileName, r), abbFlag ->
         let rec makectx = function
-          | [] -> IntSyn.null_
+          | [] -> IntSyn.Null
           | d_ :: l_ -> IntSyn.Decl (makectx l_, d_)
         in
         let rec ctxToList = function
-          | null_, acc -> acc
+          | IntSyn.Null, acc -> acc
           | IntSyn.Decl (g_, d_), acc -> ctxToList (g_, d_ :: acc)
         in
         let rec ctxAppend = function
-          | g_, null_ -> g_
+          | g_, IntSyn.Null -> g_
           | g_, IntSyn.Decl (g'_, d_) -> IntSyn.Decl (ctxAppend (g_, g'_), d_)
         in
         let rec ctxBlockToString (g0_, (g1_, g2_)) =
-          let _ = Names.varReset IntSyn.null_ in
+          let _ = Names.varReset IntSyn.Null in
           let g0'_ = Names.ctxName g0_ in
           let g1'_ = Names.ctxLUName g1_ in
           let g2'_ = Names.ctxLUName g2_ in
-          (((Print.ctxToString (IntSyn.null_, g0'_) ^ "\n")
+          (((Print.ctxToString (IntSyn.Null, g0'_) ^ "\n")
            ^ begin match g1'_ with
-           | null_ -> ""
+           | IntSyn.Null -> ""
            | _ -> ("some " ^ Print.ctxToString (g0'_, g1'_)) ^ "\n"
            end)
           ^ "pi ")
           ^ Print.ctxToString (ctxAppend (g0'_, g1'_), g2'_)
         in
         let rec checkFreevars = function
-          | null_, (g1_, g2_), r -> ()
+          | IntSyn.Null, (g1_, g2_), r -> ()
           | g0_, (g1_, g2_), r ->
-              let _ = Names.varReset IntSyn.null_ in
+              let _ = Names.varReset IntSyn.Null in
               let g0'_ = Names.ctxName g0_ in
               let g1'_ = Names.ctxLUName g1_ in
               let g2'_ = Names.ctxLUName g2_ in
@@ -249,7 +249,7 @@ end) : RECON_CONDEC = struct
           | _, Some r2 -> r2
           end
         in
-        let _ = Names.varReset IntSyn.null_ in
+        let _ = Names.varReset IntSyn.Null in
         let _ = ExtSyn.resetErrors fileName in
         let j =
           ExtSyn.jwithctx (gsome, ExtSyn.jwithctx (gblock, ExtSyn.jnothing))
@@ -266,7 +266,7 @@ end) : RECON_CONDEC = struct
                  ( r',
                    (("Constraints remain in context block after term \
                       reconstruction:\n"
-                    ^ ctxBlockToString (IntSyn.null_, (gsome_, gblock_)))
+                    ^ ctxBlockToString (IntSyn.Null, (gsome_, gblock_)))
                    ^ "\n")
                    ^ Print.cnstrsToString c_ ))
         in

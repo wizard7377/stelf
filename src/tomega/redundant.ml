@@ -564,7 +564,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
           | printDec ( T.PDec (SOME(s), F)) = (print s ; print "":(PDec)\n"")
       in
         case Psi of
-          (I.Null) => (print ""Null\n"")
+          (I.Null) => (print ""I.Null\n"")
           | (I.Decl (G, D)) =>  (printCtx(G) ; printDec(D))
       end
 *);;

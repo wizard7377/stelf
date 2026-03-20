@@ -122,7 +122,7 @@ end) : MTPSPLITTING = struct
               { sd = n; ind = i_; c = List.length l_; m; r = 0; p = g + 1 } )
 
     let rec aux = function
-      | I.Null, I.Null -> I.null_
+      | I.Null, I.Null -> I.Null
       | I.Decl (g_, d_), I.Decl (b_, S.Lemma _) ->
           I.Decl (aux (g_, b_), F.Prim d_)
       | (I.Decl (_, d_) as g_), (I.Decl (_, S.Parameter (Some l)) as b_) ->
@@ -131,7 +131,7 @@ end) : MTPSPLITTING = struct
           I.Decl (psi'_, F.Block (F.CtxBlock (Some l, g'_)))
 
     and aux' = function
-      | g_, b_, 0 -> (aux (g_, b_), I.null_)
+      | g_, b_, 0 -> (aux (g_, b_), I.Null)
       | I.Decl (g_, d_), I.Decl (b_, S.Parameter (Some _)), n ->
           let psi'_, g'_ = aux' (g_, b_, n - 1) in
           (psi'_, I.Decl (g'_, d_))
@@ -157,7 +157,7 @@ end) : MTPSPLITTING = struct
     let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
 
     and createEVarSpineW = function
-      | g_, ((I.Uni type_, s) as vs_) -> (I.Nil, vs_)
+      | g_, ((I.Uni I.Type, s) as vs_) -> (I.Nil, vs_)
       | g_, ((I.Root _, s) as vs_) -> (I.Nil, vs_)
       | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
           let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
@@ -218,11 +218,11 @@ end) : MTPSPLITTING = struct
       | d_ :: g_, s -> I.decSub (d_, s) :: ctxSub (g_, I.dot1 s)
 
     let rec createTags = function
-      | 0, l -> I.null_
+      | 0, l -> I.Null
       | n, l -> I.Decl (createTags (n - 1, l), S.Parameter (Some l))
 
     let rec createLemmaTags = function
-      | null_ -> I.null_
+      | I.Null -> I.Null
       | I.Decl (g_, d_) ->
           I.Decl (createLemmaTags g_, S.Lemma (S.Splits !MTPGlobal.maxSplit))
 
@@ -313,7 +313,7 @@ end) : MTPSPLITTING = struct
     let rec split (((I.Dec (_, v_) as d_), t_), sc, abstract) =
       let rec split' (n, cases) =
         begin if n < 0 then
-          let (g'_, b'_), s', (g0_, b0_), _ = sc (I.null_, I.null_) in
+          let (g'_, b'_), s', (g0_, b0_), _ = sc (I.Null, I.Null) in
           let rec abstract' u'_ =
             let ((g''_, b''_), s'') : (I.dctx * S.tag I.ctx) * I.sub =
               Obj.magic
@@ -337,7 +337,7 @@ end) : MTPSPLITTING = struct
           lowerSplitDest (g'_, 0, (v_, s'), abstract', constAndParamCases cases)
         else
           let (F.LabelDec (name, g1_, g2_)) = F.labelLookup n in
-          let t = someEVars (I.null_, g1_, I.id) in
+          let t = someEVars (I.Null, g1_, I.id) in
           let b1_ = createLemmaTags (F.listToCtx g1_) in
           let g2t_ = ctxSub (g2_, t) in
           let length = List.length g2_ in

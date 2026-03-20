@@ -101,7 +101,7 @@ end) : PROVER = struct
       let _ = reset () in
       let cL' = try Order.closure c with Order.Error _ -> cL in
       let f_ = RelFun.convertFor cL in
-      let o_ = transformOrder (I.null_, f_, map select cL) in
+      let o_ = transformOrder (I.Null, f_, map select cL) in
       begin if equiv (cL, cL') then
         List.app
           (function s_ -> insertState s_)

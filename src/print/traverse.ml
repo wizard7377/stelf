@@ -155,7 +155,7 @@ end) : TRAVERSE = struct
     and fromDec (g_, (I.Dec (Some x, v_), s)) = T.dec (x, fromTp (g_, (v_, s)))
 
     let rec fromConDec = function
-      | I.ConDec (c, parent, i, _, v_, type_) ->
+      | I.ConDec (c, parent, i, _, v_, I.Type) ->
           Some (T.objdec (c, fromTp (I.Null, (v_, I.id))))
       | _ -> None
   end

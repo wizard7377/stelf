@@ -94,16 +94,16 @@ end) : UNIQUESEARCH = struct
       | _ -> false
 
     let rec compose' = function
-      | null_, g_ -> g_
+      | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
     let rec shift = function
-      | null_, s -> s
+      | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
     let rec exists p_ k_ =
       let rec exists' = function
-        | null_ -> false
+        | I.Null -> false
         | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
       in
       exists' k_
@@ -332,7 +332,7 @@ end) : UNIQUESEARCH = struct
                 matchSig' (sgn', acc''')
           in
           let rec matchDProg = function
-            | null_, _, acc' -> matchSig' (Index.lookup (cidFromHead ha_), acc')
+            | I.Null, _, acc' -> matchSig' (Index.lookup (cidFromHead ha_), acc')
             | I.Decl (dPool', C.Dec (r, s, ha'_)), n, acc' -> begin
                 if eqHead (ha_, ha'_) then
                   let acc''' =

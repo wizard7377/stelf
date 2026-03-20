@@ -80,7 +80,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | _ -> false
 
     let rec atxLookup = function
-      | null_, _ -> None
+      | I.Null, _ -> None
       | I.Decl (m_, Bv), r -> atxLookup (m_, r)
       | I.Decl (m_, (Ev (r', _, _) as e_)), r -> begin
           if r = r' then Some e_ else atxLookup (m_, r)
@@ -268,10 +268,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       let lG0 = I.ctxLength g_ in
       let a_, k =
         collectDBot
-          ( lG0,
-            g_,
-            (v_, I.id),
-            collectDTop (lG0, g_, (v_, I.id), (I.null_, lG0)) )
+          (lG0, g_, (v_, I.id), collectDTop (lG0, g_, (v_, I.id), (I.Null, lG0)))
       in
       a_
 
@@ -424,7 +421,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
 
     let rec abstract
         (MetaSyn.State (name, (MetaSyn.Prefix (g_, m_, b_) as gm_), v_) as s_) =
-      let _ = Names.varReset I.null_ in
+      let _ = Names.varReset I.Null in
       let a_ = collect (gm_, v_) in
       let gm'_, _ = abstractCtx (a_, gm_) in
       let v'_ = abstractExp (a_, g_, 0, (v_, I.id)) in

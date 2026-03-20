@@ -167,12 +167,12 @@ end) : SUBORDINATE = struct
 
     let rec expandFamilyAbbrevs a =
       begin match I.constUni a with
-      | type_ ->
+      | I.Type ->
           raise
             (Error
                (("Constant " ^ Names.qidToString (Names.constQid a))
                ^ " must be a type family to be frozen or thawed"))
-      | kind_ -> begin
+      | I.Kind -> begin
           match IntSyn.sgnLookup a with
           | IntSyn.ConDec _ -> a
           | IntSyn.ConDef _ -> IntSyn.targetFam (IntSyn.constDef a)
@@ -275,7 +275,7 @@ end) : SUBORDINATE = struct
       end
 
     let rec installConDec = function
-      | b, I.ConDef (_, _, _, a_, k_, kind_, _) ->
+      | b, I.ConDef (_, _, _, a_, k_, I.Kind, _) ->
           insertNewDef (b, I.targetFam a_)
       | _ -> ()
 
@@ -364,7 +364,7 @@ end) : SUBORDINATE = struct
     let rec installDec (I.Dec (_, v_)) = installTypeN v_
 
     let rec installSome = function
-      | null_ -> ()
+      | I.Null -> ()
       | I.Decl (g_, d_) -> begin
           installSome g_;
           installDec d_
@@ -422,7 +422,7 @@ end) : SUBORDINATE = struct
     let rec show () = Table.app showFam soGraph
 
     let rec weaken = function
-      | null_, a -> I.id
+      | I.Null, a -> I.id
       | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
           let w' = weaken (g'_, a) in
           begin if belowEq (I.targetFam v_, a) then I.dot1 w'

@@ -31,7 +31,7 @@ end) : WEAKEN = struct
       I.Dec (name, strengthenExp (v_, s))
 
     let rec strengthenCtx = function
-      | null_, s -> (I.null_, s)
+      | I.Null, s -> (I.Null, s)
       | I.Decl (g_, d_), s ->
           let g'_, s' = strengthenCtx (g_, s) in
           (I.Decl (g'_, strengthenDec (d_, s')), I.dot1 s')

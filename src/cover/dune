@@ -99,4 +99,4 @@
    Unique.Unique_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show)))
+  (pps ppx_deriving.show)))

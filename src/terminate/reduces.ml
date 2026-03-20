@@ -78,7 +78,7 @@ end) : REDUCES = struct
       end
 
     let rec concat = function
-      | g'_, null_ -> g'_
+      | g'_, I.Null -> g'_
       | g'_, I.Decl (g_, d_) -> I.Decl (concat (g'_, g_), d_)
 
     let rec fmtOrder (g_, o_) =
@@ -244,7 +244,7 @@ end) : REDUCES = struct
     and checkGoalW = function
       | g0_, q0_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s), vs'_, occ
         -> begin
-          checkClause ((g0_, q0_, rl_), I.null_, I.null_, (v1_, s), P.label occ);
+          checkClause ((g0_, q0_, rl_), I.Null, I.Null, (v1_, s), P.label occ);
           checkGoal
             (g0_, q0_, rl_, (v2_, I.comp (I.invShift, s)), vs'_, P.body occ)
         end
@@ -392,7 +392,7 @@ end) : REDUCES = struct
                  ^ "." ))
 
     let rec checkClause' (vs_, occ) =
-      checkClause ((I.null_, I.null_, []), I.null_, I.null_, vs_, occ)
+      checkClause ((I.Null, I.Null, []), I.Null, I.Null, vs_, occ)
 
     let rec checkRGoal (g_, q_, rl_, vs_, occ) =
       checkRGoalW (g_, q_, rl_, Whnf.whnf vs_, occ)
@@ -544,13 +544,13 @@ end) : REDUCES = struct
             end;
             begin
               begin if !Global.chatter > 4 then begin
-                N.varReset IntSyn.null_;
+                N.varReset IntSyn.Null;
                 print "\n"
               end
               else ()
               end;
               begin try
-                checkRClause (I.null_, I.null_, [], (I.constType b, I.id), P.top)
+                checkRClause (I.Null, I.Null, [], (I.constType b, I.id), P.top)
               with
               | Error' (occ, msg) -> error (b, occ, msg)
               | R.Error msg ->
@@ -566,13 +566,13 @@ end) : REDUCES = struct
             end;
             begin
               begin if !Global.chatter > 4 then begin
-                N.varReset IntSyn.null_;
+                N.varReset IntSyn.Null;
                 print "\n"
               end
               else ()
               end;
               begin try
-                checkRClause (I.null_, I.null_, [], (I.constType d, I.id), P.top)
+                checkRClause (I.Null, I.Null, [], (I.constType d, I.id), P.top)
               with
               | Error' (occ, msg) -> error (d, occ, msg)
               | R.Error msg ->
@@ -606,7 +606,7 @@ end) : REDUCES = struct
             end;
             begin
               begin if !Global.chatter > 4 then begin
-                N.varReset IntSyn.null_;
+                N.varReset IntSyn.Null;
                 print "\n"
               end
               else ()
@@ -626,7 +626,7 @@ end) : REDUCES = struct
             end;
             begin
               begin if !Global.chatter > 4 then begin
-                N.varReset IntSyn.null_;
+                N.varReset IntSyn.Null;
                 print "\n"
               end
               else ()

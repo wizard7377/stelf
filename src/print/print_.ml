@@ -632,7 +632,7 @@ end) : PRINT = struct
           skipI2 (i - 1, I.Decl (g_, Names.decEName (g_, d'_)), v_, u_)
 
     let rec ctxToDecList = function
-      | null_, l_ -> l_
+      | I.Null, l_ -> l_
       | I.Decl (g_, d_), l_ -> ctxToDecList (g_, d_ :: l_)
 
     let rec fmtDecList = function
@@ -647,7 +647,8 @@ end) : PRINT = struct
     let rec fmtCtx (g0_, g_) = fmtDecList (g0_, ctxToDecList (g_, []))
 
     let rec fmtBlock = function
-      | null_, lblock_ -> [ sym "block"; F.break ] @ fmtDecList (I.Null, lblock_)
+      | I.Null, lblock_ ->
+          [ sym "block"; F.break ] @ fmtDecList (I.Null, lblock_)
       | gsome_, lblock_ ->
           [
             F.hVbox ([ sym "some"; F.space ] @ fmtCtx (I.Null, gsome_));
@@ -800,7 +801,7 @@ end) : PRINT = struct
           fmtCnstr cnstr_ @ [ str_ ";"; F.break ] @ fmtCnstrL cnstrL
 
     let rec abstractLam = function
-      | null_, u_ -> u_
+      | I.Null, u_ -> u_
       | I.Decl (g_, d_), u_ -> abstractLam (g_, I.Lam (d_, u_))
 
     let rec fmtNamedEVar = function

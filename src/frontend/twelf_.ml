@@ -3,7 +3,9 @@ open! Basis
 
 (** Front End Interface *)
 (** Author: Frank Pfenning *)
-module type TWELF = sig
+module type TWELF = sig 
+  module Names : NAMES 
+  module Parser : Parser.PARSER with module Names = Names
   module Print : sig
     val implicit : bool ref
 
@@ -200,7 +202,7 @@ module type TWELF = sig
 
   (** explicitly define configuration *)
   val make : string -> status
-
+  val install1 : string * (Parser.fileParseResult * Paths.region) -> unit
   (** read and load configuration *)
   val version : string
 end
@@ -426,7 +428,8 @@ module Twelf (Twelf__0 : sig
   module Msg : MSG
 end) : TWELF = struct
   open Twelf__0
-
+  module Names = Names
+  module Parser = Parser
   type status = Ok | Abort
 
   open! struct
@@ -457,11 +460,11 @@ end) : TWELF = struct
     let rec withOpenIn fileName scope =
       let instream = TextIO.openIn (Stdlib.String.trim fileName) in
       let _ = fileOpenMsg fileName in
-      let result = try Value (scope instream) with exn -> Exception exn in
+      let result = (scope instream) in
       let _ = fileCloseMsg fileName in
       let _ = TextIO.closeIn instream in
-      begin match result with Value x -> x | Exception exn -> raise exn
-      end
+      result
+      
 
     let rec evarInstToString xs_ =
       begin if !Global.chatter >= 3 then Print.evarInstToString xs_ else ""
@@ -984,7 +987,7 @@ end) : TWELF = struct
           let lemma, projs, sels = Converter.installPrg cids in
           let p_ = Tomega.lemmaDef lemma in
           let f_ = Converter.convertFor cids in
-          let _ = TomegaTypeCheck.checkPrg (IntSyn.null_, (p_, f_)) in
+          let _ = TomegaTypeCheck.checkPrg (IntSyn.Null, (p_, f_)) in
           let rec f cid = IntSyn.conDecName (IntSyn.sgnLookup cid) in
           let _ =
             begin if !Global.chatter >= 2 then
@@ -1642,7 +1645,7 @@ end) : TWELF = struct
           let _ = ReconTerm.resetErrors fileName in
           let rec install s = install' (Timers.time Timers.parsing S.expose s)
           and install' = function
-            | empty_ -> Ok
+            | S.Empty -> Ok
             | S.Cons ((Parser.BeginSubsig, _), s') ->
                 install (installSubsig (fileName, s'))
             | S.Cons (decl, s') -> begin
@@ -2465,6 +2468,8 @@ end) : TWELF = struct
   let readDecl = readDecl
   let decl = decl
   let top = top
+
+  let install1 = install1
 
   module Config : sig
     type nonrec config

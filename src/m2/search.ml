@@ -170,7 +170,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
         matchSig' (Index.lookup (cidFromHead ha_), acc')
       in
       let rec matchDProg = function
-        | null_, _, acc' -> matchSig acc'
+        | I.Null, _, acc' -> matchSig acc'
         | I.Decl (dPool', C.Dec (r, s, ha'_)), n, acc' -> begin
             if eqHead (ha_, ha'_) then
               let acc'' =

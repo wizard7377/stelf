@@ -118,7 +118,7 @@ end) : RECON_QUERY = struct
   (* call TypeCheck... if !doubleCheck = true? *)
   (* Wed May 20 08:00:28 1998 -fp *)
   let rec queryToQuery (Query_ (optName, tm), Paths.Loc (fileName, r)) =
-    let _ = Names.varReset IntSyn.null_ in
+    let _ = Names.varReset IntSyn.Null in
     let _ = T.resetErrors fileName in
     let (T.JClass ((v_, oc), l_)) =
       Timers.time Timers.recon T.reconQuery (T.jclass tm)
@@ -242,7 +242,7 @@ end) : RECON_QUERY = struct
   (* Wed May 20 08:00:28 1998 -fp *)
   let rec solveToSolve
       (defines, (Solve_ (optName, tm, r0) as sol), Paths.Loc (fileName, r)) =
-    let _ = Names.varReset IntSyn.null_ in
+    let _ = Names.varReset IntSyn.Null in
     let _ = T.resetErrors fileName in
     let rec mkd = function
       | Define_ (_, tm1, None) -> T.jterm tm1

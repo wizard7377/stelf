@@ -90,7 +90,7 @@ end) : FUNTYPECHECK = struct
 
     let rec validBlock (psi_, k, (l, g_)) =
       let rec skipBlock = function
-        | null_, k -> k
+        | I.Null, k -> k
         | I.Decl (g'_, _), k -> skipBlock (g'_, k - 1)
       in
       let rec validBlock' = function
@@ -100,7 +100,7 @@ end) : FUNTYPECHECK = struct
           end
         | I.Decl (psi_, F.Prim _), 0 ->
             raise (Error "Typecheck Error: Not a valid block")
-        | null_, k -> raise (Error "Typecheck Error: Not a valid block")
+        | I.Null, k -> raise (Error "Typecheck Error: Not a valid block")
         | I.Decl (psi_, F.Block (F.CtxBlock (l', g'_))), k ->
             validBlock' (psi_, skipBlock (g'_, k))
         | I.Decl (psi_, F.Prim d_), k -> validBlock' (psi_, k - 1)
@@ -135,7 +135,7 @@ end) : FUNTYPECHECK = struct
 
     let rec raiseType (F.CtxBlock (l, g_), psi'_) =
       let rec raiseType'' = function
-        | null_, vn_, a -> vn_
+        | I.Null, vn_, a -> vn_
         | I.Decl (g'_, (I.Dec (_, v'_) as d_)), vn_, a -> begin
             if Subordinate.belowEq (I.targetFam v'_, a) then
               raiseType'' (g'_, Abstract.piDepend ((d_, I.Maybe), vn_), a)
@@ -151,7 +151,7 @@ end) : FUNTYPECHECK = struct
             let d'_ = I.Dec (x, raiseType'' (g_, vn_, a)) in
             F.Prim d'_ :: raiseType' (I.Decl (psi1_, d_), psi1'_)
       in
-      raiseType' (I.null_, psi'_)
+      raiseType' (I.Null, psi'_)
 
     let rec raiseM = function
       | b_, [] -> []
@@ -159,24 +159,24 @@ end) : FUNTYPECHECK = struct
           F.MDec (xx, F.All (F.Block b_, f_)) :: raiseM (b_, l_)
 
     let rec psub = function
-      | k, null_, s -> s
+      | k, I.Null, s -> s
       | k, I.Decl (g_, _), s -> psub (k - 1, g_, I.Dot (I.Idx k, s))
 
     let rec deltaSub = function
-      | null_, s -> I.null_
+      | I.Null, s -> I.Null
       | I.Decl (delta_, dd_), s ->
           I.Decl (deltaSub (delta_, s), F.mdecSub (dd_, s))
 
     let rec shift delta_ = deltaSub (delta_, I.shift)
 
     let rec shifts = function
-      | null_, delta_ -> delta_
+      | I.Null, delta_ -> delta_
       | I.Decl (g_, _), delta_ -> shifts (g_, shift delta_)
 
     let rec shiftBlock (F.CtxBlock (_, g_), delta_) = shifts (g_, delta_)
 
     let rec shiftSub = function
-      | null_, s -> s
+      | I.Null, s -> s
       | I.Decl (g_, _), s -> shiftSub (g_, I.comp (I.shift, s))
 
     let rec shiftSubBlock (F.CtxBlock (_, g_), s) = shiftSub (g_, s)
@@ -276,7 +276,7 @@ end) : FUNTYPECHECK = struct
               raise
                 (Error
                    ("Typecheck Error: Declaration App"
-                   ^ FunPrint.forToString (I.null_, f_) [ "x" ]))
+                   ^ FunPrint.forToString (I.Null, f_) [ "x" ]))
         end
       | psi_, delta_, F.PApp ((kk, k), ds_) -> begin
           match infer (delta_, kk) with
@@ -319,12 +319,12 @@ end) : FUNTYPECHECK = struct
     and checkSub = function
       | I.Null, I.Shift 0, I.Null -> ()
       | I.Decl (psi_, F.Prim d_), I.Shift k, I.Null -> begin
-          if k > 0 then checkSub (psi_, I.Shift (k - 1), I.null_)
+          if k > 0 then checkSub (psi_, I.Shift (k - 1), I.Null)
           else raise (Error "Substitution not well-typed")
         end
       | I.Decl (psi_, F.Block (F.CtxBlock (_, g_))), I.Shift k, I.Null ->
           let g = I.ctxLength g_ in
-          begin if k >= g then checkSub (psi_, I.Shift (k - g), I.null_)
+          begin if k >= g then checkSub (psi_, I.Shift (k - g), I.Null)
           else raise (Error "Substitution not well-typed")
           end
       | psi'_, I.Shift k, psi_ ->
@@ -376,7 +376,7 @@ end) : FUNTYPECHECK = struct
           end
         end
 
-    let rec checkRec (p_, t_) = check (I.null_, I.null_, p_, (t_, I.id))
+    let rec checkRec (p_, t_) = check (I.Null, I.Null, p_, (t_, I.id))
 
     let rec isFor = function
       | g_, F.All (F.Prim d_, f_) -> (

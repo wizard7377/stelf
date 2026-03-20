@@ -1,0 +1,4 @@
+(library
+ (name debug)
+ (public_name twelf.debug)
+ (libraries logs logs.fmt))

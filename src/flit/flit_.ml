@@ -387,7 +387,7 @@ module Flit(Flit__0: sig
           begin
           match (! startClause, I.constUni cid)
           with 
-               | (Some cid', kind_) -> cid >= cid'
+               | (Some cid', I.Kind) -> cid >= cid'
                | _ -> false
           end;;
         let rec headCID =
@@ -401,7 +401,7 @@ module Flit(Flit__0: sig
           begin
           match (! startClause, I.constUni cid)
           with 
-               | (Some cid', type_) -> begin
+               | (Some cid', (I.Type)) -> begin
                    if cid >= cid' then
                    let a = I.targetHead (I.constType cid)
                      in let clauses =
@@ -427,9 +427,9 @@ module Flit(Flit__0: sig
                                   if (! Global.chatter) >= 3 then
                                   print_once cid else () end in idx
           end
-        and compileUni = function 
-                                  | kind_ -> kd ()
-                                  | type_ -> ty ()
+        and compileUni = function
+                                  | (I.Kind) -> kd ()
+                                  | (I.Type) -> ty ()
         and compileExpN arg__13 arg__14 =
           begin
           match (arg__13, arg__14)
@@ -565,7 +565,7 @@ module Flit(Flit__0: sig
                    | ((I.ConDec (_, _, _, _, v_, _) as condec), (true, cls))
                        -> const
                           true
-                          (compileExpN true (I.null_, v_, (true, true, cls)))
+                          (compileExpN true (I.Null, v_, (true, true, cls)))
                    | ((I.ConDec (_, _, _, _, _, _) as condec), (pred, cls))
                        -> raise
                           ((Error
@@ -576,11 +576,11 @@ module Flit(Flit__0: sig
                        -> let exp =
                             compileExpN
                             true
-                            (I.null_, v_, (true, false, false))
+                            (I.Null, v_, (true, false, false))
                             in let arg =
                                  compileExpN
                                  true
-                                 (I.null_, u_, (true, pred, cls))
+                                 (I.Null, u_, (true, pred, cls))
                                  in annotate
                                     true
                                     ((true, pred, cls), arg, exp)
@@ -589,11 +589,11 @@ module Flit(Flit__0: sig
                        -> let exp =
                             compileExpN
                             true
-                            (I.null_, v_, (true, false, false))
+                            (I.Null, v_, (true, false, false))
                             in let arg =
                                  compileExpN
                                  true
-                                 (I.null_, u_, (true, pred, cls))
+                                 (I.Null, u_, (true, pred, cls))
                                  in annotate
                                     true
                                     ((true, pred, cls), arg, exp);;

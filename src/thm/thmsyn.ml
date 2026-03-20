@@ -129,7 +129,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
 
     let rec theoremDecToConDec ((name, ThDecl (gBs_, g_, mg_, i)), r) =
       let rec theoremToConDec' = function
-        | null_, v_ -> v_
+        | I.Null, v_ -> v_
         | I.Decl (g_, d_), v_ -> begin
             if Abstract.closedDec (g_, (d_, I.id)) then
               theoremToConDec'

@@ -687,9 +687,9 @@ module MakeCompile(Compile__0: sig
       begin
       match (arg__11, arg__12)
       with 
-           | (fromCS, (a, I.ConDec (_, _, _, _, a_, type_)))
+           | (fromCS, (a, I.ConDec (_, _, _, _, a_, (Type))))
                -> installClause fromCS (a, a_)
-           | (fromCS, (a, I.SkoDec (_, _, _, a_, type_)))
+           | (fromCS, (a, I.SkoDec (_, _, _, a_, (Type))))
                -> begin
                   match ! C.optimize
                   with 
@@ -704,7 +704,7 @@ module MakeCompile(Compile__0: sig
                                (C.SClause
                                 (compileDClauseN fromCS true (I.Null, a_))))
                   end
-           | (clause_, (a, I.ConDef (_, _, _, _, a_, type_, _)))
+           | (clause_, (a, I.ConDef (_, _, _, _, a_, (I.Type), _)))
                -> C.sProgInstall
                   (a,
                    (C.SClause

@@ -65,7 +65,7 @@ end) : TYPECHECK = struct
       begin if Conv.conv (us'_, vs_) then () else raise (Error "Type mismatch")
       end
 
-    and inferUni type_ = I.Kind
+    and inferUni I.Type = I.Kind
 
     and inferExpW = function
       | g_, (I.Uni l_, _) -> (I.Uni (inferUni l_), I.id)

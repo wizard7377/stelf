@@ -97,7 +97,7 @@ end) : FILL with module State = Fill__0.State' = struct
         | (I.EClo (v_, s'), s), fs_, o_ -> try_ ((v_, I.comp (s', s)), fs_, o_)
       in
       let rec matchCtx = function
-        | null_, _, fs_ -> fs_
+        | I.Null, _, fs_ -> fs_
         | I.Decl (g_, I.Dec (x, v_)), n, fs_ ->
             matchCtx
               ( g_,
