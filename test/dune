@@ -1,5 +1,10 @@
 ; (include sources.dune)
 
+(env
+ (_
+  (flags
+   (:standard -g))))
+
 (test
  (name regression)
  (libraries twelf alcotest basis regression_cases)
@@ -8,7 +13,25 @@
   (source_tree ../examples_clp))
  (action
   (chdir
-   %{workspace_root}/test
+   %{workspace_root}
    (run %{exe:regression.exe})))
  (flags
-  (:standard -open Basis)))
+  (:standard -g -open Basis)))
+
+(rule
+ (alias profile_test)
+ (action
+  (chdir
+   %{workspace_root}
+   (run
+    perf
+    record
+    -o
+    regression.perf
+    --call-graph
+    dwarf
+    --
+    %{exe:regression.exe}
+    test
+    regression
+    %{env:TEST=1}))))

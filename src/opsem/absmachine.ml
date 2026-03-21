@@ -117,9 +117,17 @@ end) : ABSMACHINE = struct
           let x'_ = I.newAVar () in
           rSolve
             (ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
-
+      (* C.In is like C.And but for meta-level ("virtual") dependencies *)
+      | ps', (C.In (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
+          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          rSolve
+            ( ps',
+              (r, I.Dot (I.Exp x_, s)),
+              dp,
+              function
+              | s_ -> solve ((g, s), dp, function m_ -> sc (I.App (m_, s_))) )
     and aSolve = function
-      | (trivial_, s), dp, cnstr, sc -> begin
+      | (C.Trivial, s), dp, cnstr, sc -> begin
           if Assign.solveCnstr cnstr then sc () else ()
         end
       | ( (C.UnifyEq (g'_, e1, n_, eqns), s),

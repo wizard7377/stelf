@@ -120,7 +120,7 @@ end) : PROVER = struct
         | Splitting.Error s -> error ("Splitting Error: " ^ s)
         | Filling.Error s -> error ("Filling Error: " ^ s)
         | Recursion.Error s -> error ("Recursion Error: " ^ s)
-        | timeOut_ ->
+        | Filling.TimeOut ->
             error "A proof could not be found -- Exceeding Time Limit\n"
       in
       let _ = openStates := Obj.magic open_ in

@@ -1,8 +1,0 @@
-% Testing subordination
-
-a : type.
-
-b : a -> type.
-c : a -> type.
-
-s1 : b X -> c X.

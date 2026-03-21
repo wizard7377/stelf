@@ -319,12 +319,12 @@ end) : PRINT_OMDOC = struct
       let fixString =
         (" fixity=\""
         ^ begin match fixity with
-        | nonfix_ -> "prefix"
+        | Names.Fixity.Nonfix -> "prefix"
         | Names.Fixity.Infix (prec, assoc) -> begin
             match assoc with
-            | left_ -> "infixl"
-            | right_ -> "infixr"
-            | none_ -> "infix"
+            | Names.Fixity.Left -> "infixl"
+            | Names.Fixity.Right -> "infixr"
+            | Names.Fixity.None -> "infix"
           end
         | Names.Fixity.Prefix prec -> "prefix"
         | Names.Fixity.Postfix prec -> "postfix"

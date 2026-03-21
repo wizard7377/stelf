@@ -116,7 +116,7 @@ end) : ABSMACHINESBT = struct
           print "Exp (_ ). ";
           printSub s
         end
-      | IntSyn.Dot (undef_, s) -> begin
+      | IntSyn.Dot (IntSyn.Undef, s) -> begin
           print "Undef . ";
           printSub s
         end
@@ -192,7 +192,7 @@ end) : ABSMACHINESBT = struct
           end
 
     and sSolve = function
-      | (true_, s), dp, sc -> sc []
+      | (C.True, s), dp, sc -> sc []
       | (C.Conjunct (g, a_, sgoals_), s), (C.DProg (g_, dPool) as dp), sc ->
           solve'
             ( (g, s),

@@ -209,7 +209,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       ltSpineW (g_, k, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, ops)
 
     and ltSpineW = function
-      | g_, k, (us_, vs_), ((nil_, _), _), _, ops -> ops
+      | g_, k, (us_, vs_), ((I.Nil, _), _), _, ops -> ops
       | g_, k, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, ops ->
           ltSpineW (g_, k, (us_, vs_), ((s_, I.comp (s', s'')), vs'_), sc, ops)
       | ( g_,
@@ -430,12 +430,12 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       end
 
     and inputConvSpine = function
-      | mnil_, ((s1_, _), _), ((s2_, _), _) -> true
+      | ModeSyn.Mnil, ((s1_, _), _), ((s2_, _), _) -> true
       | mS, ((I.SClo (s1_, s1'), s1), vs1_), (ss2_, vs2_) ->
           inputConvSpine (mS, ((s1_, I.comp (s1', s1)), vs1_), (ss2_, vs2_))
       | mS, (ss1_, vs1_), ((I.SClo (s2_, s2'), s2), vs2_) ->
           inputConvSpine (mS, (ss1_, vs1_), ((s2_, I.comp (s2', s2)), vs2_))
-      | ( ModeSyn.Mapp (ModeSyn.Marg (minus_, _), mS),
+      | ( ModeSyn.Mapp (ModeSyn.Marg (ModeSyn.Minus, _), mS),
           ((I.App (u1_, s1_), s1), (I.Pi ((I.Dec (_, v1_), _), w1_), t1)),
           ((I.App (u2_, s2_), s2), (I.Pi ((I.Dec (_, v2_), _), w2_), t2)) ) ->
           Conv.conv ((v1_, t1), (v2_, t2))
@@ -443,7 +443,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
                ( mS,
                  ((s1_, s1), (w1_, I.Dot (I.Exp (I.EClo (u1_, s1)), t1))),
                  ((s2_, s2), (w2_, I.Dot (I.Exp (I.EClo (u1_, s1)), t2))) )
-      | ( ModeSyn.Mapp (ModeSyn.Marg (plus_, _), mS),
+      | ( ModeSyn.Mapp (ModeSyn.Marg (ModeSyn.Plus, _), mS),
           ((I.App (u1_, s1_), s1), (I.Pi ((I.Dec (_, v1_), _), w1_), t1)),
           ((I.App (u2_, s2_), s2), (I.Pi ((I.Dec (_, v2_), _), w2_), t2)) ) ->
           inputConvSpine

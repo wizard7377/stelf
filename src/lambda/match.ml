@@ -94,7 +94,7 @@ end) : MATCH = struct
             ( pruneHead (g_, h_, ss, rOccur),
               pruneSpine (g_, (s_, s), ss, rOccur) )
       | g_, ((EVar (r, gx_, v_, cnstrs) as x_), s), ss, rOccur -> begin
-          if rOccur = r then raise (Match "Variable occurrence")
+          if rOccur == r then raise (Match "Variable occurrence")
           else begin
             if Whnf.isPatSub s then
               let w = weakenSub (g_, s, ss) in
@@ -397,7 +397,7 @@ end) : MATCH = struct
         begin
           if l1 <> l2 then raise (Match "Label clash")
           else begin
-            if r1 = r2 then ()
+            if r1 == r2 then ()
             else begin
               matchSub (g_, t1, t2);
               begin

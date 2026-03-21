@@ -108,7 +108,7 @@ end) : MTPABSTRACT = struct
 
     let rec eqEVar arg__1 arg__2 =
       begin match (arg__1, arg__2) with
-      | I.EVar (r1, _, _, _), Ev (r2, _, _, _) -> r1 = r2
+      | I.EVar (r1, _, _, _), Ev (r2, _, _, _) -> r1 == r2
       | _, _ -> false
       end
 
@@ -225,7 +225,7 @@ end) : MTPABSTRACT = struct
       collectExpW (tag_, d, g_, Whnf.whnf us_, k_)
 
     and collectSpine = function
-      | tag_, d, g_, (nil_, _), k_ -> k_
+      | tag_, d, g_, (I.Nil, _), k_ -> k_
       | tag_, d, g_, (I.SClo (s_, s'), s), k_ ->
           collectSpine (tag_, d, g_, (s_, I.comp (s', s)), k_)
       | tag_, d, g_, (I.App (u_, s_), s), k_ ->
@@ -244,7 +244,7 @@ end) : MTPABSTRACT = struct
     let rec abstractEVar = function
       | I.Decl (k'_, Ev (r', _, _, d)), depth, (I.EVar (r, _, _, _) as x_) ->
         begin
-          if r = r' then (I.BVar (depth + 1), d)
+          if r == r' then (I.BVar (depth + 1), d)
           else abstractEVar (k'_, depth + 1, x_)
         end
       | I.Decl (k'_, Bv _), depth, x_ -> abstractEVar (k'_, depth + 1, x_)
@@ -309,7 +309,7 @@ end) : MTPABSTRACT = struct
               I.App (abstractExp (k_, depth, (u_, I.id)), s_) )
 
     and abstractSpine = function
-      | k_, depth, (nil_, _) -> I.Nil
+      | k_, depth, (I.Nil, _) -> I.Nil
       | k_, depth, (I.SClo (s_, s'), s) ->
           abstractSpine (k_, depth, (s_, I.comp (s', s)))
       | k_, depth, (I.App (u_, s_), s) ->
@@ -418,7 +418,7 @@ end) : MTPABSTRACT = struct
           F.Ex
             ( abstractDec (k_, depth, (d_, s)),
               abstractFor (k_, depth + 1, (f_, I.dot1 s)) )
-      | k_, depth, (true_, s) -> F.True
+      | k_, depth, (True, s) -> F.True
       | k_, depth, (F.And (f1_, f2_), s) ->
           F.And
             ( abstractFor (k_, depth, (f1_, s)),
@@ -470,7 +470,7 @@ end) : MTPABSTRACT = struct
             (g_, Abstract.piDepend ((Whnf.normalizeDec (d_, I.id), I.Maybe), v_))
 
     let rec raiseFor = function
-      | k, gorig_, (true_ as f_), w, sc -> f_
+      | k, gorig_, (F.True as f_), w, sc -> f_
       | k, gorig_, F.Ex (I.Dec (name, v_), f_), w, sc ->
           let g_ = F.listToCtx (ctxSub (F.ctxToList gorig_, w)) in
           let g = I.ctxLength g_ in

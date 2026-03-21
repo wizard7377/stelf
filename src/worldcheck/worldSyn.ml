@@ -407,11 +407,11 @@ end) : WORLDSYN = struct
 
     let rec checkClause = function
       | g_, I.Root (a, s_), w_, occ -> ()
-      | g_, I.Pi (((I.Dec (_, v1_) as d_), maybe_), v2_), w_, occ -> begin
+      | g_, I.Pi (((I.Dec (_, v1_) as d_), Maybe), v2_), w_, occ -> begin
           checkClause (decEName (g_, d_), v2_, w_, P.body occ);
           checkGoal (g_, v1_, w_, P.label occ)
         end
-      | g_, I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), w_, occ -> begin
+      | g_, I.Pi (((I.Dec (_, v1_) as d_), No), v2_), w_, occ -> begin
           checkBlocks w_ (g_, v1_, P.label occ);
           begin
             checkClause (decEName (g_, d_), v2_, w_, P.body occ);
@@ -509,9 +509,9 @@ end) : WORLDSYN = struct
           end
 
     let rec install (a, (T.Worlds cids as w_)) =
-      begin try checkSubordWorlds cids
-      with Subordinate.Error msg ->
-        raise (Error msg);
+      begin
+        (try checkSubordWorlds cids
+         with Subordinate.Error msg -> raise (Error msg));
         insert (a, w_)
       end
 

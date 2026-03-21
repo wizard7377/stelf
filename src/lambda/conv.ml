@@ -80,7 +80,7 @@ end) : CONV = struct
           let us1_e, us1_s = us1_ in
           FgnExpStd.EqualTo.apply (csfe2_csid, csfe2_ops) (EClo (us1_e, us1_s))
       | (EVar (r1, _, _, _), s1), (EVar (r2, _, _, _), s2) ->
-          r1 = r2 && convSub (s1, s2)
+          r1 == r2 && convSub (s1, s2)
       | _ -> false
 
     and convExp (us1_, us2_) = convExpW (Whnf.whnf us1_, Whnf.whnf us2_)

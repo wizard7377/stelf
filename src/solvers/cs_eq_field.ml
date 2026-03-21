@@ -163,7 +163,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
         end
       | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1_),
           (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2_) ) ->
-          r1 = r2 && sameSub (s1, s2)
+          r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
     and sameExp (us1_, us2_) = sameExpW (Whnf.whnf us1_, Whnf.whnf us2_)

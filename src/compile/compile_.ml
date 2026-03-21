@@ -411,7 +411,7 @@ module MakeCompile(Compile__0: sig
       match (arg__1, arg__2)
       with 
            | (fromCS, (g_, (I.Root _ as r_))) -> (C.Atom r_)
-           | (fromCS, (g_, I.Pi ((I.Dec (_, a1_), no_), a2_)))
+           | (fromCS, (g_, I.Pi ((I.Dec (_, a1_), I.No), a2_)))
                -> let ha1_ = I.targetHead a1_
                     in let r_ = compileDClauseN fromCS false (g_, a1_)
                          in let goal =
@@ -420,7 +420,7 @@ module MakeCompile(Compile__0: sig
                               ((I.Decl (g_, (I.Dec (None, a1_)))), a2_)
                               in (C.Impl (r_, a1_, ha1_, goal))
                               (* A1 is used to build the proof term, Ha1 for indexing *)(* never optimize when compiling local assumptions *)
-           | (fromCS, (g_, I.Pi (((I.Dec (_, a1_) as d_), maybe_), a2_)))
+           | (fromCS, (g_, I.Pi (((I.Dec (_, a1_) as d_), I.Maybe), a2_)))
                -> begin
                if (notCS fromCS) && (isConstraint (head a1_)) then
                raise
@@ -440,17 +440,17 @@ module MakeCompile(Compile__0: sig
                raise
                ((Error "Constraint appears in dynamic clause position")) else
                (C.Eq r_) end end 
-           | (fromCS, opt, (g_, I.Pi (((I.Dec (_, a1_) as d_), no_), a2_)))
+           | (fromCS, opt, (g_, I.Pi (((I.Dec (_, a1_) as d_), I.No), a2_)))
                -> (C.And
                    (compileDClauseN fromCS opt ((I.Decl (g_, d_)), a2_), a1_,
                     compileGoalN fromCS (g_, a1_)))
-           | (fromCS, opt, (g_, I.Pi (((I.Dec (_, a1_) as d_), meta_), a2_)))
+           | (fromCS, opt, (g_, I.Pi ((d_, I.Maybe), a2_)))
+               -> (C.Exists
+                   (d_, compileDClauseN fromCS opt ((I.Decl (g_, d_)), a2_)))
+           | (fromCS, opt, (g_, I.Pi (((I.Dec (_, a1_) as d_), I.Meta), a2_)))
                -> (C.In
                    (compileDClauseN fromCS opt ((I.Decl (g_, d_)), a2_), a1_,
                     compileGoalN fromCS (g_, a1_)))
-           | (fromCS, opt, (g_, I.Pi ((d_, maybe_), a2_)))
-               -> (C.Exists
-                   (d_, compileDClauseN fromCS opt ((I.Decl (g_, d_)), a2_)))
       end(* A = {x:A1} A2 *)(* A = {x: A1} A2, x  meta variable occuring in A2 *)(* A = A1 -> A2 *);;
     (*  compileGoalN _ should not arise by invariants *);;
     (* compileDClause A => G (top level)
@@ -479,14 +479,14 @@ module MakeCompile(Compile__0: sig
       match (arg__6, arg__7, arg__8)
       with 
            | (fromCS, g'_,
-              (n, I.Decl (stack_, no_), I.Decl (g_, I.Dec (_, a_))))
+              (n, I.Decl (stack_, I.No), I.Decl (g_, I.Dec (_, a_))))
                -> let sg = compileSubgoals fromCS g'_ (n + 1, stack_, g_)
                     in (C.Conjunct
                         (compileGoal fromCS (g'_, (a_, (I.Shift (n + 1)))),
                          (I.EClo (a_, (I.Shift (n + 1)))), sg))
                     (* G |- A and G' |- A[^(n+1)] *)
            | (fromCS, g'_,
-              (n, I.Decl (stack_, maybe_), I.Decl (g_, I.Dec (_, a1_))))
+              (n, I.Decl (stack_, I.Maybe), I.Decl (g_, I.Dec (_, a1_))))
                -> compileSubgoals fromCS g'_ (n + 1, stack_, g_)
            | (fromCS, g'_, (n, I.Null, I.Null)) -> C.True
       end;;
@@ -513,7 +513,7 @@ module MakeCompile(Compile__0: sig
                               in ((g'_, head_), sgoals_)
                               (* G' |- Sgoals  and G' |- ^d : G *)
            | (fromCS,
-              (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), no_), a2_)))
+              (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), I.No), a2_)))
                -> compileSClauseN
                   fromCS
                   ((I.Decl (stack_, I.No)), (I.Decl (g_, d_)), a2_)
@@ -523,7 +523,7 @@ module MakeCompile(Compile__0: sig
                   fromCS
                   ((I.Decl (stack_, I.Meta)), (I.Decl (g_, d_)), a2_)
            | (fromCS,
-              (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), maybe_), a2_)))
+              (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), I.Maybe), a2_)))
                -> compileSClauseN
                   fromCS
                   ((I.Decl (stack_, I.Maybe)), (I.Decl (g_, d_)), a2_)
@@ -648,15 +648,15 @@ module MakeCompile(Compile__0: sig
       begin
       match ! C.optimize
       with 
-           | no_
+           | No
                -> C.sProgInstall
                   (a,
                    (C.SClause (compileDClauseN fromCS true (I.Null, a_))))
-           | linearHeads_
+           | LinearHeads
                -> C.sProgInstall
                   (a,
                    (C.SClause (compileDClauseN fromCS true (I.Null, a_))))
-           | indexing_
+           | Indexing
                -> let ((g_, head_), r_) =
                     compileSClauseN
                     fromCS
@@ -693,7 +693,7 @@ module MakeCompile(Compile__0: sig
                -> begin
                   match ! C.optimize
                   with 
-                       | no_
+                       | No
                            -> C.sProgInstall
                               (a,
                                (C.SClause

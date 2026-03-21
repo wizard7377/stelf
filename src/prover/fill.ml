@@ -110,6 +110,11 @@ end) : FILL with module State = Fill__0.State' = struct
         | I.Const c :: l_, fs_ ->
             matchSig
               (l_, try_ ((I.constType c, I.id), fs_, FillWithConst (y_, c)))
+        | I.Def c :: l_, fs_ ->
+            matchSig
+              (l_, try_ ((I.constType c, I.id), fs_, FillWithConst (y_, c)))
+        | _ :: l_, fs_ ->
+            matchSig (l_, fs_)
       in
       matchCtx (g_, 0, matchSig (Index.lookup (I.targetFam v_), []))
 

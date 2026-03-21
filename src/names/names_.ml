@@ -872,10 +872,10 @@ end) : NAMES = struct
       let rec evlk = function
         | r, [] -> None
         | r, (IntSyn.EVar (r', _, _, _), name) :: l -> begin
-            if r = r' then Some name else evlk (r, l)
+            if r == r' then Some name else evlk (r, l)
           end
         | r, (IntSyn.AVar r', name) :: l -> begin
-            if r = r' then Some name else evlk (r, l)
+            if r == r' then Some name else evlk (r, l)
           end
       in
       begin match x_ with

@@ -48,7 +48,7 @@ end) : TOMEGACOVERAGE = struct
       end
 
     let rec purifyFor = function
-      | (unit_, t), (psi_, true_), s -> (t, psi_, s)
+      | (Unit, t), (psi_, True), s -> (t, psi_, s)
       | (T.PairExp (u_, p_), t), (psi_, T.Ex ((d_, _), f_)), s ->
           purifyFor
             ( (p_, T.Dot (T.Exp u_, t)),
@@ -96,7 +96,7 @@ end) : TOMEGACOVERAGE = struct
           coverageCheckPrg (w_, psi_, p1_);
           coverageCheckPrg (w_, psi_, p2_)
         end
-      | w_, psi_, unit_ -> ()
+      | w_, psi_, Unit -> ()
       | w_, psi_, T.Var _ -> ()
       | w_, psi_, T.Const _ -> ()
       | w_, psi_, T.Rec (d_, p_) -> coverageCheckPrg (w_, I.Decl (psi_, d_), p_)
@@ -109,7 +109,7 @@ end) : TOMEGACOVERAGE = struct
       | w_, psi_, T.Redex (p_, s_) -> coverageCheckSpine (w_, psi_, s_)
 
     and coverageCheckSpine = function
-      | w_, psi_, nil_ -> ()
+      | w_, psi_, T.Nil -> ()
       | w_, psi_, T.AppExp (u_, s_) -> coverageCheckSpine (w_, psi_, s_)
       | w_, psi_, T.AppBlock (b_, s_) -> coverageCheckSpine (w_, psi_, s_)
       | w_, psi_, T.AppPrg (p_, s_) -> begin

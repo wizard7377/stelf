@@ -85,7 +85,11 @@ end) : METASYN = struct
 
     let rec createAtomConst (g_, h_) =
       let cid =
-        begin match h_ with I.Const cid -> cid | I.Skonst cid -> cid
+        begin match h_ with
+        | I.Const cid -> cid
+        | I.Skonst cid -> cid
+        | I.Def cid -> cid
+        | _ -> assert false
         end
       in
       let v_ = I.constType cid in

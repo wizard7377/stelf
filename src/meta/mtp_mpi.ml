@@ -170,14 +170,14 @@ end) : MTPI = struct
     let rec printFillResult (_, p_) =
       let rec formatTuple (g_, p_) =
         let rec formatTuple' = function
-          | unit_ -> []
-          | F.Inx (m_, unit_) -> [ printFmt (Print.formatExp (g_, m_)) ]
+          | F.Unit -> []
+          | F.Inx (m_, F.Unit) -> [ printFmt (Print.formatExp (g_, m_)) ]
           | F.Inx (m_, p'_) ->
               printFmt (Print.formatExp (g_, m_))
               :: Fmt.string "," :: Fmt.break_ :: formatTuple' p'_
         in
         begin match p_ with
-        | F.Inx (_, unit_) -> Fmt.hbox (formatTuple' p_)
+        | F.Inx (_, F.Unit) -> Fmt.hbox (formatTuple' p_)
         | _ ->
             Fmt.hVbox0 1 1 1
               ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])

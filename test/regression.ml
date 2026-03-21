@@ -37,7 +37,7 @@ let regression_cases =
 module Run = struct
   let () =
     let all = Stdlib.Sys.argv in
-    Debug.setup_log ~level:Logs.Debug ();
+    Debug.setup_log ~level:Logs.Info ();
     Alcotest.run ~argv:all "twelf_regression"
       [ ("regression", regression_cases) ]
 end

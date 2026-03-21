@@ -149,7 +149,7 @@ end) : STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
             end
           in
           try TimeLimit.timeLimit !Global.timeLimit fillOp ()
-          with timeOut_ ->
+          with Filling.TimeOut ->
             begin
               print "\n----------- TIME OUT ---------------\n";
               raise Filling.TimeOut

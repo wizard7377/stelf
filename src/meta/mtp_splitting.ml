@@ -166,7 +166,11 @@ end) : MTPSPLITTING = struct
 
     let rec createAtomConst (g_, h_) =
       let cid =
-        begin match h_ with I.Const cid -> cid | I.Skonst cid -> cid
+        begin match h_ with
+        | I.Const cid -> cid
+        | I.Skonst cid -> cid
+        | I.Def cid -> cid
+        | _ -> assert false
         end
       in
       let v_ = I.constType cid in
@@ -228,8 +232,8 @@ end) : MTPSPLITTING = struct
 
     let rec constCases = function
       | g_, vs_, [], abstract, ops -> ops
-      | g_, vs_, I.Const c :: sgn_, abstract, ops ->
-          let u_, vs'_ = createAtomConst (g_, I.Const c) in
+      | g_, vs_, (I.Const c as h_) :: sgn_, abstract, ops ->
+          let u_, vs'_ = createAtomConst (g_, h_) in
           constCases
             ( g_,
               vs_,
@@ -242,6 +246,23 @@ end) : MTPSPLITTING = struct
                      else ops
                      end
                    with MTPAbstract.Error _ -> InActive :: ops)) )
+      | g_, vs_, (I.Def c as h_) :: sgn_, abstract, ops ->
+          let u_, vs'_ = createAtomConst (g_, h_) in
+          constCases
+            ( g_,
+              vs_,
+              sgn_,
+              abstract,
+              Cs_manager.trail (function () ->
+                  (try
+                     begin if Unify.unifiable (g_, vs_, vs'_) then
+                       Active (abstract u_) :: ops
+                     else ops
+                     end
+                   with MTPAbstract.Error _ -> InActive :: ops)) )
+      | g_, vs_, _ :: sgn_, abstract, ops ->
+          (* Skip other head types *)
+          constCases (g_, vs_, sgn_, abstract, ops)
 
     let rec paramCases = function
       | g_, vs_, 0, abstract, ops -> ops
@@ -400,7 +421,7 @@ end) : MTPSPLITTING = struct
       | k, I.Skonst _ -> false
 
     and occursInSpine = function
-      | _, nil_ -> false
+      | _, I.Nil -> false
       | k, I.App (u_, s_) -> occursInExp (k, u_) || occursInSpine (k, s_)
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)

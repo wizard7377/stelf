@@ -81,7 +81,7 @@ end) : FUNPRINT = struct
             Fmt.break_;
           ]
           @ formatFor' (I.Decl (g_, d'_), (f_, I.dot1 s))
-      | g_, (true_, s) -> [ Fmt.string "True" ]
+      | g_, (True, s) -> [ Fmt.string "True" ]
 
     let rec formatFor (psi_, f_) names =
       let rec nameLookup index = List.nth (names, index) in
@@ -215,14 +215,14 @@ end) : FUNPRINT = struct
       in
       let rec formatTuple (psi_, p_) =
         let rec formatTuple' = function
-          | unit_ -> []
-          | F.Inx (m_, unit_) -> [ Print.formatExp (F.makectx psi_, m_) ]
+          | F.Unit -> []
+          | F.Inx (m_, F.Unit) -> [ Print.formatExp (F.makectx psi_, m_) ]
           | F.Inx (m_, p'_) ->
               Print.formatExp (F.makectx psi_, m_)
               :: Fmt.string "," :: Fmt.break_ :: formatTuple' p'_
         in
         begin match p_ with
-        | F.Inx (_, unit_) -> Fmt.hbox (formatTuple' p_)
+        | F.Inx (_, F.Unit) -> Fmt.hbox (formatTuple' p_)
         | _ ->
             Fmt.hVbox0 1 1 1
               ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
@@ -327,7 +327,7 @@ end) : FUNPRINT = struct
                 Fmt.string "end";
               ]
       and formatPro3 = function
-        | psi_, (unit_ as p_) -> formatTuple (psi_, p_)
+        | psi_, (Unit as p_) -> formatTuple (psi_, p_)
         | psi_, (F.Inx _ as p_) -> formatTuple (psi_, p_)
         | psi_, (F.Let _ as p_) -> formatLet (psi_, p_, [])
       in

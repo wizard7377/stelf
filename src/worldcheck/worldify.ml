@@ -329,9 +329,9 @@ end) : WORLDIFY = struct
     let rec checkClause arg__10 arg__11 =
       begin match (arg__10, arg__11) with
       | w_, (g_, I.Root (a, s_), occ) -> ()
-      | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), maybe_), v2_), occ) ->
+      | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), Maybe), v2_), occ) ->
           checkClause w_ (decEName (g_, d_), v2_, P.body occ)
-      | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), occ) -> begin
+      | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), No), v2_), occ) -> begin
           checkClause w_ (decEName (g_, d_), v2_, P.body occ);
           checkGoal w_ (g_, v1_, P.label occ)
         end
@@ -435,12 +435,12 @@ end) : WORLDIFY = struct
 
     let rec worldifyClause = function
       | g_, (I.Root (a, s_) as v_), w_, occ -> v_
-      | g_, I.Pi (((I.Dec (x, v1_) as d_), maybe_), v2_), w_, occ ->
+      | g_, I.Pi (((I.Dec (x, v1_) as d_), Maybe), v2_), w_, occ ->
           let _ = print "{" in
           let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
           let _ = print "}" in
           I.Pi ((I.Dec (x, v1_), I.Maybe), w2_)
-      | g_, I.Pi (((I.Dec (x, v1_) as d_), no_), v2_), w_, occ ->
+      | g_, I.Pi (((I.Dec (x, v1_) as d_), No), v2_), w_, occ ->
           let w1_ = worldifyGoal (g_, v1_, w_, P.label occ) in
           let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
           I.Pi ((I.Dec (x, w1_), I.No), w2_)

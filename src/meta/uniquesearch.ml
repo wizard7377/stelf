@@ -117,14 +117,14 @@ end) : UNIQUESEARCH = struct
       | r, (I.Root (_, s_), s) -> occursInSpine (r, (s_, s))
       | r, (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
-      | r, (I.EVar (r', _, v'_, _), s) -> r = r' || occursInExp (r, (v'_, s))
+      | r, (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
       | r, (I.FgnExp (csid_, csfe), s) ->
           I.FgnExpStd.fold (csid_, csfe)
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
     and occursInSpine = function
-      | _, (nil_, _) -> false
+      | _, (I.Nil, _) -> false
       | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp (s', s)))
       | r, (I.App (u_, s_), s) ->
           occursInExp (r, (u_, s)) || occursInSpine (r, (s_, s))

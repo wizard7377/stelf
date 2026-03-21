@@ -122,14 +122,14 @@ end) : STYLECHECK = struct
     and checkType arg__4 arg__5 arg__6 =
       begin match (arg__4, arg__5, arg__6) with
       | c, ((g_, p_), I.Uni _, pol, occ), err -> []
-      | c, ((g_, p_), I.Pi ((d_, maybe_), v_), pol, occ), err ->
+      | c, ((g_, p_), I.Pi ((d_, Maybe), v_), pol, occ), err ->
           checkDec c
             ((g_, p_), d_, pol, occ)
             err
             (function
               | (g'_, p'_), l'_ ->
               l'_ @ checkType c ((g'_, p'_), v_, pol, P.body occ) err)
-      | c, ((g_, p_), I.Pi ((d_, no_), v_), pol, occ), err ->
+      | c, ((g_, p_), I.Pi ((d_, No), v_), pol, occ), err ->
           checkDec c
             ((g_, p_), d_, pol, occ)
             err
@@ -173,7 +173,7 @@ end) : STYLECHECK = struct
 
     and checkSpine arg__10 arg__11 arg__12 =
       begin match (arg__10, arg__11, arg__12) with
-      | c, ((g_, p_), n, 0, nil_, occ), err -> []
+      | c, ((g_, p_), n, 0, I.Nil, occ), err -> []
       | c, ((g_, p_), n, 0, I.App (u_, s_), occ), err ->
           checkExp c ((g_, p_), u_, P.arg (n, occ)) err
           @ checkSpine c ((g_, p_), n + 1, 0, s_, occ) err
@@ -185,7 +185,7 @@ end) : STYLECHECK = struct
       begin match (arg__13, arg__14, arg__15) with
       | c, ((g_, p_), 0, v_, occ), err ->
           checkType c ((g_, p_), v_, Plus, occ) err
-      | c, ((g_, p_), n, I.Pi ((d_, maybe_), v_), occ), err ->
+      | c, ((g_, p_), n, I.Pi ((d_, Maybe), v_), occ), err ->
           checkDecImp
             ((g_, p_), d_, Plus)
             (function

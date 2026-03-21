@@ -125,7 +125,7 @@ end) : PRINT = struct
       str0_ (Symbol.evar (Names.evarName (g_, x_) ^ "_"))
 
     let rec isNil = function
-      | nil_ -> true
+      | I.Nil -> true
       | I.App _ -> false
       | I.SClo (s_, _) -> isNil s_
 
@@ -165,7 +165,7 @@ end) : PRINT = struct
           checkArgNumber (s_, n)
       | i, I.App (u_, s_), n -> dropImp (i - 1, s_, n)
       | i, I.SClo (s_, s), n -> sclo' (dropImp (i, s_, n), s)
-      | i, nil_, n -> TooFew
+      | i, I.Nil, n -> TooFew
 
     let rec exceeded = function
       | _, None -> false
@@ -207,7 +207,7 @@ end) : PRINT = struct
       | _ -> 0
 
     let rec argNumber = function
-      | nonfix_ -> 0
+      | FX.Nonfix -> 0
       | FX.Infix _ -> 2
       | FX.Prefix _ -> 1
       | FX.Postfix _ -> 1
@@ -319,8 +319,8 @@ end) : PRINT = struct
 
     let rec addAccum = function
       | fmt, _, [] -> fmt
-      | fmt, FX.Infix (_, left_), accum -> F.hVbox ([ fmt ] @ accum)
-      | fmt, FX.Infix (_, right_), accum -> F.hVbox (accum @ [ fmt ])
+      | fmt, FX.Infix (_, FX.Left), accum -> F.hVbox ([ fmt ] @ accum)
+      | fmt, FX.Infix (_, FX.Right), accum -> F.hVbox (accum @ [ fmt ])
       | fmt, FX.Prefix _, accum -> F.hVbox (accum @ [ fmt ])
       | fmt, FX.Postfix _, accum -> F.hVbox ([ fmt ] @ accum)
 
@@ -406,7 +406,7 @@ end) : PRINT = struct
       let rec oe = function
         | Exact s'_ -> begin
             match fixity with
-            | nonfix_ -> OpArgs (FX.Nonfix, [ opFmt ], s'_)
+            | FX.Nonfix -> OpArgs (FX.Nonfix, [ opFmt ], s'_)
             | FX.Prefix _ -> OpArgs (fixity, [ opFmt; F.break ], s'_)
             | FX.Postfix _ -> OpArgs (fixity, [ F.break; opFmt ], s'_)
             | FX.Infix _ -> OpArgs (fixity, [ F.break; opFmt; F.space ], s'_)
@@ -479,7 +479,7 @@ end) : PRINT = struct
       | ( g_,
           d,
           Ctxt (fixity', accum, l),
-          (OpArgs ((nonfix_ as fixity), fmts, s_), s) ) ->
+          (OpArgs ((FX.Nonfix as fixity), fmts, s_), s) ) ->
           let atm = fmtSpine (g_, d, 0, (s_, s)) in
           addAccum
             ( parens ((fixity', fixity), F.hVbox (fmts @ [ F.break ] @ atm)),
@@ -488,7 +488,7 @@ end) : PRINT = struct
       | ( g_,
           d,
           Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Infix (p, left_) as fixity), fmts, s_), s) ) ->
+          (OpArgs ((FX.Infix (p, FX.Left) as fixity), fmts, s_), s) ) ->
           let accMore = eqFix (fixity, fixity') in
           let rhs =
             begin if accMore && elide l then []
@@ -515,7 +515,7 @@ end) : PRINT = struct
       | ( g_,
           d,
           Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Infix (p, right_) as fixity), fmts, s_), s) ) ->
+          (OpArgs ((FX.Infix (p, FX.Right) as fixity), fmts, s_), s) ) ->
           let accMore = eqFix (fixity, fixity') in
           let lhs =
             begin if accMore && elide l then []
@@ -539,7 +539,7 @@ end) : PRINT = struct
       | ( g_,
           d,
           Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Infix (_, none_) as fixity), fmts, s_), s) ) ->
+          (OpArgs ((FX.Infix (_, FX.None) as fixity), fmts, s_), s) ) ->
           let lhs = fmtExp (g_, d + 1, Ctxt (fixity, [], 0), fst (s_, s)) in
           let rhs = fmtExp (g_, d + 1, Ctxt (fixity, [], 0), snd (s_, s)) in
           addAccum
@@ -836,7 +836,7 @@ end) : PRINT = struct
       | (u_, _) :: xnames_, xs_ ->
           collectEVars (xnames_, Abstract.collectEVars (I.Null, (u_, I.id), xs_))
 
-    let rec eqCnstr r1 r2 = r1 = r2
+    let rec eqCnstr r1 r2 = r1 == r2
 
     let rec mergeConstraints = function
       | [], cnstrs2 -> cnstrs2

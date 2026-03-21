@@ -131,7 +131,7 @@ end) : RELFUN = struct
       | k, I.FgnConst _ -> false
 
     and occursInSpine = function
-      | _, nil_ -> false
+      | _, I.Nil -> false
       | k, I.App (u_, s_) -> occursInExpN (k, u_) || occursInSpine (k, s_)
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExpN (k, v_)
@@ -162,7 +162,7 @@ end) : RELFUN = struct
         end
       in
       let rec args = function
-        | nil_, mnil_ -> []
+        | I.Nil, M.Mnil -> []
         | I.App (u_, s'_), M.Mapp (M.Marg (m', _), mS) ->
             let l_ = args (s'_, mS) in
             begin match M.modeEqual (m, m') with

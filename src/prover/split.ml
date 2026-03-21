@@ -115,7 +115,8 @@ end) : SPLIT with module State = Split__0.State' = struct
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
           (I.App (x_, s_), vs_)
 
-    let rec createAtomConst (g_, (I.Const cid as h_)) =
+    let rec createAtomConst (g_, h_) =
+      let cid = match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false in
       let v_ = I.constType cid in
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (h_, s_), vs_)
@@ -131,13 +132,24 @@ end) : SPLIT with module State = Split__0.State' = struct
 
     let rec constCases = function
       | g_, vs_, [], sc -> ()
-      | g_, vs_, I.Const c :: sgn', sc ->
-          let u_, vs'_ = createAtomConst (g_, I.Const c) in
+      | g_, vs_, (I.Const c as h_) :: sgn', sc ->
+          let u_, vs'_ = createAtomConst (g_, h_) in
           let _ =
             Cs_manager.trail (function () ->
                 begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
                 end)
           in
+          constCases (g_, vs_, sgn', sc)
+      | g_, vs_, (I.Def c as h_) :: sgn', sc ->
+          let u_, vs'_ = createAtomConst (g_, h_) in
+          let _ =
+            Cs_manager.trail (function () ->
+                begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+                end)
+          in
+          constCases (g_, vs_, sgn', sc)
+      | g_, vs_, _ :: sgn', sc ->
+          (* Skip other head types *)
           constCases (g_, vs_, sgn', sc)
 
     let rec paramCases = function

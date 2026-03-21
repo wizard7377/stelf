@@ -51,12 +51,12 @@ module MakeModeDec () : MODEDEC = struct
           checkName' mS
 
     let rec modeConsistent = function
-      | star_, plus_ -> false
-      | star_, minus_ -> false
-      | star_, minus1_ -> false
-      | minus_, plus_ -> false
-      | minus_, minus1_ -> false
-      | minus1_, plus_ -> false
+      | M.Star, M.Plus -> false
+      | M.Star, M.Minus -> false
+      | M.Star, M.Minus1 -> false
+      | M.Minus, M.Plus -> false
+      | M.Minus, M.Minus1 -> false
+      | M.Minus1, M.Plus -> false
       | _ -> true
 
     let rec empty = function
@@ -65,11 +65,11 @@ module MakeModeDec () : MODEDEC = struct
           empty (k - 1, I.Decl (ms, (M.Marg (M.Star, None), Implicit)), v_)
 
     let rec inferVar = function
-      | I.Decl (ms, (M.Marg (star_, nameOpt), Implicit)), mode, 1 ->
+      | I.Decl (ms, (M.Marg (M.Star, nameOpt), Implicit)), mode, 1 ->
           I.Decl (ms, (M.Marg (mode, nameOpt), Implicit))
-      | I.Decl (ms, (M.Marg (_, nameOpt), Implicit)), plus_, 1 ->
+      | I.Decl (ms, (M.Marg (_, nameOpt), Implicit)), M.Plus, 1 ->
           I.Decl (ms, (M.Marg (M.Plus, nameOpt), Implicit))
-      | I.Decl (ms, (M.Marg (minus_, nameOpt), Implicit)), minus1_, 1 ->
+      | I.Decl (ms, (M.Marg (M.Minus, nameOpt), Implicit)), M.Minus1, 1 ->
           I.Decl (ms, (M.Marg (M.Minus1, nameOpt), Implicit))
       | (I.Decl (_, (_, Implicit)) as ms), _, 1 -> ms
       | (I.Decl (_, (_, Local)) as ms), _, 1 -> ms
@@ -108,7 +108,7 @@ module MakeModeDec () : MODEDEC = struct
       | ms, mode, I.FgnExp _ -> ms
 
     and inferSpine = function
-      | ms, mode, nil_ -> ms
+      | ms, mode, I.Nil -> ms
       | ms, mode, I.App (u_, s_) ->
           inferSpine (inferExp (ms, mode, u_), mode, s_)
 
@@ -170,7 +170,7 @@ module MakeModeDec () : MODEDEC = struct
 
     let rec checkPure = function
       | (a, M.Mnil), r -> ()
-      | (a, M.Mapp (M.Marg (minus1_, _), mS)), r ->
+      | (a, M.Mapp (M.Marg (M.Minus1, _), mS)), r ->
           error
             ( r,
               "Uniqueness modes (-1) not permitted in `%mode' declarations \

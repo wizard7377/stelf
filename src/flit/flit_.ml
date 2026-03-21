@@ -471,9 +471,9 @@ module Flit(Flit__0: sig
           begin
           match (arg__15, arg__16)
           with 
-               | (generate, (g_, idx, nil_, flags)) -> idx
+               | (generate, (g_, idx, I.Nil, flags)) -> idx
                | (generate,
-                  (g_, idx, I.App (u1_, nil_), ((cld, _, _) as flags)))
+                  (g_, idx, I.App (u1_, I.Nil), ((cld, _, _) as flags)))
                    -> let idxU1 =
                         compileExpN generate (g_, u1_, (cld, false, false))
                         in app generate (flags, idx, idxU1)
@@ -715,10 +715,10 @@ module Flit(Flit__0: sig
                       begin
                       match N.getFixity cid
                       with 
-                           | F.Infix (F.Strength level, left_) -> (level, 1)
-                           | F.Infix (F.Strength level, right_) -> (level, 2)
-                           | F.Infix (F.Strength level, none_) -> (level, 3)
-                           | nonfix_ -> (nonfixLevel, 0)
+                           | F.Infix (F.Strength level, F.Left) -> (level, 1)
+                           | F.Infix (F.Strength level, F.Right) -> (level, 2)
+                           | F.Infix (F.Strength level, F.None) -> (level, 3)
+                           | F.Nonfix -> (nonfixLevel, 0)
                       end
                       in let rec dumpEntry cid =
                            begin
@@ -981,7 +981,7 @@ module Flit(Flit__0: sig
                                -> (n = n') && (etaReduceSpine (n - 1) sp)
                            | _ -> false
                       end
-               | (n, nil_) -> true
+               | (n, Nil) -> true
                | (n, _) -> false
           end;;
         let rec checkTrivial cid =
@@ -1042,7 +1042,7 @@ module Flit(Flit__0: sig
           begin
           match (arg__36, arg__37)
           with 
-               | (cid, nil_) -> ()
+               | (cid, Nil) -> ()
                | (cid, App (m_, s_))
                    -> begin
                         travExp cid m_;travSpine cid s_
@@ -1195,7 +1195,7 @@ module Flit(Flit__0: sig
                                               | (_, _, _) -> false
                                          end in begin
                                          if makeNonfix then
-                                         N.installFixity (cid, F.nonfix_)
+                                         N.installFixity (cid, F.Nonfix)
                                          else () end;
                    correctFixities (cid + 1)
                    end

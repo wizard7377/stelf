@@ -11,10 +11,13 @@ doc: "https://url/to/documentation"
 bug-reports: "https://github.com/username/reponame/issues"
 depends: [
   "dune" {>= "3.20"}
-  "ocaml"
+  "ocaml" {>= "5.0.0"}
   "basis"
   "lwt"
+  "containers"
+  "alcotest" {with-test}
   "odoc" {with-doc}
+  "logs" {>= "3.0.0"}
 ]
 build: [
   ["dune" "subst"] {dev}

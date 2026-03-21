@@ -91,7 +91,7 @@ end) : TYPECHECK = struct
     and inferExp (g_, us_) = inferExpW (g_, Whnf.whnf us_)
 
     and inferSpine = function
-      | g_, (nil_, _), vs_ -> vs_
+      | g_, (I.Nil, _), vs_ -> vs_
       | g_, (I.SClo (s_, s'), s), vs_ ->
           inferSpine (g_, (s_, I.comp (s', s)), vs_)
       | g_, (I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2) -> begin

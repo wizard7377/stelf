@@ -203,7 +203,7 @@ end) : MEMOTABLE = struct
           print (("Exp ( " ^ expToS (g_, e_)) ^ " ). ");
           printSub (g_, s)
         end
-      | g_, I.Dot (undef_, s) -> begin
+      | g_, I.Dot (I.Undef, s) -> begin
           print "Undef . ";
           printSub (g_, s)
         end

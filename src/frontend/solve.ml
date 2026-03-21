@@ -276,7 +276,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
             end;
             finish m_
           end
-        with timeOut_ ->
+        with Filling.TimeOut ->
           raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
     end
 
@@ -338,7 +338,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
               end
             with Solution m_ -> finish m_
           end
-        with timeOut_ ->
+        with Filling.TimeOut ->
           raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
     end
   (* self timing *)
@@ -346,8 +346,8 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
 
   let rec solve args =
     begin match !Compile.optimize with
-    | indexing_ -> solveSbt args
-    | linearHeads_ -> solve' args
+    | CompSyn.Indexing -> solveSbt args
+    | CompSyn.LinearHeads -> solve' args
     | _ -> solve' args
     end
   (* solves A where program clauses are indexed using substitution trees
@@ -434,20 +434,17 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     begin
       begin if not (boundEq (try_, Some 0)) then begin
         Cs_manager.reset ();
-        begin try
+        (try
           try
             TimeLimit.timeLimit !Global.timeLimit
               (Timers.time Timers.solving search)
               ()
           with Done -> ()
           (* printing is timed into solving! *)
-        with timeOut_ ->
-          raise (AbortQuery "\n----------- TIME OUT ---------------\n");
-          begin
-            Cs_manager.reset ();
-            checkSolutions (expected, try_, !solutions)
-          end
-        end
+        with Filling.TimeOut ->
+          raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
+        Cs_manager.reset ();
+        checkSolutions (expected, try_, !solutions)
       end
       (* solve query if bound > 0 *)
       (* in case Done was raised *)
@@ -578,19 +575,16 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     begin
       begin if not (boundEq (try_, Some 0)) then begin
         Cs_manager.reset ();
-        begin try
-          TimeLimit.timeLimit !Global.timeLimit
-            (Timers.time Timers.solving search)
-            ()
-        with Done -> (
-          try ()
-          with timeOut_ ->
-            raise (AbortQuery "\n----------- TIME OUT ---------------\n");
-            begin
-              Cs_manager.reset ();
-              checkSolutions (expected, try_, !solutions)
-            end)
-        end
+        (try
+          try
+            TimeLimit.timeLimit !Global.timeLimit
+              (Timers.time Timers.solving search)
+              ()
+          with Done -> ()
+        with Filling.TimeOut ->
+          raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
+        Cs_manager.reset ();
+        checkSolutions (expected, try_, !solutions)
       end
       (* solve query if bound > 0 *)
       (* printing is timed into solving! *)
@@ -632,8 +626,8 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (* %query <expected> <try> A or %query <expected> <try> X : A  *)
   let rec query args =
     begin match !Compile.optimize with
-    | indexing_ -> querySbt args
-    | linearHeads_ -> query' args
+    | CompSyn.Indexing -> querySbt args
+    | CompSyn.LinearHeads -> query' args
     | _ -> query' args
     end
   (* Execute query where program clauses are
@@ -827,7 +821,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
               TimeLimit.timeLimit !Global.timeLimit
                 (Timers.time Timers.solving tabledSearch)
                 ()
-            with timeOut_ ->
+            with Filling.TimeOut ->
               begin
                 Msg.message "\n----------- TIME OUT ---------------\n";
                 raise Done

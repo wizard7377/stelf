@@ -157,7 +157,7 @@ end) : CONVERTER = struct
           T.Abs (strengthenDec (d_, s), strengthenTC (tc_, I.dot1 s))
 
     let rec strengthenSpine = function
-      | nil_, t -> I.Nil
+      | I.Nil, t -> I.Nil
       | I.App (u_, s_), t ->
           I.App (strengthenExp (u_, t), strengthenSpine (s_, t))
 
@@ -283,7 +283,7 @@ end) : CONVERTER = struct
       | k, I.Proj _ -> false
 
     and occursInSpine = function
-      | _, nil_ -> false
+      | _, I.Nil -> false
       | k, I.App (u_, s_) -> occursInExpN (k, u_) || occursInSpine (k, s_)
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExpN (k, v_)
@@ -314,7 +314,7 @@ end) : CONVERTER = struct
     let rec strengthen (psi_, (a, s_), w, m) =
       let mS = modeSpine a in
       let rec args = function
-        | nil_, M.Mnil -> []
+        | I.Nil, M.Mnil -> []
         | I.App (u_, s'_), M.Mapp (M.Marg (m', _), mS) ->
             let l_ = args (s'_, mS) in
             begin match M.modeEqual (m, m') with
@@ -436,7 +436,7 @@ end) : CONVERTER = struct
       let mS = modeSpine a in
       let v_ = typeOf a in
       let rec transformInit' = function
-        | (nil_, M.Mnil), I.Uni I.Type, (w, s) -> (w, s)
+        | (I.Nil, M.Mnil), I.Uni I.Type, (w, s) -> (w, s)
         | ( (I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS)),
             I.Pi (_, v2_),
             (w, s) ) ->
@@ -456,7 +456,7 @@ end) : CONVERTER = struct
 
     let rec transformConc ((a, s_), w) =
       let rec transformConc' = function
-        | nil_, M.Mnil -> T.Unit
+        | I.Nil, M.Mnil -> T.Unit
         | I.App (u_, s'_), M.Mapp (M.Marg (M.Plus, _), mS') ->
             transformConc' (s'_, mS')
         | I.App (u_, s'_), M.Mapp (M.Marg (M.Minus, _), mS') ->
@@ -482,7 +482,7 @@ end) : CONVERTER = struct
 
     and renameSpine arg__5 arg__6 =
       begin match (arg__5, arg__6) with
-      | f, nil_ -> I.Nil
+      | f, I.Nil -> I.Nil
       | f, I.App (u_, s_) -> I.App (renameExp f u_, renameSpine f s_)
       end
 
@@ -506,7 +506,7 @@ end) : CONVERTER = struct
     let rec traverseNeg arg__7 arg__8 =
       begin match (arg__7, arg__8) with
       | ( (l_, wmap, projs),
-          ((psi0_, psi_), I.Pi (((I.Dec (_, v1_) as d_), maybe_), v2_), w) ) ->
+          ((psi0_, psi_), I.Pi (((I.Dec (_, v1_) as d_), Maybe), v2_), w) ) ->
         begin
           match
             traverseNeg (l_, wmap, projs)
@@ -515,7 +515,7 @@ end) : CONVERTER = struct
           | Some (w', pq'_) -> Some (peel w', pq'_)
         end
       | ( (l_, wmap, projs),
-          ((psi0_, psi_), I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), w) ) ->
+          ((psi0_, psi_), I.Pi (((I.Dec (_, v1_) as d_), No), v2_), w) ) ->
         begin
           match
             traverseNeg (l_, wmap, projs)
@@ -615,7 +615,7 @@ end) : CONVERTER = struct
           in
           let rec apply ((s_, mS), ft_) = applyW ((s_, mS), T.whnfFor ft_)
           and applyW = function
-            | (nil_, M.Mnil), ft'_ -> (T.Nil, T.forSub ft'_)
+            | (I.Nil, M.Mnil), ft'_ -> (T.Nil, T.forSub ft'_)
             | ( (I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS)),
                 (T.All (d_, f'_), t') ) ->
                 let u'_ = strengthenExp (u_, w1) in

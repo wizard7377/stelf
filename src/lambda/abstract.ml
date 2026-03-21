@@ -97,7 +97,7 @@ end) : ABSTRACT = struct
 
     let rec eqEVar arg__1 arg__2 =
       begin match (arg__1, arg__2) with
-      | I.EVar (r1, _, _, _), Ev (I.EVar (r2, _, _, _)) -> r1 = r2
+      | I.EVar (r1, _, _, _), Ev (I.EVar (r2, _, _, _)) -> r1 == r2
       | _, _ -> false
       end
 
@@ -109,7 +109,7 @@ end) : ABSTRACT = struct
 
     let rec eqLVar arg__5 arg__6 =
       begin match (arg__5, arg__6) with
-      | I.LVar (r1, _, _), Lv (I.LVar (r2, _, _)) -> r1 = r2
+      | I.LVar (r1, _, _), Lv (I.LVar (r2, _, _)) -> r1 == r2
       | _, _ -> false
       end
 
@@ -257,7 +257,7 @@ end) : ABSTRACT = struct
       | ( I.Decl (k'_, Ev (I.EVar (r', _, _, _))),
           depth,
           (I.EVar (r, _, _, _) as x_) ) -> begin
-          if r = r' then I.BVar (depth + 1)
+          if r == r' then I.BVar (depth + 1)
           else abstractEVar (k'_, depth + 1, x_)
         end
       | I.Decl (k'_, _), depth, x_ -> abstractEVar (k'_, depth + 1, x_)
@@ -272,7 +272,7 @@ end) : ABSTRACT = struct
     let rec abstractLVar = function
       | I.Decl (k'_, Lv (I.LVar (r', _, _))), depth, (I.LVar (r, _, _) as l_) ->
         begin
-          if r = r' then I.Bidx (depth + 1)
+          if r == r' then I.Bidx (depth + 1)
           else abstractLVar (k'_, depth + 1, l_)
         end
       | I.Decl (k'_, _), depth, l_ -> abstractLVar (k'_, depth + 1, l_)
@@ -442,7 +442,7 @@ end) : ABSTRACT = struct
       | I.Decl (g_, d_) -> closedCtx g_ && closedDec (g_, (d_, I.id))
 
     let rec closedFor = function
-      | psi_, true_ -> true
+      | psi_, True -> true
       | psi_, T.All ((d_, _), f_) ->
           closedDEC (psi_, d_) && closedFor (I.Decl (psi_, d_), f_)
       | psi_, T.Ex ((d_, _), f_) ->
@@ -474,7 +474,7 @@ end) : ABSTRACT = struct
 
     let rec collectPrg = function
       | _, (T.EVar (psi_, r, f_, _, _, _) as p_), k_ -> I.Decl (k_, Pv p_)
-      | psi_, unit_, k_ -> k_
+      | psi_, Unit, k_ -> k_
       | psi_, T.PairExp (u_, p_), k_ ->
           collectPrg (psi_, p_, collectExp (T.coerceCtx psi_, (u_, I.id), k_))
 
@@ -482,7 +482,7 @@ end) : ABSTRACT = struct
       | ( I.Decl (k'_, Pv (T.EVar (_, r', _, _, _, _))),
           depth,
           (T.EVar (_, r, _, _, _, _) as p_) ) -> begin
-          if r = r' then T.Var (depth + 1) else abstractPVar (k'_, depth + 1, p_)
+          if r == r' then T.Var (depth + 1) else abstractPVar (k'_, depth + 1, p_)
         end
       | I.Decl (k'_, _), depth, p_ -> abstractPVar (k'_, depth + 1, p_)
 

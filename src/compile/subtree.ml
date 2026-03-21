@@ -258,7 +258,7 @@ end) : SUBTREE = struct
           print "Exp (_ ). ";
           printSub s
         end
-      | IntSyn.Dot (undef_, s) -> begin
+      | IntSyn.Dot (IntSyn.Undef, s) -> begin
           print "Undef . ";
           printSub s
         end
@@ -451,7 +451,7 @@ end) : SUBTREE = struct
           I.Pi ((normalizeNDec (d_, nsub), p_), normalizeNExp (u_, nsub))
 
     and normalizeNSpine = function
-      | nil_, _ -> I.Nil
+      | I.Nil, _ -> I.Nil
       | I.App (u_, s_), nsub ->
           I.App (normalizeNExp (u_, nsub), normalizeNSpine (s_, nsub))
 

@@ -71,7 +71,7 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
           let x_ = I.newEVar (T.coerceCtx psi_, v_) in
           let y_ = T.newEVar (psi_, T.forSub (f_, T.Dot (T.Exp x_, T.id))) in
           Some (r_, T.PairExp (x_, y_))
-      | S.Focus ((T.EVar (psi_, r, true_, None, None, _) as r_), w_) ->
+      | S.Focus ((T.EVar (psi_, r, True, None, None, _) as r_), w_) ->
           Some (r_, T.Unit)
       | S.Focus (T.EVar (psi_, r, T.FClo (f_, s), tc1_, tc2_, x_), w_) ->
           expand

@@ -206,6 +206,26 @@ end) : UNIQUE = struct
                 end)
           in
           checkUniqueBlockConsts (g_, vs_, cs, ms, bx)
+      | g_, vs_, I.Def cid :: cs, ms, bx ->
+          let _ =
+            chatter 6 (function () ->
+                ((("?- " ^ pName bx) ^ " ~ ") ^ cName cid) ^ "\n")
+          in
+          let vs'_ = instEVars (g_, (I.constType cid, I.id)) in
+          let _ =
+            Cs_manager.trail (function () ->
+                begin if unifiableRoots (g_, vs_, vs'_, ms) then
+                  raise
+                    (Error
+                       (((("Block " ^ pName bx) ^ " and constant ") ^ cName cid)
+                       ^ " overlap"))
+                else ()
+                end)
+          in
+          checkUniqueBlockConsts (g_, vs_, cs, ms, bx)
+      | g_, vs_, _ :: cs, ms, bx ->
+          (* Skip other head types *)
+          checkUniqueBlockConsts (g_, vs_, cs, ms, bx)
 
     let rec checkUniqueBlockBlock = function
       | g_, vs_, (t, []), (a, ms), (bx, b') -> ()

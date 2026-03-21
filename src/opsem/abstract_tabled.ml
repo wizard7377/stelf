@@ -73,7 +73,7 @@ end) : ABSTRACTTABLED = struct
     let rec isId = function
       | I.Shift n -> n = 0
       | I.Dot (I.Idx n, s') as s -> isId' (s, 0)
-      | I.Dot (undef_, s') as s -> isId' (s, 0)
+      | I.Dot (I.Undef, s') as s -> isId' (s, 0)
       | I.Dot (I.Exp _, s) -> false
 
     and isId' = function
@@ -81,7 +81,7 @@ end) : ABSTRACTTABLED = struct
       | I.Dot (I.Idx i, s), k ->
           let k' = k + 1 in
           i = k' && isId' (s, k')
-      | I.Dot (undef_, s), k -> isId' (s, k + 1)
+      | I.Dot (I.Undef, s), k -> isId' (s, k + 1)
 
     let rec equalCtx = function
       | I.Null, s, I.Null, s' -> true
@@ -93,7 +93,7 @@ end) : ABSTRACTTABLED = struct
 
     let rec eqEVarW arg__1 arg__2 =
       begin match (arg__1, arg__2) with
-      | I.EVar (r1, _, _, _), Ev (I.EVar (r2, _, _, _)) -> r1 = r2
+      | I.EVar (r1, _, _, _), Ev (I.EVar (r2, _, _, _)) -> r1 == r2
       | _, _ -> false
       end
 
@@ -478,7 +478,7 @@ end) : ABSTRACTTABLED = struct
             collectExp (gss_, gl_, (u_, I.id), k_, dupVars_, flag, d)
           in
           collectSub (gss_, gl_, s, k'_, dupVars'_, flag, d)
-      | gss_, gl_, I.Dot (undef_, s), k_, dupVars_, flag, d ->
+      | gss_, gl_, I.Dot (I.Undef, s), k_, dupVars_, flag, d ->
           collectSub (gss_, gl_, s, k_, dupVars_, flag, d)
 
     let rec collectCtx = function

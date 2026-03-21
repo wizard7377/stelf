@@ -276,7 +276,7 @@ end) : MODSYN = struct
       let _ = installAction (cid', origin) in
       let _ =
         begin match fixity with
-        | nonfix_ -> ()
+        | Names.Fixity.Nonfix -> ()
         | _ -> Names.installFixity (cid', fixity)
         end
       in

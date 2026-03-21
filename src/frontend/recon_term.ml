@@ -295,20 +295,17 @@ end) : RECON_TERM = struct
         raiseType (g_, IntSyn.Pi ((d_, IntSyn.Maybe), v_))
 
   (* open IntSyn *)
-  open! struct
-    let evarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
-    let fvarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
-    let fvarTable : IntSyn.exp StringTree.table = StringTree.new_ 0
-  end
+  let evarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
+  let fvarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
+  let fvarTable : IntSyn.exp StringTree.table = StringTree.new_ 0
 
-  let rec varReset () =
-    begin
-      StringTree.clear evarApxTable;
-      begin
-        StringTree.clear fvarApxTable;
-        StringTree.clear fvarTable
-      end
-    end
+  let varReset () =
+    StringTree.clear evarApxTable;
+    StringTree.clear fvarApxTable;
+    StringTree.clear fvarTable
+
+  let fvarApxTable_ref_check () =
+    fvarApxTable
 
   let rec getEVarTypeApx name =
     begin match StringTree.lookup evarApxTable name with
@@ -332,9 +329,12 @@ end) : RECON_TERM = struct
 
   let rec getFVarTypeApx name =
     begin match StringTree.lookup fvarApxTable name with
-    | Some v_ -> v_
+    | Some v_ ->
+        Logs.debug (fun m -> m "getFVarTypeApx: found existing for %s" name);
+        v_
     | None ->
         let v_ = Apx.newCVar () in
+        Logs.debug (fun m -> m "getFVarTypeApx: creating fresh CVar for %s" name);
         begin
           StringTree.insert fvarApxTable (name, v_);
           v_
@@ -1655,7 +1655,9 @@ end) : RECON_TERM = struct
 
   let rec recon' j =
     let _ = Apx.varReset () in
-    let _ = varReset () in
+    StringTree.clear evarApxTable;
+    StringTree.clear fvarApxTable;
+    StringTree.clear fvarTable;
     let j' = inferApxJob (IntSyn.Null, j) in
     let _ = clearDelayed () in
     let j'' = inferExactJob (IntSyn.Null, j') in

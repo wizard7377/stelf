@@ -66,7 +66,7 @@ end) : MTPFILLING = struct
     exception Success of int
 
     let rec createEVars = function
-      | g_, (true_, s) -> ([], F.Unit)
+      | g_, (F.True, s) -> ([], F.Unit)
       | g_, (F.Ex (I.Dec (_, v_), f_), s) ->
           let x_ = I.newEVar (g_, I.EClo (v_, s)) in
           let x'_ = Whnf.lowerEVar x_ in

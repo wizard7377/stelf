@@ -24,7 +24,7 @@ module Redundant(Redundant__0: sig module Opsem : OPSEM end) : REDUNDANT =
     module I = IntSyn;;
     module Opsem = Redundant__0.Opsem;;
     let rec optionRefEqual (r1, r2, func) = begin
-      if r1 = r2 then true else
+      if r1 == r2 then true else
       begin
       match (r1, r2)
       with 

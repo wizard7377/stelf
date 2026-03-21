@@ -49,7 +49,7 @@ struct
   (* assuming cids of consts and defs to be disjoint *)
 
   and xlate_spine = function
-    | nil_ -> []
+    | I.Nil -> []
     | I.App (e, s) -> xlate_spinelt e :: xlate_spine s
 
   and xlate_spinelt e = S.Elt (xlate_term e)
@@ -240,9 +240,9 @@ struct
         in
         begin match (mode, mstar) with
         | Omit, _ -> S.Omit :: sstar
-        | minus_, _ -> S.Elt mstar :: sstar
-        | plus_, S.ATerm t -> S.AElt t :: sstar
-        | plus_, S.NTerm t -> S.Ascribe (t, compress_type g_ (None, a)) :: sstar
+        | S.Minus, _ -> S.Elt mstar :: sstar
+        | S.Plus, S.ATerm t -> S.AElt t :: sstar
+        | S.Plus, S.NTerm t -> S.Ascribe (t, compress_type g_ (None, a)) :: sstar
         end
     end
 
@@ -259,9 +259,9 @@ struct
         in
         begin match (mode, mstar) with
         | Omit, _ -> S.Omit :: sstar
-        | minus_, _ -> S.Elt mstar :: sstar
-        | plus_, S.ATerm t -> S.AElt t :: sstar
-        | plus_, S.NTerm t -> S.Ascribe (t, compress_type g_ (None, a)) :: sstar
+        | S.Minus, _ -> S.Elt mstar :: sstar
+        | S.Plus, S.ATerm t -> S.AElt t :: sstar
+        | S.Plus, S.NTerm t -> S.Ascribe (t, compress_type g_ (None, a)) :: sstar
         end
     end
 
@@ -411,12 +411,12 @@ struct
     let rec optimize' arg__29 arg__30 =
       begin match (arg__29, arg__30) with
       | ms, [] -> rev ms
-      | ms, plus_ :: ms' -> begin
+      | ms, S.Plus :: ms' -> begin
           if can_omit (rev ms @ (S.Minus :: ms')) then
             optimize' (S.Minus :: ms) ms'
           else optimize' (S.Plus :: ms) ms'
         end
-      | ms, minus_ :: ms' -> begin
+      | ms, S.Minus :: ms' -> begin
           if can_omit (rev ms @ (S.Omit :: ms')) then
             optimize' (S.Omit :: ms) ms'
           else optimize' (S.Minus :: ms) ms'

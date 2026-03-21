@@ -151,11 +151,11 @@ end) : TOTAL = struct
 
   and checkDynOrderW = function
     | g_, (I.Root _, s), n, occ -> ()
-    | g_, (I.Pi (((I.Dec (_, v1_) as d1_), no_), v2_), s), n, occ -> begin
+    | g_, (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s), n, occ -> begin
         checkDynOrder (g_, (v1_, s), n - 1, P.label occ);
         checkDynOrder (I.Decl (g_, d1_), (v2_, I.dot1 s), n, P.body occ)
       end
-    | g_, (I.Pi ((d1_, maybe_), v2_), s), n, occ ->
+    | g_, (I.Pi ((d1_, Maybe), v2_), s), n, occ ->
         checkDynOrder (I.Decl (g_, d1_), (v2_, I.dot1 s), n, P.body occ)
 
   (* static (= dependent) assumption --- consider only body *)
@@ -173,10 +173,10 @@ end) : TOTAL = struct
   let rec checkClause (g_, vs_, occ) = checkClauseW (g_, Whnf.whnf vs_, occ)
 
   and checkClauseW = function
-    | g_, (I.Pi ((d1_, maybe_), v2_), s), occ ->
+    | g_, (I.Pi ((d1_, Maybe), v2_), s), occ ->
         let d1'_ = N.decEName (g_, I.decSub (d1_, s)) in
         checkClause (I.Decl (g_, d1'_), (v2_, I.dot1 s), P.body occ)
-    | g_, (I.Pi (((I.Dec (_, v1_) as d1_), no_), v2_), s), occ ->
+    | g_, (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s), occ ->
         let _ = checkClause (I.Decl (g_, d1_), (v2_, I.dot1 s), P.body occ) in
         checkGoal (g_, (v1_, s), P.label occ)
     | g_, (I.Root _, s), occ -> ()
@@ -209,10 +209,10 @@ end) : TOTAL = struct
        Effect: raises Error (msg) otherwise
     *)
   let rec checkDefinite = function
-    | a, mnil_ -> ()
-    | a, M.Mapp (M.Marg (plus_, _), ms') -> checkDefinite (a, ms')
-    | a, M.Mapp (M.Marg (minus_, _), ms') -> checkDefinite (a, ms')
-    | a, M.Mapp (M.Marg (star_, xOpt), ms') ->
+    | a, M.Mnil -> ()
+    | a, M.Mapp (M.Marg (M.Plus, _), ms') -> checkDefinite (a, ms')
+    | a, M.Mapp (M.Marg (M.Minus, _), ms') -> checkDefinite (a, ms')
+    | a, M.Mapp (M.Marg (M.Star, xOpt), ms') ->
         error
           ( a,
             P.top,

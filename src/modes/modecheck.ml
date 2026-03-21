@@ -115,7 +115,7 @@ end) : MODECHECK = struct
     let rec ambiguate = function
       | M.Plus -> M.Plus
       | M.Minus -> M.Minus
-      | minus1_ -> M.Minus
+      | M.Minus1 -> M.Minus
 
     let rec andUnique = function Unique, Unique -> Unique | _ -> Ambig
     let rec isFree = function Existential (Free, _) -> true | _ -> false
@@ -134,13 +134,13 @@ end) : MODECHECK = struct
       | _ -> raise Eta
 
     and etaSpine = function
-      | nil_, 0 -> ()
+      | I.Nil, 0 -> ()
       | I.App (u_, s_), n -> begin
           if etaContract (u_, 0) = n then etaSpine (s_, n - 1) else raise Eta
         end
 
     let rec checkPattern = function
-      | d_, k, args, nil_ -> ()
+      | d_, k, args, I.Nil -> ()
       | d_, k, args, I.App (u_, s_) ->
           let k' = etaContract (u_, 0) in
           begin if
@@ -180,7 +180,7 @@ end) : MODECHECK = struct
       | d_, p, I.FgnExp (cs, ops) -> false
 
     and strictSpineN = function
-      | _, _, nil_ -> false
+      | _, _, I.Nil -> false
       | d_, p, I.App (u_, s_) ->
           strictExpN (d_, p, u_) || strictSpineN (d_, p, s_)
 
@@ -205,7 +205,7 @@ end) : MODECHECK = struct
               freeExpN (d_, d, mode, Whnf.normalize (u_, I.id), occ, strictFun))
 
     and freeSpineN = function
-      | d_, d, mode, nil_, _, strictFun -> ()
+      | d_, d, mode, I.Nil, _, strictFun -> ()
       | d_, d, mode, I.App (u_, s_), (p, occ), strictFun -> begin
           freeExpN (d_, d, mode, u_, P.arg (p, occ), strictFun);
           freeSpineN (d_, d, mode, s_, (p + 1, occ), strictFun)
@@ -235,7 +235,7 @@ end) : MODECHECK = struct
             (Error "Foreign expressions not permitted when checking freeness")
 
     and nonStrictSpineN = function
-      | d_, nil_ -> d_
+      | d_, I.Nil -> d_
       | d_, I.App (u_, s_) -> nonStrictSpineN (nonStrictExpN (d_, u_), s_)
 
     and nonStrictVarD = function
@@ -263,7 +263,7 @@ end) : MODECHECK = struct
       | d_, I.FgnExp (csfe1, csfe2), u -> d_
 
     and updateSpineN = function
-      | d_, nil_, u -> d_
+      | d_, I.Nil, u -> d_
       | d_, I.App (u_, s_), u -> updateSpineN (updateExpN (d_, u_, u), s_, u)
 
     and updateVarD = function
@@ -272,16 +272,16 @@ end) : MODECHECK = struct
       | I.Decl (d_, status), k, u -> I.Decl (updateVarD (d_, k - 1, u), status)
 
     let rec updateAtom' = function
-      | d_, mode, nil_, mnil_, _ -> d_
+      | d_, _mode, I.Nil, M.Mnil, _ -> d_
       | d_, M.Plus, I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS), (p, occ) ->
           updateAtom' (updateExpN (d_, u_, Unique), M.Plus, s_, mS, (p + 1, occ))
       | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
         ->
           updateAtom' (updateExpN (d_, u_, Ambig), M.Minus, s_, mS, (p + 1, occ))
-      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
+      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
         ->
           updateAtom' (updateExpN (d_, u_, Ambig), M.Minus, s_, mS, (p + 1, occ))
-      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
+      | d_, M.Minus1, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
         ->
           updateAtom'
             (updateExpN (d_, u_, Ambig), M.Minus1, s_, mS, (p + 1, occ))
@@ -293,7 +293,7 @@ end) : MODECHECK = struct
           updateAtom' (d_, mode, s_, mS, (p + 1, occ))
 
     let rec freeAtom = function
-      | d_, mode, nil_, vs_, mnil_, _ -> ()
+      | d_, _mode, I.Nil, _vs_, M.Mnil, _ -> ()
       | ( d_,
           M.Minus,
           I.App (u_, s_),
@@ -356,14 +356,14 @@ end) : MODECHECK = struct
             Unique
 
     and groundSpineN = function
-      | d_, mode, nil_, _ -> Unique
+      | d_, mode, I.Nil, _ -> Unique
       | d_, mode, I.App (u_, s_), (p, occ) ->
           andUnique
             ( groundExpN (d_, mode, u_, P.arg (p, occ)),
               groundSpineN (d_, mode, s_, (p + 1, occ)) )
 
     and groundVar = function
-      | d_, minus1_, k, occ -> begin
+      | d_, M.Minus1, k, occ -> begin
           match I.ctxLookup (d_, k) with
           | Existential (Ground Unique, _) -> Unique
           | Universal -> Unique
@@ -395,7 +395,7 @@ end) : MODECHECK = struct
           end
 
     let rec groundAtom = function
-      | d_, _, nil_, mnil_, _ -> Unique
+      | d_, _, I.Nil, M.Mnil, _ -> Unique
       | d_, M.Plus, I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS), (p, occ) ->
           andUnique
             ( groundExpN (d_, M.Plus, u_, P.arg (p, occ)),
@@ -405,7 +405,7 @@ end) : MODECHECK = struct
           andUnique
             ( groundExpN (d_, M.Minus, u_, P.arg (p, occ)),
               groundAtom (d_, M.Minus, s_, mS, (p + 1, occ)) )
-      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (minus1_, _), mS), (p, occ)
+      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
         ->
           andUnique
             ( groundExpN (d_, M.Minus1, u_, P.arg (p, occ)),
@@ -417,13 +417,13 @@ end) : MODECHECK = struct
     let rec ctxPop ds_ = List.map (function I.Decl (d_, m) -> d_) ds_
 
     let rec checkD1 = function
-      | d_, I.Pi ((I.Dec (name, _), maybe_), v_), occ, k ->
+      | d_, I.Pi ((I.Dec (name, _), Maybe), v_), occ, k ->
           checkD1
             ( I.Decl (d_, Existential (Free, name)),
               v_,
               P.body occ,
               function I.Decl (d'_, m) -> ctxPush (m, k d'_) )
-      | d_, I.Pi ((I.Dec (name, v1_), no_), v2_), occ, k ->
+      | d_, I.Pi ((I.Dec (name, v1_), No), v2_), occ, k ->
           checkD1
             ( I.Decl (d_, Existential (Free, name)),
               v2_,
@@ -436,20 +436,15 @@ end) : MODECHECK = struct
             | [] -> ()
             | mS :: mSs ->
                 let rec checkSome = function
-                  | d'_ :: [] -> begin
+                  | d'_ :: [] ->
                       ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)));
                       checkAll mSs
-                    end
-                  | d'_ :: ds_ -> begin
-                      try
-                        begin
-                          ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)));
-                          ()
-                        end
+                  | d'_ :: ds_ ->
+                      (try
+                        ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)))
                       with ModeError _ ->
-                        checkSome ds_;
-                        checkAll mSs
-                    end
+                        checkSome ds_);
+                      checkAll mSs
                 in
                 checkSome (k (updateAtom (d_, M.Plus, s_, a, mS, (1, occ))))
           in
@@ -459,34 +454,29 @@ end) : MODECHECK = struct
             | [] -> ()
             | mS :: mSs ->
                 let rec checkSome = function
-                  | d'_ :: [] -> begin
+                  | d'_ :: [] ->
                       ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)));
                       checkAll mSs
-                    end
-                  | d'_ :: ds_ -> begin
-                      try
-                        begin
-                          ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)));
-                          ()
-                        end
+                  | d'_ :: ds_ ->
+                      (try
+                        ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)))
                       with ModeError _ ->
-                        checkSome ds_;
-                        checkAll mSs
-                    end
+                        checkSome ds_);
+                      checkAll mSs
                 in
                 checkSome (k (updateAtom (d_, M.Plus, s_, d, mS, (1, occ))))
           in
           checkAll (lookup (d, occ))
 
     and checkG1 = function
-      | d_, I.Pi ((_, maybe_), v_), occ, k ->
+      | d_, I.Pi ((_, Maybe), v_), occ, k ->
           ctxPop
             (checkG1
                ( I.Decl (d_, Universal),
                  v_,
                  P.body occ,
                  function I.Decl (d'_, m) -> ctxPush (m, k d'_) ))
-      | d_, I.Pi ((I.Dec (_, v1_), no_), v2_), occ, k ->
+      | d_, I.Pi ((I.Dec (_, v1_), No), v2_), occ, k ->
           ctxPop
             begin
               checkD1 (d_, v1_, P.label occ, function d'_ -> [ d'_ ]);
@@ -587,22 +577,20 @@ end) : MODECHECK = struct
             print (Names.qidToString (Names.constQid c) ^ " ")
           else ()
           end;
-          begin try checkDlocal (I.Null, I.constType c, P.top)
+          (try checkDlocal (I.Null, I.constType c, P.top)
           with Error' (occ, msg) ->
-            raise (Error (wrapMsg (c, occ, msg)));
-            checkAll clist
-          end
+            raise (Error (wrapMsg (c, occ, msg))));
+          checkAll clist
         end
       | I.Def d :: clist -> begin
           begin if !Global.chatter > 3 then
             print (Names.qidToString (Names.constQid d) ^ " ")
           else ()
           end;
-          begin try checkDlocal (I.Null, I.constType d, P.top)
+          (try checkDlocal (I.Null, I.constType d, P.top)
           with Error' (occ, msg) ->
-            raise (Error (wrapMsg (d, occ, msg)));
-            checkAll clist
-          end
+            raise (Error (wrapMsg (d, occ, msg))));
+          checkAll clist
         end
 
     let rec checkMode (a, ms) =

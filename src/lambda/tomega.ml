@@ -385,7 +385,7 @@ end) : TOMEGA = struct
       | I.Idx k -> Idx k
       | I.Exp u_ -> Exp u_
       | I.Block b_ -> Block b_
-      | undef_ -> Undef
+      | I.Undef -> Undef
 
     let rec coerceSub = function
       | Shift n -> I.Shift n
@@ -399,7 +399,7 @@ end) : TOMEGA = struct
       | I.Idx k -> Idx k
       | I.Exp m_ -> Exp m_
       | I.Block b -> Block b
-      | undef_ -> Undef
+      | I.Undef -> Undef
 
     let rec revCoerceSub = function
       | I.Shift n -> Shift n
@@ -554,8 +554,8 @@ end) : TOMEGA = struct
           end
         | _ -> None
       and getExpIndex = function
-        | I.Root (I.BVar k, nil_) -> Some k
-        | I.Redex (u_, nil_) -> getExpIndex u_
+        | I.Root (I.BVar k, I.Nil) -> Some k
+        | I.Redex (u_, I.Nil) -> getExpIndex u_
         | I.EClo (u_, t) -> begin
             match getExpIndex u_ with
             | None -> None

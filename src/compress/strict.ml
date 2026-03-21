@@ -129,7 +129,7 @@ module Strict = struct
                     with 
                          | (n, p, TRoot (n', s)) -> begin
                              if p then false else spine_occ n ([], s) end
-                         | (n, p, TPi (plus_, a, b))
+                         | (n, p, TPi (Plus, a, b))
                              -> (type_occ n ([], a)) ||
                                   (check_strict_type' (n + 1) p b)
                          | (n, p, TPi (_, a, b))
@@ -140,7 +140,7 @@ module Strict = struct
                     match (arg__19, arg__20)
                     with 
                          | (n, Type) -> false
-                         | (n, KPi (plus_, a, k))
+                         | (n, KPi (Plus, a, k))
                              -> (type_occ n ([], a)) ||
                                   (check_strict_kind' (n + 1) k)
                          | (n, KPi (_, a, k)) -> check_strict_kind' (n + 1) k

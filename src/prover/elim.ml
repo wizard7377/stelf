@@ -105,7 +105,7 @@ end) : ELIM with module State = Elim__0.State' = struct
               let psi''_ = I.Decl (psi'_, d2_) in
               let y_ = T.newEVar (strip psi''_, T.forSub (g_, T.Shift 2)) in
               r := Some (T.LetPairExp (d1'_, d2_, T.Var n, y_))
-          | true_ ->
+          | True ->
               let y_ = T.newEVar (strip psi_, g_) in
               r := Some (T.LetUnit (T.Var n, y_))
           end

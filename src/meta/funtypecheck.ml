@@ -182,7 +182,7 @@ end) : FUNTYPECHECK = struct
     let rec shiftSubBlock (F.CtxBlock (_, g_), s) = shiftSub (g_, s)
 
     let rec check = function
-      | psi_, delta_, unit_, (true_, _) -> ()
+      | psi_, delta_, F.Unit, (F.True, _) -> ()
       | psi_, delta_, F.Rec (dd_, p_), f_ ->
           check (psi_, I.Decl (delta_, dd_), p_, f_)
       | ( psi_,
@@ -395,7 +395,7 @@ end) : FUNTYPECHECK = struct
               isFor (I.Decl (g_, d_), f_)
             end
           with TypeCheck.Error msg -> raise (Error msg))
-      | g_, true_ -> ()
+      | g_, True -> ()
       | g_, F.And (f1_, f2_) -> begin
           isFor (g_, f1_);
           isFor (g_, f2_)

@@ -55,7 +55,7 @@ end) : TOMEGATYPECHECK = struct
     let rec inferSpine (psi_, s_, ft_) = inferSpineW (psi_, s_, T.whnfFor ft_)
 
     and inferSpineW = function
-      | psi_, nil_, (f_, t) -> (f_, t)
+      | psi_, T.Nil, (f_, t) -> (f_, t)
       | psi_, T.AppExp (m_, s_), (T.All ((T.UDec (I.Dec (_, a_)), _), f_), t) ->
           let _ = chatter 4 (function () -> "[appExp") in
           let g_ = T.coerceCtx psi_ in
@@ -101,7 +101,7 @@ end) : TOMEGATYPECHECK = struct
           let f1_ = inferPrg (psi_, p1_) in
           let f2_ = inferPrg (psi_, p2_) in
           T.And (f1_, f2_)
-      | psi_, unit_ -> T.True
+      | psi_, Unit -> T.True
       | psi_, T.Var k -> begin
           match T.ctxDec (psi_, k) with T.PDec (_, f'_, _, _) -> f'_
         end
@@ -121,7 +121,7 @@ end) : TOMEGATYPECHECK = struct
     and checkPrg (psi_, (p_, ft_)) = checkPrgW (psi_, (p_, T.whnfFor ft_))
 
     and checkPrgW = function
-      | _, (unit_, (true_, _)) ->
+      | _, (Unit, (True, _)) ->
           let _ = chatter 4 (function () -> "[true]") in
           ()
       | psi_, (T.Const lemma, (f_, t)) ->
@@ -203,7 +203,7 @@ end) : TOMEGATYPECHECK = struct
           checkPrgW (psi_, (p_, (f_, t)))
 
     and checkSpine = function
-      | psi_, nil_, (f_, t), (f'_, t') -> convFor (psi_, (f_, t), (f'_, t'))
+      | psi_, T.Nil, (f_, t), (f'_, t') -> convFor (psi_, (f_, t), (f'_, t'))
       | ( psi_,
           T.AppExp (u_, s_),
           (T.All ((T.UDec (I.Dec (_, v_)), _), f_), t),
@@ -419,7 +419,7 @@ end) : TOMEGATYPECHECK = struct
     and convValue (g_, p1_, p2_, f_) = ()
 
     and checkFor = function
-      | psi_, (true_, _) -> ()
+      | psi_, (True, _) -> ()
       | psi_, (T.All (((T.PDec (_, f1_, _, _) as d_), _), f2_), t) -> begin
           checkFor (psi_, (f1_, t));
           checkFor (I.Decl (psi_, d_), (f2_, T.dot1 t))
@@ -526,7 +526,7 @@ end) : TOMEGATYPECHECK = struct
           isValue p1_;
           isValue p2_
         end
-      | unit_ -> ()
+      | Unit -> ()
       | T.Rec _ -> ()
       | T.Const lemma -> begin
           match T.lemmaLookup lemma with

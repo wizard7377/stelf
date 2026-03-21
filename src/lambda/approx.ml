@@ -156,7 +156,7 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
     let rec varReset () = varList := [];;
     let rec varLookupRef r =
       List.find (function 
-                          | ((CVar r', _, _), _) -> r = r') (! varList);;
+                          | ((CVar r', _, _), _) -> r == r') (! varList);;
     let rec varLookupName name =
       List.find (function 
                           | (_, name') -> name = name') (! varList);;
@@ -356,7 +356,7 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
       function 
                | (r, Next l_) -> occurUniW (r, l_)
                | (r, LVar r') -> begin
-                   if r = r' then raise ((Unify "Level circularity")) else ()
+                   if r == r' then raise ((Unify "Level circularity")) else ()
                    end
                | (r, _) -> ();;
     let rec occurUni (r, l_) = occurUniW (r, whnfUni l_);;
@@ -376,7 +376,7 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
                    raise ((Unify "Level clash")) end
                | (Next l1_, Next l2_) -> matchUniW (l1_, l2_)
                | (LVar r1, (LVar r2 as l2_)) -> begin
-                   if r1 = r2 then () else r1 := ((Some l2_)) end
+                   if r1 == r2 then () else r1 := ((Some l2_)) end
                | (LVar r1, l2_)
                    -> begin
                         occurUniW (r1, l2_);r1 := ((Some l2_))
@@ -397,7 +397,7 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
                         occur' (r, v1_) || occur' (r, v2_)
                         end
                | (r, CVar r') -> begin
-                   if r = r' then
+                   if r == r' then
                    raise ((Unify ("Type/kind variable occurrence"))) else false 
                    end
                | (r, _) -> false
@@ -449,7 +449,7 @@ module MakeApprox(Approx__0: sig module Whnf : WHNF end) : APPROX =
                | (Const (I.NSDef d1), (Arrow _ as v2_))
                    -> match_ (constDefApx d1, v2_)
                | (CVar r1, (CVar r2 as u2_)) -> begin
-                   if r1 = r2 then () else r1 := ((Some u2_)) end
+                   if r1 == r2 then () else r1 := ((Some u2_)) end
                | (CVar r1, u2_)
                    -> begin
                         ignore @@ occurW (r1, u2_); r1 := ((Some u2_))

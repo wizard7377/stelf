@@ -74,8 +74,8 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
 
     let rec constCases = function
       | g_, vs_, [], abstract, ops -> ops
-      | g_, vs_, I.Const c :: sgn_, abstract, ops ->
-          let u_, vs'_ = M.createAtomConst (g_, I.Const c) in
+      | g_, vs_, (I.Const c as h_) :: sgn_, abstract, ops ->
+          let u_, vs'_ = M.createAtomConst (g_, h_) in
           constCases
             ( g_,
               vs_,
@@ -90,6 +90,25 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
                      else ops
                      end
                    with MetaAbstract.Error _ -> InActive :: ops)) )
+      | g_, vs_, (I.Def c as h_) :: sgn_, abstract, ops ->
+          let u_, vs'_ = M.createAtomConst (g_, h_) in
+          constCases
+            ( g_,
+              vs_,
+              sgn_,
+              abstract,
+              Cs_manager.trail (function () ->
+                  (try
+                     begin if Unify.unifiable (g_, vs_, vs'_) then
+                       Active
+                         (abstract (I.conDecName (I.sgnLookup c) ^ "/", u_))
+                       :: ops
+                     else ops
+                     end
+                   with MetaAbstract.Error _ -> InActive :: ops)) )
+      | g_, vs_, _ :: sgn_, abstract, ops ->
+          (* Skip other head types *)
+          constCases (g_, vs_, sgn_, abstract, ops)
 
     let rec paramCases = function
       | g_, vs_, 0, abstract, ops -> ops
@@ -150,7 +169,7 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       | k, I.Skonst _ -> false
 
     and occursInSpine = function
-      | _, nil_ -> false
+      | _, I.Nil -> false
       | k, I.App (u_, s_) -> occursInExp (k, u_) || occursInSpine (k, s_)
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
@@ -181,8 +200,8 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     and checkDec (m_, I.Dec (_, v_)) = checkExp (m_, v_)
 
     let rec modeEq = function
-      | ModeSyn.Marg (plus_, _), M.Top -> true
-      | ModeSyn.Marg (minus_, _), M.Bot -> true
+      | ModeSyn.Marg (ModeSyn.Plus, _), M.Top -> true
+      | ModeSyn.Marg (ModeSyn.Minus, _), M.Bot -> true
       | _ -> false
 
     let rec inheritBelow = function
@@ -198,7 +217,7 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       | b', k', I.Root (c_, s'_), bdd'_ -> inheritBelowSpine (b', k', s'_, bdd'_)
 
     and inheritBelowSpine = function
-      | b', k', nil_, bdd'_ -> bdd'_
+      | b', k', I.Nil, bdd'_ -> bdd'_
       | b', k', I.App (u'_, s'_), bdd'_ ->
           inheritBelowSpine (b', k', s'_, inheritBelow (b', k', u'_, bdd'_))
 
@@ -215,7 +234,7 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       | k, I.Root (c_, s_), bdd'_ -> skipSpine (k, s_, bdd'_)
 
     and skipSpine = function
-      | k, nil_, bdd'_ -> bdd'_
+      | k, I.Nil, bdd'_ -> bdd'_
       | k, I.App (u_, s_), bdd'_ -> skipSpine (k, s_, skip (k, u_, bdd'_))
 
     and skipDec (k, I.Dec (x, v_), bdd'_) = skip (k, v_, bdd'_)

@@ -320,7 +320,7 @@ end) : MTPRECURSION = struct
       ltSpineW (gb_, k, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, ac, ds_)
 
     and ltSpineW = function
-      | gb_, k, (us_, vs_), ((nil_, _), _), _, _, ds_ -> ds_
+      | gb_, k, (us_, vs_), ((I.Nil, _), _), _, _, ds_ -> ds_
       | gb_, k, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, ac, ds_ ->
           ltSpineW
             (gb_, k, (us_, vs_), ((s_, I.comp (s', s'')), vs'_), sc, ac, ds_)
@@ -482,7 +482,7 @@ end) : MTPRECURSION = struct
       ordlt (gb_, o_, o'_, sc, ac, ds'_)
 
     let rec skolem = function
-      | (du, de), gb_, w, true_, sc -> (gb_, w)
+      | (du, de), gb_, w, F.True, sc -> (gb_, w)
       | (du, de), gb_, w, F.All (F.Prim d_, f_), sc ->
           skolem
             ( (du + 1, de),

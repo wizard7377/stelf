@@ -104,15 +104,16 @@ end) : COVER = struct
   type coverInst = Match of coverInst | Skip of coverInst | Cnil
 
   let rec inCoverInst = function
-    | mnil_ -> Cnil
-    | M.Mapp (M.Marg (plus_, x), ms') -> Match (inCoverInst ms')
-    | M.Mapp (M.Marg (minus_, x), ms') -> Skip (inCoverInst ms')
-    | M.Mapp (M.Marg (star_, x), ms') -> Skip (inCoverInst ms')
+    | M.Mnil -> Cnil
+    | M.Mapp (M.Marg (M.Plus, x), ms') -> Match (inCoverInst ms')
+    | M.Mapp (M.Marg (M.Minus, x), ms') -> Skip (inCoverInst ms')
+    | M.Mapp (M.Marg (M.Star, x), ms') -> Skip (inCoverInst ms')
 
   let rec outCoverInst = function
-    | mnil_ -> Cnil
-    | M.Mapp (M.Marg (plus_, x), ms') -> Skip (outCoverInst ms')
-    | M.Mapp (M.Marg (minus_, x), ms') -> Match (outCoverInst ms')
+    | M.Mnil -> Cnil
+    | M.Mapp (M.Marg (M.Plus, x), ms') -> Skip (outCoverInst ms')
+    | M.Mapp (M.Marg (M.Minus, x), ms') -> Match (outCoverInst ms')
+    | M.Mapp (M.Marg (M.Star, x), ms') -> Skip (outCoverInst ms')
 
   let rec chatter chlev f =
     begin if !Global.chatter >= chlev then print (f ()) else ()
@@ -572,7 +573,8 @@ end) : COVER = struct
         let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
         (I.App (x_, s_), vs_)
 
-  let rec createAtomConst (g_, (I.Const cid as h_)) =
+  let rec createAtomConst (g_, h_) =
+    let cid = match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false in
     let v_ = I.constType cid in
     let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
     (I.Root (h_, s_), vs_)
@@ -588,13 +590,24 @@ end) : COVER = struct
 
   let rec constCases = function
     | g_, vs_, [], sc -> ()
-    | g_, vs_, I.Const c :: sgn', sc ->
-        let u_, vs'_ = createAtomConst (g_, I.Const c) in
+    | g_, vs_, (I.Const c as h_) :: sgn', sc ->
+        let u_, vs'_ = createAtomConst (g_, h_) in
         let _ =
           Cs_manager.trail (function () ->
               begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
               end)
         in
+        constCases (g_, vs_, sgn', sc)
+    | g_, vs_, (I.Def c as h_) :: sgn', sc ->
+        let u_, vs'_ = createAtomConst (g_, h_) in
+        let _ =
+          Cs_manager.trail (function () ->
+              begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+              end)
+        in
+        constCases (g_, vs_, sgn', sc)
+    | g_, vs_, _ :: sgn', sc ->
+        (* Skip other head types (Skonst, NSDef, etc.) *)
         constCases (g_, vs_, sgn', sc)
 
   let rec paramCases = function
@@ -697,7 +710,7 @@ end) : COVER = struct
   and occursInHead = function k, I.BVar k' -> k = k' | k, _ -> false
 
   and occursInSpine = function
-    | _, nil_ -> false
+    | _, I.Nil -> false
     | k, I.App (u_, s_) -> occursInExp (k, u_) || occursInSpine (k, s_)
 
   and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
@@ -708,7 +721,7 @@ end) : COVER = struct
     | k, I.Root (h_, s_), ci -> occursInMatchPosSpine (k, s_, ci)
 
   and occursInMatchPosSpine = function
-    | k, nil_, Cnil -> false
+    | k, I.Nil, Cnil -> false
     | k, I.App (u_, s_), Match ci ->
         occursInExp (k, u_) || occursInMatchPosSpine (k, s_, ci)
     | k, I.App (u_, s_), Skip ci -> occursInMatchPosSpine (k, s_, ci)
@@ -820,7 +833,7 @@ end) : COVER = struct
     | ms, ss1_, (I.SClo (s2_, s2'), s2) ->
         eqInpSpine (ms, ss1_, (s2_, I.comp (s2', s2)))
     | M.Mnil, (I.Nil, s), (I.Nil, s') -> true
-    | ( M.Mapp (M.Marg (plus_, _), ms'),
+    | ( M.Mapp (M.Marg (M.Plus, _), ms'),
         (I.App (u_, s_), s),
         (I.App (u'_, s'_), s') ) ->
         eqExp ((u_, s), (u'_, s')) && eqInpSpine (ms', (s_, s), (s'_, s'))
@@ -866,7 +879,7 @@ end) : COVER = struct
     | ms, ss1_, (I.SClo (s2_, s2'), s2) ->
         unifyUOutSpine (ms, ss1_, (s2_, I.comp (s2', s2)))
     | M.Mnil, (I.Nil, s1), (I.Nil, s2) -> true
-    | ( M.Mapp (M.Marg (minus1_, _), ms'),
+    | ( M.Mapp (M.Marg (M.Minus1, _), ms'),
         (I.App (u1_, s1_), s1),
         (I.App (u2_, s2_), s2) ) ->
         Unify.unifiable (I.Null, (u1_, s1), (u2_, s2))
@@ -1044,11 +1057,11 @@ end) : COVER = struct
         I.Root (a, createCoverSpine (g_, (s_, s), (I.constType cid, I.id), ms))
 
   and createCoverSpine = function
-    | g_, (nil_, s), _, mnil_ -> I.Nil
+    | g_, (I.Nil, s), _, M.Mnil -> I.Nil
     | ( g_,
         (I.App (u1_, s2_), s),
         (I.Pi ((I.Dec (_, v1_), _), v2_), s'),
-        M.Mapp (M.Marg (minus_, x), ms') ) ->
+        M.Mapp (M.Marg (M.Minus, x), ms') ) ->
         let x_ = createEVar (g_, I.EClo (v1_, s')) in
         let s2'_ =
           createCoverSpine (g_, (s2_, s), (v2_, I.Dot (I.Exp x_, s')), ms')

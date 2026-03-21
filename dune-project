@@ -14,18 +14,23 @@
 (license LICENSE)
 
 (documentation https://url/to/documentation)
-;(pin
-; (url "git+https://github.com/wizard7377/basis.git")
-; (package (name basis)))
+(pin
+ (url "file://basis")
+ (package (name basis)))
 (package
  (allow_empty)
  (name twelf)
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends
-   ocaml 
+   (ocaml (>= 5.0.0)) 
    basis
    lwt
+   containers 
+   (alcotest :with-test)
+  (odoc :with-doc)
+  
+   (logs (>= 3.0.0)) 
  )
  (tags
   ("add topics" "to describe" your project)))

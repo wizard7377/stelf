@@ -38,7 +38,7 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
     module I = IntSyn
     module F = Print.Formatter
 
-    let rec modeToString = function top_ -> "+" | bot_ -> "-"
+    let rec modeToString = function M.Top -> "+" | M.Bot -> "-"
 
     let rec depthToString b =
       begin if b <= 0 then "" else Int.toString b

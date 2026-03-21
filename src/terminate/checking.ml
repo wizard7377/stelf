@@ -236,7 +236,7 @@ end) : CHECKING = struct
       | gq_, _ -> false
 
     and isAtomicS = function
-      | gq_, (nil_, _) -> true
+      | gq_, (I.Nil, _) -> true
       | gq_, (I.SClo (s_, s'), s'') -> isAtomicS (gq_, (s_, I.comp (s', s'')))
       | gq_, (I.App (u'_, s'_), s1') -> false
 
@@ -895,7 +895,7 @@ end) : CHECKING = struct
       ltSpineRW (gq_, d_, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, k)
 
     and ltSpineRW = function
-      | gq_, d_, (us_, vs_), ((nil_, _), _), _, _ -> false
+      | gq_, d_, (us_, vs_), ((I.Nil, _), _), _, _ -> false
       | gq_, d_, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, k ->
           ltSpineR (gq_, d_, (us_, vs_), ((s_, I.comp (s', s'')), vs'_), sc, k)
       | ( gq_,
@@ -1255,7 +1255,7 @@ end) : CHECKING = struct
       ltSpineLW (gq_, d_, d'_, usVs_, (ss'_, Whnf.whnf vs'_), p_)
 
     and ltSpineLW = function
-      | gq_, d_, d'_, usVs_, ((nil_, _), _), _ -> true
+      | gq_, d_, d'_, usVs_, ((I.Nil, _), _), _ -> true
       | gq_, d_, d'_, usVs_, ((I.SClo (s_, s'), s''), vs'_), p_ ->
           ltSpineL (gq_, d_, d'_, usVs_, ((s_, I.comp (s', s'')), vs'_), p_)
       | ( gq_,
