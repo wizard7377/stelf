@@ -83,44 +83,44 @@ end) : MEMOTABLE = struct
   (*! structure TableParam = MemoTable.TableParam !*)
   let rec callCheck args =
     begin match !TableParam.strategy with
-    | variant_ -> MemoTable.callCheck args
-    | subsumption_ -> MemoTableInst.callCheck args
+    | Variant -> MemoTable.callCheck args
+    | Subsumption -> MemoTableInst.callCheck args
     end
 
   let rec insertIntoTree args =
     begin match !TableParam.strategy with
-    | variant_ -> MemoTable.insertIntoTree args
-    | subsumption_ -> MemoTableInst.insertIntoTree args
+    | Variant -> MemoTable.insertIntoTree args
+    | Subsumption -> MemoTableInst.insertIntoTree args
     end
 
   let rec answerCheck args =
     begin match !TableParam.strategy with
-    | variant_ -> MemoTable.answerCheck args
-    | subsumption_ -> MemoTableInst.answerCheck args
+    | Variant -> MemoTable.answerCheck args
+    | Subsumption -> MemoTableInst.answerCheck args
     end
 
   let rec reset () =
     begin match !TableParam.strategy with
-    | variant_ -> MemoTable.reset ()
-    | subsumption_ -> MemoTableInst.reset ()
+    | Variant -> MemoTable.reset ()
+    | Subsumption -> MemoTableInst.reset ()
     end
 
   let rec updateTable () =
     begin match !TableParam.strategy with
-    | variant_ -> MemoTable.updateTable ()
-    | subsumption_ -> MemoTableInst.updateTable ()
+    | Variant -> MemoTable.updateTable ()
+    | Subsumption -> MemoTableInst.updateTable ()
     end
 
   let rec tableSize () =
     begin match !TableParam.strategy with
-    | variant_ -> MemoTable.tableSize ()
-    | subsumption_ -> MemoTableInst.tableSize ()
+    | Variant -> MemoTable.tableSize ()
+    | Subsumption -> MemoTableInst.tableSize ()
     end
 
   let rec memberCtx args =
     begin match !TableParam.strategy with
-    | subsumption_ -> MemoTableInst.memberCtx args
-    | variant_ -> MemoTable.memberCtx args
+    | Subsumption -> MemoTableInst.memberCtx args
+    | Variant -> MemoTable.memberCtx args
     end
 end
 (*! sharing MemoTableInst.IntSyn = MemoTable.IntSyn !*)

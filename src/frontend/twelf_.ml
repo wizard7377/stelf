@@ -526,6 +526,8 @@ end) : TWELF = struct
       | ReconThm.Error msg -> abortFileMsg chlev (fileName, msg)
       | ReconModule.Error msg -> abortFileMsg chlev (fileName, msg)
       | TypeCheck.Error msg ->
+          let bt = Printexc.get_backtrace () in
+          Printf.eprintf "TYPECHECK ERROR backtrace:\n%s\n%!" bt;
           abort 0
             ((("Double-checking types fails: " ^ msg) ^ "\n")
             ^ "This indicates a bug in Twelf.\n")

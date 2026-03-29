@@ -12,6 +12,10 @@ module Group = struct
   let compile = Logs.Src.create "twelf.compile"
   let typecheck = Logs.Src.create "twelf.typecheck"
   let unify = Logs.Src.create "twelf.unify"
+  let cover = Logs.Src.create "twelf.cover"
+  let parse = Logs.Src.create "twelf.parse"
+  let reduce = Logs.Src.create "twelf.reduce"
+  let meta = Logs.Src.create "twelf.meta"
 end
 
 let msg (src : Logs.src) (level : Level.t) fmt args =

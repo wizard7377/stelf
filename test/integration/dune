@@ -1,0 +1,6 @@
+(library
+ (name integration)
+ (wrapped false)
+ (libraries twelf alcotest basis regression_cases)
+ (flags
+  (:standard -open Basis)))

@@ -704,7 +704,7 @@ module MakeCompile(Compile__0: sig
                                (C.SClause
                                 (compileDClauseN fromCS true (I.Null, a_))))
                   end
-           | (clause_, (a, I.ConDef (_, _, _, _, a_, (I.Type), _)))
+           | (I.Clause, (a, I.ConDef (_, _, _, _, a_, (I.Type), _)))
                -> C.sProgInstall
                   (a,
                    (C.SClause

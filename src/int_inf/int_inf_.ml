@@ -307,10 +307,10 @@ end
           end;;
         let rec scanWord =
           function 
-                   | bin_ -> finalWord scanBin
-                   | oct_ -> finalWord scanOct
-                   | dec_ -> finalWord scanDec
-                   | hex_ -> finalWord scanHex;;
+                   | Bin -> finalWord scanBin
+                   | Oct -> finalWord scanOct
+                   | Dec -> finalWord scanDec
+                   | Hex -> finalWord scanHex;;
         let rec finalInt scanFn getc cs =
           begin
           match scanFn getc cs
@@ -325,10 +325,10 @@ end
           end;;
         let rec scanInt =
           function 
-                   | bin_ -> finalInt scanBin
-                   | oct_ -> finalInt scanOct
-                   | dec_ -> finalInt scanDec
-                   | hex_ -> finalInt scanHex;;
+                   | Bin -> finalInt scanBin
+                   | Oct -> finalInt scanOct
+                   | Dec -> finalInt scanDec
+                   | Hex -> finalInt scanHex;;
         end;;
     (** should be to int32 **);;
     module NumFormat : sig
@@ -380,10 +380,10 @@ end
             end in f (w, 0, []);;
         let rec fmtW =
           function 
-                   | bin_ -> fun x -> (fun (_, r) -> r) (wordToBin x)
-                   | oct_ -> fun x -> (fun (_, r) -> r) (wordToOct x)
-                   | dec_ -> fun x -> (fun (_, r) -> r) (wordToDec x)
-                   | hex_ -> fun x -> (fun (_, r) -> r) (wordToHex x);;
+                   | Bin -> fun x -> (fun (_, r) -> r) (wordToBin x)
+                   | Oct -> fun x -> (fun (_, r) -> r) (wordToOct x)
+                   | Dec -> fun x -> (fun (_, r) -> r) (wordToDec x)
+                   | Hex -> fun x -> (fun (_, r) -> r) (wordToHex x);;
         let rec fmtWord radix x = String.implode (fmtW radix x);;
         let rec fmtInt radix =
           let fmtW = fmtW radix
@@ -397,11 +397,11 @@ end
                                -> begin
                                   match radix
                                   with 
-                                       | bin_
+                                       | Bin
                                            -> "~1111111111111111111111111111111"
-                                       | oct_ -> "~7777777777"
-                                       | dec_ -> "~1073741824"
-                                       | hex_ -> "~3fffffff"
+                                       | Oct -> "~7777777777"
+                                       | Dec -> "~1073741824"
+                                       | Hex -> "~3fffffff"
                                   end
                       else String.implode (fmtW (itow i)) end in fmt;;
         end;;
@@ -851,22 +851,22 @@ end
                         fmt
                         ((fun (r, _) -> r) powers2,
                          (fun (_, r) -> r) powers2,
-                         NumFormat.fmtInt StringCvt.bin_);;
+                         NumFormat.fmtInt StringCvt.Bin);;
                       let fmt8 =
                         fmt
                         ((fun (r, _) -> r) powers8,
                          (fun (_, r) -> r) powers8,
-                         NumFormat.fmtInt StringCvt.oct_);;
+                         NumFormat.fmtInt StringCvt.Oct);;
                       let fmt10 =
                         fmt
                         ((fun (r, _) -> r) powers10,
                          (fun (_, r) -> r) powers10,
-                         NumFormat.fmtInt StringCvt.dec_);;
+                         NumFormat.fmtInt StringCvt.Dec);;
                       let fmt16 =
                         fmt
                         ((fun (r, _) -> r) powers16,
                          (fun (_, r) -> r) powers16,
-                         NumFormat.fmtInt StringCvt.hex_);;
+                         NumFormat.fmtInt StringCvt.Hex);;
                       let rec scan (bound, powers, geti) getc cs =
                         let rec get (l, cs) = begin
                           if l = bound then None else
@@ -909,25 +909,25 @@ end
                         scan
                         ((fun (r, _) -> r) powers2,
                          (fun (_, _, r) -> r) powers2,
-                         NumScan.scanInt StringCvt.bin_)
+                         NumScan.scanInt StringCvt.Bin)
                         getc;;
                       let rec scan8 getc =
                         scan
                         ((fun (r, _) -> r) powers8,
                          (fun (_, _, r) -> r) powers8,
-                         NumScan.scanInt StringCvt.oct_)
+                         NumScan.scanInt StringCvt.Oct)
                         getc;;
                       let rec scan10 getc =
                         scan
                         ((fun (r, _) -> r) powers10,
                          (fun (_, _, r) -> r) powers10,
-                         NumScan.scanInt StringCvt.dec_)
+                         NumScan.scanInt StringCvt.Dec)
                         getc;;
                       let rec scan16 getc =
                         scan
                         ((fun (r, _) -> r) powers16,
                          (fun (_, _, r) -> r) powers16,
-                         NumScan.scanInt StringCvt.hex_)
+                         NumScan.scanInt StringCvt.Hex)
                         getc;;
                       end;;
     module BN = BigNat;;
@@ -1189,11 +1189,11 @@ end
         end;;
     let rec fmt =
       function 
-               | bin_ -> fmt' BN.fmt2
-               | oct_ -> fmt' BN.fmt8
-               | dec_ -> fmt' BN.fmt10
-               | hex_ -> fmt' BN.fmt16;;
-    let toString = fmt StringCvt.dec_;;
+               | Bin -> fmt' BN.fmt2
+               | Oct -> fmt' BN.fmt8
+               | Dec -> fmt' BN.fmt10
+               | Hex -> fmt' BN.fmt16;;
+    let toString = fmt StringCvt.Dec;;
     open!
       struct
         let rec scan' scanFn getc cs =
@@ -1214,11 +1214,11 @@ end
         end;;
     let rec scan =
       function 
-               | bin_ -> scan' BN.scan2
-               | oct_ -> scan' BN.scan8
-               | dec_ -> scan' BN.scan10
-               | hex_ -> scan' BN.scan16;;
-    let rec fromString s = StringCvt.scanString (scan StringCvt.dec_) s;;
+               | Bin -> scan' BN.scan2
+               | Oct -> scan' BN.scan8
+               | Dec -> scan' BN.scan10
+               | Hex -> scan' BN.scan16;;
+    let rec fromString s = StringCvt.scanString (scan StringCvt.Dec) s;;
     let rec pow =
       function 
                | (_, 0) -> one

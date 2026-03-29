@@ -48,7 +48,7 @@ end) : CONSTRAINTS = struct
 
     let rec simplify = function
       | [] -> []
-      | { contents = solved_ } :: cnstrs -> simplify cnstrs
+      | { contents = I.Solved } :: cnstrs -> simplify cnstrs
       | ({ contents = I.Eqn (g_, u1_, u2_) } as eqn_) :: cnstrs -> begin
           if Conv.conv ((u1_, I.id), (u2_, I.id)) then simplify cnstrs
           else eqn_ :: simplify cnstrs

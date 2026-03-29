@@ -1,6 +1,0 @@
-
-twelf-core-mlton.mlb
-../src/server/sigint.sig
-../src/server/sigint-mlton.sml
-../src/server/server.sml
-twelf-server-mlton.sml

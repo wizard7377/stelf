@@ -116,7 +116,9 @@ end) : SPLIT with module State = Split__0.State' = struct
           (I.App (x_, s_), vs_)
 
     let rec createAtomConst (g_, h_) =
-      let cid = match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false in
+      let cid =
+        match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false
+      in
       let v_ = I.constType cid in
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (h_, s_), vs_)

@@ -62,7 +62,53 @@ end) : TYPECHECK = struct
 
     let rec checkExp (g_, us_, vs_) =
       let us'_ = inferExp (g_, us_) in
-      begin if Conv.conv (us'_, vs_) then () else raise (Error "Type mismatch")
+      begin if Conv.conv (us'_, vs_) then ()
+      else begin
+        let ie_, is_ = us'_ in
+        let ee_, es_ = vs_ in
+        let inferred_s =
+          try Print.expToString (g_, I.EClo (ie_, is_))
+          with _ -> "<print-error>"
+        in
+        let expected_s =
+          try Print.expToString (g_, I.EClo (ee_, es_))
+          with _ -> "<print-error>"
+        in
+        let rec show_exp_raw = function
+          | I.Root (h, sp) ->
+              let hs =
+                match h with
+                | I.BVar k -> Printf.sprintf "BVar(%d)" k
+                | I.Const c ->
+                    Printf.sprintf "Const(%d=%s)" c
+                      (I.conDecName (I.sgnLookup c))
+                | I.Def d ->
+                    Printf.sprintf "Def(%d=%s)" d (I.conDecName (I.sgnLookup d))
+                | _ -> "OtherHead"
+              in
+              Printf.sprintf "Root(%s, %s)" hs (show_spine_raw sp)
+          | I.Pi _ -> "Pi(...)"
+          | I.Lam _ -> "Lam(...)"
+          | I.EClo (e, s) -> Printf.sprintf "EClo(%s, ...)" (show_exp_raw e)
+          | I.Uni _ -> "Uni"
+          | I.Redex _ -> "Redex"
+          | I.EVar _ -> "EVar"
+          | _ -> "Other"
+        and show_spine_raw = function
+          | I.Nil -> "Nil"
+          | I.App (u, sp) ->
+              Printf.sprintf "App(%s, %s)" (show_exp_raw u) (show_spine_raw sp)
+          | I.SClo (sp, _) -> Printf.sprintf "SClo(%s, ...)" (show_spine_raw sp)
+        in
+        Printf.eprintf "RAW inferred: %s\nRAW expected: %s\n%!"
+          (show_exp_raw (I.EClo (ie_, is_)))
+          (show_exp_raw (I.EClo (ee_, es_)));
+        let msg =
+          Printf.sprintf "Type mismatch\n  inferred: %s\n  expected: %s"
+            inferred_s expected_s
+        in
+        raise (Error msg)
+      end
       end
 
     and inferUni I.Type = I.Kind

@@ -304,8 +304,7 @@ end) : RECON_TERM = struct
     StringTree.clear fvarApxTable;
     StringTree.clear fvarTable
 
-  let fvarApxTable_ref_check () =
-    fvarApxTable
+  let fvarApxTable_ref_check () = fvarApxTable
 
   let rec getEVarTypeApx name =
     begin match StringTree.lookup evarApxTable name with
@@ -334,7 +333,8 @@ end) : RECON_TERM = struct
         v_
     | None ->
         let v_ = Apx.newCVar () in
-        Logs.debug (fun m -> m "getFVarTypeApx: creating fresh CVar for %s" name);
+        Logs.debug (fun m ->
+            m "getFVarTypeApx: creating fresh CVar for %s" name);
         begin
           StringTree.insert fvarApxTable (name, v_);
           v_

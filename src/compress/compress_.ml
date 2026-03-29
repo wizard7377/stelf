@@ -242,7 +242,8 @@ struct
         | Omit, _ -> S.Omit :: sstar
         | S.Minus, _ -> S.Elt mstar :: sstar
         | S.Plus, S.ATerm t -> S.AElt t :: sstar
-        | S.Plus, S.NTerm t -> S.Ascribe (t, compress_type g_ (None, a)) :: sstar
+        | S.Plus, S.NTerm t ->
+            S.Ascribe (t, compress_type g_ (None, a)) :: sstar
         end
     end
 
@@ -261,7 +262,8 @@ struct
         | Omit, _ -> S.Omit :: sstar
         | S.Minus, _ -> S.Elt mstar :: sstar
         | S.Plus, S.ATerm t -> S.AElt t :: sstar
-        | S.Plus, S.NTerm t -> S.Ascribe (t, compress_type g_ (None, a)) :: sstar
+        | S.Plus, S.NTerm t ->
+            S.Ascribe (t, compress_type g_ (None, a)) :: sstar
         end
     end
 

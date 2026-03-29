@@ -219,7 +219,7 @@ end) : CHECKING = struct
 
     and isParameterW (q_, us_) =
       try isUniversal (I.ctxLookup (q_, Whnf.etaContract (mkEClo us_)))
-      with eta_ -> isFreeEVar us_
+      with Whnf.Eta -> isFreeEVar us_
 
     and isFreeEVar = function
       | I.EVar (_, _, _, { contents = [] }), _ -> true

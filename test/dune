@@ -6,15 +6,28 @@
    (:standard -g))))
 
 (test
- (name regression)
- (libraries twelf alcotest basis regression_cases)
+ (name integration_runner)
+ (libraries twelf alcotest basis integration)
  (deps
   (source_tree ../examples)
   (source_tree ../examples_clp))
  (action
   (chdir
    %{workspace_root}
-   (run %{exe:regression.exe})))
+   (run %{exe:integration_runner.exe})))
+ (flags
+  (:standard -g -open Basis)))
+
+(test
+ (name unit_runner)
+ (libraries twelf alcotest basis unit)
+ (deps
+  (source_tree ../examples)
+  (source_tree ../examples_clp))
+ (action
+  (chdir
+   %{workspace_root}
+   (run %{exe:unit_runner.exe})))
  (flags
   (:standard -g -open Basis)))
 
@@ -27,11 +40,11 @@
     perf
     record
     -o
-    regression.perf
+    integration.perf
     --call-graph
     dwarf
     --
-    %{exe:regression.exe}
+    %{exe:integration_runner.exe}
     test
-    regression
+    integration
     %{env:TEST=1}))))

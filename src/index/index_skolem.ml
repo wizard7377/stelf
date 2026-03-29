@@ -31,7 +31,7 @@ end) : Index_.INDEX = struct
           match (fromCS, I.sgnLookup c) with
           | _, I.ConDec (_, _, _, _, a_, I.Type) ->
               update (cidFromHead (I.targetHead a_), h_)
-          | clause_, I.ConDef (_, _, _, _, a_, I.Type, _) ->
+          | I.Clause, I.ConDef (_, _, _, _, a_, I.Type, _) ->
               update (cidFromHead (I.targetHead a_), I.Def c)
           | _ -> ()
         end

@@ -1,5 +1,0 @@
-%%% A sample query.
-%%% Author: Roberto Virga.
-
-%query 1 *
-solve (S , E , N , D , M , O , R , Y , nil).

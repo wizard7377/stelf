@@ -435,14 +435,14 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       begin if not (boundEq (try_, Some 0)) then begin
         Cs_manager.reset ();
         (try
-          try
-            TimeLimit.timeLimit !Global.timeLimit
-              (Timers.time Timers.solving search)
-              ()
-          with Done -> ()
-          (* printing is timed into solving! *)
-        with Filling.TimeOut ->
-          raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
+           try
+             TimeLimit.timeLimit !Global.timeLimit
+               (Timers.time Timers.solving search)
+               ()
+           with Done -> ()
+           (* printing is timed into solving! *)
+         with Filling.TimeOut ->
+           raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
         Cs_manager.reset ();
         checkSolutions (expected, try_, !solutions)
       end
@@ -576,13 +576,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       begin if not (boundEq (try_, Some 0)) then begin
         Cs_manager.reset ();
         (try
-          try
-            TimeLimit.timeLimit !Global.timeLimit
-              (Timers.time Timers.solving search)
-              ()
-          with Done -> ()
-        with Filling.TimeOut ->
-          raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
+           try
+             TimeLimit.timeLimit !Global.timeLimit
+               (Timers.time Timers.solving search)
+               ()
+           with Done -> ()
+         with Filling.TimeOut ->
+           raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
         Cs_manager.reset ();
         checkSolutions (expected, try_, !solutions)
       end

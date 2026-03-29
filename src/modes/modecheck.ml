@@ -440,10 +440,8 @@ end) : MODECHECK = struct
                       ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)));
                       checkAll mSs
                   | d'_ :: ds_ ->
-                      (try
-                        ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)))
-                      with ModeError _ ->
-                        checkSome ds_);
+                      (try ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)))
+                       with ModeError _ -> checkSome ds_);
                       checkAll mSs
                 in
                 checkSome (k (updateAtom (d_, M.Plus, s_, a, mS, (1, occ))))
@@ -458,10 +456,8 @@ end) : MODECHECK = struct
                       ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)));
                       checkAll mSs
                   | d'_ :: ds_ ->
-                      (try
-                        ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)))
-                      with ModeError _ ->
-                        checkSome ds_);
+                      (try ignore (groundAtom (d'_, M.Minus, s_, mS, (1, occ)))
+                       with ModeError _ -> checkSome ds_);
                       checkAll mSs
                 in
                 checkSome (k (updateAtom (d_, M.Plus, s_, d, mS, (1, occ))))
@@ -578,8 +574,7 @@ end) : MODECHECK = struct
           else ()
           end;
           (try checkDlocal (I.Null, I.constType c, P.top)
-          with Error' (occ, msg) ->
-            raise (Error (wrapMsg (c, occ, msg))));
+           with Error' (occ, msg) -> raise (Error (wrapMsg (c, occ, msg))));
           checkAll clist
         end
       | I.Def d :: clist -> begin
@@ -588,8 +583,7 @@ end) : MODECHECK = struct
           else ()
           end;
           (try checkDlocal (I.Null, I.constType d, P.top)
-          with Error' (occ, msg) ->
-            raise (Error (wrapMsg (d, occ, msg))));
+           with Error' (occ, msg) -> raise (Error (wrapMsg (d, occ, msg))));
           checkAll clist
         end
 

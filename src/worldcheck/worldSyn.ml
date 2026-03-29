@@ -438,36 +438,22 @@ end) : WORLDSYN = struct
       let _ = subsumedReset () in
       let rec checkAll = function
         | [] -> ()
-        | I.Const c :: clist -> begin
-            begin if !Global.chatter = 4 then
+        | I.Const c :: clist ->
+            if !Global.chatter = 4 then
               print (Names.qidToString (Names.constQid c) ^ " ")
-            else ()
-            end;
-            begin
-              begin if !Global.chatter > 4 then Trace.clause c else ()
-              end;
-              begin try checkClause (I.Null, I.constType c, w_, P.top)
-              with Error' (occ, msg) ->
-                raise (Error (wrapMsg (c, occ, msg)));
-                checkAll clist
-              end
-            end
-          end
-        | I.Def d :: clist -> begin
-            begin if !Global.chatter = 4 then
+            else ();
+            if !Global.chatter > 4 then Trace.clause c else ();
+            (try checkClause (I.Null, I.constType c, w_, P.top)
+             with Error' (occ, msg) -> raise (Error (wrapMsg (c, occ, msg))));
+            checkAll clist
+        | I.Def d :: clist ->
+            if !Global.chatter = 4 then
               print (Names.qidToString (Names.constQid d) ^ " ")
-            else ()
-            end;
-            begin
-              begin if !Global.chatter > 4 then Trace.clause d else ()
-              end;
-              begin try checkClause (I.Null, I.constType d, w_, P.top)
-              with Error' (occ, msg) ->
-                raise (Error (wrapMsg (d, occ, msg)));
-                checkAll clist
-              end
-            end
-          end
+            else ();
+            if !Global.chatter > 4 then Trace.clause d else ();
+            (try checkClause (I.Null, I.constType d, w_, P.top)
+             with Error' (occ, msg) -> raise (Error (wrapMsg (d, occ, msg))));
+            checkAll clist
       in
       let _ = checkAll (Index.lookup a) in
       let _ =

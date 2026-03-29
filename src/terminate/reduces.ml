@@ -263,7 +263,7 @@ end) : REDUCES = struct
           ((I.Root (I.Const a', s'_), s') as vs'_),
           occ ) ->
           let rec lookup = function
-            | empty_, f -> R.Empty
+            | R.Empty, f -> R.Empty
             | (R.Le (a, a's') as a's), f -> begin
                 if f a then a's else lookup (a's', f)
               end
@@ -275,7 +275,7 @@ end) : REDUCES = struct
           let p'_ : (I.eclo * I.eclo) R.order = select (a', (s'_, s')) in
           let a's = R.mutLookup a in
           begin match lookup (a's, function x' -> x' = a') with
-          | empty_ -> ()
+          | R.Empty -> ()
           | R.Le _ -> begin
               begin if !Global.chatter > 4 then begin
                 print "Verifying termination order:\n";
@@ -406,8 +406,7 @@ end) : REDUCES = struct
               C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
               (v_, I.dot1 s),
               P.body occ )
-      | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
-        begin
+      | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ -> begin
           checkRClause (g_, q_, rl_, (v1_, s), P.label occ);
           checkRGoal (g_, q_, rl_, (v2_, I.comp (I.invShift, s)), P.body occ)
         end

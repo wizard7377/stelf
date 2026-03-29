@@ -137,8 +137,12 @@ end) : RECON_CONDEC = struct
           end
         in
         let _ =
-          begin if !Global.doubleCheck then
-            Timers.time Timers.checking TypeCheck.check (v'_, IntSyn.Uni l_)
+          begin if !Global.doubleCheck then begin
+            try Timers.time Timers.checking TypeCheck.check (v'_, IntSyn.Uni l_)
+            with TypeCheck.Error msg ->
+              Printf.eprintf "DOUBLE-CHECK FAIL on ConDec %s: %s\n%!" name msg;
+              raise (TypeCheck.Error msg)
+          end
           else ()
           end
         in
@@ -193,8 +197,19 @@ end) : RECON_CONDEC = struct
         in
         let _ =
           begin if !Global.doubleCheck then begin
-            Timers.time Timers.checking TypeCheck.check (v''_, IntSyn.Uni l_);
-            Timers.time Timers.checking TypeCheck.check (u''_, v''_)
+            (try
+               Timers.time Timers.checking TypeCheck.check (v''_, IntSyn.Uni l_)
+             with TypeCheck.Error msg ->
+               let n = match optName with None -> "_" | Some n -> n in
+               Printf.eprintf "DOUBLE-CHECK FAIL on ConDef %s (type): %s\n%!" n
+                 msg;
+               raise (TypeCheck.Error msg));
+            try Timers.time Timers.checking TypeCheck.check (u''_, v''_)
+            with TypeCheck.Error msg ->
+              let n = match optName with None -> "_" | Some n -> n in
+              Printf.eprintf "DOUBLE-CHECK FAIL on ConDef %s (term): %s\n%!" n
+                msg;
+              raise (TypeCheck.Error msg)
           end
           else ()
           end

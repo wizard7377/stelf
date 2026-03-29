@@ -482,7 +482,8 @@ end) : ABSTRACT = struct
       | ( I.Decl (k'_, Pv (T.EVar (_, r', _, _, _, _))),
           depth,
           (T.EVar (_, r, _, _, _, _) as p_) ) -> begin
-          if r == r' then T.Var (depth + 1) else abstractPVar (k'_, depth + 1, p_)
+          if r == r' then T.Var (depth + 1)
+          else abstractPVar (k'_, depth + 1, p_)
         end
       | I.Decl (k'_, _), depth, p_ -> abstractPVar (k'_, depth + 1, p_)
 

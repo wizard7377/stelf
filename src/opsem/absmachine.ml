@@ -126,6 +126,7 @@ end) : ABSMACHINE = struct
               dp,
               function
               | s_ -> solve ((g, s), dp, function m_ -> sc (I.App (m_, s_))) )
+
     and aSolve = function
       | (C.Trivial, s), dp, cnstr, sc -> begin
           if Assign.solveCnstr cnstr then sc () else ()

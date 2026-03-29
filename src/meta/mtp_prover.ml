@@ -213,29 +213,29 @@ end) : PROVER = struct
     let rec init args_ =
       he (function () ->
           begin match !MTPGlobal.prover with
-          | new_ -> ProverNew.init args_
-          | old_ -> ProverOld.init args_
+          | New -> ProverNew.init args_
+          | Old -> ProverOld.init args_
           end)
 
     let rec auto args_ =
       he (function () ->
           begin match !MTPGlobal.prover with
-          | new_ -> ProverNew.auto args_
-          | old_ -> ProverOld.auto args_
+          | New -> ProverNew.auto args_
+          | Old -> ProverOld.auto args_
           end)
 
     let rec print args_ =
       he (function () ->
           begin match !MTPGlobal.prover with
-          | new_ -> ProverNew.print args_
-          | old_ -> ProverOld.print args_
+          | New -> ProverNew.print args_
+          | Old -> ProverOld.print args_
           end)
 
     let rec install args_ =
       he (function () ->
           begin match !MTPGlobal.prover with
-          | new_ -> ProverNew.install args_
-          | old_ -> ProverOld.install args_
+          | New -> ProverNew.install args_
+          | Old -> ProverOld.install args_
           end)
   end
 
