@@ -64,7 +64,7 @@ end
 (* id | _  (type omitted) *)
 (* signature EXTSYN *)
 (* signature RECON_TERM
-   provides the interface to type reconstruction seen by Twelf 
+   provides the interface to type reconstruction seen by Stelf 
 *)
 module type RECON_TERM = sig
   (*! structure IntSyn : INTSYN !*)
@@ -183,7 +183,7 @@ end) : RECON_TERM = struct
   let errorCount = ref 0
   let errorFileName = ref "no file"
   let errorThreshold = ref (Some 20)
-  let rec exceeds = function i, None -> false | i, Some j -> i > j
+  let exceeds = function i, None -> false | i, Some j -> i > j
 
   let rec resetErrors fileName =
     begin
@@ -253,12 +253,12 @@ end) : RECON_TERM = struct
     open IntSyn
   end
 
-  let rec decl_ = function g_, d_ -> IntSyn.Decl (g_, d_)
-  let rec eClo_ = function v_, s -> IntSyn.EClo (v_, s)
-  let rec root_ = function h_, s_ -> IntSyn.Root (h_, s_)
+  let decl_ = function g_, d_ -> IntSyn.Decl (g_, d_)
+  let eClo_ = function v_, s -> IntSyn.EClo (v_, s)
+  let root_ = function h_, s_ -> IntSyn.Root (h_, s_)
   let rec bVar_ n = IntSyn.BVar n
-  let rec redex_ = function u_, s_ -> IntSyn.Redex (u_, s_)
-  let rec fVar_ = function name, v_, s -> IntSyn.FVar (name, v_, s)
+  let redex_ = function u_, s_ -> IntSyn.Redex (u_, s_)
+  let fVar_ = function name, v_, s -> IntSyn.FVar (name, v_, s)
   let rec exp_ u_ = IntSyn.Exp u_
   let undefined_ = Apx.Undefined
   let rec uni_ l_ = Apx.Uni (Apx.uniToApx l_)
@@ -295,20 +295,16 @@ end) : RECON_TERM = struct
         raiseType (g_, IntSyn.Pi ((d_, IntSyn.Maybe), v_))
 
   (* open IntSyn *)
-  open! struct
-    let evarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
-    let fvarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
-    let fvarTable : IntSyn.exp StringTree.table = StringTree.new_ 0
-  end
+  let evarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
+  let fvarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
+  let fvarTable : IntSyn.exp StringTree.table = StringTree.new_ 0
 
-  let rec varReset () =
-    begin
-      StringTree.clear evarApxTable;
-      begin
-        StringTree.clear fvarApxTable;
-        StringTree.clear fvarTable
-      end
-    end
+  let varReset () =
+    StringTree.clear evarApxTable;
+    StringTree.clear fvarApxTable;
+    StringTree.clear fvarTable
+
+  let fvarApxTable_ref_check () = fvarApxTable
 
   let rec getEVarTypeApx name =
     begin match StringTree.lookup evarApxTable name with
@@ -332,9 +328,13 @@ end) : RECON_TERM = struct
 
   let rec getFVarTypeApx name =
     begin match StringTree.lookup fvarApxTable name with
-    | Some v_ -> v_
+    | Some v_ ->
+        Logs.debug (fun m -> m "getFVarTypeApx: found existing for %s" name);
+        v_
     | None ->
         let v_ = Apx.newCVar () in
+        Logs.debug (fun m ->
+            m "getFVarTypeApx: creating fresh CVar for %s" name);
         begin
           StringTree.insert fvarApxTable (name, v_);
           v_
@@ -346,8 +346,8 @@ end) : RECON_TERM = struct
     | Some (IntSyn.EVar (_, g_, v_, _) as x_) -> (x_, raiseType (g_, v_))
     | None ->
         let v_ = Option.valOf (StringTree.lookup evarApxTable name) in
-        let v'_ = Apx.apxToClass (IntSyn.null_, v_, Apx.type_, allowed) in
-        let g''_, v''_ = lowerType (IntSyn.null_, (v'_, IntSyn.id)) in
+        let v'_ = Apx.apxToClass (IntSyn.Null, v_, Apx.(Level 1), allowed) in
+        let g''_, v''_ = lowerType (IntSyn.Null, (v'_, IntSyn.id)) in
         let x_ = IntSyn.newEVar (g''_, v''_) in
         begin
           Names.addEVar (x_, name);
@@ -360,7 +360,7 @@ end) : RECON_TERM = struct
     | Some v_ -> v_
     | None ->
         let v_ = Option.valOf (StringTree.lookup fvarApxTable name) in
-        let v'_ = Apx.apxToClass (IntSyn.null_, v_, Apx.type_, allowed) in
+        let v'_ = Apx.apxToClass (IntSyn.Null, v_, Apx.(Level 1), allowed) in
         begin
           StringTree.insert fvarTable (name, v'_);
           v'_
@@ -388,6 +388,7 @@ end) : RECON_TERM = struct
     | Scon_ of string * Paths.region
     | Omitapx_ of Apx.exp * Apx.exp * Apx.uni * Paths.region
     | Omitexact_ of IntSyn.exp * IntSyn.exp * Paths.region
+  [@@deriving show]
 
   and dec = Dec_ of string option * term * Paths.region
 
@@ -462,11 +463,11 @@ end) : RECON_TERM = struct
   and decRegion (Dec_ (name, tm, r)) = r
 
   let rec ctxRegion = function
-    | null_ -> None
+    | IntSyn.Null -> None
     | IntSyn.Decl (g, tm) -> ctxRegion' (g, decRegion tm)
 
   and ctxRegion' = function
-    | null_, r -> Some r
+    | IntSyn.Null, r -> Some r
     | IntSyn.Decl (g, tm), r -> ctxRegion' (g, Paths.join (r, decRegion tm))
 
   type apx_dec = Dec of string option * Apx.exp | NDec of string option
@@ -631,11 +632,11 @@ end) : RECON_TERM = struct
         (tm, u'_, v''_, l'_)
     | g_, (Bvar_ (k, r) as tm) ->
         let (Dec (_, v_)) = IntSyn.ctxLookup (g_, k) in
-        (tm, undefined_, v_, Apx.type_)
+        (tm, undefined_, v_, Apx.(Level 1))
     | g_, (Evar_ (name, r) as tm) ->
-        (tm, undefined_, getEVarTypeApx name, Apx.type_)
+        (tm, undefined_, getEVarTypeApx name, Apx.(Level 1))
     | g_, (Fvar_ (name, r) as tm) ->
-        (tm, undefined_, getFVarTypeApx name, Apx.type_)
+        (tm, undefined_, getFVarTypeApx name, Apx.(Level 1))
     | g_, (Typ_ r as tm) -> (tm, uni_ Type, Apx.Uni kind_, hyperkind_)
     | g_, Arrow_ (tm1, tm2) ->
         let l_ = Apx.newLVar () in
@@ -669,6 +670,17 @@ end) : RECON_TERM = struct
         let tm2', u2_, v2_, l2_ = inferApx (decl_ (g_, d_), tm2) in
         (Lam_ (tm1', tm2'), u2_, Arrow (v1_, v2_), l2_)
     | g_, (App_ (tm1, tm2) as tm) ->
+        Debug.(
+          msg Group.approx Level.Debug
+          @@ Fmt.concat
+               Fmt.
+                 [
+                   const string "Infering application of";
+                   using fst pp_term;
+                   const string "to";
+                   using snd pp_term;
+                 ])
+          (tm1, tm2);
         let l_ = Apx.newLVar () in
         let va_ = Apx.newCVar () in
         let vr_ = Apx.newCVar () in
@@ -685,7 +697,7 @@ end) : RECON_TERM = struct
             ( g_,
               tm2,
               va_,
-              Apx.type_,
+              Apx.(Level 1),
               "Argument type did not match function domain type" )
         in
         (App_ (tm1', tm2'), u1_, vr_, l_)
@@ -731,16 +743,12 @@ end) : RECON_TERM = struct
         end
       end
     with Apx.Unify problem_msg ->
-      let r = termRegion tm in
-      let tm'', u''_ = checkApx (g_, Omitted_ r, v_, l_, location_msg) in
-      let _ =
-        addDelayed (function () ->
-            begin
-              ignore (Apx.makeGroundUni l'_);
-              ()
-            end)
-      in
-      (Mismatch_ (tm', tm'', location_msg, problem_msg), u''_)
+      begin
+        let r = termRegion tm in
+        let tm'', u''_ = checkApx (g_, Omitted_ r, v_, l_, location_msg) in
+        let _ = addDelayed (fun () -> ignore (Apx.makeGroundUni l'_)) in
+        (Mismatch_ (tm', tm'', location_msg, problem_msg), u''_)
+      end
   (* just in case *)
 
   and inferApxDec (g_, Dec_ (name, tm, r)) =
@@ -839,7 +847,7 @@ end) : RECON_TERM = struct
         Jof'_ (tm1', v_)
 
   let rec ctxToApx = function
-    | null_ -> IntSyn.null_
+    | IntSyn.Null -> IntSyn.Null
     | IntSyn.Decl (g_, IntSyn.NDec x) -> IntSyn.Decl (ctxToApx g_, NDec x)
     | IntSyn.Decl (g_, IntSyn.Dec (name, v_)) ->
         let v'_, _ = Apx.classToApx v_ in
@@ -895,6 +903,7 @@ end) : RECON_TERM = struct
     | h_ -> begin
         match IntSyn.conDecStatus (headConDec h_) with
         | Foreign (_, f) -> fun (_, s_) -> f s_
+        | _ -> fun (_, s_) -> Root (h_, s_)
       end
 
   (* although internally EVars are lowered intro forms, externally they're
@@ -920,7 +929,7 @@ end) : RECON_TERM = struct
   and etaExpand (e_, vs_) = etaExpandW (e_, Whnf.whnfExpandDef vs_)
 
   (* preserves redices *)
-  let rec toElim = function Elim e_ -> e_ | Intro u_ -> redexElim u_
+  let toElim = function Elim e_ -> e_ | Intro u_ -> redexElim u_
 
   let rec toIntro = function
     | Elim e_, vs_ -> etaExpand (e_, vs_)
@@ -959,9 +968,7 @@ end) : RECON_TERM = struct
               Abstract.collectEVars (g_, (v1_, IntSyn.id), []) )
         in
         let xnames_ =
-          List.map
-            (function x_ -> (x_, Names.evarName (IntSyn.null_, x_)))
-            xs_
+          List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
         in
         let v1fmt_ = formatExp (g_, v1_) in
         let v2fmt_ = formatExp (g_, v2_) in
@@ -1041,9 +1048,7 @@ end) : RECON_TERM = struct
           Abstract.collectEVars (g_, vs2_, Abstract.collectEVars (g_, vs1_, []))
         in
         let xnames_ =
-          List.map
-            (function x_ -> (x_, Names.evarName (IntSyn.null_, x_)))
-            xs_
+          List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
         in
         let eqnsFmt =
           F.hVbox
@@ -1071,7 +1076,7 @@ end) : RECON_TERM = struct
       Abstract.collectEVars (g_, vs2_, Abstract.collectEVars (g_, vs1_, []))
     in
     let xnames_ =
-      List.map (function x_ -> (x_, Names.evarName (IntSyn.null_, x_))) xs_
+      List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
     in
     let eqnsFmt =
       F.hVbox
@@ -1121,9 +1126,7 @@ end) : RECON_TERM = struct
               Abstract.collectEVars (g_, (v_, IntSyn.id), []) )
         in
         let xnames_ =
-          List.map
-            (function x_ -> (x_, Names.evarName (IntSyn.null_, x_)))
-            xs_
+          List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
         in
         let omit =
           F.hVbox
@@ -1154,9 +1157,7 @@ end) : RECON_TERM = struct
               Abstract.collectEVars (g_, (v_, IntSyn.id), []) )
         in
         let xnames_ =
-          List.map
-            (function x_ -> (x_, Names.evarName (IntSyn.null_, x_)))
-            xs_
+          List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
         in
         let judg =
           F.hVbox
@@ -1200,9 +1201,10 @@ end) : RECON_TERM = struct
         let (Dec (_, v_)) = IntSyn.ctxDec (g_, k) in
         (tm, Elim (bvarElim k), v_)
     | g_, (Evar_ (name, r) as tm) ->
+        Logs.debug (fun m -> m "inferring EVar %s" name);
         let x_, v_ =
           try getEVar (name, false)
-          with ambiguous_ ->
+          with Apx.Ambiguous ->
             let x_, v_ = getEVar (name, true) in
             begin
               delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
@@ -1214,17 +1216,19 @@ end) : RECON_TERM = struct
         (* externally EVars are raised elim forms *)
         (* necessary? -kw *)
     | g_, (Fvar_ (name, r) as tm) ->
+        Logs.debug (fun m -> m "inferring FVar %s" name);
         let v_ =
           try getFVarType (name, false)
-          with ambiguous_ ->
+          with Apx.Ambiguous ->
             let v_ = getFVarType (name, true) in
             begin
+              Logs.debug (fun m -> m "ambiguous type for FVar %s" name);
               delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
               v_
             end
         in
         let s = IntSyn.Shift (IntSyn.ctxLength g_) in
-        (tm, Elim (fvarElim (name, v_, s)), eClo_ (v_, s))
+        (tm, Elim (fvarElim (name, v_, s)), EClo (v_, s))
         (* necessary? -kw *)
     | g_, (Typ_ r as tm) -> (tm, Intro (IntSyn.Uni Type), IntSyn.Uni Kind)
     | g_, Arrow_ (tm1, tm2) ->
@@ -1252,6 +1256,17 @@ end) : RECON_TERM = struct
     | g_, App_ (tm1, tm2) ->
         let tm1', b1_, v1_ = inferExact (g_, tm1) in
         let e1_ = toElim b1_ in
+        Debug.(
+          msg Group.approx Level.Debug
+          @@ Fmt.concat
+               Fmt.
+                 [
+                   const string "Infering exact application of";
+                   using fst pp_term;
+                   const string "to";
+                   using snd pp_term;
+                 ])
+          (tm1, tm2);
         let IntSyn.Pi ((IntSyn.Dec (_, va_), _), vr_), s =
           Whnf.whnfExpandDef (v1_, IntSyn.id)
         in
@@ -1294,7 +1309,7 @@ end) : RECON_TERM = struct
     | g_, Omitapx_ (u_, v_, l_, r) ->
         let v'_ =
           try Apx.apxToClass (g_, v_, l_, false)
-          with ambiguous_ ->
+          with Ambiguous ->
             let v'_ = Apx.apxToClass (g_, v_, l_, true) in
             begin
               delayAmbiguous
@@ -1315,7 +1330,7 @@ end) : RECON_TERM = struct
         in
         let u'_ =
           try Apx.apxToExact (g_, u_, (v'_, IntSyn.id), false)
-          with ambiguous_ ->
+          with Ambiguous ->
             let u'_ = Apx.apxToExact (g_, u_, (v'_, IntSyn.id), true) in
             begin
               delayAmbiguous
@@ -1390,7 +1405,7 @@ end) : RECON_TERM = struct
         let v'_ = eClo_ vhs_ in
         let u'_ =
           try Apx.apxToExact (g_, u_, vhs_, false)
-          with ambiguous_ ->
+          with Ambiguous ->
             let u'_ = Apx.apxToExact (g_, u_, vhs_, true) in
             begin
               delayAmbiguous
@@ -1640,7 +1655,9 @@ end) : RECON_TERM = struct
 
   let rec recon' j =
     let _ = Apx.varReset () in
-    let _ = varReset () in
+    StringTree.clear evarApxTable;
+    StringTree.clear fvarApxTable;
+    StringTree.clear fvarTable;
     let j' = inferApxJob (IntSyn.Null, j) in
     let _ = clearDelayed () in
     let j'' = inferExactJob (IntSyn.Null, j') in

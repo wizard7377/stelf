@@ -2,18 +2,13 @@
 
 open Basis
 
-(**
-% ForML Version 0.6 - 25 January 1993 - er@cs.cmu.edu
-%*********************************************************************
-{\bf File {\tt formatter.sig} with signature {\tt FORMATTER}.}
-%*********************************************************************
+(*
+   ForML Version 0.6 - 25 January 1993 - er@cs.cmu.edu
+   File formatter.sig with signature FORMATTER.
 *)
 module type FORMATTER = sig
   val indent : int ref
-  (**
-\subsection{Default values}
-These may may be changed by the user.
-*)
+  (* Default values. These may be changed by the user. *)
 
   val blanks : int ref
   val skip : int ref
@@ -76,9 +71,7 @@ These may may be changed by the user.
   (** blanks, indent, skip *)
 
   val makestring_fmt : format -> string
-  (**
-\subsection{Output routines}
-*)
+  (* Output routines. *)
 
   val print_fmt : format -> unit
 
@@ -967,7 +960,7 @@ make the use of {\tt fmtstreams} on files more convenient.
        *)
   let file_open_fmt filename =
     let fmt_stream = open_fmt (TextIO.openOut filename) in
-    let close_func = function () -> TextIO.closeOut (close_fmt fmt_stream) in
+    let close_func () = TextIO.closeOut (close_fmt fmt_stream) in
     (close_func, fmt_stream)
 
   let with_open_fmt filename func =

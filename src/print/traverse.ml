@@ -100,11 +100,11 @@ end) : TRAVERSE = struct
           T.atom
             ( fromHead (g_, c_),
               fromSpine (impCon c_, g_, (s_, s), inferConW (g_, c_)) )
-      | g_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s) ->
+      | g_, (I.Pi (((I.Dec (_, v1_) as d_), I.No), v2_), s) ->
           T.arrow
             ( fromTp (g_, (v1_, s)),
               fromTp (I.Decl (g_, I.decSub (d_, s)), (v2_, I.dot1 s)) )
-      | g_, (I.Pi ((d_, maybe_), v2_), s) ->
+      | g_, (I.Pi ((d_, I.Maybe), v2_), s) ->
           let d'_ = Names.decUName (g_, d_) in
           T.pi
             ( fromDec (g_, (d'_, s)),
@@ -131,7 +131,7 @@ end) : TRAVERSE = struct
     and fromObj (g_, us_, vt_) = fromObjW (g_, Whnf.whnf us_, Whnf.whnf vt_)
 
     and fromSpine = function
-      | i, g_, (nil_, s), vt_ -> T.nils
+      | i, g_, (I.Nil, s), vt_ -> T.nils
       | i, g_, (I.SClo (s_, s'), s), vt_ ->
           fromSpine (i, g_, (s_, I.comp (s', s)), vt_)
       | i, g_, (I.App (u_, s_), s), (I.Pi ((I.Dec (_, v1_), _), v2_), t) ->
@@ -155,7 +155,7 @@ end) : TRAVERSE = struct
     and fromDec (g_, (I.Dec (Some x, v_), s)) = T.dec (x, fromTp (g_, (v_, s)))
 
     let rec fromConDec = function
-      | I.ConDec (c, parent, i, _, v_, type_) ->
+      | I.ConDec (c, parent, i, _, v_, I.Type) ->
           Some (T.objdec (c, fromTp (I.Null, (v_, I.id))))
       | _ -> None
   end

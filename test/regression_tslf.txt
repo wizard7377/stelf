@@ -1,2 +1,0 @@
-test ../../twelf-regression/ts-lf/sources.cfg
-

@@ -1,6 +1,6 @@
 (library
- (name twelf)
- (public_name twelf)
+ (name stelf)
+ (public_name stelf)
  (libraries
   compile
   compress
@@ -28,6 +28,7 @@
   print
   prover
   server
+  debug
   solvers
   stream
   style

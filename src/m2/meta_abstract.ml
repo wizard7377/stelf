@@ -75,15 +75,15 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       TypeCheck.typeCheck (g_, (v_, I.Uni I.Type))
 
     let rec modeEq = function
-      | ModeSyn.Marg (plus_, _), top_ -> true
-      | ModeSyn.Marg (minus_, _), bot_ -> true
+      | ModeSyn.Marg (ModeSyn.Plus, _), MetaSyn.Top -> true
+      | ModeSyn.Marg (ModeSyn.Minus, _), MetaSyn.Bot -> true
       | _ -> false
 
     let rec atxLookup = function
-      | null_, _ -> None
+      | I.Null, _ -> None
       | I.Decl (m_, Bv), r -> atxLookup (m_, r)
       | I.Decl (m_, (Ev (r', _, _) as e_)), r -> begin
-          if r = r' then Some e_ else atxLookup (m_, r)
+          if r == r' then Some e_ else atxLookup (m_, r)
         end
 
     let rec raiseType = function
@@ -191,7 +191,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               collectExp (lG0, g_, (u_, I.id), mode, adepth_) )
 
     and collectSpine = function
-      | lG0, g_, (nil_, _), mode, adepth_ -> adepth_
+      | lG0, g_, (I.Nil, _), mode, adepth_ -> adepth_
       | lG0, g_, (I.SClo (s_, s'), s), mode, adepth_ ->
           collectSpine (lG0, g_, (s_, I.comp (s', s)), mode, adepth_)
       | lG0, g_, (I.App (u_, s_), s), mode, adepth_ ->
@@ -208,7 +208,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     let rec collectModeW = function
       | lG0, g_, modeIn, modeRec, (I.Root (I.Const cid, s_), s), adepth_ ->
           let rec collectModeW' = function
-            | ((nil_, _), mnil_), adepth_ -> adepth_
+            | ((I.Nil, _), ModeSyn.Mnil), adepth_ -> adepth_
             | ((I.SClo (s_, s'), s), m_), adepth_ ->
                 collectModeW' (((s_, I.comp (s', s)), m_), adepth_)
             | ((I.App (u_, s_), s), ModeSyn.Mapp (m, mS)), adepth_ ->
@@ -243,7 +243,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       collectDTopW (lG0, g_, Whnf.whnf vs_, adepth_)
 
     and collectDTopW = function
-      | lG0, g_, (I.Pi (((I.Dec (x, v1_) as d_), no_), v2_), s), adepth_ ->
+      | lG0, g_, (I.Pi (((I.Dec (x, v1_) as d_), No), v2_), s), adepth_ ->
           collectG
             ( lG0,
               g_,
@@ -268,17 +268,14 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       let lG0 = I.ctxLength g_ in
       let a_, k =
         collectDBot
-          ( lG0,
-            g_,
-            (v_, I.id),
-            collectDTop (lG0, g_, (v_, I.id), (I.null_, lG0)) )
+          (lG0, g_, (v_, I.id), collectDTop (lG0, g_, (v_, I.id), (I.Null, lG0)))
       in
       a_
 
     let rec lookupEV (a_, r) =
       let rec lookupEV' = function
         | I.Decl (a_, Ev (r, v_, _)), r', k -> begin
-            if r = r' then (k, v_) else lookupEV' (a_, r', k + 1)
+            if r == r' then (k, v_) else lookupEV' (a_, r', k + 1)
           end
         | I.Decl (a_, Bv), r', k -> lookupEV' (a_, r', k + 1)
       in
@@ -328,7 +325,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       abstractExpW (a_, g_, depth, Whnf.whnf us_)
 
     and abstractSpine = function
-      | a_, g_, depth, (nil_, _) -> I.Nil
+      | a_, g_, depth, (I.Nil, _) -> I.Nil
       | a_, g_, depth, (I.App (u_, s_), s) ->
           I.App
             ( abstractExp (a_, g_, depth, (u_, s)),
@@ -417,14 +414,14 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
                 I.Decl
                   ( b'_,
                     begin match m with
-                    | top_ -> !MetaGlobal.maxSplit
-                    | bot_ -> 0
+                    | MetaSyn.Top -> !MetaGlobal.maxSplit
+                    | MetaSyn.Bot -> 0
                     end ) ),
             lG' )
 
     let rec abstract
         (MetaSyn.State (name, (MetaSyn.Prefix (g_, m_, b_) as gm_), v_) as s_) =
-      let _ = Names.varReset I.null_ in
+      let _ = Names.varReset I.Null in
       let a_ = collect (gm_, v_) in
       let gm'_, _ = abstractCtx (a_, gm_) in
       let v'_ = abstractExp (a_, g_, 0, (v_, I.id)) in

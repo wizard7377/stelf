@@ -163,7 +163,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
         end
       | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1_),
           (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2_) ) ->
-          r1 = r2 && sameSub (s1, s2)
+          r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
     and sameExp (us1_, us2_) = sameExpW (Whnf.whnf us1_, Whnf.whnf us2_)
@@ -494,18 +494,18 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
 
        Invariant:
        If sum is normal
-       G |- U : V and U is the Twelf syntax conversion of sum
+       G |- U : V and U is the Stelf syntax conversion of sum
     *)
   (* toExpMon mon = U
 
        Invariant:
        If mon is normal
-       G |- U : V and U is the Twelf syntax conversion of mon
+       G |- U : V and U is the Stelf syntax conversion of mon
     *)
   (* toExpEClo (U,s) = U
 
        Invariant:
-       G |- U : V and U is the Twelf syntax conversion of Us
+       G |- U : V and U is the Stelf syntax conversion of Us
     *)
   (* compatibleMon (mon1, mon2) = true only if mon1 = mon2 (as monomials) *)
   (* sameExpW ((U1,s1), (U2,s2)) = T
@@ -625,7 +625,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
 
        Invariant:
        if fe is (MyIntsynRep sum) and sum : normal
-       then U is the Twelf syntax conversion of sum
+       then U is the Stelf syntax conversion of sum
     *)
   (* map (fe) f = U'
 

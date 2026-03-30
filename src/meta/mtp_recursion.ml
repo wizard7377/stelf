@@ -95,7 +95,7 @@ end) : MTPRECURSION = struct
     type dec = Lemma of int * F.for_
 
     let rec closedCtx = function
-      | null_ -> ()
+      | I.Null -> ()
       | I.Decl (g_, d_) -> begin
           if Abstract.closedDec (g_, (d_, I.id)) then raise Domain
           else closedCtx g_
@@ -134,7 +134,7 @@ end) : MTPRECURSION = struct
           ))
 
     let rec createEVars = function
-      | g_, null_ -> I.Shift (I.ctxLength g_)
+      | g_, I.Null -> I.Shift (I.ctxLength g_)
       | g_, I.Decl (g0_, I.Dec (_, v_)) ->
           let s = createEVars (g_, g0_) in
           I.Dot (I.Exp (I.newEVar (g_, I.EClo (v_, s))), s)
@@ -320,7 +320,7 @@ end) : MTPRECURSION = struct
       ltSpineW (gb_, k, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, ac, ds_)
 
     and ltSpineW = function
-      | gb_, k, (us_, vs_), ((nil_, _), _), _, _, ds_ -> ds_
+      | gb_, k, (us_, vs_), ((I.Nil, _), _), _, _, ds_ -> ds_
       | gb_, k, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, ac, ds_ ->
           ltSpineW
             (gb_, k, (us_, vs_), ((s_, I.comp (s', s'')), vs'_), sc, ac, ds_)
@@ -482,7 +482,7 @@ end) : MTPRECURSION = struct
       ordlt (gb_, o_, o'_, sc, ac, ds'_)
 
     let rec skolem = function
-      | (du, de), gb_, w, true_, sc -> (gb_, w)
+      | (du, de), gb_, w, F.True, sc -> (gb_, w)
       | (du, de), gb_, w, F.All (F.Prim d_, f_), sc ->
           skolem
             ( (du + 1, de),
@@ -578,7 +578,7 @@ end) : MTPRECURSION = struct
         else ()
         end
       in
-      let _, s'_ = selectFormula (1, (I.null_, ih_, oh_), s_) in
+      let _, s'_ = selectFormula (1, (I.Null, ih_, oh_), s_) in
       s'_
 
     let rec apply s_ =

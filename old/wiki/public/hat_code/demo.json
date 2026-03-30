@@ -1,4 +1,0 @@
-{
-  "t": "setTextAndExec",
-  "text": "nat: type.\nz: nat.\ns: nat -> nat."
-}

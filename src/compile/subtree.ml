@@ -217,19 +217,19 @@ end) : SUBTREE = struct
     exception Assignment of string
     exception Generalization of string
 
-    let rec cidFromHead = function I.Const c -> c | I.Def c -> c
+    let cidFromHead = function I.Const c -> c | I.Def c -> c
     let rec dotn = function 0, s -> s | i, s -> dotn (i - 1, I.dot1 s)
 
     let rec compose' = function
-      | null_, g_ -> g_
+      | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
     let rec shift = function
-      | null_, s -> s
+      | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
     let rec raiseType = function
-      | null_, v_ -> v_
+      | I.Null, v_ -> v_
       | I.Decl (g_, d_), v_ -> raiseType (g_, I.Lam (d_, v_))
 
     let rec printSub = function
@@ -258,7 +258,7 @@ end) : SUBTREE = struct
           print "Exp (_ ). ";
           printSub s
         end
-      | IntSyn.Dot (undef_, s) -> begin
+      | IntSyn.Dot (IntSyn.Undef, s) -> begin
           print "Undef . ";
           printSub s
         end
@@ -451,7 +451,7 @@ end) : SUBTREE = struct
           I.Pi ((normalizeNDec (d_, nsub), p_), normalizeNExp (u_, nsub))
 
     and normalizeNSpine = function
-      | nil_, _ -> I.Nil
+      | I.Nil, _ -> I.Nil
       | I.App (u_, s_), nsub ->
           I.App (normalizeNExp (u_, nsub), normalizeNSpine (s_, nsub))
 
@@ -761,7 +761,7 @@ end) : SUBTREE = struct
       with Unify.Unify msg -> false
 
     let rec ctxToExplicitSub = function
-      | i, gquery_, null_, asub -> I.id
+      | i, gquery_, I.Null, asub -> I.id
       | i, gquery_, I.Decl (gclause_, I.Dec (_, a_)), asub ->
           let s = ctxToExplicitSub (i + 1, gquery_, gclause_, asub) in
           let (I.EVar (x'_, _, _, _) as u'_) =
@@ -863,7 +863,7 @@ end) : SUBTREE = struct
     let rec retrieval (n, (Node (s, children_) as sTree_), g_, r, sc) =
       let nsub_query, assignSub = (querySubId (), assignSubId ()) in
       begin
-        S.insert nsub_query (1, (I.null_, (Body, r)));
+        S.insert nsub_query (1, (I.Null, (Body, r)));
         S.forall children_ (function _, c_ ->
             retrieveChild (n, c_, nsub_query, assignSub, [], g_, sc))
       end
@@ -945,7 +945,7 @@ end) : SUBTREE = struct
         end
       in
       begin
-        S.insert nsub_query (1, (I.null_, (Body, r)));
+        S.insert nsub_query (1, (I.Null, (Body, r)));
         begin
           S.forall children_ (function _, c_ ->
               retrieveAll (n, c_, nsub_query, assignSub, [], candSet));

@@ -90,9 +90,9 @@ end) : THMPRINT with module ThmSyn = ThmPrint__0.ThmSyn' = struct
 
     let rec fmtROrder (L.RedOrder (p_, o_, o'_)) =
       begin match p_ with
-      | less_ -> fmtOrder o_ @ (F.string " < " :: fmtOrder o'_)
-      | leq_ -> fmtOrder o_ @ (F.string " <= " :: fmtOrder o'_)
-      | eq_ -> fmtOrder o_ @ (F.string " = " :: fmtOrder o'_)
+      | Less -> fmtOrder o_ @ (F.string " < " :: fmtOrder o'_)
+      | Leq -> fmtOrder o_ @ (F.string " <= " :: fmtOrder o'_)
+      | Eq -> fmtOrder o_ @ (F.string " = " :: fmtOrder o'_)
       end
 
     let rec rOrderToString_ r_ = F.makestring_fmt (F.hVbox (fmtROrder r_))

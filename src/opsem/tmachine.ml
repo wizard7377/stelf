@@ -43,7 +43,7 @@ end) : ABSMACHINE = struct
     module T = Trace
     module N = Names
 
-    let rec cidFromHead = function I.Const a -> a | I.Def a -> a
+    let cidFromHead = function I.Const a -> a | I.Def a -> a
 
     let rec eqHead = function
       | I.Const a, I.Const a' -> a = a'

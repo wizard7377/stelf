@@ -1,52 +1,55 @@
 (* # 1 "src/frontend/twelf_.sig.ml" *)
 open! Basis
 
-(** Front End Interface *)
-(** Author: Frank Pfenning *)
-module type TWELF = sig
+(* Front End Interface *)
+(* Author: Frank Pfenning *)
+module type STELF = sig
+  module Names : NAMES
+  module Parser : Parser.PARSER with module Names = Names
+
   module Print : sig
     val implicit : bool ref
 
-    (** false, print implicit args *)
     val printInfix : bool ref
+    (** false, print implicit args *)
 
-    (** false, print fully explicit form infix when possible *)
     val depth : int option ref
+    (** false, print fully explicit form infix when possible *)
 
-    (** NONE, limit print depth *)
     val length : int option ref
+    (** NONE, limit print depth *)
 
-    (** NONE, limit argument length *)
     val indent : int ref
+    (** NONE, limit argument length *)
 
-    (** 3, indentation of subterms *)
     val width : int ref
+    (** 3, indentation of subterms *)
 
-    (** 80, line width *)
     val noShadow : bool ref
+    (** 80, line width *)
 
-    (** if true, don't print shadowed constants as ""%const%"" *)
     val sgn : unit -> unit
+    (** if true, don't print shadowed constants as ""%const%"" *)
 
-    (** print signature *)
     val prog : unit -> unit
+    (** print signature *)
 
-    (** print signature as program *)
     val subord : unit -> unit
+    (** print signature as program *)
 
-    (** print subordination relation *)
     val def : unit -> unit
+    (** print subordination relation *)
 
-    (** print information about definitions *)
     val domains : unit -> unit
+    (** print information about definitions *)
 
     (** print available constraint domains *)
     module TeX : sig
-      (** print in TeX format *)
       val sgn : unit -> unit
+      (** print in TeX format *)
 
-      (** print signature *)
       val prog : unit -> unit
+      (** print signature *)
     end
   end
 
@@ -54,65 +57,63 @@ module type TWELF = sig
   module Trace : sig
     type 'a spec = None | Some of 'a list | All
 
-    (** trace and breakpoint spec *)
-    (** no tracing, default *)
-    (** list of clauses and families *)
-    (** trace all clauses and families *)
+    (* trace and breakpoint spec:
+       no tracing (default) | list of clauses/families | all clauses/families *)
     val trace : string spec -> unit
 
-    (** trace clauses and families *)
     val break : string spec -> unit
+    (** trace clauses and families *)
 
-    (** break at clauses and families *)
     val detail : int ref
+    (** break at clauses and families *)
 
-    (** 0 = none, 1 = default, 2 = unify *)
     val show : unit -> unit
+    (** 0 = none, 1 = default, 2 = unify *)
 
-    (** show trace, break, and detail *)
     val reset : unit -> unit
+    (** show trace, break, and detail *)
   end
 
   (** reset trace, break, and detail *)
   module Table : sig
     type strategy = Variant | Subsumption
 
-    (** Variant | Subsumption *)
     val strategy : strategy ref
+    (** Variant | Subsumption *)
 
-    (** strategy used for %querytabled *)
     val strengthen : bool ref
+    (** strategy used for %querytabled *)
 
-    (** strengthenng used %querytabled *)
     val resetGlobalTable : unit -> unit
+    (** strengthenng used %querytabled *)
 
-    (** reset global table           *)
     val top : unit -> unit
+    (** reset global table *)
   end
 
   (** top-level for interactive tabled queries *)
   module Timers : sig
     val show : unit -> unit
 
-    (** show and reset timers *)
     val reset : unit -> unit
+    (** show and reset timers *)
 
-    (** reset timers *)
     val check : unit -> unit
+    (** reset timers *)
   end
 
   (** display, but not no reset *)
   module OS : sig
     val chDir : string -> unit
 
-    (** change working directory *)
     val getDir : unit -> string
+    (** change working directory *)
 
-    (** get working directory *)
     val exit : unit -> unit
+    (** get working directory *)
   end
 
-  (** exit Twelf and ML *)
+  (** exit Stelf and ML *)
   module Compile : sig
     type opt = No | LinearHeads | Indexing
 
@@ -129,84 +130,86 @@ module type TWELF = sig
   module Prover : sig
     type strategy = Rfs | Frs
 
-    (** F=Filling, R=Recursion, S=Splitting *)
     val strategy : strategy ref
+    (** F=Filling, R=Recursion, S=Splitting *)
 
-    (** FRS, strategy used for %prove *)
     val maxSplit : int ref
+    (** FRS, strategy used for %prove *)
 
-    (** 2, bound on splitting  *)
     val maxRecurse : int ref
+    (** 2, bound on splitting *)
   end
 
-  (** 10, bound on recursion *)
   val chatter : int ref
+  (** 10, bound on recursion *)
 
-  (** 3, chatter level *)
   val doubleCheck : bool ref
+  (** 3, chatter level *)
 
-  (** false, check after reconstruction *)
   val unsafe : bool ref
+  (** false, check after reconstruction *)
 
-  (** false, allows %assert *)
   val autoFreeze : bool ref
+  (** false, allows %assert *)
 
-  (** false, freezes families in meta-theorems *)
   val timeLimit : Time.time option ref
+  (** false, freezes families in meta-theorems *)
 
   (** NONEe, allows timeLimit in seconds *)
   type status = Ok | Abort
 
-  (** return status *)
   val reset : unit -> unit
+  (** return status *)
 
-  (** reset global signature *)
   val loadFile : string -> status
+  (** reset global signature *)
 
-  (** load file *)
   val loadString : string -> status
+  (** load file *)
 
-  (** load string *)
   val readDecl : unit -> status
+  (** load string *)
 
-  (** read declaration interactively *)
   val decl : string -> status
+  (** read declaration interactively *)
 
-  (** print declaration of constant *)
   val top : unit -> unit
+  (** print declaration of constant *)
 
   (** top-level for interactive queries *)
   module Config : sig
     type nonrec config
 
-    (** configuration *)
     val suffix : string ref
+    (** configuration *)
 
-    (** suffix of configuration files *)
     val read : string -> config
+    (** suffix of configuration files *)
 
-    (** read config file *)
     val readWithout : string * config -> config
+    (** read config file *)
 
-    (** read config file, minus contents of another *)
     val load : config -> status
+    (** read config file, minus contents of another *)
 
-    (** reset and load configuration *)
     val append : config -> status
+    (** reset and load configuration *)
 
-    (** load configuration (w/o reset) *)
     val define : string list -> config
+    (** load configuration (w/o reset) *)
   end
 
-  (** explicitly define configuration *)
   val make : string -> status
+  (** explicitly define configuration *)
 
-  (** read and load configuration *)
+  val install1 : string * (Parser.fileParseResult * Paths.region) -> unit
+
+  (* read and load configuration *)
   val version : string
 end
 
-(** Twelf version *)
-(** signature TWELF *)
+(* Stelf version *)
+(* signature STELF *)
 
 (* # 1 "src/frontend/twelf_.fun.ml" *)
 open! Version
@@ -216,11 +219,11 @@ open! Fquery
 open! Basis
 open Unknownexn
 
-(** Front End Interface *)
-(** Author: Frank Pfenning *)
-(** Modified: Carsten Schuermann, Jeff Polakow *)
-(** Modified: Brigitte Pientka, Roberto Virga *)
-module Twelf (Twelf__0 : sig
+(* Front End Interface *)
+(* Author: Frank Pfenning *)
+(* Modified: Carsten Schuermann, Jeff Polakow *)
+(* Modified: Brigitte Pientka, Roberto Virga *)
+module Stelf (Twelf__0 : sig
   module Global : GLOBAL
   module Timers : Timers.TIMERS
   module Whnf : WHNF
@@ -424,8 +427,10 @@ module Twelf (Twelf__0 : sig
   (* module Compat : COMPAT *)
   module UnknownExn : UNKNOWN_EXN
   module Msg : MSG
-end) : TWELF = struct
+end) : STELF = struct
   open Twelf__0
+  module Names = Names
+  module Parser = Parser
 
   type status = Ok | Abort
 
@@ -457,11 +462,10 @@ end) : TWELF = struct
     let rec withOpenIn fileName scope =
       let instream = TextIO.openIn (Stdlib.String.trim fileName) in
       let _ = fileOpenMsg fileName in
-      let result = try Value (scope instream) with exn -> Exception exn in
+      let result = scope instream in
       let _ = fileCloseMsg fileName in
       let _ = TextIO.closeIn instream in
-      begin match result with Value x -> x | Exception exn -> raise exn
-      end
+      result
 
     let rec evarInstToString xs_ =
       begin if !Global.chatter >= 3 then Print.evarInstToString xs_ else ""
@@ -523,9 +527,11 @@ end) : TWELF = struct
       | ReconThm.Error msg -> abortFileMsg chlev (fileName, msg)
       | ReconModule.Error msg -> abortFileMsg chlev (fileName, msg)
       | TypeCheck.Error msg ->
+          let bt = Printexc.get_backtrace () in
+          Printf.eprintf "TYPECHECK ERROR backtrace:\n%s\n%!" bt;
           abort 0
             ((("Double-checking types fails: " ^ msg) ^ "\n")
-            ^ "This indicates a bug in Twelf.\n")
+            ^ "This indicates a bug in Stelf.\n")
       | Abstract.Error msg -> abortFileMsg chlev (fileName, msg)
       | Total.Error msg -> abort chlev (msg ^ "\n")
       | Reduces.Error msg -> abort chlev (msg ^ "\n")
@@ -551,6 +557,7 @@ end) : TWELF = struct
       | Converter.Error msg -> abortFileMsg chlev (fileName, msg)
       | Cs_manager.Error msg ->
           abort chlev (("Constraint Solver Manager error: " ^ msg) ^ "\n")
+
     let context : ModSyn.Names.namespace option ref = ref None
 
     let rec installConst fromCS (cid, fileNameocOpt) =
@@ -984,7 +991,7 @@ end) : TWELF = struct
           let lemma, projs, sels = Converter.installPrg cids in
           let p_ = Tomega.lemmaDef lemma in
           let f_ = Converter.convertFor cids in
-          let _ = TomegaTypeCheck.checkPrg (IntSyn.null_, (p_, f_)) in
+          let _ = TomegaTypeCheck.checkPrg (IntSyn.Null, (p_, f_)) in
           let rec f cid = IntSyn.conDecName (IntSyn.sgnLookup cid) in
           let _ =
             begin if !Global.chatter >= 2 then
@@ -1642,7 +1649,7 @@ end) : TWELF = struct
           let _ = ReconTerm.resetErrors fileName in
           let rec install s = install' (Timers.time Timers.parsing S.expose s)
           and install' = function
-            | empty_ -> Ok
+            | S.Empty -> Ok
             | S.Cons ((Parser.BeginSubsig, _), s') ->
                 install (installSubsig (fileName, s'))
             | S.Cons (decl, s') -> begin
@@ -1653,7 +1660,7 @@ end) : TWELF = struct
           install (Parser.parseStream instream))
 
     let rec loadString str =
-      let tmpFile = ".twelf-load-string.tmp" in
+      let tmpFile = ".stelf-load-string.tmp" in
       let outstream = TextIO.openOut tmpFile in
       let _ = TextIO.output (outstream, str) in
       let _ = TextIO.closeOut outstream in
@@ -2293,50 +2300,51 @@ end) : TWELF = struct
   (* make (configFile)
        read and then load configuration from configFile
     *)
+
   (** re-exporting environment parameters and utilities defined elsewhere *)
   module Print : sig
     val implicit : bool ref
 
-    (** false, print implicit args *)
     val printInfix : bool ref
+    (** false, print implicit args *)
 
-    (** false, print fully explicit form infix when possible *)
     val depth : int option ref
+    (** false, print fully explicit form infix when possible *)
 
-    (** NONE, limit print depth *)
     val length : int option ref
+    (** NONE, limit print depth *)
 
-    (** NONE, limit argument length *)
     val indent : int ref
+    (** NONE, limit argument length *)
 
-    (** 3, indentation of subterms *)
     val width : int ref
+    (** 3, indentation of subterms *)
 
-    (** 80, line width *)
     val noShadow : bool ref
+    (** 80, line width *)
 
-    (** if true, don't print shadowed constants as ""%const%"" *)
     val sgn : unit -> unit
+    (** if true, don't print shadowed constants as ""%const%"" *)
 
-    (** print signature *)
     val prog : unit -> unit
+    (** print signature *)
 
-    (** print signature as program *)
     val subord : unit -> unit
+    (** print signature as program *)
 
-    (** print subordination relation *)
     val def : unit -> unit
+    (** print subordination relation *)
 
-    (** print information about definitions *)
     val domains : unit -> unit
+    (** print information about definitions *)
 
     (** print available constraint domains *)
     module TeX : sig
-      (** print in TeX format *)
       val sgn : unit -> unit
+      (** print in TeX format *)
 
-      (** print signature *)
       val prog : unit -> unit
+      (** print signature *)
     end
   end = struct
     let implicit = Print.implicit
@@ -2362,23 +2370,20 @@ end) : TWELF = struct
   module Trace : sig
     type 'a spec = None | Some of 'a list | All
 
-    (** trace specification *)
-    (** no tracing *)
-    (** list of clauses and families *)
-    (** trace all clauses and families *)
+    (* trace specification: no tracing | list of clauses/families | trace all *)
     val trace : string spec -> unit
 
-    (** clauses and families *)
     val break : string spec -> unit
-
     (** clauses and families *)
+
     val detail : int ref
+    (** clauses and families *)
 
-    (** 0 = none, 1 = default, 2 = unify *)
     val show : unit -> unit
+    (** 0 = none, 1 = default, 2 = unify *)
 
-    (** show trace, break, and detail *)
     val reset : unit -> unit
+    (** show trace, break, and detail *)
   end =
     Trace
 
@@ -2386,11 +2391,11 @@ end) : TWELF = struct
   module Timers : sig
     val show : unit -> unit
 
-    (** show and reset timers *)
     val reset : unit -> unit
+    (** show and reset timers *)
 
-    (** reset timers *)
     val check : unit -> unit
+    (** reset timers *)
   end =
     Timers
 
@@ -2398,18 +2403,18 @@ end) : TWELF = struct
   module OS : sig
     val chDir : string -> unit
 
-    (** change working directory *)
     val getDir : unit -> string
+    (** change working directory *)
 
-    (** get working directory *)
     val exit : unit -> unit
+    (** get working directory *)
   end = struct
     let chDir = OS.FileSys.chDir
     let getDir = OS.FileSys.getDir
     let rec exit () = OS.Process.exit OS.Process.success
   end
 
-  (** exit Twelf and ML *)
+  (** exit Stelf and ML *)
   module Compile : sig
     type opt = CompSyn.opt = No | LinearHeads | Indexing
 
@@ -2436,25 +2441,27 @@ end) : TWELF = struct
     (** F=Filling, R=Recursion, S=Splitting *)
     type strategy = MetaGlobal.strategy = Rfs | Frs
 
-    (** FRS or RFS *)
     val strategy : strategy ref
+    (** FRS or RFS *)
 
-    (** FRS, strategy used for %prove *)
     val maxSplit : int ref
+    (** FRS, strategy used for %prove *)
 
-    (** 2, bound on splitting  *)
     val maxRecurse : int ref
+    (** 2, bound on splitting *)
   end = struct
     type strategy = MetaGlobal.strategy = Rfs | Frs
 
     (** FRS or RFS *)
     let strategy = MetaGlobal.strategy
+
     let maxSplit = MetaGlobal.maxSplit
     let maxRecurse = MetaGlobal.maxRecurse
   end
 
   (** 10, bound on recursion *)
   let chatter : int ref = Global.chatter
+
   let doubleCheck : bool ref = Global.doubleCheck
   let unsafe : bool ref = Global.unsafe
   let autoFreeze : bool ref = Global.autoFreeze
@@ -2465,32 +2472,34 @@ end) : TWELF = struct
   let readDecl = readDecl
   let decl = decl
   let top = top
+  let install1 = install1
 
   module Config : sig
     type nonrec config
 
-    (** configuration *)
     val suffix : string ref
+    (** configuration *)
 
-    (** suffix of configuration files *)
     val read : string -> config
+    (** suffix of configuration files *)
 
-    (** read configuration from config file *)
     val readWithout : string * config -> config
+    (** read configuration from config file *)
 
-    (** read config file, minus contents of another *)
     val load : config -> status
+    (** read config file, minus contents of another *)
 
-    (** reset and load configuration *)
     val append : config -> status
+    (** reset and load configuration *)
 
-    (** load configuration (w/o reset) *)
     val define : string list -> config
+    (** load configuration (w/o reset) *)
   end =
     Config
 
   (** explicitly define configuration *)
   let make = make
+
   let version = Version.version_string
 
   module Table : sig
@@ -2524,6 +2533,6 @@ end) : TWELF = struct
   end
 end
 (* local *)
-(* functor Twelf *)
+(* functor Stelf *)
 
 (* # 1 "src/frontend/twelf_.sml.ml" *)

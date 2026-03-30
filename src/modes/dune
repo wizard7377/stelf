@@ -2,7 +2,7 @@
 
 (library
  (name modes)
- (public_name twelf.modes)
+ (public_name stelf.modes)
  (modules modesyn modetable modedec modecheck modeprint modes_)
  (libraries global table lambda formatter print names paths index basis)
  (flags
@@ -45,4 +45,4 @@
    Index.Index_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

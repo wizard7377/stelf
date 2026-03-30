@@ -2,7 +2,7 @@
 
 (library
  (name netserver)
- (public_name twelf.netserver)
+ (public_name stelf.netserver)
  (modules netserver_)
  (libraries timing frontend msg basis)
  (flags
@@ -25,4 +25,4 @@
    Msg.Msg_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

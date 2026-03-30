@@ -62,7 +62,7 @@ end) : STATE = struct
       | T.PairExp (_, p_) -> findPrg p_
       | T.PairBlock (b_, p_) -> findPrg p_
       | T.PairPrg (p1_, p2_) -> findPrg p1_ @ findPrg p2_
-      | unit_ -> []
+      | Unit -> []
       | T.Rec (_, p_) -> findPrg p_
       | T.Case (T.Cases c_) -> findCases c_
       | T.PClo (p_, t) -> findPrg p_ @ findSub t
@@ -88,10 +88,10 @@ end) : STATE = struct
       | T.Prg p_ -> findPrg p_
       | T.Exp _ -> []
       | T.Block _ -> []
-      | undef_ -> []
+      | T.Undef -> []
 
     and findSpine = function
-      | nil_ -> []
+      | T.Nil -> []
       | T.AppPrg (p_, s_) -> findPrg p_ @ findSpine s_
       | T.AppExp (_, s_) -> findSpine s_
       | T.AppBlock (_, s_) -> findSpine s_
@@ -107,7 +107,7 @@ end) : STATE = struct
       | (psi_, T.PairBlock (b_, p_)), k_ -> findExp (psi_, p_) k_
       | (psi_, T.PairPrg (p1_, p2_)), k_ ->
           findExp (psi_, p2_) (findExp (psi_, p1_) k_)
-      | (psi_, unit_), k_ -> k_
+      | (psi_, Unit), k_ -> k_
       | (psi_, T.Rec (d_, p_)), k_ -> findExp (psi_, p_) k_
       | (psi_, T.Case (T.Cases c_)), k_ -> findExpCases (psi_, c_) k_
       | (psi_, T.PClo (p_, t)), k_ ->
@@ -128,7 +128,7 @@ end) : STATE = struct
 
     and findExpSpine arg__3 arg__4 =
       begin match (arg__3, arg__4) with
-      | (psi_, nil_), k_ -> k_
+      | (psi_, T.Nil), k_ -> k_
       | (psi_, T.AppPrg (_, s_)), k_ -> findExpSpine (psi_, s_) k_
       | (psi_, T.AppExp (m_, s_)), k_ ->
           findExpSpine (psi_, s_)
@@ -157,15 +157,15 @@ end) : STATE = struct
       | (psi_, T.Exp m_), k_ ->
           Abstract.collectEVars (T.coerceCtx psi_, (m_, I.id), k_)
       | (psi_, T.Block _), k_ -> k_
-      | (psi_, undef_), k_ -> k_
+      | (psi_, T.Undef), k_ -> k_
       end
 
     let rec init (f_, w_) =
-      let x_ = T.newEVar (I.null_, f_) in
-      State (w_, I.null_, x_, f_)
+      let x_ = T.newEVar (I.Null, f_) in
+      State (w_, I.Null, x_, f_)
 
     let rec close (State (w_, _, p_, _)) =
-      begin match (findPrg p_, findExp (I.null_, p_) []) with
+      begin match (findPrg p_, findExp (I.Null, p_) []) with
       | [], [] -> true
       | _ -> false
       end
@@ -196,8 +196,8 @@ end) : STATE = struct
   let close = close
   let init = init
   let collectT = findPrg
-  let collectLF = function p_ -> findExp (I.null_, p_) []
-  let collectLFSub = function s -> findExpSub (I.null_, s) []
+  let collectLF p_ = findExp (I.Null, p_) []
+  let collectLFSub s = findExpSub (I.Null, s) []
 end
 
 (* # 1 "src/prover/state.sml.ml" *)

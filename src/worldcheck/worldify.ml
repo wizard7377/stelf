@@ -116,7 +116,7 @@ end) : WORLDIFY = struct
     exception Success of I.exp
 
     let rec createEVarSub = function
-      | g_, null_ -> I.Shift (I.ctxLength g_)
+      | g_, I.Null -> I.Shift (I.ctxLength g_)
       | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
           let s = createEVarSub (g_, g'_) in
           let v'_ = I.EClo (v_, s) in
@@ -248,8 +248,8 @@ end) : WORLDIFY = struct
           | _ -> false)
 
     let rec equivBlock ((g_, l_), l'_) =
-      let t = createEVarSub (I.null_, g_) in
-      equivList (I.null_, (t, l_), l'_)
+      let t = createEVarSub (I.Null, g_) in
+      equivList (I.Null, (t, l_), l'_)
 
     let rec equivBlocks arg__1 arg__2 =
       begin match (arg__1, arg__2) with
@@ -269,7 +269,7 @@ end) : WORLDIFY = struct
       end
 
     let rec subsumedBlock a w1_ (g_, l_) =
-      let t = createEVarSub (I.null_, g_) in
+      let t = createEVarSub (I.Null, g_) in
       let l'_ = strengthen a (t, l_) in
       begin if equivBlocks w1_ l'_ then ()
       else raise (Error "Static world subsumption failed")
@@ -305,7 +305,7 @@ end) : WORLDIFY = struct
       eqCtx (g1_, g2_) && eqList (l1_, l2_)
 
     let rec subsumedCtx = function
-      | null_, w_ -> ()
+      | I.Null, w_ -> ()
       | I.Decl (g_, I.BDec (_, (b, _))), (T.Worlds bs_ as w_) -> begin
           begin if List.exists (function b' -> eqBlock (b, b')) bs_ then ()
           else raise (Error "Dynamic world subsumption failed")
@@ -329,16 +329,16 @@ end) : WORLDIFY = struct
     let rec checkClause arg__10 arg__11 =
       begin match (arg__10, arg__11) with
       | w_, (g_, I.Root (a, s_), occ) -> ()
-      | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), maybe_), v2_), occ) ->
+      | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), Maybe), v2_), occ) ->
           checkClause w_ (decEName (g_, d_), v2_, P.body occ)
-      | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), occ) -> begin
+      | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), No), v2_), occ) -> begin
           checkClause w_ (decEName (g_, d_), v2_, P.body occ);
           checkGoal w_ (g_, v1_, P.label occ)
         end
       end
 
     let rec checkConDec w_ (I.ConDec (s, m, k, status, v_, l_)) =
-      checkClause w_ (I.null_, v_, P.top)
+      checkClause w_ (I.Null, v_, P.top)
 
     let rec subGoalToDList = function
       | I.Pi ((d_, _), v_) -> d_ :: subGoalToDList v_
@@ -435,12 +435,12 @@ end) : WORLDIFY = struct
 
     let rec worldifyClause = function
       | g_, (I.Root (a, s_) as v_), w_, occ -> v_
-      | g_, I.Pi (((I.Dec (x, v1_) as d_), maybe_), v2_), w_, occ ->
+      | g_, I.Pi (((I.Dec (x, v1_) as d_), Maybe), v2_), w_, occ ->
           let _ = print "{" in
           let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
           let _ = print "}" in
           I.Pi ((I.Dec (x, v1_), I.Maybe), w2_)
-      | g_, I.Pi (((I.Dec (x, v1_) as d_), no_), v2_), w_, occ ->
+      | g_, I.Pi (((I.Dec (x, v1_) as d_), No), v2_), w_, occ ->
           let w1_ = worldifyGoal (g_, v1_, w_, P.label occ) in
           let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
           I.Pi ((I.Dec (x, w1_), I.No), w2_)
@@ -456,7 +456,7 @@ end) : WORLDIFY = struct
           end;
           try
             I.ConDec
-              (s, m, k, status, worldifyClause (I.null_, v_, w_, P.top), l_)
+              (s, m, k, status, worldifyClause (I.Null, v_, w_, P.top), l_)
           with Error' (occ, msg) -> raise (Error (wrapMsg (c, occ, msg)))
         end
       end
@@ -467,7 +467,7 @@ end) : WORLDIFY = struct
           let a = I.targetFam v_ in
           let w'_ = W.getWorlds a in
           begin
-            checkClause w'_ (g_, worldifyClause (I.null_, v_, w'_, P.top), P.top);
+            checkClause w'_ (g_, worldifyClause (I.Null, v_, w'_, P.top), P.top);
             worldifyBlock (decUName (g_, d_), l_)
           end
 

@@ -48,7 +48,7 @@ end) : MODEPRINT = struct
 
     let rec makeSpine g_ =
       let rec makeSpine' = function
-        | null_, _, s_ -> s_
+        | I.Null, _, s_ -> s_
         | I.Decl (g_, _), k, s_ ->
             makeSpine' (g_, k + 1, I.App (I.Root (I.BVar k, I.Nil), s_))
       in
@@ -57,7 +57,7 @@ end) : MODEPRINT = struct
     let rec fmtModeDec (cid, mS) =
       let v_ = I.constType cid in
       let rec fmtModeDec' = function
-        | g_, _, mnil_ ->
+        | g_, _, M.Mnil ->
             [
               F.string "(";
               P.formatExp (g_, I.Root (I.Const cid, makeSpine g_));

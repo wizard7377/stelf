@@ -84,20 +84,20 @@ end) : MTPSEARCH = struct
       | _ -> false
 
     let rec compose' = function
-      | null_, g_ -> g_
+      | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
     let rec shift = function
-      | null_, s -> s
+      | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
     let rec raiseType = function
-      | null_, v_ -> v_
+      | I.Null, v_ -> v_
       | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
 
     let rec exists p_ k_ =
       let rec exists' = function
-        | null_ -> false
+        | I.Null -> false
         | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
       in
       exists' k_
@@ -111,14 +111,14 @@ end) : MTPSEARCH = struct
       | r, (I.Root (_, s_), s) -> occursInSpine (r, (s_, s))
       | r, (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
-      | r, (I.EVar (r', _, v'_, _), s) -> r = r' || occursInExp (r, (v'_, s))
+      | r, (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
       | r, (I.FgnExp (csid_, csfe), s) ->
           I.FgnExpStd.fold (csid_, csfe)
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
     and occursInSpine = function
-      | _, (nil_, _) -> false
+      | _, (I.Nil, _) -> false
       | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp (s', s)))
       | r, (I.App (u_, s_), s) ->
           occursInExp (r, (u_, s)) || occursInSpine (r, (s_, s))
@@ -308,7 +308,7 @@ end) : MTPSEARCH = struct
                 matchSig' sgn'
           in
           let rec matchDProg = function
-            | null_, _ -> matchSig' (Index.lookup (cidFromHead ha_))
+            | I.Null, _ -> matchSig' (Index.lookup (cidFromHead ha_))
             | I.Decl (dPool', C.Dec (r, s, ha'_)), n -> begin
                 if eqHead (ha_, ha'_) then
                   let _ =

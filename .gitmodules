@@ -1,0 +1,7 @@
+[submodule "basis"]
+	path = basis
+	url = https://github.com/wizard7377/basis
+
+[submodule "twelf"]
+	path = twelf
+	url = https://github.com/standardml/twelf

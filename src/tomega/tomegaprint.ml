@@ -203,7 +203,7 @@ end) : TOMEGAPRINT = struct
         | I.Decl (psi_, (T.UDec d_ as ld_)), n, name ->
             I.Decl (namePsi (psi_, n - 1, name), ld_)
       and nameG = function
-        | psi_, null_, n, name, k -> (k n, I.Null)
+        | psi_, I.Null, n, name, k -> (k n, I.Null)
         | psi_, I.Decl (g_, d_), 1, name, k ->
             (psi_, I.Decl (g_, nameDec (d_, name)))
         | psi_, I.Decl (g_, d_), n, name, k ->
@@ -231,11 +231,11 @@ end) : TOMEGAPRINT = struct
         | (T.Dot (T.Prg k, s), I.Decl (g_, T.PDec (Some name, _, _, _))), psi1_
           ->
             copyNames (s, g_) psi1_
-        | (T.Shift _, null_), psi1_ -> psi1_
+        | (T.Shift _, I.Null), psi1_ -> psi1_
         end
       in
       let rec psiName' = function
-        | null_ -> I.Null
+        | I.Null -> I.Null
         | I.Decl (psi_, d_) ->
             let psi'_ = psiName' psi_ in
             I.Decl (psi'_, decName (T.coerceCtx psi'_, d_))
@@ -751,7 +751,7 @@ end) : TOMEGAPRINT = struct
       Fmt.makestring_fmt (formatPrg3 (function _ -> "?") args_)
 
     let rec nameCtx = function
-      | null_ -> I.Null
+      | I.Null -> I.Null
       | I.Decl (psi_, T.UDec d_) ->
           I.Decl (nameCtx psi_, T.UDec (Names.decName (T.coerceCtx psi_, d_)))
       | I.Decl (psi_, T.PDec (None, f_, tc1_, tc2_)) ->
@@ -761,16 +761,16 @@ end) : TOMEGAPRINT = struct
       | I.Decl (psi_, (T.PDec (Some n, f_, _, _) as d_)) ->
           I.Decl (nameCtx psi_, d_)
 
-    let rec flag = function None -> "" | Some _ -> "*"
+    let flag = function None -> "" | Some _ -> "*"
 
     let rec formatCtx = function
-      | null_ -> []
-      | I.Decl (null_, T.UDec d_) -> begin
+      | I.Null -> []
+      | I.Decl (I.Null, T.UDec d_) -> begin
           if !Global.chatter >= 4 then
             [ Fmt.hVbox [ Fmt.break_; P.formatDec (I.Null, d_) ] ]
           else [ P.formatDec (I.Null, d_) ]
         end
-      | I.Decl (null_, T.PDec (Some s, f_, tc1_, tc2_)) -> begin
+      | I.Decl (I.Null, T.PDec (Some s, f_, tc1_, tc2_)) -> begin
           if !Global.chatter >= 4 then
             [
               Fmt.hVbox
@@ -1236,7 +1236,7 @@ end) : TOMEGAPRINT = struct
   let prgToString = prgToString
   let funToString = funToString
   let nameCtx = nameCtx
-  let formatCtx = function psi_ -> Fmt.hVbox (formatCtx psi_)
+  let formatCtx psi_ = Fmt.hVbox (formatCtx psi_)
   let ctxToString = ctxToString
   (*    val lemmaDecToString = lemmaDecToString *)
 end

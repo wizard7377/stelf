@@ -1,5 +1,7 @@
 (* # 1 "src/heuristic/heuristic_.sig.ml" *)
 
+(** Heuristic ordering and formatting utilities for search indices. *)
+
 open Basis
 
 (* Heuristics : Version 1.3 *)
@@ -20,7 +22,11 @@ module type HEURISTIC = sig
   val compare : index * index -> order
   (** Position (left to right) *)
 
+  val index_to_string : index -> string
+  (** Render an index as a diagnostic string. *)
+
   val indexToString : index -> string
+  (** Compatibility alias for {!index_to_string}. *)
 end
 (* signature HEURISTIC *)
 
@@ -91,33 +97,33 @@ module Heuristic : HEURISTIC = struct
           | result, _, _, _, _ -> result
         end
 
-    let recToString = function 0 -> "non-rec" | 1 -> "rec"
+    let rec_to_string = function 0 -> "non-rec" | 1 -> "rec"
 
     (* TODO: Real.fmt not available in Basis *)
-    let realFmt r = Printf.sprintf "%.2f" r
+    let real_fmt r = Printf.sprintf "%.2f" r
 
     (* NOTE: Real.( + ) and Real.( / ) are int->int->int due to basis bug; use Stdlib float ops *)
     let ratio (c, m) = Real.fromInt c /. Real.fromInt m
 
     let sum = function
       | { sd = k1; ind = None; c = c1; m = m1; r = r1; p = _p1 } ->
-          realFmt (Real.fromInt k1 +. ratio (m1, c1) +. Real.fromInt r1)
+          real_fmt (Real.fromInt k1 +. ratio (m1, c1) +. Real.fromInt r1)
       | { sd = k1; ind = Some i1; c = c1; m = m1; r = r1; p = _p1 } ->
-          realFmt
+          real_fmt
             (Real.fromInt k1
             +. ratio (1, i1)
             +. ratio (m1, c1)
             +. Real.fromInt r1)
 
-    let indexToString = function
+    let index_to_string = function
       | { sd = s1; ind = None; c = c1; m = m1; r = r1; p = p1 } ->
           ((((((((((((("(c/m=" ^ Int.toString c1) ^ "/") ^ Int.toString m1)
                    ^ "=")
-                  ^ realFmt (ratio (c1, m1)))
+                  ^ real_fmt (ratio (c1, m1)))
                  ^ ", ind=., sd=")
                 ^ Int.toString s1)
                ^ ", ")
-              ^ recToString r1)
+              ^ rec_to_string r1)
              ^ ", p=")
             ^ Int.toString p1)
            ^ "sum = ")
@@ -126,13 +132,13 @@ module Heuristic : HEURISTIC = struct
       | { sd = s1; ind = Some idx; c = c1; m = m1; r = r1; p = p1 } ->
           ((((((((((((((("(c/m=" ^ Int.toString c1) ^ "/") ^ Int.toString m1)
                      ^ "=")
-                    ^ realFmt (ratio (c1, m1)))
+                    ^ real_fmt (ratio (c1, m1)))
                    ^ ", ind=")
                   ^ Int.toString idx)
                  ^ ", sd=")
                 ^ Int.toString s1)
                ^ ", ")
-              ^ recToString r1)
+              ^ rec_to_string r1)
              ^ ", p=")
             ^ Int.toString p1)
            ^ " sum = ")
@@ -141,7 +147,8 @@ module Heuristic : HEURISTIC = struct
   end
 
   let compare = compare
-  let indexToString = indexToString
+  let index_to_string = index_to_string
+  let indexToString = index_to_string
 end
 (* functor Heuristic *)
 

@@ -392,3 +392,7 @@ bin/dune~
 bin/main.ml~
 bin_old
 test.elf
+
+.claude
+build/
+.remember

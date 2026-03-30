@@ -170,14 +170,14 @@ end) : MTPI = struct
     let rec printFillResult (_, p_) =
       let rec formatTuple (g_, p_) =
         let rec formatTuple' = function
-          | unit_ -> []
-          | F.Inx (m_, unit_) -> [ printFmt (Print.formatExp (g_, m_)) ]
+          | F.Unit -> []
+          | F.Inx (m_, F.Unit) -> [ printFmt (Print.formatExp (g_, m_)) ]
           | F.Inx (m_, p'_) ->
               printFmt (Print.formatExp (g_, m_))
               :: Fmt.string "," :: Fmt.break_ :: formatTuple' p'_
         in
         begin match p_ with
-        | F.Inx (_, unit_) -> Fmt.hbox (formatTuple' p_)
+        | F.Inx (_, F.Unit) -> Fmt.hbox (formatTuple' p_)
         | _ ->
             Fmt.hVbox0 1 1 1
               ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
@@ -272,7 +272,7 @@ end) : MTPI = struct
       begin if empty () then begin
         print "[QED]\n";
         print
-          (("Statistics: required Twelf.Prover.maxFill := "
+          (("Statistics: required Stelf.Prover.maxFill := "
            ^ Int.toString !MTPData.maxFill)
           ^ "\n")
       end
@@ -334,7 +334,7 @@ end) : MTPI = struct
       let _ = MTPGlobal.maxFill := k in
       let _ = reset () in
       let f_ = RelFun.convertFor cL in
-      let o_ = transformOrder (I.null_, f_, map select cL) in
+      let o_ = transformOrder (I.Null, f_, map select cL) in
       let slist_ = MTPInit.init (f_, Obj.magic o_) in
       let _ =
         begin if List.length slist_ = 0 then raise Domain else ()

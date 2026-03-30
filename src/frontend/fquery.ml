@@ -71,20 +71,19 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     in
     let _ =
       begin if !Global.chatter >= 3 then
-        print
-          (Timers.time Timers.printing expToString (IntSyn.null_, v_) ^ ".\n")
+        print (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n")
       else ()
       end
     in
     let k, v1_ = Abstract.abstractDecImp v_ in
-    let g_, v2_ = lower (k, I.null_, v1_) in
+    let g_, v2_ = lower (k, I.Null, v1_) in
     let a = I.targetFam v2_ in
     let w_ = W.lookup a in
     let v3_ = Worldify.worldifyGoal (g_, v2_) in
     let _ = TypeCheck.typeCheck (g_, (v3_, I.Uni I.Type)) in
     let p_ = Converter.convertGoal (T.embedCtx g_, v3_) in
     let v_ = Timers.time Timers.delphin Opsem.evalPrg p_ in
-    print (("Delphin: " ^ TomegaPrint.prgToString (I.null_, v_)) ^ "\n")
+    print (("Delphin: " ^ TomegaPrint.prgToString (I.Null, v_)) ^ "\n")
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)
   (* times itself *)
   (* G |- V'' : type *)

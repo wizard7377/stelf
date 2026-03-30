@@ -1,6 +1,0 @@
-(library
- (name regression_cases)
- (wrapped false)
- (libraries twelf alcotest basis)
- (flags
-  (:standard -open Basis)))

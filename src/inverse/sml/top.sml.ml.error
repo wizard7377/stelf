@@ -12,18 +12,18 @@ Control.Print.stringDepth := 1000;
 
 CM.make "sources.cm"; 
 
-Twelf.doubleCheck := true;
-Twelf.Print.depth := SOME 0
-Twelf.Print.length := SOME 0
-Twelf.Timers.reset()
+Stelf.doubleCheck := true;
+Stelf.Print.depth := SOME 0
+Stelf.Print.length := SOME 0
+Stelf.Timers.reset()
 val test = "../../../../test/";
-Twelf.make (test ^ "talt/sources-chk.cfg");
-Twelf.make (test ^ "talt/sources.cfg")
-Twelf.make (test ^ "sml-sound/sources.cfg");
-Twelf.make (test ^ "princeton/sources.cfg");
-Twelf.make (test ^ "misc/sources.cfg");
+Stelf.make (test ^ "talt/sources-chk.cfg");
+Stelf.make (test ^ "talt/sources.cfg")
+Stelf.make (test ^ "sml-sound/sources.cfg");
+Stelf.make (test ^ "princeton/sources.cfg");
+Stelf.make (test ^ "misc/sources.cfg");
 
-Twelf.Timers.check()
+Stelf.Timers.check()
 Timers.reset()
 val signat = (Translate.translate_signat ())
 Timers.check()
@@ -37,10 +37,10 @@ Syntax.Signat.reset()
 
 (Lib.printl "";Timers.check())
 
-Twelf.Timers.check()
+Stelf.Timers.check()
 Timers.check()
 
-Twelf.Timers.reset()
+Stelf.Timers.reset()
 
 (Translate.EE.translate_signature();raise Success)
   handle TypecheckEE.Fail_exp_skel x => x;
@@ -295,12 +295,12 @@ val it =
 (*  Timing                                                                    *)
 (* -------------------------------------------------------------------------- *)
 
-Twelf.Timers.reset()
-Twelf.Print.depth := SOME 0
-Twelf.Print.length := SOME 0
-Twelf.Print.depth := NONE
-Twelf.Print.length := NONE 
-Twelf.Timers.show()
+Stelf.Timers.reset()
+Stelf.Print.depth := SOME 0
+Stelf.Print.length := SOME 0
+Stelf.Print.depth := NONE
+Stelf.Print.length := NONE 
+Stelf.Timers.show()
 (Translate.translate_signature();raise Success)
 
 val center = Timing.newCenter "checker"
@@ -531,7 +531,7 @@ S.print_exp sgn4 tm
 
 
 
-Twelf.make "../../sources.cfg"; 
+Stelf.make "../../sources.cfg"; 
 exception Success;
 (Translate.translate_signature();raise Success)
   handle Translate.Translate s => (print s; raise Fail "")
@@ -539,5 +539,5 @@ exception Success;
        | SpineLF.Fail2(s,u1,u2) => (s,u1,u2)
 
 
-Twelf.make "../../sources.cfg"; 
+Stelf.make "../../sources.cfg"; 
 Translate.translate_signature();

@@ -1,3 +1,5 @@
+(** Public re-exports for the lambda subsystem. *)
+
 open! Fgnopn
 module Fgnopn = Fgnopn
 open! Fgnopntable

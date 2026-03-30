@@ -78,7 +78,7 @@ end) : REDUCES = struct
       end
 
     let rec concat = function
-      | g'_, null_ -> g'_
+      | g'_, I.Null -> g'_
       | g'_, I.Decl (g_, d_) -> I.Decl (concat (g'_, g_), d_)
 
     let rec fmtOrder (g_, o_) =
@@ -211,7 +211,7 @@ end) : REDUCES = struct
             end
           in
           o_
-      | g_, q_, (I.Pi ((d_, maybe_), v_), s), occ ->
+      | g_, q_, (I.Pi ((d_, Maybe), v_), s), occ ->
           let o_ =
             getROrder
               ( I.Decl (g_, N.decLUName (g_, I.decSub (d_, s))),
@@ -223,7 +223,7 @@ end) : REDUCES = struct
           | None -> None
           | Some o'_ -> Some (abstractRO (g_, I.decSub (d_, s), o'_))
           end
-      | g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s), occ ->
+      | g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
           let o_ =
             getROrder (g_, q_, (v2_, I.comp (I.invShift, s)), P.body occ)
           in
@@ -242,13 +242,13 @@ end) : REDUCES = struct
       checkGoalW (g0_, q0_, rl_, Whnf.whnf vs_, vs'_, occ)
 
     and checkGoalW = function
-      | g0_, q0_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s), vs'_, occ
+      | g0_, q0_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), vs'_, occ
         -> begin
-          checkClause ((g0_, q0_, rl_), I.null_, I.null_, (v1_, s), P.label occ);
+          checkClause ((g0_, q0_, rl_), I.Null, I.Null, (v1_, s), P.label occ);
           checkGoal
             (g0_, q0_, rl_, (v2_, I.comp (I.invShift, s)), vs'_, P.body occ)
         end
-      | g0_, q0_, rl_, (I.Pi ((d_, maybe_), v_), s), (v'_, s'), occ ->
+      | g0_, q0_, rl_, (I.Pi ((d_, Maybe), v_), s), (v'_, s'), occ ->
           checkGoal
             ( I.Decl (g0_, N.decLUName (g0_, I.decSub (d_, s))),
               I.Decl (q0_, C.All),
@@ -263,7 +263,7 @@ end) : REDUCES = struct
           ((I.Root (I.Const a', s'_), s') as vs'_),
           occ ) ->
           let rec lookup = function
-            | empty_, f -> R.Empty
+            | R.Empty, f -> R.Empty
             | (R.Le (a, a's') as a's), f -> begin
                 if f a then a's else lookup (a's', f)
               end
@@ -275,7 +275,7 @@ end) : REDUCES = struct
           let p'_ : (I.eclo * I.eclo) R.order = select (a', (s'_, s')) in
           let a's = R.mutLookup a in
           begin match lookup (a's, function x' -> x' = a') with
-          | empty_ -> ()
+          | R.Empty -> ()
           | R.Le _ -> begin
               begin if !Global.chatter > 4 then begin
                 print "Verifying termination order:\n";
@@ -359,14 +359,14 @@ end) : REDUCES = struct
       checkClauseW (gqr_, g_, q_, Whnf.whnf vs_, occ)
 
     and checkClauseW = function
-      | gqr_, g_, q_, (I.Pi ((d_, maybe_), v_), s), occ ->
+      | gqr_, g_, q_, (I.Pi ((d_, Maybe), v_), s), occ ->
           checkClause
             ( gqr_,
               I.Decl (g_, N.decEName (g_, I.decSub (d_, s))),
               I.Decl (q_, C.Exist),
               (v_, I.dot1 s),
               P.body occ )
-      | gqr_, g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s), occ ->
+      | gqr_, g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
           checkClause
             ( gqr_,
               I.Decl (g_, I.decSub (d_, s)),
@@ -392,22 +392,21 @@ end) : REDUCES = struct
                  ^ "." ))
 
     let rec checkClause' (vs_, occ) =
-      checkClause ((I.null_, I.null_, []), I.null_, I.null_, vs_, occ)
+      checkClause ((I.Null, I.Null, []), I.Null, I.Null, vs_, occ)
 
     let rec checkRGoal (g_, q_, rl_, vs_, occ) =
       checkRGoalW (g_, q_, rl_, Whnf.whnf vs_, occ)
 
     and checkRGoalW = function
       | g_, q_, rl_, ((I.Root (I.Const a, s_), s) as vs_), occ -> ()
-      | g_, q_, rl_, (I.Pi ((d_, maybe_), v_), s), occ ->
+      | g_, q_, rl_, (I.Pi ((d_, Maybe), v_), s), occ ->
           checkRGoal
             ( I.Decl (g_, N.decLUName (g_, I.decSub (d_, s))),
               I.Decl (q_, C.All),
               C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
               (v_, I.dot1 s),
               P.body occ )
-      | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s), occ ->
-        begin
+      | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ -> begin
           checkRClause (g_, q_, rl_, (v1_, s), P.label occ);
           checkRGoal (g_, q_, rl_, (v2_, I.comp (I.invShift, s)), P.body occ)
         end
@@ -424,7 +423,7 @@ end) : REDUCES = struct
       checkRImpW (g_, q_, rl_, Whnf.whnf vs_, vs'_, occ)
 
     and checkRImpW = function
-      | g_, q_, rl_, (I.Pi ((d'_, maybe_), v'_), s'), (v_, s), occ ->
+      | g_, q_, rl_, (I.Pi ((d'_, Maybe), v'_), s'), (v_, s), occ ->
           checkRImp
             ( I.Decl (g_, N.decEName (g_, I.decSub (d'_, s'))),
               I.Decl (q_, C.Exist),
@@ -435,7 +434,7 @@ end) : REDUCES = struct
       | ( g_,
           q_,
           rl_,
-          (I.Pi (((I.Dec (_, v1_) as d'_), no_), v2_), s'),
+          (I.Pi (((I.Dec (_, v1_) as d'_), No), v2_), s'),
           (v_, s),
           occ ) ->
           let rl'_ =
@@ -460,14 +459,14 @@ end) : REDUCES = struct
       checkRClauseW (g_, q_, rl_, Whnf.whnf vs_, occ)
 
     and checkRClauseW = function
-      | g_, q_, rl_, (I.Pi ((d_, maybe_), v_), s), occ ->
+      | g_, q_, rl_, (I.Pi ((d_, Maybe), v_), s), occ ->
           checkRClause
             ( I.Decl (g_, N.decEName (g_, I.decSub (d_, s))),
               I.Decl (q_, C.Exist),
               C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
               (v_, I.dot1 s),
               P.body occ )
-      | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), s), occ ->
+      | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
           let g'_ = I.Decl (g_, I.decSub (d_, s)) in
           let q'_ = I.Decl (q_, C.Exist) in
           let rl'_ = C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)) in
@@ -544,13 +543,13 @@ end) : REDUCES = struct
             end;
             begin
               begin if !Global.chatter > 4 then begin
-                N.varReset IntSyn.null_;
+                N.varReset IntSyn.Null;
                 print "\n"
               end
               else ()
               end;
               begin try
-                checkRClause (I.null_, I.null_, [], (I.constType b, I.id), P.top)
+                checkRClause (I.Null, I.Null, [], (I.constType b, I.id), P.top)
               with
               | Error' (occ, msg) -> error (b, occ, msg)
               | R.Error msg ->
@@ -566,13 +565,13 @@ end) : REDUCES = struct
             end;
             begin
               begin if !Global.chatter > 4 then begin
-                N.varReset IntSyn.null_;
+                N.varReset IntSyn.Null;
                 print "\n"
               end
               else ()
               end;
               begin try
-                checkRClause (I.null_, I.null_, [], (I.constType d, I.id), P.top)
+                checkRClause (I.Null, I.Null, [], (I.constType d, I.id), P.top)
               with
               | Error' (occ, msg) -> error (d, occ, msg)
               | R.Error msg ->
@@ -606,7 +605,7 @@ end) : REDUCES = struct
             end;
             begin
               begin if !Global.chatter > 4 then begin
-                N.varReset IntSyn.null_;
+                N.varReset IntSyn.Null;
                 print "\n"
               end
               else ()
@@ -626,7 +625,7 @@ end) : REDUCES = struct
             end;
             begin
               begin if !Global.chatter > 4 then begin
-                N.varReset IntSyn.null_;
+                N.varReset IntSyn.Null;
                 print "\n"
               end
               else ()

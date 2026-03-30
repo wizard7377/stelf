@@ -135,6 +135,7 @@ module type LEXER = sig
   val lexStream : TextIO.instream -> (token * Paths.region) Stream.stream
   val lexTerminal : string * string -> (token * Paths.region) Stream.stream
   val toString : token -> string
+  val lex : (int -> string) -> (token * Paths.region) Stream.stream
 
   (* Utilities *)
   exception NotDigit of char

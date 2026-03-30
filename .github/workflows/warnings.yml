@@ -1,0 +1,112 @@
+name: Strict Warnings
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    branches: [master]
+
+jobs:
+  warnings:
+    name: All warnings as errors / ${{ matrix.os }} / OCaml ${{ matrix.ocaml-compiler }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            ocaml-compiler: "5.4.x"
+          - os: ubuntu-latest
+            ocaml-compiler: "5.2.x"
+          - os: macos-latest
+            ocaml-compiler: "5.4.x"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test
+
+      - name: Enumerate all OCaml warnings
+        run: |
+          echo "=== OCaml compiler version ==="
+          opam exec -- ocaml --version
+          echo ""
+          echo "=== All available warnings ==="
+          opam exec -- ocaml -warn-help
+          echo ""
+
+          # Parse the max warning number from -warn-help output
+          MAX_WARN=$(opam exec -- ocaml -warn-help | grep -oP '^\s*\K[0-9]+' | sort -n | tail -1)
+          echo "Max warning number: $MAX_WARN"
+          echo "Total numbered warnings: $(opam exec -- ocaml -warn-help | grep -cP '^\s+[0-9]+')"
+
+          # Build the explicit warning list: @1@2@3...@N
+          WARN_FLAGS=""
+          for i in $(seq 1 "$MAX_WARN"); do
+            WARN_FLAGS="${WARN_FLAGS}@${i}"
+          done
+          echo "Generated warn-error flags: $WARN_FLAGS"
+          echo "WARN_FLAGS=$WARN_FLAGS" >> "$GITHUB_ENV"
+          echo "MAX_WARN=$MAX_WARN" >> "$GITHUB_ENV"
+
+          echo ""
+          echo "=== Excluded warnings (structural, not fixable) ==="
+          echo "  44 [open-shadow-identifier]  - every file does 'open Basis' (SML compat layer)"
+          echo "  45 [open-shadow-label-constructor] - same reason as 44"
+          echo "  49 [no-cmi-file]             - cascading from dune wrapper modules"
+          echo "  70 [missing-mli]             - dune-generated .ml-gen wrappers have no .mli"
+
+      - name: Build basis library (excluded from strict warnings)
+        run: opam exec -- dune build basis
+
+      - name: Build with all warnings as errors
+        env:
+          # _,  = append these flags AFTER all other compiler flags
+          # w=+a-44-45-49-70 = enable every warning except structural ones:
+          #   44: open-shadow-identifier (open Basis shadows stdlib types - by design)
+          #   45: open-shadow-label-constructor (same as 44)
+          #   49: no-cmi-file (cascading from dune wrapper modules)
+          #   70: missing-mli (dune-generated .ml-gen wrappers)
+          # warn-error=+a-44-45-49-70 = treat the enabled warnings as errors
+          OCAMLPARAM: "_,w=+a-44-45-49-70,warn-error=+a-44-45-49-70"
+        run: |
+          echo "Building with OCAMLPARAM=\"$OCAMLPARAM\""
+          echo "This enables warnings 1..$MAX_WARN (except 44,45,49,70) and treats all as errors."
+          echo ""
+          opam exec -- dune build 2>&1 | tee build-warnings.log
+        continue-on-error: true
+
+      - name: Summarize warning counts
+        if: always()
+        run: |
+          echo "=== Warning/Error Summary ==="
+          if [ -f build-warnings.log ]; then
+            # Count occurrences of each warning number
+            echo ""
+            echo "Warnings by number:"
+            grep -oiP 'warning \K[0-9]+' build-warnings.log | sort -n | uniq -c | sort -rn || echo "  (no warnings found)"
+            echo ""
+            echo "Warnings by file:"
+            grep -oP 'File "[^"]+' build-warnings.log | sed 's/File "//' | sort | uniq -c | sort -rn | head -30 || echo "  (no warnings found)"
+            echo ""
+            TOTAL=$(grep -ciP 'warning [0-9]+' build-warnings.log || echo 0)
+            echo "Total warnings: $TOTAL"
+          else
+            echo "No build log found."
+          fi
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-warnings-${{ matrix.os }}-${{ matrix.ocaml-compiler }}
+          path: build-warnings.log
+          retention-days: 30

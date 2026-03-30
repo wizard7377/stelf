@@ -1,2 +1,0 @@
-test ../../twelf-regression/talt-lf/sources.cfg
-

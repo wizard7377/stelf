@@ -42,7 +42,7 @@ open! Buildid
 module Buildid = Buildid
 open! Version
 module Version = Version
-open! Twelf
-module Twelf = Twelf
+open! Stelf
+module Stelf = Stelf
 open! Frontend_
 module Frontend_ = Frontend_

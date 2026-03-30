@@ -108,13 +108,13 @@ end) : MTPABSTRACT = struct
 
     let rec eqEVar arg__1 arg__2 =
       begin match (arg__1, arg__2) with
-      | I.EVar (r1, _, _, _), Ev (r2, _, _, _) -> r1 = r2
+      | I.EVar (r1, _, _, _), Ev (r2, _, _, _) -> r1 == r2
       | _, _ -> false
       end
 
     let rec exists p_ k_ =
       let rec exists' = function
-        | null_ -> false
+        | I.Null -> false
         | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
       in
       exists' k_
@@ -155,7 +155,7 @@ end) : MTPABSTRACT = struct
       | (d_, I.Maybe), v_ -> I.Pi ((d_, occursInExp (1, v_)), v_)
 
     let rec weaken = function
-      | null_, a -> I.id
+      | I.Null, a -> I.id
       | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
           let w' = weaken (g'_, a) in
           begin if Subordinate.belowEq (I.targetFam v_, a) then I.dot1 w'
@@ -163,17 +163,17 @@ end) : MTPABSTRACT = struct
           end
 
     let rec raiseType = function
-      | null_, v_ -> v_
+      | I.Null, v_ -> v_
       | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
 
     let rec restore = function
-      | 0, gp_ -> (gp_, I.null_)
+      | 0, gp_ -> (gp_, I.Null)
       | n, I.Decl (g_, d_) ->
           let gp'_, gx'_ = restore (n - 1, g_) in
           (gp'_, I.Decl (gx'_, d_))
 
     let rec concat = function
-      | gp_, null_ -> gp_
+      | gp_, I.Null -> gp_
       | gp_, I.Decl (g_, d_) -> I.Decl (concat (gp_, g_), d_)
 
     let rec collectExpW = function
@@ -225,7 +225,7 @@ end) : MTPABSTRACT = struct
       collectExpW (tag_, d, g_, Whnf.whnf us_, k_)
 
     and collectSpine = function
-      | tag_, d, g_, (nil_, _), k_ -> k_
+      | tag_, d, g_, (I.Nil, _), k_ -> k_
       | tag_, d, g_, (I.SClo (s_, s'), s), k_ ->
           collectSpine (tag_, d, g_, (s_, I.comp (s', s)), k_)
       | tag_, d, g_, (I.App (u_, s_), s), k_ ->
@@ -244,7 +244,7 @@ end) : MTPABSTRACT = struct
     let rec abstractEVar = function
       | I.Decl (k'_, Ev (r', _, _, d)), depth, (I.EVar (r, _, _, _) as x_) ->
         begin
-          if r = r' then (I.BVar (depth + 1), d)
+          if r == r' then (I.BVar (depth + 1), d)
           else abstractEVar (k'_, depth + 1, x_)
         end
       | I.Decl (k'_, Bv _), depth, x_ -> abstractEVar (k'_, depth + 1, x_)
@@ -309,7 +309,7 @@ end) : MTPABSTRACT = struct
               I.App (abstractExp (k_, depth, (u_, I.id)), s_) )
 
     and abstractSpine = function
-      | k_, depth, (nil_, _) -> I.Nil
+      | k_, depth, (I.Nil, _) -> I.Nil
       | k_, depth, (I.SClo (s_, s'), s) ->
           abstractSpine (k_, depth, (s_, I.comp (s', s)))
       | k_, depth, (I.App (u_, s_), s) ->
@@ -330,12 +330,12 @@ end) : MTPABSTRACT = struct
 
     let rec checkType v_ =
       begin match getLevel v_ with
-      | type_ -> ()
+      | I.Type -> ()
       | _ -> raise (Error "Typing ambiguous -- free type variable")
       end
 
     let rec abstractCtx = function
-      | null_ -> (I.null_, I.null_)
+      | I.Null -> (I.Null, I.Null)
       | I.Decl (k'_, Ev (_, v'_, (S.Lemma _b as t_), _)) ->
           let v''_ = abstractExp (k'_, 0, (v'_, I.id)) in
           let _ = checkType v''_ in
@@ -354,7 +354,7 @@ end) : MTPABSTRACT = struct
           (I.Decl (g'_, d'_), I.Decl (b'_, tag_))
 
     let rec abstractGlobalSub = function
-      | k_, I.Shift _, null_ -> I.Shift (I.ctxLength k_)
+      | k_, I.Shift _, I.Null -> I.Shift (I.ctxLength k_)
       | k_, I.Shift n, (I.Decl _ as b_) ->
           abstractGlobalSub (k_, I.Dot (I.Idx (n + 1), I.Shift (n + 1)), b_)
       | k_, I.Dot (I.Idx k, s'), I.Decl (b_, (S.Parameter _ as t_)) ->
@@ -365,7 +365,7 @@ end) : MTPABSTRACT = struct
               abstractGlobalSub (k_, s', b_) )
 
     let rec collectGlobalSub = function
-      | g0_, I.Shift _, null_, collect -> collect
+      | g0_, I.Shift _, I.Null, collect -> collect
       | g0_, s, (I.Decl (_, S.Parameter (Some l)) as b_), collect ->
           let (F.LabelDec (name, _, g2_)) = F.labelLookup l in
           skip (g0_, List.length g2_, s, b_, collect)
@@ -390,7 +390,7 @@ end) : MTPABSTRACT = struct
 
     let rec abstractNew ((g0_, b0_), s, b_) =
       let cf = collectGlobalSub (g0_, s, b_, function _, k'_ -> k'_) in
-      let k_ = cf (0, I.null_) in
+      let k_ = cf (0, I.Null) in
       (abstractCtx k_, abstractGlobalSub (k_, s, b_))
 
     let rec abstractSubAll (t, b1_, (g0_, b0_), s, b_) =
@@ -401,9 +401,9 @@ end) : MTPABSTRACT = struct
       in
       let collect2 = collectGlobalSub (g0_, s, b_, function _, k'_ -> k'_) in
       let collect0 =
-        collectGlobalSub (I.null_, t, b1_, function _, k'_ -> k'_)
+        collectGlobalSub (I.Null, t, b1_, function _, k'_ -> k'_)
       in
-      let k0_ = collect0 (0, I.null_) in
+      let k0_ = collect0 (0, I.Null) in
       let k1_ = skip'' (k0_, (g0_, b0_)) in
       let d = I.ctxLength g0_ in
       let k_ = collect2 (d, k1_) in
@@ -418,36 +418,36 @@ end) : MTPABSTRACT = struct
           F.Ex
             ( abstractDec (k_, depth, (d_, s)),
               abstractFor (k_, depth + 1, (f_, I.dot1 s)) )
-      | k_, depth, (true_, s) -> F.True
+      | k_, depth, (True, s) -> F.True
       | k_, depth, (F.And (f1_, f2_), s) ->
           F.And
             ( abstractFor (k_, depth, (f1_, s)),
               abstractFor (k_, depth, (f2_, s)) )
 
     let rec allClo = function
-      | null_, f_ -> f_
+      | I.Null, f_ -> f_
       | I.Decl (gx_, d_), f_ -> allClo (gx_, F.All (F.Prim d_, f_))
 
     let rec convert = function
-      | null_ -> I.null_
+      | I.Null -> I.Null
       | I.Decl (g_, d_) -> I.Decl (convert g_, Bv (d_, S.Parameter None))
 
     let rec createEmptyB = function
-      | 0 -> I.null_
+      | 0 -> I.Null
       | n -> I.Decl (createEmptyB (n - 1), S.None)
 
     let rec lower = function
-      | _, 0 -> I.null_
+      | _, 0 -> I.Null
       | I.Decl (g_, d_), n -> I.Decl (lower (g_, n - 1), d_)
 
     let rec split = function
-      | g_, 0 -> (g_, I.null_)
+      | g_, 0 -> (g_, I.Null)
       | I.Decl (g_, d_), n ->
           let g1_, g2_ = split (g_, n - 1) in
           (g1_, I.Decl (g2_, d_))
 
     let rec shift = function
-      | null_ -> I.shift
+      | I.Null -> I.shift
       | I.Decl (g_, _) -> I.dot1 (shift g_)
 
     let rec ctxSub = function
@@ -455,7 +455,7 @@ end) : MTPABSTRACT = struct
       | d_ :: g_, s -> I.decSub (d_, s) :: ctxSub (g_, I.dot1 s)
 
     let rec weaken2 = function
-      | null_, a, i -> (I.id, function s_ -> s_)
+      | I.Null, a, i -> (I.id, function s_ -> s_)
       | I.Decl (g'_, (I.Dec (name, v_) as d_)), a, i ->
           let w', s'_ = weaken2 (g'_, a, i + 1) in
           begin if Subordinate.belowEq (I.targetFam v_, a) then
@@ -464,13 +464,13 @@ end) : MTPABSTRACT = struct
           end
 
     let rec raiseType = function
-      | null_, v_ -> v_
+      | I.Null, v_ -> v_
       | I.Decl (g_, d_), v_ ->
           raiseType
             (g_, Abstract.piDepend ((Whnf.normalizeDec (d_, I.id), I.Maybe), v_))
 
     let rec raiseFor = function
-      | k, gorig_, (true_ as f_), w, sc -> f_
+      | k, gorig_, (F.True as f_), w, sc -> f_
       | k, gorig_, F.Ex (I.Dec (name, v_), f_), w, sc ->
           let g_ = F.listToCtx (ctxSub (F.ctxToList gorig_, w)) in
           let g = I.ctxLength g_ in
@@ -620,7 +620,7 @@ end) : MTPABSTRACT = struct
        where P' = Maybe if D occurs in V, P' = No otherwise
     *)
   (* optimize to have fewer traversals? -cs *)
-  (* pre-Twelf 1.2 code walk Fri May  8 11:17:10 1998 *)
+  (* pre-Stelf 1.2 code walk Fri May  8 11:17:10 1998 *)
   (* weaken (depth,  G, a) = (w')
     *)
   (* raiseType (G, V) = {{G}} V

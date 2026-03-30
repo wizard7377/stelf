@@ -181,7 +181,7 @@ end) : NAMES = struct
   (*
      Unprintable is raised when trying to resolve the names
      of unnamed variables.  Usually, this signals an error
-     in Twelf; the only exception is the use of anonymous
+     in Stelf; the only exception is the use of anonymous
      bound variables [_] or {_} in the source.
   *)
   exception Unprintable
@@ -265,10 +265,20 @@ end) : NAMES = struct
   *)
   let rec checkAtomic = function
     | name, IntSyn.Pi (d_, v_), 0 -> true
-    | name, IntSyn.Pi (d_, v_), n -> checkAtomic (name, v_, n - 1)
-    | _, IntSyn.Uni _, 0 -> true
-    | _, IntSyn.Root _, 0 -> true
-    | name, _, _ -> false
+    | name, IntSyn.Pi (d_, v_), n ->
+        Logs.debug (fun m ->
+            m "checkAtomic: %s %s %d" name (IntSyn.show_exp v_) n);
+        checkAtomic (name, v_, n - 1)
+    | name, IntSyn.Uni _, 0 ->
+        Logs.debug (fun m -> m "checkAtomic: %s is a universe" name);
+        true
+    | name, IntSyn.Root _, 0 ->
+        Logs.debug (fun m -> m "checkAtomic: %s is a root" name);
+        true
+    | name, v, n ->
+        Logs.debug (fun m ->
+            m "checkAtomic: %s is neither a universe nor a root" name);
+        false
 
   (* raise Error (""Constant "" ^ name ^ "" takes too many explicit arguments for given fixity"") *)
   (* allow extraneous arguments, Sat Oct 23 14:18:27 1999 -fp *)
@@ -285,11 +295,9 @@ end) : NAMES = struct
     | IntSyn.AbbrevDef (name, _, i, _, v_, l_), n ->
         checkAtomic (name, v_, i + n)
 
-  (* checkFixity (name, cidOpt, n) = ()
-     if n = 0 (no requirement on arguments)
-     or name is declared and has n exactly explicit arguments,
-     raises Error (msg) otherwise
-  *)
+  (** checkFixity (name, cidOpt, n) = () if n = 0 (no requirement on arguments)
+      or name is declared and has n exactly explicit arguments, raises Error
+      (msg) otherwise *)
   let rec checkFixity = function
     | name, _, 0 -> ()
     | name, cid, n -> begin
@@ -341,7 +349,7 @@ end) : NAMES = struct
     let name = Stdlib.String.trim name in
     validateQualName (rev (String.fields (function c -> c = '.') name))
 
-  let rec unqualified = function Qid ([], id) -> Some id | _ -> None
+  let unqualified = function Qid ([], id) -> Some id | _ -> None
 
   type nonrec namespace =
     IntSyn.mid StringTree.table * IntSyn.cid StringTree.table
@@ -748,13 +756,13 @@ end) : NAMES = struct
     let l_ = IntSyn.constUni cid in
     let _ =
       begin match l_ with
-      | type_ ->
+      | Type ->
           raise
             (Error
                ((("Object constant " ^ qidToString (constQid cid))
                 ^ " cannot be given name preference\n")
                ^ "Name preferences can only be established for type families"))
-      | kind_ -> ()
+      | Kind -> ()
       end
     in
     Array.update (namePrefArray, cid, Some (ePref, uPref))
@@ -781,7 +789,7 @@ end) : NAMES = struct
   type extent = Local | Global [@@deriving eq, ord, show]
   type role = Exist | Univ of extent [@@deriving eq, ord, show]
 
-  let rec extent = function Exist -> Global | Univ ext -> ext
+  let extent = function Exist -> Global | Univ ext -> ext
 
   let rec namePrefOf'' = function
     | Exist, None -> "X"
@@ -864,10 +872,10 @@ end) : NAMES = struct
       let rec evlk = function
         | r, [] -> None
         | r, (IntSyn.EVar (r', _, _, _), name) :: l -> begin
-            if r = r' then Some name else evlk (r, l)
+            if r == r' then Some name else evlk (r, l)
           end
         | r, (IntSyn.AVar r', name) :: l -> begin
-            if r = r' then Some name else evlk (r, l)
+            if r == r' then Some name else evlk (r, l)
           end
       in
       begin match x_ with
@@ -1151,12 +1159,11 @@ end) : NAMES = struct
        Used for implicit EVar in constant declarations after abstraction.
     *)
   let rec pisEName' = function
-    | g_, 0, v_ -> v_
-    | g_, i, IntSyn.Pi ((d_, maybe_), v_) ->
+    | g_, i, IntSyn.Pi ((d_, IntSyn.Maybe), v_) when i > 0 ->
         let d'_ = decEName (g_, d_) in
         IntSyn.Pi
           ((d'_, IntSyn.Maybe), pisEName' (IntSyn.Decl (g_, d'_), i - 1, v_))
-  (* i > 0 *)
+    | g_, _, v_ -> v_
 
   (* | pisEName' (G, i, V) = V *)
   let rec pisEName (i, v_) = pisEName' (IntSyn.Null, i, v_)

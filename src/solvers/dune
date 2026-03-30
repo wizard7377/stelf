@@ -2,7 +2,7 @@
 
 (library
  (name solvers)
- (public_name twelf.solvers)
+ (public_name stelf.solvers)
  (modules
   cs_manager
   cs
@@ -69,4 +69,4 @@
    Formatter.Formatter_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

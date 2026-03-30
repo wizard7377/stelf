@@ -179,7 +179,7 @@ end) : ASSIGN = struct
           print "Exp (_ ). ";
           printSub s
         end
-      | Dot (undef_, s) -> begin
+      | Dot (Undef, s) -> begin
           print "Undef . ";
           printSub s
         end

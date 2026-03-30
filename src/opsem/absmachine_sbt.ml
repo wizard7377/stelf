@@ -66,7 +66,7 @@ end) : ABSMACHINESBT = struct
         ref =
       ref (function ps, dp, sc -> ())
 
-    let rec cidFromHead = function I.Const a -> a | I.Def a -> a
+    let cidFromHead = function I.Const a -> a | I.Def a -> a
 
     let rec eqHead = function
       | I.Const a, I.Const a' -> a = a'
@@ -116,7 +116,7 @@ end) : ABSMACHINESBT = struct
           print "Exp (_ ). ";
           printSub s
         end
-      | IntSyn.Dot (undef_, s) -> begin
+      | IntSyn.Dot (IntSyn.Undef, s) -> begin
           print "Undef . ";
           printSub s
         end
@@ -192,7 +192,7 @@ end) : ABSMACHINESBT = struct
           end
 
     and sSolve = function
-      | (true_, s), dp, sc -> sc []
+      | (C.True, s), dp, sc -> sc []
       | (C.Conjunct (g, a_, sgoals_), s), (C.DProg (g_, dPool) as dp), sc ->
           solve'
             ( (g, s),

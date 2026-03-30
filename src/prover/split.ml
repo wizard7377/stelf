@@ -72,7 +72,7 @@ end) : SPLIT with module State = Split__0.State' = struct
     module Unify = Split__0.Unify
 
     let rec weaken = function
-      | null_, a -> I.id
+      | I.Null, a -> I.id
       | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
           let w' = weaken (g'_, a) in
           begin if Subordinate.belowEq (I.targetFam v_, a) then I.dot1 w'
@@ -92,7 +92,7 @@ end) : SPLIT with module State = Split__0.State' = struct
     and instEVarsW = function
       | vs_, 0, xsRev_ -> (vs_, xsRev_)
       | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev_ ->
-          let x1_ = I.newEVar (I.null_, I.EClo (v1_, s)) in
+          let x1_ = I.newEVar (I.Null, I.EClo (v1_, s)) in
           instEVars ((v2_, I.Dot (I.Exp x1_, s)), p - 1, Some x1_ :: xsRev_)
       | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev_ ->
           let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
@@ -115,7 +115,10 @@ end) : SPLIT with module State = Split__0.State' = struct
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
           (I.App (x_, s_), vs_)
 
-    let rec createAtomConst (g_, (I.Const cid as h_)) =
+    let rec createAtomConst (g_, h_) =
+      let cid =
+        match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false
+      in
       let v_ = I.constType cid in
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (h_, s_), vs_)
@@ -131,13 +134,24 @@ end) : SPLIT with module State = Split__0.State' = struct
 
     let rec constCases = function
       | g_, vs_, [], sc -> ()
-      | g_, vs_, I.Const c :: sgn', sc ->
-          let u_, vs'_ = createAtomConst (g_, I.Const c) in
+      | g_, vs_, (I.Const c as h_) :: sgn', sc ->
+          let u_, vs'_ = createAtomConst (g_, h_) in
           let _ =
             Cs_manager.trail (function () ->
                 begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
                 end)
           in
+          constCases (g_, vs_, sgn', sc)
+      | g_, vs_, (I.Def c as h_) :: sgn', sc ->
+          let u_, vs'_ = createAtomConst (g_, h_) in
+          let _ =
+            Cs_manager.trail (function () ->
+                begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+                end)
+          in
+          constCases (g_, vs_, sgn', sc)
+      | g_, vs_, _ :: sgn', sc ->
+          (* Skip other head types *)
           constCases (g_, vs_, sgn', sc)
 
     let rec paramCases = function
@@ -152,11 +166,11 @@ end) : SPLIT with module State = Split__0.State' = struct
           paramCases (g_, vs_, k - 1, sc)
 
     let rec createEVarSub = function
-      | null_ -> I.id
+      | I.Null -> I.id
       | I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
           let s = createEVarSub g'_ in
           let v'_ = I.EClo (v_, s) in
-          let x_ = I.newEVar (I.null_, v'_) in
+          let x_ = I.newEVar (I.Null, v'_) in
           I.Dot (I.Exp x_, s)
 
     let rec blockName cid = I.conDecName (I.sgnLookup cid)
@@ -198,21 +212,21 @@ end) : SPLIT with module State = Split__0.State' = struct
 
     let rec splitEVar ((I.EVar (_, gx_, v_, _) as x_), w_, sc) =
       lowerSplit
-        ( I.null_,
+        ( I.Null,
           (v_, I.id),
           w_,
           function
           | u_ -> begin
-              if Unify.unifiable (I.null_, (x_, I.id), (u_, I.id)) then sc ()
+              if Unify.unifiable (I.Null, (x_, I.id), (u_, I.id)) then sc ()
               else ()
             end )
 
     let rec createSub = function
-      | null_ -> T.id
+      | I.Null -> T.id
       | I.Decl (psi_, T.UDec (I.Dec (xOpt, v1_))) ->
           let t' = createSub psi_ in
           let v1'_, s'_ = Whnf.whnf (v1_, T.coerceSub t') in
-          let x_ = I.newEVar (I.null_, I.EClo (v1'_, s'_)) in
+          let x_ = I.newEVar (I.Null, I.EClo (v1'_, s'_)) in
           T.Dot (T.Exp x_, t')
       | I.Decl (psi_, T.UDec (I.BDec (_, (l, s)))) ->
           let t' = createSub psi_ in
@@ -220,7 +234,7 @@ end) : SPLIT with module State = Split__0.State' = struct
           T.Dot (T.Block l_, t')
       | I.Decl (psi_, T.PDec (_, f_, tc1_, tc2_)) ->
           let t' = createSub psi_ in
-          let y_ = T.newEVarTC (I.null_, T.FClo (f_, t'), tc1_, tc2_) in
+          let y_ = T.newEVarTC (I.Null, T.FClo (f_, t'), tc1_, tc2_) in
           T.Dot (T.Prg y_, t')
 
     let rec mkCases = function
@@ -236,7 +250,7 @@ end) : SPLIT with module State = Split__0.State' = struct
         | (g_, i), (x_ :: xs_, f_, w_, sc) ->
             let _ =
               begin if !Global.chatter >= 6 then
-                print (("Split " ^ Print.expToString (I.null_, x_)) ^ ".\n")
+                print (("Split " ^ Print.expToString (I.Null, x_)) ^ ".\n")
               else ()
               end
             in

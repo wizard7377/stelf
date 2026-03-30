@@ -71,12 +71,12 @@ end) : ELIM with module State = Elim__0.State' = struct
       | T.PDec (name, f_, tc1_, tc2_) -> T.PDec (name, f_, tc1_, stripTCOpt tc2_)
 
     let rec strip = function
-      | null_ -> I.null_
+      | I.Null -> I.Null
       | I.Decl (psi_, d_) -> I.Decl (strip psi_, stripDec d_)
 
     let rec expand (S.Focus ((T.EVar (psi_, r, g_, v_, _, _) as y_), w_)) =
       let rec matchCtx = function
-        | null_, _, fs_ -> fs_
+        | I.Null, _, fs_ -> fs_
         | I.Decl (g_, T.PDec (x, f_, _, _)), n, fs_ ->
             matchCtx (g_, n + 1, Local (y_, n) :: fs_)
         | I.Decl (g_, T.UDec _), n, fs_ -> matchCtx (g_, n + 1, fs_)
@@ -105,7 +105,7 @@ end) : ELIM with module State = Elim__0.State' = struct
               let psi''_ = I.Decl (psi'_, d2_) in
               let y_ = T.newEVar (strip psi''_, T.forSub (g_, T.Shift 2)) in
               r := Some (T.LetPairExp (d1'_, d2_, T.Var n, y_))
-          | true_ ->
+          | True ->
               let y_ = T.newEVar (strip psi_, g_) in
               r := Some (T.LetUnit (T.Var n, y_))
           end

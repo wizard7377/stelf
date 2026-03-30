@@ -29,11 +29,11 @@ end) : STRICT = struct
     module I = IntSyn
 
     let rec patSpine = function
-      | _, nil_ -> true
-      | k, I.App (I.Root (I.BVar k', nil_), s_) ->
+      | _, I.Nil -> true
+      | k, I.App (I.Root (I.BVar k', I.Nil), s_) ->
           let rec indexDistinct = function
-            | nil_ -> true
-            | I.App (I.Root (I.BVar k'', nil_), s_) ->
+            | I.Nil -> true
+            | I.App (I.Root (I.BVar k'', I.Nil), s_) ->
                 k' <> k'' && indexDistinct s_
             | _ -> false
           in
@@ -50,9 +50,7 @@ end) : STRICT = struct
           match h_ with
           | I.BVar k' -> begin
               if k' = p then patSpine (k, s_)
-              else begin
-                if k' <= k then strictSpine (k, p, s_) else false
-              end
+              else k' <= k && strictSpine (k, p, s_)
             end
           | I.Const c -> strictSpine (k, p, s_)
           | I.Def d -> strictSpine (k, p, s_)
@@ -61,7 +59,7 @@ end) : STRICT = struct
       | k, p, I.FgnExp (cs, ops) -> false
 
     and strictSpine = function
-      | _, _, nil_ -> false
+      | _, _, I.Nil -> false
       | k, p, I.App (u_, s_) -> strictExp (k, p, u_) || strictSpine (k, p, s_)
 
     and strictDec (k, p, I.Dec (_, v_)) = strictExp (k, p, v_)
@@ -108,7 +106,7 @@ end) : STRICT = struct
         | (0, v_), occ -> ()
         | (i, I.Pi ((d_, p_), v_)), occ -> begin
             match Abstract.piDepend ((d_, p_), v_) with
-            | I.Pi ((d'_, maybe_), v_) -> oit ((i - 1, v_), Paths.body occ)
+            | I.Pi ((d'_, Maybe), v_) -> oit ((i - 1, v_), Paths.body occ)
             | _ ->
                 raise
                   (Error

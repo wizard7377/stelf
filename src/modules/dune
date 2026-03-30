@@ -2,7 +2,7 @@
 
 (library
  (name modules)
- (public_name twelf.modules)
+ (public_name stelf.modules)
  (modules modsyn modules_)
  (libraries global table lambda names paths typecheck basis)
  (flags
@@ -37,4 +37,4 @@
    Typecheck.Typecheck_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

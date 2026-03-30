@@ -72,14 +72,14 @@ end) : MTPINIT = struct
             init' (gb_, o1_, f1_, init' (gb_, o2_, f2_, ss_))
         | gb_, o_, (F.Ex _ as f'_), ss_ ->
             S.State (List.length ss_ + 1, gb_, (f_, of_), 1, o_, [], f'_) :: ss_
-        | gb_, o_, (true_ as f'_), ss_ ->
+        | gb_, o_, (True as f'_), ss_ ->
             S.State (List.length ss_ + 1, gb_, (f_, of_), 1, o_, [], f'_) :: ss_
       in
       begin
-        Names.varReset I.null_;
+        Names.varReset I.Null;
         begin
           MTPData.maxFill := 0;
-          init' ((I.null_, I.null_), of_, f_, [])
+          init' ((I.Null, I.Null), of_, f_, [])
         end
       end
   end

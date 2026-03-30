@@ -219,7 +219,7 @@ end) : CHECKING = struct
 
     and isParameterW (q_, us_) =
       try isUniversal (I.ctxLookup (q_, Whnf.etaContract (mkEClo us_)))
-      with eta_ -> isFreeEVar us_
+      with Whnf.Eta -> isFreeEVar us_
 
     and isFreeEVar = function
       | I.EVar (_, _, _, { contents = [] }), _ -> true
@@ -236,7 +236,7 @@ end) : CHECKING = struct
       | gq_, _ -> false
 
     and isAtomicS = function
-      | gq_, (nil_, _) -> true
+      | gq_, (I.Nil, _) -> true
       | gq_, (I.SClo (s_, s'), s'') -> isAtomicS (gq_, (s_, I.comp (s', s'')))
       | gq_, (I.App (u'_, s'_), s1') -> false
 
@@ -362,7 +362,7 @@ end) : CHECKING = struct
           sc ) -> begin
           if Subordinate.equiv (I.targetFam v'_, I.targetFam v1_) then
             let x_ = I.newEVar (g_, I.EClo (v1_, s1)) in
-            let sc' = function () -> isParameter (q_, x_) && sc () in
+            let sc' () = isParameter (q_, x_) && sc () in
             ltInstL
               ( (g_, q_),
                 d_,
@@ -402,7 +402,7 @@ end) : CHECKING = struct
           sc ) -> begin
           if Subordinate.equiv (I.targetFam v'_, I.targetFam v1_) then
             let x_ = I.newEVar (g_, I.EClo (v1_, s1)) in
-            let sc' = function () -> isParameter (q_, x_) && sc () in
+            let sc' () = isParameter (q_, x_) && sc () in
             leInstL
               ( (g_, q_),
                 d_,
@@ -895,7 +895,7 @@ end) : CHECKING = struct
       ltSpineRW (gq_, d_, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, k)
 
     and ltSpineRW = function
-      | gq_, d_, (us_, vs_), ((nil_, _), _), _, _ -> false
+      | gq_, d_, (us_, vs_), ((I.Nil, _), _), _, _ -> false
       | gq_, d_, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, k ->
           ltSpineR (gq_, d_, (us_, vs_), ((s_, I.comp (s', s'')), vs'_), sc, k)
       | ( gq_,
@@ -926,7 +926,7 @@ end) : CHECKING = struct
           k ) -> begin
           if Subordinate.equiv (I.targetFam v_, I.targetFam v1'_) then
             let x_ = I.newEVar (g_, I.EClo (v1'_, s1')) in
-            let sc' = function () -> isParameter (q_, x_) && sc () in
+            let sc' () = isParameter (q_, x_) && sc () in
             leR
               ( gq_,
                 d_,
@@ -1255,7 +1255,7 @@ end) : CHECKING = struct
       ltSpineLW (gq_, d_, d'_, usVs_, (ss'_, Whnf.whnf vs'_), p_)
 
     and ltSpineLW = function
-      | gq_, d_, d'_, usVs_, ((nil_, _), _), _ -> true
+      | gq_, d_, d'_, usVs_, ((I.Nil, _), _), _ -> true
       | gq_, d_, d'_, usVs_, ((I.SClo (s_, s'), s''), vs'_), p_ ->
           ltSpineL (gq_, d_, d'_, usVs_, ((s_, I.comp (s', s'')), vs'_), p_)
       | ( gq_,

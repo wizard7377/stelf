@@ -1,3 +1,0 @@
-test ../TEST/poplmark/sources.cfg
-test ../TEST/wiki-misc/linearlogic.cfg
-test ../TEST/wiki-misc/lily.cfg

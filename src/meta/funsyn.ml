@@ -265,26 +265,26 @@ end) : FUNSYN = struct
         | g_, [] -> g_
         | g_, d_ :: ds_ -> listToCtx' (I.Decl (g_, d_), ds_)
       in
-      listToCtx' (I.null_, gin_)
+      listToCtx' (I.Null, gin_)
 
     let rec ctxToList gin_ =
       let rec ctxToList' = function
-        | null_, g_ -> g_
+        | I.Null, g_ -> g_
         | I.Decl (g_, d_), g'_ -> ctxToList' (g_, d_ :: g'_)
       in
       ctxToList' (gin_, [])
 
     let rec union = function
-      | g_, null_ -> g_
+      | g_, I.Null -> g_
       | g_, I.Decl (g'_, d_) -> I.Decl (union (g_, g'_), d_)
 
     let rec makectx = function
-      | null_ -> I.null_
+      | I.Null -> I.Null
       | I.Decl (g_, Prim d_) -> I.Decl (makectx g_, d_)
       | I.Decl (g_, Block (CtxBlock (l, g'_))) -> union (makectx g_, g'_)
 
     let rec lfctxLength = function
-      | null_ -> 0
+      | I.Null -> 0
       | I.Decl (psi_, Prim _) -> lfctxLength psi_ + 1
       | I.Decl (psi_, Block (CtxBlock (_, g_))) ->
           lfctxLength psi_ + I.ctxLength g_
@@ -302,7 +302,7 @@ end) : FUNSYN = struct
       lfctxLFDec' (psi_, k)
 
     let rec dot1n = function
-      | null_, s -> s
+      | I.Null, s -> s
       | I.Decl (g_, _), s -> I.dot1 (dot1n (g_, s))
 
     let rec convFor = function
@@ -328,7 +328,7 @@ end) : FUNSYN = struct
       | _ -> false
 
     let rec ctxSub = function
-      | null_, s -> (I.null_, s)
+      | I.Null, s -> (I.Null, s)
       | I.Decl (g_, d_), s ->
           let g'_, s' = ctxSub (g_, s) in
           (I.Decl (g'_, I.decSub (d_, s')), I.dot1 s)
@@ -374,7 +374,7 @@ end) : FUNSYN = struct
        and     Psi |- w' : Psi1, LD\1   (w' is a weakening substitution)
        and     LD\1 is LD if LD is prim, and LD\1 = x:A if LD = G, x:A
    *)
-  (* lfctxDec' (Null, k')  should not occur by invariant *)
+  (* lfctxDec' (I.Null, k')  should not occur by invariant *)
   (* dot1n (G, s) = s'
 
        Invariant:

@@ -268,9 +268,9 @@ end) : THM with module ThmSyn = Thm__0.ThmSyn' = struct
       | o_ :: l_, p_, n -> argROrder (o_, p_, n) :: argROrderL (l_, p_, n)
 
     let rec argPredicate = function
-      | less_, o_, o'_ -> O.Less (o_, o'_)
-      | leq_, o_, o'_ -> O.Leq (o_, o'_)
-      | eq_, o_, o'_ -> O.Eq (o_, o'_)
+      | L.Less, o_, o'_ -> O.Less (o_, o'_)
+      | L.Leq, o_, o'_ -> O.Leq (o_, o'_)
+      | L.Eq, o_, o'_ -> O.Eq (o_, o'_)
 
     let rec installPredicate = function
       | _, [], _ -> ()
@@ -305,7 +305,7 @@ end) : THM with module ThmSyn = Thm__0.ThmSyn' = struct
       let rec exists' = function
         | x, [] -> false
         | x, None :: l_ -> exists' (x, l_)
-        | x, Some y :: l_ -> begin if x = y then true else exists' (x, l_) end
+        | x, Some y :: l_ -> x = y || exists' (x, l_)
       in
       let rec delete = function
         | x, ((a, p_) as aP) :: c_ -> begin

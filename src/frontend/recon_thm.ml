@@ -303,7 +303,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     type nonrec decs = ExtSyn.dec I.ctx
 
-    let null = I.null_
+    let null = IntSyn.Null
     let decl (g, d) = I.Decl (g, d)
 
     type nonrec labeldec = decs * decs
@@ -317,32 +317,32 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     let rec dec (name, t) = (name, t)
 
     let rec ctxAppend = function
-      | g_, I.Null -> g_
+      | g_, IntSyn.Null -> g_
       | g_, I.Decl (g'_, d_) -> I.Decl (ctxAppend (g_, g'_), d_)
 
     let rec ctxMap arg__1 arg__2 =
       begin match (arg__1, arg__2) with
-      | f, I.Null -> I.null_
+      | f, IntSyn.Null -> IntSyn.Null
       | f, I.Decl (g_, d_) -> I.Decl (ctxMap f g_, f d_)
       end
 
     let rec ctxBlockToString (g0_, (g1_, g2_)) =
-      let _ = Names.varReset I.null_ in
+      let _ = Names.varReset IntSyn.Null in
       let g0'_ = Names.ctxName g0_ in
       let g1'_ = Names.ctxLUName g1_ in
       let g2'_ = Names.ctxLUName g2_ in
-      (((Print.ctxToString (I.null_, g0'_) ^ "\n")
+      (((Print.ctxToString (IntSyn.Null, g0'_) ^ "\n")
        ^ begin match g1'_ with
-       | I.Null -> ""
+       | IntSyn.Null -> ""
        | _ -> ("some " ^ Print.ctxToString (g0'_, g1'_)) ^ "\n"
        end)
       ^ "pi ")
       ^ Print.ctxToString (ctxAppend (g0'_, g1'_), g2'_)
 
     let rec checkFreevars = function
-      | I.Null, (g1_, g2_), r -> ()
+      | IntSyn.Null, (g1_, g2_), r -> ()
       | g0_, (g1_, g2_), r ->
-          let _ = Names.varReset I.null_ in
+          let _ = Names.varReset IntSyn.Null in
           let g0'_ = Names.ctxName g0_ in
           let g1'_ = Names.ctxLUName g1_ in
           let g2'_ = Names.ctxLUName g2_ in
@@ -367,7 +367,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
           error
             ( r,
               (("Constraints remain in context block after term reconstruction:\n"
-               ^ ctxBlockToString (I.null_, (g1_, g2_)))
+               ^ ctxBlockToString (IntSyn.Null, (g1_, g2_)))
               ^ "\n")
               ^ Print.cnstrsToString c_ )
       in
@@ -398,11 +398,11 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
           I.ctxLength g' )
 
     let rec forallG (gbs, (t : thm -> thm)) (_ : thm) =
-      (t (gbs, I.null_, I.null_, 0) : thm)
+      (t (gbs, IntSyn.Null, IntSyn.Null, 0) : thm)
 
     let rec theoremToTheorem t =
-      let gbs, g, m_, k = t ([], I.null_, I.null_, 0) in
-      let _ = Names.varReset IntSyn.null_ in
+      let gbs, g, m_, k = t ([], IntSyn.Null, IntSyn.Null, 0) in
+      let _ = Names.varReset IntSyn.Null in
       let gBs_ = List.map abstractCtxPair gbs in
       let (T.JWithCtx (g_, _)) = T.recon (T.jwithctx (g, T.jnothing)) in
       L.ThDecl (gBs_, g_, m_, k)

@@ -158,7 +158,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     | _ -> false
 
   (* boundToString : bound -> string *)
-  let rec boundToString = function Some n -> Int.toString n | None -> "*"
+  let boundToString = function Some n -> Int.toString n | None -> "*"
 
   (* boundMin : bound * bound -> bound *)
   let rec boundMin = function
@@ -243,18 +243,18 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let _ =
       begin if !Global.chatter >= 3 then
         Msg.message
-          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.null_, a_))
+          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
           ^ ".\n")
       else ()
       end
     in
     let g =
-      Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
+      Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
     in
     let rec search () =
       AbsMachine.solve
         ( (g, IntSyn.id),
-          CompSyn.DProg (IntSyn.null_, IntSyn.null_),
+          CompSyn.DProg (IntSyn.Null, IntSyn.Null),
           function m_ -> raise (Solution m_) )
     in
     begin
@@ -276,7 +276,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
             end;
             finish m_
           end
-        with timeOut_ ->
+        with Filling.TimeOut ->
           raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
     end
 
@@ -300,13 +300,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let _ =
       begin if !Global.chatter >= 3 then
         Msg.message
-          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.null_, a_))
+          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
           ^ ".\n")
       else ()
       end
     in
     let g =
-      Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
+      Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
     in
     begin
       Cs_manager.reset ();
@@ -315,7 +315,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
           TimeLimit.timeLimit !Global.timeLimit
             (Timers.time Timers.solving AbsMachineSbt.solve)
             ( (g, IntSyn.id),
-              CompSyn.DProg (IntSyn.null_, IntSyn.null_),
+              CompSyn.DProg (IntSyn.Null, IntSyn.Null),
               function skel_ -> raise (SolutionSkel skel_) );
           raise (AbortQuery "No solution to %solve found")
         end
@@ -332,13 +332,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
                 Timers.time Timers.ptrecon PtRecon.solve
                   ( skel_,
                     (g, IntSyn.id),
-                    CompSyn.DProg (IntSyn.null_, IntSyn.null_),
+                    CompSyn.DProg (IntSyn.Null, IntSyn.Null),
                     function skel_, m_ -> raise (Solution m_) );
                 raise (AbortQuery "Proof reconstruction for %solve failed")
               end
             with Solution m_ -> finish m_
           end
-        with timeOut_ ->
+        with Filling.TimeOut ->
           raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
     end
   (* self timing *)
@@ -346,8 +346,8 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
 
   let rec solve args =
     begin match !Compile.optimize with
-    | indexing_ -> solveSbt args
-    | linearHeads_ -> solve' args
+    | CompSyn.Indexing -> solveSbt args
+    | CompSyn.LinearHeads -> solve' args
     | _ -> solve' args
     end
   (* solves A where program clauses are indexed using substitution trees
@@ -374,13 +374,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let _ =
       begin if !Global.chatter >= 3 then
         Msg.message
-          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.null_, a_))
+          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
           ^ ".\n")
       else ()
       end
     in
     let g =
-      Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
+      Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
     in
     let solutions = ref 0 in
     let rec scInit m_ =
@@ -429,25 +429,22 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     in
     let rec search () =
       AbsMachine.solve
-        ((g, IntSyn.id), CompSyn.DProg (IntSyn.null_, IntSyn.null_), scInit)
+        ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit)
     in
     begin
       begin if not (boundEq (try_, Some 0)) then begin
         Cs_manager.reset ();
-        begin try
-          try
-            TimeLimit.timeLimit !Global.timeLimit
-              (Timers.time Timers.solving search)
-              ()
-          with Done -> ()
-          (* printing is timed into solving! *)
-        with timeOut_ ->
-          raise (AbortQuery "\n----------- TIME OUT ---------------\n");
-          begin
-            Cs_manager.reset ();
-            checkSolutions (expected, try_, !solutions)
-          end
-        end
+        (try
+           try
+             TimeLimit.timeLimit !Global.timeLimit
+               (Timers.time Timers.solving search)
+               ()
+           with Done -> ()
+           (* printing is timed into solving! *)
+         with Filling.TimeOut ->
+           raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
+        Cs_manager.reset ();
+        checkSolutions (expected, try_, !solutions)
       end
       (* solve query if bound > 0 *)
       (* in case Done was raised *)
@@ -504,13 +501,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let _ =
       begin if !Global.chatter >= 3 then
         Msg.message
-          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.null_, a_))
+          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
           ^ ".\n")
       else ()
       end
     in
     let g =
-      Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
+      Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
     in
     let solutions = ref 0 in
     let rec scInit m_ =
@@ -540,7 +537,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
                 Timers.time Timers.ptrecon PtRecon.solve
                   ( m_,
                     (g, IntSyn.id),
-                    CompSyn.DProg (IntSyn.null_, IntSyn.null_),
+                    CompSyn.DProg (IntSyn.Null, IntSyn.Null),
                     function
                     | pskel, m_ -> begin
                         if !Global.chatter >= 3 then
@@ -573,24 +570,21 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     in
     let rec search () =
       AbsMachineSbt.solve
-        ((g, IntSyn.id), CompSyn.DProg (IntSyn.null_, IntSyn.null_), scInit)
+        ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit)
     in
     begin
       begin if not (boundEq (try_, Some 0)) then begin
         Cs_manager.reset ();
-        begin try
-          TimeLimit.timeLimit !Global.timeLimit
-            (Timers.time Timers.solving search)
-            ()
-        with Done -> (
-          try ()
-          with timeOut_ ->
-            raise (AbortQuery "\n----------- TIME OUT ---------------\n");
-            begin
-              Cs_manager.reset ();
-              checkSolutions (expected, try_, !solutions)
-            end)
-        end
+        (try
+           try
+             TimeLimit.timeLimit !Global.timeLimit
+               (Timers.time Timers.solving search)
+               ()
+           with Done -> ()
+         with Filling.TimeOut ->
+           raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
+        Cs_manager.reset ();
+        checkSolutions (expected, try_, !solutions)
       end
       (* solve query if bound > 0 *)
       (* printing is timed into solving! *)
@@ -632,8 +626,8 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (* %query <expected> <try> A or %query <expected> <try> X : A  *)
   let rec query args =
     begin match !Compile.optimize with
-    | indexing_ -> querySbt args
-    | linearHeads_ -> query' args
+    | CompSyn.Indexing -> querySbt args
+    | CompSyn.LinearHeads -> query' args
     | _ -> query' args
     end
   (* Execute query where program clauses are
@@ -663,13 +657,13 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     let _ =
       begin if !Global.chatter >= 3 then
         Msg.message
-          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.null_, a_))
+          (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
           ^ ".\n")
       else ()
       end
     in
     let g =
-      Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
+      Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
     in
     let solutions = ref 0 in
     let status = ref false in
@@ -700,7 +694,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
                   Timers.time Timers.ptrecon PtRecon.solve
                     ( o_,
                       (g, IntSyn.id),
-                      CompSyn.DProg (IntSyn.null_, IntSyn.null_),
+                      CompSyn.DProg (IntSyn.Null, IntSyn.Null),
                       function
                       | o_, m_ -> begin
                           if !Global.chatter >= 3 then
@@ -806,7 +800,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     let rec tabledSearch () =
       begin
         Tabled.solve
-          ((g, IntSyn.id), CompSyn.DProg (IntSyn.null_, IntSyn.null_), scInit);
+          ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit);
         begin
           Cs_manager.reset ();
           begin
@@ -827,7 +821,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
               TimeLimit.timeLimit !Global.timeLimit
                 (Timers.time Timers.solving tabledSearch)
                 ()
-            with timeOut_ ->
+            with Filling.TimeOut ->
               begin
                 Msg.message "\n----------- TIME OUT ---------------\n";
                 raise Done
@@ -944,7 +938,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           ReconQuery.queryToQuery (query_, Paths.Loc ("stdIn", Paths.Reg (0, 0)))
         in
         let g =
-          Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
+          Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
         in
         let rec scInit m_ =
           begin
@@ -990,9 +984,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
         begin try
           begin
             Timers.time Timers.solving AbsMachine.solve
-              ( (g, IntSyn.id),
-                CompSyn.DProg (IntSyn.null_, IntSyn.null_),
-                scInit );
+              ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit);
             Msg.message "No more solutions\n";
             qLoop ()
           end
@@ -1025,7 +1017,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           ReconQuery.queryToQuery (query_, Paths.Loc ("stdIn", Paths.Reg (0, 0)))
         in
         let g =
-          Timers.time Timers.compiling Compile.compileGoal (IntSyn.null_, a_)
+          Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
         in
         let _ = Tabled.reset () in
         let rec scInit o_ =
@@ -1081,9 +1073,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
         begin try
           begin
             Timers.time Timers.solving Tabled.solve
-              ( (g, IntSyn.id),
-                CompSyn.DProg (IntSyn.null_, IntSyn.null_),
-                scInit );
+              ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit);
             try loop ()
             with Completed ->
               begin if !solExists then Msg.message "No more solutions\n"

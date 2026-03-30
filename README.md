@@ -14,29 +14,36 @@ Of the goals, there are some more short and longer term ones that are listed her
 
 ### Short term goals
 
-- [ ] Get the Twelf/Stelf server as is working correctly
-- [ ] Get the testing infrastructure working, also add expected output and expected failure tests
+- [X] Get the Twelf/Stelf server as is working correctly
+- [X] Get the testing infrastructure working, also add expected output and expected failure tests
 - [ ] Change references of Twelf to Stelf
   
 ### Medium Term Goals
 
 - [ ] Port the wiki to a easier to use format (likely either `mld`, `typ`, `tex`, or some combination)
 - [ ] Port the documentation to odoc style
+- [ ] Make the server output nicer (add REPL, using `lambda-term`)
+- [ ] Reimplement the lexer and parser to be easier to understand and more efficient, preferably using `menhir`
 
 ### Long Term Goals
 
-- [ ] Reimplement the lexer and parser to be easier to understand and more efficient
-- [ ] Make the frontend OOP based, and make it more modular
-- [ ] Split up the concrete syntax and abstract syntax into completely different libraries (ie, one that deals with the internals and another that deals with parsing)
-- [ ] Make the server output nicer (add REPL)
-- [ ] Make better IDE support (Perhaps using LSP?)
-- [ ] [Future plans](./FUTURE.typ)
 
+- [ ] Split up the concrete syntax and abstract syntax into completely different libraries (ie, one that deals with the internals and another that deals with parsing)
+- [ ] Make better IDE support (Perhaps using LSP?)
+- [ ] Remove the `=` and `:` special syntax 
+- [ ] Add support for generics
+
+## Links
+
+- [Contributing](CONTRIBUTING.md)
+- [Style Guide](STYLE.md)
+- [License](LICENSE)
+- [Building](BUILD.md)
 
 ## Credits
 
 While I actually was the one to convert the project, a translator is nothing without a work to translate.
-As such, credit is in large part due to the original writers of the Twelf project; per the [README](old/README.md)
+As such, credit is in large part due to the original writers of the Twelf project; per the [README](twelf/README.md)
 
 ### Original Twelf Source Code
 

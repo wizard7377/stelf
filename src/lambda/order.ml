@@ -1,5 +1,7 @@
 (* # 1 "src/lambda/order.sig.ml" *)
 open! Basis
+(** Termination and reduction order declarations for LF constants. *)
+
 open Intsyn
 
 (* Termination Order *)
@@ -39,14 +41,38 @@ module type ORDER = sig
 
   (* Reduction declaration      *)
   val reset : unit -> unit
+  val reset_r_order : unit -> unit
+
   val resetROrder : unit -> unit
+  (** Compatibility alias for {!reset_r_order}. *)
+
   val install : IntSyn.cid * tDec -> unit
   val uninstall : IntSyn.cid -> bool
+  val install_r_order : IntSyn.cid * rDec -> unit
+
   val installROrder : IntSyn.cid * rDec -> unit
+  (** Compatibility alias for {!install_r_order}. *)
+
+  val uninstall_r_order : IntSyn.cid -> bool
+
   val uninstallROrder : IntSyn.cid -> bool
+  (** Compatibility alias for {!uninstall_r_order}. *)
+
+  val sel_lookup : IntSyn.cid -> int order
+
   val selLookup : IntSyn.cid -> int order
+  (** Compatibility alias for {!sel_lookup}. *)
+
+  val sel_lookup_r_order : IntSyn.cid -> predicate
+
   val selLookupROrder : IntSyn.cid -> predicate
+  (** Compatibility alias for {!sel_lookup_r_order}. *)
+
+  val mut_lookup : IntSyn.cid -> mutual
+
   val mutLookup : IntSyn.cid -> mutual
+  (** Compatibility alias for {!mut_lookup}. *)
+
   val closure : IntSyn.cid -> IntSyn.cid list
 end
 (* signature ORDER *)
@@ -102,91 +128,87 @@ end) : ORDER = struct
 
   (* Reduction declaration      *)
   (* RDec ::= (P, C)            *)
-  open! struct
-    module I = IntSyn
+  module I = IntSyn
 
-    let orderTable_ : tDec Table.table = Table.new_ 0
-    let redOrderTable_ : rDec Table.table = Table.new_ 0
-    let rec reset () = Table.clear orderTable_
-    let rec resetROrder () = Table.clear redOrderTable_
-    let rec install (cid, o_) = Table.insert orderTable_ (cid, o_)
+  let orderTable_ : tDec Table.table = Table.new_ 0
+  let redOrderTable_ : rDec Table.table = Table.new_ 0
+  let rec reset () = Table.clear orderTable_
+  let rec reset_r_order () = Table.clear redOrderTable_
+  let rec install (cid, o_) = Table.insert orderTable_ (cid, o_)
 
-    let rec uninstall cid =
-      begin match Table.lookup orderTable_ cid with
-      | None -> false
-      | Some _ -> begin
-          Table.delete orderTable_ cid;
-          true
-        end
+  let rec uninstall cid =
+    begin match Table.lookup orderTable_ cid with
+    | None -> false
+    | Some _ -> begin
+        Table.delete orderTable_ cid;
+        true
       end
+    end
 
-    let rec installROrder (cid, p_) = Table.insert redOrderTable_ (cid, p_)
+  let rec install_r_order (cid, p_) = Table.insert redOrderTable_ (cid, p_)
 
-    let rec uninstallROrder cid =
-      begin match Table.lookup redOrderTable_ cid with
-      | None -> false
-      | Some _ -> begin
-          Table.delete redOrderTable_ cid;
-          true
-        end
+  let rec uninstall_r_order cid =
+    begin match Table.lookup redOrderTable_ cid with
+    | None -> false
+    | Some _ -> begin
+        Table.delete redOrderTable_ cid;
+        true
       end
+    end
 
-    let rec lookup cid = Table.lookup orderTable_ cid
-    let rec lookupROrder cid = Table.lookup redOrderTable_ cid
+  let rec lookup cid = Table.lookup orderTable_ cid
+  let rec lookup_r_order cid = Table.lookup redOrderTable_ cid
 
-    let rec selLookup a =
-      begin match lookup a with
-      | None ->
-          raise
-            (Error
-               ("No termination order assigned for "
-               ^ I.conDecName (I.sgnLookup a)))
-      | Some (TDec (s_, _)) -> s_
+  let rec sel_lookup a =
+    begin match lookup a with
+    | None ->
+        raise
+          (Error
+             ("No termination order assigned for "
+             ^ I.conDecName (I.sgnLookup a)))
+    | Some (TDec (s_, _)) -> s_
+    end
+
+  let rec sel_lookup_r_order a =
+    begin match lookup_r_order a with
+    | None ->
+        raise
+          (Error
+             (("No reduction order assigned for " ^ I.conDecName (I.sgnLookup a))
+             ^ "."))
+    | Some (RDec (p_, _)) -> p_
+    end
+
+  let rec mutLookupROrder a =
+    begin match lookup_r_order a with
+    | None ->
+        raise
+          (Error
+             (("No order assigned for " ^ I.conDecName (I.sgnLookup a)) ^ "."))
+    | Some (RDec (_, m_)) -> m_
+    end
+
+  let rec mut_lookup a =
+    begin match lookup a with
+    | None ->
+        raise (Error ("No order assigned for " ^ I.conDecName (I.sgnLookup a)))
+    | Some (TDec (_, m_)) -> m_
+    end
+
+  let rec mutual a =
+    let rec mutual' = function
+      | Empty, a's -> a's
+      | Le (a, m_), a's -> mutual' (m_, a :: a's)
+      | Lt (a, m_), a's -> mutual' (m_, a :: a's)
+    in
+    mutual' (mut_lookup a, [])
+
+  let rec closure = function
+    | [], a2s -> a2s
+    | a :: a1s, a2s -> begin
+        if List.exists (function a' -> a = a') a2s then closure (a1s, a2s)
+        else closure (mutual a @ a1s, a :: a2s)
       end
-
-    let rec selLookupROrder a =
-      begin match lookupROrder a with
-      | None ->
-          raise
-            (Error
-               (("No reduction order assigned for "
-                ^ I.conDecName (I.sgnLookup a))
-               ^ "."))
-      | Some (RDec (p_, _)) -> p_
-      end
-
-    let rec mutLookupROrder a =
-      begin match lookupROrder a with
-      | None ->
-          raise
-            (Error
-               (("No order assigned for " ^ I.conDecName (I.sgnLookup a)) ^ "."))
-      | Some (RDec (_, m_)) -> m_
-      end
-
-    let rec mutLookup a =
-      begin match lookup a with
-      | None ->
-          raise
-            (Error ("No order assigned for " ^ I.conDecName (I.sgnLookup a)))
-      | Some (TDec (_, m_)) -> m_
-      end
-
-    let rec mutual a =
-      let rec mutual' = function
-        | Empty, a's -> a's
-        | Le (a, m_), a's -> mutual' (m_, a :: a's)
-        | Lt (a, m_), a's -> mutual' (m_, a :: a's)
-      in
-      mutual' (mutLookup a, [])
-
-    let rec closure = function
-      | [], a2s -> a2s
-      | a :: a1s, a2s -> begin
-          if List.exists (function a' -> a = a') a2s then closure (a1s, a2s)
-          else closure (mutual a @ a1s, a :: a2s)
-        end
-  end
 
   (* mutual a = a's
 
@@ -202,15 +224,21 @@ end) : ORDER = struct
        and include a1s and a2s.
     *)
   let reset = reset
-  let resetROrder = resetROrder
+  let reset_r_order = reset_r_order
+  let resetROrder = reset_r_order
   let install = install
   let uninstall = uninstall
-  let installROrder = installROrder
-  let uninstallROrder = uninstallROrder
-  let selLookup = selLookup
-  let selLookupROrder = selLookupROrder
-  let mutLookup = mutLookup
-  let closure = function a -> closure ([ a ], [])
+  let install_r_order = install_r_order
+  let installROrder = install_r_order
+  let uninstall_r_order = uninstall_r_order
+  let uninstallROrder = uninstall_r_order
+  let sel_lookup = sel_lookup
+  let selLookup = sel_lookup
+  let sel_lookup_r_order = sel_lookup_r_order
+  let selLookupROrder = sel_lookup_r_order
+  let mut_lookup = mut_lookup
+  let mutLookup = mut_lookup
+  let closure a = closure ([ a ], [])
 end
 
 (*! structure IntSyn' : INTSYN !*)

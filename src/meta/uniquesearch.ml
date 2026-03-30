@@ -94,16 +94,16 @@ end) : UNIQUESEARCH = struct
       | _ -> false
 
     let rec compose' = function
-      | null_, g_ -> g_
+      | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
     let rec shift = function
-      | null_, s -> s
+      | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
     let rec exists p_ k_ =
       let rec exists' = function
-        | null_ -> false
+        | I.Null -> false
         | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
       in
       exists' k_
@@ -117,14 +117,14 @@ end) : UNIQUESEARCH = struct
       | r, (I.Root (_, s_), s) -> occursInSpine (r, (s_, s))
       | r, (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
-      | r, (I.EVar (r', _, v'_, _), s) -> r = r' || occursInExp (r, (v'_, s))
+      | r, (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
       | r, (I.FgnExp (csid_, csfe), s) ->
           I.FgnExpStd.fold (csid_, csfe)
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
     and occursInSpine = function
-      | _, (nil_, _) -> false
+      | _, (I.Nil, _) -> false
       | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp (s', s)))
       | r, (I.App (u_, s_), s) ->
           occursInExp (r, (u_, s)) || occursInSpine (r, (s_, s))
@@ -332,7 +332,7 @@ end) : UNIQUESEARCH = struct
                 matchSig' (sgn', acc''')
           in
           let rec matchDProg = function
-            | null_, _, acc' -> matchSig' (Index.lookup (cidFromHead ha_), acc')
+            | I.Null, _, acc' -> matchSig' (Index.lookup (cidFromHead ha_), acc')
             | I.Decl (dPool', C.Dec (r, s, ha'_)), n, acc' -> begin
                 if eqHead (ha_, ha'_) then
                   let acc''' =

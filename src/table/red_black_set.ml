@@ -393,10 +393,7 @@ module RBSet : RBSET = struct
         | Red (e, left, right) -> ap' (e, left, right)
         | Black (e, left, right) -> ap' (e, left, right)
       and ap' (entry, left, right) =
-        begin if f entry then true
-        else begin
-          if ap left then true else ap right
-        end
+        begin if f entry then true else ap left || ap right
         end
       in
       ap dict
@@ -726,12 +723,12 @@ module RBSet : RBSET = struct
   let insertShadow = function
     | set -> ( function entry -> set := insertShadow (!set, entry))
 
-  let isEmpty = function ordSet -> isEmpty !ordSet
-  let last = function ordSet -> last !ordSet
-  let lookup = function ordSet -> ( function key -> lookup !ordSet key)
-  let clear = function ordSet -> ordSet := empty
+  let isEmpty ordSet = isEmpty !ordSet
+  let last ordSet = last !ordSet
+  let lookup ordSet key = lookup !ordSet key
+  let clear ordSet = ordSet := empty
   let app_internal_ = app
-  let app = function ordSet -> ( function f -> app_internal_ f !ordSet)
+  let app ordSet f = app_internal_ f !ordSet
 
   let update = function
     | ordSet -> (
@@ -741,9 +738,9 @@ module RBSet : RBSET = struct
             ordSet
           end)
 
-  let forall = function ordSet -> ( function f -> forall !ordSet f)
-  let exists = function ordSet -> ( function f -> exists !ordSet f)
-  let existsOpt = function ordSet -> ( function f -> existsOpt !ordSet f)
+  let forall ordSet f = forall !ordSet f
+  let exists ordSet f = exists !ordSet f
+  let existsOpt ordSet f = existsOpt !ordSet f
   let size s_ = setsize !s_
 
   let difference = function

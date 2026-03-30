@@ -162,7 +162,7 @@ end) : TOMEGAABSTRACT = struct
   (* G' |- iw : G     *)
   (* Psi0, G' |- B'' ctx *)
   (*      val P' = T.normalizePrg (P, s)  G' |- P' : F'  *)
-  let raisePrg = function g_, p_, f_ -> raisePrg (g_, (p_, I.id), f_)
+  let raisePrg (g_, p_, f_) = raisePrg (g_, (p_, I.id), f_)
   let raiseP = raiseP
   let raiseFor = raiseFor
   let raiseF = raiseF

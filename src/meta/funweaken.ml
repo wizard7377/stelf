@@ -30,7 +30,7 @@ end) : FUNWEAKEN = struct
     module I = IntSyn
 
     let rec strengthenPsi = function
-      | null_, s -> (I.null_, s)
+      | I.Null, s -> (I.Null, s)
       | I.Decl (psi_, F.Prim d_), s ->
           let psi'_, s' = strengthenPsi (psi_, s) in
           (I.Decl (psi'_, F.Prim (Weaken.strengthenDec (d_, s'))), I.dot1 s')

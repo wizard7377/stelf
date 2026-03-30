@@ -233,7 +233,7 @@ end) : MEMOTABLE = struct
     type nonrec bvar = int
     type nonrec bdepth = int
 
-    let rec cidFromHead = function I.Const c -> c | I.Def c -> c
+    let cidFromHead = function I.Const c -> c | I.Def c -> c
     let rec dotn = function 0, s -> s | i, s -> dotn (i - 1, I.dot1 s)
 
     let rec compose = function
@@ -564,7 +564,7 @@ end) : MEMOTABLE = struct
 
     let rec eqTerm = function
       | I.Root (h2_, s2_), ((I.Root (h_, s_) as t), rho1) -> begin
-          if eqHeads (h2_, h_) then eqSpine (s2_, (s_, rho1)) else false
+          eqHeads (h2_, h_) && eqSpine (s2_, (s_, rho1))
         end
       | t2_, (I.NVar n, rho1) -> begin
           match S.lookup rho1 n with
@@ -1047,7 +1047,7 @@ end) : MEMOTABLE = struct
 
   let answerCheck = answCheck
   let updateTable = updateTable
-  let tableSize = function () -> length !answList
+  let tableSize () = length !answList
 
   (* memberCtx ((G,V), G', n) = bool
 

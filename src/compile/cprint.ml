@@ -36,7 +36,7 @@ end) : CPRINT = struct
   open! CompSyn.CompSyn
 
   let rec compose = function
-    | null_, g_ -> g_
+    | IntSyn.Null, g_ -> g_
     | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose (g_, g'_), d_)
 
   (* goalToString (G, g) where G |- g  goal *)
@@ -111,13 +111,13 @@ end) : CPRINT = struct
   (* conDecToString (c, clause) printed representation of static clause *)
   let rec conDecToString = function
     | c, SClause r ->
-        let _ = Names.varReset IntSyn.null_ in
+        let _ = Names.varReset IntSyn.Null in
         let name = IntSyn.conDecName (IntSyn.sgnLookup c) in
         let l = String.size name in
         (name
         ^ begin if l > 6 then ":\n" else ":"
         end)
-        ^ clauseToString "\t" (IntSyn.null_, r)
+        ^ clauseToString "\t" (IntSyn.Null, r)
         ^ "\n"
     | c, Void -> Print.conDecToString (IntSyn.sgnLookup c) ^ "\n\n"
 

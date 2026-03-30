@@ -271,7 +271,7 @@ end) : UNIFY = struct
             ( invertHead (g_, h_, ss, rOccur),
               invertSpine (g_, (s_, s), ss, rOccur) )
       | g_, ((EVar (r, gx_, v_, cnstrs) as x_), s), ss, rOccur -> begin
-          if rOccur = r then raise NotInvertible
+          if rOccur == r then raise NotInvertible
           else begin
             if Whnf.isPatSub s then
               let w = weakenSub (g_, s, ss) in
@@ -355,7 +355,7 @@ end) : UNIFY = struct
             ( pruneHead (g_, h_, ss, rOccur),
               pruneSpine (g_, (s_, s), ss, rOccur) )
       | g_, ((EVar (r, gx_, v_, cnstrs) as x_), s), ss, rOccur -> begin
-          if rOccur = r then raise (Unify "Variable occurrence")
+          if rOccur == r then raise (Unify "Variable occurrence")
           else begin
             if Whnf.isPatSub s then
               let w = weakenSub (g_, s, ss) in
@@ -575,7 +575,7 @@ end) : UNIFY = struct
       | ( g_,
           (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1_),
           (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2_) ) -> begin
-          if r1 = r2 then begin
+          if r1 == r2 then begin
             if Whnf.isPatSub s1 then begin
               if Whnf.isPatSub s2 then
                 let s' = intersection (s1, s2) in
@@ -740,7 +740,7 @@ end) : UNIFY = struct
           LVar (r2, (Shift k2 as s2), (l2, t2)) ) -> begin
           if l1 <> l2 then raise (Unify "Label clash")
           else begin
-            if r1 = r2 then ()
+            if r1 == r2 then ()
             else begin
               unifySub (g_, comp (t1, s1), comp (t2, s2));
               begin if k1 < k2 then

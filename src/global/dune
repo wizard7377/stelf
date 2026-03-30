@@ -2,9 +2,9 @@
 
 (library
  (name global)
- (public_name twelf.global)
+ (public_name stelf.global)
  (modules global_)
  (libraries basis)
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

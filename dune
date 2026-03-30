@@ -2,11 +2,11 @@
 
 (library
  (name main)
- (public_name twelf.main)
+ (public_name stelf.main)
  (modules main)
  (libraries frontend basis)
  (flags
   (:standard -open Basis -open Frontend -open Frontend.Frontend_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

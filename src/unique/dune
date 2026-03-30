@@ -2,7 +2,7 @@
 
 (library
  (name unique)
- (public_name twelf.unique)
+ (public_name stelf.unique)
  (modules unique_)
  (libraries
   global
@@ -84,4 +84,4 @@
    Timing.Timing_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

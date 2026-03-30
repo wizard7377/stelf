@@ -22,9 +22,9 @@ structure Parsing =
   Parsing (structure Stream' = Stream
 	   structure Lexer' = Lexer);
 *)
-(* Re-export module type before Twelf name shadowing. *)
+(* Re-export module type before Stelf name shadowing. *)
 module type LEXER = Lexer.LEXER
-module type TWELF = Twelf_.TWELF
+module type STELF = Twelf_.STELF
 
 module ReconTerm = Recon_term.ReconTerm (struct
   (*! structure IntSyn' = IntSyn !*)
@@ -246,7 +246,7 @@ module Fquery = Fquery.Fquery (struct
   module Print = Print
 end)
 
-module Twelf = Twelf_.Twelf (struct
+module Stelf = Twelf_.Stelf (struct
   module Global = Global
   module Timers = Timers.Timers
 

@@ -211,7 +211,7 @@ end) : ORDER = struct
   let selLookup = selLookup
   let selLookupROrder = selLookupROrder
   let mutLookup = mutLookup
-  let closure = function a -> closure ([ a ], [])
+  let closure a = closure ([ a ], [])
 end
 
 (*! structure IntSyn' : INTSYN !*)

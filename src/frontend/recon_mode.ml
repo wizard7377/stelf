@@ -120,7 +120,7 @@ end) : RECON_MODE = struct
         in
         let _ = T.checkErrors r in
         let rec convertSpine = function
-          | nil_ -> M.Mnil
+          | I.Nil -> M.Mnil
           | I.App (u_, s_) ->
               let k =
                 try Whnf.etaContract u_
@@ -146,8 +146,8 @@ end) : RECON_MODE = struct
         end
 
       let rec toModedec t =
-        let _ = Names.varReset I.null_ in
-        let (a, mS), r = t (I.null_, I.null_) in
+        let _ = Names.varReset I.Null in
+        let (a, mS), r = t (I.Null, I.Null) in
         ((Some a, None, mS), r)
     end
 

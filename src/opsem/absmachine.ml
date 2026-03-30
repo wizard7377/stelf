@@ -51,7 +51,7 @@ end) : ABSMACHINE = struct
     module I = IntSyn
     module C = CompSyn
 
-    let rec cidFromHead = function I.Const a -> a | I.Def a -> a
+    let cidFromHead = function I.Const a -> a | I.Def a -> a
 
     let rec eqHead = function
       | I.Const a, I.Const a' -> a = a'
@@ -117,9 +117,18 @@ end) : ABSMACHINE = struct
           let x'_ = I.newAVar () in
           rSolve
             (ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
+      (* C.In is like C.And but for meta-level ("virtual") dependencies *)
+      | ps', (C.In (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
+          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          rSolve
+            ( ps',
+              (r, I.Dot (I.Exp x_, s)),
+              dp,
+              function
+              | s_ -> solve ((g, s), dp, function m_ -> sc (I.App (m_, s_))) )
 
     and aSolve = function
-      | (trivial_, s), dp, cnstr, sc -> begin
+      | (C.Trivial, s), dp, cnstr, sc -> begin
           if Assign.solveCnstr cnstr then sc () else ()
         end
       | ( (C.UnifyEq (g'_, e1, n_, eqns), s),

@@ -122,8 +122,8 @@ module IntSet : INTSET = struct
   type nonrec intset = rbt
 
   let empty = Empty
-  let insert = function x, t -> insert (t, x)
-  let member = function x, t -> lookup t x
+  let insert (x, t) = insert (t, x)
+  let member (x, t) = lookup t x
 
   let rec foldl f a t =
     let rec fo = function

@@ -105,7 +105,7 @@ end) : INFERENCE = struct
 
     let rec expand' = function
       | (g0_, b0_), (I.Null, I.Null), n ->
-          ((I.null_, I.null_), function (g'_, b'_), w' -> ((g'_, b'_), w'))
+          ((I.Null, I.Null), function (g'_, b'_), w' -> ((g'_, b'_), w'))
       | ( (g0_, b0_),
           (I.Decl (g_, (I.Dec (_, v_) as d_)), I.Decl (b_, (S.Lemma rl_ as t_))),
           n ) ->

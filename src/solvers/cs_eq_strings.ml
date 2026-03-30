@@ -162,7 +162,7 @@ end) : Cs.CS = struct
         end
       | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1_),
           (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2_) ) ->
-          r1 = r2 && sameSub (s1, s2)
+          r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
     and sameExp (us1_, us2_) = sameExpW (Whnf.whnf us1_, Whnf.whnf us2_)
@@ -264,7 +264,7 @@ end) : Cs.CS = struct
                           Root (FgnConst (cs, conDec), Nil),
                           _ )
                         :: l_ ) -> begin
-                        if r = r' then fromString (conDecName conDec)
+                        if r == r' then fromString (conDecName conDec)
                         else assign r l_
                       end
                     | r, _ :: l_ -> assign r l_
@@ -513,7 +513,7 @@ end) : Cs.CS = struct
 
        Invariant:
        If concat is normal
-       G |- U : V and U is the Twelf syntax conversion of concat
+       G |- U : V and U is the Stelf syntax conversion of concat
     *)
   (* catConcat (concat1, concat2) = concat3
 
@@ -636,7 +636,7 @@ end) : Cs.CS = struct
 
        Invariant:
        if fe is (MyIntsynRep concat) and concat : normal
-       then U is the Twelf syntax conversion of concat
+       then U is the Stelf syntax conversion of concat
     *)
   (* map (fe) f = U'
 

@@ -2,7 +2,7 @@
 
 (library
  (name order)
- (public_name twelf.order)
+ (public_name stelf.order)
  (modules order_)
  (libraries table lambda basis)
  (flags
@@ -21,4 +21,4 @@
    Lambda.Lambda_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

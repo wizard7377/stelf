@@ -1,7 +1,7 @@
 
 Library
-  (* Twelf stuff *)
-  structure Twelf
+  (* Stelf stuff *)
+  structure Stelf
   structure IntSyn 
   structure ClausePrint
   structure Timing
@@ -41,7 +41,7 @@ Library
 is
 
 
-  (* Twelf *)
+  (* Stelf *)
   ../../lambda/sources.cm
   ../../print/sources.cm
   ../../frontend/sources.cm

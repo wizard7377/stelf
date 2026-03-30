@@ -1,5 +1,5 @@
 (executable
  (name main)
- (public_name twelf.main)
+ (public_name stelf.main)
  (modules main)
- (libraries twelf))
+ (libraries stelf))

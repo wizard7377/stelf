@@ -59,7 +59,7 @@ end) : SKOLEM = struct
       let rec installSkolem' = function
         | d, (I.Pi ((d_, dp_), v_), mS), s, k -> begin
             match mS with
-            | M.Mapp (M.Marg (plus_, _), mS') ->
+            | M.Mapp (M.Marg (M.Plus, _), mS') ->
                 installSkolem'
                   ( d + 1,
                     (v_, mS'),
@@ -69,7 +69,7 @@ end) : SKOLEM = struct
                         k
                           (Abstract.piDepend
                              ((Whnf.normalizeDec (d_, s), I.Meta), v_)) )
-            | M.Mapp (M.Marg (minus_, _), mS') ->
+            | M.Mapp (M.Marg (M.Minus, _), mS') ->
                 let (I.Dec (_, v'_)) = d_ in
                 let v''_ = k (Whnf.normalize (v'_, s)) in
                 let name' = Names.skonstName (name ^ "#") in
@@ -91,7 +91,7 @@ end) : SKOLEM = struct
                 installSkolem'
                   (d, (v_, mS'), I.Dot (I.Exp (I.Root (h_, s_)), s), k)
           end
-        | _, (I.Uni _, mnil_), _, _ -> ()
+        | _, (I.Uni _, M.Mnil), _, _ -> ()
       in
       installSkolem' (0, (v_, mS), I.id, function v_ -> v_)
 

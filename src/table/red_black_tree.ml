@@ -313,7 +313,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
               oldEntry
             end)
 
-  let lookup = function table -> ( function key -> lookup !table key)
+  let lookup table key = lookup !table key
 
   let delete = function
     | table -> (
@@ -323,9 +323,9 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             ()
           end)
 
-  let clear = function table -> table := Empty
+  let clear table = table := Empty
   let app_internal_ = app
-  let app = function f -> ( function table -> app_internal_ f !table)
+  let app f table = app_internal_ f !table
 end
 (* functor RedBlackTree *)
 

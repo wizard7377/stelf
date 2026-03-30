@@ -2,7 +2,7 @@
 
 (library
  (name print)
- (public_name twelf.print)
+ (public_name stelf.print)
  (modules
   symbol
   clause_print
@@ -32,4 +32,4 @@
    Formatter.Formatter_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

@@ -1,5 +1,7 @@
 (* # 1 "src/lambda/lambda_.sig.ml" *)
 
+(** Top-level wiring for the core lambda subsystem modules. *)
+
 (* # 1 "src/lambda/lambda_.fun.ml" *)
 
 (* # 1 "src/lambda/lambda_.sml.ml" *)

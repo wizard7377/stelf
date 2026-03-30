@@ -281,7 +281,7 @@ end) : CS_MANAGER with module Fixity = CSManager__0.Fixity = struct
   end
 
   (* vacuous solver *)
-  (* Twelf unification as a constraint solver *)
+  (* Stelf unification as a constraint solver *)
   (* List of installed solvers *)
   (* Installing function *)
   (* install the specified solver *)

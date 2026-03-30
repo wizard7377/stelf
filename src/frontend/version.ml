@@ -20,7 +20,7 @@ module Version = struct
   let external_ = build_revision = "exported"
 
   let version_string =
-    (((((((("Twelf " ^ current_version) ^ maybe (not official) "+") ^ " (")
+    (((((((("Stelf " ^ current_version) ^ maybe (not official) "+") ^ " (")
         ^ maybe ((not external_) && not official) (("r" ^ build_revision) ^ ", ")
         )
        ^ "built ")

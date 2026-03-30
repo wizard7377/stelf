@@ -2,7 +2,7 @@
 
 (library
  (name m2)
- (public_name twelf.m2)
+ (public_name stelf.m2)
  (modules
   meta_global
   skolem
@@ -120,4 +120,4 @@
    Solvers.Solvers_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

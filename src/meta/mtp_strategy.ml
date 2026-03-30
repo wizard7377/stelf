@@ -88,7 +88,7 @@ end) : MTPSTRATEGY = struct
         end;
         begin if !Global.chatter > 4 then
           print
-            (("Statistics: required Twelf.Prover.maxFill := "
+            (("Statistics: required Stelf.Prover.maxFill := "
              ^ Int.toString !MTPData.maxFill)
             ^ "\n")
         else ()

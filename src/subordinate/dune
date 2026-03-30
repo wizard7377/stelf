@@ -2,7 +2,7 @@
 
 (library
  (name subordinate)
- (public_name twelf.subordinate)
+ (public_name stelf.subordinate)
  (modules intset subordinate_)
  (libraries global table lambda names basis)
  (flags
@@ -29,4 +29,4 @@
    Names.Names_))
  (wrapped true)
  (preprocess
-  (staged_pps ppx_import ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))
