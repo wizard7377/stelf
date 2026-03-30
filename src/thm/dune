@@ -2,7 +2,7 @@
 
 (library
  (name thm)
- (public_name twelf.thm)
+ (public_name stelf.thm)
  (modules thmsyn thmprint thm_)
  (libraries global lambda names formatter modes paths tabling basis)
  (flags

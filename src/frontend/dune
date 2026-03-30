@@ -2,7 +2,7 @@
 
 (library
  (name frontend)
- (public_name twelf.frontend)
+ (public_name stelf.frontend)
  (modules
   unknownexn
   unknownexn_smlnj

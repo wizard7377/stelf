@@ -107,7 +107,7 @@ struct
     and thus carry full types around everywhere.
 
     Fortunately, this weakened form of eta-expansion is all
-    we need to reconcile the discrepancy between what twelf
+    we need to reconcile the discrepancy between what stelf
     maintains as an invariant, and full eta-longness. *)
   let rec eta_expand_term arg__1 arg__2 arg__3 =
     begin match (arg__1, arg__2, arg__3) with
@@ -436,7 +436,7 @@ struct
              | x -> begin if x < omitted_args then S.Minus else S.Plus end ))
     end
 
-  (* Given a cid, return the ""ideal"" modes specified by twelf-
+  (* Given a cid, return the ""ideal"" modes specified by stelf-
      omitted arguments. It is cheating to really use these for
      compression: the resulting signature will not typecheck. *)
   let rec idealModes cid =

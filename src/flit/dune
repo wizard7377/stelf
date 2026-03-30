@@ -2,7 +2,7 @@
 
 (library
  (name flit)
- (public_name twelf.flit)
+ (public_name stelf.flit)
  (modules flit_old_smlnj_pack flit_)
  (libraries global table lambda names index paths print basis)
  (flags

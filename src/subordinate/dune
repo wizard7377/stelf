@@ -2,7 +2,7 @@
 
 (library
  (name subordinate)
- (public_name twelf.subordinate)
+ (public_name stelf.subordinate)
  (modules intset subordinate_)
  (libraries global table lambda names basis)
  (flags

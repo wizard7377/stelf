@@ -3,12 +3,12 @@ opam-version: "2.0"
 synopsis: "A short synopsis"
 description: "A longer description"
 maintainer: ["Maintainer Name <maintainer@example.com>"]
-authors: ["Author Name <author@example.com>"]
+authors: ["Asher Frost <author@example.com>"]
 license: "LICENSE"
 tags: ["add topics" "to describe" "your" "project"]
-homepage: "https://github.com/username/reponame"
+homepage: "https://github.com/wizard7377/stelf"
 doc: "https://url/to/documentation"
-bug-reports: "https://github.com/username/reponame/issues"
+bug-reports: "https://github.com/wizard7377/stelf/issues"
 depends: [
   "dune" {>= "3.20"}
   "ocaml" {>= "5.0.0"}
@@ -33,5 +33,5 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/username/reponame.git"
+dev-repo: "git+https://github.com/wizard7377/stelf.git"
 x-maintenance-intent: ["(latest)"]

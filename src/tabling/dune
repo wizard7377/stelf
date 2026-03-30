@@ -2,7 +2,7 @@
 
 (library
  (name tabling)
- (public_name twelf.tabling)
+ (public_name stelf.tabling)
  (modules tabledsyn tabled)
  (libraries table lambda print names paths index basis)
  (flags

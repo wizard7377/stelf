@@ -2,7 +2,7 @@
 
 (library
  (name print)
- (public_name twelf.print)
+ (public_name stelf.print)
  (modules
   symbol
   clause_print

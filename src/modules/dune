@@ -2,7 +2,7 @@
 
 (library
  (name modules)
- (public_name twelf.modules)
+ (public_name stelf.modules)
  (modules modsyn modules_)
  (libraries global table lambda names paths typecheck basis)
  (flags

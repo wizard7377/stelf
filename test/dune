@@ -7,7 +7,7 @@
 
 (test
  (name integration_runner)
- (libraries twelf alcotest basis integration)
+ (libraries stelf alcotest basis integration)
  (deps
   (source_tree ../examples)
   (source_tree ../examples_clp))
@@ -20,7 +20,7 @@
 
 (test
  (name unit_runner)
- (libraries twelf alcotest basis unit)
+ (libraries stelf alcotest basis unit)
  (deps
   (source_tree ../examples)
   (source_tree ../examples_clp))

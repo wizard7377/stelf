@@ -2,7 +2,7 @@
 
 (library
  (name msg)
- (public_name twelf.msg)
+ (public_name stelf.msg)
  (modules msg_)
  (libraries basis)
  (wrapped true)

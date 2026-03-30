@@ -2,7 +2,7 @@
 
 (library
  (name cover)
- (public_name twelf.cover)
+ (public_name stelf.cover)
  (modules total cover_)
  (libraries
   global

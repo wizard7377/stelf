@@ -3,7 +3,7 @@ open Basis
 open Timing_
 module Timing = Timing_.Timing
 
-(* Timers collecting statistics about Twelf *)
+(* Timers collecting statistics about Stelf *)
 (* Author: Frank Pfenning *)
 module type TIMERS = sig
   module Timing : TIMING
@@ -94,7 +94,7 @@ end
 (* # 1 "src/timing/timers.fun.ml" *)
 open! Timing_
 
-(* Timers collecting statistics about Twelf *)
+(* Timers collecting statistics about Stelf *)
 (* Author: Frank Pfenning *)
 module MakeTimers (Timers__0 : sig
   module Timing' : TIMING

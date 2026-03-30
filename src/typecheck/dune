@@ -2,7 +2,7 @@
 
 (library
  (name typecheck)
- (public_name twelf.typecheck)
+ (public_name stelf.typecheck)
  (modules typecheck_ strict)
  (libraries lambda print paths names basis)
  (flags

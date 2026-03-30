@@ -60,7 +60,7 @@ module FunPrint = FunPrint (struct
   module Names = Names
 end)
 
-(* moves eventually into the Twelf core *)
+(* moves eventually into the Stelf core *)
 module Weaken = Weaken.Make_Weaken (struct
   (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf
 end)

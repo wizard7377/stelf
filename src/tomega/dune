@@ -2,7 +2,7 @@
 
 (library
  (name tomega_lib)
- (public_name twelf.tomega)
+ (public_name stelf.tomega)
  (modules
   opsem
   converter

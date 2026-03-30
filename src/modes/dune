@@ -2,7 +2,7 @@
 
 (library
  (name modes)
- (public_name twelf.modes)
+ (public_name stelf.modes)
  (modules modesyn modetable modedec modecheck modeprint modes_)
  (libraries global table lambda formatter print names paths index basis)
  (flags

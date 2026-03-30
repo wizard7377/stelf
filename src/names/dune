@@ -2,7 +2,7 @@
 
 (library
  (name names)
- (public_name twelf.names)
+ (public_name stelf.names)
  (modules names_)
  (libraries table global lambda basis)
  (flags

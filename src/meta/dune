@@ -2,7 +2,7 @@
 
 (library
  (name meta)
- (public_name twelf.meta)
+ (public_name stelf.meta)
  (modules
   funsyn
   funnames

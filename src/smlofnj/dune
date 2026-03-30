@@ -1,4 +1,4 @@
 (library
  (name smlofnj)
- (public_name twelf.smlofnj)
+ (public_name stelf.smlofnj)
  (libraries basis))

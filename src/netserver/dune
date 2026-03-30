@@ -2,7 +2,7 @@
 
 (library
  (name netserver)
- (public_name twelf.netserver)
+ (public_name stelf.netserver)
  (modules netserver_)
  (libraries timing frontend msg basis)
  (flags

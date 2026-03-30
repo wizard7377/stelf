@@ -135,7 +135,7 @@ end) : PROVER = struct
   end
 
   (* DISCLAIMER: This functor is temporary. Its purpose is to
-       connect the new prover to Twelf  (see also functor below) *)
+       connect the new prover to Stelf  (see also functor below) *)
   (* List of open states *)
   (* List of solved states *)
   (* last case: no existentials---order must be trivial *)

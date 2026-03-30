@@ -857,7 +857,7 @@ end) : Cs.CS = struct
   (* * : wordXX -> wordXX -> wordXX -> type *)
   (* / : wordXX -> wordXX -> wordXX -> type *)
   (* constant ID's of the proof object generators and their proof objects *)
-  (* (these are used as workaround for the lack of sigma types in Twelf)  *)
+  (* (these are used as workaround for the lack of sigma types in Stelf)  *)
   (* prove+ : {U}{V}{W} + U V W -> type *)
   (* prove* : {U}{V}{W} * U V W -> type *)
   (* prove/ : {U}{V}{W} / U V W -> type *)
@@ -903,7 +903,7 @@ end) : Cs.CS = struct
   (* toExp t = U
 
        Invariant:
-       G |- U : V and U is the Twelf syntax conversion of t
+       G |- U : V and U is the Stelf syntax conversion of t
     *)
   (* fst (S, s) = U1, the first argument in S[s] *)
   (* snd (S, s) = U2, the second argument in S[s] *)

@@ -2,7 +2,7 @@
 
 (library
  (name paths)
- (public_name twelf.paths)
+ (public_name stelf.paths)
  (modules origins paths_)
  (libraries lambda global table basis)
  (flags

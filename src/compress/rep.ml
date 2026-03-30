@@ -120,9 +120,9 @@ end
 (*
 fun autoCompress n modeFinder =
     let
-	val rep = Twelf.Names.lookup ""represents""
-	val rep_z = Twelf.Names.lookup ""represents_z""
-	val rep_s = Twelf.Names.lookup ""represents_s"" 
+	val rep = Stelf.Names.lookup ""represents""
+	val rep_z = Stelf.Names.lookup ""represents_z""
+	val rep_s = Stelf.Names.lookup ""represents_s"" 
     in
 	Compress.sgnReset();
 	Compress.sgnAutoCompressUpTo(n)

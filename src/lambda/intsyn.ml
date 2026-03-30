@@ -542,7 +542,7 @@ end) : INTSYN = struct
     | Shift n, Shift m -> Shift (n + m)
     | Dot (ft_, s), s' -> Dot (frontSub (ft_, s'), comp (s, s'))
   (* Sat Feb 14 10:15:16 1998 -fp *)
-  (* roughly 15% on standard suite for Twelf 1.1 *)
+  (* roughly 15% on standard suite for Stelf 1.1 *)
   (* next line is an optimization *)
 
   and bvarSub = function
@@ -638,7 +638,7 @@ end) : INTSYN = struct
      If s patsub then s' patsub
   *)
   (* first line is an optimization *)
-  (* roughly 15% on standard suite for Twelf 1.1 *)
+  (* roughly 15% on standard suite for Stelf 1.1 *)
   (* Sat Feb 14 10:16:16 1998 -fp *)
   let rec dot1 = function Shift 0 as s -> s | s -> Dot (Idx 1, comp (s, shift))
 

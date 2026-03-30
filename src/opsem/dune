@@ -2,7 +2,7 @@
 
 (library
  (name opsem)
- (public_name twelf.opsem)
+ (public_name stelf.opsem)
  (modules
   table_param
   abstract_tabled

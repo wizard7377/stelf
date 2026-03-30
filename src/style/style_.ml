@@ -418,7 +418,7 @@ end) : STYLECHECK = struct
   (* checkAll () = L
 
        Invariant:
-       L is a list of  strings (error messages) computed from the entire Twelf signature
+       L is a list of  strings (error messages) computed from the entire Stelf signature
     *)
   let checkConDec = function
     | c -> begin

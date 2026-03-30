@@ -2,7 +2,7 @@
 
 (library
  (name heuristic)
- (public_name twelf.heuristic)
+ (public_name stelf.heuristic)
  (modules heuristic_ heuristic_sum)
  (libraries basis)
  (wrapped true)

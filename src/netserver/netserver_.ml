@@ -20,7 +20,7 @@ module type NETSERVER = sig
   val setExamplesDir : string -> unit
 end
 
-(* filesystem directory where twelf examples are kept *)
+(* filesystem directory where stelf examples are kept *)
 (* signature SERVER *)
 module NetServer : NETSERVER = struct
   let rec join arg__1 arg__2 =
@@ -130,7 +130,7 @@ module NetServer : NETSERVER = struct
       try
         begin
           OS.FileSys.chDir ((Option.valOf !examplesDir ^ "/") ^ e);
-          Twelf.make "sources.cfg"
+          Stelf.make "sources.cfg"
         end
       with e -> raise (Error (("Exception " ^ exnName e) ^ " raised."))
     else raise (Error ("Unknown example " ^ quote e))
@@ -149,9 +149,9 @@ module NetServer : NETSERVER = struct
     | [] -> error "Missing example"
     | ts -> error "Extraneous arguments"
 
-  (* Setting Twelf parameters *)
+  (* Setting Stelf parameters *)
   let rec setParm = function
-    | "chatter" :: ts -> Twelf.chatter := getNat ts
+    | "chatter" :: ts -> Stelf.chatter := getNat ts
     | t :: ts -> error ("Unknown parameter " ^ quote t)
     | [] -> error "Missing parameter"
 
@@ -163,10 +163,10 @@ module NetServer : NETSERVER = struct
       end
     | conn, ("set", args) -> begin
         setParm (String.tokens Char.isSpace args);
-        Twelf.Ok
+        Stelf.Ok
       end
-    | conn, ("readDecl", args) -> Twelf.loadString args
-    | conn, ("decl", args) -> Twelf.decl args
+    | conn, ("readDecl", args) -> Stelf.loadString args
+    | conn, ("decl", args) -> Stelf.decl args
     | conn, ("example", args) ->
         serveExample (getExample (String.tokens Char.isSpace args))
     | conn, (t, args) -> raise (Error ("Unrecognized command " ^ quote t))
@@ -178,11 +178,11 @@ module NetServer : NETSERVER = struct
       with Error s ->
         begin
           Msg.message (("Server Error: " ^ s) ^ "\n");
-          Twelf.Abort
+          Stelf.Abort
         end
     with
-    | Twelf.Ok -> Msg.message "%%% OK %%%\n"
-    | Twelf.Abort -> Msg.message "%%% ABORT %%%\n"
+    | Stelf.Ok -> Msg.message "%%% OK %%%\n"
+    | Stelf.Abort -> Msg.message "%%% ABORT %%%\n"
     end
 
   let rec stripcr s =

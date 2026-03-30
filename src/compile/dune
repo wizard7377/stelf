@@ -2,7 +2,7 @@
 
 (library
  (name compile)
- (public_name twelf.compile)
+ (public_name stelf.compile)
  (modules compSyn cprint subtree assign compile_)
  (libraries
   global

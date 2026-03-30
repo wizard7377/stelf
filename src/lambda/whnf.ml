@@ -464,7 +464,7 @@ module Whnf () : WHNF = struct
                otherwise X = X' and no effect occurs.
     *)
   (* It is not clear if this case can happen *)
-  (* pre-Twelf 1.2 code walk, Fri May  8 11:05:08 1998 *)
+  (* pre-Stelf 1.2 code walk, Fri May  8 11:05:08 1998 *)
   (* whnfRoot ((H, S), s) = (U', s')
 
        Invariant:
@@ -508,7 +508,7 @@ module Whnf () : WHNF = struct
          Advantage: in unify, abstract... the spine needn't be treated under id, but under s
     *)
   (* simple optimization (C@S)[id] = C@S[id] *)
-  (* applied in Twelf 1.1 *)
+  (* applied in Stelf 1.1 *)
   (* Sat Feb 14 20:53:08 1998 -fp *)
   (*      | whnf (Us as (Root _, Shift (0))) = Us*)
   (* commented out, because non-strict definitions slip
@@ -587,7 +587,7 @@ module Whnf () : WHNF = struct
     *)
   (* s = id *)
   (* dead code -fp *)
-  (* pre-Twelf 1.2 code walk Fri May  8 11:37:18 1998 *)
+  (* pre-Stelf 1.2 code walk Fri May  8 11:37:18 1998 *)
   (* not any more --cs Wed Jun 19 13:59:56 EDT 2002 *)
   (* changed to obtain pattern substitution if possible *)
   (* Sat Dec  7 16:58:09 2002 -fp *)

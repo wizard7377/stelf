@@ -2,7 +2,7 @@
 
 (library
  (name formatter)
- (public_name twelf.formatter)
+ (public_name stelf.formatter)
  (modules formatter_)
  (libraries basis)
  (wrapped true)

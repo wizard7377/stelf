@@ -181,7 +181,7 @@ end) : NAMES = struct
   (*
      Unprintable is raised when trying to resolve the names
      of unnamed variables.  Usually, this signals an error
-     in Twelf; the only exception is the use of anonymous
+     in Stelf; the only exception is the use of anonymous
      bound variables [_] or {_} in the source.
   *)
   exception Unprintable

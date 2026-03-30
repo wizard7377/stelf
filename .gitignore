@@ -395,3 +395,4 @@ test.elf
 
 .claude
 build/
+.remember

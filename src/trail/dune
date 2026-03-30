@@ -2,7 +2,7 @@
 
 (library
  (name trail)
- (public_name twelf.trail)
+ (public_name stelf.trail)
  (modules trail_ notrail)
  (libraries basis)
  (wrapped true)

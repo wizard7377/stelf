@@ -3,19 +3,19 @@ open! Basis
 type make_result = Ok | Abort | Exn of exn
 
 let () = Printexc.record_backtrace true
-let _ = Frontend.Frontend_.Twelf.chatter := 0
+let _ = Frontend.Frontend_.Stelf.chatter := 0
 
 let run_make ~unsafe file =
-  let previous_unsafe = !Frontend.Frontend_.Twelf.unsafe in
-  Frontend.Frontend_.Twelf.unsafe := unsafe;
+  let previous_unsafe = !Frontend.Frontend_.Stelf.unsafe in
+  Frontend.Frontend_.Stelf.unsafe := unsafe;
   let result =
     try
-      match Frontend.Frontend_.Twelf.make file with
-      | Frontend.Frontend_.Twelf.Ok -> Ok
-      | Frontend.Frontend_.Twelf.Abort -> Abort
+      match Frontend.Frontend_.Stelf.make file with
+      | Frontend.Frontend_.Stelf.Ok -> Ok
+      | Frontend.Frontend_.Stelf.Abort -> Abort
     with exn -> Exn exn
   in
-  Frontend.Frontend_.Twelf.unsafe := previous_unsafe;
+  Frontend.Frontend_.Stelf.unsafe := previous_unsafe;
   result
 
 let fail_if ?(should_fail = false) phase file = function
@@ -35,9 +35,9 @@ let fail_if ?(should_fail = false) phase file = function
       if should_fail then () else Alcotest.fail msg
 
 let run_case ~unsafe ~success file =
-  Frontend.Frontend_.Twelf.doubleCheck := false;
+  Frontend.Frontend_.Stelf.doubleCheck := false;
   fail_if ~should_fail:(not success) "check" file (run_make ~unsafe file);
-  Frontend.Frontend_.Twelf.doubleCheck := true;
+  Frontend.Frontend_.Stelf.doubleCheck := true;
   fail_if ~should_fail:(not success) "double-check" file (run_make ~unsafe file)
 
 let test ?(unsafe = false) ?(success = true) ?title file =

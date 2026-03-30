@@ -2,7 +2,7 @@
 
 (library
  (name index)
- (public_name twelf.index)
+ (public_name stelf.index)
  (modules index_skolem index_)
  (libraries lambda table global basis)
  (flags

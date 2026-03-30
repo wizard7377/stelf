@@ -294,30 +294,30 @@ let abstract_cases =
 (* 5. Coverage checker integration (mini end-to-end)                   *)
 (* ──────────────────────────────────────────────────────────────────── *)
 
-(** These tests load minimal .cfg/.elf files through the Twelf frontend,
+(** These tests load minimal .cfg/.elf files through the Stelf frontend,
     isolating the specific phases that fail. *)
 
 let () = Printexc.record_backtrace true
-let _ = Frontend.Frontend_.Twelf.chatter := 0
+let _ = Frontend.Frontend_.Stelf.chatter := 0
 
-(** Run Twelf.make on a file and return whether it succeeded *)
+(** Run Stelf.make on a file and return whether it succeeded *)
 let twelf_make ?(unsafe = false) file =
-  let prev_unsafe = !Frontend.Frontend_.Twelf.unsafe in
-  Frontend.Frontend_.Twelf.unsafe := unsafe;
+  let prev_unsafe = !Frontend.Frontend_.Stelf.unsafe in
+  Frontend.Frontend_.Stelf.unsafe := unsafe;
   let result =
     try
-      match Frontend.Frontend_.Twelf.make file with
-      | Frontend.Frontend_.Twelf.Ok -> `Ok
-      | Frontend.Frontend_.Twelf.Abort -> `Abort
+      match Frontend.Frontend_.Stelf.make file with
+      | Frontend.Frontend_.Stelf.Ok -> `Ok
+      | Frontend.Frontend_.Stelf.Abort -> `Abort
     with exn -> `Exn exn
   in
-  Frontend.Frontend_.Twelf.unsafe := prev_unsafe;
+  Frontend.Frontend_.Stelf.unsafe := prev_unsafe;
   result
 
 let test_debruijn1_no_doublecheck () =
   (* After fixing trans.elf (removing explicit {E : exp -> exp} quantification),
      debruijn1/test.cfg now passes without doubleCheck. *)
-  Frontend.Frontend_.Twelf.doubleCheck := false;
+  Frontend.Frontend_.Stelf.doubleCheck := false;
   let result = twelf_make "examples/compile/debruijn1/test.cfg" in
   match result with
   | `Ok -> Alcotest.(check pass) "debruijn1 passes without doubleCheck" () ()
@@ -331,7 +331,7 @@ let test_cut_elim_no_doublecheck () =
   (* Test 010 passes without doubleCheck but fails with it.
      This confirms the bug is in the doubleCheck validation path,
      not in the core coverage algorithm. *)
-  Frontend.Frontend_.Twelf.doubleCheck := false;
+  Frontend.Frontend_.Stelf.doubleCheck := false;
   let result = twelf_make "examples/cut_elim/test.cfg" in
   match result with
   | `Ok -> Alcotest.(check pass) "cut_elim passes without doubleCheck" () ()
@@ -344,7 +344,7 @@ let test_cut_elim_no_doublecheck () =
 let test_cut_elim_with_doublecheck () =
   (* cut_elim now passes with doubleCheck — the abstract function
      gracefully handles type-check failures from coverage splitting. *)
-  Frontend.Frontend_.Twelf.doubleCheck := true;
+  Frontend.Frontend_.Stelf.doubleCheck := true;
   let result = twelf_make "examples/cut_elim/test.cfg" in
   match result with
   | `Ok -> Alcotest.(check pass) "cut_elim passes with doubleCheck" () ()
@@ -354,7 +354,7 @@ let test_cut_elim_with_doublecheck () =
 let test_lp_coverage_no_doublecheck () =
   (* Test 016 (lp with unsafe) passes without doubleCheck.
      This confirms the core logic works. *)
-  Frontend.Frontend_.Twelf.doubleCheck := false;
+  Frontend.Frontend_.Stelf.doubleCheck := false;
   let result = twelf_make ~unsafe:true "examples/lp/test.cfg" in
   match result with
   | `Ok -> Alcotest.(check pass) "lp passes without doubleCheck" () ()
@@ -367,7 +367,7 @@ let test_lp_coverage_no_doublecheck () =
 let test_lp_coverage_with_doublecheck () =
   (* lp now passes with doubleCheck — the abstract function
      gracefully handles type-check failures from coverage splitting. *)
-  Frontend.Frontend_.Twelf.doubleCheck := true;
+  Frontend.Frontend_.Stelf.doubleCheck := true;
   let result = twelf_make ~unsafe:true "examples/lp/test.cfg" in
   match result with
   | `Ok -> Alcotest.(check pass) "lp passes with doubleCheck" () ()
@@ -377,7 +377,7 @@ let test_lp_coverage_with_doublecheck () =
 let test_crary_explicit_coverage () =
   (* Tests 021/022 fail with coverage errors in explicit context examples.
      These are the simplest of the coverage failures. *)
-  Frontend.Frontend_.Twelf.doubleCheck := false;
+  Frontend.Frontend_.Stelf.doubleCheck := false;
   let result = twelf_make "examples/crary/explicit/excon.cfg" in
   match result with
   | `Ok -> Alcotest.(check pass) "crary/explicit passes coverage" () ()
@@ -401,15 +401,15 @@ let test_crary_explicit_coverage () =
 
 let twelf_load_file file =
   try
-    match Frontend.Frontend_.Twelf.loadFile file with
-    | Frontend.Frontend_.Twelf.Ok -> `Ok
-    | Frontend.Frontend_.Twelf.Abort -> `Abort
+    match Frontend.Frontend_.Stelf.loadFile file with
+    | Frontend.Frontend_.Stelf.Ok -> `Ok
+    | Frontend.Frontend_.Stelf.Abort -> `Abort
   with exn -> `Exn exn
 
 let test_debruijn1_prereqs_ok () =
   (* The prerequisite files (mini-ml, debruijn, trans, feval, eval)
      should all load successfully. This isolates the failure to map-eval.elf. *)
-  Frontend.Frontend_.Twelf.doubleCheck := false;
+  Frontend.Frontend_.Stelf.doubleCheck := false;
   let result = twelf_make "examples/compile/debruijn1/prereqs.cfg" in
   match result with
   | `Ok -> Alcotest.(check pass) "prereqs load OK" () ()
@@ -423,7 +423,7 @@ let test_map_eval_type_mismatch () =
   (* After fixing trans.elf (removing explicit {E : exp -> exp} quantification
      from tr_lam), map-eval.elf now loads successfully.
      Load prerequisites, then load map-eval.elf separately. *)
-  Frontend.Frontend_.Twelf.doubleCheck := false;
+  Frontend.Frontend_.Stelf.doubleCheck := false;
   (* First load prerequisites via make (which resets) *)
   let prereq_result = twelf_make "examples/compile/debruijn1/prereqs.cfg" in
   (match prereq_result with

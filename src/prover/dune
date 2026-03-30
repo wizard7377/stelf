@@ -2,7 +2,7 @@
 
 (library
  (name prover)
- (public_name twelf.prover)
+ (public_name stelf.prover)
  (modules
   state
   psearch

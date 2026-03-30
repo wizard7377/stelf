@@ -2,7 +2,7 @@
 
 (library
  (name terminate)
- (public_name twelf.terminate)
+ (public_name stelf.terminate)
  (modules checking reduces terminate_)
  (libraries
   global

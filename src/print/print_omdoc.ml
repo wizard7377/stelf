@@ -140,8 +140,8 @@ end) : PRINT_OMDOC = struct
       | g_, I.FgnConst (csid, conDec_) -> sexp [ str_ "FgnConst" ]
 
     let rec fmtUni = function
-      | I.Type -> str_ "<om:OMS cd=\"twelf\" name=\"type\"/>"
-      | I.Kind -> str_ "<om:OMS cd=\"twelf\" name=\"kind\"/>"
+      | I.Type -> str_ "<om:OMS cd=\"stelf\" name=\"type\"/>"
+      | I.Kind -> str_ "<om:OMS cd=\"stelf\" name=\"kind\"/>"
 
     let rec fmtExpW = function
       | g_, (I.Uni l_, s), _ -> sexp [ fmtUni l_ ]
@@ -169,7 +169,7 @@ end) : PRINT_OMDOC = struct
                 [
                   str_ "<om:OMA>";
                   nl_ind ();
-                  str_ "<om:OMS cd=\"twelf\" name=\"arrow\"/>";
+                  str_ "<om:OMS cd=\"stelf\" name=\"arrow\"/>";
                   nl ();
                   fmtExp (g_, (v1_, s), 0);
                   nl ();
@@ -260,7 +260,7 @@ end) : PRINT_OMDOC = struct
 
     and fmtBinder (binder, varname, varid, typ_, body_) =
       (((((((((((((((((((((((("<om:OMBIND>" ^ nl_ind ())
-                            ^ "<om:OMS cd=\"twelf\" name=\"")
+                            ^ "<om:OMS cd=\"stelf\" name=\"")
                            ^ binder)
                           ^ "\"/>")
                          ^ nl ())
@@ -272,7 +272,7 @@ end) : PRINT_OMDOC = struct
                               encoding=\"application/omdoc+xml\">"
                            ^ "<presentation for=\"#")
                            ^ varid)
-                          ^ "\"><use format=\"twelf\">")
+                          ^ "\"><use format=\"stelf\">")
                          ^ varname)
                         ^ "</use></presentation>")
                         ^ "</om:OMFOREIGN></om:OMATP>"
@@ -280,7 +280,7 @@ end) : PRINT_OMDOC = struct
                       end)
                      ^ "<om:OMATP>")
                     ^ nl ())
-                   ^ "<om:OMS cd=\"twelf\" name=\"oftype\"/>")
+                   ^ "<om:OMS cd=\"stelf\" name=\"oftype\"/>")
                   ^ nl ())
                  ^ typ_)
                 ^ nl ())
@@ -298,7 +298,7 @@ end) : PRINT_OMDOC = struct
 
     and fmtSymbol (name, v_, imp) =
       ((((((((("<symbol name=\"" ^ name) ^ "\">") ^ nl_ind ())
-           ^ "<type system=\"twelf\">")
+           ^ "<type system=\"stelf\">")
           ^ nl_ind ())
          ^ fmtExpTop (I.Null, (v_, I.id), imp))
         ^ nl_unind ())
@@ -338,7 +338,7 @@ end) : PRINT_OMDOC = struct
       let bracString = " bracket-style=\"lisp\" lbrack=\"(\" rbrack=\")\"" in
       let sepString = " separator=\" \"" in
       let implicitString = (" implicit=\"" ^ Int.toString imp) ^ "\"" in
-      let useString1 = "<use format=\"twelf\"" in
+      let useString1 = "<use format=\"stelf\"" in
       let useString2 =
         (">" ^ escape (I.conDecName (I.sgnLookup cid))) ^ "</use>"
       in
@@ -369,7 +369,7 @@ end) : PRINT_OMDOC = struct
       begin if fixity = Names.Fixity.Nonfix then ""
       else
         ((((((((((nl () ^ "<private for=\"#") ^ name_ cid) ^ "\">") ^ nl_ind ())
-             ^ "<data format=\"twelf\"><![CDATA[")
+             ^ "<data format=\"stelf\"><![CDATA[")
             ^ Names.Fixity.toString fixity)
            ^ " ")
           ^ name)

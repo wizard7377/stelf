@@ -1133,7 +1133,7 @@ end) : ABSTRACTTABLED = struct
        where P' = Maybe if D occurs in V, P' = No otherwise
     *)
   (* optimize to have fewer traversals? -cs *)
-  (* pre-Twelf 1.2 code walk Fri May  8 11:17:10 1998 *)
+  (* pre-Stelf 1.2 code walk Fri May  8 11:17:10 1998 *)
   (* raiseType (G, V) = {{G}} V
 
        Invariant:
@@ -1419,7 +1419,7 @@ end) : ABSTRACTTABLED = struct
                otherwise X = X' and no effect occurs.
     *)
   (* It is not clear if this case can happen *)
-  (* pre-Twelf 1.2 code walk, Fri May  8 11:05:08 1998 *)
+  (* pre-Stelf 1.2 code walk, Fri May  8 11:05:08 1998 *)
   (* evarsToSub (K, s') = s
       Invariant:
       if K = EV Xn ... EV X2, EV X1

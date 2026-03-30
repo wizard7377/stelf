@@ -1,6 +1,6 @@
 (library
  (name unit)
  (wrapped false)
- (libraries twelf alcotest basis)
+ (libraries stelf alcotest basis)
  (flags
   (:standard -open Basis)))

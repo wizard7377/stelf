@@ -64,7 +64,7 @@ end
 (* id | _  (type omitted) *)
 (* signature EXTSYN *)
 (* signature RECON_TERM
-   provides the interface to type reconstruction seen by Twelf 
+   provides the interface to type reconstruction seen by Stelf 
 *)
 module type RECON_TERM = sig
   (*! structure IntSyn : INTSYN !*)

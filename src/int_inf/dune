@@ -2,7 +2,7 @@
 
 (library
  (name int_inf)
- (public_name twelf.int_inf)
+ (public_name stelf.int_inf)
  (modules int_inf_sig int_inf_)
  (libraries basis)
  (wrapped true)

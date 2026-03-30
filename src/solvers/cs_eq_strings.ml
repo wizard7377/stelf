@@ -513,7 +513,7 @@ end) : Cs.CS = struct
 
        Invariant:
        If concat is normal
-       G |- U : V and U is the Twelf syntax conversion of concat
+       G |- U : V and U is the Stelf syntax conversion of concat
     *)
   (* catConcat (concat1, concat2) = concat3
 
@@ -636,7 +636,7 @@ end) : Cs.CS = struct
 
        Invariant:
        if fe is (MyIntsynRep concat) and concat : normal
-       then U is the Twelf syntax conversion of concat
+       then U is the Stelf syntax conversion of concat
     *)
   (* map (fe) f = U'
 

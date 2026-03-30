@@ -3,7 +3,7 @@ open! Basis
 
 (* Front End Interface *)
 (* Author: Frank Pfenning *)
-module type TWELF = sig
+module type STELF = sig
   module Names : NAMES
   module Parser : Parser.PARSER with module Names = Names
 
@@ -113,7 +113,7 @@ module type TWELF = sig
     (** get working directory *)
   end
 
-  (** exit Twelf and ML *)
+  (** exit Stelf and ML *)
   module Compile : sig
     type opt = No | LinearHeads | Indexing
 
@@ -208,8 +208,8 @@ module type TWELF = sig
   val version : string
 end
 
-(* Twelf version *)
-(* signature TWELF *)
+(* Stelf version *)
+(* signature STELF *)
 
 (* # 1 "src/frontend/twelf_.fun.ml" *)
 open! Version
@@ -223,7 +223,7 @@ open Unknownexn
 (* Author: Frank Pfenning *)
 (* Modified: Carsten Schuermann, Jeff Polakow *)
 (* Modified: Brigitte Pientka, Roberto Virga *)
-module Twelf (Twelf__0 : sig
+module Stelf (Twelf__0 : sig
   module Global : GLOBAL
   module Timers : Timers.TIMERS
   module Whnf : WHNF
@@ -427,7 +427,7 @@ module Twelf (Twelf__0 : sig
   (* module Compat : COMPAT *)
   module UnknownExn : UNKNOWN_EXN
   module Msg : MSG
-end) : TWELF = struct
+end) : STELF = struct
   open Twelf__0
   module Names = Names
   module Parser = Parser
@@ -531,7 +531,7 @@ end) : TWELF = struct
           Printf.eprintf "TYPECHECK ERROR backtrace:\n%s\n%!" bt;
           abort 0
             ((("Double-checking types fails: " ^ msg) ^ "\n")
-            ^ "This indicates a bug in Twelf.\n")
+            ^ "This indicates a bug in Stelf.\n")
       | Abstract.Error msg -> abortFileMsg chlev (fileName, msg)
       | Total.Error msg -> abort chlev (msg ^ "\n")
       | Reduces.Error msg -> abort chlev (msg ^ "\n")
@@ -1660,7 +1660,7 @@ end) : TWELF = struct
           install (Parser.parseStream instream))
 
     let rec loadString str =
-      let tmpFile = ".twelf-load-string.tmp" in
+      let tmpFile = ".stelf-load-string.tmp" in
       let outstream = TextIO.openOut tmpFile in
       let _ = TextIO.output (outstream, str) in
       let _ = TextIO.closeOut outstream in
@@ -2414,7 +2414,7 @@ end) : TWELF = struct
     let rec exit () = OS.Process.exit OS.Process.success
   end
 
-  (** exit Twelf and ML *)
+  (** exit Stelf and ML *)
   module Compile : sig
     type opt = CompSyn.opt = No | LinearHeads | Indexing
 
@@ -2533,6 +2533,6 @@ end) : TWELF = struct
   end
 end
 (* local *)
-(* functor Twelf *)
+(* functor Stelf *)
 
 (* # 1 "src/frontend/twelf_.sml.ml" *)

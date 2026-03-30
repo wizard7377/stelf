@@ -2,7 +2,7 @@
 
 (library
  (name domains)
- (public_name twelf.domains)
+ (public_name stelf.domains)
  (modules field ordered_field integers rationals integers_mod domains_)
  (libraries int_inf basis)
  (wrapped true)

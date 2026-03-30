@@ -2,7 +2,7 @@
 
 (library
  (name unique)
- (public_name twelf.unique)
+ (public_name stelf.unique)
  (modules unique_)
  (libraries
   global

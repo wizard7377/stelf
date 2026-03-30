@@ -2,7 +2,7 @@
 
 (library
  (name global)
- (public_name twelf.global)
+ (public_name stelf.global)
  (modules global_)
  (libraries basis)
  (wrapped true)

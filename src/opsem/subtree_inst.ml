@@ -1371,7 +1371,7 @@ end) : MEMOTABLE = struct
                otherwise X = X' and no effect occurs.
     *)
   (* It is not clear if this case can happen *)
-  (* pre-Twelf 1.2 code walk, Fri May  8 11:05:08 1998 *)
+  (* pre-Stelf 1.2 code walk, Fri May  8 11:05:08 1998 *)
   (* assign(d, Dec(n, V), X as I.Root(BVar k, S), U, asub) = ()
       Invariant:
       if D ; G |- U : V

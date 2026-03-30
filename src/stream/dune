@@ -2,7 +2,7 @@
 
 (library
  (name stream)
- (public_name twelf.stream)
+ (public_name stelf.stream)
  (modules stream_)
  (libraries basis)
  (wrapped true)

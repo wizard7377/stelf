@@ -2,7 +2,7 @@
 
 (library
  (name solvers)
- (public_name twelf.solvers)
+ (public_name stelf.solvers)
  (modules
   cs_manager
   cs

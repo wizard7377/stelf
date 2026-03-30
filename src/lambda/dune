@@ -2,7 +2,7 @@
 
 (library
  (name lambda)
- (public_name twelf.lambda)
+ (public_name stelf.lambda)
  (modules
   fgnopn
   fgnopntable

@@ -2,7 +2,7 @@
 
 (library
  (name server)
- (public_name twelf.server)
+ (public_name stelf.server)
  (modules sigint mlton_thread sigint_mlton sigint_smlnj server_)
  (libraries timing frontend basis smlofnj)
  (flags

@@ -2,7 +2,7 @@
 
 (library
  (name style)
- (public_name twelf.style)
+ (public_name stelf.style)
  (modules style_)
  (libraries global table lambda formatter print names paths index basis)
  (flags

@@ -2,7 +2,7 @@
 
 (library
  (name worldcheck)
- (public_name twelf.worldcheck)
+ (public_name stelf.worldcheck)
  (modules worldSyn worldify worldcheck_)
  (libraries
   global

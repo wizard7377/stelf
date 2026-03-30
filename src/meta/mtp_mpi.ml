@@ -272,7 +272,7 @@ end) : MTPI = struct
       begin if empty () then begin
         print "[QED]\n";
         print
-          (("Statistics: required Twelf.Prover.maxFill := "
+          (("Statistics: required Stelf.Prover.maxFill := "
            ^ Int.toString !MTPData.maxFill)
           ^ "\n")
       end

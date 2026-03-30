@@ -2,7 +2,7 @@
 
 (library
  (name timing)
- (public_name twelf.timing)
+ (public_name stelf.timing)
  (modules timers timing_ time_limit)
  (libraries basis)
  (wrapped true)

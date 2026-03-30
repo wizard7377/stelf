@@ -2,7 +2,7 @@
 
 (library
  (name table)
- (public_name twelf.table)
+ (public_name stelf.table)
  (modules
   hash_table
   string_hash
