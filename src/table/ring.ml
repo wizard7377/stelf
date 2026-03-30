@@ -1,5 +1,7 @@
 (* # 1 "src/table/ring.sig.ml" *)
 
+(** Cyclic list (ring) operations and traversal helpers. *)
+
 open Basis
 
 (* Rings (aka cyclic lists) *)
@@ -39,7 +41,7 @@ module Ring : RING = struct
      [a1,...,ai,ai+1,...,an] wrapping around
   *)
   (* empty q = true if q = [], false otherwise *)
-  let empty = function [], [] -> true | _ -> false
+  let empty (r, l) = (r, l) = ([], [])
 
   (* init l = l (as ring) *)
   let init l = ([], l)

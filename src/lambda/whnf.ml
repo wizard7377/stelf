@@ -675,7 +675,7 @@ module Whnf () : WHNF = struct
 
   exception Eta = Eta
 
-  let etaContract = function u_ -> etaContract (u_, IntSyn.id, 0)
+  let etaContract u_ = etaContract (u_, IntSyn.id, 0)
   let whnf = whnf
   let expandDef = expandDef
   let whnfExpandDef = whnfExpandDef

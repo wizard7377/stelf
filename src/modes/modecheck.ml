@@ -105,8 +105,8 @@ end) : MODECHECK = struct
       | k, [] -> true
       | k, k' :: ks -> k <> k' && unique (k, ks)
 
-    let rec isUniversal = function Universal -> true | _ -> false
-    let rec isGround = function Existential (Ground _, _) -> true | _ -> false
+    let isUniversal = function Universal -> true | _ -> false
+    let isGround = function Existential (Ground _, _) -> true | _ -> false
 
     let rec uniqueness = function
       | Existential (Ground u, _) -> u
@@ -117,8 +117,8 @@ end) : MODECHECK = struct
       | M.Minus -> M.Minus
       | M.Minus1 -> M.Minus
 
-    let rec andUnique = function Unique, Unique -> Unique | _ -> Ambig
-    let rec isFree = function Existential (Free, _) -> true | _ -> false
+    let andUnique = function Unique, Unique -> Unique | _ -> Ambig
+    let isFree = function Existential (Free, _) -> true | _ -> false
 
     exception Eta
 
@@ -539,7 +539,7 @@ end) : MODECHECK = struct
       try checkD1 (d_, v_, occ, function d'_ -> [ d'_ ])
       with ModeError (occ, msg) -> raise (Error' (occ, msg))
 
-    let rec cidFromHead = function I.Const a -> a | I.Def a -> a
+    let cidFromHead = function I.Const a -> a | I.Def a -> a
 
     let rec checkD (conDec, fileName, occOpt) =
       let _ = checkFree := false in

@@ -196,8 +196,8 @@ end) : STATE = struct
   let close = close
   let init = init
   let collectT = findPrg
-  let collectLF = function p_ -> findExp (I.Null, p_) []
-  let collectLFSub = function s -> findExpSub (I.Null, s) []
+  let collectLF p_ = findExp (I.Null, p_) []
+  let collectLFSub s = findExpSub (I.Null, s) []
 end
 
 (* # 1 "src/prover/state.sml.ml" *)

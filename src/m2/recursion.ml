@@ -183,7 +183,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
           ops ) -> begin
           if Subordinate.equiv (I.targetFam v_, I.targetFam v1'_) then
             let x_ = I.newEVar (g_, I.EClo (v1'_, s1')) in
-            let sc' = function ops' -> set_parameter (g_, x_, k, sc, ops') in
+            let sc' ops' = set_parameter (g_, x_, k, sc, ops') in
             lt
               ( g_,
                 k,
@@ -251,7 +251,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
           ops ) -> begin
           if Subordinate.equiv (I.targetFam v_, I.targetFam v1'_) then
             let x_ = I.newEVar (g_, I.EClo (v1'_, s1')) in
-            let sc' = function ops' -> set_parameter (g_, x_, k, sc, ops') in
+            let sc' ops' = set_parameter (g_, x_, k, sc, ops') in
             le
               ( g_,
                 k,

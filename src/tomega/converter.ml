@@ -94,7 +94,7 @@ end) : CONVERTER = struct
     module TomegaTypeCheck = Converter__0.TomegaTypeCheck
     module TA = Converter__0.TomegaAbstract
 
-    let rec isIdx1 = function I.Idx 1 -> true | _ -> false
+    let isIdx1 = function I.Idx 1 -> true | _ -> false
 
     let rec modeSpine a =
       begin match ModeTable.modeLookup a with
@@ -317,10 +317,7 @@ end) : CONVERTER = struct
         | I.Nil, M.Mnil -> []
         | I.App (u_, s'_), M.Mapp (M.Marg (m', _), mS) ->
             let l_ = args (s'_, mS) in
-            begin match M.modeEqual (m, m') with
-            | true -> u_ :: l_
-            | false -> l_
-            end
+            if M.modeEqual (m, m') then u_ :: l_ else l_
       in
       let rec strengthenArgs = function
         | [], s -> []
@@ -790,7 +787,7 @@ end) : CONVERTER = struct
       let name, f0_ = createIH l_ in
       let d0_ = T.PDec (Some name, f0_, None, None) in
       let psi0_ = I.Decl (I.Null, d0_) in
-      let prec_ = function p -> T.Rec (d0_, p) in
+      let prec_ p = T.Rec (d0_, p) in
       let rec convertWorlds = function
         | a :: [] ->
             let w_ = WorldSyn.lookup a in
@@ -1360,7 +1357,7 @@ end) : CONVERTER = struct
   (* Psi0, x1:V1, ..., xn:Vn |- C :: F *)
   (* F', *)
   let convertFor = convertFor
-  let convertPrg = function l_ -> convertPrg (l_, None)
+  let convertPrg l_ = convertPrg (l_, None)
   let installFor = installFor
   let installPrg = installPrg
   let traverse = traverse

@@ -119,7 +119,7 @@ end) : COVER = struct
     begin if !Global.chatter >= chlev then print (f ()) else ()
     end
 
-  let rec pluralize = function 1, s -> s | n, s -> s ^ "s"
+  let pluralize = function 1, s -> s | n, s -> s ^ "s"
   let rec abbrevCSpine (s_, ci) = s_
 
   let rec abbrevCGoal = function

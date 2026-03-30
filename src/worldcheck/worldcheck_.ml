@@ -11,7 +11,7 @@ module type WORLDSYN = WorldSyn.WORLDSYN
 module MemoTable = Hash_table.HashTable (struct
   type nonrec key' = int * int
 
-  let hash = function n, m -> (7 * n) + m
+  let hash (n, m) = (7 * n) + m
   let eq (x__op, y__op) = x__op = y__op
 end)
 

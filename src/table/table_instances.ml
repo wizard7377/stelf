@@ -27,7 +27,7 @@ end)
 module IntHashTable = HashTable (struct
   type nonrec key' = int
 
-  let hash = function n -> n
+  let hash n = n
   let eq (x__op, y__op) = x__op = y__op
 end)
 

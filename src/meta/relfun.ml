@@ -165,10 +165,7 @@ end) : RELFUN = struct
         | I.Nil, M.Mnil -> []
         | I.App (u_, s'_), M.Mapp (M.Marg (m', _), mS) ->
             let l_ = args (s'_, mS) in
-            begin match M.modeEqual (m, m') with
-            | true -> u_ :: l_
-            | false -> l_
-            end
+            if M.modeEqual (m, m') then u_ :: l_ else l_
       in
       let rec strengthenArgs = function
         | [], s -> []

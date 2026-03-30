@@ -1,6 +1,7 @@
-open! Basis
+(** Integration test case registry for STELF example suites. *)
 
-let integration_cases =
+(** The canonical integration test suite list consumed by the runner. *)
+let integration_test_cases =
   [
     Case_examples_failure.test_case;
     Case_examples_ccc.test_case;
@@ -46,3 +47,6 @@ let integration_cases =
     Case_examples_crary_tslf.test_case;
     Case_examples_crary_tslf_sing.test_case;
   ]
+
+(* Backwards-compatible alias used by existing test runner wiring. *)
+let integration_cases = integration_test_cases

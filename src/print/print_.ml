@@ -118,7 +118,7 @@ end) : PRINT = struct
     let str_ = F.string
     let rec str0_ (s, n) = F.string0 n s
     let rec sym s = str0_ (Symbol.sym s)
-    let rec nameOf = function Some id -> id | None -> "_"
+    let nameOf = function Some id -> id | None -> "_"
     let rec fmtEVar (g_, x_) = str0_ (Symbol.evar (Names.evarName (g_, x_)))
 
     let rec fmtAVar (g_, x_) =
@@ -325,7 +325,7 @@ end) : PRINT = struct
       | fmt, FX.Postfix _, accum -> F.hVbox ([ fmt ] @ accum)
 
     let rec aa (Ctxt (fixity, accum, l), fmt) = addAccum (fmt, fixity, accum)
-    let rec fmtUni = function I.Type -> sym "type" | I.Kind -> sym "kind"
+    let fmtUni = function I.Type -> sym "type" | I.Kind -> sym "kind"
 
     let rec fmtExpW = function
       | g_, d, ctx, (I.Uni l_, s) -> aa (ctx, fmtUni l_)

@@ -50,9 +50,7 @@ end) : STRICT = struct
           match h_ with
           | I.BVar k' -> begin
               if k' = p then patSpine (k, s_)
-              else begin
-                if k' <= k then strictSpine (k, p, s_) else false
-              end
+              else k' <= k && strictSpine (k, p, s_)
             end
           | I.Const c -> strictSpine (k, p, s_)
           | I.Def d -> strictSpine (k, p, s_)

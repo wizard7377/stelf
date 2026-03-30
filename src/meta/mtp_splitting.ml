@@ -614,7 +614,7 @@ end) : MTPSPLITTING = struct
     let rec compare (Operator (_, _, i1_), Operator (_, _, i2_)) =
       H.compare (i1_, i2_)
 
-    let rec isInActive = function Active _ -> false | InActive -> true
+    let isInActive = function Active _ -> false | InActive -> true
 
     let rec applicable (Operator (_, sl_, i_)) =
       not (List.exists isInActive sl_)

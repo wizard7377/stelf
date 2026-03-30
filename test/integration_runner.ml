@@ -1,4 +1,4 @@
-open! Basis
+(** Integration test runner for STELF. *)
 
 let () =
   Alcotest.run "stelf integration tests"

@@ -1,8 +1,7 @@
-
 open! Basis
-
 open Fgnopntable
-include Intsyn_intf 
+include Intsyn_intf
+
 module type INTSYN = Intsyn_intf.INTSYN
 
 (* Author: Frank Pfenning, Carsten Schuermann *)
@@ -10,22 +9,22 @@ module type INTSYN = Intsyn_intf.INTSYN
 module MakeIntSyn (IntSyn__0 : sig
   module Global : GLOBAL
 end) : INTSYN = struct
-  (** Constant identifier        *)
   type cid = int [@@deriving eq, ord, show]
+  (** Constant identifier *)
 
-  (** Variable name              *)
   type nonrec name = string
+  (** Variable name *)
 
   let equal_name (a : name) b = a = b
   let compare_name (a : name) b = compare a b
   let pp_name = Format.pp_print_string
   let show_name s = s
 
-  (** Structure identifier       *)
   type mid = int [@@deriving eq, ord, show]
+  (** Structure identifier *)
 
-  (** CS module identifier       *)
   type csid = int [@@deriving eq, ord, show]
+  (** CS module identifier *)
 
   (** Contexts *)
   type 'a ctx = Null | Decl of 'a ctx * 'a [@@deriving eq, ord, show]
@@ -60,8 +59,8 @@ end) : INTSYN = struct
     in
     ctxLength' (g_, 0)
 
-  (** foreign expression representation *)
   type fgnExp = exn
+  (** foreign expression representation *)
 
   let equal_fgnExp _ _ = false
   let compare_fgnExp _ _ = 0
@@ -71,10 +70,10 @@ end) : INTSYN = struct
   (* foreign expression representation *)
   exception UnexpectedFgnExp of fgnExp
 
-  (** raised by a constraint solver
-                                            if passed an incorrect arg *)
-  (** foreign unification constraint
-                                           representation *)
+  (* raised by a constraint solver
+      if passed an incorrect arg *)
+  (* foreign unification constraint
+      representation *)
   type fgnCnstr = exn
 
   let equal_fgnCnstr _ _ = false
@@ -84,85 +83,59 @@ end) : INTSYN = struct
 
   exception UnexpectedFgnCnstr of fgnCnstr
 
-  (** raised by a constraint solver
-                                            if passed an incorrect arg *)
-  (** Dependency information     *)
-  (** P ::= No                   *)
-  (**     | Maybe                *)
-  (**     | Meta                 *)
-  type depend = No | Maybe | Meta [@@deriving eq, ord, show { with_path = false }]
+  (* raised by a constraint solver
+     if passed an incorrect arg *)
+  (* Dependency information
+     P ::= No
+         | Maybe
+         | Meta *)
+  type depend = No | Maybe | Meta
+  [@@deriving eq, ord, show { with_path = false }]
 
-  (** Expressions *)
-  (** Universes:                 *)
-  (** L ::= Kind                 *)
-  (**     | Type                 *)
+  (* Expressions
+     Universes:
+     L ::= Kind
+         | Type *)
   type uni = Kind | Type [@@deriving eq, ord, show]
-  (** Expressions:               *)
-  (** U ::= L                    *)
-  (**     | bPi (D, P). V         *)
-  (**     | C @ S                *)
-  (**     | U @ S                *)
-  (**     | lam D. U             *)
-  (**     | X<I> : G|-V, Cnstr   *)
-  (**     | U[s]                 *)
-  (**     | A<I>                 *)
-  (**     | n (linear, fully applied) *)
-  (** grafting variable *)
-  (**     | (foreign expression) *)
-  (** Heads:                     *)
-  (** H ::= k                    *)
-  (**     | c                    *)
-  (**     | #k(b)                *)
-  (**     | c#                   *)
-  (**     | d                    *)
-  (**     | d (non strict)       *)
-  (**     | F[s]                 *)
-  (**     | (foreign constant)   *)
-  (** Spines:                    *)
-  (** S ::= Nil                  *)
-  (**     | U ; S                *)
-  (**     | S[s]                 *)
-  (** Explicit substitutions:    *)
-  (** s ::= ^n                   *)
-  (**     | Ft.s                 *)
-  (** Fronts:                    *)
-  (** Ft ::= k                   *)
-  (**     | U                    *)
-  (**     | U (assignable)       *)
-  (**     | _x                   *)
-  (**     | _                    *)
-  (** Declarations:              *)
-  (** D ::= x:V                  *)
-  (**     | v:l[s]               *)
-  (**     | v[^-d]               *)
-  (** Blocks:                    *)
-  (** b ::= v                    *)
-  (**     | L(l[^k],t)           *)
-  (**     | u1, ..., Un          *)
-  (** Constraints *)
-  (** Constraint:                *)
-  (** Cnstr ::= solved           *)
-  (**         | G|-(U1 == U2)    *)
-  (**         | (foreign)        *)
-  (** Status of a constant:      *)
-  (**   inert                    *)
-  (**   acts as constraint       *)
-  (**   is converted to foreign  *)
-  (** Result of foreign unify    *)
-  (** succeed with a list of residual operations *)
-  (** Residual of foreign unify  *)
-  (** perform the assignment G |- X = U [ss] *)
-  (** delay cnstr, associating it with all the rigid EVars in U  *)
-  (** Global signature *)
-  (** Constant declaration       *)
-  (** c : A : type               *)
-  (** Ancestor info for d or a   *)
-  (** d = M : A : type           *)
-  (** %block l = (l1 | ... | ln) *)
-  (** sc: A : type               *)
-  (** Ancestor of d or a         *)
-  (** head(expand(d)), height, head(expand[height](d)) *)
-  (** NONE means expands to {x:A}B *)
+
+  (* Expressions:
+     U ::= L
+         | bPi (D, P). V
+         | C @ S
+         | U @ S
+         | lam D. U
+         | X<I> : G|-V, Cnstr
+         | U[s]
+         | A<I>
+         | n (linear, fully applied)
+         | (foreign expression)
+     Heads:
+     H ::= k | c | #k(b) | c# | d | d (non strict) | F[s] | (foreign constant)
+     Spines:
+     S ::= Nil | U ; S | S[s]
+     Explicit substitutions:
+     s ::= ^n | Ft.s
+     Fronts:
+     Ft ::= k | U | U (assignable) | _x | _
+     Declarations:
+     D ::= x:V | v:l[s] | v[^-d]
+     Blocks:
+     b ::= v | L(l[^k],t) | u1, ..., Un
+     Constraints:
+     Cnstr ::= solved | G|-(U1 == U2) | (foreign)
+     Status of a constant:
+       inert | acts as constraint | is converted to foreign
+     Result/residual of foreign unify:
+       succeed with a list of residual operations
+       perform the assignment G |- X = U [ss]
+       delay cnstr, associating it with all rigid EVars in U
+     Global signature notes:
+       c : A : type
+       d = M : A : type
+       %block l = (l1 | ... | ln)
+       sc: A : type
+       ancestor: head(expand(d)), height, head(expand[height](d))
+       NONE means expands to {x:A}B *)
   type exp =
     | Uni of uni
     | Pi of (dec * depend) * exp
@@ -174,7 +147,7 @@ end) : INTSYN = struct
     | AVar of exp option ref
     | FgnExp of csid * fgnExp
     | NVar of int
-    [@@deriving eq, ord, show { with_path = false }]
+  [@@deriving eq, ord, show { with_path = false }]
 
   and head =
     | BVar of int
@@ -185,24 +158,23 @@ end) : INTSYN = struct
     | NSDef of cid
     | FVar of name * exp * sub
     | FgnConst of csid * conDec
-    [@@deriving eq, ord, show { with_path = false }]
+  [@@deriving eq, ord, show { with_path = false }]
 
-  and spine = Nil | App of exp * spine | SClo of spine * sub [@@deriving eq, ord, show { with_path = false }]
-  and sub = Shift of int | Dot of front * sub [@@deriving eq, ord, show { with_path = false }]
+  and spine = Nil | App of exp * spine | SClo of spine * sub
+  [@@deriving eq, ord, show { with_path = false }]
 
-  and front =
-    | Idx of int
-    | Exp of exp
-    | Axp of exp
-    | Block of block
-    | Undef
+  and sub = Shift of int | Dot of front * sub
+  [@@deriving eq, ord, show { with_path = false }]
+
+  and front = Idx of int | Exp of exp | Axp of exp | Block of block | Undef
 
   and dec =
     | Dec of name option * exp
     | BDec of name option * (cid * sub)
     | ADec of name option * int
     | NDec of name option
-    [@@deriving eq, ord, show { with_path = false }]
+  [@@deriving eq, ord, show { with_path = false }]
+
   and block =
     | Bidx of int
     | LVar of block option ref * sub * (cid * sub)
@@ -212,7 +184,7 @@ end) : INTSYN = struct
     | Solved
     | Eqn of dec ctx * exp * exp
     | FgnCnstr of csid * fgnCnstr
-    [@@deriving eq, ord, show { with_path = false }]
+  [@@deriving eq, ord, show { with_path = false }]
 
   and status =
     | Normal
@@ -228,7 +200,7 @@ end) : INTSYN = struct
           [@equal fun _ _ -> false]
           [@compare fun _ _ -> 0]
           [@printer fun fmt _ -> Format.pp_print_string fmt "<fun>"])
-    [@@deriving eq, ord, show { with_path = false }]
+  [@@deriving eq, ord, show { with_path = false }]
 
   and fgnUnify = Succeed of fgnUnifyResidual list | Fail
 
@@ -265,26 +237,25 @@ end) : INTSYN = struct
 
   and ancestor = Anc of cid option * int * cid option
 
-  (** Structure declaration      *)
-  type strDec = StrDec of string * mid option [@@deriving eq, ord, show { with_path = false }]
+  (* Structure declaration *)
+  type strDec = StrDec of string * mid option
+  [@@deriving eq, ord, show { with_path = false }]
 
-  (** Form of constant declaration *)
-  (** from constraint domain *)
-  (** ordinary declaration *)
-  (** %clause declaration *)
-  type conDecForm = FromCS | Ordinary | Clause [@@deriving eq, ord, show { with_path = false }]
+  (* Form of constant declaration:
+      from constraint domain | ordinary declaration | %clause declaration *)
+  type conDecForm = FromCS | Ordinary | Clause
+  [@@deriving eq, ord, show { with_path = false }]
 
-  (** Type abbreviations *)
-  (** G = . | G,D                *)
+  (* Type abbreviations: G = . | G,D *)
   type nonrec dctx = dec ctx
 
-  (** Us = U[s]                  *)
+  (* Us = U[s] *)
   type nonrec eclo = exp * sub
 
-  (** Bs = B[s]                  *)
+  (* Bs = B[s] *)
   type nonrec bclo = block * sub
 
-  (** constraints *)
+  (* constraints *)
   type nonrec cnstr = cnstr_ ref
 
   (*  exception Error of string              raised if out of space      *)

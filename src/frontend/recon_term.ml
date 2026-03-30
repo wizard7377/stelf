@@ -183,7 +183,7 @@ end) : RECON_TERM = struct
   let errorCount = ref 0
   let errorFileName = ref "no file"
   let errorThreshold = ref (Some 20)
-  let rec exceeds = function i, None -> false | i, Some j -> i > j
+  let exceeds = function i, None -> false | i, Some j -> i > j
 
   let rec resetErrors fileName =
     begin
@@ -253,12 +253,12 @@ end) : RECON_TERM = struct
     open IntSyn
   end
 
-  let rec decl_ = function g_, d_ -> IntSyn.Decl (g_, d_)
-  let rec eClo_ = function v_, s -> IntSyn.EClo (v_, s)
-  let rec root_ = function h_, s_ -> IntSyn.Root (h_, s_)
+  let decl_ = function g_, d_ -> IntSyn.Decl (g_, d_)
+  let eClo_ = function v_, s -> IntSyn.EClo (v_, s)
+  let root_ = function h_, s_ -> IntSyn.Root (h_, s_)
   let rec bVar_ n = IntSyn.BVar n
-  let rec redex_ = function u_, s_ -> IntSyn.Redex (u_, s_)
-  let rec fVar_ = function name, v_, s -> IntSyn.FVar (name, v_, s)
+  let redex_ = function u_, s_ -> IntSyn.Redex (u_, s_)
+  let fVar_ = function name, v_, s -> IntSyn.FVar (name, v_, s)
   let rec exp_ u_ = IntSyn.Exp u_
   let undefined_ = Apx.Undefined
   let rec uni_ l_ = Apx.Uni (Apx.uniToApx l_)
@@ -929,7 +929,7 @@ end) : RECON_TERM = struct
   and etaExpand (e_, vs_) = etaExpandW (e_, Whnf.whnfExpandDef vs_)
 
   (* preserves redices *)
-  let rec toElim = function Elim e_ -> e_ | Intro u_ -> redexElim u_
+  let toElim = function Elim e_ -> e_ | Intro u_ -> redexElim u_
 
   let rec toIntro = function
     | Elim e_, vs_ -> etaExpand (e_, vs_)

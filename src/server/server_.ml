@@ -5,6 +5,8 @@
 (* # 1 "src/server/server_.sml.ml" *)
 open! Basis
 
+(** Interactive command server for Twelf/STELF. *)
+
 module type SERVER = sig
   val server : string * string list -> OS.Process.status
 end
@@ -44,58 +46,56 @@ module Server : SERVER = struct
      splits the arguments string into a list of space-separated
      tokens
   *)
-  let rec tokenize args = String.tokens Char.isSpace args
+  let tokenize args = String.tokens Char.isSpace args
 
   (* exception Error for server errors *)
   exception Error of string
 
-  let rec error msg = raise (Error msg)
-  let rec quote string = ("`" ^ string) ^ "'"
+  let error msg = raise (Error msg)
+  let quote string = ("`" ^ string) ^ "'"
 
   (* Print the OK or ABORT messages which are parsed by Emacs *)
-  let rec issue = function
+  let issue = function
     | Twelf.Ok -> print "%% OK %%\n"
     | Twelf.Abort -> print "%% ABORT %%\n"
 
   (* Checking if there are no extraneous arguments *)
-  let rec checkEmpty = function
-    | "" -> ()
-    | args -> error "Extraneous arguments"
+  let check_empty = function "" -> () | args -> error "Extraneous arguments"
 
   (* Command argument types *)
   (* File names, given a default *)
-  let rec getFile = function
+  let get_file = function
     | "", default -> default
     | fileName, default -> fileName
 
   (* File names, not defaults *)
-  let rec getFile' = function
+  let get_file_required = function
     | "" -> error "Missing filename"
     | fileName -> fileName
 
   (* Identifiers, used as a constant *)
-  let rec getId = function
+  let get_id = function
     | id :: [] -> Stdlib.String.trim id
     | [] -> error "Missing identifier"
     | ts -> error "Extraneous arguments"
 
   (* Identifiers, used as a trace specification *)
-  let rec getIds ids = ids
+  let get_ids ids = ids
 
   (* Strategies for %prove, %establish *)
-  let rec getStrategy = function
+  let get_strategy = function
     | "FRS" :: [] -> Twelf.Prover.Frs
     | "RFS" :: [] -> Twelf.Prover.Rfs
     | [] -> error "Missing strategy"
     | t :: [] -> error (quote t ^ " is not a strategy (must be FRS or RFS)")
     | ts -> error "Extraneous arguments"
 
-  let rec strategyToString = function
+  let strategy_to_string = function
     | Twelf.Prover.Frs -> "FRS"
     | Twelf.Prover.Rfs -> "RFS"
 
   (* Booleans *)
-  let rec getBool = function
+  let get_bool = function
     | "true" :: [] -> true
     | "false" :: [] -> false
     | [] -> error "Missing boolean value"
@@ -103,22 +103,22 @@ module Server : SERVER = struct
     | ts -> error "Extraneous arguments"
 
   (* Natural numbers *)
-  let rec getNat = function
+  let get_nat = function
     | t :: [] -> (
         match Int.fromString t with
         | Some n when n >= 0 -> n
         | _ -> error (quote t ^ " is not a natural number"))
 
   (* Limits ( *, or natural number) *)
-  let rec getLimit = function
+  let get_limit = function
     | "*" :: [] -> None
-    | t :: ts -> Some (getNat (t :: ts))
+    | t :: ts -> Some (get_nat (t :: ts))
     | [] -> error "Missing `*' or natural number"
 
-  let rec limitToString = function None -> "*" | Some i -> Int.toString i
+  let limit_to_string = function None -> "*" | Some i -> Int.toString i
 
   (* Tabling strategy *)
-  let rec getTableStrategy = function
+  let get_table_strategy = function
     | "Variant" :: [] -> Twelf.Table.Variant
     | "Subsumption" :: [] -> Twelf.Table.Subsumption
     | [] -> error "Missing tabling strategy"
@@ -128,12 +128,12 @@ module Server : SERVER = struct
          ^ " is not a tabling strategy (must be Variant or Subsumption)")
     | ts -> error "Extraneous arguments"
 
-  let rec tableStrategyToString = function
+  let table_strategy_to_string = function
     | Twelf.Table.Variant -> "Variant"
     | Twelf.Table.Subsumption -> "Subsumption"
 
   (* Tracing mode for term reconstruction *)
-  let rec getReconTraceMode = function
+  let get_recon_trace_mode = function
     | "Progressive" :: [] -> Twelf.Recon.Progressive
     | "Omniscient" :: [] -> Twelf.Recon.Omniscient
     | [] -> error "Missing tracing reconstruction mode"
@@ -144,12 +144,12 @@ module Server : SERVER = struct
             (must be Progressive or Omniscient)")
     | ts -> error "Extraneous arguments"
 
-  let rec reconTraceModeToString = function
+  let recon_trace_mode_to_string = function
     | Twelf.Recon.Progressive -> "Progressive"
     | Twelf.Recon.Omniscient -> "Omniscient"
 
   (* Compile options *)
-  let rec getCompileOpt = function
+  let get_compile_opt = function
     | "No" :: [] -> Twelf.Compile.No
     | "LinearHeads" :: [] -> Twelf.Compile.LinearHeads
     | "Indexing" :: [] -> Twelf.Compile.Indexing
@@ -160,53 +160,55 @@ module Server : SERVER = struct
          ^ " is not a compile option (must be No, LinearHeads, or Indexing ")
     | ts -> error "Extraneous arguments"
 
-  let rec compOptToString = function
+  let comp_opt_to_string = function
     | Twelf.Compile.No -> "No"
     | Twelf.Compile.LinearHeads -> "LinearHeads"
     | Twelf.Compile.Indexing -> "Indexing"
 
   (* Setting Twelf parameters *)
-  let rec setParm = function
-    | "chatter" :: ts -> Twelf.chatter := getNat ts
-    | "doubleCheck" :: ts -> Twelf.doubleCheck := getBool ts
-    | "unsafe" :: ts -> Twelf.unsafe := getBool ts
-    | "autoFreeze" :: ts -> Twelf.autoFreeze := getBool ts
-    | "Print.implicit" :: ts -> Twelf.Print.implicit := getBool ts
-    | "Print.depth" :: ts -> Twelf.Print.depth := getLimit ts
-    | "Print.length" :: ts -> Twelf.Print.length := getLimit ts
-    | "Print.indent" :: ts -> Twelf.Print.indent := getNat ts
-    | "Print.width" :: ts -> Twelf.Print.width := getNat ts
-    | "Trace.detail" :: ts -> Twelf.Trace.detail := getNat ts
-    | "Compile.optimize" :: ts -> Twelf.Compile.optimize := getCompileOpt ts
-    | "Recon.trace" :: ts -> Twelf.Recon.trace := getBool ts
-    | "Recon.traceMode" :: ts -> Twelf.Recon.traceMode := getReconTraceMode ts
-    | "Prover.strategy" :: ts -> Twelf.Prover.strategy := getStrategy ts
-    | "Prover.maxSplit" :: ts -> Twelf.Prover.maxSplit := getNat ts
-    | "Prover.maxRecurse" :: ts -> Twelf.Prover.maxRecurse := getNat ts
-    | "Table.strategy" :: ts -> Twelf.Table.strategy := getTableStrategy ts
-    | "Table.strengthen" :: ts -> Twelf.Table.strengthen := getBool ts
+  let set_parm = function
+    | "chatter" :: ts -> Twelf.chatter := get_nat ts
+    | "doubleCheck" :: ts -> Twelf.doubleCheck := get_bool ts
+    | "unsafe" :: ts -> Twelf.unsafe := get_bool ts
+    | "autoFreeze" :: ts -> Twelf.autoFreeze := get_bool ts
+    | "Print.implicit" :: ts -> Twelf.Print.implicit := get_bool ts
+    | "Print.depth" :: ts -> Twelf.Print.depth := get_limit ts
+    | "Print.length" :: ts -> Twelf.Print.length := get_limit ts
+    | "Print.indent" :: ts -> Twelf.Print.indent := get_nat ts
+    | "Print.width" :: ts -> Twelf.Print.width := get_nat ts
+    | "Trace.detail" :: ts -> Twelf.Trace.detail := get_nat ts
+    | "Compile.optimize" :: ts -> Twelf.Compile.optimize := get_compile_opt ts
+    | "Recon.trace" :: ts -> Twelf.Recon.trace := get_bool ts
+    | "Recon.traceMode" :: ts ->
+        Twelf.Recon.traceMode := get_recon_trace_mode ts
+    | "Prover.strategy" :: ts -> Twelf.Prover.strategy := get_strategy ts
+    | "Prover.maxSplit" :: ts -> Twelf.Prover.maxSplit := get_nat ts
+    | "Prover.maxRecurse" :: ts -> Twelf.Prover.maxRecurse := get_nat ts
+    | "Table.strategy" :: ts -> Twelf.Table.strategy := get_table_strategy ts
+    | "Table.strengthen" :: ts -> Twelf.Table.strengthen := get_bool ts
     | t :: ts -> error ("Unknown parameter " ^ quote t)
     | [] -> error "Missing parameter"
 
   (* Getting Twelf parameter values *)
-  let rec getParm = function
+  let get_parm = function
     | "chatter" :: ts -> Int.toString !Twelf.chatter
     | "doubleCheck" :: ts -> Bool.toString !Twelf.doubleCheck
     | "unsafe" :: ts -> Bool.toString !Twelf.unsafe
     | "autoFreeze" :: ts -> Bool.toString !Twelf.autoFreeze
     | "Print.implicit" :: ts -> Bool.toString !Twelf.Print.implicit
-    | "Print.depth" :: ts -> limitToString !Twelf.Print.depth
-    | "Print.length" :: ts -> limitToString !Twelf.Print.length
+    | "Print.depth" :: ts -> limit_to_string !Twelf.Print.depth
+    | "Print.length" :: ts -> limit_to_string !Twelf.Print.length
     | "Print.indent" :: ts -> Int.toString !Twelf.Print.indent
     | "Print.width" :: ts -> Int.toString !Twelf.Print.width
     | "Trace.detail" :: ts -> Int.toString !Twelf.Trace.detail
-    | "Compile.optimize" :: ts -> compOptToString !Twelf.Compile.optimize
+    | "Compile.optimize" :: ts -> comp_opt_to_string !Twelf.Compile.optimize
     | "Recon.trace" :: ts -> Bool.toString !Twelf.Recon.trace
-    | "Recon.traceMode" :: ts -> reconTraceModeToString !Twelf.Recon.traceMode
-    | "Prover.strategy" :: ts -> strategyToString !Twelf.Prover.strategy
+    | "Recon.traceMode" :: ts ->
+        recon_trace_mode_to_string !Twelf.Recon.traceMode
+    | "Prover.strategy" :: ts -> strategy_to_string !Twelf.Prover.strategy
     | "Prover.maxSplit" :: ts -> Int.toString !Twelf.Prover.maxSplit
     | "Prover.maxRecurse" :: ts -> Int.toString !Twelf.Prover.maxRecurse
-    | "Table.strategy" :: ts -> tableStrategyToString !Twelf.Table.strategy
+    | "Table.strategy" :: ts -> table_strategy_to_string !Twelf.Table.strategy
     | t :: ts -> error ("Unknown parameter " ^ quote t)
     | [] -> error "Missing parameter"
 
@@ -280,151 +282,151 @@ module Server : SERVER = struct
 
   let rec serve' = function
     | "set", args -> begin
-        setParm (tokenize args);
+        set_parm (tokenize args);
         serve Twelf.Ok
       end
     | "get", args -> begin
-        print (getParm (tokenize args) ^ "\n");
+        print (get_parm (tokenize args) ^ "\n");
         serve Twelf.Ok
       end
     | "Style.check", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           ();
           serve Twelf.Ok
         end
       end
     | "Print.sgn", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Print.sgn ();
           serve Twelf.Ok
         end
       end
     | "Print.prog", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Print.prog ();
           serve Twelf.Ok
         end
       end
     | "Print.subord", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Print.subord ();
           serve Twelf.Ok
         end
       end
     | "Print.domains", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Print.domains ();
           serve Twelf.Ok
         end
       end
     | "Print.TeX.sgn", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Print.TeX.sgn ();
           serve Twelf.Ok
         end
       end
     | "Print.TeX.prog", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Print.TeX.prog ();
           serve Twelf.Ok
         end
       end
     | "Trace.trace", args -> begin
-        Twelf.Trace.trace (Twelf.Trace.Some (getIds (tokenize args)));
+        Twelf.Trace.trace (Twelf.Trace.Some (get_ids (tokenize args)));
         serve Twelf.Ok
       end
     | "Trace.traceAll", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Trace.trace Twelf.Trace.All;
           serve Twelf.Ok
         end
       end
     | "Trace.untrace", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Trace.trace Twelf.Trace.None;
           serve Twelf.Ok
         end
       end
     | "Trace.break", args -> begin
-        Twelf.Trace.break (Twelf.Trace.Some (getIds (tokenize args)));
+        Twelf.Trace.break (Twelf.Trace.Some (get_ids (tokenize args)));
         serve Twelf.Ok
       end
     | "Trace.breakAll", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Trace.break Twelf.Trace.All;
           serve Twelf.Ok
         end
       end
     | "Trace.unbreak", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Trace.break Twelf.Trace.None;
           serve Twelf.Ok
         end
       end
     | "Trace.show", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Trace.show ();
           serve Twelf.Ok
         end
       end
     | "Trace.reset", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Trace.reset ();
           serve Twelf.Ok
         end
       end
     | "Timers.show", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Timers.show ();
           serve Twelf.Ok
         end
       end
     | "Timers.reset", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Timers.reset ();
           serve Twelf.Ok
         end
       end
     | "Timers.check", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Timers.check ();
           serve Twelf.Ok
         end
       end
     | "OS.chDir", args -> begin
-        Twelf.OS.chDir (getFile' args);
+        Twelf.OS.chDir (get_file_required args);
         serve Twelf.Ok
       end
     | "OS.getDir", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           print (Twelf.OS.getDir () ^ "\n");
           serve Twelf.Ok
         end
       end
     | "OS.exit", args -> begin
-        checkEmpty args;
+        check_empty args;
         ()
       end
     | "quit", args -> ()
     | "Config.read", args ->
-        let fileName = getFile (args, "sources.cfg") in
+        let fileName = get_file (args, "sources.cfg") in
         begin
           globalConfig := Some (Twelf.Config.read fileName);
           serve Twelf.Ok
@@ -444,33 +446,33 @@ module Server : SERVER = struct
         serve (Twelf.Config.append (valOf !globalConfig))
       end
     | "make", args ->
-        let fileName = getFile (args, "sources.cfg") in
+        let fileName = get_file (args, "sources.cfg") in
         begin
           globalConfig := Some (Twelf.Config.read fileName);
           serve (Twelf.Config.load (valOf !globalConfig))
         end
     | "reset", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.reset ();
           serve Twelf.Ok
         end
       end
-    | "loadFile", args -> serve (Twelf.loadFile (getFile' args))
+    | "loadFile", args -> serve (Twelf.loadFile (get_file_required args))
     | "readDecl", args -> begin
-        checkEmpty args;
+        check_empty args;
         serve (Twelf.readDecl ())
       end
-    | "decl", args -> serve (Twelf.decl (getId (tokenize args)))
+    | "decl", args -> serve (Twelf.decl (get_id (tokenize args)))
     | "top", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.top ();
           serve Twelf.Ok
         end
       end
     | "Table.top", args -> begin
-        checkEmpty args;
+        check_empty args;
         begin
           Twelf.Table.top ();
           serve Twelf.Ok

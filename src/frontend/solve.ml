@@ -158,7 +158,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     | _ -> false
 
   (* boundToString : bound -> string *)
-  let rec boundToString = function Some n -> Int.toString n | None -> "*"
+  let boundToString = function Some n -> Int.toString n | None -> "*"
 
   (* boundMin : bound * bound -> bound *)
   let rec boundMin = function

@@ -1,5 +1,8 @@
 (* # 1 "src/lambda/constraints.sig.ml" *)
+
 open! Basis
+(** Constraint simplification and reporting helpers for LF terms. *)
+
 open Intsyn
 
 (* Manipulating Constraints *)
@@ -10,7 +13,12 @@ module type CONSTRAINTS = sig
   exception Error of IntSyn.cnstr list
 
   val simplify : IntSyn.cnstr list -> IntSyn.cnstr list
+
+  val warn_constraints : string list -> unit
+  (** Report unresolved constraint owners in a human-readable form. *)
+
   val warnConstraints : string list -> unit
+  (** Compatibility alias for {!warn_constraints}. *)
 end
 (* signature CONSTRAINTS *)
 
@@ -43,31 +51,29 @@ end) : CONSTRAINTS = struct
      Constraints are attached directly to the EVar X
      or to a descendent  -fp?
   *)
-  open! struct
-    module I = IntSyn
+  module I = IntSyn
 
-    let rec simplify = function
-      | [] -> []
-      | { contents = I.Solved } :: cnstrs -> simplify cnstrs
-      | ({ contents = I.Eqn (g_, u1_, u2_) } as eqn_) :: cnstrs -> begin
-          if Conv.conv ((u1_, I.id), (u2_, I.id)) then simplify cnstrs
-          else eqn_ :: simplify cnstrs
-        end
-      | ({ contents = I.FgnCnstr (csfc_csid, csfc_ops) } as fgnCnstr_) :: cnstrs
-        -> begin
-          if I.FgnCnstrStd.Simplify.apply (csfc_csid, csfc_ops) () then
-            simplify cnstrs
-          else fgnCnstr_ :: simplify cnstrs
-        end
+  let rec simplify = function
+    | [] -> []
+    | { contents = I.Solved } :: cnstrs -> simplify cnstrs
+    | ({ contents = I.Eqn (g_, u1_, u2_) } as eqn_) :: cnstrs -> begin
+        if Conv.conv ((u1_, I.id), (u2_, I.id)) then simplify cnstrs
+        else eqn_ :: simplify cnstrs
+      end
+    | ({ contents = I.FgnCnstr (csfc_csid, csfc_ops) } as fgnCnstr_) :: cnstrs
+      -> begin
+        if I.FgnCnstrStd.Simplify.apply (csfc_csid, csfc_ops) () then
+          simplify cnstrs
+        else fgnCnstr_ :: simplify cnstrs
+      end
 
-    let rec namesToString = function
-      | name :: [] -> name ^ "."
-      | name :: names -> (name ^ ", ") ^ namesToString names
+  let rec names_to_string = function
+    | name :: [] -> name ^ "."
+    | name :: names -> (name ^ ", ") ^ names_to_string names
 
-    let rec warnConstraints = function
-      | [] -> ()
-      | names -> print (("Constraints remain on " ^ namesToString names) ^ "\n")
-  end
+  let rec warn_constraints = function
+    | [] -> ()
+    | names -> print (("Constraints remain on " ^ names_to_string names) ^ "\n")
 
   (* simplify cnstrs = cnstrs'
        Effects: simplifies the constraints in cnstrs by removing constraints
@@ -75,8 +81,8 @@ end) : CONSTRAINTS = struct
          Neither U nor U' needs to be a pattern
          *)
   let simplify = simplify
-  let namesToString = namesToString
-  let warnConstraints = warnConstraints
+  let namesToString = names_to_string
+  let warnConstraints = warn_constraints
 end
 (*! structure IntSyn' : INTSYN !*)
 (*! sharing Conv.IntSyn = IntSyn' !*)

@@ -1,205 +1,157 @@
 (** {1 The Internal Syntax}
 
-@author Frank Pfenning
-@author Carsten Schuermann
-@author Roberto Virga
-@author Asher Frost
-*)
+    @author Frank Pfenning
+    @author Carsten Schuermann
+    @author Roberto Virga
+    @author Asher Frost *)
 
 open! Basis
 open Fgnopn
 
 (** The internal syntax module type *)
 module type INTSYN = sig
+  (* Basic types. *)
 
-  (** {2 Basic Types} *)
-
-  (** {3 Aliases and Exceptions} *)
-  (** Constant identifier (alias for {!int}). *)
+  (* Aliases and exceptions. *)
   type cid = int [@@deriving eq, ord, show]
+  (** Constant identifier (alias for {!int}). *)
 
-  (** Structure identifier (alias for {!int}). *)
   type mid = int [@@deriving eq, ord, show]
+  (** Structure identifier (alias for {!int}). *)
 
-  (** Constraint-solver module identifier. *)
   type csid = int [@@deriving eq, ord, show]
+  (** Constraint-solver module identifier. *)
 
-  (** foreign expression representation *)
   type nonrec fgnExp = exn
+  (** foreign expression representation *)
 
-  (** Raised by a constraint solver when passed an incorrect foreign expression. *)
   exception UnexpectedFgnExp of fgnExp
+  (** Raised by a constraint solver when passed an incorrect foreign expression.
+  *)
 
-  (** raised by a constraint solver
- 					   if passed an incorrect arg *)
-  (** foreign constraint representation *)
+  (* raised by a constraint solver
+      if passed an incorrect arg *)
+  (* foreign constraint representation *)
   type nonrec fgnCnstr = exn
 
-  (** Raised by a constraint solver when passed an incorrect foreign constraint. *)
   exception UnexpectedFgnCnstr of fgnCnstr
-  (** raised by a constraint solver
-                                            if passed an incorrect arg *)
+  (** Raised by a constraint solver when passed an incorrect foreign constraint.
+  *)
+  (* raised by a constraint solver
+      if passed an incorrect arg *)
 
+  (* Contexts. *)
 
-  (** {3 Contexts} *)
-                                            
   (** Context (lists of statements), commonly {m \Gamma}. *)
-  type 'a ctx = 
-    | Null (** Empty context {m \circ} *) 
-    | Decl of 'a ctx * 'a (** Context consed onto a statement {m \Gamma , \phi} *)
-
+  type 'a ctx =
+    | Null  (** Empty context {m \circ} *)
+    | Decl of 'a ctx * 'a
+        (** Context consed onto a statement {m \Gamma , \phi} *)
 
   val null_ : 'a ctx
-    (** Empty context *)
+  (** Empty context *)
 
   (** {4 Context Operations} *)
 
-  (** Removes the last statement from the context *)
   val ctxPop : 'a ctx -> 'a ctx
+  (** Removes the last statement from the context *)
 
-  (** Looks up a statement in the context from its index *)
   val ctxLookup : 'a ctx * int -> 'a
+  (** Looks up a statement in the context from its index *)
 
-  (** Returns the length of the context *)
   val ctxLength : 'a ctx -> int
+  (** Returns the length of the context *)
 
-
-  (** Dependency information for function types    *)
-  type depend = 
-    | No (** Non dependent function *)
-    | Maybe (** Possibly dependent function *)
-    | Meta (** Definitely dependent function. *)
-    [@@deriving eq, ord, show]
+  (** Dependency information for function types *)
+  type depend =
+    | No  (** Non dependent function *)
+    | Maybe  (** Possibly dependent function *)
+    | Meta  (** Definitely dependent function. *)
+  [@@deriving eq, ord, show]
 
   (** Sorts of LF *)
-  type uni = 
-    |  Kind 
-    (** Kinds *)
-    |  Type 
-    (** Types *)
+  type uni = Kind  (** Kinds *) | Type  (** Types *)
+  [@@deriving eq, ord, show]
 
-    [@@deriving eq, ord, show]
-  (** 
-      The type of LF expressions, {m e}. Types have the same syntax as terms. 
-      *)
+  (* The type of LF expressions [e]. Types have the same syntax as terms. *)
   type exp =
-    | Uni of uni
-    (** A value describing a universe {!uni} *)
-
+    | Uni of uni  (** A value describing a universe {!uni} *)
     | Pi of (dec * depend) * exp
-    (** 
-        {m \Pi} types, dependent function types. 
-        The first parameter of these describes the declaration being introduced, {!dec}.
-        The second, {!depend}, models whether the function is simple or dependent 
-        The final argument is the resulting type 
-        *)
-
+        (** {m \Pi} types, dependent function types. The first parameter of
+            these describes the declaration being introduced, {!dec}. The
+            second, {!depend}, models whether the function is simple or
+            dependent The final argument is the resulting type *)
     | Root of head * spine
-    (** Juxtaposition when the head is in normal form, for instance, {m add 5 4}. *)
-
+        (** Juxtaposition when the head is in normal form, for instance,
+            {m add 5 4}. *)
     | Redex of exp * spine
-    (** Juxtaposition where the head is not in normal form.
-      See {!Root}. *)
-
+        (** Juxtaposition where the head is not in normal form. See {!Root}. *)
     | Lam of dec * exp
-    (** A lambda abstraction, with the declerations introduced and the resulting expression *)
-
+        (** A lambda abstraction, with the declerations introduced and the
+            resulting expression *)
     | EVar of exp option ref * dec ctx * exp * cnstr_ ref list ref
-  (**     | X<I> : G|-V, Cnstr   *)
-
-    | EClo of exp * sub
-  (**     | U[s]                 *)
-
-    | AVar of exp option ref
-    (** [A<I>] *)
-
-    | FgnExp of csid * fgnExp
-  (**     | (foreign expression) *)
-
-    | NVar of int
-    (** Variable indexed *)
-    [@@deriving eq, ord, show]
+        (** | X<I> : G|-V, Cnstr *)
+    | EClo of exp * sub  (** | U[s] *)
+    | AVar of exp option ref  (** [A<I>] *)
+    | FgnExp of csid * fgnExp  (** | (foreign expression) *)
+    | NVar of int  (** Variable indexed *)
+  [@@deriving eq, ord, show]
 
   (** Heads of clauses *)
   and head =
-    | BVar of int
-    (** Bound variable *)
-
-    | Const of cid
-    (** A free variable *)
-
-    | Proj of block * int
-  (**     | #k(b)                *)
-
-    | Skonst of cid
-  (**     | c#                   *)
-    | Def of cid
-  (**     | d (strict)           *)
-    | NSDef of cid
-  (**     | d (non strict)       *)
-    | FVar of string * exp * sub
-  (**     | F[s]                 *)
-    | FgnConst of csid * conDec
-  (**     | (foreign constant)   *)
-    [@@deriving eq, ord, show]
+    | BVar of int  (** Bound variable *)
+    | Const of cid  (** A free variable *)
+    | Proj of block * int  (** | #k(b) *)
+    | Skonst of cid  (** | c# *)
+    | Def of cid  (** | d (strict) *)
+    | NSDef of cid  (** | d (non strict) *)
+    | FVar of string * exp * sub  (** | F[s] *)
+    | FgnConst of csid * conDec  (** | (foreign constant) *)
+  [@@deriving eq, ord, show]
 
   (** Spines.
 
       Grammar:
       {[
-      S ::= Nil
-          | U ; S
-          | S[s]
-      ]}
-  *)
-  and spine =
-    | Nil
-    | App of exp * spine
-    | SClo of spine * sub
+        S ::= Nil
+            | U ; S
+            | S[s]
+      ]} *)
+  and spine = Nil | App of exp * spine | SClo of spine * sub
 
   (** Explicit substitutions.
 
       Grammar:
       {[
-      s ::= ^n
-          | Ft.s
-      ]}
-  *)
-  and sub =
-    | Shift of int
-    | Dot of front * sub
+        s ::= ^n
+            | Ft.s
+      ]} *)
+  and sub = Shift of int | Dot of front * sub
 
   (** Fronts.
 
       Grammar:
       {[
-      Ft ::= k
-           | U
-           | _x
-           | _
-      ]}
-  *)
+        Ft ::= k
+             | U
+             | _x
+             | _
+      ]} *)
   and front =
-    | Idx of int
-    (** [k] *)
-    | Exp of exp
-    (** [U] *)
-    | Axp of exp
-    (** Alternate expression form used in substitutions. *)
-    | Block of block
-    (** [_x] *)
-    | Undef
-    (** [_] *)
+    | Idx of int  (** [k] *)
+    | Exp of exp  (** [U] *)
+    | Axp of exp  (** Alternate expression form used in substitutions. *)
+    | Block of block  (** [_x] *)
+    | Undef  (** [_] *)
 
   (** Declarations.
 
       Grammar:
       {[
-      D ::= x:V
-          | v:l[s]
-          | v[^-d]
-      ]}
-  *)
+        D ::= x:V
+            | v:l[s]
+            | v[^-d]
+      ]} *)
   and dec =
     | Dec of string option * exp
     | BDec of string option * (cid * sub)
@@ -210,15 +162,14 @@ module type INTSYN = sig
 
       Grammar:
       {[
-      b ::= v
-          | L(l[^k],t)
-          | U1, ..., Un
+        b ::= v
+            | L(l[^k],t)
+            | U1, ..., Un
       ]}
 
       Historical note: one possible extension is to let projections count like
       substitutions (for example, by adding a closure-like block form), but this
-      remains deferred.
-  *)
+      remains deferred. *)
   and block =
     | Bidx of int
     | LVar of block option ref * sub * (cid * sub)
@@ -228,11 +179,10 @@ module type INTSYN = sig
 
       Grammar:
       {[
-      Cnstr ::= solved
-              | G|-(U1 == U2)
-              | (foreign)
-      ]}
-  *)
+        Cnstr ::= solved
+                | G|-(U1 == U2)
+                | (foreign)
+      ]} *)
   and cnstr_ =
     | Solved
     | Eqn of dec ctx * exp * exp
@@ -241,8 +191,7 @@ module type INTSYN = sig
   (** Status of a constant:
       - [Normal]: inert
       - [Constraint]: acts as a constraint
-      - [Foreign]: converted to foreign handling
-  *)
+      - [Foreign]: converted to foreign handling *)
   and status =
     | Normal
     | Constraint of csid * (dec ctx * spine * int -> exp option)
@@ -253,74 +202,55 @@ module type INTSYN = sig
 
   (** Residual operations produced by foreign unification:
       - [Assign]: perform [G |- X = U [ss]]
-      - [Delay]: delay a constraint, associating it with rigid EVars
-  *)
+      - [Delay]: delay a constraint, associating it with rigid EVars *)
   and fgnUnifyResidual =
     | Assign of dec ctx * exp * exp * sub
     | Delay of exp * cnstr_ ref
 
   and conDec =
-    | ConDec of
-        string
-        * mid option
-        * int
-        * status
-        * exp
-        * uni
-      (** [a : K : kind] or analogous typed constant declaration. *)
+    | ConDec of string * mid option * int * status * exp * uni
+        (** [a : K : kind] or analogous typed constant declaration. *)
     | ConDef of string * mid option * int * exp * exp * uni * ancestor
-      (** [d = M : A : type] or [a = A : K : kind]. *)
-    | AbbrevDef of
-        string
-        * mid option
-        * int
-        * exp
-        * exp
-        * uni
-      (** [a = A : K : kind] abbreviation-like definition. *)
-    | BlockDec of
-        string
-        * mid option
-        * dec ctx
-        * dec list
-      (** [%block l : SOME G1 PI G2]. *)
+        (** [d = M : A : type] or [a = A : K : kind]. *)
+    | AbbrevDef of string * mid option * int * exp * exp * uni
+        (** [a = A : K : kind] abbreviation-like definition. *)
+    | BlockDec of string * mid option * dec ctx * dec list
+        (** [%block l : SOME G1 PI G2]. *)
     | BlockDef of string * mid option * cid list
-      (** [%block l = (l1 | ... | ln)]. *)
-    | SkoDec of
-        string * mid option * int * exp * uni
-      (** [sa : K : kind] skolem-like declaration. *)
+        (** [%block l = (l1 | ... | ln)]. *)
+    | SkoDec of string * mid option * int * exp * uni
+        (** [sa : K : kind] skolem-like declaration. *)
 
   (** Ancestor information for [d] or [a]:
-      [head(expand(d)), height, head(expand[height](d))].
-      [None] means expansion yields [{x:A}B].
-  *)
+      [head(expand(d)), height, head(expand[height](d))]. [None] means expansion
+      yields [{x:A}B]. *)
   and ancestor = Anc of cid option * int * cid option
 
-  (** Structure declaration      *)
+  (** Structure declaration *)
   type strDec = StrDec of string * mid option [@@deriving eq, ord, show]
 
-  (** Form of constant declaration *)
-  (** from constraint domain *)
-  (** ordinary declaration *)
+  (* Form of constant declaration:
+      from constraint domain | ordinary declaration | %clause declaration. *)
+
   (** %clause declaration *)
   type conDecForm = FromCS | Ordinary | Clause [@@deriving eq, ord, show]
 
-  (** Type abbreviations *)
-  (** G = . | G,D                *)
+  (* Type abbreviations: G = . | G,D. *)
   type nonrec dctx = dec ctx
 
-  (** Us = U[s]                  *)
   type nonrec eclo = exp * sub
+  (** Us = U[s] *)
 
-  (** {m Bs = B_s m}                  *)
   type nonrec bclo = block * sub
+  (** {m Bs = B_s m} *)
 
-  (** constraints *)
   type nonrec cnstr = cnstr_ ref
+  (** constraints *)
 
   exception Error of string
 
-  (** Raised if out of space. *)
+  (* Raised if out of space. *)
+
   (** Standard operations on foreign expressions. *)
   module FgnExpStd : sig
     (** Convert to internal syntax. *)
@@ -339,8 +269,8 @@ module type INTSYN = sig
     module UnifyWith :
       FGN_OPN with type arg = dec ctx * exp and type result = fgnUnify
 
-    (** Fold a function over the subterms. *)
     val fold : csid * fgnExp -> (exp * 'a -> 'a) -> 'a -> 'a
+    (** Fold a function over the subterms. *)
   end
 
   (** Standard operations on foreign constraints. *)
@@ -375,86 +305,86 @@ module type INTSYN = sig
   val sgnStructLookup : mid -> strDec
   val constType : cid -> exp
 
-  (** Type of [c] or [d]. *)
   val constDef : cid -> exp
+  (** Type of [c] or [d]. *)
 
-  (** Definition of [d]. *)
   val constImp : cid -> int
+  (** Definition of [d]. *)
+
   val constStatus : cid -> status
   val constUni : cid -> uni
   val constBlock : cid -> dctx * dec list
 
-  (** Declaration contexts. *)
   val ctxDec : dctx * int -> dec
+  (** Declaration contexts. *)
 
-  (** Get a variable declaration. *)
   val blockDec : dctx * block * int -> dec
+  (** Get a variable declaration. *)
 
-  (** Explicit substitutions. *)
   val id : sub
+  (** Explicit substitutions. *)
 
-  (** Identity substitution. *)
   val shift : sub
+  (** Identity substitution. *)
 
-  (** Shift substitution ([^]). *)
   val invShift : sub
+  (** Shift substitution ([^]). *)
 
-  (** Inverse shift substitution ([^-1]). *)
   val bvarSub : int * sub -> front
+  (** Inverse shift substitution ([^-1]). *)
 
-  (** Bound-variable substitution application ([k[s]]). *)
   val frontSub : front * sub -> front
+  (** Bound-variable substitution application ([k[s]]). *)
 
-  (** Front substitution application ([H[s]]). *)
   val decSub : dec * sub -> dec
+  (** Front substitution application ([H[s]]). *)
 
-  (** Declaration substitution application ([x:V[s]]). *)
   val blockSub : block * sub -> block
+  (** Declaration substitution application ([x:V[s]]). *)
 
-  (** Block substitution application ([B[s]]). *)
   val comp : sub * sub -> sub
+  (** Block substitution application ([B[s]]). *)
 
-  (** Substitution composition ([s o s']). *)
   val dot1 : sub -> sub
+  (** Substitution composition ([s o s']). *)
 
-  (** Dot-1 operation ([1 . (s o ^)]). *)
   val invDot1 : sub -> sub
+  (** Dot-1 operation ([1 . (s o ^)]). *)
 
-  (** Inverse dot-1 operation ([(^ o s) o ^-1]). *)
-  (** EVar-related functions. *)
+  (* Inverse dot-1 operation: [(^ o s) o ^-1]. *)
+  (* EVar-related functions. *)
   val newEVar : dctx * exp -> exp
 
-  (** Create [X:G|-V, []]. *)
   val newAVar : unit -> exp
+  (** Create [X:G|-V, []]. *)
 
-  (** Create a bare [A]. *)
   val newTypeVar : dctx -> exp
+  (** Create a bare [A]. *)
 
-  (** Create [X:G|-type, []]. *)
   val newLVar : sub * (cid * sub) -> block
+  (** Create [X:G|-type, []]. *)
 
-  (** Create [B:(l[^k],t)]. *)
-  (** Definition-related functions. *)
+  (* Create [B:(l[^k],t)]. *)
+  (* Definition-related functions. *)
   val headOpt : exp -> head option
   val ancestor : exp -> ancestor
   val defAncestor : cid -> ancestor
 
-  (** Type-related functions. *)
-  (** Do not expand type definitions. *)
+  (* Type-related functions. *)
+  (* Do not expand type definitions. *)
   val targetHeadOpt : exp -> head option
 
-  (** Target type family, or [None]. *)
   val targetHead : exp -> head
+  (** Target type family, or [None]. *)
 
-  (** Target type family. *)
-  (** Expand type definitions. *)
+  (* Target type family. *)
+  (* Expand type definitions. *)
   val targetFamOpt : exp -> cid option
 
-  (** Target type family, or [None]. *)
   val targetFam : exp -> cid
+  (** Target type family, or [None]. *)
 
-  (** Target type family. *)
-  (** Used in [Flit]. *)
+  (* Target type family. Used in Flit. *)
   val rename : cid * string -> unit
 end
 (** Signature {!INTSYN}. *)

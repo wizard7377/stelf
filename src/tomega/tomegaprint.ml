@@ -761,7 +761,7 @@ end) : TOMEGAPRINT = struct
       | I.Decl (psi_, (T.PDec (Some n, f_, _, _) as d_)) ->
           I.Decl (nameCtx psi_, d_)
 
-    let rec flag = function None -> "" | Some _ -> "*"
+    let flag = function None -> "" | Some _ -> "*"
 
     let rec formatCtx = function
       | I.Null -> []
@@ -1236,7 +1236,7 @@ end) : TOMEGAPRINT = struct
   let prgToString = prgToString
   let funToString = funToString
   let nameCtx = nameCtx
-  let formatCtx = function psi_ -> Fmt.hVbox (formatCtx psi_)
+  let formatCtx psi_ = Fmt.hVbox (formatCtx psi_)
   let ctxToString = ctxToString
   (*    val lemmaDecToString = lemmaDecToString *)
 end

@@ -73,7 +73,7 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       | L.Upper, ids, name, r -> ExtSyn.ucid (ids, name, r)
       | L.Quoted, ids, name, r -> ExtSyn.quid (ids, name, r)
 
-    let rec isQuoted = function L.Quoted -> true | _ -> false
+    let isQuoted = function L.Quoted -> true | _ -> false
 
     type nonrec stack = ExtSyn.term operator list
     type nonrec opr = ExtSyn.term operator
@@ -479,16 +479,16 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
     *)
   let parseQualId' = parseQualId'
   let parseQualIds' = parseQualIds'
-  let parseSubord' = function f -> parseSubord' (f, [])
-  let parseFreeze' = function f -> parseFreeze' (f, [])
-  let parseThaw' = function f -> parseThaw' (f, [])
-  let parseDeterministic' = function f -> parseDeterministic' (f, [])
-  let parseCompile' = function f -> parseCompile' (f, [])
+  let parseSubord' f = parseSubord' (f, [])
+  let parseFreeze' f = parseFreeze' (f, [])
+  let parseThaw' f = parseThaw' (f, [])
+  let parseDeterministic' f = parseDeterministic' (f, [])
+  let parseCompile' f = parseCompile' (f, [])
 
   (* -ABP 4/4/03 *)
-  let parseTerm' = function f -> parseExp' (f, [])
+  let parseTerm' f = parseExp' (f, [])
   let parseDec' = parseDec'
-  let parseCtx' = function f -> parseCtx (true, [], f)
+  let parseCtx' f = parseCtx (true, [], f)
 end
 (* local ... in *)
 (* functor ParseTerm *)

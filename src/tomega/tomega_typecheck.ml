@@ -634,9 +634,9 @@ end) : TOMEGATYPECHECK = struct
 
       | isValue _ = raise Error ""P isn't Value!""
 *)
-  let checkPrg = function psi_, (p_, f_) -> checkPrg (psi_, (p_, (f_, T.id)))
+  let checkPrg (psi_, (p_, f_)) = checkPrg (psi_, (p_, (f_, T.id)))
   let checkSub = checkSub
-  let checkFor = function psi_, f_ -> checkFor (psi_, (f_, T.id))
+  let checkFor (psi_, f_) = checkFor (psi_, (f_, T.id))
   let checkCtx = checkCtx
 end
 

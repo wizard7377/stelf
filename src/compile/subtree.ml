@@ -217,7 +217,7 @@ end) : SUBTREE = struct
     exception Assignment of string
     exception Generalization of string
 
-    let rec cidFromHead = function I.Const c -> c | I.Def c -> c
+    let cidFromHead = function I.Const c -> c | I.Def c -> c
     let rec dotn = function 0, s -> s | i, s -> dotn (i - 1, I.dot1 s)
 
     let rec compose' = function

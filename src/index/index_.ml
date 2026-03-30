@@ -34,7 +34,7 @@ end) : INDEX = struct
   open! struct
     module I = IntSyn
 
-    let rec cidFromHead = function I.Const c -> c | I.Def c -> c
+    let cidFromHead = function I.Const c -> c | I.Def c -> c
 
     let indexArray : IntSyn.head Queue.queue Array.array =
       Array.array (Global.maxCid + 1, Queue.empty)

@@ -349,7 +349,7 @@ end) : NAMES = struct
     let name = Stdlib.String.trim name in
     validateQualName (rev (String.fields (function c -> c = '.') name))
 
-  let rec unqualified = function Qid ([], id) -> Some id | _ -> None
+  let unqualified = function Qid ([], id) -> Some id | _ -> None
 
   type nonrec namespace =
     IntSyn.mid StringTree.table * IntSyn.cid StringTree.table
@@ -789,7 +789,7 @@ end) : NAMES = struct
   type extent = Local | Global [@@deriving eq, ord, show]
   type role = Exist | Univ of extent [@@deriving eq, ord, show]
 
-  let rec extent = function Exist -> Global | Univ ext -> ext
+  let extent = function Exist -> Global | Univ ext -> ext
 
   let rec namePrefOf'' = function
     | Exist, None -> "X"

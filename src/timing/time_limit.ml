@@ -1,5 +1,7 @@
 open Basis
 
+(** Time-bounded execution helpers. *)
+
 (* time-limit.sml
  *
  * COPYRIGHT (c) 1993 by AT&T Bell Laboratories.  See COPYRIGHT file for details.
@@ -8,11 +10,16 @@ open Basis
 module TimeLimit : sig
   exception TimeOut
 
+  val time_limit : Time.time option -> ('a -> 'b) -> 'a -> 'b
+  (** Execute [f x] with an optional timeout budget. *)
+
   val timeLimit : Time.time option -> ('a -> 'b) -> 'a -> 'b
+  (** Compatibility alias for {!time_limit}. *)
 end = struct
   exception TimeOut
 
-  let timeLimit = function None -> fun f x -> f x | Some t -> assert false
+  let time_limit = function None -> fun f x -> f x | Some _t -> assert false
+  let timeLimit = time_limit
   (* TODO deal with this some time *)
   (*
   let rec timeLimit arg__0 arg__1 arg__2 =

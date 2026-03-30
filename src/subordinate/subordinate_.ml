@@ -94,7 +94,7 @@ end) : SUBORDINATE = struct
     let memoTable : (bool * int) MemoTable.table = MemoTable.new_ 2048
     let memoInsert = MemoTable.insert memoTable
     let memoLookup = MemoTable.lookup memoTable
-    let memoClear = function () -> MemoTable.clear memoTable
+    let memoClear () = MemoTable.clear memoTable
     let memoCounter = ref 0
 
     let rec appReachable f b =
@@ -730,7 +730,7 @@ open! Basis
 module MemoTable = Hash_table.HashTable (struct
   type nonrec key' = int * int
 
-  let hash = function n, m -> (7 * n) + m
+  let hash (n, m) = (7 * n) + m
   let eq (x__op, y__op) = x__op = y__op
 end)
 

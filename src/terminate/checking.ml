@@ -362,7 +362,7 @@ end) : CHECKING = struct
           sc ) -> begin
           if Subordinate.equiv (I.targetFam v'_, I.targetFam v1_) then
             let x_ = I.newEVar (g_, I.EClo (v1_, s1)) in
-            let sc' = function () -> isParameter (q_, x_) && sc () in
+            let sc' () = isParameter (q_, x_) && sc () in
             ltInstL
               ( (g_, q_),
                 d_,
@@ -402,7 +402,7 @@ end) : CHECKING = struct
           sc ) -> begin
           if Subordinate.equiv (I.targetFam v'_, I.targetFam v1_) then
             let x_ = I.newEVar (g_, I.EClo (v1_, s1)) in
-            let sc' = function () -> isParameter (q_, x_) && sc () in
+            let sc' () = isParameter (q_, x_) && sc () in
             leInstL
               ( (g_, q_),
                 d_,
@@ -926,7 +926,7 @@ end) : CHECKING = struct
           k ) -> begin
           if Subordinate.equiv (I.targetFam v_, I.targetFam v1'_) then
             let x_ = I.newEVar (g_, I.EClo (v1'_, s1')) in
-            let sc' = function () -> isParameter (q_, x_) && sc () in
+            let sc' () = isParameter (q_, x_) && sc () in
             leR
               ( gq_,
                 d_,

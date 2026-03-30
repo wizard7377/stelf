@@ -305,7 +305,7 @@ end) : THM with module ThmSyn = Thm__0.ThmSyn' = struct
       let rec exists' = function
         | x, [] -> false
         | x, None :: l_ -> exists' (x, l_)
-        | x, Some y :: l_ -> begin if x = y then true else exists' (x, l_) end
+        | x, Some y :: l_ -> x = y || exists' (x, l_)
       in
       let rec delete = function
         | x, ((a, p_) as aP) :: c_ -> begin

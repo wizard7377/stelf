@@ -1483,7 +1483,7 @@ end) : ABSTRACTTABLED = struct
         (dEVars_, s')
   (* no linearization for answer substitution *)
 
-  let raiseType = function g_, u_ -> raiseType (g_, u_)
+  let raiseType (g_, u_) = raiseType (g_, u_)
 end
 (*! sharing Conv.IntSyn = IntSyn' !*)
 (*! structure TableParam : TABLEPARAM !*)
