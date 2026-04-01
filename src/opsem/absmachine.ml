@@ -5,12 +5,7 @@ open! Basis
 (* Author: Iliano Cervesato *)
 (* Modified: Jeff Polakow *)
 (* Modified: Frank Pfenning *)
-module type ABSMACHINE = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure CompSyn : COMPSYN !*)
-  val solve :
-    (CompSyn.goal * IntSyn.sub) * CompSyn.dProg * (IntSyn.exp -> unit) -> unit
-end
+include Absmachine_intf
 (* signature ABSMACHINE *)
 
 (* # 1 "src/opsem/absmachine.fun.ml" *)
@@ -34,7 +29,7 @@ module AbsMachine (AbsMachine__0 : sig
 
   (*! sharing Index.IntSyn = IntSyn' !*)
   (* CPrint currently unused *)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)

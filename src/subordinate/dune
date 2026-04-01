@@ -3,7 +3,11 @@
 (library
  (name subordinate)
  (public_name stelf.subordinate)
- (modules intset subordinate_)
+ (modules
+  intset
+  subordinate_
+  intset_intf
+  subordinate_intf)
  (libraries global table lambda names basis)
  (flags
   (:standard

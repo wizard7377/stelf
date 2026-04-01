@@ -3,19 +3,7 @@ open! Basis
 
 (* Splitting: Version 1.4 *)
 (* Author: Carsten Schuermann *)
-module type FIXEDPOINT = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Tomega : TOMEGA !*)
-  module State : State.STATE
-
-  exception Error of string
-
-  type nonrec operator
-
-  val expand : State.focus * Tomega.tC -> operator
-  val apply : operator -> unit
-  val menu : operator -> string
-end
+include Fixedpoint_intf
 (* signature Fixed Point *)
 
 (* # 1 "src/prover/fixedpoint.fun.ml" *)

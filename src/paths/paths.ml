@@ -1,4 +1,5 @@
-open! Paths_
+include Paths_
+include Origins
+
 module Paths_ = Paths_
-open! Origins
 module Origins = Origins

@@ -4,14 +4,7 @@ open! Parsing
 
 (* Parsing Signature Entries *)
 (* Author: Frank Pfenning *)
-module type PARSE_CONDEC = sig
-  (*! structure Parsing : PARSING !*)
-  module ExtConDec : Recon_condec.EXTCONDEC
-
-  val parseConDec' : ExtConDec.condec Parsing.parser
-  val parseAbbrev' : ExtConDec.condec Parsing.parser
-  val parseClause' : ExtConDec.condec Parsing.parser
-end
+include Parse_condec_intf
 (* signature PARSE_CONDEC *)
 
 (* # 1 "src/frontend/parse_condec.fun.ml" *)

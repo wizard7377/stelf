@@ -3,7 +3,12 @@
 (library
  (name worldcheck)
  (public_name stelf.worldcheck)
- (modules worldSyn worldify worldcheck_)
+ (modules
+  worldSyn
+  worldify
+  worldcheck_
+  worldSyn_intf
+  worldify_intf)
  (libraries
   global
   timing
@@ -51,7 +56,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+   Formatter__Formatter_
    -open
    Print
    -open
@@ -63,7 +68,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_
+   Subordinate
    -open
    Meta
    -open

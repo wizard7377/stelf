@@ -16,22 +16,7 @@ open Basis
    be initialized, otherwise exception Time.Time is raised
    somewhere.
 *)
-module type TIMING = sig
-  val init : unit -> unit
-
-  type nonrec center
-
-  val newCenter : string -> center
-  val reset : center -> unit
-  val time : center -> ('a -> 'b) -> 'a -> 'b
-
-  type nonrec sum
-
-  val sumCenter : string * center list -> sum
-  val toString : center -> string
-  val sumToString : sum -> string
-end
-
+include Timing_intf
 (* signature TIMING *)
 module Timing : TIMING = struct
   (* user and system time add up to total CPU time used *)
@@ -42,14 +27,10 @@ module Timing : TIMING = struct
 
   let init () = ()
 
-  type 'a result = Value of 'a | Exception of exn
   type nonrec center = string * (cpuTime * realTime) ref
   type nonrec sum = string * center list
 
   let zero = { usr = Time.zeroTime; sys = Time.zeroTime; gc = Time.zeroTime }
-
-  let minus ({ usr = t1; sys = t2; gc = t3 }, { usr = s1; sys = s2; gc = s3 }) =
-    { usr = Time.( - ) t1 s1; sys = Time.( - ) t2 s2; gc = Time.( - ) t3 s3 }
 
   let plus ({ usr = t1; sys = t2; gc = t3 }, { usr = s1; sys = s2; gc = s3 }) =
     { usr = Time.( + ) t1 s1; sys = Time.( + ) t2 s2; gc = Time.( + ) t3 s3 }
@@ -74,9 +55,6 @@ module Timing : TIMING = struct
        Warning: if the execution of f uses its own centers,
        the time for those will be counted twice!
     *)
-  (* TODO: Timer module is not directly accessible via open Basis.
-       Stub the timer-dependent functions until Timer is properly available. *)
-  let checkCPUAndGCTimer _timer = zero
   let time (_, _counters) (f : 'a -> 'b) (x : 'a) = f x
 
   (* sumCenter (name, centers) = sc
@@ -120,7 +98,6 @@ end
 (* Unused in the default linking, but could be *)
 (* passed as a paramter to Timers *)
 module Counting : TIMING = struct
-  type 'a result = Value of 'a | Exception of exn
   type nonrec center = string * int ref
   type nonrec sum = string * center list
 

@@ -3,7 +3,17 @@
 (library
  (name compile)
  (public_name stelf.compile)
- (modules compSyn cprint subtree assign compile_)
+ (modules
+  compSyn
+  cprint
+  subtree
+  assign
+  compile_
+  assign_intf
+  compSyn_intf
+  compile_intf
+  cprint_intf
+  subtree_intf)
  (libraries
   global
   table
@@ -45,7 +55,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+  Formatter__Formatter_
    -open
    Index
    -open
@@ -61,7 +71,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_))
+   Subordinate))
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

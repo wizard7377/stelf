@@ -6,39 +6,7 @@ open Funtypecheck
 
 (* Meta Theorem Prover abstraction : Version 1.3 *)
 (* Author: Frank Pfenning, Carsten Schuermann *)
-module type MTPABSTRACT = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure FunSyn : FUNSYN !*)
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  type approxFor =
-    | Head of IntSyn.dctx * (FunSyn.for_ * IntSyn.sub) * int
-    | Block of (IntSyn.dctx * IntSyn.sub * int * IntSyn.dec list) * approxFor
-
-  (* Approximat formula *)
-  (* AF ::= F [s] *)
-  (*  | (t, G2), AF *)
-  val weaken : IntSyn.dctx * IntSyn.cid -> IntSyn.sub
-  val raiseType : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
-
-  val abstractSub :
-    IntSyn.sub
-    * StateSyn.tag IntSyn.ctx
-    * (IntSyn.dctx * StateSyn.tag IntSyn.ctx)
-    * IntSyn.sub
-    * StateSyn.tag IntSyn.ctx ->
-    (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
-
-  val abstractSub' :
-    (IntSyn.dctx * StateSyn.tag IntSyn.ctx)
-    * IntSyn.sub
-    * StateSyn.tag IntSyn.ctx ->
-    (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
-
-  val abstractApproxFor : approxFor -> FunSyn.for_
-end
+include Mtp_abstract_intf
 (* signature MTPABSTRACT *)
 
 (* # 1 "src/meta/abstract.fun.ml" *)
@@ -51,7 +19,7 @@ module MTPAbstract (MTPAbstract__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure FunSyn' : FUNSYN !*)
   (*! sharing FunSyn'.IntSyn = IntSyn' !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.FunSyn = FunSyn' !*)
   module Whnf : WHNF
@@ -63,17 +31,17 @@ module MTPAbstract (MTPAbstract__0 : sig
   module Unify : UNIFY
 
   (*! sharing Unify.IntSyn = IntSyn' !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn' !*)
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
-  module FunTypeCheck : FUNTYPECHECK
+  module FunTypeCheck : Funtypecheck_intf.FUNTYPECHECK
 
   (*! sharing FunTypeCheck.FunSyn = FunSyn' !*)
   module Abstract : ABSTRACT
-end) : MTPABSTRACT = struct
+end) : Mtp_abstract_intf.MTPABSTRACT = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure FunSyn = FunSyn' !*)
   open MTPAbstract__0

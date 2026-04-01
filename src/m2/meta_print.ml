@@ -4,15 +4,8 @@ open Metasyn
 
 (* Meta printer for proof states *)
 (* Author: Carsten Schuermann *)
-module type METAPRINT = sig
-  module MetaSyn : METASYN
-
-  val stateToString : MetaSyn.state -> string
-  val sgnToString : MetaSyn.sgn -> string
-  val modeToString : MetaSyn.mode -> string
-  val conDecToString : IntSyn.conDec -> string
-end
-(* signature METAPRINT *)
+include Meta_print_intf
+(* signature Meta_print.METAPRINT *)
 
 (* # 1 "src/m2/meta_print.fun.ml" *)
 open! Basis
@@ -23,12 +16,12 @@ open Clause_print
 (* Author: Carsten Schuermann *)
 module MetaPrint (MetaPrint__0 : sig
   module Global : GLOBAL
-  module MetaSyn' : METASYN
+  module MetaSyn' : Metasyn.METASYN
   module Formatter : FORMATTER
   module Print : PRINT
 
   (*! sharing Print.IntSyn = MetaSyn'.IntSyn !*)
-  module ClausePrint : CLAUSEPRINT
+  module ClausePrint : Clause_print.CLAUSEPRINT
 end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
   open MetaPrint__0
   module MetaSyn = MetaSyn'

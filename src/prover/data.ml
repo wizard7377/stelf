@@ -3,11 +3,7 @@ open! Basis
 
 (* Data Global parameters *)
 (* Author: Carsten Schuermann *)
-module type DATA = sig
-  val maxFill : int ref
-  val maxSplit : int ref
-  val maxRecurse : int ref
-end
+include Data_intf
 (* signature DATA *)
 
 (* # 1 "src/prover/data.fun.ml" *)

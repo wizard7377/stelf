@@ -7,30 +7,7 @@ open Thmprint
 (* Author: Carsten Schuermann *)
 
 (** Modified: Brigitte Pientka, Frank Pfenning *)
-module type THM = sig
-  module ThmSyn : THMSYN
-
-  (*! structure Paths : PATHS !*)
-  exception Error of string
-
-  val installTotal :
-    ThmSyn.tDecl * (Paths.region * Paths.region list) -> IntSyn.cid list
-
-  val uninstallTotal : IntSyn.cid -> bool
-
-  val installTerminates :
-    ThmSyn.tDecl * (Paths.region * Paths.region list) -> IntSyn.cid list
-
-  val uninstallTerminates : IntSyn.cid -> bool
-
-  val installReduces :
-    ThmSyn.rDecl * (Paths.region * Paths.region list) -> IntSyn.cid list
-  (** true: was declared, false not *)
-
-  val uninstallReduces : IntSyn.cid -> bool
-  val installTabled : ThmSyn.tabledDecl -> unit
-  val installKeepTable : ThmSyn.keepTableDecl -> unit
-end
+include Thm_intf
 (* signature THM *)
 
 (* # 1 "src/thm/thm_.fun.ml" *)
@@ -63,7 +40,7 @@ end) : THM with module ThmSyn = Thm__0.ThmSyn' = struct
 
   open! struct
     module L = ThmSyn
-    module M = ModeSyn
+    module M = Modesyn.ModeSyn
     module I = IntSyn
     module P = ThmPrint
     module O = Order

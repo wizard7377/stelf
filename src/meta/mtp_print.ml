@@ -6,16 +6,7 @@ open Funprint
 
 (* Meta Printer Version 1.3 *)
 (* Author: Carsten Schuermann *)
-module type MTPRINT = sig
-  module Formatter : FORMATTER
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  val nameState : StateSyn.state -> StateSyn.state
-  val formatState : StateSyn.state -> Formatter.format
-  val stateToString : StateSyn.state -> string
-end
+include Mtp_print_intf
 (* signature MTPRINT *)
 
 (* # 1 "src/meta/print.fun.ml" *)
@@ -33,7 +24,7 @@ module MTPrint (MTPrint__0 : sig
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.FunSyn = FunSyn !*)
   (*! sharing StateSyn'.IntSyn = IntSyn !*)
@@ -41,8 +32,8 @@ module MTPrint (MTPrint__0 : sig
   module Print : PRINT
 
   (*! sharing Print.IntSyn = IntSyn !*)
-  module FunPrint : FUNPRINT
-end) : MTPRINT = struct
+  module FunPrint : Funprint_intf.FUNPRINT
+end) : Mtp_print_intf.MTPRINT = struct
   open MTPrint__0
   module Formatter = Formatter'
   module StateSyn = StateSyn'

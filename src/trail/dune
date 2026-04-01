@@ -3,7 +3,10 @@
 (library
  (name trail)
  (public_name stelf.trail)
- (modules trail_ notrail)
+ (modules
+  trail_
+  notrail
+  trail_intf)
  (libraries basis)
  (wrapped true)
  (preprocess

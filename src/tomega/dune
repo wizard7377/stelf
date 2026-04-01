@@ -14,7 +14,17 @@
   coverage
   redundant
   tomega_abstract
-  tomega_)
+  tomega_
+  converter_intf
+  coverage_intf
+  normalize_intf
+  opsem_intf
+  redundant_intf
+  tomega_abstract_intf
+  tomega_typecheck_intf
+  tomega_unify_intf
+  tomeganames_intf
+  tomegaprint_intf)
  (libraries
   global
   lambda
@@ -54,7 +64,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+   Formatter__Formatter_
    -open
    Names
    -open
@@ -70,7 +80,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_
+   Subordinate
    -open
    Meta
    -open

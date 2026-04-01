@@ -3,31 +3,7 @@ open! Basis
 
 (* Solve and query declarations, interactive top level *)
 (* Author: Frank Pfenning *)
-module type SOLVE = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Paths : PATHS !*)
-  module ExtQuery : Recon_query.EXTQUERY
-
-  exception AbortQuery of string
-
-  val solve :
-    ExtQuery.define list * ExtQuery.solve * Paths.location ->
-    (IntSyn.conDec * Paths.occConDec option) list
-
-  val query :
-    (int option * int option * ExtQuery.query) * Paths.location -> unit
-
-  (* may raise AbortQuery(msg) *)
-  val querytabled :
-    (int option * int option * ExtQuery.query) * Paths.location -> unit
-
-  (* may raise AbortQuery(msg) *)
-  val qLoop : unit -> bool
-
-  (* true means normal exit *)
-  val qLoopT : unit -> bool
-end
-
+include Solve_intf
 (* true means normal exit *)
 (* signature SOLVE *)
 
@@ -48,7 +24,7 @@ module Solve (Solve__0 : sig
   module ReconQuery : Recon_query.RECON_QUERY
 
   module Parser :
-    PARSER
+    Parser_intf.PARSER
       with type ExtQuery.query = ReconQuery.query
        and type ExtQuery.define = ReconQuery.define
        and type ExtQuery.solve = ReconQuery.solve
@@ -63,7 +39,7 @@ module Solve (Solve__0 : sig
 
   (*! sharing Compile.IntSyn = IntSyn' !*)
   (*! sharing Compile.CompSyn = CompSyn !*)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn !*)
@@ -276,7 +252,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
             end;
             finish m_
           end
-        with Filling.TimeOut ->
+        with TimeLimit.TimeOut ->
           raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
     end
 
@@ -338,7 +314,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
               end
             with Solution m_ -> finish m_
           end
-        with Filling.TimeOut ->
+        with TimeLimit.TimeOut ->
           raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
     end
   (* self timing *)
@@ -441,7 +417,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
                ()
            with Done -> ()
            (* printing is timed into solving! *)
-         with Filling.TimeOut ->
+         with TimeLimit.TimeOut ->
            raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
         Cs_manager.reset ();
         checkSolutions (expected, try_, !solutions)
@@ -581,7 +557,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
                (Timers.time Timers.solving search)
                ()
            with Done -> ()
-         with Filling.TimeOut ->
+         with TimeLimit.TimeOut ->
            raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
         Cs_manager.reset ();
         checkSolutions (expected, try_, !solutions)
@@ -821,7 +797,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
               TimeLimit.timeLimit !Global.timeLimit
                 (Timers.time Timers.solving tabledSearch)
                 ()
-            with Filling.TimeOut ->
+            with TimeLimit.TimeOut ->
               begin
                 Msg.message "\n----------- TIME OUT ---------------\n";
                 raise Done

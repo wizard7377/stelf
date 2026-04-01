@@ -4,17 +4,7 @@ module Tomega = Lambda_.Tomega
 
 (* Operational Semantics for Delphin *)
 (* Author: Carsten Schuermann *)
-module type OPSEM = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Tomega : TOMEGA !*)
-  exception NoMatch
-
-  val evalPrg : Tomega.prg -> Tomega.prg
-  val topLevel : Tomega.prg -> unit
-  val createVarSub : Tomega.dec IntSyn.ctx * Tomega.dec IntSyn.ctx -> Tomega.sub
-  val matchSub : Tomega.dec IntSyn.ctx * Tomega.sub * Tomega.sub -> unit
-end
-
+include Opsem_intf
 (* # 1 "src/tomega/opsem.fun.ml" *)
 open! Unify
 open! Basis
@@ -24,14 +14,14 @@ module Opsem (Opsem__0 : sig
   (* Author: Carsten Schuermann, Adam Poswolsky *)
   module Whnf : WHNF
   module Abstract : ABSTRACT
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
   module TomegaTypeCheck : Tomega_typecheck.TOMEGATYPECHECK
   module TomegaPrint : Tomegaprint.TOMEGAPRINT
   module Unify : UNIFY
 end) : OPSEM = struct
   module T = Tomega
   module I = IntSyn
-  module S = Subordinate
+  module S = Opsem__0.Subordinate
   module A = Abstract
   module Unify = Opsem__0.Unify
   module TomegaPrint = Opsem__0.TomegaPrint

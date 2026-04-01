@@ -3,10 +3,7 @@ open! Basis
 
 (* Skolem administration *)
 (* Author: Carsten Schuermann *)
-module type SKOLEM = sig
-  (*! structure IntSyn : INTSYN !*)
-  val install : IntSyn.cid list -> unit
-end
+include Skolem_intf
 (* signature SKOLEM *)
 
 (* # 1 "src/m2/skolem.fun.ml" *)
@@ -30,16 +27,16 @@ module Skolem (Skolem__0 : sig
   module IndexSkolem : INDEX
 
   (*! sharing IndexSkolem.IntSyn = IntSyn' !*)
-  module ModeTable : MODETABLE
+  module ModeTable : Modetable.MODETABLE
 
-  (*! sharing ModeSyn.IntSyn = IntSyn' !*)
+  (*! sharing Modes.Modesyn.ModeSyn.IntSyn = IntSyn' !*)
   module Print : PRINT
 
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Compile : COMPILE
 
   (*! sharing Compile.IntSyn = IntSyn' !*)
-  module Timers : TIMERS
+  module Timers : Timers_intf.TIMERS
   module Names : NAMES
 end) : SKOLEM = struct
   open Skolem__0
@@ -49,7 +46,7 @@ end) : SKOLEM = struct
 
   open! struct
     module I = IntSyn
-    module M = ModeSyn
+    module M = Modes.Modesyn.ModeSyn
 
     let rec installSkolem (name, imp, (v_, mS), l_) =
       let rec spine = function

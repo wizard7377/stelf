@@ -116,3 +116,5 @@ module Strict = struct
   let rec check_strict_type p b = check_strict_type' 0 p b
   let rec check_strict_kind k = check_strict_kind' 0 k
 end
+
+include Strict

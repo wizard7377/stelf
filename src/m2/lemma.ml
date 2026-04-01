@@ -4,13 +4,7 @@ open Metasyn
 
 (* Lemma *)
 (* Author: Carsten Schuermann *)
-module type LEMMA = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-
-  val apply : MetaSyn.state * IntSyn.cid -> MetaSyn.state
-end
+include Lemma_intf
 (* signature LEMMA *)
 
 (* # 1 "src/m2/lemma.fun.ml" *)
@@ -21,8 +15,8 @@ open Meta_abstract
 (* Lemma *)
 (* Author: Carsten Schuermann *)
 module Lemma (Lemma__0 : sig
-  module MetaSyn' : METASYN
-  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
+  module MetaSyn' : Metasyn.METASYN
+  module MetaAbstract : Meta_abstract.METAABSTRACT with module MetaSyn = MetaSyn'
 end) : LEMMA with module MetaSyn = Lemma__0.MetaSyn' = struct
   open Lemma__0
   module MetaSyn = MetaAbstract.MetaSyn

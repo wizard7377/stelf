@@ -5,22 +5,7 @@ module Tomega = Lambda_.Tomega
 (* Converter from relational representation to a functional
    representation of proof terms *)
 (* Author: Carsten Schuermann *)
-module type CONVERTER = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Tomega : TOMEGA !*)
-  exception Error of string
-  exception Error' of Tomega.sub
-
-  val convertFor : IntSyn.cid list -> Tomega.for_
-  val convertPrg : IntSyn.cid list -> Tomega.prg
-
-  val installPrg :
-    IntSyn.cid list ->
-    IntSyn.cid * Tomega.lemma list * Tomega.lemma list (* projections *)
-
-  (* selections *)
-  val convertGoal : Tomega.dec IntSyn.ctx * IntSyn.exp -> Tomega.prg
-end
+include Converter_intf
 (* Signature CONVERTER *)
 
 (* # 1 "src/tomega/converter.fun.ml" *)
@@ -63,7 +48,7 @@ module Converter (Converter__0 : sig
 
   (*! sharing WorldSyn.IntSyn = IntSyn' !*)
   (*! sharing WorldSyn.Tomega = Tomega' !*)
-  module Worldify : WORLDIFY
+  module Worldify : Worldcheck_.WORLDIFY
 
   (*! sharing Worldify.IntSyn = IntSyn' !*)
   (*! sharing Worldify.Tomega = Tomega' !*)
@@ -71,13 +56,13 @@ module Converter (Converter__0 : sig
 
   (*! sharing TomegaTypeCheck.IntSyn = IntSyn' !*)
   (*! sharing TomegaTypeCheck.Tomega = Tomega' !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn' !*)
   module TypeCheck : Typecheck_.TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
-  module Redundant : REDUNDANT
+  module Redundant : Redundant_intf.REDUNDANT
   module TomegaAbstract : Tomega_abstract.TOMEGAABSTRACT
 end) : CONVERTER = struct
   (*! structure IntSyn = IntSyn' !*)
@@ -88,8 +73,8 @@ end) : CONVERTER = struct
   open! struct
     module T = Tomega
     module I = IntSyn
-    module M = ModeSyn
-    module S = Subordinate
+    module M = Modes.Modesyn.ModeSyn
+    module S = Converter__0.Subordinate
     module A = Abstract
     module TomegaTypeCheck = Converter__0.TomegaTypeCheck
     module TA = Converter__0.TomegaAbstract
@@ -132,7 +117,7 @@ end) : CONVERTER = struct
           (I.Decl (g'_, strengthenDec (d_, s')), I.dot1 s')
 
     let rec strengthenFor = function
-      | True, s -> T.True
+      | T.True, s -> T.True
       | T.And (f1_, f2_), s ->
           T.And (strengthenFor (f1_, s), strengthenFor (f2_, s))
       | T.All ((T.UDec d_, q_), f_), s ->
@@ -142,12 +127,13 @@ end) : CONVERTER = struct
           T.Ex ((strengthenDec (d_, s), q_), strengthenFor (f_, I.dot1 s))
 
     let rec strengthenOrder = function
-      | Order.Arg ((u_, s1), (v_, s2)), s ->
-          Order.Arg ((u_, strengthenSub (s1, s)), (v_, strengthenSub (s2, s)))
-      | Order.Simul os_, s ->
-          Order.Simul (map (function o_ -> strengthenOrder (o_, s)) os_)
-      | Order.Lex os_, s ->
-          Order.Lex (map (function o_ -> strengthenOrder (o_, s)) os_)
+        | Lambda.Order.Arg ((u_, s1), (v_, s2)), s ->
+          Lambda.Order.Arg
+          ((u_, strengthenSub (s1, s)), (v_, strengthenSub (s2, s)))
+        | Lambda.Order.Simul os_, s ->
+          Lambda.Order.Simul (map (function o_ -> strengthenOrder (o_, s)) os_)
+        | Lambda.Order.Lex os_, s ->
+          Lambda.Order.Lex (map (function o_ -> strengthenOrder (o_, s)) os_)
 
     let rec strengthenTC = function
       | T.Base o_, s -> T.Base (strengthenOrder (o_, s))
@@ -488,7 +474,7 @@ end) : CONVERTER = struct
       let rec makeSubst = function
         | n, g_, s, [], f -> (g_, f)
         | n, g_, s, (I.Dec (x, v'_) as d_) :: l_, f -> begin
-            if Subordinate.belowEq (I.targetFam v'_, I.targetFam v_) then
+            if S.belowEq (I.targetFam v'_, I.targetFam v_) then
               makeSubst (n + 1, I.Decl (g_, I.decSub (d_, s)), I.dot1 s, l_, f)
             else makeSubst (n, g_, I.comp (s, I.shift), l_, f)
           end
@@ -715,7 +701,7 @@ end) : CONVERTER = struct
             if
               List.foldr
                 (function
-                  | a, b -> b && Subordinate.belowEq (a, I.targetFam v_))
+                  | a, b -> b && S.belowEq (a, I.targetFam v_))
                 true fams
             then transformList (l_, I.comp (w, I.shift))
             else

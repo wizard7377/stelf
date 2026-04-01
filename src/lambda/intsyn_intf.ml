@@ -8,11 +8,13 @@
 open! Basis
 open Fgnopn
 
-(** The internal syntax module type *)
+(** The internal syntax module type 
+  @canonical Lambda.Intsyn.INTSYN *)
 module type INTSYN = sig
   (* Basic types. *)
 
   (* Aliases and exceptions. *)
+
   type cid = int [@@deriving eq, ord, show]
   (** Constant identifier (alias for {!int}). *)
 
@@ -40,7 +42,7 @@ module type INTSYN = sig
   (* raised by a constraint solver
       if passed an incorrect arg *)
 
-  (* Contexts. *)
+  (** {3 Contexts.} *)
 
   (** Context (lists of statements), commonly {m \Gamma}. *)
   type 'a ctx =
@@ -62,6 +64,8 @@ module type INTSYN = sig
   val ctxLength : 'a ctx -> int
   (** Returns the length of the context *)
 
+  (** {2 Syntax} *)
+
   (** Dependency information for function types *)
   type depend =
     | No  (** Non dependent function *)
@@ -73,28 +77,39 @@ module type INTSYN = sig
   type uni = Kind  (** Kinds *) | Type  (** Types *)
   [@@deriving eq, ord, show]
 
-  (* The type of LF expressions [e]. Types have the same syntax as terms. *)
+  (** The type of LF expressions [e]. Types have the same syntax as terms. *)
   type exp =
-    | Uni of uni  (** A value describing a universe {!uni} *)
+    | Uni of uni  
+    (** A value describing a universe {!uni} *)
+
     | Pi of (dec * depend) * exp
-        (** {m \Pi} types, dependent function types. The first parameter of
-            these describes the declaration being introduced, {!dec}. The
-            second, {!depend}, models whether the function is simple or
-            dependent The final argument is the resulting type *)
+    (**
+       {m \Pi X : A . B}, the dependent function type.
+       The first componenet is a list of declerations ({!dec}) extracted over and dependency information ({!depend}).
+       The final value is the resulting type. 
+    *)
+
     | Root of head * spine
-        (** Juxtaposition when the head is in normal form, for instance,
-            {m add 5 4}. *)
+    (**
+       Constructor application
+       The first component is the head (of form {!head}) of the application, and the second component is the spine (of form {!spine}) of the application.
+       Note that there is a seperate constructor {!Redux} for applications of {e functions} 
+    *)
+            
     | Redex of exp * spine
-        (** Juxtaposition where the head is not in normal form. See {!Root}. *)
+    (** A application of a value to values *)
+        
     | Lam of dec * exp
         (** A lambda abstraction, with the declerations introduced and the
             resulting expression *)
     | EVar of exp option ref * dec ctx * exp * cnstr_ ref list ref
         (** | X<I> : G|-V, Cnstr *)
     | EClo of exp * sub  (** | U[s] *)
-    | AVar of exp option ref  (** [A<I>] *)
+    | AVar of exp option ref
+    (** A term that is produced as part of a graph *)
     | FgnExp of csid * fgnExp  (** | (foreign expression) *)
-    | NVar of int  (** Variable indexed *)
+    | NVar of int  
+        (** De Bruijn variable, used for bound variables and projections. The integer is the de Bruijn index. *)
   [@@deriving eq, ord, show]
 
   (** Heads of clauses *)
@@ -119,32 +134,31 @@ module type INTSYN = sig
       ]} *)
   and spine = Nil | App of exp * spine | SClo of spine * sub
 
-  (** Explicit substitutions.
+  (** Explicit subsitutions
+      These work by providing the equivalent to a exhaustive list of bindings of De Burjn variables, such that [Dot (X, Dot (Y, Dot (Z, shift 4)))] reprsents the subsitution {m 0 \to x, 1 \to y, 2 \to z, 3 \to 0, 4 \to 0 ... m} 
+      Effectivly, we can think of these as being "nested subsitutions".
+      Each "level" deeper represents a De Bruijn variable, with the outmost being the [0] index and the ultimate {!shift} representing lifting of variables
+  *)
+  and sub =
+    | Shift of int
+    (** Lift the indices in the value by [k] *)
+    | Dot of front * sub
+    (** Swap the value at the current index with the first value, and shift the rest by 1. *)
 
-      Grammar:
-      {[
-        s ::= ^n
-            | Ft.s
-      ]} *)
-  and sub = Shift of int | Dot of front * sub
+  (** Valid values to be subsited in *)
 
-  (** Fronts.
-
-      Grammar:
-      {[
-        Ft ::= k
-             | U
-             | _x
-             | _
-      ]} *)
+      
   and front =
-    | Idx of int  (** [k] *)
-    | Exp of exp  (** [U] *)
+    | Idx of int  (** A De Bruijn index (I think?) - AYF *)
+    | Exp of exp  (** An expression *)
     | Axp of exp  (** Alternate expression form used in substitutions. *)
     | Block of block  (** [_x] *)
     | Undef  (** [_] *)
 
-  (** Declarations.
+  (**
+     Declerations in Stelf.
+     Note that we use the same form for toplevel and hypothetical judgements, as used in {!exp}. 
+
 
       Grammar:
       {[
@@ -154,9 +168,15 @@ module type INTSYN = sig
       ]} *)
   and dec =
     | Dec of string option * exp
+             (** A simple variable declaration, with an optional name and a type. *)
+
+    (* TODO Figure out what these are *)
     | BDec of string option * (cid * sub)
+    (** [v:l[s]] ? *)
     | ADec of string option * int
+      (** [v[^-d]] ? *)
     | NDec of string option
+    (** ??? *)
 
   (** Blocks.
 

@@ -1,9 +1,6 @@
 (* # 1 "src/server/sigint.sig.ml" *)
 open! Basis
-
-module type SIGINT = sig
-  val interruptLoop : (unit -> unit) -> unit
-end
+include Sigint_intf
 (* signature SIGINT *)
 
 (* # 1 "src/server/sigint.fun.ml" *)

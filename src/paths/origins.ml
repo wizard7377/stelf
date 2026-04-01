@@ -5,15 +5,7 @@ module Paths = Paths_.Paths
 
 (* Origins of Declarations *)
 (* Author: Frank Pfenning *)
-module type ORIGINS = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Paths : PATHS !*)
-  val reset : unit -> unit
-  val installLinesInfo : string * Paths.linesInfo -> unit
-  val linesInfoLookup : string -> Paths.linesInfo option
-  val installOrigin : IntSyn.cid * (string * Paths.occConDec option) -> unit
-  val originLookup : IntSyn.cid -> string * Paths.occConDec option
-end
+include Origins_intf
 (* signature ORIGINS *)
 
 (* # 1 "src/paths/origins.fun.ml" *)
@@ -63,7 +55,9 @@ end
 open! Basis
 open! Table_instances
 
-include MakeOrigins (struct
+module Origins = MakeOrigins (struct
   module Global = Global
   module Table = StringHashTable
 end)
+
+include Origins

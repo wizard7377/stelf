@@ -4,10 +4,7 @@ open Funsyn
 
 (* Operational semantics *)
 (* Author: Carsten Schuermann *)
-module type Interpreter = sig
-  (*! structure FunSyn : FUNSYN !*)
-  val run : FunSyn.pro -> FunSyn.pro
-end
+include Interpret_intf
 (* Signature Interpreter *)
 
 (* # 1 "src/meta/interpret.fun.ml" *)

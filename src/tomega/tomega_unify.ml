@@ -4,13 +4,7 @@ module Tomega = Lambda_.Tomega
 
 (* Unification on Formulas *)
 (* Author: Carsten Schuermann *)
-module type TOMEGAUNIFY = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Tomega : TOMEGA !*)
-  exception Unify of string
-
-  val unifyFor : Tomega.dec IntSyn.ctx * Tomega.for_ * Tomega.for_ -> unit
-end
+include Tomega_unify_intf
 (* Signature TOMEGATYPECHECK *)
 
 (* # 1 "src/tomega/tomega_unify.fun.ml" *)
@@ -45,10 +39,10 @@ module TomegaUnify (TomegaUnify__0 : sig
 
   (*! sharing TomegaPrint.IntSyn = IntSyn' !*)
   (*! sharing TomegaPrint.Tomega = Tomega' !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn' !*)
-  module Weaken : WEAKEN
+  module Weaken : Weaken_intf.WEAKEN
 end) : TOMEGAUNIFY = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)

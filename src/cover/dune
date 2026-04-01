@@ -3,7 +3,11 @@
 (library
  (name cover)
  (public_name stelf.cover)
- (modules total cover_)
+ (modules
+  total
+  cover_
+  cover_intf
+  total_intf)
  (libraries
   global
   lambda
@@ -52,7 +56,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+   Formatter__Formatter_
    -open
    Print
    -open
@@ -60,7 +64,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_
+   Subordinate
    -open
    Modes
    -open

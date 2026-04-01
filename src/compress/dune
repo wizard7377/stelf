@@ -3,7 +3,15 @@
 (library
  (name compress)
  (public_name stelf.compress)
- (modules syntax strict sgn reductio compress_ rep)
+ (modules
+  syntax
+  strict
+  sgn
+  reductio
+  compress_
+  rep
+  compress_intf
+  sgn_intf)
  (libraries global lambda basis)
  (flags
   (:standard

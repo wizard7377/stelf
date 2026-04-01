@@ -4,19 +4,7 @@ open! Basis
 (* Coverage Checking *)
 
 (** Author: Frank Pfenning *)
-module type COVER = sig
-  exception Error of string
-
-  val checkNoDef : IntSyn.cid -> unit
-
-  val checkOut : IntSyn.dctx * IntSyn.eclo -> unit
-  (** raises Error(msg) *)
-
-  val checkCovers : IntSyn.cid * ModeSyn.modeSpine -> unit
-
-  val coverageCheckCases :
-    Tomega.worlds * (IntSyn.dctx * IntSyn.sub) list * IntSyn.dctx -> unit
-end
+include Cover_intf
 (* signature COVER *)
 
 (* # 1 "src/cover/cover_.fun.ml" *)
@@ -45,10 +33,10 @@ module MakeCover (Cover__0 : sig
   module Index : INDEX
 
   (*! sharing Index.IntSyn = IntSyn' !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn' !*)
-  module WorldSyn : WORLDSYN
+  module WorldSyn : Worldcheck_.WORLDSYN
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn' !*)
@@ -63,6 +51,8 @@ module MakeCover (Cover__0 : sig
   (*! sharing Cs_manager.IntSyn = IntSyn' !*)
   module Timers : Timers.TIMERS
 end) : COVER = struct
+  module Subordinate = Cover__0.Subordinate
+
   exception Error of string
 
   module Unify = Cover__0.Unify
@@ -79,8 +69,8 @@ end) : COVER = struct
 
   module I = IntSyn
   module T = Tomega
-  module M = ModeSyn
-  module W = WorldSyn
+  module M = Modes.Modesyn.ModeSyn
+  module W = Cover__0.WorldSyn
   module P = Paths
   module F = Print.Formatter
   module N = Names
@@ -2456,7 +2446,7 @@ module Cover = MakeCover (struct
   module ModeTable = ModeTable
   module UniqueTable = UniqueTable
   module Index = Index
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate_.Subordinate
   module WorldSyn = WorldSyn
   module Names = Names
 
@@ -2478,9 +2468,9 @@ module Total = Total.Total (struct
   module ModeTable = ModeTable
   module ModeCheck = ModeCheck
   module Index = Index
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate_.Subordinate
   module Order = Order
-  module Reduces = Reduces
+  module Reduces = Terminate_.Reduces
   module Cover = Cover
 
   (*! structure Paths = Paths !*)

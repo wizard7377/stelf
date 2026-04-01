@@ -1,3 +1,3 @@
-open Basis
-open! Formatter_
+include Formatter_
+
 module Formatter_ = Formatter_

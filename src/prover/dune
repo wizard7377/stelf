@@ -14,7 +14,17 @@
   elim
   interactive
   pweaken
-  prover_)
+  prover_
+  data_intf
+  elim_intf
+  fill_intf
+  fixedpoint_intf
+  interactive_intf
+  introduce_intf
+  psearch_intf
+  pweaken_intf
+  split_intf
+  state_intf)
  (libraries
   tomega_lib
   lambda
@@ -79,7 +89,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_
+   Subordinate
    -open
    Solvers
    -open
@@ -101,7 +111,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+   Formatter__Formatter_
    -open
    Timing
    -open

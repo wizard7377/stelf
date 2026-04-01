@@ -3,7 +3,12 @@
 (library
  (name terminate)
  (public_name stelf.terminate)
- (modules checking reduces terminate_)
+ (modules
+  checking
+  reduces
+  terminate_
+  checking_intf
+  reduces_intf)
  (libraries
   global
   trail
@@ -45,7 +50,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+  Formatter__Formatter_
    -open
    Index
    -open
@@ -53,7 +58,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_
+   Subordinate
    -open
    Paths
    -open

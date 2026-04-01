@@ -9,18 +9,7 @@ open Statesyn
 
 (* Inference: Version 1.3 *)
 (* Author: Carsten Schuermann *)
-module type INFERENCE = sig
-  (*! structure FunSyn : FUNSYN !*)
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  type nonrec operator
-
-  val expand : StateSyn.state -> operator
-  val apply : operator -> StateSyn.state
-  val menu : operator -> string
-end
+include Inference_intf
 (* signature Inference *)
 
 (* # 1 "src/meta/inference.fun.ml" *)
@@ -30,12 +19,12 @@ open! Basis
 (* Inference:  Version 1.3*)
 (* Author: Carsten Schuermann *)
 module Inference (Inference__0 : sig
-  module MTPGlobal : MTPGLOBAL
+  module MTPGlobal : Mtp_global.MTPGLOBAL
 
   (*! structure IntSyn : INTSYN !*)
   (*! structure FunSyn' : FUNSYN !*)
   (*! sharing FunSyn'.IntSyn = IntSyn !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.FunSyn = FunSyn' !*)
   module Abstract : ABSTRACT
@@ -44,10 +33,10 @@ module Inference (Inference__0 : sig
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn !*)
-  module FunTypeCheck : FUNTYPECHECK
+  module FunTypeCheck : Funtypecheck_intf.FUNTYPECHECK
 
   (*! sharing FunTypeCheck.FunSyn = FunSyn' !*)
-  module UniqueSearch : UNIQUESEARCH
+  module UniqueSearch : Uniquesearch_intf.UNIQUESEARCH
 
   (*! sharing UniqueSearch.IntSyn = IntSyn !*)
   (*! sharing UniqueSearch.FunSyn = FunSyn' !*)
@@ -55,7 +44,7 @@ module Inference (Inference__0 : sig
 
   (*! sharing Print.IntSyn = IntSyn !*)
   module Whnf : WHNF
-end) : INFERENCE = struct
+end) : Inference_intf.INFERENCE = struct
   (*! structure FunSyn = FunSyn' !*)
   open Inference__0
   module StateSyn = StateSyn'

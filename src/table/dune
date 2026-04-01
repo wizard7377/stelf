@@ -13,7 +13,14 @@
   sparse_array2
   red_black_set
   table_
-  table_instances)
+  table_instances
+  queue_intf
+  red_black_set_intf
+  ring_intf
+  sparse_array_intf
+  sparse_array2_intf
+  string_hash_intf
+  table_intf)
  (libraries basis)
  (wrapped true)
  (preprocess

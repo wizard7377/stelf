@@ -5,17 +5,7 @@ open Basis
 (* Trailing Abstract Operations *)
 
 (** Author: Roberto Virga *)
-module type TRAIL = sig
-  type nonrec 'a trail
-
-  val trail : unit -> 'a trail
-  val suspend : 'a trail * ('a -> 'b) -> 'b trail
-  val resume : 'b trail * 'a trail * ('b -> 'a) -> unit
-  val reset : 'a trail -> unit
-  val mark : 'a trail -> unit
-  val unwind : 'a trail * ('a -> unit) -> unit
-  val log : 'a trail * 'a -> unit
-end
+include Trail_intf
 (* signature TRAIL *)
 
 (* # 1 "src/trail/trail_.fun.ml" *)
@@ -26,7 +16,7 @@ end
 (* Author: Roberto Virga *)
 module Trail : TRAIL = struct
   type 'a trail_ = Cons of 'a * 'a trail_ | Mark of 'a trail_ | Nil
-  type nonrec 'a trail = 'a trail_ ref
+  type 'a trail = 'a trail_ ref
 
   let trail () = ref Nil
   let reset trail = trail := Nil

@@ -19,7 +19,22 @@
   strategy
   prover
   mpi
-  m2_)
+  m2_
+  filling_intf
+  init_intf
+  lemma_intf
+  meta_abstract_intf
+  meta_global_intf
+  meta_print_intf
+  metasyn_intf
+  mpi_intf
+  prover_intf
+  qed_intf
+  recursion_intf
+  search_intf
+  skolem_intf
+  splitting_intf
+  strategy_intf)
  (libraries
   stream
   global
@@ -73,7 +88,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+   Formatter__Formatter_
    -open
    Print
    -open
@@ -105,7 +120,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_
+   Subordinate
    -open
    Table
    -open

@@ -3,14 +3,7 @@ open! Basis
 
 (* Reduction and Termination checker *)
 (* Author: Brigitte Pientka *)
-module type REDUCES = sig
-  (*! structure IntSyn : INTSYN !*)
-  exception Error of string
-
-  val reset : unit -> unit
-  val checkFamReduction : IntSyn.cid -> unit
-  val checkFam : IntSyn.cid -> unit
-end
+include Reduces_intf
 (* signature REDUCES *)
 
 (* # 1 "src/terminate/reduces.fun.ml" *)
@@ -35,7 +28,7 @@ module Reduces (Reduces__0 : sig
   module Index : INDEX
 
   (*! sharing Index.IntSyn = IntSyn' !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn' !*)
   module Formatter : FORMATTER

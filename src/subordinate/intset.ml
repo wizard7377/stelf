@@ -9,15 +9,7 @@ open! Basis
 (* Specialized for subordination *)
 (* Author: Frank Pfenning *)
 (* Copied from src/table/red-black-tree.fun *)
-module type INTSET = sig
-  type nonrec intset
-
-  val empty : intset
-  val insert : int * intset -> intset
-  val member : int * intset -> bool
-  val foldl : (int * 'b -> 'b) -> 'b -> intset -> 'b
-end
-
+include Intset_intf
 module IntSet : INTSET = struct
   type rbt = Empty | Red of (int * rbt * rbt) | Black of (int * rbt * rbt)
 

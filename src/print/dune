@@ -10,7 +10,14 @@
   traverse
   print_twega
   print_xml
-  print_omdoc)
+  print_omdoc
+  clause_print_intf
+  print_intf
+  print_omdoc_intf
+  print_twega_intf
+  print_xml_intf
+  symbol_intf
+  traverse_intf)
  (libraries lambda names formatter basis)
  (flags
   (:standard
@@ -29,7 +36,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_))
+   Formatter__Formatter_))
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

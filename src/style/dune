@@ -3,7 +3,9 @@
 (library
  (name style)
  (public_name stelf.style)
- (modules style_)
+ (modules
+  style_
+  style_intf)
  (libraries global table lambda formatter print names paths index basis)
  (flags
   (:standard
@@ -26,7 +28,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+   Formatter__Formatter_
    -open
    Print
    -open

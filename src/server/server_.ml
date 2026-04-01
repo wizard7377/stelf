@@ -6,11 +6,7 @@
 open! Basis
 
 (** Interactive command server for Stelf/STELF. *)
-
-module type SERVER = sig
-  val server : string * string list -> OS.Process.status
-end
-
+include Server_intf
 (* signature SERVER *)
 module Server : SERVER = struct
   let globalConfig : Stelf.Config.config option ref = ref None

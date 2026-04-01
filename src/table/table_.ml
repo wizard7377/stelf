@@ -8,29 +8,7 @@ open Basis
 (* This provides a common interface to hash tables *)
 
 (** red/black trees and similar data structures *)
-module type TABLE = sig
-  type nonrec key
-
-  type nonrec 'a entry = key * 'a
-  (** parameter *)
-
-  type nonrec 'a table
-
-  val new_ : int -> 'a table
-
-  val insert : 'a table -> 'a entry -> unit
-  (** size hint for some implementations *)
-
-  val insertShadow : 'a table -> 'a entry -> 'a entry option
-  (** insert entry, return shadowed entry if there is one *)
-
-  val lookup : 'a table -> key -> 'a option
-  val delete : 'a table -> key -> unit
-  val clear : 'a table -> unit
-
-  val app : ('a entry -> unit) -> 'a table -> unit
-  (** Apply function to all entries in unpredictable order *)
-end
+include Table_intf
 (* signature TABLE *)
 
 (* # 1 "src/table/table.fun.ml" *)

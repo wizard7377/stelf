@@ -4,19 +4,7 @@ open Metasyn
 
 (* Splitting *)
 (* Author: Carsten Schuermann *)
-module type SPLITTING = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-
-  type nonrec operator
-
-  val expand : MetaSyn.state -> operator list
-  val apply : operator -> MetaSyn.state list
-  val var : operator -> int
-  val menu : operator -> string
-  val index : operator -> int
-end
+include Splitting_intf
 (* signature SPLITTING *)
 
 (* # 1 "src/m2/splitting.fun.ml" *)
@@ -30,12 +18,12 @@ open Modetable
 (* Author: Carsten Schuermann *)
 module Splitting (Splitting__0 : sig
   module Global : GLOBAL
-  module MetaSyn' : METASYN
-  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
-  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
-  module ModeTable : MODETABLE
+  module MetaSyn' : Metasyn.METASYN
+  module MetaAbstract : Meta_abstract.METAABSTRACT with module MetaSyn = MetaSyn'
+  module MetaPrint : Meta_print.METAPRINT with module MetaSyn = MetaSyn'
+  module ModeTable : Modetable.MODETABLE
 
-  (*! sharing ModeSyn.IntSyn = MetaSyn'.IntSyn !*)
+  (*! sharing Modes.Modesyn.ModeSyn.IntSyn = MetaSyn'.IntSyn !*)
   module Whnf : WHNF
 
   (*! sharing Whnf.IntSyn = MetaSyn'.IntSyn !*)
@@ -46,7 +34,7 @@ module Splitting (Splitting__0 : sig
 
   (*! sharing Print.IntSyn = MetaSyn'.IntSyn !*)
   module Unify : UNIFY
-end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
+end) : Splitting_intf.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
   open Splitting__0
   module MetaSyn = MetaAbstract.MetaSyn
 
@@ -200,8 +188,8 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     and checkDec (m_, I.Dec (_, v_)) = checkExp (m_, v_)
 
     let rec modeEq = function
-      | ModeSyn.Marg (ModeSyn.Plus, _), M.Top -> true
-      | ModeSyn.Marg (ModeSyn.Minus, _), M.Bot -> true
+      | Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Plus, _), M.Top -> true
+      | Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Minus, _), M.Bot -> true
       | _ -> false
 
     let rec inheritBelow = function
@@ -347,9 +335,9 @@ end) : SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd'_) )
 
     and inheritSpineMode = function
-      | mode, ModeSyn.Mnil, b_, k, I.Nil, k', I.Nil, bdd'_ -> bdd'_
+      | mode, Modes.Modesyn.ModeSyn.Mnil, b_, k, I.Nil, k', I.Nil, bdd'_ -> bdd'_
       | ( mode,
-          ModeSyn.Mapp (m, mS),
+          Modes.Modesyn.ModeSyn.Mapp (m, mS),
           b_,
           k,
           I.App (u_, s_),

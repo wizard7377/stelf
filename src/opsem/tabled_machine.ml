@@ -3,21 +3,7 @@ open! Basis
 
 (* Tabled Abstract Machine      *)
 (* Author: Brigitte Pientka     *)
-module type TABLED = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure CompSyn : COMPSYN !*)
-  val solve :
-    (CompSyn.goal * IntSyn.sub) * CompSyn.dProg * (CompSyn.pskeleton -> unit) ->
-    unit
-
-  val updateGlobalTable : CompSyn.goal * bool -> unit
-  val keepTable : IntSyn.cid -> bool
-  val fillTable : unit -> unit
-  val nextStage : unit -> bool
-  val reset : unit -> unit
-  val tableSize : unit -> int
-  val suspGoalNo : unit -> int
-end
+include Tabled_machine_intf
 (* signature TABLED *)
 
 (* # 1 "src/opsem/tabled_machine.fun.ml" *)
@@ -37,7 +23,7 @@ module Tabled (Tabled__0 : sig
   module Unify : UNIFY
 
   (*! sharing Unify.IntSyn = IntSyn' !*)
-  module TabledSyn : TABLEDSYN
+  module TabledSyn : Tabledsyn.TABLEDSYN
 
   (*!  sharing TabledSyn.IntSyn = IntSyn' !*)
   module Assign : ASSIGN
@@ -46,22 +32,22 @@ module Tabled (Tabled__0 : sig
   module Index : INDEX
 
   (*!  sharing Index.IntSyn = IntSyn' !*)
-  module Queue : QUEUE
+  module Queue : Queue.QUEUE
 
   (*! structure TableParam : TABLEPARAM !*)
   (*!  sharing TableParam.IntSyn = IntSyn' !*)
   (*!  sharing TableParam.CompSyn = CompSyn' !*)
-  module AbstractTabled : ABSTRACTTABLED
+  module AbstractTabled : Abstract_tabled.ABSTRACTTABLED
 
   (*!  sharing AbstractTabled.IntSyn = IntSyn' !*)
   (*! sharing AbstractTabled.TableParam = TableParam !*)
-  module MemoTable : MEMOTABLE
+  module MemoTable : Memo_table.MEMOTABLE
 
   (*!  sharing MemoTable.IntSyn = IntSyn' !*)
   (*!  sharing MemoTable.CompSyn = CompSyn'  !*)
   (*! sharing MemoTable.TableParam = TableParam  !*)
   (* CPrint currently unused *)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*!  sharing CPrint.IntSyn = IntSyn' !*)
   (*!  sharing CPrint.CompSyn = CompSyn' !*)

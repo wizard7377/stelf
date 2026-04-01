@@ -3,22 +3,7 @@ open! Basis
 
 (* World Checking *)
 (* Author: Carsten Schuermann *)
-module type WORLDSYN = sig
-  exception Error of string
-
-  val reset : unit -> unit
-  val install : IntSyn.cid * Tomega.worlds -> unit
-  val lookup : IntSyn.cid -> Tomega.worlds
-
-  (* raises Error if undeclared *)
-  val uninstall : IntSyn.cid -> bool
-
-  (* true if declared *)
-  val worldcheck : Tomega.worlds -> IntSyn.cid -> unit
-  val ctxToList : IntSyn.dec IntSyn.ctx -> IntSyn.dec list
-  val isSubsumed : Tomega.worlds -> IntSyn.cid -> unit
-  val getWorlds : IntSyn.cid -> Tomega.worlds
-end
+include WorldSyn_intf
 (* signature WORLDSYN *)
 
 (* # 1 "src/worldcheck/worldSyn.fun.ml" *)
@@ -52,7 +37,7 @@ module WorldSyn (WorldSyn__0 : sig
   (*! sharing Constraints.IntSyn = IntSyn !*)
   (*! structure Cs_manager : CS_MANAGER !*)
   (*! sharing Cs_manager.IntSyn = IntSyn !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn !*)
   module Print : PRINT
@@ -61,12 +46,14 @@ module WorldSyn (WorldSyn__0 : sig
   module Table : TABLE with type key = int
 
   (*! structure Paths : PATHS !*)
-  module Origins : ORIGINS
+  module Origins : Origins_intf.ORIGINS
 
   (*! sharing Origins.Paths = Paths !*)
   (*! sharing Origins.IntSyn = IntSyn !*)
-  module Timers : TIMERS
+  module Timers : Timers_intf.TIMERS
 end) : WORLDSYN = struct
+  module Origins = WorldSyn__0.Origins
+  module Subordinate = WorldSyn__0.Subordinate
   module I = IntSyn
   module T = Tomega
   module P = Paths

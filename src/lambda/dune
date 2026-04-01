@@ -17,7 +17,17 @@
   abstract
   approx
   intsyn_intf
-  lambda_)
+  lambda_
+  abstract_intf
+  approx_intf
+  constraints_intf
+  conv_intf
+  fgnopn_intf
+  match_intf
+  order_intf
+  tomega_intf
+  unify_intf
+  whnf_intf)
  (libraries containers global trail table basis debug)
  (flags
   (:standard

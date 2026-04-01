@@ -3,7 +3,9 @@
 (library
  (name msg)
  (public_name stelf.msg)
- (modules msg_)
+ (modules
+  msg_
+  msg_intf)
  (libraries basis)
  (wrapped true)
  (preprocess

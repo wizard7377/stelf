@@ -8,13 +8,7 @@ open Funsyn
 (* Converter from relational representation to a functional
    representation of proof terms *)
 (* Author: Carsten Schuermann *)
-module type RELFUN = sig
-  (*! structure FunSyn : FUNSYN !*)
-  exception Error of string
-
-  val convertFor : IntSyn.cid list -> FunSyn.for_
-  val convertPro : IntSyn.cid list -> FunSyn.pro
-end
+include Relfun_intf
 (* Signature RELFUN *)
 
 (* # 1 "src/meta/relfun.fun.ml" *)
@@ -29,7 +23,7 @@ module RelFun (RelFun__0 : sig
   module Global : GLOBAL
 
   (*! structure FunSyn' : FUNSYN !*)
-  module ModeTable : MODETABLE
+  module ModeTable : Modetable.MODETABLE
 
   (*! sharing ModeSyn.IntSyn = FunSyn'.IntSyn !*)
   module Names : NAMES
@@ -41,17 +35,17 @@ module RelFun (RelFun__0 : sig
   module Whnf : WHNF
 
   (*! sharing Whnf.IntSyn = FunSyn'.IntSyn !*)
-  module Weaken : WEAKEN
+  module Weaken : Weaken_intf.WEAKEN
 
   (*! sharing Weaken.IntSyn = FunSyn'.IntSyn !*)
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = FunSyn'.IntSyn !*)
-  module FunWeaken : FUNWEAKEN
+  module FunWeaken : Funweaken_intf.FUNWEAKEN
 
   (*! sharing FunWeaken.FunSyn = FunSyn' !*)
-  module FunNames : FUNNAMES
-end) : RELFUN = struct
+  module FunNames : Funnames_intf.FUNNAMES
+end) : Relfun_intf.RELFUN = struct
   (*! structure FunSyn = FunSyn' !*)
   exception Error of string
 
@@ -60,7 +54,7 @@ end) : RELFUN = struct
   open! struct
     module F = FunSyn
     module I = IntSyn
-    module M = ModeSyn
+    module M = Modes.Modesyn.ModeSyn
 
     let rec ctxSub = function
       | I.Null, s -> (I.Null, s)
@@ -329,7 +323,7 @@ end) : RELFUN = struct
           | I.Null -> (I.id, function x -> x)
           | I.Decl (g_, (I.Dec (_, v_) as d_)) ->
               let w, k = raiseExp' g_ in
-              begin if Subordinate.belowEq (I.targetFam v_, a) then
+              begin if Subordinate.Subordinate_.Subordinate.belowEq (I.targetFam v_, a) then
                 ( I.dot1 w,
                   function x -> k (I.Lam (Weaken.strengthenDec (d_, w), x)) )
               else (I.comp (w, I.shift), k)
@@ -343,7 +337,7 @@ end) : RELFUN = struct
           | I.Null, n -> (I.id, (function x -> x), function s_ -> s_)
           | I.Decl (g_, (I.Dec (_, v_) as d_)), n ->
               let w, k, k' = raiseType' (g_, n + 1) in
-              begin if Subordinate.belowEq (I.targetFam v_, a) then
+              begin if Subordinate.Subordinate_.Subordinate.belowEq (I.targetFam v_, a) then
                 ( I.dot1 w,
                   (function
                   | x -> k (I.Pi ((Weaken.strengthenDec (d_, w), I.Maybe), x))),

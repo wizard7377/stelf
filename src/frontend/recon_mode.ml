@@ -3,47 +3,8 @@ open! Basis
 
 (* External Syntax of Mode Declarations *)
 (* Author: Carsten Schuermann *)
-module type EXTMODES = sig
-  module ExtSyn : Recon_term.EXTSYN
-
-  (*! structure Paths : PATHS  !*)
-  type nonrec mode
-
-  val plus : Paths.region -> mode
-  val star : Paths.region -> mode
-  val minus : Paths.region -> mode
-  val minus1 : Paths.region -> mode
-
-  type nonrec modedec
-
-  module Short : sig
-    type nonrec mterm
-    type nonrec mspine
-
-    val mnil : Paths.region -> mspine
-    val mapp : (mode * string option) * mspine -> mspine
-    val mroot : string list * string * Paths.region * mspine -> mterm
-    val toModedec : mterm -> modedec
-  end
-
-  module Full : sig
-    type nonrec mterm
-
-    val mroot : ExtSyn.term * Paths.region -> mterm
-    val mpi : mode * ExtSyn.dec * mterm -> mterm
-    val toModedec : mterm -> modedec
-  end
-end
-
+include Recon_mode_intf
 (* signature EXTMODES *)
-module type RECON_MODE = sig
-  (*! structure ModeSyn : MODESYN !*)
-  include EXTMODES
-
-  exception Error of string
-
-  val modeToMode : modedec -> (IntSyn.cid * ModeSyn.modeSpine) * Paths.region
-end
 (* signature RECON_MODE *)
 
 (* # 1 "src/frontend/recon_mode.fun.ml" *)
@@ -77,7 +38,7 @@ end) : RECON_MODE = struct
   let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
   open! struct
-    module M = ModeSyn
+    module M = Modes.Modesyn.ModeSyn
     module I = IntSyn
     module T = ReconMode__0.ReconTerm'
     module P = Paths

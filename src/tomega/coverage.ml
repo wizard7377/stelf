@@ -4,14 +4,7 @@ module Tomega = Lambda_.Tomega
 
 (* Unification on Formulas *)
 (* Author: Carsten Schuermann *)
-module type TOMEGACOVERAGE = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Tomega : TOMEGA !*)
-  exception Error of string
-
-  val coverageCheckPrg :
-    Tomega.worlds * Tomega.dec IntSyn.ctx * Tomega.prg -> unit
-end
+include Coverage_intf
 (* Signature TOMEGACOVERAGE *)
 
 (* # 1 "src/tomega/coverage.fun.ml" *)
@@ -40,6 +33,7 @@ end) : TOMEGACOVERAGE = struct
   open! struct
     module I = IntSyn
     module T = Tomega
+    module Cover = TomegaCoverage__0.Cover
     module TomegaTypeCheck = TomegaCoverage__0.TomegaTypeCheck
 
     let rec chatter chlev f =
@@ -48,7 +42,7 @@ end) : TOMEGACOVERAGE = struct
       end
 
     let rec purifyFor = function
-      | (Unit, t), (psi_, True), s -> (t, psi_, s)
+      | (T.Unit, t), (psi_, T.True), s -> (t, psi_, s)
       | (T.PairExp (u_, p_), t), (psi_, T.Ex ((d_, _), f_)), s ->
           purifyFor
             ( (p_, T.Dot (T.Exp u_, t)),

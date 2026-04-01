@@ -6,17 +6,7 @@ open Statesyn
 
 (* Type checking for functional proof term calculus *)
 (* Author: Carsten Schuermann *)
-module type FUNTYPECHECK = sig
-  (*! structure FunSyn : FUNSYN !*)
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  val isFor : IntSyn.dctx * FunSyn.for_ -> unit
-  val check : FunSyn.pro * FunSyn.for_ -> unit
-  val checkSub : FunSyn.lfctx * IntSyn.sub * FunSyn.lfctx -> unit
-  val isState : StateSyn.state -> unit
-end
+include Funtypecheck_intf
 (* Signature FUNTYPECHECK *)
 
 (* # 1 "src/meta/funtypecheck.fun.ml" *)
@@ -29,7 +19,7 @@ module FunTypeCheck (FunTypeCheck__0 : sig
   (* Type checking for functional proof term calculus *)
   (* Author: Carsten Schuermann *)
   (*! structure FunSyn' : FUNSYN !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.FunSyn = FunSyn' !*)
   module Abstract : ABSTRACT
@@ -47,14 +37,14 @@ module FunTypeCheck (FunTypeCheck__0 : sig
   module Print : PRINT
 
   (*! sharing Print.IntSyn = FunSyn'.IntSyn !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = FunSyn'.IntSyn !*)
-  module Weaken : WEAKEN
+  module Weaken : Weaken_intf.WEAKEN
 
   (*! sharing Weaken.IntSyn = FunSyn'.IntSyn   !*)
-  module FunPrint : FUNPRINT
-end) : FUNTYPECHECK = struct
+  module FunPrint : Funprint_intf.FUNPRINT
+end) : Funtypecheck_intf.FUNTYPECHECK = struct
   (*! structure FunSyn = FunSyn' !*)
   open FunTypeCheck__0
   module StateSyn = StateSyn'

@@ -3,16 +3,7 @@ open! Basis
 
 (* Tabled Syntax *)
 (* Author: Brigitte Pientka *)
-module type TABLEDSYN = sig
-  (*! structure IntSyn : INTSYN !*)
-  exception Error of string
-
-  val reset : unit -> unit
-  val installTabled : IntSyn.cid -> unit
-  val installKeepTable : IntSyn.cid -> unit
-  val tabledLookup : IntSyn.cid -> bool
-  val keepTable : IntSyn.cid -> bool
-end
+include Tabledsyn_intf
 (* signature TABLEDSYN *)
 
 (* # 1 "src/tabling/tabledsyn.fun.ml" *)

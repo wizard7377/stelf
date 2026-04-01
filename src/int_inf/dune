@@ -3,7 +3,10 @@
 (library
  (name int_inf)
  (public_name stelf.int_inf)
- (modules int_inf_sig int_inf_)
+ (modules
+  int_inf_sig
+  int_inf_
+  int_inf_sig_intf)
  (libraries basis)
  (wrapped true)
  (preprocess

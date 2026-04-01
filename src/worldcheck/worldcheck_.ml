@@ -9,7 +9,7 @@ module type WORLDIFY = Worldify.WORLDIFY
 module type WORLDSYN = WorldSyn.WORLDSYN
 
 module MemoTable = Hash_table.HashTable (struct
-  type nonrec key' = int * int
+  type key' = int * int
 
   let hash (n, m) = (7 * n) + m
   let eq (x__op, y__op) = x__op = y__op
@@ -25,7 +25,7 @@ module WorldSyn = WorldSyn.WorldSyn (struct
   module Index = Index
 
   (*! structure Cs_manager = Cs_manager !*)
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate_.Subordinate
   module Print = Print
   module Table = Table_instances.IntRedBlackTree
   module Origins = Origins
@@ -46,7 +46,7 @@ module Worldify = Worldify.Worldify (struct
   module Constraints = Constraints
   module Index = Index
   module Cs_manager = Cs_manager
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate_.Subordinate
   module Print = Print
   module Table = Table_instances.IntRedBlackTree
   module MemoTable = MemoTable

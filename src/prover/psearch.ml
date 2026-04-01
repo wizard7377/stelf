@@ -3,17 +3,7 @@ open! Basis
 
 (* Basic search engine: Version 1.3*)
 (* Author: Carsten Schuermann *)
-module type SEARCH = sig
-  (*! structure IntSyn   : INTSYN !*)
-  (*! structure Tomega   : TOMEGA !*)
-  module State : State.STATE
-
-  exception Error of string
-
-  val searchEx :
-    int * IntSyn.exp list * (int -> unit) ->
-    unit (*      * (StateSyn.FunSyn.IntSyn.Exp * StateSyn.FunSyn.IntSyn.Sub) *)
-end
+include Psearch_intf
 (* signature SEARCH *)
 
 (* # 1 "src/prover/search.fun.ml" *)
@@ -36,7 +26,7 @@ module Search (Search__0 : sig
   (*! sharing Abstract.IntSyn = IntSyn' !*)
   (*! sharing Abstract.Tomega = Tomega' !*)
   module Data : Data.DATA
-  module CompSyn' : COMPSYN
+  module CompSyn' : CompSyn_intf.COMPSYN
 
   (*! sharing CompSyn'.IntSyn = IntSyn' !*)
   module Whnf : WHNF
@@ -45,7 +35,7 @@ module Search (Search__0 : sig
   module Unify : UNIFY
 
   (*! sharing Unify.IntSyn = IntSyn' !*)
-  module Assign : ASSIGN
+  module Assign : Assign.ASSIGN
 
   (*! sharing Assign.IntSyn = IntSyn' !*)
   module Index : INDEX
@@ -55,7 +45,7 @@ module Search (Search__0 : sig
 
   (*! sharing Compile.IntSyn = IntSyn' !*)
   (*! sharing Compile.CompSyn = CompSyn' !*)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)

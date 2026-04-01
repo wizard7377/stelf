@@ -13,7 +13,7 @@ module TomegaAbstract = Tomega_abstract.TomegaAbstract (struct
   let abstract_raiseTerm = Abstract.raiseTerm
 
   module Whnf = Whnf
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate_.Subordinate
 end)
 
 module TomegaPrint = Tomegaprint.TomegaPrint (struct
@@ -22,6 +22,10 @@ module TomegaPrint = Tomegaprint.TomegaPrint (struct
   module Formatter = Print_.Print.Formatter
   module Names = Names_.Names
   module Print : PRINT with module Formatter = Formatter = Print_.Print
+end)
+
+module Weaken = Weaken.Make_Weaken (struct
+  module Whnf = Whnf
 end)
 
 module TomegaTypeCheck = Tomega_typecheck.TomegaTypeCheck (struct
@@ -34,7 +38,7 @@ module TomegaTypeCheck = Tomega_typecheck.TomegaTypeCheck (struct
   module TypeCheck = TypeCheck
   module Conv = Conv
   module Whnf = Whnf
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate_.Subordinate
   module TomegaPrint = TomegaPrint
   module Print = Print
   module Weaken = Weaken
@@ -65,7 +69,7 @@ module Opsem = Opsem.Opsem (struct
   module Conv = Conv
   module Whnf = Whnf
   module Print = Print
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate_.Subordinate
   module TomegaPrint = TomegaPrint
   module TomegaTypeCheck = TomegaTypeCheck
   module Weaken = Weaken
@@ -108,7 +112,7 @@ module Converter = Converter.Converter (struct
   module Whnf = Whnf
   module WorldSyn = WorldSyn
   module Worldify = Worldify
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate_.Subordinate
   module Print = Print
   module Redundant = Redundant
   module Weaken = Weaken
@@ -120,5 +124,5 @@ module TomegaCoverage = Coverage.TomegaCoverage (struct
   module Tomega' = Tomega
   module TomegaPrint = TomegaPrint
   module TomegaTypeCheck = TomegaTypeCheck
-  module Cover = Cover
+  module Cover = Cover_.Cover
 end)

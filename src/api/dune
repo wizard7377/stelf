@@ -1,0 +1,4 @@
+(library 
+ (name api)
+ (public_name stelf.api)
+ (modules api))

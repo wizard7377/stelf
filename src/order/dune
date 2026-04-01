@@ -3,7 +3,9 @@
 (library
  (name order)
  (public_name stelf.order)
- (modules order_)
+ (modules
+  order_
+  order_intf)
  (libraries table lambda basis)
  (flags
   (:standard

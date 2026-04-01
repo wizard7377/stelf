@@ -5,15 +5,7 @@ open! Basis
 (* Author: Iliano Cervesato *)
 (* Modified: Jeff Polakow *)
 (* Modified: Frank Pfenning *)
-module type ABSMACHINESBT = sig
-  (*! structure IntSyn  : INTSYN !*)
-  (*! structure CompSyn : COMPSYN !*)
-  val solve :
-    (CompSyn.goal * IntSyn.sub)
-    * CompSyn.dProg
-    * (CompSyn.flatterm list -> unit) ->
-    unit
-end
+include Absmachine_sbt_intf
 (* signature ABSMACHINESBT *)
 
 (* # 1 "src/opsem/absmachine_sbt.fun.ml" *)
@@ -30,7 +22,7 @@ module AbsMachineSbt (AbsMachineSbt__0 : sig
   module Unify : UNIFY
 
   (*! sharing Unify.IntSyn = IntSyn' !*)
-  module SubTree : SUBTREE
+  module SubTree : Subtree.SUBTREE
 
   (*! sharing SubTree.IntSyn = IntSyn' !*)
   (*! sharing SubTree.CompSyn = CompSyn' !*)
@@ -41,7 +33,7 @@ module AbsMachineSbt (AbsMachineSbt__0 : sig
 
   (*! sharing Index.IntSyn = IntSyn' !*)
   (* CPrint currently unused *)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)

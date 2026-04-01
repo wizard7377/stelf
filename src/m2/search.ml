@@ -4,25 +4,7 @@ open Metasyn
 
 (* Basic search engine *)
 (* Author: Carsten Schuermann *)
-module type OLDSEARCH = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-
-  val searchEx :
-    IntSyn.dctx
-    * IntSyn.exp list
-    * (IntSyn.exp * IntSyn.sub)
-    * (unit -> MetaSyn.state) ->
-    MetaSyn.state list
-
-  val searchAll :
-    IntSyn.dctx
-    * IntSyn.exp list
-    * (IntSyn.exp * IntSyn.sub)
-    * (MetaSyn.state list -> MetaSyn.state list) ->
-    MetaSyn.state list
-end
+include Search_intf
 (* signature SEARCH *)
 
 (* # 1 "src/m2/search.fun.ml" *)
@@ -34,8 +16,8 @@ open Meta_global
 (* Author: Carsten Schuermann *)
 module OLDSearch (OLDSearch__0 : sig
   (*! structure IntSyn' : INTSYN !*)
-  module MetaGlobal : METAGLOBAL
-  module MetaSyn' : METASYN
+  module MetaGlobal : Meta_global.METAGLOBAL
+  module MetaSyn' : Metasyn.METASYN
 
   (*! sharing MetaSyn'.IntSyn = IntSyn' !*)
   (*! structure CompSyn' : COMPSYN !*)
@@ -57,7 +39,7 @@ module OLDSearch (OLDSearch__0 : sig
 
   (*! sharing Compile.IntSyn = IntSyn' !*)
   (*! sharing Compile.CompSyn = CompSyn' !*)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)

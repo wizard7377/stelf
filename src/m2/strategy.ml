@@ -4,12 +4,7 @@ open Metasyn
 
 (* Strategy *)
 (* Author: Carsten Schuermann *)
-module type STRATEGY = sig
-  module MetaSyn : METASYN
-
-  val run : MetaSyn.state list -> MetaSyn.state list * MetaSyn.state list
-end
-
+include Strategy_intf
 (* open cases -> remaining cases * solved cases *)
 (* signature STRATEGY *)
 
@@ -29,16 +24,16 @@ open Time_limit
 (* Strategy *)
 (* Author: Carsten Schuermann *)
 module StrategyFRS (StrategyFRS__0 : sig
-  module MetaGlobal : METAGLOBAL
-  module MetaSyn' : METASYN
-  module Filling : FILLING with module MetaSyn = MetaSyn'
-  module Splitting : SPLITTING with module MetaSyn = MetaSyn'
-  module Recursion : RECURSION with module MetaSyn = MetaSyn'
-  module Lemma : LEMMA with module MetaSyn = MetaSyn'
-  module Qed : QED with module MetaSyn = MetaSyn'
-  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
-  module Timers : TIMERS
-end) : STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
+  module MetaGlobal : Meta_global.METAGLOBAL
+  module MetaSyn' : Metasyn.METASYN
+  module Filling : Filling_intf.FILLING with module MetaSyn = MetaSyn'
+  module Splitting : Splitting_intf.SPLITTING with module MetaSyn = MetaSyn'
+  module Recursion : Recursion_intf.RECURSION with module MetaSyn = MetaSyn'
+  module Lemma : Lemma_intf.LEMMA with module MetaSyn = MetaSyn'
+  module Qed : Qed_intf.QED with module MetaSyn = MetaSyn'
+  module MetaPrint : Meta_print.METAPRINT with module MetaSyn = MetaSyn'
+  module Timers : Timers_intf.TIMERS
+end) : Strategy_intf.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
   open StrategyFRS__0
   module MetaSyn = MetaSyn'
 
@@ -199,16 +194,16 @@ end
 (* local *)
 (* functor StrategyFRS *)
 module StrategyRFS (StrategyRFS__1 : sig
-  module MetaGlobal : METAGLOBAL
-  module MetaSyn' : METASYN
-  module Filling : FILLING with module MetaSyn = MetaSyn'
-  module Splitting : SPLITTING with module MetaSyn = MetaSyn'
-  module Recursion : RECURSION with module MetaSyn = MetaSyn'
-  module Lemma : LEMMA with module MetaSyn = MetaSyn'
-  module Qed : QED with module MetaSyn = MetaSyn'
-  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
-  module Timers : TIMERS
-end) : STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
+  module MetaGlobal : Meta_global.METAGLOBAL
+  module MetaSyn' : Metasyn.METASYN
+  module Filling : Filling_intf.FILLING with module MetaSyn = MetaSyn'
+  module Splitting : Splitting_intf.SPLITTING with module MetaSyn = MetaSyn'
+  module Recursion : Recursion_intf.RECURSION with module MetaSyn = MetaSyn'
+  module Lemma : Lemma_intf.LEMMA with module MetaSyn = MetaSyn'
+  module Qed : Qed_intf.QED with module MetaSyn = MetaSyn'
+  module MetaPrint : Meta_print.METAPRINT with module MetaSyn = MetaSyn'
+  module Timers : Timers_intf.TIMERS
+end) : Strategy_intf.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
   open StrategyRFS__1
   module MetaSyn = MetaSyn'
 
@@ -365,11 +360,11 @@ end
 (* local *)
 (* functor StrategyRFS *)
 module Strategy (Strategy__2 : sig
-  module MetaGlobal : METAGLOBAL
-  module MetaSyn' : METASYN
-  module StrategyFRS : STRATEGY with module MetaSyn = MetaSyn'
-  module StrategyRFS : STRATEGY with module MetaSyn = MetaSyn'
-end) : STRATEGY with module MetaSyn = Strategy__2.MetaSyn' = struct
+  module MetaGlobal : Meta_global.METAGLOBAL
+  module MetaSyn' : Metasyn.METASYN
+  module StrategyFRS : Strategy_intf.STRATEGY with module MetaSyn = MetaSyn'
+  module StrategyRFS : Strategy_intf.STRATEGY with module MetaSyn = MetaSyn'
+end) : Strategy_intf.STRATEGY with module MetaSyn = Strategy__2.MetaSyn' = struct
   open Strategy__2
   module MetaSyn = MetaSyn'
 

@@ -5,12 +5,7 @@
 (* # 1 "src/msg/msg_.sml.ml" *)
 
 open Basis
-
-module type MSG = sig
-  val message : string -> unit
-  val setMessageFunc : (string -> unit) -> unit
-end
-
+include Msg_intf
 module Msg : MSG = struct
   let default = print
   let messageFunc = ref default

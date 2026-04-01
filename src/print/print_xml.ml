@@ -4,10 +4,7 @@ open! Basis
 (* Printing Signatures *)
 (* Author: Frank Pfenning *)
 (* modified: Carsten Schuermann *)
-module type PRINT_XML = sig
-  val printSgn : unit -> unit
-  val printSgnToFile : string -> string -> unit
-end
+include Print_xml_intf
 (* signature PRINT_XML *)
 
 (* # 1 "src/print/print_xml.fun.ml" *)

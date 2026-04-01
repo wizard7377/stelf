@@ -1,10 +1,6 @@
 (* # 1 "src/frontend/unknownexn.sig.ml" *)
 open! Basis
-
-module type UNKNOWN_EXN = sig
-  val unknownExn : exn -> string
-end
-
+include Unknownexn_intf
 (* # 1 "src/frontend/unknownexn.fun.ml" *)
 open! Basis
 

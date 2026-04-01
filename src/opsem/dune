@@ -16,7 +16,16 @@
   trace
   tmachine
   swmachine
-  opsem_)
+  opsem_
+  absmachine_intf
+  absmachine_sbt_intf
+  abstract_tabled_intf
+  memo_table_intf
+  ptrecon_intf
+  sw_subtree_intf
+  table_param_intf
+  tabled_machine_intf
+  trace_intf)
  (libraries
   global
   table
@@ -60,7 +69,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_
+   Formatter__Formatter_
    -open
    Index
    -open
@@ -76,7 +85,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_
+   Subordinate
    -open
    Compile
    -open

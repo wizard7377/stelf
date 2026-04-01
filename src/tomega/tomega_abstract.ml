@@ -4,16 +4,7 @@ module Tomega = Lambda_.Tomega
 
 (* Abstraction mechanisms form programs and formulas *)
 (* Author: Carsten Schuermann *)
-module type TOMEGAABSTRACT = sig
-  exception Error of string
-
-  val raiseFor :
-    IntSyn.dec IntSyn.ctx * (Tomega.for_ * IntSyn.sub) -> Tomega.for_
-
-  val raisePrg : IntSyn.dec IntSyn.ctx * Tomega.prg * Tomega.for_ -> Tomega.prg
-  val raiseP : IntSyn.dec IntSyn.ctx * Tomega.prg * Tomega.for_ -> Tomega.prg
-  val raiseF : IntSyn.dec IntSyn.ctx * (Tomega.for_ * IntSyn.sub) -> Tomega.for_
-end
+include Tomega_abstract_intf
 (* Signature TOMEGAABSTRACT *)
 
 (* # 1 "src/tomega/tomega_abstract.fun.ml" *)
@@ -29,7 +20,7 @@ module TomegaAbstract (TomegaAbstract__0 : sig
   val abstract_raiseTerm : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
 
   module Whnf : WHNF
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 end) : TOMEGAABSTRACT = struct
   exception Error of string
 

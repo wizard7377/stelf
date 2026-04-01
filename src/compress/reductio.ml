@@ -582,3 +582,5 @@ module Reductio = struct
   let check_plusconst_strictness = check_strictness_type true
   let check_minusconst_strictness = check_strictness_type false
 end
+
+include Reductio

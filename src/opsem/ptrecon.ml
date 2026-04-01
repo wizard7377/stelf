@@ -6,18 +6,7 @@ open! Basis
 (* Modified: Jeff Polakow *)
 (* Modified: Frank Pfenning *)
 (* Proof term reconstruction by proof skeleton *)
-module type PTRECON = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure CompSyn : COMPSYN !*)
-  exception Error of string
-
-  val solve :
-    CompSyn.pskeleton
-    * (CompSyn.goal * IntSyn.sub)
-    * CompSyn.dProg
-    * (CompSyn.pskeleton * IntSyn.exp -> unit) ->
-    unit
-end
+include Ptrecon_intf
 (* signature PTRECON *)
 
 (* # 1 "src/opsem/ptrecon.fun.ml" *)
@@ -40,14 +29,14 @@ module PtRecon (PtRecon__0 : sig
 
   (*! sharing Assign.IntSyn = IntSyn' !*)
   (*! structure TableParam : TABLEPARAM !*)
-  module MemoTable : MEMOTABLE
+  module MemoTable : Memo_table.MEMOTABLE
 
   (*! sharing MemoTable.TableParam = TableParam !*)
   module Index : INDEX
 
   (*! sharing Index.IntSyn = IntSyn' !*)
   (* CPrint currently unused *)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)

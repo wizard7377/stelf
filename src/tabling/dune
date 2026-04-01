@@ -3,7 +3,10 @@
 (library
  (name tabling)
  (public_name stelf.tabling)
- (modules tabledsyn tabled)
+ (modules
+  tabledsyn
+  tabled
+  tabledsyn_intf)
  (libraries table lambda print names paths index basis)
  (flags
   (:standard

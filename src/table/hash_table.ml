@@ -10,7 +10,7 @@ open Table_
 (* Author: Frank Pfenning *)
 (* Modified: Roberto Virga *)
 module HashTable (HashTable__0 : sig
-  type nonrec key'
+  type key'
 
   val hash : key' -> int
   val eq : key' * key' -> bool
@@ -18,12 +18,12 @@ end) : TABLE with type key = HashTable__0.key' = struct
   open HashTable__0
 
   type nonrec key = key'
-  type nonrec 'a entry = key * 'a
+  type 'a entry = key * 'a
 
   (* A hashtable bucket is a linked list of mutable elements *)
   (* A hashtable is an array of buckets containing entries paired with hash values *)
   type 'a bucket = Nil | Cons of 'a ref * 'a bucket ref
-  type nonrec 'a table = (int * 'a entry) bucket array * int
+  type 'a table = (int * 'a entry) bucket array * int
 
   let new_ n = (Array.array (n, Nil), n)
 

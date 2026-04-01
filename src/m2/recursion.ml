@@ -4,18 +4,7 @@ open Metasyn
 
 (* Recursion *)
 (* Author: Carsten Schuermann *)
-module type RECURSION = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-
-  type nonrec operator
-
-  val expandLazy : MetaSyn.state -> operator list
-  val expandEager : MetaSyn.state -> operator list
-  val apply : operator -> MetaSyn.state
-  val menu : operator -> string
-end
+include Recursion_intf
 (* signature RECURSION *)
 
 (* # 1 "src/m2/recursion.fun.ml" *)
@@ -33,8 +22,8 @@ open Meta_abstract
 (* See [Rohwedder,Pfenning ESOP'96] *)
 module Recursion (Recursion__0 : sig
   module Global : GLOBAL
-  module MetaGlobal : METAGLOBAL
-  module MetaSyn' : METASYN
+  module MetaGlobal : Meta_global.METAGLOBAL
+  module MetaSyn' : Metasyn.METASYN
   module Whnf : WHNF
 
   (*! sharing Whnf.IntSyn = MetaSyn'.IntSyn !*)
@@ -47,7 +36,7 @@ module Recursion (Recursion__0 : sig
   module Names : NAMES
 
   (*! sharing Names.IntSyn = MetaSyn'.IntSyn !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = MetaSyn'.IntSyn !*)
   module Print : PRINT
@@ -56,15 +45,15 @@ module Recursion (Recursion__0 : sig
   module Order : ORDER
 
   (*! sharing Order.IntSyn = MetaSyn'.IntSyn !*)
-  module ModeTable : MODETABLE
+  module ModeTable : Modetable.MODETABLE
 
-  (*! sharing ModeSyn.IntSyn = MetaSyn'.IntSyn !*)
-  module Lemma : LEMMA with module MetaSyn = MetaSyn'
-  module Filling : FILLING with module MetaSyn = MetaSyn'
-  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
-  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
+  (*! sharing Modes.Modesyn.ModeSyn.IntSyn = MetaSyn'.IntSyn !*)
+  module Lemma : Lemma_intf.LEMMA with module MetaSyn = MetaSyn'
+  module Filling : Filling_intf.FILLING with module MetaSyn = MetaSyn'
+  module MetaPrint : Meta_print.METAPRINT with module MetaSyn = MetaSyn'
+  module MetaAbstract : Meta_abstract.METAABSTRACT with module MetaSyn = MetaSyn'
   module Formatter : FORMATTER
-end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
+end) : Recursion_intf.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
   open Recursion__0
   module MetaSyn = MetaSyn'
 
@@ -430,12 +419,12 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       end
 
     and inputConvSpine = function
-      | ModeSyn.Mnil, ((s1_, _), _), ((s2_, _), _) -> true
+      | Modes.Modesyn.ModeSyn.Mnil, ((s1_, _), _), ((s2_, _), _) -> true
       | mS, ((I.SClo (s1_, s1'), s1), vs1_), (ss2_, vs2_) ->
           inputConvSpine (mS, ((s1_, I.comp (s1', s1)), vs1_), (ss2_, vs2_))
       | mS, (ss1_, vs1_), ((I.SClo (s2_, s2'), s2), vs2_) ->
           inputConvSpine (mS, (ss1_, vs1_), ((s2_, I.comp (s2', s2)), vs2_))
-      | ( ModeSyn.Mapp (ModeSyn.Marg (ModeSyn.Minus, _), mS),
+      | ( Modes.Modesyn.ModeSyn.Mapp (Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Minus, _), mS),
           ((I.App (u1_, s1_), s1), (I.Pi ((I.Dec (_, v1_), _), w1_), t1)),
           ((I.App (u2_, s2_), s2), (I.Pi ((I.Dec (_, v2_), _), w2_), t2)) ) ->
           Conv.conv ((v1_, t1), (v2_, t2))
@@ -443,7 +432,7 @@ end) : RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
                ( mS,
                  ((s1_, s1), (w1_, I.Dot (I.Exp (I.EClo (u1_, s1)), t1))),
                  ((s2_, s2), (w2_, I.Dot (I.Exp (I.EClo (u1_, s1)), t2))) )
-      | ( ModeSyn.Mapp (ModeSyn.Marg (ModeSyn.Plus, _), mS),
+      | ( Modes.Modesyn.ModeSyn.Mapp (Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Plus, _), mS),
           ((I.App (u1_, s1_), s1), (I.Pi ((I.Dec (_, v1_), _), w1_), t1)),
           ((I.App (u2_, s2_), s2), (I.Pi ((I.Dec (_, v2_), _), w2_), t2)) ) ->
           inputConvSpine

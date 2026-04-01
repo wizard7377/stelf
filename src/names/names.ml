@@ -1,2 +1,3 @@
-open! Names_
+include Names_
+
 module Names_ = Names_

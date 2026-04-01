@@ -24,7 +24,7 @@ module AbstractTabled = Abstract_tabled.AbstractTabled (struct
   module Whnf = Whnf
   module Unify = UnifyTrail
   module Constraints = Constraints
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate.Subordinate_.Subordinate
 
   (*! structure TableParam = TableParam !*)
   module Conv = Conv
@@ -72,7 +72,7 @@ module Tabled_ = Tabled_machine.Tabled (struct
   module TabledSyn = TabledSyn
   module Assign = Assign__
   module Index = Index
-  module Queue = Queue
+  module Queue = Queue.Queue
 
   (*! structure TableParam = TableParam !*)
   (*	  structure MemoTable = MemoTable    *)

@@ -4,17 +4,7 @@ open Funsyn
 
 (* Names of Constants and Variables *)
 (* Author: Carsten Schuermann *)
-module type FUNNAMES = sig
-  (*! structure FunSyn : FUNSYN !*)
-  exception Error of string
-
-  (* Constant names and fixities *)
-  val reset : unit -> unit
-  val installName : string * FunSyn.lemma -> unit
-  val nameLookup : string -> FunSyn.lemma option
-  val constName : FunSyn.lemma -> string
-end
-
+include Funnames_intf
 (* will mark if shadowed *)
 (* signature NAMES *)
 
@@ -29,7 +19,7 @@ module FunNames (FunNames__0 : sig
 
   (*! structure FunSyn' : FUNSYN !*)
   module HashTable : TABLE with type key = string
-end) : FUNNAMES = struct
+end) : Funnames_intf.FUNNAMES = struct
   open FunNames__0
 
   (*! structure FunSyn = FunSyn' !*)

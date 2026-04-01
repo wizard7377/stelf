@@ -9,20 +9,7 @@ open Funtypecheck
 
 (* Splitting : Version 1.3 *)
 (* Author: Carsten Schuermann *)
-module type MTPSPLITTING = sig
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  type nonrec operator
-
-  val expand : StateSyn.state -> operator list
-  val applicable : operator -> bool
-  val apply : operator -> StateSyn.state list
-  val menu : operator -> string
-  val index : operator -> int
-  val compare : operator * operator -> order
-end
+include Mtp_splitting_intf
 (* signature MTPSPLITTING *)
 
 (* # 1 "src/meta/splitting.fun.ml" *)
@@ -33,21 +20,21 @@ open! Basis
 (* Splitting : Version 1.3 *)
 (* Author: Carsten Schuermann *)
 module MTPSplitting (MTPSplitting__0 : sig
-  module MTPGlobal : MTPGLOBAL
+  module MTPGlobal : Mtp_global.MTPGLOBAL
   module Global : GLOBAL
 
   (*! structure IntSyn : INTSYN !*)
   (*! structure FunSyn : FUNSYN !*)
   (*! sharing FunSyn.IntSyn = IntSyn !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.FunSyn = FunSyn !*)
   (*! sharing StateSyn'.IntSyn = IntSyn !*)
   module Heuristic : HEURISTIC
-  module MTPAbstract : MTPABSTRACT
+  module MTPAbstract : Mtp_abstract_intf.MTPABSTRACT
 
   (*! sharing MTPAbstract.IntSyn = IntSyn !*)
-  module MTPrint : MTPRINT
+  module MTPrint : Mtp_print_intf.MTPRINT
   module Names : NAMES
 
   (* too be removed  -cs *)
@@ -62,10 +49,10 @@ module MTPSplitting (MTPSplitting__0 : sig
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn !*)
-  module FunTypeCheck : FUNTYPECHECK
+  module FunTypeCheck : Funtypecheck_intf.FUNTYPECHECK
 
   (*! sharing FunTypeCheck.FunSyn = FunSyn !*)
   module Index : INDEX
@@ -75,7 +62,7 @@ module MTPSplitting (MTPSplitting__0 : sig
 
   (*! sharing Print.IntSyn = IntSyn !*)
   module Unify : UNIFY
-end) : MTPSPLITTING = struct
+end) : Mtp_splitting_intf.MTPSPLITTING = struct
   open MTPSplitting__0
   module StateSyn = StateSyn'
 

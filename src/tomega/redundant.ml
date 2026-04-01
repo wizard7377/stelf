@@ -1,13 +1,7 @@
 (* # 1 "src/tomega/redundant.sig.ml" *)
 open! Basis
 module Tomega = Lambda_.Tomega
-
-module type REDUNDANT = sig
-  exception Error of string
-
-  val convert : Tomega.prg -> Tomega.prg
-end
-
+include Redundant_intf
 (* # 1 "src/tomega/redundant.fun.ml" *)
 open! Opsem
 open! Basis
@@ -15,7 +9,7 @@ open! Basis
 (* Redundancy remover (factoring) *)
 (* Author: Adam Poswolsky (ABP) *)
 module Redundant (Redundant__0 : sig
-  module Opsem : OPSEM
+  module Opsem : Opsem_intf.OPSEM
 end) : REDUNDANT = struct
   exception Error of string
 
@@ -89,7 +83,7 @@ end) : REDUNDANT = struct
               Opsem.matchSub (psi1_, t1, t');
               true
             end
-          with NoMatch -> false
+          with Opsem.NoMatch -> false
         in
         begin if doMatch then
           let newT = T.normalizeSub t in
@@ -407,7 +401,7 @@ end) : REDUNDANT = struct
               Opsem.matchSub (psi1_, t1, t');
               true
             end
-          with NoMatch -> false
+          with Opsem.NoMatch -> false
         in
         begin if doMatch then
           let newT = T.normalizeSub t in
@@ -463,7 +457,7 @@ end) : REDUNDANT = struct
           Opsem.matchSub (psi1_, s1, t');
           true
         end
-      with NoMatch -> false
+      with Opsem.NoMatch -> false
     in
     begin if not doMatch then [ c_; c'_ ]
     else

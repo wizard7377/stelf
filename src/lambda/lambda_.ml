@@ -22,9 +22,14 @@ module type APPROX = Approx.APPROX
 
 include Tomega
 
-(* Re-export Whnf and Conv under standard names *)
-module Whnf = Whnf__
-module Conv = Conv__
+(* Instantiate core normalization/conversion modules explicitly; Tomega's
+   private helper names are not exported through its .mli. *)
+module Whnf_ = Whnf
+module Conv_ = Conv
+module Whnf = Whnf_.Whnf ()
+module Conv = Conv_.Conv (struct
+  module Whnf = Whnf
+end)
 
 type nonrec spine = IntSyn.spine
 
@@ -48,18 +53,18 @@ structure Tomega : TOMEGA =
 	   structure Conv = Conv)
 *)
 module Constraints = Constraints.MakeConstraints (struct
-  (*! structure IntSyn' = IntSyn !*) module Conv = Conv__
+  (*! structure IntSyn' = IntSyn !*) module Conv = Conv
 end)
 
 module UnifyNoTrail = Unify.MakeUnify (struct
   (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf__
+  module Whnf = Whnf
   module Trail = Notrail.NoTrail
 end)
 
 module UnifyTrail = Unify.MakeUnify (struct
   (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf__
+  module Whnf = Whnf
   module Trail = Trail
 end)
 
@@ -69,17 +74,17 @@ end)
              structure Whnf = Whnf)
  *)
 module Match = Match.MakeMatch (struct
-  module Whnf = Whnf__
+  module Whnf = Whnf
   module Unify = UnifyTrail
   module Trail = Trail
 end)
 
 module Abstract = Abstract.MakeAbstract (struct
-  module Whnf = Whnf__
+  module Whnf = Whnf
   module Constraints = Constraints
   module Unify = UnifyNoTrail
 end)
 
 module Approx = Approx.MakeApprox (struct
-  (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf__
+  (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf
 end)

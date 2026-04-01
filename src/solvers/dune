@@ -13,7 +13,12 @@
   cs_eq_strings
   cs_eq_bools
   cs_integers_word
-  solvers_)
+  solvers_
+  cs_intf
+  cs_eq_field_intf
+  cs_eq_integers_intf
+  cs_manager_intf
+  solvers_intf)
  (libraries
   trail
   global
@@ -66,7 +71,7 @@
    -open
    Formatter
    -open
-   Formatter.Formatter_))
+  Formatter__Formatter_))
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

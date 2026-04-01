@@ -4,13 +4,7 @@ open Metasyn
 
 (* Qed *)
 (* Author: Carsten Schuermann *)
-module type QED = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-
-  val subgoal : MetaSyn.state -> bool
-end
+include Qed_intf
 (* signature QED *)
 
 (* # 1 "src/m2/qed.fun.ml" *)
@@ -21,7 +15,7 @@ open Metasyn
 (* Author: Carsten Schuermann *)
 module Qed (Qed__0 : sig
   module Global : GLOBAL
-  module MetaSyn' : METASYN
+  module MetaSyn' : Metasyn.METASYN
 end) : QED with module MetaSyn = Qed__0.MetaSyn' = struct
   open Qed__0
   module MetaSyn = MetaSyn'

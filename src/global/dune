@@ -3,7 +3,9 @@
 (library
  (name global)
  (public_name stelf.global)
- (modules global_)
+ (modules
+  global_
+  global_intf)
  (libraries basis)
  (wrapped true)
  (preprocess

@@ -3,7 +3,11 @@
 (library
  (name paths)
  (public_name stelf.paths)
- (modules origins paths_)
+ (modules
+  paths_intf
+  paths_
+  origins_intf
+  origins)
  (libraries lambda global table basis)
  (flags
   (:standard

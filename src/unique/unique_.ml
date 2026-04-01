@@ -4,12 +4,7 @@ open! Basis
 (* Uniqueness Checking *)
 
 (** Author: Frank Pfenning *)
-module type UNIQUE = sig
-  exception Error of string
-
-  val checkUnique : IntSyn.cid * ModeSyn.modeSpine -> unit
-end
-
+include Unique_intf
 (* raises Error(msg) *)
 (* signature UNIQUE *)
 
@@ -29,8 +24,8 @@ module MakeUnique (Unique__0 : sig
   module UniqueTable : Modetable.MODETABLE
   module UniqueCheck : Modecheck.MODECHECK
   module Index : INDEX
-  module Subordinate : SUBORDINATE
-  module WorldSyn : WORLDSYN
+  module Subordinate : Subordinate_.SUBORDINATE
+  module WorldSyn : Worldcheck_.WORLDSYN
   module Names : NAMES
   module Print : PRINT
   module TypeCheck : TYPECHECK
@@ -38,13 +33,14 @@ module MakeUnique (Unique__0 : sig
 end) : UNIQUE = struct
   exception Error of string
 
+  module Subordinate = Unique__0.Subordinate
   module Unify = Unique__0.Unify
   module UniqueCheck = Unique__0.UniqueCheck
 
   open! struct
     module I = IntSyn
-    module M = ModeSyn
-    module W = WorldSyn
+    module M = Modes.Modesyn.ModeSyn
+    module W = Unique__0.WorldSyn
     module P = Paths
     module F = Print.Formatter
     module N = Names
@@ -475,8 +471,8 @@ module Unique = MakeUnique (struct
   module UniqueTable = UniqueTable
   module UniqueCheck = UniqueCheck
   module Index = Index
-  module Subordinate = Subordinate
-  module WorldSyn = WorldSyn
+  module Subordinate = Subordinate_.Subordinate
+  module WorldSyn = Worldcheck_.WorldSyn
   module Names = Names
   module Print = Print
   module TypeCheck = TypeCheck

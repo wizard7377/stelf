@@ -112,8 +112,8 @@ end
         (* absolute value of ~2^30 *);;
         let largestPosInt : Word32.word = 1073741823;;
         (* 2^30-1 *);;
-        type nonrec 'a __0 = { getc: (char, 'a) StringCvt.reader };;
-        type nonrec 'a chr_strm = 'a __0;;
+        type 'a __0 = { getc: (char, 'a) StringCvt.reader };;
+        type 'a chr_strm = 'a __0;;
         (* A table for mapping digits to values.  Whitespace characters map to
        * 128, ""+"" maps to 129, ""-"",""~"" map to 130, ""."" maps to 131, and the
        * characters 0-9,A-Z,a-z map to their * base-36 value.  All other

@@ -6,64 +6,12 @@ open Basis
 (* Author: Brigitte Pientka *)
 (* This provides a common interface to ordered sets *)
 (* based on red/black trees *)
-module type RBSET = sig
-  type nonrec key = int
-
-  (* parameter *)
-  type nonrec 'a entry = key * 'a
-
-  exception Error of string
-
-  type nonrec 'a ordSet
-
-  val new_ : unit -> 'a ordSet
-  val copy : 'a ordSet -> 'a ordSet
-  val insert : 'a ordSet -> 'a entry -> unit
-  val insertList : 'a ordSet -> 'a entry list -> unit
-  val insertShadow : 'a ordSet -> 'a entry -> unit
-  val insertLast : 'a ordSet -> 'a -> unit
-
-  (*  val delete : 'a ordSet -> key -> unit*)
-  val lookup : 'a ordSet -> key -> 'a option
-  val isEmpty : 'a ordSet -> bool
-  val last : 'a ordSet -> 'a entry
-  val clear : 'a ordSet -> unit
-
-  (* Applies f:'a -> unit to all entries in the set
-     pre-order traversal *)
-  val app : 'a ordSet -> ('a -> unit) -> unit
-  val update : 'a ordSet -> ('a -> 'a) -> 'a ordSet
-
-  (* Applies f:'a entry -> unit to all entries in the set
-     pre-order traversal *)
-  val forall : 'a ordSet -> ('a entry -> unit) -> unit
-
-  (*  val exists : 'a ordSet -> ('a entry -> 'b option) -> ('a entry  key * 'a  * 'b) option *)
-  val exists : 'a ordSet -> ('a entry -> bool) -> bool
-  val existsOpt : 'a ordSet -> ('a -> bool) -> int option
-  val size : 'a ordSet -> int
-  val union : 'a ordSet -> 'a ordSet -> 'a ordSet
-  val difference : 'a ordSet -> 'a ordSet -> 'a ordSet
-  val difference2 : 'a ordSet -> 'a ordSet -> 'a ordSet * 'a ordSet
-
-  val differenceModulo :
-    'a ordSet -> 'b ordSet -> ('a -> 'b -> unit) -> 'a ordSet * 'b ordSet
-
-  (* splits two sets into S1, S2, S3 *)
-  val splitSets :
-    'a ordSet ->
-    'a ordSet ->
-    ('a -> 'a -> 'a option) ->
-    'a ordSet * 'a ordSet * 'a ordSet
-
-  val intersection : 'a ordSet -> 'a ordSet -> 'a ordSet
-end
+include Red_black_set_intf
 (* signature RBSET *)
 
 (* # 1 "src/table/red_black_set.fun.ml" *)
 
 (* # 1 "src/table/red_black_set.sml.ml" *)
-open Table_
 
 (* redblack-set.sml
  *
@@ -86,7 +34,7 @@ open Table_
  *)
 module RBSet : RBSET = struct
   type nonrec key = int
-  type nonrec 'a entry = key * 'a
+  type 'a entry = key * 'a
 
   type 'a dict =
     | Empty
@@ -98,11 +46,10 @@ module RBSet : RBSET = struct
 
   exception Error of string
 
-  type nonrec 'a ordSet = 'a set ref
+  type 'a ordSet = 'a set ref
 
   let isEmpty = function Set (_, Empty) -> true | Set (_, _) -> false
   let empty = Set (0, Empty)
-  let singleton x = Set (1, Red (x, Empty, Empty))
   let compare = Int.compare
 
   (* Representation Invariants *)
@@ -228,107 +175,12 @@ module RBSet : RBSET = struct
       in
       Set (n, dict')
 
-    open! struct
-      type color = RedColor | BlackColor
-
-      type 'a zipper =
-        | Top
-        | LeftRed of 'a entry * 'a dict * 'a zipper
-        | LeftBlack of 'a entry * 'a dict * 'a zipper
-        | RightRed of 'a dict * 'a entry * 'a zipper
-        | RightBlack of 'a dict * 'a entry * 'a zipper
-    end
-
-    let delete (Set (nItems, t), k) =
-      let rec zip = function
-        | Top, t -> t
-        | LeftRed (x, b, z), a -> zip (z, Red (x, a, b))
-        | LeftBlack (x, b, z), a -> zip (z, Black (x, a, b))
-        | RightRed (a, x, z), b -> zip (z, Red (x, a, b))
-        | RightBlack (a, x, z), b -> zip (z, Black (x, a, b))
-      in
-      let rec bbZip = function
-        | Top, t -> (true, t)
-        | LeftBlack (x, Red (y, c, d), z), a ->
-            bbZip (LeftRed (x, c, LeftBlack (y, d, z)), a)
-        | LeftRed (x, Red (y, c, d), z), a ->
-            bbZip (LeftRed (x, c, LeftBlack (y, d, z)), a)
-        | LeftBlack (x, Black (w, Red (y, c, d), e), z), a ->
-            bbZip (LeftBlack (x, Black (y, c, Red (w, d, e)), z), a)
-        | LeftRed (x, Black (w, Red (y, c, d), e), z), a ->
-            bbZip (LeftRed (x, Black (y, c, Red (w, d, e)), z), a)
-        | LeftBlack (x, Black (y, c, Red (w, d, e)), z), a ->
-            (false, zip (z, Black (y, Black (x, a, c), Black (w, d, e))))
-        | LeftRed (x, Black (y, c, Red (w, d, e)), z), a ->
-            (false, zip (z, Red (y, Black (x, a, c), Black (w, d, e))))
-        | LeftRed (x, Black (y, c, d), z), a ->
-            (false, zip (z, Black (x, a, Red (y, c, d))))
-        | LeftBlack (x, Black (y, c, d), z), a ->
-            bbZip (z, Black (x, a, Red (y, c, d)))
-        | RightBlack (Red (y, c, d), x, z), b ->
-            bbZip (RightRed (d, x, RightBlack (c, y, z)), b)
-        | RightRed (Red (y, c, d), x, z), b ->
-            bbZip (RightRed (d, x, RightBlack (c, y, z)), b)
-        | RightBlack (Black (y, Red (w, c, d), e), x, z), b ->
-            bbZip (RightBlack (Black (w, c, Red (y, d, e)), x, z), b)
-        | RightRed (Black (y, Red (w, c, d), e), x, z), b ->
-            bbZip (RightRed (Black (w, c, Red (y, d, e)), x, z), b)
-        | RightBlack (Black (y, c, Red (w, d, e)), x, z), b ->
-            (false, zip (z, Black (y, c, Black (x, Red (w, d, e), b))))
-        | RightRed (Black (y, c, Red (w, d, e)), x, z), b ->
-            (false, zip (z, Red (y, c, Black (x, Red (w, d, e), b))))
-        | RightRed (Black (y, c, d), x, z), b ->
-            (false, zip (z, Black (x, Red (y, c, d), b)))
-        | RightBlack (Black (y, c, d), x, z), b ->
-            bbZip (z, Black (x, Red (y, c, d), b))
-        | z, t -> (false, zip (z, t))
-      in
-      let rec delMin = function
-        | Red (y, Empty, b), z -> (y, (false, zip (z, b)))
-        | Black (y, Empty, b), z -> (y, bbZip (z, b))
-        | Red (y, a, b), z -> delMin (a, LeftRed (y, b, z))
-        | Black (y, a, b), z -> delMin (a, LeftBlack (y, b, z))
-      in
-      let joinBlack = function
-        | a, Empty, z -> (fun (_, r) -> r) (bbZip (z, a))
-        | Empty, b, z -> (fun (_, r) -> r) (bbZip (z, b))
-        | a, b, z ->
-            let x, (needB, b') = delMin (b, Top) in
-            begin if needB then (fun (_, r) -> r) (bbZip (z, Black (x, a, b')))
-            else zip (z, Black (x, a, b'))
-            end
-      in
-      let joinRed = function
-        | Empty, Empty, z -> zip (z, Empty)
-        | a, b, z ->
-            let x, (needB, b') = delMin (b, Top) in
-            begin if needB then (fun (_, r) -> r) (bbZip (z, Red (x, a, b')))
-            else zip (z, Red (x, a, b'))
-            end
-      in
-      let rec del = function
-        | Empty, _z -> raise (Error "not found\n")
-        | Red (((k', _) as y), a, b), z -> begin
-            match compare (k, k') with
-            | Less -> del (a, LeftRed (y, b, z))
-            | Equal -> joinRed (a, b, z)
-            | Greater -> del (b, RightRed (a, y, z))
-          end
-        | Black (((k', _) as y), a, b), z -> begin
-            match compare (k, k') with
-            | Less -> del (a, LeftBlack (y, b, z))
-            | Equal -> joinBlack (a, b, z)
-            | Greater -> del (b, RightBlack (a, y, z))
-          end
-      in
-      Set (nItems - 1, del (t, Top))
-
     let app f (Set (_n, dict)) =
       let rec ap = function
         | Empty -> ()
         | Red (e, left, right) -> ap' (e, left, right)
         | Black (e, left, right) -> ap' (e, left, right)
-      and ap' (((_, datum) as entry1), left, right) =
+      and ap' ((_, datum), left, right) =
         begin
           ap left;
           begin
@@ -344,7 +196,7 @@ module RBSet : RBSET = struct
         | Empty -> Empty
         | Red (e, left, right) -> Red (upd' (e, left, right))
         | Black (e, left, right) -> Black (upd' (e, left, right))
-      and upd' (((k, datum) as entry1), left, right) =
+      and upd' ((k, datum), left, right) =
         let left' = upd left in
         let datum' = f datum in
         let right' = upd right in
@@ -373,7 +225,7 @@ module RBSet : RBSET = struct
         | Empty -> None
         | Red (e, left, right) -> ap' (e, left, right)
         | Black (e, left, right) -> ap' (e, left, right)
-      and ap' (((k, d) as entry), left, right) =
+      and ap' ((k, d), left, right) =
         begin if f d then begin
           print "SUCCESS\n";
           Some k
@@ -502,7 +354,7 @@ module RBSet : RBSET = struct
         | t1, (Empty, _) -> ins (t1, n, result)
         | (tree1, r1), (tree2, r2) ->
             let ((x, _d1) as e1) = getEntry tree1 in
-            let ((y, _d2) as e2) = getEntry tree2 in
+            let (y, _d2) = getEntry tree2 in
             begin match compare (x, y) with
             | Less -> diff (r1, t2, n + 1, addItem (e1, result))
             | Equal -> diff (r1, r2, n, result)

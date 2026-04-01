@@ -7,14 +7,14 @@ open Table_
 (* Red/Black Trees *)
 (* Author: Frank Pfenning *)
 module RedBlackTree (RedBlackTree__0 : sig
-  type nonrec key'
+  type key'
 
   val compare : key' * key' -> order
 end) : TABLE with type key = RedBlackTree__0.key' = struct
   open RedBlackTree__0
 
   type nonrec key = key'
-  type nonrec 'a entry = key * 'a
+  type 'a entry = key * 'a
 
   type 'a dict =
     | Empty
@@ -22,7 +22,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
     | Black of ('a entry * 'a dict * 'a dict)
 
   (* considered black *)
-  type nonrec 'a table = 'a dict ref
+  type 'a table = 'a dict ref
 
   (* Representation Invariants *)
   (*

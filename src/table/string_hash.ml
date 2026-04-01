@@ -4,10 +4,7 @@ open Basis
 
 (* String Hash Table *)
 (* Author: Frank Pfenning *)
-module type STRING_HASH = sig
-  val stringHash : string -> int
-end
-
+include String_hash_intf
 (* # 1 "src/table/string_hash.fun.ml" *)
 
 (* # 1 "src/table/string_hash.sml.ml" *)

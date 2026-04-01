@@ -6,18 +6,7 @@ open Statesyn
 
 (* Basic search engine: Version 1.3*)
 (* Author: Carsten Schuermann *)
-module type UNIQUESEARCH = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure FunSyn : FUNSYN !*)
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  type nonrec acctype = IntSyn.exp
-
-  val searchEx :
-    int * IntSyn.exp list * (acctype list -> acctype list) -> acctype list
-end
+include Uniquesearch_intf
 (* signature SEARCH *)
 
 (* # 1 "src/meta/uniquesearch.fun.ml" *)
@@ -33,14 +22,14 @@ module UniqueSearch (UniqueSearch__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure FunSyn' : FUNSYN !*)
   (*! sharing FunSyn'.IntSyn = IntSyn' !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.IntSyn = IntSyn' !*)
   (*! sharing StateSyn'.FunSyn = FunSyn' !*)
   module Abstract : ABSTRACT
 
   (*! sharing Abstract.IntSyn = IntSyn' !*)
-  module MTPGlobal : MTPGLOBAL
+  module MTPGlobal : Mtp_global.MTPGLOBAL
 
   (*! structure CompSyn' : COMPSYN !*)
   (*! sharing CompSyn'.IntSyn = IntSyn' !*)
@@ -50,7 +39,7 @@ module UniqueSearch (UniqueSearch__0 : sig
   module Unify : UNIFY
 
   (*! sharing Unify.IntSyn = IntSyn' !*)
-  module Assign : ASSIGN
+  module Assign : Assign.ASSIGN
 
   (*! sharing Assign.IntSyn = IntSyn'                         !*)
   module Index : INDEX
@@ -60,7 +49,7 @@ module UniqueSearch (UniqueSearch__0 : sig
 
   (*! sharing Compile.IntSyn = IntSyn' !*)
   (*! sharing Compile.CompSyn = CompSyn' !*)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)
@@ -68,7 +57,7 @@ module UniqueSearch (UniqueSearch__0 : sig
 
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Names : NAMES
-end) : UNIQUESEARCH = struct
+end) : Uniquesearch_intf.UNIQUESEARCH = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure FunSyn = FunSyn' !*)
   open UniqueSearch__0

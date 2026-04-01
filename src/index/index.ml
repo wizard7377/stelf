@@ -1,4 +1,5 @@
-open! Index_
+include Index_
+include Index_skolem
+
 module Index_ = Index_
-open! Index_skolem
 module Index_skolem = Index_skolem

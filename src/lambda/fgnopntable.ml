@@ -7,8 +7,8 @@ open Fgnopn
 module FgnOpnTable (FgnOpnTable__0 : sig
   (* Extensible operation on foreign matter *)
   (* Author: Aleksey Kliger *)
-  type nonrec arg
-  type nonrec result
+  type arg
+  type result
 end) :
   FGN_OPN
     with type arg = FgnOpnTable__0.arg

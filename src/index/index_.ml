@@ -5,18 +5,7 @@ open! Basis
 (* Author: Carsten Schuermann *)
 
 (** Modified: Frank Pfenning *)
-module type INDEX = sig
-  (*! structure IntSyn : INTSYN !*)
-  val reset : unit -> unit
-  val resetFrom : IntSyn.cid -> unit
-  val install : IntSyn.conDecForm -> IntSyn.head -> unit
-
-  (* lookup a = [c1,...,cn] *)
-  (* c1,...,cn are all constants with target family a *)
-
-  val lookup : IntSyn.cid -> IntSyn.head list
-  (** in order of declaration, defined constants are omitted *)
-end
+include Index_intf
 (* signature INDEX *)
 
 (* # 1 "src/index/index_.fun.ml" *)
@@ -137,6 +126,7 @@ module Index = MakeIndex (struct
   module Global = Global
   module Queue = Queue
 end)
+include Index
 (*! structure IntSyn' = IntSyn !*)
 (* IndexSkolem commented out to break cycle with index_skolem *)
 (*

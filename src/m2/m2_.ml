@@ -33,14 +33,14 @@ module MetaAbstract = Meta_abstract.MetaAbstract (struct
   module Unify = UnifyNoTrail
   module Names = Names
   module TypeCheck = TypeCheck
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate.Subordinate_.Subordinate
 end)
 
 (*! structure Cs_manager = Cs_manager !*)
 module MetaPrint = MetaPrint (struct
   module Global = Global
   module MetaSyn' = MetaSyn
-  module Formatter = Formatter
+  module Formatter = Formatter__Formatter_.Formatter
   module Print = Print
   module ClausePrint = ClausePrint
 end)
@@ -56,7 +56,7 @@ module OLDSearch = OLDSearch (struct
   module MetaSyn' = MetaSyn
 
   (*! structure CompSyn' = CompSyn !*)
-  module Compile = Compile
+  module Compile = Compile_.Compile
   module Whnf = Whnf
   module Unify = UnifyTrail
   module Index = Index
@@ -105,7 +105,7 @@ module Recursion = Recursion (struct
   module Conv = Conv
   module Names = Names
   module Print = Print
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate.Subordinate_.Subordinate
   module Order = Order
   module ModeTable = ModeTable
   module MetaAbstract = MetaAbstract
@@ -168,6 +168,8 @@ module Prover = Prover (struct
   module Timers = Timers.Timers
 end)
 
+module M2Prover = Prover
+
 module Mpi = Mpi (struct
   module MetaGlobal = Meta_global.MetaGlobal
   module MetaSyn' = MetaSyn
@@ -187,7 +189,7 @@ end)
 
 module IndexSkolem = Index_skolem.MakeIndexSkolem (struct
   module Global = Global
-  module Queue = Queue
+  module Queue = Queue.Queue
 end)
 
 module Skolem = Skolem (struct

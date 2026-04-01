@@ -4,19 +4,7 @@ open! Parsing
 
 (* Parsing modules *)
 (* Author: Kevin Watkins *)
-module type PARSE_MODULE = sig
-  (*! structure Parsing : PARSING !*)
-  module ModExtSyn : Recon_module.MODEXTSYN
-
-  (* val parseSigExp' : ModExtSyn.sigexp Parsing.recparser *)
-  val parseSigDef' : ModExtSyn.sigdef Parsing.recparser
-
-  (* val parseStructExp' : ModExtSyn.strexp Parsing.parser *)
-  val parseStructDec' : ModExtSyn.structdec Parsing.recparser
-  val parseInclude' : ModExtSyn.sigexp Parsing.recparser
-  val parseOpen' : ModExtSyn.strexp Parsing.parser
-end
-
+include Parse_module_intf
 (* # 1 "src/frontend/parse_module.fun.ml" *)
 open! Parsing
 open! Basis

@@ -3,7 +3,9 @@
 (library
  (name netserver)
  (public_name stelf.netserver)
- (modules netserver_)
+ (modules
+  netserver_
+  netserver_intf)
  (libraries timing frontend msg basis)
  (flags
   (:standard

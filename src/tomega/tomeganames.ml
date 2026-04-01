@@ -4,10 +4,7 @@ module Tomega = Lambda_.Tomega
 
 (* Naming *)
 (* Author: Carsten Schuermann *)
-module type TOMEGANAMES = sig
-  val decName : Tomega.dec IntSyn.ctx * Tomega.dec -> Tomega.dec
-end
-
+include Tomeganames_intf
 (* # 1 "src/tomega/tomeganames.fun.ml" *)
 open! Basis
 

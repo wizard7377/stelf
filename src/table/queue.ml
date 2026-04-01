@@ -4,19 +4,7 @@ open Basis
 
 (* Queues *)
 (* Author: Frank Pfenning *)
-module type QUEUE = sig
-  type nonrec 'a queue
-
-  val empty : 'a queue
-  val insert : 'a * 'a queue -> 'a queue
-  val delete : 'a queue -> ('a * 'a queue) option
-  val insertFront : 'a * 'a queue -> 'a queue
-  val deleteEnd : 'a queue -> ('a * 'a queue) option
-
-  (* If  toList (q) ==> (l, SOME(q')) *)
-  (* then q == q' and toList q' is constant time *)
-  val toList : 'a queue -> 'a list * 'a queue option
-end
+include Queue_intf
 (* signature QUEUE *)
 
 (* # 1 "src/table/queue.fun.ml" *)
@@ -35,7 +23,7 @@ module Queue : QUEUE = struct
   (* Representation invariant:
      If  q = (inp, out)  then  q == out @ rev(inp)
   *)
-  type nonrec 'a queue = 'a list * 'a list
+  type 'a queue = 'a list * 'a list
 
   let empty = ([], [])
   let insert (x, (inp, out)) = (x :: inp, out)

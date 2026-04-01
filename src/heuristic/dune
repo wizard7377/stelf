@@ -3,7 +3,10 @@
 (library
  (name heuristic)
  (public_name stelf.heuristic)
- (modules heuristic_ heuristic_sum)
+ (modules
+  heuristic_
+  heuristic_sum
+  heuristic_intf)
  (libraries basis)
  (wrapped true)
  (preprocess

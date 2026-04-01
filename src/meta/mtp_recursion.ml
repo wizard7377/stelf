@@ -10,17 +10,7 @@ open Funprint
 
 (* Recursion: Version 1.3 *)
 (* Author: Carsten Schuermann *)
-module type MTPRECURSION = sig
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  type nonrec operator
-
-  val expand : StateSyn.state -> operator
-  val apply : operator -> StateSyn.state
-  val menu : operator -> string
-end
+include Mtp_recursion_intf
 (* signature MTPRECURSION *)
 
 (* # 1 "src/meta/recursion.fun.ml" *)
@@ -32,27 +22,27 @@ open! Basis
 (* Author: Carsten Schuermann *)
 (* See [Rohwedder,Pfenning ESOP'96] *)
 module MTPRecursion (MTPRecursion__0 : sig
-  module MTPGlobal : MTPGLOBAL
+  module MTPGlobal : Mtp_global.MTPGLOBAL
   module Global : GLOBAL
 
   (*! structure IntSyn : INTSYN !*)
   (*! structure FunSyn : FUNSYN !*)
   (*! sharing FunSyn.IntSyn = IntSyn !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.IntSyn = IntSyn !*)
   (*! sharing StateSyn'.FunSyn = FunSyn !*)
   module Abstract : ABSTRACT
 
   (*! sharing Abstract.IntSyn = IntSyn !*)
-  module MTPAbstract : MTPABSTRACT
+  module MTPAbstract : Mtp_abstract_intf.MTPABSTRACT
 
   (*! sharing MTPAbstract.IntSyn = IntSyn !*)
   (*! sharing MTPAbstract.FunSyn = FunSyn !*)
-  module FunTypeCheck : FUNTYPECHECK
+  module FunTypeCheck : Funtypecheck_intf.FUNTYPECHECK
 
   (*! sharing FunTypeCheck.FunSyn = FunSyn !*)
-  module MTPrint : MTPRINT
+  module MTPrint : Mtp_print_intf.MTPRINT
   module Whnf : WHNF
 
   (*! sharing Whnf.IntSyn = IntSyn !*)
@@ -65,7 +55,7 @@ module MTPRecursion (MTPRecursion__0 : sig
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn !*)
   module Print : PRINT
@@ -75,7 +65,7 @@ module MTPRecursion (MTPRecursion__0 : sig
 
   (*! sharing TypeCheck.IntSyn = IntSyn !*)
   module Formatter : FORMATTER
-  module FunPrint : FUNPRINT
+  module FunPrint : Funprint_intf.FUNPRINT
 end) : MTPRECURSION = struct
   open MTPRecursion__0
   module StateSyn = StateSyn'

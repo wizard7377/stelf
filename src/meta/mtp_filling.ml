@@ -8,19 +8,7 @@ open Mtp_search
 
 (* Filling: Version 1.3 *)
 (* Author: Carsten Schuermann *)
-module type MTPFILLING = sig
-  (*! structure FunSyn : FUNSYN !*)
-  module StateSyn : STATESYN
-
-  exception Error of string
-  exception TimeOut
-
-  type nonrec operator
-
-  val expand : StateSyn.state -> operator
-  val apply : operator -> int * FunSyn.pro
-  val menu : operator -> string
-end
+include Mtp_filling_intf
 (* signature MTPFILLING *)
 
 (* # 1 "src/meta/filling.fun.ml" *)
@@ -31,12 +19,12 @@ open! Basis
 (* Filling  Version 1.3*)
 (* Author: Carsten Schuermann *)
 module MTPFilling (MTPFilling__0 : sig
-  module MTPGlobal : MTPGLOBAL
+  module MTPGlobal : Mtp_global.MTPGLOBAL
 
   (*! structure IntSyn : INTSYN !*)
   (*! structure FunSyn' : FUNSYN !*)
   (*! sharing FunSyn'.IntSyn = IntSyn !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.FunSyn = FunSyn' !*)
   module Abstract : ABSTRACT
@@ -45,10 +33,10 @@ module MTPFilling (MTPFilling__0 : sig
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn !*)
-  module MTPData : MTPDATA
-  module Search : MTPSEARCH
+  module MTPData : Mtp_data_intf.MTPDATA
+  module Search : Mtp_search_intf.MTPSEARCH
   module Whnf : WHNF
-end) : MTPFILLING = struct
+end) : Mtp_filling_intf.MTPFILLING = struct
   (*! structure FunSyn = FunSyn' !*)
   open MTPFilling__0
   module StateSyn = StateSyn'

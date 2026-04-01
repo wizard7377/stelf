@@ -8,15 +8,7 @@ open Funprint
 
 (* Initialization *)
 (* Author: Carsten Schuermann *)
-module type MTPINIT = sig
-  (*! structure FunSyn : FUNSYN !*)
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  (* Current restriction to non-mutual inductive theorems ! *)
-  val init : FunSyn.for_ * StateSyn.order -> StateSyn.state list
-end
+include Mtp_init_intf
 (* signature MTPINIT *)
 
 (* # 1 "src/meta/init.fun.ml" *)
@@ -25,8 +17,8 @@ open! Basis
 (* Initialization *)
 (* Author: Carsten Schuermann *)
 module MTPInit (MTPInit__0 : sig
-  module MTPGlobal : MTPGLOBAL
-  module MTPData : MTPDATA
+  module MTPGlobal : Mtp_global.MTPGLOBAL
+  module MTPData : Mtp_data_intf.MTPDATA
 
   (*! structure IntSyn : INTSYN !*)
   module Names : NAMES
@@ -34,7 +26,7 @@ module MTPInit (MTPInit__0 : sig
   (*! sharing Names.IntSyn = IntSyn !*)
   (*! structure FunSyn' : FUNSYN !*)
   (*! sharing FunSyn'.IntSyn = IntSyn !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.FunSyn = FunSyn' !*)
   module Formatter : FORMATTER
@@ -44,8 +36,8 @@ module MTPInit (MTPInit__0 : sig
   module Print : PRINT
 
   (*! sharing Print.IntSyn = IntSyn !*)
-  module FunPrint : FUNPRINT
-end) : MTPINIT = struct
+  module FunPrint : Funprint_intf.FUNPRINT
+end) : Mtp_init_intf.MTPINIT = struct
   (*! structure FunSyn = FunSyn' !*)
   open MTPInit__0
   module StateSyn = StateSyn'

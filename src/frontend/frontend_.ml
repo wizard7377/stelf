@@ -28,7 +28,7 @@ module type STELF = Twelf_.STELF
 
 module ReconTerm = Recon_term.ReconTerm (struct
   (*! structure IntSyn' = IntSyn !*)
-  module Names = Names
+  module Names = Thm_.ThmSyn.Names
 
   (*! structure Paths' = Paths !*)
   module Approx = Approx
@@ -85,6 +85,33 @@ module ReconMode = Recon_mode.ReconMode (struct
   module ModePrint = ModePrint
   module ModeDec = ModeDec
   module ReconTerm' = ReconTerm
+end)
+
+module ThmSyn = Thmsyn.ThmSyn (struct
+  module Abstract = Abstract
+  module Whnf = Whnf
+  module Paths' = Paths
+  module Names' = Names
+end)
+
+module ThmPrint = Thmprint.ThmPrint (struct
+  module ThmSyn' = ThmSyn
+  module Formatter = Formatter
+end)
+
+module FrontendTabledSyn = Tabledsyn.MakeTabledSyn (struct
+  module Names = Names
+  module Table = Table_instances.IntRedBlackTree
+  module Index = Index
+end)
+
+module Thm = Thm_.Make_Thm (struct
+  module Global = Global
+  module ThmSyn' = ThmSyn
+  module TabledSyn = FrontendTabledSyn
+  module ModeTable = ModeTable
+  module Order = Order
+  module ThmPrint = ThmPrint
 end)
 
 module ReconThm = Recon_thm.ReconThm (struct
@@ -284,7 +311,7 @@ module Stelf = Twelf_.Stelf (struct
   module Reduces = Reduces
   module Index = Index
   module IndexSkolem = IndexSkolem
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate.Subordinate_.Subordinate
 
   (*! structure CompSyn' = CompSyn !*)
   module Compile = Compile
@@ -300,7 +327,7 @@ module Stelf = Twelf_.Stelf (struct
   module Thm = Thm
   module ReconThm = ReconThm
   module ThmPrint = ThmPrint
-  module TabledSyn = TabledSyn
+  module TabledSyn = FrontendTabledSyn
   module WorldSyn = WorldSyn
 
   (*	 structure WorldPrint = WorldPrint *)
@@ -311,7 +338,7 @@ module Stelf = Twelf_.Stelf (struct
 
   (*! structure FunSyn = FunSyn !*)
   module Skolem = Skolem
-  module Prover = CombiProver
+  module Prover = M2_.M2Prover
   module ClausePrint = ClausePrint
   module Trace = Trace
   module PrintTeX = PrintTeX

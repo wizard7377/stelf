@@ -1,25 +1,11 @@
 (* # 1 "src/domains/rationals.sig.ml" *)
 open Basis
-open Int_inf
-open Int_inf.Int_inf_
 open Ordered_field
 open Integers
 
 (* Rational numbers *)
 (* Author: Roberto Virga *)
-module type RATIONALS = sig
-  include ORDERED_FIELD
-  module Integers : INTEGERS
-
-  (* Conversions between rationals and integers *)
-  val fromInteger : Integers.int -> number
-  val floor : number -> Integers.int
-  val ceiling : number -> Integers.int
-
-  (* Basic projections *)
-  val numerator : number -> Integers.int
-  val denominator : number -> Integers.int
-end
+include Rationals_intf
 (* signature RATIONALS *)
 
 (* # 1 "src/domains/rationals.fun.ml" *)

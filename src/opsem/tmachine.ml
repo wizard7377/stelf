@@ -22,7 +22,7 @@ module TMachine (TMachine__0 : sig
   module Index : INDEX
 
   (*! sharing Index.IntSyn = IntSyn' !*)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)

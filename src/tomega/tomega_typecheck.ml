@@ -5,16 +5,7 @@ module Tomega = Lambda_.Tomega
 (* Type checking for functional proof term calculus *)
 (* Author: Carsten Schuermann *)
 (* Modified: Yu Liao *)
-module type TOMEGATYPECHECK = sig
-  exception Error of string
-
-  val checkCtx : Tomega.dec IntSyn.ctx -> unit
-  val checkFor : Tomega.dec IntSyn.ctx * Tomega.for_ -> unit
-  val checkPrg : Tomega.dec IntSyn.ctx * (Tomega.prg * Tomega.for_) -> unit
-
-  val checkSub :
-    Tomega.dec IntSyn.ctx * Tomega.sub * Tomega.dec IntSyn.ctx -> unit
-end
+include Tomega_typecheck_intf
 (* Signature TOMEGATYPECHECK *)
 
 (* # 1 "src/tomega/tomega_typecheck.fun.ml" *)
@@ -30,8 +21,8 @@ module TomegaTypeCheck (TomegaTypeCheck__0 : sig
   module Whnf : WHNF
   module Print : PRINT
   module TomegaPrint : Tomegaprint.TOMEGAPRINT
-  module Subordinate : SUBORDINATE
-  module Weaken : WEAKEN
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
+  module Weaken : Weaken_intf.WEAKEN
   module TomegaAbstract : Tomega_abstract.TOMEGAABSTRACT
 end) : TOMEGATYPECHECK = struct
   (*! structure IntSyn = IntSyn' !*)
@@ -419,7 +410,7 @@ end) : TOMEGATYPECHECK = struct
     and convValue (g_, p1_, p2_, f_) = ()
 
     and checkFor = function
-      | psi_, (True, _) -> ()
+      | psi_, (T.True, _) -> ()
       | psi_, (T.All (((T.PDec (_, f1_, _, _) as d_), _), f2_), t) -> begin
           checkFor (psi_, (f1_, t));
           checkFor (I.Decl (psi_, d_), (f2_, T.dot1 t))

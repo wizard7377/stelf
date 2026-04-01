@@ -9,7 +9,7 @@ open Trail_
 (* Not Trailing Abstract Operations *)
 (* Author: Roberto Virga *)
 module NoTrail : TRAIL = struct
-  type nonrec 'a trail = unit
+  type 'a trail = unit
 
   let trail () = ()
   let suspend ((), _copy) = ()

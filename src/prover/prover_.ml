@@ -54,7 +54,7 @@ module Split : Split.SPLIT with module State = State = Split.Split (struct
   module Names = Names
   module Print = Print
   module TypeCheck = TypeCheck
-  module Subordinate = Subordinate
+  module Subordinate = Subordinate.Subordinate_.Subordinate
 end)
 
 module Search = Psearch.Search (struct

@@ -4,29 +4,7 @@ open Basis
 
 (* Sparse 2-Dimensional Arrays *)
 (* Author: Roberto Virga *)
-module type SPARSE_ARRAY2 = sig
-  type nonrec 'a array
-
-  type nonrec 'a __0 = {
-    base : 'a array;
-    row : int;
-    col : int;
-    nrows : int;
-    ncols : int;
-  }
-
-  type nonrec 'a region = 'a __0
-  type traversal = RowMajor | ColMajor [@@deriving eq, ord, show]
-
-  val array : 'a -> 'a array
-  val sub : 'a array * int * int -> 'a
-  val update : 'a array * int * int * 'a -> unit
-  val row : 'a array * int * (int * int) -> 'a Vector.vector
-  val column : 'a array * int * (int * int) -> 'a Vector.vector
-  val app : traversal -> (int * int * 'a -> unit) -> 'a region -> unit
-  val fold : traversal -> (int * int * 'a * 'b -> 'b) -> 'b -> 'a region -> 'b
-  val modify : traversal -> (int * int * 'a -> 'a) -> 'a region -> unit
-end
+include Sparse_array2_intf
 (* signature SPARSE_ARRAY2 *)
 
 (* # 1 "src/table/sparse_array2.fun.ml" *)
@@ -39,10 +17,10 @@ module SparseArray2 (SparseArray2__0 : sig
 end) : SPARSE_ARRAY2 = struct
   open SparseArray2__0
 
-  type nonrec 'a __1 = { default : 'a; table : 'a IntTable.table }
-  type nonrec 'a array = 'a __1
+  type 'a __1 = { default : 'a; table : 'a IntTable.table }
+  type 'a array = 'a __1
 
-  type nonrec 'a __0 = {
+  type 'a __0 = {
     base : 'a array;
     row : int;
     col : int;
@@ -50,21 +28,10 @@ end) : SPARSE_ARRAY2 = struct
     ncols : int;
   }
 
-  type nonrec 'a region = 'a __0
+  type 'a region = 'a __0
   type traversal = RowMajor | ColMajor [@@deriving eq, ord, show]
 
   let size = 29
-
-  let fromInt code =
-    let rec fromInt' r =
-      let code' = (r + 1) * (r + 2) / 2 in
-      begin if code < code' then
-        let diff = code' - code - 1 in
-        (diff, r - diff)
-      else fromInt' (r + 1)
-      end
-    in
-    fromInt' 0
 
   let toInt (m, n) =
     let sum = m + n in

@@ -27,7 +27,27 @@
   buildid
   version
   twelf_
-  frontend_)
+  frontend_
+  fquery_intf
+  lexer_intf
+  parse_condec_intf
+  parse_fixity_intf
+  parse_mode_intf
+  parse_module_intf
+  parse_query_intf
+  parse_term_intf
+  parse_thm_intf
+  parser_intf
+  parsing_intf
+  recon_condec_intf
+  recon_mode_intf
+  recon_module_intf
+  recon_query_intf
+  recon_term_intf
+  recon_thm_intf
+  twelf_intf
+  solve_intf
+  unknownexn_intf)
  (libraries
   timing
   stream
@@ -140,7 +160,7 @@
    -open
    Subordinate
    -open
-   Subordinate.Subordinate_
+   Subordinate
    -open
    Modules
    -open

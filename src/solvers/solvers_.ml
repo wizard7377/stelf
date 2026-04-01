@@ -79,11 +79,7 @@ module CSIntWord32 = Cs_integers_word.Cs_int_word (struct
   (*! structure Cs_manager = Cs_manager !*)
   let wordSize = 32
 end)
-
-module type CS_INSTALLER = sig
-  val version : string
-end
-
+include Solvers_intf
 (* execute for effect *)
 (* wrapped in structure so it can be tracked by CM *)
 module CSInstaller : CS_INSTALLER = struct

@@ -4,13 +4,7 @@ open Funsyn
 
 (* Weakening substitutions for meta substitutions *)
 (* Author: Carsten Schuermann *)
-module type FUNWEAKEN = sig
-  (*! structure FunSyn : FUNSYN !*)
-  val strengthenPsi : FunSyn.lfctx * IntSyn.sub -> FunSyn.lfctx * IntSyn.sub
-
-  val strengthenPsi' :
-    FunSyn.lFDec list * IntSyn.sub -> FunSyn.lFDec list * IntSyn.sub
-end
+include Funweaken_intf
 (* signature FUNWEAKEN *)
 
 (* # 1 "src/meta/funweaken.fun.ml" *)
@@ -20,8 +14,8 @@ open! Basis
 (* Weakening substitutions for meta substitutions *)
 (* Author: Carsten Schuermann *)
 module FunWeaken (FunWeaken__0 : sig
-  module Weaken : WEAKEN
-end) : FUNWEAKEN = struct
+  module Weaken : Weaken_intf.WEAKEN
+end) : Funweaken_intf.FUNWEAKEN = struct
   (*! structure FunSyn = FunSyn' !*)
   open FunWeaken__0
 

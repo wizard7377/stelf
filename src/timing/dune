@@ -3,7 +3,12 @@
 (library
  (name timing)
  (public_name stelf.timing)
- (modules timers timing_ time_limit)
+ (modules
+  timers
+  timing_
+  time_limit
+  timers_intf
+  timing_intf)
  (libraries basis)
  (wrapped true)
  (preprocess

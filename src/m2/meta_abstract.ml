@@ -4,13 +4,7 @@ open Metasyn
 
 (* Meta Abstraction *)
 (* Author: Carsten Schuermann *)
-module type METAABSTRACT = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-
-  val abstract : MetaSyn.state -> MetaSyn.state
-end
+include Meta_abstract_intf
 (* signature METAABSTRACT *)
 
 (* # 1 "src/m2/meta_abstract.fun.ml" *)
@@ -23,14 +17,14 @@ open Modetable
 (* Author: Carsten Schuermann *)
 module MetaAbstract (MetaAbstract__0 : sig
   module Global : GLOBAL
-  module MetaSyn : METASYN
-  module MetaGlobal : METAGLOBAL
+  module MetaSyn : Metasyn.METASYN
+  module MetaGlobal : Meta_global.METAGLOBAL
   module Abstract : ABSTRACT
 
   (*! sharing Abstract.IntSyn = MetaSyn'.IntSyn !*)
-  module ModeTable : MODETABLE
+  module ModeTable : Modetable.MODETABLE
 
-  (*! sharing ModeSyn.IntSyn = MetaSyn'.IntSyn !*)
+  (*! sharing Modes.Modesyn.ModeSyn.IntSyn = MetaSyn'.IntSyn !*)
   module Whnf : WHNF
 
   (*! sharing Whnf.IntSyn = MetaSyn'.IntSyn !*)
@@ -49,7 +43,7 @@ module MetaAbstract (MetaAbstract__0 : sig
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = MetaSyn'.IntSyn !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
   open MetaAbstract__0
   module MetaSyn = MetaAbstract__0.MetaSyn
@@ -60,6 +54,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     module I = IntSyn
     module S = Stream
     module C = Constraints
+    module M = Modes.Modesyn.ModeSyn
 
     type var = Ev of I.exp option ref * I.exp * MetaSyn.mode | Bv
 
@@ -75,8 +70,8 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       TypeCheck.typeCheck (g_, (v_, I.Uni I.Type))
 
     let rec modeEq = function
-      | ModeSyn.Marg (ModeSyn.Plus, _), MetaSyn.Top -> true
-      | ModeSyn.Marg (ModeSyn.Minus, _), MetaSyn.Bot -> true
+      | M.Marg (M.Plus, _), MetaSyn.Top -> true
+      | M.Marg (M.Minus, _), MetaSyn.Bot -> true
       | _ -> false
 
     let rec atxLookup = function
@@ -208,10 +203,10 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     let rec collectModeW = function
       | lG0, g_, modeIn, modeRec, (I.Root (I.Const cid, s_), s), adepth_ ->
           let rec collectModeW' = function
-            | ((I.Nil, _), ModeSyn.Mnil), adepth_ -> adepth_
+            | ((I.Nil, _), M.Mnil), adepth_ -> adepth_
             | ((I.SClo (s_, s'), s), m_), adepth_ ->
                 collectModeW' (((s_, I.comp (s', s)), m_), adepth_)
-            | ((I.App (u_, s_), s), ModeSyn.Mapp (m, mS)), adepth_ ->
+            | ((I.App (u_, s_), s), M.Mapp (m, mS)), adepth_ ->
                 collectModeW'
                   ( ((s_, s), mS),
                     begin if modeEq (m, modeIn) then

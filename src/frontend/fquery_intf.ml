@@ -1,0 +1,13 @@
+(* # 1 "src/frontend/fquery.sig.ml" *)
+open! Basis
+
+(* fquery: Executing logic programs via functional interpretation *)
+(* Author: Carsten Schuermann *)
+
+module type FQUERY = sig
+  module ExtQuery : Recon_query.EXTQUERY
+
+  exception AbortQuery of string
+
+  val run : ExtQuery.query * Paths.location -> unit
+end

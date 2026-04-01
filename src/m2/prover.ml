@@ -3,15 +3,7 @@ open! Basis
 
 (* Meta Prover *)
 (* Author: Carsten Schuermann *)
-module type PROVER = sig
-  (*! structure IntSyn : INTSYN !*)
-  exception Error of string
-
-  val init : int * IntSyn.cid list -> unit
-  val auto : unit -> unit
-  val print : unit -> unit
-  val install : (IntSyn.conDec -> IntSyn.cid) -> unit
-end
+include Prover_intf
 (* signature PROVER *)
 
 (* # 1 "src/m2/prover.fun.ml" *)
@@ -30,19 +22,19 @@ open Timers
 (* Meta Prover *)
 (* Author: Carsten Schuermann *)
 module Prover (Prover__0 : sig
-  module MetaGlobal : METAGLOBAL
-  module MetaSyn' : METASYN
-  module Init : INIT with module MetaSyn = MetaSyn'
-  module Strategy : STRATEGY with module MetaSyn = MetaSyn'
-  module Filling : FILLING with module MetaSyn = MetaSyn'
-  module Splitting : SPLITTING with module MetaSyn = MetaSyn'
-  module Recursion : RECURSION with module MetaSyn = MetaSyn'
-  module Qed : QED with module MetaSyn = MetaSyn'
-  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
+  module MetaGlobal : Meta_global.METAGLOBAL
+  module MetaSyn' : Metasyn.METASYN
+  module Init : Init_intf.INIT with module MetaSyn = MetaSyn'
+  module Strategy : Strategy_intf.STRATEGY with module MetaSyn = MetaSyn'
+  module Filling : Filling_intf.FILLING with module MetaSyn = MetaSyn'
+  module Splitting : Splitting_intf.SPLITTING with module MetaSyn = MetaSyn'
+  module Recursion : Recursion_intf.RECURSION with module MetaSyn = MetaSyn'
+  module Qed : Qed_intf.QED with module MetaSyn = MetaSyn'
+  module MetaPrint : Meta_print.METAPRINT with module MetaSyn = MetaSyn'
   module Names : NAMES
 
   (*! sharing Names.IntSyn = MetaSyn'.IntSyn !*)
-  module Timers : TIMERS
+  module Timers : Timers_intf.TIMERS
 end) : PROVER = struct
   open Prover__0
 

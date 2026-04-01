@@ -4,13 +4,7 @@ open Metasyn
 
 (* Initialization *)
 (* Author: Carsten Schuermann *)
-module type INIT = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-
-  val init : IntSyn.cid list -> MetaSyn.state list
-end
+include Init_intf
 (* signature INIT *)
 
 (* # 1 "src/m2/init.fun.ml" *)
@@ -21,8 +15,8 @@ open Meta_abstract
 (* Initialization *)
 (* Author: Carsten Schuermann *)
 module Init (Init__0 : sig
-  module MetaSyn' : METASYN
-  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
+  module MetaSyn' : Metasyn.METASYN
+  module MetaAbstract : Meta_abstract.METAABSTRACT with module MetaSyn = MetaSyn'
 end) : INIT with module MetaSyn = Init__0.MetaSyn' = struct
   open Init__0
   module MetaSyn = MetaAbstract.MetaSyn

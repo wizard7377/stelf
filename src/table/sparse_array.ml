@@ -4,28 +4,7 @@ open Basis
 
 (* Sparse 1-Dimensional Arrays *)
 (* Author: Roberto Virga *)
-module type SPARSE_ARRAY = sig
-  type nonrec 'a array
-
-  val array : 'a -> 'a array
-  val sub : 'a array * int -> 'a
-  val update : 'a array * int * 'a -> unit
-  val extract : 'a array * int * int -> 'a Vector.vector
-
-  type nonrec 'a __0 = {
-    src : 'a Vector.vector;
-    si : int;
-    len : int option;
-    dst : 'a array;
-    di : int;
-  }
-
-  val copyVec : 'a __0 -> unit
-  val app : (int * 'a -> unit) -> 'a array * int * int -> unit
-  val foldl : (int * 'a * 'b -> 'b) -> 'b -> 'a array * int * int -> 'b
-  val foldr : (int * 'a * 'b -> 'b) -> 'b -> 'a array * int * int -> 'b
-  val modify : (int * 'a -> 'a) -> 'a array * int * int -> unit
-end
+include Sparse_array_intf
 (* signature SPARSE_ARRAY *)
 
 (* # 1 "src/table/sparse_array.fun.ml" *)
@@ -38,9 +17,9 @@ module SparseArray (SparseArray__0 : sig
 end) : SPARSE_ARRAY = struct
   open SparseArray__0
 
-  type nonrec 'a array = { default : 'a; table : 'a IntTable.table }
+  type 'a array = { default : 'a; table : 'a IntTable.table }
 
-  type nonrec 'a __0 = {
+  type 'a __0 = {
     src : 'a Vector.vector;
     si : int;
     len : int option;

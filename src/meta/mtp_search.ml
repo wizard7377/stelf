@@ -6,15 +6,7 @@ open Mtp_global
 
 (* Basic search engine: Version 1.3*)
 (* Author: Carsten Schuermann *)
-module type MTPSEARCH = sig
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  val searchEx :
-    int * IntSyn.exp list * (int -> unit) ->
-    unit (*      * (IntSyn.Exp * IntSyn.Sub) *)
-end
+include Mtp_search_intf
 (* signature SEARCH *)
 
 (* # 1 "src/meta/search.fun.ml" *)
@@ -31,8 +23,8 @@ module MTPSearch (MTPSearch__0 : sig
   module Abstract : ABSTRACT
 
   (*! sharing Abstract.IntSyn = IntSyn' !*)
-  module MTPGlobal : MTPGLOBAL
-  module StateSyn' : STATESYN
+  module MTPGlobal : Mtp_global.MTPGLOBAL
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.FunSyn.IntSyn = IntSyn' !*)
   (*! structure CompSyn' : COMPSYN !*)
@@ -43,7 +35,7 @@ module MTPSearch (MTPSearch__0 : sig
   module Unify : UNIFY
 
   (*! sharing Unify.IntSyn = IntSyn'              !*)
-  module Assign : ASSIGN
+  module Assign : Assign.ASSIGN
 
   (*! sharing Assign.IntSyn = IntSyn'   !*)
   module Index : INDEX
@@ -53,7 +45,7 @@ module MTPSearch (MTPSearch__0 : sig
 
   (*! sharing Compile.IntSyn = IntSyn' !*)
   (*! sharing Compile.CompSyn = CompSyn' !*)
-  module CPrint : CPRINT
+  module CPrint : Cprint.CPRINT
 
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)
@@ -61,7 +53,7 @@ module MTPSearch (MTPSearch__0 : sig
 
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Names : NAMES
-end) : MTPSEARCH = struct
+end) : Mtp_search_intf.MTPSEARCH = struct
   (*! structure IntSyn = IntSyn' !*)
   open MTPSearch__0
   module StateSyn = StateSyn'

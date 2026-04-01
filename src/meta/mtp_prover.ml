@@ -9,14 +9,7 @@ open Relfun
 
 (* Meta Prover Version 1.3 *)
 (* Author: Carsten Schuermann *)
-module type MTPROVER = sig
-  (*! structure FunSyn : FUNSYN !*)
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  val init : FunSyn.for_ * StateSyn.order -> unit
-end
+include Mtp_prover_intf
 (* signature MTPROVER *)
 
 (* # 1 "src/meta/prover.fun.ml" *)
@@ -25,25 +18,26 @@ open! Basis
 (* Meta Theorem Prover Version 1.3 *)
 (* Author: Carsten Schuermann *)
 module MTProver (MTProver__0 : sig
-  module MTPGlobal : MTPGLOBAL
+  module MTPGlobal : Mtp_global.MTPGLOBAL
 
   (*! structure IntSyn' : INTSYN !*)
   (*! structure FunSyn : FUNSYN !*)
   (*! sharing FunSyn.IntSyn = IntSyn' !*)
-  module StateSyn : STATESYN
+  module StateSyn : Statesyn_intf.STATESYN
 
   (*! sharing IntSyn = IntSyn' !*)
   (*! sharing StateSyn.FunSyn = FunSyn !*)
   module Order : ORDER
 
   (*! sharing Order.IntSyn = IntSyn' !*)
-  module MTPInit : MTPINIT
+  module MTPInit : Mtp_init_intf.MTPINIT
 
   (*! sharing MTPInit.FunSyn = FunSyn !*)
-  module MTPStrategy : MTPSTRATEGY
-  module RelFun : RELFUN
-end) : PROVER = struct
+  module MTPStrategy : Mtp_strategy_intf.MTPSTRATEGY
+  module RelFun : Relfun_intf.RELFUN
+end) : Mtp_prover_intf.MTPROVER = struct
   open MTProver__0
+  module StateSyn = StateSyn
 
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
@@ -115,14 +109,7 @@ end) : PROVER = struct
       end
 
     let rec auto () =
-      let open_, solvedStates' =
-        try MTPStrategy.run (Obj.magic !openStates) with
-        | Splitting.Error s -> error ("Splitting Error: " ^ s)
-        | Filling.Error s -> error ("Filling Error: " ^ s)
-        | Recursion.Error s -> error ("Recursion Error: " ^ s)
-        | Filling.TimeOut ->
-            error "A proof could not be found -- Exceeding Time Limit\n"
-      in
+      let open_, solvedStates' = MTPStrategy.run (Obj.magic !openStates) in
       let _ = openStates := Obj.magic open_ in
       let _ = solvedStates := !solvedStates @ Obj.magic solvedStates' in
       begin if List.length !openStates > 0 then
@@ -191,14 +178,14 @@ end
 (* local *)
 (* functor MTProver *)
 module CombiProver (CombiProver__1 : sig
-  module MTPGlobal : MTPGLOBAL
+  module MTPGlobal : Mtp_global.MTPGLOBAL
 
   (*! structure IntSyn' : INTSYN !*)
-  module ProverOld : PROVER
+  module ProverOld : Prover.PROVER
 
   (*! sharing ProverOld.IntSyn = IntSyn' !*)
-  module ProverNew : PROVER
-end) : PROVER = struct
+  module ProverNew : Mtp_prover_intf.MTPROVER
+end) : Mtp_prover_intf.MTPROVER = struct
   open CombiProver__1
 
   (*! structure IntSyn = IntSyn' !*)

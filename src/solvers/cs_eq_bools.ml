@@ -16,7 +16,7 @@ end) : Cs.CS = struct
   module Unify = CSEqBools__0.Unify
 
   (*! structure IntSyn = IntSyn !*)
-  type nonrec 'a set = 'a list
+  type 'a set = 'a list
 
   (* Set                        *)
   type sum_ = Sum of bool * mon_ set

@@ -3,10 +3,7 @@ open! Basis
 
 (* Printing Signatures *)
 (* Author: Frank Pfenning *)
-module type PRINT_TWEGA = sig
-  val printSgn : unit -> unit
-  val printSgnToFile : string -> unit
-end
+include Print_twega_intf
 (* signature PRINT_TWEGA *)
 
 (* # 1 "src/print/print_twega.fun.ml" *)

@@ -1,18 +1,10 @@
 (* # 1 "src/domains/integers.sig.ml" *)
 
 open Basis
-open Int_inf
-open Int_inf.Int_inf_
 
 (* Integers *)
 (* Author: Roberto Virga *)
-module type INTEGERS = sig
-  include INTEGER
-
-  val gcd : int * int -> int
-  val lcm : int * int -> int
-  val solve_gcd : int * int -> int * int
-end
+include Integers_intf
 (* signature INTEGERS *)
 
 (* # 1 "src/domains/integers.fun.ml" *)

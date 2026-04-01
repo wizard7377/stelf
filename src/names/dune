@@ -3,7 +3,9 @@
 (library
  (name names)
  (public_name stelf.names)
- (modules names_)
+ (modules
+  names_
+  names_intf)
  (libraries table global lambda basis)
  (flags
   (:standard

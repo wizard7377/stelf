@@ -3,15 +3,7 @@ open! Basis
 
 (* Worldify *)
 (* Author: Carsten Schuermann *)
-module type WORLDIFY = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Tomega : TOMEGA !*)
-  exception Error of string
-
-  val worldify : IntSyn.cid -> IntSyn.conDec list
-  val worldifyGoal : IntSyn.dec IntSyn.ctx * IntSyn.exp -> IntSyn.exp
-end
-
+include Worldify_intf
 (*  val check : Tomega.Worlds -> IntSyn.cid list -> unit
   val closure : Tomega.Worlds -> Tomega.Worlds *)
 (* signature WORLDIFY *)
@@ -53,7 +45,7 @@ module Worldify (Worldify__0 : sig
   module Cs_manager : Cs_manager.CS_MANAGER
 
   (*! sharing Cs_manager.IntSyn = IntSyn !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 
   (*! sharing Subordinate.IntSyn = IntSyn !*)
   module Print : PRINT
@@ -68,6 +60,8 @@ module Worldify (Worldify__0 : sig
 end) : WORLDIFY = struct
   (*! structure IntSyn = IntSyn !*)
   (*! structure Tomega = Tomega !*)
+  module Origins = Worldify__0.Origins
+  module Subordinate = Worldify__0.Subordinate
   module I = IntSyn
   module T = Tomega
   module P = Paths

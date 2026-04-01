@@ -14,12 +14,7 @@ open Time_limit
 
 (* MTPStrategy : Version 1.3 *)
 (* Author: Carsten Schuermann *)
-module type MTPSTRATEGY = sig
-  module StateSyn : STATESYN
-
-  val run : StateSyn.state list -> StateSyn.state list * StateSyn.state list
-end
-
+include Mtp_strategy_intf
 (* open cases -> remaining cases * solved cases *)
 (* signature MTPSTRATEGY *)
 
@@ -30,15 +25,15 @@ open! Basis
 (* MTP Strategy: Version 1.3 *)
 (* Author: Carsten Schuermann *)
 module MTPStrategy (MTPStrategy__0 : sig
-  module MTPGlobal : MTPGLOBAL
-  module StateSyn' : STATESYN
-  module MTPFilling : MTPFILLING
-  module MTPData : MTPDATA
-  module MTPSplitting : MTPSPLITTING
-  module MTPRecursion : MTPRECURSION
-  module Inference : INFERENCE
-  module MTPrint : MTPRINT
-  module Timers : TIMERS
+  module MTPGlobal : Mtp_global.MTPGLOBAL
+  module StateSyn' : Statesyn_intf.STATESYN
+  module MTPFilling : Mtp_filling_intf.MTPFILLING
+  module MTPData : Mtp_data_intf.MTPDATA
+  module MTPSplitting : Mtp_splitting_intf.MTPSPLITTING
+  module MTPRecursion : Mtp_recursion_intf.MTPRECURSION
+  module Inference : Inference_intf.INFERENCE
+  module MTPrint : Mtp_print_intf.MTPRINT
+  module Timers : Timers_intf.TIMERS
 end) : MTPSTRATEGY = struct
   open MTPStrategy__0
   module StateSyn = StateSyn'

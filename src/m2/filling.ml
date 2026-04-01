@@ -4,31 +4,7 @@ open Metasyn
 
 (* Filling *)
 (* Author: Carsten Schuermann *)
-module type FILLING = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-  exception TimeOut
-
-  type nonrec operator
-
-  val expand : MetaSyn.state -> operator list * operator
-
-  (*
-    gets a list of operators, which fill in several non index variables
-    on one level simultaneously
-  *)
-  val apply : operator -> MetaSyn.state list
-
-  (*
-    in the case of an induction hypothesis, an operator can transform a
-    state into several states. In the case of just filling in the existential
-    parameters, there will by only one resulting state (we only need ONE
-    witness instantiation of the variables 
-  *)
-  val menu : operator -> string
-end
-
+include Filling_intf
 (* # 1 "src/m2/filling.fun.ml" *)
 open! Search
 open! Basis
@@ -38,9 +14,9 @@ open Metasyn
 (* Filling *)
 (* Author: Carsten Schuermann *)
 module Filling (Filling__0 : sig
-  module MetaSyn' : METASYN
-  module MetaAbstract : METAABSTRACT with module MetaSyn = MetaSyn'
-  module Search : OLDSEARCH with module MetaSyn = MetaSyn'
+  module MetaSyn' : Metasyn.METASYN
+  module MetaAbstract : Meta_abstract.METAABSTRACT with module MetaSyn = MetaSyn'
+  module Search : Search.OLDSEARCH with module MetaSyn = MetaSyn'
   module Whnf : WHNF
 
   (*! sharing Whnf.IntSyn = MetaSyn'.IntSyn !*)

@@ -3,19 +3,7 @@ open! Basis
 
 (* Splitting: Version 1.4 *)
 (* Author: Carsten Schuermann *)
-module type SPLIT = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Tomega : TOMEGA !*)
-  module State : State.STATE
-
-  exception Error of string
-
-  type nonrec operator
-
-  val expand : State.focus -> operator list
-  val apply : operator -> unit
-  val menu : operator -> string
-end
+include Split_intf
 (* signature Split *)
 
 (* # 1 "src/prover/split.fun.ml" *)
@@ -55,7 +43,7 @@ module Split (Split__0 : sig
   module TypeCheck : TYPECHECK
 
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
-  module Subordinate : SUBORDINATE
+  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 end) : SPLIT with module State = Split__0.State' = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
@@ -69,6 +57,7 @@ end) : SPLIT with module State = Split__0.State' = struct
     module T = Tomega
     module I = IntSyn
     module S = Split__0.State'
+    module Subordinate = Split__0.Subordinate
     module Unify = Split__0.Unify
 
     let rec weaken = function

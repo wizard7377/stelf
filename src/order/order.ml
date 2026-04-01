@@ -1,2 +1,3 @@
-open! Order_
+include Order_
+
 module Order_ = Order_

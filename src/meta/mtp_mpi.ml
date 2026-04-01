@@ -18,25 +18,7 @@ open Ring
 
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
-module type MTPI = sig
-  (*! structure FunSyn : FUNSYN !*)
-  module StateSyn : STATESYN
-
-  exception Error of string
-
-  val init : int * string list -> unit
-  val select : int -> unit
-  val print : unit -> unit
-  val next : unit -> unit
-  val auto : unit -> unit
-  val solve : unit -> unit
-  val check : unit -> unit
-  val reset : unit -> unit
-
-  (*  val extract: unit -> MetaSyn.Sgn *)
-  (*  val show   : unit -> unit *)
-  val undo : unit -> unit
-end
+include Mtp_mpi_intf
 (* signature MTPI *)
 
 (* # 1 "src/meta/mpi.fun.ml" *)
@@ -47,47 +29,47 @@ open! Basis
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
 module MTPi (MTPi__0 : sig
-  module MTPGlobal : MTPGLOBAL
+  module MTPGlobal : Mtp_global.MTPGLOBAL
 
   (*! structure IntSyn : INTSYN !*)
   (*! structure FunSyn' : FUNSYN !*)
   (*! sharing FunSyn'.IntSyn = IntSyn !*)
-  module StateSyn' : STATESYN
+  module StateSyn' : Statesyn_intf.STATESYN
 
   (*! sharing StateSyn'.IntSyn = IntSyn !*)
   (*! sharing StateSyn'.FunSyn = FunSyn' !*)
-  module RelFun : RELFUN
+  module RelFun : Relfun_intf.RELFUN
 
   (*! sharing RelFun.FunSyn = FunSyn' !*)
   module Formatter : FORMATTER
   module Print : PRINT
 
   (*! sharing Print.IntSyn = IntSyn !*)
-  module FunTypeCheck : FUNTYPECHECK
+  module FunTypeCheck : Funtypecheck_intf.FUNTYPECHECK
 
   (*! sharing FunTypeCheck.FunSyn = FunSyn' !*)
-  module MTPData : MTPDATA
-  module MTPInit : MTPINIT
+  module MTPData : Mtp_data_intf.MTPDATA
+  module MTPInit : Mtp_init_intf.MTPINIT
 
   (*! sharing MTPInit.FunSyn = FunSyn' !*)
-  module MTPFilling : MTPFILLING
+  module MTPFilling : Mtp_filling_intf.MTPFILLING
 
   (*! sharing MTPFilling.FunSyn = FunSyn' !*)
-  module Inference : INFERENCE
+  module Inference : Inference_intf.INFERENCE
 
   (*! sharing Inference.FunSyn = FunSyn' !*)
-  module MTPSplitting : MTPSPLITTING
-  module MTPRecursion : MTPRECURSION
-  module MTPStrategy : MTPSTRATEGY
-  module MTPrint : MTPRINT
+  module MTPSplitting : Mtp_splitting_intf.MTPSPLITTING
+  module MTPRecursion : Mtp_recursion_intf.MTPRECURSION
+  module MTPStrategy : Mtp_strategy_intf.MTPSTRATEGY
+  module MTPrint : Mtp_print_intf.MTPRINT
   module Order : ORDER
 
   (*! sharing Order.IntSyn = IntSyn !*)
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn !*)
-  module Timers : TIMERS
-  module Ring : RING
+  module Timers : Timers_intf.TIMERS
+  module Ring : Ring_intf.RING
 end) : MTPI = struct
   open MTPi__0
 

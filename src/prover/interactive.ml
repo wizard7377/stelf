@@ -3,24 +3,7 @@ open! Basis
 
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
-module type INTERACTIVE = sig
-  (*! structure IntSyn : INTSYN !*)
-  (*! structure Tomega : TOMEGA !*)
-  module State : State.STATE
-
-  exception Error of string
-
-  val init : string list -> unit
-  val select : int -> unit
-  val print : unit -> unit
-  val stats : unit -> unit
-  val focus : string -> unit
-  val return : unit -> unit
-
-  (*   val next   : unit -> unit *)
-  val reset : unit -> unit
-end
-
+include Interactive_intf
 (*  val undo   : unit -> unit *)
 (* signature Interactive *)
 
@@ -94,7 +77,7 @@ end) : INTERACTIVE = struct
     module I = IntSyn
     module T = Tomega
     module S = State
-    module M = ModeSyn
+    module M = Modes.Modesyn.ModeSyn
     module W = WorldSyn
 
     let rec abort s =
@@ -372,7 +355,7 @@ end) : INTERACTIVE = struct
       in
       let f_ = convertFor cL in
       let ws_ = map W.lookup cL in
-      let rec select c = try Order.selLookup c with _ -> Order.Lex [] in
+      let rec select c = try Lambda.Order.selLookup c with _ -> Lambda.Order.Lex [] in
       let tc_ = Tomega.transformTC (I.Null, f_, map select cL) in
       let (w_ :: _) = ws_ in
       let _ = focus_ := [ S.init (f_, w_) ] in

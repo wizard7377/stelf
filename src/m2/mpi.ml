@@ -4,23 +4,7 @@ open Metasyn
 
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
-module type MPI = sig
-  module MetaSyn : METASYN
-
-  exception Error of string
-
-  val init : int * string list -> unit
-  val select : int -> unit
-  val print : unit -> unit
-  val next : unit -> unit
-  val auto : unit -> unit
-  val solve : unit -> unit
-  val lemma : string -> unit
-  val reset : unit -> unit
-  val extract : unit -> MetaSyn.sgn
-  val show : unit -> unit
-  val undo : unit -> unit
-end
+include Mpi_intf
 (* signature MPI *)
 
 (* # 1 "src/m2/mpi.fun.ml" *)
@@ -41,21 +25,21 @@ open Ring
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
 module Mpi (Mpi__0 : sig
-  module MetaGlobal : METAGLOBAL
-  module MetaSyn' : METASYN
-  module Init : INIT with module MetaSyn = MetaSyn'
-  module Filling : FILLING with module MetaSyn = MetaSyn'
-  module Splitting : SPLITTING with module MetaSyn = MetaSyn'
-  module Recursion : RECURSION with module MetaSyn = MetaSyn'
-  module Lemma : LEMMA with module MetaSyn = MetaSyn'
-  module Strategy : STRATEGY with module MetaSyn = MetaSyn'
-  module Qed : QED with module MetaSyn = MetaSyn'
-  module MetaPrint : METAPRINT with module MetaSyn = MetaSyn'
+  module MetaGlobal : Meta_global.METAGLOBAL
+  module MetaSyn' : Metasyn.METASYN
+  module Init : Init_intf.INIT with module MetaSyn = MetaSyn'
+  module Filling : Filling_intf.FILLING with module MetaSyn = MetaSyn'
+  module Splitting : Splitting_intf.SPLITTING with module MetaSyn = MetaSyn'
+  module Recursion : Recursion_intf.RECURSION with module MetaSyn = MetaSyn'
+  module Lemma : Lemma_intf.LEMMA with module MetaSyn = MetaSyn'
+  module Strategy : Strategy_intf.STRATEGY with module MetaSyn = MetaSyn'
+  module Qed : Qed_intf.QED with module MetaSyn = MetaSyn'
+  module MetaPrint : Meta_print.METAPRINT with module MetaSyn = MetaSyn'
   module Names : NAMES
 
   (*! sharing Names.IntSyn = MetaSyn'.IntSyn !*)
-  module Timers : TIMERS
-  module Ring : RING
+  module Timers : Timers_intf.TIMERS
+  module Ring : Ring_intf.RING
 end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
   open Mpi__0
   module MetaSyn = MetaSyn'

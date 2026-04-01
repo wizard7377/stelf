@@ -1,4 +1,4 @@
-open! Typecheck_
+include Typecheck_
+
 module Typecheck_ = Typecheck_
-open! Strict
-module Strict = Strict
+module Strict = Typecheck_.Strict

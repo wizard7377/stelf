@@ -4,6 +4,7 @@ include Intsyn_intf
 
 module type INTSYN = Intsyn_intf.INTSYN
 
+
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
 module MakeIntSyn (IntSyn__0 : sig

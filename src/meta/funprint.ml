@@ -4,18 +4,7 @@ open Funsyn
 
 (* Printing of functional proof terms *)
 (* Author: Carsten Schuermann *)
-module type FUNPRINT = sig
-  (*! structure FunSyn : FUNSYN !*)
-  module Formatter : FORMATTER
-
-  val formatForBare : IntSyn.dctx * FunSyn.for_ -> Formatter.format
-  val formatFor : FunSyn.lfctx * FunSyn.for_ -> string list -> Formatter.format
-  val formatPro : FunSyn.lfctx * FunSyn.pro -> string list -> Formatter.format
-  val formatLemmaDec : FunSyn.lemmaDec -> Formatter.format
-  val forToString : FunSyn.lfctx * FunSyn.for_ -> string list -> string
-  val proToString : FunSyn.lfctx * FunSyn.pro -> string list -> string
-  val lemmaDecToString : FunSyn.lemmaDec -> string
-end
+include Funprint_intf
 (* signature PRINT *)
 
 (* # 1 "src/meta/funprint.fun.ml" *)
@@ -31,7 +20,7 @@ module FunPrint (FunPrint__0 : sig
 
   (*! sharing Names.IntSyn = FunSyn'.IntSyn !*)
   module Print : PRINT
-end) : FUNPRINT = struct
+end) : Funprint_intf.FUNPRINT = struct
   (*! structure FunSyn = FunSyn' !*)
   module Formatter = Formatter
 
