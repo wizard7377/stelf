@@ -1,0 +1,16 @@
+%% Expected failure: %total check fails due to missing base case
+%% Inspired by wiki totality checking examples
+
+nat : type.
+z : nat.
+s : nat -> nat.
+
+%% This relation has no base case for z, so %total must fail
+partial : nat -> nat -> type.
+%mode partial +N -M.
+
+partial/s : partial (s N) (s M)
+             <- partial N M.
+
+%worlds () (partial _ _).
+%total N (partial N _).

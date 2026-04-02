@@ -4,10 +4,17 @@
  (name modules)
  (public_name stelf.modules)
  (modules
-  modsyn
-  modules_
-  modsyn_intf)
- (libraries global table lambda names paths typecheck basis)
+  Modsyn
+  Modules_
+  Modsyn_intf)
+ (libraries
+  global
+  table
+  lambda
+  names
+  paths
+  typecheck
+  basis)
  (flags
   (:standard
    -w

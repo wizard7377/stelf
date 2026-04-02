@@ -4,11 +4,15 @@
  (name paths)
  (public_name stelf.paths)
  (modules
-  paths_intf
-  paths_
-  origins_intf
-  origins)
- (libraries lambda global table basis)
+  Paths_intf
+  Paths_
+  Origins_intf
+  Origins)
+ (libraries
+  lambda
+  global
+  table
+  basis)
  (flags
   (:standard
    -w

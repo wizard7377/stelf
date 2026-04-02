@@ -4,10 +4,11 @@
  (name trail)
  (public_name stelf.trail)
  (modules
-  trail_
-  notrail
-  trail_intf)
- (libraries basis)
+  Trail_
+  Notrail
+  Trail_intf)
+ (libraries
+  basis)
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

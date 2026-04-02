@@ -4,21 +4,25 @@
  (name print)
  (public_name stelf.print)
  (modules
-  symbol
-  clause_print
-  print_
-  traverse
-  print_twega
-  print_xml
-  print_omdoc
-  clause_print_intf
-  print_intf
-  print_omdoc_intf
-  print_twega_intf
-  print_xml_intf
-  symbol_intf
-  traverse_intf)
- (libraries lambda names formatter basis)
+  Symbol
+  ClausePrint
+  Print_
+  Traverse
+  PrintTwega
+  PrintXml
+  PrintOmdoc
+  ClausePrint_intf
+  Print_intf
+  PrintOmdoc_intf
+  PrintTwega_intf
+  PrintXml_intf
+  Symbol_intf
+  Traverse_intf)
+ (libraries
+  lambda
+  names
+  formatter
+  basis)
  (flags
   (:standard
    -w

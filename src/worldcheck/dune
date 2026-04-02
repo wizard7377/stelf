@@ -4,11 +4,11 @@
  (name worldcheck)
  (public_name stelf.worldcheck)
  (modules
-  worldSyn
-  worldify
-  worldcheck_
-  worldSyn_intf
-  worldify_intf)
+  WorldSyn
+  Worldify
+  Worldcheck_
+  WorldSyn_intf
+  Worldify_intf)
  (libraries
   global
   timing

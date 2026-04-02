@@ -4,18 +4,27 @@
  (name modes)
  (public_name stelf.modes)
  (modules
-  modesyn
-  modetable
-  modedec
-  modecheck
-  modeprint
-  modes_
-  modecheck_intf
-  modedec_intf
-  modeprint_intf
-  modesyn_intf
-  modetable_intf)
- (libraries global table lambda formatter print names paths index basis)
+  Modesyn
+  Modetable
+  Modedec
+  Modecheck
+  Modeprint
+  Modes_
+  Modecheck_intf
+  Modedec_intf
+  Modeprint_intf
+  Modesyn_intf
+  Modetable_intf)
+ (libraries
+  global
+  table
+  lambda
+  formatter
+  print
+  names
+  paths
+  index
+  basis)
  (flags
   (:standard
    -w

@@ -4,10 +4,18 @@
  (name flit)
  (public_name stelf.flit)
  (modules
-  flit_old_smlnj_pack
-  flit_
-  flit_intf)
- (libraries global table lambda names index paths print basis)
+  FlitOldSmlnjPack
+  Flit_
+  Flit_intf)
+ (libraries
+  global
+  table
+  lambda
+  names
+  index
+  paths
+  print
+  basis)
  (flags
   (:standard
    -w

@@ -4,9 +4,10 @@
  (name stream)
  (public_name stelf.stream)
  (modules
-  stream_
-  stream_intf)
- (libraries basis)
+  Stream_
+  Stream_intf)
+ (libraries
+  basis)
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

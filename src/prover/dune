@@ -4,27 +4,27 @@
  (name prover)
  (public_name stelf.prover)
  (modules
-  state
-  psearch
-  data
-  fill
-  split
-  fixedpoint
-  introduce
-  elim
-  interactive
-  pweaken
-  prover_
-  data_intf
-  elim_intf
-  fill_intf
-  fixedpoint_intf
-  interactive_intf
-  introduce_intf
-  psearch_intf
-  pweaken_intf
-  split_intf
-  state_intf)
+  State
+  Psearch
+  Data
+  Fill
+  Split
+  Fixedpoint
+  Introduce
+  Elim
+  Interactive
+  Pweaken
+  Prover_
+  Data_intf
+  Elim_intf
+  Fill_intf
+  Fixedpoint_intf
+  Interactive_intf
+  Introduce_intf
+  Psearch_intf
+  Pweaken_intf
+  Split_intf
+  State_intf)
  (libraries
   tomega_lib
   lambda

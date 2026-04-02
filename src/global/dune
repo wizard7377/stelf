@@ -4,9 +4,10 @@
  (name global)
  (public_name stelf.global)
  (modules
-  global_
-  global_intf)
- (libraries basis)
+  Global_
+  Global_intf)
+ (libraries
+  basis)
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

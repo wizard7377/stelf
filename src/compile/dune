@@ -4,16 +4,16 @@
  (name compile)
  (public_name stelf.compile)
  (modules
-  compSyn
-  cprint
-  subtree
-  assign
-  compile_
-  assign_intf
-  compSyn_intf
-  compile_intf
-  cprint_intf
-  subtree_intf)
+  CompSyn
+  Cprint
+  Subtree
+  Assign
+  Compile_
+  Assign_intf
+  CompSyn_intf
+  Compile_intf
+  Cprint_intf
+  Subtree_intf)
  (libraries
   global
   table

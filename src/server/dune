@@ -4,14 +4,18 @@
  (name server)
  (public_name stelf.server)
  (modules
-  sigint
-  mlton_thread
-  sigint_mlton
-  sigint_smlnj
-  server_
-  server_intf
-  sigint_intf)
- (libraries timing frontend basis smlofnj)
+  Sigint
+  MltonThread
+  SigintMlton
+  SigintSmlnj
+  Server_
+  Server_intf
+  Sigint_intf)
+ (libraries
+  timing
+  frontend
+  basis
+  smlofnj)
  (flags
   (:standard
    -w

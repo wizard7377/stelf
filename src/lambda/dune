@@ -4,31 +4,37 @@
  (name lambda)
  (public_name stelf.lambda)
  (modules
-  fgnopn
-  fgnopntable
-  order
-  intsyn
-  whnf
-  conv
-  tomega
-  constraints
-  unify
-  match
-  abstract
-  approx
-  intsyn_intf
-  lambda_
-  abstract_intf
-  approx_intf
-  constraints_intf
-  conv_intf
-  fgnopn_intf
-  match_intf
-  order_intf
-  tomega_intf
-  unify_intf
-  whnf_intf)
- (libraries containers global trail table basis debug)
+  Fgnopn
+  Fgnopntable
+  Order
+  Intsyn
+  Whnf
+  Conv
+  Tomega
+  Constraints
+  Unify
+  Match
+  Abstract
+  Approx
+  Intsyn_intf
+  Lambda_
+  Abstract_intf
+  Approx_intf
+  Constraints_intf
+  Conv_intf
+  Fgnopn_intf
+  Match_intf
+  Order_intf
+  Tomega_intf
+  Unify_intf
+  Whnf_intf)
+ (libraries
+  containers
+  global
+  trail
+  table
+  basis
+  debug)
  (flags
   (:standard
    -w

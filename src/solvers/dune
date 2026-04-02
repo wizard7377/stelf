@@ -4,21 +4,21 @@
  (name solvers)
  (public_name stelf.solvers)
  (modules
-  cs_manager
-  cs
-  cs_eq_field
-  cs_ineq_field
-  cs_eq_integers
-  cs_ineq_integers
-  cs_eq_strings
-  cs_eq_bools
-  cs_integers_word
-  solvers_
-  cs_intf
-  cs_eq_field_intf
-  cs_eq_integers_intf
-  cs_manager_intf
-  solvers_intf)
+  CsManager
+  Cs
+  CsEqField
+  CsIneqField
+  CsEqIntegers
+  CsIneqIntegers
+  CsEqStrings
+  CsEqBools
+  CsIntegersWord
+  Solvers_
+  Cs_intf
+  CsEqField_intf
+  CsEqIntegers_intf
+  CsManager_intf
+  Solvers_intf)
  (libraries
   trail
   global

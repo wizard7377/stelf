@@ -4,27 +4,27 @@
  (name tomega_lib)
  (public_name stelf.tomega)
  (modules
-  opsem
-  converter
-  tomega_typecheck
-  tomegaprint
-  tomeganames
-  tomega_unify
-  normalize
-  coverage
-  redundant
-  tomega_abstract
-  tomega_
-  converter_intf
-  coverage_intf
-  normalize_intf
-  opsem_intf
-  redundant_intf
-  tomega_abstract_intf
-  tomega_typecheck_intf
-  tomega_unify_intf
-  tomeganames_intf
-  tomegaprint_intf)
+  Opsem
+  Converter
+  TomegaTypecheck
+  Tomegaprint
+  Tomeganames
+  TomegaUnify
+  Normalize
+  Coverage
+  Redundant
+  TomegaAbstract
+  Tomega_
+  Converter_intf
+  Coverage_intf
+  Normalize_intf
+  Opsem_intf
+  Redundant_intf
+  TomegaAbstract_intf
+  TomegaTypecheck_intf
+  TomegaUnify_intf
+  Tomeganames_intf
+  Tomegaprint_intf)
  (libraries
   global
   lambda

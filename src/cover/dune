@@ -4,10 +4,10 @@
  (name cover)
  (public_name stelf.cover)
  (modules
-  total
-  cover_
-  cover_intf
-  total_intf)
+  Total
+  Cover_
+  Cover_intf
+  Total_intf)
  (libraries
   global
   lambda

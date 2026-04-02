@@ -4,11 +4,11 @@
  (name terminate)
  (public_name stelf.terminate)
  (modules
-  checking
-  reduces
-  terminate_
-  checking_intf
-  reduces_intf)
+  Checking
+  Reduces
+  Terminate_
+  Checking_intf
+  Reduces_intf)
  (libraries
   global
   trail

@@ -4,9 +4,18 @@
  (name style)
  (public_name stelf.style)
  (modules
-  style_
-  style_intf)
- (libraries global table lambda formatter print names paths index basis)
+  Style_
+  Style_intf)
+ (libraries
+  global
+  table
+  lambda
+  formatter
+  print
+  names
+  paths
+  index
+  basis)
  (flags
   (:standard
    -w

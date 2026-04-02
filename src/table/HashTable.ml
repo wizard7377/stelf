@@ -1,0 +1,107 @@
+(* # 1 "src/table/HashTable.sig.ml" *)
+
+(* # 1 "src/table/HashTable.fun.ml" *)
+
+(* # 1 "src/table/HashTable.sml.ml" *)
+open Basis
+open Table_
+
+(* Hash Table *)
+(* Author: Frank Pfenning *)
+(* Modified: Roberto Virga *)
+module HashTable (HashTable__0 : sig
+  type key'
+
+  val hash : key' -> int
+  val eq : key' * key' -> bool
+end) : TABLE with type key = HashTable__0.key' = struct
+  open HashTable__0
+
+  type nonrec key = key'
+  type 'a entry = key * 'a
+
+  (* A hashtable bucket is a linked list of mutable elements *)
+  (* A hashtable is an array of buckets containing entries paired with hash values *)
+  type 'a bucket = Nil | Cons of 'a ref * 'a bucket ref
+  type 'a table = (int * 'a entry) bucket array * int
+
+  let new_ n = (Array.array (n, Nil), n)
+
+  let insertShadow (a, n) ((key, _datum) as e) =
+    let hashVal = hash key in
+    let index = hashVal mod n in
+    let bucket = Array.sub (a, index) in
+    let rec insertB
+        (Cons (({ contents = hash', ((key', _datum') as e') } as r'), br')) =
+      begin if hashVal = hash' && eq (key, key') then begin
+        r' := (hashVal, e);
+        Some e'
+      end
+      else insertBR br'
+      end
+    and insertBR = function
+      | { contents = Nil } as br -> begin
+          br := Cons (ref (hashVal, e), ref Nil);
+          None
+        end
+      | br -> insertB !br
+    in
+    let insertA = function
+      | Nil -> begin
+          Array.update (a, index, Cons (ref (hashVal, e), ref Nil));
+          None
+        end
+      | bucket -> insertB bucket
+    in
+    insertA bucket
+
+  let insert h e =
+    begin
+      ignore (insertShadow h e)
+    end
+
+  let lookup (a, n) key =
+    let hashVal = hash key in
+    let rec lookup' = function
+      | Cons ({ contents = hash1, (key1, datum1) }, br) -> begin
+          if hashVal = hash1 && eq (key, key1) then Some datum1 else lookup' !br
+        end
+      | Nil -> None
+    in
+    let bucket = Array.sub (a, hashVal mod n) in
+    lookup' bucket
+
+  let delete (a, n) key =
+    let hashVal = hash key in
+    let index = hashVal mod n in
+    let bucket = Array.sub (a, index) in
+    let rec deleteBR = function
+      | { contents = Cons ({ contents = hash1, (key1, _) }, br1) } as br ->
+        begin
+          if hashVal = hash1 && eq (key, key1) then br := !br1 else deleteBR br1
+        end
+      | _br -> ()
+    in
+    let deleteA = function
+      | Nil -> ()
+      | Cons ({ contents = hash1, (key1, _) }, br1) -> begin
+          if hashVal = hash1 && eq (key, key1) then Array.update (a, index, !br1)
+          else deleteBR br1
+        end
+    in
+    deleteA bucket
+
+  let clear (a, _n) = Array.modify (function _ -> Nil) a
+
+  let rec appBucket arg__1 arg__2 =
+    begin match (arg__1, arg__2) with
+    | _f, Nil -> ()
+    | f, Cons ({ contents = _, e }, br) -> begin
+        f e;
+        appBucket f !br
+      end
+    end
+
+  let app f (a, _n) = Array.app (appBucket f) a
+end
+(* functor HashTable *)

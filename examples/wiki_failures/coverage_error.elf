@@ -1,0 +1,33 @@
+%% Expected failure: incomplete coverage
+%% Inspired by twelf/wiki/pages/debugging-coverage-errors.elf
+
+tp    : type.
+int   : tp.
+float : tp.
+arrow : tp -> tp -> tp.
+
+sub       : tp -> tp -> type.
+sub-ii    : sub int int.
+sub-ff    : sub float float.
+sub-if    : sub int float.
+sub-arrow : sub (arrow T S) (arrow T' S')
+             <- sub T' T
+             <- sub S S'.
+
+%% This proof is intentionally incomplete: the arrow case is too specific
+sub-trans : sub T1 T2 -> sub T2 T3 -> sub T1 T3 -> type.
+%mode sub-trans +X1 +X2 -X3.
+
+- : sub-trans (D : sub T T) (D' : sub T T) D.
+- : sub-trans sub-ii sub-if sub-if.
+- : sub-trans sub-if sub-ff sub-if.
+
+-arrow : sub-trans
+         (sub-arrow DS DT)
+         (sub-arrow DS' DT')
+         (sub-arrow DS'' DT'')
+         <- sub-trans DT DT' DT''
+         <- sub-trans DS DS' DS''.
+
+%worlds () (sub-trans _ _ _).
+%total D (sub-trans D _ _).

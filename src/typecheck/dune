@@ -4,11 +4,16 @@
  (name typecheck)
  (public_name stelf.typecheck)
  (modules
-  typecheck_
-  strict
-  strict_intf
-  typecheck_intf)
- (libraries lambda print paths names basis)
+  Typecheck_
+  Strict
+  Strict_intf
+  Typecheck_intf)
+ (libraries
+  lambda
+  print
+  paths
+  names
+  basis)
  (flags
   (:standard
    -w

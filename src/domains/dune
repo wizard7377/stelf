@@ -4,17 +4,19 @@
  (name domains)
  (public_name stelf.domains)
  (modules
-  field
-  ordered_field
-  integers
-  rationals
-  integers_mod
-  domains_
-  field_intf
-  integers_intf
-  ordered_field_intf
-  rationals_intf)
- (libraries int_inf basis)
+  Field
+  OrderedField
+  Integers
+  Rationals
+  IntegersMod
+  Domains_
+  Field_intf
+  Integers_intf
+  OrderedField_intf
+  Rationals_intf)
+ (libraries
+  int_inf
+  basis)
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

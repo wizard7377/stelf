@@ -1,0 +1,6 @@
+%% Expected failure: query for an inhabitant of an empty type
+%% Inspired by wiki examples of uninhabited types
+
+empty_type : type.
+
+%query 1 1 empty_type.

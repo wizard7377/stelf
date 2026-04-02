@@ -4,10 +4,11 @@
  (name heuristic)
  (public_name stelf.heuristic)
  (modules
-  heuristic_
-  heuristic_sum
-  heuristic_intf)
- (libraries basis)
+  Heuristic_
+  HeuristicSum
+  Heuristic_intf)
+ (libraries
+  basis)
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

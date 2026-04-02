@@ -1,0 +1,26 @@
+%% Expected failure: mode violation
+%% An output argument is used in an input position
+
+nat : type.
+z : nat.
+s : nat -> nat.
+
+plus : nat -> nat -> nat -> type.
+%mode plus +N1 +N2 -N3.
+
+plus/z : plus z N N.
+plus/s : plus (s N1) N2 (s N3)
+          <- plus N1 N2 N3.
+
+%worlds () (plus _ _ _).
+%total N (plus N _ _).
+
+%% This relation violates mode: N3 is output (-) but used as input (+)
+bad : nat -> nat -> type.
+%mode bad +N1 -N2.
+
+bad/case : bad N1 N2
+            <- plus N1 N2 N1.  %% N2 is output but used as input to plus
+
+%worlds () (bad _ _).
+%total N (bad N _).

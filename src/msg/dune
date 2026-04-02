@@ -4,9 +4,10 @@
  (name msg)
  (public_name stelf.msg)
  (modules
-  msg_
-  msg_intf)
- (libraries basis)
+  Msg_
+  Msg_intf)
+ (libraries
+  basis)
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

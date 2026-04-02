@@ -1,4 +1,6 @@
 (library
  (name debug)
  (public_name stelf.debug)
- (libraries logs logs.fmt))
+ (libraries
+  logs
+  logs.fmt))

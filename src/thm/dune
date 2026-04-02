@@ -4,13 +4,21 @@
  (name thm)
  (public_name stelf.thm)
  (modules
-  thmsyn
-  thmprint
-  thm_
-  thm_intf
-  thmprint_intf
-  thmsyn_intf)
- (libraries global lambda names formatter modes paths tabling basis)
+  Thmsyn
+  Thmprint
+  Thm_
+  Thm_intf
+  Thmprint_intf
+  Thmsyn_intf)
+ (libraries
+  global
+  lambda
+  names
+  formatter
+  modes
+  paths
+  tabling
+  basis)
  (flags
   (:standard
    -w

@@ -4,15 +4,18 @@
  (name compress)
  (public_name stelf.compress)
  (modules
-  syntax
-  strict
-  sgn
-  reductio
-  compress_
-  rep
-  compress_intf
-  sgn_intf)
- (libraries global lambda basis)
+  Syntax
+  Strict
+  Sgn
+  Reductio
+  Compress_
+  Rep
+  Compress_intf
+  Sgn_intf)
+ (libraries
+  global
+  lambda
+  basis)
  (flags
   (:standard
    -w

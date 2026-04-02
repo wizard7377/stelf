@@ -4,9 +4,10 @@
  (name formatter)
  (public_name stelf.formatter)
  (modules
-  formatter_
-  formatter_intf)
- (libraries basis)
+  Formatter_
+  Formatter_intf)
+ (libraries
+  basis)
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

@@ -4,28 +4,28 @@
  (name opsem)
  (public_name stelf.opsem)
  (modules
-  table_param
-  abstract_tabled
-  memo_table
-  subtree_inst
-  sw_subtree
-  tabled_machine
-  absmachine
-  absmachine_sbt
-  ptrecon
-  trace
-  tmachine
-  swmachine
-  opsem_
-  absmachine_intf
-  absmachine_sbt_intf
-  abstract_tabled_intf
-  memo_table_intf
-  ptrecon_intf
-  sw_subtree_intf
-  table_param_intf
-  tabled_machine_intf
-  trace_intf)
+  TableParam
+  AbstractTabled
+  MemoTable
+  SubtreeInst
+  SwSubtree
+  TabledMachine
+  Absmachine
+  AbsmachineSbt
+  Ptrecon
+  Trace
+  Tmachine
+  Swmachine
+  Opsem_
+  Absmachine_intf
+  AbsmachineSbt_intf
+  AbstractTabled_intf
+  MemoTable_intf
+  Ptrecon_intf
+  SwSubtree_intf
+  TableParam_intf
+  TabledMachine_intf
+  Trace_intf)
  (libraries
   global
   table

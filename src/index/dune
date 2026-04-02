@@ -4,10 +4,14 @@
  (name index)
  (public_name stelf.index)
  (modules
-  index_skolem
-  index_
-  index_intf)
- (libraries lambda table global basis)
+  IndexSkolem
+  Index_
+  Index_intf)
+ (libraries
+  lambda
+  table
+  global
+  basis)
  (flags
   (:standard
    -w

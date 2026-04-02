@@ -4,8 +4,8 @@
  (name unique)
  (public_name stelf.unique)
  (modules
-  unique_
-  unique_intf)
+  Unique_
+  Unique_intf)
  (libraries
   global
   lambda
