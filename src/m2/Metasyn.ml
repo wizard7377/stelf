@@ -11,9 +11,7 @@ open! Basis
 
 (* Meta syntax *)
 (* Author: Carsten Schuermann *)
-module Make_MetaSyn (MetaSyn__0 : sig
-  module Whnf : WHNF
-end) : METASYN = struct
+module Make_MetaSyn (Whnf : WHNF) : METASYN = struct
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 

@@ -12,9 +12,7 @@ open! Basis
 
 (* Table parameters *)
 (* Author: Brigitte Pientka *)
-module MakeTableParam (TableParam__0 : sig
-  module Global : GLOBAL
-end) : TABLEPARAM = struct
+module MakeTableParam (Global : GLOBAL) : TABLEPARAM = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
   (*! structure RBSet = RBSet !*)
@@ -109,9 +107,7 @@ end
 (* # 1 "src/opsem/TableParam.sml.ml" *)
 open! Basis
 
-module TableParam = MakeTableParam (struct
-  module Global = Global
-end)
+module TableParam = MakeTableParam (Global)
 (*! structure IntSyn' = IntSyn !*)
 (*! structure CompSyn' = CompSyn !*)
 (*! structure RBSet = RBSet !*)

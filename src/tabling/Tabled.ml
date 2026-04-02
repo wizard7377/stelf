@@ -5,9 +5,8 @@
 (* # 1 "src/tabling/Tabled.sml.ml" *)
 open! Basis
 
-module TabledSyn = Tabledsyn.MakeTabledSyn (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Names = Names
-  module Table = TableInstances.IntRedBlackTree
-  module Index = Index
-end)
+module TabledSyn =
+  Tabledsyn.MakeTabledSyn
+    (Names)
+    (TableInstances.IntRedBlackTree)
+    (Index)

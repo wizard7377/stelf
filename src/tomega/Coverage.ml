@@ -10,7 +10,13 @@ include Coverage_intf
 (* # 1 "src/tomega/Coverage.fun.ml" *)
 open! Basis
 
-module MakeTomegaCoverage (TomegaCoverage__0 : sig
+module MakeTomegaCoverage
+    (TomegaPrint : Tomegaprint.TOMEGAPRINT)
+    (TomegaTypeCheck : TomegaTypecheck_intf.TOMEGATYPECHECK)
+    (Cover : COVER) :
+  TOMEGACOVERAGE =
+struct
+(*
   (* Coverage checker for programs *)
   (* Author: Carsten Schuermann *)
   (*! structure IntSyn' : INTSYN !*)
@@ -25,7 +31,7 @@ module MakeTomegaCoverage (TomegaCoverage__0 : sig
   (*! sharing TomegaTypeCheck.IntSyn = IntSyn' !*)
   (*! sharing TomegaTypeCheck.Tomega = Tomega' !*)
   module Cover : COVER
-end) : TOMEGACOVERAGE = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
   exception Error of string
@@ -33,8 +39,8 @@ end) : TOMEGACOVERAGE = struct
   open! struct
     module I = IntSyn
     module T = Tomega
-    module Cover = TomegaCoverage__0.Cover
-    module TomegaTypeCheck = TomegaCoverage__0.TomegaTypeCheck
+    module Cover = Cover
+    module TomegaTypeCheck = TomegaTypeCheck
 
     let rec chatter chlev f =
       begin if !Global.chatter >= chlev then print ("[coverage] " ^ f ())

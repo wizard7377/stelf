@@ -99,20 +99,20 @@ module ThmPrint = Thmprint.ThmPrint (struct
   module Formatter = Formatter
 end)
 
-module FrontendTabledSyn = Tabledsyn.MakeTabledSyn (struct
-  module Names = Names
-  module Table = TableInstances.IntRedBlackTree
-  module Index = Index
-end)
+module FrontendTabledSyn =
+  Tabledsyn.MakeTabledSyn
+    (Names)
+    (TableInstances.IntRedBlackTree)
+    (Index)
 
-module Thm = Thm_.Make_Thm (struct
-  module Global = Global
-  module ThmSyn' = ThmSyn
-  module TabledSyn = FrontendTabledSyn
-  module ModeTable = ModeTable
-  module Order = Order
-  module ThmPrint = ThmPrint
-end)
+module Thm =
+  Thm_.Make_Thm
+    (Global)
+    (ThmSyn)
+    (FrontendTabledSyn)
+    (ModeTable)
+    (Order)
+    (ThmPrint)
 
 module ReconThm = ReconThm.ReconThm (struct
   module Global = Global

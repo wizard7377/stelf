@@ -11,16 +11,11 @@ include Style_intf
 open! Basis
 open Origins
 
-module MakeStyleCheck (StyleCheck__0 : sig
-  (* Style Checking *)
-  (* Author: Carsten Schuermann *)
-  module Whnf : WHNF
-  module Index : INDEX
-  module Origins : ORIGINS
-end) : STYLECHECK = struct
-  module Origins = StyleCheck__0.Origins
-  module Whnf = StyleCheck__0.Whnf
-  module Index = StyleCheck__0.Index
+module MakeStyleCheck
+    (Whnf : WHNF)
+    (Index : INDEX)
+    (Origins : ORIGINS) :
+  STYLECHECK = struct
 
   exception Error of string
 
@@ -425,8 +420,4 @@ end
 (* # 1 "src/style/Style_.sml.ml" *)
 open! Basis
 
-module StyleCheck = MakeStyleCheck (struct
-  module Whnf = Whnf
-  module Index = Index
-  module Origins = Origins
-end)
+module StyleCheck = MakeStyleCheck (Whnf) (Index) (Origins)

@@ -57,10 +57,8 @@ end
 
 (* STREAM extends BASIC_STREAMS by operations *)
 (* definable without reference to the implementation *)
-module MakeStream (Stream__0 : sig
-  module BasicStream : BASIC_STREAM
-end) : STREAM = struct
-  include Stream__0.BasicStream
+module MakeStream (BasicStream : BASIC_STREAM) : STREAM = struct
+  include BasicStream
 
   exception EmptyStream
 
@@ -131,14 +129,10 @@ end) : STREAM = struct
 end
 
 (* structure Stream :> STREAM --- non-memoizing *)
-module Stream : STREAM = MakeStream (struct
-  module BasicStream = BasicStream
-end)
+module Stream : STREAM = MakeStream (BasicStream)
 
 (* structure MStream :> STREAM --- memoizing *)
-module MStream : STREAM = MakeStream (struct
-  module BasicStream = BasicMemoStream
-end)
+module MStream : STREAM = MakeStream (BasicMemoStream)
 (*
 structure S = Stream;   abbreviation 
 

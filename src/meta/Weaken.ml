@@ -11,9 +11,7 @@ open! Basis
 
 (* Weakening substitutions *)
 (* Author: Carsten Schuermann *)
-module Make_Weaken (Weaken__0 : sig
-  module Whnf : WHNF
-end) : Weaken_intf.WEAKEN = struct
+module Make_Weaken (Whnf : WHNF) : Weaken_intf.WEAKEN = struct
   (*! structure IntSyn = IntSyn' !*)
   open! struct
     module I = IntSyn
@@ -67,9 +65,6 @@ end
 (*! structure IntSyn' : INTSYN !*)
 (*! sharing Whnf.IntSyn = IntSyn' !*)
 (* functor Weaken *)
-
-module Weaken = Make_Weaken (struct
-  module Whnf = Whnf
-end)
+module Weaken = Make_Weaken (Whnf)
 
 (* # 1 "src/meta/Weaken.sml.ml" *)

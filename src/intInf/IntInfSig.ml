@@ -1,8 +1,8 @@
-(* # 1 "src/int_inf/IntInfSig.sig.ml" *)
+(* # 1 "src/intInf/IntInfSig.sig.ml" *)
 
-(* # 1 "src/int_inf/IntInfSig.fun.ml" *)
+(* # 1 "src/intInf/IntInfSig.fun.ml" *)
 
-(* # 1 "src/int_inf/IntInfSig.sml.ml" *)
+(* # 1 "src/intInf/IntInfSig.sml.ml" *)
 
 open Basis
 

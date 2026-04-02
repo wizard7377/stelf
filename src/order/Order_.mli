@@ -1,8 +1,6 @@
 include module type of Order_intf
 
-module MakeOrder (Order__0 : sig
-  module Table : TABLE with type key = int
-end) : ORDER
+module MakeOrder (Table : TABLE with type key = int) : ORDER
 
 module Order : ORDER
 include ORDER

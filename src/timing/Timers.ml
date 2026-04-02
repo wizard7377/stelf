@@ -10,14 +10,10 @@ include Timers_intf
 (* signature TIMERS *)
 
 (* # 1 "src/timing/Timers.fun.ml" *)
-open! Timing_
 
 (* Timers collecting statistics about Stelf *)
 (* Author: Frank Pfenning *)
-module MakeTimers (Timers__0 : sig
-  module Timing' : TIMING
-end) : TIMERS = struct
-  open Timers__0
+module MakeTimers (Timing' : TIMING) : TIMERS with module Timing = Timing' = struct
   module Timing = Timing'
 
   let parsing = Timing.newCenter "Parsing       "
@@ -88,9 +84,7 @@ end
 
 (* Timers *)
 (* Author: Frank Pfenning *)
-module Timers = MakeTimers (struct
-  module Timing' = Timing
-end)
+module Timers = MakeTimers (Timing)
 (*
  alternative not using actual timers 
 structure Timers =

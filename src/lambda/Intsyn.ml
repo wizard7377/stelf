@@ -7,9 +7,7 @@ module type INTSYN = Intsyn_intf.INTSYN
 
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
-module MakeIntSyn (IntSyn__0 : sig
-  module Global : GLOBAL
-end) : INTSYN = struct
+module MakeIntSyn (Global : GLOBAL) : INTSYN = struct
   type cid = int [@@deriving eq, ord, show]
   (** Constant identifier *)
 
@@ -784,8 +782,6 @@ end) : INTSYN = struct
 end
 
 (* functor IntSyn *)
-module IntSyn = MakeIntSyn (struct
-  module Global = Global
-end)
+module IntSyn = MakeIntSyn (Global)
 
 (* # 1 "src/lambda/Intsyn.sml.ml" *)

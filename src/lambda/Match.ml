@@ -16,18 +16,8 @@ open! Basis
 (* Unification modified to Matching *)
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga, Brigitte Pientka *)
-module MakeMatch (Match__0 : sig
-  (*! structure IntSyn' : INTSYN !*)
-  module Whnf : WHNF
-
-  (*! sharing Whnf.IntSyn = IntSyn' !*)
-  module Unify : UNIFY
-  module Trail : TRAIL
-end) : MATCH = struct
+module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
   (*! structure IntSyn = IntSyn' !*)
-  module Whnf = Match__0.Whnf
-  module Unify = Match__0.Unify
-  module Trail = Match__0.Trail
 
   exception Match of string
   exception NotInvertible

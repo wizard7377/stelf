@@ -10,12 +10,9 @@ include Parsing_intf
 (* # 1 "src/frontend/Parsing.fun.ml" *)
 open! Basis
 
-module MakeParsing (Parsing__0 : sig
-  module Stream' : STREAM
-  module Lexer' : Lexer.LEXER
-end) : PARSING = struct
-  module Stream = Parsing__0.Stream'
-  module Lexer = Parsing__0.Lexer'
+module MakeParsing (Stream : STREAM) (Lexer : Lexer.LEXER) : PARSING = struct
+  module Stream = Stream
+  module Lexer = Lexer
 
   (*! structure Lexer = Lexer' !*)
   type nonrec lexResult = Lexer.token * Paths.region
@@ -41,10 +38,7 @@ end
 (*! structure Lexer' : LEXER !*)
 (*! sharing Lexer'.Stream = Stream' !*)
 (* functor Parsing *)
-module Parsing = MakeParsing (struct
-  module Stream' = Stream
-  module Lexer' = Lexer
-end)
+module Parsing = MakeParsing (Stream) (Lexer)
 
 module Stream = Parsing.Stream
 module Lexer = Parsing.Lexer

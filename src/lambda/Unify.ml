@@ -14,16 +14,8 @@ open! Basis
 (* Unification *)
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
-module MakeUnify (Unify__0 : sig
-  (*! structure IntSyn' : INTSYN !*)
-  module Whnf : WHNF
-
-  (*! sharing Whnf.IntSyn = IntSyn' !*)
-  module Trail : TRAIL
-end) : UNIFY = struct
+module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
   (*! structure IntSyn = IntSyn' !*)
-  module Whnf = Unify__0.Whnf
-  module Trail = Unify__0.Trail
 
   exception Unify of string
   exception NotInvertible

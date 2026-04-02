@@ -8,27 +8,11 @@ open! Basis
 (* structure ModeSyn  in Modesyn.sml *)
 module ModeSyn = Modesyn.ModeSyn
 
-module ModeTable = Modetable.MakeModeTable (struct
-  module Table = TableInstances.IntRedBlackTree
-end)
+module ModeTable = Modetable.MakeModeTable (TableInstances.IntRedBlackTree)
 
 module ModeDec = Modedec.MakeModeDec (struct end)
 
-(*! structure ModeSyn' = ModeSyn !*)
-(*! structure Paths' = Paths !*)
-module ModeCheck = Modecheck.MakeModeCheck (struct
-  (*! structure IntSyn = IntSyn !*)
-  module ModeTable = ModeTable
-  module Whnf = Whnf
-  module Index = Index
+module ModeCheck =
+  Modecheck.MakeModeCheck (ModeTable) (Whnf) (Index) (Origins)
 
-  (*! structure Paths = Paths !*)
-  module Origins = Origins
-end)
-
-module ModePrint = Modeprint.MakeModePrint (struct
-  (*! structure ModeSyn' = ModeSyn !*)
-  module Names = Names
-  module Formatter = Formatter
-  module Print = Print
-end)
+module ModePrint = Modeprint.MakeModePrint (Names) (Formatter) (Print)

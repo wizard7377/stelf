@@ -12,54 +12,33 @@ open! Basis
 
 (* Coverage Checking *)
 (* Author: Frank Pfenning *)
-module MakeCover (Cover__0 : sig
-  module Global : GLOBAL
-  module Whnf : WHNF
-  module Conv : CONV
-
-  (*! sharing Whnf.IntSyn = IntSyn' !*)
-  module Abstract : ABSTRACT
-
-  (*! sharing Abstract.IntSyn = IntSyn' !*)
-  module Unify : UNIFY
-
-  (* must be trailing! *)
-  (*! sharing Unify.IntSyn = IntSyn' !*)
-  module Constraints : CONSTRAINTS
-
-  (*! sharing Constraints.IntSyn = IntSyn' !*)
-  module ModeTable : Modetable.MODETABLE
-  module UniqueTable : Modetable.MODETABLE
-  module Index : INDEX
-
-  (*! sharing Index.IntSyn = IntSyn' !*)
-  module Subordinate : Subordinate.Subordinate_.SUBORDINATE
-
-  (*! sharing Subordinate.IntSyn = IntSyn' !*)
-  module WorldSyn : Worldcheck_.WORLDSYN
-  module Names : NAMES
-
-  (*! sharing Names.IntSyn = IntSyn' !*)
-  (*! structure Paths : PATHS !*)
-  module Print : PRINT
-
-  (*! sharing Print.IntSyn = IntSyn' !*)
-  module TypeCheck : TYPECHECK
-
-  (*! sharing TypeCheck.IntSyn = IntSyn' !*)
-  (*! structure CsManager : CS_MANAGER !*)
-  (*! sharing CsManager.IntSyn = IntSyn' !*)
-  module Timers : Timers.TIMERS
-end) : COVER = struct
-  module Subordinate = Cover__0.Subordinate
+module MakeCover
+    (Global : GLOBAL)
+    (Whnf : WHNF)
+    (Conv : CONV)
+    (Abstract : ABSTRACT)
+    (Unify : UNIFY)
+    (Constraints : CONSTRAINTS)
+    (ModeTable : Modetable.MODETABLE)
+    (UniqueTable : Modetable.MODETABLE)
+    (Index : INDEX)
+    (Subordinate : Subordinate.Subordinate_.SUBORDINATE)
+    (WorldSyn : Worldcheck_.WORLDSYN)
+    (Names : NAMES)
+    (Print : PRINT)
+    (TypeCheck : TYPECHECK)
+    (Timers : Timers.TIMERS) :
+  COVER =
+struct
+  module Subordinate = Subordinate
 
   exception Error of string
 
-  module Unify = Cover__0.Unify
-  module ModeTable = Cover__0.ModeTable
-  module UniqueTable = Cover__0.UniqueTable
-  module TypeCheck = Cover__0.TypeCheck
-  module Timers = Cover__0.Timers
+  module Unify = Unify
+  module ModeTable = ModeTable
+  module UniqueTable = UniqueTable
+  module TypeCheck = TypeCheck
+  module Timers = Timers
 
   type caseLabel = Top | Child of caseLabel * int
 
@@ -70,7 +49,7 @@ end) : COVER = struct
   module I = IntSyn
   module T = Tomega
   module M = Modes.Modesyn.ModeSyn
-  module W = Cover__0.WorldSyn
+  module W = WorldSyn
   module P = Paths
   module F = Print.Formatter
   module N = Names
@@ -2436,27 +2415,23 @@ end
 (* # 1 "src/cover/Cover_.sml.ml" *)
 open! Basis
 
-module Cover = MakeCover (struct
-  module Global = Global
-  module Whnf = Whnf
-  module Conv = Conv
-  module Abstract = Abstract
-  module Unify = UnifyTrail
-  module Constraints = Constraints
-  module ModeTable = ModeTable
-  module UniqueTable = UniqueTable
-  module Index = Index
-  module Subordinate = Subordinate_.Subordinate
-  module WorldSyn = WorldSyn
-  module Names = Names
-
-  (*! structure Paths = Paths !*)
-  module Print = Print
-  module TypeCheck = TypeCheck
-
-  (*! structure CsManager = CsManager !*)
-  module Timers = Timers.Timers
-end)
+module Cover =
+  MakeCover
+    (Global)
+    (Whnf)
+    (Conv)
+    (Abstract)
+    (UnifyTrail)
+    (Constraints)
+    (ModeTable)
+    (UniqueTable)
+    (Index)
+    (Subordinate_.Subordinate)
+    (WorldSyn)
+    (Names)
+    (Print)
+    (TypeCheck)
+    (Timers.Timers)
 
 module Total = Total.Total (struct
   module Global = Global

@@ -61,9 +61,7 @@ module FunPrint = FunPrint (struct
 end)
 
 (* moves eventually into the Stelf core *)
-module Weaken = Weaken.Make_Weaken (struct
-  (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf
-end)
+module Weaken = Weaken.Make_Weaken (Whnf)
 
 module FunWeaken = FunWeaken (struct
   (*! structure FunSyn' = FunSyn !*) module Weaken = Weaken

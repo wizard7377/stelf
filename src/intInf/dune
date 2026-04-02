@@ -1,8 +1,8 @@
 ; (include sources.dune)
 
 (library
- (name int_inf)
- (public_name stelf.int_inf)
+ (name intInf)
+ (public_name stelf.intInf)
  (modules
   IntInfSig
   IntInf_

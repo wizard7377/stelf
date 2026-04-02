@@ -5,11 +5,11 @@ include Unknownexn_intf
 open! Basis
 
 (* Print an informative message on receipt of an unhandled exception. *)
-module MakeUnknownExn (UnknownExn__0 : sig
+module MakeUnknownExn (UnknownExn : sig
   val exnHistory : exn -> string list
 end) : UNKNOWN_EXN = struct
   let rec unknownExn exn =
-    let history = rev (UnknownExn__0.exnHistory exn) in
+    let history = rev (UnknownExn.exnHistory exn) in
     let rec wrap1 x = ("  raised at: " ^ x) ^ "\n" in
     let rec wrapn x = ("             " ^ x) ^ "\n" in
     concat

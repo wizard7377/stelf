@@ -14,27 +14,27 @@ open! Basis
 (* Subordination a la Virga [Technical Report 96] *)
 (* Author: Carsten Schuermann *)
 (* Reverse subordination order *)
-module MakeSubordinate (Subordinate__0 : sig
-  module Global : GLOBAL
-
+module MakeSubordinate
+    (Global : GLOBAL)
+    (Whnf : WHNF)
+    (Names : NAMES)
+    (Table : TABLE with type key = int)
+    (MemoTable : TABLE with type key = int * int)
+    (IntSet : Intset.INTSET) :
+  SUBORDINATE =
+struct
+(*
   (*! structure IntSyn' : INTSYN !*)
-  module Whnf : WHNF
-
   (*! sharing Whnf.IntSyn = IntSyn' !*)
-  module Names : NAMES
-
   (*! sharing Names.IntSyn = IntSyn' !*)
-  module Table : TABLE with type key = int
-  module MemoTable : TABLE with type key = int * int
-  module IntSet : Intset.INTSET
-end) : SUBORDINATE = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
-  module Global = Subordinate__0.Global
-  module Whnf = Subordinate__0.Whnf
-  module Names = Subordinate__0.Names
-  module Table = Subordinate__0.Table
-  module MemoTable = Subordinate__0.MemoTable
-  module IntSet = Subordinate__0.IntSet
+  module Global = Global
+  module Whnf = Whnf
+  module Names = Names
+  module Table = Table
+  module MemoTable = MemoTable
+  module IntSet = IntSet
 
   exception Error of string
 
@@ -689,13 +689,11 @@ module MemoTable = HashTable.HashTable (struct
   let eq (x__op, y__op) = x__op = y__op
 end)
 
-module Subordinate = MakeSubordinate (struct
-  module Global = Global
-
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Names = Names
-  module Table = TableInstances.IntRedBlackTree
-  module MemoTable = MemoTable
-  module IntSet = Intset.IntSet
-end)
+module Subordinate =
+  MakeSubordinate
+    (Global)
+    (Whnf)
+    (Names)
+    (TableInstances.IntRedBlackTree)
+    (MemoTable)
+    (Intset.IntSet)

@@ -1,6 +1,13 @@
 include module type of PrintOmdoc_intf
 
-module MakePrintOMDoc (PrintOMDoc__0 : sig
+module MakePrintOMDoc
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Constraints : CONSTRAINTS)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER) :
+  PRINT_OMDOC
+(*
   (* Printing *)
   (* Author: Frank Pfenning *)
   (* Modified: Jeff Polakow *)
@@ -20,4 +27,4 @@ module MakePrintOMDoc (PrintOMDoc__0 : sig
 
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Formatter_param : FORMATTER
-end) : PRINT_OMDOC
+*)

@@ -52,39 +52,19 @@ structure Tomega : TOMEGA =
 	   structure Whnf = Whnf
 	   structure Conv = Conv)
 *)
-module Constraints = Constraints.MakeConstraints (struct
-  (*! structure IntSyn' = IntSyn !*) module Conv = Conv
-end)
+module Constraints = Constraints.MakeConstraints (Conv)
 
-module UnifyNoTrail = Unify.MakeUnify (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Trail = Notrail.NoTrail
-end)
+module UnifyNoTrail = Unify.MakeUnify (Whnf) (Notrail.NoTrail)
 
-module UnifyTrail = Unify.MakeUnify (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Trail = Trail
-end)
+module UnifyTrail = Unify.MakeUnify (Whnf) (Trail)
 
 (* structure Normalize : NORMALIZE =  
   Normalize (! structure IntSyn' = IntSyn !
              ! structure Tomega' = Tomega !
              structure Whnf = Whnf)
  *)
-module Match = Match.MakeMatch (struct
-  module Whnf = Whnf
-  module Unify = UnifyTrail
-  module Trail = Trail
-end)
+module Match = Match.MakeMatch (Whnf) (UnifyTrail) (Trail)
 
-module Abstract = Abstract.MakeAbstract (struct
-  module Whnf = Whnf
-  module Constraints = Constraints
-  module Unify = UnifyNoTrail
-end)
+module Abstract = Abstract.MakeAbstract (Whnf) (UnifyNoTrail) (Constraints)
 
-module Approx = Approx.MakeApprox (struct
-  (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf
-end)
+module Approx = Approx.MakeApprox (Whnf)

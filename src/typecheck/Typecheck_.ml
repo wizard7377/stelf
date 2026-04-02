@@ -12,19 +12,19 @@ open! Basis
 
 (* Type Checking *)
 (* Author: Carsten Schuermann *)
-module MakeTypeCheck (TypeCheck__0 : sig
+module MakeTypeCheck
+    (Conv : CONV)
+    (Whnf : WHNF)
+    (Names : NAMES)
+    (Print : PRINT) :
+  TYPECHECK =
+struct
+(*
   (*! structure IntSyn' : INTSYN !*)
-  module Conv : CONV
-
   (*! sharing Conv.IntSyn = IntSyn' !*)
-  module Whnf : WHNF
-
   (*! sharing Whnf.IntSyn = IntSyn'  !*)
-  module Names : NAMES
-
   (*! sharing Names.IntSyn = IntSyn' !*)
-  module Print : PRINT
-end) : TYPECHECK = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 
@@ -349,13 +349,7 @@ open! Basis
 
 module type STRICT = Strict.STRICT
 
-module TypeCheck = MakeTypeCheck (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Conv = Conv
-  module Whnf = Whnf
-  module Names = Names
-  module Print = Print
-end)
+module TypeCheck = MakeTypeCheck (Conv) (Whnf) (Names) (Print)
 
 module Strict = Strict.Strict (struct
   (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf

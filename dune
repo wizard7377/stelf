@@ -4,7 +4,9 @@
  (name main)
  (public_name stelf.main)
  (modules main)
- (libraries frontend basis)
+ (libraries
+  frontend
+  basis)
  (flags
   (:standard -open Basis -open Frontend -open Frontend.Frontend_))
  (wrapped true)

@@ -15,21 +15,22 @@ open! Basis
 (* Names of Constants and Variables *)
 (* Author: Frank Pfenning *)
 (* Modified: Jeff Polakow *)
-module MakeNames (Names__0 : sig
-  module Global : GLOBAL
-
+module MakeNames
+    (Global : GLOBAL)
+    (Constraints : CONSTRAINTS)
+    (HashTable : TABLE with type key = string)
+    (StringTree : TABLE with type key = string) :
+  NAMES =
+struct
+(*
   (*! structure IntSyn' : INTSYN !*)
-  module Constraints : CONSTRAINTS
-
   (*! sharing Constraints.IntSyn = IntSyn' !*)
-  module HashTable : TABLE with type key = string
-  module StringTree : TABLE with type key = string
-end) : NAMES = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
-  module Global = Names__0.Global
-  module Constraints = Names__0.Constraints
-  module HashTable = Names__0.HashTable
-  module StringTree = Names__0.StringTree
+  module Global = Global
+  module Constraints = Constraints
+  module HashTable = HashTable
+  module StringTree = StringTree
 
   exception Error of string
 
@@ -1072,13 +1073,11 @@ end
 (* # 1 "src/names/Names_.sml.ml" *)
 open! Basis
 
-module Names = MakeNames (struct
-  module Global = Global
-
-  (*! structure IntSyn' = IntSyn !*)
-  module Constraints = Constraints
-  module HashTable = TableInstances.StringHashTable
-  module StringTree = TableInstances.StringRedBlackTree
-end)
+module Names =
+  MakeNames
+    (Global)
+    (Constraints)
+    (TableInstances.StringHashTable)
+    (TableInstances.StringRedBlackTree)
 
 include Names

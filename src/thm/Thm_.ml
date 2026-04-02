@@ -16,17 +16,15 @@ open! Basis
 (* Theorem and Related Declarations *)
 (* Author: Carsten Schuermann *)
 (* Modified: Brigitte Pientka *)
-module Make_Thm (Thm__0 : sig
-  module Global : GLOBAL
-  module ThmSyn' : THMSYN
-  module TabledSyn : Tabledsyn.TABLEDSYN
-  module ModeTable : Modetable.MODETABLE
-  module Order : ORDER
-
-  (*! sharing Order.IntSyn = ThmSyn'.ModeSyn.IntSyn !*)
-  module ThmPrint : Thmprint.THMPRINT
-end) : THM with module ThmSyn = Thm__0.ThmSyn' = struct
-  open Thm__0
+module Make_Thm
+    (Global : GLOBAL)
+    (ThmSyn' : THMSYN)
+    (TabledSyn : Tabledsyn.TABLEDSYN)
+    (ModeTable : Modetable.MODETABLE)
+    (Order : ORDER)
+    (ThmPrint : Thmprint.THMPRINT) :
+  THM with module ThmSyn = ThmSyn' =
+struct
   module ThmSyn = ThmSyn'
 
   (*! structure Paths = Paths' !*)
@@ -570,15 +568,11 @@ module ThmPrint = ThmPrint (struct
   module Formatter = Formatter
 end)
 
-module Thm = Make_Thm (struct
-  module Global = Global
-  module ThmSyn' = ThmSyn
-  module TabledSyn = Tabled.TabledSyn
-
-  (*       structure RedOrder = RedOrder *)
-  (* -bp *)
-  module Order = Order
-  module ModeTable = ModeTable
-  module ThmPrint = ThmPrint
-  module Paths' = Paths
-end)
+module Thm =
+  Make_Thm
+    (Global)
+    (ThmSyn)
+    (Tabled.TabledSyn)
+    (ModeTable)
+    (Order)
+    (ThmPrint)

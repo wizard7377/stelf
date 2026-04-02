@@ -11,18 +11,16 @@ open! Basis
 
 (* Printer for Compiled Syntax *)
 (* Author: Iliano Cervesato *)
-module Make_CPrint (CPrint__0 : sig
-  (*! structure IntSyn' : INTSYN !*)
-  (*! structure CompSyn' : COMPSYN !*)
-  (*! sharing CompSyn'.IntSyn = IntSyn' !*)
-  module Print : PRINT
-
-  (*! sharing Print.IntSyn = IntSyn' !*)
-  module Formatter : FORMATTER
-  module Names : NAMES
-end) : CPRINT = struct
+module Make_CPrint
+    (Print_ : PRINT)
+    (Formatter_ : FORMATTER)
+    (Names_ : NAMES) :
+  CPRINT = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
+  module Print = Print_
+  module Formatter = Formatter_
+  module Names = Names_
   open! CompSyn.CompSyn
 
   let rec compose = function
@@ -141,13 +139,6 @@ end
 (* local open ... *)
 (* functor CPrint *)
 
-module CPrint = Make_CPrint (struct
-  (*! structure IntSyn' = IntSyn !*)
-  (*! structure CompSyn' = CompSyn !*)
-  (*! sharing CompSyn'.IntSyn = IntSyn !*)
-  module Print = Print
-  module Formatter = Formatter
-  module Names = Names
-end)
+module CPrint = Make_CPrint (Print) (Formatter) (Names)
 
 (* # 1 "src/compile/Cprint.sml.ml" *)

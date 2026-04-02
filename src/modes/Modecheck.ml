@@ -18,27 +18,15 @@ open Origins
 (* Mode Checking *)
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning, Roberto Virga *)
-module MakeModeCheck (ModeCheck__0 : sig
-  (*! structure IntSyn : INTSYN !*)
-  module ModeTable : MODETABLE
-
-  (*! sharing ModeSyn.IntSyn = IntSyn !*)
-  module Whnf : WHNF
-
-  (*! sharing Whnf.IntSyn = IntSyn !*)
-  module Index : INDEX
-
-  (*! sharing Index.IntSyn = IntSyn !*)
-  (*! structure Paths : PATHS !*)
-  module Origins : ORIGINS
-end) : MODECHECK = struct
+module MakeModeCheck
+    (ModeTable : MODETABLE)
+    (Whnf : WHNF)
+    (Index : INDEX)
+    (Origins : ORIGINS) :
+  MODECHECK = struct
   (*! structure IntSyn = IntSyn !*)
   (*! structure ModeSyn = ModeSyn !*)
   (*! structure Paths = Paths !*)
-  module ModeTable = ModeCheck__0.ModeTable
-  module Whnf = ModeCheck__0.Whnf
-  module Index = ModeCheck__0.Index
-  module Origins = ModeCheck__0.Origins
 
   exception Error of string
 

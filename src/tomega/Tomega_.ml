@@ -24,9 +24,7 @@ module TomegaPrint = Tomegaprint.TomegaPrint (struct
   module Print : PRINT with module Formatter = Formatter = Print_.Print
 end)
 
-module Weaken = Weaken.Make_Weaken (struct
-  module Whnf = Whnf
-end)
+module Weaken = Weaken.Make_Weaken (Whnf)
 
 module TomegaTypeCheck = TomegaTypecheck.TomegaTypeCheck (struct
   module Global = Global
@@ -59,21 +57,14 @@ end)
    structure Print = Print
    structure Weaken = Weaken);
 *)
-module Opsem_ = Opsem.MakeOpsem (struct
-  module Global = Global
-  module IntSyn' = IntSyn
-  module Abstract = Abstract
-  module Tomega' = Tomega
-  module TypeCheck = TypeCheck
-  module Unify = UnifyNoTrail
-  module Conv = Conv
-  module Whnf = Whnf
-  module Print = Print
-  module Subordinate = Subordinate_.Subordinate
-  module TomegaPrint = TomegaPrint
-  module TomegaTypeCheck = TomegaTypeCheck
-  module Weaken = Weaken
-end)
+module Opsem_ =
+  Opsem.MakeOpsem
+    (Whnf)
+    (Abstract)
+    (Subordinate_.Subordinate)
+    (TomegaTypeCheck)
+    (TomegaPrint)
+    (UnifyNoTrail)
 
 (*
 structure Opsem = OpsemCont
@@ -96,36 +87,29 @@ module Redundant = Redundant.Redundant (struct
   module Opsem = Opsem_
 end)
 
-module Converter_ = Converter.MakeConverter (struct
-  module Global = Global
-  module IntSyn' = IntSyn
-  module Abstract = Abstract
-  module Tomega' = Tomega
-  module Names = Names
-  module ModeTable = ModeTable
-  module TypeCheck = TypeCheck
-  module TomegaAbstract = TomegaAbstract
-  module TomegaTypeCheck = TomegaTypeCheck
-  module Trail = Trail
-  module Unify = UnifyTrail
-  module TomegaPrint = TomegaPrint
-  module Whnf = Whnf
-  module WorldSyn = WorldSyn
-  module Worldify = Worldify
-  module Subordinate = Subordinate_.Subordinate
-  module Print = Print
-  module Redundant = Redundant
-  module Weaken = Weaken
-end)
+module Converter_ =
+  Converter.MakeConverter
+    (Global)
+    (Abstract)
+    (ModeTable)
+    (Names)
+    (UnifyTrail)
+    (Whnf)
+    (Print)
+    (TomegaPrint)
+    (WorldSyn)
+    (Worldify)
+    (TomegaTypeCheck)
+    (Subordinate_.Subordinate)
+    (TypeCheck)
+    (Redundant)
+    (TomegaAbstract)
 
-module TomegaCoverage_ = Coverage.MakeTomegaCoverage (struct
-  module Global = Global
-  module IntSyn' = IntSyn
-  module Tomega' = Tomega
-  module TomegaPrint = TomegaPrint
-  module TomegaTypeCheck = TomegaTypeCheck
-  module Cover = Cover_.Cover
-end)
+module TomegaCoverage_ =
+  Coverage.MakeTomegaCoverage
+    (TomegaPrint)
+    (TomegaTypeCheck)
+    (Cover_.Cover)
 
 module Opsem = Opsem_
 module Converter = Converter_

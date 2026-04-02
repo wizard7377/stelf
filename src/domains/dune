@@ -15,7 +15,7 @@
   OrderedField_intf
   Rationals_intf)
  (libraries
-  int_inf
+  intInf
   basis)
  (wrapped true)
  (preprocess

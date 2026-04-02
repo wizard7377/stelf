@@ -1,8 +1,8 @@
-(* # 1 "src/int_inf/IntInf_.sig.ml" *)
+(* # 1 "src/intInf/IntInf_.sig.ml" *)
 
-(* # 1 "src/int_inf/IntInf_.fun.ml" *)
+(* # 1 "src/intInf/IntInf_.fun.ml" *)
 
-(* # 1 "src/int_inf/IntInf_.sml.ml" *)
+(* # 1 "src/intInf/IntInf_.sml.ml" *)
 open Basis
 open IntInfSig
 

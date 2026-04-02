@@ -15,10 +15,7 @@ open Queue
 (* Indexing *)
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning *)
-module MakeIndex (Index__0 : sig
-  module Global : GLOBAL
-  module Queue : QUEUE
-end) : INDEX = struct
+module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
   (*! structure IntSyn = IntSyn' !*)
   open! struct
     module I = IntSyn
@@ -122,10 +119,7 @@ end
 (* # 1 "src/index/Index_.sml.ml" *)
 open! Basis
 
-module Index = MakeIndex (struct
-  module Global = Global
-  module Queue = Queue
-end)
+module Index = MakeIndex (Global) (Queue)
 include Index
 (*! structure IntSyn' = IntSyn !*)
 (* IndexSkolem commented out to break cycle with index_skolem *)

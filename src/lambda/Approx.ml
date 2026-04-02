@@ -11,11 +11,8 @@ open! Basis
 
 (* Approximate language for term reconstruction *)
 (* Author: Kevin Watkins *)
-module MakeApprox (Approx__0 : sig
-  module Whnf : WHNF
-end) : APPROX = struct
+module MakeApprox (Whnf : WHNF) : APPROX = struct
   (*! structure IntSyn = IntSyn' !*)
-  module Whnf = Approx__0.Whnf
   module I = IntSyn
 
   let rec headConDec = function

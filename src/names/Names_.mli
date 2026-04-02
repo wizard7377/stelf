@@ -1,15 +1,15 @@
 include module type of Names_intf
 
-module MakeNames (Names__0 : sig
-  module Global : GLOBAL
-
+module MakeNames
+    (Global : GLOBAL)
+    (Constraints : CONSTRAINTS)
+    (HashTable : TABLE with type key = string)
+    (StringTree : TABLE with type key = string) :
+  NAMES
+(*
   (*! structure IntSyn' : INTSYN !*)
-  module Constraints : CONSTRAINTS
-
   (*! sharing Constraints.IntSyn = IntSyn' !*)
-  module HashTable : TABLE with type key = string
-  module StringTree : TABLE with type key = string
-end) : NAMES
+*)
 
 module Names : NAMES
 include NAMES

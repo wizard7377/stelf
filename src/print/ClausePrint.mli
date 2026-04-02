@@ -1,6 +1,21 @@
 include module type of ClausePrint_intf
 
-module MakeClausePrint (ClausePrint__0 : sig
+module MakeClausePrint
+    (Whnf : WHNF)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER)
+    (Print : sig
+      module Formatter : FORMATTER
+
+      val formatDec : IntSyn.dctx * IntSyn.dec -> Formatter.format
+      val formatExp : IntSyn.dctx * IntSyn.exp -> Formatter.format
+      val formatSpine : IntSyn.dctx * IntSyn.spine -> Formatter.format list
+      val formatConDec : IntSyn.conDec -> Formatter.format
+      val implicit : bool ref
+    end)
+    (Symbol : Symbol.SYMBOL) :
+  CLAUSEPRINT
+(*
   (* Clause Printing *)
   (* Author: Frank Pfenning, Carsten Schuermann *)
   (* This is like printing of expressions, except that
@@ -29,4 +44,4 @@ module MakeClausePrint (ClausePrint__0 : sig
 
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Symbol : Symbol.SYMBOL
-end) : CLAUSEPRINT
+*)

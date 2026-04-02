@@ -1,6 +1,23 @@
 include module type of Converter_intf
 
-module MakeConverter (Converter__0 : sig
+module MakeConverter
+    (Global : GLOBAL)
+    (Abstract : ABSTRACT)
+    (ModeTable : Modetable.MODETABLE)
+    (Names : NAMES)
+    (Unify : UNIFY)
+    (Whnf : WHNF)
+    (Print : PRINT)
+    (TomegaPrint : Tomegaprint.TOMEGAPRINT)
+    (WorldSyn : Worldcheck_.WORLDSYN)
+    (Worldify : Worldcheck_.WORLDIFY)
+    (TomegaTypeCheck : TomegaTypecheck_intf.TOMEGATYPECHECK)
+    (Subordinate : Subordinate.Subordinate_.SUBORDINATE)
+    (TypeCheck : Typecheck_.TYPECHECK)
+    (Redundant : Redundant_intf.REDUNDANT)
+    (TomegaAbstract : TomegaAbstract_intf.TOMEGAABSTRACT) :
+  CONVERTER
+(*
   (* Converter from relational representation to a functional
    representation of proof terms *)
   (* Author: Carsten Schuermann *)
@@ -51,4 +68,4 @@ module MakeConverter (Converter__0 : sig
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
   module Redundant : Redundant_intf.REDUNDANT
   module TomegaAbstract : TomegaAbstract_intf.TOMEGAABSTRACT
-end) : CONVERTER
+*)

@@ -12,10 +12,8 @@ open! Basis
 (* Lexer *)
 (* Author: Frank Pfenning *)
 (* Modified: Brigitte Pientka *)
-module MakeLexer (Lexer__0 : sig
-  module Stream' : STREAM
-end) : LEXER = struct
-  module Stream = Lexer__0.Stream'
+module MakeLexer (Stream : STREAM) : LEXER = struct
+  module Stream = Stream
 
   (*! structure Paths = Paths' !*)
   open! struct
@@ -578,9 +576,7 @@ end
 (*! structure Paths' : PATHS !*)
 (* local ... *)
 (* functor Lexer *)
-module Lexer = MakeLexer (struct
-  module Stream' = Stream
-end)
+module Lexer = MakeLexer (Stream)
 include Lexer
 (*! structure Paths' = Paths !*)
 

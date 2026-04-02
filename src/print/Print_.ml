@@ -12,7 +12,16 @@ include Print_intf
 open! Symbol
 open! Basis
 
-module MakePrint (Print__0 : sig
+module MakePrint
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Constraints : CONSTRAINTS)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER)
+    (Symbol : SYMBOL) :
+  PRINT =
+struct
+(*
   (* Printing *)
   (* Author: Frank Pfenning *)
   (* Modified: Jeff Polakow, Roberto Virga *)
@@ -31,17 +40,17 @@ module MakePrint (Print__0 : sig
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Formatter_param : FORMATTER
   module Symbol : SYMBOL
-end) : PRINT = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
   module Formatter = struct
-    include Print__0.Formatter_param
+    include Formatter_param
   end
 
-  module Whnf = Print__0.Whnf
-  module Abstract = Print__0.Abstract
-  module Constraints = Print__0.Constraints
-  module Names = Print__0.Names
-  module Symbol = Print__0.Symbol
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
+  module Symbol = Symbol
   module Tomega = Tomega
 
   (* Externally visible parameters *)
@@ -1174,72 +1183,64 @@ structure WorldPrint = WorldPrint
    structure Formatter_param = Formatter
    structure Print = Print);
 *)
-module Print = MakePrint (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Abstract = Abstract
-  module Constraints = Constraints
-  module Names = Names
-  module Formatter_param = Formatter
-  module Symbol = SymbolAscii
-end)
+module Print =
+  MakePrint
+    (Whnf)
+    (Abstract)
+    (Constraints)
+    (Names)
+    (Formatter)
+    (SymbolAscii)
 
 module ClausePrintFunctor = ClausePrint
 
 include Print
 
-module ClausePrint = ClausePrintFunctor.MakeClausePrint (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Names = Names
-  module Formatter_param = Formatter
-  module Print = Print
-  module Symbol = SymbolAscii
-end)
+module ClausePrint =
+  ClausePrintFunctor.MakeClausePrint
+    (Whnf)
+    (Names)
+    (Formatter)
+    (Print)
+    (SymbolAscii)
 
-module PrintTeX = MakePrint (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Abstract = Abstract
-  module Constraints = Constraints
-  module Names = Names
-  module Formatter_param = Formatter
-  module Symbol = SymbolTeX
-end)
+module PrintTeX =
+  MakePrint
+    (Whnf)
+    (Abstract)
+    (Constraints)
+    (Names)
+    (Formatter)
+    (SymbolTeX)
 
-module ClausePrintTeX = ClausePrintFunctor.MakeClausePrint (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Constraints = Constraints
-  module Names = Names
-  module Formatter_param = Formatter
-  module Print = PrintTeX
-  module Symbol = SymbolTeX
-end)
+module ClausePrintTeX =
+  ClausePrintFunctor.MakeClausePrint
+    (Whnf)
+    (Names)
+    (Formatter)
+    (PrintTeX)
+    (SymbolTeX)
 
-module PrintTwega = PrintTwega.MakePrintTwega (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Abstract = Abstract
-  module Constraints = Constraints
-  module Names = Names
-  module Formatter_param = Formatter
-end)
+module PrintTwega =
+  PrintTwega.MakePrintTwega
+    (Whnf)
+    (Abstract)
+    (Constraints)
+    (Names)
+    (Formatter)
 
-module PrintXML = PrintXml.MakePrintXML (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Abstract = Abstract
-  module Constraints = Constraints
-  module Names = Names
-  module Formatter_param = Formatter
-end)
+module PrintXML =
+  PrintXml.MakePrintXML
+    (Whnf)
+    (Abstract)
+    (Constraints)
+    (Names)
+    (Formatter)
 
-module PrintOMDoc = PrintOmdoc.MakePrintOMDoc (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Abstract = Abstract
-  module Constraints = Constraints
-  module Names = Names
-  module Formatter_param = Formatter
-end)
+module PrintOMDoc =
+  PrintOmdoc.MakePrintOMDoc
+    (Whnf)
+    (Abstract)
+    (Constraints)
+    (Names)
+    (Formatter)

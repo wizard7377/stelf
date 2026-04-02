@@ -10,7 +10,15 @@ include PrintXml_intf
 (* # 1 "src/print/PrintXml.fun.ml" *)
 open! Basis
 
-module MakePrintXML (PrintXML__0 : sig
+module MakePrintXML
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Constraints : CONSTRAINTS)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER) :
+  PRINT_XML =
+struct
+(*
   (* Printing *)
   (* Author: Frank Pfenning *)
   (* Modified: Jeff Polakow *)
@@ -29,16 +37,16 @@ module MakePrintXML (PrintXML__0 : sig
 
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Formatter_param : FORMATTER
-end) : PRINT_XML = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
   module Formatter = struct
-    include PrintXML__0.Formatter_param
+    include Formatter_param
   end
 
-  module Whnf = PrintXML__0.Whnf
-  module Abstract = PrintXML__0.Abstract
-  module Constraints = PrintXML__0.Constraints
-  module Names = PrintXML__0.Names
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
 
   open! struct
     module I = IntSyn

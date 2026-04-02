@@ -12,13 +12,7 @@ open! Basis
 
 (* Internal syntax for functional proof term calculus *)
 (* Author: Carsten Schuermann *)
-module Make_FunSyn (FunSyn__0 : sig
-  (*! structure IntSyn' : INTSYN !*)
-  module Whnf : WHNF
-
-  (*! sharing Whnf.IntSyn = IntSyn' !*)
-  module Conv : CONV
-end) : FUNSYN = struct
+module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 
@@ -317,10 +311,6 @@ end
 
 (*! sharing Conv.IntSyn = IntSyn' !*)
 (* functor FunSyn *)
-module FunSyn = Make_FunSyn (struct
-  (*! structure IntSyn' = IntSyn !*)
-  module Whnf = Whnf
-  module Conv = Conv
-end)
+module FunSyn = Make_FunSyn (Whnf) (Conv)
 
 (* # 1 "src/meta/Funsyn.sml.ml" *)

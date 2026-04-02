@@ -16,12 +16,7 @@ open Intsyn
 (* Internal syntax for functional proof term calculus *)
 (* Author: Carsten Schuermann *)
 (* Modified: Yu Liao, Adam Poswolsky *)
-module MakeTomega (Tomega__0 : sig
-  module Whnf : WHNF
-  module Conv : CONV
-end) : TOMEGA = struct
-  module Whnf = Tomega__0.Whnf
-  module Conv = Tomega__0.Conv
+module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
 
   exception Error of string
 
@@ -895,9 +890,6 @@ module Conv__ = Conv (struct
   module Whnf = Whnf__
 end)
 
-module Tomega : TOMEGA = MakeTomega (struct
-  module Whnf = Whnf__
-  module Conv = Conv__
-end)
+module Tomega : TOMEGA = MakeTomega (Whnf__) (Conv__)
 
 include Tomega

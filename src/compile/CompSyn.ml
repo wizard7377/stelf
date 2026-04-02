@@ -15,16 +15,14 @@ open! Basis
 (* Modified: Jeff Polakow *)
 (* Modified: Frank Pfenning *)
 (* Modified: Brigitte Pientka *)
-module Make_CompSyn (CompSyn__0 : sig
-  module Global : GLOBAL
-
-  (*! structure IntSyn' : INTSYN !*)
-  module Names : NAMES
-
-  (*! sharing Names.IntSyn = IntSyn' !*)
-  module Table : TABLE with type key = int
-end) : COMPSYN = struct
-  open CompSyn__0
+module Make_CompSyn
+    (Global_ : GLOBAL)
+    (Names_ : NAMES)
+    (Table_ : TABLE with type key = int) :
+  COMPSYN = struct
+  module Global = Global_
+  module Names = Names_
+  module Table = Table_
 
   (*! structure IntSyn = IntSyn' !*)
   type opt = No | LinearHeads | Indexing [@@deriving eq, ord, show]
@@ -218,13 +216,7 @@ end
 open TableInstances
 
 (* functor CompSyn *)
-module CompSyn = Make_CompSyn (struct
-  module Global = Global
-
-  (*! structure IntSyn' = IntSyn !*)
-  module Names = Names
-  module Table = IntRedBlackTree
-end)
+module CompSyn = Make_CompSyn (Global) (Names) (IntRedBlackTree)
 
 include CompSyn
 

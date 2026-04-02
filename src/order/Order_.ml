@@ -13,9 +13,7 @@ open! Basis
 (* Terminiation and Reduction Order *)
 (* Author: Carsten Schuermann *)
 (* Modified: Brigitte Pientka *)
-module MakeOrder (Order__0 : sig
-  module Table : TABLE with type key = int
-end) : ORDER = struct
+module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
   (*! structure IntSyn = IntSyn' !*)
   exception Error of string
 
@@ -56,7 +54,6 @@ end) : ORDER = struct
   (* RDec ::= (P, C)            *)
   open! struct
     module I = IntSyn
-    module Table = Order__0.Table
 
     let orderTable_ : tDec Table.table = Table.new_ 0
     let redOrderTable_ : rDec Table.table = Table.new_ 0
@@ -180,9 +177,7 @@ end
 open! Basis
 open TableInstances
 
-module Order = MakeOrder (struct
-  (*! structure IntSyn' = IntSyn !*) module Table = IntRedBlackTree
-end)
+module Order = MakeOrder (IntRedBlackTree)
 
 include Order
 (* -bp *)

@@ -13,11 +13,8 @@ open! Basis
 (* Mode Table *)
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning, Roberto Virga *)
-module MakeModeTable (ModeTable__0 : sig
-  module Table : TABLE with type key = int
-end) : MODETABLE = struct
+module MakeModeTable (Table : TABLE with type key = int) : MODETABLE = struct
   (*! structure IntSyn = IntSyn' !*)
-  module Table = ModeTable__0.Table
 
   exception Error of string
 

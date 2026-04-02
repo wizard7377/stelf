@@ -11,7 +11,25 @@ include Converter_intf
 (* # 1 "src/tomega/Converter.fun.ml" *)
 open! Basis
 
-module MakeConverter (Converter__0 : sig
+module MakeConverter
+    (Global : GLOBAL)
+    (Abstract : ABSTRACT)
+    (ModeTable : Modetable.MODETABLE)
+    (Names : NAMES)
+    (Unify : UNIFY)
+    (Whnf : WHNF)
+    (Print : PRINT)
+    (TomegaPrint : Tomegaprint.TOMEGAPRINT)
+    (WorldSyn : Worldcheck_.WORLDSYN)
+    (Worldify : Worldcheck_.WORLDIFY)
+    (TomegaTypeCheck : TomegaTypecheck_intf.TOMEGATYPECHECK)
+    (Subordinate : Subordinate.Subordinate_.SUBORDINATE)
+    (TypeCheck : Typecheck_.TYPECHECK)
+    (Redundant : Redundant_intf.REDUNDANT)
+    (TomegaAbstract : TomegaAbstract_intf.TOMEGAABSTRACT) :
+  CONVERTER =
+struct
+(*
   (* Converter from relational representation to a functional
    representation of proof terms *)
   (* Author: Carsten Schuermann *)
@@ -62,7 +80,7 @@ module MakeConverter (Converter__0 : sig
   (*! sharing TypeCheck.IntSyn = IntSyn' !*)
   module Redundant : Redundant_intf.REDUNDANT
   module TomegaAbstract : TomegaAbstract_intf.TOMEGAABSTRACT
-end) : CONVERTER = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
   exception Error of string
@@ -72,10 +90,10 @@ end) : CONVERTER = struct
     module T = Tomega
     module I = IntSyn
     module M = Modes.Modesyn.ModeSyn
-    module S = Converter__0.Subordinate
+    module S = Subordinate
     module A = Abstract
-    module TomegaTypeCheck = Converter__0.TomegaTypeCheck
-    module TA = Converter__0.TomegaAbstract
+    module TomegaTypeCheck = TomegaTypeCheck
+    module TA = TomegaAbstract
 
     let isIdx1 = function I.Idx 1 -> true | _ -> false
 
@@ -887,7 +905,7 @@ end) : CONVERTER = struct
             else ()
             end
           in
-          let factP = Converter__0.Redundant.convert p_ in
+          let factP = Redundant.convert p_ in
           let _ =
             begin if !Global.chatter >= 4 then print "done]\n" else ()
             end
@@ -908,7 +926,7 @@ end) : CONVERTER = struct
             else ()
             end
           in
-          let factP = Converter__0.Redundant.convert p_ in
+          let factP = Redundant.convert p_ in
           let _ =
             begin if !Global.chatter >= 4 then print "done]\n" else ()
             end

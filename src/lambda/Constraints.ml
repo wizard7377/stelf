@@ -19,11 +19,8 @@ open Intsyn
 (* Manipulating Constraints *)
 (* Author: Jeff Polakow, Frank Pfenning *)
 (* Modified: Roberto Virga *)
-module MakeConstraints (Constraints__0 : sig
-  module Conv : CONV
-end) : CONSTRAINTS = struct
+module MakeConstraints (Conv : CONV) : CONSTRAINTS = struct
   (*! structure IntSyn = IntSyn' !*)
-  module Conv = Constraints__0.Conv
 
   exception Error of IntSyn.cnstr list
 

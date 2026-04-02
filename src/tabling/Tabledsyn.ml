@@ -11,18 +11,23 @@ open! Basis
 
 (* Tabled Syntax *)
 (* Author: Brigitte Pientka *)
-module MakeTabledSyn (TabledSyn__0 : sig
+module MakeTabledSyn
+    (Names : NAMES)
+    (Table : TABLE with type key = int)
+    (Index : INDEX) : TABLEDSYN =
+struct
+(*
   (*! structure IntSyn' : INTSYN !*)
   module Names : NAMES
 
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Table : TABLE with type key = int
   module Index : INDEX
-end) : TABLEDSYN = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
-  module Table = TabledSyn__0.Table
-  module Names = TabledSyn__0.Names
-  module Index = TabledSyn__0.Index
+  module Table = Table
+  module Names = Names
+  module Index = Index
 
   exception Error of string
 

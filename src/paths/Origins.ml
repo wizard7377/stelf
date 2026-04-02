@@ -13,15 +13,10 @@ open! Basis
 
 (* Origins of Declarations *)
 (* Author: Frank Pfenning *)
-module MakeOrigins (Origins__0 : sig
-  module Global : GLOBAL
-  module Table : TABLE with type key = string
-end) : ORIGINS = struct
+module MakeOrigins (Global : GLOBAL) (Table : TABLE with type key = string) : ORIGINS = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Paths = Paths' !*)
   open! struct
-    module Table = Origins__0.Table
-
     let linesInfoTable : Paths.linesInfo Table.table = Table.new_ 31
     let rec reset () = Table.clear linesInfoTable
 
@@ -55,9 +50,6 @@ end
 open! Basis
 open! TableInstances
 
-module Origins = MakeOrigins (struct
-  module Global = Global
-  module Table = StringHashTable
-end)
+module Origins = MakeOrigins (Global) (StringHashTable)
 
 include Origins

@@ -11,17 +11,18 @@ open! Basis
 
 (* Constraint Solver Manager *)
 (* Author: Roberto Virga *)
-module MakeCsManager (CSManager__0 : sig
-  module Global : GLOBAL
-
+module MakeCsManager
+    (Global : GLOBAL)
+    (Unify : UNIFY)
+    (Fixity : FIXITY) :
+  CS_MANAGER with module Fixity = Fixity =
+struct
+(*
   (*! structure IntSyn : INTSYN !*)
-  module Unify : UNIFY
-
   (*! sharing Unify.IntSyn = IntSyn !*)
-  module Fixity : FIXITY
-end) : CS_MANAGER with module Fixity = CSManager__0.Fixity = struct
+*)
   module IntSyn = IntSyn
-  module Fixity = CSManager__0.Fixity
+  module Fixity = Fixity
 
   (* structure ModeSyn = ModeSyn *)
   type nonrec sigEntry =
@@ -69,9 +70,9 @@ end) : CS_MANAGER with module Fixity = CSManager__0.Fixity = struct
         needs = [];
         fgnConst = None;
         init = (function _ -> ());
-        reset = CSManager__0.Unify.reset;
-        mark = CSManager__0.Unify.mark;
-        unwind = CSManager__0.Unify.unwind;
+        reset = Unify.reset;
+        mark = Unify.mark;
+        unwind = Unify.unwind;
       }
 
     type solver_ = Solver of solver * bool ref
@@ -263,12 +264,9 @@ end
 
 (*! structure ModeSyn : MODESYN !*)
 (* functor CsManager *)
-include MakeCsManager (struct
-  module Global = Global
-
-  (*! structure IntSyn = IntSyn !*)
-  module Unify = UnifyTrail
-  module Fixity = Names.Fixity
-end)
+include MakeCsManager
+    (Global)
+    (UnifyTrail)
+    (Names.Fixity)
 
 (* # 1 "src/solvers/CsManager.sml.ml" *)

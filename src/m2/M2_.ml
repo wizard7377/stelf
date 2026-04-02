@@ -17,9 +17,7 @@ open Prover
 open Mpi
 open Skolem
 
-module MetaSyn = Metasyn.Make_MetaSyn (struct
-  (*! structure IntSyn' = IntSyn !*) module Whnf = Whnf
-end)
+module MetaSyn = Metasyn.Make_MetaSyn (Whnf)
 
 module MetaAbstract_ = MetaAbstract.MetaAbstract (struct
   module Global = Global
@@ -187,10 +185,7 @@ module Mpi = Mpi (struct
   module Ring = Ring.Ring
 end)
 
-module IndexSkolem = IndexSkolem.MakeIndexSkolem (struct
-  module Global = Global
-  module Queue = Queue.Queue
-end)
+module IndexSkolem = IndexSkolem.MakeIndexSkolem (Global) (Queue.Queue)
 
 module Skolem = Skolem (struct
   module Global = Global

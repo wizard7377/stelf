@@ -1,18 +1,17 @@
 include module type of Typecheck_intf
 
-module MakeTypeCheck (TypeCheck__0 : sig
+module MakeTypeCheck
+    (Conv : CONV)
+    (Whnf : WHNF)
+    (Names : NAMES)
+    (Print : PRINT) :
+  TYPECHECK
+(*
   (*! structure IntSyn' : INTSYN !*)
-  module Conv : CONV
-
   (*! sharing Conv.IntSyn = IntSyn' !*)
-  module Whnf : WHNF
-
   (*! sharing Whnf.IntSyn = IntSyn'  !*)
-  module Names : NAMES
-
   (*! sharing Names.IntSyn = IntSyn' !*)
-  module Print : PRINT
-end) : TYPECHECK
+*)
 
 module type STRICT = Strict.STRICT
 module TypeCheck : TYPECHECK

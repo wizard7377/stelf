@@ -1,9 +1,6 @@
 include module type of Parsing_intf
 
-module MakeParsing (Parsing__0 : sig
-  module Stream' : STREAM
-  module Lexer' : Lexer.LEXER
-end) : PARSING
+module MakeParsing (Stream : STREAM) (Lexer : Lexer.LEXER) : PARSING
 
 module Parsing : PARSING
 

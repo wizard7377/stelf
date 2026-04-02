@@ -7,10 +7,7 @@ open Queue
 (* Indexing (Constants and Skolem constants) *)
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning *)
-module MakeIndexSkolem (IndexSkolem__0 : sig
-  module Global : GLOBAL
-  module Queue : QUEUE
-end) : Index_.INDEX = struct
+module MakeIndexSkolem (Global : GLOBAL) (Queue : QUEUE) : Index_.INDEX = struct
   (*! structure IntSyn = IntSyn' !*)
   open! struct
     module I = IntSyn

@@ -1,6 +1,13 @@
 include module type of PrintTwega_intf
 
-module MakePrintTwega (PrintTwega__0 : sig
+module MakePrintTwega
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Constraints : CONSTRAINTS)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER) :
+  PRINT_TWEGA
+(*
   (* Printing *)
   (* Author: Frank Pfenning *)
   (* Modified: Jeff Polakow *)
@@ -18,4 +25,4 @@ module MakePrintTwega (PrintTwega__0 : sig
 
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Formatter_param : FORMATTER
-end) : PRINT_TWEGA
+*)

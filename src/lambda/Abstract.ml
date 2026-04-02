@@ -19,21 +19,12 @@ open Tomega
 (* Abstraction *)
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
-module MakeAbstract (Abstract__0 : sig
-  (*! structure IntSyn' : INTSYN !*)
-  module Whnf : WHNF
-
-  (*! sharing Whnf.IntSyn = IntSyn' !*)
-  module Unify : UNIFY
-
-  (*! sharing Unify.IntSyn = IntSyn' !*)
-  module Constraints : CONSTRAINTS
-end) : ABSTRACT = struct
+module MakeAbstract
+    (Whnf : WHNF)
+    (Unify : UNIFY)
+    (Constraints : CONSTRAINTS) :
+  ABSTRACT = struct
   exception Error of string
-
-  module Whnf = Abstract__0.Whnf
-  module Unify = Abstract__0.Unify
-  module Constraints = Abstract__0.Constraints
 
   open! struct
     module I = IntSyn

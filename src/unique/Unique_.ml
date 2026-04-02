@@ -13,34 +13,33 @@ open! Basis
 
 (* Uniqueness Checking *)
 (* Author: Frank Pfenning *)
-module MakeUnique (Unique__0 : sig
-  module Global : GLOBAL
-  module Whnf : WHNF
-  module Abstract : ABSTRACT
-  module Unify : UNIFY
-
-  (* must be trailing! *)
-  module Constraints : CONSTRAINTS
-  module UniqueTable : Modetable.MODETABLE
-  module UniqueCheck : Modecheck.MODECHECK
-  module Index : INDEX
-  module Subordinate : Subordinate_.SUBORDINATE
-  module WorldSyn : Worldcheck_.WORLDSYN
-  module Names : NAMES
-  module Print : PRINT
-  module TypeCheck : TYPECHECK
-  module Timers : Timers.TIMERS
-end) : UNIQUE = struct
+module MakeUnique
+    (Global : GLOBAL)
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Unify : UNIFY)
+    (Constraints : CONSTRAINTS)
+    (UniqueTable : Modetable.MODETABLE)
+    (UniqueCheck : Modecheck.MODECHECK)
+    (Index : INDEX)
+    (Subordinate : Subordinate_.SUBORDINATE)
+    (WorldSyn : Worldcheck_.WORLDSYN)
+    (Names : NAMES)
+    (Print : PRINT)
+    (TypeCheck : TYPECHECK)
+    (Timers : Timers.TIMERS) :
+  UNIQUE =
+struct
   exception Error of string
 
-  module Subordinate = Unique__0.Subordinate
-  module Unify = Unique__0.Unify
-  module UniqueCheck = Unique__0.UniqueCheck
+  module Subordinate = Subordinate
+  module Unify = Unify
+  module UniqueCheck = UniqueCheck
 
   open! struct
     module I = IntSyn
     module M = Modes.Modesyn.ModeSyn
-    module W = Unique__0.WorldSyn
+    module W = WorldSyn
     module P = Paths
     module F = Print.Formatter
     module N = Names
@@ -451,30 +450,24 @@ end
 (* # 1 "src/unique/Unique_.sml.ml" *)
 open! Basis
 
-module UniqueTable = Modetable.MakeModeTable (struct
-  module Table = TableInstances.IntRedBlackTree
-end)
+module UniqueTable = Modetable.MakeModeTable (TableInstances.IntRedBlackTree)
 
-module UniqueCheck = Modecheck.MakeModeCheck (struct
-  module ModeTable = UniqueTable
-  module Whnf = Whnf
-  module Index = Index
-  module Origins = Origins
-end)
+module UniqueCheck =
+  Modecheck.MakeModeCheck (UniqueTable) (Whnf) (Index) (Origins)
 
-module Unique = MakeUnique (struct
-  module Global = Global
-  module Whnf = Whnf
-  module Abstract = Abstract
-  module Unify = UnifyTrail
-  module Constraints = Constraints
-  module UniqueTable = UniqueTable
-  module UniqueCheck = UniqueCheck
-  module Index = Index
-  module Subordinate = Subordinate_.Subordinate
-  module WorldSyn = Worldcheck_.WorldSyn
-  module Names = Names
-  module Print = Print
-  module TypeCheck = TypeCheck
-  module Timers = Timers.Timers
-end)
+module Unique =
+  MakeUnique
+    (Global)
+    (Whnf)
+    (Abstract)
+    (UnifyTrail)
+    (Constraints)
+    (UniqueTable)
+    (UniqueCheck)
+    (Index)
+    (Subordinate_.Subordinate)
+    (Worldcheck_.WorldSyn)
+    (Names)
+    (Print)
+    (TypeCheck)
+    (Timers.Timers)

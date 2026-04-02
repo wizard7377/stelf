@@ -19,40 +19,36 @@ open Cprint
 (* Author: Iliano Cervesato *)
 (* Modified: Jeff Polakow, Carsten Schuermann, Larry Greenfield,
              Roberto Virga, Brigitte Pientka *)
-module MakeCompile (Compile__0 : sig
+module MakeCompile
+    (Whnf : WHNF)
+    (TypeCheck : TYPECHECK)
+    (SubTree : Subtree.SUBTREE)
+    (CPrint : Cprint.CPRINT)
+    (Print : PRINT)
+    (Names : NAMES) :
+  COMPILE =
+struct
+(*
   (*! structure IntSyn' : INTSYN !*)
   (*! structure CompSyn' : COMPSYN !*)
   (*! sharing CompSyn'.IntSyn = IntSyn' !*)
-  module Whnf : WHNF
-
   (*! sharing Whnf.IntSyn = IntSyn' !*)
-  module TypeCheck : TYPECHECK
-
   (* sharing TypeCheck.IntSyn = IntSyn' !*)
-  module SubTree : Subtree.SUBTREE
-
   (*! sharing SubTree.IntSyn = IntSyn' !*)
   (*! sharing SubTree.CompSyn = CompSyn' !*)
-  (* CPrint currently unused *)
-  module CPrint : Cprint.CPRINT
-
   (*! sharing CPrint.IntSyn = IntSyn' !*)
   (*! sharing CPrint.CompSyn = CompSyn' !*)
-  (* CPrint currently unused *)
-  module Print : PRINT
-
   (*! sharing Print.IntSyn = IntSyn' !*)
-  module Names : NAMES
-end) : COMPILE = struct
+*)
   (* FIX: need to associate errors with occurrences -kw *)
   exception Error of string
 
   module I = IntSyn
   module T = Tomega
   module C = CompSyn
-  module SubTree = Compile__0.SubTree
-  module Whnf = Compile__0.Whnf
-  module CPrint = Compile__0.CPrint
+  module SubTree = SubTree
+  module Whnf = Whnf
+  module CPrint = CPrint
 
   type duplicates = Bvar of int | Fgn | Def of int
 
@@ -657,13 +653,7 @@ structure CompSyn =
 	   structure Names = Names
            structure Table = IntRedBlackTree);
 *)
-module CPrint = Cprint.Make_CPrint (struct
-  (*! structure IntSyn' = IntSyn !*)
-  (*! structure CompSyn' = CompSyn !*)
-  module Print = Print
-  module Formatter = Formatter
-  module Names = Names
-end)
+module CPrint = Cprint.Make_CPrint (Print) (Formatter) (Names)
 
 module SubTree = Subtree.SubTree (struct
   module IntSyn' = IntSyn
@@ -679,16 +669,7 @@ module SubTree = Subtree.SubTree (struct
   module RBSet = RBSet
 end)
 
-module Compile = MakeCompile (struct
-  (*! structure IntSyn' = IntSyn !*)
-  (*! structure CompSyn' = CompSyn !*)
-  module Whnf = Whnf
-  module TypeCheck = TypeCheck
-  module SubTree = SubTree
-  module CPrint = CPrint
-  module Print = Print
-  module Names = Names
-end)
+module Compile = MakeCompile (Whnf) (TypeCheck) (SubTree) (CPrint) (Print) (Names)
 
 module Assign__ = Assign.Assign (struct
   (*! structure IntSyn' = IntSyn !*)

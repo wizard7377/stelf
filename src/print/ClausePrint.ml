@@ -12,7 +12,23 @@ open! Symbol
 (* open! Print_;; - causes cycle, qualify PRINT directly *)
 open! Basis
 
-module MakeClausePrint (ClausePrint__0 : sig
+module MakeClausePrint
+    (Whnf : WHNF)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER)
+    (Print : sig
+      module Formatter : FORMATTER
+
+      val formatDec : IntSyn.dctx * IntSyn.dec -> Formatter.format
+      val formatExp : IntSyn.dctx * IntSyn.exp -> Formatter.format
+      val formatSpine : IntSyn.dctx * IntSyn.spine -> Formatter.format list
+      val formatConDec : IntSyn.conDec -> Formatter.format
+      val implicit : bool ref
+    end)
+    (Symbol : SYMBOL) :
+  CLAUSEPRINT =
+struct
+(*
   (* Clause Printing *)
   (* Author: Frank Pfenning, Carsten Schuermann *)
   (* This is like printing of expressions, except that
@@ -41,13 +57,13 @@ module MakeClausePrint (ClausePrint__0 : sig
 
   (*! sharing Print.IntSyn = IntSyn' !*)
   module Symbol : SYMBOL
-end) : CLAUSEPRINT = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
-  module Print = ClausePrint__0.Print
+  module Print = Print
   module Formatter = Print.Formatter
-  module Whnf = ClausePrint__0.Whnf
-  module Names = ClausePrint__0.Names
-  module Symbol = ClausePrint__0.Symbol
+  module Whnf = Whnf
+  module Names = Names
+  module Symbol = Symbol
 
   open! struct
     module I = IntSyn

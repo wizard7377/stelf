@@ -2,7 +2,7 @@ FLAGS +=
 DUNE ?= dune
 OPAM ?= opam
 SRCS=
-OUTPUT_DIR ?= _build 
+OUTPUT_DIR ?= _build
 OUTPUT ?= build
 
 .PHONY: default run build test fmt install check docs

@@ -9,7 +9,15 @@ include PrintTwega_intf
 (* # 1 "src/print/PrintTwega.fun.ml" *)
 open! Basis
 
-module MakePrintTwega (PrintTwega__0 : sig
+module MakePrintTwega
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Constraints : CONSTRAINTS)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER) :
+  PRINT_TWEGA =
+struct
+(*
   (* Printing *)
   (* Author: Frank Pfenning *)
   (* Modified: Jeff Polakow *)
@@ -27,16 +35,16 @@ module MakePrintTwega (PrintTwega__0 : sig
 
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Formatter_param : FORMATTER
-end) : PRINT_TWEGA = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
   module Formatter = struct
-    include PrintTwega__0.Formatter_param
+    include Formatter_param
   end
 
-  module Whnf = PrintTwega__0.Whnf
-  module Abstract = PrintTwega__0.Abstract
-  module Constraints = PrintTwega__0.Constraints
-  module Names = PrintTwega__0.Names
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
 
   open! struct
     module I = IntSyn

@@ -8,7 +8,4 @@ open Queue
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning *)
 
-module MakeIndexSkolem (IndexSkolem__0 : sig
-  module Global : GLOBAL
-  module Queue : QUEUE
-end) : Index_.INDEX
+module MakeIndexSkolem (Global : GLOBAL) (Queue : QUEUE) : Index_.INDEX

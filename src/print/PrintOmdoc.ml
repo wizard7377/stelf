@@ -9,7 +9,15 @@ include PrintOmdoc_intf
 (* # 1 "src/print/PrintOmdoc.fun.ml" *)
 open! Basis
 
-module MakePrintOMDoc (PrintOMDoc__0 : sig
+module MakePrintOMDoc
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Constraints : CONSTRAINTS)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER) :
+  PRINT_OMDOC =
+struct
+(*
   (* Printing *)
   (* Author: Frank Pfenning *)
   (* Modified: Jeff Polakow *)
@@ -29,16 +37,16 @@ module MakePrintOMDoc (PrintOMDoc__0 : sig
 
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Formatter_param : FORMATTER
-end) : PRINT_OMDOC = struct
+*)
   (*! structure IntSyn = IntSyn' !*)
   module Formatter = struct
-    include PrintOMDoc__0.Formatter_param
+    include Formatter_param
   end
 
-  module Whnf = PrintOMDoc__0.Whnf
-  module Abstract = PrintOMDoc__0.Abstract
-  module Constraints = PrintOMDoc__0.Constraints
-  module Names = PrintOMDoc__0.Names
+  module Whnf = Whnf
+  module Abstract = Abstract
+  module Constraints = Constraints
+  module Names = Names
 
   open! struct
     module I = IntSyn

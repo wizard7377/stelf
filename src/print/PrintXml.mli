@@ -1,6 +1,13 @@
 include module type of PrintXml_intf
 
-module MakePrintXML (PrintXML__0 : sig
+module MakePrintXML
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Constraints : CONSTRAINTS)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER) :
+  PRINT_XML
+(*
   (* Printing *)
   (* Author: Frank Pfenning *)
   (* Modified: Jeff Polakow *)
@@ -19,4 +26,4 @@ module MakePrintXML (PrintXML__0 : sig
 
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Formatter_param : FORMATTER
-end) : PRINT_XML
+*)

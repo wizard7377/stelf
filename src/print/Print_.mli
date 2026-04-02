@@ -1,6 +1,14 @@
 include module type of Print_intf
 
-module MakePrint (Print__0 : sig
+module MakePrint
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Constraints : CONSTRAINTS)
+    (Names : NAMES)
+    (Formatter_param : FORMATTER)
+    (Symbol : Symbol.SYMBOL) :
+  PRINT
+(*
   (* Printing *)
   (* Author: Frank Pfenning *)
   (* Modified: Jeff Polakow, Roberto Virga *)
@@ -19,7 +27,7 @@ module MakePrint (Print__0 : sig
   (*! sharing Names.IntSyn = IntSyn' !*)
   module Formatter_param : FORMATTER
   module Symbol : Symbol.SYMBOL
-end) : PRINT
+*)
 
 module Print : PRINT
 include PRINT

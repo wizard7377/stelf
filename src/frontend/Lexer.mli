@@ -1,8 +1,6 @@
 include module type of Lexer_intf
 
-module MakeLexer (Lexer__0 : sig
-  module Stream' : STREAM
-end) : LEXER
+module MakeLexer (Stream : STREAM) : LEXER
 
 module Lexer : LEXER
 

@@ -1,9 +1,6 @@
 include module type of Origins_intf
 
-module MakeOrigins (Origins__0 : sig
-  module Global : GLOBAL
-  module Table : TABLE with type key = string
-end) : ORIGINS
+module MakeOrigins (Global : GLOBAL) (Table : TABLE with type key = string) : ORIGINS
 
 module Origins : ORIGINS
 include ORIGINS

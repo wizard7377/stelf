@@ -8,7 +8,16 @@ include Opsem_intf
 (* # 1 "src/tomega/Opsem.fun.ml" *)
 open! Basis
 
-module MakeOpsem (Opsem__0 : sig
+module MakeOpsem
+    (Whnf : WHNF)
+    (Abstract : ABSTRACT)
+    (Subordinate : Subordinate.Subordinate_.SUBORDINATE)
+    (TomegaTypeCheck : TomegaTypecheck_intf.TOMEGATYPECHECK)
+    (TomegaPrint : Tomegaprint.TOMEGAPRINT)
+    (Unify : UNIFY) :
+  OPSEM =
+struct
+(*
   (* Internal syntax for functional proof term calculus *)
   (* Author: Carsten Schuermann, Adam Poswolsky *)
   module Whnf : WHNF
@@ -17,13 +26,13 @@ module MakeOpsem (Opsem__0 : sig
   module TomegaTypeCheck : TomegaTypecheck_intf.TOMEGATYPECHECK
   module TomegaPrint : Tomegaprint.TOMEGAPRINT
   module Unify : UNIFY
-end) : OPSEM = struct
+*)
   module T = Tomega
   module I = IntSyn
-  module S = Opsem__0.Subordinate
+  module S = Subordinate
   module A = Abstract
-  module Unify = Opsem__0.Unify
-  module TomegaPrint = Opsem__0.TomegaPrint
+  module Unify = Unify
+  module TomegaPrint = TomegaPrint
 
   exception Error of string
   exception Abort
