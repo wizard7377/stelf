@@ -1,0 +1,5 @@
+(library 
+ (name parser)
+ (public_name stelf.parser)
+(libraries lexer)
+)
