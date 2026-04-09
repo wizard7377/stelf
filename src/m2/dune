@@ -53,6 +53,7 @@
   subordinate
   table
   timing
+  debug
   solvers
   basis)
  (flags

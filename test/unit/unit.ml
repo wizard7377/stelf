@@ -24,6 +24,13 @@ module I = Lambda.Lambda_.IntSyn
 module Whnf = Lambda.Lambda_.Whnf
 module Approx = Lambda.Lambda_.Approx
 module Abstract = Lambda.Lambda_.Abstract
+module ModernSyntax = Syntax.IntSyn (Global.Global_.Global)
+module TestLexer = Lexer.Lexer
+module TestParser = Parser.Make_Parser (struct
+  type t = string
+end) (TestLexer)
+
+module Modern = Grammar__Modern.Make_Modern (ModernSyntax) (TestLexer) (TestParser)
 
 (* ──────────────────────────────────────────────────────────────────── *)
 (* Test helpers                                                        *)
@@ -34,6 +41,41 @@ let rec make_ctx n =
   if n <= 0 then I.Null
   else
     I.Decl (make_ctx (n - 1), I.Dec (Some ("x" ^ string_of_int n), I.Uni I.Type))
+
+let modern_state () : Modern.state = { fixities = Hashtbl.create 8 }
+
+let parse_modern parser input =
+  let lexbuf = Modern.Lexer.of_string input in
+  match Modern.Parser.run parser lexbuf (modern_state ()) with
+  | Modern.Parser.Success (value, _, _), final_lexbuf
+    when Modern.Lexer.get_offset final_lexbuf = String.size input -> value
+  | Modern.Parser.Success (_, _, _), final_lexbuf ->
+      Alcotest.fail
+        (Printf.sprintf
+           "parser left trailing input at offset %d in %S"
+           (Modern.Lexer.get_offset final_lexbuf) input)
+  | Modern.Parser.ParseError errors, _ ->
+      let error_text =
+        String.concatWith "; "
+          (List.map (fun (msg, _pos) -> msg) errors)
+      in
+      Alcotest.fail ("parse failed for " ^ input ^ ": " ^ error_text)
+
+let test_modern_name () =
+  let result = parse_modern Modern.name "foo" in
+  Alcotest.(check string) "name parses" "foo" result
+
+let test_modern_name_rejects_wildcard () =
+  let lexbuf = Modern.Lexer.of_string "_" in
+  match Modern.Parser.run Modern.name lexbuf (modern_state ()) with
+  | Modern.Parser.ParseError _, _ -> Alcotest.(check bool) "wildcard rejected" true true
+  | Modern.Parser.Success (_, _, _), _ ->
+      Alcotest.fail "underscore should not parse as a name"
+
+let modern_parser_cases =
+  [ Alcotest.test_case "name parser" `Quick test_modern_name
+  ; Alcotest.test_case "wildcard rejection" `Quick test_modern_name_rejects_wildcard
+  ]
 
 (* ──────────────────────────────────────────────────────────────────── *)
 (* 1. ctxLookup tests                                                  *)
@@ -54,7 +96,7 @@ let test_ctx_lookup_valid () =
 
 let test_ctx_lookup_out_of_bounds () =
   (* This is the exact crash from Test 010: ctxLookup reaches Null
-     and raises Match_failure because there's no Null case.
+     and raises Invalid_argument when the index exceeds the context depth.
      The coverage checker's abstract function can produce terms where
      de Bruijn indices exceed the context depth. *)
   let ctx = make_ctx 2 in
@@ -62,9 +104,9 @@ let test_ctx_lookup_out_of_bounds () =
     try
       ignore (I.ctxLookup (ctx, 5));
       false
-    with Match_failure _ -> true
+    with Invalid_argument _ -> true
   in
-  Alcotest.(check bool) "out-of-bounds raises Match_failure" true raised
+  Alcotest.(check bool) "out-of-bounds raises Invalid_argument" true raised
 
 let test_ctx_lookup_null () =
   (* Looking up anything in Null context should fail.
@@ -74,9 +116,9 @@ let test_ctx_lookup_null () =
     try
       ignore (I.ctxLookup (I.Null, 1));
       false
-    with Match_failure _ -> true
+    with Invalid_argument _ -> true
   in
-  Alcotest.(check bool) "Null context raises Match_failure" true raised
+  Alcotest.(check bool) "Null context raises Invalid_argument" true raised
 
 let test_ctx_lookup_zero_index () =
   (* Index 0 is invalid (indices are 1-based). This should not
@@ -526,6 +568,7 @@ let coverage_cases =
 
 let unit_cases =
   [
+    ("modern parser", modern_parser_cases);
     ("ctxLookup", ctx_lookup_cases);
     ("approx matching", apx_match_cases);
     ("whnf normalization", whnf_cases);

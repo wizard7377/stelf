@@ -34,8 +34,6 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    exception Success of M.state
-
     let rec delay (search, params_) () =
       try search params_ with Search.Error s -> raise (Error s)
 
@@ -53,13 +51,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
           abstractEx,
           makeAddress ) ->
           ( [],
-            ( makeAddress 0,
-              assert false
-              (* TODO This was removed bc I'll come back to it later *)
-              (* delay ((function params_ ->
-                  (try Search.searchEx params_
-                   with Success s_ -> ([ s_ ], (g_, ge_, vs_, abstractEx))))) ) *)
-            ) )
+            ( makeAddress 0, delay (Search.searchEx, (g_, ge_, vs_, abstractEx)) ) )
       | ( g_,
           ge_,
           (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s),
@@ -114,12 +106,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
         with MetaAbstract.Error s -> acc
       in
       let rec abstractEx () =
-        try
-          raise
-            (Success
-               (MetaAbstract.abstract
-                  (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))))
-        with MetaAbstract.Error s -> ()
+        MetaAbstract.abstract (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
       in
       operators
         (g'_, ge'_, (v_, s'), abstractAll, abstractEx, makeAddressInit s_)

@@ -1,19 +1,18 @@
 (* # 1 "src/frontend/Lexer.sig.ml" *)
 open! Basis
 
-(* Lexer *)
-(* Author: Frank Pfenning *)
+(** Lexer interface.
+  Author: Frank Pfenning. *)
 
 module type LEXER = sig
   (* Stream is not memoizing for efficiency *)
   module Stream : STREAM
 
   (*! structure Paths : PATHS !*)
+  (** Identifier case used by the lexer. *)
   type idCase = Upper | Lower | Quoted
 
-  (* [A-Z]<id> or _<id> *)
-  (* any other <id> *)
-  (* '<id>', currently unused *)
+  (** Tokens produced by the lexer. *)
   type token =
     | Eof
     | Dot
@@ -132,15 +131,20 @@ module type LEXER = sig
   (* string constants *)
   exception Error of string
 
-  (* lexer returns an infinite stream, terminated by EOF token *)
+  (** [lexStream instream] returns an infinite token stream terminated by [Eof]. *)
   val lexStream : TextIO.instream -> (token * Paths.region) Stream.stream
   val lexTerminal : string * string -> (token * Paths.region) Stream.stream
   val toString : token -> string
+
+  (** [lex inputFun] tokenizes input read line by line from [inputFun]. *)
   val lex : (int -> string) -> (token * Paths.region) Stream.stream
 
   (* Utilities *)
   exception NotDigit of char
 
+  (** Convert a decimal string to an integer. *)
   val stringToNat : string -> int
+
+  (** True when a string starts with an uppercase letter or underscore. *)
   val isUpper : string -> bool
 end

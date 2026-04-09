@@ -14,10 +14,9 @@ module OLDSearch (OLDSearch__0 : sig
   module Unify : UNIFY
 
   (*! sharing Unify.IntSyn = IntSyn' !*)
-  (*
-                structure Assign : ASSIGN
-                sharing Assign.IntSyn = IntSyn'
-                *)
+  module Assign : Assign.ASSIGN
+
+  (*! sharing Assign.IntSyn = IntSyn' !*)
   module Index : INDEX
 
   (*! sharing Index.IntSyn = IntSyn' !*)

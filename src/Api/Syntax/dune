@@ -1,0 +1,5 @@
+(library
+ (name syntax)
+ (public_name stelf.syntax)
+ (libraries containers basis global))
+ 

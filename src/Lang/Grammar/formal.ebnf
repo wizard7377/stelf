@@ -1,0 +1,57 @@
+
+(* === Outer Language === *)
+
+document     = { prose | declaration | block | comment | markup } ;
+
+prose        = (* any characters not starting with '%' *) ;
+
+declaration  = sort_decl | term_decl | clause_decl | define_decl | symbol_decl | mode_decl | world_decl | total_decl | query_decl
+             | infix_decl | prefix_decl | postfix_decl ;
+
+(* Every declaration is terminated either by '%.' (returns to prose mode)
+   or implicitly by the next top-level keyword. *)
+sort_decl    = '%sort', NAME, { sort_arg } ;
+sort_arg     = '_', inner_expr ;                        (* unnamed index: _ TYPE *)
+term_decl    = '%term', NAME, inner_expr ;
+clause_decl  = '%decl', inner_expr ;
+define_decl  = '%define', NAME, inner_expr ;
+symbol_decl  = '%symbol', NAME, inner_expr ;
+prose_decl   = '%.', document ;
+mode_decl    = '%mode', NAME, { mode_ann }  ;
+mode_ann     = '+' | '-' | '*' ;
+world_decl   = '%world', NAME, block ;
+world = NAME | IVAR ;
+total_decl   = '%total', world, NAME, inner_expr ;
+query_decl   = ( '%query' | '%?' ), inner_expr ;
+infix_decl   = ( '%infixl' | '%infixr' | '%infix' ), NAME, NUMBER ;
+prefix_decl  = '%prefix', NAME, NUMBER ;
+postfix_decl = '%postfix', NAME, NUMBER ;
+
+block        = '%{', _, '%}'
+             | '%{{', _, '%}}' ;
+             (* etc *)
+comment      = '%[', (* any *), '%]'
+             | '%[[', (* any *), '%]]' ;
+             (* etc *)
+             (* NOTE comments may occur anywhere *)
+markup       = '%(', (* any *), '%)'
+             | '%((', (* any *), '%))' ;
+             (* etc *)
+
+(* === Inner Language (Value Language) === *)
+
+inner_expr   = pi_expr | lam_expr | app_expr | ascription | atom ;
+
+pi_expr      = '{', atom, { atom }, inner_expr, '}', inner_expr ;
+lam_expr     = '[', atom, { atom }, ']', inner_expr ;
+app_expr     = '(', inner_expr, { inner_expr }, ')' ;
+ascription   = '%the', inner_expr, inner_expr ;
+
+atom         = WORD | IVAR ;
+
+(* === Lexical === *)
+
+NAME         = WORD ;
+WORD         = (* non-whitespace, excluding % { } ( ) [ ] *) ;
+IVAR         = '_', (* NO SPACE *) WORD ;       (* implicit variable *)
+NUMBER       = digit, { digit } ;

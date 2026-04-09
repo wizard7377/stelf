@@ -6,6 +6,7 @@ open! Order
 module Order : ORDER
 open! Intsyn
 module Intsyn : INTSYN
+module IntSyn : INTSYN
 open! Tomega
 module Tomega : TOMEGA
 open! Whnf

@@ -8,12 +8,12 @@ open Lexer_intf
 module type LEXER = Lexer_intf.LEXER
 
 module Make_Lexer () : LEXER = struct
-  type nonrec source = source
-  type nonrec pos = pos
-  type nonrec lexbuf = lexbuf
+  type nonrec source = Tag.Pos.source
+  type nonrec pos = Tag.Pos.pos
+  type nonrec lexbuf = Tag.Pos.lexbuf
   type +'a t = lexbuf -> (lexbuf * 'a) option
 
-  let of_string ?(source = Interactive) (buffer : string) : lexbuf =
+  let of_string ?(source = Tag.Pos.Interactive) (buffer : string) : lexbuf =
     { buffer; source; current_offset = 0; current_source = source }
 
   let take (f : lexbuf -> (lexbuf * 'a) option) : 'a t = f

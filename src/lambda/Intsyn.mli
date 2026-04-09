@@ -1,5 +1,2 @@
-include module type of Intsyn_intf
-
-module MakeIntSyn (Global : GLOBAL) : INTSYN
-
-module IntSyn : INTSYN
+module Make_IntSyn (Global : GLOBAL) : Syntax.INTSYN 
+module IntSyn : module type of IntSyn

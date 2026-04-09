@@ -8,6 +8,7 @@ open! Order
 module Order = Order
 open! Intsyn
 module Intsyn = Intsyn
+module IntSyn = Intsyn
 open! Tomega
 module Tomega = Tomega
 open! Whnf

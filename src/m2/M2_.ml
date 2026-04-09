@@ -48,6 +48,12 @@ module Init = Init (struct
   module MetaAbstract = MetaAbstract_
 end)
 
+module Assign_ = Assign.Assign (struct
+  module Whnf = Whnf
+  module Unify = UnifyTrail
+  module Print = Print
+end)
+
 module OLDSearch = OLDSearch (struct
   module MetaGlobal = MetaGlobal.MetaGlobal
   module Conv = Conv
@@ -58,6 +64,7 @@ module OLDSearch = OLDSearch (struct
   module Whnf = Whnf
   module Unify = UnifyTrail
   module Index = Index
+  module Assign = Assign_
 
   (* structure Assign = Assign *)
   module CPrint = CPrint

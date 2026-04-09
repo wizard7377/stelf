@@ -2,7 +2,7 @@
 open! Basis
 
 module type NORMALIZE = sig
-  module IntSyn : INTSYN
+  module IntSyn : Intsyn_intf.INTSYN
   module Tomega : TOMEGA
 
   val normalizeFor : Tomega.for_ * Tomega.sub -> Tomega.for_

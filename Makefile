@@ -5,7 +5,7 @@ SRCS=
 OUTPUT_DIR ?= _build
 OUTPUT ?= build
 
-.PHONY: default run build test fmt install check docs
+.PHONY: default run build test fmt install check docs repl
 default: install
 
 check: dune dune-project dune-workspace $(SRCS)
@@ -17,6 +17,9 @@ build: dune dune-project dune-workspace $(SRCS)
 	@cp $(OUTPUT_DIR)/default/bin/main.exe $(OUTPUT)/stelf.exe
 test: dune dune-project dune-workspace $(SRCS)
 	@$(DUNE) build --profile=dev @runtest --force
+repl: dune dune-project dune-workspace $(SRCS)
+	@$(DUNE) exec --profile=dev bin/main.exe
+
 fmt: dune dune-project dune-workspace $(SRCS)
 	@$(DUNE) fmt 
 

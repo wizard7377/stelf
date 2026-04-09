@@ -2,8 +2,8 @@
 (context default)
 
 (env
- (dev (flags (:standard -warn-error -8-26-27-32..37-67)))
+ (dev (flags (:standard -warn-error -8-26-27-32..38-67)))
  (release (flags (:standard -w -A)))
- (check (flags (:standard -warn-error -8-26-27-32..37)))
- (_ (flags (:standard -warn-error -8-26-27-32..37-67)))
+ (check (flags (:standard -warn-error -8-26-27-32..38)))
+ (_ (flags (:standard -warn-error -8-26-27-32..38-67)))
 )

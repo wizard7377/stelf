@@ -8,6 +8,7 @@
 module type PARSER = Parser_intf.PARSER
 module type S = Parser_intf.S
 
-module Make_Parser (L : Lexer.LEXER) : PARSER with module Lexer = L
+module Make_Parser (N : sig type t end) (L : Lexer.LEXER) : PARSER with type node = N.t and module Lexer = L
 
 module Sugar (P : PARSER) : S with module Lexer = P.Lexer
+ 

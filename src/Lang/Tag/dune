@@ -1,0 +1,4 @@
+(library
+ (name tag)
+ (public_name stelf.tag)
+ (libraries basis fpath))

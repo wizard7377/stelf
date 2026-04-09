@@ -1,8 +1,8 @@
 (* # 1 "src/frontend/Lexer.sig.ml" *)
 open! Basis
 
-(* Lexer *)
-(* Author: Frank Pfenning *)
+(** Lexer implementation.
+  Author: Frank Pfenning. *)
 include Lexer_intf
 (* signature LEXER *)
 
@@ -20,11 +20,10 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
     module P = Paths
   end
 
+  (** Identifier case used by the lexer. *)
   type idCase = Upper | Lower | Quoted
 
-  (* [A-Z]<id> or _<id> *)
-  (* any other <id> *)
-  (* '<id>', currently unused *)
+  (** Tokens produced by the lexer. *)
   type token =
     | Eof
     | Dot
@@ -463,8 +462,10 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
     begin match TextIO.inputLine instream with Some s -> s | None -> ""
     end
 
+  (** [lexStream instream] returns an infinite token stream terminated by [Eof]. *)
   let rec lexStream instream = lex (function i -> inputLine97 instream)
 
+  (** [lexTerminal (prompt0, prompt1)] lexes from standard input using the given prompts. *)
   let rec lexTerminal (prompt0, prompt1) =
     lex (function
       | 0 -> begin
@@ -554,6 +555,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
 
   (* stringToNat(s) = n converts string s to a natural number *)
   (* raises NotDigit(c) if s contains character c which is not a digit *)
+  (** Convert a decimal string to an integer. *)
   let rec stringToNat s =
     let l = String.size s in
     let rec stn (i, n) =
@@ -566,6 +568,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
   (* isUpper (s) = true, if s is a string starting with an uppercase
      letter or underscore (_).
   *)
+  (** True when a string starts with an uppercase letter or underscore. *)
   let rec isUpper = function
     | "" -> false
     | s ->
