@@ -1,13 +1,16 @@
 open! Basis
 
 module type IMPL = sig
+
+
   module Cst : Cst.CST
   (** Concrete syntax tree: the CST used by the modern parser. *)
 
-  module Cmd : Modern.CMD.CMD with module Cst = Cst
-  (** New parser layer: command-level parsing using the Modern parser. *)
+  module Names : Names.NAMES.NAMES
+  (** Shared Names module; equals Cmd.Modern.Names. *)
 
-  (** Names module — same as Cmd.Names. *)
+  module Cmd : Modern.CMD.CMD with module Cst = Cst and module Modern.Names = Names
+  (** New parser layer: command-level parsing using the Modern parser. *)
 
   module Recon : Recon.RECON
   (** New elaboration layer: reconstruction / type-inference sub-modules. *)
@@ -48,10 +51,10 @@ module type IMPL = sig
   (** {1 Signature installation} *)
 
   module Install : sig
-    val install1 : ?path:Fpath.t option -> Cst.cmd -> unit
+    val install1 : ?path:Fpath.t option -> Names.namespace -> Cst.cmd -> unit
     (** Install a single parsed command into the global signature. *)
 
-    val install : ?path:Fpath.t option -> Cst.cmd list -> unit
+    val install : ?path:Fpath.t option -> Names.namespace -> Cst.cmd list -> unit
     (** Install a list of commands in order. *)
 
     val reset : unit -> unit
@@ -61,7 +64,7 @@ module type IMPL = sig
   (* -------------------------------------------------------------------- *)
   (** {1 Loading} *)
 
-  val load : source -> status
+  val load : Names.namespace -> source -> status
   (** Parse and install all declarations from a source. *)
 
   val read_decl : unit -> status
@@ -77,29 +80,11 @@ module type IMPL = sig
   (** {1 Configuration file management} *)
 
   module Config : sig
-    type t
-    (** An opaque configuration: a working directory plus an ordered list of
-        source files, each with a modification-time slot for incremental reload.
-    *)
-
-    val suffix : string ref
-    (** File-extension treated as a config file (default: ["cfg"]). *)
-
-    val read : source -> t
-    (** Parse a config file and return the resulting configuration. *)
-
-    val read_without : source * t -> t
-    (** Like {!read} but omit any files already present in the second config. *)
-
+    type t = Project.Format.file
+    (** The type of configuration objects. *)
+    val read : source -> t 
     val load : t -> status
-    (** Reset global state and then load all files listed in the config. *)
 
-    val append : t -> status
-    (** Load the config without resetting first; starts from the first file
-        whose modification time is newer than the last successful load. *)
-
-    val define : string list -> t
-    (** Build a config directly from an explicit list of file names. *)
   end
 
   val make : source -> status

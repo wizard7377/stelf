@@ -312,14 +312,8 @@ module MakeCompile
     in
     let r = convertKRes (C.Assign (r'_, eqs_), List.rev k_, left) in
     begin
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 6)
-           (Display.Info.Form.string "\nClause LH Eqn"));
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 6)
-           (Display.Info.Form.string (CPrint.clauseToString "\t" (g_, r))));
+      Display.chatter_s 6 "\nClause LH Eqn";
+      Display.chatter_s 6 (CPrint.clauseToString "\t" (g_, r));
       r
     end
 
@@ -347,15 +341,8 @@ module MakeCompile
     in
     let g'_ = convertKRes (g_, List.rev k_, left) in
     begin
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 6)
-           (Display.Info.Form.string "\nClause Sbt Eqn"));
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 6)
-           (Display.Info.Form.string
-              (CPrint.clauseToString "\t" (g'_, C.Assign (h'_, eqs_)))));
+      Display.chatter_s 6 "\nClause Sbt Eqn";
+      Display.chatter_s 6 (CPrint.clauseToString "\t" (g'_, C.Assign (h'_, eqs_)));
       (g'_, Some (h'_, eqs_))
     end
   (* insert R' together with Eqs and G and sc C.True *)

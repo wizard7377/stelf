@@ -11,6 +11,13 @@ let string_to_source = function
   | s -> Some (Fpath.of_string s)
 
 module Impl () = struct
+
+  let current_path : string list ref = ref [] 
+  let current_load_path : Fpath.t list ref = ref ([Result.get_ok @@ Bos.OS.Dir.current ()])
+  let load_paths : (Fpath.t * string) list ref = ref []
+
+
+  (** Additional directories to search for included files. *)
   (* Save Basis's OS before any module definitions shadow it *)
   module BasisOS = OS
 
@@ -90,7 +97,7 @@ module Impl () = struct
   (* let msg s = Msg.Msg_.Msg.message s *)
 
   let msg m =
-    Display.message ~level:Display.Verbose ~kind:Display.Info
+    Display.message ~level:Display.Normal ~kind:Display.Info
       (Display.Form.string m)
 
   let print_error (label : string) (detail : string) : unit =
@@ -100,10 +107,11 @@ module Impl () = struct
   (* ConDec installation                                                   *)
   (* ------------------------------------------------------------------ *)
 
-  let install_condec (cd : Intsyn.IntSyn.conDec) : unit =
+  let install_condec ns (cd : Intsyn.IntSyn.conDec) : unit =
     let open Intsyn.IntSyn in
     let cid = sgnAdd cd in
     Names.installConstName cid;
+    Names.insertConst (ns, cid);
     match cd with
     | BlockDec _ -> Subordinate.Subordinate_.Subordinate.installBlock cid
     | BlockDef _ -> ()
@@ -224,7 +232,102 @@ module Impl () = struct
       let rrs = (dummy_r, List.map (fun _ -> dummy_r) body) in
       (TS.TDecl (order, callpats), rrs)
 
-    let rec install1 ?(path = None) (cmd : Cst.cmd) : unit =
+    let loc_of filename (l : Cst.loc) : Paths.location =
+      Paths.Loc (filename, Cst.loc_to_region l)
+
+    let run_query loc q =
+      let v_, opt_name, xs_ =
+        Recon.ReconQuery.queryToQuery (q, loc)
+      in
+      let g =
+        Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, v_)
+      in
+      let solutions = ref 0 in
+      let exception Done in
+      let sc m_ =
+        incr solutions;
+        if !Global.Global_.Global.chatter >= 3 then begin
+          msg
+            (Printf.sprintf "---------- Solution %d ----------\n" !solutions);
+          List.app
+            (fun (e_, n) ->
+              msg
+                (n ^ " = "
+                ^ Print.Print_.expToString (Intsyn.IntSyn.Null, e_)
+                ^ "\n"))
+            xs_;
+          match opt_name with
+          | None -> ()
+          | Some name ->
+              msg
+                (name ^ " = "
+                ^ Print.Print_.expToString (Intsyn.IntSyn.Null, m_)
+                ^ "\n")
+        end;
+        raise Done
+      in
+      (try
+         Opsem.Opsem_.AbsMachine.solve
+           ( (g, Intsyn.IntSyn.id),
+             Compile.CompSyn.CompSyn.DProg
+               (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null),
+             sc )
+       with Done -> ());
+      if !solutions = 0 && !Global.Global_.Global.chatter >= 3 then
+        msg "No solution.\n"
+
+    let install_worlds_cmd ids tm =
+      let resolve_block id =
+        match Names.constLookup (Names.Qid ([], id)) with
+        | None ->
+            failwith
+              ("Undeclared block label " ^ id ^ " in worlds declaration")
+        | Some cid -> cid
+      in
+      let rec flatten = function
+        | [] -> []
+        | cid :: rest -> (
+            match Intsyn.IntSyn.sgnLookup cid with
+            | Intsyn.IntSyn.BlockDec _ -> cid :: flatten rest
+            | Intsyn.IntSyn.BlockDef (_, _, l) -> flatten (l @ rest)
+            | _ -> cid :: flatten rest)
+      in
+      let block_cids = flatten (List.map resolve_block ids) in
+      let w_ = Intsyn.Lambda_.Tomega.Worlds block_cids in
+      let lookup_head tm =
+        match Cst.View.Term.view tm with
+        | Cst.View.Term.Lowercase (_, (ns, n)) ->
+            Names.constLookup (Names.Qid (ns, n))
+        | Cst.View.Term.Uppercase (_, (ns, n)) ->
+            Names.constLookup (Names.Qid (ns, n))
+        | Cst.View.Term.Qualified (_, (ns, n)) ->
+            Names.constLookup (Names.Qid (ns, n))
+        | _ -> None
+      in
+      let family_cid_opt =
+        match Cst.View.Term.view tm with
+        | Cst.View.Term.App (_, head, _) -> lookup_head head
+        | v -> lookup_head (Cst.View.Term.review v)
+      in
+      match family_cid_opt with
+      | None -> failwith "%worlds: expected a type family name"
+      | Some a ->
+          WorldSyn.install (a, w_);
+          WorldSyn.worldcheck w_ a
+
+    let install_condec_cmd ?(inline = false) ns condec loc =
+      match Recon.ReconConDec.condecToConDec (condec, loc, inline) with
+      | Some cd, _ -> install_condec ns cd
+      | None, _ -> ()
+
+    let name_to_cid ns label id =
+      match Names.constLookupIn (ns, Names.Qid ([], id)) with
+      | None ->
+          failwith
+            ("Undeclared identifier " ^ id ^ " in " ^ label ^ " declaration")
+      | Some cid -> cid
+
+    let rec install1 ?(path = None) ns (cmd : Cst.cmd) : unit =
       let filename =
         Stdlib.Option.value
           (Option.map Fpath.to_string path)
@@ -232,16 +335,6 @@ module Impl () = struct
       in
       Debug.(
         msg' ~src:Group.pal ~level:Level.Debug Fmt.string "Installing command");
-      let loc_of (l : Cst.loc) : Paths.location =
-        Paths.Loc (filename, Cst.loc_to_region l)
-      in
-      let name_to_cid label id =
-        match Names.constLookup (Names.Qid ([], id)) with
-        | None ->
-            failwith
-              ("Undeclared identifier " ^ id ^ " in " ^ label ^ " declaration")
-        | Some cid -> cid
-      in
       match cmd with
       | Cst.SortCmd_ (ids, decls) ->
           List.app
@@ -254,12 +347,7 @@ module Impl () = struct
               let condec =
                 Cst.ConDec.constant_decl (Cst.Decl.decl1 [ Some id ] kind)
               in
-              match
-                Recon.ReconConDec.condecToConDec
-                  (condec, loc_of Cst.ghost, false)
-              with
-              | Some cd, _ -> install_condec cd
-              | None, _ -> ())
+              install_condec_cmd ns condec (loc_of filename Cst.ghost))
             ids
       | Cst.TermCmd_ decl -> (
           Debug.(
@@ -272,68 +360,22 @@ module Impl () = struct
             | Cst.View.Decl.Decl0 (_, ns, t) -> (ns, t)
           in
           let names' = List.map (function Some n -> n | None -> "_") names in
-          Display.message ~level:Display.Verbose
+          Display.message ~level:Display.Detailed
             Display.(
               string "Installing term command for"
               ++ each string names' ++ space ()
               ++ hvbox [ shown Cst.show_term ty ]);
           let condec = Cst.ConstantDecl_ decl in
-          match
-            Recon.ReconConDec.condecToConDec (condec, loc_of Cst.ghost, false)
-          with
-          | Some cd, _ -> install_condec cd
-          | None, _ -> ())
-      | Cst.DefineCmd_ (Cst.Define_ (name_opt, tm, tp_opt)) -> (
+          install_condec_cmd ns condec (loc_of filename Cst.ghost))
+      | Cst.DefineCmd_ (Cst.Define_ (name_opt, tm, tp_opt)) ->
           let name = match name_opt with Some n -> n | None -> "_" in
           let condec = Cst.ConstantDef_ (name, tm, tp_opt) in
-          match
-            Recon.ReconConDec.condecToConDec (condec, loc_of Cst.ghost, false)
-          with
-          | Some cd, _ -> install_condec cd
-          | None, _ -> ())
+          install_condec_cmd ns condec (loc_of filename Cst.ghost)
       | Cst.QueryCmd_ (_n, _b, _d, q) ->
-          let v_, opt_name, xs_ =
-            Recon.ReconQuery.queryToQuery (q, loc_of Cst.ghost)
-          in
-          let g =
-            Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, v_)
-          in
-          let solutions = ref 0 in
-          let exception Done in
-          let sc m_ =
-            incr solutions;
-            if !Global.Global_.Global.chatter >= 3 then begin
-              msg
-                (Printf.sprintf "---------- Solution %d ----------\n" !solutions);
-              List.app
-                (fun (e_, n) ->
-                  msg
-                    (n ^ " = "
-                    ^ Print.Print_.expToString (Intsyn.IntSyn.Null, e_)
-                    ^ "\n"))
-                xs_;
-              match opt_name with
-              | None -> ()
-              | Some name ->
-                  msg
-                    (name ^ " = "
-                    ^ Print.Print_.expToString (Intsyn.IntSyn.Null, m_)
-                    ^ "\n")
-            end;
-            raise Done
-          in
-          (try
-             Opsem.Opsem_.AbsMachine.solve
-               ( (g, Intsyn.IntSyn.id),
-                 Compile.CompSyn.CompSyn.DProg
-                   (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null),
-                 sc )
-           with Done -> ());
-          if !solutions = 0 && !Global.Global_.Global.chatter >= 3 then
-            msg "No solution.\n"
+          run_query (loc_of filename Cst.ghost) q
       | Cst.SolveCmd_ sol ->
           let v_, sc_fn =
-            Recon.ReconQuery.solveToSolve ([], sol, loc_of Cst.ghost)
+            Recon.ReconQuery.solveToSolve ([], sol, loc_of filename Cst.ghost)
           in
           let g =
             Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, v_)
@@ -354,7 +396,7 @@ module Impl () = struct
             | None -> failwith "%solve: no solution found"
             | Some m_ -> m_
           in
-          List.app (fun (cd, _) -> install_condec cd) (sc_fn m_)
+          List.app (fun (cd, _) -> install_condec ns cd) (sc_fn m_)
       | Cst.StopCmd_ -> ()
       | Cst.QuitCmd_ -> BasisOS.Process.exit BasisOS.Process.success
       | Cst.HelpCmd_ topic ->
@@ -372,47 +414,9 @@ module Impl () = struct
           end
       | Cst.SetCmd_ (key, value) -> Options.set key value
       | Cst.VersionCmd_ -> msg (Frontend.Version.Version.version_string ^ "\n")
-      | Cst.EvalCmd_ cmds -> List.app install1 cmds
+      | Cst.EvalCmd_ cmds -> List.app (install1 ~path ns) cmds
       | Cst.AdhocQueryCmd_ q ->
-          let v_, opt_name, xs_ =
-            Recon.ReconQuery.queryToQuery (q, loc_of Cst.ghost)
-          in
-          let g =
-            Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, v_)
-          in
-          let solutions = ref 0 in
-          let exception Done in
-          let sc m_ =
-            incr solutions;
-            if !Global.Global_.Global.chatter >= 3 then begin
-              msg
-                (Printf.sprintf "---------- Solution %d ----------\n" !solutions);
-              List.app
-                (fun (e_, n) ->
-                  msg
-                    (n ^ " = "
-                    ^ Print.Print_.expToString (Intsyn.IntSyn.Null, e_)
-                    ^ "\n"))
-                xs_;
-              match opt_name with
-              | None -> ()
-              | Some name ->
-                  msg
-                    (name ^ " = "
-                    ^ Print.Print_.expToString (Intsyn.IntSyn.Null, m_)
-                    ^ "\n")
-            end;
-            raise Done
-          in
-          (try
-             Opsem.Opsem_.AbsMachine.solve
-               ( (g, Intsyn.IntSyn.id),
-                 Compile.CompSyn.CompSyn.DProg
-                   (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null),
-                 sc )
-           with Done -> ());
-          if !solutions = 0 && !Global.Global_.Global.chatter >= 3 then
-            msg "No solution.\n"
+          run_query (loc_of filename Cst.ghost) q
       | Cst.DeclCmd_ tm ->
           let qid_opt =
             match Cst.View.Term.view tm with
@@ -432,16 +436,16 @@ module Impl () = struct
               end
           end
       | Cst.FreezeCmd_ ids ->
-          let cids = List.map (name_to_cid "freeze") ids in
+          let cids = List.map (name_to_cid ns "freeze") ids in
           let _ = Subordinate.Subordinate_.Subordinate.freeze cids in
           ()
       | Cst.ThawCmd_ ids ->
           if not !unsafe then failwith "%thaw not safe: Toggle `unsafe' flag";
-          let cids = List.map (name_to_cid "thaw") ids in
+          let cids = List.map (name_to_cid ns "thaw") ids in
           let _ = Subordinate.Subordinate_.Subordinate.thaw cids in
           ()
       | Cst.DeterministicCmd_ ids ->
-          let cids = List.map (name_to_cid "deterministic") ids in
+          let cids = List.map (name_to_cid ns "deterministic") ids in
           List.app
             (fun cid -> Compile.CompSyn.CompSyn.detTableInsert (cid, true))
             cids
@@ -458,20 +462,16 @@ module Impl () = struct
           in
           List.app
             (fun id ->
-              let cid = name_to_cid "prec" id in
+              let cid = name_to_cid ns "prec" id in
               Names.installFixity (cid, fixity))
             ids
       | Cst.SymbolCmd_ (id, pref) ->
-          let cid = name_to_cid "symbol" id in
+          let cid = name_to_cid ns "symbol" id in
           Names.installNamePref (cid, ([ pref ], [ pref ]))
-      | Cst.InlineCmd_ (name, tm) -> (
+      | Cst.InlineCmd_ (name, tm) ->
           let condec = Cst.ConstantDef_ (name, tm, None) in
-          match
-            Recon.ReconConDec.condecToConDec (condec, loc_of Cst.ghost, true)
-          with
-          | Some cd, _ -> install_condec cd
-          | None, _ -> ())
-      | Cst.BlockCmd_ (id, items) -> (
+          install_condec_cmd ~inline:true ns condec (loc_of filename Cst.ghost)
+      | Cst.BlockCmd_ (id, items) ->
           let pis =
             Stdlib.List.filter_map
               (function Cst.BlockPi_ d -> Some d | _ -> None)
@@ -483,15 +483,11 @@ module Impl () = struct
               items
           in
           let condec = Cst.BlockDecl_ (id, pis, somes) in
-          match
-            Recon.ReconConDec.condecToConDec (condec, loc_of Cst.ghost, false)
-          with
-          | Some cd, _ -> install_condec cd
-          | None, _ -> ())
+          install_condec_cmd ns condec (loc_of filename Cst.ghost)
       | Cst.ModeCmd_ md ->
           let () =
             Display.(
-              message ~level:Verbose
+              message ~level:Detailed
                 (string "Installing mode declaration for "
                 ++ shown Cst.show_modeDec md))
           in
@@ -538,56 +534,14 @@ module Impl () = struct
               UniqueTable.installMode mdec;
               Unique.checkUnique mdec
           end
-      | Cst.UnionCmd_ (id, ids) -> (
+      | Cst.UnionCmd_ (id, ids) ->
           let syms = List.map (fun s -> ([], s)) ids in
           let condec = Cst.BlockDef_ (id, syms) in
-          match
-            Recon.ReconConDec.condecToConDec (condec, loc_of Cst.ghost, false)
-          with
-          | Some cd, _ -> install_condec cd
-          | None, _ -> ())
-      | Cst.WorldsCmd_ (ids, tm) ->
-          let resolve_block id =
-            match Names.constLookup (Names.Qid ([], id)) with
-            | None ->
-                failwith
-                  ("Undeclared block label " ^ id ^ " in worlds declaration")
-            | Some cid -> cid
-          in
-          let rec flatten = function
-            | [] -> []
-            | cid :: rest -> (
-                match Intsyn.IntSyn.sgnLookup cid with
-                | Intsyn.IntSyn.BlockDec _ -> cid :: flatten rest
-                | Intsyn.IntSyn.BlockDef (_, _, l) -> flatten (l @ rest)
-                | _ -> cid :: flatten rest)
-          in
-          let block_cids = flatten (List.map resolve_block ids) in
-          let w_ = Intsyn.Lambda_.Tomega.Worlds block_cids in
-          let lookup_head tm =
-            match Cst.View.Term.view tm with
-            | Cst.View.Term.Lowercase (_, (ns, n)) ->
-                Names.constLookup (Names.Qid (ns, n))
-            | Cst.View.Term.Uppercase (_, (ns, n)) ->
-                Names.constLookup (Names.Qid (ns, n))
-            | Cst.View.Term.Qualified (_, (ns, n)) ->
-                Names.constLookup (Names.Qid (ns, n))
-            | _ -> None
-          in
-          let family_cid_opt =
-            match Cst.View.Term.view tm with
-            | Cst.View.Term.App (_, head, _) -> lookup_head head
-            | v -> lookup_head (Cst.View.Term.review v)
-          in
-          begin match family_cid_opt with
-          | None -> failwith "%worlds: expected a type family name"
-          | Some a ->
-              WorldSyn.install (a, w_);
-              WorldSyn.worldcheck w_ a
-          end
+          install_condec_cmd ns condec (loc_of filename Cst.ghost)
+      | Cst.WorldsCmd_ (ids, tm) -> install_worlds_cmd ids tm
       | Cst.QueryTabledCmd_ (numSol, try_, _d, q) ->
           let a_, opt_name, xs_ =
-            Recon.ReconQuery.queryToQuery (q, loc_of Cst.ghost)
+            Recon.ReconQuery.queryToQuery (q, loc_of filename Cst.ghost)
           in
           let g =
             Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, a_)
@@ -640,30 +594,49 @@ module Impl () = struct
              loop ()
            with Done -> ());
           if !solutions = 0 && !chatter >= 3 then msg "No tabled solution.\n"
-      | Cst.Open_ id ->
-          failwith
-            "%module: module definitions not yet implemented in this frontend"
-          (* let se = Cst.Struct.str_exp (ids, id) in
-          let mid = Recon.ReconModule.strexpToStrexp se in
-          let ns = ModSyn.Names.getComponents mid in
-          let module_ = ModSyn.abstractModule (ns, Some mid) in
-          let action (cid, _) =
-            Index.Index_.Index.install Intsyn.IntSyn.Ordinary
-              (Intsyn.IntSyn.Const cid);
-            Compile.Compile_.Compile.install Intsyn.IntSyn.Ordinary cid;
-            Subordinate.Subordinate_.Subordinate.install cid;
-            Subordinate.Subordinate_.Subordinate.installDef cid
+      | Cst.Open_ ids ->
+          let qid =
+            match List.rev ids with
+            | [] -> failwith "%open: empty module path"
+            | last :: prefix -> Names.Qid (List.rev prefix, last)
           in
-          ModSyn.installSig (module_, None, action, true) *)
-      | Cst.Scope_ _ ->
-          failwith
-            "%module: module definitions not yet implemented in this frontend"
+          let mid =
+            match Names.structLookupIn (ns, qid) with
+            | Some m -> m
+            | None ->
+              (match Names.structLookup qid with
+               | Some m -> m
+               | None ->
+                 failwith ("%open: unknown module " ^ Names.qidToString qid))
+          in
+          let comps = Names.getComponents mid in
+          Names.appConsts (fun (_, cid) -> Names.insertConst (ns, cid)) comps;
+          Names.appStructs (fun (_, m) -> Names.insertStruct (ns, m)) comps
+      | Cst.Scope_ (name, body_cmd) ->
+          let child_ns = Names.newNamespace () in
+          let mid =
+            Intsyn.IntSyn.sgnStructAdd (Intsyn.IntSyn.StrDec (name, None))
+          in
+          Names.installStructName mid;
+          Names.insertStruct (ns, mid);
+          install1 ~path child_ns body_cmd;
+          Names.installComponents (mid, child_ns)
       | Cst.Use_ _ ->
           failwith
             "%use: module instantiation not yet implemented in this frontend"
+      | Cst.Macro_ _ ->
+          failwith "Macros not yet implemented in this frontend"
+      | Cst.Seq_ cmds ->
+          List.app (install1_item ~path ns) cmds
+        | Cst.Require_ path -> failwith "Require not yet implemented in this frontend"
 
-    let install ?(path = None) (cmds : Cst.cmd list) : unit =
-      List.app (install1 ~path) cmds
+    and install1_item ?(path = None) ns (item : Cst.item) : unit =
+      match item with
+      | Cst.Outer _ -> ()
+      | Cst.Cmd cmd -> install1 ~path ns cmd
+
+    let install ?(path = None) ns (cmds : Cst.cmd list) : unit =
+      List.app (install1 ~path ns) cmds
 
     let reset () : unit = Frontend.Frontend_.Stelf.reset ()
   end
@@ -672,35 +645,64 @@ module Impl () = struct
   (* Loading                                                              *)
   (* ------------------------------------------------------------------ *)
 
-  let load_string ?(path = None) (str : string) : status =
-    let ns = ref (Names.newNamespace ()) in
+  let load_string ?(path = None) ?(ns_init = None) (str : string) : status =
+    let ns = match ns_init with Some r -> r | None -> ref (Names.newNamespace ()) in
     let loc = Cst.ghost in
     try
       let cmds = ModernImpl.run (Cmd.parse ()) ns loc str in
       try
-        Install.install ~path cmds;
+        Install.install ~path !ns cmds;
         Ok
-      with exn ->
-        print_error (source_to_string path) (Printexc.to_string exn);
-        Abort
+      with
+      | Error.Error.Err _ as e -> raise e
+      | Recon.ReconConDec.Error msg
+      | Recon.ReconTerm.Error msg
+      | Recon.ReconModule.Error msg
+      | Recon.ReconQuery.Error msg ->
+          Error.Error.err ~stage:Error.Error.Recon (Display.Form.string msg)
+      | Recon.ReconMode.Error msg
+      | Recon.ReconThm.Error msg ->
+          Error.Error.err ~stage:Error.Error.Check (Display.Form.string msg)
+      | Intsyn.Lambda_.Abstract.Error msg ->
+          Error.Error.err ~stage:Error.Error.Recon (Display.Form.string msg)
+      | Typecheck.Typecheck_.TypeCheck.Error msg ->
+          Error.Error.err ~stage:Error.Error.Check
+            Display.Form.(string ("Double-check failed (internal bug): " ^ msg))
+      | Failure msg ->
+          Error.Error.err ~stage:Error.Error.Unknown (Display.Form.string msg)
+      | exn ->
+          print_error (source_to_string path) (Printexc.to_string exn);
+          Abort
     with
+    | Error.Error.Err (stage, form) ->
+        let stage_str =
+          match stage with
+          | Error.Error.Parse -> "parse"
+          | Error.Error.Check -> "check"
+          | Error.Error.Recon -> "recon"
+          | _ -> "error"
+        in
+        Printf.eprintf "[%s] %s\n%!" stage_str (Display.Form.to_plain form);
+        Abort
     | Modern.Modern.ParseError e ->
+        (* Fallback during transition; should no longer be reached *)
         print_error (source_to_string path) ("parse error: " ^ e);
         Abort
     | exn ->
         print_error (source_to_string path) (Printexc.to_string exn);
         Abort
 
-  let load (src : source) : status =
+  let load ns (src : source) : status =
+    let ns_ref = ref ns in
     match src with
-    | Input str -> load_string str
+    | Input str -> load_string ~ns_init:(Some ns_ref) str
     | File path -> (
         let filename = Some path in
         try
           let ic = TextIO.openIn (Fpath.to_string path) in
           let str = TextIO.inputAll ic in
           let () = TextIO.closeIn ic in
-          load_string ~path:filename str
+          load_string ~path:filename ~ns_init:(Some ns_ref) str
         with exn ->
           print_error "pal" (Printexc.to_string exn);
           Abort)
@@ -732,107 +734,39 @@ module Impl () = struct
   (* Configuration file management                                        *)
   (* ------------------------------------------------------------------ *)
 
-  module Config = struct
-    type mfile = { filename : string; mutable mtime : Time.time option }
-    type t = { sources : mfile list }
-
-    let suffix = ref "cfg"
-    let mk_mfile filename = { filename; mtime = None }
-
-    let is_config item =
-      let sfx = "." ^ !suffix in
-      let n = Stdlib.String.length item and m = Stdlib.String.length sfx in
-      n >= m && Stdlib.String.sub item (n - m) m = sfx
-
-    let mk_rel base path =
-      OS.Path.mkCanonical
-        (if OS.Path.isAbsolute path then path else OS.Path.concat (base, path))
-
+  module Config = struct 
+    type t = Project.Format.file
     let read (src : source) : t =
-      let cfg_path =
-        match src with
-        | File p -> Fpath.to_string p
-        | Input _ ->
-            failwith "Config.read: cannot use Input source as config file"
-      in
-      let rec collect (sources, seen) cfg =
-        if Stdlib.List.mem cfg seen then (sources, seen)
-        else
-          let seen' = cfg :: seen in
-          let dir = OS.Path.dir cfg in
-          let ic = TextIO.openIn cfg in
-          let acc = ref (sources, seen') in
-          (try
-             while true do
-               match TextIO.inputLine ic with
-               | None -> raise Exit
-               | Some raw_line ->
-                   let line = Stdlib.String.trim raw_line in
-                   let line =
-                     match Stdlib.String.index_opt line '%' with
-                     | Some i -> Stdlib.String.trim (Stdlib.String.sub line 0 i)
-                     | None -> line
-                   in
-                   if line <> "" then begin
-                     let item = mk_rel dir line in
-                     let srcs, cfgs = !acc in
-                     if is_config item then acc := collect (srcs, cfgs) item
-                     else if
-                       not
-                         (Stdlib.List.exists
-                            (fun mf -> mf.filename = item)
-                            srcs)
-                     then acc := (srcs @ [ mk_mfile item ], cfgs)
-                   end
-             done
-           with Exit -> ());
-          TextIO.closeIn ic;
-          !acc
-      in
-      let sources, _ = collect ([], []) cfg_path in
-      { sources }
+      let str = match src with
+      | Input str -> str
+      | File path -> (
+          try
+            let ic = TextIO.openIn (Fpath.to_string path) in
+            let str = TextIO.inputAll ic in
+            let () = TextIO.closeIn ic in
+            str
+          with exn ->
+            print_error "pal" (Printexc.to_string exn);
+            "") in 
+      match Project.Format.from_toml @@ Otoml.string str with
+      | None -> failwith "Failed to parse config file"
+      | Some config -> config
 
-    let read_without ((src, existing) : source * t) : t =
-      let fresh = read src in
-      let existing_names =
-        Stdlib.List.map (fun mf -> mf.filename) existing.sources
-      in
-      let sources' =
-        Stdlib.List.filter
-          (fun mf -> not (Stdlib.List.mem mf.filename existing_names))
-          fresh.sources
-      in
-      { sources = sources' }
+      let load' (cfg : Project.Format.t) : status =
+        assert false
+      let load (cfg : t) : status = 
+        assert false
 
-    let is_modified mf = mf.mtime = None
-
-    let load_file (mf : mfile) (acc : status) : status =
-      match acc with
-      | Abort -> Abort
-      | Ok ->
-          let st = load (File (Fpath.v mf.filename)) in
-          if st = Ok then mf.mtime <- Some Time.zeroTime;
-          st
-
-    let append (cfg : t) : status =
-      let rec from_first_modified = function
-        | [] -> []
-        | mf :: rest ->
-            if is_modified mf then mf :: rest else from_first_modified rest
-      in
-      let to_load = from_first_modified cfg.sources in
-      Stdlib.List.fold_left (fun acc mf -> load_file mf acc) Ok to_load
-
-    let load (cfg : t) : status =
-      Install.reset ();
-      Stdlib.List.iter (fun mf -> mf.mtime <- None) cfg.sources;
-      append cfg
-
-    let define (filenames : string list) : t =
-      { sources = Stdlib.List.map mk_mfile filenames }
+      
   end
-
-  let make (src : source) : status = Config.load (Config.read src)
+  let make (src : source) : status =
+    let is_config path =
+      let ext = Fpath.get_ext path in
+      ext = ".cfg" || ext = ".toml"
+    in
+    match src with
+    | File path when is_config path -> Config.load (Config.read src)
+    | _ -> load (Names.newNamespace ()) src
 
   (* ------------------------------------------------------------------ *)
   (* Print settings                                                       *)
@@ -955,7 +889,8 @@ module Impl () = struct
   (* ------------------------------------------------------------------ *)
 
   module Eval = struct
-    let eval (cmd : Cst.cmd) : unit = Install.install1 cmd
+    let eval (cmd : Cst.cmd) : unit =
+      Install.install1 (Names.newNamespace ()) cmd
   end
 
   (* ------------------------------------------------------------------ *)

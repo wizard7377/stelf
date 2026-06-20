@@ -17,17 +17,17 @@ type src =
 type kind = Debug | Info | Warning | Error | Response
 
 (* Corresponds to chatter 5 4 3 2 1 0, respectively *)
-type level = VeryVerbose | Verbose | Normal | Quiet | VeryQuiet | Silent
+type level = Exhaustive | Detailed | Normal | Terse | Minimal | Off
 
 let from_chatter x =
   assert (x >= 0);
   match x with
-  | 0 -> Silent
-  | 1 -> VeryQuiet
-  | 2 -> Quiet
+  | 0 -> Off
+  | 1 -> Minimal
+  | 2 -> Terse
   | 3 -> Normal
-  | 4 -> Verbose
-  | _ -> VeryVerbose
+  | 4 -> Detailed
+  | _ -> Exhaustive
 
 module Form = Form.Form
 
@@ -39,12 +39,12 @@ let msg ?(src : src option) ?(kind : kind option) ?(level = Normal) (fmt : form)
   { src; kind; level; msg = fmt }
 
 let to_int : level -> int = function
-  | Silent -> 0
-  | VeryQuiet -> 1
-  | Quiet -> 2
+  | Off -> 0
+  | Minimal -> 1
+  | Terse -> 2
   | Normal -> 3
-  | Verbose -> 4
-  | VeryVerbose -> 5
+  | Detailed -> 4
+  | Exhaustive -> 5
 
 let ( >= ) x y = to_int x >= to_int y
 let ( > ) x y = to_int x > to_int y

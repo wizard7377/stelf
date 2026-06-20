@@ -26,7 +26,9 @@ module Parser : PARSER = struct
       | None -> return ()
       | Some (' ' | '\t' | '\n' | '(' | ')' | '{' | '}' | '[' | ']' | '%') ->
           return ()
-      | _ -> fail ("keyword " ^ s' ^ " not at word boundary")
+      | Some c ->
+          fail (Printf.sprintf
+            "expected whitespace or delimiter after '%s', found '%c'" s' c)
     in
     string s' *> boundary *> whitespace
 

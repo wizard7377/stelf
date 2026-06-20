@@ -83,11 +83,7 @@ module MakeCover
     | M.Mapp (M.Marg (M.Minus, x), ms') -> Match (outCoverInst ms')
     | M.Mapp (M.Marg (M.Star, x), ms') -> Skip (outCoverInst ms')
 
-  let rec chatter chlev f =
-    Display.display'
-      (Display.Info.msg
-         ~level:(Display.Info.from_chatter chlev)
-         (Display.Info.Form.string (f ())))
+  let rec chatter chlev f = Display.chatter_s chlev (f ())
 
   let pluralize = function 1, s -> s | n, s -> s ^ "s"
   let rec abbrevCSpine (s_, ci) = s_

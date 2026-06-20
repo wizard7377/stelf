@@ -23,12 +23,6 @@ module Repl (M : REPL.S) : REPL.REPL = struct
 
   let () = Display.register (fun m -> Lwt.return @@ add_msg m)
 
-  let seq_l : 'a 'b. 'a Lwt.t -> 'b Lwt.t -> 'b Lwt.t =
-   fun a b ->
-    let open Lwt.Syntax in
-    let* _ = a in
-    b
-
   type response = Continue | Fail of string | Stop
 
   let term : LTerm.t ref Lwt.t = Lwt.map ref @@ Lazy.force LTerm.stdout
@@ -75,41 +69,34 @@ module Repl (M : REPL.S) : REPL.REPL = struct
   exception Interrupted
 
   let stop code = exit code
-
+  
   let rec read : (string -> response Lwt.t) -> int Lwt.t =
    fun f ->
     let open Lwt.Syntax in
     let* term' = term in
-
+    let pp_msg fmt m : unit = Grace_ansi_renderer.pp_diagnostic fmt m in
+    let display_msg (s : Grace.Diagnostic.Severity.t) (m : Display.Info.t) : unit Lwt.t =
+      let diag = Grace.Diagnostic.create s (fun ppf -> Display.fmt ppf m.msg) in
+      let str = Format.asprintf "%a" pp_msg diag in
+      LTerm.printf "%s" str in
+    let open Grace.Diagnostic.Severity in
     let display_err (m : Display.Info.t) : unit Lwt.t =
-      let open Display in
-      let arrow = Form.(styles Style.[ Fore.red; bold ] (string "!>")) in
-      let out = Form.(markup @@ concat [ arrow; space (); m.msg ]) in
-      LTerm.printls out
+      display_msg Error m
     in
     let display_warn (m : Display.Info.t) : unit Lwt.t =
-      let open Display in
-      let arrow = Form.(styles Style.[ Fore.yellow; bold ] (string "!!")) in
-      let out = Form.(markup @@ concat [ arrow; space (); m.msg ]) in
-      LTerm.printls out
+      display_msg Warning m
     in
     let display_info (m : Display.Info.t) : unit Lwt.t =
-      let open Display in
-      let arrow = Form.(styles Style.[ Fore.blue; bold ] (string "*>")) in
-      let out = Form.(markup @@ concat [ arrow; space (); m.msg ]) in
-      LTerm.printls out
+      display_msg Note m
     in
     let display_debug (m : Display.Info.t) : unit Lwt.t =
-      let open Display in
-      let arrow = Form.(styles Style.[ Fore.magenta; bold ] (string "?>")) in
-      let out = Form.(markup @@ concat [ arrow; space (); m.msg ]) in
-      LTerm.printls out
+      display_msg Note m
     in
     let display_response (m : Display.Info.t) : unit Lwt.t =
       let open Display in
       let arrow = Form.(styles Style.[ Fore.orange; bold ] (string "=>")) in
       let out = Form.(markup @@ concat [ arrow; space (); m.msg ]) in
-      LTerm.printls out
+      Notty_lwt.output_image (Notty_lwt.eol out)
     in
 
     let should_display (msg : Display.Info.t) : bool =
@@ -151,20 +138,29 @@ module Repl (M : REPL.S) : REPL.REPL = struct
         in
 
         match continue with
-        | Continue -> seq_l (flush ()) (read f)
+        | Continue ->
+            let* () = flush () in
+            read f
         | Fail msg ->
             Printf.eprintf "Error: %s\n%!" msg;
-            seq_l (flush ()) (Lwt.return 1)
-        | Stop -> seq_l (flush ()) (Lwt.return 0))
+            let* () = flush () in
+            Lwt.return 1
+        | Stop ->
+            let* () = flush () in
+            Lwt.return 0)
       (fun exn ->
         match exn with
-        | LTerm_read_line.Interrupt -> seq_l (flush ()) (Lwt.return 0)
+        | LTerm_read_line.Interrupt ->
+            let* () = flush () in
+            Lwt.return 0
         | exn ->
-            seq_l
-              (display_err
-                 (Display.Info.msg @@ Display.Form.string
-                @@ Printexc.to_string exn))
-              (seq_l (flush ()) (read f)))
+            let* () =
+              display_err
+                (Display.Info.msg @@ Display.Form.string
+                @@ Printexc.to_string exn)
+            in
+            let* () = flush () in
+            read f)
 
   let show fmt = () (* Format.pp_print_string fmt "λΠ> "*)
 end

@@ -440,7 +440,10 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
   open Lens
   module View :
     LENS.VIEW
-      with type Term.t = term
+      with type loc = loc
+       and type Loc.t = loc
+       and module Paths = Paths
+       and type Term.t = term
        and type Decl.t = decl
        and type ConDec.t = conDec
        and type Mode.t = mode
@@ -455,6 +458,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
        and type Solve.t = solve
        and type Define.t = define
        and type Fixity.t = fixity
+       and type BlockItem.t = block_item
        and type Cmd.t = cmd = struct
     module Paths = Paths 
  
@@ -1062,6 +1066,12 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | CoversCmd_ md -> Covers (ghost, md)
         | NameCmd_ id -> Name (ghost, id)
         | ReducesCmd_ (pred, body) -> Reduces (ghost, pred, body)
+        | Open_ ids -> Open (ghost, ids)
+        | Scope_ (id, cmd) -> Scope (ghost, id, cmd)
+        | Use_ (ids, tms) -> Use (ghost, ids, tms)
+        | Macro_ (n, id, cmd) -> Macro (ghost, n, id, cmd)
+        | Seq_ _ -> failwith "Cmd.view: Seq_ is not representable in view"
+        | Require_ ids -> Require (ghost, ids)
 
       let review (y : u) : t =
         match y with
@@ -1096,6 +1106,12 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Covers (_, md) -> CoversCmd_ md
         | Name (_, id) -> NameCmd_ id
         | Reduces (_, pred, body) -> ReducesCmd_ (pred, body)
+        | Open (_, ids) -> Open_ ids
+        | Scope (_, id, cmd) -> Scope_ (id, cmd)
+        | Use (_, ids, tms) -> Use_ (ids, tms)
+        | Macro (_, n, id, cmd) -> Macro_ (n, id, cmd)
+        | Seq _ -> failwith "Cmd.review: Seq is not representable in review"
+        | Require (_, ids) -> Require_ ids
 
       let (!>) = view
       let (!<) = review

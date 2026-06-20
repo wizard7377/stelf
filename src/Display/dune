@@ -1,4 +1,4 @@
 (library
  (name display)
  (public_name stelf.display)
- (libraries lwt fmt lambda-term))
+ (libraries lwt fmt notty-community))

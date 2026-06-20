@@ -80,11 +80,7 @@ end) : SKOLEM = struct
                 in
                 let s_ = spine d in
                 let _ =
-                  Display.display'
-                    (Display.Info.msg
-                       ~level:(Display.Info.from_chatter 3)
-                       (Display.Info.Form.string
-                          (Print.conDecToString sd_ ^ "\n")))
+                  Display.chatter_s 3 (Print.conDecToString sd_ ^ "\n")
                 in
                 installSkolem'
                   (d, (v_, mS'), I.Dot (I.Exp (I.Root (h_, s_)), s), k)

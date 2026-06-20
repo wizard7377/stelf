@@ -28,13 +28,16 @@ module Display : DISPLAY = struct
         Printf.eprintf "Error in display handler: %s\n%!"
           (Printexc.to_string exn))
 
-  let message ?src ?kind ?(level = Quiet) t =
+  let message ?src ?kind ?(level = Terse) t =
     assert !registered;
     Lwt.dont_wait
       (fun () -> !rep { src; kind; level; msg = t })
       (fun exn ->
         Printf.eprintf "Error in display handler: %s\n%!"
           (Printexc.to_string exn))
+
+  let chatter ?src ?kind n t = message ?src ?kind ~level:(Info.from_chatter n) t
+  let chatter_s ?src ?kind n s = chatter ?src ?kind n (Form.string s)
 
   let debug ?src ?level t = message ?src ~kind:Info.Debug ?level t
   let info ?src ?level t = message ?src ~kind:Info.Info ?level t

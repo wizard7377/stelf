@@ -37,11 +37,13 @@ module IntIdx : Common.CID with type t = int = struct
   let compare = compare
   let equal = ( = )
 
-  let fresh =
-    let c = ref 0 in
-    fun () ->
-      incr c;
-      !c
+  let counter = ref 0
+
+  let fresh () =
+    incr counter;
+    !counter
+
+  let reset () = counter := 0
 
   let pp fmt i = Format.fprintf fmt "%d" i
   let toString = string_of_int
@@ -67,11 +69,13 @@ module ExtIdx : Common.CID with type t = string = struct
   let compare = compare
   let equal = ( = )
 
-  let fresh =
-    let c = ref 0 in
-    fun () ->
-      incr c;
-      "ext" ^ string_of_int !c
+  let counter = ref 0
+
+  let fresh () =
+    incr counter;
+    "ext" ^ string_of_int !counter
+
+  let reset () = counter := 0
 
   let pp fmt i = Format.fprintf fmt "%s" i
   let toString s = s

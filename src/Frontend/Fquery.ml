@@ -56,23 +56,13 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string "%fquery"))
+      Display.chatter_s 3 "%fquery"
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string " "))
+      Display.chatter_s 3 " "
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n")))
+      Display.chatter_s 3 (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n")
     in
     let k, v1_ = Abstract.abstractDecImp v_ in
     let g_, v2_ = lower (k, I.Null, v1_) in

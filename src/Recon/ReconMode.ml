@@ -67,7 +67,7 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
       end
     with Error m ->
       Display.(
-        message ~kind:Warning ~level:Verbose
+        message ~kind:Warning ~level:Detailed
           (string "Error processing mode declaration: " ++ string m));
       raise' m
 end

@@ -97,10 +97,7 @@ module Make_ReconConDec
         in
         let ocd = Paths.dec (i, oc) in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string (Print.conDecToString cd ^ "\n")))
+          Display.chatter_s 3 (Print.conDecToString cd ^ "\n")
         in
         let _ =
           if !Global.doubleCheck then
@@ -146,10 +143,7 @@ module Make_ReconConDec
           end
         in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string (Print.conDecToString cd ^ "\n")))
+          Display.chatter_s 3 (Print.conDecToString cd ^ "\n")
         in
         let _ =
           if !Global.doubleCheck then begin
@@ -202,10 +196,7 @@ module Make_ReconConDec
             (IntSyn.BlockDec (name, None, gsome'_, ctxToList gblock'_))
         in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string (Print.conDecToString bd ^ "\n")))
+          Display.chatter_s 3 (Print.conDecToString bd ^ "\n")
         in
         (Some bd, None)
     | Cst.View.ConDec.BlockDef (_, name, worlds) ->
@@ -227,10 +218,7 @@ module Make_ReconConDec
         in
         let bd = Names.nameConDec (IntSyn.BlockDef (name, None, cids)) in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string (Print.conDecToString bd ^ "\n")))
+          Display.chatter_s 3 (Print.conDecToString bd ^ "\n")
         in
         (Some bd, None)
     | _ -> raise (Error "condecToConDec: unrecognised conDec variant")

@@ -33,7 +33,7 @@
    (and
     (>= 5.0.0)
     (not (and 
-      (< 5.5.0)
+      (< 5.6.0)
       (>= 5.4.0)
     ))
     ))
@@ -43,10 +43,10 @@
   angstrom
   (alcotest :with-test)
   (alcotest-lwt :with-test)
-  (bisect-ppx :dev)
+  grace
+  notty-community
   (odoc :with-doc)
   (sherlodoc :with-doc)
-  (bisect_ppx :dev)
   (ocamlformat :dev)
   (ocaml-lsp-server :dev)
   (user-setup :dev)
@@ -57,7 +57,8 @@
   fmt
   bos
   cmdliner 
-  logs)
+  logs
+  otoml)
  (tags
   ("logic" "language" stelf)))
 

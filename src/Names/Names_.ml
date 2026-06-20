@@ -649,14 +649,14 @@ module MakeNames
   let extent = function Exist -> Global | Univ ext -> ext
 
   let rec namePrefOf'' = function
-    | Exist, None -> "X"
-    | Univ _, None -> "x"
+    | Exist, None -> "_?"
+    | Univ _, None -> "_"
     | Exist, Some (ePref, uPref) -> hd ePref
     | Univ _, Some (ePref, uPref) -> hd uPref
 
   let rec namePrefOf' = function
-    | Exist, None -> "X"
-    | Univ _, None -> "x"
+    | Exist, None -> "_?"
+    | Univ _, None -> "_"
     | role, Some (IntSyn.Const cid) ->
         namePrefOf'' (role, Array.sub (namePrefArray, cid))
     | role, Some (IntSyn.Def cid) ->
@@ -865,8 +865,8 @@ module MakeNames
   let rec findNameLocal (g_, base, i) =
     let name =
       base
-      ^ begin if i = 0 then "" else Int.toString i
-      end
+      ^ Int.toString i
+      
     in
     begin if varDefined name || conDefined name || ctxDefined (g_, name) then
       findNameLocal (g_, base, i + 1)

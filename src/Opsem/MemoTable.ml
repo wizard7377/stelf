@@ -679,29 +679,20 @@ end) : MEMOTABLE = struct
           begin
             added := true;
             begin
-              Display.display'
-                (Display.Info.msg
-                   ~level:(Display.Info.from_chatter 5)
-                   (Display.Info.Form.string "\t -- Add goal \n"));
+              Display.chatter_s 5 "\t -- Add goal \n";
               T.NewEntry answRef
             end
           end
         end
       | _, T.RepeatedEntry (((_, asub) as s), answRef, status) -> begin
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 5)
-               (Display.Info.Form.string "\t -- Suspend goal\n"));
+          Display.chatter_s 5 "\t -- Suspend goal\n";
           T.RepeatedEntry ((esub, asub), answRef, status)
         end
       | _, T.DivergingEntry (_, answRef) -> begin
           begin
             added := true;
             begin
-              Display.display'
-                (Display.Info.msg
-                   ~level:(Display.Info.from_chatter 5)
-                   (Display.Info.Form.string "\t -- Add diverging goal\n"));
+              Display.chatter_s 5 "\t -- Add diverging goal\n";
               T.DivergingEntry (I.id, answRef)
             end
           end
@@ -727,28 +718,19 @@ end) : MEMOTABLE = struct
       | _, T.NewEntry answRef -> begin
           added := true;
           begin
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 5)
-                 (Display.Info.Form.string "\t -- Add goal \n"));
+            Display.chatter_s 5 "\t -- Add goal \n";
             T.NewEntry answRef
           end
         end
       | _, T.RepeatedEntry (asub, answRef, status) -> begin
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 5)
-               (Display.Info.Form.string "\t -- Suspend goal\n"));
+          Display.chatter_s 5 "\t -- Suspend goal\n";
           T.RepeatedEntry (asub, answRef, status)
         end
       | _, T.DivergingEntry (_, answRef) -> begin
           begin
             added := true;
             begin
-              Display.display'
-                (Display.Info.msg
-                   ~level:(Display.Info.from_chatter 5)
-                   (Display.Info.Form.string "\t -- Add diverging goal\n"));
+              Display.chatter_s 5 "\t -- Add diverging goal\n";
               T.DivergingEntry (I.id, answRef)
             end
           end

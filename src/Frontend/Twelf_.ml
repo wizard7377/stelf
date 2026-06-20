@@ -429,11 +429,7 @@ end) : TWELF.STELF = struct
       let rec installAction ((cid, _) as data) =
         begin
           installConst IntSyn.Ordinary data;
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 4)
-               (Display.Info.Form.string
-                  (Print.conDecToString (IntSyn.sgnLookup cid) ^ "\n")))
+          Display.chatter_s 4 (Print.conDecToString (IntSyn.sgnLookup cid) ^ "\n")
         end
       in
       let _ =
@@ -447,11 +443,7 @@ end) : TWELF.STELF = struct
       let rec installAction ((cid, _) as data) =
         begin
           installConst IntSyn.Ordinary data;
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 4)
-               (Display.Info.Form.string
-                  (Print.conDecToString (IntSyn.sgnLookup cid) ^ "\n")))
+          Display.chatter_s 4 (Print.conDecToString (IntSyn.sgnLookup cid) ^ "\n")
         end
       in
       let _ =
@@ -617,20 +609,7 @@ end) : TWELF.STELF = struct
             with Subordinate.Error msg ->
               raise (Subordinate.Error (Paths.wrap (r, msg)))
           in
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string
-                  ("%subord"
-                  ^ List.foldr
-                      (function
-                        | (a1, a2), s ->
-                            ((((" (" ^ Names.qidToString (Names.constQid a1))
-                              ^ " ")
-                             ^ Names.qidToString (Names.constQid a2))
-                            ^ ")")
-                            ^ s)
-                      ".\n" cidpairs)))
+          Display.chatter_s 3 ("%subord" ^ List.foldr (function | (a1, a2), s -> ((((" (" ^ Names.qidToString (Names.constQid a1)) ^ " ") ^ Names.qidToString (Names.constQid a2)) ^ ")") ^ s) ".\n" cidpairs)
       | fileName, (Parser.FreezeDec qids, r) ->
           let rec toCid qid =
             begin match Names.constLookup qid with
@@ -653,26 +632,8 @@ end) : TWELF.STELF = struct
               raise (Subordinate.Error (Paths.wrap (r, msg)))
           in
           begin
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    ("%freeze"
-                    ^ List.foldr
-                        (function
-                          | a, s ->
-                              (" " ^ Names.qidToString (Names.constQid a)) ^ s)
-                        ".\n" cids)));
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 4)
-                 (Display.Info.Form.string
-                    ("Frozen:"
-                    ^ List.foldr
-                        (function
-                          | a, s ->
-                              (" " ^ Names.qidToString (Names.constQid a)) ^ s)
-                        "\n" frozen)))
+            Display.chatter_s 3 ("%freeze" ^ List.foldr (function | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s) ".\n" cids);
+            Display.chatter_s 4 ("Frozen:" ^ List.foldr (function | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s) "\n" frozen)
           end
       | fileName, (Parser.ThawDec qids, r) ->
           let _ =
@@ -702,24 +663,10 @@ end) : TWELF.STELF = struct
               raise (Subordinate.Error (Paths.wrap (r, msg)))
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    ("%thaw"
-                    ^ List.foldr
-                        (function a, s -> (" " ^ cidToString a) ^ s)
-                        ".\n" cids)))
+            Display.chatter_s 3 ("%thaw" ^ List.foldr (function a, s -> (" " ^ cidToString a) ^ s) ".\n" cids)
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 4)
-                 (Display.Info.Form.string
-                    ("Thawed"
-                    ^ List.foldr
-                        (function a, s -> (" " ^ cidToString a) ^ s)
-                        "\n" thawed)))
+            Display.chatter_s 4 ("Thawed" ^ List.foldr (function a, s -> (" " ^ cidToString a) ^ s) "\n" thawed)
           in
           let _ = invalidate WorldSyn.uninstall thawed "world" in
           let _ = invalidate Thm.uninstallTerminates thawed "termination" in
@@ -746,18 +693,7 @@ end) : TWELF.STELF = struct
           in
           begin
             List.app insertCid cids;
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    ((begin if !Global.chatter >= 4 then "%" else ""
-                      end
-                     ^ "%deterministic")
-                    ^ List.foldr
-                        (function
-                          | a, s ->
-                              (" " ^ Names.qidToString (Names.constQid a)) ^ s)
-                        ".\n" cids)))
+            Display.chatter_s 3 ((begin if !Global.chatter >= 4 then "%" else "" end ^ "%deterministic") ^ List.foldr (function | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s) ".\n" cids)
           end
       | fileName, (Parser.Compile qids, r) ->
           let rec toCid qid =
@@ -789,26 +725,10 @@ end) : TWELF.STELF = struct
           let _ = TomegaTypeCheck.checkPrg (IntSyn.Null, (p_, f_)) in
           let rec f cid = IntSyn.conDecName (IntSyn.sgnLookup cid) in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 2)
-                 (Display.Info.Form.string
-                    (("\n" ^ TomegaPrint.funToString ((map f cids, projs), p_))
-                    ^ "\n")))
+            Display.chatter_s 2 (("\n" ^ TomegaPrint.funToString ((map f cids, projs), p_)) ^ "\n")
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    ((begin if !Global.chatter >= 4 then "%" else ""
-                      end
-                     ^ "%compile")
-                    ^ List.foldr
-                        (function
-                          | a, s ->
-                              (" " ^ Names.qidToString (Names.constQid a)) ^ s)
-                        ".\n" cids)))
+            Display.chatter_s 3 ((begin if !Global.chatter >= 4 then "%" else "" end ^ "%compile") ^ List.foldr (function | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s) ".\n" cids)
           in
           ()
       | fileName, (Parser.FixDec ((qid, r), fixity), _) ->
@@ -823,16 +743,7 @@ end) : TWELF.STELF = struct
               try
                 begin
                   Names.installFixity (cid, fixity);
-                  Display.display'
-                    (Display.Info.msg
-                       ~level:(Display.Info.from_chatter 3)
-                       (Display.Info.Form.string
-                          ((((begin if !Global.chatter >= 4 then "%" else ""
-                              end
-                             ^ Names.Fixity.toString fixity)
-                            ^ " ")
-                           ^ Names.qidToString (Names.constQid cid))
-                          ^ ".\n")))
+                  Display.chatter_s 3 ((((begin if !Global.chatter >= 4 then "%" else "" end ^ Names.Fixity.toString fixity) ^ " ") ^ Names.qidToString (Names.constQid cid)) ^ ".\n")
                 end
               with Names.Error msg ->
                 raise (Names.Error (Paths.wrap (r, msg))))
@@ -898,14 +809,7 @@ end) : TWELF.STELF = struct
               mdecs
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%mode "
-                     ^ ModePrint.modesToString
-                         (List.map (function mdec, r -> mdec) mdecs))
-                    ^ ".\n")))
+            Display.chatter_s 3 (("%mode " ^ ModePrint.modesToString (List.map (function mdec, r -> mdec) mdecs)) ^ ".\n")
           in
           ()
       | fileName, (Parser.UniqueDec mterms, r) ->
@@ -937,14 +841,7 @@ end) : TWELF.STELF = struct
               mdecs
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%unique "
-                     ^ ModePrint.modesToString
-                         (List.map (function mdec, r -> mdec) mdecs))
-                    ^ ".\n")))
+            Display.chatter_s 3 (("%unique " ^ ModePrint.modesToString (List.map (function mdec, r -> mdec) mdecs)) ^ ".\n")
           in
           ()
       | fileName, (Parser.CoversDec mterms, r) ->
@@ -961,14 +858,7 @@ end) : TWELF.STELF = struct
               mdecs
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%covers "
-                     ^ ModePrint.modesToString
-                         (List.map (function mdec, r -> mdec) mdecs))
-                    ^ ".\n")))
+            Display.chatter_s 3 (("%covers " ^ ModePrint.modesToString (List.map (function mdec, r -> mdec) mdecs)) ^ ".\n")
           in
           ()
       | fileName, (Parser.TotalDec lterm, r) ->
@@ -984,11 +874,7 @@ end) : TWELF.STELF = struct
                 raise (Subordinate.Error (Paths.wrap (r, msg)))
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%total " ^ ThmPrint.tDeclToString t_) ^ ".\n")))
+            Display.chatter_s 3 (("%total " ^ ThmPrint.tDeclToString t_) ^ ".\n")
           in
           ()
       | fileName, (Parser.TerminatesDec lterm, _) ->
@@ -1005,11 +891,7 @@ end) : TWELF.STELF = struct
             end
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%terminates " ^ ThmPrint.tDeclToString t_) ^ ".\n")))
+            Display.chatter_s 3 (("%terminates " ^ ThmPrint.tDeclToString t_) ^ ".\n")
           in
           ()
       | fileName, (Parser.ReducesDec lterm, _) ->
@@ -1038,23 +920,14 @@ end) : TWELF.STELF = struct
           let t_, r = ReconThm.tableddeclTotabledDecl tdecl in
           let la_ = Thm.installTabled t_ in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%tabled " ^ ThmPrint.tabledDeclToString t_) ^ ".\n")))
+            Display.chatter_s 3 (("%tabled " ^ ThmPrint.tabledDeclToString t_) ^ ".\n")
           in
           ()
       | fileName, (Parser.KeepTableDec tdecl, _) ->
           let t_, r = ReconThm.keepTabledeclToktDecl tdecl in
           let la_ = Thm.installKeepTable t_ in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%keeptabled " ^ ThmPrint.keepTableDeclToString t_)
-                    ^ ".\n")))
+            Display.chatter_s 3 (("%keeptabled " ^ ThmPrint.keepTableDeclToString t_) ^ ".\n")
           in
           ()
       | fileName, (Parser.TheoremDec tdec, r) ->
@@ -1092,24 +965,14 @@ end) : TWELF.STELF = struct
           in
           let _ = ModeTable.installMode (cid, convert_mode_spine ms_) in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%theorem " ^ Print.conDecToString e_) ^ "\n")))
+            Display.chatter_s 3 (("%theorem " ^ Print.conDecToString e_) ^ "\n")
           in
           ()
       | fileName, (Parser.ProveDec lterm, r) ->
           let ThmSyn.PDecl (depth, t_), rrs = ReconThm.proveToProve lterm in
           let la_ = Thm.installTerminates (t_, rrs) in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (((("%prove " ^ Int.toString depth) ^ " ")
-                     ^ ThmPrint.tDeclToString t_)
-                    ^ ".\n")))
+            Display.chatter_s 3 (((("%prove " ^ Int.toString depth) ^ " ") ^ ThmPrint.tDeclToString t_) ^ ".\n")
           in
           let _ = Prover.init (depth, la_) in
           let _ =
@@ -1117,14 +980,7 @@ end) : TWELF.STELF = struct
               map
                 (function
                   | a ->
-                      Display.display'
-                        (Display.Info.msg
-                           ~level:(Display.Info.from_chatter 3)
-                           (Display.Info.Form.string
-                              (("%mode "
-                               ^ ModePrint.modeToString
-                                   (a, valOf (ModeTable.modeLookup a)))
-                              ^ ".\n"))))
+                      Display.chatter_s 3 (("%mode " ^ ModePrint.modeToString (a, valOf (ModeTable.modeLookup a))) ^ ".\n"))
                 la_
             else [ () ]
           in
@@ -1134,10 +990,7 @@ end) : TWELF.STELF = struct
               raise (Prover.Error (Paths.wrap (joinregion rrs, msg)))
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string "%QED\n"))
+            Display.chatter_s 3 "%QED\n"
           in
           begin
             Prover.install (function e_ ->
@@ -1164,14 +1017,7 @@ end) : TWELF.STELF = struct
               map
                 (function
                   | a ->
-                      Display.display'
-                        (Display.Info.msg
-                           ~level:(Display.Info.from_chatter 3)
-                           (Display.Info.Form.string
-                              (("%mode "
-                               ^ ModePrint.modeToString
-                                   (a, valOf (ModeTable.modeLookup a)))
-                              ^ ".\n"))))
+                      Display.chatter_s 3 (("%mode " ^ ModePrint.modeToString (a, valOf (ModeTable.modeLookup a))) ^ ".\n"))
                 la_
             else [ () ]
           in
@@ -1192,25 +1038,14 @@ end) : TWELF.STELF = struct
           let (ThmSyn.Callpats l_ as cp), rrs = ReconThm.assertToAssert aterm in
           let la_ = map (function c, p_ -> c) l_ in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("%assert " ^ ThmPrint.callpatsToString cp) ^ ".\n")))
+            Display.chatter_s 3 (("%assert " ^ ThmPrint.callpatsToString cp) ^ ".\n")
           in
           let _ =
             if !Global.chatter >= 3 then
               map
                 (function
                   | a ->
-                      Display.display'
-                        (Display.Info.msg
-                           ~level:(Display.Info.from_chatter 3)
-                           (Display.Info.Form.string
-                              (("%mode "
-                               ^ ModePrint.modeToString
-                                   (a, valOf (ModeTable.modeLookup a)))
-                              ^ ".\n"))))
+                      Display.chatter_s 3 (("%mode " ^ ModePrint.modeToString (a, valOf (ModeTable.modeLookup a))) ^ ".\n"))
                 la_
             else [ () ]
           in
@@ -1281,13 +1116,7 @@ end) : TWELF.STELF = struct
             end
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (((("%worlds " ^ Print.worldsToString w_) ^ " ")
-                     ^ ThmPrint.callpatsToString cp)
-                    ^ ".\n")))
+            Display.chatter_s 3 (((("%worlds " ^ Print.worldsToString w_) ^ " ") ^ ThmPrint.callpatsToString cp) ^ ".\n")
           in
           begin
             Timers.time Timers.worlds
@@ -1336,10 +1165,7 @@ end) : TWELF.STELF = struct
               raise (ModSyn.Error (Paths.wrap (r, msg)))
           in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string (("%sig " ^ name) ^ " = { ... }.\n")))
+            Display.chatter_s 3 (("%sig " ^ name) ^ " = { ... }.\n")
           in
           ()
       | fileName, moduleOpt, (Parser.StructDec structdec, r) ->
@@ -1428,10 +1254,7 @@ end) : TWELF.STELF = struct
       let oldContext = !context in
       let _ = context := Some namespace in
       let _ =
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 4)
-             (Display.Info.Form.string "\n% begin subsignature\n"))
+        Display.chatter_s 4 "\n% begin subsignature\n"
       in
       let rec install s = install' (Timers.time Timers.parsing S.expose s)
       and install' = function
@@ -1448,10 +1271,7 @@ end) : TWELF.STELF = struct
           let s' = install s in
           let module_ = ModSyn.abstractModule (namespace, None) in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 4)
-                 (Display.Info.Form.string "% end subsignature\n\n"))
+            Display.chatter_s 4 "% end subsignature\n\n"
           in
           Value (module_, s')
         with exn -> Exception exn
@@ -1567,16 +1387,7 @@ end) : TWELF.STELF = struct
         | Some fixity -> begin
             let fixity' = convert_fixity fixity in
             Names.installFixity (cid, fixity');
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    ((((begin if !Global.chatter >= 4 then "%" else ""
-                        end
-                       ^ Names.Fixity.toString fixity')
-                      ^ " ")
-                     ^ Names.qidToString (Names.constQid cid))
-                    ^ ".\n")))
+            Display.chatter_s 3 ((((begin if !Global.chatter >= 4 then "%" else "" end ^ Names.Fixity.toString fixity') ^ " ") ^ Names.qidToString (Names.constQid cid)) ^ ".\n")
           end
         | None -> ()
         end

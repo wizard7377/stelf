@@ -13,17 +13,17 @@ doc: "https://github.com/standardocaml/stelf/wiki"
 bug-reports: "https://github.com/standardocaml/stelf/issues"
 depends: [
   "dune" {>= "3.21"}
-  "ocaml" {>= "5.0.0" & !(< "5.5.0" & >= "5.4.0")}
+  "ocaml" {>= "5.0.0" & !(< "5.6.0" & >= "5.4.0")}
   "lwt"
   "containers"
   "base"
   "angstrom"
   "alcotest" {with-test}
   "alcotest-lwt" {with-test}
-  "bisect-ppx" {dev}
+  "grace"
+  "notty-community"
   "odoc" {with-doc}
   "sherlodoc" {with-doc}
-  "bisect_ppx" {dev}
   "ocamlformat" {dev}
   "ocaml-lsp-server" {dev}
   "user-setup" {dev}
@@ -35,6 +35,7 @@ depends: [
   "bos"
   "cmdliner"
   "logs"
+  "otoml"
 ]
 build: [
   ["dune" "subst"] {dev}

@@ -113,11 +113,7 @@ module MakeConverter
       | _ -> raise (Error "Type Constant declaration expected")
       end
 
-    let rec chatter chlev f =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter chlev)
-           (Display.Info.Form.string ("[tomega] " ^ f ())))
+    let rec chatter chlev f = Display.chatter_s chlev ("[tomega] " ^ f ())
 
     let rec strengthenExp (u_, s) = Whnf.normalize (Whnf.cloInv (u_, s), I.id)
     let rec strengthenSub (s, t) = Whnf.compInv (s, t)
@@ -901,17 +897,11 @@ module MakeConverter
           let name = I.conDecName (I.sgnLookup cid) in
           let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f_)) in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 4)
-                 (Display.Info.Form.string "[Redundancy Checker (factoring) ..."))
+            Display.chatter_s 4 "[Redundancy Checker (factoring) ..."
           in
           let factP = Redundant.convert p_ in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 4)
-                 (Display.Info.Form.string "done]\n"))
+            Display.chatter_s 4 "done]\n"
           in
           let lemma = T.lemmaAdd (T.ValDec (name, factP, f_)) in
           (lemma, [], [])
@@ -924,17 +914,11 @@ module MakeConverter
           let s = name cids in
           let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f_)) in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 4)
-                 (Display.Info.Form.string "[Redundancy Checker (factoring) ..."))
+            Display.chatter_s 4 "[Redundancy Checker (factoring) ..."
           in
           let factP = Redundant.convert p_ in
           let _ =
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 4)
-                 (Display.Info.Form.string "done]\n"))
+            Display.chatter_s 4 "done]\n"
           in
           let lemma = T.lemmaAdd (T.ValDec (s, factP, f_)) in
           let sels = installSelection (cids, projs, f_, lemma) in

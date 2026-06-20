@@ -16,6 +16,7 @@ module type COLORS = sig
   val cyan : t
   val white : t
   val orange : t
+  val rgb : int -> int -> int -> t
 end
 
 module type FORM = sig
@@ -30,6 +31,10 @@ module type FORM = sig
 
     module Fore : COLORS with type t := style
     module Back : COLORS with type t := style
+  end
+
+  module Syntax : sig 
+    val syntax : style 
   end
 
   val ( +++ ) : t -> t -> t
@@ -51,8 +56,12 @@ module type FORM = sig
   val hbox : t list -> t
   val vbox : t list -> t
   val hvbox : t list -> t
-  val markup : t -> LTerm_text.t
+  val markup : t -> Notty.image
   val shown_many : ?sep:t -> ('a -> string) -> 'a list -> t
   val optional : ?def:t -> ('a -> t) -> 'a option -> t
+  val to_plain : t -> string
   val fmt : t Fmt.t
+  val header : level:int -> t -> t
+  val show : t -> Notty.image
+  val custom : unit Fmt.t -> t
 end

@@ -12,8 +12,15 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
 
   open Parser
 
-  (* Skip outer text (non-% characters) between commands *)
-  let skip_outer : unit t = skip_while (fun c -> c <> '%')
+  let ghost' = Cst.View.Loc.(review Ghost)
+
+  (* Skip outer text (non-% characters) between commands.
+     %%% is an escape sequence for a literal %. *)
+  let skip_outer : unit t =
+    fix (fun self ->
+      skip_while (fun c -> c <> '%')
+      *> option ()
+           (string "%%%" *> commit *> self))
 
   (* Defer a thunk-parser to prevent infinite recursion at construction time.
      Used for %module and %eval which recursively embed cmd lists. *)
@@ -55,35 +62,35 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
     choice ~failure_msg:"command"
       [
         begin
-          whitespace *> (keyword "." *> commit *> return (Cst.Cmd.stop ()))
+          whitespace *> (keyword "." *> commit *> skip_outer *> return (Cst.View.Cmd.(review @@ Stop (ghost', ()))))
           (* querytabled BEFORE query — "query" is a prefix of "querytabled" *)
         end;
         begin
           (keyword "querytabled" *> commit
           *>
           let+ n, b, d, q = Modern.parse_query () in
-          Cst.Cmd.query_tabled ~n ~b ~d q)
+          Cst.View.Cmd.(review @@ QueryTabled (ghost', n, b, d, q)))
           <?> "querytabled"
         end;
         begin
           (keyword "query" *> commit
           *>
           let+ n, b, d, q = Modern.parse_query () in
-          Cst.Cmd.query ~n ~b ~d q)
+          Cst.View.Cmd.(review @@ Query (ghost', n, b, d, q)))
           <?> "query"
         end;
         begin
           (keyword "?" *> commit
           *>
           let+ tm = Modern.parse_expr () in
-          Cst.Cmd.adhoc_query (Cst.Query.query None tm))
+          Cst.View.Cmd.(review @@ AdhocQuery (ghost', Cst.View.Query.(review @@ Query (ghost', None, tm)))))
           <?> "adhoc query"
         end;
         begin
           (keyword "unique" *> commit
           *>
           let+ tm = Modern.parse_expr () in
-          Cst.Cmd.unique tm
+          Cst.View.Cmd.(review @@ Unique (ghost', tm))
           (* module BEFORE mode — "mode" is a prefix of "module" *))
           <?> "unique"
         end;
@@ -91,14 +98,15 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           keyword "scope" *> commit
           *>
           let* id = Modern.parse_var () in
-          let+ cmds = parse1 () in
-          Cst.View.Cmd.(review @@ Scope (Cst.View.Loc.(review Ghost), id, cmds))
+          let+ cmds = parse_cmd_list () in
+          Cst.View.Cmd.(
+            review @@ Scope (Cst.View.Loc.(review Ghost), id, review @@ Eval (ghost', cmds)))
         end;
         begin
           (keyword "mode" *> commit
           *>
           let+ md = Modern.parse_mode_dec () in
-          Cst.Cmd.mode md (* TODO Check this *))
+          Cst.View.Cmd.(review @@ Mode (ghost', md)) (* TODO Check this *))
           <?> "mode"
         end;
         begin
@@ -113,7 +121,7 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           (keyword "decl" *> commit
           *>
           let+ tm = Modern.parse_expr () in
-          Cst.Cmd.decl_cmd tm)
+          Cst.View.Cmd.(review @@ DeclCmd (ghost', tm)))
           <?> "declaration"
         end;
         begin
@@ -121,7 +129,7 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           *>
           let* id = Modern.parse_var () in
           let+ tm = Modern.parse_expr () in
-          Cst.Cmd.inline id tm)
+          Cst.View.Cmd.(review @@ Inline (ghost', id, tm)))
           <?> "inline"
         end;
         begin
@@ -129,21 +137,21 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           *>
           let* id1 = Modern.parse_var () in
           let+ id2 = Modern.parse_var () in
-          Cst.Cmd.symbol id1 id2)
+          Cst.View.Cmd.(review @@ Symbol (ghost', id1, id2)))
           <?> "symbol"
         end;
         begin
           (keyword "freeze" *> commit
           *>
           let+ ids = Modern.parse_id_list () in
-          Cst.Cmd.freeze ids)
+          Cst.View.Cmd.(review @@ Freeze (ghost', ids)))
           <?> "freeze"
         end;
         begin
           (keyword "thaw" *> commit
           *>
           let+ ids = Modern.parse_id_list () in
-          Cst.Cmd.thaw ids)
+          Cst.View.Cmd.(review @@ Thaw (ghost', ids)))
           <?> "thaw"
         end;
         begin
@@ -158,7 +166,7 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           (keyword "term" *> commit
           *>
           let+ d = Modern.parse_decl () in
-          Cst.Cmd.term d)
+          Cst.View.Cmd.(review @@ Term (ghost', d)))
           <?> "term"
         end;
         begin
@@ -166,7 +174,7 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           *>
           let* id = Modern.parse_var () in
           let+ items = many (Modern.parse_block_item ()) in
-          Cst.Cmd.block id items)
+          Cst.View.Cmd.(review @@ Block (ghost', id, items)))
           <?> "block"
         end;
         begin
@@ -174,7 +182,7 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           *>
           let* id = Modern.parse_var () in
           let+ ids = inside "(" ")" (many (Modern.parse_var ())) in
-          Cst.Cmd.union id ids)
+          Cst.View.Cmd.(review @@ Union (ghost', id, ids)))
           <?> "union"
         end;
         begin
@@ -182,14 +190,14 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           *>
           let* ids = inside "(" ")" (many (Modern.parse_var ())) in
           let+ tm = Modern.parse_expr () in
-          Cst.Cmd.worlds ids tm)
+          Cst.View.Cmd.(review @@ Worlds (ghost', ids, tm)))
           <?> "worlds"
         end;
         begin
           (keyword "deterministic" *> commit
           *>
           let+ ids = Modern.parse_id_list () in
-          Cst.Cmd.deterministic ids)
+          Cst.View.Cmd.(review @@ Deterministic (ghost', ids)))
           <?> "deterministic"
         end;
         begin
@@ -212,7 +220,7 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           (keyword "eval" *> commit
           *>
           let+ cmds = parse_cmd_list () in
-          Cst.Cmd.eval cmds)
+          Cst.View.Cmd.(review @@ Eval (ghost', cmds)))
           <?> "eval"
         end;
         begin
@@ -222,18 +230,18 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           let* n = Modern.parse_fixity () in
           let* ids = Modern.parse_id_list () in
           let () = Modern.register_local_fixity fix n ids in
-          return (Cst.Cmd.prec fix n ids))
+          return (Cst.View.Cmd.(review @@ Prec (ghost', fix, n, ids))))
           <?> "prec"
         end;
         begin
           (keyword "solve" *> commit
           *>
           let+ s = Modern.parse_solve () in
-          Cst.Cmd.solve s)
+          Cst.View.Cmd.(review @@ Solve (ghost', s)))
           <?> "solve"
         end;
         begin
-          keyword "quit" *> commit *> return (Cst.Cmd.Repl.quit ()) <?> "quit"
+          keyword "quit" *> commit *> return (Cst.View.Cmd.(review @@ ReplQuit (ghost', ()))) <?> "quit"
         end;
         begin
           (keyword "help" *> commit
@@ -243,14 +251,14 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
               (let+ id = Modern.parse_var () in
                Some id)
           in
-          Cst.Cmd.Repl.help t)
+          Cst.View.Cmd.(review @@ ReplHelp (ghost', t)))
           <?> "help"
         end;
         begin
           (keyword "get" *> commit
           *>
           let+ id = Modern.parse_var () in
-          Cst.Cmd.Repl.get id)
+          Cst.View.Cmd.(review @@ ReplGet (ghost', id)))
           <?> "get"
         end;
         begin
@@ -258,11 +266,11 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           *>
           let* id = Modern.parse_var () in
           let+ v = Modern.parse_var () in
-          Cst.Cmd.Repl.set id v)
+          Cst.View.Cmd.(review @@ ReplSet (ghost', id, v)))
           <?> "set"
         end;
         begin
-          keyword "version" *> commit *> return (Cst.Cmd.Repl.version ())
+          keyword "version" *> commit *> return (Cst.View.Cmd.(review @@ ReplVersion (ghost', ())))
           <?> "version"
         end;
         begin
@@ -287,14 +295,14 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           (keyword "covers" *> commit
           *>
           let+ md = Modern.parse_mode_dec () in
-          Cst.Cmd.covers md)
+          Cst.View.Cmd.(review @@ Covers (ghost', md)))
           <?> "covers"
         end;
         begin
           (keyword "name" *> commit
           *>
           let+ id = Modern.parse_var () in
-          Cst.Cmd.name id)
+          Cst.View.Cmd.(review @@ Name (ghost', id)))
           <?> "name"
         end;
         begin

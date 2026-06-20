@@ -10,6 +10,16 @@ module type MODERN = sig
 
   exception ParseError of string
 
+  exception FullParseError of {
+    title    : Display.form option;
+    subtitle : Display.form option;
+    body     : Display.form;
+    loc      : Cst.loc option;
+  }
+
+  (** A list of symbols that refer to restricted names *)
+  val given_symbols : (string * string) list ref 
+  
   val parse_expr1 : unit -> Cst.Term.t t
   val parse_expr : unit -> Cst.Term.t t
   val parse_var : unit -> string t
@@ -18,21 +28,20 @@ module type MODERN = sig
   (** {v %val ( ... ) v} *)
 
   val parse_text : unit -> string t
-  val parse_decl : unit -> Cst.Decl.t t
-  val parse_mode : unit -> Cst.Mode.mode t
-  val parse_mode_dec : unit -> Cst.Mode.modedec t
-  val parse_sigexp : unit -> Cst.Struct.sigexp t
-  val parse_inst : unit -> Cst.Struct.inst t
-  val parse_sigexp : unit -> Cst.Struct.sigexp t
-  val parse_sigdef : unit -> Cst.Struct.sigdef t
-  val parse_struct_dec : unit -> Cst.Struct.structdec t
+  val parse_decl : unit -> Cst.decl t
+  val parse_mode : unit -> Cst.mode t
+  val parse_mode_dec : unit -> Cst.modeDec t
+  val parse_sigexp : unit -> Cst.sigexp t
+  val parse_inst : unit -> Cst.inst t
+  val parse_sigdef : unit -> Cst.sigdef t
+  val parse_struct_dec : unit -> Cst.structDec t
   val parse_fixity : unit -> int t
 
   val parse_query :
-    unit -> (int option * int option * int option * Cst.Query.query) t
+    unit -> (int option * int option * int option * Cst.query) t
 
   val parse_define : unit -> Cst.define t
-  val parse_solve : unit -> Cst.Query.solve t
+  val parse_solve : unit -> Cst.solve t
   val parse_bound : unit -> int option t
   val parse_id_list : unit -> string list t
   val parse_reduces_rel : unit -> string t

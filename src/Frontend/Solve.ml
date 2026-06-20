@@ -214,18 +214,10 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string "%solve "))
+      Display.chatter_s 3 "%solve "
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-              ^ ".\n")))
+      Display.chatter_s 3 (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_)) ^ ".\n")
     in
     let g =
       Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
@@ -251,10 +243,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       with Solution m_ -> (
         try
           begin
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string " OK\n"));
+            Display.chatter_s 3 " OK\n";
             finish m_
           end
         with TimeLimit.TimeOut ->
@@ -275,18 +264,10 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string "%solve "))
+      Display.chatter_s 3 "%solve "
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-              ^ ".\n")))
+      Display.chatter_s 3 (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_)) ^ ".\n")
     in
     let g =
       Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
@@ -308,10 +289,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       with SolutionSkel skel_ -> (
         try
           begin
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 2)
-                 (Display.Info.Form.string " OK\n"));
+            Display.chatter_s 2 " OK\n";
             try
               begin
                 Timers.time Timers.ptrecon PtRecon.solve
@@ -345,27 +323,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (((("%query " ^ boundToString expected) ^ " ")
-               ^ boundToString try_)
-              ^ "\n")))
+      Display.chatter_s 3 (((("%query " ^ boundToString expected) ^ " ") ^ boundToString try_) ^ "\n")
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 4)
-           (Display.Info.Form.string " "))
+      Display.chatter_s 4 " "
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-              ^ ".\n")))
+      Display.chatter_s 3 (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_)) ^ ".\n")
     in
     let g =
       Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
@@ -376,29 +340,14 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
         solutions := !solutions + 1;
         begin
           begin
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("---------- Solution " ^ Int.toString !solutions)
-                    ^ " ----------\n")));
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (Timers.time Timers.printing evarInstToString xs_ ^ "\n")))
+            Display.chatter_s 3 (("---------- Solution " ^ Int.toString !solutions) ^ " ----------\n");
+            Display.chatter_s 3 (Timers.time Timers.printing evarInstToString xs_ ^ "\n")
           end;
           begin
             begin match optName with
             | None -> ()
             | Some name -> begin
-                Display.display'
-                  (Display.Info.msg
-                     ~level:(Display.Info.from_chatter 3)
-                     (Display.Info.Form.string
-                        (Timers.time Timers.printing evarInstToString
-                           [ (m_, name) ]
-                        ^ "\n")))
+                Display.chatter_s 3 (Timers.time Timers.printing evarInstToString [ (m_, name) ] ^ "\n")
               end
             end;
             begin
@@ -407,11 +356,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
               with
               | None -> ()
               | Some str ->
-                  Display.display'
-                    (Display.Info.msg
-                       ~level:(Display.Info.from_chatter 3)
-                       (Display.Info.Form.string
-                          (("Remaining constraints:\n" ^ str) ^ "\n")))
+                  Display.chatter_s 3 (("Remaining constraints:\n" ^ str) ^ "\n")
               end
               (* Question: should we collect constraints in M? *);
               begin if exceeds (Some !solutions, try_) then raise Done else ()
@@ -444,25 +389,12 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       (* in case Done was raised *)
       (* check if number of solutions is correct *)
         else begin
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string "Skipping query (bound = 0)\n"));
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 4)
-             (Display.Info.Form.string "skipping"))
+        Display.chatter_s 3 "Skipping query (bound = 0)\n";
+        Display.chatter_s 4 "skipping"
       end
       end;
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              "____________________________________________\n\n"));
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 4)
-           (Display.Info.Form.string " OK\n"))
+      Display.chatter_s 3 "____________________________________________\n\n";
+      Display.chatter_s 4 " OK\n"
     end
 
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)
@@ -488,27 +420,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (((("%query " ^ boundToString expected) ^ " ")
-               ^ boundToString try_)
-              ^ "\n")))
+      Display.chatter_s 3 (((("%query " ^ boundToString expected) ^ " ") ^ boundToString try_) ^ "\n")
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 4)
-           (Display.Info.Form.string " "))
+      Display.chatter_s 4 " "
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-              ^ ".\n")))
+      Display.chatter_s 3 (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_)) ^ ".\n")
     in
     let g =
       Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
@@ -519,17 +437,8 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
         solutions := !solutions + 1;
         begin
           begin
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (("---------- Solution " ^ Int.toString !solutions)
-                    ^ " ----------\n")));
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    (Timers.time Timers.printing evarInstToString xs_ ^ "\n")))
+            Display.chatter_s 3 (("---------- Solution " ^ Int.toString !solutions) ^ " ----------\n");
+            Display.chatter_s 3 (Timers.time Timers.printing evarInstToString xs_ ^ "\n")
           end;
           begin
             begin match optName with
@@ -547,13 +456,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
                     CompSyn.DProg (IntSyn.Null, IntSyn.Null),
                     function
                     | pskel, m_ -> begin
-                        Display.display'
-                          (Display.Info.msg
-                             ~level:(Display.Info.from_chatter 3)
-                             (Display.Info.Form.string
-                                (Timers.time Timers.printing evarInstToString
-                                   [ (m_, name) ]
-                                ^ "\n")))
+                        Display.chatter_s 3 (Timers.time Timers.printing evarInstToString [ (m_, name) ] ^ "\n")
                       end )
               end
             end;
@@ -563,11 +466,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
               with
               | None -> ()
               | Some str ->
-                  Display.display'
-                    (Display.Info.msg
-                       ~level:(Display.Info.from_chatter 3)
-                       (Display.Info.Form.string
-                          (("Remaining constraints:\n" ^ str) ^ "\n")))
+                  Display.chatter_s 3 (("Remaining constraints:\n" ^ str) ^ "\n")
               end
               (* Question: should we collect constraints in M? *);
               begin if exceeds (Some !solutions, try_) then raise Done else ()
@@ -600,25 +499,12 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       (* in case Done was raised *)
       (* check if number of solutions is correct *)
         else begin
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string "Skipping query (bound = 0)\n"));
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 4)
-             (Display.Info.Form.string "skipping"))
+        Display.chatter_s 3 "Skipping query (bound = 0)\n";
+        Display.chatter_s 4 "skipping"
       end
       end;
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              "____________________________________________\n\n"));
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 4)
-           (Display.Info.Form.string " OK\n"))
+      Display.chatter_s 3 "____________________________________________\n\n";
+      Display.chatter_s 4 " OK\n"
     end
 
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)
@@ -657,29 +543,16 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
   solutions or if we have reached the maximal number of stages *)
   let rec querytabled ((numSol, try_, quy), Paths.Loc (fileName, r)) =
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              ((("%querytabled " ^ boundToString numSol) ^ " ")
-              ^ boundToString try_)))
+      Display.chatter_s 3 ((("%querytabled " ^ boundToString numSol) ^ " ") ^ boundToString try_)
     in
     let a_, optName, xs_ =
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 4)
-           (Display.Info.Form.string " "))
+      Display.chatter_s 4 " "
     in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-              ^ ".\n")))
+      Display.chatter_s 3 (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_)) ^ ".\n")
     in
     let g =
       Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
@@ -695,21 +568,9 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           solExists := true;
           begin
             begin
-              Display.display'
-                (Display.Info.msg
-                   ~level:(Display.Info.from_chatter 3)
-                   (Display.Info.Form.string
-                      (("\n---------- Solutions " ^ Int.toString !solutions)
-                      ^ " ----------\n")));
-              Display.display'
-                (Display.Info.msg
-                   ~level:(Display.Info.from_chatter 3)
-                   (Display.Info.Form.string
-                      (Timers.time Timers.printing evarInstToString xs_ ^ " \n")));
-              Display.display'
-                (Display.Info.msg
-                   ~level:(Display.Info.from_chatter 1)
-                   (Display.Info.Form.string "."))
+              Display.chatter_s 3 (("\n---------- Solutions " ^ Int.toString !solutions) ^ " ----------\n");
+              Display.chatter_s 3 (Timers.time Timers.printing evarInstToString xs_ ^ " \n");
+              Display.chatter_s 1 "."
             end;
             begin
               begin match optName with
@@ -722,13 +583,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
                       CompSyn.DProg (IntSyn.Null, IntSyn.Null),
                       function
                       | o_, m_ -> begin
-                          Display.display'
-                            (Display.Info.msg
-                               ~level:(Display.Info.from_chatter 3)
-                               (Display.Info.Form.string
-                                  (Timers.time Timers.printing evarInstToString
-                                     [ (m_, name) ]
-                                  ^ "\n")))
+                          Display.chatter_s 3 (Timers.time Timers.printing evarInstToString [ (m_, name) ] ^ "\n")
                         end )
                 end
               end;
@@ -738,27 +593,16 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
                 with
                 | None -> ()
                 | Some str ->
-                    Display.display'
-                      (Display.Info.msg
-                         ~level:(Display.Info.from_chatter 3)
-                         (Display.Info.Form.string
-                            (("Remaining constraints:\n" ^ str) ^ "\n")))
+                    Display.chatter_s 3 (("Remaining constraints:\n" ^ str) ^ "\n")
                 end
                 (* Question: should we collect constraints in M? *);
                 begin
-                  Display.display'
-                    (Display.Info.msg
-                       ~level:(Display.Info.from_chatter 1)
-                       (Display.Info.Form.string "More solutions?\n"));
+                  Display.chatter_s 1 "More solutions?\n";
                   begin match numSol with
                   | None -> ()
                   | Some n ->
                       begin if !solutions = n then begin
-                        Display.display'
-                          (Display.Info.msg
-                             ~level:(Display.Info.from_chatter 1)
-                             (Display.Info.Form.string
-                                "Found enough solutions\n"));
+                        Display.chatter_s 1 "Found enough solutions\n";
                         raise Done
                       end
                       else ()
@@ -774,12 +618,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     let rec loop () =
       begin
         begin if exceeds (Some (!stages - 1), try_) then begin
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 1)
-               (Display.Info.Form.string
-                  (("\n ================= " ^ " Number of tries exceeds stages ")
-                  ^ " ======================= \n")));
+          Display.chatter_s 1 (("\n ================= " ^ " Number of tries exceeds stages ") ^ " ======================= \n");
           begin
             status := false;
             raise Done
@@ -788,12 +627,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
         else ()
         end;
         begin
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 1)
-               (Display.Info.Form.string
-                  (("\n ====================== Stage " ^ Int.toString !stages)
-                  ^ " finished =================== \n")));
+          Display.chatter_s 1 (("\n ====================== Stage " ^ Int.toString !stages) ^ " finished =================== \n");
           begin
             begin if exceeds (Some !stages, try_) then begin
               Msg.message
@@ -858,101 +692,38 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           (* solve query if bound > 0 *)
         with Done -> ()
       else begin
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string "Skipping query (bound = 0)\n"));
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 2)
-             (Display.Info.Form.string "skipping"))
+        Display.chatter_s 3 "Skipping query (bound = 0)\n";
+        Display.chatter_s 2 "skipping"
       end
       end;
       begin
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string
-                "\n____________________________________________\n\n"));
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string
-                ((((("number of stages: tried " ^ boundToString try_) ^ " \n")
-                  ^ "terminated after ")
-                 ^ Int.toString !stages)
-                ^ " stages \n \n")));
+        Display.chatter_s 3 "\n____________________________________________\n\n";
+        Display.chatter_s 3 ((((("number of stages: tried " ^ boundToString try_) ^ " \n") ^ "terminated after ") ^ Int.toString !stages) ^ " stages \n \n");
         begin if !solExists then ()
         else
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string "\nNO solution exists to query \n\n"))
+          Display.chatter_s 3 "\nNO solution exists to query \n\n"
         end;
         begin if !status then
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string "Tabled evaluation COMPLETE \n \n"))
+          Display.chatter_s 3 "Tabled evaluation COMPLETE \n \n"
         else
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string "Tabled evaluation NOT COMPLETE \n \n"))
+          Display.chatter_s 3 "Tabled evaluation NOT COMPLETE \n \n"
         end;
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string
-                "\n____________________________________________\n\n"));
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string "\n Table Indexing parameters: \n"));
+        Display.chatter_s 3 "\n____________________________________________\n\n";
+        Display.chatter_s 3 "\n Table Indexing parameters: \n";
         begin match !TableParam.strategy with
         | variant_ ->
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    "\n       Table Strategy := Variant \n"))
+            Display.chatter_s 3 "\n Table Strategy := Variant \n"
         | subsumption_ ->
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 3)
-                 (Display.Info.Form.string
-                    "\n       Table Strategy := Subsumption \n"))
+            Display.chatter_s 3 "\n Table Strategy := Subsumption \n"
         end;
         begin if !TableParam.strengthen then
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string "\n       Strengthening := true \n"))
+          Display.chatter_s 3 "\n Strengthening := true \n"
         else
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string "\n       Strengthening := false \n"))
+          Display.chatter_s 3 "\n Strengthening := false \n"
         end;
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string
-                (("\nNumber of table indices : "
-                 ^ Int.toString (Tabled.tableSize ()))
-                ^ "\n")));
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string
-                (("Number of suspended goals : "
-                 ^ Int.toString (Tabled.suspGoalNo ()))
-                ^ "\n")));
-        Display.display'
-          (Display.Info.msg
-             ~level:(Display.Info.from_chatter 3)
-             (Display.Info.Form.string
-                "\n____________________________________________\n\n"));
+        Display.chatter_s 3 (("\nNumber of table indices : " ^ Int.toString (Tabled.tableSize ())) ^ "\n");
+        Display.chatter_s 3 (("Number of suspended goals : " ^ Int.toString (Tabled.suspGoalNo ())) ^ "\n");
+        Display.chatter_s 3 "\n____________________________________________\n\n";
         Tabled.updateGlobalTable (g, !status)
       end
     end
@@ -996,22 +767,12 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
         in
         let rec scInit m_ =
           begin
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 1)
-                 (Display.Info.Form.string
-                    (Timers.time Timers.printing evarInstToString xs_ ^ "\n")));
+            Display.chatter_s 1 (Timers.time Timers.printing evarInstToString xs_ ^ "\n");
             begin
               begin match optName with
               | None -> ()
               | Some name -> begin
-                  Display.display'
-                    (Display.Info.msg
-                       ~level:(Display.Info.from_chatter 3)
-                       (Display.Info.Form.string
-                          (Timers.time Timers.printing evarInstToString
-                             [ (m_, name) ]
-                          ^ "\n")))
+                  Display.chatter_s 3 (Timers.time Timers.printing evarInstToString [ (m_, name) ] ^ "\n")
                 end
               end;
               begin
@@ -1020,11 +781,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
                 with
                 | None -> ()
                 | Some str ->
-                    Display.display'
-                      (Display.Info.msg
-                         ~level:(Display.Info.from_chatter 3)
-                         (Display.Info.Form.string
-                            (("Remaining constraints:\n" ^ str) ^ "\n")))
+                    Display.chatter_s 3 (("Remaining constraints:\n" ^ str) ^ "\n")
                 end
                 (* Question: should we collect constraints from M *);
                 begin if moreSolutions () then () else raise Done
@@ -1034,10 +791,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           end
         in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string "Solving...\n"))
+          Display.chatter_s 3 "Solving...\n"
         in
         begin try
           begin
@@ -1080,20 +834,12 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
         let _ = Tabled.reset () in
         let rec scInit o_ =
           begin
-            Display.display'
-              (Display.Info.msg
-                 ~level:(Display.Info.from_chatter 1)
-                 (Display.Info.Form.string
-                    (Timers.time Timers.printing evarInstToString xs_ ^ "\n")));
+            Display.chatter_s 1 (Timers.time Timers.printing evarInstToString xs_ ^ "\n");
             begin
               begin match optName with
               | None -> ()
               | Some name -> begin
-                  Display.display'
-                    (Display.Info.msg
-                       ~level:(Display.Info.from_chatter 3)
-                       (Display.Info.Form.string
-                          " Sorry cannot reconstruct pskeleton proof terms yet \n"))
+                  Display.chatter_s 3 " Sorry cannot reconstruct pskeleton proof terms yet \n"
                 end
               end;
               begin
@@ -1102,11 +848,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
                 with
                 | None -> ()
                 | Some str ->
-                    Display.display'
-                      (Display.Info.msg
-                         ~level:(Display.Info.from_chatter 3)
-                         (Display.Info.Form.string
-                            (("Remaining constraints:\n" ^ str) ^ "\n")))
+                    Display.chatter_s 3 (("Remaining constraints:\n" ^ str) ^ "\n")
                 end
                 (* Question: should we collect constraints from M? *);
                 begin
@@ -1127,10 +869,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
            *)
         in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string "Solving...\n"))
+          Display.chatter_s 3 "Solving...\n"
         in
         begin try
           begin

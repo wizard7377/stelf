@@ -12,11 +12,12 @@ module Opts : OPTS = struct
       and v_conv =
         Arg.enum
           [
-            ("quiet", Display.Info.Quiet);
+            ("terse", Display.Info.Terse);
             ("normal", Display.Info.Normal);
-            ("verbose", Display.Info.Verbose);
-            ("very_verbose", Display.Info.VeryVerbose);
-            ("silent", Display.Info.Silent);
+            ("detailed", Display.Info.Detailed);
+            ("exhaustive", Display.Info.Exhaustive);
+            ("minimal", Display.Info.Minimal);
+            ("off", Display.Info.Off);
           ]
       in
       Arg.(opt v_conv Display.Info.(Normal) & doc)

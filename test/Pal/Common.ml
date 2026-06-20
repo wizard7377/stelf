@@ -6,14 +6,31 @@ let test ?(skip = false) ?(failure = false) (name : string) (cmds : string list)
   let () = Fmt_tty.setup_std_outputs () in
   let () =
     Display.register (fun m ->
-        let _ = Display.fmt Fmt.stdout m.msg in
+        if Display.Info.( >= ) Display.Info.Normal m.level then begin
+          let severity =
+            let open Grace.Diagnostic.Severity in
+            match m.kind with
+            | Some Display.Info.Error -> Error
+            | Some Warning -> Warning
+            | Some Info | Some Debug | Some Response | None -> Note
+          in
+          let diag =
+            Grace.Diagnostic.create severity (fun ppf ->
+                Display.fmt ppf m.msg)
+          in
+          Grace_ansi_renderer.pp_diagnostic Format.std_formatter diag
+        end;
         Lwt.return ())
   in
-  let module P = Pal.Pal.Start () in
+  let exec =
+    lazy
+      (let module P = Pal.Pal.Start () in
+       P.exec)
+  in
   let run cmd =
     try
       Printexc.record_backtrace true;
-      P.exec cmd;
+      (Lazy.force exec) cmd;
       None
     with e -> Some e
   in

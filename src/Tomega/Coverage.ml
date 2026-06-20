@@ -40,11 +40,7 @@ module MakeTomegaCoverage
     module Cover = Cover
     module TomegaTypeCheck = TomegaTypeCheck
 
-    let rec chatter chlev f =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter chlev)
-           (Display.Info.Form.string ("[coverage] " ^ f ())))
+    let rec chatter chlev f = Display.chatter_s chlev ("[coverage] " ^ f ())
 
     let rec purifyFor = function
       | (T.Unit, t), (psi_, T.True), s -> (t, psi_, s)

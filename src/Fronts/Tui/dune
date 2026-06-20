@@ -1,4 +1,4 @@
 (library
  (name tui)
  (public_name stelf.tui_fronts)
- (libraries frontend server fmt lambda-term lwt parsing display))
+ (libraries frontend server fmt grace grace.ansi_renderer lambda-term lwt parsing display notty-community.lwt))

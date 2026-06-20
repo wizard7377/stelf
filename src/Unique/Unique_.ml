@@ -44,11 +44,7 @@ module MakeUnique
     module N = Names
     module T = Tomega
 
-    let rec chatter chlev f =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter chlev)
-           (Display.Info.Form.string (f ())))
+    let rec chatter chlev f = Display.chatter_s chlev (f ())
 
     let rec cName cid = N.qidToString (N.constQid cid)
 

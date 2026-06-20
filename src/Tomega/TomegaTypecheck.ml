@@ -35,11 +35,7 @@ end) : TOMEGATYPECHECK = struct
     module S = Subordinate
     module TA = TomegaTypeCheck__0.TomegaAbstract
 
-    let rec chatter chlev f =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter chlev)
-           (Display.Info.Form.string (f ())))
+    let rec chatter chlev f = Display.chatter_s chlev (f ())
 
     let rec normalizeHead = function
       | T.Const lemma, t -> T.Const lemma

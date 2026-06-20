@@ -5,15 +5,19 @@
   display
   basis
   names
+  error
   cmdliner
   modern
   tui
+  project
+  fmt
   syntax
   paths
   cst
   recon
   intsyn
   global
+  typecheck
   timing
   print
   opsem
@@ -23,6 +27,7 @@
   index
   frontend
   terminate
+  fmt.tty
   worldcheck
   modules
   lwt.unix))

@@ -17,7 +17,7 @@ type src =
 type kind = Debug | Info | Warning | Error | Response
 
 (* Corresponds to chatter 5 4 3 2 1 0, respectively *)
-type level = VeryVerbose | Verbose | Normal | Quiet | VeryQuiet | Silent
+type level = Exhaustive | Detailed | Normal | Terse | Minimal | Off
 
 module Form : module type of Form.Form
 

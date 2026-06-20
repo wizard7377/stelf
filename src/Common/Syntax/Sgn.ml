@@ -76,7 +76,9 @@ module Make_Sgn
   let reset () : unit =
     begin
       CTable.clear table;
-      MTable.clear structArray
+      MTable.clear structArray;
+      Common.Cid.reset ();
+      Common.Mid.reset ()
     end
 
   let size () : int * int = (CTable.length table, MTable.length structArray)

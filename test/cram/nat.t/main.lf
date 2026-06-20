@@ -1,0 +1,32 @@
+# Natural Numbers Test
+
+This is going to be (hopefully) a simple test of the natural numbers and scopes
+
+%sort nat %.
+
+This just defines the sort of natural numbers, but it doesn't define any terms or operations on them. We will define those in the next scope.
+
+## We can use headings whenever we wish
+
+%scope nat %{
+
+  %. NOTE, we can use `%%%.` inside of a scope 
+
+  %term 0 nat 
+  %term S 
+    %pi nat 
+    %-> nat
+%}
+
+%sort add {_ nat} {_ nat} {_ nat} %.
+%scope add %{
+  %term 0 {{X}} add X %(0 nat) X
+  %term S {{X Y Z}} 
+    %if add X (%(S nat) Y) (%(S nat) Z)
+    %<- add X Y Z
+%}
+
+%mode add %in %in %out %.
+%worlds () (add _ _ _)
+%total Y (add _ Y _)
+

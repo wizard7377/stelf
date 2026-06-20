@@ -134,11 +134,7 @@ end) : RECON_QUERY = struct
     in
     let cd = Names.nameConDec cd in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (Timers.time Timers.printing Print.conDecToString cd ^ "\n")))
+      Display.chatter_s 3 (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
     in
     let _ =
       begin if !Global.doubleCheck then begin
@@ -176,11 +172,7 @@ end) : RECON_QUERY = struct
     in
     let cd = Names.nameConDec cd in
     let _ =
-      Display.display'
-        (Display.Info.msg
-           ~level:(Display.Info.from_chatter 3)
-           (Display.Info.Form.string
-              (Timers.time Timers.printing Print.conDecToString cd ^ "\n")))
+      Display.chatter_s 3 (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
     in
     let _ =
       begin if !Global.doubleCheck then begin

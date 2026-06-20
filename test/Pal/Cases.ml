@@ -74,13 +74,8 @@ let cases () =
         test "LP-HORN-ND" Source.[ lp_horn_nd ];
         test "CHURCH-ROSSER-LAM" Source.[ church_rosser_lam ];
         test "CUT-ELIM-FORMULAS" Source.[ cut_elim_formulas ];
-        (* cut_elim/sources: placed immediately after CUT-ELIM-FORMULAS because later
-       groups (CRARY-EXCON, SMALL-STEP-LAM, TAPL-DEFS, etc.) declare o/tp/exp as
-       terms, polluting the sort `o : type` that hyp/conc depend on.
-       Uses explicit parameters (no `{{A}}` implicit) and infix form for operators
-       (and/imp/or are globally registered as infix from CUT-ELIM-FORMULAS).
-       Omitted: %mode/%worlds/%total/etc. — just syntax declarations. *)
-        test "cut_elim/sources" Source.[ cut_elim_sources_2 ];
+        test "cut_elim/sources"
+          Source.[ cut_elim_formulas; cut_elim_sources_2 ];
         test "GUIDE-ND" Source.[ guide_nd ];
         test "CPSOCC-DSBNF" Source.[ cpsocc_dsbnf ];
         test "CPSOCC-CPSBF" Source.[ cpsocc_cpsBNF ];
@@ -125,40 +120,32 @@ let cases () =
             ];
         test "POPLMARK-1A"
           Source.[ poplmark_1a_syntax; poplmark_1b_syntax; poplmark_2b_syntax ];
-        (* POPLMARK-2A: `of`/`term`/`value` conflict with earlier suite declarations
-       in the shared global state of the Pal frontend. Kept as failing test consistent
-       with FOL-14, S4-1, LAM-1, POLYLAM-1, GUIDE-ND-1 pattern — runtime failure only.
-    *)
-        test "POPLMARK-2A" Source.[ poplmark_2a_syntax ];
+        test "POPLMARK-2A"
+          Source.[ poplmark_1a_syntax; poplmark_2a_syntax ];
         test "CCC" Source.[ ccc_syntax ];
         test "INCLL" Source.[ incll_syntax ];
         test "CRARY-LINEAR" Source.[ crary_linear_syntax; crary_linear_linear ];
         test "CRARY-LINEARD" Source.[ crary_lineard_syntax ];
         test "CRARY-MODAL" Source.[ crary_modal_syntax ];
-        (* cut_elim/sources: extends CUT-ELIM-FORMULAS with int.elf (sequent calculus).
-       cut_elim_formulas is omitted since it is in global scope from CUT-ELIM-FORMULAS.
-       hyp and conc are fresh names. *)
-        (* church_rosser/sources: extends CHURCH-ROSSER-LAM with ord-red and par-red.
-       church_rosser_lam is omitted here since term/lam/app are already in global
-       scope from the CHURCH-ROSSER-LAM group above. *)
         test "church_rosser/sources"
-          Source.[ church_rosser_sources_2; church_rosser_sources_3 ];
-        (* mini_ml/sources: extends MINI-ML with eval and type-inference.
-       mini_ml_exp/value/tp are omitted since they are in global scope from MINI-ML.
-       Skipped: by the time mini_ml/sources runs, `z` has been re-declared as `nat`
-       by ARITH/TAPL groups, so `eval z z` (expecting exp-typed z) fails with a
-       type mismatch. The STELF reconstructor does not perform type-directed
-       disambiguation for overloaded names (known limitation as of 2026-06). *)
+          Source.
+            [
+              church_rosser_lam;
+              church_rosser_sources_2;
+              church_rosser_sources_3;
+            ];
         test ~skip:true "mini_ml/sources"
-          Source.[ mini_ml_sources_eval; mini_ml_sources_tpinf ];
-        (* lp_horn/sources: extends LP-HORN-ND with canonical forms and conversion.
-       lp_horn_nd is omitted since it is in global scope from LP-HORN-ND.
-       Skipped: %sort can {A o} {_ pf A} (dependent sort where second arg type depends
-       on first arg value) triggers "Classifier in declaration must be a type" with
-       "Inferred: %tp%" — STELF reconstructor does not handle dependent sort indices
-       in %sort declarations (known limitation as of 2026-06). *)
+          Source.
+            [
+              mini_ml_exp;
+              mini_ml_value;
+              mini_ml_tp;
+              mini_ml_sources_eval;
+              mini_ml_sources_tpinf;
+            ];
+        (* Skipped: dependent sort indices in %sort declarations not yet supported. *)
         test ~skip:true "lp_horn/sources"
-          Source.[ lp_horn_sources_2; lp_horn_sources_3 ];
+          Source.[ lp_horn_nd; lp_horn_sources_2; lp_horn_sources_3 ];
         (* examples/arith/sources.cfg: nat + nt + plus + acker — same content as ARITH
        above, re-declared. Pal frontend is lenient about re-declarations. *)
         test "arith/sources"
@@ -220,10 +207,6 @@ let cases () =
         test "crary/substruct/modal" Source.[ crary_modal_syntax ];
         (* Tier 2: single-elf cfg files *)
 
-        (* examples/handbook/sources.cfg → handbook/fol.elf: same FOL content as existing
-       Source.ml fol suite. Skipped: by the time this runs, `o` has been re-declared
-       as a term by CRARY-EXCON (%term o tp), causing "Level clash" when handbook_sources_1
-       tries to use `o` as a type sort. *)
         test ~skip:true "handbook/sources" Source.[ handbook_sources_1 ];
         (* examples/ccc/spass.cfg → spass.elf: CCC with categorical laws.
        Uses dependent sort indices (== : mor A B -> mor A B -> type) —
@@ -261,5 +244,7 @@ let cases () =
         test ~skip:true "tabled/parsing/tab" Source.[ tabled_parsing_tab_1 ];
         (* examples/tabled/ccc/tab.cfg: CCC with tabling. *)
         test ~skip:true "tabled/ccc/tab" Source.[ tabled_ccc_tab_1 ];
-      ]
-    end
+        test "nat-scope" Source.[ nat_scope ]; 
+      ];
+    
+    end 

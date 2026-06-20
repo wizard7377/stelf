@@ -100,11 +100,7 @@ end) : RECON_CONDEC = struct
         in
         let ocd = Paths.dec (i, oc) in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string
-                  (Timers.time Timers.printing Print.conDecToString cd ^ "\n")))
+          Display.chatter_s 3 (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
         in
         let _ =
           begin if !Global.doubleCheck then
@@ -160,11 +156,7 @@ end) : RECON_CONDEC = struct
           end
         in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string
-                  (Timers.time Timers.printing Print.conDecToString cd ^ "\n")))
+          Display.chatter_s 3 (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
         in
         let _ =
           begin if !Global.doubleCheck then begin
@@ -261,11 +253,7 @@ end) : RECON_CONDEC = struct
           IntSyn.BlockDec (name, None, gsome'_, ctxToList (gblock'_, []))
         in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string
-                  (Timers.time Timers.printing Print.conDecToString bd ^ "\n")))
+          Display.chatter_s 3 (Timers.time Timers.printing Print.conDecToString bd ^ "\n")
         in
         (Some bd, None)
         (* closed nf *)
@@ -288,11 +276,7 @@ end) : RECON_CONDEC = struct
         in
         let bd = IntSyn.BlockDef (name, None, w''_) in
         let _ =
-          Display.display'
-            (Display.Info.msg
-               ~level:(Display.Info.from_chatter 3)
-               (Display.Info.Form.string
-                  (Timers.time Timers.printing Print.conDecToString bd ^ "\n")))
+          Display.chatter_s 3 (Timers.time Timers.printing Print.conDecToString bd ^ "\n")
         in
         (Some bd, None)
 
