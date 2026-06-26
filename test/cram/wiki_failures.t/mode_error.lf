@@ -1,0 +1,30 @@
+# Expected failure: mode violation (output arg used as input)
+
+%sort nat %.
+%scope nat %{
+  %term 0 nat
+  %term S %pi nat %-> nat
+%}
+
+%sort plus {_ nat} {_ nat} {_ nat} %.
+%scope plus %{
+  %term plus/z {{N}} plus %(0 nat) N N
+  %term plus/s {{N1 N2 N3}}
+    %if plus (%(S nat) N1) N2 (%(S nat) N3)
+    %<- plus N1 N2 N3
+%}
+
+%mode plus %in %in %out %.
+%worlds () (plus _ _ _)
+%total N (plus N _ _)
+
+%sort bad {_ nat} {_ nat} %.
+%scope bad %{
+  %term bad/case {{N1 N2}}
+    %if bad N1 N2
+    %<- plus N1 N2 N1
+%}
+
+%mode bad %in %out %.
+%worlds () (bad _ _)
+%total N (bad N _)

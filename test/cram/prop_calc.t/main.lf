@@ -1,0 +1,49 @@
+# Intuitionistic propositional calculus (positive fragment)
+# Two formulations: natural deduction and Hilbert-style system.
+# Author: Frank Pfenning (ported to STELF)
+
+%sort o %.
+%scope o %{
+  %term => %pi o %-> o %-> o
+  %prec %right 10 => %.
+  %term & %pi o %-> o %-> o
+  %prec %right 11 & %.
+  %term true o
+%}
+
+%sort |- {_ o} %.
+%scope |- %{
+  %term K {{A B}} |- (%(=> o) A (%(=> o) B A))
+  %term S {{A B C}} |- (%(=> o) (%(=> o) A (%(=> o) B C)) (%(=> o) (%(=> o) A B) (%(=> o) A C)))
+  %term ONE |- %(true o)
+  %term PAIR {{A B}} |- (%(=> o) A (%(=> o) B (%(& o) A B)))
+  %term LEFT {{A B}} |- (%(=> o) (%(& o) A B) A)
+  %term RIGHT {{A B}} |- (%(=> o) (%(& o) A B) B)
+  %term MP {{A B}} %if |- B %<- |- (%(=> o) A B) %<- |- A
+%}
+
+%sort ! {_ o} %.
+%scope ! %{
+  %term trueI ! %(true o)
+  %term andI {{A B}} %if ! (%(& o) A B) %<- ! A %<- ! B
+  %term andEL {{A B}} %if ! A %<- ! (%(& o) A B)
+  %term andER {{A B}} %if ! B %<- ! (%(& o) A B)
+  %term impliesI {{A B}} %if ! (%(=> o) A B) %<- %pi (! A) %-> ! B
+  %term impliesE {{A B}} %if ! B %<- ! (%(=> o) A B) %<- ! A
+%}
+
+%sort !^ {_ o} %.
+%sort !v {_ o} %.
+%scope !^ %{
+  %term trueI^ !^ %(true o)
+  %term andI^ {{A B}} %if !^ (%(& o) A B) %<- !^ A %<- !^ B
+  %term impI^ {{A B}} %if !^ (%(=> o) A B) %<- %pi (!v A) %-> !^ B
+  %term close {{A}} %if !^ A %<- !v A
+%}
+%scope !v %{
+  %term andEvL {{A B}} %if !v A %<- !v (%(& o) A B)
+  %term andEvR {{A B}} %if !v B %<- !v (%(& o) A B)
+  %term impEv {{A B}} %if !v B %<- !v (%(=> o) A B) %<- !^ A
+%}
+
+%. %require equiv %.  % equiv.lf uses LF function types as sort indices (unsupported in STELF)

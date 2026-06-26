@@ -1,0 +1,4 @@
+# Expected failure: query for an inhabitant of an empty type
+
+%sort void %.
+%query 1 * * void

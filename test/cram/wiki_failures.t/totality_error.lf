@@ -1,0 +1,18 @@
+# Expected failure: %total check fails due to missing base case
+
+%sort nat %.
+%scope nat %{
+  %term 0 nat
+  %term S %pi nat %-> nat
+%}
+
+%sort partial {_ nat} {_ nat} %.
+%scope partial %{
+  %term partial/s {{N M}}
+    %if partial (%(S nat) N) (%(S nat) M)
+    %<- partial N M
+%}
+
+%mode partial %in %out %.
+%worlds () (partial _ _)
+%total N (partial N _)

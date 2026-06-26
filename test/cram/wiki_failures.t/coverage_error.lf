@@ -1,0 +1,35 @@
+# Expected failure: incomplete coverage in sub-transitivity
+# Simplified from coverage_error.elf: sub-trans is missing cases
+# (int→int→float and reflexivity for float in the transitivity proof)
+
+%sort tp %.
+%scope tp %{
+  %term int tp
+  %term float tp
+  %term arrow %pi tp %-> tp %-> tp
+%}
+
+%sort sub {_ tp} {_ tp} %.
+%scope sub %{
+  %term sub-ii sub %(int tp) %(int tp)
+  %term sub-ff sub %(float tp) %(float tp)
+  %term sub-if sub %(int tp) %(float tp)
+  %term sub-arrow {{T S T' S'}}
+    %if sub (%(arrow tp) T S) (%(arrow tp) T' S')
+    %<- sub T' T
+    %<- sub S S'
+%}
+
+%sort sub-trans {_ tp} {_ tp} {_ tp} %.
+%scope sub-trans %{
+  %term sub-trans/refl {{T}}
+    sub-trans T T T
+  %term sub-trans/arrow {{T1 T2 T3 T1' T3'}}
+    %if sub-trans (%(arrow tp) T1 T3) (%(arrow tp) T1 T3) (%(arrow tp) T1' T3')
+    %<- sub-trans T1' T1 T1
+    %<- sub-trans T3 T3 T3'
+%}
+
+%mode sub-trans %in %in %out %.
+%worlds () (sub-trans _ _ _)
+%total D (sub-trans D _ _)
