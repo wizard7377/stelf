@@ -12,6 +12,9 @@ include RECONCONDEC
 (* # 1 "src/frontend/ReconCondec.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ReconConDec (ReconConDec__0 : sig
   (* Reconstruct signature entries *)
   (* Author: Frank Pfenning *)
@@ -51,7 +54,7 @@ end) : RECON_CONDEC = struct
   module Timers = ReconConDec__0.Timers
   module ExtSyn = ReconConDec__0.ReconTerm'
 
-  exception Error of string
+  exception Error = Error
 
   (* error (r, msg) raises a syntax error within region r with text msg *)
   let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))

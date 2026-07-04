@@ -15,6 +15,9 @@ open! Basis
 (* Subordination a la Virga [Technical Report 96] *)
 (* Author: Carsten Schuermann *)
 (* Reverse subordination order *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeSubordinate
     (Global : GLOBAL)
     (Whnf : WHNF)
@@ -35,7 +38,7 @@ module MakeSubordinate
   module MemoTable = MemoTable
   module IntSet = IntSet
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

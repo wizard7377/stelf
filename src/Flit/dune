@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name flit)
  (public_name stelf.flit)
  (modules FlitOldSmlnjPack Flit_ FLIT)

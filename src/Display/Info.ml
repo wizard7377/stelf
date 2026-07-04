@@ -29,9 +29,7 @@ let from_chatter x =
   | 4 -> Detailed
   | _ -> Exhaustive
 
-module Form = Form.Form
-
-type form = Form.t
+type form = Format.formatter -> unit
 type t = { src : src option; kind : kind option; level : level; msg : form }
 
 let msg ?(src : src option) ?(kind : kind option) ?(level = Normal) (fmt : form)

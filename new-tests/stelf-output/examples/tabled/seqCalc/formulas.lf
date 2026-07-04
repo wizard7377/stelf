@@ -1,0 +1,26 @@
+%%% Language of formulas for intuitionistic and classical
+%%% predicate calculus.
+%%% Author: Frank Pfenning
+%sort i %.
+% individuals
+%name i %.
+% S % more than one currently disallowed
+%sort o %.
+% formulas
+%name o %.
+% B C % more than one currently disallowed
+%sort p %.
+% Atoms
+%term atom %pi p %-> o %.
+%term and %pi o %-> o %-> o %.
+%prec %right 11 and %.
+%term imp %pi o %-> o %-> o %.
+%prec %right 10 imp %.
+%term or %pi o %-> o %-> o %.
+%prec %right 11 or %.
+%term not %pi o %-> o %.
+%prec %prefix 12 not %.
+%term true o %.
+%term false o %.
+%term forall %pi (%pi i %-> o) %-> o %.
+%term exists %pi (%pi i %-> o) %-> o %.

@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name netserver)
  (public_name stelf.netserver)
  (modules Netserver_ NETSERVER)

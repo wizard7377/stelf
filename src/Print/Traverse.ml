@@ -15,6 +15,9 @@ include TRAVERSE
 (* # 1 "src/print/Traverse.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Traverse (Traverse__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   module Whnf : WHNF
@@ -33,7 +36,7 @@ end) : TRAVERSE = struct
   module Whnf = Traverse__0.Whnf
   module Names = Traverse__0.Names
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

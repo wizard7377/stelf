@@ -1,0 +1,27 @@
+% Generalizing the language of goals to
+% allow residuation of disjuction, failure, existential,
+% and equality.
+%sort goal %.
+%sort prog %.
+%name goal %.
+%name prog %.
+%term atom' %pi p %-> goal %.
+%term and' %pi goal %-> goal %-> goal %.
+%prec %right 11 and' %.
+%term imp' %pi prog %-> goal %-> goal %.
+%prec %right 10 imp' %.
+%term true' goal %.
+%term forall' %pi (%pi i %-> goal) %-> goal %.
+%term or' %pi goal %-> goal %-> goal %.
+%prec %right 11 or' %.
+%term false' goal %.
+%term exists' %pi (%pi i %-> goal) %-> goal %.
+%term == %pi p %-> p %-> goal %.
+%prec %none 12 == %.
+%term atom^ %pi p %-> prog %.
+%term and^ %pi prog %-> prog %-> prog %.
+%prec %right 11 and^ %.
+%term imp^ %pi goal %-> prog %-> prog %.
+%prec %right 10 imp^ %.
+%term true^ prog %.
+%term forall^ %pi (%pi i %-> prog) %-> prog %.

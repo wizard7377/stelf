@@ -1,0 +1,72 @@
+%sort ekd-wf/seq-a %.
+%mode ekd-wf/seq-a %in %in %out %.
+%term _ ekd-wf/seq-a seq/kd/refl D1 D1 %.
+%worlds (cn-block ovar-block ofkd-block) (ekd-wf/seq-a _ _ _) %.
+%total {} (ekd-wf/seq-a _ _ _) %.
+%sort vdt/esg-wf %.
+%mode vdt/esg-wf %in %in %out %.
+%term _ vdt/esg-wf (esg-wf/sg/unit DO) fst-sg/unit (ekd-wf/kd/unit DO) %.
+%term _ vdt/esg-wf (esg-wf/sg/kd DK) fst-sg/kd DK %.
+%term _ 
+	%pi (vdt/esg-wf (esg-wf/sg/cn DC) fst-sg/cn (ekd-wf/kd/unit DO))
+	%<- (eofkd-ordered DC DO) %.
+%term _ 
+	%pi (vdt/esg-wf (esg-wf/sg/sgm D1 D2 DFS') (fst-sg/sgm DFS DFS2) (ekd-wf/kd/sgm DW DW2))
+	%<- (fst-sg-seq DFS' DFS (%the (seq/kd K3 K1) DQ))
+	%<- (vdt/esg-wf D1 DFS DW)
+	%<- (vdt/esg-wf D1 DFS' DW')
+	%<- ({a cn} {da} vdt/esg-wf (D2 a da) (DFS2 a) (DW2' a da))
+	%<- (ekd-wf/seq-a DQ DW2' DW2) %.
+%term _ 
+	%pi (vdt/esg-wf (esg-wf/sg/pi D1 _ _) fst-sg/pi (ekd-wf/kd/unit DO))
+	%<- (esg-wf-ordered D1 DO) %.
+%worlds (cn-block ovar-block ofkd-block) (vdt/esg-wf _ _ _) %.
+%total D1 (vdt/esg-wf D1 _ _) %.
+%sort wkn-deq-esg-deq {x} %.
+%mode wkn-deq-esg-deq %in %in %in %in %out %.
+%term _ 
+	%pi (wkn-deq-esg-deq DA DA' _ ([x] [di] esg-deq/sg/unit (DO x di)) ([x] [di] esg-deq/sg/unit (DO' x di)))
+	%<- ({x} {di} wkn-deq-cxt-ordered (DA x) (DA' x) (DO x di) (DO' x di)) %.
+%term _ 
+	%pi (wkn-deq-esg-deq DA DA' DQ ([x] [di] esg-deq/sg/cn (D1 x di)) ([x] [di] esg-deq/sg/cn (D1' x di)))
+	%<- (wkn-deq-ecn-deq DA DA' DQ D1 D1') %.
+%term _ 
+	%pi (wkn-deq-esg-deq DA DA' DQ ([x] [di] esg-deq/sg/kd (D1 x di)) ([x] [di] esg-deq/sg/kd (D1' x di)))
+	%<- (wkn-deq-ekd-deq DA DA' DQ D1 D1') %.
+%term _ 
+	%pi (wkn-deq-esg-deq DA DA' DQ ([x] [di] esg-deq/sg/sgm (D1 x di) (D2 x di) (DFS x)) ([x] [di] esg-deq/sg/sgm (D1' x di) (D2' x di) (DFS x)))
+	%<- (wkn-deq-esg-deq DA DA' DQ D1 D1')
+	%<- ({y} {dy} wkn-deq-esg-deq ([x] cxt-append/cons (DA x)) ([x] cxt-append/cons (DA' x)) DQ ([x] [di] D2 x di y dy) ([x] [di] D2' x di y dy)) %.
+%term _ 
+	%pi (wkn-deq-esg-deq DA DA' DQ ([x] [di] esg-deq/sg/pi (D1 x di) (D2 x di) (DFS x)) ([x] [di] esg-deq/sg/pi (D1' x di) (D2' x di) (DFS x)))
+	%<- (wkn-deq-esg-deq DA DA' DQ D1 D1')
+	%<- ({y} {dy} wkn-deq-esg-deq ([x] cxt-append/cons (DA x)) ([x] cxt-append/cons (DA' x)) DQ ([x] [di] D2 x di y dy) ([x] [di] D2' x di y dy)) %.
+%worlds (cn-block ovar-block can-mofkd-block) (wkn-deq-esg-deq _ _ _ _ _) %.
+%total (D1) (wkn-deq-esg-deq _ _ _ D1 _) %.
+%sort funct-esg-wf {x cn} %.
+%mode funct-esg-wf %in %in %in %in %in %in %out %out %.
+%term _ 
+	%pi (funct-esg-wf DA DA' DC DCC DQ ([x] [di] esg-wf/sg/unit (DO x di)) (esg-deq/sg/unit DO') (esg-deq/sg/unit DO'))
+	%<- (subst-cxt-ordered DA DA' DO DO') %.
+%term _ 
+	%pi (funct-esg-wf DA DA' DC DCCz DQ ([x] [di] esg-wf/sg/cn (DCC x di)) (esg-deq/sg/cn DCQ) (esg-deq/sg/cn (ecn-deq/sym DCQ)))
+	%<- (funct-eofkd DA DA' DC DCCz DQ DCC DCQ) %.
+%term _ 
+	%pi (funct-esg-wf DA DA' DC DCCz DQ ([x] [di] esg-wf/sg/kd (DCC x di)) (esg-deq/sg/kd DQ1) (esg-deq/sg/kd DQ2))
+	%<- (funct-ekd-wf DA DA' DC DCCz DQ DCC DQ1 DQ2) %.
+%term _ 
+	%pi (funct-esg-wf DA DA' DC DCC (%the (ecn-deq _ C1 C2 _) DQ) ([x] [di] esg-wf/sg/sgm (D1 x di) (D2 x di) (DFS x)) (esg-deq/sg/sgm D1' D2' (DFS C1)) (esg-deq/sg/sgm D1'' D2''w (DFS C2)))
+	%<- (funct-esg-wf DA DA' DC DCC DQ D1 D1' D1'')
+	%<- ({y} {dy} {_ isvar-fun dy dy seq/loc/refl} funct-esg-wf ([x] cxt-append/cons (DA x)) (cxt-append-sub/cons DA') DC DCC DQ ([x] [di] D2 x di y dy) (D2' y dy) (D2'' y dy))
+	%<- ({x} {di} vdt/esg-wf (D1 x di) (DFS x) (D1c x di))
+	%<- (funct-ekd-wf DA DA' DC DCC DQ D1c _ D1k'')
+	%<- (wkn-deq-esg-deq ([x] cxt-append/nil) ([x] cxt-append/nil) D1k'' D2'' D2''w) %.
+%term _ 
+	%pi (funct-esg-wf DA DA' DC DCC (%the (ecn-deq _ C1 C2 _) DQ) ([x] [di] esg-wf/sg/pi (D1 x di) (D2 x di) (DFS x)) (esg-deq/sg/pi D1'' D2'w (DFS C2)) (esg-deq/sg/pi D1' D2'' (DFS C1)))
+	%<- (funct-esg-wf DA DA' DC DCC DQ D1 D1' D1'')
+	%<- ({y} {dy} {_ isvar-fun dy dy seq/loc/refl} funct-esg-wf ([x] cxt-append/cons (DA x)) (cxt-append-sub/cons DA') DC DCC DQ ([x] [di] D2 x di y dy) (D2' y dy) (D2'' y dy))
+	%<- ({x} {di} vdt/esg-wf (D1 x di) (DFS x) (D1c x di))
+	%<- (funct-ekd-wf DA DA' DC DCC DQ D1c _ D1k'')
+	%<- (wkn-deq-esg-deq ([x] cxt-append/nil) ([x] cxt-append/nil) D1k'' D2' D2'w) %.
+%worlds (cn-block isvar-fun-block can-mofkd-block) (funct-esg-wf _ _ _ _ _ _ _ _) %.
+%total (D1) (funct-esg-wf _ _ _ _ _ D1 _ _) %.

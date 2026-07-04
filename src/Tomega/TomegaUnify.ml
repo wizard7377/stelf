@@ -10,6 +10,9 @@ include TOMEGAUNIFY
 (* # 1 "src/tomega/TomegaUnify.fun.ml" *)
 open! Basis
 
+exception Unify of string
+let () = Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
+
 module TomegaUnify (TomegaUnify__0 : sig
   (* Unification on Formulas *)
   (* Author: Carsten Schuermann *)
@@ -46,7 +49,7 @@ module TomegaUnify (TomegaUnify__0 : sig
 end) : TOMEGAUNIFY = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  exception Unify of string
+  exception Unify = Unify
 
   open! struct
     module I = IntSyn

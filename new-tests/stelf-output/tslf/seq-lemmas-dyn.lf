@@ -1,0 +1,23 @@
+%%%% lemmas about syntactic equality
+%%%% this file could benefit from better organization. perhaps splitting it
+%%%% into different files, etc..
+%sort seq/val/tm %.
+%mode seq/val/tm %in %in %out %.
+%term _ seq/val/tm seq/tm/refl D1 D1 %.
+%worlds (ofkd+vdt-block) (seq/val/tm _ _ _) %.
+%total {} (seq/val/tm _ _ _) %.
+%sort seq/val/md %.
+%mode seq/val/md %in %in %out %.
+%term _ seq/val/md seq/md/refl D1 D1 %.
+%worlds (ofkd+vdt-block) (seq/val/md _ _ _) %.
+%total {} (seq/val/md _ _ _) %.
+%sort step/tm/seq %.
+%mode step/tm/seq %in %in %out %.
+%term _ step/tm/seq seq/tm/refl S1 S1 %.
+%worlds () (step/tm/seq _ _ _) %.
+%total {} (step/tm/seq _ _ _) %.
+%sort step/md/seq %.
+%mode step/md/seq %in %in %out %.
+%term _ step/md/seq seq/md/refl S1 S1 %.
+%worlds () (step/md/seq _ _ _) %.
+%total {} (step/md/seq _ _ _) %.

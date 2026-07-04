@@ -1,0 +1,208 @@
+%                                        
+%{! ## Syntax !}%
+%sort tp %.
+%name tp %.
+%term tunit tp %.
+%term arr %pi tp %-> tp %-> tp %.
+%sort exp %.
+%name exp %.
+%term unit exp %.
+%term fun %pi tp %-> tp %-> (%pi exp %-> exp %-> exp) %-> exp %.
+%term app %pi exp %-> exp %-> exp %.
+%{! ## Series-parallel graphs !}%
+%sort graph %.
+%term 0 graph %.
+%term 1 graph %.
+%term + %pi graph %-> graph %-> graph %.
+%prec %right 5 + %.
+%term * %pi graph %-> graph %-> graph %.
+%prec %right 5 * %.
+%{!  !}%
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%{! ### Size of graphs !}%
+%sort plus %.
+%term plus/z plus z N N %.
+%term plus/s %pi (plus (s N1) N2 (s N3)) %<- (plus N1 N2 N3) %.
+%sort sizeof %.
+%term sizeof/0 sizeof 0 z %.
+%term sizeof/1 sizeof 1 (s z) %.
+%term sizeof/+ %pi (sizeof (G1 + G2) C3) %<- (sizeof G1 C1) %<- (sizeof G2 C2) %<- (plus C2 C1 C3) %.
+%term sizeof/* %pi (sizeof (G1 * G2) C3) %<- (sizeof G1 C1) %<- (sizeof G2 C2) %<- (plus C2 C1 C3) %.
+%{! ### Depth of graphs !}%
+%sort max %.
+%term max/zz max z z z %.
+%term max/sz %pi (max (s N) z (s M)) %<- (max N z M) %.
+%term max/zs %pi (max z (s N) (s M)) %<- (max z N M) %.
+%term max/ss %pi (max (s N) (s M) (s P)) %<- (max N M P) %.
+%sort depthof %.
+%term depthof/0 depthof 0 z %.
+%term depthof/1 depthof 1 (s z) %.
+%term depthof/+ 
+	%pi (depthof (G1 + G2) C)
+	%<- (depthof G1 C1)
+	%<- (depthof G2 C2)
+	%<- (plus C1 C2 C) %.
+%term depthof/* %pi (depthof (G1 * G2) C) %<- (depthof G1 C1) %<- (depthof G2 C2) %<- (max C1 C2 C) %.
+%{! ## Cost Semantics !}%
+%sort evcost %.
+%term evcost/unit evcost unit unit 0 %.
+%term evcost/fun evcost (fun T1 T2 E) (fun T1 T2 E) 0 %.
+%term evcost/app 
+	%pi (evcost (app E1 E2) V (G1 * G2 + 1 + G))
+	%<- (evcost E1 (fun T1 T2 ([f] [x] E f x)) G1)
+	%<- (evcost E2 V2 G2)
+	%<- (evcost (E (fun T1 T2 ([f] [x] E f x)) V2) V G) %.
+%{! ## Sequential Evaluation !}%
+%sort value %.
+%name value %.
+%mode value %in %.
+%term value/unit value unit %.
+%term value/fun value (fun _ _ _) %.
+%sort step %.
+%name step %.
+%mode step %in %out %.
+%term step/app/fun %pi (step (app E1 E2) (app E1' E2)) %<- (step E1 E1') %.
+%term step/app/arg %pi (step (app E1 E2) (app E1 E2')) %<- (value E1) %<- (step E2 E2') %.
+%term step/app/beta-v 
+	%pi (step (app (fun T1 T2 ([f] [x] E f x)) E2) (E (fun T1 T2 ([f] [x] E f x)) E2))
+	%<- (value E2) %.
+%{!  !}%
+%sort steps %.
+%mode steps %in %out %out %.
+%term steps/refl steps E E z %.
+%term steps/trans %pi (steps E E'' (s C)) %<- (step E E') %<- (steps E' E'' C) %.
+%{! ## Parallel Evaluation !}%
+%sort pstep %.
+%term pstep/app/ %pi (pstep (app E1 E2) (app E1' E2')) %<- (pstep E1 E1') %<- (pstep E2 E2') %.
+%term pstep/app/fun %pi (pstep (app E1 E2) (app E1' E2)) %<- (pstep E1 E1') %<- (value E2) %.
+%term pstep/app/arg %pi (pstep (app E1 E2) (app E1 E2')) %<- (pstep E2 E2') %<- (value E1) %.
+%term pstep/app/beta-v 
+	%pi (pstep (app (fun T1 T2 ([f] [x] E f x)) E2) (E (fun T1 T2 ([f] [x] E f x)) E2))
+	%<- (value E2) %.
+%{!  !}%
+%sort psteps %.
+%term psteps/refl psteps E E z %.
+%term psteps/trans %pi (psteps E E'' (s C)) %<- (pstep E E') %<- (psteps E' E'' C) %.
+%{! ### Cost of parallel evaluation !}%
+%sort par_app %.
+%mode par_app %in %in %in %in %in %out %.
+%term _ par_app max/zz psteps/refl Val1 psteps/refl Val2 psteps/refl %.
+%term _ 
+	%pi (par_app (max/sz (%the (max C1 z Cmax) Max)) (psteps/trans (%the (psteps E1' V1 C1) P1s) (%the (pstep E1 E1') Step1)) (%the (value V1) Val1) (%the (psteps V2 V2 z) psteps/refl) (%the (value V2) Val2) (psteps/trans Psteps (pstep/app/fun Val2 Step1)))
+	%<- (par_app Max P1s Val1 psteps/refl Val2 (%the (psteps (app E1' V2) (app V1 V2) Cmax) Psteps)) %.
+%term _ 
+	%pi (par_app (max/zs (%the (max z C2 Cmax) Max)) (%the (psteps V1 V1 z) psteps/refl) (%the (value V1) Val1) (psteps/trans (%the (psteps E2' V2 C2) P2s) (%the (pstep E2 E2') Step2)) (%the (value V2) Val2) (psteps/trans Psteps (pstep/app/arg Val1 Step2)))
+	%<- (par_app Max psteps/refl Val1 P2s Val2 (%the (psteps (app V1 E2') (app V1 V2) Cmax) Psteps)) %.
+%term _ 
+	%pi (par_app (max/ss (%the (max C1 C2 Cmax) Max)) (psteps/trans (%the (psteps E1' V1 C1) P1s) (%the (pstep E1 E1') Step1)) (%the (value V1) Val1) (psteps/trans (%the (psteps E2' V2 C2) P2s) (%the (pstep E2 E2') Step2)) (%the (value V2) Val2) (psteps/trans Psteps (pstep/app/ Step2 Step1)))
+	%<- (par_app Max P1s Val1 P2s Val2 (%the (psteps (app E1' E2') (app V1 V2) Cmax) Psteps)) %.
+%worlds () (par_app _ _ _ _ _ _) %.
+%total T (par_app T _ _ _ _ _) %.
+%sort compose %.
+%mode compose %in %in %in %out %.
+%term _ compose plus/z psteps/refl Psteps Psteps %.
+%term _ 
+	%pi (compose (plus/s D) (psteps/trans Ps S) Ps' (psteps/trans Ps'' S))
+	%<- (compose D Ps Ps' Ps'') %.
+%worlds () (compose _ _ _ _) %.
+%total T (compose T _ _ _) %.
+%sort schedule_parallel %.
+%mode schedule_parallel %in %in %out %out %.
+%term _ schedule_parallel evcost/unit depthof/0 psteps/refl value/unit %.
+%term _ schedule_parallel evcost/fun depthof/0 psteps/refl value/fun %.
+%term _ 
+	%pi (schedule_parallel (evcost/app (%the (evcost (E (fun T1 T2 E) V2) V G) Dcost) (%the (evcost E2 V2 G2) Dcost2) (%the (evcost E1 (fun T1 T2 E) G1) Dcost1)) (depthof/+ (%the (plus DepthMax (s DepthG) Depth) Dplus) (depthof/+ (plus/s plus/z) (%the (depthof G DepthG) DdepthG) depthof/1) (depthof/* (%the (max Depth1 Depth2 DepthMax) Dmax) (%the (depthof G2 Depth2) DdepthG2) (%the (depthof G1 Depth1) DdepthG1))) Dstep'' Val)
+	%<- (schedule_parallel Dcost1 DdepthG1 (%the (psteps E1 (fun T1 T2 E) Depth1) Dstep1) (%the (value (fun T1 T2 E)) Val1))
+	%<- (schedule_parallel Dcost2 DdepthG2 (%the (psteps E2 V2 Depth2) Dstep2) (%the (value V2) Val2))
+	%<- (schedule_parallel Dcost DdepthG (%the (psteps (E (fun T1 T2 E) V2) V DepthG) Dstep) (%the (value V) Val))
+	%<- (par_app Dmax Dstep1 Val1 Dstep2 Val2 (%the (psteps (app E1 E2) (app (fun T1 T2 E) V2) DepthMax) Dstep'))
+	%<- (compose Dplus Dstep' (psteps/trans Dstep (pstep/app/beta-v Val2)) (%the (psteps (app E1 E2) V Depth) Dstep'')) %.
+%worlds () (schedule_parallel _ _ _ _) %.
+%total T (schedule_parallel T _ _ _) %.
+%{! ### Random Plus Lemmas !}%
+%sort plus_lemma %.
+%mode plus_lemma %out %in %.
+%term _ %pi (plus_lemma (plus/s Dplus) (plus/s Dplus')) %<- (plus_lemma Dplus Dplus') %.
+%term _ plus_lemma (plus/s plus/z) plus/z %.
+%worlds () (plus_lemma _ _) %.
+%total [D] (plus_lemma _ D) %.
+%sort plus_lemma' %.
+%mode plus_lemma' %in %out %.
+%term _ %pi (plus_lemma' (plus/s Dplus) (plus/s Dplus')) %<- (plus_lemma' Dplus Dplus') %.
+%term _ plus_lemma' (plus/s plus/z) plus/z %.
+%worlds () (plus_lemma' _ _) %.
+%total [D] (plus_lemma' D _) %.
+%sort plus_zero {N} %.
+%mode plus_zero %in %out %.
+%term _ plus_zero z plus/z %.
+%term _ %pi (plus_zero (s N) (plus/s Dplus)) %<- (plus_zero N Dplus) %.
+%worlds () (plus_zero _ _) %.
+%total [N] (plus_zero N _) %.
+%sort plus_commute %.
+%mode plus_commute %in %out %.
+%term _ 
+	%pi (plus_commute (plus/s Dplus) Dplus'')
+	%<- (plus_commute Dplus Dplus')
+	%<- (plus_lemma' (plus/s Dplus') Dplus'') %.
+%term _ %pi (plus_commute plus/z Dplus) %<- (plus_zero _ Dplus) %.
+%worlds () (plus_commute _ _) %.
+%total [D] (plus_commute D _) %.
+%{! ### Cost of sequential evaluation !}%
+%sort steps_lemma %.
+%mode steps_lemma %in %in %out %.
+%term _ steps_lemma steps/refl E'step (steps/trans steps/refl E'step) %.
+%term _ 
+	%pi (steps_lemma (steps/trans E'steps Estep) E''step (steps/trans E'steps' Estep))
+	%<- (steps_lemma E'steps E''step E'steps') %.
+%worlds () (steps_lemma _ _ _) %.
+%total [D] (steps_lemma D _ _) %.
+%sort steps_lemma2 %.
+%mode steps_lemma2 %in %in %out %out %.
+%term _ steps_lemma2 Esteps steps/refl plus/z Esteps %.
+%term _ 
+	%pi (steps_lemma2 Esteps (steps/trans E''steps E'step) Dplus' Esteps'')
+	%<- (steps_lemma Esteps E'step Esteps')
+	%<- (steps_lemma2 Esteps' E''steps Dplus Esteps'')
+	%<- (plus_lemma Dplus' Dplus) %.
+%worlds () (steps_lemma2 _ _ _ _) %.
+%total [D] (steps_lemma2 _ D _ _) %.
+%sort app_lemma1 %.
+%mode {%in E1 exp} {%in E1' exp} {%in E2 exp} {%in C nat} {%in D steps E1 E1' C} {%out D' steps (app E1 E2) (app E1' E2) C} app_lemma1 D D' %.
+%term _ app_lemma1 steps/refl steps/refl %.
+%term _ 
+	%pi (app_lemma1 (steps/trans E'steps Estep) (steps/trans E'steps' (step/app/fun Estep)))
+	%<- (app_lemma1 E'steps E'steps') %.
+%worlds () (app_lemma1 _ _) %.
+%total [D] (app_lemma1 D _) %.
+%sort app_lemma2 %.
+%mode {%in V1 exp} {%in E2 exp} {%in E2' exp} {%in C nat} {%in D value V1} {%in D' steps E2 E2' C} {%out D'' steps (app V1 E2) (app V1 E2') C} app_lemma2 D D' D'' %.
+%term _ app_lemma2 _ steps/refl steps/refl %.
+%term _ 
+	%pi (app_lemma2 Vvalue (steps/trans E'steps Estep) (steps/trans E'steps' (step/app/arg Estep Vvalue)))
+	%<- (app_lemma2 Vvalue E'steps E'steps') %.
+%worlds () (app_lemma2 _ _ _) %.
+%total [D] (app_lemma2 _ D _) %.
+%sort schedule_serial %.
+%mode schedule_serial %in %out %out %out %.
+%term _ schedule_serial evcost/unit sizeof/0 steps/refl value/unit %.
+%term _ schedule_serial evcost/fun sizeof/0 steps/refl value/fun %.
+%term _ 
+	%pi (schedule_serial (evcost/app Ecost E2cost E1cost) (sizeof/+ Dplus' (sizeof/+ Dplus'' Esize sizeof/1) (sizeof/* Dplus E2size E1size)) E1steps''' E'value)
+	%<- (schedule_serial E1cost E1size E1steps _)
+	%<- (schedule_serial E2cost E2size E2steps E2'value)
+	%<- (schedule_serial Ecost Esize Esteps E'value)
+	%<- (app_lemma1 E1steps E1steps')
+	%<- (app_lemma2 value/fun E2steps E2steps')
+	%<- (steps_lemma2 E1steps' E2steps' Dplus E1steps'')
+	%<- (steps_lemma2 E1steps'' (steps/trans Esteps (step/app/beta-v E2'value)) Dplus' E1steps''')
+	%<- (plus_commute (plus/s plus/z) Dplus'') %.
+%worlds () (schedule_serial _ _ _ _) %.
+%total [D] (schedule_serial D _ _ _) %.
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/POPL_Tutorial/Cost_semantics).
+!}%

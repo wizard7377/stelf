@@ -1,0 +1,8 @@
+%%%% Syntax for signatures %%%%
+%sort sg %.
+%name sg %.
+%term sg/unit sg %.
+%term sg/kd %pi kd %-> sg %.
+%term sg/cn %pi cn %-> sg %.
+%term sg/pi %pi sg %-> (%pi cn %-> sg) %-> sg %.
+%term sg/sgm %pi sg %-> (%pi cn %-> sg) %-> sg %.

@@ -1,0 +1,435 @@
+%{ This is part of a proof of the soundness of Featherweight Java (Atsushi Igarashi,
+Benjamin Pierce and Philip Wadler) in the Twelf logical Framework.
+It was developed by Stephanie Weirich <sweirich@cis.upenn.edu> and
+Geoffrey Washburn <geoffw@cis.upenn.edu>. }%
+%%   Semantics of FJ
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Abstract syntax
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort className %.
+%name className %.
+%sort methodName %.
+%name methodName %.
+% Method and class names are just natural numbers
+%term methodName_nat %pi nat %-> methodName %.
+%term cn %pi nat %-> className %.
+% Object is the only pre-existing class, defined to be natural number zero.
+%define object className cn z %.
+% Class name lists. Indexed by length 
+%sort cnlist %.
+%name cnlist %.
+%term cnnil cnlist z %.
+% Empty class name list
+%term cncons %pi className %-> (cnlist N) %-> (cnlist (s N)) %.
+% Class name list cons
+% Expressions and expression lists
+%sort exp %.
+%name exp %.
+%sort elist %.
+%name elist %.
+% lists are indexed by length
+%term fieldProj %pi exp %-> nat %-> exp %.
+%term methodInvk %pi exp %-> methodName %-> (elist N) %-> exp %.
+%term new %pi className %-> (elist N) %-> exp %.
+%term cast %pi className %-> exp %-> exp %.
+% and
+%term enil elist z %.
+%term econs %pi exp %-> (elist N) %-> (elist (s N)) %.
+%% a simple expression
+%define unit exp new object enil %.
+% Expressions with binders (used for method bodies), indexed by className lists for
+% convenience.  Idea mostly taken from CMU POPLmark solution
+% Base case abstract a single variable for "this"
+% Bind case binds an additional argument.
+%sort bexp %.
+%name bexp %.
+%term base %pi (%pi exp %-> exp) %-> (bexp cnnil) %.
+%term bind {C className} %pi (%pi exp %-> (bexp CS)) %-> (bexp (cncons C CS)) %.
+% Method declaration
+%sort methodDef %.
+%name methodDef %.
+%term method %pi className %-> ({M methodName} %pi (bexp CS) %-> (methodDef M)) %.
+% Assoc tables of methods
+%sort methodTable %.
+%name methodTable %.
+%% definition of methodTable is below. We are using a representation of method 
+%% tables that includes a proof that labels are not repeated. However, we have 
+%% to define equality for method names first. We could drop this proof and still
+%% prove the soundness of FJ, but adding this to our representation makes the 
+%% adequacy proof easier.
+% Class definition
+%sort classDef %.
+%name classDef %.
+%term class {C className} %pi className %-> (cnlist N) %-> methodTable %-> (classDef C) %.
+% class table
+%% The invariant is  "object" cannot be a part of the class table.
+%% This is satisfied by the well-formedness rule for class tables.
+%% the "cons" constructor also ensures that all class definitions in the table are unique.
+%% For type soundness, this isn't actually necessary, but it does make our adequacy proof
+%% a little easier.
+%sort classTable %.
+%name classTable %.
+%% definition of classTable is also below
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Relations and functions on the abstract syntax
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Equality relation for class names
+%sort className_eq %.
+%name className_eq %.
+%mode className_eq %in %in %.
+% FIX - Do I need this mode declaration?
+% className_refl : nat_eq N1 N2 ->
+%               % --------------------------------------
+%                 className_eq (cn N1) (cn N2).
+%term className_refl className_eq N N %.
+%worlds () (className_eq CN1 CN2) %.
+%terminates {CN1 CN2} (className_eq CN1 CN2) %.
+%%%%%%%%%%%%%
+% Not equals relation for class names
+%sort className_neq %.
+%name className_neq %.
+%mode className_neq %in %in %.
+% FIX - Do I need this mode declaration?
+%term className_neq_natnat %pi (nat_neq N1 N2) %-> (className_neq (cn N1) (cn N2)) %.
+%worlds () (className_neq CN1 CN2) %.
+%terminates {CN1 CN2} (className_neq CN1 CN2) %.
+%%%%%%%%%%%%%
+% Equality relation for method names
+%sort methodName_eq %.
+%name methodName_eq %.
+%mode methodName_eq %in %in %.
+% FIX - Do I need this mode declaration?
+% methodName_eq_base : nat_eq N1 N2 ->
+%              % --------------------------------------
+%                methodName_eq (methodName_nat N1) (methodName_nat N2).
+%term methodName_refl methodName_eq M1 M1 %.
+%worlds () (methodName_eq MN1 MN2) %.
+%terminates {MN1 MN2} (methodName_eq MN1 MN2) %.
+%%%%%%%%%%%%%
+% Not equals relation for method names
+%sort methodName_neq %.
+%name methodName_neq %.
+%mode methodName_neq %in %in %.
+% FIX - Do I need this mode declaration?
+%term methodName_neq_base %pi (nat_neq N1 N2) %-> (methodName_neq (methodName_nat N1) (methodName_nat N2)) %.
+%worlds () (methodName_neq MN1 MN2) %.
+%terminates {MN1 MN2} (methodName_neq MN1 MN2) %.
+%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% List manipulation functions for expression and class name lists.
+% Nth for expression lists
+%sort enth_opt %.
+%mode enth_opt %in %in %out %.
+%term enth_sz enth_opt z (econs E _) E %.
+%term enth_sn %pi (enth_opt N TL E) %-> (enth_opt (s N) (econs E' TL) E) %.
+%worlds () (enth_opt N EL E) %.
+%terminates N (enth_opt N EL E) %.
+%%%%%%%%%%%%%
+% Nth for classname lists
+%sort cnnth_opt %.
+%mode cnnth_opt %in %in %out %.
+%name cnnth_opt %.
+%term cnnth_sz cnnth_opt z (cncons C CS) C %.
+%term cnnth_sn %pi (cnnth_opt N CS C) %-> (cnnth_opt (s N) (cncons D CS) C) %.
+%worlds () (cnnth_opt N CL C) %.
+%terminates N (cnnth_opt N CL C) %.
+%%%%%%%%%%%%%
+% Append for class name lists
+%sort cnappend %.
+%mode cnappend %in %in %out %out %.
+%term cnappend_cnnil cnappend cnnil CS CS plus_z %.
+%term cnappend_cncons 
+	%pi (cnappend CS1 CS2 CS3 PL)
+	%-> (cnappend (cncons CN CS1) CS2 (cncons CN CS3) (plus_s PL)) %.
+%worlds () (cnappend CS1 CS2 CS3 PL) %.
+%terminates CS1 (cnappend CS1 CS2 CS3 PL) %.
+%unique cnappend %in %in %out %out %.
+%covers cnappend %in %in %out %out %.
+%total CS1 (cnappend CS1 CS2 CS3 PL) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Helper functions for method and class tables as well as 
+% class table and method table abstract syntax.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% method and class tables embed proofs that each new name is not already added
+% to the class table. Therefore, we have to define names not appearing in tables
+% simultaneously with the tables themselves.
+%sort notInMT %.
+%mode notInMT %in %in %.
+%name notInMT %.
+%sort notInCT %.
+%mode notInCT %in %in %.
+% Empty method record
+%term mrnil methodTable %.
+% Method record cons
+%term mrcons {MD methodDef M} {MT methodTable} %pi (notInMT MT M) %-> methodTable %.
+% Empty class table
+%term crnil classTable %.
+% class table cons.
+%term crcons {CD classDef C} {CT classTable} %pi (notInCT CT C) %-> classTable %.
+%%%%%%%%%%%%%
+%% a method name is NOT defined in a method table
+%term notInMT_mrnil notInMT mrnil M %.
+%term notInMT_mrcons 
+	%pi (notInMT MT M)
+	%-> (methodName_neq M M')
+	%-> (notInMT (mrcons (method _ M' _) MT NI') M) %.
+%worlds () (notInMT M N) %.
+%%%%%%%%%%%%%
+%% a class name is NOT defined in a class table
+%term nnil notInCT crnil C %.
+%term ncons 
+	%pi (notInCT CT N)
+	%-> (className_neq N N')
+	%-> (notInCT (crcons (class N' _ _ _) CT NI') N) %.
+%worlds () (notInCT CT C) %.
+%%%%%%%%%%%%%
+% Method lookup
+%sort lookupMethod %.
+%name lookupMethod %.
+%mode lookupMethod %in %in %out %.
+%term lookupMethod_mrcons1 lookupMethod (mrcons (method C MN1 BE) MT MU) MN1 (method C MN1 BE) %.
+%term lookupMethod_mrcons2 
+	%pi (methodName_neq MN1 MN2)
+	%-> (lookupMethod MR MN1 MD)
+	%-> (lookupMethod (mrcons (method C MN2 BE) MR MU) MN1 MD) %.
+%worlds () (lookupMethod MR MN MD) %.
+%terminates MR (lookupMethod MR MN MD) %.
+%%%%%%%%%%%%%
+% Find the class definition for a given class.
+%% returns the rest of the class table, which is where the superclass of 
+%sort lookupClass {CT classTable} {C className} %.
+%name lookupClass %.
+%mode lookupClass %in %in %out %.
+%term lookupClass_crcons1 lookupClass (crcons (class CN2 CN3 CNL MR) CT CTU) CN2 (class CN2 CN3 CNL MR) %.
+%term lookupClass_crcons2 
+	%pi (className_neq CN1 CN2)
+	%-> (lookupClass CT CN1 CD)
+	%-> (lookupClass (crcons (class CN2 CN3 CNL MR) CT CTU) CN1 CD) %.
+%worlds () (lookupClass CN CT CD) %.
+%terminates CN (lookupClass CN CT CD) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Static Semantics of FJ
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Subtyping
+%% Note, I couldn't specify the mode I wanted for subtyping because of the 
+%% transitivity rule---the middle types are not ground inputs. 
+%% therefore, I'm using an 'algorithmic' subtyping judgment instead.
+%% I should lookup later whether I can use the subtyping judgment that appears
+%% in TAPL instead.
+%% In the end, we don't need the mode declaration for subtyping. On the other
+%% hand, defining subtyping in this way means that our type system is syntax 
+%% directed and proof search capabilities of twelf means that we have also
+%% implemented a type checker.
+%sort subtyping %.
+%name subtyping %.
+%%mode subtyping +CT +CN1 +CN2.
+%term s_refl subtyping CT C C %.
+% s_trans: subtyping CT C1 C2 ->
+%         subtyping CT C2 C3 ->
+%       % ------------------
+%         subtyping CT C1 C3.
+%term s_super 
+	%pi (subtyping CT D E)
+	%-> (lookupClass CT C (class C D _ _))
+	%-> (className_neq C object)
+	%-> (subtyping CT C E) %.
+%worlds () (subtyping CT C1 C2) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% Calculate the fields of a given class
+%sort fields %.
+%mode fields %in %in %out %out %.
+%term f_obj fields _ object z cnnil %.
+%term f_class 
+	%pi (cnappend CS2 CS1 (%the (cnlist N) CS3) _)
+	%-> (fields CT D _ CS2)
+	%-> (lookupClass CT C (class C D CS1 _))
+	%-> (className_neq C object)
+	%-> (fields CT C N CS3) %.
+%worlds () (fields CT C M CS) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% Method type lookup
+%% method M in class C1 takes args CS and produces C2.
+%sort mtype {CT classTable} %.
+%name mtype %.
+%mode mtype %in %in %in %out %out %.
+%% method is found in this class.
+%term mt_class 
+	%pi (lookupMethod MT M (method C2 _ (%the (bexp CS) BE)))
+	%-> (lookupClass CT C1 (class _ _ _ MT))
+	%-> (className_neq C1 object)
+	%-> (mtype CT M C1 CS C2) %.
+%% the method is not found in this class, but is found in some 
+%% superclass
+%term mt_super 
+	%pi (mtype CT M C2 CS C0)
+	%-> (notInMT MT M)
+	%-> (lookupClass CT C1 (class _ C2 _ MT))
+	%-> (className_neq C1 object)
+	%-> (mtype CT M C1 CS C0) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% Method body lookup
+%sort mbody %.
+%mode mbody %in %in %in %out %.
+%term mb_class 
+	%pi (lookupMethod MT M (method _ _ BE))
+	%-> (lookupClass CT C1 (class _ _ _ MT))
+	%-> (className_neq C1 object)
+	%-> (mbody CT M C1 BE) %.
+%term mb_super 
+	%pi (notInMT MT M)
+	%-> (mbody CT M C2 BE)
+	%-> (lookupClass CT C1 (class _ C2 _ MT))
+	%-> (className_neq C1 object)
+	%-> (mbody CT M C1 BE) %.
+%worlds () (mbody C CT M BE) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% method not defined in a class.
+%sort method_undefined %.
+%mode method_undefined %in %in %in %.
+%name method_undefined %.
+%term mu_object method_undefined CT M object %.
+%term mu_super 
+	%pi (method_undefined CT M D)
+	%-> (notInMT MT M)
+	%-> (lookupClass CT C (class _ D _ MT))
+	%-> (className_neq C object)
+	%-> (method_undefined CT M C) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% Expression/expression list typing
+%% although expression typing is "tight", expression list typing is not.
+%sort typing {CT classTable} %.
+%% %mode typing +CT +E -C.
+%sort typing_list {CT classTable} %.
+%% %mode typing_list +CT +ES +CS.
+%term t_field 
+	%pi (cnnth_opt FI CS CI)
+	%-> (fields CT C1 N2 CS)
+	%-> (typing CT E C1)
+	%-> (typing CT (fieldProj E FI) CI) %.
+%term t_invk 
+	%pi (typing_list CT ES DS)
+	%-> (mtype CT M C0 DS C)
+	%-> (typing CT E0 C0)
+	%-> (typing CT (methodInvk E0 M ES) C) %.
+%term t_new %pi (typing_list CT ES DS) %-> (fields CT C N DS) %-> (typing CT (new C ES) C) %.
+%term t_cast %pi (typing CT E C1) %-> (typing CT (cast C2 E) C2) %.
+%term tl_nil typing_list CT enil cnnil %.
+%term tl_cons 
+	%pi (subtyping CT C0 C)
+	%-> (typing_list CT ES CS)
+	%-> (typing CT E C0)
+	%-> (typing_list CT (econs E ES) (cncons C CS)) %.
+%% Notes about typing judgment:
+% casts include both safe and unsafe casts.
+% field projection uses the "partial" version of nth---if there is 
+% a derivation of nth then the expression will be well-typed. That
+% seems reasonable to me.
+%%terminates E (typing CT E C).  % Can't prove this b/c don't know fields is total
+%% typing for method bodies
+%sort typing_bexp %.
+%% %mode typing_bexp +CT +BE +C -E.
+%term t_base 
+	%pi ({THIS exp} {D typing CT THIS C} typing CT (E THIS) E0)
+	%-> (typing_bexp CT (base E) C E0) %.
+%term t_bind 
+	%pi ({XI exp} {D typing CT XI CI} typing_bexp CT (E XI) C E0)
+	%-> (typing_bexp CT (bind CI E) C E0) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Check that all definitions of the method above class name have the 
+%% same type. 
+%sort override %.
+%mode override %in %in %in %in %in %.
+%% mtype is defined for M 
+%term ov1 %pi (mtype CT M D CS C) %-> (override CT M D CS C) %.
+%% mtype is not defined for M
+%term ov2 %pi (method_undefined CT M D) %-> (override CT M D CS C) %.
+%sort method_typing %.
+%% %mode method_typing +CT +M +MD +C.
+%term t_method 
+	%pi (subtyping CT E0 C0)
+	%-> (typing_bexp CT BE C E0)
+	%-> (override CT M D CS C0)
+	%-> (lookupClass CT C (class C D FS MT))
+	%-> (method_typing CT M (method C0 M (%the (bexp CS) BE)) C) %.
+%sort method_table_typing %.
+%% %mode method_table_typing +CT +MT +C.
+%term mtt_nil method_table_typing CT mrnil C %.
+%term mtt_cons 
+	%pi (method_table_typing CT MT C)
+	%-> (method_typing CT M MD C)
+	%-> (method_table_typing CT (mrcons (%the (methodDef M) MD) MT MNI) C) %.
+%sort class_typing %.
+% %mode class_typing +CT +C +CD.
+%term t_class 
+	%pi (fields CT D N DS)
+	%-> (method_table_typing CT MT C)
+	%-> (subtyping CT D object)
+	%-> (class_typing CT C (class C D FS MT)) %.
+%sort class_table_typing_help %.
+%term ctt_nil class_table_typing_help CT0 crnil %.
+%term ctt_cons 
+	%pi (class_table_typing_help CT0 CT)
+	%-> (class_typing CT0 C CD)
+	%-> (className_neq C object)
+	%-> (class_table_typing_help CT0 (crcons (%the (classDef C) CD) CT CTI)) %.
+%sort class_table_typing %.
+% %mode class_table_typing +CT.
+%term ctt %pi (class_table_typing_help CT CT) %-> (class_table_typing CT) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    FJ Operational semantics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Method body invocation helper
+% Given a method body a list of arguments and a this expression, perform the substitutions
+%sort invoc %.
+%mode invoc %in %in %in %out %.
+%term invoc_base invoc (base ([this exp] E1 this)) enil E2 (E1 E2) %.
+%term invoc_bind 
+	%pi (invoc (BE E1) EL E2 E3)
+	%-> (invoc (bind _ ([x exp] BE x)) (econs E1 EL) E2 E3) %.
+%worlds () (invoc BE EL E1 E2) %.
+%unique invoc %in %in %in %out %.
+%total BE (invoc BE EL E1 E2) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Values and lists of values
+%sort value_list %.
+%name value_list %.
+%mode value_list %in %.
+%sort value %.
+%name value %.
+%mode value %in %.
+%term v_nil value_list enil %.
+%term v_cons %pi (value_list EL) %-> (value E) %-> (value_list (econs E EL)) %.
+%term v_newv %pi (value_list EL) %-> (value (new C EL)) %.
+%terminates (E EL) (value E) (value_list EL) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Operational semantics
+%sort reduction_list {CT classTable} %.
+%sort reduction {CT classTable} %.
+%term r_field 
+	%pi (enth_opt N2 EL E)
+	%-> (reduction CT (fieldProj (new C (%the (elist N1) EL)) N2) E) %.
+%term r_invk 
+	%pi (value_list EL2)
+	%-> (mbody CT M C BE)
+	%-> (invoc BE EL2 (new C EL1) E)
+	%-> (reduction CT (methodInvk (new C EL1) M EL2) E) %.
+%term r_cast %pi (subtyping CT C1 C2) %-> (reduction CT (cast C2 (new C1 EL)) (new C1 EL)) %.
+%term rc_field %pi (reduction CT E1 E2) %-> (reduction CT (fieldProj E1 N) (fieldProj E2 N)) %.
+%term rc_invk_recv 
+	%pi (reduction CT E1 E2)
+	%-> (reduction CT (methodInvk E1 M EL) (methodInvk E2 M EL)) %.
+%term rc_invk_arg 
+	%pi (value E)
+	%-> (reduction_list CT EL1 EL2)
+	%-> (reduction CT (methodInvk E M EL1) (methodInvk E M EL2)) %.
+%term rc_new_arg %pi (reduction_list CT EL1 EL2) %-> (reduction CT (new C EL1) (new C EL2)) %.
+%term rc_cast %pi (reduction CT E1 E2) %-> (reduction CT (cast C E1) (cast C E2)) %.
+%term rl_hd %pi (reduction CT E1 E2) %-> (reduction_list CT (econs E1 EL) (econs E2 EL)) %.
+%term rl_tl 
+	%pi (value E)
+	%-> (reduction_list CT EL1 EL2)
+	%-> (reduction_list CT (econs E EL1) (econs E EL2)) %.

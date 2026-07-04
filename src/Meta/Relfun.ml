@@ -16,6 +16,9 @@ open! Weaken
 open! Global
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module RelFun (RelFun__0 : sig
   (* Converter from relational representation to a functional
    representation of proof terms *)
@@ -47,7 +50,7 @@ module RelFun (RelFun__0 : sig
   module FunNames : FUNNAMES.FUNNAMES
 end) : RELFUN.RELFUN = struct
   (*! structure FunSyn = FunSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   open RelFun__0
 

@@ -57,4 +57,6 @@ end = struct
     end
     *)
 end
+
+let () = Printexc.register_printer (function TimeLimit.TimeOut -> Some "TimeOut" | _ -> None)
 (* TimeLimit *)

@@ -16,6 +16,9 @@ open! Basis
 
 (* Search (based on abstract machine ) : Version 1.3 *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module UniqueSearch (UniqueSearch__0 : sig
   module Global : GLOBAL
 
@@ -64,7 +67,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
   module StateSyn = StateSyn'
 
   (*! structure CompSyn = CompSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   type nonrec acctype = IntSyn.exp
 

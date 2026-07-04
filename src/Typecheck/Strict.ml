@@ -11,12 +11,15 @@ open! Basis
 
 (* Checking Definitions for Strict *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Strict (Strict__0 : sig
   module Whnf : WHNF
 end) : STRICT = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Paths = Paths' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

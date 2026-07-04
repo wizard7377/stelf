@@ -100,6 +100,14 @@ module type NAMES = sig
 
   (* Nonfix if undefined *)
 
+  val installAlias : string * IntSyn.cid -> unit
+  (** [installAlias (name, cid)] registers [name] as an additional lookup name
+      for constant [cid] in the global namespace. *)
+
+  val insertConstAlias : namespace * string * IntSyn.cid -> unit
+  (** [insertConstAlias (ns, name, cid)] registers [name] as an additional
+      lookup name for constant [cid] in the given namespace [ns]. *)
+
   val installNamePref : IntSyn.cid * (string list * string list) -> unit
   (** Name preferences for anonymous variables: a, EPref, UPref *)
 

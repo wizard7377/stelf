@@ -1,0 +1,4 @@
+%require %[ refex %] %.
+%require %[ programs %] %.
+%require %[ refex %] %.
+%require %[ norefex %] %.

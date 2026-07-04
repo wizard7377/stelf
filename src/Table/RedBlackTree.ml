@@ -186,12 +186,8 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             | Greater -> del (b, Rightr (a, entry1, z))
             end
       in
-      try
-        begin
-          ignore (del (t, Top));
-          true
-        end
-      with NotFound -> false
+      try del (t, Top)
+      with NotFound -> t
 
     let insertShadow (dict, ((key, _datum) as entry)) =
       let oldEntry = ref None in
@@ -218,12 +214,14 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
       in
       begin
         oldEntry := None;
-        ( begin match ins dict with
+        let new_dict =
+          begin match ins dict with
           | Red ((_, Red _, _) as t) -> Black t
           | Red ((_, _, Red _) as t) -> Black t
           | dict -> dict
-          end,
-          !oldEntry )
+          end
+        in
+        (new_dict, !oldEntry)
       end
 
     let app f dict =
@@ -319,7 +317,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
     | table -> (
         function
         | key -> begin
-            ignore (delete !table key);
+            table := delete !table key;
             ()
           end)
 

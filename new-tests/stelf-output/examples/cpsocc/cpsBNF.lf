@@ -1,0 +1,16 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% BNF of continuation-passing style terms
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort croot %.
+%name croot %.
+%sort cexp %.
+%name cexp %.
+%sort ctriv %.
+%name ctriv %.
+%sort ccont %.
+%name ccont %.
+%term klam %pi (%pi ccont %-> cexp) %-> croot %.
+%term capp %pi ctriv %-> ctriv %-> ccont %-> cexp %.
+%term cret %pi ccont %-> ctriv %-> cexp %.
+%term xlam %pi (%pi ctriv %-> croot) %-> ctriv %.
+%term vlam %pi (%pi ctriv %-> cexp) %-> ccont %.

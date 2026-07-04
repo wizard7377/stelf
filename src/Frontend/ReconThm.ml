@@ -12,6 +12,9 @@ include RECONTHM
 (* # 1 "src/frontend/ReconThm.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ReconThm (ReconThm__0 : sig
   (* Reconstruct Termination Information *)
   (* Author: Carsten Schuermann *)
@@ -39,7 +42,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
   (*! structure Paths = Paths' !*)
   module ExtSyn = ReconThm__0.ReconTerm'
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module M = ModeSyn

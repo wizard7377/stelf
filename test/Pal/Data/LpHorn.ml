@@ -89,7 +89,5 @@ let lp_horn_sources_3 =
 
 %term ta_atom {{P D}} {_ atm D} toatm D D
 %term ta_whr {{D D' D''}} {_ whr D D'} {_ toatm D' D''} toatm D D''
-
-%block latm {u pf _} {_ toatm u u}
-%worlds (latm) (tocan _ _ _) (toatm _ _)
 |}
+

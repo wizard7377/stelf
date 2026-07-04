@@ -1,0 +1,20 @@
+%sort pty-sub-refl {P pty} %.
+%mode pty-sub-refl %in %out %.
+%term _ pty-sub-refl pty/p pty-sub/pp %.
+%term _ pty-sub-refl pty/i pty-sub/ii %.
+%worlds () (pty-sub-refl _ _) %.
+%total {} (pty-sub-refl _ _) %.
+%sort pty-sub-trans %.
+%mode pty-sub-trans %in %in %out %.
+%term _ pty-sub-trans pty-sub/pp pty-sub/pp pty-sub/pp %.
+%term _ pty-sub-trans pty-sub/pp pty-sub/pi pty-sub/pi %.
+%term _ pty-sub-trans pty-sub/pi pty-sub/ii pty-sub/pi %.
+%term _ pty-sub-trans pty-sub/ii pty-sub/ii pty-sub/ii %.
+%worlds () (pty-sub-trans _ _ _) %.
+%total {} (pty-sub-trans _ _ _) %.
+%sort pty-sub-pty/i-top {P pty} %.
+%mode pty-sub-pty/i-top %in %out %.
+%term _ pty-sub-pty/i-top _ pty-sub/pi %.
+%term _ pty-sub-pty/i-top _ pty-sub/ii %.
+%worlds () (pty-sub-pty/i-top _ _) %.
+%total {} (pty-sub-pty/i-top _ _) %.

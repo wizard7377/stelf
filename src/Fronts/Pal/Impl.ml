@@ -12,7 +12,7 @@ let string_to_source = function
 
 module Impl () = struct
 
-  let current_path : string list ref = ref [] 
+  let current_path : string list ref = ref []
   let current_load_path : Fpath.t list ref = ref ([Result.get_ok @@ Bos.OS.Dir.current ()])
   let load_paths : (Fpath.t * string) list ref = ref []
 
@@ -80,6 +80,29 @@ module Impl () = struct
   type status = Ok | Abort
 
   let status_to_exit = function Ok -> 0 | Abort -> 1
+
+  (* Top-level namespace for the group currently being loaded.
+     %require deposits here, escaping any inner %scope. *)
+  let current_group_ns : Names.namespace ref = ref (Names.newNamespace ())
+
+  (* Canonical paths already run via %require; skip on repeat (#once). *)
+  let required_files : (string, unit) Hashtbl.t = Hashtbl.create 16
+
+  (* Forward reference set after `load` is defined, breaking the cycle
+     between Install.install1 (needs to call load for %require) and load
+     (which calls Install.install). *)
+  let load_file_ref : (Names.namespace -> Fpath.t -> status) ref =
+    ref (fun _ns _path -> Ok)
+
+  (* Forward reference for TOML config detection, set after Config is defined.
+     load calls this to check if a file is a valid TOML project before
+     treating it as source. *)
+  let try_toml_ref : (Fpath.t -> string -> Project.Format.file option) ref =
+    ref (fun _path _str -> None)
+
+  let load_toml_ref : (Project.Format.file -> status) ref =
+    ref (fun _cfg -> Ok)
+
   (* ------------------------------------------------------------------ *)
   (* Options store                                                         *)
   (* ------------------------------------------------------------------ *)
@@ -97,11 +120,16 @@ module Impl () = struct
   (* let msg s = Msg.Msg_.Msg.message s *)
 
   let msg m =
-    Display.message ~level:Display.Normal ~kind:Display.Info
+    Display.message ~level:Display.Normal ~kind:Display.Response
+      (Display.Form.string m)
+
+  let dbg m =
+    Display.message ~level:Display.Exhaustive ~kind:Display.Debug
       (Display.Form.string m)
 
   let print_error (label : string) (detail : string) : unit =
-    Printf.eprintf "%s: %s\n%!" label detail
+    Display.message ~level:Display.Normal ~kind:Display.Error
+      (Display.Form.string (label ^ ": " ^ detail))
 
   (* ------------------------------------------------------------------ *)
   (* ConDec installation                                                   *)
@@ -235,6 +263,16 @@ module Impl () = struct
     let loc_of filename (l : Cst.loc) : Paths.location =
       Paths.Loc (filename, Cst.loc_to_region l)
 
+    let decl_loc (Cst.Dec_ (_, _, l)) : Cst.loc = l
+
+    let term_loc (tm : Cst.term) : Cst.loc =
+      match tm with
+      | Cst.Arrow_ (l, _, _) | Cst.Pi_ (l, _, _) | Cst.Lam_ (l, _, _)
+      | Cst.App_ (l, _, _) | Cst.Hastype_ (l, _, _) | Cst.Omitted_ l
+      | Cst.Typ_ l | Cst.MacroParam_ (l, _, _) | Cst.Local_ (l, _, _) -> l
+      | Cst.Lcid_ (_, _, l) | Cst.Ucid_ (_, _, l) | Cst.Quid_ (_, _, l)
+      | Cst.Scon_ (_, l) | Cst.Evar_ (_, l) | Cst.Fvar_ (_, l) -> l
+
     let run_query loc q =
       let v_, opt_name, xs_ =
         Recon.ReconQuery.queryToQuery (q, loc)
@@ -276,7 +314,7 @@ module Impl () = struct
       if !solutions = 0 && !Global.Global_.Global.chatter >= 3 then
         msg "No solution.\n"
 
-    let install_worlds_cmd ids tm =
+    let install_worlds_cmd ids tms =
       let resolve_block id =
         match Names.constLookup (Names.Qid ([], id)) with
         | None ->
@@ -304,16 +342,19 @@ module Impl () = struct
             Names.constLookup (Names.Qid (ns, n))
         | _ -> None
       in
-      let family_cid_opt =
-        match Cst.View.Term.view tm with
-        | Cst.View.Term.App (_, head, _) -> lookup_head head
-        | v -> lookup_head (Cst.View.Term.review v)
+      let resolve_family tm =
+        let family_cid_opt =
+          match Cst.View.Term.view tm with
+          | Cst.View.Term.App (_, head, _) -> lookup_head head
+          | v -> lookup_head (Cst.View.Term.review v)
+        in
+        match family_cid_opt with
+        | None -> failwith "%worlds: expected a type family name"
+        | Some a -> a
       in
-      match family_cid_opt with
-      | None -> failwith "%worlds: expected a type family name"
-      | Some a ->
-          WorldSyn.install (a, w_);
-          WorldSyn.worldcheck w_ a
+      let families = List.map resolve_family tms in
+      List.app (fun a -> WorldSyn.install (a, w_)) families;
+      List.app (fun a -> WorldSyn.worldcheck w_ a) families
 
     let install_condec_cmd ?(inline = false) ns condec loc =
       match Recon.ReconConDec.condecToConDec (condec, loc, inline) with
@@ -337,6 +378,7 @@ module Impl () = struct
         msg' ~src:Group.pal ~level:Level.Debug Fmt.string "Installing command");
       match cmd with
       | Cst.SortCmd_ (ids, decls) ->
+          let sort_loc = match decls with d :: _ -> decl_loc d | [] -> Cst.ghost in
           List.app
             (fun id ->
               Debug.(
@@ -347,7 +389,7 @@ module Impl () = struct
               let condec =
                 Cst.ConDec.constant_decl (Cst.Decl.decl1 [ Some id ] kind)
               in
-              install_condec_cmd ns condec (loc_of filename Cst.ghost))
+              install_condec_cmd ns condec (loc_of filename sort_loc))
             ids
       | Cst.TermCmd_ decl -> (
           Debug.(
@@ -366,16 +408,16 @@ module Impl () = struct
               ++ each string names' ++ space ()
               ++ hvbox [ shown Cst.show_term ty ]);
           let condec = Cst.ConstantDecl_ decl in
-          install_condec_cmd ns condec (loc_of filename Cst.ghost))
+          install_condec_cmd ns condec (loc_of filename (decl_loc decl)))
       | Cst.DefineCmd_ (Cst.Define_ (name_opt, tm, tp_opt)) ->
           let name = match name_opt with Some n -> n | None -> "_" in
           let condec = Cst.ConstantDef_ (name, tm, tp_opt) in
-          install_condec_cmd ns condec (loc_of filename Cst.ghost)
-      | Cst.QueryCmd_ (_n, _b, _d, q) ->
-          run_query (loc_of filename Cst.ghost) q
-      | Cst.SolveCmd_ sol ->
+          install_condec_cmd ns condec (loc_of filename (term_loc tm))
+      | Cst.QueryCmd_ (_n, _b, _d, (Cst.Query_ (_, qtm) as q)) ->
+          run_query (loc_of filename (term_loc qtm)) q
+      | Cst.SolveCmd_ (Cst.Solve_ (_, stm) as sol) ->
           let v_, sc_fn =
-            Recon.ReconQuery.solveToSolve ([], sol, loc_of filename Cst.ghost)
+            Recon.ReconQuery.solveToSolve ([], sol, loc_of filename (term_loc stm))
           in
           let g =
             Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, v_)
@@ -415,8 +457,8 @@ module Impl () = struct
       | Cst.SetCmd_ (key, value) -> Options.set key value
       | Cst.VersionCmd_ -> msg (Frontend.Version.Version.version_string ^ "\n")
       | Cst.EvalCmd_ cmds -> List.app (install1 ~path ns) cmds
-      | Cst.AdhocQueryCmd_ q ->
-          run_query (loc_of filename Cst.ghost) q
+      | Cst.AdhocQueryCmd_ (Cst.Query_ (_, qtm) as q) ->
+          run_query (loc_of filename (term_loc qtm)) q
       | Cst.DeclCmd_ tm ->
           let qid_opt =
             match Cst.View.Term.view tm with
@@ -465,12 +507,14 @@ module Impl () = struct
               let cid = name_to_cid ns "prec" id in
               Names.installFixity (cid, fixity))
             ids
-      | Cst.SymbolCmd_ (id, pref) ->
+      | Cst.SymbolCmd_ (pref, id) ->
           let cid = name_to_cid ns "symbol" id in
+          Names.installAlias (pref, cid);
+          Names.insertConstAlias (ns, pref, cid);
           Names.installNamePref (cid, ([ pref ], [ pref ]))
       | Cst.InlineCmd_ (name, tm) ->
           let condec = Cst.ConstantDef_ (name, tm, None) in
-          install_condec_cmd ~inline:true ns condec (loc_of filename Cst.ghost)
+          install_condec_cmd ~inline:true ns condec (loc_of filename (term_loc tm))
       | Cst.BlockCmd_ (id, items) ->
           let pis =
             Stdlib.List.filter_map
@@ -482,8 +526,11 @@ module Impl () = struct
               (function Cst.BlockSome_ d -> Some d | _ -> None)
               items
           in
+          let block_loc =
+            match pis @ somes with d :: _ -> decl_loc d | [] -> Cst.ghost
+          in
           let condec = Cst.BlockDecl_ (id, pis, somes) in
-          install_condec_cmd ns condec (loc_of filename Cst.ghost)
+          install_condec_cmd ns condec (loc_of filename block_loc)
       | Cst.ModeCmd_ md ->
           let () =
             Display.(
@@ -538,10 +585,10 @@ module Impl () = struct
           let syms = List.map (fun s -> ([], s)) ids in
           let condec = Cst.BlockDef_ (id, syms) in
           install_condec_cmd ns condec (loc_of filename Cst.ghost)
-      | Cst.WorldsCmd_ (ids, tm) -> install_worlds_cmd ids tm
-      | Cst.QueryTabledCmd_ (numSol, try_, _d, q) ->
+      | Cst.WorldsCmd_ (ids, tms) -> install_worlds_cmd ids tms
+      | Cst.QueryTabledCmd_ (numSol, try_, _d, (Cst.Query_ (_, qtm) as q)) ->
           let a_, opt_name, xs_ =
-            Recon.ReconQuery.queryToQuery (q, loc_of filename Cst.ghost)
+            Recon.ReconQuery.queryToQuery (q, loc_of filename (term_loc qtm))
           in
           let g =
             Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, a_)
@@ -628,7 +675,39 @@ module Impl () = struct
           failwith "Macros not yet implemented in this frontend"
       | Cst.Seq_ cmds ->
           List.app (install1_item ~path ns) cmds
-        | Cst.Require_ path -> failwith "Require not yet implemented in this frontend"
+        | Cst.Require_ ids ->
+          let rel = String.concatWith "/" ids in
+          let req_path = Fpath.v rel in
+          let parent_dir = Fpath.parent req_path in
+          let stem = Fpath.to_string (Fpath.rem_ext (Fpath.base req_path)) in
+          let is_source_ext ext = ext <> "" && ext <> ".cfg" && ext <> ".toml" in
+          let found =
+            Stdlib.List.find_map (fun base_dir ->
+              let search_dir = Fpath.(base_dir // parent_dir) in
+              match Bos.OS.Dir.contents search_dir with
+              | Error _ -> None
+              | Ok entries ->
+                  Stdlib.List.find_opt (fun entry ->
+                    let b = Fpath.base entry in
+                    Fpath.to_string (Fpath.rem_ext b) = stem
+                    && is_source_ext (Fpath.get_ext b)
+                  ) entries
+            ) !current_load_path
+          in
+          (match found with
+          | None -> failwith ("%require: file not found: " ^ rel)
+          | Some file_path ->
+              let canon = Fpath.to_string (Fpath.normalize file_path) in
+              dbg ("%%require: resolved " ^ rel ^ " -> " ^ canon);
+              if not (Hashtbl.mem required_files canon) then begin
+                dbg ("%%require: loading " ^ canon);
+                Hashtbl.add required_files canon ();
+                (match !load_file_ref !current_group_ns file_path with
+                | Ok -> dbg ("%%require: finished " ^ canon)
+                | Abort ->
+                    failwith ("%require: error loading " ^ Fpath.to_string file_path))
+              end else
+                dbg ("%%require: skipping " ^ canon ^ " (already loaded)"))
 
     and install1_item ?(path = None) ns (item : Cst.item) : unit =
       match item with
@@ -646,6 +725,7 @@ module Impl () = struct
   (* ------------------------------------------------------------------ *)
 
   let load_string ?(path = None) ?(ns_init = None) (str : string) : status =
+    dbg ("load_string: " ^ source_to_string path);
     let ns = match ns_init with Some r -> r | None -> ref (Names.newNamespace ()) in
     let loc = Cst.ghost in
     try
@@ -671,8 +751,8 @@ module Impl () = struct
       | Failure msg ->
           Error.Error.err ~stage:Error.Error.Unknown (Display.Form.string msg)
       | exn ->
-          print_error (source_to_string path) (Printexc.to_string exn);
-          Abort
+          Error.Error.err ~stage:Error.Error.Unknown
+            (Display.Form.string (Printexc.to_string exn))
     with
     | Error.Error.Err (stage, form) ->
         let stage_str =
@@ -682,30 +762,51 @@ module Impl () = struct
           | Error.Error.Recon -> "recon"
           | _ -> "error"
         in
-        Printf.eprintf "[%s] %s\n%!" stage_str (Display.Form.to_plain form);
+        Display.message ~level:Display.Normal ~kind:Display.Error
+          (Display.Form.string
+             ("[" ^ stage_str ^ "] " ^ Display.Form.to_plain form));
         Abort
     | Modern.Modern.ParseError e ->
         (* Fallback during transition; should no longer be reached *)
         print_error (source_to_string path) ("parse error: " ^ e);
         Abort
     | exn ->
-        print_error (source_to_string path) (Printexc.to_string exn);
-        Abort
+        Error.Error.err ~stage:Error.Error.Unknown
+          (Display.Form.string (Printexc.to_string exn))
 
   let load ns (src : source) : status =
     let ns_ref = ref ns in
     match src with
-    | Input str -> load_string ~ns_init:(Some ns_ref) str
+    | Input str ->
+        dbg "load: loading from input";
+        load_string ~ns_init:(Some ns_ref) str
     | File path -> (
+        dbg ("load: loading file " ^ Fpath.to_string path);
         let filename = Some path in
         try
-          let ic = TextIO.openIn (Fpath.to_string path) in
-          let str = TextIO.inputAll ic in
-          let () = TextIO.closeIn ic in
-          load_string ~path:filename ~ns_init:(Some ns_ref) str
+          let buf = Bos.OS.File.read path in
+          let str = match buf with
+          | Ok s -> s
+          | Error (`Msg msg) ->
+              print_error "pal" ("Failed to read file: " ^ msg);
+              failwith (msg)
+          in
+          match !try_toml_ref path str with
+          | Some cfg ->
+              dbg ("load: detected TOML config in " ^ Fpath.to_string path);
+              !load_toml_ref cfg
+          | None ->
+              let saved_load_path = !current_load_path in
+              let parent = Fpath.parent path in
+              current_load_path := parent :: !current_load_path;
+              let result = load_string ~path:filename ~ns_init:(Some ns_ref) str in
+              current_load_path := saved_load_path;
+              result
         with exn ->
           print_error "pal" (Printexc.to_string exn);
           Abort)
+
+  let () = load_file_ref := (fun ns fp -> load ns (File fp))
 
   let read_decl () : status =
     begin match TextIO.inputLine TextIO.stdIn with
@@ -746,27 +847,183 @@ module Impl () = struct
             let () = TextIO.closeIn ic in
             str
           with exn ->
-            print_error "pal" (Printexc.to_string exn);
-            "") in 
-      match Project.Format.from_toml @@ Otoml.string str with
-      | None -> failwith "Failed to parse config file"
-      | Some config -> config
+            let msg = "Failed to read config file " ^ Fpath.to_string path
+                      ^ ": " ^ Printexc.to_string exn in
+            print_error "pal" msg;
+            failwith msg) in
+      let toml =
+        match Otoml.Parser.from_string str with
+        | toml -> toml
+        | exception Otoml.Parse_error (pos_opt, msg) ->
+            let loc = match pos_opt with
+              | Some (line, col) -> Printf.sprintf " at line %d, col %d" line col
+              | None -> "" in
+            let full = Printf.sprintf "TOML parse error%s: %s" loc msg in
+            print_error "pal" full;
+            failwith full
+        | exception exn ->
+            let msg = "TOML parse error: " ^ Printexc.to_string exn in
+            print_error "pal" msg;
+            failwith msg in
+      match Project.Format.from_toml toml with
+      | Error msg ->
+          print_error "pal" msg;
+          failwith msg
+      | Ok config -> config
 
-      let load' (cfg : Project.Format.t) : status =
-        assert false
-      let load (cfg : t) : status = 
-        assert false
+      let rebase_group base_dir (g : Project.Format.t) : Project.Format.t =
+        let open Project.Format in
+        let rebase_dep = function
+          | Local ({ path = Some p; _ } as d) -> Local { d with path = Some Fpath.(base_dir // p) }
+          | dep -> dep
+        in
+        { g with
+          main = Fpath.(base_dir // g.main);
+          dirs = List.map (fun d -> Fpath.(base_dir // d)) g.dirs;
+          deps = List.map rebase_dep g.deps;
+        }
 
-      
+      let try_toml (path : Fpath.t) (str : string) : t option =
+        let base_dir = Fpath.parent path in
+        let is_toml = Fpath.has_ext "toml" path in
+        match Otoml.Parser.from_string str with
+        | exception Otoml.Parse_error (pos_opt, msg) ->
+            if is_toml then begin
+              let loc = match pos_opt with
+                | Some (line, col) -> Printf.sprintf " at line %d, col %d" line col
+                | None -> "" in
+              print_error "config"
+                (Printf.sprintf "TOML parse error in %s%s: %s" (Fpath.to_string path) loc msg)
+            end;
+            None
+        | exception exn ->
+            if is_toml then
+              print_error "config"
+                ("Error reading TOML config " ^ Fpath.to_string path ^ ": "
+                 ^ Printexc.to_string exn);
+            None
+        | toml ->
+            match Project.Format.from_toml toml with
+            | Error msg ->
+                if is_toml then
+                  print_error "config" (Fpath.to_string path ^ ": " ^ msg);
+                None
+            | Ok cfg ->
+                let groups = List.map (rebase_group base_dir) cfg.Project.Format.groups in
+                Some { cfg with Project.Format.groups = groups }
+
+      let rec load' ~(all_groups : Project.Format.t list) (cfg : Project.Format.t) : status =
+        let open Project.Format in
+        dbg ("Config.load': group " ^ cfg.name ^ ", main=" ^ Fpath.to_string cfg.main);
+        let group_ns = Names.newNamespace () in
+        let saved_group_ns = !current_group_ns in
+        let saved_load_path = !current_load_path in
+        current_group_ns := group_ns;
+        current_load_path :=
+          (if cfg.dirs = [] then [ Fpath.v "." ] else cfg.dirs);
+        let install_dep dep =
+          match dep with
+          | Local { name; alias; path = None } ->
+              dbg ("Config.load': dependency " ^ name
+                ^ (match alias with Some a -> " (alias " ^ a ^ ")" | None -> ""));
+              (match Stdlib.List.find_opt (fun g -> g.name = name) all_groups with
+              | None ->
+                  print_error "config" ("Local dependency not found: " ^ name);
+                  Abort
+              | Some dep_group ->
+                  dbg ("Config.load': loading dependency group " ^ dep_group.name);
+                  let _ = load' ~all_groups dep_group in
+                  let ns_name = Stdlib.Option.value alias ~default:name in
+                  if ns_name <> dep_group.name then begin
+                    (* Create an alias struct with copied components *)
+                    match Names.structLookupIn (group_ns, Names.Qid ([], dep_group.name)) with
+                    | None -> Ok
+                    | Some mid_dep ->
+                        let alias_ns = Names.newNamespace () in
+                        let comps = Names.getComponents mid_dep in
+                        Names.appConsts (fun (_, cid) -> Names.insertConst (alias_ns, cid)) comps;
+                        Names.appStructs (fun (_, m) -> Names.insertStruct (alias_ns, m)) comps;
+                        let mid_alias = Intsyn.IntSyn.sgnStructAdd
+                            (Intsyn.IntSyn.StrDec (ns_name, None)) in
+                        Names.installStructName mid_alias;
+                        Names.insertStruct (group_ns, mid_alias);
+                        Names.installComponents (mid_alias, alias_ns);
+                        Ok
+                  end else Ok)
+          | Local { name; alias; path = Some p } ->
+              dbg ("Config.load': dependency " ^ name ^ " at " ^ Fpath.to_string p
+                ^ (match alias with Some a -> " (alias " ^ a ^ ")" | None -> ""));
+              (match Bos.OS.File.read p with
+              | Error (`Msg msg) ->
+                  print_error "config" ("Failed to read dependency file: " ^ msg); Abort
+              | Ok str ->
+                  (match !try_toml_ref p str with
+                  | None ->
+                      print_error "config" ("Not a valid TOML config: " ^ Fpath.to_string p); Abort
+                  | Some sub_file ->
+                      let groups = sub_file.Project.Format.groups in
+                      (match Stdlib.List.find_opt (fun g -> g.Project.Format.name = name) groups with
+                      | None ->
+                          print_error "config"
+                            ("Group '" ^ name ^ "' not found in " ^ Fpath.to_string p); Abort
+                      | Some dep_group ->
+                          let _ = load' ~all_groups:groups dep_group in
+                          let ns_name = Stdlib.Option.value alias ~default:name in
+                          if ns_name <> dep_group.Project.Format.name then
+                            match Names.structLookupIn (group_ns, Names.Qid ([], dep_group.Project.Format.name)) with
+                            | None -> Ok
+                            | Some mid_dep ->
+                                let alias_ns = Names.newNamespace () in
+                                let comps = Names.getComponents mid_dep in
+                                Names.appConsts (fun (_, cid) -> Names.insertConst (alias_ns, cid)) comps;
+                                Names.appStructs (fun (_, m) -> Names.insertStruct (alias_ns, m)) comps;
+                                let mid_alias = Intsyn.IntSyn.sgnStructAdd
+                                    (Intsyn.IntSyn.StrDec (ns_name, None)) in
+                                Names.installStructName mid_alias;
+                                Names.insertStruct (group_ns, mid_alias);
+                                Names.installComponents (mid_alias, alias_ns);
+                                Ok
+                          else Ok)))
+          | Installed { name; _ } ->
+              dbg ("Config.load': installed dependency " ^ name);
+              Ok
+          | External _ ->
+              dbg "Config.load': external dependency (skipped)";
+              Ok
+        in
+        let dep_results = List.map install_dep cfg.deps in
+        let dep_ok = not (List.exists (fun s -> s = Abort) dep_results) in
+        let main_status =
+          if dep_ok then begin
+            dbg ("Config.load': loading main " ^ Fpath.to_string cfg.main);
+            load group_ns (File cfg.main)
+          end else Abort
+        in
+        let mid = Intsyn.IntSyn.sgnStructAdd
+            (Intsyn.IntSyn.StrDec (cfg.name, None)) in
+        Names.installStructName mid;
+        Names.insertStruct (saved_group_ns, mid);
+        Names.installComponents (mid, group_ns);
+        current_group_ns := saved_group_ns;
+        current_load_path := saved_load_path;
+        main_status
+
+      let load (cfg : t) : status =
+        let groups = cfg.Project.Format.groups in
+        dbg ("Config.load: " ^ string_of_int (Stdlib.List.length groups) ^ " group(s)");
+        let results = List.map (load' ~all_groups:groups) groups in
+        if List.exists (fun s -> s = Abort) results then Abort else Ok
+
   end
+
+  let () = try_toml_ref := Config.try_toml
+  let () = load_toml_ref := Config.load
+
   let make (src : source) : status =
-    let is_config path =
-      let ext = Fpath.get_ext path in
-      ext = ".cfg" || ext = ".toml"
-    in
-    match src with
-    | File path when is_config path -> Config.load (Config.read src)
-    | _ -> load (Names.newNamespace ()) src
+    dbg (match src with
+       | File p -> "make: loading " ^ Fpath.to_string p
+       | Input _ -> "make: loading from input");
+    load (Names.newNamespace ()) src
 
   (* ------------------------------------------------------------------ *)
   (* Print settings                                                       *)

@@ -14,6 +14,9 @@ open! Basis
 
 (* Printing of functional proof terms *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module TomegaPrint (TomegaPrint__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure Tomega' : TOMEGA !*)
@@ -31,7 +34,7 @@ end) : TOMEGAPRINT = struct
   (*! structure Tomega = Tomega' !*)
   module Formatter = TomegaPrint__0.Formatter
 
-  exception Error of string
+  exception Error = Error
 
   (* is just here because we don't have a
      module yet for Names. move later

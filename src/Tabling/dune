@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name tabling)
  (public_name stelf.tabling)
  (modules Tabledsyn Tabled TABLEDSYN)

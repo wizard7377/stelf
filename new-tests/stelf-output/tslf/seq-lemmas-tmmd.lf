@@ -1,0 +1,83 @@
+%%%% lemmas about syntactic equality
+%%%% this file could benefit from better organization. perhaps splitting it
+%%%% into different files, etc..
+%sort seq/tm/pj1 %.
+%mode seq/tm/pj1 %in %out %.
+%term _ seq/tm/pj1 _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/pj1 _ _) %.
+%total {} (seq/tm/pj1 _ _) %.
+%sort seq/tm/pj2 %.
+%mode seq/tm/pj2 %in %out %.
+%term _ seq/tm/pj2 _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/pj2 _ _) %.
+%total {} (seq/tm/pj2 _ _) %.
+%sort seq/tm/tmapp {E3 tm} %.
+%mode seq/tm/tmapp %in %in %out %.
+%term _ seq/tm/tmapp _ _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/tmapp _ _ _) %.
+%total {} (seq/tm/tmapp _ _ _) %.
+%sort seq/tm/tag {E3 tm} %.
+%mode seq/tm/tag %in %in %out %.
+%term _ seq/tm/tag _ _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/tag _ _ _) %.
+%total {} (seq/tm/tag _ _ _) %.
+%sort seq/tm/cnapp {E3 cn} %.
+%mode seq/tm/cnapp %in %in %out %.
+%term _ seq/tm/cnapp _ _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/cnapp _ _ _) %.
+%total {} (seq/tm/cnapp _ _ _) %.
+%sort seq/tm/term %.
+%mode seq/tm/term %in %out %.
+%term _ seq/tm/term _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/term _ _) %.
+%total {} (seq/tm/term _ _) %.
+%sort seq/tm/unroll %.
+%mode seq/tm/unroll %in %out %.
+%term _ seq/tm/unroll _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/unroll _ _) %.
+%total {} (seq/tm/unroll _ _) %.
+%sort seq/tm/sym %.
+%mode seq/tm/sym %in %out %.
+%term _ seq/tm/sym _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/sym _ _) %.
+%total {} (seq/tm/sym _ _) %.
+%sort seq/tm/term-a %.
+%mode seq/tm/term-a %in %out %.
+%term _ seq/tm/term-a _ seq/md/refl %.
+%worlds (ofkd+vdt-block ofsg+vdt-block) (seq/tm/term-a _ _) %.
+%total {} (seq/tm/term-a _ _) %.
+%sort seq/md/app {M3 md} %.
+%mode seq/md/app %in %in %out %.
+%term _ seq/md/app _ _ seq/md/refl %.
+%worlds (ofkd+vdt-block) (seq/md/app _ _ _) %.
+%total {} (seq/md/app _ _ _) %.
+%sort fst-md/seq-m %.
+%mode fst-md/seq-m %in %in %out %.
+%term _ fst-md/seq-m seq/md/refl D1 D1 %.
+%worlds (ofkd+vdt-block ofsg+vdt-block) (fst-md/seq-m _ _ _) %.
+%total {} (fst-md/seq-m _ _ _) %.
+%sort seq/md/pj1 %.
+%mode seq/md/pj1 %in %out %.
+%term _ seq/md/pj1 _ seq/md/refl %.
+%worlds (ofkd+vdt-block) (seq/md/pj1 _ _) %.
+%total {} (seq/md/pj1 _ _) %.
+%sort seq/md/pj2 %.
+%mode seq/md/pj2 %in %out %.
+%term _ seq/md/pj2 _ seq/md/refl %.
+%worlds (ofkd+vdt-block) (seq/md/pj2 _ _) %.
+%total {} (seq/md/pj2 _ _) %.
+%sort oftp/seq-t %.
+%mode oftp/seq-t %in %in %out %.
+%term _ oftp/seq-t seq/tm/refl D1 D1 %.
+%worlds (ofkd+vdt-block ofsg+vdt-block) (oftp/seq-t _ _ _) %.
+%total {} (oftp/seq-t _ _ _) %.
+%sort seq/tm/get %.
+%mode seq/tm/get %in %out %.
+%term _ seq/tm/get _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/get _ _) %.
+%total {} (seq/tm/get _ _) %.
+%sort seq/tm/set {E3 tm} %.
+%mode seq/tm/set %in %in %out %.
+%term _ seq/tm/set _ _ seq/tm/refl %.
+%worlds (ofkd+vdt-block) (seq/tm/set _ _ _) %.
+%total {} (seq/tm/set _ _ _) %.

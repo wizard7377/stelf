@@ -1,0 +1,3 @@
+%sort nat %.
+%term zero nat %.
+%term succ {_ nat} nat %.

@@ -12,11 +12,14 @@ open! Basis
 
 (* Table parameters *)
 (* Author: Brigitte Pientka *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeTableParam (Global : GLOBAL) : TABLEPARAM = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure CompSyn = CompSyn' !*)
   (*! structure RBSet = RBSet !*)
-  exception Error of string
+  exception Error = Error
 
   type strategy = Variant | Subsumption
 

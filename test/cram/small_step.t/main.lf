@@ -1,0 +1,96 @@
+# Progress and preservation for the Church-style simply-typed lambda calculus.
+# Ported from examples/small_step/lam.elf.
+
+%sort tp %.
+%scope tp %{
+  %term => %pi tp %-> %pi tp %-> tp
+  %prec %left 5 => %.
+%}
+
+%sort tm %.
+%scope tm %{
+  %term @ %pi tm %-> %pi tm %-> tm
+  %prec %left 5 @ %.
+  %term lam %pi tp %-> %pi (%pi tm %-> tm) %-> tm
+%}
+
+%sort is {_ tm} {_ tp} %.
+%scope is %{
+  %term is_@ {{E1 E2 T1 T2}}
+    %if is (%(@ tm) E1 E2) T2
+    %<- is E1 (%(=> tp) T1 T2)
+    %<- is E2 T1
+  %term is_lam {{T1 T2 E}}
+    %if is (%(lam tm) T1 E) (%(=> tp) T1 T2)
+    %<- %pi tm %-> %pi (is _ T1) %-> is (E _) T2
+%}
+
+%sort val {_ tm} %.
+%scope val %{
+  %term val_lam {{T E}} val (%(lam tm) T E)
+%}
+
+%sort step {_ tm} {_ tm} %.
+%scope step %{
+  %term r_@1 {{E1 E1' E2}}
+    %if step (%(@ tm) E1 E2) (%(@ tm) E1' E2)
+    %<- step E1 E1'
+  %term r_@2 {{E1 E2 E2'}}
+    %if step (%(@ tm) E1 E2) (%(@ tm) E1 E2')
+    %<- val E1
+    %<- step E2 E2'
+  %term r_@3 {{T E1 E2}}
+    %if step (%(@ tm) (%(lam tm) T E1) E2) (E1 E2)
+    %<- val E2
+%}
+
+# Preservation: typing is preserved under reduction
+%sort pres {_ (is _ _)} {_ (step _ _)} {_ (is _ _)} %.
+%mode pres %in %in %out %.
+%scope pres %{
+  %term pres_@1 {{E1 E1' E2 T D1 D2 EV1 D1'}}
+    %if pres (%(is_@ is) D1 D2) (%(r_@1 step) EV1) (%(is_@ is) D1' D2)
+    %<- pres D1 EV1 D1'
+  %term pres_@2 {{E1 E2 E2' T1 T2 D1 D2 V EV2 D2'}}
+    %if pres (%(is_@ is) D1 D2) (%(r_@2 step) V EV2) (%(is_@ is) D1 D2')
+    %<- pres D2 EV2 D2'
+  %term pres_@3 {{T1 T2 D1 D2 V}}
+    %if pres (%(is_@ is) (%(is_lam is) D1) D2) (%(r_@3 step) V) (D1 _ D2)
+%}
+%worlds () (pres _ _ _)
+%total EV (pres _ EV _)
+
+%sort step_or_val {_ tm} %.
+%scope step_or_val %{
+  %term step_ {{E E'}} step_or_val E %<- step E E'
+  %term val_ {{E}} step_or_val E %<- val E
+%}
+
+# Lemma factoring subcases for progress
+%sort prog_lemma {_ (step_or_val _)} {_ (step_or_val _)} {_ (step_or_val _)} %.
+%mode prog_lemma %in %in %out %.
+%scope prog_lemma %{
+  %term pl_s {{EV E2 SV2}}
+    %if prog_lemma (%(step_ step_or_val) EV) SV2 (%(step_ step_or_val) (%(r_@1 step) EV))
+  %term pl_vs {{E1 EV VL SV}}
+    %if prog_lemma (%(val_ step_or_val) VL) (%(step_ step_or_val) EV) (%(step_ step_or_val) (%(r_@2 step) VL EV))
+  %term pl_vv {{VL1 VL2 E1 E2}}
+    %if prog_lemma (%(val_ step_or_val) VL1) (%(val_ step_or_val) VL2) (%(step_ step_or_val) (%(r_@3 step) VL2))
+%}
+%worlds () (prog_lemma _ _ _)
+%total {SV1 SV2} (prog_lemma SV1 SV2 _)
+
+# Progress: every well-typed term is a value or takes a step
+%sort prog {_ (is _ _)} {_ (step_or_val _)} %.
+%mode prog %in %out %.
+%scope prog %{
+  %term prog_@ {{D1 D2 SV1 SV2 SV3}}
+    %if prog (%(is_@ is) D1 D2) SV3
+    %<- prog_lemma SV1 SV2 SV3
+    %<- prog D1 SV1
+    %<- prog D2 SV2
+  %term prog_lam {{T1 T2 D1}}
+    %if prog (%(is_lam is) D1) (%(val_ step_or_val) %(val_lam val))
+%}
+%worlds () (prog _ _)
+%total D (prog D _)

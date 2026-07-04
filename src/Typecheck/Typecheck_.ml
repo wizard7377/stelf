@@ -13,6 +13,9 @@ open! Basis
 
 (* Type Checking *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeTypeCheck
     (Conv : CONV)
     (Whnf : WHNF)
@@ -25,7 +28,7 @@ module MakeTypeCheck
   (*! sharing Names.IntSyn = IntSyn' !*)
 *)
   (*! structure IntSyn = IntSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

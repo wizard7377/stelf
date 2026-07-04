@@ -1,5 +1,7 @@
 module type RECON_MODE = RECON_MODE.RECON_MODE
 
+exception Error of string
+
 module ModeDec = Modes.Modedec.MakeModeDec ()
 
 let ghost_region = Paths.Paths_.Paths.Reg (0, 0)
@@ -12,7 +14,7 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
   module Paths = M.Paths
   module Modes = Modes.Modesyn.ModeSyn
 
-  exception Error of string
+  exception Error = Error
 
   let raise' m =
     Display.(
@@ -66,8 +68,5 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
       | _ -> raise' "Invalid mode declaration"
       end
     with Error m ->
-      Display.(
-        message ~kind:Warning ~level:Detailed
-          (string "Error processing mode declaration: " ++ string m));
       raise' m
 end

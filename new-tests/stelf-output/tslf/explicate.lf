@@ -1,0 +1,187 @@
+%%%% explicate
+%sort explicate-open-ofkd {I loc} {x} %.
+%mode explicate-open-ofkd %in %in %out %.
+%term _ 
+	%pi (explicate-open-ofkd I Dof Dofe)
+	%<- ({x} {d ofkd x A} {dm mofkd d met/unit} {_ can-mofkd d dm} can-mofkd (Dof x d) (%the (mofkd _ Mm) (Dmof x d dm)))
+	%<- ({x} {d' isvar x I} cut-ofkd Mm ([d] Dof x d) ([d] [dm] Dmof x d dm) (cxt-lookup/hit (cxt-bounded/nil d')) (Dofe x d') _) %.
+%worlds (can-mofkd-block ovar-block) (explicate-open-ofkd _ _ _) %.
+%total {} (explicate-open-ofkd _ _ _) %.
+%sort explicate-open-kd-wf {I loc} {x} %.
+%mode explicate-open-kd-wf %in %in %out %.
+%term _ 
+	%pi (explicate-open-kd-wf I Dof Dofe)
+	%<- ({x} {d ofkd x A} {dm mofkd d met/unit} {_ can-mofkd d dm} can-mkd-wf (Dof x d) (%the (mkd-wf _ Mm) (Dmof x d dm)))
+	%<- ({x} {d' isvar x I} cut-kd-wf Mm ([d] Dof x d) ([d] [dm] Dmof x d dm) (cxt-lookup/hit (cxt-bounded/nil d')) (Dofe x d') _) %.
+%worlds (can-mofkd-block ovar-block) (explicate-open-kd-wf _ _ _) %.
+%total {} (explicate-open-kd-wf _ _ _) %.
+%sort explicate-open-kd-deq {I loc} {x} %.
+%mode explicate-open-kd-deq %in %in %out %.
+%term _ 
+	%pi (explicate-open-kd-deq I Dof Dofe)
+	%<- ({x} {d ofkd x A} {dm mofkd d met/unit} {_ can-mofkd d dm} can-mkd-deq (Dof x d) (%the (mkd-deq _ Mm) (Dmof x d dm)))
+	%<- ({x} {d' isvar x I} cut-kd-deq Mm ([d] Dof x d) ([d] [dm] Dmof x d dm) (cxt-lookup/hit (cxt-bounded/nil d')) (Dofe x d') _) %.
+%worlds (can-mofkd-block ovar-block) (explicate-open-kd-deq _ _ _) %.
+%total {} (explicate-open-kd-deq _ _ _) %.
+%sort explicate-open-kd-sub {I loc} {x} %.
+%mode explicate-open-kd-sub %in %in %out %.
+%term _ 
+	%pi (explicate-open-kd-sub I Dof Dofe)
+	%<- ({x} {d ofkd x A} {dm mofkd d met/unit} {_ can-mofkd d dm} can-mkd-sub (Dof x d) (%the (mkd-sub _ Mm) (Dmof x d dm)))
+	%<- ({x} {d' isvar x I} cut-kd-sub Mm ([d] Dof x d) ([d] [dm] Dmof x d dm) (cxt-lookup/hit (cxt-bounded/nil d')) (Dofe x d') _) %.
+%worlds (can-mofkd-block ovar-block) (explicate-open-kd-sub _ _ _) %.
+%total {} (explicate-open-kd-sub _ _ _) %.
+%sort explicate-open-cn-deq {I loc} {x} %.
+%mode explicate-open-cn-deq %in %in %out %.
+%term _ 
+	%pi (explicate-open-cn-deq I Dof Dofe)
+	%<- ({x} {d ofkd x A} {dm mofkd d met/unit} {_ can-mofkd d dm} can-mcn-deq (Dof x d) (%the (mcn-deq _ Mm) (Dmof x d dm)))
+	%<- ({x} {d' isvar x I} cut-cn-deq Mm ([d] Dof x d) ([d] [dm] Dmof x d dm) (cxt-lookup/hit (cxt-bounded/nil d')) (Dofe x d') _) %.
+%worlds (can-mofkd-block ovar-block) (explicate-open-cn-deq _ _ _) %.
+%total {} (explicate-open-cn-deq _ _ _) %.
+%sort explicate-closed-ofkd %.
+%mode explicate-closed-ofkd %in %out %.
+%term _ explicate-closed-ofkd D1 (eofkd/closed D1 cxt-ordered/nil) %.
+%worlds (can-mofkd-block) (explicate-closed-ofkd _ _) %.
+%total {} (explicate-closed-ofkd _ _) %.
+%sort explicate-closed-kd-wf %.
+%mode explicate-closed-kd-wf %in %out %.
+%term _ explicate-closed-kd-wf kd-wf/kd/unit (ekd-wf/kd/unit cxt-ordered/nil) %.
+%term _ explicate-closed-kd-wf kd-wf/kd/type (ekd-wf/kd/type cxt-ordered/nil) %.
+%term _ 
+	%pi (explicate-closed-kd-wf (kd-wf/kd/sing D1) (ekd-wf/kd/sing D1'))
+	%<- (explicate-closed-ofkd D1 D1') %.
+%term _ 
+	%pi (explicate-closed-kd-wf (kd-wf/kd/sgm D1 D2) (ekd-wf/kd/sgm D1' D2'))
+	%<- (explicate-closed-kd-wf D1 D1')
+	%<- (explicate-open-kd-wf loc/z D2 D2') %.
+%term _ 
+	%pi (explicate-closed-kd-wf (kd-wf/kd/pi D1 D2) (ekd-wf/kd/pi D1' D2'))
+	%<- (explicate-closed-kd-wf D1 D1')
+	%<- (explicate-open-kd-wf loc/z D2 D2') %.
+%worlds (can-mofkd-block) (explicate-closed-kd-wf _ _) %.
+%total {D1} (explicate-closed-kd-wf D1 _) %.
+%sort explicate-closed-kd-sub %.
+%mode explicate-closed-kd-sub %in %out %.
+%sort explicate-closed-kd-deq %.
+%mode explicate-closed-kd-deq %in %out %.
+%sort explicate-closed-cn-deq %.
+%mode explicate-closed-cn-deq %in %out %.
+%term _ explicate-closed-kd-sub kd-sub/kd/unit (ekd-sub/kd/unit cxt-ordered/nil) %.
+%term _ explicate-closed-kd-sub kd-sub/kd/type (ekd-sub/kd/type cxt-ordered/nil) %.
+%term _ 
+	%pi (explicate-closed-kd-sub (kd-sub/kd/sing-kd/sing D1) (ekd-sub/kd/sing-kd/sing D1'))
+	%<- (explicate-closed-cn-deq D1 D1') %.
+%term _ 
+	%pi (explicate-closed-kd-sub (kd-sub/kd/sing-kd/type D1) (ekd-sub/kd/sing-kd/type D1'))
+	%<- (explicate-closed-ofkd D1 D1') %.
+%term _ 
+	%pi (explicate-closed-kd-sub (kd-sub/kd/sgm D1 D2 D3) (ekd-sub/kd/sgm D1' D2' D3'))
+	%<- (explicate-closed-kd-sub D1 D1')
+	%<- (explicate-open-kd-sub loc/z D2 D2')
+	%<- (explicate-open-kd-wf loc/z D3 D3') %.
+%term _ 
+	%pi (explicate-closed-kd-sub (kd-sub/kd/pi D1 D2 D3) (ekd-sub/kd/pi D1' D2' D3'))
+	%<- (explicate-closed-kd-sub D1 D1')
+	%<- (explicate-open-kd-sub loc/z D2 D2')
+	%<- (explicate-open-kd-wf loc/z D3 D3') %.
+%term _ explicate-closed-kd-deq kd-deq/kd/unit (ekd-deq/kd/unit cxt-ordered/nil) %.
+%term _ explicate-closed-kd-deq kd-deq/kd/type (ekd-deq/kd/type cxt-ordered/nil) %.
+%term _ 
+	%pi (explicate-closed-kd-deq (kd-deq/kd/sing D1) (ekd-deq/kd/sing D1'))
+	%<- (explicate-closed-cn-deq D1 D1') %.
+%term _ 
+	%pi (explicate-closed-kd-deq (kd-deq/kd/sgm D1 D2) (ekd-deq/kd/sgm D1' D2'))
+	%<- (explicate-closed-kd-deq D1 D1')
+	%<- (explicate-open-kd-deq loc/z D2 D2') %.
+%term _ 
+	%pi (explicate-closed-kd-deq (kd-deq/kd/pi D1 D2) (ekd-deq/kd/pi D1' D2'))
+	%<- (explicate-closed-kd-deq D1 D1')
+	%<- (explicate-open-kd-deq loc/z D2 D2') %.
+%term _ explicate-closed-cn-deq cn-deq/cn/unit (ecn-deq/cn/unit cxt-ordered/nil) %.
+%term _ explicate-closed-cn-deq cn-deq/tp/unit (ecn-deq/tp/unit cxt-ordered/nil) %.
+%term _ explicate-closed-cn-deq cn-deq/tp/tagged (ecn-deq/tp/tagged cxt-ordered/nil) %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/kd/sing D1) (ecn-deq/kd/sing D1'))
+	%<- (explicate-closed-ofkd D1 D1') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/refl D1) (ecn-deq/refl D1'))
+	%<- (explicate-closed-ofkd D1 D1') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/sym D1) (ecn-deq/sym D1'))
+	%<- (explicate-closed-cn-deq D1 D1') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/tp/ref D1) (ecn-deq/tp/ref D1'))
+	%<- (explicate-closed-cn-deq D1 D1') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/tp/tag D1) (ecn-deq/tp/tag D1'))
+	%<- (explicate-closed-cn-deq D1 D1') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/cn/pj1 D1) (ecn-deq/cn/pj1 D1'))
+	%<- (explicate-closed-cn-deq D1 D1') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/cn/pj2 D1) (ecn-deq/cn/pj2 D1'))
+	%<- (explicate-closed-cn-deq D1 D1') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/trans D1 D2) (ecn-deq/trans D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-cn-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/tp/cross D1 D2) (ecn-deq/tp/cross D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-cn-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/tp/arrow D1 D2) (ecn-deq/tp/arrow D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-cn-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/tp/sum D1 D2) (ecn-deq/tp/sum D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-cn-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/cn/pair D1 D2) (ecn-deq/cn/pair D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-cn-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/cn/app D1 D2) (ecn-deq/cn/app D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-cn-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/sgm-ext D1 D2) (ecn-deq/sgm-ext D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-cn-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/sub D1 D2) (ecn-deq/sub D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-kd-sub D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/deq D1 D2) (ecn-deq/deq D1' D2'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-closed-kd-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/kd/unit D1 D2) (ecn-deq/kd/unit D1' D2'))
+	%<- (explicate-closed-ofkd D1 D1')
+	%<- (explicate-closed-ofkd D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/cn/lam D1 D2) (ecn-deq/cn/lam D1' D2'))
+	%<- (explicate-open-cn-deq loc/z D1 D1')
+	%<- (explicate-closed-kd-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/tp/forall D1 D2) (ecn-deq/tp/forall D1' D2'))
+	%<- (explicate-open-cn-deq loc/z D1 D1')
+	%<- (explicate-closed-kd-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/cn/mu D1 D2) (ecn-deq/cn/mu D1' D2'))
+	%<- (explicate-open-cn-deq loc/z D1 D1')
+	%<- (explicate-closed-kd-deq D2 D2') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/pi-ext D1 D2 D3) (ecn-deq/pi-ext D1' D2' D3'))
+	%<- (explicate-closed-ofkd D1 D1')
+	%<- (explicate-closed-ofkd D2 D2')
+	%<- (explicate-open-cn-deq loc/z D3 D3') %.
+%term _ 
+	%pi (explicate-closed-cn-deq (cn-deq/pi-ext-2 D1 D3) (ecn-deq/pi-ext-2 D1' D3'))
+	%<- (explicate-closed-cn-deq D1 D1')
+	%<- (explicate-open-cn-deq loc/z D3 D3') %.
+%worlds (can-mofkd-block) (explicate-closed-kd-sub D1 _) (explicate-closed-kd-deq _ _) (explicate-closed-cn-deq _ _) %.
+%total (D1 D2 D3) (explicate-closed-kd-sub D3 _) (explicate-closed-kd-deq D1 _) (explicate-closed-cn-deq D2 _) %.

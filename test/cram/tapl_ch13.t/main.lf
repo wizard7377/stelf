@@ -1,0 +1,5 @@
+# STLC with references (Chapter 13 of TAPL).
+# Ported from examples/tapl_ch13/.
+
+%require nat %.
+%require defs %.

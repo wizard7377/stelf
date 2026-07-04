@@ -15,6 +15,9 @@ open! Basis
 
 (* Names of Constants and Variables *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module FunNames (FunNames__0 : sig
   module Global : GLOBAL
 
@@ -24,7 +27,7 @@ end) : FUNNAMES.FUNNAMES = struct
   open FunNames__0
 
   (*! structure FunSyn = FunSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   (****************************************)
   (* Constants Names and Name Preferences *)

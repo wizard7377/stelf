@@ -1,0 +1,363 @@
+%{ This is part of a proof of the soundness of Featherweight Java (Atsushi Igarashi,
+Benjamin Pierce and Philip Wadler) in the Twelf logical Framework.
+It was developed by Stephanie Weirich <sweirich@cis.upenn.edu> and
+Geoffrey Washburn <geoffw@cis.upenn.edu>. }%
+%%% Auxilary lemmas for the proof of progress for FJ.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definition of what it means for a some class not to be the subtype of another.
+%
+
+% This is somewhat tricky because we allow reasoning about classNames that may
+% not be in the classTable.  object is one such example of a className.
+%sort notSubtype %.
+%name notSubtype %.
+%term ns_undef %pi (notInCT CT C) %-> (className_neq C D) %-> (notSubtype CT C D) %.
+%term ns_super 
+	%pi (notSubtype CT E D)
+	%-> (lookupClass CT C (class C E _ _))
+	%-> (className_neq C D)
+	%-> (notSubtype CT C D) %.
+%worlds () (notSubtype CT C1 C2) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Disequality on classNames is symmetric
+%sort cnneq_sym %.
+%mode cnneq_sym %in %out %.
+%term _ 
+	%pi (nat_neq_sym NNEQ1 NNEQ2)
+	%-> (cnneq_sym (className_neq_natnat NNEQ1) (className_neq_natnat NNEQ2)) %.
+%worlds () (cnneq_sym CNNEQ1 CNNEQ2) %.
+%total CNNEQ1 (cnneq_sym CNNEQ1 CNNEQ2) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Well-formed classTables do not contain object.
+% Use a helper function because of the way class_table_typing is defined.
+%sort objectNotInCT_helper %.
+%mode objectNotInCT_helper %in %out %.
+%term _ objectNotInCT_helper ctt_nil nnil %.
+%term _ 
+	%pi (objectNotInCT_helper CTTH UNDEF)
+	%-> (cnneq_sym CNEQ1 CNEQ2)
+	%-> (objectNotInCT_helper (ctt_cons CTTH CTP CNEQ1) (ncons UNDEF CNEQ2)) %.
+%worlds () (objectNotInCT_helper CTTH UNDEF) %.
+%total CTTH (objectNotInCT_helper CTTH UNDEF) %.
+%sort objectNotInCT %.
+%mode objectNotInCT %in %out %.
+%term _ %pi (objectNotInCT_helper CTTH UNDEF) %-> (objectNotInCT (ctt CTTH) UNDEF) %.
+%worlds () (objectNotInCT CTT UNDEF) %.
+%total CTT (objectNotInCT CTT UNDEF) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Class name excluded middle -- classNames are either equal or they aren't.
+%% first the definition of the excluded middle sum
+%sort cneq_em %.
+%term cneq_eq %pi (className_eq M N) %-> (cneq_em M N) %.
+%term cneq_neq %pi (className_neq M N) %-> (cneq_em M N) %.
+% We need a helper because Twelf can't handle output factoring
+%sort cneq_helper %.
+%mode cneq_helper %in %out %.
+%term _ cneq_helper (nat_em_eq EQ) (cneq_eq className_refl) %.
+%term _ cneq_helper (nat_em_neq NEQ) (cneq_neq (className_neq_natnat NEQ)) %.
+%worlds () (cneq_helper M N) %.
+%total M (cneq_helper M N) %.
+%sort cneq_excluded_middle {C} {D} %.
+%mode cneq_excluded_middle %in %in %out %.
+%term _ 
+	%pi (cneq_helper CDEQ EQ)
+	%-> (nat_excluded C D CDEQ)
+	%-> (cneq_excluded_middle (cn C) (cn D) EQ) %.
+%worlds () (cneq_excluded_middle C D CD) %.
+%total {C D} (cneq_excluded_middle C D CD) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% lc_total: Class lookup is decidable
+%% We can either lookup a className in the classTable or 
+%% get a derivation that the className is not in the class table.
+%% Again, split into several helper functions because of factoring problems.
+%% Based significantly on lm_total in aux-lemma.elf
+% The disjoint sum for the result.
+%sort lookup_or_notInCT %.
+%term loc1 %pi (lookupClass CT C CD) %-> (lookup_or_notInCT CT C) %.
+%term loc2 %pi (notInCT CT C) %-> (lookup_or_notInCT CT C) %.
+%sort lc_helper2 %.
+%mode {%in C className} {%in D className} {%in CT classTable} {%in NEQ className_neq C D} {%in CTU notInCT CT D} {%in LOC1 lookup_or_notInCT CT C} {%in E className} {%in N nat} {%in CNL cnlist N} {%in MR methodTable} {%out LOC2 lookup_or_notInCT (crcons (class D E CNL MR) CT CTU) C} lc_helper2 NEQ LOC1 LOC2 %.
+%sort lc_helper1 {CT classTable} {CTU notInCT CT D} %.
+%mode {%in CT classTable} {%in C className} {%in D className} {%in CTU notInCT CT D} {%in EQ cneq_em C D} {%in E className} {%in N nat} {%in CNL cnlist N} {%in MR methodTable} {%out LOC lookup_or_notInCT (crcons (class D E CNL MR) CT CTU) C} lc_helper1 CT CTU EQ LOC %.
+%sort lc_total {CT classTable} {C className} %.
+%mode lc_total %in %in %out %.
+%term _ lc_helper2 NEQ (loc1 LC) (loc1 (lookupClass_crcons2 NEQ LC)) %.
+%term _ lc_helper2 NEQ (loc2 CU) (loc2 (ncons CU NEQ)) %.
+%worlds () (lc_helper2 N L O) %.
+%total L1 (lc_helper2 N2 L1 O1) %.
+%term _ lc_helper1 CT CTU (cneq_eq EQ) (loc1 lookupClass_crcons1) %.
+%term _ 
+	%pi (lc_helper2 CEQ LOC1 LOC2)
+	%-> (lc_total CT C LOC1)
+	%-> (lc_helper1 CT CTU (cneq_neq CEQ) LOC2) %.
+%term _ lc_total crnil C (loc2 nnil) %.
+%term _ 
+	%pi (lc_helper1 CT CTU EX LOM)
+	%-> (cneq_excluded_middle C D EX)
+	%-> (lc_total (crcons (class D E CNL MR) CT CTU) C LOM) %.
+%worlds () (lc_total CT C LOC) (lc_helper1 CT CTU XM LOC) %.
+%total (CT1 CT2) (lc_total CT1 C LOC1) (lc_helper1 CT2 CTU XM LOC2) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If two classNames are equal than they are subtypes of each other.
+%sort cneq_subtyping {CT classTable} %.
+%mode cneq_subtyping %in %in %out %.
+%term _ cneq_subtyping CT CEQ s_refl %.
+%worlds () (cneq_subtyping CT CNEQ SB) %.
+%total CNEQ (cneq_subtyping CT CNEQ SB) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Class typing is decidable: Given a well-typd class table, 
+% a class is either in the class table and well-typed, or it isn't in 
+% the class table.
+% Disjoint sum for ctyping_total 
+%sort notInCT_or_ctyping %.
+%term nctct_nct %pi (notInCT CT C) %-> (notInCT_or_ctyping CT C) %.
+%term nctct_ct 
+	%pi (className_neq C object)
+	%-> (lookupClass CT C CDEF)
+	%-> (class_typing CT C CDEF)
+	%-> (notInCT_or_ctyping CT C) %.
+% Helper needed for ouput factoring
+%sort ctyping_total_helper %.
+%mode ctyping_total_helper %in %in %out %.
+%term _ 
+	%pi (ctt_ct CTT LC CNNEQ CTP)
+	%-> (ctyping_total_helper CTT (loc1 LC) (nctct_ct CNNEQ LC CTP)) %.
+%term _ ctyping_total_helper CTT (loc2 UNDEF) (nctct_nct UNDEF) %.
+%worlds () (ctyping_total_helper CTT LOC WO) %.
+%total LOC (ctyping_total_helper CTT LOC WO) %.
+%sort ctyping_total {CT classTable} %.
+%mode ctyping_total %in %in %in %out %.
+%term _ 
+	%pi (ctyping_total_helper CTT LOC WO)
+	%-> (lc_total CT C LOC)
+	%-> (ctyping_total CT CTT C WO) %.
+%worlds () (ctyping_total CT CTT C WO) %.
+%total CTT (ctyping_total CT CTT C WO) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Decidability of subtyping
+% Given a well-typed class table and two classNames, 
+% one is a subtype of the other or it isn't
+% disjoint sum for sb_total
+%sort xm_subtype %.
+%name xm_subtype %.
+%term xms_sub %pi (subtyping CT C1 C2) %-> (xm_subtype CT C1 C2) %.
+%term xms_notsub %pi (notSubtype CT C1 C2) %-> (xm_subtype CT C1 C2) %.
+% helper3 exists just to handle output factoring for helper2
+%sort sb_total_helper3 %.
+%mode sb_total_helper3 %in %in %in %in %out %.
+%term _ sb_total_helper3 LC CNNEQ1 CNNEQ2 (xms_sub SB) (xms_sub (s_super SB LC CNNEQ1)) %.
+%term _ sb_total_helper3 LC CNNEQ1 CNNEQ2 (xms_notsub NSB) (xms_notsub (ns_super NSB LC CNNEQ2)) %.
+%worlds () (sb_total_helper3 LC CNNEQ1 CNNEQ2 XMSB1 XMSB2) %.
+%total XMSB1 (sb_total_helper3 LC CNNEQ1 CNNEQ2 XMSB1 XMSB2) %.
+% helper2 works by induction over the derivation that C is a subtype of
+% object, and attempts to find a (not)subtyping derivation.
+%sort sb_total_helper2 {CT classTable} %.
+%mode sb_total_helper2 %in %in %in %in %out %.
+%term _ 
+	%pi (cneq_subtyping CT CNEQ1 SB)
+	%-> (sb_total_helper2 CT CTT (cneq_eq CNEQ1) _ (xms_sub SB)) %.
+%term _ 
+	%pi (objectNotInCT CTT UNDEF)
+	%-> (sb_total_helper2 CT CTT (cneq_neq CNEQ1) s_refl (xms_notsub (ns_undef UNDEF CNEQ1))) %.
+%term _ 
+	%pi (sb_total_helper3 LC CNNEQ2 CNNEQ1 XMSB1 XMSB2)
+	%-> (sb_total_helper2 CT CTT CNXM SB XMSB1)
+	%-> (cneq_excluded_middle E _ CNXM)
+	%-> (sb_total_helper2 CT CTT (cneq_neq CNNEQ1) (s_super (%the (subtyping CT E object) SB) LC CNNEQ2) XMSB2) %.
+%worlds () (sb_total_helper2 CT CTT CNXM SB XMSB) %.
+%total SB (sb_total_helper2 CT CTT CNXM SB XMSB) %.
+% helper1 does cases upon whether the classNames are equal
+% and if not, whether they are well-formed classes in the classTable.
+% If they are equal they are trivially subtypes.
+% If C is not in the class table and not equal to D, they are 
+% trivially not subtypes.
+% Otherwise we call out to helper2 to do induction over the derivation
+% that C is a subtype of object (which forces the classTable to be acyclic).
+%sort sb_total_helper1 {CT classTable} %.
+%mode sb_total_helper1 %in %in %in %in %in %out %.
+%term _ 
+	%pi (cneq_subtyping CT CNEQ SB)
+	%-> (sb_total_helper1 CT CTT (cneq_eq CNEQ) WO1 WO2 (xms_sub SB)) %.
+%term _ sb_total_helper1 CT CTT (cneq_neq CNNEQ) (nctct_nct UNDEF) WO2 (xms_notsub (ns_undef UNDEF CNNEQ)) %.
+%term _ 
+	%pi (sb_total_helper2 CT CTT CNXM (s_super SB LC CNNEQ2) XMSB)
+	%-> (sb_total_helper1 CT CTT CNXM (nctct_ct CNNEQ2 LC (t_class _ _ SB)) WO2 XMSB) %.
+%worlds () (sb_total_helper1 CT CTT CNXM WO1 WO2 XMSB) %.
+%total {WO1 WO2} (sb_total_helper1 CT CTT CNXM WO1 WO2 XMSB) %.
+% The primary lemma.  Works by looking up whether the classes are 
+% in the class table or not and getting their typings if so.
+% Also check whether the two classNames are equal or not.
+% Pass the results off to helper1 because of factoring
+%sort sb_total {CT classTable} {C className} {D className} %.
+%mode sb_total %in %in %in %in %out %.
+%term _ 
+	%pi (sb_total_helper1 CT CTT CNXM WO1 WO2 XMSB)
+	%-> (cneq_excluded_middle C D CNXM)
+	%-> (ctyping_total CT CTT D WO2)
+	%-> (ctyping_total CT CTT C WO1)
+	%-> (sb_total CT C D CTT XMSB) %.
+%worlds () (sb_total CT C D CTT XMSB) %.
+%total {C D} (sb_total CT C D CTT XMSB) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If we can lookup the type of a method in the classTable, 
+% we can lookup the body of the method in the classTable.
+%sort mtype_to_mbody {CS cnlist N} %.
+%mode {%in CT classTable} {%in M methodName} {%in C1 className} {%in C0 className} {%in N nat} {%in CS cnlist N} {%in MTY mtype CT M C1 CS C0} {%out BE bexp CS} {%out MBY mbody CT M C1 BE} mtype_to_mbody CS MTY BE MBY %.
+%term _ mtype_to_mbody CS (mt_class LM LC CNNEQ) _ (mb_class LM LC CNNEQ) %.
+%term _ 
+	%pi (mtype_to_mbody CS MTY BE MBY)
+	%-> (mtype_to_mbody CS (mt_super MTY UNDEF LC CNNEQ) _ (mb_super UNDEF MBY LC CNNEQ)) %.
+%worlds () (mtype_to_mbody CS MTY BE MBY) %.
+%total MTY (mtype_to_mbody CS MTY BE MBY) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If we have a well-typed object, and a method typing for the apparent className
+% of that object, we can obtain the method typing for the real className. 
+%sort mtype_inv %.
+%mode mtype_inv %in %in %out %.
+%term _ mtype_inv (t_new TPS FS) MTY MTY %.
+%worlds () (mtype_inv TP MTY1 MTY2) %.
+%total TP (mtype_inv TP MTY1 MTY2) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Combines the two previous lemmas, given a well-typed object,
+% get its method body.
+%sort mbody_inv %.
+%mode {%in CT classTable} {%in C1 className} {%in C2 className} {%in M methodName} {%in C0 className} {%in N1 nat} {%in N2 nat} {%in ES elist N1} {%in CS cnlist N2} {%in TP typing CT (new C1 ES) C2} {%in MTY mtype CT M C2 CS C0} {%out BE bexp CS} {%out MBY mbody CT M C1 BE} mbody_inv TP MTY BE MBY %.
+%term _ 
+	%pi (mtype_to_mbody _ MTY2 BE MBY)
+	%-> (mtype_inv TP MTY1 MTY2)
+	%-> (mbody_inv TP MTY1 BE MBY) %.
+%worlds () (mbody_inv TP MTY BE MBY) %.
+%total {TP MTY} (mbody_inv TP MTY BE MBY) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% We can always construct an invoc derivation, given the correct inputs.
+%sort invoc_total {ES elist N} %.
+%mode invoc_total %in %in %in %in %out %.
+%term _ invoc_total enil tl_nil (base ([this exp] E1 this)) E invoc_base %.
+%term _ 
+	%pi (invoc_total EL TPS (BE E1) E INV)
+	%-> (invoc_total (econs E1 EL) (tl_cons _ TPS _) (bind _ ([x exp] BE x)) E (invoc_bind INV)) %.
+%worlds () (invoc_total ES TPS BE E1 INV) %.
+%total BE (invoc_total ES TPS BE E1 INV) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Given an expression list calculate the nth projection, assuming n is less than
+% the length of the list.
+%sort enth_opt_total {ES elist N1} %.
+%mode enth_opt_total %in %in %out %.
+%term _ enth_opt_total (econs E _) nat_lt_z enth_sz %.
+%term _ 
+	%pi (enth_opt_total ES NLT ENTH)
+	%-> (enth_opt_total (econs _ ES) (nat_lt_s NLT) (enth_sn ENTH)) %.
+%worlds () (enth_opt_total ES NLT ENTH) %.
+%total ES (enth_opt_total ES NLT ENTH) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Is we projected out the FIth className, then FI must be less than the length 
+% of the className list.
+%sort cnnth_lemma {CS cnlist N1} %.
+%mode cnnth_lemma %in %in %out %.
+%term _ cnnth_lemma (cncons C _) cnnth_sz nat_lt_z %.
+%term _ 
+	%pi (cnnth_lemma CS CNNTH NLT)
+	%-> (cnnth_lemma (cncons _ CS) (cnnth_sn CNNTH) (nat_lt_s NLT)) %.
+%worlds () (cnnth_lemma CS CNNTH NLT) %.
+%total CNNTH (cnnth_lemma CS CNNTH NLT) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Looking up a className in the classTable and getting different results
+% is contradictory.
+%sort lookupClass_exclusive %.
+%mode lookupClass_exclusive %in %in %in %out %.
+%term _ 
+	%pi (className_eq_exclusive CNEQ CNNEQ FALSE)
+	%-> (classDef_eq_extract CDEFEQ CNEQ _ _)
+	%-> (lookupClass_unique LC1 LC2 CDEFEQ)
+	%-> (lookupClass_exclusive LC1 LC2 CNNEQ FALSE) %.
+%worlds () (lookupClass_exclusive LC1 LC2 CNNEQ P) %.
+%total CNNEQ (lookupClass_exclusive LC1 LC2 CNNEQ P) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If two className lists are equal then their lengths must be equal.
+%sort cnlist_eq_length {CS1 cnlist N1} {CS2 cnlist N2} %.
+%mode cnlist_eq_length %in %in %in %out %.
+%term _ cnlist_eq_length CS1 CS2 CLEQ nat_refl %.
+%worlds () (cnlist_eq_length CS1 CS2 CLEQ NEQ) %.
+%total CLEQ (cnlist_eq_length CS1 CS2 CLEQ NEQ) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fields_length_unique.  If we look up the fields of a class, the number
+% of fields will always be the same.
+% abusrdity helper -- if we look up a class twice and get different results 
+% we a licensed to conclude that the number fields they have are the same.
+%sort lookup_absurd1 {CS1 cnlist N1} {CS2 cnlist N2} %.
+%mode lookup_absurd1 %in %in %in %in %in %out %.
+%term _ 
+	%pi (false_imp_nat_eq _ _ FALSE NEQ)
+	%-> (lookupClass_exclusive LC1 LC2 CNNEQ FALSE)
+	%-> (lookup_absurd1 CS1 CS2 LC1 LC2 CNNEQ NEQ) %.
+%worlds () (lookup_absurd1 CS1 CS2 LC1 LC2 CNNEQ NEQ) %.
+%total {LC1 LC2 CNNEQ} (lookup_absurd1 CS1 CS2 LC1 LC2 CNNEQ NEQ) %.
+% abusrdity helper -- if we look up a class twice and get different results 
+% we a licensed to conclude that the number fields their respective parents 
+% have are the same.
+%sort lookup_absurd2 %.
+%mode lookup_absurd2 %in %in %in %in %in %out %.
+%term _ 
+	%pi (false_imp_nat_eq _ _ FALSE NEQ)
+	%-> (lookupClass_exclusive LC1 LC2 CNNEQ FALSE)
+	%-> (lookup_absurd2 LC1 LC2 FS1 FS2 CNNEQ NEQ) %.
+%worlds () (lookup_absurd2 LC1 LC2 FS1 FS2 CNNEQ NEQ) %.
+%total {LC1 LC2 CNNEQ} (lookup_absurd2 LC1 LC2 FS1 FS2 CNNEQ NEQ) %.
+% This helper handles dispatching upon the equality of the parent classNames.  
+% Necessary because of output factoring.  Mutually defined with fields_length_unique
+%sort fields_length_unique_helper {CS1 cnlist N1} {CS2 cnlist N2} %.
+%mode fields_length_unique_helper %in %in %in %in %in %in %in %out %out %.
+%sort fields_length_unique %.
+%mode fields_length_unique %in %in %out %.
+% Cases for fields_length_unique_helper
+%term _ 
+	%pi (fields_length_unique FS1 FS2 NEQ2)
+	%-> (cnlist_eq_length CS1 CS2 CLEQ NEQ1)
+	%-> (classDef_eq_extract CDEFEQ _ CLEQ _)
+	%-> (lookupClass_unique LC1 LC2 CDEFEQ)
+	%-> (fields_length_unique_helper CS1 CS2 LC1 LC2 (cneq_eq CNEQ) FS1 FS2 NEQ1 NEQ2) %.
+%term _ 
+	%pi (lookup_absurd2 LC1 LC2 FS1 FS2 CNNEQ NEQ2)
+	%-> (lookup_absurd1 CS1 CS2 LC1 LC2 CNNEQ NEQ1)
+	%-> (lookupClass_exclusive LC1 LC2 CNNEQ FALSE)
+	%-> (fields_length_unique_helper CS1 CS2 LC1 LC2 (cneq_neq CNNEQ) FS1 FS2 NEQ1 NEQ2) %.
+% Cases for fields_length_unique 
+%term _ fields_length_unique f_obj f_obj nat_refl %.
+%term _ 
+	%pi (plus_eq_lemma NEQ2 NEQ1 PL1 PL2 NEQ3)
+	%-> (fields_length_unique_helper _ _ LC1 LC2 CNXM FS1 FS2 NEQ1 NEQ2)
+	%-> (cneq_excluded_middle _ _ CNXM)
+	%-> (fields_length_unique (f_class (%the (cnappend _ _ _ PL1) CNAP1) FS1 LC1 CNNEQ1) (f_class (%the (cnappend _ _ _ PL2) CNAP2) FS2 LC2 CNNEQ2) NEQ3) %.
+%worlds () (fields_length_unique FS1 FS2 NEQ) (fields_length_unique_helper CS1 CS2 LC1 LC2 CNXM FS1 FS2 NEQ1 NEQ2) %.
+%total (FS1 FS3) (fields_length_unique FS1 FS2 NEQ1) (fields_length_unique_helper CS1 CS2 LC1 LC2 CNXM FS3 FS4 NEQ2N EQ3) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If we have a well-typed object, the number of fields will equal the number
+% of arguments to the object.
+%sort new_fields_lemma {ES elist N1} %.
+%mode new_fields_lemma %in %in %in %out %.
+%term _ 
+	%pi (fields_length_unique FS1 FS2 NEQ)
+	%-> (new_fields_lemma _ (t_new _ FS1) FS2 NEQ) %.
+%worlds () (new_fields_lemma ES TP FS NEQ) %.
+%total TP (new_fields_lemma ES TP FS NEQ) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If we have a well-typed object, and we projected on of its fields,
+% we can also project out one of the object's arguments.
+%sort proj_lemma_helper {ES elist N1} %.
+%mode proj_lemma_helper %in %in %in %in %in %out %.
+%term _ 
+	%pi (nat_lt_eq NLT1 NEQ NLT2)
+	%-> (cnnth_lemma _ CNNTH NLT1)
+	%-> (proj_lemma_helper ES TP FS NEQ CNNTH NLT2) %.
+%worlds () (proj_lemma_helper ES TP FS NEQ CNNTH NLT) %.
+%total CNNTH (proj_lemma_helper ES TP FS NEQ CNNTH NLT) %.
+%sort proj_lemma %.
+%mode proj_lemma %in %in %in %out %.
+%term _ 
+	%pi (enth_opt_total _ NLT ENTH)
+	%-> (proj_lemma_helper _ TP FS NEQ CNNTH NLT)
+	%-> (new_fields_lemma _ TP FS NEQ)
+	%-> (proj_lemma TP FS CNNTH ENTH) %.
+%worlds () (proj_lemma TP FS CNNTH ENTH) %.
+%total CNNTH (proj_lemma TP FS CNNTH ENTH) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -11,6 +11,9 @@ open! Basis
 
 (* Tabled Syntax *)
 (* Author: Brigitte Pientka *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeTabledSyn
     (Names : NAMES)
     (Table : TABLE with type key = int)
@@ -28,7 +31,7 @@ module MakeTabledSyn
   module Names = Names
   module Index = Index
 
-  exception Error of string
+  exception Error = Error
 
   type tabled = Yes_ | No_ [@@deriving eq, ord, show]
 

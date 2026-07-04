@@ -13,6 +13,9 @@ open! Basis
 (* Abstraction *)
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga, Brigitte Pientka *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module AbstractTabled (AbstractTabled__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   module Whnf : WHNF
@@ -36,7 +39,7 @@ end) : ABSTRACTTABLED = struct
 
   (*! structure IntSyn = IntSyn' !*)
   (*! structure TableParam = TableParam !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

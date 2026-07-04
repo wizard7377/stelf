@@ -12,6 +12,9 @@ include RECONQUERY
 (* # 1 "src/frontend/ReconQuery.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ReconQuery (ReconQuery__0 : sig
   (* Reconstruct queries *)
   (* Author: Frank Pfenning *)
@@ -46,7 +49,7 @@ end) : RECON_QUERY = struct
   module ExtSyn = ReconQuery__0.ReconTerm'
   module T = ReconQuery__0.ReconTerm'
 
-  exception Error of string
+  exception Error = Error
 
   (* error (r, msg) raises a syntax error within region r with text msg *)
   let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))

@@ -1,0 +1,4 @@
+[[group]]
+name = "guide_nd"
+main = "./main.lf"
+dirs = ["."]

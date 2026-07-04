@@ -1,0 +1,31 @@
+%%% The Mini-ML typing rules which can be used as a complete
+%%% implementation of type inference.
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort of %.
+%name of %.
+%mode of %in %star %.
+% Natural Numbers
+%term tp_z of z nat %.
+%term tp_s %pi (of (s E) nat) %<- (of E nat) %.
+%term tp_case 
+	%pi (of (case E1 E2 E3) T)
+	%<- (of E1 nat)
+	%<- (of E2 T)
+	%<- ({x exp} %pi (of x nat) %-> (of (E3 x) T)) %.
+% Pairs
+%term tp_pair %pi (of (pair E1 E2) (cross T1 T2)) %<- (of E1 T1) %<- (of E2 T2) %.
+%term tp_fst %pi (of (fst E) T1) %<- (of E (cross T1 T2)) %.
+%term tp_snd %pi (of (snd E) T2) %<- (of E (cross T1 T2)) %.
+% Functions
+%term tp_lam %pi (of (lam E) (arrow T1 T2)) %<- ({x exp} %pi (of x T1) %-> (of (E x) T2)) %.
+%term tp_app %pi (of (app E1 E2) T1) %<- (of E1 (arrow T2 T1)) %<- (of E2 T2) %.
+% Definitions
+%term tp_letv 
+	%pi (of (letv E1 E2) T2)
+	%<- (of E1 T1)
+	%<- ({x exp} %pi (of x T1) %-> (of (E2 x) T2)) %.
+%term tp_letn %pi (of (letn E1 E2) T2) %<- (of E1 T1) %<- (of (E2 E1) T2) %.
+% Recursion
+%term tp_fix %pi (of (fix E) T) %<- ({x exp} %pi (of x T) %-> (of (E x) T)) %.
+%block l {T tp} [x exp] [d of x T]%.
+%worlds (l) (of E T) %.

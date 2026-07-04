@@ -1,0 +1,4 @@
+%scope sr_scope %{
+  %require sr_inner %.
+%}
+%term sr_use sr_type %.

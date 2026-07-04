@@ -19,6 +19,9 @@ open Origins
 (** Mode Checking *)
 (** @author Carsten Schuermann *)
 (** Modified: Frank Pfenning, Roberto Virga *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeModeCheck
     (ModeTable : MODETABLE)
     (Whnf : WHNF)
@@ -28,7 +31,7 @@ module MakeModeCheck
   (*! structure ModeSyn = ModeSyn !*)
   (*! structure Paths = Paths !*)
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     let print' s = Display.(debug Form.(string s))
@@ -836,7 +839,7 @@ module MakeModeCheck
     let rec checkAll = function
       | [] -> ()
       | I.Const c :: clist -> begin
-          Display.(debug Form.(string "checking mode of constant" ++ space () ++ shown (fun x -> Names.show_qid @@ Names.constQid c) c ++ space () ++ string "..." ++ nl ()));
+          Display.(debug Form.(string "checking mode of constant" ++ space () ++ shown (fun x -> Names.qidToString @@ Names.constQid c) c ++ space () ++ string "..." ++ nl ()));
           
           (try checkDlocal (I.Null, I.constType c, P.top)
            with Error' (occ, msg) -> raise (Error (wrapMsg (c, occ, msg))));

@@ -9,6 +9,9 @@ include SPLIT
 (* # 1 "src/prover/Split.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Split (Split__0 : sig
   (* State definition for Proof Search *)
   (* Author: Carsten Schuermann *)
@@ -49,7 +52,7 @@ end) : SPLIT with module State = Split__0.State' = struct
   (*! structure Tomega = Tomega' !*)
   module State = Split__0.State'
 
-  exception Error of string
+  exception Error = Error
 
   type operator_ = Split of Tomega.prg option ref * Tomega.prg * string
 

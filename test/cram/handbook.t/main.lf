@@ -1,0 +1,75 @@
+# First-Order Logic: natural deduction and Hilbert system.
+# Ported from examples/handbook/fol.elf.
+
+%sort i %.
+
+%sort o %.
+%scope o %{
+  %term imp %pi o %-> %pi o %-> o
+  %prec %right 10 imp %.
+  %term not %pi o %-> o
+  %prec %prefix 12 not %.
+  %term forall %pi (%pi i %-> o) %-> o
+%}
+
+%sort nd {_ o} %.
+%scope nd %{
+  %term impi {{A B}}
+    %if nd (%(imp o) A B)
+    %<- %pi (nd A) %-> nd B
+  %term impe {{A B}}
+    %if nd B
+    %<- nd (%(imp o) A B)
+    %<- nd A
+  %term noti {{A}}
+    %if nd (%(not o) A)
+    %<- %pi o %-> %pi (nd A) %-> nd _
+  %term note {{A C}}
+    %if nd C
+    %<- nd (%(not o) A)
+    %<- nd A
+  %term foralli {{A}}
+    %if nd (%(forall o) A)
+    %<- %pi i %-> nd (A _)
+  %term foralle {{A T}}
+    %if nd (A T)
+    %<- nd (%(forall o) A)
+%}
+
+%sort hil {_ o} %.
+%scope hil %{
+  %term k {{A B}} hil (%(imp o) A (%(imp o) B A))
+  %term s {{A B C}} hil (%(imp o) (%(imp o) A (%(imp o) B C)) (%(imp o) (%(imp o) A B) (%(imp o) A C)))
+  %term n1 {{A B}} hil (%(imp o) (%(imp o) A (%(not o) B)) (%(imp o) (%(imp o) A B) (%(not o) A)))
+  %term n2 {{A}} hil (%(imp o) (%(not o) A) (%(imp o) A _))
+  %term f1 {{A T}} hil (%(imp o) (%(forall o) A) (A T))
+  %term f2 {{A B}} hil (%(imp o) (%(forall o) ([x] %(imp o) B (A x))) (%(imp o) B (%(forall o) A)))
+  %term mp {{A B}} %if hil B %<- hil (%(imp o) A B) %<- hil A
+  %term ug {{A}} %if hil (%(forall o) A) %<- %pi i %-> hil (A _)
+%}
+
+# Translation from Hilbert derivations to natural deductions
+%sort hilnd {_ (hil _)} {_ (nd _)} %.
+%mode hilnd %in %out %.
+%scope hilnd %{
+  %term hnd_k {{A B}} hilnd %(k hil) (%(impi nd) ([u] %(impi nd) ([v] u)))
+  %term hnd_s {{A B C}} hilnd %(s hil)
+    (%(impi nd) ([u] %(impi nd) ([v] %(impi nd) ([w] %(impe nd) (%(impe nd) u w) (%(impe nd) v w)))))
+  %term hnd_n1 {{A B}} hilnd %(n1 hil)
+    (%(impi nd) ([u] %(impi nd) ([v] %(noti nd) ([p] [w] %(note nd) (%(impe nd) u w) (%(impe nd) v w)))))
+  %term hnd_n2 {{A}} hilnd %(n2 hil)
+    (%(impi nd) ([u] %(impi nd) ([v] %(note nd) u _ v)))
+  %term hnd_f1 {{A T}} hilnd (%(f1 hil) T) (%(impi nd) ([u] %(foralle nd) u T))
+  %term hnd_f2 {{A B}} hilnd %(f2 hil)
+    (%(impi nd) ([u] %(impi nd) ([v] %(foralli nd) ([a] %(impe nd) (%(foralle nd) u a) v))))
+  %term hnd_mp {{A B H1 H2 D1 D2}}
+    %if hilnd (%(mp hil) H1 H2) (%(impe nd) D1 D2)
+    %<- hilnd H1 D1
+    %<- hilnd H2 D2
+  %term hnd_ug {{A H1 D1}}
+    %if hilnd (%(ug hil) H1) (%(foralli nd) D1)
+    %<- %pi i %-> hilnd (H1 _) (D1 _)
+%}
+%worlds () (hilnd _ _)
+%terminates H (hilnd H _)
+%total H (hilnd H _)

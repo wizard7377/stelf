@@ -1,0 +1,32 @@
+%%% Expression representation using de Bruijn indices
+%%% Author: Frank Pfenning, based on [Hannan & Pfenning 92]
+%sort exp' %.
+%name exp' %.
+%term 1 exp' %.
+%term ^ %pi exp' %-> exp' %.
+%prec %postfix 20 ^ %.
+%term z' exp' %.
+%term s' %pi exp' %-> exp' %.
+%term case' %pi exp' %-> exp' %-> exp' %-> exp' %.
+%term pair' %pi exp' %-> exp' %-> exp' %.
+%term fst' %pi exp' %-> exp' %.
+%term snd' %pi exp' %-> exp' %.
+%term lam' %pi exp' %-> exp' %.
+%term app' %pi exp' %-> exp' %-> exp' %.
+%term letv' %pi exp' %-> exp' %-> exp' %.
+%term letn' %pi exp' %-> exp' %-> exp' %.
+%term fix' %pi exp' %-> exp' %.
+% Environments and values
+%sort env %.
+%name env %.
+%sort val %.
+%name val %.
+%term empty env %.
+%term ; %pi env %-> val %-> env %.
+%prec %left 10 ; %.
+%term + %pi env %-> exp' %-> env %.
+%prec %left 10 + %.
+%term z* val %.
+%term s* %pi val %-> val %.
+%term pair* %pi val %-> val %-> val %.
+%term clo %pi env %-> exp' %-> val %.

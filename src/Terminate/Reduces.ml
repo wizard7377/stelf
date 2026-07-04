@@ -15,6 +15,9 @@ open! Basis
    for a revised version incorporating reducation checking see
    tech report CMU-CS-01-115
  *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Reduces (Reduces__0 : sig
   module Global : GLOBAL
 
@@ -46,7 +49,7 @@ module Reduces (Reduces__0 : sig
   module Origins : Origins.ORIGINS
 end) : REDUCES = struct
   (*! structure IntSyn = IntSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

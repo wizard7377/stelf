@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name trail)
  (public_name stelf.trail)
  (modules Trail_ Notrail TRAIL)

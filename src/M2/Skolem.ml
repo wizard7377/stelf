@@ -12,6 +12,10 @@ open Metasyn
 open Modetable
 open Timers
 
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Skolem (Skolem__0 : sig
   (* Skolem constant administration *)
   (* Author: Carsten Schuermann *)
@@ -42,7 +46,7 @@ end) : SKOLEM = struct
   open Skolem__0
 
   (*! structure IntSyn = IntSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

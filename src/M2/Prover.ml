@@ -21,6 +21,10 @@ open Timers
 
 (* Meta Prover *)
 (* Author: Carsten Schuermann *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Prover (Prover__0 : sig
   module MetaGlobal : METAGLOBAL.METAGLOBAL
   module MetaSyn' : Metasyn.METASYN
@@ -39,7 +43,7 @@ end) : PROVER = struct
   open Prover__0
 
   (*! structure IntSyn = MetaSyn'.IntSyn !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module MetaSyn = MetaSyn'

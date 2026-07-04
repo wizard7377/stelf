@@ -28,6 +28,9 @@ open! Basis
 
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MTPi (MTPi__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL
 
@@ -73,7 +76,7 @@ module MTPi (MTPi__0 : sig
 end) : MTPI = struct
   open MTPi__0
 
-  exception Error of string
+  exception Error = Error
 
   (*! structure FunSyn = FunSyn' !*)
   module StateSyn = StateSyn'

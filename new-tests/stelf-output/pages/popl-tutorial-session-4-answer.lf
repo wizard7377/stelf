@@ -1,0 +1,100 @@
+%                                          
+%{! 
+
+## Session 4: Type Preservation Answer
+
+### Syntax
+
+!}%
+%sort tp %.
+%name tp %.
+%term nat tp %.
+%term arr %pi tp %-> tp %-> tp %.
+%sort exp %.
+%name exp %.
+%term z exp %.
+%term fun %pi tp %-> tp %-> (%pi exp %-> exp %-> exp) %-> exp %.
+%term app %pi exp %-> exp %-> exp %.
+%{! 
+TASK 1:
+!}%
+%term s %pi exp %-> exp %.
+%term ifz %pi exp %-> exp %-> (%pi exp %-> exp) %-> exp %.
+%{! 
+
+### Static Semantics
+
+!}%
+%sort of %.
+%name of %.
+%term of/z of z nat %.
+%term of/fun 
+	%pi (of (fun T1 T2 ([f] [x] E f x)) (arr T1 T2))
+	%<- ({f} %pi (of f (arr T1 T2)) %-> ({x} %pi (of x T1) %-> (of (E f x) T2))) %.
+%term of/app %pi (of (app E1 E2) T') %<- (of E1 (arr T T')) %<- (of E2 T) %.
+%{! 
+TASK 2:
+!}%
+%term of/s %pi (of (s E) nat) %<- (of E nat) %.
+%term of/ifz 
+	%pi (of (ifz E E1 ([x] E2 x)) T)
+	%<- (of E nat)
+	%<- (of E1 T)
+	%<- ({x} %pi (of x nat) %-> (of (E2 x) T)) %.
+%{! 
+
+### Dynamic Semantics
+
+!}%
+%sort value %.
+%name value %.
+%term value/z value z %.
+%term value/s %pi (value (s E)) %<- (value E) %.
+%term value/fun value (fun _ _ _) %.
+%sort step %.
+%name step %.
+%term step/app/fun %pi (step (app E1 E2) (app E1' E2)) %<- (step E1 E1') %.
+%term step/app/arg %pi (step (app E1 E2) (app E1 E2')) %<- (value E1) %<- (step E2 E2') %.
+%term step/app/beta-v 
+	%pi (step (app (fun T1 T2 ([f] [x] E1 f x)) E2) (E1 (fun T1 T2 ([f] [x] E1 f x)) E2))
+	%<- (value E2) %.
+%{! 
+TASK 3:
+!}%
+%term step/s %pi (step (s E) (s E')) %<- (step E E') %.
+%term step/ifz/arg %pi (step (ifz E E1 ([x] E2 x)) (ifz E' E1 ([x] E2 x))) %<- (step E E') %.
+%term step/ifz/z step (ifz z E1 ([x] E2 x)) E1 %.
+%term step/ifz/s %pi (step (ifz (s E) E1 ([x] E2 x)) (E2 E)) %<- (value E) %.
+%{! 
+
+### Preservation
+
+!}%
+%sort preservation %.
+%mode preservation %in %in %out %.
+%term _ 
+	%pi (preservation (of/app (%the (of E2 T) DofE2) (%the (of E1 (arr T T')) DofE1)) (%the (step (app E1 E2) (app E1' E2)) (step/app/fun (%the (step E1 E1') Dstep))) (of/app DofE2 DofE1'))
+	%<- (preservation DofE1 Dstep (%the (of E1' (arr T T')) DofE1')) %.
+%term _ 
+	%pi (preservation (of/app (%the (of E2 T) DofE2) (%the (of E1 (arr T T')) DofE1)) (%the (step (app E1 E2) (app E1 E2')) (step/app/arg (%the (step E2 E2') Dstep) _)) (of/app DofE2' DofE1))
+	%<- (preservation DofE2 Dstep (%the (of E2' T) DofE2')) %.
+%term _ preservation (of/app (%the (of E2 T1) DofE2) (%the (of (fun T1 T2 ([f] [x] E1 f x)) (arr T1 T2)) (of/fun (%the ({f} %pi (of f (arr T1 T2)) %-> ({x} %pi (of x T1) %-> (of (E1 f x) T2))) DofE1)))) (%the (step (app (fun T1 T2 ([f] [x] E1 f x)) E2) (E1 (fun T1 T2 ([f] [x] E1 f x)) E2)) (step/app/beta-v _)) (DofE1 (fun T1 T2 ([f] [x] E1 f x)) (of/fun DofE1) E2 DofE2) %.
+%{! 
+TASK 4:
+!}%
+%term _ 
+	%pi (preservation (of/s (%the (of E nat) Dof)) (%the (step (s E) (s E')) (step/s (%the (step E E') Dstep))) (of/s Dof'))
+	%<- (preservation Dof Dstep (%the (of E' nat) Dof')) %.
+%term _ 
+	%pi (preservation (of/ifz (%the ({x} %pi (of x nat) %-> (of (E2 x) T)) DofE2) (%the (of E1 T) DofE1) (%the (of E nat) DofE)) (%the (step (ifz E E1 ([x] E2 x)) (ifz E' E1 ([x] E2 x))) (step/ifz/arg (%the (step E E') Dstep))) (of/ifz DofE2 DofE1 DofE'))
+	%<- (preservation DofE Dstep (%the (of E' nat) DofE')) %.
+%term _ preservation (of/ifz (%the ({x} %pi (of x nat) %-> (of (E2 x) T)) DofE2) (%the (of E1 T) DofE1) of/z) (%the (step (ifz z E1 ([x] E2 x)) E1) step/ifz/z) DofE1 %.
+%term _ preservation (of/ifz (%the ({x} %pi (of x nat) %-> (of (E2 x) T)) DofE2) (%the (of E1 T) DofE1) (of/s (%the (of E nat) DofE))) (%the (step (ifz (s E) E1 ([x] E2 x)) (E2 E)) (step/ifz/s _)) (DofE2 E DofE) %.
+%worlds () (preservation _ _ _) %.
+%total D (preservation _ D _) %.
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/POPL_Tutorial/Session_4_Answer).
+!}%

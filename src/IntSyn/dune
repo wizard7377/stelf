@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name intsyn)
  (public_name stelf.intsyn)
  (modules

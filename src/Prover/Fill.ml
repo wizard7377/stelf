@@ -12,6 +12,9 @@ open! Basis
 (* Filling *)
 (* Author: Carsten Schuermann *)
 (* Date: Thu Mar 16 13:08:33 2006 *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Fill (Fill__0 : sig
   module Data : Data.DATA
 
@@ -42,7 +45,7 @@ end) : FILL with module State = Fill__0.State' = struct
   (*! structure Tomega = Tomega' !*)
   module State = Fill__0.State'
 
-  exception Error of string
+  exception Error = Error
 
   type operator_ =
     | FillWithConst of IntSyn.exp * IntSyn.cid

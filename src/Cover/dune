@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name cover)
  (public_name stelf.cover)
  (modules Total Cover_ COVER TOTAL)

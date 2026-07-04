@@ -1,0 +1,20 @@
+%%% Expression representation using de Bruijn indices
+%%% Version restricted to pure lambda-calculus
+%%% Author: Frank Pfenning, based on [Hannan & Pfenning 92]
+% Expressions
+%sort exp' %.
+%name exp' %.
+%term 1 exp' %.
+%term ^ %pi exp' %-> exp' %.
+%prec %postfix 20 ^ %.
+%term lam' %pi exp' %-> exp' %.
+%term app' %pi exp' %-> exp' %-> exp' %.
+% Environments and values
+%sort env %.
+%name env %.
+%sort val %.
+%name val %.
+%term empty env %.
+%term ; %pi env %-> val %-> env %.
+%prec %left 10 ; %.
+%term clo %pi env %-> exp' %-> val %.

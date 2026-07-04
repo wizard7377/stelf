@@ -14,6 +14,10 @@ open MetaGlobal
 
 (* Search (based on abstract machine ) *)
 (* Author: Carsten Schuermann *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module OLDSearch (OLDSearch__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   module MetaGlobal : METAGLOBAL.METAGLOBAL
@@ -53,7 +57,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
   module MetaSyn = MetaSyn'
 
   (*! structure CompSyn = CompSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

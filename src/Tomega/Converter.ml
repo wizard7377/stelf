@@ -11,6 +11,11 @@ include CONVERTER
 (* # 1 "src/tomega/Converter.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+exception Error' of Tomega.sub
+let () = Printexc.register_printer (function Error' _ -> Some "Tomega converter error" | _ -> None)
+
 module MakeConverter
     (Global : GLOBAL)
     (Abstract : ABSTRACT)
@@ -81,8 +86,8 @@ module MakeConverter
 *)
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  exception Error of string
-  exception Error' of Tomega.sub
+  exception Error = Error
+  exception Error' = Error'
 
   open! struct
     module T = Tomega

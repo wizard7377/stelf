@@ -19,6 +19,9 @@ open! Basis
 
 (* Splitting : Version 1.3 *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MTPSplitting (MTPSplitting__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL
   module Global : GLOBAL
@@ -66,7 +69,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
   open MTPSplitting__0
   module StateSyn = StateSyn'
 
-  exception Error of string
+  exception Error = Error
 
   (* Invariant:
      Case analysis generates a list of successor states

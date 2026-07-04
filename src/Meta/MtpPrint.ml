@@ -13,6 +13,9 @@ include MTPPRINT
 open! Global
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MTPrint (MTPrint__0 : sig
   (* Meta Printer Version 1.3 *)
   (* Author: Carsten Schuermann *)
@@ -38,7 +41,7 @@ end) : MTPPRINT.MTPRINT = struct
   module Formatter = Formatter'
   module StateSyn = StateSyn'
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

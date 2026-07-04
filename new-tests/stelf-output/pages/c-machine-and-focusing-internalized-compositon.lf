@@ -1,0 +1,110 @@
+%                                                            
+%{! 
+C Machine and Focusing
+!}%
+%{! ## Syntax !}%
+%sort pos %.
+%name pos %.
+%sort neg %.
+%name neg %.
+%term down %pi neg %-> pos %.
+%term plus %pi pos %-> pos %-> pos %.
+%term times %pi pos %-> pos %-> pos %.
+%term zero pos %.
+%term one pos %.
+%term up %pi pos %-> neg %.
+%term arr %pi pos %-> neg %-> neg %.
+%term with %pi neg %-> neg %-> neg %.
+%term top neg %.
+%inline conc neg %.
+%sort val+ %.
+%sort cont- %.
+%sort cont+ %.
+%sort val- %.
+%sort exp %.
+%% positive values
+%term mt+ val+ one %.
+%% no rule for zero
+%term pair+ %pi (val+ A) %-> (val+ B) %-> (val+ (times A B)) %.
+%term inl %pi (val+ A) %-> (val+ (plus A B)) %.
+%term inr %pi (val+ B) %-> (val+ (plus A B)) %.
+%term delay- %pi (exp A-) %-> (val+ (down A-)) %.
+%% positive continuations (shallow matching)
+%% positive conts
+%term let1 %pi (exp C) %-> (cont+ one C) %.
+%% no rule for zero
+%term split %pi (%pi (val+ A) %-> (val+ B) %-> (exp C)) %-> (cont+ (times A B) C) %.
+%term case 
+	%pi (%pi (val+ A) %-> (exp C))
+	%-> (%pi (val+ B) %-> (exp C))
+	%-> (cont+ (plus A B) C) %.
+%% wait to peel off the shift until you're ready to focus.
+%term force- %pi (cont- A- C) %-> (cont+ (down A-) C) %.
+%term comp+- %pi (cont+ A+ B-) %-> (cont- B- C-) %-> (cont+ A+ C-) %.
+%% negative continuations
+%term app %pi (val+ A+) %-> (cont- B C) %-> (cont- (arr A+ B) C) %.
+%term fst %pi (cont- A C) %-> (cont- (with A B) C) %.
+%term snd %pi (cont- B C) %-> (cont- (with A B) C) %.
+%term force+ %pi (%pi (val+ A+) %-> (exp C)) %-> (cont- (up A+) C) %.
+%% internalize identity so we don't need to eta-expand
+%term id- cont- A A %.
+%term comp-- %pi (cont- A- B-) %-> (cont- B- C-) %-> (cont- A- C-) %.
+%% negative values (shallow)
+%term lam %pi (%pi (val+ A+) %-> (exp B-)) %-> (val- (arr A+ B-)) %.
+%term pair- %pi (exp A-) %-> (exp B-) %-> (val- (with A- B-)) %.
+%term mt- val- top %.
+%term delay+ %pi (val+ A+) %-> (val- (up A+)) %.
+%% wait to peel off shift until focus
+%% neutral sequents
+%term return %pi (val- A) %-> (exp A) %.
+%% canonical when the value is a variable;
+%% non-canonical otherwise
+%term cut+ %pi (val+ A+) %-> (cont+ A+ C) %-> (exp C) %.
+%% non-canonical
+%term cut- %pi (val- A-) %-> (cont- A- C) %-> (exp C) %.
+%term compe- %pi (exp A-) %-> (cont- A- C-) %-> (exp C-) %.
+%{! ### Stack Machine !}%
+%% the sum type that you'd define for progress is
+%% (val C) + (exp C)
+%% so let's just abuse exp C for this sum and write the
+%% operational semantics as the progress proof.
+%% the only downside is that you can't tell whether an expression
+%% took a real step towards a value or already was a value.
+%sort step %.
+%mode step %in %out %.
+%term step/return step (return V) (return V) %.
+%term step/let1 step (cut+ mt+ (let1 E)) E %.
+%term step/split step (cut+ (pair+ V1 V2) (split E)) (E V1 V2) %.
+%term step/case1 step (cut+ (inl V1) (case E1 E2)) (E1 V1) %.
+%term step/case2 step (cut+ (inr V2) (case E1 E2)) (E2 V2) %.
+%term step/force- step (cut+ (delay- E) (force- K)) (compe- E K) %.
+%term step/app step (cut- (lam E) (app V K)) (compe- (E V) K) %.
+%term step/fst step (cut- (pair- E1 E2) (fst K)) (compe- E1 K) %.
+%term step/snd step (cut- (pair- E1 E2) (snd K)) (compe- E2 K) %.
+%term step/force+ step (cut- (delay+ V) (force+ E)) (E V) %.
+%term step/id step (cut- V id-) (return V) %.
+%% find the redex
+%term step/compe-/compe- step (compe- (compe- E K1) K2) (compe- E (comp-- K1 K2)) %.
+%term step/compe-/cut+ step (compe- (cut+ V K1) K2) (cut+ V (comp+- K1 K2)) %.
+%term step/compe-/cut- step (compe- (cut- V K1) K2) (cut- V (comp-- K1 K2)) %.
+%term step/compe-/cut- step (compe- (return V) K2) (cut- V K2) %.
+%% find the top of the stack
+%term step/comp+-/let1 step (cut+ V (comp+- (let1 E) K)) (cut+ V (let1 (compe- E K))) %.
+%term step/comp+-/split step (cut+ V (comp+- (split E) K)) (cut+ V (split ([x] [y] compe- (E x y) K))) %.
+%term step/comp+-/case step (cut+ V (comp+- (case E1 E2) K)) (cut+ V (case ([x] compe- (E1 x) K) ([x] compe- (E2 x) K))) %.
+%term step/comp+-/force step (cut+ V (comp+- (force- K1) K2)) (cut+ V (force- (comp-- K1 K2))) %.
+%term step/comp+-/force step (cut+ V (comp+- (comp+- K1 K2) K3)) (cut+ V (comp+- K1 (comp-- K2 K3))) %.
+%term step/comp--/app step (cut- V1 (comp-- (app V2 K) K2)) (cut- V1 (app V2 (comp-- K K2))) %.
+%term step/comp--/fst step (cut- V1 (comp-- (fst K) K2)) (cut- V1 (fst (comp-- K K2))) %.
+%term step/comp--/snd step (cut- V1 (comp-- (snd K) K2)) (cut- V1 (snd (comp-- K K2))) %.
+%term step/comp--/snd step (cut- V1 (comp-- (force+ E) K2)) (cut- V1 (force+ ([x] compe- (E x) K2))) %.
+%term step/comp--/id step (cut- V1 (comp-- id- K)) (cut- V1 K) %.
+%term step/comp--/id step (cut- V1 (comp-- (comp-- K1 K2) K)) (cut- V1 (comp-- K1 (comp-- K2 K))) %.
+%worlds () (step _ _) %.
+%total D (step D _) %.
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/C_machine_and_focusing_(internalized_compositon)).
+!}%

@@ -24,6 +24,10 @@ open Ring
 
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Mpi (Mpi__0 : sig
   module MetaGlobal : METAGLOBAL.METAGLOBAL
   module MetaSyn' : Metasyn.METASYN
@@ -44,7 +48,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
   open Mpi__0
   module MetaSyn = MetaSyn'
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module M = MetaSyn

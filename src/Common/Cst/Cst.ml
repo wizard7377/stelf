@@ -41,6 +41,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     | Fvar_ of string * loc
     | Typ_ of loc
     | MacroParam_ of loc * int option * int
+    | Local_ of loc * namespace * term
   [@@deriving show { with_path = false }, eq]
 
   (* Constant/block declarations *)
@@ -127,7 +128,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     | TermCmd_ of decl
     | BlockCmd_ of string * block_item list
     | UnionCmd_ of string * string list
-    | WorldsCmd_ of string list * term
+    | WorldsCmd_ of string list * term list
     | DeterministicCmd_ of string list
     | EvalCmd_ of cmd list
     | PrecCmd_ of fixity * int * string list
@@ -327,7 +328,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     let term ?fc:(_ = ghost) d = TermCmd_ d
     let block ?fc:(_ = ghost) id items = BlockCmd_ (id, items)
     let union ?fc:(_ = ghost) id ids = UnionCmd_ (id, ids)
-    let worlds ?fc:(_ = ghost) ids tm = WorldsCmd_ (ids, tm)
+    let worlds ?fc:(_ = ghost) ids tms = WorldsCmd_ (ids, tms)
     let deterministic ?fc:(_ = ghost) ids = DeterministicCmd_ ids
     
    
@@ -503,34 +504,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
       let (!<) = review
     end
     let ghost' : Loc.t = ghost
-    (** {3 Term Syntax} *)
-    module rec Term : sig
-      type t = term
-
-      type u =
-        | Lowercase of Loc.t * symbol
-        | Uppercase of Loc.t * symbol
-        | Qualified of Loc.t * symbol
-        | Text of Loc.t * name
-        | ExistVar of Loc.t * name
-        | FreeVar of Loc.t * name
-        | Pi of Loc.t * Decl.t list * t
-        | Lam of Loc.t * Decl.t list * t
-        | App of Loc.t * t * t list
-        | HasType of Loc.t * t * t
-        | Omitted of Loc.t
-        | Typ of Loc.t
-        | Arrow of Loc.t * t * t
-        | BackArrow of Loc.t * t * t
-        | Foreign of Loc.t * t
-        | Internal of int
-        | MacroParam of Loc.t * int option * int
-
-      val view : t -> u
-      val review : u -> t
-      val (!>) : t -> u
-      val (!<) : u -> t
-    end = struct
+    module Term = struct
       type t = term
 
       type u =
@@ -540,8 +514,8 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Text of Loc.t * string
         | ExistVar of Loc.t * string
         | FreeVar of Loc.t * string
-        | Pi of Loc.t * Decl.t list * t
-        | Lam of Loc.t * Decl.t list * t
+        | Pi of Loc.t * decl list * t
+        | Lam of Loc.t * decl list * t
         | App of Loc.t * t * t list
         | HasType of Loc.t * t * t
         | Omitted of Loc.t
@@ -551,6 +525,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Foreign of Loc.t * t
         | Internal of int
         | MacroParam of Loc.t * int option * int
+        | Local of Loc.t * namespace * t
       let view (x : t) : u =
         let rec collect_pis = function
           | Pi_ (_, d, body) ->
@@ -588,6 +563,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Omitted_ loc -> Omitted loc
         | Typ_ loc -> Typ loc
         | Arrow_ (loc, a, b) -> Arrow (loc, a, b)
+        | Local_ (loc, ns, tm) -> Local (loc, ns, tm) 
 
       let review (y : u) : t =
         let rec fold_right f lst acc =
@@ -629,29 +605,18 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | BackArrow (loc, a, b) -> Arrow_ (loc, b, a)
         | Foreign (_, _) -> raise Lacking
         | Internal _ -> raise Lacking
+        | Local (loc, ns, tm) -> Local_ (loc, ns, tm)
 
       let (!>) = view
       let (!<) = review
     end
 
-    (** Binder declaration constructors. *)
-    and Decl : sig
+    module Decl = struct
       type t = decl
 
       type u =
-        | Decl1 of Loc.t * string option list * Term.t * Term.t
-        | Decl0 of Loc.t * string option list * Term.t
-
-      val view : t -> u
-      val review : u -> t
-      val (!>) : t -> u
-      val (!<) : u -> t
-    end = struct
-      type t = decl
-
-      type u =
-        | Decl1 of Loc.t * string option list * Term.t * Term.t
-        | Decl0 of Loc.t * string option list * Term.t
+        | Decl1 of Loc.t * string option list * term * term
+        | Decl0 of Loc.t * string option list * term
 
       let view (x : t) : u =
         match x with
@@ -1010,7 +975,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Term of Loc.t * Decl.t
         | Block of Loc.t * string * BlockItem.t list
         | Union of Loc.t * string * string list
-        | Worlds of Loc.t * string list * Term.t
+        | Worlds of Loc.t * string list * Term.t list
         | Deterministic of Loc.t * string list
         | Eval of Loc.t * t list
         | Prec of Loc.t * Fixity.t * int * string list

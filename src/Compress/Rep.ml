@@ -8,6 +8,9 @@ open! Sgn
 open! Reductio
 open! Basis
 
+exception Crap
+let () = Printexc.register_printer (function Crap -> Some "Crap" | _ -> None)
+
 module Rep = struct
   module I = IntSyn
   module S = Syntax
@@ -44,7 +47,7 @@ module Rep = struct
   (* val l : (Syntax.term * Syntax.tp) list ref = ref [] *)
   let k : Reductio.eq_c option ref = ref None
 
-  exception Crap
+  exception Crap = Crap
 
   let rec sanityCheck cid =
     try

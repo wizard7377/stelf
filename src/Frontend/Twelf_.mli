@@ -1,4 +1,4 @@
-include module type of TWELF
+module type STELF = TWELF.STELF
 
 module Stelf (Twelf__0 : sig
   module Global : GLOBAL

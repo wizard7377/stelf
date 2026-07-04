@@ -55,6 +55,7 @@ type 'a recparser = 'a Parsing.recparser
 let recwith = Parsing.recwith
 
 exception Error = Parsing.Error
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 let error = Parsing.error
 (*! structure Lexer' = Lexer !*)

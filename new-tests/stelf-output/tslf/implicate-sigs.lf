@@ -1,0 +1,59 @@
+%%%% implicate lemma.  explicit system to implicit system.
+%sort implicate/sg-wf %.
+%mode implicate/sg-wf %in %out %.
+%sort implicate/sg-deq %.
+%mode implicate/sg-deq %in %out %.
+%term _ 
+	%pi (implicate/sg-wf (esg-wf/sg/unit _) D)
+	%<- (sg-wf-to-isg-wf G sg-wf/sg/unit D) %.
+%term _ 
+	%pi (implicate/sg-wf (esg-wf/sg/cn D) D'')
+	%<- (implicate/ofkd D D')
+	%<- (isg-wf/sg/cn D' D'') %.
+%term _ 
+	%pi (implicate/sg-wf (esg-wf/sg/kd D) D'')
+	%<- (implicate/kd-wf D D')
+	%<- (isg-wf/sg/kd D' D'') %.
+%term _ 
+	%pi (implicate/sg-wf (esg-wf/sg/sgm D1 D2 DFS) D'')
+	%<- (implicate/sg-wf D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/sg-wf (D2 c d) (isg-wf/cons (D2' c)))
+	%<- (isg-wf/sg/sgm D1' DFS D2' D'') %.
+%term _ 
+	%pi (implicate/sg-wf (esg-wf/sg/pi D1 D2 DFS) D'')
+	%<- (implicate/sg-wf D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/sg-wf (D2 c d) (isg-wf/cons (D2' c)))
+	%<- (isg-wf/sg/pi D1' DFS D2' D'') %.
+%term _ 
+	%pi (implicate/sg-deq (esg-deq/sg/unit _) D)
+	%<- (sg-deq-to-isg-deq G sg-deq/sg/unit D) %.
+%term _ 
+	%pi (implicate/sg-deq (esg-deq/sg/cn D) D'')
+	%<- (implicate/cn-deq D D')
+	%<- (isg-deq/sg/cn D' D'') %.
+%term _ 
+	%pi (implicate/sg-deq (esg-deq/sg/kd D) D'')
+	%<- (implicate/kd-deq D D')
+	%<- (isg-deq/sg/kd D' D'') %.
+%term _ 
+	%pi (implicate/sg-deq (esg-deq/sg/sgm D1 D2 DFS) D'')
+	%<- (implicate/sg-deq D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/sg-deq (D2 c d) (isg-deq/cons (D2' c)))
+	%<- (isg-deq/sg/sgm D1' DFS D2' D'') %.
+%term _ 
+	%pi (implicate/sg-deq (esg-deq/sg/pi D1 D2 DFS) D'')
+	%<- (implicate/sg-deq D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/sg-deq (D2 c d) (isg-deq/cons (D2' c)))
+	%<- (isg-deq/sg/pi D1' DFS D2' D'') %.
+%worlds (ovar-block ofkd-block) (implicate/sg-wf _ _) (implicate/sg-deq _ _) %.
+%total (D1 D2) (implicate/sg-wf D1 _) (implicate/sg-deq D2 _) %.
+%sort implicate-closed/sg-wf %.
+%mode implicate-closed/sg-wf %in %out %.
+%term _ %pi (implicate-closed/sg-wf D D') %<- (implicate/sg-wf D (isg-wf/nil D')) %.
+%worlds (ofkd-block) (implicate-closed/sg-wf _ _) %.
+%total {} (implicate-closed/sg-wf _ _) %.
+%sort implicate-closed/sg-deq %.
+%mode implicate-closed/sg-deq %in %out %.
+%term _ %pi (implicate-closed/sg-deq D D') %<- (implicate/sg-deq D (isg-deq/nil D')) %.
+%worlds (ofkd-block) (implicate-closed/sg-deq _ _) %.
+%total {} (implicate-closed/sg-deq _ _) %.

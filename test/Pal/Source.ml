@@ -24,3 +24,8 @@ include CraryLinear
 include Failures
 include Placeholders
 include NatScope
+include Shadowing
+include Scope
+include Defs
+include Frozen
+include Advanced

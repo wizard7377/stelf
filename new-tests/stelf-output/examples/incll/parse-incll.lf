@@ -1,0 +1,84 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+% parsing examples
+%
+
+% the logic program is the grammar.
+% the ordered context is the input to be parsed.
+%
+
+%
+
+%
+
+% small_parser.ll example from Lolli distribution
+%
+
+%
+
+%term snt atm %.
+%term snt1 atm %.
+%term np atm %.
+%term vp atm %.
+%term tv atm %.
+%term stv atm %.
+%term sbar atm %.
+%term det atm %.
+%term pn atm %.
+%term n atm %.
+%term rel atm %.
+%term whom atm %.
+%term the atm %.
+%term that atm %.
+%term man atm %.
+%term woman atm %.
+%term girl atm %.
+%term boy atm %.
+%term mary atm %.
+%term bob atm %.
+%term jill atm %.
+%term loves atm %.
+%term married atm %.
+%term believes atm %.
+%
+
+% the parse grammar
+%   note that unlike in Lolli (or lambda-Prolog) everything can
+%   remain propositional. 
+%
+
+%term snt_0 prog (^ np =>> ^ vp =>> ^ snt) %.
+%term snt1_0 prog (^ np =>> (^ np =0 ^ vp) =>> ^ snt1) %.
+%term vp_0 prog (^ tv =>> ^ np =>> ^ vp) %.
+%term vp_1 prog (^ stv =>> ^ sbar =>> ^ vp) %.
+%	
+% note: (^ that) is before (^ snt) in the context
+% done in this manner to prevent looping
+%
+
+%term sbar_0 prog (^ snt =>> ^ that >=> ^ sbar) %.
+%term np_0 prog (^ det =>> ^ n =>> ^ np) %.
+%term np_1 prog (^ det =>> ^ n =>> ^ rel =>> ^ np) %.
+%term np_2 prog (^ pn =>> ^ np) %.
+%
+
+% Adding a ^ np at end of context, insures that gap
+% is at end of phrase so no need for quantifiers. 
+% Also (^ whom) is before (^ np =>> ^ snt)
+%
+
+% rel_0 : prog( (^ np =>> ^ snt) =>> ^ whom >=> ^ rel).	
+% rel_1 : prog( ((^ np =>> (^ np =0 ^ vp) =>> ^ snt) =0 ^ snt) =>> ^ whom >=> ^ rel).	
+%term rel_0 prog (^ snt1 =>> ^ whom >=> ^ rel) %.
+%term det_0 prog (^ the =>> ^ det) %.
+%term n_man prog (^ man =>> ^ n) %.
+%term n_woman prog (^ woman =>> ^ n) %.
+%term n_girl prog (^ girl =>> ^ n) %.
+%term n_boy prog (^ boy =>> ^ n) %.
+%term pn_mary prog (^ mary =>> ^ pn) %.
+%term pn_bob prog (^ bob =>> ^ pn) %.
+%term pn_jill prog (^ jill =>> ^ pn) %.
+%term tv_loves prog (^ loves =>> ^ tv) %.
+%term tv_married prog (^ married =>> ^ tv) %.
+%term tv_believes prog (^ believes =>> ^ stv) %.

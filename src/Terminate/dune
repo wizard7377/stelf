@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name terminate)
  (public_name stelf.terminate)
  (modules Checking Reduces Terminate_ CHECKING REDUCES)

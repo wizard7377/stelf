@@ -18,6 +18,9 @@ open MemoTable
 (* Author: Brigitte Pientka *)
 (* Modified: Jeff Polakow, Frank Pfenning, Larry Greenfield, Roberto Virga, Brigitte Pientka *)
 (* Proof term reconstruction from proof skeleton *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module PtRecon (PtRecon__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure CompSyn' : COMPSYN !*)
@@ -54,7 +57,7 @@ end) : PTRECON = struct
     module MT = MemoTable
   end
 
-  exception Error of string
+  exception Error = Error
 
   let rec cidFromHead = function I.Const a -> a | I.Def a -> a
 

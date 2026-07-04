@@ -1,0 +1,133 @@
+%%% First-Order Logic
+%%% Fragment with implication, negation, universal quantification.
+%%%
+%%% Author: Frank Pfenning
+%%%
+%%% This code is from the article
+%%%
+%%%   Logical Frameworks
+%%%   Handbook of Automated Reasoning
+%%%   Alan Robinson and Andrei Voronkov, editors
+%%%   Chapter 16
+%%%   Elsevier Science and MIT Press
+%%%   In preparation
+%%%
+%sort i %.
+% individuals
+%sort o %.
+% formulas
+%name i %.
+%name o %.
+% Formulas
+%term imp %pi o %-> o %-> o %.
+%prec %right 10 imp %.
+%term not %pi o %-> o %.
+%prec %prefix 12 not %.
+%term forall %pi (%pi i %-> o) %-> o %.
+% Natural deductions
+%sort nd %.
+%name nd %.
+%term impi %pi (%pi (nd A) %-> (nd B)) %-> (nd (A imp B)) %.
+%term impe %pi (nd (A imp B)) %-> (nd A) %-> (nd B) %.
+%term noti %pi ({p o} %pi (nd A) %-> (nd p)) %-> (nd (not A)) %.
+%term note %pi (nd (not A)) %-> ({C o} %pi (nd A) %-> (nd C)) %.
+%term foralli %pi ({a i} nd (A a)) %-> (nd (forall A)) %.
+%term foralle %pi (nd (forall A)) %-> ({T i} nd (A T)) %.
+%block lnd {A o} [u nd A]%.
+%block lo [p o]%.
+%block li [a i]%.
+%worlds (lnd lo li) (nd A) %.
+% Example
+%define _ (nd (A imp (B imp A))) impi ([u nd A] impi ([v nd B] u)) %.
+% Hilbert deductions
+%sort hil %.
+% Hilbert deductions
+%name hil %.
+%term k hil (A imp (B imp A)) %.
+%term s hil (A imp (B imp C) imp (A imp B imp (A imp C))) %.
+%term n1 hil (A imp (not B) imp (A imp B imp (not A))) %.
+%term n2 hil (not A imp (A imp B)) %.
+%term f1 {T i} hil (forall ([x i] A x) imp (A T)) %.
+%term f2 hil (forall ([x i] B imp A x) imp (B imp forall ([x i] A x))) %.
+%term mp %pi (hil (A imp B)) %-> (hil A) %-> (hil B) %.
+%term ug %pi ({a i} hil (A a)) %-> (hil (forall ([x i] A x))) %.
+%worlds (li) (hil A) %.
+% Local reductions
+%sort ==>R %.
+%prec %none 14 ==>R %.
+%name ==>R %.
+%term redl_imp impe (impi ([u nd A] D u)) E ==>R (D E) %.
+%term redl_not note (noti ([p o] [u nd A] D p u)) C E ==>R (D C E) %.
+%term redl_forall foralle (foralli ([a i] D a)) T ==>R (D T) %.
+% Local expansions
+%sort ==>E %.
+%prec %none 14 ==>E %.
+%name ==>E %.
+%term expl_imp {D nd (A imp B)} D ==>E (impi ([u nd A] impe D u)) %.
+%term expl_not {D nd (not A)} D ==>E (noti ([p o] [u nd A] note D p u)) %.
+%term expl_forall {D nd (forall A)} D ==>E (foralli ([a i] foralle D a)) %.
+% Sequent calculus search result
+%define dn (nd (A imp not not A)) impi ([u nd A] noti ([p o] [w nd (not A)] note w p u)) %.
+% Translating Hilbert derivations to natural deductions
+%sort hilnd %.
+%term hnd_k hilnd k (impi ([u nd A] impi ([v nd B] u))) %.
+%term hnd_s hilnd s (impi ([u nd (A imp B imp C)] impi ([v nd (A imp B)] impi ([w nd A] impe (impe u w) (impe v w))))) %.
+%term hnd_n1 hilnd n1 (impi ([u nd (A imp (not B))] impi ([v nd (A imp B)] noti ([p o] [w nd A] note (impe u w) p (impe v w))))) %.
+%term hnd_n2 hilnd n2 (impi ([u nd (not A)] impi ([v nd A] note u B v))) %.
+%term hnd_f1 hilnd (f1 T) (impi ([u nd (forall ([x i] A x))] foralle u T)) %.
+%term hnd_f2 hilnd f2 (impi ([u nd (forall ([x i] B imp A x))] impi ([v nd B] foralli ([a i] impe (foralle u a) v)))) %.
+%term hnd_mp %pi (hilnd (mp H1 H2) (impe D1 D2)) %<- (hilnd H1 D1) %<- (hilnd H2 D2) %.
+%term hnd_ug %pi (hilnd (ug H1) (foralli D1)) %<- ({a i} hilnd (H1 a) (D1 a)) %.
+%mode hilnd %in %out %.
+%worlds (li) (hilnd H D) %.
+%terminates H (hilnd H _) %.
+%covers hilnd %in %out %.
+%total H (hilnd H _) %.
+%solve id' : hilnd (mp (mp s k) k) (%the (nd (A imp A)) D) %.
+%define _ (nd (A imp A)) impe (impe (impi ([u nd (A imp (B imp A) imp A)] impi ([v nd (A imp B imp A)] impi ([w nd A] impe (impe u w) (impe v w))))) (impi ([u nd A] impi ([v nd (B imp A)] u)))) (impi ([u nd A] impi ([v nd B] u))) %.
+%%% The deduction theorem for Hilbert derivations
+%sort ded %.
+%term ded_id ded ([u hil A] u) (mp (mp s k) (%the (hil (A imp (A imp A))) k)) %.
+%term ded_k ded ([u hil A] k) (mp k k) %.
+%term ded_s ded ([u hil A] s) (mp k s) %.
+%term ded_n1 ded ([u hil A] n1) (mp k n1) %.
+%term ded_n2 ded ([u hil A] n2) (mp k n2) %.
+%term ded_f1 ded ([u hil A] f1 T) (mp k (f1 T)) %.
+%term ded_f2 ded ([u hil A] f2) (mp k f2) %.
+%term ded_mp 
+	%pi (ded ([u hil A] mp (H1 u) (H2 u)) (mp (mp s H1') H2'))
+	%<- (ded H1 H1')
+	%<- (ded H2 H2') %.
+%term ded_ug 
+	%pi (ded ([u hil A] ug (H1 u)) (mp f2 (ug H1')))
+	%<- ({a i} ded ([u hil A] H1 u a) (H1' a)) %.
+%block lded {A o} [u nd A] [v hil A] [h {C o} ded ([w hil C] v) (mp k v)]%.
+%mode ded %in %out %.
+%worlds (li lo lded) (ded H H') %.
+%terminates H (ded H _) %.
+%covers ded %in %out %.
+%total H (ded H _) %.
+%%% Mapping natural deductions to Hilbert derivations.
+%sort ndhil %.
+%term ndh_impi 
+	%pi (ndhil (impi D1) H1')
+	%<- ({u nd A1} {v hil A1} %pi ({C o} ded ([w hil C] v) (mp k v)) %-> (ndhil u v) %-> (ndhil (D1 u) (H1 v)))
+	%<- (ded H1 H1') %.
+%term ndh_impe %pi (ndhil (impe D1 D2) (mp H1 H2)) %<- (ndhil D1 H1) %<- (ndhil D2 H2) %.
+%term ndh_noti 
+	%pi (ndhil (noti D1) (mp (mp n1 H1') H1''))
+	%<- ({p o} {u nd A1} {v hil A1} 
+	%pi ({C o} ded ([w hil C] v) (mp k v))
+	%-> (ndhil u v)
+	%-> (ndhil (D1 p u) (H1 p v)))
+	%<- (ded (H1 (not A1)) H1')
+	%<- (ded (H1 A1) H1'') %.
+%term ndh_note %pi (ndhil (note D1 C D2) (mp (mp n2 H1) H2)) %<- (ndhil D1 H1) %<- (ndhil D2 H2) %.
+%term ndh_foralli %pi (ndhil (foralli D1) (ug H1)) %<- ({a i} ndhil (D1 a) (H1 a)) %.
+%term ndh_foralle %pi (ndhil (foralle D1 T) (mp (f1 T) H1)) %<- (ndhil D1 H1) %.
+%mode ndhil %in %out %.
+%block lndhil {A o} [u nd A] [v hil A] [h {C o} ded ([w hil C] v) (mp k v)] [nh ndhil u v]%.
+%worlds (li lo lndhil) (ndhil D H) %.
+%terminates D (ndhil D _) %.
+%covers ndhil %in %out %.
+%total D (ndhil D _) %.

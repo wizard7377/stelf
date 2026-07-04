@@ -12,6 +12,9 @@ open! Basis
 
 (* Assignment *)
 (* Author: Brigitte Pientka *)
+exception Assignment of string
+let () = Printexc.register_printer (function Assignment msg -> Some msg | _ -> None)
+
 module Assign (Assign__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   module Whnf : WHNF
@@ -25,7 +28,7 @@ end) : ASSIGN = struct
   (*! structure IntSyn = IntSyn' !*)
   open Assign__0
 
-  exception Assignment of string
+  exception Assignment = Assignment
 
   open! struct
     open IntSyn

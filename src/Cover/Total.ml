@@ -14,6 +14,12 @@ open! Basis
 (* Total Declarations *)
 (* Author: Frank Pfenning *)
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+exception Error' of Paths.occ * string
+let () = Printexc.register_printer (function Error' (_, msg) -> Some msg | _ -> None)
+
 (* COVER module type inlined here to avoid dependency cycle with cover_ *)
 module Total (Total__0 : sig
   module Global : GLOBAL
@@ -52,7 +58,7 @@ module Total (Total__0 : sig
   module Timers : Timers.TIMERS
 end) : TOTAL = struct
   (*! structure IntSyn = IntSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   module Table = Total__0.Table
   module Cover = Total__0.Cover
@@ -96,7 +102,7 @@ end) : TOTAL = struct
     end
   (* call only on constants *)
 
-  exception Error' of P.occ * string
+  exception Error' = Error'
 
   (* copied from terminates/Reduces.fun *)
   let rec error (c, occ, msg) =

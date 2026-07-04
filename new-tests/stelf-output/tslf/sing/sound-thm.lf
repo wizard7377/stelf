@@ -1,0 +1,388 @@
+%%%%%  Conversion of Subtypes  %%%%%
+%sort convert-subtype %.
+%mode convert-subtype %in %in %in %out %out %out %.
+%scope convert-subtype %term t convert-subtype subtype/t tconvert/t tconvert/t subtp/t ([x] [d] [ex] [xt] convert/at (aconvert/var xt tconvert/t wf/t d)) ([ex] [ed] equiv/reflex (eof/var ewf/t ed)) %.
+%term pi 
+	%pi (convert-subtype (subtype/pi (%the ({x} subtype (Bx x) (D x) ([y] N x y)) DsubtypeBD) (%the ({x} tsub B (M x) (Bx x)) DsubBx) (%the (subtype C A ([x] M x)) DsubtypeCA)) (tconvert/pi (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (tconvert/pi (%the ({x} %pi (vof x C) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (D x) (ED ex)))) DconvertD) (%the (tconvert C EC) DconvertC)) (subtp/pi DewfB ([ex] [ed] subtp/trans (subtp/trans (DsubtpBD ex ed) (subtp/reflex (Dtequiv ex ed))) (subtp/reflex (DequivBM ex ed))) DsubtpCA) ([z] [f] [ez] [zt] convert/lam ([x] [d] [ex] [xt] Dconvert z f ez zt x d ex xt) DconvertC) ([ez] [ef] equiv/extpi ([ex] [ed] equiv/trans (equiv/symm (equiv/beta (eof/var DewfC ed) ([ex] [ed] Deof ez ef ex ed))) (equiv/trans (DequivN' ez ef ex ed) (equiv/subsume (DsubtpBD ex ed) (equiv/subsume (subtp/reflex (Dtequiv ex ed)) (equiv/symm (equiv/app (equiv/symm (DequivM ex ed)) (equiv/reflex (eof/var (ewf/pi DewfB DewfA) ef)))))))) (eof/lam ([ex] [ed] Deof ez ef ex ed) DewfC) (eof/subsume (subtp/pi DewfB ([ex] [ed] subtp/reflex (tequiv/reflex (DewfB' ex ed))) DsubtpCA) (eof/var (ewf/pi DewfB DewfA) ef))))
+	%<- (convert-subtype DsubtypeCA DconvertC DconvertA (%the (subtp EC EA) DsubtpCA) (%the ({x} %pi (vof x C) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) A (EM ex)))) DconvertM) (%the ({ex} %pi (evof ex EC) %-> (equiv ex (EM ex) EA)) DequivM))
+	%<- ({x} {d vof x C} {ex} {xt vtrans ex x} {ed evof ex EC} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertC ed)
+	%-> (convert-tsub DconvertB (DconvertM x d ex xt) (DsubBx x) (%the (tconvert (Bx x) (EBx ex)) (DconvertBx x d ex xt)) (%the (tequiv (EB (EM ex)) (EBx ex)) (Dtequiv ex ed))))
+	%<- ({x} {d vof x C} {ex} {xt vtrans ex x} {ed evof ex EC} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertC ed)
+	%-> (convert-subtype (DsubtypeBD x) (DconvertBx x d ex xt) (DconvertD x d ex xt) (%the (subtp (EBx ex) (ED ex)) (DsubtpBD ex ed)) (%the ({y} 
+	%pi (vof y (Bx x))
+	%-> ({ey} %pi (vtrans ey y) %-> (convert (N x y) (D x) (EN ex ey)))) (DconvertN x d ex xt)) (%the ({ey} %pi (evof ey (EBx ex)) %-> (equiv ey (EN ex ey) (ED ex))) (DequivN ex ed))))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (tconvert-reg (DconvertB x d ex xt) (%the (ewf (EB ex)) (DewfB ex ed))))
+	%<- (tconvert-reg-il DconvertA (%the (wf A) DwfA))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} tconvert-reg-il (DconvertB x d ex xt) (%the (wf (B x)) (DwfB x d)))
+	%<- ({z} {f vof z (pi A B)} {ez} {zt vtrans ez z} {ef evof ez (epi EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/pi DconvertB DconvertA) ef)
+	%-> ({x} {d vof x C} {ex} {xt vtrans ex x} {ed evof ex EC} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertC ed)
+	%-> (convert-ssub (DconvertN x d ex xt) (%the (aconvert (app z (M x)) (Bx x) (eapp ez (EM ex))) (aconvert/app (DsubBx x) (DconvertM x d ex xt) (aconvert/var zt (tconvert/pi DconvertB DconvertA) (wf/pi DwfB DwfA) f))) (%the (convert (N x (app z (M x))) (D x) (EN ex (eapp ez (EM ex)))) (Dconvert z f ez zt x d ex xt)))))
+	%<- ({z} {f vof z (pi A B)} {ez} {zt vtrans ez z} {ef evof ez (epi EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/pi DconvertB DconvertA) ef)
+	%-> ({x} {d vof x C} {ex} {xt vtrans ex x} {ed evof ex EC} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertC ed)
+	%-> (convert-reg (Dconvert z f ez zt x d ex xt) (DconvertD x d ex xt) (%the (eof (EN ex (eapp ez (EM ex))) (ED ex)) (Deof ez ef ex ed)))))
+	%<- ({x} {d vof x C} {ex} {xt vtrans ex x} {ed evof ex EC} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertC ed)
+	%-> (convert-reg (DconvertM x d ex xt) DconvertA (%the (eof (EM ex) EA) (DeofM ex ed))))
+	%<- (subtp-reg DsubtpCA (%the (ewf EC) DewfC) (%the (ewf EA) DewfA))
+	%<- ({ez} {ef evof ez (epi EA EB)} {ex} {ed evof ex EC} esubst-equiv (DequivN ex ed) (%the (eof (eapp ez (EM ex)) (EBx ex)) (eof/subsume (subtp/reflex (Dtequiv ex ed)) (eof/app (DeofM ex ed) (eof/var (ewf/pi DewfB DewfA) ef)))) (%the (equiv (eapp ez (EM ex)) (EN ex (eapp ez (EM ex))) (ED ex)) (DequivN' ez ef ex ed)))
+	%<- ({ex} {ed evof ex EC} esubst-wf DewfB (eof/subsume DsubtpCA (eof/var DewfC ed)) (%the (ewf (EB ex)) (DewfB' ex ed)))
+	%<- ({ex} {ed} tfunctionality DewfB (DequivM ex ed) (%the (tequiv (EB ex) (EB (EM ex))) (DequivBM ex ed))) %.
+%scope convert-subtype %term sigma 
+	%pi (convert-subtype (subtype/sigma (%the ({x} subtype (B x) (Dx x) ([y] N x y)) DsubtypeBD) (%the ({x} tsub D (M x) (Dx x)) DsubDx) (%the (subtype A C ([x] M x)) DsubtypeAC)) (tconvert/sigma (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (tconvert/sigma (%the ({x} %pi (vof x C) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (D x) (ED ex)))) DconvertD) (%the (tconvert C EC) DconvertC)) (subtp/sigma DewfD ([ex] [ed] subtp/trans (subtp/trans (subtp/reflex (tequiv/symm (DequivDM ex ed))) (subtp/reflex (tequiv/symm (Dtequiv ex ed)))) (DsubtpBD ex ed)) DsubtpAC) ([z] [f] [zt] [ef] convert/pair DwfD (Dconvert2' z f zt ef) (DsubDx (pi1 z)) (Dconvert1 z f zt ef)) ([ez] [ef] equiv/extsigma DewfD (equiv/trans (equiv/symm (equiv/beta2 (eof/subsume (subtp/trans (subtp/reflex (DequivDMx ez ef)) (subtp/reflex (tequiv/symm (Dtequiv' ez ef)))) (DeofNxy ez ef)) (DeofMx ez ef))) (equiv/subsume (subtp/trans (subtp/reflex (DequivDMx ez ef)) (subtp/reflex (tequiv/symm (Dtequiv' ez ef)))) (DequivNxy ez ef))) (equiv/trans (equiv/symm (equiv/beta1 (DeofNxy ez ef) (DeofMx ez ef))) (DequivMx ez ef))))
+	%<- (convert-subtype DsubtypeAC DconvertA DconvertC (%the (subtp EA EC) DsubtpAC) (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) C (EM ex)))) DconvertM) (%the ({ex} %pi (evof ex EA) %-> (equiv ex (EM ex) EC)) DequivM))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (convert-tsub DconvertD (DconvertM x d ex xt) (DsubDx x) (%the (tconvert (Dx x) (EDx ex)) (DconvertDx x d ex xt)) (%the (tequiv (ED (EM ex)) (EDx ex)) (Dtequiv ex ed))))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (convert-subtype (DsubtypeBD x) (DconvertB x d ex xt) (DconvertDx x d ex xt) (%the (subtp (EB ex) (EDx ex)) (DsubtpBD ex ed)) (%the ({y} 
+	%pi (vof y (B x))
+	%-> ({ey} %pi (vtrans ey y) %-> (convert (N x y) (Dx x) (EN ex ey)))) (DconvertN x d ex xt)) (%the ({ey} %pi (evof ey (EB ex)) %-> (equiv ey (EN ex ey) (EDx ex))) (DequivN ex ed))))
+	%<- ({x} {d vof x C} {ex} {xt vtrans ex x} {ed evof ex EC} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertC ed)
+	%-> (tconvert-reg (DconvertD x d ex xt) (%the (ewf (ED ex)) (DewfD ex ed))))
+	%<- (tconvert-reg-il DconvertA (%the (wf A) DwfA))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} tconvert-reg-il (DconvertB x d ex xt) (%the (wf (B x)) (DwfB x d)))
+	%<- ({z} {f vof z (sigma A B)} {ez} {zt vtrans ez z} {ef evof ez (esigma EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/sigma DconvertB DconvertA) ef)
+	%-> (convert-ssub DconvertM (%the (aconvert (pi1 z) A (epi1 ez)) (aconvert/pi1 (aconvert/var zt (tconvert/sigma DconvertB DconvertA) (wf/sigma DwfB DwfA) f))) (%the (convert (M (pi1 z)) C (EM (epi1 ez))) (Dconvert1 z f ez zt))))
+	%<- ({z} {f vof z (sigma A B)} {ez} {zt vtrans ez z} {ef evof ez (esigma EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/sigma DconvertB DconvertA) ef)
+	%-> (convert-stsub DconvertB (aconvert/pi1 (aconvert/var zt (tconvert/sigma DconvertB DconvertA) (wf/sigma DwfB DwfA) f)) (%the (tconvert (B (pi1 z)) (EB (epi1 ez))) (DconvertBx z f ez zt))))
+	%<- ({z} {f vof z (sigma A B)} {ez} {zt vtrans ez z} {ef evof ez (esigma EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/sigma DconvertB DconvertA) ef)
+	%-> (convert-ssub1 DconvertN (%the (aconvert (pi1 z) A (epi1 ez)) (aconvert/pi1 (aconvert/var zt (tconvert/sigma DconvertB DconvertA) (wf/sigma DwfB DwfA) f))) DwfB (%the ({y} 
+	%pi (vof y (B (pi1 z)))
+	%-> ({ey} %pi (vtrans ey y) %-> (convert (N (pi1 z) y) (Dx (pi1 z)) (EN (epi1 ez) ey)))) (Dconvert2 z f ez zt))))
+	%<- ({z} {f vof z (sigma A B)} {ez} {zt vtrans ez z} {ef evof ez (esigma EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/sigma DconvertB DconvertA) ef)
+	%-> (convert-ssub (Dconvert2 z f ez zt) (%the (aconvert (pi2 z) (B (pi1 z)) (epi2 ez)) (aconvert/pi2 (aconvert/var zt (tconvert/sigma DconvertB DconvertA) (wf/sigma DwfB DwfA) f))) (%the (convert (N (pi1 z) (pi2 z)) (Dx (pi1 z)) (EN (epi1 ez) (epi2 ez))) (Dconvert2' z f ez zt))))
+	%<- ({x} {d vof x C} {ex} {xt vtrans ex x} tconvert-reg-il (DconvertD x d ex xt) (%the (wf (D x)) (DwfD x d)))
+	%<- ({z} {f vof z (sigma A B)} {ez} {zt vtrans ez z} {ef evof ez (esigma EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/sigma DconvertB DconvertA) ef)
+	%-> (convert-reg (Dconvert1 z f ez zt) DconvertC (%the (eof (EM (epi1 ez)) EC) (DeofMx ez ef))))
+	%<- ({z} {f vof z (sigma A B)} {ez} {zt vtrans ez z} {ef evof ez (esigma EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/sigma DconvertB DconvertA) ef)
+	%-> (convert-stsub DconvertDx (aconvert/pi1 (aconvert/var zt (tconvert/sigma DconvertB DconvertA) (wf/sigma DwfB DwfA) f)) (%the (tconvert (Dx (pi1 z)) (EDx (epi1 ez))) (DconvertDxx z f ez zt))))
+	%<- ({z} {f vof z (sigma A B)} {ez} {zt vtrans ez z} {ef evof ez (esigma EA EB)} {fv variable ez} 
+	%pi (vtrans-variable zt fv)
+	%-> (vsound f zt (tconvert/sigma DconvertB DconvertA) ef)
+	%-> (convert-reg (Dconvert2' z f ez zt) (DconvertDxx z f ez zt) (%the (eof (EN (epi1 ez) (epi2 ez)) (EDx (epi1 ez))) (DeofNxy ez ef))))
+	%<- (tconvert-reg DconvertA (%the (ewf EA) DewfA))
+	%<- ({x} {d} {ex} {xt} {ed} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (tconvert-reg (DconvertB x d ex xt) (%the (ewf (EB ex)) (DewfB ex ed))))
+	%<- ({ez} {ef evof ez (esigma EA EB)} esubst-equiv DequivM (eof/pi1 (eof/var (ewf/sigma DewfB DewfA) ef)) (%the (equiv (epi1 ez) (EM (epi1 ez)) EC) (DequivMx ez ef)))
+	%<- ({ez} {ef evof ez (esigma EA EB)} esubst-tequiv Dtequiv (eof/pi1 (eof/var (ewf/sigma DewfB DewfA) ef)) (%the (tequiv (ED (EM (epi1 ez))) (EDx (epi1 ez))) (Dtequiv' ez ef)))
+	%<- ({ez} {ef evof ez (esigma EA EB)} {ey} {ee evof ey (EB (epi1 ez))} esubst-equiv-gen ([ed] DequivN (epi1 ez) ed ey ee) (%the (%pi (eof (epi1 ez) EA) %-> (equiv ey (EN (epi1 ez) ey) (EDx (epi1 ez)))) (DequivNx ez ef ey ee)))
+	%<- ({ez} {ef evof ez (esigma EA EB)} esubst-equiv ([ey] [ee] DequivNx ez ef ey ee (eof/pi1 (eof/var (ewf/sigma DewfB DewfA) ef))) (eof/pi2 (eof/var (ewf/sigma DewfB DewfA) ef)) (%the (equiv (epi2 ez) (EN (epi1 ez) (epi2 ez)) (EDx (epi1 ez))) (DequivNxy ez ef)))
+	%<- ({ex} {ed} tfunctionality DewfD (DequivM ex ed) (%the (tequiv (ED ex) (ED (EM ex))) (DequivDM ex ed)))
+	%<- ({ez} {ef} tfunctionality DewfD (equiv/symm (DequivMx ez ef)) (%the (tequiv (ED (EM (epi1 ez))) (ED (epi1 ez))) (DequivDMx ez ef))) %.
+%term sing_t 
+	%pi (convert-subtype subtype/sing_t (tconvert/sing (%the (aconvert R t EM) Dconvert)) tconvert/t (subtp/sing_t Deof) ([x] [d] [ex] [xt] convert/at Dconvert) ([ex] [ed] equiv/singelim (eof/var (ewf/sing Deof) ed)))
+	%<- (aconvert-reg' Dconvert tconvert/t (%the (eof EM et) Deof)) %.
+%scope convert-subtype %term sing 
+	%pi (convert-subtype subtype/sing (tconvert/sing (%the (aconvert R t EM) Dconvert)) (tconvert/sing (%the (aconvert R t EM') Dconvert')) Dsubtp ([x] [d] [ex] [xt] convert/sing Dconvert) Dequiv)
+	%<- (aconvert-reg' Dconvert tconvert/t (%the (eof EM et) Deof))
+	%<- (aconvert-fun Dconvert Dconvert' _ (%the (eterm-eq EM EM') DeqM))
+	%<- (etp-resp-eterm esing DeqM (%the (etp-eq (esing EM) (esing EM')) Deq))
+	%<- (subtp-resp etp-eq/i Deq (subtp/sing (equiv/reflex Deof)) (%the (subtp (esing EM) (esing EM')) Dsubtp))
+	%<- ({ex} {ed evof ex (esing EM)} equiv-resp eterm-eq/i eterm-eq/i Deq (%the (equiv ex EM (esing EM)) (equiv/symm (equiv/sing (equiv/symm (equiv/singelim (eof/var (ewf/sing Deof) ed)))))) (%the (equiv ex EM (esing EM')) (Dequiv ex ed))) %.
+%worlds (sbind) (convert-subtype _ _ _ _ _ _) %.
+%total D (convert-subtype D _ _ _ _ _) %.
+%sort convert-subtype' %.
+%mode convert-subtype' %in %in %in %out %.
+%term _ %pi (convert-subtype' D1 D2 D3 D) %<- (convert-subtype D1 D2 D3 D _ _) %.
+%worlds (sbind) (convert-subtype' _ _ _ _) %.
+%total {} (convert-subtype' _ _ _ _) %.
+%sort convert-subtype-equiv %.
+%mode convert-subtype-equiv %in %in %in %in %in %out %.
+%term _ 
+	%pi (convert-subtype-equiv (%the (subtype A B ([_] N)) Dsubtype) (%the (tconvert A EA) DconvertA) (%the (tconvert B EB) DconvertB) (%the (convert N B EN) DconvertN) (%the (eof EM EA) DeofM) DequivM)
+	%<- (convert-subtype Dsubtype DconvertA DconvertB _ (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert N B (EN' ex)))) DconvertN') (%the ({ex} %pi (evof ex EA) %-> (equiv ex (EN' ex) EB)) Dequiv))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} convert-fun (DconvertN' x d ex xt) DconvertN (%the (eterm-eq (EN' ex) EN) (Deq ex)))
+	%<- ({ex} {ed evof ex EA} equiv-resp eterm-eq/i (Deq ex) etp-eq/i (Dequiv ex ed) (%the (equiv ex EN EB) (Dequiv' ex ed)))
+	%<- (esubst-equiv Dequiv' DeofM (%the (equiv EM EN EB) DequivM)) %.
+%worlds (sbind) (convert-subtype-equiv _ _ _ _ _ _) %.
+%total {} (convert-subtype-equiv _ _ _ _ _ _) %.
+%%%%%  Soundness of Eta-expansion  %%%%%
+%sort expand-convert %.
+%mode expand-convert %in %in %in %out %out %.
+%scope expand-convert %term t 
+	%pi (expand-convert expand/t (%the (aconvert R t EM) Dconvert) (convert/at (%the (aconvert R t EM') Dconvert')) tconvert/t Dequiv)
+	%<- (aconvert-fun Dconvert Dconvert' _ (%the (eterm-eq EM EM') Deq))
+	%<- (aconvert-reg Dconvert tconvert/t (%the (eof EM et) Deof))
+	%<- (equiv-resp eterm-eq/i Deq etp-eq/i (equiv/reflex Deof) (%the (equiv EM EM' et) Dequiv)) %.
+%term pi 
+	%pi (expand-convert (%the (expand R (pi A B) (lam M)) (expand/pi (%the ({x} expand (app R (X x)) (B x) (M x)) Dexpand2) (%the ({x} expand x A (X x)) Dexpand1))) (%the (aconvert R (pi A B) EO) Daconvert) (convert/lam (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))) DconvertM) (%the (tconvert A EA) DconvertA)) (tconvert/pi DconvertB DconvertA) (equiv/extpi ([ex] [ed evof ex EA] equiv/trans (equiv/trans (equiv/symm (equiv/beta (eof/var DewfA ed) DeofM)) (Dequiv2 ex ed)) (equiv/app (Dequiv1' ex ed) (equiv/reflex DeofO))) (eof/lam DeofM DewfA) DeofO))
+	%<- (aconvert-reg-il Daconvert (%the (aof R (pi A B)) DofR))
+	%<- (aof-reg DofR (wf/pi (%the ({x} %pi (vof x A) %-> (wf (B x))) DwfB) (%the (wf A) DwfA)))
+	%<- ({x} {d vof x A} expand-reg (aof/var DwfA d) (Dexpand1 x) (%the (of (X x) A) (DofX x d)))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (can-convert (DofX x d) (%the (convert (X x) A (EN ex)) (DconvertN x d ex xt))))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (expand-convert (Dexpand1 x) (aconvert/var xt DconvertA DwfA d) (DconvertN x d ex xt) (%the (tconvert A (EA' ex)) (DconvertA' x d ex xt)) (%the (equiv ex (EN ex) (EA' ex)) (Dequiv1 ex ed))))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} tconvert-fun (DconvertA' x d ex xt) DconvertA (%the (etp-eq (EA' ex) EA) (DeqEA ex)))
+	%<- ({ex} {ed} equiv-resp eterm-eq/i eterm-eq/i (DeqEA ex) (Dequiv1 ex ed) (%the (equiv ex (EN ex) EA) (Dequiv1' ex ed)))
+	%<- ({x} {d vof x A} can-tsub DwfB (DofX x d) (%the (tsub B (X x) (B' x)) (DsubB' x)))
+	%<- ({x} {d vof x A} tsub-expand (aof/var DwfA d) DwfB (Dexpand1 x) (DsubB' x) (%the (tp-eq (B' x) (B x)) (DeqB x)))
+	%<- ({x} tsub-resp ([_] tp-eq/i) term-eq/i (DeqB x) (DsubB' x) (%the (tsub B (X x) (B x)) (DsubB x)))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (expand-convert (Dexpand2 x) (%the (aconvert (app R (X x)) (B x) (eapp EO (EN ex))) (aconvert/app (DsubB x) (DconvertN x d ex xt) Daconvert)) (DconvertM x d ex xt) (%the (tconvert (B x) (EB ex)) (DconvertB x d ex xt)) (%the (equiv (eapp EO (EN ex)) (EM ex) (EB ex)) (Dequiv2 ex ed))))
+	%<- (tconvert-reg DconvertA (%the (ewf EA) DewfA))
+	%<- (aconvert-reg' Daconvert (tconvert/pi DconvertB DconvertA) (%the (eof EO (epi EA EB)) DeofO))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (convert-reg (DconvertM x d ex xt) (DconvertB x d ex xt) (%the (eof (EM ex) (EB ex)) (DeofM ex ed)))) %.
+%scope expand-convert %term sigma 
+	%pi (expand-convert (%the (expand R (sigma A B) (pair M N)) (expand/sigma (%the (expand (pi2 R) (B (pi1 R)) N) Dexpand2) (%the (expand (pi1 R) A M) Dexpand1))) (%the (aconvert R (sigma A B) EO) Daconvert) (convert/pair _ (%the (convert N Bx EN) DconvertN) (%the (tsub B M Bx) DsubBx) (%the (convert M A EM) DconvertM)) (tconvert/sigma DconvertB DconvertA) (equiv/extsigma DewfB (equiv/trans (equiv/symm (equiv/beta2 DeofN DeofM)) Dequiv2') (equiv/trans (equiv/symm (equiv/beta1 DeofN DeofM)) Dequiv1)))
+	%<- (expand-convert Dexpand1 (aconvert/pi1 Daconvert) DconvertM (%the (tconvert A EA) DconvertA) (%the (equiv (epi1 EO) EM EA) Dequiv1))
+	%<- (aconvert-reg-il Daconvert (%the (aof R (sigma A B)) DofR))
+	%<- (aof-reg DofR (wf/sigma (%the ({x} %pi (vof x A) %-> (wf (B x))) DwfB) (%the (wf A) DwfA)))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (can-tconvert (DwfB x d) (%the (tconvert (B x) (EB ex)) (DconvertB x d ex xt))))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (tconvert-reg (DconvertB x d ex xt) (%the (ewf (EB ex)) (DewfB ex ed))))
+	%<- (tsub-expand (aof/pi1 DofR) DwfB Dexpand1 DsubBx (%the (tp-eq Bx (B (pi1 R))) DeqBx))
+	%<- (convert-stsub DconvertB (aconvert/pi1 Daconvert) (%the (tconvert (B (pi1 R)) (EB (epi1 EO))) DconvertBx))
+	%<- (convert-resp term-eq/i DeqBx eterm-eq/i DconvertN (%the (convert N (B (pi1 R)) EN) DconvertN'))
+	%<- (expand-convert Dexpand2 (aconvert/pi2 Daconvert) DconvertN' (%the (tconvert (B (pi1 R)) EBx) DconvertBx') (%the (equiv (epi2 EO) EN EBx) Dequiv2))
+	%<- (tconvert-fun DconvertBx' DconvertBx (%the (etp-eq EBx (EB (epi1 EO))) DeqEBx))
+	%<- (equiv-resp eterm-eq/i eterm-eq/i DeqEBx Dequiv2 (%the (equiv (epi2 EO) EN (EB (epi1 EO))) Dequiv2'))
+	%<- (convert-reg DconvertM DconvertA (%the (eof EM EA) DeofM))
+	%<- (convert-reg DconvertN' DconvertBx (%the (eof EN (EB (epi1 EO))) DeofN)) %.
+%term sing 
+	%pi (expand-convert expand/sing (%the (aconvert R (sing R') EM) Dconvert) (convert/sing (%the (aconvert R' t EM') Dconvert')) (tconvert/sing Dconvert') (equiv/symm (equiv/sing (equiv/symm (equiv/singelim Deof)))))
+	%<- (aconvert-reg' Dconvert (tconvert/sing Dconvert') (%the (eof EM (esing EM')) Deof)) %.
+%worlds (sbind) (expand-convert _ _ _ _ _) %.
+%total D (expand-convert D _ _ _ _) %.
+%sort self-convert %.
+%mode self-convert %in %in %in %in %in %out %out %.
+%scope self-convert %term t self-convert self/t (convert/at (%the (aconvert R t EM) Dconvert)) tconvert/t (%the (eof EN et) DeofN) (%the (equiv EN EM et) Dequiv) (tconvert/sing Dconvert) (eof/subsume (subtp/sing Dequiv) (eof/sing DeofN)) %.
+%term pi 
+	%pi (self-convert (self/pi (%the ({x} self (M x) (B x) (Bs x)) Dself)) (convert/lam (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))) DconvertM) (%the (tconvert A EA) DconvertA)) (tconvert/pi (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA') DconvertA')) (%the (eof EN (epi EA' EB)) DeofN) (%the (equiv EN (elam EA EM) (epi EA' EB)) DequivN) (tconvert/pi DconvertBs DconvertA) (eof/extpi Deof DeofN'))
+	%<- (tconvert-fun DconvertA' DconvertA (%the (etp-eq EA' EA) DeqA))
+	%<- (etp-resp-etp ([a] epi a EB) DeqA (%the (etp-eq (epi EA' EB) (epi EA EB)) Deq))
+	%<- (eof-resp eterm-eq/i Deq DeofN (%the (eof EN (epi EA EB)) DeofN'))
+	%<- (equiv-resp eterm-eq/i eterm-eq/i Deq DequivN (%the (equiv EN (elam EA EM) (epi EA EB)) DequivN'))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (convert-reg (DconvertM x d ex xt) (DconvertB x d ex xt) (%the (eof (EM ex) (EB ex)) (DeofM ex ed))))
+	%<- (tconvert-reg DconvertA (%the (ewf EA) DewfA))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (self-convert (Dself x) (DconvertM x d ex xt) (DconvertB x d ex xt) (%the (eof (eapp EN ex) (EB ex)) (eof/app (eof/var DewfA ed) DeofN')) (%the (equiv (eapp EN ex) (EM ex) (EB ex)) (equiv/trans (equiv/beta (eof/var DewfA ed) DeofM) (equiv/app (equiv/reflex (eof/var DewfA ed)) DequivN'))) (%the (tconvert (Bs x) (EBs ex)) (DconvertBs x d ex xt)) (%the (eof (eapp EN ex) (EBs ex)) (Deof ex ed)))) %.
+%scope self-convert %term sigma 
+	%pi (self-convert (self/sigma (%the (self N Bx Bs) Dself2) (%the (tsub B M Bx) DsubBx) (%the (self M A As) Dself1)) (convert/pair _ (%the (convert N Bx' EN) DconvertN) (%the (tsub B M Bx') DsubBx') (%the (convert M A EM) DconvertM)) (tconvert/sigma (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (%the (eof EO (esigma EA EB)) DeofO) (%the (equiv EO (epair EM EN) (esigma EA EB)) DequivO) (tconvert/sigma ([_] [_] [_] [_] DconvertBs) DconvertAs) (eof/extsigma ([_] [_] DewfBs) Deof2 Deof1))
+	%<- (convert-reg DconvertM DconvertA (%the (eof EM EA) DeofM))
+	%<- (tsub-fun DsubBx' DsubBx (%the (tp-eq Bx' Bx) DeqBx))
+	%<- (convert-resp term-eq/i DeqBx eterm-eq/i DconvertN (%the (convert N Bx EN) DconvertN'))
+	%<- (convert-tsub DconvertB DconvertM DsubBx (%the (tconvert Bx EBx) DconvertBx) (%the (tequiv (EB EM) EBx) Dtequiv))
+	%<- (convert-reg DconvertN' DconvertBx (%the (eof EN EBx) DeofN))
+	%<- (self-convert Dself1 DconvertM DconvertA (%the (eof (epi1 EO) EA) (eof/pi1 DeofO)) (%the (equiv (epi1 EO) EM EA) (equiv/trans (equiv/beta1 DeofN DeofM) (equiv/pi1 DequivO))) (%the (tconvert As EAs) DconvertAs) (%the (eof (epi1 EO) EAs) Deof1))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (tconvert-reg (DconvertB x d ex xt) (%the (ewf (EB ex)) (DewfB ex ed))))
+	%<- (tfunctionality DewfB (equiv/trans (equiv/beta1 DeofN DeofM) (equiv/pi1 DequivO)) (%the (tequiv (EB (epi1 EO)) (EB EM)) DequivBx))
+	%<- (self-convert Dself2 DconvertN' DconvertBx (%the (eof (epi2 EO) EBx) (eof/subsume (subtp/reflex Dtequiv) (eof/equiv DequivBx (eof/pi2 DeofO)))) (%the (equiv (epi2 EO) EN EBx) (equiv/subsume (subtp/reflex Dtequiv) (equiv/trans (equiv/beta2 (eof/subsume (subtp/reflex (tequiv/symm Dtequiv)) DeofN) DeofM) (equiv/equiv DequivBx (equiv/pi2 DequivO))))) (%the (tconvert Bs EBs) DconvertBs) (%the (eof (epi2 EO) EBs) Deof2))
+	%<- (tconvert-reg DconvertBs (%the (ewf EBs) DewfBs)) %.
+%term sing 
+	%pi (self-convert self/sing (convert/sing (%the (aconvert R t EM) Dconvert)) (tconvert/sing (%the (aconvert R t EM') Dconvert')) (%the (eof EN (esing EM')) Deof) (%the (equiv EN EM (esing EM')) Dequiv) (tconvert/sing Dconvert) Deof')
+	%<- (aconvert-fun Dconvert' Dconvert _ (%the (eterm-eq EM' EM) Deq))
+	%<- (etp-resp-eterm esing Deq (%the (etp-eq (esing EM') (esing EM)) Deq'))
+	%<- (eof-resp eterm-eq/i Deq' Deof (%the (eof EN (esing EM)) Deof')) %.
+%worlds (sbind) (self-convert _ _ _ _ _ _ _) %.
+%total D (self-convert D _ _ _ _ _ _) %.
+%%%%%  Soundness  %%%%%
+%sort sound-trans %.
+%mode sound-trans %in %out %out %.
+%sort sound-ttrans %.
+%mode sound-ttrans %in %out %out %out %.
+%scope sound-ttrans %term const 
+	%pi (sound-trans (trans/const (%the (self M A As) Dself) (%the (expand (const C) A M) Dexpand) (%the (wf A) Dwf) (%the (kof C A) Dkof)) DconvertAs Deof)
+	%<- (expand-reg (aof/const Dwf Dkof) Dexpand (%the (of M A) DofM))
+	%<- (can-tconvert Dwf (%the (tconvert A EA) DconvertA))
+	%<- (can-convert DofM (%the (convert M A EM) DconvertM))
+	%<- (expand-convert Dexpand (aconvert/const DconvertA Dwf Dkof) DconvertM (%the (tconvert A EA') DconvertA') (%the (equiv (econst C) EM EA') Dequiv))
+	%<- (aconvert-reg' (aconvert/const DconvertA Dwf Dkof) DconvertA (%the (eof (econst C) EA) DeofX))
+	%<- (tconvert-fun DconvertA' DconvertA (%the (etp-eq EA' EA) DeqA))
+	%<- (equiv-resp eterm-eq/i eterm-eq/i DeqA Dequiv (%the (equiv (econst C) EM EA) Dequiv'))
+	%<- (self-convert Dself DconvertM DconvertA DeofX Dequiv' (%the (tconvert As EAs) DconvertAs) (%the (eof (econst C) EAs) Deof)) %.
+%term forall 
+	%pi (sound-trans (trans/forall (%the (self M (qtp A) B) Dself) (%the (expand (forall A) (qtp A) M) Dexpand) (%the (ttrans EA A) DtransA)) DconvertB Deof')
+	%<- (sound-ttrans DtransA (%the (ewf EA) DewfA) (%the (tconvert A EA') DconvA) (%the (tequiv EA EA') DequivA))
+	%<- (ttrans-reg DtransA (%the (wf A) DwfA))
+	%<- (expand-reg (aof/forall DwfA) Dexpand (%the (of M (qtp A)) DofM))
+	%<- (can-convert DofM (%the (convert M (qtp A) EM) DconvertM))
+	%<- (expand-convert Dexpand (aconvert/forall DconvA) DconvertM (%the (tconvert (qtp A) EQ) DconvertQ) (%the (equiv (eforall EA') EM EQ) Dequiv))
+	%<- (tconvert-fun DconvertQ (tconvert/pi ([_] [_] [_] [_] tconvert/t) (tconvert/pi ([_] [_] [_] [_] tconvert/t) DconvA)) (%the (etp-eq EQ (qetp EA')) DeqQ))
+	%<- (equiv-resp eterm-eq/i eterm-eq/i DeqQ Dequiv (%the (equiv (eforall EA') EM (qetp EA')) Dequiv'))
+	%<- (self-convert Dself DconvertM (tconvert/pi ([_] [_] [_] [_] tconvert/t) (tconvert/pi ([_] [_] [_] [_] tconvert/t) DconvA)) (eof/equiv (tequiv/pi ([_] [_] tequiv/t) (tequiv/pi ([_] [_] tequiv/t) DequivA)) (eof/forall DewfA)) (equiv/trans Dequiv' (%the (equiv (eforall EA) (eforall EA') (qetp EA')) (equiv/symm (equiv/forall (tequiv/symm DequivA))))) (%the (tconvert B EB) DconvertB) (%the (eof (eforall EA) EB) Deof')) %.
+%scope sound-ttrans %term var 
+	%pi (sound-trans (trans/var (%the (self M A As) Dself) (%the (expand X A M) Dexpand) (%the (wf A) DwfA) (%the (vof X A) Dvof) (%the (vtrans EX X) Dvtrans)) DconvertAs DeofX')
+	%<- (expand-reg (aof/var DwfA Dvof) Dexpand (%the (of M A) DofM))
+	%<- (can-convert DofM (%the (convert M A EM) DconvertM))
+	%<- (can-tconvert DwfA (%the (tconvert A _) DconvertA'))
+	%<- (expand-convert Dexpand (aconvert/var Dvtrans DconvertA' DwfA Dvof) DconvertM (%the (tconvert A EA) DconvertA) (%the (equiv EX EM EA) Dequiv))
+	%<- (aconvert-reg' (aconvert/var Dvtrans DconvertA' DwfA Dvof) DconvertA (%the (eof EX EA) DeofX))
+	%<- (self-convert Dself DconvertM DconvertA DeofX Dequiv (%the (tconvert As EAs) DconvertAs) (%the (eof EX EAs) DeofX')) %.
+%term app 
+	%pi (sound-trans (trans/app (%the (tsub B O Bx) DsubBx) (%the (subtype C A ([_] O)) DsubtypeCA) (%the (trans EN C) DtransN) (%the (trans EM (pi A B)) DtransM)) DconvertBx (eof/subsume (subtp/reflex Dtequiv) (eof/subsume (subtp/reflex DequivBx) (eof/app (eof/subsume Dsubtp DeofN) DeofM))))
+	%<- (trans-reg DtransM (wf/pi (%the ({x} %pi (vof x A) %-> (wf (B x))) DwfB) (%the (wf A) DwfA)))
+	%<- (trans-reg DtransN (%the (wf C) DwfC))
+	%<- (sound-trans DtransM (tconvert/pi (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (%the (eof EM (epi EA EB)) DeofM))
+	%<- (sound-trans DtransN (%the (tconvert C EC) DconvertC) (%the (eof EN EC) DeofN))
+	%<- (subtype-reg' DsubtypeCA DwfC DwfA (%the (of O A) DofO))
+	%<- (can-convert DofO (%the (convert O A EO) DconvertO))
+	%<- (convert-tsub DconvertB DconvertO DsubBx (%the (tconvert Bx EBx) DconvertBx) (%the (tequiv (EB EO) EBx) Dtequiv))
+	%<- (convert-subtype' DsubtypeCA DconvertC DconvertA (%the (subtp EC EA) Dsubtp))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (tconvert-reg (DconvertB x d ex xt) (%the (ewf (EB ex)) (DewfB ex ed))))
+	%<- (convert-subtype-equiv DsubtypeCA DconvertC DconvertA DconvertO DeofN (%the (equiv EN EO EA) Dequiv))
+	%<- (tfunctionality DewfB Dequiv (%the (tequiv (EB EN) (EB EO)) DequivBx)) %.
+%scope sound-ttrans %term pi1 
+	%pi (sound-trans (trans/pi1 (%the (trans EM (sigma A ([_] B))) DtransM)) DconvertA (eof/pi1 Deof'))
+	%<- (trans-reg DtransM (wf/sigma (%the ({x} %pi (vof x A) %-> (wf B)) DwfB) (%the (wf A) DwfA)))
+	%<- (tinhabitsub DwfA DwfB (%the (wf B) DwfB'))
+	%<- (can-tconvert DwfB' (%the (tconvert B EB) DconvertB))
+	%<- (sound-trans DtransM (tconvert/sigma (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert B (EB' ex)))) DconvertB') (%the (tconvert A EA) DconvertA)) (%the (eof EM (esigma EA EB')) Deof))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} tconvert-fun (DconvertB' x d ex xt) DconvertB (%the (etp-eq (EB' ex) EB) (DeqB ex)))
+	%<- (esigma-resp etp-eq/i DeqB (%the (etp-eq (esigma EA EB') (esigma EA ([_] EB))) Deq))
+	%<- (eof-resp eterm-eq/i Deq Deof (%the (eof EM (esigma EA ([_] EB))) Deof')) %.
+%term pi2 
+	%pi (sound-trans (trans/pi2 (%the (trans EM (sigma A ([_] B))) DtransM)) DconvertB (eof/pi2 Deof'))
+	%<- (trans-reg DtransM (wf/sigma (%the ({x} %pi (vof x A) %-> (wf B)) DwfB) (%the (wf A) DwfA)))
+	%<- (tinhabitsub DwfA DwfB (%the (wf B) DwfB'))
+	%<- (can-tconvert DwfB' (%the (tconvert B EB) DconvertB))
+	%<- (sound-trans DtransM (tconvert/sigma (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert B (EB' ex)))) DconvertB') (%the (tconvert A EA) DconvertA)) (%the (eof EM (esigma EA EB')) Deof))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} tconvert-fun (DconvertB' x d ex xt) DconvertB (%the (etp-eq (EB' ex) EB) (DeqB ex)))
+	%<- (esigma-resp etp-eq/i DeqB (%the (etp-eq (esigma EA EB') (esigma EA ([_] EB))) Deq))
+	%<- (eof-resp eterm-eq/i Deq Deof (%the (eof EM (esigma EA ([_] EB))) Deof')) %.
+%scope sound-ttrans %term lam 
+	%pi (sound-trans (trans/lam (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (trans (EM ex) (B x)))) DtransM) (%the (ttrans EC A) DtransA)) (tconvert/pi DconvertB DconvertA) (eof/subsume (subtp/reflex (tequiv/symm (tequiv/pi ([ex] [ed] tequiv/reflex (DewfB ex ed)) (tequiv/symm Dtequiv)))) (eof/lam DeofM' DewfC)))
+	%<- (sound-ttrans DtransA (%the (ewf EC) DewfC) (%the (tconvert A EA) DconvertA) (%the (tequiv EC EA) Dtequiv))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (sound-trans (DtransM x d ex xt) (%the (tconvert (B x) (EB ex)) (DconvertB x d ex xt)) (%the (eof (EM ex) (EB ex)) (DeofM ex ed))))
+	%<- ({ex} {ed evof ex EC} esubst DeofM (eof/subsume (subtp/reflex Dtequiv) (eof/var DewfC ed)) (%the (eof (EM ex) (EB ex)) (DeofM' ex ed)))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (tconvert-reg (DconvertB x d ex xt) (%the (ewf (EB ex)) (DewfB ex ed)))) %.
+%term pair 
+	%pi (sound-trans (trans/pair (%the (trans EN B) DtransN) (%the (trans EM A) DtransM)) (tconvert/sigma ([_] [_] [_] [_] DconvertB) DconvertA) (eof/pair ([_] [_] DewfB) DeofN DeofM))
+	%<- (sound-trans DtransM (%the (tconvert A EA) DconvertA) (%the (eof EM EA) DeofM))
+	%<- (sound-trans DtransN (%the (tconvert B EB) DconvertB) (%the (eof EN EB) DeofN))
+	%<- (tconvert-reg DconvertB (%the (ewf EB) DewfB)) %.
+%scope sound-ttrans %term t sound-ttrans ttrans/t ewf/t tconvert/t (tequiv/reflex ewf/t) %.
+%term pi 
+	%pi (sound-ttrans (ttrans/pi (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (ttrans (EB ex) (B x)))) DtransB) (%the (ttrans EA A) DtransA)) (ewf/pi DewfB' DewfA) (tconvert/pi DconvertB DconvertA) (tequiv/symm (tequiv/pi ([ex] [ed] tequiv/symm (DequivB ex ed)) (tequiv/symm DequivA))))
+	%<- (sound-ttrans DtransA (%the (ewf EA) DewfA) (%the (tconvert A EA') DconvertA) (%the (tequiv EA EA') DequivA))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA'} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (sound-ttrans (DtransB x d ex xt) (%the (ewf (EB ex)) (DewfB ex ed)) (%the (tconvert (B x) (EB' ex)) (DconvertB x d ex xt)) (%the (tequiv (EB ex) (EB' ex)) (DequivB ex ed))))
+	%<- ({ex} {ed evof ex EA} esubst-wf DewfB (eof/subsume (subtp/reflex DequivA) (eof/var DewfA ed)) (%the (ewf (EB ex)) (DewfB' ex ed))) %.
+%scope sound-ttrans %term sigma 
+	%pi (sound-ttrans (ttrans/sigma (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (ttrans (EB ex) (B x)))) DtransB) (%the (ttrans EA A) DtransA)) (ewf/sigma DewfB' DewfA) (tconvert/sigma DconvertB DconvertA) (tequiv/symm (tequiv/sigma ([ex] [ed] tequiv/symm (DequivB ex ed)) (tequiv/symm DequivA))))
+	%<- (sound-ttrans DtransA (%the (ewf EA) DewfA) (%the (tconvert A EA') DconvertA) (%the (tequiv EA EA') DequivA))
+	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA'} {dv variable ex} 
+	%pi (vtrans-variable xt dv)
+	%-> (vsound d xt DconvertA ed)
+	%-> (sound-ttrans (DtransB x d ex xt) (%the (ewf (EB ex)) (DewfB ex ed)) (%the (tconvert (B x) (EB' ex)) (DconvertB x d ex xt)) (%the (tequiv (EB ex) (EB' ex)) (DequivB ex ed))))
+	%<- ({ex} {ed evof ex EA} esubst-wf DewfB (eof/subsume (subtp/reflex DequivA) (eof/var DewfA ed)) (%the (ewf (EB ex)) (DewfB' ex ed))) %.
+%term sing 
+	%pi (sound-ttrans (ttrans/sing (%the (trans EM (sing R)) DtransM)) (ewf/sing (eof/subsume (subtp/sing_t DeofN) DeofM)) (tconvert/sing Dconvert) (tequiv/sing (equiv/singelim DeofM)))
+	%<- (sound-trans DtransM (tconvert/sing (%the (aconvert R t EN) Dconvert)) (%the (eof EM (esing EN)) DeofM))
+	%<- (aconvert-reg' Dconvert tconvert/t (%the (eof EN et) DeofN)) %.
+%worlds (sbind) (sound-trans _ _ _) (sound-ttrans _ _ _ _) %.
+%total (D1 D2) (sound-trans D1 _ _) (sound-ttrans D2 _ _ _) %.
+%sort sound-trans' %.
+%mode sound-trans' %in %in %out %.
+%term _ 
+	%pi (sound-trans' Dtrans Dconv Dof)
+	%<- (sound-trans Dtrans Dconv' Dof')
+	%<- (tconvert-fun Dconv' Dconv Deq)
+	%<- (eof-resp eterm-eq/i Deq Dof' Dof) %.
+%worlds (sbind) (sound-trans' _ _ _) %.
+%total {} (sound-trans' _ _ _) %.
+%sort sound-ttrans' %.
+%mode sound-ttrans' %in %in %out %.
+%term _ 
+	%pi (sound-ttrans' Dtrans Dconv Dequiv)
+	%<- (sound-ttrans Dtrans _ Dconv' Dequiv')
+	%<- (tconvert-fun Dconv' Dconv Deq)
+	%<- (tequiv-resp etp-eq/i Deq Dequiv' Dequiv) %.
+%worlds (sbind) (sound-ttrans' _ _ _) %.
+%total {} (sound-ttrans' _ _ _) %.
+%%%%%  Wrapping Up  %%%%%
+%sort il-soundness %.
+%mode il-soundness %in %in %in %in %in %out %.
+%term _ 
+	%pi (il-soundness (%the (trans EM A) DtransM) (%the (trans EN B) DtransN) (%the (ttrans EC C) DtransC) (%the (subtype A C O) DsubtypeAC) (%the (subtype B C O) DsubtypeBC) (equiv/subsume (subtp/reflex (tequiv/symm DequivCD)) (equiv/trans (equiv/symm DequivN) DequivM)))
+	%<- (sound-trans DtransM (%the (tconvert A EA) DconvertA) (%the (eof EM EA) DeofM))
+	%<- (sound-trans DtransN (%the (tconvert B EB) DconvertB) (%the (eof EN EB) DeofN))
+	%<- (sound-ttrans DtransC _ (%the (tconvert C ED) DconvertD) (%the (tequiv EC ED) DequivCD))
+	%<- (trans-subtype DtransM DsubtypeAC (%the (subtype A C ([_] P)) DsubtypeAC') (%the ({x} term-eq (O x) P) DeqO))
+	%<- (subtype-resp tp-eq/i tp-eq/i DeqO DsubtypeBC (%the (subtype B C ([_] P)) DsubtypeBC'))
+	%<- (trans-reg DtransM (%the (wf A) DwfA))
+	%<- (ttrans-reg DtransC (%the (wf C) DwfC))
+	%<- (subtype-reg' DsubtypeAC' DwfA DwfC (%the (of P C) DofP))
+	%<- (can-convert DofP (%the (convert P C EP) DconvertP))
+	%<- (convert-subtype-equiv DsubtypeAC' DconvertA DconvertD DconvertP DeofM (%the (equiv EM EP ED) DequivM))
+	%<- (convert-subtype-equiv DsubtypeBC' DconvertB DconvertD DconvertP DeofN (%the (equiv EN EP ED) DequivN)) %.
+%worlds (sbind) (il-soundness _ _ _ _ _ _) %.
+%total {} (il-soundness _ _ _ _ _ _) %.
+%sort il-soundness-tp %.
+%mode il-soundness-tp %in %in %out %.
+%term _ 
+	%pi (il-soundness-tp DtransA DtransA' (tequiv/trans (tequiv/symm DequivA') DequivA''))
+	%<- (sound-ttrans DtransA _ DconvA DequivA)
+	%<- (sound-ttrans DtransA' _ DconvA' DequivA')
+	%<- (tconvert-fun DconvA DconvA' Deq)
+	%<- (tequiv-resp etp-eq/i Deq DequivA DequivA'') %.
+%worlds (sbind) (il-soundness-tp _ _ _) %.
+%total {} (il-soundness-tp _ _ _) %.

@@ -15,12 +15,24 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
   let ghost' = Cst.View.Loc.(review Ghost)
 
   (* Skip outer text (non-% characters) between commands.
-     %%% is an escape sequence for a literal %. *)
+     Handles three special sequences starting with %:
+       %%%       — escape for a literal %
+       %% ...    — line comment (skips to end of line)
+       %{! ... !}% — block comment (skips to matching !}%) *)
   let skip_outer : unit t =
     fix (fun self ->
       skip_while (fun c -> c <> '%')
       *> option ()
-           (string "%%%" *> commit *> self))
+           (   (string "%%%" *> commit *> self)
+           <|> (string "%%" *> commit
+                *> skip_while (fun c -> c <> '\n')
+                *> self)
+           <|> (string "%{!" *> commit
+                *> fix (fun inner ->
+                     skip_while (fun c -> c <> '!')
+                     *> ((string "!}%" *> commit)
+                        <|> (char '!' *> inner)))
+                *> self)))
 
   (* Defer a thunk-parser to prevent infinite recursion at construction time.
      Used for %module and %eval which recursively embed cmd lists. *)
@@ -158,7 +170,7 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           (keyword "sort" *> commit
           *>
           let* ids = Modern.parse_id_list () in
-          let+ ds = many (inside "{" "}" (commit *> Modern.parse_decl ())) in
+          let+ ds = many ((inside "{" "}" (commit *> Modern.parse_decl ())) <|> Modern.parse_decl_simple ()) in
           Cst.View.Cmd.(review @@ Sort (Cst.View.Loc.(review Ghost), ids, ds)))
           <?> "sort"
         end;
@@ -189,8 +201,8 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           (keyword "worlds" *> commit
           *>
           let* ids = inside "(" ")" (many (Modern.parse_var ())) in
-          let+ tm = Modern.parse_expr () in
-          Cst.View.Cmd.(review @@ Worlds (ghost', ids, tm)))
+          let+ tms = many1 (Modern.parse_expr1 ()) in
+          Cst.View.Cmd.(review @@ Worlds (ghost', ids, tms)))
           <?> "worlds"
         end;
         begin
@@ -215,6 +227,17 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           let+ id = Modern.parse_id_list () in
           Cst.View.Cmd.(review @@ Open (Cst.View.Loc.(review Ghost), id)))
           <?> "open"
+        end;
+        begin
+          (keyword "require" *> commit
+          *>
+          let+ ids =
+            (let+ s = Modern.parse_text () in
+             String.trim s |> String.split_on_char '/')
+            <|> Modern.parse_id_list ()
+          in
+          Cst.View.Cmd.(review @@ Require (ghost', ids)))
+          <?> "require"
         end;
         begin
           (keyword "eval" *> commit

@@ -9,6 +9,9 @@ include SERVER
 (** Interactive command server for Stelf/STELF. *)
 
 (* signature SERVER *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Server : SERVER = struct
   let globalConfig : Stelf.Config.config option ref = ref None
 
@@ -46,7 +49,7 @@ module Server : SERVER = struct
   let tokenize args = String.tokens Char.isSpace args
 
   (* exception Error for server errors *)
-  exception Error of string
+  exception Error = Error
 
   let error msg = raise (Error msg)
   let quote string = ("`" ^ string) ^ "'"

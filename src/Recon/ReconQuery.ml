@@ -1,5 +1,7 @@
 module type RECON_QUERY = RECON_QUERY.RECON_QUERY
 
+exception Error of string
+
 module Make_ReconQuery
     (M : S.S)
     (RT : RECON_TERM.RECON_TERM with module M = M) :
@@ -10,7 +12,7 @@ module Make_ReconQuery
   module Paths = M.Paths
   module Syntax = M.Syntax
 
-  exception Error of string
+  exception Error = Error
 
   let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 

@@ -1,3 +1,6 @@
+exception Interrupted
+let () = Printexc.register_printer (function Interrupted -> Some "Interrupted" | _ -> None)
+
 module Repl (M : REPL.S) : REPL.REPL = struct
   let () =
     Debug.setup_log
@@ -66,7 +69,7 @@ module Repl (M : REPL.S) : REPL.REPL = struct
     let* s = rl#run in
     Lwt.return (Zed_string.to_utf8 s)
 
-  exception Interrupted
+  exception Interrupted = Interrupted
 
   let stop code = exit code
   
@@ -93,10 +96,10 @@ module Repl (M : REPL.S) : REPL.REPL = struct
       display_msg Note m
     in
     let display_response (m : Display.Info.t) : unit Lwt.t =
-      let open Display in
-      let arrow = Form.(styles Style.[ Fore.orange; bold ] (string "=>")) in
-      let out = Form.(markup @@ concat [ arrow; space (); m.msg ]) in
-      Notty_lwt.output_image (Notty_lwt.eol out)
+      let arrow = Notty.(I.string A.(fg (rgb_888 ~r:255 ~g:165 ~b:0) ++ st bold) "=>") in
+      let msg_str = Format.asprintf "%t" m.msg in
+      let msg_img = Notty.I.string Notty.A.empty (" " ^ msg_str) in
+      Notty_lwt.output_image (Notty_lwt.eol Notty.I.(arrow <|> msg_img))
     in
 
     let should_display (msg : Display.Info.t) : bool =
@@ -123,9 +126,17 @@ module Repl (M : REPL.S) : REPL.REPL = struct
         Lwt_list.iter_s (fun info -> display info) pending_list
       end
     in
+    let rec read_multiline (acc : string) : string Lwt.t =
+      let prompt = if String.equal acc "" then "λΠ> " else "  > " in
+      let* line = read_line !term' prompt in
+      let full = if String.equal acc "" then line else acc ^ "\n" ^ line in
+      if ends_with_terminator full || String.equal (String.trim full) ""
+      then Lwt.return full
+      else read_multiline full
+    in
     Lwt.catch
       (fun () ->
-        let* r0 = read_line !term' "λΠ> " in
+        let* r0 = read_multiline "" in
         let* continue =
           try f r0 with
           | Sys.Break -> Lwt.return Stop

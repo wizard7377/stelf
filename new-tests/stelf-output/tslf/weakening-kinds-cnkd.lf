@@ -1,0 +1,52 @@
+%%%% weakening lemma for kinds. 
+%%%% proposition 3.5 in SH. only need to show (2). (1) follows by the encoding
+%sort kd-wkn/ofkd {a cn} %.
+%mode kd-wkn/ofkd %in %in %out %.
+%term _ kd-wkn/ofkd DI DS ([a] [da] DI a (ofkd/sub da DS)) %.
+%worlds (ofkd-block) (kd-wkn/ofkd _ _ _) %.
+%total {} (kd-wkn/ofkd _ _ _) %.
+%sort kd-wkn/kd-wf {a cn} {da ofkd a K2} %.
+%mode kd-wkn/kd-wf %in %in %out %.
+%term _ kd-wkn/kd-wf DI DS ([a] [da] DI a (ofkd/sub da DS)) %.
+%worlds (ofkd-block ofkd+vdt-block) (kd-wkn/kd-wf _ _ _) %.
+%total {} (kd-wkn/kd-wf _ _ _) %.
+%sort kd-wkn/kd-deq {a cn} {da ofkd a K2} %.
+%mode kd-wkn/kd-deq %in %in %out %.
+%term _ kd-wkn/kd-deq DI DS ([a] [da] DI a (ofkd/sub da DS)) %.
+%worlds (ofkd-block) (kd-wkn/kd-deq _ _ _) %.
+%total {} (kd-wkn/kd-deq _ _ _) %.
+%sort kd-wkn/kd-sub {a cn} {da ofkd a K2} %.
+%mode kd-wkn/kd-sub %in %in %out %.
+%term _ kd-wkn/kd-sub DI DS ([a] [da] DI a (ofkd/sub da DS)) %.
+%worlds (ofkd-block) (kd-wkn/kd-sub _ _ _) %.
+%total {} (kd-wkn/kd-sub _ _ _) %.
+%sort kd-wkn/cn-deq {a cn} {da ofkd a K2} %.
+%mode kd-wkn/cn-deq %in %in %out %.
+%term _ kd-wkn/cn-deq DI DS ([a] [da] DI a (ofkd/sub da DS)) %.
+%worlds (ofkd-block) (kd-wkn/cn-deq _ _ _) %.
+%total {} (kd-wkn/cn-deq _ _ _) %.
+%sort kd-wkn-deq/ofkd {a cn} %.
+%mode kd-wkn-deq/ofkd %in %in %out %.
+%term _ kd-wkn-deq/ofkd DI DS ([a] [da] DI a (ofkd/deq da DS)) %.
+%worlds (ofkd-block) (kd-wkn-deq/ofkd _ _ _) %.
+%total {} (kd-wkn-deq/ofkd _ _ _) %.
+%sort kd-wkn-deq/kd-wf {a cn} {da ofkd a K2} %.
+%mode kd-wkn-deq/kd-wf %in %in %out %.
+%term _ kd-wkn-deq/kd-wf DI DS ([a] [da] DI a (ofkd/deq da DS)) %.
+%worlds (ofkd-block ofkd+vdt-block) (kd-wkn-deq/kd-wf _ _ _) %.
+%total {} (kd-wkn-deq/kd-wf _ _ _) %.
+%sort kd-wkn-deq/kd-deq {a cn} {da ofkd a K2} %.
+%mode kd-wkn-deq/kd-deq %in %in %out %.
+%term _ kd-wkn-deq/kd-deq DI DS ([a] [da] DI a (ofkd/deq da DS)) %.
+%worlds (ofkd-block) (kd-wkn-deq/kd-deq _ _ _) %.
+%total {} (kd-wkn-deq/kd-deq _ _ _) %.
+%sort kd-wkn-deq/kd-sub {a cn} {da ofkd a K2} %.
+%mode kd-wkn-deq/kd-sub %in %in %out %.
+%term _ kd-wkn-deq/kd-sub DI DS ([a] [da] DI a (ofkd/deq da DS)) %.
+%worlds (ofkd-block) (kd-wkn-deq/kd-sub _ _ _) %.
+%total {} (kd-wkn-deq/kd-sub _ _ _) %.
+%sort kd-wkn-deq/cn-deq {a cn} {da ofkd a K2} %.
+%mode kd-wkn-deq/cn-deq %in %in %out %.
+%term _ kd-wkn-deq/cn-deq DI DS ([a] [da] DI a (ofkd/deq da DS)) %.
+%worlds (ofkd-block) (kd-wkn-deq/cn-deq _ _ _) %.
+%total {} (kd-wkn-deq/cn-deq _ _ _) %.

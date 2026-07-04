@@ -1,0 +1,54 @@
+# Lambda-calculus fragment of Mini-ML.
+# Ported from examples/guide/lam.elf.
+
+%sort tp %.
+%scope tp %{
+  %term arrow %pi tp %-> %pi tp %-> tp
+%}
+
+%sort exp %.
+%scope exp %{
+  %term lam %pi (%pi exp %-> exp) %-> exp
+  %term app %pi exp %-> %pi exp %-> exp
+%}
+
+%sort of {_ exp} {_ tp} %.
+%mode of %in %out %.
+%scope of %{
+  %term tp_lam {{E T1 T2}}
+    %if of (%(lam exp) E) (%(arrow tp) T1 T2)
+    %<- %pi (of _ T1) %-> of (E _) T2
+  %term tp_app {{E1 E2 T1 T2}}
+    %if of (%(app exp) E1 E2) T1
+    %<- of E1 (%(arrow tp) T2 T1)
+    %<- of E2 T2
+%}
+
+%sort eval {_ exp} {_ exp} %.
+%mode eval %in %out %.
+%scope eval %{
+  %term ev_lam {{E}} eval (%(lam exp) E) (%(lam exp) E)
+  %term ev_app {{E1 E2 E1' V2 V}}
+    %if eval (%(app exp) E1 E2) V
+    %<- eval E1 (%(lam exp) E1')
+    %<- eval E2 V2
+    %<- eval (E1' V2) V
+%}
+
+# Type preservation: evaluation preserves types.
+# Note: STELF does not yet support proof-indexed sorts where the index sort has
+# %[ %mode and heterogeneous parameters (e.g. {_ (eval _ _)} where eval {_ exp}{_ exp}). ]
+# The tps relation is omitted pending a STELF elaborator fix.
+
+# Copy relation: structural recursion over exp
+%sort cp {_ exp} {_ exp} %.
+%mode cp %in %out %.
+%scope cp %{
+  %term cp_app {{E1 E2 F1 F2}}
+    %if cp (%(app exp) E1 E2) (%(app exp) F1 F2)
+    %<- cp E1 F1
+    %<- cp E2 F2
+  %term cp_lam {{E F}}
+    %if cp (%(lam exp) E) (%(lam exp) F)
+    %<- %pi (cp _ _) %-> cp (E _) (F _)
+%}

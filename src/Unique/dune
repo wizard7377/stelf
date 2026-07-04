@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name unique)
  (public_name stelf.unique)
  (modules Unique_ UNIQUE)

@@ -1,32 +1,64 @@
-BUILD_DIR ?= _build/default
-DUNE ?= dune
-DUNE_PROJECT ?= ./dune-project
-DUNE_WORKSPACE ?= ./dune-workspace
+TARGET         ?= ./stelf
+DUNE_LOCK      ?= ./dune.lock/
+OPAM_FILE      ?= ./stelf.opam
+DUNE_BUILD_DIR ?= _build/default
+DUNE_MIN_VERSION ?= 3.23
+DUNE_PROJECT   ?= ./dune-project
+SWITCH         ?= .
+OPAM           ?= opam
+OPAM_EXEC      := $(OPAM) exec --switch $(SWITCH) --
+DUNE           ?= dune
 
-.PHONY: all build test docs install clean repl check help
+SWITCH_SENTINEL := _opam/.opam-switch/switch-config
+DUNE_SENTINEL   := _opam/lib/dune/META
+DEPS_SENTINEL   := .deps-installed
 
-all: build test docs install 
+.PHONY: all build test install docs clean check lock
 
-dune.lock/: $(DUNE_PROJECT) $(DUNE_WORKSPACE)
-	@$(DUNE) pkg lock
-build: dune.lock/
-	@$(DUNE) build
+all: build
 
-check: dune.lock/
-	@$(DUNE) build @check
+# Phase 1: initialize opam if needed, then create the local switch
+$(SWITCH_SENTINEL):
+	$(OPAM) init --bare --no-setup --yes 2>/dev/null || true
+	$(OPAM) switch create $(SWITCH) --empty --yes 2>/dev/null || true
+	@test -f $@ || (echo "ERROR: opam switch creation failed"; exit 1)
 
-repl: dune.lock/
-	@$(DUNE) utop
+# Phase 2: install OCaml compiler + dune >= $(DUNE_MIN_VERSION) into the switch
+$(DUNE_SENTINEL): $(SWITCH_SENTINEL)
+	$(OPAM) install --switch $(SWITCH) --yes \
+	    "ocaml>=5.0.0" "dune>=$(DUNE_MIN_VERSION)"
 
-test: dune.lock/
-	@$(DUNE) runtest
+# Phase 3: ensure submodules are present, then generate stelf.opam from dune-project
+# dune.lock/ is committed — re-locking is done explicitly via `make lock`
+$(OPAM_FILE): $(DUNE_PROJECT) $(DUNE_SENTINEL)
+	git submodule update --init --recursive
+	$(OPAM_EXEC) $(DUNE) build $(OPAM_FILE)
 
-docs: dune.lock/
-	@$(DUNE) build @doc
+# Phase 4: install all package dependencies into the local switch
+$(DEPS_SENTINEL): $(OPAM_FILE)
+	$(OPAM) install --switch $(SWITCH) . --deps-only --yes
+	@touch $@
 
-install: dune.lock/
-	@$(DUNE) install
+build: $(DEPS_SENTINEL)
+	$(OPAM_EXEC) $(DUNE) build
+	cp $(DUNE_BUILD_DIR)/bin/main.exe $(TARGET)
 
-clean: dune.lock/
-	@$(DUNE) clean
+test: $(DEPS_SENTINEL)
+	$(OPAM_EXEC) $(DUNE) runtest
 
+check: $(DEPS_SENTINEL)
+	$(OPAM_EXEC) $(DUNE) build @check
+
+install: build
+	$(OPAM_EXEC) $(DUNE) install --prefix _opam
+
+docs: $(DEPS_SENTINEL)
+	$(OPAM_EXEC) $(DUNE) build @doc
+
+# Explicitly refresh the lock file (requires network; updates dune.lock/)
+lock: $(DUNE_SENTINEL)
+	$(OPAM_EXEC) $(DUNE) pkg lock
+
+clean:
+	$(OPAM_EXEC) $(DUNE) clean
+	rm -f $(TARGET) $(DEPS_SENTINEL)

@@ -9,6 +9,13 @@ include OPSEM
 (* # 1 "src/tomega/Opsem.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+exception Abort
+let () = Printexc.register_printer (function Abort -> Some "Abort" | _ -> None)
+exception NoMatch
+let () = Printexc.register_printer (function NoMatch -> Some "NoMatch" | _ -> None)
+
 module MakeOpsem
     (Whnf : WHNF)
     (Abstract : ABSTRACT)
@@ -33,11 +40,11 @@ module MakeOpsem
   module Unify = Unify
   module TomegaPrint = TomegaPrint
 
-  exception Error of string
-  exception Abort
+  exception Error = Error
+  exception Abort = Abort
 
   (*  local -- removed ABP 1/19/03 *)
-  exception NoMatch
+  exception NoMatch = NoMatch
 
   (*
  matchPrg is used to see if two values can be 'unified' for

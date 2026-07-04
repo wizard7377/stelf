@@ -1,0 +1,188 @@
+%%%%%  Substitution Functionality  %%%%%
+%sort aasub-aosub-contra %.
+%mode aasub-aosub-contra %in %in %out %.
+%scope aasub-aosub-contra %term app 
+	%pi (aasub-aosub-contra (aasub/app _ Daasub) (aosub/app _ _ Daosub) D)
+	%<- (aasub-aosub-contra Daasub Daosub D) %.
+%term appcl 
+	%pi (aasub-aosub-contra aasub/closed (aosub/app _ _ Daosub) D)
+	%<- (aasub-aosub-contra aasub/closed Daosub D) %.
+%scope aasub-aosub-contra %term pi1 
+	%pi (aasub-aosub-contra (aasub/pi1 D1) (aosub/pi1 D2) D)
+	%<- (aasub-aosub-contra D1 D2 D) %.
+%term pi1 
+	%pi (aasub-aosub-contra aasub/closed (aosub/pi1 D2) D)
+	%<- (aasub-aosub-contra aasub/closed D2 D) %.
+%scope aasub-aosub-contra %term pi2 
+	%pi (aasub-aosub-contra (aasub/pi2 D1) (aosub/pi2 D2) D)
+	%<- (aasub-aosub-contra D1 D2 D) %.
+%term pi2 
+	%pi (aasub-aosub-contra aasub/closed (aosub/pi2 D2) D)
+	%<- (aasub-aosub-contra aasub/closed D2 D) %.
+%worlds (var) (aasub-aosub-contra _ _ _) %.
+%total D (aasub-aosub-contra _ D _) %.
+%sort aosub-absent %.
+%mode aosub-absent %in %out %.
+%term _ %pi (aosub-absent Daosub D) %<- (aasub-aosub-contra aasub/closed Daosub D) %.
+%worlds (var) (aosub-absent _ _) %.
+%total {} (aosub-absent _ _) %.
+%sort aasub-absent-fun %.
+%mode aasub-absent-fun %in %out %.
+%sort sub-absent-fun %.
+%mode sub-absent-fun %in %out %.
+%sort tsub-absent-fun %.
+%mode tsub-absent-fun %in %out %.
+%term _ aasub-absent-fun aasub/closed atom-eq/i %.
+%term _ 
+	%pi (aasub-absent-fun (aasub/forall D) Deq')
+	%<- (tsub-absent-fun D Deq)
+	%<- (atom-resp-tp forall Deq Deq') %.
+%term _ 
+	%pi (aasub-absent-fun (aasub/app D2 D1) Deq)
+	%<- (aasub-absent-fun D1 Deq1)
+	%<- (sub-absent-fun D2 Deq2)
+	%<- (app-resp Deq1 Deq2 Deq) %.
+%term _ 
+	%pi (aasub-absent-fun (aasub/pi1 D) Deq')
+	%<- (aasub-absent-fun D Deq)
+	%<- (atom-resp-atom pi1 Deq Deq') %.
+%term _ 
+	%pi (aasub-absent-fun (aasub/pi2 D) Deq')
+	%<- (aasub-absent-fun D Deq)
+	%<- (atom-resp-atom pi2 Deq Deq') %.
+%term _ 
+	%pi (sub-absent-fun (sub/aa D) Deq')
+	%<- (aasub-absent-fun D Deq)
+	%<- (term-resp-atom at Deq Deq') %.
+%term _ 
+	%pi (sub-absent-fun (sub/ao D) Deq)
+	%<- (aosub-absent D Dfalse)
+	%<- (false-implies-term-eq Dfalse Deq) %.
+%term _ 
+	%pi (sub-absent-fun (sub/lam D) Deq')
+	%<- ({y} sub-absent-fun (D y) (Deq y))
+	%<- (lam-resp Deq Deq') %.
+%term _ 
+	%pi (sub-absent-fun (sub/pair D2 D1) Deq)
+	%<- (sub-absent-fun D1 Deq1)
+	%<- (sub-absent-fun D2 Deq2)
+	%<- (pair-resp Deq1 Deq2 Deq) %.
+%term _ tsub-absent-fun tsub/t tp-eq/i %.
+%term _ 
+	%pi (tsub-absent-fun (tsub/pi D2 D1) Deq)
+	%<- (tsub-absent-fun D1 Deq1)
+	%<- ({y} tsub-absent-fun (D2 y) (Deq2 y))
+	%<- (pi-resp Deq1 Deq2 Deq) %.
+%term _ 
+	%pi (tsub-absent-fun (tsub/sigma D2 D1) Deq)
+	%<- (tsub-absent-fun D1 Deq1)
+	%<- ({y} tsub-absent-fun (D2 y) (Deq2 y))
+	%<- (sigma-resp Deq1 Deq2 Deq) %.
+%term _ 
+	%pi (tsub-absent-fun (tsub/singa D) Deq')
+	%<- (aasub-absent-fun D Deq)
+	%<- (tp-resp-atom sing Deq Deq') %.
+%term _ 
+	%pi (tsub-absent-fun (tsub/singo D) Deq)
+	%<- (aosub-absent D Dfalse)
+	%<- (false-implies-tp-eq Dfalse Deq) %.
+%worlds (var) (aasub-absent-fun _ _) (sub-absent-fun _ _) (tsub-absent-fun _ _) %.
+%total (D1 D2 D3) (aasub-absent-fun D1 _) (sub-absent-fun D2 _) (tsub-absent-fun D3 _) %.
+%sort aasub-fun %.
+%mode aasub-fun %in %in %out %.
+%sort aosub-fun %.
+%mode aosub-fun %in %in %out %.
+%sort sub-fun %.
+%mode sub-fun %in %in %out %.
+%sort tsub-fun %.
+%mode tsub-fun %in %in %out %.
+%scope tsub-fun %term closed 
+	%pi (aasub-fun aasub/closed D Deq')
+	%<- (aasub-absent-fun D Deq)
+	%<- (atom-eq-symm Deq Deq') %.
+%term closed %pi (aasub-fun D aasub/closed Deq) %<- (aasub-absent-fun D Deq) %.
+%scope tsub-fun %term forall 
+	%pi (aasub-fun (aasub/forall D1) (aasub/forall D2) Deq')
+	%<- (tsub-fun D1 D2 Deq)
+	%<- (atom-resp-tp forall Deq Deq') %.
+%term app 
+	%pi (aasub-fun (aasub/app D2 D1) (aasub/app D2' D1') D)
+	%<- (aasub-fun D1 D1' Deq1)
+	%<- (sub-fun D2 D2' Deq2)
+	%<- (app-resp Deq1 Deq2 D) %.
+%scope tsub-fun %term pi1 
+	%pi (aasub-fun (aasub/pi1 D1) (aasub/pi1 D2) Deq')
+	%<- (aasub-fun D1 D2 Deq)
+	%<- (atom-resp-atom pi1 Deq Deq') %.
+%term pi1 
+	%pi (aasub-fun (aasub/pi2 D1) (aasub/pi2 D2) Deq')
+	%<- (aasub-fun D1 D2 Deq)
+	%<- (atom-resp-atom pi2 Deq Deq') %.
+%scope tsub-fun %term var aosub-fun aosub/var aosub/var term-eq/i %.
+%term app 
+	%pi (aosub-fun (aosub/app D3 D2 D1) (aosub/app D3' D2' D1') Deq)
+	%<- (aosub-fun D1 D1' Deq1)
+	%<- (term-eq-cdr-lam Deq1 Deq1')
+	%<- (sub-fun D2 D2' Deq2)
+	%<- (sub-resp Deq1' Deq2 term-eq/i D3 D3'')
+	%<- (sub-fun D3'' D3' Deq) %.
+%scope tsub-fun %term pi1 
+	%pi (aosub-fun (aosub/pi1 D1) (aosub/pi1 D2) Deq1)
+	%<- (aosub-fun D1 D2 Deq)
+	%<- (term-eq-cdr-pair Deq Deq1 Deq2) %.
+%term pi2 
+	%pi (aosub-fun (aosub/pi2 D1) (aosub/pi2 D2) Deq2)
+	%<- (aosub-fun D1 D2 Deq)
+	%<- (term-eq-cdr-pair Deq Deq1 Deq2) %.
+%scope tsub-fun %term aa 
+	%pi (sub-fun (sub/aa D1) (sub/aa D2) Deq')
+	%<- (aasub-fun D1 D2 Deq)
+	%<- (term-resp-atom at Deq Deq') %.
+%term ao %pi (sub-fun (sub/ao D1) (sub/ao D2) Deq) %<- (aosub-fun D1 D2 Deq) %.
+%scope tsub-fun %term aaao 
+	%pi (sub-fun (sub/aa D1) (sub/ao D2) Deq)
+	%<- (aasub-aosub-contra D1 D2 D)
+	%<- (false-implies-term-eq D Deq) %.
+%term aoaa 
+	%pi (sub-fun (sub/ao D2) (sub/aa D1) Deq)
+	%<- (aasub-aosub-contra D1 D2 D)
+	%<- (false-implies-term-eq D Deq) %.
+%scope tsub-fun %term lam 
+	%pi (sub-fun (sub/lam D1) (sub/lam D2) Deq')
+	%<- ({y} sub-fun (D1 y) (D2 y) (Deq y))
+	%<- (lam-resp Deq Deq') %.
+%term pair 
+	%pi (sub-fun (sub/pair D2 D1) (sub/pair D2' D1') Deq)
+	%<- (sub-fun D1 D1' Deq1)
+	%<- (sub-fun D2 D2' Deq2)
+	%<- (pair-resp Deq1 Deq2 Deq) %.
+%scope tsub-fun %term t tsub-fun tsub/t tsub/t tp-eq/i %.
+%term pi 
+	%pi (tsub-fun (tsub/pi D2 D1) (tsub/pi D2' D1') Deq)
+	%<- (tsub-fun D1 D1' Deq1)
+	%<- ({y} tsub-fun (D2 y) (D2' y) (Deq2 y))
+	%<- (pi-resp Deq1 Deq2 Deq) %.
+%scope tsub-fun %term sigma 
+	%pi (tsub-fun (tsub/sigma D2 D1) (tsub/sigma D2' D1') Deq)
+	%<- (tsub-fun D1 D1' Deq1)
+	%<- ({y} tsub-fun (D2 y) (D2' y) (Deq2 y))
+	%<- (sigma-resp Deq1 Deq2 Deq) %.
+%term singa 
+	%pi (tsub-fun (tsub/singa D1) (tsub/singa D2) Deq')
+	%<- (aasub-fun D1 D2 Deq)
+	%<- (tp-resp-atom sing Deq Deq') %.
+%scope tsub-fun %term singo 
+	%pi (tsub-fun (tsub/singo D1) (tsub/singo D2) Deq'')
+	%<- (aosub-fun D1 D2 Deq)
+	%<- (term-eq-cdr-at Deq Deq')
+	%<- (tp-resp-atom sing Deq' Deq'') %.
+%term singao 
+	%pi (tsub-fun (tsub/singa D1) (tsub/singo D2) Deq)
+	%<- (aasub-aosub-contra D1 D2 Dfalse)
+	%<- (false-implies-tp-eq Dfalse Deq) %.
+%scope tsub-fun %term singoa 
+	%pi (tsub-fun (tsub/singo D2) (tsub/singa D1) Deq)
+	%<- (aasub-aosub-contra D1 D2 Dfalse)
+	%<- (false-implies-tp-eq Dfalse Deq) %.
+%worlds (var) (aasub-fun _ _ _) (aosub-fun _ _ _) (sub-fun _ _ _) (tsub-fun _ _ _) %.
+%total (D1 D2 D3 D4) (aasub-fun D1 _ _) (aosub-fun D2 _ _) (sub-fun D3 _ _) (tsub-fun D4 _ _) %.

@@ -20,6 +20,9 @@ open Cprint
 (* Author: Iliano Cervesato *)
 (* Modified: Jeff Polakow, Carsten Schuermann, Larry Greenfield,
              Roberto Virga, Brigitte Pientka *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeCompile
     (Whnf : WHNF)
     (TypeCheck : TYPECHECK)
@@ -40,7 +43,7 @@ module MakeCompile
   (*! sharing Print.IntSyn = IntSyn' !*)
 *)
   (* FIX: need to associate errors with occurrences -kw *)
-  exception Error of string
+  exception Error = Error
 
   module I = IntSyn
   module T = Tomega

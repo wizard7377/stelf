@@ -1,0 +1,88 @@
+%%%% lemmas needed for implcate
+% "halfway" explicit semantics?
+%sort isg-wf %.
+%term isg-wf/nil %pi (isg-wf cxt/nil K) %<- (sg-wf K) %.
+%term isg-wf/cons %pi (isg-wf (cxt/cons G C K) K') %<- (%pi (ofkd C K) %-> (isg-wf G K')) %.
+%sort isg-deq %.
+%term isg-deq/nil %pi (isg-deq cxt/nil K K') %<- (sg-deq K K') %.
+%term isg-deq/cons %pi (isg-deq (cxt/cons G C K) K1 K2) %<- (%pi (ofkd C K) %-> (isg-deq G K1 K2)) %.
+%sort sg-wf-to-isg-wf {G cxt} %.
+%mode sg-wf-to-isg-wf %in %in %out %.
+%term _ sg-wf-to-isg-wf cxt/nil D (isg-wf/nil D) %.
+%term _ 
+	%pi (sg-wf-to-isg-wf (cxt/cons G C K) D (isg-wf/cons ([d] D')))
+	%<- (sg-wf-to-isg-wf G D D') %.
+%worlds (ovar-block iofkd-block ofkd-block) (sg-wf-to-isg-wf _ _ _) %.
+%total G (sg-wf-to-isg-wf G _ _) %.
+%sort sg-deq-to-isg-deq {G cxt} %.
+%mode sg-deq-to-isg-deq %in %in %out %.
+%term _ sg-deq-to-isg-deq cxt/nil D (isg-deq/nil D) %.
+%term _ 
+	%pi (sg-deq-to-isg-deq (cxt/cons G C K) D (isg-deq/cons ([d] D')))
+	%<- (sg-deq-to-isg-deq G D D') %.
+%worlds (ovar-block iofkd-block ofkd-block) (sg-deq-to-isg-deq _ _ _) %.
+%total G (sg-deq-to-isg-deq G _ _) %.
+%sort isg-wf/sg/cn %.
+%mode isg-wf/sg/cn %in %out %.
+%term _ isg-wf/sg/cn (iofkd/nil D) (isg-wf/nil (sg-wf/sg/cn D)) %.
+%term _ 
+	%pi (isg-wf/sg/cn (iofkd/cons D) (isg-wf/cons D'))
+	%<- ({d ofkd C K} isg-wf/sg/cn (D d) (D' d)) %.
+%worlds (ovar-block iofkd-block ofkd-block) (isg-wf/sg/cn _ _) %.
+%total D (isg-wf/sg/cn D _) %.
+%sort isg-wf/sg/kd %.
+%mode isg-wf/sg/kd %in %out %.
+%term _ isg-wf/sg/kd (ikd-wf/nil D) (isg-wf/nil (sg-wf/sg/kd D)) %.
+%term _ 
+	%pi (isg-wf/sg/kd (ikd-wf/cons D) (isg-wf/cons D'))
+	%<- ({d ofkd C K} isg-wf/sg/kd (D d) (D' d)) %.
+%worlds (ovar-block iofkd-block ofkd-block) (isg-wf/sg/kd _ _) %.
+%total D (isg-wf/sg/kd D _) %.
+%sort isg-wf/sg/sgm %.
+%mode isg-wf/sg/sgm %in %in %in %out %.
+%term _ isg-wf/sg/sgm (isg-wf/nil D) DFS ([c] [d] isg-wf/nil (D' c d)) (isg-wf/nil (sg-wf/sg/sgm D D' DFS)) %.
+%term _ 
+	%pi (isg-wf/sg/sgm (isg-wf/cons D1) DFS ([c cn] [d ofkd c _] isg-wf/cons ([d'] D2 c d d')) (isg-wf/cons D'))
+	%<- ({d ofkd C K} isg-wf/sg/sgm (D1 d) DFS ([c] [d'] D2 c d' d) (D' d)) %.
+%worlds (ovar-block iofkd-block ofkd-block) (isg-wf/sg/sgm _ _ _ _) %.
+%total D (isg-wf/sg/sgm D _ _ _) %.
+%sort isg-wf/sg/pi %.
+%mode isg-wf/sg/pi %in %in %in %out %.
+%term _ isg-wf/sg/pi (isg-wf/nil D) DFS ([c] [d] isg-wf/nil (D' c d)) (isg-wf/nil (sg-wf/sg/pi D D' DFS)) %.
+%term _ 
+	%pi (isg-wf/sg/pi (isg-wf/cons D1) DFS ([c cn] [d ofkd c _] isg-wf/cons ([d'] D2 c d d')) (isg-wf/cons D'))
+	%<- ({d ofkd C K} isg-wf/sg/pi (D1 d) DFS ([c] [d'] D2 c d' d) (D' d)) %.
+%worlds (ovar-block iofkd-block ofkd-block) (isg-wf/sg/pi _ _ _ _) %.
+%total D (isg-wf/sg/pi D _ _ _) %.
+%sort isg-deq/sg/cn %.
+%mode isg-deq/sg/cn %in %out %.
+%term _ isg-deq/sg/cn (icn-deq/nil D) (isg-deq/nil (sg-deq/sg/cn D)) %.
+%term _ 
+	%pi (isg-deq/sg/cn (icn-deq/cons D) (isg-deq/cons D'))
+	%<- ({d ofkd C K} isg-deq/sg/cn (D d) (D' d)) %.
+%worlds (ovar-block iofkd-block ofkd-block) (isg-deq/sg/cn _ _) %.
+%total D (isg-deq/sg/cn D _) %.
+%sort isg-deq/sg/kd %.
+%mode isg-deq/sg/kd %in %out %.
+%term _ isg-deq/sg/kd (ikd-deq/nil D) (isg-deq/nil (sg-deq/sg/kd D)) %.
+%term _ 
+	%pi (isg-deq/sg/kd (ikd-deq/cons D) (isg-deq/cons D'))
+	%<- ({d ofkd C K} isg-deq/sg/kd (D d) (D' d)) %.
+%worlds (ovar-block iofkd-block ofkd-block) (isg-deq/sg/kd _ _) %.
+%total D (isg-deq/sg/kd D _) %.
+%sort isg-deq/sg/sgm %.
+%mode isg-deq/sg/sgm %in %in %in %out %.
+%term _ isg-deq/sg/sgm (isg-deq/nil D) DFS ([c] [d] isg-deq/nil (D' c d)) (isg-deq/nil (sg-deq/sg/sgm D D' DFS)) %.
+%term _ 
+	%pi (isg-deq/sg/sgm (isg-deq/cons D1) DFS ([c cn] [d ofkd c _] isg-deq/cons ([d'] D2 c d d')) (isg-deq/cons D'))
+	%<- ({d ofkd C K} isg-deq/sg/sgm (D1 d) DFS ([c] [d'] D2 c d' d) (D' d)) %.
+%worlds (ovar-block iofkd-block ofkd-block) (isg-deq/sg/sgm _ _ _ _) %.
+%total D (isg-deq/sg/sgm D _ _ _) %.
+%sort isg-deq/sg/pi %.
+%mode isg-deq/sg/pi %in %in %in %out %.
+%term _ isg-deq/sg/pi (isg-deq/nil D) DFS ([c] [d] isg-deq/nil (D' c d)) (isg-deq/nil (sg-deq/sg/pi D D' DFS)) %.
+%term _ 
+	%pi (isg-deq/sg/pi (isg-deq/cons D1) DFS ([c cn] [d ofkd c _] isg-deq/cons ([d'] D2 c d d')) (isg-deq/cons D'))
+	%<- ({d ofkd C K} isg-deq/sg/pi (D1 d) DFS ([c] [d'] D2 c d' d) (D' d)) %.
+%worlds (ovar-block iofkd-block ofkd-block) (isg-deq/sg/pi _ _ _ _) %.
+%total D (isg-deq/sg/pi D _ _ _) %.

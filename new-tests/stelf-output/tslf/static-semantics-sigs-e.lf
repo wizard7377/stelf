@@ -1,0 +1,59 @@
+%%%%% Static Semantics for sigs %%%%%%
+%sort esg-wf %.
+%mode esg-wf %star %star %.
+%sort esg-deq %.
+%mode esg-deq %star %star %star %.
+%sort esg-sub %.
+%mode esg-sub %star %star %star %.
+%term esg-wf/sg/unit %pi (esg-wf G sg/unit) %<- (cxt-ordered G) %.
+%term esg-wf/sg/kd %pi (esg-wf G (sg/kd K)) %<- (ekd-wf G K) %.
+%term esg-wf/sg/cn %pi (esg-wf G (sg/cn C)) %<- (eofkd G C kd/type) %.
+%term esg-wf/sg/sgm 
+	%pi (esg-wf G (sg/sgm S1 S2))
+	%<- (fst-sg S1 K1)
+	%<- ({a cn} %pi (isvar a I) %-> (esg-wf (cxt/cons G a K1) (S2 a)))
+	%<- (esg-wf G S1) %.
+%term esg-wf/sg/pi 
+	%pi (esg-wf G (sg/pi S1 S2))
+	%<- (fst-sg S1 K1)
+	%<- ({a cn} %pi (isvar a I) %-> (esg-wf (cxt/cons G a K1) (S2 a)))
+	%<- (esg-wf G S1) %.
+%term esg-deq/sg/unit %pi (esg-deq G sg/unit sg/unit) %<- (cxt-ordered G) %.
+%term esg-deq/sg/kd %pi (esg-deq G (sg/kd K1) (sg/kd K2)) %<- (ekd-deq G K1 K2) %.
+%term esg-deq/sg/cn %pi (esg-deq G (sg/cn C1) (sg/cn C2)) %<- (ecn-deq G C1 C2 kd/type) %.
+%term esg-deq/sg/sgm 
+	%pi (esg-deq G (sg/sgm S1 S2) (sg/sgm S3 S4))
+	%<- (fst-sg S1 K1)
+	%<- ({a cn} %pi (isvar a I) %-> (esg-deq (cxt/cons G a K1) (S2 a) (S4 a)))
+	%<- (esg-deq G S1 S3) %.
+%term esg-deq/sg/pi 
+	%pi (esg-deq G (sg/pi S1 S2) (sg/pi S3 S4))
+	%<- (fst-sg S3 K3)
+	%<- ({a cn} %pi (isvar a I) %-> (esg-deq (cxt/cons G a K3) (S2 a) (S4 a)))
+	%<- (esg-deq G S3 S1) %.
+%{
+
+esg-sub/sg/unit	: esg-sub G sg/unit sg/unit
+		   <- cxt-ordered G.
+
+esg-sub/sg/kd	: esg-sub G (sg/kd K1) (sg/kd K2)
+		   <- ekd-sub G K1 K2.
+
+esg-sub/sg/cn	: esg-sub G (sg/cn C1) (sg/cn C2)
+		   <- ecn-deq G C1 C2 kd/type.
+
+esg-sub/sg/sgm	: esg-sub G (sg/sgm S1 S2) (sg/sgm S3 S4)
+		   <- fst-sg S3 K3
+		   <- fst-sg S1 K1
+		   <- ({a:cn} isvar a I ->
+			 esg-wf (cxt/cons G a K3) (S4 a))
+		   <- ({a:cn} isvar a I ->
+			 esg-sub (cxt/cons G a K1) (S2 a) (S4 a))
+		   <- esg-sub G S1 S3.
+
+esg-sub/sg/pi	: esg-sub G (sg/pi S1 S2) (sg/pi S3 S4)
+		   <- fst-sg S3 K3
+		   <- ({a:cn} isvar a I ->
+			 esg-deq (cxt/cons G a K3) (S2 a) (S4 a))
+		   <- esg-deq G S3 S1.
+}%

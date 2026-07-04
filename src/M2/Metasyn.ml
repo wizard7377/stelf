@@ -11,9 +11,13 @@ open! Basis
 
 (* Meta syntax *)
 (* Author: Carsten Schuermann *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Make_MetaSyn (Whnf : WHNF) : METASYN = struct
   (*! structure IntSyn = IntSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   type nonrec var = int
   type mode = Bot | Top [@@deriving eq, ord, show]

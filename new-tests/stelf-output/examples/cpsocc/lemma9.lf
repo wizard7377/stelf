@@ -1,0 +1,73 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Lemma 9 : Preservation of Var-validity under substitution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% moved to def3+6+fig5.elf Thu Mar 10 20:45:31 2005 -fp
+% & : stack -> stack -> stack. %infix left 10 & .
+%sort app %.
+%mode app %in %out %.
+%term app_init app (Xi & dot) Xi %.
+%term app_stack %pi (app (Xi1 & (Xi2 , T)) (Xi , T)) %<- (app (Xi1 & Xi2) Xi) %.
+%sort appT %.
+%mode appT %in %in %out %out %.
+% note: Xi1' is output.  -fp
+% original from belmina -fp
+%{
+app_v : {v:ctriv}{vvv:{xi:stack}vvalT (xi , v) v xi}
+        appT (vvv Xi) (app_stack APP) APP (vvv Xi').
+
+app_t : {t:ctriv}{vvt:{xi:stack}vvalT xi t xi}
+        appT (vvt Xi) APP APP (vvt Xi').
+}%
+%term app_t appT (vval_xlam VVR) APP APP (vval_xlam VVR) %.
+%sort lemma9-1b {v ctriv} %.
+%mode lemma9-1b %in %in %in %in %out %.
+%sort lemma9-1e {v ctriv} %.
+%mode lemma9-1e %in %in %in %in %out %.
+%sort lemma9-3a {k ccont} {vvk vvalC dot k} %.
+%mode lemma9-3a %in %in %in %in %out %.
+%sort lemma9-3b {k ccont} {vvk vvalC dot k} %.
+%mode lemma9-3b %in %in %in %in %out %.
+%term lemma9-1b_cret_t lemma9-1b ([v ctriv] app_init) ([v ctriv] [vvv] vval_cret VVC (vvv Xi')) VVT app_init (vval_cret VVC (VVT Xi')) %.
+%term lemma9-1b_cret_c 
+	%pi (lemma9-1b APP ([v ctriv] [vvv] vval_cret (VVC v vvv) VVT) VVT1 APP1 (vval_cret VVC' (VVT1 Xi0)))
+	%<- (lemma9-1e APP VVC VVT1 APP1 VVC') %.
+%term lemma9-1b_capp_t1 lemma9-1b ([v ctriv] app_init) ([v ctriv] [vvv] vval_capp VVC VVT0 (vvv Xi')) VVT app_init (vval_capp VVC VVT0 (VVT Xi')) %.
+% original from Belmina -fp
+%{
+lemma9-1b_capp_t0 : {vvt1:{xi:stack}vvalT xi T xi}
+                    lemma9-1b ([v:ctriv]app_init)
+                              ([v:ctriv][vvv]
+                                vval_capp VVC
+                                          (vvv Xi')
+                                          (vvt1 (Xi' , v)))
+                               VVT
+                               app_init 
+                               (vval_capp VVC (VVT Xi') (vvt1 Xi')).
+}%
+%term lemma9-1b_capp_t0 lemma9-1b ([v ctriv] app_init) ([v ctriv] [vvv] vval_capp VVC (vvv Xi') (%the (vvalT (Xi' , v) _ (Xi' , v)) (vval_xlam VVR))) VVT app_init (vval_capp VVC (VVT Xi') (%the (vvalT Xi' _ Xi') (vval_xlam VVR))) %.
+%term lemma9-1b_capp_c 
+	%pi (lemma9-1b APP ([v ctriv] [vvv] vval_capp (VVC v vvv) VVT0 VVT1) VVT APP1 (vval_capp VVC' VVT0 VVT1))
+	%<- (lemma9-1e APP VVC VVT APP1 VVC') %.
+%term lemma9-1e_vlam 
+	%pi (lemma9-1e APP ([v ctriv] [vvv] vval_vlam ([v1 ctriv] [vvv1] VVE v1 vvv1 v vvv)) VVT APP1 (vval_vlam VVE'))
+	%<- ({v1 ctriv} {vvv1 {xi stack} vvalT (xi , v1) v1 xi} 
+	%pi ({Xi stack} {Xi0 stack} {Xi1 stack} {APP app (Xi0 & Xi) Xi1} appT (vvv1 Xi) (app_stack APP) APP (vvv1 Xi1))
+	%-> (lemma9-1b ([v ctriv] app_stack (APP v)) (VVE v1 vvv1) VVT (app_stack APP1) (VVE' v1 vvv1))) %.
+%term lemma9-3a_cret_c 
+	%pi (lemma9-3a ([k ccont] [vvk] vval_cret (VVC k vvk) VVT) (cval_cret CVC CVT) VVC1 APP (vval_cret VVC' VVT'))
+	%<- (appT VVT APP APP1 VVT')
+	%<- (lemma9-3b VVC CVC VVC1 APP1 VVC') %.
+%term lemma9-3a_capp_c 
+	%pi (lemma9-3a ([k ccont] [vvk] vval_capp (VVC k vvk) VVT0 VVT1) (cval_capp CVC CVT0 CVT1) VVC1 APP (vval_capp VVC' VVT0' VVT1'))
+	%<- (appT VVT1 APP APP1 VVT1')
+	%<- (appT VVT0 APP1 APP2 VVT0')
+	%<- (lemma9-3b VVC CVC VVC1 APP2 VVC') %.
+%term lemma9-3b_vlam 
+	%pi (lemma9-3b ([k ccont] [vvk vvalC dot k] vval_vlam ([v ctriv] [vvv {xi stack} vvalT (xi , v) v xi] VVE v vvv k vvk)) (cval_vlam CVE) VVC1 APP (vval_vlam VVE'))
+	%<- ({v ctriv} {vvv {xi stack} vvalT (xi , v) v xi} {cvv cvalT v} 
+	%pi ({Xi stack} {Xi0 stack} {Xi1 stack} {APP app (Xi0 & Xi) Xi1} appT (vvv Xi) (app_stack APP) APP (vvv Xi1))
+	%-> (lemma9-3a (VVE v vvv) (CVE v cvv) VVC1 (app_stack APP) (VVE' v vvv))) %.
+%term lemma9-3b_k lemma9-3b ([k ccont] [vvk vvalC dot k] vvk) cval_k VVC APP VVC %.
+%terminates APP (appT _ APP _ _) %.
+%terminates (VVE VVC) (lemma9-1b _ VVE _ _ _) (lemma9-1e _ VVC _ _ _) %.
+%terminates (VVE VVC) (lemma9-3a VVE _ _ _ _) (lemma9-3b VVC _ _ _ _) %.

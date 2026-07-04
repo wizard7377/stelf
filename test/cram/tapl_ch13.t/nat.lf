@@ -1,0 +1,36 @@
+# Natural numbers.
+# Ported from examples/tapl_ch13/nat.elf.
+
+%sort nat %.
+%scope nat %{
+  %term z nat
+  %term s %pi nat %-> nat
+%}
+
+# Equality
+%sort nat_eq {_ nat} {_ nat} %.
+%mode nat_eq %in %in %.
+%scope nat_eq %{
+  %term neq_eq_refl {{N}} nat_eq N N
+%}
+
+# Strict inequality
+%sort nat_neq {_ nat} {_ nat} %.
+%mode nat_neq %in %in %.
+%scope nat_neq %{
+  %term nat_neq_zs {{N}} nat_neq %(z nat) (%(s nat) N)
+  %term nat_neq_sz {{N}} nat_neq (%(s nat) N) %(z nat)
+  %term nat_neq_ss {{N1 N2}}
+    %if nat_neq (%(s nat) N1) (%(s nat) N2)
+    %<- nat_neq N1 N2
+%}
+
+# Less-than
+%sort nat_lt {_ nat} {_ nat} %.
+%mode nat_lt %in %in %.
+%scope nat_lt %{
+  %term nat_lt_zs {{N}} nat_lt %(z nat) (%(s nat) N)
+  %term nat_lt_ss {{N1 N2}}
+    %if nat_lt (%(s nat) N1) (%(s nat) N2)
+    %<- nat_lt N1 N2
+%}

@@ -13,6 +13,9 @@ open! Basis
 
 (* fquery: Executing logic programs via functional interpretation *)
 (* Author: Carsten Schuermann *)
+exception AbortQuery of string
+let () = Printexc.register_printer (function AbortQuery msg -> Some msg | _ -> None)
+
 module Fquery (Fquery__0 : sig
   module Global : GLOBAL
   module Names : NAMES
@@ -24,7 +27,7 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
   module ReconQuery = Fquery__0.ReconQuery
   module Timers = Fquery__0.Timers
 
-  exception AbortQuery of string
+  exception AbortQuery = AbortQuery
 
   module I = IntSyn
   module T = Tomega

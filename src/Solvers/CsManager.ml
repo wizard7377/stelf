@@ -262,5 +262,6 @@ end
 (*! structure ModeSyn : MODESYN !*)
 (* functor CsManager *)
 include MakeCsManager (Global) (UnifyTrail) (Names.Fixity)
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 (* # 1 "src/solvers/CsManager.sml.ml" *)

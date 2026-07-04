@@ -17,6 +17,9 @@ open! Basis
 
 (* Meta Theorem Prover Version 1.3 *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MTProver (MTProver__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL
 
@@ -40,7 +43,7 @@ end) : MTPPROVER.MTPROVER = struct
   module StateSyn = StateSyn
 
   (*! structure IntSyn = IntSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn
@@ -189,7 +192,7 @@ end) : MTPPROVER.MTPROVER = struct
   open CombiProver__1
 
   (*! structure IntSyn = IntSyn' !*)
-  exception Error of string
+  exception Error = Error
 
   let rec he f =
     try f () with

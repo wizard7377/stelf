@@ -1,0 +1,129 @@
+%                                                                               
+%{! 
+
+\{\{Summer school 2008
+  |prev=Typed arithmetic expressions
+  |prevname=Typed arithmetic expressions
+  |nonext=
+\}\}
+
+Arithmetic expressions with pairs and sums.  (There are two alternate solutions, [one by William](/wiki/summer-school-2008-typed-arithmetic-expressions-with-sums-2/) (involving output factoring) and [one by Dan](/wiki/summer-school-2008-typed-arithmetic-expressions-with-sums/) (involving output factoring and identity types).)
+
+Numbers and strings are unchanged.
+
+|hidden="true" !}%
+%sort nat %.
+%name nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort add %.
+%mode add %in %in %out %.
+%term add/z add z N N %.
+%term add/s %pi (add (s M) N (s P)) %<- (add M N P) %.
+%worlds () (add _ _ _) %.
+%total M (add M _ _) %.
+%sort char %.
+%name char %.
+%term a char %.
+%term b char %.
+%sort str %.
+%name str %.
+%term emp str %.
+%term cons %pi char %-> str %-> str %.
+%sort cat %.
+%mode cat %in %in %out %.
+%term cat/e cat emp S S %.
+%term cat/c %pi (cat (cons X S1) S2 (cons X S3)) %<- (cat S1 S2 S3) %.
+%worlds () (cat _ _ _) %.
+%total S (cat S _ _) %.
+%{! 
+
+## Typed expressions
+
+Add a type for disjoint sums:
+
+!}%
+%sort tp %.
+%name tp %.
+%term number tp %.
+%term string tp %.
+%term prod %pi tp %-> tp %-> tp %.
+%term sum %pi tp %-> tp %-> tp %.
+%{! 
+
+Add injections as values, and case as an expression. Note that you can only case on a value.  This makes evaluation slightly easier; 
+for versions with expression-case as a primitive; see the above alternate solutions.
+
+!}%
+%sort val %.
+%name val %.
+%prec %postfix 1 val %.
+%term num %pi nat %-> (number val) %.
+%term lit %pi str %-> (string val) %.
+%term pair %pi (T val) %-> (U val) %-> (prod T U val) %.
+%term inl %pi (T val) %-> (sum T U val) %.
+%term inr %pi (U val) %-> (sum T U val) %.
+%sort exp %.
+%name exp %.
+%prec %postfix 1 exp %.
+%term ret %pi (T val) %-> (T exp) %.
+%term plus %pi (number exp) %-> (number exp) %-> (number exp) %.
+%term append %pi (string exp) %-> (string exp) %-> (string exp) %.
+%term let %pi (T exp) %-> (%pi (T val) %-> (U exp)) %-> (U exp) %.
+%term fst %pi (prod T U exp) %-> (T exp) %.
+%term snd %pi (prod T U exp) %-> (U exp) %.
+%term case 
+	%pi (sum T U val)
+	%-> (%pi (T val) %-> (V exp))
+	%-> (%pi (U val) %-> (V exp))
+	%-> (V exp) %.
+%{! 
+
+Note that if we want to case on an expression, we can let-bind it:
+
+!}%
+%define ecase (
+	%pi (sum T U exp)
+	%-> (%pi (T val) %-> (V exp))
+	%-> (%pi (U val) %-> (V exp))
+	%-> (V exp)) [esum] [e1] [e2] let esum ([x] case x e1 e2) %.
+%{! 
+
+Add eval cases for case.
+
+!}%
+%sort eval %.
+%mode eval %in %out %.
+%term eval/val eval (ret V) V %.
+%term eval/plus 
+	%pi (eval (plus E1 E2) (num N))
+	%<- (eval E1 (num N1))
+	%<- (eval E2 (num N2))
+	%<- (add N1 N2 N) %.
+%term eval/append 
+	%pi (eval (append E1 E2) (lit S))
+	%<- (eval E1 (lit S1))
+	%<- (eval E2 (lit S2))
+	%<- (cat S1 S2 S) %.
+%term eval/let %pi (eval (let E1 ([x] E2 x)) A) %<- (eval E1 V) %<- (eval (E2 V) A) %.
+%term eval/fst %pi (eval (fst E) A) %<- (eval E (pair A _)) %.
+%term eval/snd %pi (eval (snd E) B) %<- (eval E (pair _ B)) %.
+%term eval/case1 %pi (eval (case (inl A) ([x] E1 x) _) A1) %<- (eval (E1 A) A1) %.
+%term eval/case2 %pi (eval (case (inr A) _ ([x] E2 x)) A2) %<- (eval (E2 A) A2) %.
+%worlds () (eval _ _) %.
+%total E (eval E _) %.
+%{! 
+
+\{\{Summer school 2008
+  |prev=Exercises 1
+  |prevname=Exercises 1
+  |nonext=
+\}\}
+
+!}%
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Summer_school_2008:Alternate_typed_arithmetic_expressions_with_sums).
+!}%

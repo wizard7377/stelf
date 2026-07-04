@@ -1,0 +1,135 @@
+%                                                           
+%{! 
+
+\{\{Summer school 2008
+  |prev=Arithmetic expressions with let-binding (hypothetical evaluation)
+  |prevname=Arithmetic expressions with let-binding (hypothetical evaluation)
+  |next=Typed arithmetic expressions (extrinsic encoding)
+  |nextname=Typed arithmetic expressions (extrinsic encoding)
+\}\}
+
+Next, we add another base type besides numbers.
+
+## Numbers and addition
+
+Natural numbers and addition are the same as before:
+
+!}%
+%sort nat %.
+%name nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort add %.
+%mode add %in %in %out %.
+%term add/z add z N N %.
+%term add/s %pi (add (s M) N (s P)) %<- (add M N P) %.
+%worlds () (add _ _ _) %.
+%total M (add M _ _) %.
+%{! 
+
+## Strings and append
+
+Strings and append are analogous
+
+!}%
+%sort char %.
+%name char %.
+%term a char %.
+%term b char %.
+%sort str %.
+%name str %.
+%term emp str %.
+%term cons %pi char %-> str %-> str %.
+%sort cat %.
+%mode cat %in %in %out %.
+%term cat/e cat emp S S %.
+%term cat/c %pi (cat (cons X S1) S2 (cons X S3)) %<- (cat S1 S2 S3) %.
+%worlds () (cat _ _ _) %.
+%total S (cat S _ _) %.
+%{! 
+
+## Typed expressions
+
+There are two types:
+
+!}%
+%sort tp %.
+%name tp %.
+%term number tp %.
+%term string tp %.
+%{! 
+
+We use an [intrinsic encoding](/wiki/intrinsic-and-extrinsic-encodings/), where only well-typed terms are
+represented.  Another way of looking at this is that we skip raw syntax
+and work directly with typing derivations. This works well for
+simply-typed languages, where the raw syntax for well-typed terms is
+isomorphic to its typing derivations.
+
+!}%
+%sort val %.
+%name val %.
+%prec %postfix 1 val %.
+%term num %pi nat %-> (number val) %.
+%term lit %pi str %-> (string val) %.
+%sort exp %.
+%name exp %.
+%prec %postfix 1 exp %.
+%term ret %pi (T val) %-> (T exp) %.
+%term plus %pi (number exp) %-> (number exp) %-> (number exp) %.
+%term append %pi (string exp) %-> (string exp) %-> (string exp) %.
+%term let %pi (T exp) %-> (%pi (T val) %-> (U exp)) %-> (U exp) %.
+%{! 
+
+Answers are typed as well:
+
+!}%
+%sort ans %.
+%name ans %.
+%prec %postfix 1 ans %.
+%term anum %pi nat %-> (number ans) %.
+%term astr %pi str %-> (string ans) %.
+%{! 
+
+Evaluation relates an expression to an answer of the same type,
+guaranteeing type preservation.  
+
+Because of Twelf's implicit argument mechanism, the cases for numbers
+and let-binding are unchanged.
+
+!}%
+%sort eval %.
+%mode eval %in %out %.
+%term eval/val/num eval (ret (num N)) (anum N) %.
+%term eval/val/str eval (ret (lit S)) (astr S) %.
+%term eval/plus 
+	%pi (eval (plus E1 E2) (anum N))
+	%<- (eval E1 (anum N1))
+	%<- (eval E2 (anum N2))
+	%<- (add N1 N2 N) %.
+%term eval/append 
+	%pi (eval (append E1 E2) (astr S))
+	%<- (eval E1 (astr S1))
+	%<- (eval E2 (astr S2))
+	%<- (cat S1 S2 S) %.
+%term eval/let/num %pi (eval (let E1 ([x] E2 x)) A) %<- (eval E1 (anum N)) %<- (eval (E2 (num N)) A) %.
+%term eval/let/str %pi (eval (let E1 ([x] E2 x)) A) %<- (eval E1 (astr S)) %<- (eval (E2 (lit S)) A) %.
+%worlds () (eval _ _) %.
+%total E (eval E _) %.
+%{! 
+
+Note: in this example ``ans`` is isomorphic to ``val``, so we can simplify things slightly by not making the distinction.  (See [Typed arithmetic expressions (value)](/wiki/summer-school-2008-typed-arithmetic-expressions-value/)).
+
+\{\{Summer school 2008
+  |prev=Arithmetic expressions with let-binding (hypothetical evaluation)
+  |prevname=Arithmetic expressions with let-binding (hypothetical evaluation)
+  |next=Typed arithmetic expressions (extrinsic encoding)
+  |nextname=Typed arithmetic expressions (extrinsic encoding)
+\}\}
+
+!}%
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Summer_school_2008:Typed_arithmetic_expressions).
+!}%

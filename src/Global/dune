@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name global)
  (public_name stelf.global)
  (modules Global_ GLOBAL)

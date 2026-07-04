@@ -14,11 +14,16 @@ open! Basis
 (* Unification *)
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
+exception Unify of string
+let () = Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
+exception NotInvertible
+let () = Printexc.register_printer (function NotInvertible -> Some "Not invertible" | _ -> None)
+
 module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
   (*! structure IntSyn = IntSyn' !*)
 
-  exception Unify of string
-  exception NotInvertible
+  exception Unify = Unify
+  exception NotInvertible = NotInvertible
 
   type fAction =
     | BindExp of IntSyn.exp option ref * IntSyn.exp option

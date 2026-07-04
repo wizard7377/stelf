@@ -16,6 +16,10 @@ open Modetable
 
 (* Splitting *)
 (* Author: Carsten Schuermann *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Splitting (Splitting__0 : sig
   module Global : GLOBAL
   module MetaSyn' : Metasyn.METASYN
@@ -38,7 +42,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
   open Splitting__0
   module MetaSyn = MetaAbstract.MetaSyn
 
-  exception Error of string
+  exception Error = Error
 
   (* Invariant:
      Case analysis generates a list of successor states

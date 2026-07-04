@@ -13,6 +13,9 @@ open! Basis
 (* Theorems *)
 (* Author: Carsten Schuermann *)
 (* Modified: Brigitte Pientka *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ThmSyn (ThmSyn__0 : sig
   (*! structure IntSyn : INTSYN !*)
   (*! structure ModeSyn' : MODESYN !*)
@@ -31,7 +34,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
   (*! structure Paths = Paths' !*)
   module Names = ThmSyn__0.Names'
 
-  exception Error of string
+  exception Error = Error
 
   let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 

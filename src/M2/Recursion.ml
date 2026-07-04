@@ -20,6 +20,10 @@ open MetaAbstract
 (* Recursion *)
 (* Author: Carsten Schuermann *)
 (* See [Rohwedder,Pfenning ESOP'96] *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Recursion (Recursion__0 : sig
   module Global : GLOBAL
   module MetaGlobal : METAGLOBAL.METAGLOBAL
@@ -57,7 +61,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
   open Recursion__0
   module MetaSyn = MetaSyn'
 
-  exception Error of string
+  exception Error = Error
 
   type nonrec operator = MetaSyn.state
 

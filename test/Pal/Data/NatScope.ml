@@ -3,7 +3,7 @@ let nat_scope = {|
 
 This is going to be (hopefully) a simple test of the natural numbers and scopes
 
-%sort nat
+%sort nat %.
 
 ## We can use headings whenever we wish
 

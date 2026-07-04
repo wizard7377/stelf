@@ -1,0 +1,25 @@
+%                   
+%                                                                                             
+%{! The **``%abbrev``** keyword can be placed before any <Todo>definition</Todo> in a Twelf [signature](/wiki/twelf-signature/) to cause the definition to, in the future, act as syntatic shorthand for some other term.
+
+## Example
+
+Say, for some reason, we had extremely verbose names for the syntax of the [natural numbers](/wiki/natural-numbers/). !}%
+%sort this-is-a-long-name-for-nat %.
+%term this-is-a-long-name-for-z this-is-a-long-name-for-nat %.
+%term this-is-a-long-name-for-s %pi this-is-a-long-name-for-nat %-> this-is-a-long-name-for-nat %.
+%{! We can define ``nat`` and ``z`` from their long names using ``%abbrev``, and ``s`` without ``%abbrev``. !}%
+%inline nat this-is-a-long-name-for-nat %.
+%inline z this-is-a-long-name-for-z %.
+%define s this-is-a-long-name-for-s %.
+%{! We can see the difference here - while definitions like ``s`` will be expanded only if they have to be, definitions made with the ``%abbrev`` keyword are always expanded by Twelf. !}%
+%{!! begin checked !!}%
+%define three s (s (s z)) %.
+%{!! end checked !!}%
+%{! ## See also
+
+* <Guide chapter="3" section="10">Definitions</Guide>
+
+<Keyword />
+
+!}%

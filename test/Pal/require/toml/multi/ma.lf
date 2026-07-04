@@ -1,0 +1,2 @@
+%sort ma_add {_ mn_nat} {_ mn_nat} {_ mn_nat} %.
+%term ma_add_z {y mn_nat} ma_add mn_zero y y %.

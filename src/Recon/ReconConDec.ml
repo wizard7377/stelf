@@ -1,5 +1,7 @@
 module type RECON_CONDEC = RECON_CONDEC.RECON_CONDEC
 
+exception Error of string
+
 module Make_ReconConDec
     (M : S.S)
     (RT : RECON_TERM.RECON_TERM with module M = M) :
@@ -9,7 +11,7 @@ module Make_ReconConDec
   module Ast = M.Ast
   module Paths = M.Paths
 
-  exception Error of string
+  exception Error = Error
 
   let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 

@@ -13,6 +13,9 @@ open! Basis
 
 (* Reconstructing Mode Declarations *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ReconMode (ReconMode__0 : sig
   module Global : GLOBAL
 
@@ -34,7 +37,7 @@ end) : RECON_MODE = struct
   module ExtSyn = ReconMode__0.ReconTerm'
 
   (*! structure Paths = Paths' !*)
-  exception Error of string
+  exception Error = Error
 
   let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 

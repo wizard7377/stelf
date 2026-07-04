@@ -9,6 +9,9 @@ include MODSYN
 open! Basis
 open Origins
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ModSyn (ModSyn__0 : sig
   (* Syntax for elaborated modules *)
   (* Author: Kevin Watkins *)
@@ -39,7 +42,7 @@ end) : MODSYN = struct
   (*! structure Paths = Paths' !*)
   module I = IntSyn
 
-  exception Error of string
+  exception Error = Error
 
   type constInfo =
     | ConstInfo of

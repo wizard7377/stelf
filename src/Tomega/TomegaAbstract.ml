@@ -10,6 +10,9 @@ include TOMEGAABSTRACT
 (* # 1 "src/tomega/TomegaAbstract.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module TomegaAbstract (TomegaAbstract__0 : sig
   (* Converter from relational representation to a functional
    representation of proof terms *)
@@ -22,7 +25,7 @@ module TomegaAbstract (TomegaAbstract__0 : sig
   module Whnf : WHNF
   module Subordinate : Subordinate.Subordinate_.SUBORDINATE
 end) : TOMEGAABSTRACT = struct
-  exception Error of string
+  exception Error = Error
 
   module Global = TomegaAbstract__0.Global
   module Whnf = TomegaAbstract__0.Whnf

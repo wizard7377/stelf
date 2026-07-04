@@ -26,17 +26,19 @@ module Format_ = struct
   (** A group (specified by `[[group]]` (can be mutiple per file), is a single
       unit *)
 
-  type file = t list
-  (** File is a list of [[group]] tables*)
+  type file = { groups : t list; interactive : string option }
+  (** A parsed project file: [[group]] tables plus an optional top-level
+      [interactive] key naming the group to load in REPL mode. *)
 end
 
 module Format : sig
   include module type of Format_
 
-  val from_toml : Otoml.t -> file option
+  val from_toml : Otoml.t -> (file, string) result
 end = struct
   include Format_
 
+  (* Option monad for depends/ext helpers — unknown dep types are silently skipped *)
   let ( let* ) = Option.bind
 
   let fpath_opt s = match Fpath.of_string s with Ok p -> Some p | Error _ -> None
@@ -72,21 +74,52 @@ end = struct
       let* url = Otoml.Helpers.find_string_opt link [ "url" ] in
       Some (Url { url })
 
+  (* Result monad for group/file parsing — missing fields are errors *)
+  let ( let*! ) x f = match x with Ok v -> f v | Error _ as e -> e
+
+  let required_string toml key =
+    match Otoml.Helpers.find_string_opt toml key with
+    | Some s -> Ok s
+    | None -> Error (Printf.sprintf "missing required field %S" (String.concat "." key))
+
+  let fpath_r label s =
+    match Fpath.of_string s with
+    | Ok p -> Ok p
+    | Error (`Msg msg) -> Error (Printf.sprintf "invalid %s path %S: %s" label s msg)
+
   let group_of_toml toml =
-    let* name = Otoml.Helpers.find_string_opt toml [ "name" ] in
-    let* dirs_s = Otoml.Helpers.find_strings_opt toml [ "dirs" ] in
+    let*! name = required_string toml [ "name" ] in
+    let*! dirs_s =
+      match
+        List.find_map
+          (fun key -> Otoml.Helpers.find_strings_opt toml [ key ])
+          [ "dirs"; "srcs"; "src"; "dir" ]
+      with
+      | Some ss -> Ok ss
+      | None -> Error {|missing required field "dirs" (or "srcs" / "src" / "dir")|} in
     let dirs = List.filter_map fpath_opt dirs_s in
-    let* main_s = Otoml.Helpers.find_string_opt toml [ "main" ] in
-    let* main = fpath_opt main_s in
+    let*! main_s = required_string toml [ "main" ] in
+    let*! main = fpath_r "main" main_s in
     let deps =
-      match Otoml.find_opt toml (Otoml.get_array ~strict:false Otoml.get_value) [ "deps" ] with
+      match
+        List.find_map
+          (fun key -> Otoml.find_opt toml (Otoml.get_array ~strict:false Otoml.get_value) [ key ])
+          [ "deps"; "dependencies" ]
+      with
       | Some items -> List.filter_map depends_of_toml items
       | None -> []
     in
-    Some { name; dirs; deps; main }
+    Ok { name; dirs; deps; main }
 
   let from_toml toml =
+    let interactive = Otoml.Helpers.find_string_opt toml [ "interactive" ] in
     match Otoml.find_opt toml (Otoml.get_array ~strict:false Otoml.get_value) [ "group" ] with
-    | Some groups -> Some (List.filter_map group_of_toml groups)
-    | None -> None
+    | None -> Error "missing required [[group]] section"
+    | Some groups ->
+        let results = List.map group_of_toml groups in
+        let errors = List.filter_map (function Error e -> Some e | Ok _ -> None) results in
+        if errors <> [] then Error (String.concat "; " errors)
+        else
+          let valid = List.filter_map (function Ok g -> Some g | Error _ -> None) results in
+          Ok { groups = valid; interactive }
 end

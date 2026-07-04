@@ -1,5 +1,7 @@
 module type RECON_MODULE = RECON_MODULE.RECON_MODULE
 
+exception Error of string
+
 module Make_ReconModule
     (M : S.S)
     (RT : RECON_TERM.RECON_TERM with module M = M) :
@@ -11,7 +13,7 @@ module Make_ReconModule
   module ModSyn = Modules.Modules_.ModSyn
   module IntTree = TableInstances.IntRedBlackTree
 
-  exception Error of string
+  exception Error = Error
 
   let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 

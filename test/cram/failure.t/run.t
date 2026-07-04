@@ -3,4 +3,6 @@
   main.lf
 
   $ stelf check main.lf
-  [1]
+  note: %sort void
+  => No solution.
+  

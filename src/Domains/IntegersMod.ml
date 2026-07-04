@@ -6,6 +6,9 @@ open Field
 
 (* Integers Modulo a Prime Number *)
 (* Author: Roberto Virga *)
+exception Div
+let () = Printexc.register_printer (function Div -> Some "Division by zero" | _ -> None)
+
 module IntegersMod (IntegersMod__0 : sig
   val p : int
 end) : FIELD = struct
@@ -19,7 +22,7 @@ end) : FIELD = struct
   let zero = 0
   let one = 1
 
-  exception Div
+  exception Div = Div
 
   let ( ~- ) n = Int.( - ) p n
   let ( + ) m n = normalize (Int.( + ) m n)

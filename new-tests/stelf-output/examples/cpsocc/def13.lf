@@ -1,0 +1,26 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Definition 13 : Control-stack substitution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort cstack_substE %.
+%sort cstack_substC %.
+%mode cstack_substE %in %in %out %.
+%mode cstack_substC %in %in %out %.
+%term csubst_cret 
+	%pi (cstack_substE ([k ccont] cret (C k) T) Phi ([k ccont] cret (C' k) T))
+	%<- (cstack_substC C Phi C') %.
+%term csubst_capp 
+	%pi (cstack_substE ([k ccont] capp T0 T1 (C k)) Phi ([k ccont] capp T0 T1 (C' k)))
+	%<- (cstack_substC C Phi C') %.
+%term csubst_vlam 
+	%pi (cstack_substC ([k ccont] vlam ([v ctriv] E v k)) Phi ([k ccont] vlam ([v ctriv] E' v k)))
+	%<- ({v ctriv} cstack_substE (E v) Phi (E' v)) %.
+%term csubst_k_init cstack_substC ([k ccont] k) ([k ccont] cdot) ([k ccont] k) %.
+%term csubst_k_vlam 
+	%pi (cstack_substC ([k ccont] k) ([k ccont] Phi k ; (vlam ([v ctriv] E v k))) ([k ccont] vlam ([v ctriv] E' v k)))
+	%<- ({v ctriv} cstack_substE (E v) Phi (E' v)) %.
+% does this require a multiset extension? -fp
+%{
+%terminates [(Phi1 Phi2) (E C)]
+ (cstack_substE E Phi1 _)
+ (cstack_substC C Phi2 _).
+}%

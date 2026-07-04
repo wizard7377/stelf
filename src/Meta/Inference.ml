@@ -18,6 +18,9 @@ open! Basis
 
 (* Inference:  Version 1.3*)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Inference (Inference__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL
 
@@ -49,7 +52,7 @@ end) : INFERENCE.INFERENCE = struct
   open Inference__0
   module StateSyn = StateSyn'
 
-  exception Error of string
+  exception Error = Error
 
   type nonrec operator = unit -> StateSyn.state
 

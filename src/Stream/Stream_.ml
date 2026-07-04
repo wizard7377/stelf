@@ -24,11 +24,16 @@ end
 (* Note that this implementation is NOT semantically *)
 (* equivalent to the plain (non-memoizing) streams, since *)
 (* effects will be executed only once in this implementation *)
+exception Uninitialized
+let () = Printexc.register_printer (function Uninitialized -> Some "Uninitialized" | _ -> None)
+exception EmptyStream
+let () = Printexc.register_printer (function EmptyStream -> Some "EmptyStream" | _ -> None)
+
 module BasicMemoStream : BASIC_STREAM = struct
   type 'a stream = Stream of (unit -> 'a front)
   and 'a front = Empty | Cons of 'a * 'a stream
 
-  exception Uninitialized
+  exception Uninitialized = Uninitialized
 
   let expose (Stream d) = d ()
 
@@ -61,7 +66,7 @@ end
 module MakeStream (BasicStream : BASIC_STREAM) : STREAM = struct
   include BasicStream
 
-  exception EmptyStream
+  exception EmptyStream = EmptyStream
 
   (* functions null, hd, tl, map, filter, exists, take, drop *)
   (* parallel the functions in the List structure *)

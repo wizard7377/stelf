@@ -1,0 +1,235 @@
+%                 
+%{! This page describes the data structure of lists as well as a large number of operations and theorems about them.
+
+## Definition
+
+This standard definition of lists in Twelf . We first define what the list elements are: in this example they are just an arbitrary type ``elem``. This example is parametric in the type of the elements, so you can change this definition to anything you like.
+
+<DisplayMath formula="e ::= \texttt{a} \,|\, \texttt{b} \,|\, \texttt{c}(e)"/> !}%
+%{! (options removed from twelftag: hidden="true") !}%
+% Lists
+% By Carsten Varming 2006
+%{!  !}%
+%sort elem %.
+%term a elem %.
+%term b elem %.
+%term c %pi elem %-> elem %.
+%{! The important defintion is the one of lists. There are two ways of constructing a Twelf object of type ``list``. The first is the constructor for the empty list ``nil``. The second is the constructor ``cons`` that given an object of type ``elem`` and an object of type ``list`` creates a list with elem as head and list as tail.
+
+<DisplayMath formula="l ::= \texttt{nil} \,|\, e :: l"/> !}%
+%sort list %.
+%name list %.
+%term nil list %.
+%term cons %pi elem %-> list %-> list %.
+%freeze list %.
+%{! ## Equalities
+
+Equality is defined as [identity](/wiki/equality/), which makes the symmetry and transitivity proofs entirely trivial. One [congruence lemma](/wiki/respects-lemma/) needs to be defined ``eq-cong-cons``, expressing that if the tails of two lists are equal, and the heads of the lists are identical, the lists are equal. !}%
+%sort eq %.
+%mode eq %in %out %.
+%term eq/ref eq Ls Ls %.
+%worlds () (eq _ _) %.
+%freeze eq %.
+%sort eq-symm %.
+%mode eq-symm %in %out %.
+%term _ eq-symm eq/ref eq/ref %.
+%worlds () (eq-symm _ _) %.
+%freeze eq-symm %.
+%total {} (eq-symm _ _) %.
+%sort eq-trans %.
+%mode eq-trans %in %in %out %.
+%term _ eq-trans eq/ref eq/ref eq/ref %.
+%worlds () (eq-trans _ _ _) %.
+%freeze eq-trans %.
+%total {} (eq-trans _ _ _) %.
+%sort eq-cong-cons {E} %.
+%mode eq-cong-cons %in %in %out %.
+%term _ eq-cong-cons _ eq/ref eq/ref %.
+%worlds () (eq-cong-cons _ _ _) %.
+%total {} (eq-cong-cons _ _ _) %.
+%{! ## Reversal
+There are at least two very common operations on lists: Reverse and Append. Lists form a semigroup with the opeation append <Math formula="\cdot \diamonds \cdot"/> and the empty list as right and left unit. If we define an operation <Math formula="f(x,y) = y \diamonds x"/> then reverse <Math formula="(\cdot)^\top"/> is an isomorphism between the semigroups (lists,<Math formula="\diamonds"/>,nil) and (lists,f,nil).
+### Definition
+I will use the standard logic programming way of encoding reversal. In the following ``rev`` will be a ternary relation where the first two elements are input and the third is output. The invariant is <Math formula="\forall a,b,c. a^\top \bowtie b = c"/>, where <Math formula="\bowtie"/> is concatenation, thus <Math formula="a^\top=b"/> is obtained by ``rev a nil b``. We will later see that <Math formula="\bowtie"/> can be thought of as <Math formula="\diamonds"/>. !}%
+%sort rev %.
+%mode rev %in %in %out %.
+%term rev/nil rev nil Ls' Ls' %.
+%term rev/cons %pi (rev (cons E Ls) Ls'' Ls') %<- (rev Ls (cons E Ls'') Ls') %.
+%worlds () (rev _ _ _) %.
+%freeze rev %.
+%total D (rev D _ _) %.
+%sort can-rev {Ls} {Ls'} %.
+%mode can-rev %in %in %out %.
+%term _ can-rev nil _ rev/nil %.
+%term _ %pi (can-rev (cons E Ls) Ls' (rev/cons Ls'')) %<- (can-rev Ls (cons E Ls') Ls'') %.
+%worlds () (can-rev _ _ _) %.
+%freeze can-rev %.
+%total D (can-rev D _ _) %.
+%{! ### Equality !}%
+%sort rev-eq %.
+%mode rev-eq %in %in %in %in %out %.
+%term _ rev-eq eq/ref eq/ref eq/ref R R %.
+%worlds () (rev-eq _ _ _ _ _) %.
+%total {} (rev-eq _ _ _ _ _) %.
+%{! ### Determinism
+As the Twelf definition only states that rev is a relation we need to prove that it indeed is a function. Namely <Math formula="\forall a,b,c,d. a^\top \diamonds b = c \land a^\top \diamonds b = d \Rightarrow c = d"/>. !}%
+%sort rev-determ %.
+%mode rev-determ %in %in %out %.
+%term _ rev-determ rev/nil _ eq/ref %.
+%term _ %pi (rev-determ (rev/cons R) (rev/cons R') Q) %<- (rev-determ R R' Q) %.
+%worlds () (rev-determ _ _ _) %.
+%freeze rev-determ %.
+%total D (rev-determ D _ _) %.
+%{! ### Double reversal
+Reverse is an isomorphism that turn out to be its own inverse.
+<Math formula="\forall a,b,c. a^\top = b \land b^\top = c \Rightarrow a = c"/>. !}%
+%sort revrev-id-lem %.
+%mode revrev-id-lem %in %in %in %out %.
+%term _ %pi (revrev-id-lem rev/nil F F' Q) %<- (rev-determ F' F Q) %.
+%term _ 
+	%pi (revrev-id-lem (rev/cons R) R' R'' Q)
+	%<- (revrev-id-lem R R' (rev/cons R'') Q) %.
+%worlds () (revrev-id-lem _ _ _ _) %.
+%freeze revrev-id-lem %.
+%total D (revrev-id-lem D _ _ _) %.
+%sort revrev-id %.
+%mode revrev-id %in %out %.
+%term _ 
+	%pi (revrev-id R R')
+	%<- (can-rev _ nil R1)
+	%<- (revrev-id-lem R R1 rev/nil E)
+	%<- (eq-symm E E')
+	%<- (rev-eq eq/ref eq/ref E' R1 R') %.
+%worlds () (revrev-id _ _) %.
+%freeze revrev-id %.
+%total {} (revrev-id _ _) %.
+%{! ### Injectivity
+As reverse has an inverse it is injective <Math formula="\forall a,b,c. a^\top = c \land b^\top = c \Rightarrow a = b"/>. !}%
+%sort rev-injective %.
+%mode rev-injective %in %in %out %.
+%term _ 
+	%pi (rev-injective (%the (rev Ls nil Ls') R) R' Q)
+	%<- (revrev-id R R1)
+	%<- (revrev-id R' R1')
+	%<- (rev-determ R1 R1' Q) %.
+%worlds () (rev-injective _ _ _) %.
+%freeze rev-injective %.
+%total D (rev-injective D _ _) %.
+%{! ## Append
+
+### Definition !}%
+%sort append %.
+%name append %.
+%term append/nil append nil L L %.
+%term append/cons %pi (append (cons E L1) L2 (cons E L3)) %<- (append L1 L2 L3) %.
+%freeze append %.
+%sort can-append {L1} {L2} %.
+%mode can-append %in %in %out %.
+%term _ can-append nil L append/nil %.
+%term _ %pi (can-append (cons E L1) L2 (append/cons A)) %<- (can-append L1 L2 A) %.
+%worlds () (can-append _ _ _) %.
+%total D (can-append D _ _) %.
+%{! ### Equality !}%
+%sort append-eq %.
+%mode append-eq %in %in %in %in %out %.
+%term _ append-eq eq/ref eq/ref eq/ref A A %.
+%worlds () (append-eq _ _ _ _ _) %.
+%total {} (append-eq _ _ _ _ _) %.
+%{! ### Units
+We need to prove that ``nil`` is the right and left unit of the semigroup <Math formula="\forall a. a \diamonds nil = nil \diamonds a = a"/>. The later is by axiom and the former is by this lemma. !}%
+%sort append-eq-nil {L1} %.
+%mode append-eq-nil %in %out %.
+%term _ append-eq-nil nil append/nil %.
+%term _ %pi (append-eq-nil (cons E L) (append/cons A)) %<- (append-eq-nil L A) %.
+%worlds () (append-eq-nil _ _) %.
+%total D (append-eq-nil D _) %.
+%{! Sometimes it is helpful to reason with equalities like <Math formula="\forall a b. a \diamonds nil = b \Rightarrow a = b"/>. !}%
+%sort append-eq-nil %.
+%mode append-eq-nil %in %out %.
+%term _ append-eq-nil append/nil eq/ref %.
+%term _ 
+	%pi (append-eq-nil (append/cons A) E)
+	%<- (append-eq-nil A E1)
+	%<- (eq-cong-cons _ E1 E) %.
+%worlds () (append-eq-nil _ _) %.
+%total D (append-eq-nil D _) %.
+%{! ### Determinism
+As with reverse we need to show that append is indeed a function <Math formula="\forall a,b,c,c'. a \diamonds b = c \land a \diamonds b = c' \Rightarrow c = c'"/>. !}%
+%sort append-determ %.
+%mode append-determ %in %in %out %.
+%term _ append-determ append/nil append/nil eq/ref %.
+%term _ 
+	%pi (append-determ (append/cons A1) (append/cons A2) E)
+	%<- (append-determ A1 A2 E2)
+	%<- (eq-cong-cons _ E2 E) %.
+%worlds () (append-determ _ _ _) %.
+%total D (append-determ D _ _) %.
+%{! ### Associativity
+We need to prove that append is associative <Math formula="\forall a,b,c.(a \diamonds b) \diamonds c = a \diamonds (b \diamonds c)"/>. !}%
+%sort append-assoc1 %.
+%mode append-assoc1 %in %in %out %out %.
+%term _ append-assoc1 append/nil A1 A1 append/nil %.
+%term _ 
+	%pi (append-assoc1 (append/cons A1) (append/cons A2) A3 (append/cons A4))
+	%<- (append-assoc1 A1 A2 A3 A4) %.
+%worlds () (append-assoc1 _ _ _ _) %.
+%total D (append-assoc1 D _ _ _) %.
+%sort append-assoc2 %.
+%mode append-assoc2 %in %in %in %in %out %.
+%term _ 
+	%pi (append-assoc2 A1 A2 A3 A4 E)
+	%<- (append-assoc1 A1 A2 A3' A4')
+	%<- (append-determ A3 A3' E3)
+	%<- (append-eq eq/ref E3 eq/ref A4 A4'')
+	%<- (append-determ A4' A4'' E) %.
+%worlds () (append-assoc2 _ _ _ _ _) %.
+%total {} (append-assoc2 _ _ _ _ _) %.
+%{! ## Append and reversal
+I promissed to prove that ``rev`` is an isomorphism. Lets start by a few lemmas.
+First <Math formula="\forall a,b,c.b^\top \bowtie (a^\top \bowtie c) = (a \diamonds b)^\top \bowtie c"/>. !}%
+%sort append-rev1 %.
+%mode append-rev1 %in %in %in %out %.
+%term _ append-rev1 append/nil rev/nil R R %.
+%term _ 
+	%pi (append-rev1 (append/cons A) (rev/cons R1) R3 (rev/cons R2))
+	%<- (append-rev1 A R1 R3 R2) %.
+%worlds () (append-rev1 _ _ _ _) %.
+%total D (append-rev1 D _ _ _) %.
+%{! And second <Math formula="\forall a,b,c.(a^\top \bowtie b)\diamonds c = a^\top \bowtie (b \diamonds c)"/>. If we let <Math formula="b = nil"/> then we get <Math formula="a^\top \diamonds c = a^\top \bowtie c"/>, which shows how we can think of <Math formula="\bowtie"/> as <Math formula="\diamonds"/>. !}%
+%sort append-rev2 %.
+%mode append-rev2 %in %in %in %out %.
+%term _ 
+	%pi (append-rev2 rev/nil A1 A2 R)
+	%<- (append-determ A1 A2 E)
+	%<- (rev-eq eq/ref eq/ref E rev/nil R) %.
+%term _ 
+	%pi (append-rev2 (rev/cons R) A1 A2 (rev/cons R2))
+	%<- (append-rev2 R (append/cons A1) A2 R2) %.
+%worlds () (append-rev2 _ _ _ _) %.
+%total D (append-rev2 D _ _ _) %.
+%{! And here we go. <Math formula="\forall a,b,c,d. (a^\top \bowtie b) \diamonds (c^\top \bowtie d) # ((d^\top \bowtie c) \diamonds (b^\top \bowtie a))^\top "/> which boils down to
+<Math formula="\forall a,c.a^\top \diamonds c^\top = (c \diamonds a)^\top = f(c^\top,a^\top) "/>, whence reverse is a homeomorphism. This combined with the fact that reverse is its own inverse we get that reverse is an isomorphism. !}%
+%sort append-rev %.
+%mode append-rev %in %in %in %in %in %in %out %.
+%term _ 
+	%pi (append-rev R1 (rev/cons R2) A1 R3 R4 A2 R5)
+	%<- (append-rev R1 R2 A1 R3 (rev/cons R4) A2 R5) %.
+%term _ 
+	%pi (append-rev (rev/cons R1) rev/nil A1 R2 R3 A2 R5)
+	%<- (append-rev R1 rev/nil A1 (rev/cons R2) R3 A2 R5) %.
+%term _ 
+	%pi (append-rev rev/nil rev/nil A1 R3 R4 A2 R5)
+	%<- (append-rev2 R3 append/nil A2 RC)
+	%<- (append-rev1 A1 R4 RC RB)
+	%<- (revrev-id RB R5) %.
+%worlds () (append-rev _ _ _ _ _ _ _) %.
+%total [D E] (append-rev E D _ _ _ _ _) %.
+%{! ``>See the Twelf code for this example`` - `` check=true>See Twelf's output``
+
+\{\{case study\}\} !}%
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Lists).
+!}%

@@ -1,0 +1,8 @@
+%require %[ ../lam %] %.
+%require %[ ../ord-red %] %.
+%require %[ ../par-red %] %.
+%require %[ ../par-lemmas %] %.
+%require %[ par-cr %] %.
+%require %[ ../ord-lemmas %] %.
+%require %[ ../equiv %] %.
+%require %[ ../ord-cr %] %.

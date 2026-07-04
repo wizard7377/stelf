@@ -16,6 +16,9 @@ open MemoTable
 (* Abstract Machine for tabling*)
 (* Author: Brigitte Pientka *)
 (* Based on abstract machine in Absmachine.fun *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Tabled (Tabled__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure CompSyn' : COMPSYN !*)
@@ -99,7 +102,7 @@ end) : TABLED = struct
       ref =
     ref []
 
-  exception Error of string
+  exception Error = Error
 
   (* ---------------------------------------------------------------------- *)
   let rec cidFromHead = function I.Const a -> a | I.Def a -> a

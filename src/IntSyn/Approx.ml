@@ -12,6 +12,11 @@ open! Basis
 
 (* Approximate language for term reconstruction *)
 (* Author: Kevin Watkins *)
+exception Ambiguous
+let () = Printexc.register_printer (function Ambiguous -> Some "Ambiguous term" | _ -> None)
+exception Unify of string
+let () = Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
+
 module MakeApprox (Whnf : WHNF) : APPROX = struct
   (*! structure IntSyn = IntSyn' !*)
   module I = IntSyn
@@ -122,7 +127,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   let rec varInsert ((u_, v_, l_), name) =
     varList := ((u_, v_, l_), name) :: !varList
 
-  exception Ambiguous
+  exception Ambiguous = Ambiguous
 
   (* getReplacementName (u, v, l, allowed) = name
          if u : v : l
@@ -292,7 +297,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
     apxToExactW (g_, u_, Whnf.whnfExpandDef vs_, allowed)
 
   (* matching for the approximate language *)
-  exception Unify of string
+  exception Unify = Unify
 
   (* occurUni (r, l) = ()
        iff r does not occur in l,

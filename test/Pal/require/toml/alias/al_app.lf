@@ -1,0 +1,2 @@
+%open al_b
+%term al_app_use al_base_type %.

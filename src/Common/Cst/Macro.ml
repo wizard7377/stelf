@@ -17,7 +17,7 @@ module Macro (C : CST.CST) : MACRO.MACRO with module C = C = struct
     | Unique (loc, tm) -> review (Unique (loc, go_term i args tm))
     | DeclCmd (loc, tm) -> review (DeclCmd (loc, go_term i args tm))
     | Inline (loc, id, tm) -> review (Inline (loc, id, go_term i args tm))
-    | Worlds (loc, ids, tm) -> review (Worlds (loc, ids, go_term i args tm))
+    | Worlds (loc, ids, tms) -> review (Worlds (loc, ids, List.map (go_term i args) tms))
     | Total (loc, orders, tms) ->
       review (Total (loc, orders, List.map (go_term i args) tms))
     | Terminates (loc, orders, tms) ->

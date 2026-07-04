@@ -1,0 +1,6 @@
+%sort vdt/assm/tm %.
+%mode vdt/assm/tm %in %out %.
+%sort vdt/assm/md %.
+%mode vdt/assm/md %in %out %out %out %out %.
+%sort fst-md-seq %.
+%mode fst-md-seq %in %in %out %.

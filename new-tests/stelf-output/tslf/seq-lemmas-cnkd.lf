@@ -1,0 +1,110 @@
+%sort seq/cn/sym %.
+%mode seq/cn/sym %in %out %.
+%term _ seq/cn/sym _ seq/cn/refl %.
+%worlds (cn-block) (seq/cn/sym _ _) %.
+%total {} (seq/cn/sym _ _) %.
+%sort seq/cn/pair %.
+%mode seq/cn/pair %in %in %out %.
+%term _ seq/cn/pair _ _ seq/cn/refl %.
+%worlds (cn-block) (seq/cn/pair _ _ _) %.
+%total {} (seq/cn/pair _ _ _) %.
+%sort seq/cn/pj1 %.
+%mode seq/cn/pj1 %in %out %.
+%term _ seq/cn/pj1 _ seq/cn/refl %.
+%worlds (cn-block) (seq/cn/pj1 _ _) %.
+%total {} (seq/cn/pj1 _ _) %.
+%sort seq/cn/pj2 %.
+%mode seq/cn/pj2 %in %out %.
+%term _ seq/cn/pj2 _ seq/cn/refl %.
+%worlds (cn-block) (seq/cn/pj2 _ _) %.
+%total {} (seq/cn/pj2 _ _) %.
+%sort seq/cn/tag %.
+%mode seq/cn/tag %in %out %.
+%term _ seq/cn/tag _ seq/cn/refl %.
+%worlds (cn-block) (seq/cn/tag _ _) %.
+%total {} (seq/cn/tag _ _) %.
+%sort ofkd/seq-k %.
+%mode ofkd/seq-k %in %in %out %.
+%term _ ofkd/seq-k seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (ofkd/seq-k _ _ _) %.
+%total {} (ofkd/seq-k _ _ _) %.
+%sort ofkd/seq-k-pi-l %.
+%mode ofkd/seq-k-pi-l %in %in %out %.
+%term _ ofkd/seq-k-pi-l seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (ofkd/seq-k-pi-l _ _ _) %.
+%total {} (ofkd/seq-k-pi-l _ _ _) %.
+%sort ofkd/seq-c %.
+%mode ofkd/seq-c %in %in %out %.
+%term _ ofkd/seq-c seq/cn/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (ofkd/seq-c _ _ _) %.
+%total {} (ofkd/seq-c _ _ _) %.
+%sort kd-wf/seq %.
+%mode kd-wf/seq %in %in %out %.
+%term _ kd-wf/seq seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (kd-wf/seq _ _ _) %.
+%total {} (kd-wf/seq _ _ _) %.
+%sort seq/kd/sgm %.
+%mode seq/kd/sgm %in %in %out %.
+%term _ seq/kd/sgm _ _ seq/kd/refl %.
+%worlds (cn-block cn-block) (seq/kd/sgm _ _ _) %.
+%total {} (seq/kd/sgm _ _ _) %.
+%sort kd-wf/seq-a %.
+%mode kd-wf/seq-a %in %in %out %.
+%term _ kd-wf/seq-a seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd+vdt-block ofkd-block) (kd-wf/seq-a _ _ _) %.
+%total {} (kd-wf/seq-a _ _ _) %.
+%sort kd-sub/seq-l %.
+%mode kd-sub/seq-l %in %in %out %.
+%term _ kd-sub/seq-l seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (kd-sub/seq-l _ _ _) %.
+%total {} (kd-sub/seq-l _ _ _) %.
+%sort kd-sub/seq-r %.
+%mode kd-sub/seq-r %in %in %out %.
+%term _ kd-sub/seq-r seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (kd-sub/seq-r _ _ _) %.
+%total {} (kd-sub/seq-r _ _ _) %.
+%sort kd-sub/seq-a %.
+%mode kd-sub/seq-a %in %in %out %.
+%term _ kd-sub/seq-a seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (kd-sub/seq-a _ _ _) %.
+%total {} (kd-sub/seq-a _ _ _) %.
+%sort kd-deq/seq-l %.
+%mode kd-deq/seq-l %in %in %out %.
+%term _ kd-deq/seq-l seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (kd-deq/seq-l _ _ _) %.
+%total {} (kd-deq/seq-l _ _ _) %.
+%sort kd-deq/seq-r %.
+%mode kd-deq/seq-r %in %in %out %.
+%term _ kd-deq/seq-r seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (kd-deq/seq-r _ _ _) %.
+%total {} (kd-deq/seq-r _ _ _) %.
+%sort kd-deq/seq-a %.
+%mode kd-deq/seq-a %in %in %out %.
+%term _ kd-deq/seq-a seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (kd-deq/seq-a _ _ _) %.
+%total {} (kd-deq/seq-a _ _ _) %.
+%sort seq/cn/beta-pj1 %.
+%mode seq/cn/beta-pj1 %in %in %in %out %.
+%term _ seq/cn/beta-pj1 seq/cn/refl seq/cn/refl D1 D1 %.
+%worlds () (seq/cn/beta-pj1 _ _ _ _) %.
+%total {} (seq/cn/beta-pj1 _ _ _ _) %.
+%sort seq/cn/beta-pj2 %.
+%mode seq/cn/beta-pj2 %in %in %in %out %.
+%term _ seq/cn/beta-pj2 seq/cn/refl seq/cn/refl D1 D1 %.
+%worlds () (seq/cn/beta-pj2 _ _ _ _) %.
+%total {} (seq/cn/beta-pj2 _ _ _ _) %.
+%sort cn-deq/seq-l %.
+%mode cn-deq/seq-l %in %in %out %.
+%term _ cn-deq/seq-l seq/cn/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (cn-deq/seq-l _ _ _) %.
+%total {} (cn-deq/seq-l _ _ _) %.
+%sort cn-deq/seq-r %.
+%mode cn-deq/seq-r %in %in %out %.
+%term _ cn-deq/seq-r seq/cn/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (cn-deq/seq-r _ _ _) %.
+%total {} (cn-deq/seq-r _ _ _) %.
+%sort cn-deq/seq-k %.
+%mode cn-deq/seq-k %in %in %out %.
+%term _ cn-deq/seq-k seq/kd/refl D1 D1 %.
+%worlds (cn-block ofkd-block) (cn-deq/seq-k _ _ _) %.
+%total {} (cn-deq/seq-k _ _ _) %.

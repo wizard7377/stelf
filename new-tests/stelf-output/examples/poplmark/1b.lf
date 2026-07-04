@@ -1,0 +1,674 @@
+%%%%%  Nats  %%%%%
+%sort nat %.
+%name nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort nat_eq %.
+%sort nat_neq %.
+%sort nat_less %.
+%sort nat_more %.
+%term nat_eq_ nat_eq N N %.
+%term nat_neq_zs nat_neq z (s _) %.
+%term nat_neq_sz nat_neq (s _) z %.
+%term nat_neq_ss %pi (nat_neq (s N) (s M)) %<- (nat_neq N M) %.
+%term nat_less_z nat_less z (s _) %.
+%term nat_less_s %pi (nat_less (s N) (s M)) %<- (nat_less N M) %.
+%term nat_more_z nat_more (s _) z %.
+%term nat_more_s %pi (nat_more (s N) (s M)) %<- (nat_more N M) %.
+%sort plus %.
+%term plus_z plus z N N %.
+%term plus_s %pi (plus (s M) N (s N')) %<- (plus M N N') %.
+%reduces <= N M (plus _ N M) %.
+%sort sum_inc {N1} {N2} {N3} %.
+%mode sum_inc %in %in %in %in %out %.
+%term _ sum_inc _ _ _ plus_z plus_z %.
+%term _ %pi (sum_inc _ _ _ (plus_s D) (plus_s D')) %<- (sum_inc _ _ _ D D') %.
+%worlds () (sum_inc _ _ _ _ _) %.
+%total (D) (sum_inc _ _ _ D _) %.
+%sort commute' {N1} {N2} {N3} %.
+%mode commute' %in %in %in %in %out %.
+%term _ %pi (commute' z (s M) _ plus_z (plus_s D)) %<- (commute' z M _ plus_z D) %.
+%term _ commute' _ z _ _ plus_z %.
+%term _ 
+	%pi (commute' (s N1) N2 _ (plus_s D) D'')
+	%<- (commute' N1 N2 _ D D')
+	%<- (sum_inc _ _ _ D' D'') %.
+%worlds () (commute' _ _ _ _ _) %.
+%total [N1 N2] (commute' N1 N2 _ _ _) %.
+%sort assoc %.
+%mode assoc %in %in %out %out %.
+%term _ assoc plus_z D D plus_z %.
+%term _ %pi (assoc (plus_s Da) (plus_s Db) Da' (plus_s Db')) %<- (assoc Da Db Da' Db') %.
+%worlds () (assoc _ _ _ _) %.
+%total (D) (assoc D _ _ _) %.
+%sort assoc' %.
+%mode assoc' %in %in %out %out %.
+%term _ 
+	%pi (assoc' D1 D2 D3 D4)
+	%<- (commute' _ _ _ D2 D2')
+	%<- (assoc (plus_s D1) D2' D3' (plus_s D4'))
+	%<- (commute' _ _ _ D3' D3)
+	%<- (sum_inc _ _ _ D4' D4) %.
+%worlds () (assoc' _ _ _ _) %.
+%total (D) (assoc' D _ _ _) %.
+%sort add {N1} {N2} %.
+%mode add %in %in %out %.
+%term _ add z N2 plus_z %.
+%term _ %pi (add (s N1) N2 (plus_s D)) %<- (add N1 N2 D) %.
+%worlds () (add _ _ _) %.
+%total (N) (add N _ _) %.
+%%%%% Labels %%%%%
+%sort label %.
+%name label %.
+%term label_nat %pi nat %-> label %.
+%sort label_eq %.
+%sort label_neq %.
+%sort label_less %.
+%sort label_more %.
+%term label_eq_ label_eq L L %.
+%term label_neq_ %pi (label_neq (label_nat N) (label_nat M)) %<- (nat_neq N M) %.
+%term label_less_ %pi (label_less (label_nat N) (label_nat M)) %<- (nat_less N M) %.
+%term label_more_ %pi (label_more (label_nat N) (label_nat M)) %<- (nat_more N M) %.
+%%%%% Types %%%%%
+%sort tp %.
+%name tp %.
+%sort trow %.
+%name trow %.
+%term trow_nil trow %.
+%term trow_cons %pi label %-> tp %-> trow %-> trow %.
+%sort trow_lookup %.
+%term trow_lookup_yes trow_lookup L (trow_cons L T _) T %.
+%term trow_lookup_no %pi (trow_lookup L (trow_cons _ _ TR) T) %<- (trow_lookup L TR T) %.
+%sort trow_labelfree %.
+%term trow_labelfree_nil trow_labelfree trow_nil _ %.
+%term trow_labelfree_cons 
+	%pi (trow_labelfree (trow_cons L' _ TR) L)
+	%<- (label_neq L L')
+	%<- (trow_labelfree TR L) %.
+%sort trow_eq %.
+%term trow_eq_ trow_eq TR TR %.
+%% Takes a record in and returns one in sorted order
+%sort trow_order %.
+%sort trow_insert %.
+%term trow_order_nil trow_order trow_nil trow_nil %.
+%term trow_order_cons 
+	%pi (trow_order (trow_cons L S SR) TR')
+	%<- (trow_order SR TR)
+	%<- (trow_insert L S TR TR') %.
+%term trow_insert_nil trow_insert L S trow_nil (trow_cons L S trow_nil) %.
+%term trow_insert_less 
+	%pi (trow_insert L S (trow_cons L' T TR) (trow_cons L S (trow_cons L' T TR)))
+	%<- (label_less L L') %.
+%term trow_insert_more 
+	%pi (trow_insert L S (trow_cons L' T TR) (trow_cons L' T TR'))
+	%<- (label_more L L')
+	%<- (trow_insert L S TR TR') %.
+%sort trow_uniqueness %.
+%term trow_uniqueness_nil trow_uniqueness trow_nil %.
+%term trow_uniqueness_cons 
+	%pi (trow_uniqueness (trow_cons L _ TR))
+	%<- (trow_labelfree TR L)
+	%<- (trow_uniqueness TR) %.
+%term top tp %.
+%term arrow %pi tp %-> tp %-> tp %.
+%term forall %pi tp %-> (%pi tp %-> tp) %-> tp %.
+%term record {TR trow} %pi (trow_uniqueness TR) %-> tp %.
+%%%%% Subtyping %%%%%
+%sort assm %.
+%sort var %.
+%sort sub %.
+%% sub_trow requires that the elements be in sorted order
+%sort sub_trow %.
+%term sub_top sub _ top %.
+%term sub_refl %pi (sub X X) %<- (assm X _) %.
+%term sub_trans %pi (sub X T) %<- (assm X U) %<- (sub U T) %.
+%term sub_arrow %pi (sub (arrow S1 S2) (arrow T1 T2)) %<- (sub T1 S1) %<- (sub S2 T2) %.
+%term sub_forall 
+	%pi (sub (forall S1 ([x] S2 x)) (forall T1 ([x] T2 x)))
+	%<- (sub T1 S1)
+	%<- ({x} %pi (assm x T1) %-> (sub (S2 x) (T2 x))) %.
+%term sub_record 
+	%pi (sub (record SR SRunique) (record TR TRunique))
+	%<- (trow_order SR SR')
+	%<- (trow_order TR TR')
+	%<- (sub_trow SR' TR') %.
+%term sub_trow_nil sub_trow trow_nil trow_nil %.
+%term sub_trow_cons 
+	%pi (sub_trow (trow_cons L S SR) (trow_cons L T TR))
+	%<- (sub_trow SR TR)
+	%<- (sub S T) %.
+%term sub_trow_cons' %pi (sub_trow (trow_cons L S SR) TR) %<- (sub_trow SR TR) %.
+%%%%%  Variables and Blocks  %%%%%
+%sort assm_var %.
+%mode assm_var %in %out %.
+%block bind {t tp} [x tp] [dv var x] [d assm x t] [thm assm_var d dv]%.
+%block vblock [t tp] [d var t]%.
+%block ablock {x tp} {dv var x} {t tp} [d assm x t] [thm assm_var d dv]%.
+%worlds (bind vblock ablock) (assm_var _ _) %.
+%total {} (assm_var _ _) %.
+%%%%% Metric %%%%% 
+%sort size %.
+%sort size_trow %.
+%term size_top size top z %.
+%term size_var %pi (size T z) %<- (var T) %.
+%term size_arrow %pi (size (arrow T1 T2) (s N)) %<- (size T1 N1) %<- (size T2 N2) %<- (plus N1 N2 N) %.
+%term size_forall 
+	%pi (size (forall T1 T2) (s N))
+	%<- (size T1 N1)
+	%<- ({t tp} %pi (var t) %-> (size (T2 t) N2))
+	%<- (plus N1 N2 N) %.
+%term size_record %pi (size (record TR _) (s N)) %<- (size_trow TR N) %.
+%term size_trow_nil size_trow trow_nil z %.
+%term size_trow_cons 
+	%pi (size_trow (trow_cons L T TR) (s N))
+	%<- (size T N1)
+	%<- (size_trow TR N2)
+	%<- (plus N1 N2 N) %.
+%sort employ_plus {N1} {N2} {N3} %.
+%mode employ_plus %in %in %in %in %.
+%term _ employ_plus _ _ _ plus_z %.
+%term _ %pi (employ_plus _ _ _ (plus_s D)) %<- (employ_plus _ _ _ D) %.
+%worlds (bind) (employ_plus _ _ _ _) %.
+%total (D) (employ_plus _ _ _ D) %.
+%reduces <= N2 N3 (employ_plus _ N2 N3 _) %.
+%sort employ_plus2 {N1} {N2} {N3} %.
+%mode employ_plus2 %in %in %in %in %.
+%term _ %pi (employ_plus2 _ _ _ D) %<- (commute' _ _ _ D D') %<- (employ_plus _ _ _ D') %.
+%worlds (bind) (employ_plus2 _ _ _ _) %.
+%total [] (employ_plus2 _ _ _ _) %.
+%reduces <= N1 N3 (employ_plus2 N1 _ N3 _) %.
+%sort find_size {T} %.
+%mode find_size %in %out %.
+%sort find_size_trow {TR} %.
+%mode find_size_trow %in %out %.
+%block sblock [t tp] [d var t] [thm find_size t (size_var d)]%.
+%block sbind {t tp} [x tp] [dv var x] [d assm x t] [thm assm_var d dv] [thm' find_size x (size_var dv)]%.
+%term _ find_size top size_top %.
+%term _ 
+	%pi (find_size (arrow T1 T2) (size_arrow Plus Size2 Size1))
+	%<- (find_size T1 Size1)
+	%<- (find_size T2 Size2)
+	%<- (add _ _ Plus) %.
+%term _ 
+	%pi (find_size (forall T1 T2) (size_forall Plus Size2 Size1))
+	%<- (find_size T1 Size1)
+	%<- ({t tp} {dv var t} %pi (find_size t (size_var dv)) %-> (find_size (T2 t) (Size2 t dv)))
+	%<- (add _ _ Plus) %.
+%term _ %pi (find_size (record TR _) (size_record D)) %<- (find_size_trow TR D) %.
+%term _ find_size_trow trow_nil size_trow_nil %.
+%term _ 
+	%pi (find_size_trow (trow_cons _ T TR) (size_trow_cons Plus Size2 Size1))
+	%<- (find_size T Size1)
+	%<- (find_size_trow TR Size2)
+	%<- (add _ _ Plus) %.
+%worlds (sblock sbind) (find_size _ _) (find_size_trow _ _) %.
+%total (T TR) (find_size T _) (find_size_trow TR _) %.
+%%%%%  Reductio ad absurdio  %%%%%
+%sort false %.
+%sort raa_sub %.
+%mode {%in S tp} {%in T tp} {%in X1 false} {%out X2 sub S T} raa_sub X1 X2 %.
+%worlds (bind vblock ablock) (raa_sub _ _) %.
+%total {} (raa_sub _ _) %.
+%sort raa_treq %.
+%mode {%in TR trow} {%in SR trow} {%in X1 false} {%out X2 trow_eq TR SR} raa_treq X1 X2 %.
+%worlds (bind vblock ablock) (raa_treq _ _) %.
+%total {} (raa_treq _ _) %.
+%%%%%  Various things are not variables  %%%%%
+%sort top_var_contra %.
+%mode top_var_contra %in %out %.
+%worlds (bind vblock ablock) (top_var_contra _ _) %.
+%total {} (top_var_contra _ _) %.
+%sort arrow_var_contra %.
+%mode arrow_var_contra %in %out %.
+%worlds (bind vblock ablock) (arrow_var_contra _ _) %.
+%total {} (arrow_var_contra _ _) %.
+%sort forall_var_contra %.
+%mode forall_var_contra %in %out %.
+%worlds (bind vblock ablock) (forall_var_contra _ _) %.
+%total {} (forall_var_contra _ _) %.
+%sort record_var_contra %.
+%mode record_var_contra %in %out %.
+%worlds (bind vblock ablock) (record_var_contra _ _) %.
+%total {} (record_var_contra _ _) %.
+%%%%% Nats and labels are well-ordered %%%%%
+%sort nat_contra %.
+%mode nat_contra %in %in %out %.
+%term _ %pi (nat_contra (nat_less_s D) (nat_more_s D') F) %<- (nat_contra D D' F) %.
+%worlds (bind vblock ablock) (nat_contra _ _ _) %.
+%total (D) (nat_contra D _ _) %.
+%sort label_contra %.
+%mode label_contra %in %in %out %.
+%term _ %pi (label_contra (label_less_ D) (label_more_ D') F) %<- (nat_contra D D' F) %.
+%worlds (bind vblock ablock) (label_contra _ _ _) %.
+%total {} (label_contra D _ _) %.
+%%%%% Lemmas %%%%%
+%sort trow_cons_unique {L} {T} %.
+%mode trow_cons_unique %in %in %in %out %.
+%term _ trow_cons_unique _ _ trow_eq_ trow_eq_ %.
+%worlds (bind vblock ablock) (trow_cons_unique _ _ _ _) %.
+%total [] (trow_cons_unique _ _ _ _) %.
+%sort trow_insert_unique %.
+%mode trow_insert_unique %in %in %in %out %.
+%term _ trow_insert_unique trow_insert_nil _ _ trow_eq_ %.
+%term _ trow_insert_unique (trow_insert_less _) (trow_insert_less _) _ trow_eq_ %.
+%term _ 
+	%pi (trow_insert_unique (trow_insert_more D _) (trow_insert_more D' _) trow_eq_ Deq')
+	%<- (trow_insert_unique D D' trow_eq_ Deq)
+	%<- (trow_cons_unique _ _ Deq Deq') %.
+%% contradiction cases
+%term _ 
+	%pi (trow_insert_unique (trow_insert_less D) (trow_insert_more _ D') trow_eq_ Deq)
+	%<- (label_contra D D' F)
+	%<- (raa_treq F Deq) %.
+%term _ 
+	%pi (trow_insert_unique (trow_insert_more _ D') (trow_insert_less D) trow_eq_ Deq)
+	%<- (label_contra D D' F)
+	%<- (raa_treq F Deq) %.
+%worlds (bind vblock ablock) (trow_insert_unique _ _ _ _) %.
+%total (D) (trow_insert_unique D _ _ _) %.
+%sort trow_order_unique %.
+%mode trow_order_unique %in %in %out %.
+%term _ trow_order_unique trow_order_nil _ trow_eq_ %.
+%term _ 
+	%pi (trow_order_unique (trow_order_cons D2a D1a) (trow_order_cons D2b D1b) Deq')
+	%<- (trow_order_unique D1a D1b Deq)
+	%<- (trow_insert_unique D2a D2b Deq Deq') %.
+%worlds (bind vblock ablock) (trow_order_unique _ _ _) %.
+%total (D) (trow_order_unique D _ _) %.
+%sort equality_sub_trow %.
+%mode equality_sub_trow %in %in %out %.
+%term _ equality_sub_trow D trow_eq_ D %.
+%worlds (bind vblock ablock) (equality_sub_trow _ _ _) %.
+%total [] (equality_sub_trow _ _ _) %.
+%sort preserve_size_insert %.
+%mode preserve_size_insert %in %in %in %in %out %.
+%term _ preserve_size_insert DsizeT DsizeTR _ Dplus (size_trow_cons Dplus DsizeTR DsizeT) %.
+%term _ 
+	%pi (preserve_size_insert DsizeT (size_trow_cons Dplus DsizeTR DsizeS) (trow_insert_more Dins _) Dplus' (size_trow_cons Dplus''' DsizeTR' DsizeS))
+	%<- (assoc' Dplus Dplus' Dplus'' Dplus''')
+	%<- (preserve_size_insert DsizeT DsizeTR Dins Dplus'' DsizeTR') %.
+%worlds (bind vblock ablock) (preserve_size_insert _ _ _ _ _) %.
+%total (D) (preserve_size_insert _ D _ _ _) %.
+%sort preserve_size_order %.
+%mode preserve_size_order %in %in %out %.
+%term _ preserve_size_order size_trow_nil trow_order_nil size_trow_nil %.
+%term _ 
+	%pi (preserve_size_order (size_trow_cons Dplus DsizeTR DsizeT) (trow_order_cons Dins Dord) DsizeTR'')
+	%<- (preserve_size_order DsizeTR Dord DsizeTR')
+	%<- (preserve_size_insert DsizeT DsizeTR' Dins Dplus DsizeTR'') %.
+%worlds (bind vblock ablock) (preserve_size_order _ _ _) %.
+%total (D) (preserve_size_order D _ _) %.
+%sort trans* {Nsize nat} %.
+%sort trans_trow* {Nsize nat} %.
+%sort narrow* {Nsize nat} %.
+%sort narrow_trow* {Nsize nat} %.
+%mode trans* %in %in %in %in %in %in %out %.
+%mode trans_trow* %in %in %in %in %in %in %out %.
+%mode narrow* %in %in %in %in %in %in %in %out %.
+%mode narrow_trow* %in %in %in %in %in %in %in %out %.
+%scope narrow_trow* %term top trans* _ _ _ _ D sub_top sub_top %.
+%term refl trans* _ _ _ _ (sub_refl _) D D %.
+%scope narrow_trow* %term trans* 
+	%pi (trans* _ Size _ nat_eq_ (sub_trans D2 D1) D (sub_trans D' D1))
+	%<- (trans* _ Size _ nat_eq_ D2 D D') %.
+%term arrow 
+	%pi (trans* _ (size_arrow Dplus Dsize2 Dsize1) _ nat_eq_ (sub_arrow D1b D1a) (sub_arrow D2b D2a) (sub_arrow Db Da))
+	%<- (employ_plus _ _ _ Dplus)
+	%<- (employ_plus2 _ _ _ Dplus)
+	%<- (trans* _ Dsize1 _ nat_eq_ D2a D1a Da)
+	%<- (trans* _ Dsize2 _ nat_eq_ D1b D2b Db) %.
+%scope narrow_trow* %term forall 
+	%pi (trans* _ (size_forall Dplus Dsize2 Dsize1) _ nat_eq_ (sub_forall (%the ({t tp} %pi (assm t T2) %-> (sub (T3 t) (T4 t))) D1b) D1a) (sub_forall D2b D2a) (sub_forall Db Da))
+	%<- (employ_plus _ _ _ Dplus)
+	%<- (employ_plus2 _ _ _ Dplus)
+	%<- (trans* _ Dsize1 _ nat_eq_ (%the (sub T1 T2) D2a) D1a Da)
+	%<- ({x} {dv var x} narrow* _ Dsize1 _ nat_eq_ dv ([d] D1b x d) D2a ([d] D1b' x d))
+	%<- ({x} {dv var x} {d assm x T1} 
+	%pi (assm_var d dv)
+	%-> (trans* _ (Dsize2 x dv) _ nat_eq_ (D1b' x d) (D2b x d) (Db x d))) %.
+%term record 
+	%pi (trans* _ (size_record Dsize) _ _ (sub_record (%the (sub_trow SR' QR') SR'sub) (%the (trow_order QR QR') QRorder) (%the (trow_order SR SR') SRorder)) (sub_record (%the (sub_trow QR'' TR') QR''sub) (%the (trow_order TR TR') TRorder) (%the (trow_order QR QR'') QRorder')) (sub_record (%the (sub_trow SR' TR') SR'sub') TRorder SRorder))
+	%<- (trow_order_unique QRorder' QRorder QR''eq)
+	%<- (equality_sub_trow QR''sub QR''eq QR'sub)
+	%<- (preserve_size_order Dsize QRorder Dsize')
+	%<- (trans_trow* _ Dsize' _ nat_eq_ SR'sub QR'sub SR'sub') %.
+%% contradiction cases
+%term _ 
+	%pi (trans* _ _ _ _ _ (sub_refl Dassm) D)
+	%<- (assm_var Dassm Dvar)
+	%<- (top_var_contra Dvar Dfalse)
+	%<- (raa_sub Dfalse D) %.
+%term _ 
+	%pi (trans* _ _ _ _ _ (sub_refl Dassm) D)
+	%<- (assm_var Dassm Dvar)
+	%<- (arrow_var_contra Dvar Dfalse)
+	%<- (raa_sub Dfalse D) %.
+%term _ 
+	%pi (trans* _ _ _ _ _ (sub_refl Dassm) D)
+	%<- (assm_var Dassm Dvar)
+	%<- (forall_var_contra Dvar Dfalse)
+	%<- (raa_sub Dfalse D) %.
+%term _ 
+	%pi (trans* _ _ _ _ _ (sub_refl Dassm) D)
+	%<- (assm_var Dassm Dvar)
+	%<- (record_var_contra Dvar Dfalse)
+	%<- (raa_sub Dfalse D) %.
+%term _ 
+	%pi (trans* _ _ _ _ _ (sub_trans _ Dassm) D)
+	%<- (assm_var Dassm Dvar)
+	%<- (top_var_contra Dvar Dfalse)
+	%<- (raa_sub Dfalse D) %.
+%term _ 
+	%pi (trans* _ _ _ _ _ (sub_trans _ Dassm) D)
+	%<- (assm_var Dassm Dvar)
+	%<- (arrow_var_contra Dvar Dfalse)
+	%<- (raa_sub Dfalse D) %.
+%term _ 
+	%pi (trans* _ _ _ _ _ (sub_trans _ Dassm) D)
+	%<- (assm_var Dassm Dvar)
+	%<- (forall_var_contra Dvar Dfalse)
+	%<- (raa_sub Dfalse D) %.
+%term _ 
+	%pi (trans* _ _ _ _ _ (sub_trans _ Dassm) D)
+	%<- (assm_var Dassm Dvar)
+	%<- (record_var_contra Dvar Dfalse)
+	%<- (raa_sub Dfalse D) %.
+%term cons 
+	%pi (trans_trow* _ (size_trow_cons Dplus Dsize2 Dsize1) _ nat_eq_ (sub_trow_cons Ssub SRsub) (sub_trow_cons Tsub TRsub) (sub_trow_cons Ssub' SRsub'))
+	%<- (employ_plus _ _ _ Dplus)
+	%<- (employ_plus2 _ _ _ Dplus)
+	%<- (trans* _ Dsize1 _ nat_eq_ Ssub Tsub Ssub')
+	%<- (trans_trow* _ Dsize2 _ nat_eq_ SRsub TRsub SRsub') %.
+%term cons 
+	%pi (trans_trow* _ (size_trow_cons Dplus Dsize2 _) _ _ (sub_trow_cons Ssub SRsub) (sub_trow_cons' TRsub) (sub_trow_cons' SRsub'))
+	%<- (employ_plus _ _ _ Dplus)
+	%<- (trans_trow* _ Dsize2 _ nat_eq_ SRsub TRsub SRsub') %.
+%term cons' 
+	%pi (trans_trow* _ Dsize _ nat_eq_ (sub_trow_cons' SRsub) TRsub (sub_trow_cons' SRsub'))
+	%<- (trans_trow* _ Dsize _ nat_eq_ SRsub TRsub SRsub') %.
+%term nil trans_trow* _ _ _ _ _ sub_trow_nil sub_trow_nil %.
+%term closed narrow* _ _ _ _ Dvar ([d] D) _ ([d] D) %.
+%term refl narrow* _ _ _ _ Dvar ([d] sub_refl d) _ ([d] sub_refl d) %.
+%term trans 
+	%pi (narrow* _ Size _ nat_eq_ Dvar ([d] sub_trans (D d) Dassm) Dsub ([d] sub_trans (D' d) Dassm))
+	%<- (narrow* _ Size _ nat_eq_ Dvar D Dsub D') %.
+%term trans 
+	%pi (narrow* _ Size _ nat_eq_ Dvar ([d] sub_trans (D d) d) Dsub ([d] sub_trans (D'' d) d))
+	%<- (narrow* _ Size _ nat_eq_ Dvar D Dsub D')
+	%<- ({d assm X Q} %pi (assm_var d Dvar) %-> (trans* _ Size _ nat_eq_ Dsub (D' d) (D'' d))) %.
+%term arrow 
+	%pi (narrow* _ Size _ nat_eq_ Dvar ([d] sub_arrow (D2 d) (D1 d)) Dsub ([d] sub_arrow (D2' d) (D1' d)))
+	%<- (narrow* _ Size _ nat_eq_ Dvar D1 Dsub D1')
+	%<- (narrow* _ Size _ nat_eq_ Dvar D2 Dsub D2') %.
+%term forall 
+	%pi (narrow* _ Size _ nat_eq_ Dvar ([d] sub_forall (D2 d) (D1 d)) Dsub ([d] sub_forall (D2' d) (D1' d)))
+	%<- (narrow* _ Size _ nat_eq_ Dvar D1 Dsub D1')
+	%<- ({x'} {dv'} {d'} 
+	%pi (assm_var d' dv')
+	%-> (narrow* _ Size _ nat_eq_ Dvar ([d] D2 d x' d') Dsub ([d] D2' d x' d'))) %.
+%term record 
+	%pi (narrow* _ Size _ nat_eq_ Dvar ([d] sub_record (SRsub d) D2 D1) Dsub ([d] sub_record (SRsub' d) D2 D1))
+	%<- (narrow_trow* _ Size _ nat_eq_ Dvar SRsub Dsub SRsub') %.
+%term cons' 
+	%pi (narrow_trow* _ Size _ nat_eq_ Dvar ([d] sub_trow_cons' (SRsub d)) Dsub ([d] sub_trow_cons' (SRsub' d)))
+	%<- (narrow_trow* _ Size _ nat_eq_ Dvar SRsub Dsub SRsub') %.
+%term cons 
+	%pi (narrow_trow* _ Size _ nat_eq_ Dvar ([d] sub_trow_cons (Ssub d) (SRsub d)) Dsub ([d] sub_trow_cons (Ssub' d) (SRsub' d)))
+	%<- (narrow_trow* _ Size _ nat_eq_ Dvar SRsub Dsub SRsub')
+	%<- (narrow* _ Size _ nat_eq_ Dvar Ssub Dsub Ssub') %.
+%term nil narrow_trow* _ _ _ nat_eq_ Dvar ([d] SRsub) Dsub ([d] SRsub) %.
+%worlds (bind vblock ablock) (trans* _ _ _ _ _ _ _) (trans_trow* _ _ _ _ _ _ _) (narrow* _ _ _ _ _ _ _ _) (narrow_trow* _ _ _ _ _ _ _ _) %.
+%total {(M1 M2 M3 M4) (N1 N2 N3 N4) (D1 D2 D3 D4)} (trans_trow* M3 _ N3 _ D3 _ _) (narrow* M2 _ N2 _ _ D2 _ _) (narrow_trow* M4 _ N4 _ _ D4 _ _) (trans* M1 _ N1 _ D1 _ _) %.
+%%%%%  Peroration  %%%%%
+%sort trans %.
+%mode trans %in %in %out %.
+%term _ %pi (trans D1 D2 D3) %<- (find_size _ Size) %<- (trans* _ Size _ nat_eq_ D1 D2 D3) %.
+%worlds (sbind) (trans _ _ _) %.
+%total {} (trans _ _ _) %.
+%sort narrow {x} %.
+%mode narrow %in %in %out %.
+%term _ 
+	%pi (narrow D1 D2 D3)
+	%<- (find_size _ Size)
+	%<- ({x} {dv} narrow* _ Size _ nat_eq_ dv ([d] D1 x d) D2 ([d] D3 x d)) %.
+%worlds (sbind) (narrow _ _ _) %.
+%total {} (narrow _ _ _) %.
+%sort reflx {Nsize nat} %.
+%mode reflx %in %in %out %.
+%sort reflx_trow {Nsize nat} %.
+%mode reflx_trow %in %in %out %.
+%%%%% Some blocks %%%%%
+%block rbind {t tp} [x tp] [dv var x] [d assm x t] [thm assm_var d dv] [thm find_size x (size_var dv)] [thm reflx z (size_var dv) (sub_refl d)]%.
+%sort labelfree_trans_insert %.
+%mode labelfree_trans_insert %in %in %in %out %.
+%term _ labelfree_trans_insert trow_labelfree_nil trow_insert_nil Lneq (trow_labelfree_cons trow_labelfree_nil Lneq) %.
+%term _ labelfree_trans_insert Lfree (trow_insert_less _) L'neq (trow_labelfree_cons Lfree L'neq) %.
+%term _ 
+	%pi (labelfree_trans_insert (trow_labelfree_cons Lfree Lneq) (trow_insert_more TRins _) L'neq (trow_labelfree_cons Lfree' Lneq))
+	%<- (labelfree_trans_insert Lfree TRins L'neq Lfree') %.
+%worlds (rbind) (labelfree_trans_insert _ _ _ _) %.
+%total (TRins) (labelfree_trans_insert _ TRins _ _) %.
+%sort labelfree_trans_order %.
+%mode labelfree_trans_order %in %in %out %.
+%term _ labelfree_trans_order Lfree trow_order_nil Lfree %.
+%term _ 
+	%pi (labelfree_trans_order (trow_labelfree_cons Lfree Lneq) (trow_order_cons TRins SRorder) Lfree'')
+	%<- (labelfree_trans_order Lfree SRorder Lfree')
+	%<- (labelfree_trans_insert Lfree' TRins Lneq Lfree'') %.
+%worlds (rbind) (labelfree_trans_order _ _ _) %.
+%total (TRord) (labelfree_trans_order _ TRord _) %.
+%% we need to know what and neq correspondes to greater than or less than
+%sort nat_mol %.
+%term nat_mol_less %pi (nat_mol N M) %<- (nat_less N M) %.
+%term nat_mol_more %pi (nat_mol N M) %<- (nat_more N M) %.
+%sort label_mol %.
+%term label_mol_ %pi (label_mol (label_nat N) (label_nat M)) %<- (nat_mol N M) %.
+%sort nat_mol_inc %.
+%mode nat_mol_inc %in %out %.
+%term _ nat_mol_inc (nat_mol_less Less) (nat_mol_less (nat_less_s Less)) %.
+%term _ nat_mol_inc (nat_mol_more More) (nat_mol_more (nat_more_s More)) %.
+%worlds (rbind) (nat_mol_inc _ _) %.
+%total [] (nat_mol_inc _ _) %.
+%sort nat_neq_to_mol %.
+%mode nat_neq_to_mol %in %out %.
+%term _ nat_neq_to_mol nat_neq_zs (nat_mol_less nat_less_z) %.
+%term _ nat_neq_to_mol nat_neq_sz (nat_mol_more nat_more_z) %.
+%term _ 
+	%pi (nat_neq_to_mol (nat_neq_ss Nneq) Nmol)
+	%<- (nat_neq_to_mol Nneq Nmol')
+	%<- (nat_mol_inc Nmol' Nmol) %.
+%worlds (rbind) (nat_neq_to_mol _ _) %.
+%total (Nneq) (nat_neq_to_mol Nneq _) %.
+%sort label_neq_to_mol %.
+%mode label_neq_to_mol %in %out %.
+%term _ 
+	%pi (label_neq_to_mol (label_neq_ Nneq) (label_mol_ Nmol))
+	%<- (nat_neq_to_mol Nneq Nmol) %.
+%worlds (rbind) (label_neq_to_mol _ _) %.
+%total [] (label_neq_to_mol _ _) %.
+%sort trow_can_insert_helper {S} %.
+%mode trow_can_insert_helper %in %in %in %out %.
+%term _ trow_can_insert_helper _ (label_mol_ (nat_mol_less Less)) _ (trow_insert_less (label_less_ Less)) %.
+%term _ trow_can_insert_helper _ (label_mol_ (nat_mol_more More)) TRins (trow_insert_more TRins (label_more_ More)) %.
+%worlds (rbind) (trow_can_insert_helper _ _ _ _) %.
+%total [] (trow_can_insert_helper _ _ _ _) %.
+%sort trow_can_insert {T} %.
+%mode trow_can_insert %in %in %out %.
+%term _ trow_can_insert _ trow_labelfree_nil trow_insert_nil %.
+%term _ 
+	%pi (trow_can_insert _ (trow_labelfree_cons Lfree Lneq) TRins)
+	%<- (trow_can_insert _ Lfree TRins')
+	%<- (label_neq_to_mol Lneq Lmol)
+	%<- (trow_can_insert_helper _ Lmol TRins' TRins) %.
+%worlds (rbind) (trow_can_insert _ _ _) %.
+%total (Lfree) (trow_can_insert _ Lfree _) %.
+%sort trow_has_order %.
+%mode trow_has_order %in %out %.
+%term _ trow_has_order trow_uniqueness_nil trow_order_nil %.
+%term _ 
+	%pi (trow_has_order (trow_uniqueness_cons TRunique Lfree) (trow_order_cons TR'ins TRord))
+	%<- (trow_has_order TRunique TRord)
+	%<- (labelfree_trans_order Lfree TRord Lfree')
+	%<- (trow_can_insert _ Lfree' TR'ins) %.
+%worlds (rbind) (trow_has_order _ _) %.
+%total (TRunique) (trow_has_order TRunique _) %.
+%                                                     
+%%mode reflx +X1 +X2 -X3.
+%                                                                       
+%%mode reflx_trow +X1 +X2 -X3.
+%term _ reflx _ _ sub_top %.
+%term _ 
+	%pi (reflx _ (size_arrow Dplus Dsize2 Dsize1) (sub_arrow T2refl T1refl))
+	%<- (employ_plus _ _ _ Dplus)
+	%<- (employ_plus2 _ _ _ Dplus)
+	%<- (reflx _ Dsize1 T1refl)
+	%<- (reflx _ Dsize2 T2refl) %.
+%term _ 
+	%pi (reflx _ (size_forall Dplus Dsize2 Dsize1) (sub_forall T2refl T1refl))
+	%<- (employ_plus _ _ _ Dplus)
+	%<- (employ_plus2 _ _ _ Dplus)
+	%<- (reflx _ Dsize1 T1refl)
+	%<- ({x} {dv} {d} 
+	%pi (assm_var d dv)
+	%-> (find_size x (size_var dv))
+	%-> (reflx z (size_var dv) (sub_refl d))
+	%-> (reflx _ (Dsize2 x dv) (T2refl x d))) %.
+%term _ 
+	%pi (reflx _ (%the (size (record _ TRunique) _) (size_record TRsize)) (sub_record TR'sub TRord TRord))
+	%<- (trow_has_order TRunique TRord)
+	%<- (preserve_size_order TRsize TRord TR'size)
+	%<- (reflx_trow _ TR'size TR'sub) %.
+%term _ reflx_trow _ size_trow_nil sub_trow_nil %.
+%term _ 
+	%pi (reflx_trow _ (size_trow_cons Dplus DsizeTR DsizeT) (sub_trow_cons Tsub TRsub))
+	%<- (employ_plus _ _ _ Dplus)
+	%<- (employ_plus2 _ _ _ Dplus)
+	%<- (reflx _ DsizeT Tsub)
+	%<- (reflx_trow _ DsizeTR TRsub) %.
+%worlds (rbind) (reflx _ _ _) (reflx_trow _ _ _) %.
+%total (N M) (reflx N _ _) (reflx_trow M _ _) %.
+%%%%% Now we redefine subtying and prove soundness and completeness
+%sort sub_tp %.
+%sort sub_tp_trow %.
+%term sub_tp_top sub_tp _ top %.
+%term sub_tp_refl sub_tp T T %.
+%term sub_tp_trans %pi (sub_tp T1 T3) %<- (sub_tp T1 T2) %<- (sub_tp T2 T3) %.
+%term sub_tp_arrow %pi (sub_tp (arrow S1 S2) (arrow T1 T2)) %<- (sub_tp T1 S1) %<- (sub_tp S2 T2) %.
+%term sub_tp_forall 
+	%pi (sub_tp (forall S1 S2) (forall T1 T2))
+	%<- (sub_tp T1 S1)
+	%<- ({x} %pi (sub_tp x T1) %-> (sub_tp (S2 x) (T2 x))) %.
+%term sub_tp_record 
+	%pi (sub_tp (record SR _) (record TR _))
+	%<- (trow_order SR SR')
+	%<- (trow_order TR TR')
+	%<- (sub_tp_trow SR' TR') %.
+%term sub_tp_trow_nil sub_tp_trow trow_nil trow_nil %.
+%term sub_tp_trow_cons 
+	%pi (sub_tp_trow (trow_cons L S SR) (trow_cons L T TR))
+	%<- (sub_tp_trow SR TR)
+	%<- (sub_tp S T) %.
+%term sub_tp_trow_cons' %pi (sub_tp_trow (trow_cons L S SR) TR) %<- (sub_tp_trow SR TR) %.
+%sort sub_tp_trow_refl {TR} %.
+%mode sub_tp_trow_refl %in %out %.
+%term _ sub_tp_trow_refl trow_nil sub_tp_trow_nil %.
+%term _ 
+	%pi (sub_tp_trow_refl (trow_cons _ _ TR) (sub_tp_trow_cons sub_tp_refl TRsub))
+	%<- (sub_tp_trow_refl TR TRsub) %.
+%worlds () (sub_tp_trow_refl _ _) %.
+%total (TR) (sub_tp_trow_refl TR _) %.
+%sort sub_tp_trow_trans %.
+%mode sub_tp_trow_trans %in %in %out %.
+%term _ sub_tp_trow_trans _ sub_tp_trow_nil sub_tp_trow_nil %.
+%term _ 
+	%pi (sub_tp_trow_trans (sub_tp_trow_cons' SRsub) TRsub (sub_tp_trow_cons' SRsub'))
+	%<- (sub_tp_trow_trans SRsub TRsub SRsub') %.
+%term _ 
+	%pi (sub_tp_trow_trans (sub_tp_trow_cons _ SRsub) (sub_tp_trow_cons' TRsub) (sub_tp_trow_cons' SRsub'))
+	%<- (sub_tp_trow_trans SRsub TRsub SRsub') %.
+%term _ 
+	%pi (sub_tp_trow_trans (sub_tp_trow_cons Ssub SRsub) (sub_tp_trow_cons Tsub TRsub) (sub_tp_trow_cons (sub_tp_trans Tsub Ssub) SRsub'))
+	%<- (sub_tp_trow_trans SRsub TRsub SRsub') %.
+%worlds () (sub_tp_trow_trans _ _ _) %.
+%total (SRsub) (sub_tp_trow_trans SRsub _ _) %.
+%sort equality_sub_tp_trow %.
+%mode equality_sub_tp_trow %in %in %in %out %.
+%term _ equality_sub_tp_trow D trow_eq_ trow_eq_ D %.
+%worlds () (equality_sub_tp_trow _ _ _ _) %.
+%total [] (equality_sub_tp_trow _ _ _ _) %.
+%%%%% Proof that sub and sub_tp are equivalent %%%%%
+%sort assm_to_sub_tp %.
+%mode assm_to_sub_tp %in %out %.
+%block cblock {T tp} {S tp} [x tp] [d assm x T] [d' sub_tp x T] [thm assm_to_sub_tp d d']%.
+%worlds (cblock) (assm_to_sub_tp _ _) %.
+%total [] (assm_to_sub_tp _ _) %.
+%sort completeness %.
+%mode completeness %in %out %.
+%sort completeness_trow %.
+%mode completeness_trow %in %out %.
+%term _ completeness sub_top sub_tp_top %.
+%term _ completeness (sub_refl _) sub_tp_refl %.
+%term _ 
+	%pi (completeness (sub_trans D2 D1) (sub_tp_trans D2' D1'))
+	%<- (assm_to_sub_tp D1 D1')
+	%<- (completeness D2 D2') %.
+%term _ 
+	%pi (completeness (sub_arrow D2 D1) (sub_tp_arrow D2' D1'))
+	%<- (completeness D1 D1')
+	%<- (completeness D2 D2') %.
+%term _ 
+	%pi (completeness (sub_forall D2 D1) (sub_tp_forall D2' D1'))
+	%<- (completeness D1 D1')
+	%<- ({x} {d assm x T} {d' sub_tp x T} %pi (assm_to_sub_tp d d') %-> (completeness (D2 x d) (D2' x d'))) %.
+%term _ 
+	%pi (completeness (sub_record D3 D2 D1) (sub_tp_record D3' D2 D1))
+	%<- (completeness_trow D3 D3') %.
+%term _ completeness_trow sub_trow_nil sub_tp_trow_nil %.
+%term _ 
+	%pi (completeness_trow (sub_trow_cons D2 D1) (sub_tp_trow_cons D2' D1'))
+	%<- (completeness_trow D1 D1')
+	%<- (completeness D2 D2') %.
+%term _ 
+	%pi (completeness_trow (sub_trow_cons' D) (sub_tp_trow_cons' D'))
+	%<- (completeness_trow D D') %.
+%worlds (cblock) (completeness _ _) (completeness_trow _ _) %.
+%total (D D') (completeness D _) (completeness_trow D' _) %.
+%sort soundness %.
+%mode soundness %in %out %.
+%sort soundness_trow %.
+%mode soundness_trow %in %out %.
+%block sbind {t tp} {d'' sub t t} [x tp] [dv var x] [d assm x t] [thm assm_var d dv] [thm' find_size x (size_var dv)] [thm' reflx z (size_var dv) (sub_refl d)] [d' sub_tp x t] [thm'' soundness d' (sub_trans d'' d)]%.
+%term _ soundness sub_tp_top sub_top %.
+%term _ %pi (soundness sub_tp_refl D) %<- (find_size _ Dsize) %<- (reflx _ Dsize D) %.
+%term _ 
+	%pi (soundness (sub_tp_trans D2 D1) D)
+	%<- (soundness D1 D1')
+	%<- (soundness D2 D2')
+	%<- (trans D1' D2' D) %.
+%term _ 
+	%pi (soundness (sub_tp_arrow D2 D1) (sub_arrow D2' D1'))
+	%<- (soundness D1 D1')
+	%<- (soundness D2 D2') %.
+%term _ 
+	%pi (soundness (sub_tp_forall D2 D1) (sub_forall D2' D1'))
+	%<- (soundness D1 D1')
+	%<- (find_size _ Dsize)
+	%<- (reflx _ Dsize D'')
+	%<- ({x tp} {dv var x} {d assm x T} 
+	%pi (assm_var d dv)
+	%-> (find_size x (size_var dv))
+	%-> (reflx z (size_var dv) (sub_refl d))
+	%-> ({d' sub_tp x T} %pi (soundness d' (sub_trans D'' d)) %-> (soundness (D2 x d') (D2' x d)))) %.
+%term _ 
+	%pi (soundness (sub_tp_record D3 D2 D1) (sub_record D3' D2 D1))
+	%<- (soundness_trow D3 D3') %.
+%term _ soundness_trow sub_tp_trow_nil sub_trow_nil %.
+%term _ 
+	%pi (soundness_trow (sub_tp_trow_cons D2 D1) (sub_trow_cons D2' D1'))
+	%<- (soundness_trow D1 D1')
+	%<- (soundness D2 D2') %.
+%term _ 
+	%pi (soundness_trow (sub_tp_trow_cons' D) (sub_trow_cons' D'))
+	%<- (soundness_trow D D') %.
+%worlds (sbind) (soundness _ _) (soundness_trow _ _) %.
+%total (D D') (soundness D _) (soundness_trow D' _) %.

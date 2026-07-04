@@ -59,8 +59,26 @@ module Make_Modern
 
   let ghost' = Cst.View.Loc.(review Ghost)
 
-  let rec combine_fc (r1 : Paths.region) (r2 : Paths.region) : Paths.region =
-    assert false
+  let combine_fc (r1 : Paths.region) (r2 : Paths.region) : Paths.region =
+    Paths.join (r1, r2)
+
+  let loc_union (l1 : Cst.loc) (l2 : Cst.loc) : Cst.loc =
+    let open Cst.View.Loc in
+    match view l1, view l2 with
+    | Loc (_, s1, e1), Loc (_, s2, e2) -> mk_loc (min s1 s2) (max e1 e2)
+    | Ghost, _ -> l2
+    | _, Ghost -> l1
+
+  let term_loc (tm : Cst.Term.t) : Cst.loc =
+    let open Cst.View.Term in
+    match view tm with
+    | Lowercase (loc, _) | Uppercase (loc, _) | Qualified (loc, _)
+    | Text (loc, _) | ExistVar (loc, _) | FreeVar (loc, _)
+    | Pi (loc, _, _) | Lam (loc, _, _) | App (loc, _, _)
+    | HasType (loc, _, _) | Omitted loc | Typ loc
+    | Arrow (loc, _, _) | BackArrow (loc, _, _)
+    | Foreign (loc, _) | MacroParam (loc, _, _) | Local (loc, _, _) -> loc
+    | Internal _ -> ghost'
 
   module FX = Names.Fixity
 
@@ -92,30 +110,42 @@ module Make_Modern
   let jux_op =
     Infix_
       ( (FX.inc FX.maxPrec, FX.Left),
-        fun (f, x) -> Cst.View.Term.(review @@ App (ghost', f, [ x ])) )
+        fun (f, x) ->
+          let loc = loc_union (term_loc f) (term_loc x) in
+          Cst.View.Term.(review @@ App (loc, f, [ x ])) )
 
   let infix_op (infixity, tm) =
     Infix_
       ( infixity,
         fun (tm1, tm2) ->
+          let loc = loc_union (term_loc tm1) (term_loc tm2) in
           Cst.View.Term.(
-            review @@ App (ghost', review @@ App (ghost', tm, [ tm1 ]), [ tm2 ]))
+            review @@ App (loc, review @@ App (term_loc tm1, tm, [ tm1 ]), [ tm2 ]))
       )
 
   let prefix_op (prec, tm) =
     Prefix_
-      (prec, fun tm1 -> Cst.View.Term.(review @@ App (ghost', tm, [ tm1 ])))
+      ( prec,
+        fun tm1 ->
+          let loc = loc_union (term_loc tm) (term_loc tm1) in
+          Cst.View.Term.(review @@ App (loc, tm, [ tm1 ])) )
 
   let postfix_op (prec, tm) =
     Postfix_
-      (prec, fun tm1 -> Cst.View.Term.(review @@ App (ghost', tm, [ tm1 ])))
+      ( prec,
+        fun tm1 ->
+          let loc = loc_union (term_loc tm1) (term_loc tm) in
+          Cst.View.Term.(review @@ App (loc, tm, [ tm1 ])) )
 
   let classify (tm : Cst.Term.t) : operator =
     let open Cst.View.Term in
     match !>tm with
+    | Qualified _ ->
+        (* %(name sort) constructor-reference syntax is always an atom —
+           explicit qualification opts out of operator status *)
+        Atom tm
     | Lowercase (_, (ns, name))
-    | Uppercase (_, (ns, name))
-    | Qualified (_, (ns, name)) ->
+    | Uppercase (_, (ns, name)) ->
         let fixity =
           match Hashtbl.find_opt local_fixity name with
           | Some fx -> fx
@@ -277,11 +307,13 @@ module Make_Modern
     (let@ d, s, e = inside "[" "]" (parse_decl ()) in
      let loc = mk_loc s e in
      let+ body = parse_expr () in
-     Cst.View.Term.(review @@ Lam (loc, [ d ], body)))
+     let full_loc = loc_union loc (term_loc body) in
+     Cst.View.Term.(review @@ Lam (full_loc, [ d ], body)))
     <|> (let@ d, s, e = inside "{" "}" (parse_decl ()) in
          let loc = mk_loc s e in
          let+ body = parse_expr () in
-         Cst.View.Term.(review @@ Pi (loc, [ d ], body)))
+         let full_loc = loc_union loc (term_loc body) in
+         Cst.View.Term.(review @@ Pi (full_loc, [ d ], body)))
     <|> ((let* ids = inside "{{" "}}" (many @@ parse_var ()) in
           let+ body = with_uppercase ids parse_expr in
           body)
@@ -302,15 +334,16 @@ module Make_Modern
          let init = List.rev (List.tl rev) in
          List.fold_right
            (fun t acc ->
+             let loc = loc_union (term_loc t) (term_loc acc) in
              Cst.View.Term.(
                review
                @@ Pi
-                    ( ghost',
+                    ( loc,
                       [
                         Cst.View.Decl.(
                           review
                           @@ Decl1
-                               ( ghost',
+                               ( term_loc t,
                                  [ None ],
                                  t,
                                  Cst.View.Term.(review @@ Omitted ghost') ));
@@ -324,15 +357,16 @@ module Make_Modern
             let rest_rev = List.rev rest in
             List.fold_right
               (fun t acc ->
+                let loc = loc_union (term_loc t) (term_loc acc) in
                 Cst.View.Term.(
                   review
                   @@ Pi
-                       ( ghost',
+                       ( loc,
                          [
                            Cst.View.Decl.(
                              review
                              @@ Decl1
-                                  ( ghost',
+                                  ( term_loc t,
                                     [ None ],
                                     t,
                                     Cst.View.Term.(review @@ Omitted ghost') ));
@@ -350,17 +384,35 @@ module Make_Modern
   and parse_expr1 () : Cst.Term.t t =
     begin
       choice
-        [ parse_id (); inside "(" ")" (return () >>= fun () -> parse_expr ()) ]
+        [ parse_id ();
+          inside "(" ")" (return () >>= fun () -> parse_expr ());
+          (let@ str, s, e = parse_text () in
+           let loc = mk_loc s e in
+           return Cst.View.Term.(review @@ Text (loc, str))) ]
     end
     <?> "small expression"
 
   and parse_expr () : Cst.Term.t t =
     begin
-      (keyword' "the" *> commit
-      *>
-      let* ty = parse_expr1 () in
-      let+ body = parse_expr () in
-      Cst.View.Term.(review @@ HasType (ghost', body, ty)))
+      (let@ (ty, body), s, e =
+         keyword' "the" *> commit
+         *>
+         let* ty = parse_expr1 () in
+         let+ body = parse_expr () in
+         (ty, body)
+       in
+       let loc = mk_loc s e in
+       return Cst.View.Term.(review @@ HasType (loc, body, ty)))
+      <|>
+      (let@ (ns_id, body), s, e =
+         keyword' "local" *> commit
+         *>
+         let* ns_id = ident1 in
+         let+ body = parse_expr () in
+         (ns_id, body)
+       in
+       let loc = mk_loc s e in
+       return Cst.View.Term.(review @@ Local (loc, [ ns_id ], body)))
       
       (*
             %<- A
@@ -406,10 +458,15 @@ module Make_Modern
     <?> "qualified name"
 
   and parse_text () : string t =
-    begin
-      string "%[" *> take_till (fun c -> c = '%')
-      <* string "%]" <* whitespace' ()
-    end
+    let take_until delim =
+      fix (fun self ->
+        let* pre = take_while (fun c -> c <> '%') in
+        (string delim *> return pre)
+        <|> (char '%' *> let+ suf = self in pre ^ "%" ^ suf))
+    in
+    (string "%[[" *> commit *> take_until "%]]" <* whitespace' ())
+    <|>
+    (string "%[" *> commit *> take_until "%]" <* whitespace' ())
     <?> "string literal"
 
   and parse_decl () : Cst.decl t =
@@ -433,7 +490,12 @@ module Make_Modern
                  (loc, [ name ], typ, Cst.View.Term.(review @@ Omitted ghost')))
     end
     <?> "declaration"
-
+  and parse_decl_simple () : Cst.decl t =  begin 
+    let@ (typ, s, e) = (parse_id ()) <|> (inside "(" ")" (parse_expr ())) in 
+    let loc = mk_loc s e in
+    return @@ Cst.View.Decl.(review @@ Decl1 (loc, [None], typ, Cst.View.Term.(review @@ Omitted ghost')))
+  end
+    
   and parse_mode () : Cst.mode t =
     begin
       (let@ (), s, e = keyword' "out1" *> commit *> return () in
@@ -744,6 +806,9 @@ module ModernCst = Cst.Make_Cst (Paths.Paths_)
 
 module Modern : MODERN.MODERN =
   Make_Modern (Paths.Paths_) (ModernCst) (Names.Names_) (Parsing.Parser.Parser)
+let () = Printexc.register_printer (function Modern.ParseError msg -> Some msg | _ -> None)
+let () = Printexc.register_printer (function Modern.FullParseError _ -> Some "Parse error" | _ -> None)
+
 
 (* Re-export sub-modules so they are accessible outside the library *)
 module Cmd = Cmd

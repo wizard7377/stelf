@@ -15,6 +15,11 @@ open! Basis
 (* Worldification and World-checking *)
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+exception Error' of Paths.occ * string
+let () = Printexc.register_printer (function Error' (_, msg) -> Some msg | _ -> None)
+
 module Worldify (Worldify__0 : sig
   module Global : GLOBAL
 
@@ -71,8 +76,8 @@ end) : WORLDIFY = struct
   module CsManager = Worldify__0.CsManager
   module WorldSyn = Worldify__0.WorldSyn
 
-  exception Error of string
-  exception Error' of P.occ * string
+  exception Error = Error
+  exception Error' = Error'
 
   (* copied from terminates/Reduces.fun *)
   let rec wrapMsg (c, occ, msg) =

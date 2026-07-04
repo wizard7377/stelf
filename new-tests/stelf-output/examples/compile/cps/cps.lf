@@ -1,0 +1,18 @@
+%%% Expressions in Continuation-Passing Style
+%%% Author: Frank Pfenning
+%sort cexp %.
+%sort cval %.
+%term z+ cval %.
+%term s+ %pi cval %-> cval %.
+%term case+ %pi cval %-> cexp %-> (%pi cval %-> cexp) %-> cexp %.
+%term pair+ %pi cval %-> cval %-> cval %.
+%term fst+ %pi cval %-> (%pi cval %-> cexp) %-> cexp %.
+%term snd+ %pi cval %-> (%pi cval %-> cexp) %-> cexp %.
+%term lam+ %pi (%pi cval %-> (%pi cval %-> cexp) %-> cexp) %-> cval %.
+%term app+ %pi cval %-> cval %-> (%pi cval %-> cexp) %-> cexp %.
+% no letv+
+% letn+ : ((cval -> cexp) -> cexp) ->
+%         (((cval -> cexp) -> cexp) -> cexp) -> cexp.
+% omit treatment of letn+ for now.
+% omit treatment of fix+ for now.
+%term vl+ %pi cval %-> cexp %.

@@ -1,0 +1,128 @@
+%                                                                       
+%{! 
+
+\{\{Summer school 2008
+  |prev=Typed arithmetic expressions
+  |prevname=Typed arithmetic expressions
+  |nonext=
+\}\}
+
+Arithmetic expressions with pairs and sums.  (This solution involves [output factoring](/wiki/output-factoring/), but no [identity types](/wiki/equality/).  Dan posted a [solution involving identity types](/wiki/summer-school-2008-typed-arithmetic-expressions-with-sums/), and Chris posted a [solution that avoids output factoring](/wiki/summer-school-2008-alternate-typed-arithmetic-expressions-with-sums/).)
+
+Numbers and strings are unchanged.
+
+|hidden="true" !}%
+%sort nat %.
+%name nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort add %.
+%mode add %in %in %out %.
+%term add/z add z N N %.
+%term add/s %pi (add (s M) N (s P)) %<- (add M N P) %.
+%worlds () (add _ _ _) %.
+%total M (add M _ _) %.
+%sort char %.
+%name char %.
+%term a char %.
+%term b char %.
+%sort str %.
+%name str %.
+%term emp str %.
+%term cons %pi char %-> str %-> str %.
+%sort cat %.
+%mode cat %in %in %out %.
+%term cat/e cat emp S S %.
+%term cat/c %pi (cat (cons X S1) S2 (cons X S3)) %<- (cat S1 S2 S3) %.
+%worlds () (cat _ _ _) %.
+%total S (cat S _ _) %.
+%{! 
+
+## Typed expressions
+
+Add a type for disjoint sums:
+
+!}%
+%sort tp %.
+%name tp %.
+%term number tp %.
+%term string tp %.
+%term prod %pi tp %-> tp %-> tp %.
+%term sum %pi tp %-> tp %-> tp %.
+%{! 
+
+Add injections as values, and case as an expression.
+
+!}%
+%sort val %.
+%name val %.
+%prec %postfix 1 val %.
+%term num %pi nat %-> (number val) %.
+%term lit %pi str %-> (string val) %.
+%term pair %pi (T val) %-> (U val) %-> (prod T U val) %.
+%term inl %pi (T val) %-> (sum T U val) %.
+%term inr %pi (U val) %-> (sum T U val) %.
+%sort exp %.
+%name exp %.
+%prec %postfix 1 exp %.
+%term ret %pi (T val) %-> (T exp) %.
+%term plus %pi (number exp) %-> (number exp) %-> (number exp) %.
+%term append %pi (string exp) %-> (string exp) %-> (string exp) %.
+%term let %pi (T exp) %-> (%pi (T val) %-> (U exp)) %-> (U exp) %.
+%term fst %pi (prod T U exp) %-> (T exp) %.
+%term snd %pi (prod T U exp) %-> (U exp) %.
+%{! 
+For technical reasons, we bundle the branches of the case into a separate term with type ``cases``; this makes the termination order more evident to Twelf.  An element of "cases T U V" is the branches for a "sum T U" whose result has tp "V".
+!}%
+%sort cases %.
+%term cases/i %pi (%pi (T val) %-> (V exp)) %-> (%pi (U val) %-> (V exp)) %-> (cases T U V) %.
+%term case %pi (sum T U exp) %-> (cases T U V) %-> (V exp) %.
+%{! 
+
+Add eval cases for case.
+
+!}%
+%sort eval %.
+%mode eval %in %out %.
+%term eval/val eval (ret V) V %.
+%term eval/plus 
+	%pi (eval (plus E1 E2) (num N))
+	%<- (eval E1 (num N1))
+	%<- (eval E2 (num N2))
+	%<- (add N1 N2 N) %.
+%term eval/append 
+	%pi (eval (append E1 E2) (lit S))
+	%<- (eval E1 (lit S1))
+	%<- (eval E2 (lit S2))
+	%<- (cat S1 S2 S) %.
+%term eval/let %pi (eval (let E1 ([x] E2 x)) A) %<- (eval E1 V) %<- (eval (E2 V) A) %.
+%term eval/fst %pi (eval (fst E) A) %<- (eval E (pair A _)) %.
+%term eval/snd %pi (eval (snd E) B) %<- (eval E (pair _ B)) %.
+%{! 
+For "case" evaluation, we need an auxiliary relation "evalcase" to branch on inl vs. inr ([output factoring](/wiki/output-factoring/)).
+!}%
+%sort evalcase %.
+%mode evalcase %in %in %out %.
+%term eval/case %pi (eval (case E Cases) A) %<- (eval E V) %<- (evalcase V Cases A) %.
+%term evalcase/inl %pi (evalcase (inl V1) (cases/i ([x] F1 x) ([y] F2 y)) A) %<- (eval (F1 V1) A) %.
+%term evalcase/inr %pi (evalcase (inr V2) (cases/i ([x] F1 x) ([y] F2 y)) A) %<- (eval (F2 V2) A) %.
+%{! 
+Then we use [mutual induction](/wiki/mutual-induction/) to show evaluation total.
+!}%
+%worlds () (eval _ _) (evalcase _ _ _) %.
+%total (E Cases) (eval E _) (evalcase _ Cases _) %.
+%{! 
+
+\{\{Summer school 2008
+  |prev=Exercises 1
+  |prevname=Exercises 1
+  |nonext=
+\}\}
+
+!}%
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Summer_school_2008:Typed_arithmetic_expressions_with_sums_2).
+!}%

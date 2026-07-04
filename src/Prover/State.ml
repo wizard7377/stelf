@@ -10,6 +10,9 @@ open! Basis
 
 (* State definition for Proof Search *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module State (State__0 : sig
   module Formatter : FORMATTER
 end) : STATE = struct
@@ -33,7 +36,7 @@ end) : STATE = struct
     | And   of SideCondition * SideCondition
     | Order of Order.Predicate
 *)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module T = Tomega

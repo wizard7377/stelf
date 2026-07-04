@@ -10,6 +10,11 @@ open! Sgn
 open! Reductio
 open! Basis
 
+exception Unimp
+let () = Printexc.register_printer (function Unimp -> Some "Unimp" | _ -> None)
+exception NoModes
+let () = Printexc.register_printer (function NoModes -> Some "NoModes" | _ -> None)
+
 module Compress (Compress__0 : sig
   module Global : GLOBAL
 end) =
@@ -18,8 +23,8 @@ struct
   module S = Syntax
   module Sgn = Sgn
 
-  exception Unimp
-  exception NoModes
+  exception Unimp = Unimp
+  exception NoModes = NoModes
 
   (* modes are not appropriate for the given I.ConDec *)
   let debug = ref (-1)

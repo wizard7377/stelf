@@ -1,0 +1,22 @@
+% ((A => F) => F) => A 
+%querytabled _ _ %the ({A o} conc (A imp false imp false imp A)) D %.
+% Peirce's law : conc ((A => B) => A) => A 
+%querytabled _ _ %the ({A o} {B o} conc (A imp B imp A imp A)) D %.
+% (A => false) or A 
+%querytabled _ _ %the ({A o} conc (A imp false or A)) D %.
+% ((A => F) => A) => A 
+%querytabled _ _ %the ({A o} conc (A imp false imp A imp A)) D %.
+% T => F 
+%querytabled _ _ %the (conc (true imp false)) D %.
+% ~(A => B) => A & ~B 
+%querytabled _ _ %the ({A o} {B o} conc (A imp B imp false imp (A and (B imp false)))) D %.
+% ~(A & B) => ~A v ~B  
+%querytabled _ _ %the ({A o} {B o} conc (A and B imp false imp (A imp false or (B imp false)))) D %.
+% (A => B v C) <= (A => B) v (A => C) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A imp (B or C) imp (A imp C))) D %.
+% (A & B) => (((A => (B => C)) => C) => (A => B => C)) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A and B imp (A imp (B imp C) imp C imp (A imp (B imp C))))) D %.
+% A => (B v C) --> (A => B) v (A imp C)
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A imp (B or C))) %-> (conc (A imp B or (A imp C)))) D %.
+% A => B => C ---> (A v C) & (B => C)
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A imp B imp C)) %-> (conc (A or C and (B imp C)))) D %.

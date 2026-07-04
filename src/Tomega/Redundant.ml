@@ -9,10 +9,13 @@ open! Basis
 
 (* Redundancy remover (factoring) *)
 (* Author: Adam Poswolsky (ABP) *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Redundant (Redundant__0 : sig
   module Opsem : OPSEM.OPSEM
 end) : REDUNDANT = struct
-  exception Error of string
+  exception Error = Error
 
   (*
      convert:  Tomega.Prg -> Tomega.Prg

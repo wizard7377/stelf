@@ -32,6 +32,9 @@ include REDBLACKSET
  * condition implies that any node with only one child will be black and
  * its child will be a red leaf.
  *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module RBSet : RBSET = struct
   type nonrec key = int
   type 'a entry = key * 'a
@@ -44,7 +47,7 @@ module RBSet : RBSET = struct
   (* considered black *)
   type 'a set = Set of int * 'a dict
 
-  exception Error of string
+  exception Error = Error
 
   type 'a ordSet = 'a set ref
 

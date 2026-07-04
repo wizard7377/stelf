@@ -1,0 +1,99 @@
+%
+
+% small parser from lolli distribution in same style
+%
+
+%term wd sort %.
+%term that trm wd %.
+%term whom trm wd %.
+%term the trm wd %.
+%term man trm wd %.
+%term woman trm wd %.
+%term girl trm wd %.
+%term boy trm wd %.
+%term mary trm wd %.
+%term bob trm wd %.
+%term jill trm wd %.
+%term loves trm wd %.
+%term married trm wd %.
+%term believes trm wd %.
+%term prs sort %.
+%term gap trm prs %.
+%term that' trm prs %.
+%term whom' trm prs %.
+%term the' trm prs %.
+%term man' trm prs %.
+%term woman' trm prs %.
+%term girl' trm prs %.
+%term boy' trm prs %.
+%term mary' trm prs %.
+%term bob' trm prs %.
+%term jill' trm prs %.
+%term loves' trm prs %.
+%term married' trm prs %.
+%term believes' trm prs %.
+%term snt' %pi (trm prs) %-> (trm prs) %-> (trm prs) %.
+%term vp' %pi (trm prs) %-> (trm prs) %-> (trm prs) %.
+%term np' %pi (trm prs) %-> (trm prs) %.
+%term npD' %pi (trm prs) %-> (trm prs) %-> (trm prs) %.
+%term npR' %pi (trm prs) %-> (trm prs) %-> (trm prs) %-> (trm prs) %.
+%term stv' %pi (trm prs) %-> (trm prs) %-> (trm prs) %.
+%term sbar' %pi (trm prs) %-> (trm prs) %-> (trm prs) %.
+%term det' %pi (trm prs) %-> (trm prs) %.
+%term rel' %pi (trm prs) %-> (trm prs) %-> (trm prs) %.
+%term n' %pi (trm prs) %-> (trm prs) %.
+%term pn' %pi (trm prs) %-> (trm prs) %.
+%term tv' %pi (trm prs) %-> (trm prs) %.
+%term stv' %pi (trm prs) %-> (trm prs) %.
+%term snt %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term vp %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term np %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term stv %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term sbar %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term n %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term det %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term rel %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term pn %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term tv %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+%term stv %pi (trm (list wd)) %-> (trm (list wd)) %-> (trm prs) %-> atm %.
+% % grammar rules
+% sent P1 P2 (sent N V) :- {np P1 P0 N}, vp P0 P2 V.
+%term snt_0 prog (^ (snt P1 P2 (snt' N V)) <= ^ (np P1 P0 N) <<= ^ (vp P0 P2 V)) %.
+% vp P1 P2 (vp T N) :- tv P1 P0 T, np P0 P2 N.
+%term vp_0 prog (^ (vp P1 P2 (vp' T N)) <<= ^ (tv P1 P0 T) <<= ^ (np P0 P2 N)) %.
+% vp P1 P2 (vp Stv Sbar) :- stv P1 P0 Stv, sbar P0 P2 Sbar.
+%term vp_1 prog (^ (vp P1 P2 (vp' T N)) <<= ^ (stv P1 P0 T) <<= ^ (sbar P0 P2 N)) %.
+% sbar (that::P1) P2 (sbar that S) :- sent P1 P2 S.
+%term sbar_0 prog (^ (sbar (that | P1) P2 (sbar' that' S)) <<= ^ (snt P1 P2 S)) %.
+% np P1 P2 (np D N) :- det P1 P0 D, n P0 P2 N.
+%term np_0 prog (^ (np P1 P2 (npD' D N)) <<= ^ (det P1 P0 D) <<= ^ (n P0 P2 N)) %.
+% np P1 P2 (np D N R) :- det P1 P0 D, n P0 P3 N, rel P3 P2 R.
+%term np_1 prog (^ (np P1 P2 (npR' D N R)) <<= ^ (det P1 P0 D) <<= ^ (n P0 P3 N) <<= ^ (rel P3 P2 R)) %.
+% np P1 P2 (np P) :- pn P1 P2 P.
+%term np_2 prog (^ (np P1 P2 (np' P)) <<= ^ (pn P1 P2 P)) %.
+% rel (whom::P1) P2 (rel whom S) :- 
+%	(forall Z\ np Z Z (np gap)) -o sent P1 P2 S.
+%term rel_0 prog (^ (rel (whom | P1) P2 (rel' whom' S)) <<= (forall (list wd) ([Z] ^ (np Z Z (np' gap))) =0 ^ (snt P1 P2 S))) %.
+% % lexical items
+% det (the::L) L (det the).
+%term det_the prog (^ (det (the | L) L (det' the'))) %.
+% n (man::L) L (n man).
+%term n_man prog (^ (n (man | L) L (n' man'))) %.
+% n (woman::L) L (n woman).
+%term n_woman prog (^ (n (woman | L) L (n' woman'))) %.
+% n (girl::L) L (n girl).
+%term n_girl prog (^ (n (girl | L) L (n' girl'))) %.
+% n (boy::L) L (n boy).
+%term n_boy prog (^ (n (boy | L) L (n' boy'))) %.
+% pn (mary::L) L (pn mary).
+%term pn_mary prog (^ (pn (mary | L) L (pn' mary'))) %.
+% pn (bob::L) L (pn bob).
+%term pn_bob prog (^ (pn (bob | L) L (pn' bob'))) %.
+% pn (jill::L) L (pn jill).
+%term pn_jill prog (^ (pn (jill | L) L (pn' jill'))) %.
+% tv (loves::L) L (tv loves).
+%term tv_loves prog (^ (tv (loves | L) L (tv' loves'))) %.
+% tv (married::L) L (tv married).
+%term tv_married prog (^ (tv (married | L) L (tv' married'))) %.
+% stv (believes::L) L (stv believes).
+%term tv_believes prog (^ (stv (believes | L) L (stv' believes'))) %.

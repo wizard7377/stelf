@@ -13,10 +13,13 @@ open! Basis
 (* Mode Table *)
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning, Roberto Virga *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeModeTable (Table : TABLE with type key = int) : MODETABLE = struct
   (*! structure IntSyn = IntSyn' !*)
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

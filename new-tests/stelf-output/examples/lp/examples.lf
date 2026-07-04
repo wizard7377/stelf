@@ -1,0 +1,15 @@
+% Needed to allow extension of p, i, o
+% as of Twelf 1.5R2 (March 2005)
+%term q0 p %.
+%term r0 p %.
+%term s0 p %.
+%term 0 i %.
+%term s %pi i %-> i %.
+%term nat %pi i %-> p %.
+%term natz assume (atom (nat 0)) %.
+%term nats assume (forall ([X] atom (nat X) imp atom (nat (s X)))) %.
+%term plus %pi i %-> i %-> i %-> p %.
+%term plz assume (forall ([Y] atom (plus 0 Y Y))) %.
+%term pls assume (forall ([X] forall ([Y] forall ([Z] atom (plus X Y Z) imp atom (plus (s X) Y (s Z)))))) %.
+%term double %pi i %-> i %-> p %.
+%term db assume' (atom^ (double 0 0) and^ (forall^ ([X] forall^ ([Y] atom' (double X Y) imp^ atom^ (double (s X) (s (s Y))))))) %.

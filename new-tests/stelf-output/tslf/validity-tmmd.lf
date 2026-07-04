@@ -1,0 +1,150 @@
+%%%%% Validity %%%%%
+% vdt/assm/tm :  assm/tm E C -> ofkd C kd/type -> type.
+% mode vdt/assm/tm +D1 -D2.
+%worlds (oftp+vdt-block ofkd+vdt-block ofsg+vdt-block) (vdt/assm/tm _ _) %.
+%total {} (vdt/assm/tm _ _) %.
+%sort vdt/ofsg/i %.
+%mode vdt/ofsg/i %in %out %.
+%sort vdt/oftp %.
+%mode vdt/oftp %in %out %.
+%sort vdt/ofsg/p %.
+%mode vdt/ofsg/p %in %out %out %out %out %.
+%term _ %pi (vdt/oftp (oftp/var D) DC) %<- (vdt/assm/tm D DC) %.
+%term _ vdt/oftp oftp/tm/unit ofkd/tp/unit %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/pair D1 D2) (ofkd/tp/cross DC1 DC2))
+	%<- (vdt/oftp D1 DC1)
+	%<- (vdt/oftp D2 DC2) %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/pj1 D1) DC1)
+	%<- (vdt/oftp D1 DC)
+	%<- (inv/ofkd/tp/cross DC kd-sub/kd/type DC1 _) %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/pj2 D1) DC2)
+	%<- (vdt/oftp D1 DC)
+	%<- (inv/ofkd/tp/cross DC kd-sub/kd/type _ DC2) %.
+%term _ vdt/oftp (oftp/tm/fun DE DK) DK %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/tmapp D1 D2) DC2)
+	%<- (vdt/oftp D1 DC)
+	%<- (inv/ofkd/tp/arrow DC kd-sub/kd/type _ DC2) %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/cnabs D1 DK) (ofkd/tp/forall DC' DK))
+	%<- ({a cn} {da ofkd a K} {dm mofkd da met/unit} {_ can-mofkd da dm} {kd vdt/ofkd da DK} vdt/oftp (D1 a da) (DC' a da)) %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/cnapp DE DC) (DC' C DC))
+	%<- (vdt/oftp DE DCC)
+	%<- (inv/ofkd/tp/forall DCC kd-sub/kd/type _ DC') %.
+%term _ %pi (vdt/oftp (oftp/deq DE DC) DC') %<- (vdt/cn-deq DC _ DC' _) %.
+%term _ %pi (vdt/oftp (oftp/tm/term DM) DC) %<- (vdt/ofsg/i DM (sg-wf/sg/cn DC)) %.
+%term _ %pi (vdt/oftp (oftp/tm/term DM) DC) %<- (vdt/ofsg/p DM (sg-wf/sg/cn DC) _ _ _) %.
+%term _ vdt/oftp (oftp/tm/loc _ DC) (ofkd/tp/ref DC) %.
+%term _ %pi (vdt/oftp (oftp/tm/ref D) (ofkd/tp/ref DC)) %<- (vdt/oftp D DC) %.
+%term _ vdt/oftp (oftp/tm/set D1 D2) ofkd/tp/unit %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/get D) DC')
+	%<- (vdt/oftp D DC)
+	%<- (inv/ofkd/tp/ref DC kd-sub/kd/type DC') %.
+%term _ %pi (vdt/oftp (oftp/tm/inl D1 DC) (ofkd/tp/sum DC' DC)) %<- (vdt/oftp D1 DC') %.
+%term _ %pi (vdt/oftp (oftp/tm/inr D1 DC) (ofkd/tp/sum DC DC')) %<- (vdt/oftp D1 DC') %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/case DE D1 _) DC)
+	%<- (vdt/oftp DE DC')
+	%<- (inv/ofkd/tp/sum DC' kd-sub/kd/type DC1 _)
+	%<- ({x} {dx assm/tm x _} {vd vdt/assm/tm dx DC1} vdt/oftp (D1 x dx) DC) %.
+%term _ vdt/oftp (oftp/tm/raise _ DC) DC %.
+%term _ %pi (vdt/oftp (oftp/tm/try D1 _) DC) %<- (vdt/oftp D1 DC) %.
+%term _ vdt/oftp (oftp/tm/new-tag DC) (ofkd/tp/tag DC) %.
+%term _ vdt/oftp (oftp/tm/tagloc _ DC) (ofkd/tp/tag DC) %.
+%term _ vdt/oftp (oftp/tm/tag _ _) ofkd/tp/tagged %.
+%term _ %pi (vdt/oftp (oftp/tm/iftag _ _ _ D1) DC) %<- (vdt/oftp D1 DC) %.
+%term _ vdt/oftp (oftp/tm/roll _ DC) DC %.
+%term _ 
+	%pi (vdt/oftp (oftp/tm/unroll D1) (DCo _ DC))
+	%<- (vdt/oftp D1 DC)
+	%<- (inv/ofkd/cn/mu DC kd-sub/kd/type DCo) %.
+%term _ %pi (vdt/ofsg/p (ofsg/var D) DW DFS DFM DC) %<- (vdt/assm/md D DW DFS DFM DC) %.
+%term _ vdt/ofsg/p ofsg/md/unit sg-wf/sg/unit fst-sg/unit fst-md/unit ofkd/cn/unit %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/md/tm D) (sg-wf/sg/cn D') fst-sg/cn fst-md/tm ofkd/cn/unit)
+	%<- (vdt/oftp D D') %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/md/cn D) (sg-wf/sg/kd D') fst-sg/kd fst-md/cn D)
+	%<- (vdt/ofkd D D') %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/md/lam DM DS DFS) (sg-wf/sg/pi DS DS' DFS) fst-sg/pi fst-md/lam ofkd/cn/unit)
+	%<- (vdt/sg-wf DS DFS DKW)
+	%<- ({s md} {ds assm/md s _} {a cn} {da ofkd a K1} {dm mofkd da met/unit} {_ can-mofkd da dm} {vd vdt/ofkd da DKW} {dfm fst-md s a} {_ vdt/assm/md ds DS DFS dfm da} {_ fst-md-seq dfm dfm seq/cn/refl} vdt/ofsg/i (DM s ds a da dfm) (DS' a da)) %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/md/lam DM (%the (sg-wf S1) DS) (%the (fst-sg S1 K1) DFS)) (sg-wf/sg/pi DS (%the ({a} {da ofkd a K1} sg-wf (S2 a)) DS') DFS) fst-sg/pi fst-md/lam ofkd/cn/unit)
+	%<- (vdt/sg-wf DS DFS DKW)
+	%<- ({s md} {ds assm/md s S1} {a cn} {da ofkd a K1} {dm mofkd da met/unit} {_ can-mofkd da dm} {vd vdt/ofkd da DKW} {dfm fst-md s a} {_ vdt/assm/md ds DS DFS dfm da} {_ fst-md-seq dfm dfm seq/cn/refl} vdt/ofsg/p (DM s ds a da dfm) (DS' a da) (Df a) (Df' s a dfm) (Do a da)) %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/md/pair D1 D2) (sg-wf/sg/sgm DSW1 ([a cn] [da ofkd a K1] DSW2) FS1) (fst-sg/sgm FS1 ([a cn] FS2)) (fst-md/pair FM1 FM2) (ofkd/cn/pair DC1 DC2))
+	%<- (vdt/ofsg/p D1 DSW1 FS1 FM1 DC1)
+	%<- (vdt/ofsg/p D2 DSW2 FS2 FM2 DC2) %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/md/pj1 D1) DSW1 DS1 (fst-md/pj1 DM1) (ofkd/cn/pj1 DC1))
+	%<- (vdt/ofsg/p D1 (sg-wf/sg/sgm DSW1 _ _) (fst-sg/sgm DS1 _) DM1 DC1) %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/md/pj2 D1 DF) (DSW2 (cn/pj1 C) DCp1') (FS2 (cn/pj1 C)) (fst-md/pj2 DF) (ofkd/cn/pj2 DC))
+	%<- (vdt/ofsg/p D1 (sg-wf/sg/sgm DSW1 DSW2 (%the (fst-sg S1 K1) FSo)) (fst-sg/sgm (%the (fst-sg S1 K3) FS1) FS2) DF' DC')
+	%<- (fst-md-seq DF' DF DQ)
+	%<- (ofkd/seq-c DQ DC' DC)
+	%<- (fst-sg-seq FS1 FSo DQ')
+	%<- (ofkd/seq-k DQ' (ofkd/cn/pj1 DC) DCp1') %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/sgm-ext D1 D2) (sg-wf/sg/sgm DSW1 ([a cn] [da ofkd a _] DSW2) DS1) (fst-sg/sgm DS1 ([a cn] DS2)) DF1 (ofkd/sgm-ext DC1 DC2'))
+	%<- (vdt/ofsg/p D1 DSW1 DS1 (fst-md/pj1 DF1) DC1)
+	%<- (vdt/ofsg/p D2 DSW2 DS2 (fst-md/pj2 DF2) DC2)
+	%<- (fst-md-seq DF2 DF1 DQ)
+	%<- (seq/cn/pj2 DQ DQs)
+	%<- (ofkd/seq-c DQs DC2 DC2') %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/kd-ext _ DF DC) (sg-wf/sg/kd DW) fst-sg/kd DF DC)
+	%<- (vdt/ofkd DC DW) %.
+%term _ 
+	%pi (vdt/ofsg/p (ofsg/sub D1 (%the (sg-sub S1 S2) DSU) _) DSW FS2 DM (ofkd/sub DC DKS))
+	%<- (vdt/ofsg/p D1 _ DS DM DC)
+	%<- (fst-sg-complete S2 FS2)
+	%<- (vdt/sg-sub DSU DS FS2 _ DSW DKS) %.
+%term _ 
+	%pi (vdt/ofsg/i (ofsg/md/pair D1 D2) (sg-wf/sg/sgm DS1 ([a cn] [da ofkd a K1] DS2) DFS))
+	%<- (vdt/ofsg/i D1 DS1)
+	%<- (vdt/ofsg/i D2 DS2)
+	%<- (fst-sg-complete S1 DFS) %.
+%term _ %pi (vdt/ofsg/i (ofsg/md/pj1 D1) DS) %<- (vdt/ofsg/i D1 (sg-wf/sg/sgm DS _ _)) %.
+%term _ 
+	%pi (vdt/ofsg/i (ofsg/md/app D1 D2 DF) (DS2 C DC''))
+	%<- (vdt/ofsg/i D1 (sg-wf/sg/pi DS1 DS2 (%the (fst-sg S1 K1) DFS)))
+	%<- (vdt/ofsg/p D2 DS1' (%the (fst-sg S1 K) DFS') DF' DC')
+	%<- (fst-md-seq DF' DF DQ)
+	%<- (ofkd/seq-c DQ DC' DC)
+	%<- (vdt/ofkd DC DW)
+	%<- (fst-sg-seq DFS' DFS DQ')
+	%<- (ofkd/seq-k DQ' DC DC'') %.
+%term _ 
+	%pi (vdt/ofsg/i (ofsg/md/app D1 D2 DF) (DS2 C DC''))
+	%<- (vdt/ofsg/p D1 (sg-wf/sg/pi DS1 DS2 DFS) _ _ _)
+	%<- (vdt/ofsg/p D2 DS1' DFS' DF' DC')
+	%<- (fst-md-seq DF' DF DQ)
+	%<- (ofkd/seq-c DQ DC' DC)
+	%<- (vdt/ofkd DC DW)
+	%<- (fst-sg-seq DFS' DFS DQ')
+	%<- (ofkd/seq-k DQ' DC DC'') %.
+%term _ vdt/ofsg/i (ofsg/md/let _ _ DS _) DS %.
+%term _ %pi (vdt/ofsg/i (ofsg/md/seal D) DS) %<- (vdt/ofsg/i D DS) %.
+%term _ %pi (vdt/ofsg/i (ofsg/md/seal D) DS) %<- (vdt/ofsg/p D DS _ _ _) %.
+%term _ 
+	%pi (vdt/ofsg/i (ofsg/sub D1 DS _) DSS)
+	%<- (fst-sg-complete S1 FS1)
+	%<- (fst-sg-complete S2 FS2)
+	%<- (vdt/sg-sub DS FS1 FS2 _ DSS _) %.
+%worlds (oftp+vdt-block ofkd+vdt-block ofsg+vdt-block) (vdt/ofsg/p _ _ _ _ _) (vdt/oftp _ _) (vdt/assm/md _ _ _ _ _) (vdt/ofsg/i _ _) %.
+%total (D1 D2 D7 D3) (vdt/oftp D1 _) (vdt/ofsg/i D2 _) (vdt/assm/md D3 _ _ _ _) (vdt/ofsg/p D7 _ _ _ _) %.
+%sort vdt/ofsg %.
+%mode vdt/ofsg %in %out %.
+%term _ %pi (vdt/ofsg D1 DS) %<- (vdt/ofsg/i D1 DS) %.
+%term _ %pi (vdt/ofsg D1 DS) %<- (vdt/ofsg/p D1 DS _ _ _) %.
+%worlds (oftp+vdt-block ofkd+vdt-block ofsg+vdt-block) (vdt/ofsg _ _) %.
+%total D1 (vdt/ofsg D1 _) %.

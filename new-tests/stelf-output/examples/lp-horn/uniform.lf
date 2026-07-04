@@ -1,0 +1,29 @@
+%%% Uniform Derivations
+%%% Author: Frank Pfenning
+%%% Temporarily removed parametric and hypothetical judgments
+%sort solve %.
+% solve goal formulas
+%sort assume %.
+% assume program formulas
+%sort >> %.
+% immediate entailment
+%prec %none 8 >> %.
+%name solve %.
+%name assume %.
+%name >> %.
+%term s_and %pi (solve (A1 and A2)) %<- (solve A1) %<- (solve A2) %.
+%{
+s_imp  : solve (A2 imp A1)
+	  <- (assume A2 -> solve A1).
+}%
+%term s_true solve true %.
+%{
+s_forall : solve (forall A1)
+	    <- {a:i} solve (A1 a).
+}%
+%term s_atom %pi (solve (atom P)) %<- (assume A) %<- (A >> P) %.
+%term i_andl %pi (A1 and A2 >> P) %<- (A1 >> P) %.
+%term i_andr %pi (A1 and A2 >> P) %<- (A2 >> P) %.
+%term i_imp %pi (A2 imp A1 >> P) %<- (A1 >> P) %<- (solve A2) %.
+%term i_forall {T i} %pi (forall A1 >> P) %<- (A1 T >> P) %.
+%term i_atom atom P >> P %.

@@ -370,8 +370,8 @@ module type CST = sig
     val[@deprecated "Use View equivalent instead"] union : ?fc:loc -> string -> string list -> cmd
     (** [%union id ids] — union of block labels. *)
 
-    val[@deprecated "Use View equivalent instead"] worlds : ?fc:loc -> string list -> term -> cmd
-    (** [%worlds ids expr] — assert expr lives in the named world. *)
+    val[@deprecated "Use View equivalent instead"] worlds : ?fc:loc -> string list -> term list -> cmd
+    (** [%worlds ids exprs] — assert exprs live in the named world. *)
 
     val[@deprecated "Use View equivalent instead"] deterministic : ?fc:loc -> string list -> cmd
     (** [%deterministic id_list] — mark type families as deterministic. *)

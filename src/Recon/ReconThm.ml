@@ -1,5 +1,7 @@
 module type RECON_THM = RECON_THM.RECON_THM
 
+exception Error of string
+
 module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   RECON_THM with module M = M = struct
   module M = M
@@ -9,7 +11,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   module Syntax = M.Syntax
   module ThmSyn = Thm.Thm_.ThmSyn
 
-  exception Error of string
+  exception Error = Error
 
   let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 

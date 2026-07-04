@@ -14,10 +14,13 @@ open! Basis
 (* Modes: short and full mode declarations *)
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeModeDec () : MODEDEC = struct
   (*! structure ModeSyn = ModeSyn' !*)
   (*! structure Paths = Paths' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module M = ModeSyn
@@ -26,7 +29,7 @@ module MakeModeDec () : MODEDEC = struct
 
     type arg = Implicit | Explicit | Local [@@deriving eq, ord, show]
 
-    let rec error (r, msg) = raise (Error (P.wrap (r, msg)))
+    let rec error (r, msg) = raise (Error (P.toString r ^ ": " ^ msg))
 
     let rec checkName = function
       | M.Mnil -> ()

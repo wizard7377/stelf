@@ -11,6 +11,9 @@ include TOMEGATYPECHECK
 (* # 1 "src/tomega/TomegaTypecheck.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module TomegaTypeCheck (TomegaTypeCheck__0 : sig
   (* Type checking for Tomega *)
   (* Author: Carsten Schuermann *)
@@ -27,7 +30,7 @@ module TomegaTypeCheck (TomegaTypeCheck__0 : sig
 end) : TOMEGATYPECHECK = struct
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

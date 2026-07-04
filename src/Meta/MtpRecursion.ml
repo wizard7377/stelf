@@ -21,6 +21,9 @@ open! Basis
 (* Meta Recursion Version 1.3 *)
 (* Author: Carsten Schuermann *)
 (* See [Rohwedder,Pfenning ESOP'96] *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MTPRecursion (MTPRecursion__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL
   module Global : GLOBAL
@@ -70,7 +73,7 @@ end) : MTPRECURSION = struct
   open MTPRecursion__0
   module StateSyn = StateSyn'
 
-  exception Error of string
+  exception Error = Error
 
   type nonrec operator = StateSyn.state
 

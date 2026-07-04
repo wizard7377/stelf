@@ -1,0 +1,10 @@
+%%% Mini-ML types.
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort tp %.
+%name tp %.
+%term nat tp %.
+% Natural Numbers
+%term cross %pi tp %-> tp %-> tp %.
+% Pairs
+%term arrow %pi tp %-> tp %-> tp %.
+% Functions

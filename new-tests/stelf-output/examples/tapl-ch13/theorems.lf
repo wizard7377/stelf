@@ -1,0 +1,403 @@
+%{
+   A formalization of Chapter 13 from _Types and Programming Languages_:
+   the simply typed lambda-calculus with references. Only the progress and
+   preservation theorems are included here (with associated lemmas).
+   
+   Author: Brian E. Aydemir (baydemir [at] cis.upenn.edu).
+}%
+%%% The one block of interest here.
+%block bind {t tp} [x exp] [d var x t]%.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store typings reflexively extend themselves.
+%sort store_extends_refl {S} %.
+%mode store_extends_refl %in %out %.
+%term _ store_extends_refl store_nil store_extends_base %.
+%term _ 
+	%pi (store_extends_refl (store_cons _ S) (store_extends_ind P))
+	%<- (store_extends_refl S P) %.
+%worlds () (store_extends_refl _ _) %.
+%total S (store_extends_refl S _) %.
+%unique store_extends_refl %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% If a heap is well-typed with respect to a store typing, then the length
+%%% of the store typing is the same as the length of the heap.
+%sort wt_same_length_store_check %.
+%mode wt_same_length_store_check %in %in %out %.
+%term _ wt_same_length_store_check check_wt_nil length_heap_nil length_store_nil %.
+%term _ 
+	%pi (wt_same_length_store_check (check_wt_cons C _) (length_heap_cons H) (length_store_cons S))
+	%<- (wt_same_length_store_check C H S) %.
+%worlds (bind) (wt_same_length_store_check _ _ _) %.
+%total W (wt_same_length_store_check W _ _) %.
+%unique wt_same_length_store_check %in %in %out %.
+%sort wt_same_length_store %.
+%mode wt_same_length_store %in %in %out %.
+%term _ 
+	%pi (wt_same_length_store (wt_heap_def C) L1 L2)
+	%<- (wt_same_length_store_check C L1 L2) %.
+%worlds (bind) (wt_same_length_store _ _ _) %.
+%total W (wt_same_length_store W _ _) %.
+%unique wt_same_length_store %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% It is always possible to append a type to a store typing.
+%sort can_append_store {S} {T} %.
+%mode can_append_store %in %in %out %.
+%term _ can_append_store store_nil T append_store_nil %.
+%term _ 
+	%pi (can_append_store (store_cons T1 S) T2 (append_store_cons A))
+	%<- (can_append_store S T2 A) %.
+%worlds () (can_append_store _ _ _) %.
+%total S (can_append_store S _ _) %.
+%unique can_append_store %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Appending something to a store typing does indeed extend it.
+%sort does_extend %.
+%mode does_extend %in %out %.
+%term _ does_extend append_store_nil store_extends_base %.
+%term _ 
+	%pi (does_extend (append_store_cons A) (store_extends_ind E))
+	%<- (does_extend A E) %.
+%worlds () (does_extend _ _) %.
+%total A (does_extend A _) %.
+%unique does_extend %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% It is always possible to compute the length of a heap.
+%sort can_length_heap {H} %.
+%mode can_length_heap %in %out %.
+%term _ can_length_heap heap_nil length_heap_nil %.
+%term _ 
+	%pi (can_length_heap (heap_cons _ H) (length_heap_cons L))
+	%<- (can_length_heap H L) %.
+%worlds () (can_length_heap _ _) %.
+%total H (can_length_heap H _) %.
+%unique can_length_heap %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% It is always possible to append an expression to a heap.
+%sort can_append_heap {H} {E} %.
+%mode can_append_heap %in %in %out %.
+%term _ can_append_heap heap_nil E append_heap_nil %.
+%term _ 
+	%pi (can_append_heap (heap_cons E1 H) E2 (append_heap_cons A))
+	%<- (can_append_heap H E2 A) %.
+%worlds () (can_append_heap _ _ _) %.
+%total H (can_append_heap H _ _) %.
+%unique can_append_heap %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% We can always find the element we just appended to a store typing.
+%sort append_store_findable %.
+%mode append_store_findable %in %in %out %.
+%term _ append_store_findable append_store_nil length_store_nil find_in_store_yes %.
+%term _ 
+	%pi (append_store_findable (append_store_cons A) (length_store_cons L) (find_in_store_no F))
+	%<- (append_store_findable A L F) %.
+%worlds () (append_store_findable _ _ _) %.
+%total A (append_store_findable A _ _) %.
+%unique append_store_findable %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% We can always find the element we just appended to a heap.
+%sort append_heap_findable %.
+%mode append_heap_findable %in %in %out %.
+%term _ append_heap_findable append_heap_nil length_heap_nil find_in_heap_yes %.
+%term _ 
+	%pi (append_heap_findable (append_heap_cons A) (length_heap_cons L) (find_in_heap_no F))
+	%<- (append_heap_findable A L F) %.
+%worlds () (append_heap_findable _ _ _) %.
+%total A (append_heap_findable A _ _) %.
+%unique append_heap_findable %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% If a heap is well-typed with respect to a store typing, if we can find a
+%%% label in the store typing, then we can find it in the heap.
+%sort check_find_lemma %.
+%mode check_find_lemma %in %in %out %.
+%term _ check_find_lemma _ find_in_store_yes find_in_heap_yes %.
+%term _ 
+	%pi (check_find_lemma (check_wt_cons C _) (find_in_store_no F) (find_in_heap_no F'))
+	%<- (check_find_lemma C F F') %.
+%worlds () (check_find_lemma _ _ _) %.
+%total F (check_find_lemma _ F _) %.
+%unique check_find_lemma %in %in %out %.
+%sort find_lemma %.
+%mode find_lemma %in %in %out %.
+%term _ %pi (find_lemma (wt_heap_def C) F H) %<- (check_find_lemma C F H) %.
+%worlds () (find_lemma _ _ _) %.
+%total {} (find_lemma _ _ _) %.
+%unique find_lemma %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% If a heap is well-typed with respect to a store typing, and if we can
+%%% find a label in the store typing, then we can replace its binding in the
+%%% heap.
+%sort check_replace_lemma {E exp} %.
+%mode check_replace_lemma %in %in %in %out %.
+%term _ check_replace_lemma _ _ find_in_store_yes replace_in_heap_yes %.
+%term _ 
+	%pi (check_replace_lemma E (check_wt_cons C _) (find_in_store_no F) (replace_in_heap_no R))
+	%<- (check_replace_lemma E C F R) %.
+%worlds () (check_replace_lemma _ _ _ _) %.
+%total F (check_replace_lemma _ _ F _) %.
+%unique check_replace_lemma %in %in %in %out %.
+%sort replace_lemma {E exp} %.
+%mode replace_lemma %in %in %in %out %.
+%term _ %pi (replace_lemma E (wt_heap_def C) F R) %<- (check_replace_lemma E C F R) %.
+%worlds () (replace_lemma _ _ _ _) %.
+%total {} (replace_lemma _ _ _ _) %.
+%unique replace_lemma %in %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Basically prove an inversion lemma for wt_heap here that lets us recover
+%%% typing judgments.
+%sort check_wt_inv %.
+%mode check_wt_inv %in %in %in %out %.
+%term _ check_wt_inv (check_wt_cons _ Q) find_in_store_yes find_in_heap_yes Q %.
+%term _ 
+	%pi (check_wt_inv (check_wt_cons C _) (find_in_store_no Fstore) (find_in_heap_no Fheap) Q)
+	%<- (check_wt_inv C Fstore Fheap Q) %.
+%worlds (bind) (check_wt_inv _ _ _ _) %.
+%total F (check_wt_inv _ _ F _) %.
+%unique check_wt_inv %in %in %in %out %.
+%sort wt_heap_inv %.
+%mode wt_heap_inv %in %in %in %out %.
+%term _ 
+	%pi (wt_heap_inv (wt_heap_def C) Fstore Fheap Q)
+	%<- (check_wt_inv C Fstore Fheap Q) %.
+%worlds (bind) (wt_heap_inv _ _ _ _) %.
+%total {} (wt_heap_inv _ _ _ _) %.
+%unique wt_heap_inv %in %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Lemma 13.5.4 (substitution). And you thought we wouldn't need this...
+%sort substitution {x exp} %.
+%mode substitution %in %in %out %.
+%term _ substitution ([x] [d] t_var d) Q Q %.
+%term _ substitution ([x] [d] t_var D') _ (t_var D') %.
+%term _ 
+	%pi (substitution ([x exp] [d var x T1] t_abs ([y exp] [f var y T2] Q1 y f x d)) Q2 (t_abs Q1'))
+	%<- ({y exp} {f var y T2} substitution (Q1 y f) Q2 (Q1' y f)) %.
+%term _ 
+	%pi (substitution ([x] [d] t_app (Q1 x d) (Q2 x d)) Q3 (t_app Q1' Q2'))
+	%<- (substitution Q1 Q3 Q1')
+	%<- (substitution Q2 Q3 Q2') %.
+%term _ substitution ([x] [d] t_unit) _ t_unit %.
+%term _ substitution ([x] [d] t_loc L) _ (t_loc L) %.
+%term _ 
+	%pi (substitution ([x] [d] t_ref (Q1 x d)) Q2 (t_ref Q1'))
+	%<- (substitution Q1 Q2 Q1') %.
+%term _ 
+	%pi (substitution ([x] [d] t_deref (Q1 x d)) Q2 (t_deref Q1'))
+	%<- (substitution Q1 Q2 Q1') %.
+%term _ 
+	%pi (substitution ([x] [d] t_assign (Q1 x d) (Q2 x d)) Q3 (t_assign Q1' Q2'))
+	%<- (substitution Q1 Q3 Q1')
+	%<- (substitution Q2 Q3 Q2') %.
+%worlds (bind) (substitution _ _ _) %.
+%total D (substitution D _ _) %.
+%unique substitution %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Lemma 13.5.6 (but first an auxiliary, "obvious" lemma).
+%sort store_find_extends %.
+%mode store_find_extends %in %in %out %.
+%term _ store_find_extends find_in_store_yes (store_extends_ind X) find_in_store_yes %.
+%term _ 
+	%pi (store_find_extends (find_in_store_no F) (store_extends_ind X) (find_in_store_no F'))
+	%<- (store_find_extends F X F') %.
+%worlds () (store_find_extends _ _ _) %.
+%total F (store_find_extends F _ _) %.
+%unique store_find_extends %in %in %out %.
+%sort of_store_extends %.
+%mode of_store_extends %in %in %out %.
+%term _ 
+	%pi (of_store_extends (t_abs Q) P (t_abs Q'))
+	%<- ({x exp} {d var x T} of_store_extends (Q x d) P (Q' x d)) %.
+%term _ of_store_extends (t_var V) P (t_var V) %.
+%term _ 
+	%pi (of_store_extends (t_app Qarg Qfun) P (t_app Qarg' Qfun'))
+	%<- (of_store_extends Qarg P Qarg')
+	%<- (of_store_extends Qfun P Qfun') %.
+%term _ of_store_extends t_unit P t_unit %.
+%term _ %pi (of_store_extends (t_loc F) P (t_loc F')) %<- (store_find_extends F P F') %.
+%term _ %pi (of_store_extends (t_ref Q) P (t_ref Q')) %<- (of_store_extends Q P Q') %.
+%term _ %pi (of_store_extends (t_deref Q) P (t_deref Q')) %<- (of_store_extends Q P Q') %.
+%term _ 
+	%pi (of_store_extends (t_assign Q1 Q2) P (t_assign Q1' Q2'))
+	%<- (of_store_extends Q1 P Q1')
+	%<- (of_store_extends Q2 P Q2') %.
+%worlds (bind) (of_store_extends _ _ _) %.
+%total Q (of_store_extends Q _ _) %.
+%unique of_store_extends %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% If a heap and related store-typing are extended appropriately, then we
+%%% can extend the proof that they're well-typed as well.
+%sort extend_check_wt_store %.
+%mode extend_check_wt_store %in %in %out %.
+%term _ extend_check_wt_store check_wt_nil _ check_wt_nil %.
+%term _ 
+	%pi (extend_check_wt_store (check_wt_cons C Q) P (check_wt_cons C' Q'))
+	%<- (of_store_extends Q P Q')
+	%<- (extend_check_wt_store C P C') %.
+%worlds (bind) (extend_check_wt_store _ _ _) %.
+%total W (extend_check_wt_store W _ _) %.
+%unique extend_check_wt_store %in %in %out %.
+%sort extend_check_wt %.
+%mode extend_check_wt %in %in %in %in %out %.
+%term _ extend_check_wt check_wt_nil Q append_store_nil append_heap_nil (check_wt_cons check_wt_nil Q) %.
+%term _ 
+	%pi (extend_check_wt (check_wt_cons C Qc) Q (append_store_cons S) (append_heap_cons H) (check_wt_cons C' Qc))
+	%<- (extend_check_wt C Q S H C') %.
+%worlds (bind) (extend_check_wt _ _ _ _ _) %.
+%total W (extend_check_wt W _ _ _ _) %.
+%unique extend_check_wt %in %in %in %in %out %.
+%sort extend_wt_heap %.
+%mode extend_wt_heap %in %in %in %in %out %.
+%term _ 
+	%pi (extend_wt_heap (wt_heap_def C) Q As Ah (wt_heap_def C''))
+	%<- (extend_check_wt C Q As Ah C')
+	%<- (does_extend As P)
+	%<- (extend_check_wt_store C' P C'') %.
+%worlds (bind) (extend_wt_heap _ _ _ _ _) %.
+%total {} (extend_wt_heap _ _ _ _ _) %.
+%unique extend_wt_heap %in %in %in %in %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Replacing an element of a heap can preserve its well-typedness with
+%%% respect to a store. (Similar to Lemma 13.5.5.)
+%sort assign_lemma_check %.
+%mode assign_lemma_check %in %in %in %in %out %out %.
+%term _ 
+	%pi (assign_lemma_check (%the (check_wt _ (store_cons T S) _) (check_wt_cons C Qc)) Q find_in_store_yes replace_in_heap_yes P (check_wt_cons C Q))
+	%<- (store_extends_refl (store_cons T S) P) %.
+%term _ 
+	%pi (assign_lemma_check (check_wt_cons C Qc) Q (find_in_store_no F) (replace_in_heap_no R) (store_extends_ind P) (check_wt_cons C' Qc))
+	%<- (assign_lemma_check C Q F R P C') %.
+%worlds (bind) (assign_lemma_check _ _ _ _ _ _) %.
+%total F (assign_lemma_check _ _ F _ _ _) %.
+%unique assign_lemma_check %in %in %in %in %out %out %.
+%sort assign_lemma %.
+%mode assign_lemma %in %in %in %in %out %out %.
+%term _ 
+	%pi (assign_lemma (wt_heap_def C) Q F R P' (wt_heap_def C''))
+	%<- (assign_lemma_check C Q F R P' C')
+	%<- (extend_check_wt_store C' P' C'') %.
+%worlds (bind) (assign_lemma _ _ _ _ _ _) %.
+%total {} (assign_lemma _ _ _ _ _ _) %.
+%unique assign_lemma %in %in %in %in %out %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Preservation.
+%sort preservation %.
+%mode preservation %in %in %in %out %out %out %.
+%%% Easy stuff: Cases for congruence rules.
+%term _ 
+	%pi (preservation (t_app Qarg Qfun) W (e_app1 S) P' W' (t_app Qarg' Q'))
+	%<- (preservation Qfun W S P' W' Q')
+	%<- (of_store_extends Qarg P' Qarg') %.
+%term _ 
+	%pi (preservation (t_app Qarg Qfun) W (e_app2 S V) P' W' (t_app Q' Qfun'))
+	%<- (preservation Qarg W S P' W' Q')
+	%<- (of_store_extends Qfun P' Qfun') %.
+%term _ 
+	%pi (preservation (t_ref Q) W (e_alloc S) P' W' (t_ref Q'))
+	%<- (preservation Q W S P' W' Q') %.
+%term _ 
+	%pi (preservation (t_deref Q) W (e_deref S) P' W' (t_deref Q'))
+	%<- (preservation Q W S P' W' Q') %.
+%term _ 
+	%pi (preservation (t_assign Qv Ql) W (e_gets1 S) P' W' (t_assign Qv' Ql'))
+	%<- (preservation Ql W S P' W' Ql')
+	%<- (of_store_extends Qv P' Qv') %.
+%term _ 
+	%pi (preservation (t_assign Qv Ql) W (e_gets2 S V) P' W' (t_assign Qv' Ql'))
+	%<- (preservation Qv W S P' W' Qv')
+	%<- (of_store_extends Ql P' Ql') %.
+%%% Cases for computation rules.
+%term _ 
+	%pi (preservation (t_app Qarg (t_abs Qbody)) (%the (wt_heap S _) W) (e_appabs V) P W Qres)
+	%<- (substitution Qbody Qarg Qres)
+	%<- (store_extends_refl S P) %.
+%term _ 
+	%pi (preservation (%the (of S (alloc E) (ref T)) (t_ref Q)) W (e_allocVal Lh Ah V) P W' (t_loc F'))
+	%<- (can_append_store S T As)
+	%<- (does_extend As P)
+	%<- (wt_same_length_store W Lh L)
+	%<- (append_store_findable As L F')
+	%<- (extend_wt_heap W Q As Ah W') %.
+%term _ 
+	%pi (preservation (t_deref (t_loc Fstore)) (%the (wt_heap S _) W) (e_derefVal Fheap) P W Qres)
+	%<- (wt_heap_inv W Fstore Fheap Qres)
+	%<- (store_extends_refl S P) %.
+%term _ 
+	%pi (preservation (t_assign Qval (t_loc F)) W (e_getsVal R V) P' W' t_unit)
+	%<- (assign_lemma W Qval F R P' W') %.
+%%% No more cases.
+%worlds (bind) (preservation _ _ _ _ _ _) %.
+%total S (preservation _ _ S _ _ _) %.
+%unique preservation %in %in %in %out %out %out %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Progress.
+%%% A judgment declaring that with respect to the given heap, an expression
+%%% can step or is a value.
+%sort progresses %.
+%mode progresses %in %in %.
+%term can_step %pi (progresses H E) %<- (step H E H' E') %.
+%term is_val %pi (progresses _ E) %<- (value E) %.
+%%% (Most of) The statement of progress.
+%sort progress %.
+%mode progress %in %in %out %.
+%%% Easy cases: values.
+%term _ progress t_unit _ (is_val v_dot) %.
+%term _ progress (t_loc _) _ (is_val v_loc) %.
+%term _ progress (t_abs _) _ (is_val v_lam) %.
+%%% Less easy case: allocations.
+%sort alloc_progresses %.
+%mode alloc_progresses %in %out %.
+%term _ 
+	%pi (alloc_progresses (%the (progresses H E) (is_val V)) (can_step (e_allocVal L A V)))
+	%<- (can_append_heap H E A)
+	%<- (can_length_heap H L) %.
+%term _ alloc_progresses (can_step S) (can_step (e_alloc S)) %.
+%worlds () (alloc_progresses _ _) %.
+%total P (alloc_progresses P _) %.
+%unique alloc_progresses %in %out %.
+%term _ %pi (progress (t_ref Q) Z P) %<- (progress Q Z Pind) %<- (alloc_progresses Pind P) %.
+%%% Less easy case: applications.
+%sort app_progresses %.
+%mode app_progresses %in %in %in %out %.
+%term _ app_progresses _ (can_step S) _ (can_step (e_app1 S)) %.
+%term _ app_progresses _ (is_val V) (can_step S) (can_step (e_app2 S V)) %.
+%term _ app_progresses _ (is_val v_lam) (is_val V2) (can_step (e_appabs V2)) %.
+%worlds () (app_progresses _ _ _ _) %.
+%total {P1 P2} (app_progresses _ P1 P2 _) %.
+%unique app_progresses %in %in %in %out %.
+%term _ 
+	%pi (progress (t_app Qarg Qbody) Z P)
+	%<- (progress Qarg Z Parg)
+	%<- (progress Qbody Z Pbody)
+	%<- (app_progresses Qbody Pbody Parg P) %.
+%%% Less easy case: dereferences.
+%sort deref_progresses %.
+%mode deref_progresses %in %in %in %out %.
+%term _ deref_progresses _ _ (can_step S) (can_step (e_deref S)) %.
+%term _ 
+	%pi (deref_progresses (t_loc X) W (is_val v_loc) (can_step (e_derefVal Y)))
+	%<- (find_lemma W X Y) %.
+%worlds () (deref_progresses _ _ _ _) %.
+%total P (deref_progresses _ _ P _) %.
+%unique deref_progresses %in %in %in %out %.
+%term _ 
+	%pi (progress (t_deref Q) Z P)
+	%<- (progress Q Z Pind)
+	%<- (deref_progresses Q Z Pind P) %.
+%%% Less easy case: assignments.
+%sort assign_progresses %.
+%mode assign_progresses %in %in %in %in %out %.
+%term _ assign_progresses _ _ (can_step S) _ (can_step (e_gets1 S)) %.
+%term _ assign_progresses _ _ (is_val V) (can_step S) (can_step (e_gets2 S V)) %.
+%term _ 
+	%pi (assign_progresses (t_loc X) W (is_val v_loc) (is_val (%the (value E) V2)) (can_step (e_getsVal Y V2)))
+	%<- (replace_lemma E W X Y) %.
+%worlds () (assign_progresses _ _ _ _ _) %.
+%total {P1 P2} (assign_progresses _ _ P1 P2 _) %.
+%unique assign_progresses %in %in %in %in %out %.
+%term _ 
+	%pi (progress (t_assign Qval Qloc) Z P)
+	%<- (progress Qval Z Pval)
+	%<- (progress Qloc Z Ploc)
+	%<- (assign_progresses Qloc Z Ploc Pval P) %.
+%%% No more cases.
+%worlds () (progress _ _ _) %.
+%total Q (progress Q _ _) %.
+%unique progress %in %in %out %.

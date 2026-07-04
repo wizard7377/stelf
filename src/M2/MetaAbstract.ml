@@ -15,6 +15,10 @@ open Modetable
 
 (* Meta Abstraction *)
 (* Author: Carsten Schuermann *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MetaAbstract (MetaAbstract__0 : sig
   module Global : GLOBAL
   module MetaSyn : Metasyn.METASYN
@@ -48,7 +52,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
   open MetaAbstract__0
   module MetaSyn = MetaAbstract__0.MetaSyn
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

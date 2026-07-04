@@ -1,0 +1,2 @@
+%query 1 _ _ xeval (app (lam ([x] vl x)) z) V %.
+%query 1 _ _ xeval (app (fix ([double] lam ([x] case (vl x) z ([x'] s (s (app double (vl x'))))))) (s (s (s z)))) V %.

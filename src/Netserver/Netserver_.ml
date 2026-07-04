@@ -8,6 +8,13 @@ include NETSERVER
 
 (* filesystem directory where stelf examples are kept *)
 (* signature SERVER *)
+exception Eof
+let () = Printexc.register_printer (function Eof -> Some "End of file" | _ -> None)
+exception Quit
+let () = Printexc.register_printer (function Quit -> Some "Quit" | _ -> None)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module NetServer : NETSERVER = struct
   let rec join arg__1 arg__2 =
     begin match (arg__1, arg__2) with
@@ -62,8 +69,8 @@ module NetServer : NETSERVER = struct
     let _ = TextIO.closeIn s in
     data
 
-  exception Eof
-  exception Quit
+  exception Eof = Eof
+  exception Quit = Quit
 
   let rec send _conn _str = ()
 
@@ -80,7 +87,7 @@ module NetServer : NETSERVER = struct
   let rec setExamplesDir s = examplesDir := Some s
 
   (* exception Error for server errors *)
-  exception Error of string
+  exception Error = Error
 
   let rec error msg = raise (Error msg)
 

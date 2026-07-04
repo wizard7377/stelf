@@ -1,3 +1,4 @@
 (test
+ (instrumentation (backend bisect_ppx))
  (name ParseTest)
  (libraries modern alcotest display))

@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name compress)
  (public_name stelf.compress)
  (modules Syntax Strict Sgn Reductio Compress_ Rep COMPRESS SGN)

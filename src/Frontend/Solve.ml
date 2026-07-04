@@ -15,6 +15,9 @@ open! Basis
 (* Front End Interface *)
 (* Author: Frank Pfenning *)
 (* Modified: Carsten Schuermann, Jeff Polakow, Roberto Virga *)
+exception AbortQuery of string
+let () = Printexc.register_printer (function AbortQuery msg -> Some msg | _ -> None)
+
 module Solve (Solve__0 : sig
   module Global : GLOBAL
 
@@ -116,7 +119,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
      is raised when a %query declaration has an unexpected number of solutions
      or of %solve has no solution.
   *)
-  exception AbortQuery of string
+  exception AbortQuery = AbortQuery
 
   (* Bounds SOME(n) for n >= 0, NONE represents positive infinity *)
   (* Concrete syntax: 0, 1, 2, ..., * *)

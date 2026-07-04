@@ -1,0 +1,3 @@
+%sort sg_nat %.
+%term sg_zero sg_nat %.
+%term sg_succ {_ sg_nat} sg_nat %.

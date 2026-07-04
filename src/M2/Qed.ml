@@ -13,6 +13,10 @@ open Metasyn
 
 (* QED *)
 (* Author: Carsten Schuermann *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Qed (Qed__0 : sig
   module Global : GLOBAL
   module MetaSyn' : Metasyn.METASYN
@@ -20,7 +24,7 @@ end) : QED with module MetaSyn = Qed__0.MetaSyn' = struct
   open Qed__0
   module MetaSyn = MetaSyn'
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module M = MetaSyn

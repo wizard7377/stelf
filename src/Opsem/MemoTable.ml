@@ -17,6 +17,9 @@ open RedBlackSet
 (* Any term we insert into the substitution tree is in normalform *)
 (* Variant Checking *)
 (* Author: Brigitte Pientka *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MemoTable (MemoTable__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   (*! structure CompSyn' : COMPSYN !*)
@@ -152,7 +155,7 @@ end) : MEMOTABLE = struct
   let indexArray =
     Array.tabulate (Global.maxCid, function i -> (ref 0, makeTree ()))
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

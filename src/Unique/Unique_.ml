@@ -14,6 +14,9 @@ open! Basis
 
 (* Uniqueness Checking *)
 (* Author: Frank Pfenning *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeUnique
     (Global : GLOBAL)
     (Whnf : WHNF)
@@ -29,7 +32,7 @@ module MakeUnique
     (Print : PRINT)
     (TypeCheck : TYPECHECK)
     (Timers : Timers.TIMERS) : UNIQUE = struct
-  exception Error of string
+  exception Error = Error
 
   module Subordinate = Subordinate
   module Unify = Unify

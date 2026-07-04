@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name intInf)
  (public_name stelf.intInf)
  (modules IntInfSig IntInf_ INTINFSIG)

@@ -1,0 +1,9 @@
+% Continuation style small step semantics refines the big step semantics
+%sort ccf %.
+%mode ccf %in %out %.
+% Completeness Proof implies  Soundness Proof
+%sort peq %.
+%mode peq %in %out %.
+% Soundness Proof implies Completeness Proof
+%sort peqr %.
+%mode peqr %in %out %.

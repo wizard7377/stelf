@@ -1,0 +1,4 @@
+[[group]]
+name = "sources"
+main = "sources.lf"
+src = ["."]

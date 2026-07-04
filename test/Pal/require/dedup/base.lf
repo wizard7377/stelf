@@ -1,0 +1,3 @@
+%sort dedup_nat %.
+%term dedup_zero dedup_nat %.
+%term dedup_succ {_ dedup_nat} dedup_nat %.

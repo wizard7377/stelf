@@ -625,10 +625,11 @@ module MakePrint
       | I.Uni _ -> []
       | I.Pi ((d_, _), v2_) ->
           let d'_ = Names.decLUName (g_, d_) in
+          let rest = fmtKindBinders (I.Decl (g_, d'_), d + 1, v2_) in
           sym "{"
           :: fmtDec (g_, d, (d'_, I.id))
-          :: sym "}" :: F.break
-          :: fmtKindBinders (I.Decl (g_, d'_), d + 1, v2_)
+          :: sym "}"
+          :: (match rest with [] -> [] | _ -> F.break :: rest)
       | _ -> [ fmtExp (g_, d, noCtxt, (v_, I.id)) ]
       end
 

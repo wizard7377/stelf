@@ -13,6 +13,11 @@ open! Basis
 
 (* Coverage Checking *)
 (* Author: Frank Pfenning *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+exception NotFinitary
+let () = Printexc.register_printer (function NotFinitary -> Some "Not finitary" | _ -> None)
+
 module MakeCover
     (Global : GLOBAL)
     (Whnf : WHNF)
@@ -31,7 +36,7 @@ module MakeCover
     (Timers : Timers.TIMERS) : COVER = struct
   module Subordinate = Subordinate
 
-  exception Error of string
+  exception Error = Error
 
   module Unify = Unify
   module ModeTable = ModeTable
@@ -745,7 +750,7 @@ module MakeCover
   let rec incCount () = counter := !counter + 1
   let rec getCount () = !counter
 
-  exception NotFinitary
+  exception NotFinitary = NotFinitary
 
   let rec finitary1 (x_, k, w_, f, cands) =
     begin

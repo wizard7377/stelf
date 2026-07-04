@@ -17,7 +17,7 @@ module Level = struct
     match x with
     | 0 -> Error
     | 1 | 2 | 3 -> Warning
-    | 4 | 5 -> Info
+    | 4 -> Info
     | _ -> Debug
 end
 

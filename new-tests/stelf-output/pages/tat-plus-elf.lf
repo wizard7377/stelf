@@ -1,0 +1,40 @@
+%                        
+%{! Part 1 !}%
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort plus %.
+%mode plus %in %in %out %.
+%term p/z plus z N N %.
+%term p/s %pi (plus (s N) M (s P)) %<- (plus N M P) %.
+%worlds () (plus _ _ _) %.
+%total N (plus N _ _) %.
+%sort plus/z {N nat} %.
+%mode plus/z %in %out %.
+%scope plus/z %term z plus/z z p/z %.
+%term s %pi (plus/z (s N) (p/s Dplus)) %<- (plus/z N (%the (plus N z N) Dplus)) %.
+%worlds () (plus/z _ _) %.
+%total N (plus/z N _) %.
+%sort plus/s %.
+%mode plus/s %in %out %.
+%scope plus/s %term z plus/s p/z p/z %.
+%term s 
+	%pi (plus/s (p/s (%the (plus N M P) Dplus)) (p/s Dplus'))
+	%<- (plus/s Dplus (%the (plus N (s M) (s P)) Dplus')) %.
+%worlds () (plus/s _ _) %.
+%total D (plus/s D _) %.
+%sort plus/commutes %.
+%mode plus/commutes %in %out %.
+%scope plus/commutes %term z %pi (plus/commutes p/z D) %<- (plus/z _ D) %.
+%term s 
+	%pi (plus/commutes (p/s (%the (plus N M P) Dplus)) Dplus'')
+	%<- (plus/commutes Dplus (%the (plus M N P) Dplus'))
+	%<- (plus/s Dplus' (%the (plus M (s N) (s P)) Dplus'')) %.
+%worlds () (plus/commutes _ _) %.
+%total D (plus/commutes D _) %.
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/TAT/plus.elf).
+!}%

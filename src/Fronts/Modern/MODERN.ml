@@ -29,6 +29,7 @@ module type MODERN = sig
 
   val parse_text : unit -> string t
   val parse_decl : unit -> Cst.decl t
+  val parse_decl_simple : unit -> Cst.decl t
   val parse_mode : unit -> Cst.mode t
   val parse_mode_dec : unit -> Cst.modeDec t
   val parse_sigexp : unit -> Cst.sigexp t

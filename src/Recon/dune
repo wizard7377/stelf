@@ -3,6 +3,7 @@
 ; private module type.  Restore once Pal.ml supplies a named module satisfying S.S.
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name recon)
  (public_name stelf.recon)
  (libraries

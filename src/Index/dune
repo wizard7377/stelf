@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name index)
  (public_name stelf.index)
  (modules IndexSkolem Index_ INDEX)

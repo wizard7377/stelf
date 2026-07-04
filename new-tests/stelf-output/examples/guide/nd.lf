@@ -1,0 +1,62 @@
+%%% Natural deduction for a fragment of intuitionistic logic
+%%% Author: Frank Pfennig
+%%% Individuals
+%sort i %.
+%name i %.
+%%% Propositions
+%sort o %.
+%name o %.
+%term imp %pi o %-> o %-> o %.
+%prec %right 10 imp %.
+%term and %pi o %-> o %-> o %.
+%prec %right 11 and %.
+%term true o %.
+%term or %pi o %-> o %-> o %.
+%prec %right 11 or %.
+%term false o %.
+%term forall %pi (%pi i %-> o) %-> o %.
+%term exists %pi (%pi i %-> o) %-> o %.
+%define not (%pi o %-> o) [A o] A imp false %.
+%%% Natural Deductions
+%sort nd %.
+%name nd %.
+%term impi %pi (%pi (nd A) %-> (nd B)) %-> (nd (A imp B)) %.
+%term impe %pi (nd (A imp B)) %-> (nd A) %-> (nd B) %.
+%term andi %pi (nd A) %-> (nd B) %-> (nd (A and B)) %.
+%term ande1 %pi (nd (A and B)) %-> (nd A) %.
+%term ande2 %pi (nd (A and B)) %-> (nd B) %.
+%term truei nd true %.
+% no truee
+%term ori1 %pi (nd A) %-> (nd (A or B)) %.
+%term ori2 %pi (nd B) %-> (nd (A or B)) %.
+%term ore 
+	%pi (nd (A or B))
+	%-> (%pi (nd A) %-> (nd C))
+	%-> (%pi (nd B) %-> (nd C))
+	%-> (nd C) %.
+% no falsei
+%term falsee %pi (nd false) %-> (nd C) %.
+%term foralli %pi ({x i} nd (A x)) %-> (nd (forall A)) %.
+%term foralle %pi (nd (forall A)) %-> ({T i} nd (A T)) %.
+%term existsi {T i} %pi (nd (A T)) %-> (nd (exists A)) %.
+%term existse %pi (nd (exists A)) %-> ({x i} %pi (nd (A x)) %-> (nd C)) %-> (nd C) %.
+%define noti (%pi (%pi (nd A) %-> (nd false)) %-> (nd (not A))) [D %pi (nd A) %-> (nd false)] impi D %.
+%define note (%pi (nd (not A)) %-> (nd A) %-> (nd false)) [D nd (not A)] [E nd A] impe D E %.
+%%% Verifying regular worlds
+%block nd_hyp {A o} [u nd A]%.
+%block nd_parm [x i]%.
+%worlds (nd_hyp nd_parm) (nd A) %.
+%%% Local reductions
+%sort red %.
+%term impred red (impe (impi D) E) (D E) %.
+%term andred1 red (ande1 (andi D E)) D %.
+%term andred2 red (ande2 (andi D E)) E %.
+% no truered
+%term orred1 red (ore (ori1 D) E1 E2) (E1 D) %.
+%term orred2 red (ore (ori2 D) E1 E2) (E2 D) %.
+% no falsered
+%term forallred red (foralle (foralli D) T) (D T) %.
+%term existsred red (existse (existsi T D) E) (E T D) %.
+%%% A simple theorem
+%theorem trivI : exists {D {A o} nd (A imp A)} true %.
+%prove 2 {} (trivI D) %.

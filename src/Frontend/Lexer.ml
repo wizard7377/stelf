@@ -586,6 +586,8 @@ end
 (* functor Lexer *)
 module Lexer = MakeLexer (Stream)
 include Lexer
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+let () = Printexc.register_printer (function NotDigit c -> Some (Printf.sprintf "Not a digit: '%c'" c) | _ -> None)
 (*! structure Paths' = Paths !*)
 
 (* # 1 "src/frontend/Lexer.sml.ml" *)

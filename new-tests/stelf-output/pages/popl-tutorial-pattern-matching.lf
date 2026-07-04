@@ -1,0 +1,285 @@
+%                                          
+%{! 
+This is a case study on pattern matching using Twelf.
+!}%
+% 
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort tp %.
+%term o tp %.
+%term arrow %pi tp %-> tp %-> tp %.
+%term prod %pi tp %-> tp %-> tp %.
+%term sum %pi tp %-> tp %-> tp %.
+%sort tplist %.
+%term tplist/nil tplist %.
+%term tplist/cons %pi tp %-> tplist %-> tplist %.
+%sort pat %.
+%term pat/underscore pat %.
+%term pat/pair %pi pat %-> pat %-> pat %.
+%term pat/inl %pi pat %-> pat %.
+%term pat/inr %pi pat %-> pat %.
+%term pat/var pat %.
+%term pat/as %pi pat %-> pat %-> pat %.
+%sort exp %.
+%sort oexp %.
+% oexp N is an expression with N bound vars
+%sort match %.
+%term exp/unit exp %.
+%term exp/lam %pi match %-> exp %.
+%term exp/app %pi exp %-> exp %-> exp %.
+%term exp/pair %pi exp %-> exp %-> exp %.
+%term exp/inl %pi exp %-> exp %.
+%term exp/inr %pi exp %-> exp %.
+%term exp/handle %pi exp %-> exp %-> exp %.
+%term oexp/c %pi exp %-> oexp %.
+%term oexp/o %pi (%pi exp %-> oexp) %-> oexp %.
+%term match/nil match %.
+%term match/cons %pi pat %-> oexp %-> match %-> match %.
+%{! static semantics !}%
+%sort tplist-append %.
+%term tplist-append/nil tplist-append tplist/nil TL TL %.
+%term tplist-append/cons 
+	%pi (tplist-append (tplist/cons T TL) TL' (tplist/cons T TL''))
+	%<- (tplist-append TL TL' TL'') %.
+%sort tplist-get %.
+%term tplist-get/hit tplist-get z (tplist/cons T TL) T %.
+%term tplist-get/miss %pi (tplist-get (s N) (tplist/cons T TL) T') %<- (tplist-get N TL T') %.
+%sort of-pat %.
+%term of-pat/underscore of-pat pat/underscore T tplist/nil %.
+%term of-pat/pair 
+	%pi (of-pat (pat/pair P1 P2) (prod T1 T2) TL')
+	%<- (of-pat P1 T1 TL1)
+	%<- (of-pat P2 T2 TL2)
+	%<- (tplist-append TL1 TL2 TL') %.
+%term of-pat/inl %pi (of-pat (pat/inl P) (sum T1 T2) TL) %<- (of-pat P T1 TL) %.
+%term of-pat/inr %pi (of-pat (pat/inr P) (sum T1 T2) TL) %<- (of-pat P T2 TL) %.
+%term of-pat/var of-pat pat/var T (tplist/cons T tplist/nil) %.
+%term of-pat/as 
+	%pi (of-pat (pat/as P1 P2) T TL3)
+	%<- (of-pat P1 T TL1)
+	%<- (of-pat P2 T TL2)
+	%<- (tplist-append TL1 TL2 TL3) %.
+%sort of-exp %.
+%sort of-match %.
+%sort of-oexp %.
+%term of-oexp/c %pi (of-oexp tplist/nil (oexp/c E) T) %<- (of-exp E T) %.
+%term of-oexp/o 
+	%pi (of-oexp (tplist/cons T TL) (oexp/o ([x] EL x)) T')
+	%<- ({x} %pi (of-exp x T) %-> (of-oexp TL (EL x) T')) %.
+%term of-match/nil of-match match/nil T T' %.
+%term of-match/cons 
+	%pi (of-match (match/cons P OE M) T T')
+	%<- (of-pat P T TL)
+	%<- (of-oexp TL OE T')
+	%<- (of-match M T T') %.
+%term of-exp/unit of-exp exp/unit o %.
+%term of-exp/lam %pi (of-exp (exp/lam M) (arrow T1 T2)) %<- (of-match M T1 T2) %.
+%term of-exp/app %pi (of-exp (exp/app E1 E2) T2) %<- (of-exp E1 (arrow T1 T2)) %<- (of-exp E2 T1) %.
+%term of-exp/pair %pi (of-exp (exp/pair E1 E2) (prod T1 T2)) %<- (of-exp E1 T1) %<- (of-exp E2 T2) %.
+%term of-exp/inl %pi (of-exp (exp/inl E) (sum T1 T2)) %<- (of-exp E T1) %.
+%term of-exp/inr %pi (of-exp (exp/inr E) (sum T1 T2)) %<- (of-exp E T2) %.
+%term of-exp/handle %pi (of-exp (exp/handle E1 E2) T) %<- (of-exp E1 T) %<- (of-exp E2 T) %.
+% syntax only needed for dynamic semantics of the language
+%sort explist %.
+%term explist/nil explist %.
+%term explist/cons %pi exp %-> explist %-> explist %.
+% static semantics of explists
+%sort of-explist %.
+%term of-explist/nil of-explist explist/nil tplist/nil %.
+%term of-explist/cons 
+	%pi (of-explist (explist/cons E EL) (tplist/cons T TL))
+	%<- (of-exp E T)
+	%<- (of-explist EL TL) %.
+%sort subst-oexp %.
+%term subst-oexp/c subst-oexp explist/nil (oexp/c E) E %.
+%term subst-oexp/o 
+	%pi (subst-oexp (explist/cons E EL) (oexp/o ([x] OE x)) E')
+	%<- (subst-oexp EL (OE E) E') %.
+%sort explist-get %.
+%term explist-get/hit explist-get z (explist/cons T TL) T %.
+%term explist-get/miss %pi (explist-get (s N) (explist/cons T TL) T') %<- (explist-get N TL T') %.
+%sort explist-append %.
+%term explist-append/nil explist-append explist/nil EL EL %.
+%term explist-append/cons 
+	%pi (explist-append (explist/cons E EL) EL' (explist/cons E EL''))
+	%<- (explist-append EL EL' EL'') %.
+%sort apply-pat %.
+% only have to define failure over well-typed pattern/expression pairs
+% failures arise from inl/inr mismatches
+%sort fail-pat %.
+%term apply-pat/underscore apply-pat pat/underscore E explist/nil %.
+%term apply-pat/pair 
+	%pi (apply-pat (pat/pair P1 P2) (exp/pair E1 E2) EL')
+	%<- (apply-pat P1 E1 EL1)
+	%<- (apply-pat P2 E2 EL2)
+	%<- (explist-append EL1 EL2 EL') %.
+%term apply-pat/inl %pi (apply-pat (pat/inl P) (exp/inl E) EL) %<- (apply-pat P E EL) %.
+%term apply-pat/inr %pi (apply-pat (pat/inr P) (exp/inr E) EL) %<- (apply-pat P E EL) %.
+%term apply-pat/var apply-pat pat/var E (explist/cons E explist/nil) %.
+%term apply-pat/as 
+	%pi (apply-pat (pat/as P1 P2) E EL')
+	%<- (apply-pat P1 E EL1)
+	%<- (apply-pat P2 E EL2)
+	%<- (explist-append EL1 EL2 EL') %.
+%term fail-pat/pair-1 %pi (fail-pat (pat/pair P1 P2) (exp/pair E1 E2)) %<- (fail-pat P1 E1) %.
+%term fail-pat/pair-2 
+	%pi (fail-pat (pat/pair P1 P2) (exp/pair E1 E2))
+	%<- (apply-pat P1 E1 EL)
+	%<- (fail-pat P2 E2) %.
+%term fail-pat/inl-t %pi (fail-pat (pat/inl P) (exp/inl E)) %<- (fail-pat P E) %.
+%term fail-pat/inl-f fail-pat (pat/inl P) (exp/inr E) %.
+%term fail-pat/inr-t %pi (fail-pat (pat/inr P) (exp/inr E)) %<- (fail-pat P E) %.
+%term fail-pat/inr-f fail-pat (pat/inr P) (exp/inl E) %.
+%term fail-pat/as-1 %pi (fail-pat (pat/as P1 P2) E) %<- (fail-pat P1 E) %.
+%term fail-pat/as-2 %pi (fail-pat (pat/as P1 P2) E) %<- (apply-pat P1 E EL) %<- (fail-pat P2 E) %.
+%sort apply-or-fail-pat %.
+%term apply-or-fail-pat/apply %pi (apply-or-fail-pat P E) %<- (apply-pat P E EL) %.
+%term apply-or-fail-pat/fail %pi (apply-or-fail-pat P E) %<- (fail-pat P E) %.
+%sort apply-match %.
+%term apply-match/cons-1 
+	%pi (apply-match (match/cons P OE M) E E')
+	%<- (apply-pat P E EL)
+	%<- (subst-oexp EL OE E') %.
+%term apply-match/cons-2 
+	%pi (apply-match (match/cons P OE M) E E')
+	%<- (fail-pat P E)
+	%<- (apply-match M E E') %.
+%sort fail-match %.
+%term fail-match/nil fail-match match/nil E %.
+%term fail-match/cons %pi (fail-match (match/cons P OE M) E) %<- (fail-pat P E) %<- (fail-match M E) %.
+%sort apply-or-fail-match %.
+%term apply-or-fail-match/apply %pi (apply-or-fail-match M E) %<- (apply-match M E E') %.
+%term apply-or-fail-match/fail %pi (apply-or-fail-match M E) %<- (fail-match M E) %.
+%sort exception %.
+%term exception/match exception %.
+%sort value %.
+%term value/unit value exp/unit %.
+%term value/lam value (exp/lam M) %.
+%term value/pair %pi (value (exp/pair E1 E2)) %<- (value E1) %<- (value E2) %.
+%term value/inl %pi (value (exp/inl E)) %<- (value E) %.
+%term value/inr %pi (value (exp/inr E)) %<- (value E) %.
+%sort raises %.
+%term raises/app-1 %pi (raises (exp/app E1 E2) X) %<- (raises E1 X) %.
+%term raises/app-2 %pi (raises (exp/app E1 E2) X) %<- (value E1) %<- (raises E2 X) %.
+%term raises/app-fail 
+	%pi (raises (exp/app (exp/lam M) E2) exception/match)
+	%<- (value E2)
+	%<- (fail-match M E2) %.
+%term raises/pair-1 %pi (raises (exp/pair E1 E2) X) %<- (raises E1 X) %.
+%term raises/pair-2 %pi (raises (exp/pair E1 E2) X) %<- (value E1) %<- (raises E2 X) %.
+%term raises/inl %pi (raises (exp/inl E) X) %<- (raises E X) %.
+%term raises/inr %pi (raises (exp/inr E) X) %<- (raises E X) %.
+%sort step %.
+%term step/app-1 %pi (step (exp/app E1 E2) (exp/app E1' E2)) %<- (step E1 E1') %.
+%term step/app-2 %pi (step (exp/app E1 E2) (exp/app E1 E2')) %<- (value E1) %<- (step E2 E2') %.
+%term step/app-beta %pi (step (exp/app (exp/lam M) E) E') %<- (value E2) %<- (apply-match M E E') %.
+%term step/pair-1 %pi (step (exp/pair E1 E2) (exp/pair E1' E2)) %<- (step E1 E1') %.
+%term step/pair-2 %pi (step (exp/pair E1 E2) (exp/pair E1 E2')) %<- (value E1) %<- (step E2 E2') %.
+%term step/inl %pi (step (exp/inl E) (exp/inl E')) %<- (step E E') %.
+%term step/inr %pi (step (exp/inr E) (exp/inr E')) %<- (step E E') %.
+%term step/handle %pi (step (exp/handle E1 E2) (exp/handle E1' E2)) %<- (step E1 E1') %.
+%term step/handle-beta %pi (step (exp/handle E1 E2) E1) %<- (value E1) %.
+%term step/handle-fail %pi (step (exp/handle E1 E2) E2) %<- (raises E1 X) %.
+%sort preservation-subst-oexp %.
+%mode preservation-subst-oexp %in %in %in %out %.
+%term _ preservation-subst-oexp _ (of-oexp/c D1) subst-oexp/c D1 %.
+%term _ 
+	%pi (preservation-subst-oexp (of-explist/cons D1 D) (of-oexp/o D2) (subst-oexp/o D3) D4)
+	%<- (preservation-subst-oexp D1 (D2 _ D) D3 D4) %.
+%worlds () (preservation-subst-oexp _ _ _ _) %.
+%total (D1) (preservation-subst-oexp _ _ D1 _) %.
+%sort preservation-append %.
+%mode preservation-append %in %in %in %in %out %.
+%term _ preservation-append _ D explist-append/nil tplist-append/nil D %.
+%term _ 
+	%pi (preservation-append (of-explist/cons D1 D) D2 (explist-append/cons D3) (tplist-append/cons D4) (of-explist/cons D5 D))
+	%<- (preservation-append D1 D2 D3 D4 D5) %.
+%worlds () (preservation-append _ _ _ _ _) %.
+%total (D1) (preservation-append _ _ _ D1 _) %.
+%sort preservation-get %.
+%mode preservation-get %in %in %in %out %.
+%term _ preservation-get (of-explist/cons _ D) explist-get/hit tplist-get/hit D %.
+%term _ 
+	%pi (preservation-get (of-explist/cons DL _) (explist-get/miss D') (tplist-get/miss D'') D)
+	%<- (preservation-get DL D' D'' D) %.
+%worlds () (preservation-get _ _ _ _) %.
+%total (D1) (preservation-get _ _ D1 _) %.
+%sort preservation-apply-pat %.
+%mode preservation-apply-pat %in %in %in %out %.
+%term _ preservation-apply-pat D1 of-pat/underscore apply-pat/underscore of-explist/nil %.
+%term _ 
+	%pi (preservation-apply-pat (of-exp/pair DE2 DE1) (of-pat/pair DTA DP2 DP1) (apply-pat/pair DEA DA2 DA1) D3)
+	%<- (preservation-apply-pat DE1 DP1 DA1 D1)
+	%<- (preservation-apply-pat DE2 DP2 DA2 D2)
+	%<- (preservation-append D1 D2 DEA DTA D3) %.
+%term _ 
+	%pi (preservation-apply-pat DE (of-pat/as DTA DP2 DP1) (apply-pat/as DEA DA2 DA1) D3)
+	%<- (preservation-apply-pat DE DP1 DA1 D1)
+	%<- (preservation-apply-pat DE DP2 DA2 D2)
+	%<- (preservation-append D1 D2 DEA DTA D3) %.
+%term _ 
+	%pi (preservation-apply-pat (of-exp/inl DE) (of-pat/inl DP) (apply-pat/inl DA) D)
+	%<- (preservation-apply-pat DE DP DA D) %.
+%term _ 
+	%pi (preservation-apply-pat (of-exp/inr DE) (of-pat/inr DP) (apply-pat/inr DA) D)
+	%<- (preservation-apply-pat DE DP DA D) %.
+%term _ preservation-apply-pat D1 of-pat/var apply-pat/var (of-explist/cons of-explist/nil D1) %.
+%worlds () (preservation-apply-pat _ _ _ _) %.
+%total (D1) (preservation-apply-pat _ _ D1 _) %.
+%sort preservation-apply-match %.
+%mode preservation-apply-match %in %in %in %out %.
+%term _ 
+	%pi (preservation-apply-match D1 (of-match/cons _ DOE D2) (apply-match/cons-1 DS DA) D')
+	%<- (preservation-apply-pat D1 D2 DA D)
+	%<- (preservation-subst-oexp D DOE DS D') %.
+%term _ 
+	%pi (preservation-apply-match D1 (of-match/cons D2 _ _) (apply-match/cons-2 DA _) D')
+	%<- (preservation-apply-match D1 D2 DA D') %.
+%worlds () (preservation-apply-match _ _ _ _) %.
+%total (D1) (preservation-apply-match _ _ D1 _) %.
+%sort preservation %.
+%mode preservation %in %in %out %.
+%term _ 
+	%pi (preservation (of-exp/app D2 D1) (step/app-1 DS) (of-exp/app D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/app D2 D1) (step/app-2 DS V) (of-exp/app D2' D1))
+	%<- (preservation D2 DS D2') %.
+%term _ 
+	%pi (preservation (of-exp/app D2 (of-exp/lam D1)) (step/app-beta DA _) D)
+	%<- (preservation-apply-match D2 D1 DA D) %.
+%term _ 
+	%pi (preservation (of-exp/pair D2 D1) (step/pair-1 DS) (of-exp/pair D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/pair D2 D1) (step/pair-2 DS V) (of-exp/pair D2' D1))
+	%<- (preservation D2 DS D2') %.
+%term _ 
+	%pi (preservation (of-exp/handle D2 D1) (step/handle DS) (of-exp/handle D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/inl D1) (step/inl DS) (of-exp/inl D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/inr D1) (step/inr DS) (of-exp/inr D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/handle D2 D1) (step/handle DS) (of-exp/handle D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ preservation (of-exp/handle D2 D1) (step/handle-beta _) D1 %.
+%term _ preservation (of-exp/handle D2 D1) (step/handle-fail _) D2 %.
+%worlds () (preservation _ _ _) %.
+%total (D1) (preservation _ D1 _) %.
+%{! 
+--[DanielKLee](/wiki/user-danielklee/) 01:46, 11 October 2007 (EDT)
+
+TODO: Finish commentary.
+\{\{stub\}\}
+!}%
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/POPL_Tutorial/Pattern_matching).
+!}%

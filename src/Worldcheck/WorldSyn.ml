@@ -15,6 +15,16 @@ open Table_
 (* World Checking *)
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning *)
+exception Error of string
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+exception Error' of Paths.occ * string
+
+let () =
+  Printexc.register_printer (function Error' (_, msg) -> Some msg | _ -> None)
+
 module WorldSyn (WorldSyn__0 : sig
   module Global : GLOBAL
   module Whnf : WHNF
@@ -61,8 +71,8 @@ end) : WORLDSYN = struct
   module Table = WorldSyn__0.Table
   module Unify = WorldSyn__0.Unify
 
-  exception Error of string
-  exception Error' of P.occ * string
+  exception Error = Error
+  exception Error' = Error'
 
   (* copied from terminates/Reduces.fun *)
   let rec wrapMsg (c, occ, msg) =

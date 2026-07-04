@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name stream)
  (public_name stelf.stream)
  (modules Stream_ STREAM)

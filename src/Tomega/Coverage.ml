@@ -10,6 +10,9 @@ include COVERAGE
 (* # 1 "src/tomega/Coverage.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MakeTomegaCoverage
     (TomegaPrint : Tomegaprint.TOMEGAPRINT)
     (TomegaTypeCheck : TOMEGATYPECHECK.TOMEGATYPECHECK)
@@ -32,7 +35,7 @@ module MakeTomegaCoverage
 *)
   (*! structure IntSyn = IntSyn' !*)
   (*! structure Tomega = Tomega' !*)
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

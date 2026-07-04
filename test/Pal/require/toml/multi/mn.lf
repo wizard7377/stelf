@@ -1,0 +1,3 @@
+%sort mn_nat %.
+%term mn_zero mn_nat %.
+%term mn_succ {_ mn_nat} mn_nat %.

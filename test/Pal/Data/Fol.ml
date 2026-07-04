@@ -14,8 +14,8 @@ This code is from the article
   Elsevier Science and MIT Press
   In preparation
 
-%sort i
-%sort o
+%sort i %.
+%sort o %.
 
 Formulas
 
@@ -27,7 +27,7 @@ Formulas
 
 Natural deductions
 
-%sort nd {_ o}
+%sort nd {_ o} %.
 
 %term impi {{A B}} {_ {_ nd A} nd B} nd (A imp B)
 %term impe {{A B}} {_ nd (A imp B)} {_ nd A} nd B

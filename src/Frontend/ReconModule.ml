@@ -8,6 +8,9 @@ include RECONMODULE
 (* # 1 "src/frontend/ReconModule.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ReconModule (ReconModule__0 : sig
   (* Elaboration for module expressions *)
   (* Author: Kevin Watkins *)
@@ -34,7 +37,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
   (*! structure Paths = Paths' !*)
   module ModSyn = ReconModule__0.ModSyn'
 
-  exception Error of string
+  exception Error = Error
 
   let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 

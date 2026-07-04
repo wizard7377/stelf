@@ -14,6 +14,10 @@ open MetaAbstract
 
 (* Lemma *)
 (* Author: Carsten Schuermann *)
+
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Lemma (Lemma__0 : sig
   module MetaSyn' : Metasyn.METASYN
   module MetaAbstract : METAABSTRACT.METAABSTRACT with module MetaSyn = MetaSyn'
@@ -21,7 +25,7 @@ end) : LEMMA with module MetaSyn = Lemma__0.MetaSyn' = struct
   open Lemma__0
   module MetaSyn = MetaAbstract.MetaSyn
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module A = MetaAbstract

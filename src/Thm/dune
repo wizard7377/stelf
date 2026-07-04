@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name thm)
  (public_name stelf.thm)
  (modules Thmsyn Thmprint Thm_ THM THMPRINT THMSYN)

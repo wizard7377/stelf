@@ -2,4 +2,4 @@
  (name main)
  (public_name stelf)
  (modules main)
- (libraries stelf server pal))
+ (libraries stelf server pal cmdliner fmt.tty display basis lwt.unix grace grace.ansi_renderer))

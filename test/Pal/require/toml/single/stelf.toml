@@ -1,0 +1,4 @@
+[[group]]
+name = "sg"
+main = "./main.lf"
+dirs = ["."]

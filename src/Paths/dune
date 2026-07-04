@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name paths)
  (public_name stelf.paths)
  (modules PATHS Paths_ ORIGINS Origins)

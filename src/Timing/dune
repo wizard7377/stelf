@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name timing)
  (public_name stelf.timing)
  (modules Timers Timing_ TimeLimit TIMERS TIMING)

@@ -12,6 +12,9 @@ open! Basis
 (* Elim *)
 (* Author: Carsten Schuermann *)
 (* Date: Thu Mar 16 13:39:26 2006 *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Elim (Elim__0 : sig
   module Data : Data.DATA
 
@@ -38,7 +41,7 @@ end) : ELIM with module State = Elim__0.State' = struct
   (*! structure Tomega = Tomega' !*)
   module State = Elim__0.State'
 
-  exception Error of string
+  exception Error = Error
 
   type operator_ = Local of Tomega.prg * int
   type nonrec operator = operator_

@@ -1,0 +1,11 @@
+%
+
+% 3 + 2 * 1
+%
+
+%define o1i rnil ,r # ^ fun end ,r # ^ con 1 ,r # ^ fun * ,r # ^ con 2 ,r # ^ fun + ,r # ^ con 3 %.
+%define o1o rnil ,r del ,r del ,r del ,r del ,r del ,r del %.
+%define o2 rnil ,r # ^ fun end ,r # ^ con 1 %.
+%query 1 _ _ sqnt rnil rnil o2 OO (^ (evc end 1)) %.
+%query 1 _ _ sqnt rnil rnil o2 OO (^ (evc end A)) %.
+%query 1 _ _ sqnt rnil rnil o1i o1o (^ (evc end A)) %.

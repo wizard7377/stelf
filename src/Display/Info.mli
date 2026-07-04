@@ -19,9 +19,7 @@ type kind = Debug | Info | Warning | Error | Response
 (* Corresponds to chatter 5 4 3 2 1 0, respectively *)
 type level = Exhaustive | Detailed | Normal | Terse | Minimal | Off
 
-module Form : module type of Form.Form
-
-type form = Form.t
+type form = Format.formatter -> unit
 
 val from_chatter : int -> level
 

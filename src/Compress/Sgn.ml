@@ -143,3 +143,4 @@ module Sgn = struct
 end
 
 include Sgn
+let () = Printexc.register_printer (function NoSuch _ -> Some "NoSuch" | _ -> None)

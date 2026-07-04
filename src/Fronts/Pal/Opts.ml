@@ -7,20 +7,17 @@ module Opts : OPTS = struct
 
   let verbosity : Display.Info.level t =
     begin
-      let doc : Arg.info =
-        Arg.info ~doc:"The verbosity level" [ "v"; "verbose" ] ~docv:"LEVEL"
-      and v_conv =
-        Arg.enum
+      let v_conv =
+        Arg.vflag Display.Info.Normal
           [
-            ("terse", Display.Info.Terse);
-            ("normal", Display.Info.Normal);
-            ("detailed", Display.Info.Detailed);
-            ("exhaustive", Display.Info.Exhaustive);
-            ("minimal", Display.Info.Minimal);
-            ("off", Display.Info.Off);
+          (Display.Info.Terse, Arg.info ~doc:"Display less information" [ "q"; "quiet" ]);
+            (Display.Info.Detailed, Arg.info ~doc:"Display more information" [ "v"; "verbose" ]); 
+            (Display.Info.Exhaustive, Arg.info ~doc:"Display exhaustive information" [ "debug" ]);
+            (Display.Info.Minimal, Arg.info ~doc:"Display minimal information" [ "s"; "silent" ]);
+            (Display.Info.Off, Arg.info ~doc:"Display no information" [ "no-output" ]);
           ]
       in
-      Arg.(opt v_conv Display.Info.(Normal) & doc)
+      v_conv
     end
 
   let color : bool t =

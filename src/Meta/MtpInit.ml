@@ -16,6 +16,9 @@ open! Basis
 
 (* Initialization *)
 (* Author: Carsten Schuermann *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module MTPInit (MTPInit__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL
   module MTPData : MTPDATA.MTPDATA
@@ -42,7 +45,7 @@ end) : MTPINIT.MTPINIT = struct
   open MTPInit__0
   module StateSyn = StateSyn'
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module I = IntSyn

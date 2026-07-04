@@ -1,0 +1,77 @@
+%%%%%  Translation Functionality Proof  %%%%%
+%sort kof-fun %.
+%mode kof-fun %in %in %out %.
+%term _ %pi (kof-fun (kof/i D Dckof) (kof/i D' Dckof) Deq) %<- (topen-fun D D' Deq) %.
+%worlds (var) (kof-fun _ _ _) %.
+%total {} (kof-fun _ _ _) %.
+%sort trans-fun %.
+%mode trans-fun %in %in %out %.
+%sort ttrans-fun %.
+%mode ttrans-fun %in %in %out %.
+%scope ttrans-fun %term const 
+	%pi (trans-fun (trans/const Dself Dexpand _ Dkof) (trans/const Dself' Dexpand' _ Dkof') Deq)
+	%<- (kof-fun Dkof Dkof' Deqt)
+	%<- (expand-resp atom-eq/i Deqt term-eq/i Dexpand Dexpand'')
+	%<- (expand-fun Dexpand'' Dexpand' Deqm)
+	%<- (self-resp Deqm Deqt tp-eq/i Dself Dself'')
+	%<- (self-fun Dself'' Dself' Deq) %.
+%term var 
+	%pi (trans-fun (trans/var (%the (self M A B) Dself) (%the (expand X A M) Dexpand) _ (%the (vof X A) Dvof) (%the (vtrans EM X) Dvtrans)) (trans/var (%the (self M' A B') Dself') (%the (expand X A M') Dexpand') _ (%the (vof X A) Dvof) (%the (vtrans EM X) Dvtrans)) DeqB)
+	%<- (expand-fun Dexpand Dexpand' (%the (term-eq M M') DeqM))
+	%<- (self-resp DeqM tp-eq/i tp-eq/i Dself (%the (self M' A B) Dself''))
+	%<- (self-fun Dself'' Dself' (%the (tp-eq B B') DeqB)) %.
+%scope ttrans-fun %term forall 
+	%pi (trans-fun (trans/forall (%the (self M (qtp A) B) Dself) (%the (expand (forall A) (qtp A) M) Dexpand) (%the (ttrans EA A) Dtrans)) (trans/forall (%the (self M' (qtp A') B') Dself') (%the (expand (forall A') (qtp A') M') Dexpand') (%the (ttrans EA A') Dtrans')) DeqB)
+	%<- (ttrans-fun Dtrans Dtrans' (%the (tp-eq A A') DeqA))
+	%<- (atom-resp-tp forall DeqA (%the (atom-eq (forall A) (forall A')) DeqF))
+	%<- (tp-resp-tp qtp DeqA (%the (tp-eq (qtp A) (qtp A')) DeqQ))
+	%<- (expand-resp DeqF DeqQ term-eq/i Dexpand Dexpand'')
+	%<- (expand-fun Dexpand'' Dexpand' (%the (term-eq M M') DeqM))
+	%<- (self-resp DeqM DeqQ tp-eq/i Dself (%the (self M' (qtp A') B) Dself''))
+	%<- (self-fun Dself'' Dself' (%the (tp-eq B B') DeqB)) %.
+%term app 
+	%pi (trans-fun (trans/app Dsub Dsubtype DtransN DtransM) (trans/app Dsub' Dsubtype' DtransN' DtransM') Deq)
+	%<- (trans-fun DtransM DtransM' DeqPi)
+	%<- (tp-eq-cdr-pi DeqPi DeqA DeqB)
+	%<- (trans-fun DtransN DtransN' DeqC)
+	%<- (subtype-resp DeqC DeqA ([_] term-eq/i) Dsubtype Dsubtype'')
+	%<- (subtype-fun Dsubtype'' Dsubtype' (%the (%pi atom %-> (term-eq N N')) DeqN))
+	%<- (tsub-resp DeqB (DeqN aca) tp-eq/i Dsub Dsub'')
+	%<- (tsub-fun Dsub'' Dsub' Deq) %.
+%scope ttrans-fun %term pi1 
+	%pi (trans-fun (trans/pi1 Dtrans) (trans/pi1 Dtrans') D)
+	%<- (trans-fun Dtrans Dtrans' DeqSig)
+	%<- (tp-eq-cdr-sigma DeqSig D _) %.
+%term pi2 
+	%pi (trans-fun (trans/pi2 Dtrans) (trans/pi2 Dtrans') (D aca))
+	%<- (trans-fun Dtrans Dtrans' DeqSig)
+	%<- (tp-eq-cdr-sigma DeqSig _ D) %.
+%scope ttrans-fun %term lam 
+	%pi (trans-fun (trans/lam Dtrans Dttrans) (trans/lam Dtrans' Dttrans') Deq)
+	%<- (ttrans-fun Dttrans Dttrans' Deqt)
+	%<- (trans-resp-underbind Deqt Dtrans Dtrans'')
+	%<- ({x} {d} {ex} {xt} trans-fun (Dtrans'' x d ex xt) (Dtrans' x d ex xt) (Deqm x))
+	%<- (pi-resp Deqt Deqm Deq) %.
+%term pair 
+	%pi (trans-fun (trans/pair Dtrans2 Dtrans1) (trans/pair Dtrans2' Dtrans1') Deq)
+	%<- (trans-fun Dtrans1 Dtrans1' Deq1)
+	%<- (trans-fun Dtrans2 Dtrans2' Deq2)
+	%<- (sigma-resp Deq1 ([_] Deq2) Deq) %.
+%scope ttrans-fun %term t ttrans-fun ttrans/t ttrans/t tp-eq/i %.
+%term pi 
+	%pi (ttrans-fun (ttrans/pi Dtrans Dttrans) (ttrans/pi Dtrans' Dttrans') Deq)
+	%<- (ttrans-fun Dttrans Dttrans' Deqt)
+	%<- (ttrans-resp-underbind Deqt Dtrans Dtrans'')
+	%<- ({x} {d} {ex} {xt} ttrans-fun (Dtrans'' x d ex xt) (Dtrans' x d ex xt) (Deqm x))
+	%<- (pi-resp Deqt Deqm Deq) %.
+%scope ttrans-fun %term sigma 
+	%pi (ttrans-fun (ttrans/sigma Dtrans Dttrans) (ttrans/sigma Dtrans' Dttrans') Deq)
+	%<- (ttrans-fun Dttrans Dttrans' Deqt)
+	%<- (ttrans-resp-underbind Deqt Dtrans Dtrans'')
+	%<- ({x} {d} {ex} {xt} ttrans-fun (Dtrans'' x d ex xt) (Dtrans' x d ex xt) (Deqm x))
+	%<- (sigma-resp Deqt Deqm Deq) %.
+%term sing 
+	%pi (ttrans-fun (ttrans/sing Dtrans) (ttrans/sing Dtrans') Deq)
+	%<- (trans-fun Dtrans Dtrans' Deq) %.
+%worlds (var bind tbind) (ttrans-fun _ _ _) (trans-fun _ _ _) %.
+%total (D1 D2) (trans-fun _ D1 _) (ttrans-fun _ D2 _) %.

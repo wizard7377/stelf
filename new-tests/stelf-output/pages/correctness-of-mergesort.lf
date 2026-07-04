@@ -1,0 +1,557 @@
+%                                    
+%{! 
+This is an extended example of a proof of correctness of mergesort for lists without duplicates. In particular, it is an example of showing that an implementation of sorting (mergesort) matches up with a declarative definition that relates a list to its sort (i.e. the sorted list is a permutation of the unsorted list). 
+!}%
+%{! 
+### Definitions
+
+#### Declarative definitions
+
+We must first define natural numbers, lists of natural numbers, comparison on natural numbers, and what it means for one list to be the sorted version of another.
+!}%
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort nat-less %.
+%term nat-less/z nat-less z (s _) %.
+%term nat-less/s %pi (nat-less (s N) (s N')) %<- (nat-less N N') %.
+%sort nat-list %.
+%term nat-list/nil nat-list %.
+%term nat-list/cons %pi nat %-> nat-list %-> nat-list %.
+%sort nat-list-head-less %.
+%term nat-list-head-less/nil nat-list-head-less N nat-list/nil %.
+%term nat-list-head-less/cons %pi (nat-list-head-less N (nat-list/cons N' _)) %<- (nat-less N N') %.
+%sort nat-list-sorted %.
+%term nat-list-sorted/nil nat-list-sorted nat-list/nil %.
+%term nat-list-sorted/cons 
+	%pi (nat-list-sorted (nat-list/cons N NL))
+	%<- (nat-list-head-less N NL)
+	%<- (nat-list-sorted NL) %.
+%sort in-nat-list %.
+%term in-nat-list/hit in-nat-list N (nat-list/cons N NL) %.
+%term in-nat-list/miss %pi (in-nat-list N (nat-list/cons N' NL)) %<- (in-nat-list N NL) %.
+%sort all-in-nat-list %.
+%term all-in-nat-list/nil all-in-nat-list nat-list/nil NL %.
+%term all-in-nat-list/cons 
+	%pi (all-in-nat-list (nat-list/cons N NL) NL')
+	%<- (in-nat-list N NL')
+	%<- (all-in-nat-list NL NL') %.
+%{! 
+For the purposes of this proof, we use a set-theoretic extensional definition of permutation, where two lists are permutations of each other if they contain the same set of elements. This is only a proper definition of permutation if we assume both lists contain no duplicates. This invariant is baked into both our definition of sorted and our definition of mergesort. 
+!}%
+%sort nat-list-permute %.
+%term nat-list-permute/i 
+	%pi (nat-list-permute NL NL')
+	%<- (all-in-nat-list NL NL')
+	%<- (all-in-nat-list NL' NL) %.
+%sort nat-list-declarative-sort %.
+%term nat-list-declarative-sort/i 
+	%pi (nat-list-declarative-sort NL NL')
+	%<- (nat-list-permute NL NL')
+	%<- (nat-list-sorted NL') %.
+%{! 
+#### Definitions used to define mergesort
+!}%
+%sort split %.
+%term split/nil split nat-list/nil nat-list/nil nat-list/nil %.
+%term split/1 split (nat-list/cons N nat-list/nil) (nat-list/cons N nat-list/nil) nat-list/nil %.
+%term split/cons 
+	%pi (split (nat-list/cons N (nat-list/cons N' NL)) (nat-list/cons N NL1) (nat-list/cons N' NL2))
+	%<- (split NL NL1 NL2) %.
+%sort merge %.
+%term merge/nil-1 merge nat-list/nil N N %.
+%term merge/nil-2 merge (nat-list/cons N NL) nat-list/nil (nat-list/cons N NL) %.
+%term merge/cons-1 
+	%pi (merge (nat-list/cons N1 NL1) (nat-list/cons N2 NL2) (nat-list/cons N1 NL))
+	%<- (nat-less N1 N2)
+	%<- (merge NL1 (nat-list/cons N2 NL2) NL) %.
+%term merge/cons-2 
+	%pi (merge (nat-list/cons N1 NL1) (nat-list/cons N2 NL2) (nat-list/cons N2 NL))
+	%<- (nat-less N2 N1)
+	%<- (merge NL2 (nat-list/cons N1 NL1) NL) %.
+%sort mergesort %.
+%term mergesort/nil mergesort nat-list/nil nat-list/nil %.
+%term mergesort/1 mergesort (nat-list/cons N nat-list/nil) (nat-list/cons N nat-list/nil) %.
+%term mergesort/cons 
+	%pi (mergesort NL1 NL2)
+	%<- (split NL1 NLA NLB)
+	%<- (mergesort NLA NLA')
+	%<- (mergesort NLB NLB')
+	%<- (merge NLA' NLB' NL2) %.
+%{! ### Helper definitions used in proofs
+
+``all-in-2 N1 N2 N3`` is a judgment that holds when all the elements in ``N1`` are in the union of ``N1`` and ``N2``/
+
+!}%
+% all-in-2 N1 N2 N3, everything in N1 is either in N2 or N3
+%sort all-in-2 %.
+%term all-in-2/nil all-in-2 nat-list/nil NL1 NL2 %.
+%term all-in-2/cons-1 
+	%pi (all-in-2 (nat-list/cons N NL) NL1 NL2)
+	%<- (in-nat-list N NL1)
+	%<- (all-in-2 NL NL1 NL2) %.
+%term all-in-2/cons-2 
+	%pi (all-in-2 (nat-list/cons N NL) NL1 NL2)
+	%<- (in-nat-list N NL2)
+	%<- (all-in-2 NL NL1 NL2) %.
+%{! ### Proof that mergesort returns a sorted result !}%
+%sort nat-less-trans %.
+%mode nat-less-trans %in %in %out %.
+%term _ nat-less-trans nat-less/z D1 nat-less/z %.
+%term _ 
+	%pi (nat-less-trans (nat-less/s D1) (nat-less/s D2) (nat-less/s D3))
+	%<- (nat-less-trans D1 D2 D3) %.
+%worlds () (nat-less-trans _ _ _) %.
+%total (D1) (nat-less-trans D1 _ _) %.
+%sort merge-head-less %.
+%mode merge-head-less %in %in %in %out %.
+%term _ merge-head-less _ DL merge/nil-1 (nat-list-head-less/cons DL) %.
+%term _ merge-head-less _ DL (merge/cons-2 _ _) (nat-list-head-less/cons DL) %.
+%term _ merge-head-less (nat-list-head-less/cons DL) _ (merge/cons-1 _ _) (nat-list-head-less/cons DL) %.
+%worlds () (merge-head-less _ _ _ _) %.
+%total (D1) (merge-head-less _ _ D1 _) %.
+%sort merge-sorted %.
+%mode merge-sorted %in %in %in %out %.
+%term _ merge-sorted _ D1 merge/nil-1 D1 %.
+%term _ merge-sorted D1 _ merge/nil-2 D1 %.
+%term _ 
+	%pi (merge-sorted (nat-list-sorted/cons D1 DHL) D2 (merge/cons-1 DM DL) (nat-list-sorted/cons DS DHL'))
+	%<- (merge-head-less DHL DL DM DHL')
+	%<- (merge-sorted D1 D2 DM DS) %.
+%term _ 
+	%pi (merge-sorted D2 (nat-list-sorted/cons D1 DHL) (merge/cons-2 DM DL) (nat-list-sorted/cons DS DHL'))
+	%<- (merge-head-less DHL DL DM DHL')
+	%<- (merge-sorted D1 D2 DM DS) %.
+%worlds () (merge-sorted _ _ _ _) %.
+%total (D1) (merge-sorted _ _ D1 _) %.
+%sort mergesort-sorted %.
+%mode mergesort-sorted %in %out %.
+%term _ mergesort-sorted mergesort/nil nat-list-sorted/nil %.
+%term _ mergesort-sorted mergesort/1 (nat-list-sorted/cons nat-list-sorted/nil nat-list-head-less/nil) %.
+%term _ 
+	%pi (mergesort-sorted (mergesort/cons DM D2 D1 _) DS)
+	%<- (mergesort-sorted D1 DS1)
+	%<- (mergesort-sorted D2 DS2)
+	%<- (merge-sorted DS1 DS2 DM DS) %.
+%worlds () (mergesort-sorted _ _) %.
+%total (D1) (mergesort-sorted D1 _) %.
+%{! ### Proof that mergesort returns a permutation of the input !}%
+%sort all-in-2-wkn-l {N} %.
+%mode all-in-2-wkn-l %in %in %out %.
+%term _ all-in-2-wkn-l _ all-in-2/nil all-in-2/nil %.
+%term _ 
+	%pi (all-in-2-wkn-l _ (all-in-2/cons-1 DHL DIN) (all-in-2/cons-1 DHL' (in-nat-list/miss DIN)))
+	%<- (all-in-2-wkn-l _ DHL DHL') %.
+%term _ 
+	%pi (all-in-2-wkn-l _ (all-in-2/cons-2 DHL DIN) (all-in-2/cons-2 DHL' DIN))
+	%<- (all-in-2-wkn-l _ DHL DHL') %.
+%worlds () (all-in-2-wkn-l _ _ _) %.
+%total (D1) (all-in-2-wkn-l _ D1 _) %.
+%sort all-in-2-wkn-r {N} %.
+%mode all-in-2-wkn-r %in %in %out %.
+%term _ all-in-2-wkn-r _ all-in-2/nil all-in-2/nil %.
+%term _ 
+	%pi (all-in-2-wkn-r _ (all-in-2/cons-2 DHL DIN) (all-in-2/cons-2 DHL' (in-nat-list/miss DIN)))
+	%<- (all-in-2-wkn-r _ DHL DHL') %.
+%term _ 
+	%pi (all-in-2-wkn-r _ (all-in-2/cons-1 DHL DIN) (all-in-2/cons-1 DHL' DIN))
+	%<- (all-in-2-wkn-r _ DHL DHL') %.
+%worlds () (all-in-2-wkn-r _ _ _) %.
+%total (D1) (all-in-2-wkn-r _ D1 _) %.
+%sort split-all-in-2 %.
+%mode split-all-in-2 %in %out %.
+%term _ split-all-in-2 split/nil all-in-2/nil %.
+%term _ split-all-in-2 split/1 (all-in-2/cons-1 all-in-2/nil in-nat-list/hit) %.
+%term _ 
+	%pi (split-all-in-2 (split/cons DS1) (all-in-2/cons-1 (all-in-2/cons-2 DS1''' in-nat-list/hit) in-nat-list/hit))
+	%<- (split-all-in-2 DS1 DS1')
+	%<- (all-in-2-wkn-l _ DS1' DS1'')
+	%<- (all-in-2-wkn-r _ DS1'' DS1''') %.
+%worlds () (split-all-in-2 _ _) %.
+%total (D1) (split-all-in-2 D1 _) %.
+%sort all-in-nat-list-wkn {N} %.
+%mode all-in-nat-list-wkn %in %in %out %.
+%term _ all-in-nat-list-wkn _ all-in-nat-list/nil all-in-nat-list/nil %.
+%term _ 
+	%pi (all-in-nat-list-wkn _ (all-in-nat-list/cons DAS DIN) (all-in-nat-list/cons DAS' (in-nat-list/miss DIN)))
+	%<- (all-in-nat-list-wkn _ DAS DAS') %.
+%worlds () (all-in-nat-list-wkn _ _ _) %.
+%total (D1) (all-in-nat-list-wkn _ D1 _) %.
+%sort all-in-nat-list-refl {NL} %.
+%mode all-in-nat-list-refl %in %out %.
+%term _ all-in-nat-list-refl _ all-in-nat-list/nil %.
+%term _ 
+	%pi (all-in-nat-list-refl (nat-list/cons _ NL) (all-in-nat-list/cons DHL' in-nat-list/hit))
+	%<- (all-in-nat-list-refl NL DHL)
+	%<- (all-in-nat-list-wkn _ DHL DHL') %.
+%worlds () (all-in-nat-list-refl _ _) %.
+%total (D1) (all-in-nat-list-refl D1 _) %.
+%sort merge-all-in %.
+%mode merge-all-in %in %out %out %.
+%term _ 
+	%pi (merge-all-in merge/nil-1 all-in-nat-list/nil D1)
+	%<- (all-in-nat-list-refl _ D1) %.
+%term _ 
+	%pi (merge-all-in merge/nil-2 D1 all-in-nat-list/nil)
+	%<- (all-in-nat-list-refl _ D1) %.
+%term _ 
+	%pi (merge-all-in (merge/cons-1 DM1 DL) (all-in-nat-list/cons DHL1' in-nat-list/hit) DHL2')
+	%<- (merge-all-in DM1 DHL1 DHL2)
+	%<- (all-in-nat-list-wkn _ DHL1 DHL1')
+	%<- (all-in-nat-list-wkn _ DHL2 DHL2') %.
+%term _ 
+	%pi (merge-all-in (merge/cons-2 DM1 DL) DHL1' (all-in-nat-list/cons DHL2' in-nat-list/hit))
+	%<- (merge-all-in DM1 DHL2 DHL1)
+	%<- (all-in-nat-list-wkn _ DHL1 DHL1')
+	%<- (all-in-nat-list-wkn _ DHL2 DHL2') %.
+%worlds () (merge-all-in _ _ _) %.
+%total (D1) (merge-all-in D1 _ _) %.
+%sort in-nat-list-trans %.
+%mode in-nat-list-trans %in %in %out %.
+%term _ in-nat-list-trans in-nat-list/hit (all-in-nat-list/cons _ D1) D1 %.
+%term _ 
+	%pi (in-nat-list-trans (in-nat-list/miss D1) (all-in-nat-list/cons D _) D1')
+	%<- (in-nat-list-trans D1 D D1') %.
+%worlds () (in-nat-list-trans _ _ _) %.
+%total (D1) (in-nat-list-trans D1 _ _) %.
+%sort all-in-2-trans %.
+%mode all-in-2-trans %in %in %in %out %.
+%term _ all-in-2-trans all-in-2/nil _ _ all-in-nat-list/nil %.
+%term _ 
+	%pi (all-in-2-trans (all-in-2/cons-1 DHL DIN) DA DB (all-in-nat-list/cons DHL' DIN'))
+	%<- (all-in-2-trans DHL DA DB DHL')
+	%<- (in-nat-list-trans DIN DA DIN') %.
+%term _ 
+	%pi (all-in-2-trans (all-in-2/cons-2 DHL DIN) DA DB (all-in-nat-list/cons DHL' DIN'))
+	%<- (all-in-2-trans DHL DA DB DHL')
+	%<- (in-nat-list-trans DIN DB DIN') %.
+%worlds () (all-in-2-trans _ _ _ _) %.
+%total (D1) (all-in-2-trans D1 _ _ _) %.
+%sort all-in-2-trans-a %.
+%mode all-in-2-trans-a %in %in %in %out %.
+%term _ all-in-2-trans-a all-in-2/nil _ _ all-in-2/nil %.
+%term _ 
+	%pi (all-in-2-trans-a (all-in-2/cons-1 DHL DIN) DA DB (all-in-2/cons-1 DHL' DIN'))
+	%<- (all-in-2-trans-a DHL DA DB DHL')
+	%<- (in-nat-list-trans DIN DA DIN') %.
+%term _ 
+	%pi (all-in-2-trans-a (all-in-2/cons-2 DHL DIN) DA DB (all-in-2/cons-2 DHL' DIN'))
+	%<- (all-in-2-trans-a DHL DA DB DHL')
+	%<- (in-nat-list-trans DIN DB DIN') %.
+%worlds () (all-in-2-trans-a _ _ _ _) %.
+%total (D1) (all-in-2-trans-a D1 _ _ _) %.
+%sort mergesort-all-in %.
+%mode mergesort-all-in %in %out %.
+%term _ mergesort-all-in mergesort/nil all-in-nat-list/nil %.
+%term _ mergesort-all-in mergesort/1 (all-in-nat-list/cons all-in-nat-list/nil in-nat-list/hit) %.
+%term _ 
+	%pi (mergesort-all-in (mergesort/cons Dmerge Dms2 Dms1 Dsplit) DHLtwo'')
+	%<- (split-all-in-2 Dsplit (%the (all-in-2 NL NA NB) DHLtwo))
+	%<- (mergesort-all-in Dms1 (%the (all-in-nat-list NA NA') DHL1))
+	%<- (mergesort-all-in Dms2 DHL2)
+	%<- (merge-all-in Dmerge DHL3 DHL4)
+	%<- (all-in-2-trans-a DHLtwo DHL1 DHL2 DHLtwo')
+	%<- (all-in-2-trans DHLtwo' DHL3 DHL4 DHLtwo'') %.
+%worlds () (mergesort-all-in _ _) %.
+%total (D1) (mergesort-all-in D1 _) %.
+%sort all-in-2-refl-r {NL} {NL'} %.
+%mode all-in-2-refl-r %in %in %out %.
+%term _ all-in-2-refl-r _ _ all-in-2/nil %.
+%term _ 
+	%pi (all-in-2-refl-r (nat-list/cons N NL) _ (all-in-2/cons-2 DHL' in-nat-list/hit))
+	%<- (all-in-2-refl-r NL _ DHL)
+	%<- (all-in-2-wkn-r _ DHL DHL') %.
+%worlds () (all-in-2-refl-r _ _ _) %.
+%total (D1) (all-in-2-refl-r D1 _ _) %.
+%sort all-in-2-refl-l {NL} {NL'} %.
+%mode all-in-2-refl-l %in %in %out %.
+%term _ all-in-2-refl-l _ _ all-in-2/nil %.
+%term _ 
+	%pi (all-in-2-refl-l (nat-list/cons N NL) _ (all-in-2/cons-1 DHL' in-nat-list/hit))
+	%<- (all-in-2-refl-l NL _ DHL)
+	%<- (all-in-2-wkn-l _ DHL DHL') %.
+%worlds () (all-in-2-refl-l _ _ _) %.
+%total (D1) (all-in-2-refl-l D1 _ _) %.
+%sort all-in-2-sym %.
+%mode all-in-2-sym %in %out %.
+%term _ all-in-2-sym all-in-2/nil all-in-2/nil %.
+%term _ 
+	%pi (all-in-2-sym (all-in-2/cons-1 DHL DIN) (all-in-2/cons-2 DHL' DIN))
+	%<- (all-in-2-sym DHL DHL') %.
+%term _ 
+	%pi (all-in-2-sym (all-in-2/cons-2 DHL DIN) (all-in-2/cons-1 DHL' DIN))
+	%<- (all-in-2-sym DHL DHL') %.
+%worlds () (all-in-2-sym _ _) %.
+%total (D1) (all-in-2-sym D1 _) %.
+%sort merge-all-in-2 %.
+%mode merge-all-in-2 %in %out %.
+%term _ %pi (merge-all-in-2 merge/nil-1 D1) %<- (all-in-2-refl-r _ _ D1) %.
+%term _ %pi (merge-all-in-2 merge/nil-2 D1) %<- (all-in-2-refl-l _ _ D1) %.
+%term _ 
+	%pi (merge-all-in-2 (merge/cons-1 DM _) (all-in-2/cons-1 DHL' in-nat-list/hit))
+	%<- (merge-all-in-2 DM DHL)
+	%<- (all-in-2-wkn-l _ DHL DHL') %.
+%term _ 
+	%pi (merge-all-in-2 (merge/cons-2 DM _) (all-in-2/cons-2 DHL'' in-nat-list/hit))
+	%<- (merge-all-in-2 DM DHL)
+	%<- (all-in-2-wkn-l _ DHL DHL')
+	%<- (all-in-2-sym DHL' DHL'') %.
+%worlds () (merge-all-in-2 _ _) %.
+%total (D1) (merge-all-in-2 D1 _) %.
+%sort split-all-in %.
+%mode split-all-in %in %out %out %.
+%term _ split-all-in split/nil all-in-nat-list/nil all-in-nat-list/nil %.
+%term _ split-all-in split/1 (all-in-nat-list/cons all-in-nat-list/nil in-nat-list/hit) all-in-nat-list/nil %.
+%term _ 
+	%pi (split-all-in (split/cons DS) (all-in-nat-list/cons DHL'' in-nat-list/hit) (all-in-nat-list/cons DBL'' (in-nat-list/miss in-nat-list/hit)))
+	%<- (split-all-in DS DHL DBL)
+	%<- (all-in-nat-list-wkn _ DHL DHL')
+	%<- (all-in-nat-list-wkn _ DHL' DHL'')
+	%<- (all-in-nat-list-wkn _ DBL DBL')
+	%<- (all-in-nat-list-wkn _ DBL' DBL'') %.
+%worlds () (split-all-in _ _ _) %.
+%total (D1) (split-all-in D1 _ _) %.
+%sort mergesort-all-in-r %.
+%mode mergesort-all-in-r %in %out %.
+%term _ mergesort-all-in-r mergesort/nil all-in-nat-list/nil %.
+%term _ mergesort-all-in-r mergesort/1 (all-in-nat-list/cons all-in-nat-list/nil in-nat-list/hit) %.
+%term _ 
+	%pi (mergesort-all-in-r (mergesort/cons Dmerge Dms2 Dms1 Dsplit) DHLtwo'')
+	%<- (merge-all-in-2 Dmerge (%the (all-in-2 NL NA NB) DHLtwo))
+	%<- (mergesort-all-in-r Dms1 (%the (all-in-nat-list NA NA') DHL1))
+	%<- (mergesort-all-in-r Dms2 DHL2)
+	%<- (split-all-in Dsplit DHL3 DHL4)
+	%<- (all-in-2-trans-a DHLtwo DHL1 DHL2 DHLtwo')
+	%<- (all-in-2-trans DHLtwo' DHL3 DHL4 DHLtwo'') %.
+%worlds () (mergesort-all-in-r _ _) %.
+%total (D1) (mergesort-all-in-r D1 _) %.
+%sort mergesort-permute %.
+%mode mergesort-permute %in %out %.
+%term _ 
+	%pi (mergesort-permute D1 (nat-list-permute/i DB DA))
+	%<- (mergesort-all-in D1 DA)
+	%<- (mergesort-all-in-r D1 DB) %.
+%worlds () (mergesort-permute _ _) %.
+%total {} (mergesort-permute _ _) %.
+%{! ### Final result
+Showing the final result merely requires composing the two big intermediate results, namely that mergesort produces a sorted output and that mergesort's output is a permutation of the input.
+
+!}%
+%sort mergesort-correct %.
+%mode mergesort-correct %in %out %.
+%term _ 
+	%pi (mergesort-correct D1 (nat-list-declarative-sort/i Dsorted Dpermute))
+	%<- (mergesort-permute D1 Dpermute)
+	%<- (mergesort-sorted D1 Dsorted) %.
+%worlds () (mergesort-correct _ _) %.
+%total {} (mergesort-correct _ _) %.
+%{! 
+
+----
+
+## Equivalence of definitions of permutations
+
+We can also show that ``nat-list-permute`` under the right constraints (implied by ``nat-list-sorted`` is equivalent to a definition of permutations as a composition of swaps.
+
+Note: Maybe this should be its own article?
+
+!}%
+%sort all-in-nat-list-trans %.
+%mode all-in-nat-list-trans %in %in %out %.
+%term _ all-in-nat-list-trans all-in-nat-list/nil _ all-in-nat-list/nil %.
+%term _ 
+	%pi (all-in-nat-list-trans (all-in-nat-list/cons D2 D1) D3 (all-in-nat-list/cons D5 D4))
+	%<- (in-nat-list-trans D1 D3 D4)
+	%<- (all-in-nat-list-trans D2 D3 D5) %.
+%worlds () (all-in-nat-list-trans _ _ _) %.
+%total (D1) (all-in-nat-list-trans D1 _ _) %.
+%sort nat-list-permutes %.
+%term nat-list-permutes/nil nat-list-permutes nat-list/nil nat-list/nil %.
+%term nat-list-permutes/cons 
+	%pi (nat-list-permutes (nat-list/cons N1 NL) (nat-list/cons N1 NL'))
+	%<- (nat-list-permutes NL NL') %.
+%term nat-list-permutes/swap nat-list-permutes (nat-list/cons N1 (nat-list/cons N2 NL)) (nat-list/cons N2 (nat-list/cons N1 NL)) %.
+%term nat-list-permutes/trans 
+	%pi (nat-list-permutes N1 N3)
+	%<- (nat-list-permutes N1 N2)
+	%<- (nat-list-permutes N2 N3) %.
+%sort nat-list-permutes-all-in %.
+%mode nat-list-permutes-all-in %in %out %.
+%term _ nat-list-permutes-all-in nat-list-permutes/nil all-in-nat-list/nil %.
+%term _ 
+	%pi (nat-list-permutes-all-in (nat-list-permutes/cons D1) (all-in-nat-list/cons D2' in-nat-list/hit))
+	%<- (nat-list-permutes-all-in D1 D2)
+	%<- (all-in-nat-list-wkn _ D2 D2') %.
+%term _ 
+	%pi (nat-list-permutes-all-in nat-list-permutes/swap (all-in-nat-list/cons (all-in-nat-list/cons D1'' in-nat-list/hit) (in-nat-list/miss in-nat-list/hit)))
+	%<- (all-in-nat-list-refl _ D1)
+	%<- (all-in-nat-list-wkn _ D1 D1')
+	%<- (all-in-nat-list-wkn _ D1' D1'') %.
+%term _ 
+	%pi (nat-list-permutes-all-in (nat-list-permutes/trans D2 D1) D3')
+	%<- (nat-list-permutes-all-in D1 D1')
+	%<- (nat-list-permutes-all-in D2 D2')
+	%<- (all-in-nat-list-trans D1' D2' D3') %.
+%worlds () (nat-list-permutes-all-in _ _) %.
+%total (D1) (nat-list-permutes-all-in D1 _) %.
+%sort nat-neq %.
+%term nat-neq/l %pi (nat-neq N1 N2) %<- (nat-less N1 N2) %.
+%term nat-neq/r %pi (nat-neq N1 N2) %<- (nat-less N2 N1) %.
+%sort nin-nat-list %.
+%term nin-nat-list/nil nin-nat-list N1 nat-list/nil %.
+%term nin-nat-list/cons 
+	%pi (nin-nat-list N1 (nat-list/cons N2 NL))
+	%<- (nat-neq N1 N2)
+	%<- (nin-nat-list N1 NL) %.
+%sort nat-list-no-dups %.
+%term nat-list-no-dups/nil nat-list-no-dups nat-list/nil %.
+%term nat-list-no-dups/cons 
+	%pi (nat-list-no-dups (nat-list/cons N1 NL))
+	%<- (nin-nat-list N1 NL)
+	%<- (nat-list-no-dups NL) %.
+%sort nat-list-permutes-refl {NL} %.
+%mode nat-list-permutes-refl %in %out %.
+%term _ nat-list-permutes-refl nat-list/nil nat-list-permutes/nil %.
+%term _ 
+	%pi (nat-list-permutes-refl (nat-list/cons _ NL) (nat-list-permutes/cons D1))
+	%<- (nat-list-permutes-refl NL D1) %.
+%worlds () (nat-list-permutes-refl _ _) %.
+%total (D1) (nat-list-permutes-refl D1 _) %.
+%sort nat-list-permutes-sym %.
+%mode nat-list-permutes-sym %in %out %.
+%term _ nat-list-permutes-sym nat-list-permutes/nil nat-list-permutes/nil %.
+%term _ 
+	%pi (nat-list-permutes-sym (nat-list-permutes/cons D1) (nat-list-permutes/cons D1'))
+	%<- (nat-list-permutes-sym D1 D1') %.
+%term _ nat-list-permutes-sym nat-list-permutes/swap nat-list-permutes/swap %.
+%term _ 
+	%pi (nat-list-permutes-sym (nat-list-permutes/trans D2 D1) (nat-list-permutes/trans D1' D2'))
+	%<- (nat-list-permutes-sym D1 D1')
+	%<- (nat-list-permutes-sym D2 D2') %.
+%worlds () (nat-list-permutes-sym _ _) %.
+%total (D1) (nat-list-permutes-sym D1 _) %.
+%sort nat-list-permutes-swap-head-2 %.
+%mode nat-list-permutes-swap-head-2 %in %out %.
+%term _ nat-list-permutes-swap-head-2 D1 (nat-list-permutes/trans nat-list-permutes/swap D1) %.
+%worlds () (nat-list-permutes-swap-head-2 _ _) %.
+%total {} (nat-list-permutes-swap-head-2 _ _) %.
+%sort in-nat-list-permutes %.
+%mode in-nat-list-permutes %in %out %.
+%term _ %pi (in-nat-list-permutes in-nat-list/hit D1) %<- (nat-list-permutes-refl _ D1) %.
+%term _ 
+	%pi (in-nat-list-permutes (in-nat-list/miss (%the (in-nat-list N (nat-list/cons N2 NL)) D1)) DP)
+	%<- (in-nat-list-permutes D1 (%the (nat-list-permutes (nat-list/cons N2 NL) (nat-list/cons N NL')) DL))
+	%<- (nat-list-permutes-swap-head-2 (nat-list-permutes/cons DL) DP) %.
+%worlds () (in-nat-list-permutes _ _) %.
+%total (D1) (in-nat-list-permutes D1 _) %.
+%sort nin-nat-list-permutes %.
+%mode nin-nat-list-permutes %in %in %out %.
+%term _ nin-nat-list-permutes _ nat-list-permutes/nil nin-nat-list/nil %.
+%term _ 
+	%pi (nin-nat-list-permutes (nin-nat-list/cons D1 Dneq) (nat-list-permutes/cons D2) (nin-nat-list/cons D1' Dneq))
+	%<- (nin-nat-list-permutes D1 D2 D1') %.
+%term _ nin-nat-list-permutes (nin-nat-list/cons (nin-nat-list/cons D1 Dneq2) Dneq1) nat-list-permutes/swap (nin-nat-list/cons (nin-nat-list/cons D1 Dneq1) Dneq2) %.
+%term _ 
+	%pi (nin-nat-list-permutes D1 (nat-list-permutes/trans D3 D2) D1'')
+	%<- (nin-nat-list-permutes D1 D2 D1')
+	%<- (nin-nat-list-permutes D1' D3 D1'') %.
+%worlds () (nin-nat-list-permutes _ _ _) %.
+%total (D1) (nin-nat-list-permutes _ D1 _) %.
+%sort nat-neq-sym %.
+%mode nat-neq-sym %in %out %.
+%term _ nat-neq-sym (nat-neq/l D1) (nat-neq/r D1) %.
+%term _ nat-neq-sym (nat-neq/r D1) (nat-neq/l D1) %.
+%worlds () (nat-neq-sym _ _) %.
+%total {} (nat-neq-sym _ _) %.
+%sort no-dups-permutes %.
+%mode no-dups-permutes %in %in %out %.
+%term _ no-dups-permutes _ nat-list-permutes/nil nat-list-no-dups/nil %.
+%term _ 
+	%pi (no-dups-permutes (nat-list-no-dups/cons D2 D1) (nat-list-permutes/cons D3) (nat-list-no-dups/cons D2' D1'))
+	%<- (nin-nat-list-permutes D1 D3 D1')
+	%<- (no-dups-permutes D2 D3 D2') %.
+%term _ 
+	%pi (no-dups-permutes (nat-list-no-dups/cons (nat-list-no-dups/cons D3 DninB) (nin-nat-list/cons DninA DneqA1)) nat-list-permutes/swap (nat-list-no-dups/cons (nat-list-no-dups/cons D3 DninA) (nin-nat-list/cons DninB DneqA1')))
+	%<- (nat-neq-sym DneqA1 DneqA1') %.
+%term _ 
+	%pi (no-dups-permutes D1 (nat-list-permutes/trans D3 D2) D1'')
+	%<- (no-dups-permutes D1 D2 D1')
+	%<- (no-dups-permutes D1' D3 D1'') %.
+%worlds () (no-dups-permutes _ _ _) %.
+%total (D1) (no-dups-permutes _ D1 _) %.
+%sort nat-list-length %.
+%term nat-list-length/z nat-list-length nat-list/nil z %.
+%term nat-list-length/s %pi (nat-list-length (nat-list/cons _ NL) (s N)) %<- (nat-list-length NL N) %.
+%sort permutes-length %.
+%mode permutes-length %in %in %out %.
+%term _ permutes-length _ nat-list-permutes/nil nat-list-length/z %.
+%term _ 
+	%pi (permutes-length (nat-list-length/s D1) (nat-list-permutes/cons D2) (nat-list-length/s D3))
+	%<- (permutes-length D1 D2 D3) %.
+%term _ permutes-length (nat-list-length/s (nat-list-length/s D1)) nat-list-permutes/swap (nat-list-length/s (nat-list-length/s D1)) %.
+%term _ 
+	%pi (permutes-length D1 (nat-list-permutes/trans D3 D2) D3')
+	%<- (permutes-length D1 D2 D1')
+	%<- (permutes-length D1' D3 D3') %.
+%worlds () (permutes-length _ _ _) %.
+%total (D1) (permutes-length _ D1 _) %.
+%sort uninhabited %.
+%sort nat-less-irrefl %.
+%mode nat-less-irrefl %in %out %.
+%term _ %pi (nat-less-irrefl (nat-less/s D1) DU) %<- (nat-less-irrefl D1 DU) %.
+%worlds () (nat-less-irrefl _ _) %.
+%total (D1) (nat-less-irrefl D1 _) %.
+%sort nat-neq-irrefl %.
+%mode nat-neq-irrefl %in %out %.
+%term _ %pi (nat-neq-irrefl (nat-neq/l D1) DU) %<- (nat-less-irrefl D1 DU) %.
+%term _ %pi (nat-neq-irrefl (nat-neq/r D1) DU) %<- (nat-less-irrefl D1 DU) %.
+%worlds () (nat-neq-irrefl _ _) %.
+%total {} (nat-neq-irrefl _ _) %.
+%sort uninhabited-in-nat-list {N1} {NL} %.
+%mode uninhabited-in-nat-list %in %in %in %out %.
+%worlds () (uninhabited-in-nat-list _ _ _ _) %.
+%total {} (uninhabited-in-nat-list _ _ _ _) %.
+%sort in-nat-list-strengthen %.
+%mode in-nat-list-strengthen %in %in %out %.
+%term _ in-nat-list-strengthen _ (in-nat-list/miss D1) D1 %.
+%term _ 
+	%pi (in-nat-list-strengthen D1 in-nat-list/hit D1')
+	%<- (nat-neq-irrefl D1 DU)
+	%<- (uninhabited-in-nat-list _ _ DU D1') %.
+%worlds () (in-nat-list-strengthen _ _ _) %.
+%total (D1) (in-nat-list-strengthen _ D1 _) %.
+%sort all-in-strengthen %.
+%mode all-in-strengthen %in %in %out %.
+%term _ all-in-strengthen _ all-in-nat-list/nil all-in-nat-list/nil %.
+%term _ 
+	%pi (all-in-strengthen (nin-nat-list/cons D1 Dneq) (all-in-nat-list/cons DB DA) (all-in-nat-list/cons DB' DA'))
+	%<- (all-in-strengthen D1 DB DB')
+	%<- (in-nat-list-strengthen Dneq DA DA') %.
+%worlds () (all-in-strengthen _ _ _) %.
+%total (D1) (all-in-strengthen _ D1 _) %.
+%sort all-in-no-dups-permutes {N} %.
+%mode all-in-no-dups-permutes %in %in %in %in %in %out %.
+%term _ all-in-no-dups-permutes _ _ _ _ all-in-nat-list/nil nat-list-permutes/nil %.
+%term _ 
+	%pi (all-in-no-dups-permutes _ (nat-list-no-dups/cons D1 DNINN) (nat-list-length/s Dl1) DN (all-in-nat-list/cons (%the (all-in-nat-list NL NL') DA) DIN) (nat-list-permutes/trans DP' (nat-list-permutes/cons DPP)))
+	%<- (in-nat-list-permutes DIN (%the (nat-list-permutes NL' (nat-list/cons N1 NL'')) DP))
+	%<- (nat-list-permutes-all-in DP (%the (all-in-nat-list NL' (nat-list/cons N1 NL'')) DIN'))
+	%<- (permutes-length DN DP (nat-list-length/s D3'))
+	%<- (all-in-nat-list-trans DA DIN' DIN'')
+	%<- (all-in-strengthen DNINN DIN'' DIN''')
+	%<- (all-in-no-dups-permutes _ D1 Dl1 D3' DIN''' DPP)
+	%<- (nat-list-permutes-sym DP DP') %.
+%worlds () (all-in-no-dups-permutes _ _ _ _ _ _) %.
+%total (D1) (all-in-no-dups-permutes D1 _ _ _ _ _) %.
+%{! 
+
+TODO: Finish commentary on the proof. 
+
+\{\{stub\}\}
+!}%
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Correctness_of_mergesort).
+!}%

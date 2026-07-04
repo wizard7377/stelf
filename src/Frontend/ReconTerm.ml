@@ -26,6 +26,9 @@ open! Basis
 (* ------------------- *)
 (* Type Reconstruction *)
 (* ------------------- *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ReconTerm (ReconTerm__0 : sig
   (*! structure IntSyn' : INTSYN !*)
   module Names : NAMES
@@ -78,7 +81,7 @@ end) : RECON_TERM = struct
     in
     run' !delayedList
 
-  exception Error of string
+  exception Error = Error
 
   let errorCount = ref 0
   let errorFileName = ref "no file"

@@ -1,6 +1,7 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation (backend bisect_ppx))
  (name typecheck)
  (public_name stelf.typecheck)
  (modules Typecheck_ Strict STRICT TYPECHECK)

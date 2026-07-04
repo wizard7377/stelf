@@ -11,8 +11,11 @@ open! Basis
 include MODESYN
 
 (* signature MODESYN *)
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module ModeSyn : MODESYN = struct
-  exception Error of string
+  exception Error = Error
 
   type mode = Plus | Star | Minus | Minus1 [@@deriving eq, ord, show]
 

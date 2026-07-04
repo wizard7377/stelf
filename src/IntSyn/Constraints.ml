@@ -19,10 +19,13 @@ open Intsyn_
 (* Manipulating Constraints *)
 (* Author: Jeff Polakow, Frank Pfenning *)
 (* Modified: Roberto Virga *)
+exception Error of IntSyn.cnstr list
+let () = Printexc.register_printer (function Error _ -> Some "Constraint error" | _ -> None)
+
 module MakeConstraints (Conv : CONV) : CONSTRAINTS = struct
   (*! structure IntSyn = IntSyn' !*)
 
-  exception Error of IntSyn.cnstr list
+  exception Error = Error
 
   (*
      Constraints cnstr are of the form (X<I>[s] = U).

@@ -303,6 +303,12 @@ module MakeNames
     | Some (_, cid') -> Array.update (shadowArray, cid, Some cid')
     end
 
+  let rec installAlias (name, cid) =
+    ignore (topInsert (name, cid))
+
+  let rec insertConstAlias ((structTable, constTable), name, cid) =
+    ignore (StringTree.insertShadow constTable (name, cid))
+
   let rec uninstallConst cid =
     let condec_ = IntSyn.sgnLookup cid in
     let id = IntSyn.conDecName condec_ in
@@ -1079,3 +1085,5 @@ module Names =
     (TableInstances.StringRedBlackTree)
 
 include Names
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+let () = Printexc.register_printer (function Unprintable -> Some "Unprintable" | _ -> None)

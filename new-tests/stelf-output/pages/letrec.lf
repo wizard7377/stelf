@@ -1,0 +1,295 @@
+%                  
+%{! An example of encoding ``letrec``, i.e. let-binding a bundle of mutually recursive expressions !}%
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort tp %.
+%term natt tp %.
+%term arrow %pi tp %-> tp %-> tp %.
+%sort tplist %.
+%term tplist/z tplist z %.
+%term tplist/s %pi tp %-> (tplist N) %-> (tplist (s N)) %.
+%sort exp %.
+%sort oexp %.
+%sort explist %.
+%{! 
+oexplist N M, is a list of M expressions with N bound variables
+!}%
+%sort oexplist %.
+%term zero exp %.
+%term succ %pi exp %-> exp %.
+%term case %pi exp %-> exp %-> (%pi exp %-> exp) %-> exp %.
+%term let %pi exp %-> (%pi exp %-> exp) %-> exp %.
+%term letrec %pi (oexplist N N) %-> (oexp N) %-> exp %.
+%term bproj %pi (oexplist N N) %-> nat %-> exp %.
+% projecting from a bundle
+%term lam %pi (%pi exp %-> exp) %-> exp %.
+%term app %pi exp %-> exp %-> exp %.
+%term oexp/z %pi exp %-> (oexp z) %.
+%term oexp/s %pi (%pi exp %-> (oexp N)) %-> (oexp (s N)) %.
+%term explist/z explist z %.
+%term explist/s %pi exp %-> (explist N) %-> (explist (s N)) %.
+%term oexplist/z %pi (explist N) %-> (oexplist z N) %.
+%term oexplist/s %pi (%pi exp %-> (oexplist N M)) %-> (oexplist (s N) M) %.
+%sort tplist-get %.
+%term tplist-get/hit tplist-get z (tplist/s T TL) T %.
+%term tplist-get/miss %pi (tplist-get (s N) (tplist/s T TL) T') %<- (tplist-get N TL T') %.
+%sort of-exp %.
+%sort of-oexp %.
+%sort of-explist %.
+%sort of-oexplist %.
+%term of-exp/zero of-exp zero natt %.
+%term of-exp/succ %pi (of-exp (succ E) natt) %<- (of-exp E natt) %.
+%term of-exp/case 
+	%pi (of-exp (case E1 E2 E3) T)
+	%<- (of-exp E1 natt)
+	%<- (of-exp E2 T)
+	%<- ({x} %pi (of-exp x natt) %-> (of-exp (E3 x) T)) %.
+%term of-exp/let 
+	%pi (of-exp (let E1 E2) T')
+	%<- (of-exp E1 T)
+	%<- ({x} %pi (of-exp x T) %-> (of-exp (E2 x) T')) %.
+%term of-exp/letrec %pi (of-exp (letrec OEL OE) T) %<- (of-oexplist TL OEL TL) %<- (of-oexp TL OE T) %.
+%term of-exp/bproj %pi (of-exp (bproj OE N) T) %<- (of-oexplist TL OE TL) %<- (tplist-get N TL T) %.
+%term of-exp/lam 
+	%pi (of-exp (lam E) (arrow T1 T2))
+	%<- ({x} %pi (of-exp x T1) %-> (of-exp (E x) T2)) %.
+%term of-exp/app %pi (of-exp (app E1 E2) T2) %<- (of-exp E1 (arrow T1 T2)) %<- (of-exp E2 T1) %.
+%term of-oexp/z %pi (of-oexp tplist/z (oexp/z E) T) %<- (of-exp E T) %.
+%term of-oexp/s 
+	%pi (of-oexp (tplist/s T TL) (oexp/s ([x] EL x)) T')
+	%<- ({x} %pi (of-exp x T) %-> (of-oexp TL (EL x) T')) %.
+%sort of-explist %.
+%term of-explist/z of-explist explist/z tplist/z %.
+%term of-explist/s 
+	%pi (of-explist (explist/s E EL) (tplist/s T TL))
+	%<- (of-exp E T)
+	%<- (of-explist EL TL) %.
+%term of-oexplist/z %pi (of-oexplist tplist/z (oexplist/z EL) TL) %<- (of-explist EL TL) %.
+%term of-oexplist/s 
+	%pi (of-oexplist (tplist/s T TL) (oexplist/s OEL) TL')
+	%<- ({x} %pi (of-exp x T) %-> (of-oexplist TL (OEL x) TL')) %.
+%sort value %.
+%term value/zero value zero %.
+%term value/succ %pi (value (succ E)) %<- (value E) %.
+%term value/lam value (lam E) %.
+%sort subst-oexp %.
+%term subst-oexp/z subst-oexp explist/z (oexp/z E) E %.
+%term subst-oexp/s 
+	%pi (subst-oexp (explist/s E EL) (oexp/s ([x] OE x)) E')
+	%<- (subst-oexp EL (OE E) E') %.
+%sort expand-oexplist %.
+%term expand-oexplist/z expand-oexplist _ _ (oexplist/z EL) EL %.
+%term expand-oexplist/s 
+	%pi (expand-oexplist N OEL (oexplist/s OEL') EL)
+	%<- (expand-oexplist (s N) OEL (OEL' (bproj OEL N)) EL) %.
+%sort explist-get %.
+%term explist-get/hit explist-get z (explist/s E EL) E %.
+%term explist-get/miss %pi (explist-get (s N) (explist/s E EL) E') %<- (explist-get N EL E') %.
+%sort step %.
+%term step/succ %pi (step (succ E) (succ E')) %<- (step E E') %.
+%term step/case %pi (step (case E1 E2 E3) (case E1' E2 E3)) %<- (step E1 E1') %.
+%term step/case-beta-1 step (case zero E2 E3) E2 %.
+%term step/case-beta-2 %pi (step (case (succ E1) E2 E3) (E3 E1)) %<- (value E1) %.
+%term step/let %pi (step (let E1 E2) (let E1' E2)) %<- (step E1 E1') %.
+%term step/let-beta %pi (step (let E1 E2) (E2 E1)) %<- (value E1) %.
+%term step/letrec 
+	%pi (step (letrec OEL OE) E)
+	%<- (expand-oexplist z OEL OEL EL)
+	%<- (subst-oexp EL OE E) %.
+%term step/bproj 
+	%pi (step (bproj OEL N) E)
+	%<- (expand-oexplist z OEL OEL EL)
+	%<- (explist-get N EL E) %.
+%term step/app-1 %pi (step (app E1 E2) (app E1' E2)) %<- (step E1 E1') %.
+%term step/app-2 %pi (step (app E1 E2) (app E1 E2')) %<- (value E1) %<- (step E2 E2') %.
+%term step/app-beta %pi (step (app (lam E) E2) (E E2)) %<- (value E2) %.
+%sort nat-plus %.
+%term nat-plus/z nat-plus z N N %.
+%term nat-plus/s %pi (nat-plus (s N1) N2 (s N3)) %<- (nat-plus N1 N2 N3) %.
+%sort nat-plus-move-s %.
+%mode nat-plus-move-s %in %out %.
+%term _ nat-plus-move-s (nat-plus/s nat-plus/z) nat-plus/z %.
+%term _ %pi (nat-plus-move-s (nat-plus/s D1) (nat-plus/s D2)) %<- (nat-plus-move-s D1 D2) %.
+%worlds () (nat-plus-move-s _ _) %.
+%total (D1) (nat-plus-move-s D1 _) %.
+%sort can-expand-oexplist {N} {OEL oexplist NN NN} {OEL' oexplist N NN} %.
+%mode can-expand-oexplist %in %in %in %in %out %.
+%term _ can-expand-oexplist z OEL (oexplist/z EL) nat-plus/z expand-oexplist/z %.
+%term _ 
+	%pi (can-expand-oexplist (s N) _ _ NP (expand-oexplist/s DEO))
+	%<- (nat-plus-move-s NP NP')
+	%<- (can-expand-oexplist N _ _ NP' DEO) %.
+%worlds () (can-expand-oexplist _ _ _ _ _) %.
+%total (D1) (can-expand-oexplist D1 _ _ _ _) %.
+%sort nat-plus-z {N} %.
+%mode nat-plus-z %in %out %.
+%term _ nat-plus-z _ nat-plus/z %.
+%term _ %pi (nat-plus-z _ (nat-plus/s D1)) %<- (nat-plus-z _ D1) %.
+%worlds () (nat-plus-z _ _) %.
+%total (D1) (nat-plus-z D1 _) %.
+%sort notstuck %.
+%term notstuck/value %pi (notstuck E) %<- (value E) %.
+%term notstuck/step %pi (notstuck E) %<- (step E E') %.
+%sort can-subst-oexp {EL explist N} {OE oexp N} %.
+%mode can-subst-oexp %in %in %out %.
+%term _ can-subst-oexp _ _ subst-oexp/z %.
+%term _ 
+	%pi (can-subst-oexp (explist/s E EL) _ (subst-oexp/s D1))
+	%<- (can-subst-oexp EL _ D1) %.
+%worlds () (can-subst-oexp _ _ _) %.
+%total (D1) (can-subst-oexp D1 _ _) %.
+%sort can-explist-get {EL explist N'} %.
+%mode can-explist-get %in %in %out %.
+%term _ can-explist-get _ tplist-get/hit explist-get/hit %.
+%term _ 
+	%pi (can-explist-get _ (tplist-get/miss D2) (explist-get/miss D'))
+	%<- (can-explist-get _ D2 D') %.
+%worlds () (can-explist-get _ _ _) %.
+%total (D2) (can-explist-get _ D2 _) %.
+%sort progress-case {E1} {E2} %.
+%mode progress-case %in %in %in %in %out %.
+%term _ progress-case _ _ _ (notstuck/step S) (notstuck/step (step/case S)) %.
+%term _ progress-case _ _ of-exp/zero (notstuck/value _) (notstuck/step step/case-beta-1) %.
+%term _ progress-case _ _ (of-exp/succ _) (notstuck/value (value/succ DV)) (notstuck/step (step/case-beta-2 DV)) %.
+%worlds () (progress-case _ _ _ _ _) %.
+%total {} (progress-case _ _ _ _ _) %.
+%sort progress-succ %.
+%mode progress-succ %in %out %.
+%term _ progress-succ (notstuck/step DS) (notstuck/step (step/succ DS)) %.
+%term _ progress-succ (notstuck/value DV1) (notstuck/value (value/succ DV1)) %.
+%worlds () (progress-succ _ _) %.
+%total {} (progress-succ _ _) %.
+%sort progress-app %.
+%mode progress-app %in %in %in %in %out %.
+%term _ progress-app _ _ (notstuck/step DS) _ (notstuck/step (step/app-1 DS)) %.
+%term _ progress-app _ _ (notstuck/value V) (notstuck/step DS) (notstuck/step (step/app-2 DS V)) %.
+%term _ progress-app (of-exp/lam DM) D2 (notstuck/value value/lam) (notstuck/value DV) (notstuck/step (step/app-beta DV)) %.
+%worlds () (progress-app _ _ _ _ _) %.
+%total {} (progress-app _ _ _ _ _) %.
+%sort progress-let {E2} %.
+%mode progress-let %in %in %out %.
+%term _ progress-let _ (notstuck/step S) (notstuck/step (step/let S)) %.
+%term _ progress-let _ (notstuck/value V) (notstuck/step (step/let-beta V)) %.
+%worlds () (progress-let _ _ _) %.
+%total {} (progress-let _ _ _) %.
+%sort progress %.
+%mode progress %in %out %.
+%term _ progress (of-exp/lam _) (notstuck/value value/lam) %.
+%term _ 
+	%pi (progress (of-exp/app D2 D1) NS3)
+	%<- (progress D1 NS1)
+	%<- (progress D2 NS2)
+	%<- (progress-app D1 D2 NS1 NS2 NS3) %.
+%term _ progress of-exp/zero (notstuck/value value/zero) %.
+%term _ 
+	%pi (progress (of-exp/succ D1) NS)
+	%<- (progress D1 NS1)
+	%<- (progress-succ NS1 NS) %.
+%term _ 
+	%pi (progress (of-exp/case _ _ D1) NS)
+	%<- (progress D1 NS1)
+	%<- (progress-case _ _ D1 NS1 NS) %.
+%term _ 
+	%pi (progress (of-exp/let _ D1) NS)
+	%<- (progress D1 NS1)
+	%<- (progress-let _ NS1 NS) %.
+%term _ 
+	%pi (progress (of-exp/letrec D2 D1) (notstuck/step (step/letrec DS DX)))
+	%<- (nat-plus-z _ DNP)
+	%<- (can-expand-oexplist _ _ _ DNP DX)
+	%<- (can-subst-oexp _ _ DS) %.
+%term _ 
+	%pi (progress (of-exp/bproj D2 D1) (notstuck/step (step/bproj DS DX)))
+	%<- (nat-plus-z _ DNP)
+	%<- (can-expand-oexplist _ _ _ DNP DX)
+	%<- (can-explist-get _ D2 DS) %.
+%worlds () (progress _ _) %.
+%total (D1) (progress D1 _) %.
+%sort tplist-prefix %.
+%term tplist-prefix/z tplist-prefix z TL TL %.
+%term tplist-prefix/s %pi (tplist-prefix (s N) (tplist/s T TL) TL') %<- (tplist-prefix N TL TL') %.
+%sort tplist-prefix-get %.
+%mode tplist-prefix-get %in %out %.
+%term _ tplist-prefix-get tplist-prefix/z tplist-get/hit %.
+%term _ 
+	%pi (tplist-prefix-get (tplist-prefix/s D1) (tplist-get/miss D2))
+	%<- (tplist-prefix-get D1 D2) %.
+%worlds () (tplist-prefix-get _ _) %.
+%total (D1) (tplist-prefix-get D1 _) %.
+%sort tplist-prefix-s %.
+%mode tplist-prefix-s %in %out %.
+%term _ tplist-prefix-s tplist-prefix/z (tplist-prefix/s tplist-prefix/z) %.
+%term _ 
+	%pi (tplist-prefix-s (tplist-prefix/s D1) (tplist-prefix/s D2))
+	%<- (tplist-prefix-s D1 D2) %.
+%worlds () (tplist-prefix-s _ _) %.
+%total (D1) (tplist-prefix-s D1 _) %.
+%sort preservation-expand-oexplist %.
+%mode preservation-expand-oexplist %in %in %in %in %out %.
+%term _ preservation-expand-oexplist _ DOE (of-oexplist/z DEL) expand-oexplist/z DEL %.
+%term _ 
+	%pi (preservation-expand-oexplist DO DOE (of-oexplist/s DOE') (expand-oexplist/s DOX) DEL)
+	%<- (tplist-prefix-s DO DO')
+	%<- (tplist-prefix-get DO DG)
+	%<- (preservation-expand-oexplist DO' DOE (DOE' _ (of-exp/bproj DG DOE)) DOX DEL) %.
+%worlds () (preservation-expand-oexplist _ _ _ _ _) %.
+%total (D1) (preservation-expand-oexplist _ _ _ D1 _) %.
+%sort preservation-subst-oexp %.
+%mode preservation-subst-oexp %in %in %in %out %.
+%term _ preservation-subst-oexp _ (of-oexp/z D1) subst-oexp/z D1 %.
+%term _ 
+	%pi (preservation-subst-oexp (of-explist/s D1 D) (of-oexp/s D2) (subst-oexp/s D3) D4)
+	%<- (preservation-subst-oexp D1 (D2 _ D) D3 D4) %.
+%worlds () (preservation-subst-oexp _ _ _ _) %.
+%total (D1) (preservation-subst-oexp _ _ D1 _) %.
+%sort preservation-get %.
+%mode preservation-get %in %in %in %out %.
+%term _ preservation-get (of-explist/s _ D) explist-get/hit tplist-get/hit D %.
+%term _ 
+	%pi (preservation-get (of-explist/s DL _) (explist-get/miss D') (tplist-get/miss D'') D)
+	%<- (preservation-get DL D' D'' D) %.
+%worlds () (preservation-get _ _ _ _) %.
+%total (D1) (preservation-get _ _ D1 _) %.
+%sort preservation %.
+%mode preservation %in %in %out %.
+%term _ 
+	%pi (preservation (of-exp/app D2 D1) (step/app-1 DS) (of-exp/app D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/app D2 D1) (step/app-2 DS V) (of-exp/app D2' D1))
+	%<- (preservation D2 DS D2') %.
+%term _ preservation (of-exp/app D2 (of-exp/lam D1)) (step/app-beta V) (D1 _ D2) %.
+%term _ 
+	%pi (preservation (of-exp/succ D1) (step/succ DS) (of-exp/succ D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/case D3 D2 D1) (step/case DS) (of-exp/case D3 D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ preservation (of-exp/case D3 D2 _) step/case-beta-1 D2 %.
+%term _ preservation (of-exp/case D3 _ (of-exp/succ D1)) (step/case-beta-2 _) (D3 _ D1) %.
+%term _ 
+	%pi (preservation (of-exp/let D2 D1) (step/let DS) (of-exp/let D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ preservation (of-exp/let D2 D1) (step/let-beta _) (D2 _ D1) %.
+%term _ 
+	%pi (preservation (of-exp/letrec D2 D1) (step/letrec DOS DOX) D)
+	%<- (preservation-expand-oexplist tplist-prefix/z D1 D1 DOX D1')
+	%<- (preservation-subst-oexp D1' D2 DOS D) %.
+%term _ 
+	%pi (preservation (of-exp/bproj D2 D1) (step/bproj DOS DOX) D)
+	%<- (preservation-expand-oexplist tplist-prefix/z D1 D1 DOX D1')
+	%<- (preservation-get D1' DOS D2 D) %.
+%worlds () (preservation _ _ _) %.
+%total (D1) (preservation _ D1 _) %.
+%{! 
+TODO: commentary.
+
+\{\{stub\}\}
+!}%
+%{!
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Letrec).
+!}%

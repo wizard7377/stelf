@@ -9,6 +9,9 @@ include NORMALIZE
 (* # 1 "src/tomega/Normalize.fun.ml" *)
 open! Basis
 
+exception Error of string
+let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 module Normalize (Normalize__0 : sig
   (* Internal syntax for functional proof term calculus *)
   (* Author: Carsten Schuermann *)
@@ -17,7 +20,7 @@ end) : NORMALIZE = struct
   module IntSyn = IntSyn
   module Tomega = Tomega
 
-  exception Error of string
+  exception Error = Error
 
   open! struct
     module Whnf = Normalize__0.Whnf
