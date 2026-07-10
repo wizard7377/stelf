@@ -1,0 +1,26 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Theorem 2 : A result of cps transformation is cont-valid
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort cps_cvR {_ cpsR R R'} {_ cvalR R'} %.
+%sort cps_cvE {_ cvalK Kappa} {_ {k ccont} cpsE E (Kappa k) (E' k)} {_ cvalE E'} %.
+%sort cps_cvT {_ cpsT T T'} {_ cvalT T'} %.
+%mode cps_cvR %in %out %.
+%mode cps_cvE %in %in %out %.
+%mode cps_cvT %in %out %.
+%name cps_cvR %.
+%name cps_cvE %.
+%name cps_cvT %.
+%term cval_droot 
+	%pi (cps_cvR (cps_droot CE) (cval_klam CVE))
+	%<- (cps_cvE (cval_kappa ([v ctriv] [CVV cvalT v] cval_cret cval_k CVV)) CE CVE) %.
+%term cval_dtriv 
+	%pi (cps_cvE (cval_kappa CVE) ([k ccont] cps_dtriv CT) (CVE T CVT))
+	%<- (cps_cvT CT CVT) %.
+%term cval_dapp 
+	%pi (cps_cvE (cval_kappa CVE) ([k ccont] cps_dapp (CE0 k) (CE1 k)) CE)
+	%<- ({t0 ctriv} {CVt0 cvalT t0} cps_cvE (cval_kappa ([t1 ctriv] [cvt1 cvalT t1] cval_capp (cval_vlam CVE) CVt0 cvt1)) ([k ccont] CE1 k t0) (CVE' t0 CVt0))
+	%<- (cps_cvE (cval_kappa CVE') CE0 CE) %.
+%term cval_dlam 
+	%pi (cps_cvT (cps_dlam CR) (cval_xlam CVR))
+	%<- ({x dtriv} {x' ctriv} {CX cpsT x x'} {CVX cvalT x'} %pi (cps_cvT CX CVX) %-> (cps_cvR (CR x x' CX) (CVR x' CVX))) %.
+%terminates (CR CE CT) (cps_cvR CR _) (cps_cvE _ CE _) (cps_cvT CT _) %.

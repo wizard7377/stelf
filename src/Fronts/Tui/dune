@@ -1,5 +1,6 @@
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name tui)
  (public_name stelf.tui_fronts)
- (libraries frontend server fmt grace grace.ansi_renderer lambda-term lwt parsing display notty-community.lwt))
+ (libraries frontend server lambda-term lwt parsing display))

@@ -16,7 +16,9 @@ open! Basis
 (* Meta Theorem Prover abstraction : Version 1.3 *)
 (* Author: Frank Pfenning, Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MTPAbstract (MTPAbstract__0 : sig
   (*! structure IntSyn' : INTSYN !*)

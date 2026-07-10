@@ -1,0 +1,45 @@
+%%% Intuitionistic Sequent Calculus using inversion-based strategy
+%%% Tabling only used for loop-detection for implL rule
+%%% Follows Frank Pfenning ATP notes.
+%%% Author: Brigitte Pientka
+%sort ctx %.
+%term nil ctx %.
+%term ; %pi ctx %-> o %-> ctx %.
+%prec %left 11 ; %.
+%sort search {_ o} %.
+%sort activeR {_ ctx} {_ o} %.
+% Conclusion (right)
+%sort activeL {_ ctx} {_ o} %.
+%sort focusR {_ o} %.
+% Conclusion (right)
+%sort hyp {_ o} %.
+% Hypothesis (left)
+%name hyp %.
+%name activeR %.
+%name activeL %.
+%name focusR %.
+% tabled hyp.
+%tabled focusR %.
+% Right asynchronous propositions
+%term truer activeR G true %.
+%term andr %pi (activeR G (A and B)) %<- (activeR G A) %<- (activeR G B) %.
+%term impr %pi (activeR G (A imp B)) %<- (activeR (G ; A) B) %.
+%term aRL_atom %pi (activeR G (atom P)) %<- (activeL G (atom P)) %.
+%term aRL_false %pi (activeR G false) %<- (activeL G false) %.
+%term aRL_or %pi (activeR G (A or B)) %<- (activeL G (A or B)) %.
+% Left asynchronous propositions
+%term a_nil %pi (activeL nil R) %<- (focusR R) %.
+%term andL %pi (activeL (G ; (A and B)) R) %<- (activeL (G ; A ; B) R) %.
+%term orL %pi (activeL (G ; (A or B)) R) %<- (activeL (G ; A) R) %<- (activeL (G ; B) R) %.
+%term falseL activeL (G ; false) R %.
+%term a_imp %pi (activeL (G ; (A imp B)) R) %<- (%pi (hyp (A imp B)) %-> (activeL G R)) %.
+%term a_atom %pi (activeL (G ; (atom A)) R) %<- (%pi (hyp (atom A)) %-> (activeL G R)) %.
+%term a_true %pi (activeL (G ; true) R) %<- (activeL G R) %.
+% Right synchronous propositions
+%term axiom %pi (hyp (atom A)) %-> (focusR (atom A)) %.
+%term f_or1 %pi (focusR (A or B)) %<- (search A) %.
+%term f_or2 %pi (focusR (A or B)) %<- (search B) %.
+% Left synchronous propositions
+%term impl %pi (%pi (hyp (A imp B)) %-> (focusR R)) %<- (search A) %<- (activeL (nil ; B) R) %.
+% top level search
+%term s_top %pi (search A) %<- (activeR nil A) %.

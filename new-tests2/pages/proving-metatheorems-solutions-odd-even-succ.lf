@@ -1,0 +1,42 @@
+%                                                       
+%                                                                                                                                    
+%. %[[
+
+_This page is part of the introduction to [proving metatheorems with Twelf](/wiki/proving-metatheorems-with-twelf/)._
+
+Exercise 3 from [the part 1 exercises](/wiki/proving-metatheorems-summary-the-natural-numbers/): State and prove a theorem ``succ-even`` that shows that the successor of an even number is an odd number. After that, state and prove a theorem ``succ-odd`` that shows that the successor of an odd number is an even number.
+
+Starting with the preliminaries, including the [definition of `odd` from exercise 2](/wiki/proving-metatheorems-solutions-define-odd/):
+
+%]]
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort plus {_ nat} {_ nat} {_ nat} %.
+%term plus-z plus z N2 N2 %.
+%term plus-s %pi (plus (s N1) N2 (s N3)) %<- (plus N1 N2 N3) %.
+%sort even {_ nat} %.
+%term even-z even z %.
+%term even-s %pi (even (s (s N))) %<- (even N) %.
+%sort odd {_ nat} %.
+%term odd-1 odd (s z) %.
+%term odd-s %pi (odd N) %-> (odd (s (s N))) %.
+%. %[[ Because both the `even` and `odd` judgements are defined independently, it's necessary to perform induction on the `even` judgement to prove that the first theorem, and induction on the `odd` judgement to prove the second theorem: %]]
+%. %[[ ## The successor of an even number is odd %]]
+%. %[[! begin checked !%]]
+%sort succ-even {_ even N} {_ odd (s N)} %.
+%mode succ-even %in %out %.
+%term sez succ-even even-z odd-1 %.
+%term ses %pi (succ-even (even-s EvenA) (odd-s OddA)) %<- (succ-even EvenA OddA) %.
+%worlds () (succ-even _ _) %.
+%total D (succ-even D _) %.
+%. %[[! end checked !%]]
+%. %[[ ## The successor of an odd number is even %]]
+%. %[[! begin checked !%]]
+%sort succ-odd {_ odd N} {_ even (s N)} %.
+%mode succ-odd %in %out %.
+%term so1 succ-odd odd-1 (even-s even-z) %.
+%term sos %pi (succ-odd (odd-s OddA) (even-s EvenA)) %<- (succ-odd OddA EvenA) %.
+%worlds () (succ-odd _ _) %.
+%total D (succ-odd D _) %.
+%. %[[! end checked !%]]

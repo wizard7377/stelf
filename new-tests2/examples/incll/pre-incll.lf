@@ -1,0 +1,32 @@
+%
+
+% operator precedence parsing
+%
+
+%term int sort %.
+% z : trm int.
+% s : trm int -> trm int. %prefix 10 s.
+%term 1 trm int %.
+%term 2 trm int %.
+%term 3 trm int %.
+%term con %pi (trm int) %-> atm %.
+%define op arrow int (arrow int int) %.
+%term + trm op %.
+%term * trm op %.
+%term end trm op %.
+%term fun %pi (trm op) %-> atm %.
+%term gt %pi (trm op) %-> (trm op) %-> atm %.
+%term lt %pi (trm op) %-> (trm op) %-> atm %.
+%term evc %pi (trm op) %-> (trm int) %-> atm %.
+%term evo %pi (trm op) %-> (trm int) %-> atm %.
+%term red %pi (trm int) %-> atm %.
+%term gt_1 prog (^ gt * _) %.
+%term lt_0 prog (^ lt end *) %.
+%term lt_2 prog (^ lt end +) %.
+%term lt_1 prog (^ lt + *) %.
+%term ev_0 prog (^ evc end A <<= ^ con A <<= ^ fun end) %.
+%term ev_1 prog (^ evc Op A <<= ^ con C <<= (^ con C >=> ^ evo Op A)) %.
+%term ev_2 prog (^ evo Op (app (app Op X) Y) <<= ^ fun end <<= ^ con X <<= ^ fun Op <<= ^ con Y) %.
+%term ev_3 prog (^ evo Op A <<= ^ fun Op' <= ^ gt Op Op' <<= (^ fun Op' =>> ^ red A)) %.
+%term ev_4 prog (^ evo Op A <<= ^ fun Op' <= ^ lt Op Op' <<= (^ fun Op' >=> ^ evc Op' A)) %.
+%term ev_5 prog (^ red A <=< ^ con X <=< ^ fun F <=< ^ con Y <=< ^ fun Op <=< (^ fun Op >=> ^ con (app (app F X) Y) >=> ^ evo Op A)) %.

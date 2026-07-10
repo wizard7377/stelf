@@ -13,7 +13,9 @@ open! Basis
 (* Internal syntax for functional proof term calculus *)
 (* Author: Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
   (*! structure IntSyn = IntSyn' !*)

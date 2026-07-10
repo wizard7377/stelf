@@ -1,0 +1,40 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Figure 12 : CPS abstract machine with two stack 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort two_stacksR {_ croot} {_ ctriv} %.
+%sort two_stacksE {_ %pi ccont %-> cstack} {_ stack} {_ %pi ccont %-> cexp} {_ ctriv} %.
+%sort two_stacksT {_ stack} {_ ctriv} {_ ctriv} {_ stack} %.
+%sort two_stacksC {_ %pi ccont %-> cstack} {_ %pi ccont %-> ccont} {_ %pi ccont %-> cstack} %.
+%mode two_stacksR %in %out %.
+%mode two_stacksE %in %in %in %out %.
+%mode two_stacksT %in %in %out %out %.
+%mode two_stacksC %in %in %out %.
+%term two_stacks_klam %pi (two_stacksR (klam E) A) %<- (two_stacksE ([k ccont] cdot) dot E A) %.
+%term two_stacks_cret_k_init 
+	%pi (two_stacksE ([k ccont] cdot) Xi ([k ccont] cret k T) A)
+	%<- (two_stacksT Xi T A dot) %.
+%term two_stacks_cret_k_vlam 
+	%pi (two_stacksE ([k ccont] Phi k ; (vlam ([v ctriv] E v k))) Xi ([k ccont] cret k T) A)
+	%<- (two_stacksT Xi T T' Xi')
+	%<- ({v ctriv} 
+	%pi ({xi stack} {t ctriv} two_stacksT (xi , t) v t xi)
+	%-> (two_stacksE Phi (Xi' , T') (E v) A)) %.
+%term two_stacks_cret_vlam_phi 
+	%pi (two_stacksE Phi Xi ([k ccont] cret (vlam ([v ctriv] E v k)) T) A)
+	%<- (two_stacksT Xi T T' Xi')
+	%<- ({v ctriv} 
+	%pi ({xi stack} {t ctriv} two_stacksT (xi , t) v t xi)
+	%-> (two_stacksE Phi (Xi' , T') (E v) A)) %.
+%term two_stacks_capp 
+	%pi (two_stacksE Phi Xi ([k ccont] capp T0 T1 (C k)) A)
+	%<- (two_stacksT Xi T1 T1' Xi1)
+	%<- (two_stacksT Xi1 T0 (xlam ([x ctriv] klam (E x))) Xi0)
+	%<- (two_stacksC Phi C Phi')
+	%<- (two_stacksE Phi' Xi0 (E T1') A) %.
+%term two_stacks_xlam two_stacksT Xi (xlam R) (xlam R) Xi %.
+%term two_stacks_vlam two_stacksC Phi ([k ccont] vlam (E k)) ([k ccont] Phi k ; (vlam (E k))) %.
+%term two_stacks_k two_stacksC Phi ([k ccont] k) Phi %.
+%name two_stacksR %.
+%name two_stacksE %.
+%name two_stacksT %.
+%name two_stacksC %.

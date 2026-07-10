@@ -23,7 +23,7 @@
 	%pi (eq1 (lm R1) S*)
 	%<- ({x term} {eqx x => x} %pi (eq1 eqx id1) %-> (eq1 (R1 x eqx) (S1* x)))
 	%<- (lm1* S1* S*) %.
-%block leq1 [x term] [eqx x => x] [e eq1 eqx id1]%.
+%block leq1 {x term} {eqx x => x} {e eq1 eqx id1}%.
 %worlds (leq1) (eq1 R S*) %.
 %covers eq1 %in %out %.
 %terminates R (eq1 R _) %.

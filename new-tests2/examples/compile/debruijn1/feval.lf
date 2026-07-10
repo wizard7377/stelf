@@ -1,0 +1,15 @@
+%%% Mini-ML Natural Semantics
+%%% Version restricted to pure lambda-calculus
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort feval {_ env} {_ exp'} {_ val} %.
+%name feval %.
+% Variables
+%term fev_1 feval (K ; W) 1 W %.
+%term fev_^ %pi (feval (K ; W') (F ^) W) %<- (feval K F W) %.
+% Functions
+%term fev_lam feval K (lam' F) (clo K (lam' F)) %.
+%term fev_app 
+	%pi (feval K (app' F1 F2) W)
+	%<- (feval K F1 (clo K' (lam' F1')))
+	%<- (feval K F2 W2)
+	%<- (feval (K' ; W2) F1' W) %.

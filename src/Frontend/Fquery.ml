@@ -14,7 +14,9 @@ open! Basis
 (* fquery: Executing logic programs via functional interpretation *)
 (* Author: Carsten Schuermann *)
 exception AbortQuery of string
-let () = Printexc.register_printer (function AbortQuery msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function AbortQuery msg -> Some msg | _ -> None)
 
 module Fquery (Fquery__0 : sig
   module Global : GLOBAL
@@ -58,14 +60,11 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     let v_, optName, xs_ =
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
+    let _ = Display.chatter_s 3 "%fquery" in
+    let _ = Display.chatter_s 3 " " in
     let _ =
-      Display.chatter_s 3 "%fquery"
-    in
-    let _ =
-      Display.chatter_s 3 " "
-    in
-    let _ =
-      Display.chatter_s 3 (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n")
+      Display.chatter_s 3
+        (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n")
     in
     let k, v1_ = Abstract.abstractDecImp v_ in
     let g_, v2_ = lower (k, I.Null, v1_) in

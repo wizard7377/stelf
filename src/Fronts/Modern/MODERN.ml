@@ -10,16 +10,17 @@ module type MODERN = sig
 
   exception ParseError of string
 
-  exception FullParseError of {
-    title    : Display.form option;
-    subtitle : Display.form option;
-    body     : Display.form;
-    loc      : Cst.loc option;
-  }
+  exception
+    FullParseError of {
+      title : Display.form option;
+      subtitle : Display.form option;
+      body : Display.form;
+      loc : Cst.loc option;
+    }
 
+  val given_symbols : (string * string) list ref
   (** A list of symbols that refer to restricted names *)
-  val given_symbols : (string * string) list ref 
-  
+
   val parse_expr1 : unit -> Cst.Term.t t
   val parse_expr : unit -> Cst.Term.t t
   val parse_var : unit -> string t
@@ -37,10 +38,7 @@ module type MODERN = sig
   val parse_sigdef : unit -> Cst.sigdef t
   val parse_struct_dec : unit -> Cst.structDec t
   val parse_fixity : unit -> int t
-
-  val parse_query :
-    unit -> (int option * int option * int option * Cst.query) t
-
+  val parse_query : unit -> (int option * int option * int option * Cst.query) t
   val parse_define : unit -> Cst.define t
   val parse_solve : unit -> Cst.solve t
   val parse_bound : unit -> int option t

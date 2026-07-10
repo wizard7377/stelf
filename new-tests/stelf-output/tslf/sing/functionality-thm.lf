@@ -1,6 +1,6 @@
 %%%%%  Contexts  %%%%%
 %sort eisvar %.
-%block eovar {n nat} [x eterm] [d eisvar x]%.
+%block eovar [n nat] {x eterm} {d eisvar x}%.
 %sort ectx %.
 %name ectx %.
 %term enil ectx %.

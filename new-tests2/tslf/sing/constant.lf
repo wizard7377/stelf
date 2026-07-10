@@ -1,0 +1,24 @@
+%sort constant %.
+%name constant %.
+%sort ctp %.
+%name ctp %.
+%term ct ctp %.
+%term cpi %pi ctp %-> ctp %-> ctp %.
+%sort ckof {_ constant} {_ ctp} %.
+%mode ckof %in %out %.
+%term arrow constant %.
+%term ckof/arrow ckof arrow (cpi ct (cpi ct ct)) %.
+%term cross constant %.
+%term ckof/cross ckof cross (cpi ct (cpi ct ct)) %.
+%term unit constant %.
+%term ckof/unit ckof unit ct %.
+%term ref constant %.
+%term ckof/ref ckof ref (cpi ct ct) %.
+%term dsum constant %.
+%term ckof/dsum ckof dsum (cpi ct (cpi ct ct)) %.
+%term tag constant %.
+%term ckof/tag ckof tag (cpi ct ct) %.
+%term tagged constant %.
+%term ckof/tagged ckof tagged ct %.
+%term mu constant %.
+%term ckof/mu ckof mu (cpi (cpi ct ct) ct) %.

@@ -27,7 +27,9 @@ open! Basis
 (* Type Reconstruction *)
 (* ------------------- *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module ReconTerm (ReconTerm__0 : sig
   (*! structure IntSyn' : INTSYN !*)
@@ -244,12 +246,19 @@ end) : RECON_TERM = struct
   let rec getFVarTypeApx name =
     begin match StringTree.lookup fvarApxTable name with
     | Some v_ ->
-        Logs.debug (fun m -> m "getFVarTypeApx: found existing for %s" name);
+        Debug.(
+          msg ~src:Group.approx ~level:Level.Debug
+            (Fmt.shown_exact
+               (fun name -> "getFVarTypeApx: found existing for " ^ name)
+               name));
         v_
     | None ->
         let v_ = Apx.newCVar () in
-        Logs.debug (fun m ->
-            m "getFVarTypeApx: creating fresh CVar for %s" name);
+        Debug.(
+          msg ~src:Group.approx ~level:Level.Debug
+            (Fmt.shown_exact
+               (fun name -> "getFVarTypeApx: creating fresh CVar for " ^ name)
+               name));
         begin
           StringTree.insert fvarApxTable (name, v_);
           v_
@@ -1118,7 +1127,9 @@ end) : RECON_TERM = struct
         let (Dec (_, v_)) = IntSyn.ctxDec (g_, k) in
         (tm, Elim (bvarElim k), v_)
     | g_, (Evar_ (name, r) as tm) ->
-        Logs.debug (fun m -> m "inferring EVar %s" name);
+        Debug.(
+          msg ~src:Group.approx ~level:Level.Debug
+            (Fmt.shown_exact (fun name -> "inferring EVar " ^ name) name));
         let x_, v_ =
           try getEVar (name, false)
           with Apx.Ambiguous ->
@@ -1133,13 +1144,19 @@ end) : RECON_TERM = struct
         (* externally EVars are raised elim forms *)
         (* necessary? -kw *)
     | g_, (Fvar_ (name, r) as tm) ->
-        Logs.debug (fun m -> m "inferring FVar %s" name);
+        Debug.(
+          msg ~src:Group.approx ~level:Level.Debug
+            (Fmt.shown_exact (fun name -> "inferring FVar " ^ name) name));
         let v_ =
           try getFVarType (name, false)
           with Apx.Ambiguous ->
             let v_ = getFVarType (name, true) in
             begin
-              Logs.debug (fun m -> m "ambiguous type for FVar %s" name);
+              Debug.(
+                msg ~src:Group.approx ~level:Level.Debug
+                  (Fmt.shown_exact
+                     (fun name -> "ambiguous type for FVar " ^ name)
+                     name));
               delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
               v_
             end

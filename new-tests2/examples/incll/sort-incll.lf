@@ -1,0 +1,29 @@
+%
+
+% a deterministic merge sort
+%
+
+%term rInt sort %.
+%term mergeSort %pi (trm (list rInt)) %-> (trm (list rInt)) %-> atm %.
+%term msort %pi (trm (list rInt)) %-> atm %.
+%term srt %pi (trm (list rInt)) %-> atm %.
+%term merge %pi (trm (list rInt)) %-> (trm (list rInt)) %-> (trm (list rInt)) %-> atm %.
+%term gt %pi (trm rInt) %-> (trm rInt) %-> atm %.
+%term lte %pi (trm rInt) %-> (trm rInt) %-> atm %.
+%term z trm rInt %.
+%term s %pi (trm rInt) %-> (trm rInt) %.
+%prec %prefix 10 s %.
+%term gt1 prog (^ gt (s X) (s Y) <= ^ gt X Y) %.
+%term gt2 prog (^ gt (s X) z) %.
+%term lte1 prog (^ lte (s X) (s Y) <= ^ lte X Y) %.
+%term lte2 prog (^ lte z X) %.
+%term merge1 prog (^ merge (H1 | T1) (H2 | T2) (H2 | T3) <= ^ gt H1 H2 <= ^ merge (H1 | T1) T2 T3) %.
+%term merge2 prog (^ merge (H1 | T1) (H2 | T2) (H1 | T3) <= ^ lte H1 H2 <= ^ merge T1 (H2 | T2) T3) %.
+%term merge3 prog (^ merge L nil L) %.
+%term merge4 prog (^ merge nil L L) %.
+%term msort1 prog (^ mergeSort (H | T) L <<= (^ srt (H | nil) =>> ^ mergeSort T L)) %.
+%term msort2 prog (^ mergeSort nil L <<= ^ msort L) %.
+% replacing >=> by =>> in msort3 yields
+% an insertion sort instead of a merge sort.
+%term msort3 prog (^ (msort L) <<= ^ srt L1 <<= ^ srt L2 <= ^ merge L1 L2 L12 <=< (^ srt L12 >=> ^ msort L)) %.
+%term msort4 prog (^ msort L <<= ^ srt L) %.

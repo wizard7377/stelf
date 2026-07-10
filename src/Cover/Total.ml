@@ -15,10 +15,14 @@ open! Basis
 (* Author: Frank Pfenning *)
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 exception Error' of Paths.occ * string
-let () = Printexc.register_printer (function Error' (_, msg) -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error' (_, msg) -> Some msg | _ -> None)
 
 (* COVER module type inlined here to avoid dependency cycle with cover_ *)
 module Total (Total__0 : sig
@@ -120,7 +124,8 @@ end) : TOTAL = struct
   (* G is unused here *)
   let rec checkDynOrder = function
     | g_, vs_, 0, occ -> begin
-        Display.chatter_s 5 "Output coverage: skipping redundant checking of third-order \ clause\n";
+        Display.chatter_s 5
+          "Output coverage: skipping redundant checking of third-order  clause\n";
         ()
       end
     | g_, vs_, n, occ -> checkDynOrderW (g_, Whnf.whnf vs_, n, occ)
@@ -257,7 +262,8 @@ end) : TOTAL = struct
       try
         begin
           Timers.time Timers.terminate Reduces.checkFam a;
-          Display.chatter_s 4 (("Terminates: " ^ N.qidToString (N.constQid a)) ^ "\n")
+          Display.chatter_s 4
+            (("Terminates: " ^ N.qidToString (N.constQid a)) ^ "\n")
         end
       with Reduces.Error msg -> raise (Reduces.Error msg)
     in
@@ -267,12 +273,15 @@ end) : TOTAL = struct
       try
         begin
           Timers.time Timers.coverage Cover.checkCovers (a, ms);
-          Display.chatter_s 4 (("Covers (input): " ^ N.qidToString (N.constQid a)) ^ "\n")
+          Display.chatter_s 4
+            (("Covers (input): " ^ N.qidToString (N.constQid a)) ^ "\n")
         end
       with Cover.Error msg -> raise (Cover.Error msg)
     in
     let _ =
-      Display.chatter_s 4 (("Output coverage checking family " ^ N.qidToString (N.constQid a)) ^ "\n")
+      Display.chatter_s 4
+        (("Output coverage checking family " ^ N.qidToString (N.constQid a))
+        ^ "\n")
     in
     let _ = ModeCheck.checkFreeOut (a, ms) in
     let cs = Index.lookup a in
@@ -283,7 +292,8 @@ end) : TOTAL = struct
           begin
             begin if !Global.chatter = 4 then print "\n" else ()
             end;
-            Display.chatter_s 4 (("Covers (output): " ^ N.qidToString (N.constQid a)) ^ "\n")
+            Display.chatter_s 4
+              (("Covers (output): " ^ N.qidToString (N.constQid a)) ^ "\n")
           end
         end
       with Cover.Error msg -> raise (Cover.Error msg)

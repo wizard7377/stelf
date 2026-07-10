@@ -1,5 +1,6 @@
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name pal)
  (public_name stelf.pal)
  (libraries

@@ -1,0 +1,31 @@
+%%%% reflexivity of kinds
+%sort sg-refl/deq {_ sg-wf S} {_ sg-deq S S} %.
+%mode sg-refl/deq %in %out %.
+%term _ sg-refl/deq sg-wf/sg/unit sg-deq/sg/unit %.
+%term _ %pi (sg-refl/deq (sg-wf/sg/kd DK) (sg-deq/sg/kd DKS)) %<- (kd-refl/deq DK DKS) %.
+%term _ sg-refl/deq (sg-wf/sg/cn DC) (sg-deq/sg/cn (cn-deq/refl DC)) %.
+%term _ 
+	%pi (sg-refl/deq (sg-wf/sg/sgm D1 D2 DFS) (sg-deq/sg/sgm D3 D4 DFS))
+	%<- (sg-refl/deq D1 D3)
+	%<- ({a cn} {da ofkd a _} sg-refl/deq (D2 a da) (D4 a da)) %.
+%term _ 
+	%pi (sg-refl/deq (sg-wf/sg/pi D1 D2 DFS) (sg-deq/sg/pi D3 D4 DFS))
+	%<- (sg-refl/deq D1 D3)
+	%<- ({a cn} {da ofkd a _} sg-refl/deq (D2 a da) (D4 a da)) %.
+%worlds (ofkd-block) (sg-refl/deq _ _) %.
+%total (D1) (sg-refl/deq D1 _) %.
+%sort sg-refl/sub {_ sg-wf S} {_ sg-sub S S} %.
+%mode sg-refl/sub %in %out %.
+%term _ sg-refl/sub sg-wf/sg/unit sg-sub/sg/unit %.
+%term _ %pi (sg-refl/sub (sg-wf/sg/kd DK) (sg-sub/sg/kd DKS)) %<- (kd-refl/sub DK DKS) %.
+%term _ sg-refl/sub (sg-wf/sg/cn DC) (sg-sub/sg/cn (cn-deq/refl DC)) %.
+%term _ 
+	%pi (sg-refl/sub (sg-wf/sg/sgm D1 D2 DFS) (sg-sub/sg/sgm D3 D4 D2 DFS DFS))
+	%<- (sg-refl/sub D1 D3)
+	%<- ({a cn} {da ofkd a _} sg-refl/sub (D2 a da) (D4 a da)) %.
+%term _ 
+	%pi (sg-refl/sub (sg-wf/sg/pi D1 D2 DFS) (sg-sub/sg/pi D3 D4 DFS))
+	%<- (sg-refl/deq D1 D3)
+	%<- ({a cn} {da ofkd a _} sg-refl/deq (D2 a da) (D4 a da)) %.
+%worlds (ofkd-block) (sg-refl/sub _ _) %.
+%total (D1) (sg-refl/sub D1 _) %.

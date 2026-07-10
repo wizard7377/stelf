@@ -31,12 +31,16 @@ module Make_Syntax (Common : Common.COMMON) :
   module Misc : MISC = Misc.Make_Misc (Common) (Ast)
 end
 
-module IntIdx : Common.CID with type t = int = struct
+(* Generative so that each instantiation has its OWN [counter]: constant ids
+   ([Cid]) and structure/module ids ([Mid]) must be independent sequences.
+   Sharing one counter (a plain [module Cid = IntIdx] alias) let structure ids
+   run past [Global.maxMid] once many constants had been added, overflowing the
+   fixed-size [componentsArray] in [Names] with a [Subscript]. *)
+module IntIdx () : Common.CID with type t = int = struct
   type t = int
 
   let compare = compare
   let equal = ( = )
-
   let counter = ref 0
 
   let fresh () =
@@ -44,7 +48,6 @@ module IntIdx : Common.CID with type t = int = struct
     !counter
 
   let reset () = counter := 0
-
   let pp fmt i = Format.fprintf fmt "%d" i
   let toString = string_of_int
   let show = toString
@@ -53,8 +56,8 @@ end
 module type INTSYN = sig end
 
 module IntSyn (Global : Global.GLOBAL.GLOBAL) = Make_Syntax (struct
-  module Cid = IntIdx
-  module Mid = IntIdx
+  module Cid = IntIdx ()
+  module Mid = IntIdx ()
 
   module Tag = struct
     type t = Tag
@@ -63,12 +66,11 @@ module IntSyn (Global : Global.GLOBAL.GLOBAL) = Make_Syntax (struct
   module Global = Global
 end)
 
-module ExtIdx : Common.CID with type t = string = struct
+module ExtIdx () : Common.CID with type t = string = struct
   type t = string
 
   let compare = compare
   let equal = ( = )
-
   let counter = ref 0
 
   let fresh () =
@@ -76,15 +78,14 @@ module ExtIdx : Common.CID with type t = string = struct
     "ext" ^ string_of_int !counter
 
   let reset () = counter := 0
-
   let pp fmt i = Format.fprintf fmt "%s" i
   let toString s = s
   let show = toString
 end
 
 module ExtSyn (Global : Global.GLOBAL.GLOBAL) = Make_Syntax (struct
-  module Cid = ExtIdx
-  module Mid = ExtIdx
+  module Cid = ExtIdx ()
+  module Mid = ExtIdx ()
 
   module Tag = struct
     type t = Tag

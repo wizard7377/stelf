@@ -29,7 +29,7 @@
 	%<- ({x exp} %pi (closed x) %-> (closed (E2 x))) %.
 % Recursion
 %term clo_fix %pi (closed (fix E)) %<- ({x exp} %pi (closed x) %-> (closed (E x))) %.
-%block lc [x exp] [u closed x]%.
+%block lc {x exp} {u closed x}%.
 %worlds (lc) (closed E) %.
 %terminates E (closed E) %.
 %covers closed %in %.
@@ -60,7 +60,7 @@
 %term open_letn2 %pi (open (letn E1 E2)) %<- ({x exp} open (E2 x)) %.
 % Recursion
 %term open_fix %pi (open (fix E)) %<- ({x exp} open (E x)) %.
-%block lo [x exp]%.
+%block lo {x exp}%.
 %worlds (lo) (open E) %.
 %terminates E (open E) %.
 % next reports z and #lo_x as missing

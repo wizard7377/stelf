@@ -5,9 +5,15 @@ module type PAL = PAL.PAL
 module type PAL' = PAL.PAL'
 
 module Opts = Opts
+module Reply = Reply
+module Render = Render
 
 exception Error of exn
-let () = Printexc.register_printer (function Error exn -> Some (Printexc.to_string exn) | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Error exn -> Some (Printexc.to_string exn)
+    | _ -> None)
 
 module Pal : PAL.PAL = struct
   module M = Impl.Impl ()
@@ -20,31 +26,35 @@ module Pal : PAL.PAL = struct
   exception Error = Error
 
   module Start () = struct
-    module M = struct 
+    module M = struct
       include M
+
       let () = Install.reset ()
     end
 
     let ns = ref (M.Names.newNamespace ())
     let loc = ref M.Cst.View.ghost
-    let install (cmd : M.Cst.cmd) : unit = M.Install.install1 !ns cmd
+    let install (cmd : M.Cst.cmd) : Reply.t list = M.Install.install1 !ns cmd
 
     let parse (s : string) : M.Cst.cmd list =
       M.Cmd.Modern.run (M.Cmd.parse ()) ns !loc s
 
-    let exec (s : string) : unit = List.iter install (parse s)
+    let exec (s : string) : Reply.t list = M.Install.install !ns (parse s)
   end
 
   let top ?config (module N : Tui.REPL.S) =
     let module Pal = Start () in
     let module R = Tui.Repl.Repl (N) in
     M.mode := `Repl;
+    M.chatter := Display.Info.to_chatter N.verbosity;
     (match config with
-     | Some f -> ignore (M.make (M.File f))
-     | None -> ());
+    | Some f -> ignore (Render.report (M.make (M.File f)))
+    | None -> ());
     R.read (fun l ->
-        Pal.exec l;
-        Lwt.return R.Continue)
+        let replies = Pal.exec l in
+        Render.replies replies;
+        if Reply.quit_requested replies then Lwt.return R.Stop
+        else Lwt.return R.Continue)
 
   let run () = ()
 end

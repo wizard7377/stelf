@@ -1,0 +1,19 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% machine.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Machines
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%term ; %pi st %-> exp %-> mach %.
+%prec %right 20 ; %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Machine Ok
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort mach_ok {_ st} {_ exp} %.
+%name mach_ok %.
+%mode mach_ok %in %in %.
+%term mach_ok_irred %pi (exp_irred E) %-> (mach_ok S E) %.
+%term mach_ok_step %pi (step S E S' E') %-> (mach_ok S E) %.
+%terminates {} (mach_ok _ _) %.
+%worlds () (mach_ok _ _) %.
+%covers mach_ok %in %in %.

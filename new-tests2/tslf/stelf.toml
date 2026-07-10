@@ -1,0 +1,5 @@
+[[group]]
+name = "sources"
+main = "sources.lf"
+src = ["."]
+dependencies = [{path = "sing/stelf.toml", name = "sources"}]

@@ -27,8 +27,8 @@ Block definitions allow multiple blocks to be combined:
 !}%
 %sort typ %.
 %sort exp %.
-%block typ-var [a typ]%.
-%block exp-var {T typ} [x exp T]%.
+%block typ-var {a typ}%.
+%block exp-var [T typ] {x exp T}%.
 %block vars%.
 %{! Using ``vars`` in a [``%worlds``](/wiki/percent-worlds/) declaration is the same as using ``typ-var | exp-var``, and in fact when Twelf prints out the ``%worlds`` declaration, block definitions will be automatically expanded. !}%
 %{!! begin checked !!}%

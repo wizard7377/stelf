@@ -13,7 +13,9 @@ open! Basis
 (* Assignment *)
 (* Author: Brigitte Pientka *)
 exception Assignment of string
-let () = Printexc.register_printer (function Assignment msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Assignment msg -> Some msg | _ -> None)
 
 module Assign (Assign__0 : sig
   (*! structure IntSyn' : INTSYN !*)

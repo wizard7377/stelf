@@ -1,0 +1,93 @@
+% Progress and preservation for System F with natural numbers.
+%sort tp %.
+%sort tm %.
+% Types
+%term nat tp %.
+%term => %pi tp %-> tp %-> tp %.
+%prec %left 5 => %.
+%term forall %pi (%pi tp %-> tp) %-> tp %.
+% Terms
+%term z tm %.
+%term s %pi tm %-> tm %.
+%term @ %pi tm %-> tm %-> tm %.
+%prec %left 5 @ %.
+%term lam %pi tp %-> (%pi tm %-> tm) %-> tm %.
+%term Lam %pi (%pi tp %-> tm) %-> tm %.
+%term # %pi tm %-> tp %-> tm %.
+%prec %left 5 # %.
+% Typing
+%sort is {_ tm} {_ tp} %.
+%prec %left 5 is %.
+%term is_z z is nat %.
+%term is_s %pi (E is nat) %-> (s E is nat) %.
+%term is_@ %pi (E1 is (T1 => T2)) %-> (E2 is T1) %-> (E1 @ E2 is T2) %.
+%term is_lam %pi ({x tm} %pi (x is T1) %-> (E x is T2)) %-> (lam T1 ([x] E x) is (T1 => T2)) %.
+%term is_Lam %pi ({a tp} E a is (T a)) %-> (Lam ([a] E a) is (forall ([a] T a))) %.
+%term is_# %pi (E is (forall ([a] T1 a))) %-> (E # T2 is (T1 T2)) %.
+% Values
+%sort value {_ tm} %.
+%term value_z value z %.
+%term value_s %pi (value V) %-> (value (s V)) %.
+%term value_lam value (lam T ([x] E x)) %.
+%term value_Lam value (Lam ([a] E a)) %.
+% Operational semantics
+%sort ~> {_ tm} {_ tm} %.
+%prec %left 5 ~> %.
+%term ~>_s %pi (E ~> E') %-> (s E ~> (s E')) %.
+%term ~>_@1 %pi (E1 ~> E1') %-> (E1 @ E2 ~> (E1' @ E2)) %.
+%term ~>_@2 %pi (value E1) %-> (E2 ~> E2') %-> (E1 @ E2 ~> (E1 @ E2')) %.
+%term ~>_@3 %pi (value E2) %-> (lam T ([x] E1 x) @ E2 ~> (E1 E2)) %.
+%term ~>_#1 %pi (E ~> E') %-> (E # T ~> (E' # T)) %.
+%term ~>_#2 Lam ([a] E a) # T ~> (E T) %.
+% Preservation
+%sort pres {_ E is T} {_ E ~> E'} {_ E' is T} %.
+%mode pres %in %in %out %.
+%term pres_s %pi (pres D EV D') %-> (pres (is_s D) (~>_s EV) (is_s D')) %.
+%term pres_@1 %pi (pres D1 EV1 D1') %-> (pres (is_@ D1 D2) (~>_@1 EV1) (is_@ D1' D2)) %.
+%term pres_@2 %pi (pres D2 EV2 D2') %-> (pres (is_@ D1 D2) (~>_@2 V EV2) (is_@ D1 D2')) %.
+%term pres_@3 pres (is_@ (is_lam ([x tm] [d x is T1] D1 x d)) D2) (~>_@3 V) (D1 _ D2) %.
+%term pres_#1 %pi (pres D EV D') %-> (pres (is_# D) (~>_#1 EV) (is_# D')) %.
+%term pres_#2 pres (%the (_ # T is _) (is_# (is_Lam ([a tp] D a)))) ~>_#2 (D T) %.
+%worlds () (pres D1 E D2) %.
+%total E (pres _ E _) %.
+% Progress (much trickier)
+% Introduce a new type family to distinguish between the case where a term can 
+% take a step and it is a value. 
+%sort step_or_val {_ tm} %.
+%term step %pi (E ~> E') %-> (step_or_val E) %.
+%term val %pi (value E) %-> (step_or_val E) %.
+%sort prog_@_lemma {_ E1 is (T1 => T2)} {_ step_or_val E1} {_ step_or_val E2} {_ step_or_val (E1 @ E2)} %.
+%mode prog_@_lemma %in %in %in %out %.
+%term prog_@_lemma_s prog_@_lemma _ (step EV) _ (step (~>_@1 EV)) %.
+%term prog_@_lemma_vs prog_@_lemma _ (val VL) (step EV) (step (~>_@2 VL EV)) %.
+%term prog_@_lemma_vs prog_@_lemma _ (val VL1) (val VL2) (step (~>_@3 VL2)) %.
+%worlds () (prog_@_lemma D SV1 SV2 SV3) %.
+%total {SV1 SV2} (prog_@_lemma _ SV1 SV2 _) %.
+%sort prog_#_lemma {T2} {_ E is (forall ([a tp] T1 a))} {_ step_or_val E} {_ step_or_val (E # T2)} %.
+%mode prog_#_lemma %in %in %in %out %.
+%term prog_#_lemma_s prog_#_lemma _ _ (step EV) (step (~>_#1 EV)) %.
+%term prog_#_lemma_v prog_#_lemma _ _ (val VL) (step ~>_#2) %.
+%worlds () (prog_#_lemma T2 D SV1 SV2) %.
+%total {SV1} (prog_#_lemma _ _ SV1 _) %.
+%sort prog_s_lemma {_ step_or_val E} {_ step_or_val (s E)} %.
+%mode prog_s_lemma %in %out %.
+%term prog_s_lemma_s prog_s_lemma (step EV) (step (~>_s EV)) %.
+%term prog_s_lemma_v prog_s_lemma (val VL) (val (value_s VL)) %.
+%worlds () (prog_s_lemma SV1 SV2) %.
+%total (SV1) (prog_s_lemma SV1 _) %.
+% Now we can prove progress by simply using the above lemmas 
+%sort prog {_ E is T} {_ step_or_val E} %.
+%mode prog %in %out %.
+%term prog_z prog is_z (val value_z) %.
+%term prog_s %pi (prog_s_lemma SV SV') %-> (prog D SV) %-> (prog (is_s D) SV') %.
+%term prog_@ 
+	%pi (prog_@_lemma D1 SV1 SV2 SV3)
+	%-> (prog D1 SV1)
+	%-> (prog D2 SV2)
+	%-> (prog (is_@ D1 D2) SV3) %.
+%term prog_# %pi (prog_#_lemma _ D SV SV') %-> (prog D SV) %-> (prog (is_# D) SV') %.
+%term prog_lam prog (is_lam ([x tm] [d x is T1] D1 x d)) (val value_lam) %.
+%term prog_Lam prog (is_Lam ([a tp] D a)) (val value_Lam) %.
+%worlds () (prog D SV) %.
+%total D (prog D _) %.
+% QED

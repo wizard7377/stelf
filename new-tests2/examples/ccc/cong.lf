@@ -1,0 +1,17 @@
+% general congruence: if e <-> e' then e2[e/x] <-> e2[e'/x]
+%sort cong {M %pi (term A) %-> (term B)} {_ %pi (conv E E') %-> (conv (M E) (M E'))} %.
+%term cong_var cong ([x] x) ([c] c) %.
+%term cong_unit cong ([x] lunit) ([c] c_refl) %.
+%term cong_pair 
+	%pi (cong ([x] lpair (E1 x) (E2 x)) ([c] c_pair (CP1 c) (CP2 c)))
+	%<- (cong E1 CP1)
+	%<- (cong E2 CP2) %.
+%term cong_fst %pi (cong ([x] lfst (E x)) ([c] c_fst (CP c))) %<- (cong E CP) %.
+%term cong_snd %pi (cong ([x] lsnd (E x)) ([c] c_snd (CP c))) %<- (cong E CP) %.
+%term cong_lam 
+	%pi (cong ([x] llam ([y] E x y)) ([c] c_lam ([y] CP c y)))
+	%<- ({y} %pi (cong ([x] y) ([c] c_refl)) %-> (cong ([x] E x y) ([c] CP c y))) %.
+%term cong_app 
+	%pi (cong ([x] lapp (E1 x) (E2 x)) ([c] c_app (CP1 c) (CP2 c)))
+	%<- (cong E1 CP1)
+	%<- (cong E2 CP2) %.

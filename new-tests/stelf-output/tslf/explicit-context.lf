@@ -20,7 +20,7 @@
 %mode cxt-ordered %star %.
 %term cxt-ordered/nil cxt-ordered cxt/nil %.
 %term cxt-ordered/cons %pi (cxt-ordered (cxt/cons G X _)) %<- (cxt-bounded G X) %.
-%block ovar-block {l loc} [a cn] [do isvar a l]%.
+%block ovar-block [l loc] {a cn} {do isvar a l}%.
 %%%% context lookup for explicit contexts
 %sort cxt-lookup %.
 %mode cxt-lookup %star %star %star %.

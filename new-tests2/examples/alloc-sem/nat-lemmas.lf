@@ -1,0 +1,29 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% nat-lemmas.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Nat Less-than Lemmas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort nat!N_lt_sN {N nat} {_ nat_lt N (s_nat N)} %.
+%mode nat!N_lt_sN %in %out %.
+%scope nat!N_lt_sN %term z nat!N_lt_sN z_nat nat_lt_z %.
+%term s %pi (nat!N_lt_sN (s_nat N) (nat_lt_s DNatLt)) %<- (nat!N_lt_sN N DNatLt) %.
+%terminates N (nat!N_lt_sN N _) %.
+%worlds () (nat!N_lt_sN _ _) %.
+%covers nat!N_lt_sN %in %out %.
+%total N (nat!N_lt_sN N _) %.
+%sort nat!lt_trans {_ nat_lt N1 N2} {_ nat_lt N2 N3} {_ nat_lt N1 N3} %.
+%mode nat!lt_trans %in %in %out %.
+%scope nat!lt_trans %term z nat!lt_trans nat_lt_z _ nat_lt_z %.
+%term s 
+	%pi (nat!lt_trans (nat_lt_s DNatLt12) (nat_lt_s DNatLt23) (nat_lt_s DNatLt13))
+	%<- (nat!lt_trans DNatLt12 DNatLt23 DNatLt13) %.
+%worlds () (nat!lt_trans _ _ _) %.
+%total DNatLt12 (nat!lt_trans DNatLt12 _ _) %.
+%sort nat!lt_contradict {_ nat_lt N N} {_ absurd} %.
+%mode nat!lt_contradict %in %out %.
+%scope nat!lt_contradict %term s 
+	%pi (nat!lt_contradict (nat_lt_s DNatLt) Absurd)
+	%<- (nat!lt_contradict DNatLt Absurd) %.
+%worlds () (nat!lt_contradict _ _) %.
+%total DNatLt (nat!lt_contradict DNatLt _) %.

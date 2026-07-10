@@ -88,7 +88,7 @@ rule based on eta-expansion.)
 %term eq/refl teq M M %.
 %term eq/symm %pi (teq M M') %<- (teq M' M) %.
 %term eq/trans %pi (teq M M'') %<- (teq M' M'') %<- (teq M M') %.
-%block teq-block {A tp} [x term A]%.
+%block teq-block [A tp] {x term A}%.
 %worlds (teq-block) (teq _ _) %.
 % definitional equality on combs
 %sort ceq %.
@@ -106,7 +106,7 @@ rule based on eta-expansion.)
 %term ceq/trans %pi (ceq N N'') %<- (ceq N' N'') %<- (ceq N N') %.
 %inline ; (%pi (ceq N N') %-> (ceq N' N'') %-> (ceq N N'')) [d1] [d2] ceq/trans d1 d2 %.
 %prec %right 5 ; %.
-%block ceq-block {A tp} [y comb A]%.
+%block ceq-block [A tp] {y comb A}%.
 %worlds (ceq-block) (ceq _ _) %.
 %{! 
 
@@ -182,7 +182,7 @@ below.
 	%pi (bracket ([x] capp (N1 x) (N2 x)) (capp (capp s N1') N2'))
 	%<- (bracket ([x] N1 x) N1')
 	%<- (bracket ([x] N2 x) N2') %.
-%block trans-block {A tp} [x term A] [y comb A] [dtrans translate x y]%.
+%block trans-block [A tp] {x term A} {y comb A} {dtrans translate x y}%.
 %worlds (trans-block) (bracket _ _) %.
 %worlds (trans-block) (translate _ _) %.
 %{! 
@@ -215,7 +215,7 @@ Instead, we need effectiveness lemmas.  XXX explain this better...
 	%pi (can-translate (lam ([x] M x)) (t/lam Dbrack Dtrans))
 	%<- ({x} {y} {dtrans translate x y} {thm can-translate x dtrans} can-translate (M x) (%the (translate (M x) (N y)) (Dtrans x y dtrans)))
 	%<- (can-bracket ([y] N y) (%the (bracket ([y] N y) N*) Dbrack)) %.
-%block can-block {A tp} [x term A] [y comb A] [dtrans translate x y] [thm can-translate x dtrans]%.
+%block can-block [A tp] {x term A} {y comb A} {dtrans translate x y} {thm can-translate x dtrans}%.
 %worlds (can-block) (can-bracket _ _) %.
 %total N (can-bracket N _) %.
 %worlds (can-block) (can-translate _ _) %.
@@ -259,7 +259,7 @@ equivalence.
 	%<- ({x} {y} {dtrans translate x y} {thm-unique translate-unique dtrans dtrans ceq/refl} translate-unique (Dtrans x y dtrans) (Dtrans' x y dtrans) (%the (ceq (N y) (N' y)) (Dceqtrans y)))
 	%<- ({z} subst Dbrack z (%the (ceq (N* @@ z) (N z)) (Dceq z)))
 	%<- ({z} subst Dbrack' z (%the (ceq (N'* @@ z) (N' z)) (Dceq' z))) %.
-%block unique-block {A tp} [x term A] [y comb A] [dtrans translate x y] [thm translate-unique dtrans dtrans ceq/refl]%.
+%block unique-block [A tp] {x term A} {y comb A} {dtrans translate x y} {thm translate-unique dtrans dtrans ceq/refl}%.
 %worlds (unique-block) (translate-unique _ _ _) %.
 %total D (translate-unique D _ _) %.
 %{! 
@@ -301,7 +301,7 @@ beta-reduction.
 	%<- (can-translate M' (%the (translate M' N') Dtrans'))
 	%<- (simulate Deq1 Dtrans Dtrans' (%the (ceq N N') Dceq1))
 	%<- (simulate Deq2 Dtrans' Dtrans'' (%the (ceq N' N'') Dceq2)) %.
-%block simulate-block {A tp} [x term A] [y comb A] [dtrans translate x y] [thm-can can-translate x dtrans] [thm-unique translate-unique dtrans dtrans ceq/refl] [thm-simulate simulate' dtrans dtrans eq/refl ceq/refl]%.
+%block simulate-block [A tp] {x term A} {y comb A} {dtrans translate x y} {thm-can can-translate x dtrans} {thm-unique translate-unique dtrans dtrans ceq/refl} {thm-simulate simulate' dtrans dtrans eq/refl ceq/refl}%.
 %worlds (simulate-block) (simulate' _ _ _ _) %.
 %total D (simulate' _ _ D _) %.
 %{!

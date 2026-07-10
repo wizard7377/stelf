@@ -1,0 +1,145 @@
+%%%%%  Syntax  %%%%%
+%sort etp %.
+%name etp %.
+%sort eterm %.
+%name eterm %.
+%term et etp %.
+%term epi %pi etp %-> (%pi eterm %-> etp) %-> etp %.
+%term esigma %pi etp %-> (%pi eterm %-> etp) %-> etp %.
+%term esing %pi eterm %-> etp %.
+%term econst %pi constant %-> eterm %.
+%term eforall %pi etp %-> eterm %.
+%term eapp %pi eterm %-> eterm %-> eterm %.
+%term epi1 %pi eterm %-> eterm %.
+%term epi2 %pi eterm %-> eterm %.
+%term elam %pi etp %-> (%pi eterm %-> eterm) %-> eterm %.
+%term epair %pi eterm %-> eterm %-> eterm %.
+%%%%%  Rules  %%%%%
+%sort ekof {_ constant} {_ etp} %.
+%sort evof {_ eterm} {_ etp} %.
+%sort ewf {_ etp} %.
+%sort subtp {_ etp} {_ etp} %.
+%sort eof {_ eterm} {_ etp} %.
+%sort equiv {_ eterm} {_ eterm} {_ etp} %.
+%sort tequiv {_ etp} {_ etp} %.
+%%%  type formation
+%term ewf/t ewf et %.
+%term ewf/pi %pi (ewf (epi A B)) %<- (ewf A) %<- ({x} %pi (evof x A) %-> (ewf (B x))) %.
+%term ewf/sigma %pi (ewf (esigma A B)) %<- (ewf A) %<- ({x} %pi (evof x A) %-> (ewf (B x))) %.
+%term ewf/sing %pi (ewf (esing M)) %<- (eof M et) %.
+%%%  typing
+%term eof/var %pi (eof X A) %<- (evof X A) %<- (ewf A) %.
+%term eof/const %pi (eof (econst K) A) %<- (ekof K A) %<- (ewf A) %.
+%define qetp (%pi etp %-> etp) [a] epi (epi a ([_] et)) ([_] et) %.
+%term eof/forall %pi (eof (eforall A) (qetp A)) %<- (ewf A) %.
+%term eof/lam 
+	%pi (eof (elam A M) (epi A B))
+	%<- (ewf A)
+	%<- ({x} %pi (evof x A) %-> (eof (M x) (B x))) %.
+%term eof/app %pi (eof (eapp M N) (B N)) %<- (eof M (epi A B)) %<- (eof N A) %.
+%term eof/pair 
+	%pi (eof (epair M N) (esigma A B))
+	%<- (eof M A)
+	%<- (eof N (B M))
+	%<- ({x} %pi (evof x A) %-> (ewf (B x))) %.
+%term eof/pi1 %pi (eof (epi1 M) A) %<- (eof M (esigma A B)) %.
+%term eof/pi2 %pi (eof (epi2 M) (B (epi1 M))) %<- (eof M (esigma A B)) %.
+%term eof/sing %pi (eof M (esing M)) %<- (eof M et) %.
+%term eof/extpi 
+	%pi (eof M (epi A B))
+	%<- (eof M (epi A B'))
+	%<- ({x} %pi (evof x A) %-> (eof (eapp M x) (B x))) %.
+%term eof/extsigma 
+	%pi (eof M (esigma A B))
+	%<- (eof (epi1 M) A)
+	%<- (eof (epi2 M) (B (epi1 M)))
+	%<- ({x} %pi (evof x A) %-> (ewf (B x))) %.
+%term eof/subsume %pi (eof M A') %<- (eof M A) %<- (subtp A A') %.
+%%% term equivalence
+%term equiv/reflex %pi (equiv M M A) %<- (eof M A) %.
+%term equiv/symm %pi (equiv M N A) %<- (equiv N M A) %.
+%term equiv/trans %pi (equiv M P A) %<- (equiv M N A) %<- (equiv N P A) %.
+%term equiv/forall 
+	%pi (equiv (eforall A) (eforall A') (epi (epi A ([_] et)) ([_] et)))
+	%<- (tequiv A A') %.
+%term equiv/lam 
+	%pi (equiv (elam A M) (elam A' M') (epi A B))
+	%<- (tequiv A A')
+	%<- ({x} %pi (evof x A) %-> (equiv (M x) (M' x) (B x))) %.
+%term equiv/app 
+	%pi (equiv (eapp M N) (eapp M' N') (B N))
+	%<- (equiv M M' (epi A B))
+	%<- (equiv N N' A) %.
+%term equiv/pair 
+	%pi (equiv (epair M N) (epair M' N') (esigma A B))
+	%<- (equiv M M' A)
+	%<- (equiv N N' (B M))
+	%<- ({x} %pi (evof x A) %-> (ewf (B x))) %.
+%term equiv/pi1 %pi (equiv (epi1 M) (epi1 M') A) %<- (equiv M M' (esigma A B)) %.
+%term equiv/pi2 %pi (equiv (epi2 M) (epi2 M') (B (epi1 M))) %<- (equiv M M' (esigma A B)) %.
+%term equiv/sing %pi (equiv M N (esing M)) %<- (equiv M N et) %.
+%term equiv/singelim %pi (equiv M N et) %<- (eof M (esing N)) %.
+%term equiv/extpi 
+	%pi (equiv M N (epi A B))
+	%<- (eof M (epi A B'))
+	%<- (eof N (epi A B''))
+	%<- ({x} %pi (evof x A) %-> (equiv (eapp M x) (eapp N x) (B x))) %.
+%term equiv/extpiw 
+	%pi (equiv M N (epi A B))
+	%<- (equiv M N (epi A B'))
+	%<- ({x} %pi (evof x A) %-> (equiv (eapp M x) (eapp N x) (B x))) %.
+%term equiv/extsigma 
+	%pi (equiv M N (esigma A B))
+	%<- (equiv (epi1 M) (epi1 N) A)
+	%<- (equiv (epi2 M) (epi2 N) (B (epi1 M)))
+	%<- ({x} %pi (evof x A) %-> (ewf (B x))) %.
+%term equiv/subsume %pi (equiv M N B) %<- (equiv M N A) %<- (subtp A B) %.
+%term equiv/beta 
+	%pi (equiv (eapp (elam A M) N) (M N) (B N))
+	%<- ({x} %pi (evof x A) %-> (eof (M x) (B x)))
+	%<- (eof N A) %.
+%term equiv/beta1 %pi (equiv (epi1 (epair M N)) M A) %<- (eof M A) %<- (eof N B) %.
+%term equiv/beta2 %pi (equiv (epi2 (epair M N)) N B) %<- (eof M A) %<- (eof N B) %.
+%%%  subtyping
+%term subtp/reflex %pi (subtp A B) %<- (tequiv A B) %.
+%term subtp/trans %pi (subtp A C) %<- (subtp A B) %<- (subtp B C) %.
+%term subtp/sing_t %pi (subtp (esing M) et) %<- (eof M et) %.
+%term subtp/pi 
+	%pi (subtp (epi A B) (epi A' B'))
+	%<- (subtp A' A)
+	%<- ({x} %pi (evof x A') %-> (subtp (B x) (B' x)))
+	%<- ({x} %pi (evof x A) %-> (ewf (B x))) %.
+%term subtp/sigma 
+	%pi (subtp (esigma A B) (esigma A' B'))
+	%<- (subtp A A')
+	%<- ({x} %pi (evof x A) %-> (subtp (B x) (B' x)))
+	%<- ({x} %pi (evof x A') %-> (ewf (B' x))) %.
+%%% type equivalence
+%term tequiv/reflex %pi (tequiv A A) %<- (ewf A) %.
+%term tequiv/symm %pi (tequiv A B) %<- (tequiv B A) %.
+%term tequiv/trans %pi (tequiv A C) %<- (tequiv A B) %<- (tequiv B C) %.
+%term tequiv/pi 
+	%pi (tequiv (epi A B) (epi A' B'))
+	%<- (tequiv A A')
+	%<- ({x} %pi (evof x A) %-> (tequiv (B x) (B' x))) %.
+%term tequiv/sigma 
+	%pi (tequiv (esigma A B) (esigma A' B'))
+	%<- (tequiv A A')
+	%<- ({x} %pi (evof x A) %-> (tequiv (B x) (B' x))) %.
+%term tequiv/sing %pi (tequiv (esing M) (esing M')) %<- (equiv M M' et) %.
+%%% derived rules
+%define eof/equiv (%pi (eof M B) %<- (eof M A) %<- (tequiv A B)) [d2] [d1] eof/subsume (subtp/reflex d2) d1 %.
+%define equiv/equiv (%pi (equiv M N B) %<- (equiv M N A) %<- (tequiv A B)) [d2] [d1] equiv/subsume (subtp/reflex d2) d1 %.
+%define subtp/t (subtp et et) subtp/reflex (tequiv/reflex ewf/t) %.
+%define subtp/sing (%pi (subtp (esing M) (esing M')) %<- (equiv M M' et)) [d] subtp/reflex (tequiv/sing d) %.
+%define tequiv/t (tequiv et et) tequiv/reflex ewf/t %.
+%%%%%  Constants  %%%%%
+%sort etopen {_ ctp} {_ etp} %.
+%mode etopen %in %out %.
+%term etopen/t etopen ct et %.
+%term etopen/pi %pi (etopen (cpi Ac Bc) (epi A ([_] B))) %<- (etopen Ac A) %<- (etopen Bc B) %.
+%term ekof/i %pi (ekof K A') %<- (ckof K A) %<- (etopen A A') %.
+%%%%%  Worlds  %%%%%
+%block evar {ex eterm}%.
+%block ebind [ea etp] {ex eterm} {ed evof ex ea}%.
+%block eofblock [ex eterm] [ea etp] {ed evof ex ea}%.

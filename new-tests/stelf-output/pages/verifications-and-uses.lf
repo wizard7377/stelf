@@ -29,7 +29,7 @@ to do things this way, and also foreshadows a number of other interesting
 developments. !}%
 %sort prop %.
 %sort atom %.
-%block bl_atom [qp atom]%.
+%block bl_atom {qp atom}%.
 %term a %pi atom %-> prop %.
 %term ⊃ %pi prop %-> prop %-> prop %.
 %prec %right 9 ⊃ %.
@@ -38,7 +38,7 @@ developments. !}%
 %sort hyp %.
 %sort verif %.
 %sort use %.
-%block bl_hyp {A prop} [x hyp A]%.
+%block bl_hyp [A prop] {x hyp A}%.
 %term var %pi (hyp A) %-> (use A) %.
 %term atm %pi (use (a Q)) %-> (verif (a Q)) %.
 %term ⊃I %pi (%pi (hyp A) %-> (verif B)) %-> (verif (A ⊃ B)) %.

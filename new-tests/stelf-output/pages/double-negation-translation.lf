@@ -11,7 +11,7 @@
 %term ibot iprop %.
 %term ior %pi iprop %-> iprop %-> iprop %.
 %term iimp %pi iprop %-> iprop %-> iprop %.
-%block ipb [X iprop]%.
+%block ipb {X iprop}%.
 %worlds (ipb) (iprop) %.
 %sort itrue %.
 %term imt itrue itop %.
@@ -36,7 +36,7 @@
 %define dnebot (%pi (itrue (idn ibot)) %-> (itrue ibot)) [x] iapp x (ilam ([x] x)) %.
 %inline dnetop (%pi (itrue (idn itop)) %-> (itrue itop)) [x] imt %.
 %define distdnimp (%pi (itrue (idn (iimp A B))) %-> (itrue (iimp (idn A) (idn B)))) [f] ilam ([x itrue (idn A)] ilam ([y itrue (inot B)] iapp f (ilam ([g itrue (iimp A B)] iapp x (ilam ([z itrue A] iapp y (iapp g z))))))) %.
-%block itb {A iprop} [D itrue A]%.
+%block itb [A iprop] {D itrue A}%.
 %worlds (ipb itb) (itrue _) %.
 %{! 
 
@@ -52,7 +52,7 @@
 %term imp %pi prop %-> prop %-> prop %.
 %term nbot prop %.
 %term not %pi prop %-> prop %.
-%block pb [X prop]%.
+%block pb {X prop}%.
 %worlds (pb) (prop) %.
 %sort conc %.
 %term true %pi prop %-> conc %.
@@ -90,8 +90,8 @@
 %% because not should be positive
 %% letcc
 %term letcc %pi (%pi (>> false A) %-> (>> contra)) %-> (>> true A) %.
-%block tb {A prop} [D >> true A]%.
-%block fb {A prop} [D >> false A]%.
+%block tb [A prop] {D >> true A}%.
+%block fb [A prop] {D >> false A}%.
 %worlds (pb tb fb) (>> _) %.
 %define iff (%pi prop %-> prop %-> prop) [A] [B] and (imp A B) (imp B A) %.
 %define iffi (
@@ -121,13 +121,13 @@ It differs only by De Morgan laws that are provable intuitionistically.
 %term */imp %pi (* (imp A B) (iimp A' B')) %<- (* A A') %<- (* B B') %.
 %term */nbot * nbot ibot %.
 %term */not %pi (* (not A) (inot A')) %<- (* A A') %.
-%block *b [X prop] [X' iprop] [_ * X (inot (inot X'))]%.
+%block *b {X prop} {X' iprop} {_ * X (inot (inot X'))}%.
 %worlds (*b) (* _ _) %.
 %total A (* A _) %.
 %unique * %in %out %.
 %sort *tot {A} %.
 %mode *tot %in %out %.
-%block *totb [X prop] [X' iprop] [D* * X (idn X')] [_ *tot X D*]%.
+%block *totb {X prop} {X' iprop} {D* * X (idn X')} {_ *tot X D*}%.
 %worlds (*totb) (*tot _ _) %.
 %total {} (*tot _ _) %.
 %% verified by %total above
@@ -167,7 +167,7 @@ It differs only by De Morgan laws that are provable intuitionistically.
 	%pi (dne (*/imp D*2 D*1) ([x] ilam ([y] E2 (iapp (distdnimp x) (dni y)))))
 	%<- (dne D*2 E2) %.
 %term _ %pi (dne (*/not D*) tne) %<- (dne D* E) %.
-%block dneb [X prop] [X' iprop] [dx * X (idn X')] [_ dne dx tne]%.
+%block dneb {X prop} {X' iprop} {dx * X (idn X')} {_ dne dx tne}%.
 %worlds (dneb itb) (dne _ _) %.
 %total D (dne D _) %.
 %{! 
@@ -320,16 +320,16 @@ It differs only by De Morgan laws that are provable intuitionistically.
 	%<- (id-iprop-not-cong Did Did')
 	%<- (itrue-respects-id x' Did' E'')} sound/contra (E2 x) (E2' x')) %.
 %% uses a fancy variable case:
-%block soundtb {A prop} {A' iprop} {Dx * A A'} [x >> true A] [x' itrue A'] [_ {A''} {D* * A A''} {Did} {E''} 
+%block soundtb [A prop] [A' iprop] [Dx * A A'] {x >> true A} {x' itrue A'} {_ {A''} {D* * A A''} {Did} {E''} 
 	%pi (sound/true x D* E'')
 	%<- (*unique D* Dx Did)
 	%<- (itrue-respects-id x' Did E'')]%.
-%block soundfb {A prop} {A' iprop} {Dx * A A'} [x >> false A] [x' itrue (inot A')] [_ {A'' iprop} {D* * A A''} {Did id-iprop A'' A'} {Did' id-iprop (inot A'') (inot A')} {E'' itrue (inot A'')} 
+%block soundfb [A prop] [A' iprop] [Dx * A A'] {x >> false A} {x' itrue (inot A')} {_ {A'' iprop} {D* * A A''} {Did id-iprop A'' A'} {Did' id-iprop (inot A'') (inot A')} {E'' itrue (inot A'')} 
 	%pi (sound/false x D* E'')
 	%<- (*unique D* Dx Did)
 	%<- (id-iprop-not-cong Did Did')
 	%<- (itrue-respects-id x' Did' E'')]%.
-%block soundpb [X prop] [X' iprop] [dx * X (idn X')] [_ dne dx tne] [_ *tot X dx]%.
+%block soundpb {X prop} {X' iprop} {dx * X (idn X')} {_ dne dx tne} {_ *tot X dx}%.
 %worlds (soundpb soundtb soundfb) (sound/true _ _ _) (sound/true _ _ _) (sound/false _ _ _) (sound/false _ _ _) (sound/contra _ _) %.
 %total (D1 D4 D2 D5 D3) (sound/true D4 _ _) (sound/true D1 _ _) (sound/false D5 _ _) (sound/false D2 _ _) (sound/contra D3 _) %.
 %{! 
@@ -350,13 +350,13 @@ translate atoms).
 %term *i/bot *i bot ibot %.
 %term *i/or %pi (*i (or A B) (ior A' B')) %<- (*i A A') %<- (*i B B') %.
 %term *i/imp %pi (*i (imp A B) (iimp A' B')) %<- (*i A A') %<- (*i B B') %.
-%block *ib [X prop] [X' iprop] [_ *i X X']%.
+%block *ib {X prop} {X' iprop} {_ *i X X'}%.
 %worlds (*ib) (*i _ _) %.
 %total A (*i _ A) %.
 %unique *i %out %in %.
 %sort *itot {A'} %.
 %mode *itot %in %out %.
-%block *itotb [X prop] [X' iprop] [D*i *i X X'] [_ *itot X' D*i]%.
+%block *itotb {X prop} {X' iprop} {D*i *i X X'} {_ *itot X' D*i}%.
 %worlds (*itotb fb pb) (*itot _ _) %.
 %total {} (*itot _ _) %.
 %% verified by %total above
@@ -416,7 +416,7 @@ The arguments are in a funny order because I copied from soundness. =)
 	%<- (*itot A D*A)
 	%<- (incl E1 (*i/imp D*B D*A) E1')
 	%<- (incl E2 D*A E2') %.
-%block inclb {A} {A'} {D* *i A A'} [x >> true A] [x' itrue A'] [_ {A-2} {D*' *i A-2 A'} {Did id-prop A-2 A} {E >> true A-2} %pi (incl E D*' x') %<- (*iunique D*' D* Did) %<- (true-respects-id x Did E)]%.
+%block inclb [A] [A'] [D* *i A A'] {x >> true A} {x' itrue A'} {_ {A-2} {D*' *i A-2 A'} {Did id-prop A-2 A} {E >> true A-2} %pi (incl E D*' x') %<- (*iunique D*' D* Did) %<- (true-respects-id x Did E)}%.
 %worlds (inclb fb *itotb) (incl _ _ _) %.
 %total D (incl _ _ D) %.
 %{! 
@@ -443,7 +443,7 @@ The arguments are in a funny order because I copied from soundness. =)
 %term _ 
 	%pi (equiv (*/not D*) (*i/imp *i/bot D*') (iffi ([x] lam ([y] cabort (notcase x ([u] throw u (iffer E y))))) ([x] noti (cont ([y] abort (app x (iffel E y)))))))
 	%<- (equiv D* D*' E) %.
-%block equivb [X prop] [X' iprop] [d*i *i X X'] [d* * X (inot (inot X'))] [_ equiv d* (*i/imp *i/bot (*i/imp *i/bot d*i)) (iffi ([x >> true X] iffel notimpbot2 (cdni x)) ([x >> true (imp (imp X bot) bot)] cdne (iffer notimpbot2 x)))]%.
+%block equivb {X prop} {X' iprop} {d*i *i X X'} {d* * X (inot (inot X'))} {_ equiv d* (*i/imp *i/bot (*i/imp *i/bot d*i)) (iffi ([x >> true X] iffel notimpbot2 (cdni x)) ([x >> true (imp (imp X bot) bot)] cdne (iffer notimpbot2 x)))}%.
 %worlds (equivb tb fb) (equiv _ _ _) %.
 %total D (equiv D _ _) %.
 %{! 
@@ -458,7 +458,7 @@ The arguments are in a funny order because I copied from soundness. =)
 	%<- (*itot A' D*i)
 	%<- (incl E D*i E')
 	%<- (equiv D* D*i Eiff) %.
-%block comp-pb [X prop] [X' iprop] [d*i *i X X'] [d* * X (inot (inot X'))] [_ equiv d* (*i/imp *i/bot (*i/imp *i/bot d*i)) (iffi ([x >> true X] iffel notimpbot2 (cdni x)) ([x >> true (imp (imp X bot) bot)] cdne (iffer notimpbot2 x)))] [_ *itot X' d*i]%.
+%block comp-pb {X prop} {X' iprop} {d*i *i X X'} {d* * X (inot (inot X'))} {_ equiv d* (*i/imp *i/bot (*i/imp *i/bot d*i)) (iffi ([x >> true X] iffel notimpbot2 (cdni x)) ([x >> true (imp (imp X bot) bot)] cdne (iffer notimpbot2 x)))} {_ *itot X' d*i}%.
 %worlds (comp-pb inclb fb) (comp _ _ _) %.
 %total E1 (comp E1 _ _) %.
 %sort comp/false %.

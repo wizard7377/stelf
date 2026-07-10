@@ -1,0 +1,19 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Definition 16 : Data-stack substitution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort dstack_substT {_ ctriv} {_ stack} {_ ctriv} {_ stack} %.
+%sort dstack_substE {_ cexp} {_ stack} {_ cexp} %.
+%sort dstack_substC {_ ccont} {_ stack} {_ ccont} %.
+%term dstack_subst_xlam dstack_substT (xlam R) Xi (xlam R) Xi %.
+%term dstack_subst_cret 
+	%pi (dstack_substE (cret C T) Xi (cret C' T'))
+	%<- (dstack_substT T Xi T' Xi')
+	%<- (dstack_substC C Xi' C') %.
+%term dstack_subst_capp 
+	%pi (dstack_substE (capp T0 T1 C) Xi (capp T0' T1' C'))
+	%<- (dstack_substT T1 Xi T1' Xi1)
+	%<- (dstack_substT T0 Xi1 T0' Xi0)
+	%<- (dstack_substC C Xi0 C') %.
+%term dstack_subst_vlam 
+	%pi (dstack_substC (vlam E) Xi (vlam E'))
+	%<- ({v ctriv} {dsv {xi stack} {t ctriv} dstack_substT v (xi , t) t xi} dstack_substE (E v) (Xi , v) (E' v)) %.

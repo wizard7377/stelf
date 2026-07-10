@@ -187,9 +187,9 @@ Twelf excels for this kind of proof. The only difficulty is that the most natura
 	%<- ({bf} xm (A & B) W ([&t] &T ([at] [bt] D1 &t at bt) &t) ([&f] E2 &f bf) (E2' bf))
 	%<- ({bt} xm A W ([at] D1' at bt) ([af] E1' af) (D1'' bt))
 	%<- (xm B W ([bt] D1'' bt) ([bf] E2' bf) F) %.
-%block blockw [w world]%.
-%block blockt {A prop} {W world} [tt true A W]%.
-%block blockf {A prop} {W world} [ff false A W]%.
+%block blockw {w world}%.
+%block blockt [A prop] [W world] {tt true A W}%.
+%block blockf [A prop] [W world] {ff false A W}%.
 %worlds (blockw blockt blockf) (xm A W D E F) %.
 %total {A [D E]} (xm A W D E F) %.
 %{! ## Natural deduction to sequent calculus
@@ -259,8 +259,8 @@ The admissibility of excluded middle allows us to straightforwardly translate na
 	%pi (ndseq (throw D K) ([cf'] F AF))
 	%<- (ndseq D ([af] F af))
 	%<- (contfalse K AF) %.
-%block blockh {A prop} {W world} [a A @ W] [at true A W] [_ ndseq a ([af] contra at af)]%.
-%block block* {A prop} {W world} [ac A * W] [af false A W] [_ contfalse ac af]%.
+%block blockh [A prop] [W world] {a A @ W} {at true A W} {_ ndseq a ([af] contra at af)}%.
+%block block* [A prop] [W world] {ac A * W} {af false A W} {_ contfalse ac af}%.
 %worlds (blockw blockh block*) (contfalse D F) %.
 %worlds (blockw blockh block*) (ndseq D F) %.
 %total D (contfalse D F) %.
@@ -406,12 +406,12 @@ With substitution defined, we can now translate sequent calculus proofs back int
 	%<- ({cc} {ww} xs ([c] [w] [a'] throw (?G (?I a')) N?) ([a*'] F1 a*' cc ww) (FF cc ww)) %.
 %{! Finally, we can declare the [worlds](/wiki/percent-worlds/) for our metatheorems and ask Twelf to check them: !}%
 % for xs
-%block blocku {A prop} {W world} [u A * W]%.
-%block blocka {A prop} {W world} [u A @ W]%.
+%block blocku [A prop] [W world] {u A * W}%.
+%block blocka [A prop] [W world] {u A @ W}%.
 % for seqnd
-%block blocknt {A prop} {W world} [at true A W] [a A @ W] [t truend at a]%.
-%block blocknf {A prop} {W world} [af false A W] [a A * W] [t falsend af a]%.
-%block blockp [a prop]%.
+%block blocknt [A prop] [W world] {at true A W} {a A @ W} {t truend at a}%.
+%block blocknf [A prop] [W world] {af false A W} {a A * W} {t falsend af a}%.
+%block blockp {a prop}%.
 %worlds (blockw blocka blocknt blocknf blocku blockp) (xs D E F) (seqnd D F) (truend D F) (falsend D F) %.
 %total E (xs D E F) %.
 %total (D T F) (seqnd D FF) (truend T N) (falsend F M) %.

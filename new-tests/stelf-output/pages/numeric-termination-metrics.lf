@@ -136,7 +136,7 @@ We now show part of the proof of the diamond property for this notion of reducti
 	%<- (diamond N11 N12 D11 D12 DM11 DM12 D11' D12')
 	%<- (diamond N21 N22 D21 D22 DM21 DM22 D21' D22') %.
 %% fill in remaining cases
-%block bind {t tp} [x exp] [d of x t]%.
+%block bind [t tp] {x exp} {d of x t}%.
 %worlds (bind) (diamond _ _ _ _ _ _ _ _) %.
 %terminates [N1 N2] (diamond N1 N2 _ _ _ _ _ _) %.
 %{! The ``reduce_app`` against ``reduce_app`` case illustrates why we need to know that summands are subterms of their sum: the inductive calls are on the summands that add up to the size of the overall derivation.  If we elided the calls to ``sum_reduces*``, the case would not termination-check, because Twelf would not be able to tell that, for example, ``N11 &lt; (s N1)``.

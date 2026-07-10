@@ -1,0 +1,13 @@
+%%%%%  Expansion  %%%%%
+%sort expand {_ atom} {_ tp} {_ term} %.
+%mode expand %in %in %out %.
+%term expand/t expand R t (at R) %.
+%term expand/pi 
+	%pi (expand R (pi A B) (lam N))
+	%<- ({x} expand x A (M x))
+	%<- ({x} expand (app R (M x)) (B x) (N x)) %.
+%term expand/sigma 
+	%pi (expand R (sigma A B) (pair M N))
+	%<- (expand (pi1 R) A M)
+	%<- (expand (pi2 R) (B (pi1 R)) N) %.
+%term expand/sing expand R (sing R') (at R') %.

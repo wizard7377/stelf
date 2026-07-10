@@ -1,0 +1,12 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% var-validity of mixed stacks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort vvalMS {_ stack} {_ stack} %.
+%term vvalMS_init vvalMS dot dot %.
+%term vvalMS_v %pi (vvalMS (XXi , V) (Xi , V)) %<- (vvalMS XXi Xi) %.
+%term vvalMS_t %pi (vvalMS (XXi , V) (Xi , T)) %<- ({xi stack} vvalT xi T xi) %<- (vvalMS XXi Xi) %.
+%sort vvalDS->vvalMS {_ vvalDS XXi Xi} {_ vvalMS XXi Xi} %.
+%term ds_ms_init vvalDS->vvalMS vvalDS_init vvalMS_init %.
+%term ds_ms_stack 
+	%pi (vvalDS->vvalMS (vvalDS_stack VVDS VVT) (vvalMS_t VVMS VVT))
+	%<- (vvalDS->vvalMS VVDS VVMS) %.

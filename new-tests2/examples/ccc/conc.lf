@@ -1,0 +1,12 @@
+% Translation CCC combinators -> lambda-terms
+%sort conc {_ mor A B} {_ %pi (term A) %-> (term B)} %.
+%mode conc %in %out %.
+%term cid conc id ([x] x) %.
+%term ccomp %pi (conc (F @ G) ([x] M (N x))) %<- (conc G N) %<- (conc F M) %.
+%term cunit conc drop ([x] lunit) %.
+%term cpair %pi (conc (pair F G) ([x] lpair (M x) (N x))) %<- (conc G N) %<- (conc F M) %.
+%term cfst conc fst ([x] lfst x) %.
+%term csnd conc snd ([x] lsnd x) %.
+%term ccur %pi (conc (cur F) ([a] llam ([b] M (lpair a b)))) %<- (conc F M) %.
+%term capp conc app ([a] lapp (lfst a) (lsnd a)) %.
+%worlds () (conc _ _) %.

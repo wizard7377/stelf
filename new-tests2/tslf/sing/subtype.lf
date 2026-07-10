@@ -1,0 +1,32 @@
+%%%%%  Subtyping and Coercions  %%%%%
+%sort subtype {_ tp} {_ tp} {_ %pi atom %-> term} %.
+%mode subtype %in %in %out %.
+%term subtype/t subtype t t ([x] at x) %.
+%term subtype/pi 
+	%pi (subtype (pi A1 A2) (pi B1 B2) ([f] lam ([x] M2 x (app f (M1 x)))))
+	%<- (subtype B1 A1 ([x] M1 x))
+	%<- ({x} tsub A2 (M1 x) (A2' x))
+	%<- ({x} subtype (A2' x) (B2 x) ([y] M2 x y)) %.
+%term subtype/sigma 
+	%pi (subtype (sigma A1 A2) (sigma B1 B2) ([p] pair (M1 (pi1 p)) (M2 (pi1 p) (pi2 p))))
+	%<- (subtype A1 B1 ([x] M1 x))
+	%<- ({x} tsub B2 (M1 x) (B2' x))
+	%<- ({x} subtype (A2 x) (B2' x) ([y] M2 x y)) %.
+%term subtype/sing_t subtype (sing R) t ([x] at R) %.
+%term subtype/sing subtype (sing R) (sing R) ([x] at R) %.
+%%%%%  Selfification  %%%%%
+%sort self {_ term} {_ tp} {_ tp} %.
+%term self/t self (at R) t (sing R) %.
+%term self/pi 
+	%pi (self (lam ([x] M x)) (pi A ([x] B x)) (pi A ([x] B' x)))
+	%<- ({x} self (M x) (B x) (B' x)) %.
+%term self/sigma 
+	%pi (self (pair M N) (sigma A ([x] B x)) (sigma A' ([_] B'')))
+	%<- (self M A A')
+	%<- (tsub B M B')
+	%<- (self N B' B'') %.
+%term self/sing self (at R) (sing R) (sing R) %.
+%sort principal {_ tp} %.
+%term principal/sing principal (sing R) %.
+%term principal/pi %pi (principal (pi A B)) %<- ({x} principal (B x)) %.
+%term principal/sigma %pi (principal (sigma A ([_] B))) %<- (principal A) %<- (principal B) %.

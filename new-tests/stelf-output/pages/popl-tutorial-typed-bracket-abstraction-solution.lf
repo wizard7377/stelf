@@ -177,7 +177,7 @@ below.
 	%pi (bracket ([x] capp (N1 x) (N2 x)) (capp (capp s N1') N2'))
 	%<- (bracket ([x] N1 x) N1')
 	%<- (bracket ([x] N2 x) N2') %.
-%block tbind {A tp} [x term A] [y cterm A] [dtrans trans x y]%.
+%block tbind [A tp] {x term A} {y cterm A} {dtrans trans x y}%.
 %worlds (tbind) (bracket _ _) %.
 %worlds (tbind) (trans _ _) %.
 %{! 

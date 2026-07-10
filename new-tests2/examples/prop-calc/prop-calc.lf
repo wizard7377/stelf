@@ -1,0 +1,46 @@
+%%% Intuitionistic propositional calculus
+%%% Positive fragment with implies, and, true.
+%%% Two formulations here: natural deduction and Hilbert-style system.
+%%% Author: Frank Pfenning
+% Type of propositions.
+%sort o %.
+%name o %.
+% Syntax: implication, plus a few constants.
+%term => %pi o %-> o %-> o %.
+%prec %right 10 => %.
+%term & %pi o %-> o %-> o %.
+%prec %right 11 & %.
+%term true o %.
+% Provability.
+%sort |- {_ o} %.
+%prec %prefix 9 |- %.
+%name |- %.
+% Axioms.
+%term K |- A => B => A %.
+%term S |- (A => B => C) => (A => B) => A => C %.
+%term ONE |- true %.
+%term PAIR |- A => B => A & B %.
+%term LEFT |- A & B => A %.
+%term RIGHT |- A & B => B %.
+% Inference Rule.
+%term MP %pi (|- A => B) %-> (|- A) %-> (|- B) %.
+% Natural Deduction.
+%sort ! {_ o} %.
+%prec %prefix 9 ! %.
+%name ! %.
+%term trueI ! true %.
+%term andI %pi (! A) %-> (! B) %-> (! A & B) %.
+%term andEL %pi (! A & B) %-> (! A) %.
+%term andER %pi (! A & B) %-> (! B) %.
+%term impliesI %pi (%pi (! A) %-> (! B)) %-> (! A => B) %.
+%term impliesE %pi (! A => B) %-> (! A) %-> (! B) %.
+% Normal deductions (for faster search)
+%sort !^ {_ o} %.
+%sort !v {_ o} %.
+%term trueI^ !^ true %.
+%term andI^ %pi (!^ A) %-> (!^ B) %-> (!^ (A & B)) %.
+%term andEvL %pi (!v (A & B)) %-> (!v A) %.
+%term andEvR %pi (!v (A & B)) %-> (!v B) %.
+%term impI^ %pi (%pi (!v A) %-> (!^ B)) %-> (!^ (A => B)) %.
+%term impEv %pi (!v (A => B)) %-> (!^ A) %-> (!v B) %.
+%term close %pi (!v A) %-> (!^ A) %.

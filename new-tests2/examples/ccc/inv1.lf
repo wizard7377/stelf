@@ -1,0 +1,31 @@
+%sort exp {_ env P} {_ term P} %.
+%term exp_empty exp empty lunit %.
+%term exp_addv %pi (exp (addv G X) (lpair N X)) %<- (exp G N) %.
+%sort invcav {_ absv G X F} {_ conc F M} {_ exp G N} {_ conv (M N) X} %.
+%term invcav_x invcav av_x csnd (exp_addv EP) c_prr %.
+%term invcav_y 
+	%pi (invcav (av_y AV) (ccomp (%the (conc _ M) CP) cfst) (%the (exp _ (lpair MG Y)) (exp_addv EP)) (c_trans (CC (%the (conv (lfst (lpair MG Y)) _) c_prl)) CVP))
+	%<- (cong M CC)
+	%<- (invcav AV CP EP CVP) %.
+%sort invca {_ abse G E F} {_ conc F M} {_ exp G N} {_ conv (M N) E} %.
+%term invca_var %pi (invca (avar AV) CP EP CVP) %<- (invcav AV CP EP CVP) %.
+%term invca_fst %pi (invca (afst AP) (ccomp cfst CP) EP (c_fst CVP)) %<- (invca AP CP EP CVP) %.
+%term invca_snd %pi (invca (asnd AP) (ccomp csnd CP) EP (c_snd CVP)) %<- (invca AP CP EP CVP) %.
+%term invca_pair 
+	%pi (invca (apair AP1 AP2) (cpair CP1 CP2) EP (c_pair CVP1 CVP2))
+	%<- (invca AP1 CP1 EP CVP1)
+	%<- (invca AP2 CP2 EP CVP2) %.
+%term invca_lam 
+	%pi (invca (alam ([x] AP x)) (ccur CP) EP (c_lam ([x] CVP x)))
+	%<- ({x} invca (AP x) CP (exp_addv EP) (CVP x)) %.
+%term invca_app 
+	%pi (invca (aapp AP1 AP2) (ccomp capp (cpair CP1 CP2)) EP (c_app (c_trans c_prl CVP1) (c_trans c_prr CVP2)))
+	%<- (invca AP1 CP1 EP CVP1)
+	%<- (invca AP2 CP2 EP CVP2) %.
+% sigma[p1:{x}{y}abse (addv (addv empty x) y) x F] sigma [p2:conc F M] sigma [p3:{x}{y}exp (addv (addv empty x) y) (N x y)] {x}{y}invca (p1 x y) p2 (p3 x y) (R x y).
+% sigma[p1:{x}abse (addv empty x) (llam [y] lpair y x) F] sigma [p2:conc F M] sigma [p3:{x}exp (addv empty x) (N x)] {x}invca (p1 x) p2 (p3 x) (R x).
+%sort zconc {_ mor A B} {_ env A} {_ term B} %.
+%term zconc1 %pi (zconc F G (M MG)) %<- (conc F M) %<- (exp G MG) %.
+%sort inv {_ abse G E F} {_ zconc F G E'} {_ conv E' E} %.
+%term inv1 %pi (inv AP (zconc1 EXP CP) EE) %<- (invca AP CP EXP EE) %.
+% sigma[p1:{x}abse (addv empty x) (llam [y] lpair y x) F] sigma [p2:{x}zconc F (addv empty x) (M x)] {x} inv (p1 x) (p2 x) (R x).

@@ -67,6 +67,5 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
           end
       | _ -> raise' "Invalid mode declaration"
       end
-    with Error m ->
-      raise' m
+    with Error m -> raise' m
 end

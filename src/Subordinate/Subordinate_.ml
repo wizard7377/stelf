@@ -16,7 +16,9 @@ open! Basis
 (* Author: Carsten Schuermann *)
 (* Reverse subordination order *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MakeSubordinate
     (Global : GLOBAL)

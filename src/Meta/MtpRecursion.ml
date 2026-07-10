@@ -22,7 +22,9 @@ open! Basis
 (* Author: Carsten Schuermann *)
 (* See [Rohwedder,Pfenning ESOP'96] *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MTPRecursion (MTPRecursion__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL

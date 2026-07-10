@@ -55,8 +55,8 @@ atomic propositions) and ``bl_atmneg`` (negative atomic propositions). !}%
 %term neg polarity %.
 %sort atm %.
 %name atm %.
-%block bl_atmpos [qp atm pos]%.
-%block bl_atmneg [qn atm neg]%.
+%block bl_atmpos {qp atm pos}%.
+%block bl_atmneg {qn atm neg}%.
 %{! ## Fairtlough and Mendler's lax logic !}%
 %{! Fairtlough and Mendler's presentation of lax logic has a slight
 inconsistancy: the logic's syntax is defined as 
@@ -93,7 +93,7 @@ We represent the hypotheses using the LF context; each
 <Math formula="M \in \Gamma"/> becomes an LF variable of type ``hyp' M``, and
 we use the world ``bl_hyp'`` to describe all such contexts. !}%
 %sort hyp' %.
-%block bl_hyp' {M prop'} [h hyp' M]%.
+%block bl_hyp' [M prop'] {h hyp' M}%.
 %{! We represent the conclusion as ``conc' T D``, where
 * ``T`` is a metric capturing the shape of the derivation
 * ``D`` = ``conc-#'`` represents proving a contradiction <Math formula="\Gamma \vdash "/>; we abbreviate ``conc' T conc-#'`` as ``# T``.
@@ -223,7 +223,7 @@ when we write ``P -o N``, not linear implication. !}%
 %{! Our assumptions are, as before, represented by LF variables, this time
 of type ``hyp A``. !}%
 %sort hyp %.
-%block bl_hyp {S polarity} {A prop S} [h hyp A]%.
+%block bl_hyp [S polarity] [A prop S] {h hyp A}%.
 %{! We are always trying to prove one of two _judgments,_ and so our
 sequents either take the form <Math formula="\Gamma \vdash A~true"/> (<Math formula="A"/>
 is true) or <Math formula="\Gamma \vdash A~lax"/> (<Math formula="A"/> is true
@@ -371,12 +371,12 @@ different worlds.
 * ``trans-complhyp`` takes a source logic hypothesis ``H'`` and obtains a translation ``TR`` and a target logic hypothesis ``H``. !}%
 %sort trans-soundhyp %.
 %mode trans-soundhyp %in %out %out %.
-%block bl_trans-soundhyp {M metric} {S polarity} {A prop S} {A' prop'} {T trans M A' S A} [h hyp A] [h' hyp' A'] [t trans-soundhyp h T h']%.
+%block bl_trans-soundhyp [M metric] [S polarity] [A prop S] [A' prop'] [T trans M A' S A] {h hyp A} {h' hyp' A'} {t trans-soundhyp h T h'}%.
 %worlds (bl_atmpos bl_atmneg bl_trans-soundhyp) (trans-soundhyp _ _ _) %.
 %total [] (trans-soundhyp _ _ _) %.
 %sort trans-complhyp %.
 %mode trans-complhyp %in %out %out %.
-%block bl_trans-complhyp {M metric} {A prop'} {S polarity} {C prop S} {T trans M A S C} [h' hyp' A] [h hyp C] [t trans-complhyp h' T h]%.
+%block bl_trans-complhyp [M metric] [A prop'] [S polarity] [C prop S] [T trans M A S C] {h' hyp' A} {h hyp C} {t trans-complhyp h' T h}%.
 %worlds (bl_atmpos bl_atmneg bl_trans-complhyp) (trans-complhyp _ _ _) %.
 %total [] (trans-complhyp _ _ _) %.
 %{! ### Correspondence !}%

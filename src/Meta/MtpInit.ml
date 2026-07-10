@@ -17,7 +17,9 @@ open! Basis
 (* Initialization *)
 (* Author: Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MTPInit (MTPInit__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL

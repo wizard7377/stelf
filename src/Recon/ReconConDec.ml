@@ -65,6 +65,23 @@ module Make_ReconConDec
             "Free variables in context block after term reconstruction:\n"
             ^ ctxBlockToString (g0', (g1', g2')) )
 
+  (* Fresh names for anonymous top-level declarations: each `_` names a
+     distinct constant (cf. the classic Twelf `- : A.` clause idiom, where
+     every `-` shadows the previous one; here they get distinct generated
+     names instead).  Collision-checked against the signature so a
+     user-written `_1` etc. is never captured. *)
+  let anon_counter = ref 0
+
+  let fresh_anon_name () =
+    let rec next () =
+      incr anon_counter;
+      let candidate = "_" ^ string_of_int !anon_counter in
+      match Names.constLookup (Names.Qid ([], candidate)) with
+      | None -> candidate
+      | Some _ -> next ()
+    in
+    next ()
+
   let condecToConDec (condec, loc, abbFlag) =
     let (Paths.Loc (filename, r)) = loc in
     match Cst.View.ConDec.view condec with
@@ -78,7 +95,7 @@ module Make_ReconConDec
         in
         let name =
           let rec find_name = function
-            | [] -> raise (Error "Anonymous top-level constant declaration")
+            | [] -> fresh_anon_name ()
             | None :: rest -> find_name rest
             | Some n :: _ -> n
           in
@@ -98,9 +115,7 @@ module Make_ReconConDec
             (IntSyn.ConDec (name, None, i, IntSyn.Normal, v'_, l_))
         in
         let ocd = Paths.dec (i, oc) in
-        let _ =
-          Display.chatter_s 3 (Print.conDecToString cd ^ "\n")
-        in
+        let _ = Display.chatter_s 3 (Print.conDecToString cd ^ "\n") in
         let _ =
           if !Global.doubleCheck then
             begin try Typecheck.Typecheck_.TypeCheck.check (v'_, IntSyn.Uni l_)
@@ -144,9 +159,7 @@ module Make_ReconConDec
                  (name, None, i, u''_, v''_, l_, IntSyn.ancestor u''_))
           end
         in
-        let _ =
-          Display.chatter_s 3 (Print.conDecToString cd ^ "\n")
-        in
+        let _ = Display.chatter_s 3 (Print.conDecToString cd ^ "\n") in
         let _ =
           if !Global.doubleCheck then begin
             (try Typecheck.Typecheck_.TypeCheck.check (v''_, IntSyn.Uni l_)
@@ -197,9 +210,7 @@ module Make_ReconConDec
           Names.nameConDec
             (IntSyn.BlockDec (name, None, gsome'_, ctxToList gblock'_))
         in
-        let _ =
-          Display.chatter_s 3 (Print.conDecToString bd ^ "\n")
-        in
+        let _ = Display.chatter_s 3 (Print.conDecToString bd ^ "\n") in
         (Some bd, None)
     | Cst.View.ConDec.BlockDef (_, name, worlds) ->
         (* Case D: block definition *)
@@ -219,9 +230,7 @@ module Make_ReconConDec
             w'
         in
         let bd = Names.nameConDec (IntSyn.BlockDef (name, None, cids)) in
-        let _ =
-          Display.chatter_s 3 (Print.conDecToString bd ^ "\n")
-        in
+        let _ = Display.chatter_s 3 (Print.conDecToString bd ^ "\n") in
         (Some bd, None)
     | _ -> raise (Error "condecToConDec: unrecognised conDec variant")
 

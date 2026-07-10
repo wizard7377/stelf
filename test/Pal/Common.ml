@@ -1,10 +1,8 @@
 let setup_display () =
   Printexc.record_backtrace true;
-  Logs.set_reporter (Logs_fmt.reporter ());
-  Logs.set_level ~all:false (Some Logs.Debug);
   Fmt_tty.setup_std_outputs ();
   Display.register (fun m ->
-      if Display.Info.( >= ) Display.Info.Normal m.level then begin
+      if Display.Info.Level.normal >= m.level then begin
         let severity =
           let open Grace.Diagnostic.Severity in
           match m.kind with
@@ -14,7 +12,7 @@ let setup_display () =
         in
         let diag =
           Grace.Diagnostic.create severity (fun ppf ->
-              Display.fmt ppf m.msg)
+              Display.fmt ppf (Display.Info.body_to_form m.msg))
         in
         Grace_ansi_renderer.pp_diagnostic Format.std_formatter diag
       end;
@@ -31,7 +29,7 @@ let test ?(skip = false) ?(failure = false) (name : string) (cmds : string list)
   let run cmd =
     try
       Printexc.record_backtrace true;
-      (Lazy.force exec) cmd;
+      ignore ((Lazy.force exec) cmd : Pal.Reply.t list);
       None
     with e -> Some e
   in
@@ -61,17 +59,22 @@ let test ?(skip = false) ?(failure = false) (name : string) (cmds : string list)
               | None | Some _ -> ()))
       cmds )
 
-let file_test ?(skip = false) ?(failure = false) (name : string) (paths : string list)
-    : string * unit Alcotest.test_case list =
+let file_test ?(skip = false) ?(failure = false) (name : string)
+    (paths : string list) : string * unit Alcotest.test_case list =
   let () = setup_display () in
   let make =
     lazy
       (let module P = Pal.Pal.Start () in
        fun path ->
          let fp = Fpath.v path in
-         match P.M.make (P.M.File fp) with
-         | P.M.Ok -> None
-         | P.M.Abort -> Some (Failure ("Abort loading " ^ path)))
+         let outcome = P.M.make (P.M.File fp) in
+         match outcome.Pal.Reply.error with
+         | None -> None
+         | Some e ->
+             Some
+               (Failure
+                  ("Abort loading " ^ path ^ ": "
+                  ^ Display.Form.to_plain e.Pal.Reply.message)))
   in
   let run path =
     try

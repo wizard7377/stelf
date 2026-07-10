@@ -1,0 +1,37 @@
+%%% Simply-typed lambda-calculus
+%% Lambda-calc language
+% types are objects
+% obj : type (from ccc.elf)
+% simply-typed terms
+%sort term {_ obj} %.
+%name term %.
+% beta-eta convertibility
+%sort conv {_ term A} {_ term A} %.
+%name conv %.
+% products
+%term lpair %pi (term A) %-> (term B) %-> (term (A * B)) %.
+%term lfst %pi (term (A * B)) %-> (term A) %.
+%term lsnd %pi (term (A * B)) %-> (term B) %.
+% unit
+%term lunit term 1 %.
+% function space
+%term llam %pi (%pi (term A) %-> (term B)) %-> (term (A => B)) %.
+%term lapp %pi (term (A => B)) %-> (term A) %-> (term B) %.
+%% Equations
+% equivalence
+%term c_refl conv E E %.
+%term c_trans %pi (conv E E') %-> (conv E' E'') %-> (conv E E'') %.
+%term c_sym %pi (conv E E') %-> (conv E' E) %.
+% congruence
+%term c_fst %pi (conv E E') %-> (conv (lfst E) (lfst E')) %.
+%term c_snd %pi (conv E E') %-> (conv (lsnd E) (lsnd E')) %.
+%term c_pair %pi (conv E1 E1') %-> (conv E2 E2') %-> (conv (lpair E1 E2) (lpair E1' E2')) %.
+%term c_lam %pi ({x} conv (E x) (E' x)) %-> (conv (llam E) (llam E')) %.
+%term c_app %pi (conv E1 E1') %-> (conv E2 E2') %-> (conv (lapp E1 E2) (lapp E1' E2')) %.
+% proper equations
+%term c_unit conv lunit E %.
+%term c_prl conv (lfst (lpair E1 E2)) E1 %.
+%term c_prr conv (lsnd (lpair E1 E2)) E2 %.
+%term c_surj conv (lpair (lfst E) (lsnd E)) E %.
+%term c_beta conv (lapp (llam E1) E2) (E1 E2) %.
+%term c_eta conv (llam ([x] lapp E x)) E %.

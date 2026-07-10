@@ -18,7 +18,9 @@ open! Basis
 (* Meta Theorem Prover Version 1.3 *)
 (* Author: Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MTProver (MTProver__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL

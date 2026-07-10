@@ -120,4 +120,8 @@ module Strict = struct
 end
 
 include Strict
-let () = Printexc.register_printer (function EtaContract -> Some "EtaContract" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | EtaContract -> Some "EtaContract"
+    | _ -> None)

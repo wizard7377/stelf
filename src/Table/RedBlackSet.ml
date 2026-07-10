@@ -33,7 +33,9 @@ include REDBLACKSET
  * its child will be a red leaf.
  *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module RBSet : RBSET = struct
   type nonrec key = int

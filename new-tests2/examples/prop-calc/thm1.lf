@@ -1,0 +1,8 @@
+%%% into a proof in the Hilbert-style system and vice versa.
+%%% Expresses the equivalence of the two systems.
+%%% Author: Frank Pfenning
+%sort abs {_ %pi (|- A) %-> (|- B)} {_ |- A => B} %.
+%term aID abs ([x] x) (MP (MP S K) K) %.
+%term aK abs ([x] K) (MP K K) %.
+%term aS abs ([x] S) (MP K S) %.
+%term aMP %pi (abs ([x] MP (P x) (Q x)) (MP (MP S P') Q')) %<- (abs P P') %<- (abs Q Q') %.

@@ -13,7 +13,9 @@ open! Basis
 (* Author: Carsten Schuermann *)
 (* Date: Thu Mar 16 13:39:26 2006 *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Elim (Elim__0 : sig
   module Data : Data.DATA

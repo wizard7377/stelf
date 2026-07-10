@@ -1,7 +1,8 @@
 ; (include sources.dune)
 
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name msg)
  (public_name stelf.msg)
  (modules Msg_ MSG)

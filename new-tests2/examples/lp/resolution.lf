@@ -1,0 +1,28 @@
+% Resolution without unification
+%sort solve' {_ goal} %.
+%sort assume' {_ prog} %.
+%sort resolve {_ prog} {_ p} {_ goal} %.
+%name solve' %.
+%name assume' %.
+%name resolve %.
+% Next lines should give an error for exists'.
+% %mode solve' +G.
+% %mode assume' +D.
+% %mode resolve +D +P -G.
+%term s'_and %pi (solve' (G1 and' G2)) %<- (solve' G1) %<- (solve' G2) %.
+%term s'_imp %pi (solve' (D2 imp' G1)) %<- (%pi (assume' D2) %-> (solve' G1)) %.
+%term s'_true solve' true' %.
+%term s'_forall %pi (solve' (forall' G1)) %<- ({a i} solve' (G1 a)) %.
+%term s'_eqp solve' (P == P) %.
+%term s'_orl %pi (solve' (G1 or' G2)) %<- (solve' G1) %.
+%term s'_orr %pi (solve' (G1 or' G2)) %<- (solve' G2) %.
+%term s'_exists {T i} %pi (solve' (exists' G1)) %<- (solve' (G1 T)) %.
+%term s'_atom %pi (solve' (atom' P)) %<- (assume' D) %<- (resolve D P G) %<- (solve' G) %.
+%term r_and 
+	%pi (resolve (D1 and^ D2) P (G1 or' G2))
+	%<- (resolve D1 P G1)
+	%<- (resolve D2 P G2) %.
+%term r_imp %pi (resolve (G2 imp^ D1) P (G1 and' G2)) %<- (resolve D1 P G1) %.
+%term r_true resolve true^ P false' %.
+%term r_forall %pi (resolve (forall^ D1) P (exists' G1)) %<- ({a i} resolve (D1 a) P (G1 a)) %.
+%term r_atom resolve (atom^ Q) P (Q == P) %.

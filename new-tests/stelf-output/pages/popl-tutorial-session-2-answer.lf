@@ -415,7 +415,7 @@ We promised we'd stay in the empty LF context, but we don't.
 %term of/snd %pi (of (snd E) T2) %<- (of E (prod T1 T2)) %.
 %term of/let %pi (of (let E1 ([x] E2 x)) T) %<- (of E1 T1) %<- ({x val} of (E2 x) T) %.
 %mode of %in %out %.
-%block valb [x val]%.
+%block valb {x val}%.
 %{! 
 
 &lt;twelf name="worldsubserror" check="decl"&gt;
@@ -431,7 +431,7 @@ We promised we'd stay in the empty LF context, but we don't.
 %term of-val/pair %pi (of-val (pair V1 V2) (prod T1 T2)) %<- (of-val V1 T1) %<- (of-val V2 T2) %.
 %% synthesis 
 %mode of-val %in %out %.
-%block valb [x val]%.
+%block valb {x val}%.
 %worlds (valb) (of-val _ _) %.
 %sort of %.
 %term of/ret %pi (of (ret V) T) %<- (of-val V T) %.
@@ -458,7 +458,7 @@ We need a derivation of  ``of-val x natural``!
 %term of-val/num of-val (num N) natural %.
 %term of-val/pair %pi (of-val (pair V1 V2) (prod T1 T2)) %<- (of-val V1 T1) %<- (of-val V2 T2) %.
 %mode of-val %in %out %.
-%block valb {T tp} [x val] [dx of-val x T]%.
+%block valb [T tp] {x val} {dx of-val x T}%.
 %worlds (valb) (of-val _ _) %.
 %sort of %.
 %term of/ret %pi (of (ret V) T) %<- (of-val V T) %.

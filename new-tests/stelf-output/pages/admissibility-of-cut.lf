@@ -130,7 +130,7 @@ The final two cases are uses of the left rules, but where they act on a hypothes
 ## The metatheorem
 
 We can now state and check the metatheorem: that for every [ground](/wiki/ground/) arguments ``A``, ``D`` and ``E`` to the ``cut`` relation, there exists a derivation ``F`` that concludes ``C`` without using the hypothesis ``A``. Our [%worlds](/wiki/percent-worlds/) declaration for cut is only that hypotheses may appear in the context: !}%
-%block hyp {A prop} [H hyp A]%.
+%block hyp [A prop] {H hyp A}%.
 %worlds (hyp) (cut _ _ _ _) %.
 %{! We check the totality of ``cut`` using a lexicographic induction order, as discussed above. We write ``\{A [D E]\}`` to mean that either the cut formula ``A`` gets smaller, or it stays the same size and one of ``D`` or ``E`` gets smaller with the other staying the same size. !}%
 %total {A [D E]} (cut A D E F) %.

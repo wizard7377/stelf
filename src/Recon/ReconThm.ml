@@ -54,7 +54,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   let rec convertOrder ord =
     let module O = Cst.View.Thm.Order in
     match O.view ord with
-    | O.Varg (_, names) -> (ThmSyn.Varg names, Cst.loc_to_region Cst.ghost)
+    | O.Varg (loc, names) -> (ThmSyn.Varg names, Cst.loc_to_region loc)
     | O.Lex (_, ords) ->
         let rec go = function
           | [] -> ([], Cst.loc_to_region Cst.ghost)

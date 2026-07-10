@@ -1,0 +1,33 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% inversion-prog.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Typing Inversion (Progress)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort prog_|-st_inversion_aux {_ sttp_wf ST} {_ st_wf S} {_ |-st S ST} {_ sttp_lookup ST L T} {_ st_lookup S L V} {_ |-val ST V T} %.
+%mode prog_|-st_inversion_aux %in %in %in %in %out %out %.
+%scope prog_|-st_inversion_aux %term hit 
+	%pi (prog_|-st_inversion_aux DSTWf DSWf (|-st_cons DValTc' _) sttp_lookup_hit st_lookup_hit DValTc)
+	%<- (sttp!wf_cons_implies_extend_cons DSTWf DSttpExtend)
+	%<- (sttp_weak_|-val DValTc' DSttpExtend DValTc) %.
+%term miss 
+	%pi (prog_|-st_inversion_aux DSTWf DSWf (|-st_cons _ DStTc') (sttp_lookup_miss DSttpLookup' DLocLt) (st_lookup_miss DStLookup' DLocLt) DValTc)
+	%<- (sttp!wf_tail DSTWf DSTWf')
+	%<- (st!wf_tail DSWf DSWf')
+	%<- (prog_|-st_inversion_aux DSTWf' DSWf' DStTc' DSttpLookup' DStLookup' DValTc')
+	%<- (sttp!wf_cons_implies_extend_cons DSTWf DSttpExtend')
+	%<- (sttp_weak_|-val DValTc' DSttpExtend' DValTc) %.
+%terminates DSttpLookup (prog_|-st_inversion_aux _ _ _ DSttpLookup _ _) %.
+%worlds () (prog_|-st_inversion_aux _ _ _ _ _ _) %.
+%covers prog_|-st_inversion_aux %in %in %in %out %in %out %.
+%total DSttpLookup (prog_|-st_inversion_aux _ _ _ DSttpLookup _ _) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort prog_|-st_inversion {_ |-stwf S ST} {_ sttp_lookup ST L T} {_ st_lookup S L V} {_ |-val ST V T} %.
+%mode prog_|-st_inversion %in %in %out %out %.
+%term _ 
+	%pi (prog_|-st_inversion (|-stwf_ DSTWf DSWf DStTc) DSttpLookup DStLookup DValTc)
+	%<- (prog_|-st_inversion_aux DSTWf DSWf DStTc DSttpLookup DStLookup DValTc) %.
+%terminates {} (prog_|-st_inversion _ _ _ _) %.
+%worlds () (prog_|-st_inversion _ _ _ _) %.
+%covers prog_|-st_inversion %in %in %out %out %.
+%total {} (prog_|-st_inversion _ _ _ _) %.

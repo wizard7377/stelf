@@ -11,7 +11,9 @@ open! Basis
 (* State definition for Proof Search *)
 (* Author: Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module State (State__0 : sig
   module Formatter : FORMATTER

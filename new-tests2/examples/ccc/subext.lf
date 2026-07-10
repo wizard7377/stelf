@@ -1,0 +1,52 @@
+%% Substitution extension lemma
+% needs ccc.elf, lambda.elf, abs-env.elf
+% subproof used in lambda-case of lemma
+%sort svx {_ {A} {Y term A} {GY} {DY} %pi (absv G Y GY) %-> (abse D Y DY) %-> (GY @ H == DY) %-> %type} {_ absv (addv G X) Y GXY} {_ abse (addv D X) Y DXY} {_ GXY @ pair (H @ fst) snd == DXY} %.
+%term svx1 svx Z av_x (avar av_x) prod_r %.
+%term svx2 
+	%pi (svx Z (av_y AV1) (avar (av_y AV2)) (sym ass then =@= refl prod_l then ass then =@= EE refl))
+	%<- (Z _ _ _ _ AV1 (avar AV2) EE) %.
+%sort subext {_ abse G E GE} {_ abse D E DE} {_ {A} {X term A} {GX} {DX} %pi (absv G X GX) %-> (abse D X DX) %-> (GX @ H == DX) %-> %type} {_ GE @ H == DE} %.
+%term subext_var %pi (subext (avar AV) AP Z E) %<- (Z _ _ _ _ AV AP E) %.
+%term subext_unit subext aunit aunit Z term_u %.
+%term subext_pair 
+	%pi (subext (apair AP1 AP2) (apair AP1' AP2') Z (DP then =pair= EP1 EP2))
+	%<- (distp DP)
+	%<- (subext AP1 AP1' Z EP1)
+	%<- (subext AP2 AP2' Z EP2) %.
+%term subext_fst 
+	%pi (subext (afst AP) (afst AP') Z (sym ass then =@= refl EP))
+	%<- (subext AP AP' Z EP) %.
+%term subext_snd 
+	%pi (subext (asnd AP) (asnd AP') Z (sym ass then =@= refl EP))
+	%<- (subext AP AP' Z EP) %.
+%term subext_lam 
+	%pi (subext (alam ([x] AP x)) (alam ([x] AP' x)) Z (DC then =cur= EP))
+	%<- (distc DC)
+	%<- ({x} subext (AP x) (AP' x) ([_] [_] [_] [_] svx Z) EP) %.
+%term subext_app 
+	%pi (subext (aapp AP1 AP2) (aapp AP1' AP2') Z (sym ass then =@= refl (DP then =pair= EP1 EP2)))
+	%<- (distp DP)
+	%<- (subext AP1 AP1' Z EP1)
+	%<- (subext AP2 AP2' Z EP2) %.
+% Corollary: weakening
+%sort weakv {_ absv G V M'} {_ abse (addv G X) V M} {_ M' @ fst == M} %.
+%term weakv1 weakv AV (avar (av_y AV)) refl %.
+%sort weak {_ abse G E M'} {_ abse (addv G X) E M} {_ M' @ fst == M} %.
+%term weak1 %pi (weak AP AP1 E) %<- (subext AP AP1 ([_] [_] [_] [_] weakv) E) %.
+% Corollary : substitution
+%term svx2' 
+	%pi (svx Z (av_y AV) AP2 (sym ass then =@= refl prod_l then ass then =@= EE refl then WE))
+	%<- (Z _ _ _ _ AV AP EE)
+	%<- (weak AP AP2 WE) %.
+%sort subv {_ abse D X DX} {_ absv (addv D X) Y DXY} {_ abse D Y DY} {_ DXY @ pair id DX == DY} %.
+%term subv1 subv AP av_x AP prod_r %.
+%term subv2 subv AP (av_y AV) (avar AV) (sym ass then =@= refl prod_l then id_r) %.
+%sort subst {_ abse D E1 M1} {_ {x} abse (addv D x) (E2 x) M2} {_ abse D (E2 E1) M} {_ M2 @ pair id M1 == M} %.
+% Too much magic here...
+%term subst1 
+	%pi (subst AP1 ([x] AP2 x) AP E)
+	%<- (subext (AP2 _) AP ([_] [_] [_] [_] subv AP1) E) %.
+%%% tests
+% {x}sigma[p1:{y}absv (addv (addv empty x) y) x M1]sigma[p2:absv (addv empty x) x M2]{y}weakv (p1 y) (p2) E. --> undecl cst x ???
+% [w,x,y |- let z=fst(x) in (z,w)] == [w,x |- let z=fst(x) in (z,w)] @ fst

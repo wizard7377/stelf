@@ -891,4 +891,6 @@ end)
 
 module Tomega : TOMEGA = MakeTomega (Whnf__) (Conv__)
 include Tomega
-let () = Printexc.register_printer (function NoMatch -> Some "No match" | _ -> None)
+
+let () =
+  Printexc.register_printer (function NoMatch -> Some "No match" | _ -> None)

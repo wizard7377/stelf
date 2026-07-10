@@ -1,0 +1,120 @@
+%
+
+% IO uniform proof sequents for INCLL
+%
+
+%sort prog {_ frm} %.
+%
+
+% sqnt is:  G ; D_I \ D_O ; O_I \ O_O --> A
+%
+
+%sort sqnt {_ rctx} {_ rctx} {_ rctx} {_ rctx} {_ frm} %.
+%
+
+% ie_sqnt1 is: G ; D_I \ D_O ; ( L_I \ L_O ; R_I \ R_O ) --> A >> P
+%
+
+%sort ie_sqnt1 {_ rctx} {_ rctx} {_ rctx} {_ rctx} {_ rctx} {_ rctx} {_ frm} {_ atm} %.
+%
+
+% ie_sqnt2 is: G ; D_I \ D_O ; O_I \ ( O_L | O_M | O_R ) --> A >> P
+%
+
+%sort ie_sqnt2 {_ rctx} {_ rctx} {_ rctx} {_ rctx} {_ rctx} {_ rctx} {_ frm} {_ atm} %.
+%term =>_R %pi (sqnt Di Do Oi Oo (A => B)) %<- (%pi (prog A) %-> (sqnt Di Do Oi Oo B)) %.
+%term =0_R %pi (sqnt Di Do Oi Oo (A =0 B)) %<- (sqnt (Di ,r # A) (Do ,r del) Oi Oo B) %.
+%term >=>_R 
+	%pi (sqnt Di Do Oi Oo (A >=> B))
+	%<- (r2l Oi Oi')
+	%<- (l2r (# A ,l Oi') Oi'')
+	%<- (sqnt Di Do Oi'' Oo'' B)
+	%<- (r2l Oo'' (del ,l Oo'))
+	%<- (l2r Oo' Oo) %.
+%term =>>_R %pi (sqnt Di Do Oi Oo (A =>> B)) %<- (sqnt Di Do (Oi ,r # A) (Oo ,r del) B) %.
+%term forall_R 
+	%pi (sqnt Di Do Oi Oo (forall Srt Frm))
+	%<- ({x trm Srt} sqnt Di Do Oi Oo (Frm x)) %.
+%term forall2_R 
+	%pi (sqnt Di Do Oi Oo (forall2 Srt1 Srt2 Frm))
+	%<- ({x %pi (trm Srt1) %-> (trm Srt2)} sqnt Di Do Oi Oo (Frm x)) %.
+%term choice_O 
+	%pi (sqnt Di Do Oi Oo (^ P))
+	%<- (choose Oi OiL A OiR)
+	%<- (ie_sqnt1 Di Do OiL OoL OiR OoR A P)
+	%<- (appr (OoL ,r del) OoR Oo) %.
+%term choice_D 
+	%pi (sqnt Di Do Oi Oo (^ P))
+	%<- (choose Di DiL A DiR)
+	%<- (appr DiL DiR Di')
+	%<- (ie_sqnt2 Di' Do' Oi Ol Om Or A P)
+	%<- (insertAfter DiR (# A) Di' Di)
+	%<- (insertAfter DiR del Do' Do)
+	%<- (appr Ol Om Oo')
+	%<- (appr Oo' Or Oo) %.
+%term choice_G 
+	%pi (sqnt Di Do Oi Oo (^ P))
+	%<- (prog A)
+	%<- (ie_sqnt2 Di Do Oi Ol Om Or A P)
+	%<- (appr Ol Om Oo')
+	%<- (appr Oo' Or Oo) %.
+%term forall_L1 {t trm Srt} 
+	%pi (ie_sqnt1 Di Do OiL OoL OiR OoR (forall Srt Frm) P)
+	%<- (ie_sqnt1 Di Do OiL OoL OiR OoR (Frm t) P) %.
+%term forall_L2 {t trm Srt} 
+	%pi (ie_sqnt2 Di Do Oi Ol Om Or (forall Srt Frm) P)
+	%<- (ie_sqnt2 Di Do Oi Ol Om Or (Frm t) P) %.
+%term forall2_L1 {t %pi (trm Srt1) %-> (trm Srt2)} 
+	%pi (ie_sqnt1 Di Do OiL OoL OiR OoR (forall2 Srt1 Srt2 Frm) P)
+	%<- (ie_sqnt1 Di Do OiL OoL OiR OoR (Frm t) P) %.
+%term forall2_L2 {t %pi (trm Srt1) %-> (trm Srt2)} 
+	%pi (ie_sqnt2 Di Do Oi Ol Om Or (forall2 Srt1 Srt2 Frm) P)
+	%<- (ie_sqnt2 Di Do Oi Ol Om Or (Frm t) P) %.
+%term =>_L1 
+	%pi (ie_sqnt1 Di Do OiL OoL OiR OoR (A => B) P)
+	%<- (ie_sqnt1 Di Do OiL OoL OiR OoR B P)
+	%<- (sqnt rnil rnil rnil rnil A) %.
+%term =0_L1 
+	%pi (ie_sqnt1 Di Do OiL OoL OiR OoR (A =0 B) P)
+	%<- (ie_sqnt1 Di Dm OiL OoL OiR OoR B P)
+	%<- (sqnt Dm Do rnil rnil A) %.
+%term >=>_L1 
+	%pi (ie_sqnt1 Di Do OiL OoL OiR OoR (A >=> B) P)
+	%<- (ie_sqnt1 Di Dm OiL OoL' OiR OoR B P)
+	%<- (splitr OoL' OoLL OiA)
+	%<- (sqnt Dm Do OiA OoA A)
+	%<- (appr OoLL OoA OoL) %.
+%term =>>_L1 
+	%pi (ie_sqnt1 Di Do OiL OoL OiR OoR (A =>> B) P)
+	%<- (ie_sqnt1 Di Dm OiL OoL OiR OoR' B P)
+	%<- (r2l OoR' OoRl)
+	%<- (splitl OoRl OiAl OoRl')
+	%<- (l2r OoRl' OoRL)
+	%<- (l2r OiAl OiA)
+	%<- (sqnt Dm Do OiA OoA A)
+	%<- (appr OoA OoRL OoR) %.
+%term =>_L2 
+	%pi (ie_sqnt2 Di Do Oi Ol Om Or (A => B) P)
+	%<- (ie_sqnt2 Di Do Oi Ol Om Or B P)
+	%<- (sqnt rnil rnil rnil rnil A) %.
+%term =0_L2 
+	%pi (ie_sqnt2 Di Do Oi Ol Om Or (A =0 B) P)
+	%<- (ie_sqnt2 Di Dm Oi Ol Om Or B P)
+	%<- (sqnt Dm Do rnil rnil A) %.
+%term >=>_L2 
+	%pi (ie_sqnt2 Di Do Oi Ol OmR Or (A >=> B) P)
+	%<- (ie_sqnt2 Di Dm Oi Ol' Om Or B P)
+	%<- (sqnt Dm Do Om Om' A)
+	%<- (splitr Om' OmL OmR)
+	%<- (appr Ol' OmL Ol) %.
+%term =>>_L2 
+	%pi (ie_sqnt2 Di Do Oi Ol OmL Or (A =>> B) P)
+	%<- (ie_sqnt2 Di Dm Oi Ol Om Or' B P)
+	%<- (sqnt Dm Do Om Om' A)
+	%<- (r2l Om' Om'l)
+	%<- (splitl Om'l OmLl OmRl)
+	%<- (l2r OmLl OmL)
+	%<- (l2r OmRl OmR)
+	%<- (appr OmR Or' Or) %.
+%term init_1 ie_sqnt1 Di Di OiL OiL OiR OiR (^ P) P %.
+%term init_2 ie_sqnt2 Di Di Oi rnil Oi rnil (^ P) P %.

@@ -1,7 +1,8 @@
 ; (include sources.dune)
 
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name worldcheck)
  (public_name stelf.worldcheck)
  (modules WorldSyn Worldify Worldcheck_ WORLDSYN WORLDIFY)

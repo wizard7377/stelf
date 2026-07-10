@@ -1,0 +1,16 @@
+%sort nd {_ o} %.
+%term impE %pi (nd (A => B)) %-> (nd A) %-> (nd B) %.
+%term impI %pi (%pi (nd A) %-> (nd B)) %-> (nd (A => B)) %.
+%define examplebb impI ([u nd A] impI ([v nd B] u)) %.
+%sort ndI {_ o} %.
+%sort ndE {_ o} %.
+%term impE %pi (ndE (A => B)) %-> (ndI A) %-> (ndE B) %.
+%term impI %pi (%pi (ndE A) %-> (ndI B)) %-> (ndI (A => B)) %.
+%term a o %.
+%term IE %pi (ndE a) %-> (ndI a) %.
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort add {_ nat} {_ nat} {_ nat} %.
+%term addz add z N N %.
+%term adds %pi (add M N L) %-> (add (s M) N (s L)) %.

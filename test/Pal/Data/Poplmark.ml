@@ -138,7 +138,7 @@ let poplmark_1b_syntax =
 %term trow_uniqueness_nil trow_uniqueness trow_nil
 %term trow_uniqueness_cons {L label} {TR trow} {T tp} %if (trow_uniqueness (trow_cons L T TR)) %<- (trow_labelfree TR L) %<- (trow_uniqueness TR)
 
-%term record {_ trow} {_ trow_uniqueness _} tp
+%term record {R trow} {_ trow_uniqueness R} tp
 
 %sort sub_trow {_ trow} {_ trow}
 %term sub_trow_nil sub_trow trow_nil trow_nil

@@ -1,0 +1,17 @@
+%sort tp %.
+%term => %pi tp %-> tp %-> tp %.
+%prec %right 10 => %.
+%term all %pi (%pi tp %-> tp) %-> tp %.
+%sort tm {_ tp} %.
+%term lam %pi (%pi (tm A) %-> (tm B)) %-> (tm (A => B)) %.
+%term app %pi (tm (A => B)) %-> (tm A) %-> (tm B) %.
+%term tlam %pi ({a tp} tm (A a)) %-> (tm (all A)) %.
+%term tapp %pi (tm (all A)) %-> ({B tp} tm (A B)) %.
+%define nat all ([a] a => (a => a) => a) %.
+%define zero tlam ([a] lam ([z tm a] lam ([s tm (a => a)] z))) %.
+%define succ lam ([x tm nat] tlam ([a tp] lam ([z tm a] lam ([s tm (a => a)] app s (app (app (tapp x a) z) s))))) %.
+%define succ' (tm (nat => nat)) lam ([x] tlam ([a] lam ([z] lam ([s] app s (app (app (tapp x a) z) s))))) %.
+%define plus lam ([x tm nat] lam ([y tm nat] app (app (tapp y nat) x) succ)) %.
+%define times lam ([x tm nat] lam ([y tm nat] app (app (tapp y nat) zero) (app plus x))) %.
+%define exp lam ([x tm nat] lam ([y tm nat] app (app (tapp y nat) (app succ zero)) (app times x))) %.
+% idnat = [x: tm nat] x.

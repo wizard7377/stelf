@@ -54,11 +54,11 @@ Also, I don't think I know how to do the equivalent of the _first_ metalemma in 
 %term eq2/pair %pi (eq2 (pair T1 T2) (pair T1' T2')) %<- (eq2 T1 T1') %<- (eq2 T2 T2') %.
 %term eq2/list %pi (eq2 (list T) (list T')) %<- (eq2 T T') %.
 %term eq2/forall %pi (eq2 (forall T) (forall T')) %<- ({a} %pi (eq2 a a) %-> (eq2 (T a) (T' a))) %.
-%block tp-block [a tp]%.
-%block eq2-block [a tp] [eqa eq2 a a]%.
+%block tp-block {a tp}%.
+%block eq2-block {a tp} {eqa eq2 a a}%.
 %sort eq1=>2 {T1} %.
 %mode eq1=>2 %in %in %out %.
-%block eq1=>2-block [a tp] [eqa eq2 a a] [_ eq1=>2 a eq1/i eqa]%.
+%block eq1=>2-block {a tp} {eqa eq2 a a} {_ eq1=>2 a eq1/i eqa}%.
 %term _ eq1=>2 base _ eq2/base %.
 %term _ 
 	%pi (eq1=>2 (pair T1 T2) _ (eq2/pair D2 D1))

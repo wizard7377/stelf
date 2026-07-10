@@ -22,7 +22,7 @@
 %mode |-var %in %out %.
 % Church-style
 %% %mode |-var +E *T. % Curry-style
-%block |-var_block {T tp} [x exp] [_ |-var x T]%.
+%block |-var_block [T tp] {x exp} {_ |-var x T}%.
 %terminates {} (|-var _ _) %.
 %worlds (|-var_block) (|-var _ _) %.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

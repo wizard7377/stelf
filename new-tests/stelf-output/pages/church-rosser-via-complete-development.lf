@@ -21,7 +21,7 @@ Consequently, all beta-redices must be reduced away before a term can take a ref
 %sort trm %.
 %term lam %pi (%pi trm %-> trm) %-> trm %.
 %term app %pi trm %-> trm %-> trm %.
-%block trmb [x trm]%.
+%block trmb {x trm}%.
 %worlds (trmb) (trm) %.
 %{! ### Parallel reduction !}%
 %sort => %.
@@ -33,7 +33,7 @@ Consequently, all beta-redices must be reduced away before a term can take a ref
 	%<- (N => N') %.
 %term =>/app %pi (app M N => (app M' N')) %<- (M => M') %<- (N => N') %.
 %term =>/lam %pi (lam M => lam M') %<- ({x trm} %pi (x => x) %-> (M x => M' x)) %.
-%block =>b [x trm] [prx x => x]%.
+%block =>b {x trm} {prx x => x}%.
 %worlds (=>b) (=> _ _) %.
 %total E (=> E _) %.
 %{! Note that Twelf can prove that parallel reduction is total automatically! !}%
@@ -41,7 +41,7 @@ Consequently, all beta-redices must be reduced away before a term can take a ref
 %sort notlam %.
 %mode notlam %in %.
 %term notlam/app notlam (app _ _) %.
-%block nlb [x trm] [nlx notlam x]%.
+%block nlb {x trm} {nlx notlam x}%.
 %worlds (nlb) (notlam _) %.
 %sort ==> %.
 %prec %none 10 ==> %.
@@ -54,7 +54,7 @@ Consequently, all beta-redices must be reduced away before a term can take a ref
 %term ==>/lam 
 	%pi (lam M ==> lam M')
 	%<- ({x trm} %pi (notlam x) %-> (x ==> x) %-> (M x ==> M' x)) %.
-%block ==>b [x trm] [nlx notlam x] [cdx x ==> x]%.
+%block ==>b {x trm} {nlx notlam x} {cdx x ==> x}%.
 %worlds (==>b) (==> _ _) %.
 %{! Twelf cannot prove that complete development is total automatically,
 but we will prove this fact ourselves below. !}%
@@ -62,7 +62,7 @@ but we will prove this fact ourselves below. !}%
 Below, we will want to work in a world where both parallel reduction and complete development exist.  
 Thus, we define a block that includes all the assumptions in both ``=>b`` and ``==>b``:
 !}%
-%block =>&==>b [x trm] [prx x => x] [nlx notlam x] [cdx x ==> x]%.
+%block =>&==>b {x trm} {prx x => x} {nlx notlam x} {cdx x ==> x}%.
 %{! ## Diamond property of parallel reduction !}%
 %{! ### Every term either is or isn't a lambda
 
@@ -85,7 +85,7 @@ do by putting a case in the LF context.
 (See [Proving metatheorems: Proving metatheorems in non-empty contexts](/wiki/proving-metatheorems-proving-metatheorems-in-non-empty-contexts/) for a discussion of this technique.)
 Thus, we arrive at:
 !}%
-%block decideb [x trm] [nlx notlam x] [decx decide x (lam-or-not/not nlx)]%.
+%block decideb {x trm} {nlx notlam x} {decx decide x (lam-or-not/not nlx)}%.
 %worlds (decideb) (decide _ _) %.
 %total E (decide E _) %.
 %{! ### Complete development is total
@@ -121,7 +121,7 @@ Additionally, because the above case uses ``decide`` as a lemma, we need to ensu
 the world we choose here.  Additionally, to show that variables reduce, we need a theorem case in the context.
 Thus, we arrive at the following block:
 !}%
-%block ==>totb [x trm] [nlx notlam x] [cdx x ==> x] [_ decide x (lam-or-not/not nlx)] [_ ==>-tot x cdx]%.
+%block ==>totb {x trm} {nlx notlam x} {cdx x ==> x} {_ decide x (lam-or-not/not nlx)} {_ ==>-tot x cdx}%.
 %worlds (==>totb) (==>-tot _ _) %.
 %total D (==>-tot D _) %.
 %{! 
@@ -249,7 +249,7 @@ Twelf verifies the world subsumption showing that
 ``==>-tot`` and ``tri`` remain true under such extensions of 
 the context.
 !}%
-%block diab [x trm] [prx x => x] [nlx notlam x] [cdx x ==> x] [_ decide x (lam-or-not/not nlx)] [_ ==>-tot x cdx]%.
+%block diab {x trm} {prx x => x} {nlx notlam x} {cdx x ==> x} {_ decide x (lam-or-not/not nlx)} {_ ==>-tot x cdx}%.
 %worlds (diab) (dia _ _ _ _) %.
 %total {} (dia _ _ _ _) %.
 %{! ## Other properties of complete development
@@ -278,7 +278,7 @@ we simply forget the proof of the side condition on the application rule.
 %{! For this theorem, we need both complete development and parallel reduction,
 as well as a theorem case, so we extend ``=>&==>b`` as follows:
 !}%
-%block soundb [x trm] [nlx notlam x] [cdx x ==> x] [prx x => x] [_ sound cdx prx]%.
+%block soundb {x trm} {nlx notlam x} {cdx x ==> x} {prx x => x} {_ sound cdx prx}%.
 %worlds (soundb) (sound _ _) %.
 %total D (sound D _) %.
 %{! ### Complete development is deterministic

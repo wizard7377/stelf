@@ -1,0 +1,66 @@
+%%% Soundness of Evaluation under Continuations
+%%% Author: Frank Pfenning
+%. %[ Main Lemma:
+   If   C :: K # (ev E) =>* (answer W)
+   then for some V
+        D :: eval E V
+   and  C' :: K # (return V) =>* (answer W)
+   where C' is a subderivation of C.
+
+Proof: By complete induction on the structure of C.
+
+Note that the fact that C' is a subderivation of C is not
+represented in the implementation below.  This could be added
+as a higher-level judgment on transformations.
+}%
+%sort csd {_ K # (ev E) =>* (answer W)} {_ eval E V} {_ K # (return V) =>* (answer W)} %.
+%name csd %.
+% Natural Numbers
+%term csd_z csd (C' << st_z) ev_z C' %.
+%term csd_s %pi (csd (C1 << st_s) (ev_s D1) C') %<- (csd C1 D1 (C' << st_return)) %.
+%term csd_case_z 
+	%pi (csd (C1 << st_case) (ev_case_z D2 D1) C')
+	%<- (csd C1 D1 (C2 << st_case1_z << st_return))
+	%<- (csd C2 D2 C') %.
+%term csd_case_s 
+	%pi (csd (C1 << st_case) (ev_case_s D3 D1) C')
+	%<- (csd C1 D1 (C3 << st_case1_s << st_return))
+	%<- (csd C3 D3 C') %.
+% Pairs
+%term csd_pair 
+	%pi (csd (C1 << st_pair) (ev_pair D2 D1) C')
+	%<- (csd C1 D1 (C2 << st_pair1 << st_return))
+	%<- (csd C2 D2 (C' << st_return)) %.
+%term csd_fst 
+	%pi (csd (C1 << st_fst) (ev_fst D1) C')
+	%<- (csd C1 D1 (C' << st_fst1 << st_return)) %.
+%term csd_snd 
+	%pi (csd (C1 << st_snd) (ev_snd D1) C')
+	%<- (csd C1 D1 (C' << st_snd1 << st_return)) %.
+% Functions
+%term csd_lam csd (C' << st_lam) ev_lam C' %.
+%term csd_app 
+	%pi (csd (C1 << st_app) (ev_app D3 D2 D1) C')
+	%<- (csd C1 D1 (C2 << st_app1 << st_return))
+	%<- (csd C2 D2 (C3 << st_app2 << st_return))
+	%<- (csd C3 D3 C') %.
+% Definitions
+%term csd_letv 
+	%pi (csd (C1 << st_letv) (ev_letv D2 D1) C')
+	%<- (csd C1 D1 (C2 << st_return))
+	%<- (csd C2 D2 C') %.
+%term csd_letn %pi (csd (C1 << st_letn) (ev_letn D1) C') %<- (csd C1 D1 C') %.
+% Recursion
+%term csd_fix %pi (csd (C1 << st_fix) (ev_fix D1) C') %<- (csd C1 D1 C') %.
+% Values
+%term csd_vl csd (C' << st_vl) ev_vl C' %.
+% Return instruction are not possible since the initial state
+% is of the form K # (ev E).
+%. %[ Theorem:
+   If  CE :: ceval E V
+   then D :: eval E V.
+
+Proof: By inversion on CE and appeal to the Main Lemma.
+}%
+%sort ceval_sound {_ ceval E V} {_ eval E V} %.
+%term cevsd %pi (ceval_sound (cev C) D) %<- (csd C D (stop << st_init)) %.

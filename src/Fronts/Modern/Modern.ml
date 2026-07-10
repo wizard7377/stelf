@@ -16,12 +16,14 @@ module Make_Modern
   type arrow_last = LeftArrow | RightArrow | NoArrow
 
   exception ParseError of string
-  exception FullParseError of {
-    title : Display.form option;
-    subtitle : Display.form option;
-    body: Display.form;
-    loc: Cst.loc option;
-  }
+
+  exception
+    FullParseError of {
+      title : Display.form option;
+      subtitle : Display.form option;
+      body : Display.form;
+      loc : Cst.loc option;
+    }
 
   open Parser
 
@@ -64,7 +66,7 @@ module Make_Modern
 
   let loc_union (l1 : Cst.loc) (l2 : Cst.loc) : Cst.loc =
     let open Cst.View.Loc in
-    match view l1, view l2 with
+    match (view l1, view l2) with
     | Loc (_, s1, e1), Loc (_, s2, e2) -> mk_loc (min s1 s2) (max e1 e2)
     | Ghost, _ -> l2
     | _, Ghost -> l1
@@ -72,12 +74,24 @@ module Make_Modern
   let term_loc (tm : Cst.Term.t) : Cst.loc =
     let open Cst.View.Term in
     match view tm with
-    | Lowercase (loc, _) | Uppercase (loc, _) | Qualified (loc, _)
-    | Text (loc, _) | ExistVar (loc, _) | FreeVar (loc, _)
-    | Pi (loc, _, _) | Lam (loc, _, _) | App (loc, _, _)
-    | HasType (loc, _, _) | Omitted loc | Typ loc
-    | Arrow (loc, _, _) | BackArrow (loc, _, _)
-    | Foreign (loc, _) | MacroParam (loc, _, _) | Local (loc, _, _) -> loc
+    | Lowercase (loc, _)
+    | Uppercase (loc, _)
+    | Qualified (loc, _)
+    | Text (loc, _)
+    | ExistVar (loc, _)
+    | FreeVar (loc, _)
+    | Pi (loc, _, _)
+    | Lam (loc, _, _)
+    | App (loc, _, _)
+    | HasType (loc, _, _)
+    | Omitted loc
+    | Typ loc
+    | Arrow (loc, _, _)
+    | BackArrow (loc, _, _)
+    | Foreign (loc, _)
+    | MacroParam (loc, _, _)
+    | Local (loc, _, _) ->
+        loc
     | Internal _ -> ghost'
 
   module FX = Names.Fixity
@@ -120,8 +134,8 @@ module Make_Modern
         fun (tm1, tm2) ->
           let loc = loc_union (term_loc tm1) (term_loc tm2) in
           Cst.View.Term.(
-            review @@ App (loc, review @@ App (term_loc tm1, tm, [ tm1 ]), [ tm2 ]))
-      )
+            review
+            @@ App (loc, review @@ App (term_loc tm1, tm, [ tm1 ]), [ tm2 ])) )
 
   let prefix_op (prec, tm) =
     Prefix_
@@ -144,8 +158,7 @@ module Make_Modern
         (* %(name sort) constructor-reference syntax is always an atom —
            explicit qualification opts out of operator status *)
         Atom tm
-    | Lowercase (_, (ns, name))
-    | Uppercase (_, (ns, name)) ->
+    | Lowercase (_, (ns, name)) | Uppercase (_, (ns, name)) ->
         let fixity =
           match Hashtbl.find_opt local_fixity name with
           | Some fx -> fx
@@ -282,15 +295,14 @@ module Make_Modern
        <|> let@ name, s, e = ident1 in
            let loc = mk_loc s e in
            return Cst.View.Term.(review @@ Qualified (loc, ([], name))))
-    <|>
-    (string "%(" *> commit
-    *> let@ ns, s, e = many1 ident1 <* string ")" <* whitespace in
-       let loc = mk_loc s e in
-       let split = function
-         | [] -> failwith "Expected qualified name"
-         | name :: scopes -> (List.rev scopes, name)
-       in
-       return Cst.View.Term.(review @@ Qualified (loc, split ns)))
+    <|> (string "%(" *> commit
+        *> let@ ns, s, e = many1 ident1 <* string ")" <* whitespace in
+           let loc = mk_loc s e in
+           let split = function
+             | [] -> failwith "Expected qualified name"
+             | name :: scopes -> (List.rev scopes, name)
+           in
+           return Cst.View.Term.(review @@ Qualified (loc, split ns)))
     <|>
     let@ name, s, e = ident1 in
     let loc = mk_loc s e in
@@ -299,7 +311,14 @@ module Make_Modern
       && (name.[0] = '_' || (name.[0] >= 'A' && name.[0] <= 'Z'))
     in
     return
-      (if is_upper || List.mem name !currently_uppercase then
+      (if name = "_" then
+         (* A lone `_` is an omitted term: a fresh placeholder solved by
+            reconstruction at each occurrence.  (Underscore-prefixed names
+            like `_C1` remain ordinary uppercase-class variables; making `_`
+            one of those would alias every `_` in a declaration to a single
+            rigid free variable named "_".) *)
+         Cst.View.Term.(review @@ Omitted loc)
+       else if is_upper || List.mem name !currently_uppercase then
          Cst.View.Term.(review @@ Uppercase (loc, ([], name)))
        else Cst.View.Term.(review @@ Lowercase (loc, ([], name))))
 
@@ -319,60 +338,43 @@ module Make_Modern
           body)
         <?> "expression with implicit variables")
     <|>
-      (* %if A %-> B  %-> C  ==>  {_ A} {_ B} C  (last arg is the body) *)
-      (* %if A %<- B  %<- C  ==>  {_ C} {_ B} A  (first arg is the body) *)
-      (* commit fires only after the first separator is confirmed *)
-      (keywords [ "if"; "do"; "pi" ] *>
-       let* first = return () >>= fun () -> parse_expr () in
-       ((keyword' "->" *> commit *>
-         let+ rest =
-           sep_by1 (keyword' "->") (return () >>= fun () -> parse_expr ())
-         in
-         let all = first :: rest in
-         let rev = List.rev all in
-         let body = List.hd rev in
-         let init = List.rev (List.tl rev) in
-         List.fold_right
-           (fun t acc ->
-             let loc = loc_union (term_loc t) (term_loc acc) in
-             Cst.View.Term.(
-               review
-               @@ Pi
-                    ( loc,
-                      [
-                        Cst.View.Decl.(
-                          review
-                          @@ Decl1
-                               ( term_loc t,
-                                 [ None ],
-                                 t,
-                                 Cst.View.Term.(review @@ Omitted ghost') ));
-                      ],
-                      acc )))
-           init body)
-       <|> (keyword' "<-" *> commit *>
-            let+ rest =
-              sep_by1 (keyword' "<-") (return () >>= fun () -> parse_expr ())
-            in
-            let rest_rev = List.rev rest in
-            List.fold_right
-              (fun t acc ->
-                let loc = loc_union (term_loc t) (term_loc acc) in
-                Cst.View.Term.(
-                  review
-                  @@ Pi
-                       ( loc,
-                         [
-                           Cst.View.Decl.(
-                             review
-                             @@ Decl1
-                                  ( term_loc t,
-                                    [ None ],
-                                    t,
-                                    Cst.View.Term.(review @@ Omitted ghost') ));
-                         ],
-                         acc )))
-              rest_rev first)))
+    (* %if A %-> B  %-> C  ==>  {_ A} {_ B} C  (last arg is the body) *)
+    (* %if A %<- B  %<- C  ==>  {_ C} {_ B} A  (first arg is the body) *)
+    (* commit fires only after the first separator is confirmed *)
+    (keywords [ "if"; "do"; "pi" ]
+    *>
+    let* first = return () >>= fun () -> parse_expr () in
+    (keyword' "->" *> commit
+    *>
+    let+ rest =
+      sep_by1 (keyword' "->") (return () >>= fun () -> parse_expr ())
+    in
+    let all = first :: rest in
+    let rev = List.rev all in
+    let body = List.hd rev in
+    let init = List.rev (List.tl rev) in
+    (* Non-dependent arrows: elaborate as [Arrow] (not an anonymous-binder [Pi]),
+       so the codomain (clause head) is reconstructed WITHOUT the domain
+       (premise) in scope.  Routing through [Pi] over-scopes the head's omitted
+       EVars under the premise binder, which later derails coverage checking. *)
+    List.fold_right
+      (fun t acc ->
+        let loc = loc_union (term_loc t) (term_loc acc) in
+        Cst.View.Term.(review @@ Arrow (loc, t, acc)))
+      init body)
+    <|> keyword' "<-" *> commit
+        *>
+        let+ rest =
+          sep_by1 (keyword' "<-") (return () >>= fun () -> parse_expr ())
+        in
+        let rest_rev = List.rev rest in
+        (* Non-dependent arrows: see the [%->] case above.  Elaborate as
+           [Arrow] so the head ([first]) is not scoped under premise binders. *)
+        List.fold_right
+          (fun t acc ->
+            let loc = loc_union (term_loc t) (term_loc acc) in
+            Cst.View.Term.(review @@ Arrow (loc, t, acc)))
+          rest_rev first)
     <|> parse_id () <?> "trailing expression"
 
   and parse_expr_app () : Cst.Term.t t =
@@ -384,11 +386,13 @@ module Make_Modern
   and parse_expr1 () : Cst.Term.t t =
     begin
       choice
-        [ parse_id ();
+        [
+          parse_id ();
           inside "(" ")" (return () >>= fun () -> parse_expr ());
           (let@ str, s, e = parse_text () in
            let loc = mk_loc s e in
-           return Cst.View.Term.(review @@ Text (loc, str))) ]
+           return Cst.View.Term.(review @@ Text (loc, str)));
+        ]
     end
     <?> "small expression"
 
@@ -403,17 +407,15 @@ module Make_Modern
        in
        let loc = mk_loc s e in
        return Cst.View.Term.(review @@ HasType (loc, body, ty)))
-      <|>
-      (let@ (ns_id, body), s, e =
-         keyword' "local" *> commit
-         *>
-         let* ns_id = ident1 in
-         let+ body = parse_expr () in
-         (ns_id, body)
-       in
-       let loc = mk_loc s e in
-       return Cst.View.Term.(review @@ Local (loc, [ ns_id ], body)))
-      
+      <|> (let@ (ns_id, body), s, e =
+             keyword' "local" *> commit
+             *>
+             let* ns_id = ident1 in
+             let+ body = parse_expr () in
+             (ns_id, body)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Term.(review @@ Local (loc, [ ns_id ], body)))
       (*
             %<- A
             %<- B
@@ -446,28 +448,23 @@ module Make_Modern
         | [] -> failwith "Expected qualified name"
         | name :: scopes -> (List.rev scopes, name)
       in
-      (keyword' "val" *> commit
+      keyword' "val" *> commit
       *> ((let* ident in
            return ([], ident))
          <|> inside "(" ")"
                (let* ns = many1 ident in
-                return @@ split ns)))
-                <|> (keyword' "(" *> let* ns = (many1 ident) <* string ")" in return @@ split ns) <|>
-      (keyword "(" *> commit *> let* ns = many1 ident <* string ")" in return @@ split ns)
+                return @@ split ns))
+      <|> (keyword' "("
+          *> let* ns = many1 ident <* string ")" in
+             return @@ split ns)
+      <|> keyword "(" *> commit
+          *> let* ns = many1 ident <* string ")" in
+             return @@ split ns
     end
     <?> "qualified name"
 
   and parse_text () : string t =
-    let take_until delim =
-      fix (fun self ->
-        let* pre = take_while (fun c -> c <> '%') in
-        (string delim *> return pre)
-        <|> (char '%' *> let+ suf = self in pre ^ "%" ^ suf))
-    in
-    (string "%[[" *> commit *> take_until "%]]" <* whitespace' ())
-    <|>
-    (string "%[" *> commit *> take_until "%]" <* whitespace' ())
-    <?> "string literal"
+    string_lit () <* whitespace' () <?> "string literal"
 
   and parse_decl () : Cst.decl t =
     begin
@@ -490,12 +487,18 @@ module Make_Modern
                  (loc, [ name ], typ, Cst.View.Term.(review @@ Omitted ghost')))
     end
     <?> "declaration"
-  and parse_decl_simple () : Cst.decl t =  begin 
-    let@ (typ, s, e) = (parse_id ()) <|> (inside "(" ")" (parse_expr ())) in 
-    let loc = mk_loc s e in
-    return @@ Cst.View.Decl.(review @@ Decl1 (loc, [None], typ, Cst.View.Term.(review @@ Omitted ghost')))
-  end
-    
+
+  and parse_decl_simple () : Cst.decl t =
+    begin
+      let@ typ, s, e = parse_id () <|> inside "(" ")" (parse_expr ()) in
+      let loc = mk_loc s e in
+      return
+      @@ Cst.View.Decl.(
+           review
+           @@ Decl1
+                (loc, [ None ], typ, Cst.View.Term.(review @@ Omitted ghost')))
+    end
+
   and parse_mode () : Cst.mode t =
     begin
       (let@ (), s, e = keyword' "out1" *> commit *> return () in
@@ -633,6 +636,7 @@ module Make_Modern
       let* ty =
         let+ t = parse_expr1 () in
         match Cst.View.Term.view t with
+        | Cst.View.Term.Omitted _ -> None
         | Cst.View.Term.Uppercase (_, ([], "_")) -> None
         | _ -> Some t
       in
@@ -677,11 +681,13 @@ module Make_Modern
     <?> "reduces predicate"
 
   and parse_block_item () : Cst.block_item t =
+    (* [x t] binds a some-variable (instantiated per world, like a lambda
+       binder); {x t} declares a block-body hypothesis (like a pi binder). *)
     begin
-      inside "{" "}"
+      inside "[" "]"
         (let+ d = parse_decl () in
          Cst.View.BlockItem.(review @@ Any (ghost', d)))
-      <|> inside "[" "]"
+      <|> inside "{" "}"
             (let+ d = parse_decl () in
              Cst.View.BlockItem.(review @@ All (ghost', d)))
     end
@@ -734,12 +740,16 @@ module Make_Modern
     let pos = Int.min pos (Int.max 0 (len - 1)) in
     let line_start =
       let i = ref pos in
-      while !i > 0 && src.[!i - 1] <> '\n' do decr i done;
+      while !i > 0 && src.[!i - 1] <> '\n' do
+        decr i
+      done;
       !i
     in
     let line_end =
       let i = ref pos in
-      while !i < len && src.[!i] <> '\n' do incr i done;
+      while !i < len && src.[!i] <> '\n' do
+        incr i
+      done;
       !i
     in
     let line_text = String.sub src line_start (line_end - line_start) in
@@ -759,12 +769,32 @@ module Make_Modern
       let full_parser = whitespace' () *> p in
       let state =
         Parser.Buffered.(
-          parse full_parser
-          |> (fun st -> feed st (`String s))
-          |> (fun st -> feed st `Eof))
+          (parse full_parser |> fun st -> feed st (`String s)) |> fun st ->
+          feed st `Eof)
       in
-      (match state with
-      | Parser.Buffered.Done (_, res) -> res
+      match state with
+      | Parser.Buffered.Done (unconsumed, res) when unconsumed.len = 0 -> res
+      | Parser.Buffered.Done (unconsumed, _) ->
+          (* The parser stopped early without failing (e.g. [many] gave up at
+             an unparseable construct).  Treating this as success would
+             silently discard the rest of the input, so report it. *)
+          let err_pos = String.length s - unconsumed.len in
+          let loc =
+            Some (mk_loc err_pos (min (err_pos + 1) (String.length s)))
+          in
+          let body =
+            Display.Form.(
+              string "Input left over after parsing (unrecognized command?)\n"
+              +++ source_context s err_pos)
+          in
+          raise
+            (FullParseError
+               {
+                 title = Some Display.Form.(string "Parse error");
+                 subtitle = None;
+                 body;
+                 loc;
+               })
       | Parser.Buffered.Partial _ ->
           raise (ParseError "Unexpected end of input")
       | Parser.Buffered.Fail (unconsumed, marks, msg) ->
@@ -782,16 +812,16 @@ module Make_Modern
           in
           raise
             (FullParseError
-               { title = Some Display.Form.(string "Parse error");
+               {
+                 title = Some Display.Form.(string "Parse error");
                  subtitle = None;
                  body;
-                 loc }))
+                 loc;
+               })
     with
     | ParseError m ->
         (* P-module operator-precedence errors: no offset available *)
-        let body =
-          Display.Form.(string m +++ nl () +++ source_context s 0)
-        in
+        let body = Display.Form.(string m +++ nl () +++ source_context s 0) in
         Error.Error.err ~stage:Error.Error.Parse
           Display.Form.(string "Parse error" +++ nl () +++ body)
     | FullParseError { title; body; _ } ->
@@ -806,9 +836,16 @@ module ModernCst = Cst.Make_Cst (Paths.Paths_)
 
 module Modern : MODERN.MODERN =
   Make_Modern (Paths.Paths_) (ModernCst) (Names.Names_) (Parsing.Parser.Parser)
-let () = Printexc.register_printer (function Modern.ParseError msg -> Some msg | _ -> None)
-let () = Printexc.register_printer (function Modern.FullParseError _ -> Some "Parse error" | _ -> None)
 
+let () =
+  Printexc.register_printer (function
+    | Modern.ParseError msg -> Some msg
+    | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Modern.FullParseError _ -> Some "Parse error"
+    | _ -> None)
 
 (* Re-export sub-modules so they are accessible outside the library *)
 module Cmd = Cmd

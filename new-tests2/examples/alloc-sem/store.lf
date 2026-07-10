@@ -1,0 +1,42 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% store.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Stores
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%term nil_st st %.
+%term cons_st %pi loc %-> val %-> st %-> st %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store WF
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort st_wf {_ st} %.
+%mode st_wf %in %.
+%term st_wf_nil st_wf nil_st %.
+%term st_wf_cons_nil st_wf (cons_st L V nil_st) %.
+%term st_wf_cons_cons 
+	%pi (st_wf (cons_st L' V' S'))
+	%-> (loc_lt L' L)
+	%-> (st_wf (cons_st L V (cons_st L' V' S'))) %.
+%terminates S (st_wf S) %.
+%worlds () (st_wf _) %.
+%covers st_wf %in %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Lookup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort st_lookup {_ st} {_ loc} {_ val} %.
+%mode st_lookup %in %in %out %.
+%term st_lookup_hit st_lookup (cons_st L V _) L V %.
+%term st_lookup_miss %pi (st_lookup S' L V) %-> (loc_lt L L') %-> (st_lookup (cons_st L' _ S') L V) %.
+%terminates S (st_lookup S _ _) %.
+%worlds () (st_lookup _ _ _) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Alloc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort st_alloc {_ st} {_ val} {_ st} {_ loc} %.
+%mode st_alloc %in %in %out %out %.
+%term st_alloc_nil st_alloc nil_st V'' (cons_st (mkLoc z_nat) V'' nil_st) (mkLoc z_nat) %.
+%term st_alloc_cons st_alloc (cons_st (mkLoc N') V' S) V'' (cons_st (mkLoc (s_nat N')) V'' (cons_st (mkLoc N') V' S)) (mkLoc (s_nat N')) %.
+%terminates S (st_alloc S _ _ _) %.
+%worlds () (st_alloc _ _ _ _) %.
+%covers st_alloc %in %in %out %out %.
+%total S (st_alloc S _ _ _) %.

@@ -88,7 +88,7 @@
 %term cut/rinv/s+R cut/rinv A TM RI ([x] s+R H) (s+R H) %.
 %term cut/rinv/topR cut/rinv A TM RI ([x] topR) topR %.
 % Checks
-%block b {P p} [x hyp P]%.
+%block b [P p] {x hyp P}%.
 %mode trans %in %in %out %.
 %mode mono/rinv %in %in %out %.
 %mode mono/lfoc %in %in %out %.

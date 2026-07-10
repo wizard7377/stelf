@@ -6,7 +6,7 @@
    Author: Brian E. Aydemir (baydemir [at] cis.upenn.edu).
 }%
 %%% The one block of interest here.
-%block bind {t tp} [x exp] [d var x t]%.
+%block bind [t tp] {x exp} {d var x t}%.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Store typings reflexively extend themselves.
 %sort store_extends_refl {S} %.

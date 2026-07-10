@@ -1,0 +1,27 @@
+%%% Intuitionistic Sequent Calculus with Cut
+%%% Author: Frank Pfenning
+%sort conc* {_ o} %.
+% Conclusion (right)
+%name conc* %.
+%term cut* {A o} %pi (conc* A) %-> (%pi (hyp A) %-> (conc* C)) %-> (conc* C) %.
+%term axiom* %pi (hyp A) %-> (conc* A) %.
+%term andr* %pi (conc* A) %-> (conc* B) %-> (conc* (A and B)) %.
+%term andl1* %pi (%pi (hyp A) %-> (conc* C)) %-> (hyp (A and B)) %-> (conc* C) %.
+%term andl2* %pi (%pi (hyp B) %-> (conc* C)) %-> (hyp (A and B)) %-> (conc* C) %.
+%term impr* %pi (%pi (hyp A) %-> (conc* B)) %-> (conc* (A imp B)) %.
+%term impl* %pi (conc* A) %-> (%pi (hyp B) %-> (conc* C)) %-> (hyp (A imp B)) %-> (conc* C) %.
+%term orr1* %pi (conc* A) %-> (conc* (A or B)) %.
+%term orr2* %pi (conc* B) %-> (conc* (A or B)) %.
+%term orl* 
+	%pi (%pi (hyp A) %-> (conc* C))
+	%-> (%pi (hyp B) %-> (conc* C))
+	%-> (hyp (A or B))
+	%-> (conc* C) %.
+%term notr* %pi ({p o} %pi (hyp A) %-> (conc* p)) %-> (conc* (not A)) %.
+%term notl* %pi (conc* A) %-> (hyp (not A)) %-> (conc* C) %.
+%term truer* conc* true %.
+%term falsel* %pi (hyp false) %-> (conc* C) %.
+%term forallr* %pi ({a i} conc* (A a)) %-> (conc* (forall A)) %.
+%term foralll* {T i} %pi (%pi (hyp (A T)) %-> (conc* C)) %-> (hyp (forall A)) %-> (conc* C) %.
+%term existsr* {T i} %pi (conc* (A T)) %-> (conc* (exists A)) %.
+%term existsl* %pi ({a i} %pi (hyp (A a)) %-> (conc* C)) %-> (hyp (exists A)) %-> (conc* C) %.

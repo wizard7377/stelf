@@ -11,7 +11,7 @@ module Parser : PARSER = struct
 
   let whitespace =
     skip_while (function ' ' | '\t' | '\n' -> true | _ -> false)
-
+  let blank = (skip (function ' ' | '\t' -> true | _ -> false) *> whitespace)
   let token s = (string s <* whitespace) *> return ()
 
   (* Require that the character after the keyword body is either EOF
@@ -27,8 +27,9 @@ module Parser : PARSER = struct
       | Some (' ' | '\t' | '\n' | '(' | ')' | '{' | '}' | '[' | ']' | '%') ->
           return ()
       | Some c ->
-          fail (Printf.sprintf
-            "expected whitespace or delimiter after '%s', found '%c'" s' c)
+          fail
+            (Printf.sprintf
+               "expected whitespace or delimiter after '%s', found '%c'" s' c)
     in
     string s' *> boundary *> whitespace
 
@@ -72,4 +73,38 @@ module Parser : PARSER = struct
   let inside x y p = token x *> p <* token y
   let extend _p _q = assert false
   let forget p = p *> return ()
+
+  let string_lit () : string t =
+    let rec scan closing_len buf =
+      take_while (function '%' -> false | _ -> true) >>= fun chunk ->
+      Buffer.add_string buf chunk;
+      peek_char >>= function
+      | None -> fail "unterminated string literal"
+      | Some '%' -> (
+          any_char
+          *>
+          let rec read_closer consumed remaining =
+            if remaining = 0 then return (`Close ())
+            else
+              peek_char >>= function
+              | Some ']' ->
+                  any_char *> read_closer (']' :: consumed) (remaining - 1)
+              | _ -> return (`Not_close (List.rev consumed))
+          in
+          let* close_result = read_closer [] closing_len in
+          match close_result with
+          | `Close () -> return (Buffer.contents buf)
+          | `Not_close suffix ->
+              Buffer.add_char buf '%';
+              List.iter (Buffer.add_char buf) suffix;
+              scan closing_len buf)
+      | Some c ->
+          let* c = any_char in
+          Buffer.add_char buf c;
+          scan closing_len buf
+    in
+    string "%[" *> many (char '[') >>= fun extra_opens ->
+    let closing_len = 1 + List.length extra_opens in
+    let buf = Buffer.create 32 in
+    scan closing_len buf
 end

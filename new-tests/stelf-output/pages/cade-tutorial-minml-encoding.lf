@@ -21,7 +21,7 @@
 !}%
 %term ifz %pi exp %-> exp %-> (%pi exp %-> exp) %-> exp %.
 %% you can world-check syntax if you want
-%block exp_block [x exp]%.
+%block exp_block {x exp}%.
 %worlds (exp_block) (exp) %.
 %{! 
 
@@ -44,7 +44,7 @@
 	%<- (of E num)
 	%<- (of E0 T)
 	%<- ({x exp} %pi (of x num) %-> (of (E1 x) T)) %.
-%block of_block {T tp} [x exp] [dx of x T]%.
+%block of_block [T tp] {x exp} {dx of x T}%.
 %worlds (of_block) (of _ _) %.
 %{! 
 

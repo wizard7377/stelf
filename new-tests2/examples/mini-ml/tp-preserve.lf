@@ -1,0 +1,39 @@
+%%% Representation of the Proof of Type Preservation
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort tps {_ eval E V} {_ of E T} {_ of V T} %.
+%mode tps %in %in %out %.
+% Natural Numbers
+%term tps_z tps ev_z tp_z tp_z %.
+%term tps_s %pi (tps (ev_s D1) (tp_s P1) (tp_s Q1)) %<- (tps D1 P1 Q1) %.
+%term tps_case_z %pi (tps (ev_case_z D2 D1) (tp_case P3 P2 P1) Q2) %<- (tps D2 P2 Q2) %.
+%term tps_case_s 
+	%pi (tps (ev_case_s D3 D1) (tp_case P3 P2 P1) Q3)
+	%<- (tps D1 P1 (tp_s Q1'))
+	%<- (tps D3 (P3 V1 Q1') Q3) %.
+% Pairs
+%term tps_pair 
+	%pi (tps (ev_pair D2 D1) (tp_pair P2 P1) (tp_pair Q2 Q1))
+	%<- (tps D1 P1 Q1)
+	%<- (tps D2 P2 Q2) %.
+%term tps_fst %pi (tps (ev_fst D1) (tp_fst P1) Q1) %<- (tps D1 P1 (tp_pair Q2 Q1)) %.
+%term tps_snd %pi (tps (ev_snd D1) (tp_snd P1) Q2) %<- (tps D1 P1 (tp_pair Q2 Q1)) %.
+% Functions
+%term tps_lam tps ev_lam (tp_lam P) (tp_lam P) %.
+%term tps_app 
+	%pi (tps (ev_app D3 D2 D1) (tp_app P2 P1) Q3)
+	%<- (tps D1 P1 (tp_lam Q1'))
+	%<- (tps D2 P2 Q2)
+	%<- (tps D3 (Q1' V2 Q2) Q3) %.
+% Definitions
+%term tps_letv 
+	%pi (tps (ev_letv D2 D1) (tp_letv P2 P1) Q2)
+	%<- (tps D1 P1 Q1)
+	%<- (tps D2 (P2 V1 Q1) Q2) %.
+%term tps_letn %pi (tps (ev_letn D2) (tp_letn P2 P1) Q2) %<- (tps D2 P2 Q2) %.
+% Recursion
+%term tps_fix %pi (tps (ev_fix D1) (tp_fix P1) Q1) %<- (tps D1 (P1 _ (tp_fix P1)) Q1) %.
+%%% Termination of type preservation judgment
+%worlds () (tps D _ _) %.
+%terminates D (tps D _ _) %.
+%covers tps %in %in %out %.
+%total D (tps D P _) %.

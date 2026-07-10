@@ -17,7 +17,4 @@ let lam_ ty body = Lam (Dec (None, ty), body)
 (* Alcotest testable for exp based on structural equality.
    show_exp returns "<exp>" for all values which is uninformative but works. *)
 let exp_testable =
-  Alcotest.testable
-    (fun fmt _ -> Format.pp_print_string fmt "<exp>")
-    equal_exp
-
+  Alcotest.testable (fun fmt _ -> Format.pp_print_string fmt "<exp>") equal_exp

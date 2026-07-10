@@ -16,9 +16,14 @@ open Metasyn
 (* Author: Carsten Schuermann *)
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 exception TimeOut
-let () = Printexc.register_printer (function TimeOut -> Some "TimeOut" | _ -> None)
+
+let () =
+  Printexc.register_printer (function TimeOut -> Some "TimeOut" | _ -> None)
 
 module Filling (Filling__0 : sig
   module MetaSyn' : Metasyn.METASYN

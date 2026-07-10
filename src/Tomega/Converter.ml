@@ -12,9 +12,16 @@ include CONVERTER
 open! Basis
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 exception Error' of Tomega.sub
-let () = Printexc.register_printer (function Error' _ -> Some "Tomega converter error" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Error' _ -> Some "Tomega converter error"
+    | _ -> None)
 
 module MakeConverter
     (Global : GLOBAL)
@@ -119,7 +126,6 @@ module MakeConverter
       end
 
     let rec chatter chlev f = Display.chatter_s chlev ("[tomega] " ^ f ())
-
     let rec strengthenExp (u_, s) = Whnf.normalize (Whnf.cloInv (u_, s), I.id)
     let rec strengthenSub (s, t) = Whnf.compInv (s, t)
 
@@ -901,13 +907,9 @@ module MakeConverter
           let p_ = convertPrg ([ cid ], None) in
           let name = I.conDecName (I.sgnLookup cid) in
           let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f_)) in
-          let _ =
-            Display.chatter_s 4 "[Redundancy Checker (factoring) ..."
-          in
+          let _ = Display.chatter_s 4 "[Redundancy Checker (factoring) ..." in
           let factP = Redundant.convert p_ in
-          let _ =
-            Display.chatter_s 4 "done]\n"
-          in
+          let _ = Display.chatter_s 4 "done]\n" in
           let lemma = T.lemmaAdd (T.ValDec (name, factP, f_)) in
           (lemma, [], [])
       | cids ->
@@ -918,13 +920,9 @@ module MakeConverter
           let p_ = convertPrg (cids, Some projs) in
           let s = name cids in
           let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f_)) in
-          let _ =
-            Display.chatter_s 4 "[Redundancy Checker (factoring) ..."
-          in
+          let _ = Display.chatter_s 4 "[Redundancy Checker (factoring) ..." in
           let factP = Redundant.convert p_ in
-          let _ =
-            Display.chatter_s 4 "done]\n"
-          in
+          let _ = Display.chatter_s 4 "done]\n" in
           let lemma = T.lemmaAdd (T.ValDec (s, factP, f_)) in
           let sels = installSelection (cids, projs, f_, lemma) in
           (lemma, projs, sels)

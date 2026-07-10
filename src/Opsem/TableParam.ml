@@ -13,7 +13,9 @@ open! Basis
 (* Table parameters *)
 (* Author: Brigitte Pientka *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MakeTableParam (Global : GLOBAL) : TABLEPARAM = struct
   (*! structure IntSyn = IntSyn' !*)

@@ -1,0 +1,11 @@
+%%% Appending lists of propositions
+%%% Example for User's Guide
+%%% Author: Frank Pfenning
+%sort list %.
+%term nil list %.
+%term cons %pi o %-> list %-> list %.
+%sort append {_ list} {_ list} {_ list} %.
+%term appNil append nil K K %.
+%term appCons %pi (append (cons A L) K (cons A M)) %<- (append L K M) %.
+%query 1 1 _ append (cons true nil) (cons false nil) L %.
+%query 1 1 _ append (cons true (cons false nil)) (cons true nil) L %.

@@ -1,0 +1,70 @@
+%
+
+% mini-ml
+% 
+%term exp sort %.
+%term val sort %.
+%term z trm exp %.
+%term s %pi (trm exp) %-> (trm exp) %.
+%term case %pi (trm exp) %-> (trm exp) %-> (%pi (trm val) %-> (trm exp)) %-> (trm exp) %.
+%term pair %pi (trm exp) %-> (trm exp) %-> (trm exp) %.
+%term fst %pi (trm exp) %-> (trm exp) %.
+%term snd %pi (trm exp) %-> (trm exp) %.
+%term lamm %pi (%pi (trm val) %-> (trm exp)) %-> (trm exp) %.
+%term appm %pi (trm exp) %-> (trm exp) %-> (trm exp) %.
+%term letv %pi (trm exp) %-> (%pi (trm val) %-> (trm exp)) %-> (trm exp) %.
+%term letn %pi (trm exp) %-> (%pi (trm exp) %-> (trm exp)) %-> (trm exp) %.
+%term fix %pi (%pi (trm exp) %-> (trm exp)) %-> (trm exp) %.
+%term vl %pi (trm val) %-> (trm exp) %.
+%term z* trm val %.
+%term s* %pi (trm val) %-> (trm val) %.
+%term pair* %pi (trm val) %-> (trm val) %-> (trm val) %.
+%term lamm* %pi (%pi (trm val) %-> (trm exp)) %-> (trm val) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+% continuation passing machine
+%
+
+% Machine Instructions
+%term ev %pi (trm exp) %-> atm %.
+%term return %pi (trm val) %-> atm %.
+%term case1 %pi (trm val) %-> (trm exp) %-> (%pi (trm val) %-> (trm exp)) %-> atm %.
+%term pair1 %pi (trm val) %-> (trm exp) %-> atm %.
+%term fst1 %pi (trm val) %-> atm %.
+%term snd1 %pi (trm val) %-> atm %.
+%term appm1 %pi (trm val) %-> (trm exp) %-> atm %.
+%term appm2 %pi (trm val) %-> (trm val) %-> atm %.
+%
+
+% evaluation of machine
+%
+
+% queries should be: sqnt cpmG rnil rnil rnil rnil (^(return V) =>> ^(ev E)).
+%	where E is some expression to evaluate.
+% 
+% Thus the ordered context is the stack of continuations left to execute.
+%
+
+% Note the use of left implications (>=>) in rules where a continuation expecting 
+%  a new value s put onto the stack.
+%
+
+%% Natural Numbers
+%term ev2 prog (^ ev z <<= ^ return z*) %.
+%term ev3 prog (^ ev (s E) <<= (forall val ([V] ^ return V <=< ^ return (s* V)) =>> ^ ev E)) %.
+%term ev4 prog (^ ev (case E1 E2 E3) <<= (forall val ([V] ^ return V <=< ^ case1 V E2 E3) =>> ^ ev E1)) %.
+%term ev5 prog (^ case1 z* E2 E3 <<= ^ ev E2) %.
+%term ev6 prog (^ case1 (s* V) E2 E3 <<= ^ ev (E3 V)) %.
+%% Functions
+%term ev7 prog (^ ev (lamm E) <<= ^ return (lamm* E)) %.
+%term ev8 prog (^ ev (appm E1 E2) <<= (forall val ([V1] ^ return V1 <=< ^ appm1 V1 E2) =>> ^ ev E1)) %.
+%term ev9 prog (^ appm1 V1 E2 <<= (forall val ([V2] ^ return V2 <=< ^ appm2 V1 V2) =>> ^ ev E2)) %.
+%term ev10 prog (^ appm2 (lamm* E1') V2 <<= ^ ev (E1' V2)) %.
+%% Definitions 
+%term ev11 prog (^ ev (letv E1 E2) <<= (forall val ([V1] ^ ev (E2 V1) >=> ^ return V1) =>> ^ ev E1)) %.
+%term ev12 prog (^ ev (letn E1 E2) <<= ^ ev (E2 E1)) %.
+%%  Recursion 
+%term ev13 prog (^ ev (fix E) <<= ^ ev (E (fix E))) %.
+%% Values
+%term ev14 prog (^ ev (vl V) <<= ^ return V) %.

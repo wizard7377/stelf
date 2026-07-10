@@ -1,0 +1,78 @@
+%                                             
+%. %[[ It often comes to pass that you have a judgement and a second judgement which picks out some of the subjects of the first. For instance, terms and values, or terms and well-typed terms, or finite maps and well-formed finite maps (e.g. maps without duplicate keys). Depending on what you're doing, you may then have a choice as to whether to encode the judgements _intrinsically_ or _extrinsically_.
+
+In an extrinsic encoding, the second judgement is represented as a refinement of the first: a type family which is indexed by the type family representing the first judgement. For example, the simply-typed lambda calculus, extrinsically: %]]
+%sort tm %.
+%term lam %pi (%pi tm %-> tm) %-> tm %.
+%term app %pi tm %-> tm %-> tm %.
+%sort tp %.
+%term arr %pi tp %-> tp %-> tp %.
+%sort of {_ tm} {_ tp} %.
+%term of-lam %pi ({x tm} {d of x T} of (B x) T') %-> (of (lam B) (arr T T')) %.
+%term of-app %pi (of M' (arr T T')) %-> (of M T) %-> (of (app M' M) T') %.
+%. %[[ In an intrinsic encoding, the second judgement is rolled into the definition of the first; there is no representation of subjects of the first judgement which are not subjects of the second. For example, the simply-typed lambda calculus, intrinsically: %]]
+%sort tp %.
+%term arr %pi tp %-> tp %-> tp %.
+%sort tm {_ tp} %.
+%term lam %pi (%pi (tm T) %-> (tm T')) %-> (tm (arr T T')) %.
+%term app %pi (tm (arr T T')) %-> (tm T) %-> (tm T') %.
+%. %[[ Strictly speaking this is not just a different encoding; it adequately encodes only the typing judgement, since there are ill-typed terms which can be written down in the previous signature but not in this one.
+
+
+
+You may wish to work with both judgements (for instance, terms and values). In that case you have the choice of representing values extrinsically, as a judgement indexed by terms, or intrinsically, as a separate judgement. Extrinsically: %]]
+%sort tm %.
+%term lam %pi (%pi tm %-> tm) %-> tm %.
+%term app %pi tm %-> tm %-> tm %.
+%sort val {_ tm} %.
+%term val-lam val (lam B) %.
+%. %[[ Intrinsically: %]]
+%sort tm %.
+%sort val %.
+%term lam %pi (%pi val %-> tm) %-> val %.
+%term app %pi tm %-> tm %-> tm %.
+%term inj %pi val %-> tm %.
+%. %[[ In this representation values must be explicitly injected into terms with ``inj``. (Note that taking ``val`` as argument to the body of ``lam`` makes the language call-by-value.) An advantage of the intrinsic encoding is that you need only pass around a single ``val`` derivation to operate on values, while in the extrinsic encoding you must pass both a ``tm`` and a ``value``. A disadvantage is that you have to deal with the term/value distinction everywhere you work with terms.
+
+Another possibility is to have a completely separate secondary judgement and inject its subjects into the primary judgement via a metatheorem rather than a constructor: %]]
+%sort tm %.
+%term lam %pi (%pi tm %-> tm) %-> tm %.
+%term app %pi tm %-> tm %-> tm %.
+%sort val %.
+%term val-lam %pi (%pi tm %-> tm) %-> val %.
+%. %[[ As a final example, consider finite maps. On paper you typically work with finite maps which are implicitly well-defined (they have at most one binding for a key). To encode them as LF terms in Twelf you have the choice of an extrinsic encoding, in which there is a separate well-formedness judgement, or an intrinsic one, in which only well-formed maps can be written down. Extrinsically: %]]
+%sort key %.
+% pretend that key and value have some inhabitants
+%sort value %.
+%sort map %.
+%term empty map %.
+%term bind %pi map %-> key %-> value %-> map %.
+%sort key-neq {_ key} {_ key} %.
+% holds if keys are not equal
+%sort key-not-in-map {_ key} {_ map} %.
+%term _ key-not-in-map K empty %.
+%term _ %pi (key-not-in-map K (bind M K' V)) %<- (key-neq K K') %<- (key-not-in-map K M) %.
+%sort wf-map {_ map} %.
+%term _ wf-map empty %.
+%term _ %pi (wf-map (bind M K V)) %<- (key-not-in-map K M) %<- (wf-map M) %.
+%. %[[ Intrinsically: %]]
+%sort key %.
+% pretend that key and value have some inhabitants
+%sort value %.
+%sort map %.
+%sort key-neq {_ key} {_ key} %.
+% holds if keys are not equal
+%term empty map %.
+%sort key-not-in-map {_ key} {_ map} %.
+%term bind {M map} {K key} %pi value %-> (key-not-in-map K M) %-> map %.
+%term _ key-not-in-map K empty %.
+%term _ %pi (key-not-in-map K (bind M K' V _)) %<- (key-neq K K') %<- (key-not-in-map K M) %.
+%. %[[ Here the extrinsic encoding has the advantage that you need not prove that well-formedness is maintained as you go (or even maintain it), which may save a lot of work. The intrinsic encoding has the advantage that since only well-formed maps can be written down, you never need to prove that a type-family maintains well-formedness as an invariant, which may save a lot of work.
+
+For an example of an intrinsic encoding, see [CPS conversion](/wiki/cps-conversion/), where the distinction between values and expressions is encoded intrinsically, and where all terms are manifestly well-typed. %]]
+%. %[[
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Intrinsic_and_extrinsic_encodings).
+%]]

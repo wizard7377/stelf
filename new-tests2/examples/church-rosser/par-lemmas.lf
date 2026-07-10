@@ -1,0 +1,23 @@
+%%% Basic lemmas concerning parallel reductions
+%%% Author: Frank Pfenning
+% Every term reduces to itself (in parallel)
+%sort identity {M term} {_ M => M} %.
+%mode identity %in %out %.
+%term id_lam 
+	%pi (identity (lam M1) (lm R1))
+	%<- ({x term} {eqx x => x} %pi (identity x eqx) %-> (identity (M1 x) (R1 x eqx))) %.
+%term id_app %pi (identity (app M1 M2) (ap R1 R2)) %<- (identity M1 R1) %<- (identity M2 R2) %.
+%block lid {x term} {eqx x => x} {u identity x eqx}%.
+%worlds (lid) (identity M R) %.
+%covers identity %in %out %.
+%terminates M (identity M _) %.
+%total M (identity M _) %.
+%  Parallel multi-step reduction is transitive.
+%sort append {_ M =>* M'} {_ M' =>* M''} {_ M =>* M''} %.
+%mode append %in %in %out %.
+%term append_id append id S* S* %.
+%term append_step %pi (append (R1 ; R2*) S* (R1 ; S2*')) %<- (append R2* S* S2*') %.
+%worlds () (append R* S* S*') %.
+%covers append %in %in %out %.
+%terminates R* (append R* S* _) %.
+%total R* (append R* S* _) %.

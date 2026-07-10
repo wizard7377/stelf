@@ -13,7 +13,7 @@ Rather than introducing the administrative redices of explicitly introducing and
 %term app %pi (exp (A => B)) %-> (exp A) %-> (exp B) %.
 %term lam %pi (%pi (value A) %-> (exp B)) %-> (value (A => B)) %.
 %term ret %pi (value A) %-> (exp A) %.
-%block sourceb {A tp} [x value A]%.
+%block sourceb [A tp] {x value A}%.
 %worlds (sourceb) (exp _) (value _) %.
 %{!  !}%
 %sort contra %.
@@ -22,8 +22,8 @@ Rather than introducing the administrative redices of explicitly introducing and
 %term clam 
 	%pi (%pi (cvalue A) %-> (%pi (cvalue B) %-> contra) %-> contra)
 	%-> (cvalue (A => B)) %.
-%block targetb1 {A tp} [x cvalue A]%.
-%block targetb2 {A tp} [y %pi (cvalue A) %-> contra]%.
+%block targetb1 [A tp] {x cvalue A}%.
+%block targetb2 [A tp] {y %pi (cvalue A) %-> contra}%.
 %worlds (targetb1 targetb2) (contra) (cvalue _) %.
 %{! 
 Notice that we no longer need terms for continuations as they are implicitly represented by the functions from values to contradictions.

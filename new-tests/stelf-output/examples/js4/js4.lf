@@ -45,8 +45,8 @@
 %term sdboxep 
 	%pi (subdia (boxep M ([u] E u)) ([w] [x] F w x) (boxep M ([u] F' u)))
 	%<- ({u {V world} tm B V} subdia (E u) ([w] [x] F w x) (F' u)) %.
-%block by {B tp} [v world] [y tm B v]%.
-%block bu {B tp} [u {V world} tm B V]%.
+%block by [B tp] {v world} {y tm B v}%.
+%block bu [B tp] {u {V world} tm B V}%.
 %worlds (by bu) (subdia E F F') %.
 %total E (subdia E F _) %.
 %{ This does not work, unfortunately

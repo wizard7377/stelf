@@ -1,0 +1,12 @@
+%require %[ formulas %] %.
+%require %[ int %] %.
+%require %[ cl %] %.
+%require %[ int-admit %] %.
+%require %[ cl-admit %] %.
+%require %[ int-cut %] %.
+%require %[ cl-cut %] %.
+%require %[ int-elim %] %.
+%require %[ cl-elim %] %.
+%require %[ examples-quy %] %.
+%require %[ cl-thm %] %.
+%require %[ int-thm %] %.

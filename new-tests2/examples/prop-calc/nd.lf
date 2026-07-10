@@ -1,0 +1,14 @@
+%%% Intuitionistic propositional calculus
+%%% Positive fragment with implies, and, true.
+%%% Two formulations here: natural deduction and Hilbert-style system.
+%%% Author: Frank Pfenning
+% Natural Deduction.
+%sort ! {_ o} %.
+%prec %prefix 9 ! %.
+%name ! %.
+%term trueI ! true %.
+%term andI %pi (! A) %-> (! B) %-> (! A & B) %.
+%term andEL %pi (! A & B) %-> (! A) %.
+%term andER %pi (! A & B) %-> (! B) %.
+%term impliesI %pi (%pi (! A) %-> (! B)) %-> (! A => B) %.
+%term impliesE %pi (! A => B) %-> (! A) %-> (! B) %.

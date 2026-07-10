@@ -1,0 +1,43 @@
+%%%% Syntax for terms and modules %%%%
+%sort tm %.
+%name tm %.
+%sort md %.
+%name md %.
+%term tm/unit tm %.
+%term tm/pair %pi tm %-> tm %-> tm %.
+%term tm/pj1 %pi tm %-> tm %.
+%term tm/pj2 %pi tm %-> tm %.
+%term tm/fun %pi cn %-> cn %-> (%pi tm %-> tm %-> tm) %-> tm %.
+%term tm/tmapp %pi tm %-> tm %-> tm %.
+%term tm/cnabs %pi kd %-> (%pi cn %-> tm) %-> tm %.
+%term tm/cnapp %pi tm %-> cn %-> tm %.
+%term tm/term %pi md %-> tm %.
+%term tm/loc %pi loc %-> tm %.
+%term tm/ref %pi tm %-> tm %.
+%term tm/set %pi tm %-> tm %-> tm %.
+%term tm/get %pi tm %-> tm %.
+%term tm/inl %pi cn %-> tm %-> tm %.
+%term tm/inr %pi cn %-> tm %-> tm %.
+%term tm/case %pi tm %-> (%pi tm %-> tm) %-> (%pi tm %-> tm) %-> tm %.
+%term tm/raise %pi tm %-> tm %.
+%term tm/try %pi tm %-> (%pi tm %-> tm) %-> tm %.
+%term tm/new-tag %pi cn %-> tm %.
+%term tm/tagloc %pi loc %-> tm %.
+%term tm/tag %pi tm %-> tm %-> tm %.
+%term tm/iftag %pi tm %-> tm %-> (%pi tm %-> tm) %-> tm %-> tm %.
+%term tm/roll %pi cn %-> tm %-> tm %.
+%term tm/unroll %pi tm %-> tm %.
+%term md/unit md %.
+%term md/cn %pi cn %-> md %.
+%term md/tm %pi tm %-> md %.
+%term md/pair %pi md %-> md %-> md %.
+%term md/pj1 %pi md %-> md %.
+%term md/pj2 %pi md %-> md %.
+%term md/lam %pi sg %-> (%pi cn %-> sg) %-> (%pi md %-> cn %-> md) %-> md %.
+%term md/app %pi md %-> md %-> md %.
+%term md/let %pi md %-> (%pi md %-> cn %-> md) %-> sg %-> md %.
+%term md/seal %pi md %-> sg %-> md %.
+%sort seq/tm {_ tm} {_ tm} %.
+%term seq/tm/refl seq/tm E E %.
+%sort seq/md {_ md} {_ md} %.
+%term seq/md/refl seq/md M1 M1 %.

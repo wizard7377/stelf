@@ -1,0 +1,6 @@
+%sort vdt/assm/tm {_ assm/tm E C} {_ ofkd C kd/type} %.
+%mode vdt/assm/tm %in %out %.
+%sort vdt/assm/md {_ assm/md M S} {_ sg-wf S} {_ fst-sg S K} {_ fst-md M C} {_ ofkd C K} %.
+%mode vdt/assm/md %in %out %out %out %out %.
+%sort fst-md-seq {_ fst-md M C} {_ fst-md M C'} {_ seq/cn C C'} %.
+%mode fst-md-seq %in %in %out %.

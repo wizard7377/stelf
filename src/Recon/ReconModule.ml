@@ -69,8 +69,8 @@ module Make_ReconModule
             | inst :: rest -> (
                 let eqns = go rest in
                 match Cst.View.Struct.Inst.view inst with
-                | Cst.View.Struct.Inst.ConInst (_, (ids, id), _, tm) -> (
-                    let r = Cst.loc_to_region Cst.ghost in
+                | Cst.View.Struct.Inst.ConInst (loc, (ids, id), _, tm) -> (
+                    let r = Cst.loc_to_region loc in
                     let qid = ModSyn.Names.Qid (ids, id) in
                     match ModSyn.Names.constLookupIn (ns, qid) with
                     | None ->
@@ -80,8 +80,8 @@ module Make_ReconModule
                             ^ ModSyn.Names.qidToString
                                 (valOf (ModSyn.Names.constUndefIn (ns, qid))) )
                     | Some cid -> (cid, External tm, r) :: eqns)
-                | Cst.View.Struct.Inst.StrInst (_, (ids, id), _, strexp) ->
-                    let r1 = Cst.loc_to_region Cst.ghost in
+                | Cst.View.Struct.Inst.StrInst (loc, (ids, id), _, strexp) ->
+                    let r1 = Cst.loc_to_region loc in
                     let qid = ModSyn.Names.Qid (ids, id) in
                     let mid1 =
                       match ModSyn.Names.structLookupIn (ns, qid) with

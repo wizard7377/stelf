@@ -1,0 +1,27 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% syntax.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Syntax
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort loc %.
+%name loc %.
+%% loc.elf
+%sort exp %.
+%name exp %.
+%% exp.elf
+%sort val %.
+%name val %.
+%% val.elf
+%sort st %.
+%name st %.
+%% store.elf
+%sort tp %.
+%name tp %.
+%% tp.elf
+%sort sttp %.
+%name sttp %.
+%% storetp.elf
+%sort mach %.
+%name mach %.
+%% machine.elf

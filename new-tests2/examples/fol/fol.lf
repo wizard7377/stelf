@@ -1,0 +1,25 @@
+%%% Intuitionistic propositional calculus
+%%% Positive fragment with implies, and, true.
+%%% Author: Frank Pfenning
+% Type of propositions.
+%sort o %.
+%name o %.
+% Type of atomic propositions.
+%sort atm %.
+% Syntax: implication, plus a few constants.
+%term => %pi o %-> o %-> o %.
+%prec %right 10 => %.
+%term & %pi o %-> o %-> o %.
+%prec %right 11 & %.
+%term true o %.
+%term ` %pi atm %-> o %.
+% Atomic deductions (for faster search)
+%sort !^ {_ o} %.
+%sort !v {_ o} %.
+%term trueI^ !^ true %.
+%term andI^ %pi (!^ A) %-> (!^ B) %-> (!^ (A & B)) %.
+%term andEvL %pi (!v (A & B)) %-> (!v A) %.
+%term andEvR %pi (!v (A & B)) %-> (!v B) %.
+%term impI^ %pi (%pi (!v A) %-> (!^ B)) %-> (!^ (A => B)) %.
+%term impEv %pi (!v (A => B)) %-> (!^ A) %-> (!v B) %.
+%term close %pi (!v (` P)) %-> (!^ (` P)) %.

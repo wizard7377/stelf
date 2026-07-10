@@ -1,0 +1,239 @@
+%                                                                                    
+%. %[[ 
+
+\{\{Summer school 2008
+  |prev=Exercises 3
+  |prevname=Exercies 3
+  |nonext=
+\}\}
+
+Type safety for MinML with monadic effects, with putn and getn primitives.
+
+%]]
+%. %[[ 
+
+## Syntax / static semantics
+
+Types:
+
+%]]
+%sort tp %.
+%name tp %.
+%term nat tp %.
+%term arr %pi tp %-> tp %-> tp %.
+%term circle %pi tp %-> tp %.
+%. %[[ 
+
+Typed expressions (i.e., typing derivations):
+
+%]]
+%sort exp {_ tp} %.
+%name exp %.
+%prec %postfix 1 exp %.
+%sort command {_ tp} %.
+%name command %.
+%prec %postfix 1 command %.
+%term z nat exp %.
+%term s %pi (nat exp) %-> (nat exp) %.
+%term ifz %pi (nat exp) %-> (T exp) %-> (%pi (nat exp) %-> (T exp)) %-> (T exp) %.
+%term fun {T1 tp} {T2 tp} %pi (%pi (arr T1 T2 exp) %-> (T1 exp) %-> (T2 exp)) %-> (arr T1 T2 exp) %.
+%term app %pi (arr T1 T2 exp) %-> (T1 exp) %-> (T2 exp) %.
+%term comp %pi (T command) %-> (circle T exp) %.
+%term return %pi (T exp) %-> (T command) %.
+%term let %pi (circle T exp) %-> (%pi (T exp) %-> (U command)) %-> (U command) %.
+%term getn %pi (%pi (nat exp) %-> (U command)) %-> (U command) %.
+%term putn %pi (nat exp) %-> (U command) %-> (U command) %.
+%. %[[ 
+
+## Dynamic semantics / preservation
+
+### Values and final states
+
+%]]
+%sort value {_ T exp} %.
+%name value %.
+%mode value %in %.
+%term value/z value z %.
+%term value/s %pi (value (s E)) %<- (value E) %.
+%term value/fun value (fun _ _ _) %.
+%term value/comp value (comp _) %.
+%sort final {_ T command} %.
+%name final %.
+%mode final %in %.
+%term final/ret %pi (final (return E)) %<- (value E) %.
+%. %[[ 
+
+### Transition relation for expressions
+
+%]]
+%sort step {_ T exp} {_ T exp} %.
+%name step %.
+%mode step %in %out %.
+%term step/s %pi (step (s E) (s E')) %<- (step E E') %.
+%term step/ifz/arg %pi (step (ifz E E1 ([x] E2 x)) (ifz E' E1 ([x] E2 x))) %<- (step E E') %.
+%term step/ifz/z step (ifz z E1 ([x] E2 x)) E1 %.
+%term step/ifz/s %pi (step (ifz (s E) E1 ([x] E2 x)) (E2 E)) %<- (value E) %.
+%term step/app/fun %pi (step (app E1 E2) (app E1' E2)) %<- (step E1 E1') %.
+%term step/app/arg %pi (step (app E1 E2) (app E1 E2')) %<- (value E1) %<- (step E2 E2') %.
+%term step/app/beta-v 
+	%pi (step (app (fun T1 T2 ([f] [x] E f x)) E2) (E (fun T1 T2 ([f] [x] E f x)) E2))
+	%<- (value E2) %.
+%. %[[ 
+
+### Labelled transition relation for commands
+
+%]]
+%sort label %.
+%name label %.
+%term label/read %pi (value (%the (nat exp) N)) %-> label %.
+%term label/write %pi (value (%the (nat exp) N)) %-> label %.
+%term label/sil label %.
+%% silent transition
+%sort mstep {_ T command} {_ T command} {_ label} %.
+%name mstep %.
+%mode mstep %in %star %star %.
+%term mstep/ret %pi (mstep (return E) (return E') label/sil) %<- (step E E') %.
+%term mstep/let-e %pi (mstep (let E ([x] M x)) (let E' ([x] M x)) label/sil) %<- (step E E') %.
+%term mstep/let-m 
+	%pi (mstep (let (comp M1) ([x] M2 x)) (let (comp M1') ([x] M2 x)) L)
+	%<- (mstep M1 M1' L) %.
+%term mstep/let-beta 
+	%pi (mstep (let (comp (return E)) ([x] M x)) (M E) label/sil)
+	%<- (final (return E)) %.
+%term mstep/getn mstep (getn ([x] M x)) (M E) (label/read (%the (value E) Dval)) %.
+%term mstep/putn %pi (mstep (putn E M) (putn E' M) label/sil) %<- (step E E') %.
+%term mstep/putn-put mstep (putn E M) M (label/write (%the (value E) Dval)) %.
+%. %[[ 
+
+## Progress
+
+### Return sums
+
+%]]
+%sort val-or-step {_ T exp} %.
+%name val-or-step %.
+%term vos/val %pi (val-or-step E) %<- (value E) %.
+%term vos/step %pi (val-or-step E) %<- (step E _) %.
+%sort fin-or-mstep {_ T command} %.
+%name fin-or-mstep %.
+%term fos/fin %pi (fin-or-mstep M) %<- (final M) %.
+%term fos/step %pi (fin-or-mstep M) %<- (mstep M _ _) %.
+%. %[[ 
+
+### [Factoring](/wiki/output-factoring/) lemmas
+
+%]]
+%sort prog/s {_ val-or-step E} {_ val-or-step (s E)} %.
+%mode prog/s %in %out %.
+%term _ prog/s (vos/step Dstep) (vos/step (step/s Dstep)) %.
+%term _ prog/s (vos/val Dval) (vos/val (value/s Dval)) %.
+%worlds () (prog/s _ _) %.
+%total {} (prog/s _ _) %.
+%sort prog/ifz {_ val-or-step (%the (nat exp) E)} {E1} {E2} {_ step (ifz E E1 ([x] E2 x)) E'} %.
+%mode prog/ifz %in %in %in %out %.
+%term _ prog/ifz (vos/step Dstep) _ _ (step/ifz/arg Dstep) %.
+%term _ prog/ifz (vos/val value/z) _ _ step/ifz/z %.
+%term _ prog/ifz (vos/val (value/s Dval)) _ _ (step/ifz/s Dval) %.
+%worlds () (prog/ifz _ _ _ _) %.
+%total {} (prog/ifz _ _ _ _) %.
+%sort prog/app {_ val-or-step (%the (arr T2 T exp) E1)} {_ val-or-step (%the (T2 exp) E2)} {_ step (app E1 E2) E'} %.
+%mode prog/app %in %in %out %.
+%term _ prog/app (vos/step Dstep1) _ (step/app/fun Dstep1) %.
+%term _ prog/app (vos/val Dval1) (vos/step Dstep2) (step/app/arg Dstep2 Dval1) %.
+%term _ prog/app (vos/val Dval1) (vos/val Dval2) (step/app/beta-v Dval2) %.
+%worlds () (prog/app _ _ _) %.
+%total {} (prog/app _ _ _) %.
+%. %[[ 
+
+### Progress for expressions
+
+%]]
+%sort prog {E T exp} {_ val-or-step E} %.
+%name prog %.
+%mode prog %in %out %.
+%term _ prog z (vos/val value/z) %.
+%term _ %pi (prog (s E) Dvos') %<- (prog E Dvos) %<- (prog/s Dvos Dvos') %.
+%term _ 
+	%pi (prog (ifz E E1 ([x] E2 x)) (vos/step Dstep))
+	%<- (prog E Dvos)
+	%<- (prog/ifz Dvos _ _ Dstep) %.
+%term _ prog (fun _ _ _) (vos/val value/fun) %.
+%term _ 
+	%pi (prog (app E1 E2) (vos/step Dstep))
+	%<- (prog E1 Dvos1)
+	%<- (prog E2 Dvos2)
+	%<- (prog/app Dvos1 Dvos2 Dstep) %.
+%term _ prog (comp M) (vos/val value/comp) %.
+%worlds () (prog _ _) %.
+%total Dof (prog Dof _) %.
+%. %[[ 
+
+### Factoring lemmas for commands
+
+%]]
+%sort mprog/ret {_ val-or-step E} {_ fin-or-mstep (return E)} %.
+%mode mprog/ret %in %out %.
+%term _ mprog/ret (vos/val Dval) (fos/fin (final/ret Dval)) %.
+%term _ mprog/ret (vos/step Dstep) (fos/step (mstep/ret Dstep)) %.
+%worlds () (mprog/ret _ _) %.
+%total {} (mprog/ret _ _) %.
+%sort mprog/let-comp {_ fin-or-mstep (%the (T command) M1)} {M2 %pi (T exp) %-> (U command)} {_ mstep (let (comp M1) M2) M' L} %.
+%mode mprog/let-comp %in %in %out %.
+%term _ mprog/let-comp (fos/fin (%the (final (return E)) (final/ret Dval))) M2 (%the (mstep (let (comp (return E)) M2) (M2 E) label/sil) (mstep/let-beta (final/ret Dval))) %.
+%term _ mprog/let-comp (fos/step (%the (mstep M1 M1' L) Dmstep)) M2 (%the (mstep (let (comp M1) M2) (let (comp M1') M2) L) (mstep/let-m Dmstep)) %.
+%worlds () (mprog/let-comp _ _ _) %.
+%total {} (mprog/let-comp _ _ _) %.
+%sort mprog/putn {_ val-or-step E} {M} {_ mstep (putn E M) M' L} %.
+%mode mprog/putn %in %in %out %.
+%term _ mprog/putn (vos/val Dval) M (%the (mstep (putn E M) M (label/write Dval)) mstep/putn-put) %.
+%term _ mprog/putn (vos/step Dstep) _ (mstep/putn Dstep) %.
+%worlds () (mprog/putn _ _ _) %.
+%total {} (mprog/putn _ _ _) %.
+%. %[[ 
+
+### Progress for commands
+
+One of the factoring lemmas is mutually recursive with the main theorem:
+
+%]]
+%sort mprog/let {E circle T exp} {_ val-or-step E} {M %pi (T exp) %-> (U command)} {_ mstep (let E M) M' L} %.
+%mode mprog/let %in %in %in %out %.
+%sort mprog {M T command} {_ fin-or-mstep M} %.
+%mode mprog %in %out %.
+%% mprog/let
+%term _ 
+	%pi (mprog/let (comp M) (vos/val value/comp) _ Dmstep)
+	%<- (mprog M Dfos)
+	%<- (mprog/let-comp Dfos _ Dmstep) %.
+%term _ mprog/let _ (vos/step Dstep) _ (mstep/let-e Dstep) %.
+%% mprog
+%term _ %pi (mprog (return E) Dfos) %<- (prog E Dvos) %<- (mprog/ret Dvos Dfos) %.
+%term _ 
+	%pi (mprog (let (%the (circle T exp) E) (%the (%pi (T exp) %-> (U command)) M)) (fos/step Dmstep))
+	%<- (prog E (%the (val-or-step E) Dvos))
+	%<- (mprog/let E Dvos M (%the (mstep (let E M) M' L) Dmstep)) %.
+%                                                   
+%%       maybe this isn't the right theorem
+%term _ mprog (getn M) (fos/step (%the (mstep (getn M) (M z) (label/read value/z)) mstep/getn)) %.
+%term _ 
+	%pi (mprog (putn E M) (fos/step Dmstep))
+	%<- (prog E Dvos)
+	%<- (mprog/putn Dvos M Dmstep) %.
+%worlds () (mprog _ _) (mprog/let _ _ _ _) %.
+%total (M E) (mprog M _) (mprog/let E _ _ _) %.
+%. %[[ 
+And thus we have proved type safety for MinML with monadic effects!
+
+\{\{Summer school 2008
+  |prev=Exercises 3
+  |prevname=Exercies 3
+  |nonext=
+\}\}
+
+%]]
+%. %[[
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Summer_school_2008:Type_safety_for_MinML_with_monadic_effects_(putngetn)).
+%]]

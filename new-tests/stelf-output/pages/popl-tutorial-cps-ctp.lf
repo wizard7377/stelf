@@ -17,7 +17,7 @@
 %term app %pi (e (cnot (A cand (cnot B)))) %-> (e A) %-> (e B) %.
 %term lam %pi (%pi (v A) %-> (e B)) %-> (v (cnot (A cand (cnot B)))) %.
 %term inj %pi (v A) %-> (e A) %.
-%block sourceb {A ctp} [x v A]%.
+%block sourceb [A ctp] {x v A}%.
 %worlds (sourceb) (e _) (v _) %.
 %% Destination expression and values annotated by their types.
 %sort ce %.
@@ -27,7 +27,7 @@
 %term clam %pi (%pi (cv A) %-> (cv (cnot B)) %-> ce) %-> (cv (cnot (A cand (cnot B)))) %.
 %term cnoti %pi (%pi (cv A) %-> ce) %-> (cv (cnot A)) %.
 %term throw %pi (cv A) %-> (cv (cnot A)) %-> ce %.
-%block targetb {A ctp} [x cv A]%.
+%block targetb [A ctp] {x cv A}%.
 %worlds (targetb) (ce) (cv _) %.
 %sort cps %.
 %mode cps %in %out %.
@@ -43,7 +43,7 @@
 %term cpse/inj 
 	%pi (cpse (inj (%the (v A) V)) ([c cv (cnot A)] throw V' c))
 	%<- (cps V (%the (cv A) V')) %.
-%block cpsb {A ctp} [x v A] [x' cv A] [d cps x x']%.
+%block cpsb [A ctp] {x v A} {x' cv A} {d cps x x'}%.
 %worlds (cpsb) (cps _ _) (cpse _ _) %.
 %total (E V) (cps E _) (cpse V _) %.
 %{!

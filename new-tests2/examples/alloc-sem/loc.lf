@@ -1,0 +1,15 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% loc.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Locations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%term mkLoc %pi nat %-> loc %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Loc Less-than
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort loc_lt {_ loc} {_ loc} %.
+%mode loc_lt %in %in %.
+%term loc_lt_ %pi (loc_lt (mkLoc N1) (mkLoc N2)) %<- (nat_lt N1 N2) %.
+%terminates {} (loc_lt _ _) %.
+%worlds () (loc_lt _ _) %.

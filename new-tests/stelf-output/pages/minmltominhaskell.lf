@@ -34,7 +34,7 @@ Uses third-order coverage checking.
 %term return %pi (| true A) %-> (| lax A) %.
 %term let %pi (| true (circ A)) %-> (%pi (| true A) %-> (| lax C)) %-> (| lax C) %.
 %term print %pi (| lax C) %-> (| lax C) %.
-%block trueb {A _} [x | true A]%.
+%block trueb [A _] {x | true A}%.
 %worlds (trueb) (| _) %.
 %{! 
 
@@ -124,7 +124,7 @@ Uses third-order coverage checking.
 	%<- (tptrans-unique DB DB'' Did)
 	%<- (laxresp (return x') Did E'')} trans (E2 x) DC (E2' x')) %.
 %term _ %pi (trans (mprint E) DC (print E')) %<- (trans E DC E') %.
-%block transb {A _} {A' _} {DA tptrans A A'} [x mtrue A] [x' | true A'] [_ {A'' _} {DA'' tptrans A A''} {Did id-tp A' A''} {E'' | lax A''} 
+%block transb [A _] [A' _] [DA tptrans A A'] {x mtrue A} {x' | true A'} {_ {A'' _} {DA'' tptrans A A''} {Did id-tp A' A''} {E'' | lax A''} 
 	%pi (trans x DA'' E'')
 	%<- (tptrans-unique DA DA'' Did)
 	%<- (laxresp (return x') Did E'')]%.

@@ -68,7 +68,7 @@ The technique is to introduce another lemma that makes explicit the invariant re
 %sort has-rh %.
 %mode has-rh %in %out %.
 %{! We can prove the `has-rh` theorem in a `%world` that is much simpler than the complicated world used before: !}%
-%block simpler_block {E elt} {RH is-red E} [sd seed E] [clause has-rh sd RH]%.
+%block simpler_block [E elt] [RH is-red E] {sd seed E} {clause has-rh sd RH}%.
 %worlds (simpler_block) (has-rh _ _) %.
 %total X (has-rh X _) %.
 %{! The proof of the main theorem can be stated more simply in this less complicated world: !}%

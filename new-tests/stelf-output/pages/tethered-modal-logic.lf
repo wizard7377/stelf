@@ -223,11 +223,11 @@ logic with cut admissibility)
 	%pi (cag (big/ M) A D ([h] copy (E h) ACC h) F)
 	%<- ({h2} cag (big/ M) A D ([h] E h h2) (E' h2))
 	%<- (ca M A (D _ ACC) E' F) %.
-%block bacc {Q w} {P w} [d P <= Q]%.
-%block bhyp {A o} {P w} [h hyp A P]%.
-%block bghyp {A o} {P w} [h ghyp A P]%.
-%block bw [a w]%.
-%block bo [p o]%.
+%block bacc [Q w] [P w] {d P <= Q}%.
+%block bhyp [A o] [P w] {h hyp A P}%.
+%block bghyp [A o] [P w] {h ghyp A P}%.
+%block bw {a w}%.
+%block bo {p o}%.
 %worlds (bhyp bghyp bw bo bacc) (ca M A D E F) (cag M A D E F) %.
 %mode ca %in %in %in %in %out %.
 %mode cag %in %in %in %in %out %.

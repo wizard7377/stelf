@@ -1,0 +1,40 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% dynsem.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Dynamic Semantics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort step {_ st} {_ exp} {_ st} {_ exp} %.
+%name step %.
+%mode step %in %in %out %out %.
+%term lam_alloc_step %pi (step S (lam_e Tx F) S' (loc_e L')) %<- (st_alloc S (lam_v Tx F) S' L') %.
+%term app_ctxt1_step %pi (step S (app_e E1 E2) S' (app_e E1' E2)) %<- (step S E1 S' E1') %.
+%term app_ctxt2_step 
+	%pi (step S (app_e (loc_e L1) E2) S' (app_e (loc_e L1) E2'))
+	%<- (step S E2 S' E2') %.
+%term app_beta_step 
+	%pi (step S (app_e (loc_e L1) (loc_e L2)) S (F1' (loc_e L2)))
+	%<- (st_lookup S L1 (lam_v Tx F1')) %.
+%term unit_alloc_step %pi (step S unit_e S' (loc_e L')) %<- (st_alloc S unit_v S' L') %.
+%term letunit_ctxt_step %pi (step S (letunit_e E1 E2) S' (letunit_e E1' E2)) %<- (step S E1 S' E1') %.
+%term letunit_beta_step %pi (step S (letunit_e (loc_e L1) E2) S E2) %<- (st_lookup S L1 unit_v) %.
+%term pair_ctxt1_step %pi (step S (pair_e E1 E2) S' (pair_e E1' E2)) %<- (step S E1 S' E1') %.
+%term pair_ctxt2_step 
+	%pi (step S (pair_e (loc_e L1) E2) S' (pair_e (loc_e L1) E2'))
+	%<- (step S E2 S' E2') %.
+%term pair_alloc_step 
+	%pi (step S (pair_e (loc_e L1) (loc_e L2)) S' (loc_e L'))
+	%<- (st_alloc S (pair_v L1 L2) S' L') %.
+%term letpair_ctxt_step %pi (step S (letpair_e E1 F2) S' (letpair_e E1' F2)) %<- (step S E1 S' E1') %.
+%term letpair_beta_step 
+	%pi (step S (letpair_e (loc_e L1) F2) S (F2 (loc_e L11) (loc_e L12)))
+	%<- (st_lookup S L1 (pair_v L11 L12)) %.
+%terminates E1 (step _ E1 _ _) %.
+%worlds () (step _ _ _ _) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort step* {_ st} {_ exp} {_ st} {_ exp} %.
+%name step* %.
+%term refl_step* step* S E S E %.
+%term trans_step* %pi (step* S1 E1 S3 E3) %<- (step* S1 E1 S2 E2) %<- (step* S2 E2 S3 E3) %.
+%term step_step* %pi (step* S1 E1 S2 E2) %<- (step S1 E1 S2 E2) %.

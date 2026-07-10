@@ -1,0 +1,18 @@
+%%%% lemmas that take the uninhabited judgment as input.
+%%%% when you are nowhere, anything is possible!
+%sort uninhabited-ofsg {L lt} {T lt} {Y pty} {M md} {S sg} {_ uninhabited} {_ ofsg L T Y M S} %.
+%mode uninhabited-ofsg %in %in %in %in %in %in %out %.
+%worlds (ofsg-block oftp-block ofkd-block ofsg+vdt-block oftp+vdt-block ofkd+vdt-block) (uninhabited-ofsg _ _ _ _ _ _ _) %.
+%total {} (uninhabited-ofsg _ _ _ _ _ _ _) %.
+%sort uninhabited-fst-md {M md} {C cn} {_ uninhabited} {_ fst-md M C} %.
+%mode uninhabited-fst-md %in %in %in %out %.
+%worlds (ofsg+vdt-block oftp+vdt-block ofkd+vdt-block) (uninhabited-fst-md _ _ _ _) %.
+%total {} (uninhabited-fst-md _ _ _ _) %.
+%sort uninhabited-oftp {_ uninhabited} {L lt} {T lt} {E tm} {C cn} {_ oftp L T E C} %.
+%mode uninhabited-oftp %in %in %in %in %in %out %.
+%worlds (ofsg-block oftp-block ofkd-block ofsg+vdt-block oftp+vdt-block ofkd+vdt-block) (uninhabited-oftp _ _ _ _ _ _) %.
+%total {} (uninhabited-oftp _ _ _ _ _ _) %.
+%sort uninhabited-seq/tm {E1} {E2} {_ uninhabited} {_ seq/tm E1 E2} %.
+%mode uninhabited-seq/tm %in %in %in %out %.
+%worlds (ofkd+vdt-block) (uninhabited-seq/tm _ _ _ _) %.
+%total {} (uninhabited-seq/tm _ _ _ _) %.

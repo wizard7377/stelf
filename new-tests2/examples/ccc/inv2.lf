@@ -1,0 +1,25 @@
+%sort inve {_ conc F M} {_ abse G E GE} {_ abse G (M E) GME} {_ GME == F @ GE} %.
+%term inve_id inve cid AP AP (sym id_l) %.
+%term inve_comp 
+	%pi (inve (ccomp CF CG) AP1 AP2 (EPF then (=@= refl EPG) then ass))
+	%<- (inve CG AP1 AP3 EPG)
+	%<- (inve CF AP3 AP2 EPF) %.
+%term inve_pair 
+	%pi (inve (cpair CF CG) AP (apair APF APG) (=pair= EPF EPG then sym DP))
+	%<- (distp DP)
+	%<- (inve CF AP APF EPF)
+	%<- (inve CG AP APG EPG) %.
+%term inve_fst inve cfst AP (afst AP) refl %.
+%term inve_snd inve csnd AP (asnd AP) refl %.
+%term inve_cur 
+	%pi (inve (ccur CF) AP (alam ([x] AP2 x)) (=cur= (EE then =@= refl (=pair= (sym EW) refl)) then sym DC))
+	%<- (distc DC)
+	%<- ({y} weak AP (AP' y) EW)
+	%<- ({y} inve CF (apair (AP' y) (avar av_x)) (AP2 y) EE) %.
+%term inve_app inve capp AP (aapp (afst AP) (asnd AP)) (=@= refl prod_u) %.
+%sort zabs {_ %pi (term A) %-> (term B)} {_ mor A B} %.
+%term zabs1 %pi (zabs ([x] E x) (F @ pair drop id)) %<- ({x} abse (addv empty x) (E x) F) %.
+%sort invac {_ conc F M} {_ zabs M F'} {_ F' == F} %.
+%term invac1 
+	%pi (invac C (zabs1 ([x] AP x)) (=@= EE refl then sym ass then =@= refl prod_r then id_r))
+	%<- ({x} inve C (avar av_x) (AP x) EE) %.

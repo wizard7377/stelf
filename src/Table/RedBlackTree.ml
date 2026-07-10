@@ -186,8 +186,7 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             | Greater -> del (b, Rightr (a, entry1, z))
             end
       in
-      try del (t, Top)
-      with NotFound -> t
+      try del (t, Top) with NotFound -> t
 
     let insertShadow (dict, ((key, _datum) as entry)) =
       let oldEntry = ref None in

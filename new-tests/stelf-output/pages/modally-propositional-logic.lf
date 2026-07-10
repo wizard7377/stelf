@@ -9,12 +9,12 @@
 %term world1 world %.
 %term succ %pi world %-> world %.
 %% so it doesn't split worlds, which makes the coverage checking output annoying
-%block worldb [w world]%.
+%block worldb {w world}%.
 %worlds (worldb) (world) %.
 %sort acc %.
 %term refl acc W W %.
 %term trans %pi (acc W1 W2) %-> (acc W2 W3) %-> (acc W1 W3) %.
-%block accb {W1 _} {W2 _} [a acc W1 W2]%.
+%block accb [W1 _] [W2 _] {a acc W1 W2}%.
 %worlds (worldb accb) (acc _ _) %.
 %sort prop %.
 %name prop %.
@@ -23,7 +23,7 @@
 %term imp %pi (prop W) %-> (prop W) %-> (prop W) %.
 %term at %pi (prop W') %-> (prop W) %.
 %term down %pi (boxprop W) %-> (prop W) %.
-%block propb {W world} [a prop W]%.
+%block propb [W world] {a prop W}%.
 %worlds (worldb accb propb) (prop _) %.
 %sort hyp %.
 %sort conc %.
@@ -41,8 +41,8 @@
 	%pi (conc C)
 	%<- (hyp (%the (prop W) (down A)))
 	%<- (%pi (hyp (A W refl)) %-> (conc C)) %.
-%block hypb {W _} {A prop W} [x hyp A]%.
-%block prophypb {W _} [a prop W] [h %pi (hyp a) %-> (conc a)]%.
+%block hypb [W _] [A prop W] {x hyp A}%.
+%block prophypb [W _] {a prop W} {h %pi (hyp a) %-> (conc a)}%.
 %worlds (worldb accb prophypb hypb) (hyp _) (conc _) %.
 %sort id {A prop W} %.
 %mode id %in %out %.
@@ -60,7 +60,7 @@
 %% ambipolar: 
 % - : id (at A) ([a] (atL ([x1] atR (E x1)) a))
 %      <- id A E.
-%block idcase {W _} [a prop W] [h %pi (hyp a) %-> (conc a)] [_ id a h]%.
+%block idcase [W _] {a prop W} {h %pi (hyp a) %-> (conc a)} {_ id a h}%.
 %worlds (worldb accb idcase hypb) (id _ _) %.
 %total A (id A _) %.
 %sort ca {A} %.
@@ -106,7 +106,7 @@
 	%pi (ca _ D ([x] impL ([y] E x y) (Arg x) Y) (impL F Arg' Y))
 	%<- ({y} ca _ D ([x] E x y) (F y))
 	%<- (ca _ D ([x] Arg x) Arg') %.
-%block capropb {W _} [a prop W] [init %pi (hyp a) %-> (conc a)] [_ {y hyp a} ca a (init y) init (init y)] [_ {W' world} {A prop W'} {D conc A} {y hyp a} ca A D ([_] init y) (init y)]%.
+%block capropb [W _] {a prop W} {init %pi (hyp a) %-> (conc a)} {_ {y hyp a} ca a (init y) init (init y)} {_ {W' world} {A prop W'} {D conc A} {y hyp a} ca A D ([_] init y) (init y)}%.
 %% FIXME: this shouldn't pass:
 %% propb is not equivalent to prophypb for hyp and conc.
 %% does twelf only check world subsumption on subgoals?

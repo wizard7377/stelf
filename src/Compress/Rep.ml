@@ -9,6 +9,7 @@ open! Reductio
 open! Basis
 
 exception Crap
+
 let () = Printexc.register_printer (function Crap -> Some "Crap" | _ -> None)
 
 module Rep = struct

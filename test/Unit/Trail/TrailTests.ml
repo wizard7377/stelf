@@ -65,7 +65,7 @@ let test_lifo_order () =
   T.unwind (tr, fun n -> order := n :: !order);
   (* unwind calls undo in LIFO order: 3, 2, 1.
      Each call prepends n to order, so the final list is [1; 2; 3]. *)
-  Alcotest.(check (list int)) "LIFO unwind order (prepended)" [1; 2; 3] !order
+  Alcotest.(check (list int)) "LIFO unwind order (prepended)" [ 1; 2; 3 ] !order
 
 let test_no_log_unwind_is_noop () =
   let tr : int T.trail = T.trail () in
@@ -76,12 +76,16 @@ let test_no_log_unwind_is_noop () =
   Alcotest.(check int) "unwind with no logs is a no-op" 42 !x
 
 let suites =
-  [ ( "Trail"
-    , [ Alcotest.test_case "log and unwind" `Quick test_log_unwind
-      ; Alcotest.test_case "multiple logs unwound" `Quick test_multiple_logs_unwind
-      ; Alcotest.test_case "nested marks" `Quick test_nested_marks
-      ; Alcotest.test_case "reset clears trail" `Quick test_reset_clears_trail
-      ; Alcotest.test_case "LIFO unwind order" `Quick test_lifo_order
-      ; Alcotest.test_case "unwind with no logs is noop" `Quick test_no_log_unwind_is_noop
-      ] )
+  [
+    ( "Trail",
+      [
+        Alcotest.test_case "log and unwind" `Quick test_log_unwind;
+        Alcotest.test_case "multiple logs unwound" `Quick
+          test_multiple_logs_unwind;
+        Alcotest.test_case "nested marks" `Quick test_nested_marks;
+        Alcotest.test_case "reset clears trail" `Quick test_reset_clears_trail;
+        Alcotest.test_case "LIFO unwind order" `Quick test_lifo_order;
+        Alcotest.test_case "unwind with no logs is noop" `Quick
+          test_no_log_unwind_is_noop;
+      ] );
   ]

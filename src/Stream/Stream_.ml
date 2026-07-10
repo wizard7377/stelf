@@ -25,9 +25,18 @@ end
 (* equivalent to the plain (non-memoizing) streams, since *)
 (* effects will be executed only once in this implementation *)
 exception Uninitialized
-let () = Printexc.register_printer (function Uninitialized -> Some "Uninitialized" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Uninitialized -> Some "Uninitialized"
+    | _ -> None)
+
 exception EmptyStream
-let () = Printexc.register_printer (function EmptyStream -> Some "EmptyStream" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | EmptyStream -> Some "EmptyStream"
+    | _ -> None)
 
 module BasicMemoStream : BASIC_STREAM = struct
   type 'a stream = Stream of (unit -> 'a front)

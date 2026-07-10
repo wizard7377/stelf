@@ -1,11 +1,12 @@
 ; (include sources.dune)
 
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name names)
  (public_name stelf.names)
  (modules Names_ NAMES)
- (libraries display table global intsyn basis)
+ (libraries display debug table global intsyn basis)
  (flags
   (:standard
    -w

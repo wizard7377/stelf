@@ -1,0 +1,30 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Figure 8 : CPS abstract machine with a control stack 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort cstack %.
+%term cdot cstack %.
+%term ; %pi cstack %-> ccont %-> cstack %.
+%prec %left 10 ; %.
+%sort cstackR {_ croot} {_ ctriv} %.
+%sort cstackE {_ %pi ccont %-> cstack} {_ %pi ccont %-> cexp} {_ ctriv} %.
+%sort cstackC {_ %pi ccont %-> cstack} {_ %pi ccont %-> ccont} {_ %pi ccont %-> cstack} %.
+%mode cstackR %in %out %.
+%mode cstackE %in %in %out %.
+%mode cstackC %in %in %out %.
+%term cstack_klam %pi (cstackR (klam E) A) %<- (cstackE ([k ccont] cdot) E A) %.
+%term cstack_cret_k_init cstackE ([k ccont] cdot) ([k ccont] cret k T) T %.
+%term cstack_cret_k_vlam 
+	%pi (cstackE ([k ccont] Phi k ; (vlam ([v ctriv] E v k))) ([k ccont] cret k T) A)
+	%<- (cstackE Phi (E T) A) %.
+%term cstack_cret_vlam_phi 
+	%pi (cstackE Phi ([k ccont] cret (vlam ([v ctriv] E v k)) T) A)
+	%<- (cstackE Phi (E T) A) %.
+%term cstack_capp 
+	%pi (cstackE Phi ([k ccont] capp (xlam ([x ctriv] klam (E x))) T (C k)) A)
+	%<- (cstackC Phi C Phi')
+	%<- (cstackE Phi' (E T) A) %.
+%term cstack_phi_k cstackC Phi ([k ccont] k) Phi %.
+%term cstack_vlam cstackC Phi ([k ccont] vlam (E k)) ([k ccont] Phi k ; (vlam (E k))) %.
+%name cstackR %.
+%name cstackE %.
+%name cstackC %.

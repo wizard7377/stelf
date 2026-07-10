@@ -1,0 +1,6 @@
+%%%% location typing for terms
+%sort lt %.
+%name lt %.
+%term lt/nil lt %.
+%term lt/cons %pi lt %-> loc %-> cn %-> lt %.
+%worlds () (lt) %.

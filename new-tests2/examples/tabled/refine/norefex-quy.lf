@@ -1,0 +1,7 @@
+% not provable
+%%%%%%%%%%%%%%%%%%%%%%
+% not provable
+%querytabled _ _ %the (check inc (nat => nat)) D %.
+%querytabled _ 5 check test2 nat %.
+%querytabled _ _ check sub' (nat => nat => nat) %.
+%querytabled _ 16 check mult (nat => pos => nat) %.

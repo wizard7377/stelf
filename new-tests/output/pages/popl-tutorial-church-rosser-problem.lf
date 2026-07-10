@@ -24,7 +24,7 @@ context with arbitrary expression variables. This will be the only world we
 will need for this exercise. 
 
 !}%
-%block exps [x exp]%.
+%block exps {x exp}%.
 %{! ## Reduction !}%
 %{! 
 

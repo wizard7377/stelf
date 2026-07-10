@@ -65,7 +65,7 @@ will also add assm_var assumptions.  Hence, we have the following
 block from which to build contexts:
 
 }%
-%block bind {t tp} [x tp] [dv var x] [d assm x t] [thm assm_var d dv]%.
+%block bind [t tp] {x tp} {dv var x} {d assm x t} {thm assm_var d dv}%.
 %{
 
 In addition to the bind block, we have (for highly technical reasons,
@@ -82,8 +82,8 @@ explained later) two other blocks that arise:
    an assm assumption, it must also add a case for assm_var.
 
 }%
-%block vblock [t tp] [d var t]%.
-%block ablock {x tp} {dv var x} {t tp} [d assm x t] [thm assm_var d dv]%.
+%block vblock {t tp} {d var t}%.
+%block ablock [x tp] [dv var x] [t tp] {d assm x t} {thm assm_var d dv}%.
 %{
 
 Assm_var is true in any context made up from bind, vblock, and ablock
@@ -308,8 +308,8 @@ never calls trans, we needn't bother to maintain trans's invariants.
 }%
 %sort reflx {T} %.
 %mode reflx %in %out %.
-%block rblock {t tp} [x tp] [d assm x t] [thm reflx x (sub_refl d)]%.
-%block rbind {t tp} [x tp] [dv var x] [d assm x t] [thm assm_var d dv] [thm' reflx x (sub_refl d)]%.
+%block rblock [t tp] {x tp} {d assm x t} {thm reflx x (sub_refl d)}%.
+%block rbind [t tp] {x tp} {dv var x} {d assm x t} {thm assm_var d dv} {thm' reflx x (sub_refl d)}%.
 %term _ reflx top sub_top %.
 %term _ 
 	%pi (reflx (arrow T1 T2) (sub_arrow T2refl T1refl))
@@ -334,7 +334,7 @@ never calls trans, we needn't bother to maintain trans's invariants.
 %%%%%  Correctness of the algorithm  %%%%%
 %sort assm_to_subtype %.
 %mode assm_to_subtype %in %out %.
-%block sbind {t tp} [x tp] [d assm x t] [d' subtype x t] [thm assm_to_subtype d d']%.
+%block sbind [t tp] {x tp} {d assm x t} {d' subtype x t} {thm assm_to_subtype d d'}%.
 %worlds (sbind) (assm_to_subtype _ _) %.
 %total {} (assm_to_subtype _ _) %.
 %sort soundness %.
@@ -357,7 +357,7 @@ never calls trans, we needn't bother to maintain trans's invariants.
 %total (D) (soundness D _) %.
 %sort completeness %.
 %mode completeness %in %out %.
-%block cbind {t tp} {d_refl sub t t} [x tp] [dv var x] [d assm x t] [thm1 assm_var d dv] [thm2 reflx x (sub_refl d)] [d' subtype x t] [thm3 completeness d' (sub_trans d_refl d)]%.
+%block cbind [t tp] [d_refl sub t t] {x tp} {dv var x} {d assm x t} {thm1 assm_var d dv} {thm2 reflx x (sub_refl d)} {d' subtype x t} {thm3 completeness d' (sub_trans d_refl d)}%.
 %term _ completeness subtype_top sub_top %.
 %term _ %pi (completeness subtype_refl D) %<- (reflx _ D) %.
 %term _ 

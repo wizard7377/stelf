@@ -1,0 +1,533 @@
+%%%%%  Expansion Effectiveness/Functionality  %%%%%
+%sort can-expand* {T} {R atom} {A tp} {_ simp A T} {M term} {_ expand R A M} %.
+%mode can-expand* %in %in %in %in %out %out %.
+%term _ can-expand* _ R t simp/t (at R) expand/t %.
+%term _ 
+	%pi (can-expand* _ R (pi A B) (simp/pi Dsimp2 Dsimp1) (lam N) (expand/pi Dexpand2 Dexpand1))
+	%<- ({x} can-expand* _ x A Dsimp1 (M x) (Dexpand1 x))
+	%<- ({x} can-expand* _ (app R (M x)) (B x) (Dsimp2 x) (N x) (Dexpand2 x)) %.
+%term _ 
+	%pi (can-expand* _ R (sigma A B) (simp/sigma Dsimp2 Dsimp1) (pair M N) (expand/sigma Dexpand2 Dexpand1))
+	%<- (can-expand* _ (pi1 R) A Dsimp1 M Dexpand1)
+	%<- (can-expand* _ (pi2 R) (B (pi1 R)) (Dsimp2 (pi1 R)) N Dexpand2) %.
+%term _ can-expand* _ R (sing R') simp/sing (at R') expand/sing %.
+%worlds (var bind) (can-expand* T _ _ _ _ _) %.
+%total T (can-expand* T _ _ _ _ _) %.
+%sort can-expand {R atom} {A tp} {M term} {_ expand R A M} %.
+%mode can-expand %in %in %out %out %.
+%term _ %pi (can-expand R A M D) %<- (can-simp A Dsimp) %<- (can-expand* _ R A Dsimp M D) %.
+%worlds (var bind) (can-expand _ _ _ _) %.
+%total {} (can-expand _ _ _ _) %.
+%sort expand-fun {_ expand R A M} {_ expand R A M'} {_ term-eq M M'} %.
+%mode expand-fun %in %in %out %.
+%term _ expand-fun expand/t expand/t term-eq/i %.
+%term _ 
+	%pi (expand-fun (expand/pi Dexpand2 Dexpand1) (expand/pi Dexpand2' Dexpand1') Deq)
+	%<- ({x} expand-fun (Dexpand1 x) (Dexpand1' x) (Deq1 x))
+	%<- ({x} atom-resp-term ([m] app R m) (Deq1 x) (Deq1' x))
+	%<- ({x} expand-resp (Deq1' x) tp-eq/i term-eq/i (Dexpand2 x) (Dexpand2'' x))
+	%<- ({x} expand-fun (Dexpand2'' x) (Dexpand2' x) (Deq2 x))
+	%<- (lam-resp Deq2 Deq) %.
+%term _ 
+	%pi (expand-fun (expand/sigma Dexpand2 Dexpand1) (expand/sigma Dexpand2' Dexpand1') Deq)
+	%<- (expand-fun Dexpand1 Dexpand1' Deq1)
+	%<- (expand-fun Dexpand2 Dexpand2' Deq2)
+	%<- (pair-resp Deq1 Deq2 Deq) %.
+%term _ expand-fun expand/sing expand/sing term-eq/i %.
+%worlds (var bind) (expand-fun _ _ _) %.
+%total D (expand-fun _ D _) %.
+%sort expand-t-invert {_ expand R t M} {_ term-eq M (at R)} %.
+%mode expand-t-invert %in %out %.
+%term _ expand-t-invert expand/t term-eq/i %.
+%worlds (var) (expand-t-invert _ _) %.
+%total {} (expand-t-invert _ _) %.
+%sort expand-pi-invert {_ expand R (pi A B) (lam M)} {_ {x} expand x A (X x)} {_ {x} expand (app R (X x)) (B x) (M x)} %.
+%mode expand-pi-invert %in %out %out %.
+%term _ expand-pi-invert (expand/pi D2 D1) D1 D2 %.
+%worlds (var) (expand-pi-invert _ _ _) %.
+%total {} (expand-pi-invert _ _ _) %.
+%sort expand-sigma-invert {_ expand R (sigma A B) (pair M N)} {_ expand (pi1 R) A M} {_ expand (pi2 R) (B (pi1 R)) N} %.
+%mode expand-sigma-invert %in %out %out %.
+%term _ expand-sigma-invert (expand/sigma D2 D1) D1 D2 %.
+%worlds (var) (expand-sigma-invert _ _ _) %.
+%total {} (expand-sigma-invert _ _ _) %.
+%%%%%  Expansion (Explicit Context)  %%%%%
+%sort expand-reg-em {Ncase} {T} {_ nat-eq Ncase 0} {_ simp A T} {_ aofe G R A} {_ expand R A M} {_ ofe G M A} %.
+%mode expand-reg-em %in %in %in %in %in %in %out %.
+%sort expand-aasub-em {Ncase} {T} {_ nat-eq Ncase (s 0)} {_ {x} simp (B x) T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ ofe G1 M A} {_ {x} %pi (isvar x I) %-> (aofe (G x) (R x) (B x))} {_ {x} expand (R x) (B x) (N x)} {_ aasub ([x] R x) M Rx} {_ tsub ([x] B x) M Ax} {_ expand Rx Ax N'} {_ sub N M N'} %.
+%mode expand-aasub-em %in %in %in %in %in %in %in %in %in %in %in %out %.
+%sort expand-aosub-em {Ncase} {T} {_ nat-eq Ncase (s (s 0))} {_ {x} simp (B x) T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ csub G M Gx} {_ ofe G1 M A} {_ {x} %pi (isvar x I) %-> (aofe (G x) (R x) (B x))} {_ {x} expand (R x) (B x) (N x)} {_ aosub ([x] R x) M LRx} {_ sub N M LRx} %.
+%mode expand-aosub-em %in %in %in %in %in %in %in %in %in %in %out %.
+%sort aasub-expand-em {Ncase} {T} {_ nat-eq Ncase (s (s (s 0)))} {_ simp A T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ aofe G1 R A} {_ {x} %pi (isvar x I) %-> (aofe (G x) (Q x) (B x))} {_ expand R A XR} {_ aasub Q XR Q'} {_ atom-eq Q' (Q R)} %.
+%mode aasub-expand-em %in %in %in %in %in %in %in %in %in %out %.
+%sort aosub-expand-em {Ncase} {T} {_ nat-eq Ncase (s (s (s 0)))} {_ simp A T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ aofe G1 R A} {_ {x} %pi (isvar x I) %-> (aofe (G x) (Q x) (B x))} {_ expand R A XR} {_ aosub Q XR LQx} {_ expand (Q R) (B R) LQx} %.
+%mode aosub-expand-em %in %in %in %in %in %in %in %in %in %out %.
+%sort sub-expand-em {Ncase} {T} {_ nat-eq Ncase (s (s (s 0)))} {_ simp A T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ aofe G1 R A} {_ {x} %pi (isvar x I) %-> (ofe (G x) (M x) (B x))} {_ expand R A XR} {_ sub M XR M'} {_ term-eq M' (M R)} %.
+%mode sub-expand-em %in %in %in %in %in %in %in %in %in %out %.
+%sort tsub-expand-em {Ncase} {T} {_ nat-eq Ncase (s (s (s 0)))} {_ simp A T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ aofe G1 R A} {_ {x} %pi (isvar x I) %-> (wfe (G x) (B x))} {_ expand R A XR} {_ tsub B XR B'} {_ tp-eq B' (B R)} %.
+%mode tsub-expand-em %in %in %in %in %in %in %in %in %in %out %.
+%sort tsub-expand-var-em {Ncase} {T} {_ nat-eq Ncase (s (s (s (s 0))))} {_ simp A T} {_ wfe G A} {_ {x} %pi (isvar x I) %-> (wfe (cons G x A) (B x))} {_ {x} expand x A (X x)} {_ {x} tsub ([x] B x) (X x) (B x)} %.
+%mode tsub-expand-var-em %in %in %in %in %in %in %in %out %.
+%sort sub-expand-var-em {Ncase} {T} {_ nat-eq Ncase (s (s (s (s 0))))} {_ simp A T} {_ wfe G A} {_ {x} %pi (isvar x I) %-> (ofe (cons G x A) (M x) (B x))} {_ {x} expand x A (X x)} {_ {x} sub ([x] M x) (X x) (M x)} %.
+%mode sub-expand-var-em %in %in %in %in %in %in %in %out %.
+%scope sub-expand-var-em %term t expand-reg-em _ _ _ _ Daof expand/t (ofe/at Daof) %.
+%term pi 
+	%pi (expand-reg-em _ _ nat-eq/i (simp/pi (%the ({x} simp (B x) T) DsimpB) (%the (simp A S) DsimpA)) (%the (aofe G R (pi A B)) DofR) (expand/pi (%the ({x} expand (app R (M x)) (B x) (N x)) Dexpand2) (%the ({x} expand x A (M x)) Dexpand1)) (ofe/lam DofN DwfA))
+	%<- (aofe-reg DofR (wfe/pi (%the ({x} %pi (isvar x I) %-> (wfe (cons G x A) (B x))) DwfB) (%the (wfe G A) DwfA)))
+	%<- ({x} {d isvar x I} wfe-context (DwfB x d) (ordered/cons (%the (bounded G x) (Dbounded x d))))
+	%<- ({x} {d isvar x I} weaken-wfe (Dbounded x d) DwfA _ (%the (wfe (cons G x A) A) (DwfA' x d)))
+	%<- ({x} {d isvar x I} weaken-aofe (Dbounded x d) DofR _ (%the (aofe (cons G x A) R (pi A B)) (DofR' x d)))
+	%<- ({x} {d isvar x I} expand-reg-em _ _ nat-eq/i DsimpA (aofe/var (DwfA' x d) (lookup/hit (Dbounded x d))) (Dexpand1 x) (%the (ofe (cons G x A) (M x) A) (DofM x d)))
+	%<- (weaken-wfe-insert1 DwfB Dbounded _ (%the ({x} %pi (isvar x I) %-> ({y} %pi (isvar y J) %-> (wfe (cons (cons G x A) y A) (B y)))) DwfB'))
+	%<- (can-tsub-context-e DofM DwfB (%the ({x} tsub B (M x) (B' x)) Dtsub))
+	%<- ({x} {d isvar x I} tsub-expand-em _ _ nat-eq/i DsimpA ([_] append/nil) (aofe/var (DwfA' x d) (lookup/hit (Dbounded x d))) (DwfB' x d) (Dexpand1 x) (Dtsub x) (%the (tp-eq (B' x) (B x)) (Deq x)))
+	%<- ({x} tsub-resp ([_] tp-eq/i) term-eq/i (Deq x) (Dtsub x) (%the (tsub B (M x) (B x)) (Dtsub' x)))
+	%<- ({x} {d isvar x I} expand-reg-em _ _ nat-eq/i (DsimpB x) (aofe/app (DwfB x d) (Dtsub' x) (DofM x d) (DofR' x d)) (Dexpand2 x) (%the (ofe (cons G x A) (N x) (B x)) (DofN x d))) %.
+%scope sub-expand-var-em %term sigma 
+	%pi (expand-reg-em _ _ nat-eq/i (simp/sigma (%the ({x} simp (B x) T) DsimpB) (%the (simp A S) DsimpA)) (%the (aofe G R (sigma A B)) DofR) (expand/sigma (%the (expand (pi2 R) (B (pi1 R)) N) Dexpand2) (%the (expand (pi1 R) A M) Dexpand1)) (ofe/pair DwfB DofN DsubBx' DofM))
+	%<- (aofe-reg DofR (wfe/sigma (%the ({x} %pi (isvar x I) %-> (wfe (cons G x A) (B x))) DwfB) (%the (wfe G A) DwfA)))
+	%<- (expand-reg-em _ _ nat-eq/i DsimpA (aofe/pi1 DofR) Dexpand1 (%the (ofe G M A) DofM))
+	%<- (can-tsub-e ([_] append/nil) DwfB DofM (%the (tsub B M Bx) DsubBx))
+	%<- (tsub-expand-em _ _ nat-eq/i DsimpA ([_] append/nil) (aofe/pi1 DofR) DwfB Dexpand1 DsubBx (%the (tp-eq Bx (B (pi1 R))) Deq))
+	%<- (tsub-resp ([_] tp-eq/i) term-eq/i Deq DsubBx (%the (tsub B M (B (pi1 R))) DsubBx'))
+	%<- (expand-reg-em _ _ nat-eq/i (DsimpB (pi1 R)) (aofe/pi2 DofR) Dexpand2 (%the (ofe G N (B (pi1 R))) DofN)) %.
+%term sing 
+	%pi (expand-reg-em _ _ _ _ (%the (aofe G R (sing R')) DofR) expand/sing (ofe/sing DofR'))
+	%<- (aofe-reg DofR (wfe/sing (%the (aofe G R' t) DofR'))) %.
+%%%
+%scope sub-expand-var-em %term t expand-aasub-em _ _ _ _ _ _ _ ([_] expand/t) Dsub tsub/t expand/t (sub/aa Dsub) %.
+%term pi 
+	%pi (expand-aasub-em _ _ nat-eq/i ([x] simp/pi (%the ({y} simp (C x y) T) (DsimpC x)) (%the (simp (B x) S) (DsimpB x))) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (pi (B x) ([y] C x y)))) DofR) ([x] %the (expand (R x) (pi (B x) ([y] C x y)) (lam ([y] N x y))) (expand/pi (%the ({y} expand (app (R x) (Y x y)) (C x y) (N x y)) (DexpandRY x)) (%the ({y} expand y (B x) (Y x y)) (DexpandY x)))) (%the (aasub ([x] R x) M Rx) DsubRx) (%the (tsub ([x] pi (B x) ([y] C x y)) M (pi Bx ([y] Cx y))) (tsub/pi (%the ({y} tsub ([x] C x y) M (Cx y)) DtsubC) (%the (tsub ([x] B x) M Bx) DtsubB))) (%the (expand Rx (pi Bx ([y] Cx y)) (lam ([y] N' y))) (expand/pi (%the ({y} expand (app Rx (Y' y)) (Cx y) (N' y)) DexpandRY') (%the ({y} expand y Bx (Y' y)) DexpandY'))) (sub/lam DsubRYx))
+	%<- ({x} {d isvar x I} aofe-reg (DofR x d) (wfe/pi (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} wfe-context (DwfC x d y e) (ordered/cons (%the (bounded (G x) y) (Dbounded x d y e))))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} weaken-aofe (Dbounded x d y e) (DofR x d) _ (%the (aofe (cons (G x) y (B x)) (R x) (pi (B x) ([y] C x y))) (DofR' x d y e)))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} weaken-wfe (Dbounded x d y e) (DwfB x d) _ (%the (wfe (cons (G x) y (B x)) (B x)) (DwfB' x d y e)))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} expand-reg-em _ _ nat-eq/i (DsimpB x) (aofe/var (DwfB' x d y e) (lookup/hit (Dbounded x d y e))) (DexpandY x y) (%the (ofe (cons (G x) y (B x)) (Y x y) (B x)) (DofY x d y e)))
+	%<- ({y} aasub-absent y M (%the (aasub ([x] y) M y) (Dsuby y)))
+	%<- ({y} {e isvar y J} expand-aasub-em _ _ nat-eq/i ([x] DsimpB x) ([x] append/cons (Dappend x)) DofM ([x] [d] aofe/var (DwfB' x d y e) (lookup/hit (Dbounded x d y e))) ([x] DexpandY x y) (Dsuby y) DtsubB (DexpandY' y) (%the (sub ([x] Y x y) M (Y' y)) (DsubYx y)))
+	%<- ({x} {d isvar x I} tsub-expand-var-em _ _ nat-eq/i (DsimpB x) (DwfB x d) ([y] [e] DwfC x d y e) (DexpandY x) (%the ({y} tsub ([y] C x y) (Y x y) (C x y)) (DsubCy x)))
+	%<- ({y} {e isvar y J} expand-aasub-em _ _ nat-eq/i ([x] DsimpC x y) ([x] append/cons (Dappend x)) DofM ([x] [d] aofe/app (DwfC x d y e) (DsubCy x y) (DofY x d y e) (DofR' x d y e)) ([x] DexpandRY x y) (aasub/app (DsubYx y) DsubRx) (DtsubC y) (DexpandRY' y) (%the (sub ([x] N x y) M (N' y)) (DsubRYx y))) %.
+%scope sub-expand-var-em %term sigma 
+	%pi (expand-aasub-em _ _ nat-eq/i ([x] simp/sigma (%the ({y} simp (C x y) T) (DsimpC x)) (%the (simp (B x) S) (DsimpB x))) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (sigma (B x) ([y] C x y)))) DofR) ([x] %the (expand (R x) (sigma (B x) ([y] C x y)) (pair (N1 x) (N2 x))) (expand/sigma (%the (expand (pi2 (R x)) (C x (pi1 (R x))) (N2 x)) (DexpandR2 x)) (%the (expand (pi1 (R x)) (B x) (N1 x)) (DexpandR1 x)))) (%the (aasub ([x] R x) M Rx) DsubRx) (%the (tsub ([x] sigma (B x) ([y] C x y)) M (sigma Bx ([y] Cx y))) (tsub/sigma (%the ({y} tsub ([x] C x y) M (Cx y)) DtsubC) (%the (tsub ([x] B x) M Bx) DtsubB))) (%the (expand Rx (sigma Bx ([y] Cx y)) (pair N1' N2')) (expand/sigma (%the (expand (pi2 Rx) (Cx (pi1 Rx)) N2') DexpandR2') (%the (expand (pi1 Rx) Bx N1') DexpandR1'))) (sub/pair DsubN2x DsubN1x))
+	%<- ({x} {d isvar x I} aofe-reg (DofR x d) (wfe/sigma (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} wfe-context (DwfC x d y e) (ordered/cons (%the (bounded (G x) y) (Dbounded x d y e))))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} weaken-aofe (Dbounded x d y e) (DofR x d) _ (%the (aofe (cons (G x) y (B x)) (R x) (sigma (B x) ([y] C x y))) (DofR' x d y e)))
+	%<- (expand-aasub-em _ _ nat-eq/i ([x] DsimpB x) Dappend DofM ([x] [d] aofe/pi1 (DofR x d)) DexpandR1 (aasub/pi1 DsubRx) DtsubB DexpandR1' (%the (sub ([x] N1 x) M N1') DsubN1x))
+	%<- ({x} {d isvar x I} stsubst-e ([_] append/nil) append/nil ([y] [e] DwfC x d y e) (aofe/pi1 (DofR x d)) (%the (wfe (G x) (C x (pi1 (R x)))) (DwfCy x d)))
+	%<- (can-tsub-e Dappend DwfCy DofM (%the (tsub ([x] C x (pi1 (R x))) M Cyx) DtsubCyx))
+	%<- (stsub-aa-permute-e Dappend DofM ([x] [d] aofe/pi1 (DofR x d)) ([x] [d] [y] [e] DwfC x d y e) DtsubC (aasub/pi1 DsubRx) DtsubCyx (%the (tp-eq (Cx (pi1 Rx)) Cyx) DeqC))
+	%<- (tp-eq-symm DeqC (%the (tp-eq Cyx (Cx (pi1 Rx))) DeqC'))
+	%<- (tsub-resp ([_] tp-eq/i) term-eq/i DeqC' DtsubCyx (%the (tsub ([x] C x (pi1 (R x))) M (Cx (pi1 Rx))) DtsubCyx'))
+	%<- (expand-aasub-em _ _ nat-eq/i ([x] DsimpC x _) Dappend DofM ([x] [d] aofe/pi2 (DofR x d)) DexpandR2 (aasub/pi2 DsubRx) DtsubCyx' DexpandR2' (%the (sub ([x] N2 x) M N2') DsubN2x)) %.
+%term sing expand-aasub-em _ _ _ _ _ _ _ ([_] expand/sing) _ (tsub/singa Dsub) expand/sing (sub/aa Dsub) %.
+%scope sub-expand-var-em %term sing expand-aasub-em _ _ _ _ _ _ _ ([_] expand/sing) _ (tsub/singo Dsub) expand/sing (sub/ao Dsub) %.
+%term t expand-aosub-em _ _ _ _ _ _ _ _ ([x] expand/t) Daosub (sub/ao Daosub) %.
+%%%
+%scope sub-expand-var-em %term pi 
+	%pi (expand-aosub-em _ _ nat-eq/i ([x] simp/pi (%the ({y} simp (C x y) T) (DsimpC x)) (%the (simp (B x) S) (DsimpB x))) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (pi (B x) ([y] C x y)))) DofR) ([x] %the (expand (R x) (pi (B x) ([y] C x y)) (lam ([y] O x y))) (expand/pi (%the ({y} expand (app (R x) (N x y)) (C x y) (O x y)) (Dexpand2 x)) (%the ({y} expand y (B x) (N x y)) (Dexpand1 x)))) (%the (aosub ([x] R x) M (lam ([y] P y))) Daosub) (sub/lam Dsub))
+	%<- ({x} {d isvar x I} aofe-reg (DofR x d) (wfe/pi (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} wfe-context (DwfC x d y e) (ordered/cons (%the (bounded (G x) y) (Dbounded x d y e))))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} weaken-wfe (Dbounded x d y e) (DwfB x d) _ (%the (wfe (cons (G x) y (B x)) (B x)) (DwfB' x d y e)))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} weaken-aofe (Dbounded x d y e) (DofR x d) _ (%the (aofe (cons (G x) y (B x)) (R x) (pi (B x) ([y] C x y))) (DofR' x d y e)))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} expand-reg-em _ _ nat-eq/i (DsimpB x) (aofe/var (DwfB' x d y e) (lookup/hit (Dbounded x d y e))) (Dexpand1 x y) (%the (ofe (cons (G x) y (B x)) (N x y) (B x)) (DofN x d y e)))
+	%<- ({x} {d isvar x I} weaken-wfe-insert1 ([y] [e] DwfC x d y e) (Dbounded x d) _ (%the ({y} 
+	%pi (isvar y J)
+	%-> ({z} %pi (isvar z K) %-> (wfe (cons (cons (G x) y (B x)) z (B x)) (C x z)))) (DwfC' x d)))
+	%<- ({x} {d isvar x I} can-tsub-context-e ([y] [e] DofN x d y e) ([y] [e] DwfC x d y e) (%the ({y} tsub ([y] C x y) (N x y) (C' x y)) (Dtsub x)))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} tsub-expand-em _ _ nat-eq/i (DsimpB x) ([_] append/nil) (aofe/var (DwfB' x d y e) (lookup/hit (Dbounded x d y e))) ([z] [f] DwfC' x d y e z f) (Dexpand1 x y) (Dtsub x y) (%the (tp-eq (C' x y) (C x y)) (Deq x y)))
+	%<- ({x} {y} tsub-resp ([_] tp-eq/i) term-eq/i (Deq x y) (Dtsub x y) (%the (tsub ([y] C x y) (N x y) (C x y)) (Dtsub' x y)))
+	%<- (can-tsub-e Dappend DwfB DofM (%the (tsub ([x] B x) M Bx) DsubBx))
+	%<- ({y} {e isvar y J} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- ({y} can-expand y Bx (Nx y) (%the (expand y Bx (Nx y)) (Dexpand1' y)))
+	%<- ({y} {e isvar y J} expand-aasub-em _ _ nat-eq/i DsimpB ([x] append/cons (Dappend x)) DofM ([x] [d] aofe/var (DwfB' x d y e) (lookup/hit (Dbounded x d y e))) ([x] Dexpand1 x y) aasub/closed DsubBx (Dexpand1' y) (%the (sub ([x] N x y) M (Nx y)) (DsubNx y)))
+	%<- (tsubst-e Dappend Dcsub DofM DsubBx DwfB (%the (wfe Gx Bx) DwfBx))
+	%<- (aosubst-e Dappend Dcsub DofM Daosub (tsub/pi DsubCx DsubBx) DofR (ofe/lam (%the ({y} %pi (isvar y J') %-> (ofe (cons Gx y Bx) (P y) (Cx y))) DofP) _))
+	%<- (tsub-preserves-simp DsubBx DsimpB DsimpBx)
+	%<- (sub-expand-var-em _ _ nat-eq/i DsimpBx DwfBx DofP Dexpand1' (%the ({y} sub ([y] P y) (Nx y) (P y)) DsubPy))
+	%<- ({y} {e isvar y J} expand-aosub-em _ _ nat-eq/i ([x] DsimpC x y) ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) DofM ([x] [d] aofe/app (DwfC x d y e) (Dtsub' x y) (DofN x d y e) (DofR' x d y e)) ([x] Dexpand2 x y) (%the (aosub ([x] app (R x) (N x y)) M (P y)) (aosub/app (DsubPy y) (DsubNx y) Daosub)) (%the (sub ([x] O x y) M (P y)) (Dsub y))) %.
+%term pibad 
+	%pi (expand-aosub-em _ _ _ _ (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (pi (B x) ([y] C x y)))) DofR) _ (%the (aosub ([x] R x) M (at Q)) Daosub) Dsub)
+	%<- ({x} {d isvar x I} aofe-reg (DofR x d) (%the (wfe (G x) (pi (B x) ([y] C x y))) (Dwf x d)))
+	%<- (can-tsub-e Dappend Dwf DofM (%the (tsub ([x] pi (B x) ([y] C x y)) M (pi Bx ([y] Cx y))) Dtsub))
+	%<- (aosubst-e Dappend Dcsub DofM Daosub Dtsub DofR (%the (ofe Gx (at Q) (pi Bx Cx)) Dof))
+	%<- (ofe-at-pi-contra Dof Dfalse)
+	%<- (false-implies-sub Dfalse Dsub) %.
+%scope sub-expand-var-em %term pibad 
+	%pi (expand-aosub-em _ _ _ _ (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (pi (B x) ([y] C x y)))) DofR) _ (%the (aosub ([x] R x) M (pair P1 P2)) Daosub) Dsub)
+	%<- ({x} {d isvar x I} aofe-reg (DofR x d) (%the (wfe (G x) (pi (B x) ([y] C x y))) (Dwf x d)))
+	%<- (can-tsub-e Dappend Dwf DofM (%the (tsub ([x] pi (B x) ([y] C x y)) M (pi Bx ([y] Cx y))) Dtsub))
+	%<- (aosubst-e Dappend Dcsub DofM Daosub Dtsub DofR (%the (ofe Gx (pair P1 P2) (pi Bx Cx)) Dof))
+	%<- (ofe-pair-pi-contra Dof Dfalse)
+	%<- (false-implies-sub Dfalse Dsub) %.
+%term sigma 
+	%pi (expand-aosub-em _ _ nat-eq/i ([x] simp/sigma (%the ({y} simp (C x y) T) (DsimpC x)) (%the (simp (B x) S) (DsimpB x))) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (sigma (B x) ([y] C x y)))) DofR) ([x] %the (expand (R x) (sigma (B x) ([y] C x y)) (pair (N1 x) (N2 x))) (expand/sigma (%the (expand (pi2 (R x)) (C x (pi1 (R x))) (N2 x)) (Dexpand2 x)) (%the (expand (pi1 (R x)) (B x) (N1 x)) (Dexpand1 x)))) (%the (aosub ([x] R x) M (pair P1 P2)) Daosub) (sub/pair Dsub2 Dsub1))
+	%<- (expand-aosub-em _ _ nat-eq/i DsimpB Dappend Dcsub DofM ([x] [d] aofe/pi1 (DofR x d)) Dexpand1 (aosub/pi1 Daosub) (%the (sub N1 M P1) Dsub1))
+	%<- (expand-aosub-em _ _ nat-eq/i ([x] DsimpC x _) Dappend Dcsub DofM ([x] [d] aofe/pi2 (DofR x d)) Dexpand2 (aosub/pi2 Daosub) (%the (sub N2 M P2) Dsub2)) %.
+%scope sub-expand-var-em %term sigmab 
+	%pi (expand-aosub-em _ _ _ _ (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (sigma (B x) ([y] C x y)))) DofR) _ (%the (aosub ([x] R x) M (at Q)) Daosub) Dsub)
+	%<- ({x} {d isvar x I} aofe-reg (DofR x d) (%the (wfe (G x) (sigma (B x) ([y] C x y))) (Dwf x d)))
+	%<- (can-tsub-e Dappend Dwf DofM (%the (tsub ([x] sigma (B x) ([y] C x y)) M (sigma Bx ([y] Cx y))) Dtsub))
+	%<- (aosubst-e Dappend Dcsub DofM Daosub Dtsub DofR (%the (ofe Gx (at Q) (sigma Bx Cx)) Dof))
+	%<- (ofe-at-sigma-contra Dof Dfalse)
+	%<- (false-implies-sub Dfalse Dsub) %.
+%term sigmab 
+	%pi (expand-aosub-em _ _ _ _ (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (sigma (B x) ([y] C x y)))) DofR) _ (%the (aosub ([x] R x) M (lam P)) Daosub) Dsub)
+	%<- ({x} {d isvar x I} aofe-reg (DofR x d) (%the (wfe (G x) (sigma (B x) ([y] C x y))) (Dwf x d)))
+	%<- (can-tsub-e Dappend Dwf DofM (%the (tsub ([x] sigma (B x) ([y] C x y)) M (sigma Bx ([y] Cx y))) Dtsub))
+	%<- (aosubst-e Dappend Dcsub DofM Daosub Dtsub DofR (%the (ofe Gx (lam P) (sigma Bx Cx)) Dof))
+	%<- (ofe-lam-sigma-contra Dof Dfalse)
+	%<- (false-implies-sub Dfalse Dsub) %.
+%scope sub-expand-var-em %term sing 
+	%pi (expand-aosub-em _ _ _ _ (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) (%the (ofe G1 M A) DofM) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (R x) (sing (R' x)))) DofR) ([x] %the (expand (R x) (sing (R' x)) (at (R' x))) expand/sing) (%the (aosub R M N) Daosub) Dsub')
+	%<- ({x} {d isvar x I} aofe-reg (DofR x d) (wfe/sing (%the (aofe (G x) (R' x) t) (DofR' x d))))
+	%<- (can-tsub-e Dappend ([x] [d] wfe/sing (DofR' x d)) DofM (%the (tsub ([x] sing (R' x)) M (sing R'')) Dtsub))
+	%<- (tsub-sing-sub-at Dtsub (%the (sub ([x] at (R' x)) M (at R'')) Dsub))
+	%<- (aosubst-e Dappend Dcsub DofM Daosub Dtsub DofR (%the (ofe Gx N (sing R'')) DofN))
+	%<- (ofe-invert-sing DofN (%the (term-eq N (at R'')) Deq))
+	%<- (term-eq-symm Deq (%the (term-eq (at R'') N) Deq'))
+	%<- (sub-resp ([_] term-eq/i) term-eq/i Deq' Dsub (%the (sub ([x] at (R' x)) M N) Dsub')) %.
+%term closed aasub-expand-em _ _ _ _ _ _ _ _ aasub/closed atom-eq/i %.
+%%%
+%scope sub-expand-var-em %term forall 
+	%pi (aasub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (forall (B x)) _)) DaofeQuant) (%the (expand R A XR) DexpandR) (aasub/forall (%the (tsub B XR Bx) DsubBx)) Deq')
+	%<- ({x} {d} aofe-invert-forall (DaofeQuant x d) (%the (wfe (G x) (B x)) (Dwf x d)) (DeqT x))
+	%<- (tsub-expand-em _ _ nat-eq/i Dsimp Dappend DofR Dwf DexpandR DsubBx Deq)
+	%<- (atom-resp-tp forall Deq Deq') %.
+%term app 
+	%pi (aasub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (app (Q x) (M x)) (Cy x))) DaofeApp) (%the (expand R A XR) DexpandR) (aasub/app (%the (sub M XR Mx) DsubMx) (%the (aasub Q XR Qx) DsubQx)) Deq)
+	%<- ({x} {d isvar x I} aofe-invert-app (DaofeApp x d) (%the (aofe (G x) (Q x) (pi (B x) ([y] C x y))) (DofQ x d)) (%the (ofe (G x) (M x) (B x)) (DofM x d)) (%the (tsub ([y] C x y) (M x) (Cy x)) (DsubCy x)))
+	%<- (aasub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubQx (%the (atom-eq Qx (Q R)) DeqQ))
+	%<- (sub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofM DexpandR DsubMx (%the (term-eq Mx (M R)) DeqM))
+	%<- (atom-resp-atom ([r] app r Mx) DeqQ (%the (atom-eq (app Qx Mx) (app (Q R) Mx)) Deq1))
+	%<- (atom-resp-term ([m] app (Q R) m) DeqM (%the (atom-eq (app (Q R) Mx) (app (Q R) (M R))) Deq2))
+	%<- (atom-eq-trans Deq1 Deq2 (%the (atom-eq (app Qx Mx) (app (Q R) (M R))) Deq)) %.
+%scope sub-expand-var-em %term pi1 
+	%pi (aasub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (pi1 (Q x)) (B x))) DaofeProj) (%the (expand R A XR) DexpandR) (aasub/pi1 (%the (aasub Q XR Qx) DsubQx)) Deq)
+	%<- ({x} {d isvar x I} aofe-invert-pi1 (DaofeProj x d) (%the (aofe (G x) (Q x) (sigma (B x) ([y] C x y))) (DofQ x d)))
+	%<- (aasub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubQx (%the (atom-eq Qx (Q R)) DeqQ))
+	%<- (atom-resp-atom pi1 DeqQ (%the (atom-eq (pi1 Qx) (pi1 (Q R))) Deq)) %.
+%term pi2 
+	%pi (aasub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (pi2 (Q x)) (Cy x))) DaofeProj) (%the (expand R A XR) DexpandR) (aasub/pi2 (%the (aasub Q XR Qx) DsubQx)) Deq)
+	%<- ({x} {d isvar x I} aofe-invert-pi2 (DaofeProj x d) (%the (aofe (G x) (Q x) (sigma (B x) ([y] C x y))) (DofQ x d)) (%the (tp-eq (Cy x) (C x (pi1 (Q x)))) (DeqCy x)))
+	%<- (aasub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubQx (%the (atom-eq Qx (Q R)) DeqQ))
+	%<- (atom-resp-atom pi2 DeqQ (%the (atom-eq (pi2 Qx) (pi2 (Q R))) Deq)) %.
+%%%
+%scope sub-expand-var-em %term var 
+	%pi (aosub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (aofe (G x) x (B x))) DaofeVar) (%the (expand R A XR) DexpandR) aosub/var DexpandR')
+	%<- (aofe-invert-var DaofeVar (%the ({x} %pi (isvar x I) %-> (lookup (G x) x (B x))) Dlookup))
+	%<- ({x} {d isvar x I} lookup-binder-fun (Dappend x) (Dlookup x d) (%the (tp-eq A (B x)) (Deq x)))
+	%<- (expand-resp atom-eq/i (Deq R) term-eq/i DexpandR (%the (expand R (B R) XR) DexpandR')) %.
+%term app 
+	%pi (aosub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (app (Q x) (M x)) (Cy x))) DaofeApp) (%the (expand R A XR) DexpandR) (aosub/app (%the (sub P Mx Py) DsubPy) (%the (sub M XR Mx) DsubMx) (%the (aosub Q XR (lam ([y] P y))) DsubP)) Dexpand')
+	%<- ({x} {d isvar x I} aofe-invert-app (DaofeApp x d) (%the (aofe (G x) (Q x) (pi (B x) ([y] C x y))) (DofQ x d)) (%the (ofe (G x) (M x) (B x)) (DofM x d)) (%the (tsub ([y] C x y) (M x) (Cy x)) (DsubCy x)))
+	%<- ({x} {d isvar x I} aofe-reg (DofQ x d) (wfe/pi (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- ({x} {d isvar x I} {y} {e isvar y J} wfe-context (DwfC x d y e) (ordered/cons (%the (bounded (G x) y) (Dbounded x d y e))))
+	%<- (aosub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubP (%the (expand (Q R) (pi (B R) ([y] C R y)) (lam ([y] P y))) DexpandQx))
+	%<- (expand-pi-invert DexpandQx (%the ({y} expand y (B R) (Y y)) Dexpand1) (%the ({y} expand (app (Q R) (Y y)) (C R y) (P y)) Dexpand2))
+	%<- (sub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofM DexpandR DsubMx (%the (term-eq Mx (M R)) DeqM))
+	%<- (can-expand (app (Q R) (M R)) (Cy R) XQM (%the (expand (app (Q R) (M R)) (Cy R) XQM) Dexpand))
+	%<- (can-append G1 (G2 R) G' (%the (append G1 (G2 R) G') Dappend'))
+	%<- ({y} {e isvar y J} scsub-bounded Dappend Dappend' ([x] [d] Dbounded x d y e) (%the (bounded G' y) (Dbounded' y e)))
+	%<- (ssubst-e Dappend Dappend' DofM DofR (%the (ofe G' (M R) (B R)) DofMx))
+	%<- (ofe-reg DofMx (%the (wfe G' (B R)) DwfBx))
+	%<- ({y} {e isvar y J} weaken-wfe (Dbounded' y e) DwfBx _ (%the (wfe (cons G' y (B R)) (B R)) (DwfBx' y e)))
+	%<- ({y} {e isvar y J} stsubst-e ([x] append/cons (Dappend x)) (append/cons Dappend') ([x] [d] DwfC x d y e) DofR (%the (wfe (cons G' y (B R)) (C R y)) (DwfCx y e)))
+	%<- (aosub-headvar DsubP (%the (headvar ([x] Q x)) Dheadvar))
+	%<- (headvar-tp-size Dappend DofQ Dsimp Dheadvar ([x] simp/pi (%the ({y} simp (C x y) U2) (DsimpC x)) (%the (simp (B x) U1) (DsimpB x))) (%the (stp-leq (spi U1 U2) T) Dleq))
+	%<- (employ-stp-leq (spi U1 U2) T Dleq)
+	%<- (expand-aosub-em _ _ nat-eq/i ([_] DsimpB R) ([_] append/nil) csub/base DofMx ([y] [e isvar y J] aofe/var (DwfBx' y e) (lookup/hit (Dbounded' y e))) Dexpand1 aosub/var (%the (sub ([y] Y y) (M R) (M R)) DsubYy))
+	%<- (aasub-absent (Q R) (M R) (%the (aasub ([y] Q R) (M R) (Q R)) DsubQxy))
+	%<- (sasubst-e Dappend Dappend' DofQ DofR (%the (aofe G' (Q R) (pi (B R) ([y] C R y))) DofQx))
+	%<- ({y} {e isvar y J} weaken-aofe (Dbounded' y e) DofQx _ (%the (aofe (cons G' y (B R)) (Q R) (pi (B R) ([y] C R y))) (DofQx' y e)))
+	%<- ({y} {e isvar y J} expand-reg-em _ _ nat-eq/i (DsimpB R) (aofe/var (DwfBx' y e) (lookup/hit (Dbounded' y e))) (Dexpand1 y) (%the (ofe (cons G' y (B R)) (Y y) (B R)) (DofY y e)))
+	%<- (tsub-expand-var-em _ _ nat-eq/i (DsimpB R) DwfBx DwfCx Dexpand1 (%the ({y} tsub ([y] C R y) (Y y) (C R y)) Dtsub))
+	%<- (expand-aasub-em _ _ nat-eq/i ([y] DsimpC R y) ([y] append/nil) DofMx ([y] [e isvar y J] aofe/app (DwfCx y e) (Dtsub y) (DofY y e) (DofQx' y e)) Dexpand2 (%the (aasub ([y] app (Q R) (Y y)) (M R) (app (Q R) (M R))) (aasub/app DsubYy DsubQxy)) (%the (tsub ([y] C R y) (M R) (Cy R)) (DsubCy R)) Dexpand (%the (sub ([y] P y) (M R) XQM) DsubPy'))
+	%<- (sub-resp ([_] term-eq/i) DeqM term-eq/i DsubPy (%the (sub ([y] P y) (M R) Py) DsubPy''))
+	%<- (sub-fun DsubPy' DsubPy'' (%the (term-eq XQM Py) DeqPy))
+	%<- (expand-resp atom-eq/i tp-eq/i DeqPy Dexpand (%the (expand (app (Q R) (M R)) (Cy R) Py) Dexpand')) %.
+%scope sub-expand-var-em %term pi1 
+	%pi (aosub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (pi1 (Q x)) (B x))) DaofeProj) (%the (expand R A XR) DexpandR) (aosub/pi1 (%the (aosub Q XR (pair P1 P2)) DsubP)) Dexpand1)
+	%<- ({x} {d isvar x I} aofe-invert-pi1 (DaofeProj x d) (%the (aofe (G x) (Q x) (sigma (B x) ([y] C x y))) (DofQ x d)))
+	%<- (aosub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubP (%the (expand (Q R) (sigma (B R) ([y] C R y)) (pair P1 P2)) DexpandQx))
+	%<- (expand-sigma-invert DexpandQx (%the (expand (pi1 (Q R)) (B R) P1) Dexpand1) (%the (expand (pi2 (Q R)) (C R (pi1 (Q R))) P2) Dexpand2)) %.
+%term pi2 
+	%pi (aosub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (aofe (G x) (pi2 (Q x)) (Cy x))) DaofeProj) (%the (expand R A XR) DexpandR) (aosub/pi2 (%the (aosub Q XR (pair P1 P2)) DsubP)) Dexpand2')
+	%<- ({x} {d isvar x I} aofe-invert-pi2 (DaofeProj x d) (%the (aofe (G x) (Q x) (sigma (B x) ([y] C x y))) (DofQ x d)) (%the (tp-eq (Cy x) (C x (pi1 (Q x)))) (DeqCy x)))
+	%<- ({x} tp-eq-symm (DeqCy x) (%the (tp-eq (C x (pi1 (Q x))) (Cy x)) (DeqCy' x)))
+	%<- (aosub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubP (%the (expand (Q R) (sigma (B R) ([y] C R y)) (pair P1 P2)) DexpandQx))
+	%<- (expand-sigma-invert DexpandQx (%the (expand (pi1 (Q R)) (B R) P1) Dexpand1) (%the (expand (pi2 (Q R)) (C R (pi1 (Q R))) P2) Dexpand2))
+	%<- (expand-resp atom-eq/i (DeqCy' R) term-eq/i Dexpand2 (%the (expand (pi2 (Q R)) (Cy R) P2) Dexpand2')) %.
+%%%
+%scope sub-expand-var-em %term aa 
+	%pi (sub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (ofe (G x) (at (Q x)) (B x))) DofAt) (%the (expand R A XR) DexpandR) (sub/aa (%the (aasub Q XR Qx) DsubQx)) Deq)
+	%<- ({x} {d isvar x I} ofe-invert-at (DofAt x d) (%the (aofe (G x) (Q x) t) (DofQ x d)))
+	%<- (aasub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubQx (%the (atom-eq Qx (Q R)) DeqQ))
+	%<- (term-resp-atom at DeqQ (%the (term-eq (at Qx) (at (Q R))) Deq)) %.
+%term ao 
+	%pi (sub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) (%the ({x} %pi (isvar x I) %-> (ofe (G x) (at (Q x)) (B x))) DofAt) (%the (expand R A XR) DexpandR) (sub/ao (%the (aosub Q XR LQx) DsubQx)) Deq)
+	%<- ({x} {d isvar x I} ofe-invert-at (DofAt x d) (%the (aofe (G x) (Q x) t) (DofQ x d)))
+	%<- (aosub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubQx (%the (expand (Q R) t LQx) DexpandQ))
+	%<- (expand-t-invert DexpandQ (%the (term-eq LQx (at (Q R))) Deq)) %.
+%scope sub-expand-var-em %term lam 
+	%pi (sub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) ([x] [d isvar x I] ofe/lam (%the ({y} %pi (isvar y J) %-> (ofe (cons (G x) y (B x)) (M x y) (C x y))) (DofM x d)) (%the (wfe (G x) (B x)) (DwfB x d))) (%the (expand R A XR) DexpandR) (sub/lam (%the ({y} sub ([x] M x y) XR (Mx y)) DsubMx)) Deq)
+	%<- ({y} {e isvar y J} sub-expand-em _ _ nat-eq/i Dsimp ([x] append/cons (Dappend x)) DofR ([x] [d] DofM x d y e) DexpandR (DsubMx y) (%the (term-eq (Mx y) (M R y)) (DeqM y)))
+	%<- (lam-resp DeqM (%the (term-eq (lam ([y] Mx y)) (lam ([y] M R y))) Deq)) %.
+%term pair 
+	%pi (sub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) ([x] [d isvar x I] ofe/pair (%the ({y} %pi (isvar y J) %-> _) _) (%the (ofe (G x) (N x) (Cy x)) (DofN x d)) (%the (tsub ([y] C x y) (M x) (Cy x)) (DsubCy x)) (%the (ofe (G x) (M x) (B x)) (DofM x d))) (%the (expand R A XR) DexpandR) (sub/pair (%the (sub ([x] N x) XR Nx) DsubNx) (%the (sub ([x] M x) XR Mx) DsubMx)) Deq)
+	%<- (sub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofM DexpandR DsubMx (%the (term-eq Mx (M R)) DeqM))
+	%<- (sub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofN DexpandR DsubNx (%the (term-eq Nx (N R)) DeqN))
+	%<- (term-resp-term ([m] pair m Nx) DeqM (%the (term-eq (pair Mx Nx) (pair (M R) Nx)) Deq1))
+	%<- (term-resp-term ([m] pair (M R) m) DeqN (%the (term-eq (pair (M R) Nx) (pair (M R) (N R))) Deq2))
+	%<- (term-eq-trans Deq1 Deq2 (%the (term-eq (pair Mx Nx) (pair (M R) (N R))) Deq)) %.
+%%%
+%scope sub-expand-var-em %term t tsub-expand-em _ _ _ _ _ _ _ _ tsub/t tp-eq/i %.
+%term pi 
+	%pi (tsub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) ([x] [d isvar x I] wfe/pi (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))) (%the (expand R A XR) DexpandR) (tsub/pi (%the ({y} tsub ([x] C x y) XR (Cx y)) DsubCx) (%the (tsub B XR Bx) DsubBx)) Deq)
+	%<- (tsub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DwfB DexpandR DsubBx (%the (tp-eq Bx (B R)) DeqB))
+	%<- ({y} {e isvar y J} tsub-expand-em _ _ nat-eq/i Dsimp ([x] append/cons (Dappend x)) DofR ([x] [d] DwfC x d y e) DexpandR (DsubCx y) (%the (tp-eq (Cx y) (C R y)) (DeqC y)))
+	%<- (pi-resp DeqB DeqC (%the (tp-eq (pi Bx Cx) (pi (B R) ([y] C R y))) Deq)) %.
+%scope sub-expand-var-em %term sigma 
+	%pi (tsub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) ([x] [d isvar x I] wfe/sigma (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))) (%the (expand R A XR) DexpandR) (tsub/sigma (%the ({y} tsub ([x] C x y) XR (Cx y)) DsubCx) (%the (tsub B XR Bx) DsubBx)) Deq)
+	%<- (tsub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DwfB DexpandR DsubBx (%the (tp-eq Bx (B R)) DeqB))
+	%<- ({y} {e isvar y J} tsub-expand-em _ _ nat-eq/i Dsimp ([x] append/cons (Dappend x)) DofR ([x] [d] DwfC x d y e) DexpandR (DsubCx y) (%the (tp-eq (Cx y) (C R y)) (DeqC y)))
+	%<- (sigma-resp DeqB DeqC (%the (tp-eq (sigma Bx Cx) (sigma (B R) ([y] C R y))) Deq)) %.
+%term singa 
+	%pi (tsub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) ([x] [d isvar x I] wfe/sing (%the (aofe (G x) (Q x) t) (DofQ x d))) (%the (expand R A XR) DexpandR) (tsub/singa (%the (aasub Q XR Qx) DsubQx)) Deq)
+	%<- (aasub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubQx (%the (atom-eq Qx (Q R)) DeqQ))
+	%<- (tp-resp-atom sing DeqQ (%the (tp-eq (sing Qx) (sing (Q R))) Deq)) %.
+%scope sub-expand-var-em %term singo 
+	%pi (tsub-expand-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (aofe G1 R A) DofR) ([x] [d isvar x I] wfe/sing (%the (aofe (G x) (Q x) t) (DofQ x d))) (%the (expand R A XR) DexpandR) (tsub/singo (%the (aosub Q XR (at Q')) DsubQx)) Deq)
+	%<- (aosub-expand-em _ _ nat-eq/i Dsimp Dappend DofR DofQ DexpandR DsubQx (%the (expand (Q R) t (at Q')) DexpandQ))
+	%<- (expand-t-invert DexpandQ (%the (term-eq (at Q') (at (Q R))) DeqAtQ))
+	%<- (term-eq-cdr-at DeqAtQ (%the (atom-eq Q' (Q R)) DeqQ))
+	%<- (tp-resp-atom sing DeqQ (%the (tp-eq (sing Q') (sing (Q R))) Deq)) %.
+%%%
+%term _ 
+	%pi (tsub-expand-var-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the (wfe G A) DwfA) (%the ({x} %pi (isvar x I) %-> (wfe (cons G x A) (B x))) DwfB) (%the ({x} expand x A (X x)) Dexpand) Dtsub')
+	%<- ({x} {d isvar x I} wfe-context (DwfB x d) (ordered/cons (%the (bounded G x) (Dbounded x d))))
+	%<- ({x} {d isvar x I} weaken-wfe (Dbounded x d) DwfA _ (%the (wfe (cons G x A) A) (DwfA' x d)))
+	%<- ({x} {d isvar x I} expand-reg-em _ _ nat-eq/i Dsimp (aofe/var (DwfA' x d) (lookup/hit (Dbounded x d))) (Dexpand x) (%the (ofe (cons G x A) (X x) A) (DofX x d)))
+	%<- (can-tsub-context-e DofX DwfB (%the ({x} tsub ([x] B x) (X x) (B' x)) Dtsub))
+	%<- (weaken-wfe-insert1 DwfB Dbounded _ (%the ({x} %pi (isvar x I) %-> ({y} %pi (isvar y J) %-> (wfe (cons (cons G x A) y A) (B y)))) DwfB'))
+	%<- ({x} {d isvar x I} tsub-expand-em _ _ nat-eq/i Dsimp ([_] append/nil) (aofe/var (DwfA' x d) (lookup/hit (Dbounded x d))) ([y] [e] DwfB' x d y e) (Dexpand x) (Dtsub x) (%the (tp-eq (B' x) (B x)) (Deq x)))
+	%<- ({x} tsub-resp ([_] tp-eq/i) term-eq/i (Deq x) (Dtsub x) (%the (tsub ([x] B x) (X x) (B x)) (Dtsub' x))) %.
+%%%
+%term _ 
+	%pi (sub-expand-var-em _ _ nat-eq/i (%the (simp A T) Dsimp) (%the (wfe G A) DwfA) (%the ({x} %pi (isvar x I) %-> (ofe (cons G x A) (M x) (B x))) DofM) (%the ({x} expand x A (X x)) Dexpand) Dsub')
+	%<- ({x} {d isvar x I} ofe-context (DofM x d) (ordered/cons (%the (bounded G x) (Dbounded x d))))
+	%<- ({x} {d isvar x I} weaken-wfe (Dbounded x d) DwfA _ (%the (wfe (cons G x A) A) (DwfA' x d)))
+	%<- ({x} {d isvar x I} expand-reg-em _ _ nat-eq/i Dsimp (aofe/var (DwfA' x d) (lookup/hit (Dbounded x d))) (Dexpand x) (%the (ofe (cons G x A) (X x) A) (DofX x d)))
+	%<- (can-sub-context-e DofX DofM (%the ({x} sub ([x] M x) (X x) (M' x)) Dsub))
+	%<- (weaken-ofe-insert1 DofM Dbounded _ (%the ({x} 
+	%pi (isvar x I)
+	%-> ({y} %pi (isvar y J) %-> (ofe (cons (cons G x A) y A) (M y) (B y)))) DofM'))
+	%<- ({x} {d isvar x I} sub-expand-em _ _ nat-eq/i Dsimp ([_] append/nil) (aofe/var (DwfA' x d) (lookup/hit (Dbounded x d))) ([y] [e] DofM' x d y e) (Dexpand x) (Dsub x) (%the (term-eq (M' x) (M x)) (Deq x)))
+	%<- ({x} sub-resp ([_] term-eq/i) term-eq/i (Deq x) (Dsub x) (%the (sub ([x] M x) (X x) (M x)) (Dsub' x))) %.
+%worlds (bind ovar var) (expand-reg-em _ _ _ _ _ _ _) (expand-aasub-em _ _ _ _ _ _ _ _ _ _ _ _) (expand-aosub-em _ _ _ _ _ _ _ _ _ _ _) (aasub-expand-em _ _ _ _ _ _ _ _ _ _) (aosub-expand-em _ _ _ _ _ _ _ _ _ _) (sub-expand-em _ _ _ _ _ _ _ _ _ _) (tsub-expand-em _ _ _ _ _ _ _ _ _ _) (tsub-expand-var-em _ _ _ _ _ _ _ _) (sub-expand-var-em _ _ _ _ _ _ _ _) %.
+%total {(T1 T2 T3 T4 T5 T6 T7 T8 T9) (N1 N2 N3 N4 N5 N6 N7 N8 N9) (D1 D2 D3 D4 D5 D6 D7 D8 D9)} (expand-reg-em N1 T1 _ _ _ D1 _) (expand-aasub-em N2 T2 _ _ _ _ _ _ _ _ D2 _) (expand-aosub-em N3 T3 _ _ _ _ _ _ _ D3 _) (aasub-expand-em N4 T4 _ _ _ _ _ _ D4 _) (aosub-expand-em N5 T5 _ _ _ _ _ _ D5 _) (sub-expand-em N6 T6 _ _ _ _ _ _ D6 _) (tsub-expand-em N7 T7 _ _ _ _ _ _ D7 _) (tsub-expand-var-em N8 T8 _ _ _ _ D8 _) (sub-expand-var-em N9 T9 _ _ _ _ D9 _) %.
+%sort expand-reg-e {_ aofe G R A} {_ expand R A M} {_ ofe G M A} %.
+%mode expand-reg-e %in %in %out %.
+%term _ 
+	%pi (expand-reg-e Daof Dexpand Dof)
+	%<- (can-simp _ Dsimp)
+	%<- (expand-reg-em _ _ nat-eq/i Dsimp Daof Dexpand Dof) %.
+%worlds (bind ovar var) (expand-reg-e _ _ _) %.
+%total {} (expand-reg-e _ _ _) %.
+%sort expand-aasub-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ ofe G1 M A} {_ {x} %pi (isvar x I) %-> (aofe (G x) (R x) (B x))} {_ {x} expand (R x) (B x) (N x)} {_ aasub ([x] R x) M Rx} {_ tsub ([x] B x) M Ax} {_ expand Rx Ax N'} {_ sub N M N'} %.
+%mode expand-aasub-e %in %in %in %in %in %in %in %out %.
+%term _ 
+	%pi (expand-aasub-e D1 D2 D3 D4 D5 D6 D7 D8)
+	%<- ({x} can-simp _ (Dsimp x))
+	%<- (expand-aasub-em _ _ nat-eq/i Dsimp D1 D2 D3 D4 D5 D6 D7 D8) %.
+%worlds (bind ovar var) (expand-aasub-e _ _ _ _ _ _ _ _) %.
+%total {} (expand-aasub-e _ _ _ _ _ _ _ _) %.
+%sort expand-aosub-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ csub G M Gx} {_ ofe G1 M A} {_ {x} %pi (isvar x I) %-> (aofe (G x) (R x) (B x))} {_ {x} expand (R x) (B x) (N x)} {_ aosub ([x] R x) M LRx} {_ sub N M LRx} %.
+%mode expand-aosub-e %in %in %in %in %in %in %out %.
+%term _ 
+	%pi (expand-aosub-e D1 D2 D3 D4 D5 D6 D7)
+	%<- ({x} can-simp _ (Dsimp x))
+	%<- (expand-aosub-em _ _ nat-eq/i Dsimp D1 D2 D3 D4 D5 D6 D7) %.
+%worlds (bind ovar var) (expand-aosub-e _ _ _ _ _ _ _) %.
+%total {} (expand-aosub-e _ _ _ _ _ _ _) %.
+%sort aasub-expand-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ aofe G1 R A} {_ {x} %pi (isvar x I) %-> (aofe (G x) (Q x) (B x))} {_ expand R A XR} {_ aasub Q XR Q'} {_ atom-eq Q' (Q R)} %.
+%mode aasub-expand-e %in %in %in %in %in %out %.
+%term _ 
+	%pi (aasub-expand-e D1 D2 D3 D4 D5 D6)
+	%<- (can-simp _ Dsimp)
+	%<- (aasub-expand-em _ _ nat-eq/i Dsimp D1 D2 D3 D4 D5 D6) %.
+%worlds (bind ovar var) (aasub-expand-e _ _ _ _ _ _) %.
+%total {} (aasub-expand-e _ _ _ _ _ _) %.
+%sort aosub-expand-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ aofe G1 R A} {_ {x} %pi (isvar x I) %-> (aofe (G x) (Q x) (B x))} {_ expand R A XR} {_ aosub Q XR LQx} {_ expand (Q R) (B R) LQx} %.
+%mode aosub-expand-e %in %in %in %in %in %out %.
+%term _ 
+	%pi (aosub-expand-e D1 D2 D3 D4 D5 D6)
+	%<- (can-simp _ Dsimp)
+	%<- (aosub-expand-em _ _ nat-eq/i Dsimp D1 D2 D3 D4 D5 D6) %.
+%worlds (bind ovar var) (aosub-expand-e _ _ _ _ _ _) %.
+%total {} (aosub-expand-e _ _ _ _ _ _) %.
+%sort sub-expand-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ aofe G1 R A} {_ {x} %pi (isvar x I) %-> (ofe (G x) (M x) (B x))} {_ expand R A XR} {_ sub M XR M'} {_ term-eq M' (M R)} %.
+%mode sub-expand-e %in %in %in %in %in %out %.
+%term _ 
+	%pi (sub-expand-e D1 D2 D3 D4 D5 D6)
+	%<- (can-simp _ Dsimp)
+	%<- (sub-expand-em _ _ nat-eq/i Dsimp D1 D2 D3 D4 D5 D6) %.
+%worlds (bind ovar var) (sub-expand-e _ _ _ _ _ _) %.
+%total {} (sub-expand-e _ _ _ _ _ _) %.
+%sort tsub-expand-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ aofe G1 R A} {_ {x} %pi (isvar x I) %-> (wfe (G x) (B x))} {_ expand R A XR} {_ tsub B XR B'} {_ tp-eq B' (B R)} %.
+%mode tsub-expand-e %in %in %in %in %in %out %.
+%term _ 
+	%pi (tsub-expand-e D1 D2 D3 D4 D5 D6)
+	%<- (can-simp _ Dsimp)
+	%<- (tsub-expand-em _ _ nat-eq/i Dsimp D1 D2 D3 D4 D5 D6) %.
+%worlds (bind ovar var) (tsub-expand-e _ _ _ _ _ _) %.
+%total {} (tsub-expand-e _ _ _ _ _ _) %.
+%sort tsub-expand-var-e {_ wfe G A} {_ {x} %pi (isvar x I) %-> (wfe (cons G x A) (B x))} {_ {x} expand x A (X x)} {_ {x} tsub ([x] B x) (X x) (B x)} %.
+%mode tsub-expand-var-e %in %in %in %out %.
+%term _ 
+	%pi (tsub-expand-var-e D1 D2 D3 D4)
+	%<- (can-simp _ Dsimp)
+	%<- (tsub-expand-var-em _ _ nat-eq/i Dsimp D1 D2 D3 D4) %.
+%worlds (bind ovar var) (tsub-expand-var-e _ _ _ _) %.
+%total {} (tsub-expand-var-e _ _ _ _) %.
+%sort sub-expand-var-e {_ wfe G A} {_ {x} %pi (isvar x I) %-> (ofe (cons G x A) (M x) (B x))} {_ {x} expand x A (X x)} {_ {x} sub ([x] M x) (X x) (M x)} %.
+%mode sub-expand-var-e %in %in %in %out %.
+%term _ 
+	%pi (sub-expand-var-e D1 D2 D3 D4)
+	%<- (can-simp _ Dsimp)
+	%<- (sub-expand-var-em _ _ nat-eq/i Dsimp D1 D2 D3 D4) %.
+%worlds (bind ovar var) (sub-expand-var-e _ _ _ _) %.
+%total {} (sub-expand-var-e _ _ _ _) %.
+%%%%%  Expansion (Implicit Context)  %%%%%
+%sort expand-reg {_ aof R A} {_ expand R A M} {_ of M A} %.
+%mode expand-reg %in %in %out %.
+%term _ 
+	%pi (expand-reg Daof Dexpand Dof)
+	%<- (aof-to-aofe Daof Daofe)
+	%<- (expand-reg-e Daofe Dexpand Dofe)
+	%<- (ofe-to-of Dofe Dof) %.
+%worlds (bind var ovar) (expand-reg _ _ _) %.
+%total {} (expand-reg _ _ _) %.
+%sort expand-aasub {_ of N A} {_ {x} %pi (vof x A) %-> (aof (R x) (B x))} {_ {x} expand (R x) (B x) (M x)} {_ aasub ([x] R x) N Rx} {_ tsub ([x] B x) N Bx} {_ expand Rx Bx M'} {_ sub M N M'} %.
+%mode expand-aasub %in %in %in %in %in %in %out %.
+%term _ 
+	%pi (expand-aasub DofN DaofR DexpandR Daasub Dtsub DexpandRx Dsub)
+	%<- (of-to-ofe DofN DofeN)
+	%<- (aof1-to-aofe 0 DaofR DaofeR)
+	%<- (expand-aasub-e ([_] append/nil) DofeN DaofeR DexpandR Daasub Dtsub DexpandRx Dsub) %.
+%worlds (bind var ovar) (expand-aasub _ _ _ _ _ _ _) %.
+%total {} (expand-aasub _ _ _ _ _ _ _) %.
+%sort expand-aasub1 {_ of N A} {_ {x} %pi (vof x A) %-> ({y} %pi (vof y (B x)) %-> (aof (R x y) (C x y)))} {_ {x} {y} expand (R x y) (C x y) (M x y)} {_ {y} aasub ([x] R x y) N (Rx y)} {_ {y} tsub ([x] C x y) N (Cx y)} {_ {y} expand (Rx y) (Cx y) (M' y)} {_ {y} sub ([x] M x y) N (M' y)} %.
+%mode expand-aasub1 %in %in %in %in %in %in %out %.
+%term _ 
+	%pi (expand-aasub1 DofN DofR DexpandR Daasub DsubCx DexpandRx Dsub)
+	%<- (of-to-ofe DofN DofeN)
+	%<- (aof2-to-aofe (%the (lt 0 (s 0)) lt/z) DofR DofeR)
+	%<- ({y} {e} expand-aasub-e ([_] append/cons append/nil) DofeN ([x] [d] DofeR x d y e) ([x] DexpandR x y) (Daasub y) (DsubCx y) (DexpandRx y) (Dsub y)) %.
+%worlds (bind var ovar) (expand-aasub1 _ _ _ _ _ _ _) %.
+%total {} (expand-aasub1 _ _ _ _ _ _ _) %.
+%sort expand-aosub {_ of N A} {_ {x} %pi (vof x A) %-> (aof (R x) (B x))} {_ {x} expand (R x) (B x) (M x)} {_ aosub ([x] R x) N LRx} {_ sub M N LRx} %.
+%mode expand-aosub %in %in %in %in %out %.
+%term _ 
+	%pi (expand-aosub DofN DaofR Dexpand Daosub Dsub)
+	%<- (of-to-ofe DofN DofeN)
+	%<- (aof1-to-aofe 0 DaofR DaofeR)
+	%<- (expand-aosub-e ([_] append/nil) csub/base DofeN DaofeR Dexpand Daosub Dsub) %.
+%worlds (bind var ovar) (expand-aosub _ _ _ _ _) %.
+%total {} (expand-aosub _ _ _ _ _) %.
+%sort expand-aosub1 {_ of N A} {_ {x} %pi (vof x A) %-> (wf (B x))} {_ {x} %pi (vof x A) %-> ({y} %pi (vof y (B x)) %-> (aof (R x y) (C x y)))} {_ {x} {y} expand (R x y) (C x y) (M x y)} {_ {y} aosub ([x] R x y) N (LRx y)} {_ {y} sub ([x] M x y) N (LRx y)} %.
+%mode expand-aosub1 %in %in %in %in %in %out %.
+%term _ 
+	%pi (expand-aosub1 DofN DwfB DofR Dexpand Daosub Dsub)
+	%<- (can-tsub DwfB DofN DsubBx)
+	%<- (of-to-ofe DofN DofeN)
+	%<- (aof2-to-aofe (%the (lt 0 (s 0)) lt/z) DofR DofeR)
+	%<- ({y} {e} expand-aosub-e ([_] append/cons append/nil) (csub/cons DsubBx csub/base) DofeN ([x] [d] DofeR x d y e) ([x] Dexpand x y) (Daosub y) (Dsub y)) %.
+%worlds (bind var ovar) (expand-aosub1 _ _ _ _ _ _) %.
+%total {} (expand-aosub1 _ _ _ _ _ _) %.
+%sort aasub-expand {_ aof R A} {_ {x} %pi (vof x A) %-> (aof (Q x) (B x))} {_ expand R A XR} {_ aasub Q XR Q'} {_ atom-eq Q' (Q R)} %.
+%mode aasub-expand %in %in %in %in %out %.
+%term _ 
+	%pi (aasub-expand DaofR DaofQ Dexpand Daasub Deq)
+	%<- (aof-to-aofe DaofR DaofeR)
+	%<- (aof1-to-aofe 0 DaofQ DaofeQ)
+	%<- (aasub-expand-e ([_] append/nil) DaofeR DaofeQ Dexpand Daasub Deq) %.
+%worlds (bind var ovar) (aasub-expand _ _ _ _ _) %.
+%total {} (aasub-expand _ _ _ _ _) %.
+%sort aosub-expand {_ aof R A} {_ {x} %pi (vof x A) %-> (aof (Q x) (B x))} {_ expand R A XR} {_ aosub Q XR Qx} {_ expand (Q R) (B R) Qx} %.
+%mode aosub-expand %in %in %in %in %out %.
+%term _ 
+	%pi (aosub-expand DaofR DaofQ Dexpand Daosub Dexpand')
+	%<- (aof-to-aofe DaofR DaofeR)
+	%<- (aof1-to-aofe 0 DaofQ DaofeQ)
+	%<- (aosub-expand-e ([_] append/nil) DaofeR DaofeQ Dexpand Daosub Dexpand') %.
+%worlds (bind var ovar) (aosub-expand _ _ _ _ _) %.
+%total {} (aosub-expand _ _ _ _ _) %.
+%sort sub-expand {_ aof R A} {_ {x} %pi (vof x A) %-> (of (M x) (B x))} {_ expand R A XR} {_ sub M XR M'} {_ term-eq M' (M R)} %.
+%mode sub-expand %in %in %in %in %out %.
+%term _ 
+	%pi (sub-expand DaofR DofM Dexpand Daasub Deq)
+	%<- (aof-to-aofe DaofR DaofeR)
+	%<- (of1-to-ofe 0 DofM DofeM)
+	%<- (sub-expand-e ([_] append/nil) DaofeR DofeM Dexpand Daasub Deq) %.
+%worlds (bind var ovar) (sub-expand _ _ _ _ _) %.
+%total {} (sub-expand _ _ _ _ _) %.
+%sort tsub-expand {_ aof R A} {_ {x} %pi (vof x A) %-> (wf (B x))} {_ expand R A XR} {_ tsub B XR B'} {_ tp-eq B' (B R)} %.
+%mode tsub-expand %in %in %in %in %out %.
+%term _ 
+	%pi (tsub-expand DaofR DwfB Dexpand Daasub Deq)
+	%<- (aof-to-aofe DaofR DaofeR)
+	%<- (wf1-to-wfe 0 DwfB DwfeB)
+	%<- (tsub-expand-e ([_] append/nil) DaofeR DwfeB Dexpand Daasub Deq) %.
+%worlds (bind var ovar) (tsub-expand _ _ _ _ _) %.
+%total {} (tsub-expand _ _ _ _ _) %.
+%%%%%  Corollaries  %%%%%
+%sort sub-expand-var {_ wf A} {_ {x} %pi (vof x A) %-> (of (M x) (B x))} {_ {x} expand x A (X x)} {_ {x} sub ([y] M y) (X x) (M x)} %.
+%mode sub-expand-var %in %in %in %out %.
+%term _ 
+	%pi (sub-expand-var DwfA DofM Dexpand Dsub')
+	%<- ({x} {d vof x A} expand-reg (aof/var DwfA d) (Dexpand x) (DofX x d))
+	%<- ({x} {d vof x A} can-sub DofM (DofX x d) (%the (sub ([y] M y) (X x) (M' x)) (Dsub x)))
+	%<- ({x} {d vof x A} sub-expand (aof/var DwfA d) DofM (Dexpand x) (Dsub x) (%the (term-eq (M' x) (M x)) (Deq x)))
+	%<- ({x} sub-resp ([_] term-eq/i) term-eq/i (Deq x) (Dsub x) (%the (sub ([y] M y) (X x) (M x)) (Dsub' x))) %.
+%worlds (bind) (sub-expand-var _ _ _ _) %.
+%total {} (sub-expand-var _ _ _ _) %.
+%sort tsub-expand-var-e {_ wfe G A} {_ {x} %pi (isvar x I) %-> (wfe (cons G x A) (B x))} {_ {x} expand x A (X x)} {_ {x} tsub ([y] B y) (X x) (B x)} %.
+%mode tsub-expand-var-e %in %in %in %out %.
+%term _ 
+	%pi (tsub-expand-var-e DwfA DwfB Dexpand Dtsub')
+	%<- ({x} {d} wfe-context (DwfB x d) (ordered/cons (Dord x d)))
+	%<- ({x} {d} weaken-wfe (Dord x d) DwfA _ (DwfA' x d))
+	%<- ({x} {d} expand-reg-e (aofe/var (DwfA' x d) (lookup/hit (Dord x d))) (Dexpand x) (DofX x d))
+	%<- (can-tsub-context-e DofX DwfB (%the ({x} tsub ([y] B y) (X x) (B' x)) Dtsub))
+	%<- (weaken-wfe-insert1 DwfB Dord _ DwfB')
+	%<- ({x} {d} tsub-expand-e ([_] append/nil) (aofe/var (DwfA' x d) (lookup/hit (Dord x d))) ([y] [e] DwfB' x d y e) (Dexpand x) (Dtsub x) (%the (tp-eq (B' x) (B x)) (Deq x)))
+	%<- ({x} tsub-resp ([_] tp-eq/i) term-eq/i (Deq x) (Dtsub x) (%the (tsub ([y] B y) (X x) (B x)) (Dtsub' x))) %.
+%worlds (bind var ovar) (tsub-expand-var-e _ _ _ _) %.
+%total {} (tsub-expand-var-e _ _ _ _) %.
+%sort tsub-expand-var {_ wf A} {_ {x} %pi (vof x A) %-> (wf (B x))} {_ {x} expand x A (X x)} {_ {x} tsub ([y] B y) (X x) (B x)} %.
+%mode tsub-expand-var %in %in %in %out %.
+%term _ 
+	%pi (tsub-expand-var DwfA DwfB Dexpand Dtsub')
+	%<- ({x} {d vof x A} expand-reg (aof/var DwfA d) (Dexpand x) (DofX x d))
+	%<- ({x} {d vof x A} can-tsub DwfB (DofX x d) (%the (tsub ([y] B y) (X x) (B' x)) (Dtsub x)))
+	%<- ({x} {d vof x A} tsub-expand (aof/var DwfA d) DwfB (Dexpand x) (Dtsub x) (%the (tp-eq (B' x) (B x)) (Deq x)))
+	%<- ({x} tsub-resp ([_] tp-eq/i) term-eq/i (Deq x) (Dtsub x) (%the (tsub ([y] B y) (X x) (B x)) (Dtsub' x))) %.
+%worlds (bind var ovar) (tsub-expand-var _ _ _ _) %.
+%total {} (tsub-expand-var _ _ _ _) %.
+%sort sub-into-expand-var {_ {x} expand x A (X x)} {_ of M A} {_ sub X M M} %.
+%mode sub-into-expand-var %in %in %out %.
+%term _ 
+	%pi (sub-into-expand-var Dexpand DofM Dsub)
+	%<- (of-reg DofM DwfA)
+	%<- (expand-aosub DofM ([x] [d] aof/var DwfA d) Dexpand aosub/var (%the (sub X M M) Dsub)) %.
+%worlds (bind var) (sub-into-expand-var _ _ _) %.
+%total {} (sub-into-expand-var _ _ _) %.
+%%%%%  Miscellaneous  %%%%%
+%sort strengthen-expand {_ {x atom} expand R A (M x)} {_ {x} term-eq (M x) M'} %.
+%mode strengthen-expand %in %out %.
+%term _ 
+	%pi (strengthen-expand Dexpand Deq)
+	%<- (can-expand R A M' Dexpand')
+	%<- ({x} expand-fun (Dexpand x) Dexpand' (Deq x)) %.
+%worlds (var var) (strengthen-expand _ _) %.
+%total {} (strengthen-expand _ _) %.

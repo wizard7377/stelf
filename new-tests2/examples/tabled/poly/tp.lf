@@ -1,0 +1,17 @@
+%%% Mini-ML types.
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort tp %.
+%name tp %.
+%term nat tp %.
+% Natural Numbers
+%term cross %pi tp %-> tp %-> tp %.
+% Pairs
+%term arrow %pi tp %-> tp %-> tp %.
+% Functions
+%term all %pi (%pi tp %-> tp) %-> tp %.
+% Polymorphism
+% For the examples, we introduce an abbreviation
+%define => (%pi tp %-> tp %-> tp) [a] [b] arrow a b %.
+%prec %right 10 => %.
+%define * (%pi tp %-> tp %-> tp) [a] [b] cross a b %.
+%prec %right 9 * %.

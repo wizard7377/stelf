@@ -58,9 +58,9 @@ Polarized PCF with a stack machine semantics
 %term let %pi (exp A+) %-> (%pi (val+ A+) %-> (exp C+)) %-> (exp C+) %.
 %% these terms are not eta-long, because we use the same
 %% val judgements on the left as on the right
-%block posb {A+ pos} [x val+ A+]%.
-%block negb {A- neg} [x val- A-]%.
-%block negcb {A- neg} [A+ pos] [k cont- A- A+]%.
+%block posb [A+ pos] {x val+ A+}%.
+%block negb [A- neg] {x val- A-}%.
+%block negcb [A- neg] {A+ pos} {k cont- A- A+}%.
 %worlds (posb negb negcb) (val+ _) (cont+ _ _) (val- _) (cont- _ _) (exp _) %.
 %% FIXME: weirldly asymetric: we need both pos and neg assumptions,
 %% but not both kinds of conclusion??
@@ -218,7 +218,7 @@ Note that all rules are axioms.
 	%pi (complete D' x E)
 	%<- (unique-poltp D' (poltp/stream D) Did)
 	%<- (retype (ret x') Did E)} complete (poltp/stream D) (E1 x) (E1' x')) %.
-%block completeb {T1 etp} {A1 pos} {D poltp T1 A1} [x T1 eexp] [x' val+ A1] [d {A1' pos} {D' poltp T1 A1'} {Did id A1 A1'} {E exp A1'} %pi (complete D' x E) %<- (unique-poltp D' D Did) %<- (retype (ret x') Did E)]%.
+%block completeb [T1 etp] [A1 pos] [D poltp T1 A1] {x T1 eexp} {x' val+ A1} {d {A1' pos} {D' poltp T1 A1'} {Did id A1 A1'} {E exp A1'} %pi (complete D' x E) %<- (unique-poltp D' D Did) %<- (retype (ret x') Did E)}%.
 %worlds (completeb) (complete _ E _) %.
 %total (E) (complete _ E _) %.
 %{!

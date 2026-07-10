@@ -1,0 +1,79 @@
+% Intuitionistic Modal S4 based upon Pfenning and Davies
+%sort w %.
+% worlds.
+%sort o %.
+% propositions
+% Propositions
+%term ⊤ o %.
+%term ⊥ o %.
+%term ⇒ %pi o %-> o %-> o %.
+%prec %right 5 ⇒ %.
+%term □ %pi o %-> o %.
+%term <> %pi o %-> o %.
+% Negation is an abbreviation as usual.
+%inline ¬ (%pi o %-> o) [x o] x ⇒ ⊥ %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Natural deduction version
+%sort true {_ o} {_ w} %.
+%sort poss {_ o} %.
+%term ⊤I true ⊤ W %.
+%term ⊥E %pi (true ⊥ W) %-> (true P W) %.
+%term ⇒I %pi (%pi (true P1 W) %-> (true P2 W)) %-> (true (P1 ⇒ P2) W) %.
+%term ⇒E %pi (true (P1 ⇒ P2) W) %-> (true P1 W) %-> (true P2 W) %.
+%term □I %pi ({W' w} true P W') %-> (true (□ P) W) %.
+%term □E %pi (true (□ P1) W) %-> ({W' w} %pi (true P1 W') %-> (true P2 W)) %-> (true P2 W) %.
+%term <>I %pi (poss P) %-> (true (<> P) W) %.
+%term <>E %pi (true (<> P1) W) %-> (%pi (true P1 W) %-> (poss P2)) %-> (poss P2) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%. %[
+%theorem k_axiom1 : exists {D:{W:w}{A:o}{B:o} true ((□ (A ⇒ B)) ⇒  (□ A) ⇒ (□ B)) W} true.
+%establish 6 {} (k_axiom1 D).
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Sequent calculus version
+%sort hyp {_ o} {_ w} %.
+%sort conc {_ o} {_ w} %.
+%sort poss {_ o} %.
+%term ⊤R conc ⊤ W %.
+%term ⊥L %pi (hyp ⊥ W) %-> (conc P W') %.
+%term axiom %pi (hyp P W) %-> (conc P W) %.
+%term ⇒R %pi (%pi (hyp P1 W) %-> (conc P2 W)) %-> (conc (P1 ⇒ P2) W) %.
+%term ⇒L 
+	%pi (%pi (hyp P2 W) %-> (conc P3 W'))
+	%-> (conc P1 W)
+	%-> (hyp (P1 ⇒ P2) W)
+	%-> (conc P3 W') %.
+%term □R %pi ({W' w} conc P W') %-> (conc (□ P) W) %.
+%term □L %pi (%pi (hyp P1 W') %-> (conc P2 W'')) %-> (hyp (□ P1) W) %-> (conc P2 W'') %.
+%term cnv %pi (conc P W) %-> (poss P) %.
+%term <>R %pi (poss P) %-> (conc (<> P) W) %.
+%term <>L %pi ({W' w} %pi (hyp P1 W') %-> (poss P2)) %-> (hyp (<> P1) W) %-> (poss P2) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%theorem dn_peirce : exists {D {W w} {A o} {B o} conc (¬ (¬ (A ⇒ B ⇒ A ⇒ A))) W} true %.
+%prove 10 {} (dn_peirce D) %.
+%theorem k_axiom1 : exists {D {W w} {A o} {B o} conc (□ (A ⇒ B) ⇒ (□ A) ⇒ (□ B)) W} true %.
+%establish 20 {} (k_axiom1 D) %.
+%theorem k_axiom2 : exists {D {W w} {A o} {B o} conc (□ (A ⇒ B) ⇒ (<> A) ⇒ (<> B)) W} true %.
+%establish 20 {} (k_axiom2 D) %.
+%theorem t_axiom1 : exists {D {W w} {A o} conc (□ A ⇒ A) W} true %.
+%establish 50 {} (t_axiom1 D) %.
+%theorem t_axiom2 : exists {D {W w} {A o} conc (A ⇒ (<> A)) W} true %.
+%establish 50 {} (t_axiom2 D) %.
+%theorem 4_axiom1 : exists {D {W w} {A o} conc (□ A ⇒ (□ (□ A))) W} true %.
+%establish 50 {} (4_axiom1 D) %.
+%theorem 4_axiom2 : exists {D {W w} {A o} conc (<> (<> A) ⇒ (<> A)) W} true %.
+%establish 50 {} (4_axiom2 D) %.
+%. %[ 
+%theorem modaleq1 : exists {D:{W:w}{A:o} conc ((□ A) ⇒ (¬ (<> (¬ A)))) W} true.
+%prove 50 {} (modaleq1 D).
+
+%theorem modaleq2 : exists {D:{W:w}{A:o} conc ((<> A) ⇒ (¬ (□ (¬ A)))) W} true.
+%prove 30 {} (modaleq2 D).
+}%
+%. %[
+%theorem dn_modaleq2 : exists {D:{W:w}{A:o} conc (¬ (¬ ((<> A) ⇒ (¬ (□ (¬ A)))) )) W} true.
+%prove 10 {} (dn_modaleq2 D).
+
+%theorem dn_modaleq1 : exists {D:{W:w}{A:o} conc (¬ (¬ ((□ A) ⇒ (¬ (<> (¬ A)))) )) W} true.
+%prove 10 {} (dn_modaleq1 D).
+}%

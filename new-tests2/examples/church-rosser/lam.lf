@@ -1,0 +1,6 @@
+%%% Untyped lambda-calculus
+%%% Author: Frank Pfenning
+%sort term %.
+%name term %.
+%term lam %pi (%pi term %-> term) %-> term %.
+%term app %pi term %-> term %-> term %.

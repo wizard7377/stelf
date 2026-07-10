@@ -1,0 +1,15 @@
+%sort node %.
+%term a node %.
+%term b node %.
+%term c node %.
+%term d node %.
+%sort edge {_ node} {_ node} %.
+%term e_ab edge a b %.
+%term e_ac edge a c %.
+%term e_ba edge b a %.
+%term e_bd edge b d %.
+%sort reach {_ node} {_ node} %.
+%tabled reach %.
+%term r_refl reach X X %.
+%term r_cl %pi (reach X Y) %<- (edge X Z) %<- (reach Z Y) %.
+%querytabled _ 3 reach a X %.

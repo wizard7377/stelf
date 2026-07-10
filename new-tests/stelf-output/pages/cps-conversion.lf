@@ -278,12 +278,12 @@ The final case in the theorem is the translation of lambda values: !}%
 ## Metatheorem
 
 We can now check our metatheorem, which is that these translations are total. We start by declaring [block](/wiki/percent-block/)s for use in the [%worlds](/wiki/percent-worlds/) declarations: !}%
-%block blockcvar {A typ} {A' ctyp} {CTA ttoct A A'} [x] [xof ofv x A] [x'] [x'of cofv x' A'] [thm tocpsv- xof CTA x'of]%.
-%block blockwcv {CA ctyp} [r] [rof cofv r CA]%.
+%block blockcvar [A typ] [A' ctyp] [CTA ttoct A A'] {x} {xof ofv x A} {x'} {x'of cofv x' A'} {thm tocpsv- xof CTA x'of}%.
+%block blockwcv [CA ctyp] {r} {rof cofv r CA}%.
 %{! The first block corresponds to the five hypotheses we needed in the ``let`` and ``lam`` cases. The second is for the return continuation we assume in the ``lam`` case&mdash;it does not correspond to any direct style assumption so it need only be well-formed.
 
 For this proof to check we must also make world declarations for the type families ``cof``, ``cofv``, ``cval`` and ``cexp``. I believe this has to do with Twelf's overconservativity of world subsumption on third-order metatheorems, but I am not sure of the exact cause. Although they are strange (and meaningless, since we do not check the totality of these type families, whose modes are all [``*``](/wiki/percent-mode/)), they pose no problem here: !}%
-%block blockcv [v cval]%.
+%block blockcv {v cval}%.
 %worlds (blockcv) (cval) (cexp) %.
 %worlds (blockwcv) (cofv _ _) (cof _) %.
 %{! Then, the world declarations for our theorems and lemmas: !}%

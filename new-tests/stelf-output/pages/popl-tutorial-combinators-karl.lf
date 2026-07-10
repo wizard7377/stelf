@@ -37,7 +37,7 @@
 %{! ## Soundness !}%
 %sort abstract-sound %.
 %mode abstract-sound %in %out %.
-%block abstract-sound-block [x exp]%.
+%block abstract-sound-block {x exp}%.
 %term _ abstract-sound (%the (abstract ([x] x) i) abstract/var) (%the (reduce i (lam ([x] x))) reduce/refl) %.
 %term _ abstract-sound (%the (abstract ([x] E) (app k E)) abstract/closed) (%the (reduce (app k E) (lam ([x] E))) reduce/beta) %.
 %term _ 
@@ -48,7 +48,7 @@
 %total D (abstract-sound D _) %.
 %sort translate-sound %.
 %mode translate-sound %in %out %.
-%block translate-sound-block [x exp] [d_translate translate x x] [_ translate-sound d_translate reduce/refl]%.
+%block translate-sound-block {x exp} {d_translate translate x x} {_ translate-sound d_translate reduce/refl}%.
 %term _ 
 	%pi (translate-sound (%the (translate (lam ([x] E x)) E'') (translate/lam (%the (abstract ([x] E' x) E'') Dabstract) (%the ({x exp} %pi (translate x x) %-> (translate (E x) (E' x))) Dtranslate))) (reduce/trans (reduce/lam ([x] Dreduce1 x)) Dreduce2))
 	%<- ({x} {d_translate translate x x} 
@@ -69,7 +69,7 @@
 %term clean/app %pi (clean (app E1 E2)) %<- (clean E1) %<- (clean E2) %.
 %sort abstract-clean {x} %.
 %mode abstract-clean %in %in %out %.
-%block abstract-clean-block [x exp] [d_clean clean x]%.
+%block abstract-clean-block {x exp} {d_clean clean x}%.
 %term _ abstract-clean _ (%the (abstract ([x] x) i) abstract/var) clean/i %.
 %term _ abstract-clean (%the ({x} %pi (clean x) %-> (clean E)) Dclean) abstract/closed (clean/app (%the (clean E) (Dclean i clean/i)) clean/k) %.
 %term _ 
@@ -80,7 +80,7 @@
 %total D (abstract-clean _ D _) %.
 %sort translate-clean %.
 %mode translate-clean %in %out %.
-%block translate-clean-block [x exp] [d_translate translate x x] [d_clean clean x] [_ translate-clean d_translate d_clean]%.
+%block translate-clean-block {x exp} {d_translate translate x x} {d_clean clean x} {_ translate-clean d_translate d_clean}%.
 %term _ 
 	%pi (translate-clean (%the (translate (lam ([x] E x)) E'') (translate/lam (%the (abstract ([x] E' x) E'') Dabstract) (%the ({x exp} %pi (translate x x) %-> (translate (E x) (E' x))) Dtranslate))) Dclean')
 	%<- ({x} {d_translate translate x x} {d_clean clean x} 
@@ -95,7 +95,7 @@
 %total D (translate-clean D _) %.
 %sort can-abstract {x} %.
 %mode can-abstract %in %out %.
-%block can-abstract-block [x exp] [d_clean clean x]%.
+%block can-abstract-block {x exp} {d_clean clean x}%.
 %term _ can-abstract ([x] [d clean x] d) abstract/var %.
 %term _ can-abstract (%the ({x} %pi (clean x) %-> (clean E)) _) abstract/closed %.
 %term _ 
@@ -106,7 +106,7 @@
 %total D (can-abstract D _) %.
 %sort can-translate {E exp} %.
 %mode can-translate %in %out %.
-%block can-translate-block [x exp] [d_translate translate x x] [d_clean clean x] [_ translate-clean d_translate d_clean] [_ can-translate x d_translate]%.
+%block can-translate-block {x exp} {d_translate translate x x} {d_clean clean x} {_ translate-clean d_translate d_clean} {_ can-translate x d_translate}%.
 %term _ 
 	%pi (can-translate (lam ([x] E x)) (%the (translate (lam ([x] E x)) E'') (translate/lam Dabstract Dtranslate)))
 	%<- ({x} {d_translate translate x x} {d_clean clean x} 

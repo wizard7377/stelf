@@ -420,5 +420,11 @@ module Syntax = struct
 end
 
 include Syntax
-let () = Printexc.register_printer (function Syntax msg -> Some msg | _ -> None)
-let () = Printexc.register_printer (function MissingVar -> Some "MissingVar" | _ -> None)
+
+let () =
+  Printexc.register_printer (function Syntax msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | MissingVar -> Some "MissingVar"
+    | _ -> None)

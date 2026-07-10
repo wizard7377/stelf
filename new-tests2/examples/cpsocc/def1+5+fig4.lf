@@ -1,0 +1,33 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Definition 1 + 5 + Figure 4 : Cont-validity of cps terms
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort cvalR {_ croot} %.
+%sort cvalE {_ %pi ccont %-> cexp} %.
+%sort cvalT {_ ctriv} %.
+%sort cvalC {_ %pi ccont %-> ccont} %.
+%mode cvalR %in %.
+%mode cvalE %in %.
+%mode cvalT %in %.
+%mode cvalC %in %.
+%sort cvalK {_ %pi ccont %-> ctriv %-> cexp} %.
+%mode cvalK %in %.
+%term cval_klam %pi (cvalR (klam E)) %<- (cvalE E) %.
+%term cval_capp 
+	%pi (cvalE ([k ccont] capp T0 T1 (C k)))
+	%<- (cvalT T1)
+	%<- (cvalT T0)
+	%<- (cvalC C) %.
+%term cval_cret %pi (cvalE ([k ccont] cret (C k) T)) %<- (cvalT T) %<- (cvalC C) %.
+%term cval_xlam %pi (cvalT (xlam R)) %<- ({x ctriv} %pi (cvalT x) %-> (cvalR (R x))) %.
+%term cval_vlam 
+	%pi (cvalC ([k ccont] vlam ([v ctriv] C v k)))
+	%<- ({v ctriv} %pi (cvalT v) %-> (cvalE (C v))) %.
+%term cval_k cvalC ([k ccont] k) %.
+%term cval_kappa %pi (cvalK Kappa) %<- ({t ctriv} %pi (cvalT t) %-> (cvalE ([k ccont] Kappa k t))) %.
+%name cvalR %.
+%name cvalE %.
+%name cvalT %.
+%name cvalC %.
+%name cvalK %.
+%terminates (R E T C) (cvalR R) (cvalE E) (cvalT T) (cvalC C) %.
+%terminates K (cvalK K) %.

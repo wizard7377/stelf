@@ -145,8 +145,8 @@
 %mode can-unmap %in %out %.
 %sort can-tunmap {A} %.
 %mode can-tunmap %in %out %.
-%block can-unmap-bind {a cn} [x eterm] [xt unmap x a] [thm can-unmap x xt]%.
-%block can-unmap-bind-for-unmap {a cn} {b etp} [x eterm] [d evof x b] [xt unmap x a] [thm can-unmap x xt]%.
+%block can-unmap-bind [a cn] {x eterm} {xt unmap x a} {thm can-unmap x xt}%.
+%block can-unmap-bind-for-unmap [a cn] [b etp] {x eterm} {d evof x b} {xt unmap x a} {thm can-unmap x xt}%.
 %term _ %pi (can-unmap _ (unmap/app D2 D1)) %<- (can-unmap _ D1) %<- (can-unmap _ D2) %.
 %term _ %pi (can-unmap _ (unmap/pi1 D)) %<- (can-unmap _ D) %.
 %term _ %pi (can-unmap _ (unmap/pi2 D)) %<- (can-unmap _ D) %.
@@ -180,9 +180,9 @@
 %mode unmap-fun %in %in %out %.
 %sort tunmap-fun %.
 %mode tunmap-fun %in %in %out %.
-%block unmap-fun-bind {a cn} [x eterm] [xt unmap x a]%.
-%block unmap-fun-bind-for-invert {a cn} [x eterm] [at map a x] [xt unmap x a]%.
-%block unmap-fun-bind-for-unmap {a cn} {b etp} [x eterm] [d evof x b] [xt unmap x a]%.
+%block unmap-fun-bind [a cn] {x eterm} {xt unmap x a}%.
+%block unmap-fun-bind-for-invert [a cn] {x eterm} {at map a x} {xt unmap x a}%.
+%block unmap-fun-bind-for-unmap [a cn] [b etp] {x eterm} {d evof x b} {xt unmap x a}%.
 %term _ unmap-fun D D cn-eq/i %.
 %term _ 
 	%pi (unmap-fun (unmap/app D2 D1) (unmap/app D2' D1') Deq)
@@ -234,7 +234,7 @@
 %mode invert-map %in %in %out %out %.
 %sort invert-tmap %.
 %mode invert-tmap %in %in %out %out %.
-%block invert-bind {k kd} {d_wf kd-wf k} [a cn] [d ofkd a k] [dm mofkd d met/unit] [thm can-mofkd d dm] [thm vdt/ofkd d d_wf] [x eterm] [at map a x] [xt unmap x a] [thm invert-map d at xt (cn-deq/refl d)]%.
+%block invert-bind [k kd] [d_wf kd-wf k] {a cn} {d ofkd a k} {dm mofkd d met/unit} {thm can-mofkd d dm} {thm vdt/ofkd d d_wf} {x eterm} {at map a x} {xt unmap x a} {thm invert-map d at xt (cn-deq/refl d)}%.
 %scope invert-tmap %term app 
 	%pi (invert-map (ofkd/cn/app Dof1 Dof2) (map/app D2 D1) (unmap/app D2' D1') (cn-deq/cn/app Dequiv1 Dequiv2))
 	%<- (invert-map Dof1 D1 D1' Dequiv1)
@@ -407,7 +407,7 @@
 %mode unmap-equiv %in %in %in %out %out %.
 %sort unmap-equiv' %.
 %mode unmap-equiv' %in %in %in %in %out %.
-%block unmap-bind {k kd} {d_wf kd-wf k} {b etp} {d_unmap tunmap b k} [a cn] [e ofkd a k] [em mofkd e met/unit] [thm1 can-mofkd e em] [thm2 vdt/ofkd e d_wf] [x eterm] [d evof x b] [xt unmap x a] [thm can-unmap x xt] [thm unmap-vof d xt d_unmap e]%.
+%block unmap-bind [k kd] [d_wf kd-wf k] [b etp] [d_unmap tunmap b k] {a cn} {e ofkd a k} {em mofkd e met/unit} {thm1 can-mofkd e em} {thm2 vdt/ofkd e d_wf} {x eterm} {d evof x b} {xt unmap x a} {thm can-unmap x xt} {thm unmap-vof d xt d_unmap e}%.
 %term _ %pi (unmap-of (eof/var _ Dvof) D Dt Dof) %<- (unmap-vof Dvof D Dt Dof) %.
 %term _ 
 	%pi (unmap-of (eof/app Dof2 Dof1) (unmap/app Dmap2 Dmap1) (DmapB _ _ Dmap2) (ofkd/cn/app Dof1' Dof2'))
@@ -826,8 +826,8 @@
 %mode can-map %in %out %.
 %sort can-tmap {K} %.
 %mode can-tmap %in %out %.
-%block can-map-bind {m eterm} [a cn] [at map a m] [thm can-map a at]%.
-%block can-map-bind-for-map {x eterm} {k kd} [a cn] [e ofkd a k] [at map a x] [thm can-map a at]%.
+%block can-map-bind [m eterm] {a cn} {at map a m} {thm can-map a at}%.
+%block can-map-bind-for-map [x eterm] [k kd] {a cn} {e ofkd a k} {at map a x} {thm can-map a at}%.
 %term _ %pi (can-map _ (map/app D2 D1)) %<- (can-map _ D1) %<- (can-map _ D2) %.
 %term _ %pi (can-map _ (map/pi1 D)) %<- (can-map _ D) %.
 %term _ %pi (can-map _ (map/pi2 D)) %<- (can-map _ D) %.
@@ -866,8 +866,8 @@
 %mode map-fun %in %in %out %.
 %sort tmap-fun %.
 %mode tmap-fun %in %in %out %.
-%block map-fun-bind {x eterm} [a cn] [at map a x]%.
-%block map-fun-bind-for-map {x eterm} {k kd} [a cn] [e ofkd a k] [at map a x]%.
+%block map-fun-bind [x eterm] {a cn} {at map a x}%.
+%block map-fun-bind-for-map [x eterm] [k kd] {a cn} {e ofkd a k} {at map a x}%.
 %term _ map-fun D D eterm-eq/i %.
 %term _ 
 	%pi (map-fun (map/app D2 D1) (map/app D2' D1') Deq)
@@ -958,7 +958,7 @@
 %mode map-equiv' %in %in %in %out %out %.
 %sort map-equiv'' %.
 %mode map-equiv'' %in %in %in %in %out %.
-%block map-bind {b etp} {k kd} {d_map tmap k b} {d_wf ewf b} [x eterm] [d evof x b] [a cn] [e ofkd a k] [at map a x] [thm can-map a at] [thm map-of e at d_map (eof/var d_wf d)]%.
+%block map-bind [b etp] [k kd] [d_map tmap k b] [d_wf ewf b] {x eterm} {d evof x b} {a cn} {e ofkd a k} {at map a x} {thm can-map a at} {thm map-of e at d_map (eof/var d_wf d)}%.
 %term _ 
 	%pi (map-of (ofkd/cn/app Dof1 Dof2) (map/app Dmap2 Dmap1) (DmapB _ _ Dmap2) (eof/app Dof2' Dof1'))
 	%<- (map-of Dof1 Dmap1 (tmap/pi DmapB DmapA) Dof1')

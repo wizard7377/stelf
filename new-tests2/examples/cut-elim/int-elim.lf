@@ -1,0 +1,38 @@
+%%% Cut Elimination in Intuitionistic Sequent Calculus
+%%% Author: Frank Pfenning
+%sort ce {_ conc* C} {_ conc C} %.
+%mode ce %in %out %.
+%term ce_cut 
+	%pi (ce (cut* A D1* D2*) D)
+	%<- (ce D1* D1)
+	%<- ({h1 hyp A} ce (D2* h1) (D2 h1))
+	%<- (ca A D1 D2 D) %.
+%term ce_axiom ce (axiom* H) (axiom H) %.
+%term ce_andr %pi (ce (andr* D1* D2*) (andr D1 D2)) %<- (ce D1* D1) %<- (ce D2* D2) %.
+%term ce_andl1 %pi (ce (andl1* D1* H) (andl1 D1 H)) %<- ({h1 hyp A} ce (D1* h1) (D1 h1)) %.
+%term ce_andl2 %pi (ce (andl2* D2* H) (andl2 D2 H)) %<- ({h2 hyp B} ce (D2* h2) (D2 h2)) %.
+%term ce_impr %pi (ce (impr* D1*) (impr D1)) %<- ({h1 hyp A} ce (D1* h1) (D1 h1)) %.
+%term ce_impl 
+	%pi (ce (impl* D1* D2* H) (impl D1 D2 H))
+	%<- (ce D1* D1)
+	%<- ({h2 hyp B} ce (D2* h2) (D2 h2)) %.
+%term ce_orr1 %pi (ce (orr1* D1*) (orr1 D1)) %<- (ce D1* D1) %.
+%term ce_orr2 %pi (ce (orr2* D2*) (orr2 D2)) %<- (ce D2* D2) %.
+%term ce_orl 
+	%pi (ce (orl* D1* D2* H) (orl D1 D2 H))
+	%<- ({h1 hyp A} ce (D1* h1) (D1 h1))
+	%<- ({h2 hyp B} ce (D2* h2) (D2 h2)) %.
+%term ce_notr %pi (ce (notr* D1*) (notr D1)) %<- ({p o} {h1 hyp A} ce (D1* p h1) (D1 p h1)) %.
+%term ce_notl %pi (ce (notl* D1* H) (notl D1 H)) %<- (ce D1* D1) %.
+%term ce_truer ce truer* truer %.
+%term ce_falsel ce (falsel* H) (falsel H) %.
+%term ce_forallr %pi (ce (forallr* D1*) (forallr D1)) %<- ({a i} ce (D1* a) (D1 a)) %.
+%term ce_foralll %pi (ce (foralll* T D1* H) (foralll T D1 H)) %<- ({h1} ce (D1* h1) (D1 h1)) %.
+%term ce_existsr %pi (ce (existsr* T D1*) (existsr T D1)) %<- (ce D1* D1) %.
+%term ce_existsl 
+	%pi (ce (existsl* D1* H) (existsl D1 H))
+	%<- ({a i} {h1 hyp (A1 a)} ce (D1* a h1) (D1 a h1)) %.
+%worlds (l1 l2 l3) (ce D* D) %.
+%covers ce %in %star %.
+%terminates D (ce D _) %.
+%total D (ce D _) %.

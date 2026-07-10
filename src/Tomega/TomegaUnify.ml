@@ -11,7 +11,9 @@ include TOMEGAUNIFY
 open! Basis
 
 exception Unify of string
-let () = Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
 
 module TomegaUnify (TomegaUnify__0 : sig
   (* Unification on Formulas *)

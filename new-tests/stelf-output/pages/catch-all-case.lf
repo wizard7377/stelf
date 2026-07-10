@@ -123,7 +123,7 @@ As a motivating example, we use the theorem about the size of a STLC term from \
 %term size-empty size empty (s z) %.
 %term size-lam %pi (size (lam _ E) (s N)) %<- ({x} {dx size x (s z)} size (E x) N) %.
 %term size-app %pi (size (app E1 E2) (s N)) %<- (size E1 N1) %<- (size E2 N2) %<- (plus N1 N2 N) %.
-%block size-block [x tm] [dx size x (s z)]%.
+%block size-block {x tm} {dx size x (s z)}%.
 %worlds (size-block) (size _ _) %.
 %total E (size E _) %.
 %{! ## Original proof !}%
@@ -136,7 +136,7 @@ As a motivating example, we use the theorem about the size of a STLC term from \
 %{! In \{\{proving|title=Proving metatheorems in non-empty contexts\}\}, we proved the following theorem: !}%
 %sort subst-size {E' tm} {x tm} %.
 %mode subst-size %in %in %in %out %.
-%block sdblock [y tm] [dy size y (s z)] [_ {E' tm} subst-size E' ([x] [dx] dy) dy plus-z]%.
+%block sdblock {y tm} {dy size y (s z)} {_ {E' tm} subst-size E' ([x] [dx] dy) dy plus-z}%.
 %worlds (sdblock) (subst-size _ _ _ _) %.
 %{! The ``%block`` declaration includes a case of the theorem for the variable ``dy`` declared in the context.  
 

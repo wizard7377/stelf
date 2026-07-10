@@ -16,9 +16,14 @@ open! Basis
 (* Author: Carsten Schuermann *)
 (* Modified: Frank Pfenning *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 exception Error' of Paths.occ * string
-let () = Printexc.register_printer (function Error' (_, msg) -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error' (_, msg) -> Some msg | _ -> None)
 
 module Worldify (Worldify__0 : sig
   module Global : GLOBAL

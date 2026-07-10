@@ -29,7 +29,9 @@ open! Basis
 (* Meta Prover Interface *)
 (* Author: Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MTPi (MTPi__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL

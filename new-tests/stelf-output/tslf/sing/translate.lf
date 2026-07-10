@@ -42,7 +42,7 @@
 	%<- (ttrans EA A)
 	%<- ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (trans (EM ex) (B x)))) %.
 %term trans/pair %pi (trans (epair EM EN) (sigma A ([_] B))) %<- (trans EM A) %<- (trans EN B) %.
-%block tbind {r atom} [ex eterm] [tr vtrans ex r]%.
+%block tbind [r atom] {ex eterm} {tr vtrans ex r}%.
 %sort _ %.
 %%%%%  Explicit Contexts  %%%%%
 %sort ttranse %.

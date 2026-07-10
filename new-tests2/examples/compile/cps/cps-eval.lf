@@ -1,0 +1,9 @@
+%%% Evaluation of CPS terms
+%%% Author: Frank Pfenning
+%sort ceval {_ cexp} {_ cval} %.
+%term ceval_vl ceval (vl+ V) V %.
+%term ceval_case_z %pi (ceval (case+ z+ E2 E3) V) %<- (ceval E2 V) %.
+%term ceval_case_s %pi (ceval (case+ (s+ V1') E2 E3) V) %<- (ceval (E3 V1') V) %.
+%term ceval_fst %pi (ceval (fst+ (pair+ V1 V2) K) V) %<- (ceval (K V1) V) %.
+%term ceval_snd %pi (ceval (snd+ (pair+ V1 V2) K) V) %<- (ceval (K V2) V) %.
+%term ceval_app %pi (ceval (app+ (lam+ E1') V2 K) V) %<- (ceval (E1' V2 K) V) %.

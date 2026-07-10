@@ -59,7 +59,7 @@ We would like to assert that every term has a size.  However, because the defini
 The worlds declaration fails because ``size`` does not stay in the empty context.
 
 To give an appropriate worlds declaration for this type family, we must first specify the form of the contexts in which we consider it.  We do so with a block declaration: !}%
-%block size-block [x tm] [_ size x (s z)]%.
+%block size-block {x tm} {_ size x (s z)}%.
 %worlds (size-block) (size _ _) %.
 %{! The block declaration names a context block comprised of the assumptions ``x:tm, _:size x (s z)``.  The world declaration declares ``size`` for any context composed of any number of ``size-blocks``.  That
 is, it specifies that we consider ``size`` in the [regular world](/wiki/percent-worlds/) ``(size-block)*``.  

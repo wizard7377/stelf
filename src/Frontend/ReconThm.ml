@@ -13,7 +13,9 @@ include RECONTHM
 open! Basis
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module ReconThm (ReconThm__0 : sig
   (* Reconstruct Termination Information *)

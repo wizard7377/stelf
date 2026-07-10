@@ -17,8 +17,8 @@
 %prec %right 9 + %.
 %scope + %term o %pi (prop pos) %-> (prop neg) %-> (prop neg) %.
 %prec %right 8 -o %.
-%block bl_atmpos [qp atm pos]%.
-%block bl_atmneg [qn atm neg]%.
+%block bl_atmpos {qp atm pos}%.
+%block bl_atmneg {qn atm neg}%.
 %{! ## Sequent calculus for polarized logic !}%
 %{! ### Logic definition !}%
 %{! 
@@ -30,7 +30,7 @@ A sequent is written
 %name hyp %.
 %sort conc %.
 %name conc %.
-%block bl_hyp {S polarity} {A prop S} [h hyp A]%.
+%block bl_hyp [S polarity] [A prop S] {h hyp A}%.
 %term init %pi (hyp (atom Q)) %-> (conc (atom Q)) %.
 %term upR %pi (conc P) %-> (conc (up P)) %.
 %term upL %pi (%pi (hyp P) %-> (conc C)) %-> (hyp (up P)) %-> (conc C) %.
@@ -79,7 +79,7 @@ These can be generically expressed as:
 %inline rfoc [P] conseq (conc-rfoc P) %.
 %inline lfoc [N] [N'] conseq (conc-lfoc N N') %.
 %inline right [N] conseq (conc-right N) %.
-%block bl_left {P prop pos} [l left P]%.
+%block bl_left [P prop pos] {l left P}%.
 %term initR' %pi (left (atom Qp)) %-> (rfoc (atom Qp)) %.
 %term initL' lfoc (atom Qn) (atom Qn) %.
 %term upR' %pi (rfoc P) %-> (right (up P)) %.
@@ -192,7 +192,7 @@ These can be generically expressed as:
 %sort eta+ {P prop pos} %.
 %mode eta- %in %in %out %.
 %mode eta+ %in %in %out %.
-%block bl_rfoc {P prop pos} [rf rfoc P]%.
+%block bl_rfoc [P prop pos] {rf rfoc P}%.
 %term _ eta+ (atom Qp) ([rf] R rf) ([l] R (initR' l)) %.
 %term _ eta- (atom Qn) ([n'] [lf] R n' lf) (R (atom Qn) initL') %.
 %term _ 
@@ -264,7 +264,7 @@ These can be generically expressed as:
 	%pi (sd- (-oL' R1 R2) ([h] -oL D1 ([h2] D2 h2) h))
 	%<- (sd+ R1 D1)
 	%<- (sd- R2 ([h2] D2 h2)) %.
-%block bl_sdL {P prop pos} [l left P] [h hyp P] [_ sdL l h]%.
+%block bl_sdL [P prop pos] {l left P} {h hyp P} {_ sdL l h}%.
 %worlds (bl_atmpos bl_atmneg bl_sdL) (sdR _ _) (sd+ _ _) (sd- _ _) (sdL _ _) %.
 %total [] (sdL _ _) %.
 %total (R1 R2 R3) (sdR R1 _) (sd+ R2 _) (sd- R3 _) %.
@@ -375,8 +375,8 @@ These can be generically expressed as:
 	%<- (cp+ Dp1 R1)
 	%<- ({hn2 hyp N2} {l2 left (down N2)} %pi (cph- hn2 l2) %-> (cp+ (Dp2 hn2) (R2 l2)))
 	%<- (adm-oL R1 ([l2] R2 l2) ([l] R12 l)) %.
-%block bl_cph+ {P prop pos} [hp hyp P] [l left P] [_ cph+ hp l]%.
-%block bl_cph- {N prop neg} [hn hyp N] [l left (down N)] [_ cph- hn l]%.
+%block bl_cph+ [P prop pos] {hp hyp P} {l left P} {_ cph+ hp l}%.
+%block bl_cph- [N prop neg] {hn hyp N} {l left (down N)} {_ cph- hn l}%.
 %worlds (bl_atmpos bl_atmneg bl_cph+ bl_cph-) (cp- _ _) (cp+ _ _) (cph- _ _) (cph+ _ _) %.
 %total [] (cph+ Hp _) %.
 %total [] (cph- Hn _) %.

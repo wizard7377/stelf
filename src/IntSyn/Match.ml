@@ -17,9 +17,16 @@ open! Basis
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga, Brigitte Pientka *)
 exception Match of string
-let () = Printexc.register_printer (function Match msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Match msg -> Some msg | _ -> None)
+
 exception NotInvertible
-let () = Printexc.register_printer (function NotInvertible -> Some "Not invertible" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | NotInvertible -> Some "Not invertible"
+    | _ -> None)
 
 module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
   (*! structure IntSyn = IntSyn' !*)

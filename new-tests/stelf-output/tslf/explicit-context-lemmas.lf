@@ -79,7 +79,7 @@
 %total {} (cxt-precedes-not-refl _ _) %.
 %sort isvar-fun %.
 %mode isvar-fun %in %in %out %.
-%block isvar-fun-block {n loc} [x cn] [d isvar x n] [thm isvar-fun d d seq/loc/refl]%.
+%block isvar-fun-block [n loc] {x cn} {d isvar x n} {thm isvar-fun d d seq/loc/refl}%.
 %worlds (cn-block isvar-fun-block) (isvar-fun _ _ _) %.
 %total {} (isvar-fun _ _ _) %.
 %sort seq/loc/less-r %.

@@ -1,0 +1,43 @@
+%%% Conversion to canonical form
+%%% Author: Frank Pfenning
+% Weak head reduction
+%sort whr {_ pf A} {_ pf A} %.
+% Weak head reduction
+%name whr %.
+% Reductions
+%term whr_andl whr (andel (andi D E)) D %.
+%term whr_andr whr (ander (andi D E)) E %.
+%term whr_imp whr (impe (impi D) E) (D E) %.
+%term whr_forall whr (foralle (foralli D) T) (D T) %.
+% Congruences on elimination rules
+%term whr_andel %pi (whr (andel D) (andel D')) %<- (whr D D') %.
+%term whr_ander %pi (whr (ander D) (ander D')) %<- (whr D D') %.
+%term whr_impe %pi (whr (impe D E) (impe D' E)) %<- (whr D D') %.
+%term whr_foralle %pi (whr (foralle D T) (foralle D' T)) %<- (whr D D') %.
+% Conversion to canonical and atomic form.
+%sort tocan {A o} {_ pf A} {_ pf A} %.
+% Conversion to canonical form
+%sort toatm {_ pf A} {_ pf A} %.
+% Conversion to atomic form
+%name tocan %.
+%name toatm %.
+%term tc_and 
+	%pi (tocan (A and B) D (andi D1' D2'))
+	%<- (tocan A (andel D) D1')
+	%<- (tocan B (ander D) D2') %.
+%term tc_imp 
+	%pi (tocan (A imp B) D (impi D'))
+	%<- ({u pf A} %pi (toatm u u) %-> (tocan B (impe D u) (D' u))) %.
+%term tc_true tocan true D truei %.
+%term tc_forall 
+	%pi (tocan (forall A) D (foralli D'))
+	%<- ({a i} tocan (A a) (foralle D a) (D' a)) %.
+%term tc_whr %pi (tocan (atom P) D D') %<- (whr D D'') %<- (tocan (atom P) D'' D') %.
+%term tc_atm %pi (tocan (atom P) D D') %<- (toatm D D') %.
+%term ta_impe 
+	%pi (toatm (impe D (%the (pf A) E)) (impe D' E'))
+	%<- (toatm D D')
+	%<- (tocan A E E') %.
+%term ta_andel %pi (toatm (andel D) (andel D')) %<- (toatm D D') %.
+%term ta_ander %pi (toatm (ander D) (ander D')) %<- (toatm D D') %.
+%term ta_foralle %pi (toatm (foralle D T) (foralle D' T)) %<- (toatm D D') %.

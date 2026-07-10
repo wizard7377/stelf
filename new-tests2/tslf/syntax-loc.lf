@@ -1,0 +1,7 @@
+%%%% Syntax for locations
+%sort loc %.
+%term loc/z loc %.
+%term loc/s %pi loc %-> loc %.
+%worlds () (loc) %.
+%sort seq/loc {_ loc} {_ loc} %.
+%term seq/loc/refl seq/loc L1 L1 %.

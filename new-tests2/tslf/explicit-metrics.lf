@@ -1,0 +1,726 @@
+%%%% metrics on typing derivations for the explicit system
+%sort mkd-wf {_ kd-wf K} {_ met} %.
+%mode mkd-wf %star %star %.
+%sort mkd-sub {_ kd-sub K1 K2} {_ met} %.
+%mode mkd-sub %star %star %.
+%sort mkd-deq {_ kd-deq K1 K2} {_ met} %.
+%mode mkd-deq %star %star %.
+%sort mcn-deq {_ cn-deq C1 C2 K} {_ met} %.
+%mode mcn-deq %star %star %.
+%term mofkd/cn/unit mofkd ofkd/cn/unit met/unit %.
+%term mofkd/tp/unit mofkd ofkd/tp/unit met/unit %.
+%term mofkd/tp/tagged mofkd ofkd/tp/tagged met/unit %.
+%term mofkd/tp/ref %pi (mofkd (ofkd/tp/ref D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mofkd/tp/tag %pi (mofkd (ofkd/tp/tag D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mofkd/cn/pj1 %pi (mofkd (ofkd/cn/pj1 D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mofkd/cn/pj2 %pi (mofkd (ofkd/cn/pj2 D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mofkd/kd/sing %pi (mofkd (ofkd/kd/sing D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mofkd/tp/cross 
+	%pi (mofkd (ofkd/tp/cross D1 D2) (met/pair D1' D2'))
+	%<- (mofkd D2 D2')
+	%<- (mofkd D1 D1') %.
+%term mofkd/tp/arrow 
+	%pi (mofkd (ofkd/tp/arrow D1 D2) (met/pair D1' D2'))
+	%<- (mofkd D2 D2')
+	%<- (mofkd D1 D1') %.
+%term mofkd/tp/sum 
+	%pi (mofkd (ofkd/tp/sum D1 D2) (met/pair D1' D2'))
+	%<- (mofkd D2 D2')
+	%<- (mofkd D1 D1') %.
+%term mofkd/cn/pair 
+	%pi (mofkd (ofkd/cn/pair D1 D2) (met/pair D1' D2'))
+	%<- (mofkd D2 D2')
+	%<- (mofkd D1 D1') %.
+%term mofkd/cn/app 
+	%pi (mofkd (ofkd/cn/app D1 D2) (met/pair D1' D2'))
+	%<- (mofkd D2 D2')
+	%<- (mofkd D1 D1') %.
+%term mofkd/sgm-ext 
+	%pi (mofkd (ofkd/sgm-ext D1 D2) (met/pair D1' D2'))
+	%<- (mofkd D2 D2')
+	%<- (mofkd D1 D1') %.
+%term mofkd/tp/forall 
+	%pi (mofkd (ofkd/tp/forall D1 D2) (met/pair D1' D2'))
+	%<- (mkd-wf D2 D2')
+	%<- ({a} {da} {dm mofkd da met/unit} mofkd (D1 a da) D1') %.
+%term mofkd/cn/mu 
+	%pi (mofkd (ofkd/cn/mu D1 D2) (met/pair D1' D2'))
+	%<- (mkd-wf D2 D2')
+	%<- ({a} {da} {dm mofkd da met/unit} mofkd (D1 a da) D1') %.
+%term mofkd/cn/lam 
+	%pi (mofkd (ofkd/cn/lam D1 D2) (met/pair D1' D2'))
+	%<- (mkd-wf D2 D2')
+	%<- ({a} {da} {dm mofkd da met/unit} mofkd (D1 a da) D1') %.
+%term mofkd/pi-ext 
+	%pi (mofkd (ofkd/pi-ext D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} mofkd (D2 a da) D2')
+	%<- (mofkd D1 D1') %.
+%term mofkd/sub 
+	%pi (mofkd (ofkd/sub D1 DS) (met/pair D1' DS'))
+	%<- (mkd-sub DS DS')
+	%<- (mofkd D1 D1') %.
+%term mofkd/deq 
+	%pi (mofkd (ofkd/deq D1 DS) (met/pair D1' DS'))
+	%<- (mkd-deq DS DS')
+	%<- (mofkd D1 D1') %.
+%term mkd-wf/kd/unit mkd-wf kd-wf/kd/unit met/unit %.
+%term mkd-wf/kd/type mkd-wf kd-wf/kd/type met/unit %.
+%term mkd-wf/kd/sing %pi (mkd-wf (kd-wf/kd/sing D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mkd-wf/kd/sgm 
+	%pi (mkd-wf (kd-wf/kd/sgm D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} mkd-wf (D2 a da) D2')
+	%<- (mkd-wf D1 D1') %.
+%term mkd-wf/kd/pi 
+	%pi (mkd-wf (kd-wf/kd/pi D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} mkd-wf (D2 a da) D2')
+	%<- (mkd-wf D1 D1') %.
+%term mkd-deq/kd/unit mkd-deq kd-deq/kd/unit met/unit %.
+%term mkd-deq/kd/type mkd-deq kd-deq/kd/type met/unit %.
+%term mkd-deq/kd/sing %pi (mkd-deq (kd-deq/kd/sing D1) (met/sing D1')) %<- (mcn-deq D1 D1') %.
+%term mkd-deq/kd/sgm 
+	%pi (mkd-deq (kd-deq/kd/sgm D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} mkd-deq (D2 a da) D2')
+	%<- (mkd-deq D1 D1') %.
+%term mkd-deq/kd/pi 
+	%pi (mkd-deq (kd-deq/kd/pi D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} mkd-deq (D2 a da) D2')
+	%<- (mkd-deq D1 D1') %.
+%term mkd-sub/kd/unit mkd-sub kd-sub/kd/unit met/unit %.
+%term mkd-sub/kd/type mkd-sub kd-sub/kd/type met/unit %.
+%term mkd-sub/kd/sing-kd/sing %pi (mkd-sub (kd-sub/kd/sing-kd/sing D1) (met/sing D1')) %<- (mcn-deq D1 D1') %.
+%term mkd-sub/kd/sing-kd/type %pi (mkd-sub (kd-sub/kd/sing-kd/type D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mkd-sub/kd/sgm 
+	%pi (mkd-sub (kd-sub/kd/sgm D1 D2 D3) (met/pair D1' (met/pair D2' D3')))
+	%<- ({a} {da} {dm mofkd da met/unit} mkd-wf (D3 a da) D3')
+	%<- ({a} {da} {dm mofkd da met/unit} mkd-sub (D2 a da) D2')
+	%<- (mkd-sub D1 D1') %.
+%term mkd-sub/kd/pi 
+	%pi (mkd-sub (kd-sub/kd/pi D1 D2 D3) (met/pair D1' (met/pair D2' D3')))
+	%<- ({a} {da} {dm mofkd da met/unit} mkd-wf (D3 a da) D3')
+	%<- ({a} {da} {dm mofkd da met/unit} mkd-sub (D2 a da) D2')
+	%<- (mkd-sub D1 D1') %.
+%term mcn-deq/refl %pi (mcn-deq (cn-deq/refl D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mcn-deq/sym %pi (mcn-deq (cn-deq/sym D1) (met/sing D1')) %<- (mcn-deq D1 D1') %.
+%term mcn-deq/trans 
+	%pi (mcn-deq (cn-deq/trans D1 D2) (met/pair D1' D2'))
+	%<- (mcn-deq D2 D2')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/cn/unit mcn-deq cn-deq/cn/unit met/unit %.
+%term mcn-deq/tp/unit mcn-deq cn-deq/tp/unit met/unit %.
+%term mcn-deq/tp/tagged mcn-deq cn-deq/tp/tagged met/unit %.
+%term mcn-deq/tp/ref %pi (mcn-deq (cn-deq/tp/ref D1) (met/sing D1')) %<- (mcn-deq D1 D1') %.
+%term mcn-deq/tp/tag %pi (mcn-deq (cn-deq/tp/tag D1) (met/sing D1')) %<- (mcn-deq D1 D1') %.
+%term mcn-deq/cn/pj1 %pi (mcn-deq (cn-deq/cn/pj1 D1) (met/sing D1')) %<- (mcn-deq D1 D1') %.
+%term mcn-deq/cn/pj2 %pi (mcn-deq (cn-deq/cn/pj2 D1) (met/sing D1')) %<- (mcn-deq D1 D1') %.
+%term mcn-deq/kd/sing %pi (mcn-deq (cn-deq/kd/sing D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term mcn-deq/tp/cross 
+	%pi (mcn-deq (cn-deq/tp/cross D1 D2) (met/pair D1' D2'))
+	%<- (mcn-deq D2 D2')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/tp/arrow 
+	%pi (mcn-deq (cn-deq/tp/arrow D1 D2) (met/pair D1' D2'))
+	%<- (mcn-deq D2 D2')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/tp/sum 
+	%pi (mcn-deq (cn-deq/tp/sum D1 D2) (met/pair D1' D2'))
+	%<- (mcn-deq D2 D2')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/cn/pair 
+	%pi (mcn-deq (cn-deq/cn/pair D1 D2) (met/pair D1' D2'))
+	%<- (mcn-deq D2 D2')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/cn/app 
+	%pi (mcn-deq (cn-deq/cn/app D1 D2) (met/pair D1' D2'))
+	%<- (mcn-deq D2 D2')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/sgm-ext 
+	%pi (mcn-deq (cn-deq/sgm-ext D1 D2) (met/pair D1' D2'))
+	%<- (mcn-deq D2 D2')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/kd/unit 
+	%pi (mcn-deq (cn-deq/kd/unit D1 D2) (met/pair D1' D2'))
+	%<- (mofkd D2 D2')
+	%<- (mofkd D1 D1') %.
+%term mcn-deq/tp/forall 
+	%pi (mcn-deq (cn-deq/tp/forall D1 D2) (met/pair D1' D2'))
+	%<- (mkd-deq D2 D2')
+	%<- ({a} {da} {dm mofkd da met/unit} mcn-deq (D1 a da) D1') %.
+%term mcn-deq/cn/mu 
+	%pi (mcn-deq (cn-deq/cn/mu D1 D2) (met/pair D1' D2'))
+	%<- (mkd-deq D2 D2')
+	%<- ({a} {da} {dm mofkd da met/unit} mcn-deq (D1 a da) D1') %.
+%term mcn-deq/cn/lam 
+	%pi (mcn-deq (cn-deq/cn/lam D1 D2) (met/pair D1' D2'))
+	%<- (mkd-deq D2 D2')
+	%<- ({a} {da} {dm mofkd da met/unit} mcn-deq (D1 a da) D1') %.
+%term mcn-deq/pi-ext 
+	%pi (mcn-deq (cn-deq/pi-ext D1 D2 D3) (met/pair D1' (met/pair D2' D3')))
+	%<- ({a} {da} {dm mofkd da met/unit} mcn-deq (D3 a da) D3')
+	%<- (mofkd D2 D2')
+	%<- (mofkd D1 D1') %.
+%term mcn-deq/pi-ext-2 
+	%pi (mcn-deq (cn-deq/pi-ext-2 D1 D3) (met/pair D1' D3'))
+	%<- ({a} {da} {dm mofkd da met/unit} mcn-deq (D3 a da) D3')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/sub 
+	%pi (mcn-deq (cn-deq/sub D1 DS) (met/pair D1' DS'))
+	%<- (mkd-sub DS DS')
+	%<- (mcn-deq D1 D1') %.
+%term mcn-deq/deq 
+	%pi (mcn-deq (cn-deq/deq D1 DS) (met/pair D1' DS'))
+	%<- (mkd-deq DS DS')
+	%<- (mcn-deq D1 D1') %.
+%sort can-mkd-wf {D kd-wf K} {_ mkd-wf D Km} %.
+%mode can-mkd-wf %in %out %.
+%sort can-mkd-sub {D kd-sub K K'} {_ mkd-sub D Km} %.
+%mode can-mkd-sub %in %out %.
+%sort can-mkd-deq {D kd-deq K K'} {_ mkd-deq D Km} %.
+%mode can-mkd-deq %in %out %.
+%sort can-mcn-deq {D cn-deq C C' K'} {_ mcn-deq D Km} %.
+%mode can-mcn-deq %in %out %.
+%term _ can-mofkd ofkd/cn/unit mofkd/cn/unit %.
+%term _ can-mofkd ofkd/tp/unit mofkd/tp/unit %.
+%term _ can-mofkd ofkd/tp/tagged mofkd/tp/tagged %.
+%term _ %pi (can-mofkd (ofkd/tp/ref D1) (mofkd/tp/ref D1')) %<- (can-mofkd D1 D1') %.
+%term _ %pi (can-mofkd (ofkd/tp/tag D1) (mofkd/tp/tag D1')) %<- (can-mofkd D1 D1') %.
+%term _ %pi (can-mofkd (ofkd/kd/sing D1) (mofkd/kd/sing D1')) %<- (can-mofkd D1 D1') %.
+%term _ %pi (can-mofkd (ofkd/cn/pj1 D1) (mofkd/cn/pj1 D1')) %<- (can-mofkd D1 D1') %.
+%term _ %pi (can-mofkd (ofkd/cn/pj2 D1) (mofkd/cn/pj2 D1')) %<- (can-mofkd D1 D1') %.
+%term _ 
+	%pi (can-mofkd (ofkd/cn/pair D1 D2) (mofkd/cn/pair D1' D2'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mofkd D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/tp/cross D1 D2) (mofkd/tp/cross D1' D2'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mofkd D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/tp/arrow D1 D2) (mofkd/tp/arrow D1' D2'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mofkd D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/tp/sum D1 D2) (mofkd/tp/sum D1' D2'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mofkd D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/sgm-ext D1 D2) (mofkd/sgm-ext D1' D2'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mofkd D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/cn/app D1 D2) (mofkd/cn/app D1' D2'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mofkd D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/pi-ext D1 D2) (mofkd/pi-ext D1' D2'))
+	%<- (can-mofkd D1 D1')
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mofkd (D2 a da) (D2' a da dm)) %.
+%term _ 
+	%pi (can-mofkd (ofkd/cn/lam D1 D2) (mofkd/cn/lam D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mofkd (D1 a da) (D1' a da dm))
+	%<- (can-mkd-wf D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/tp/forall D1 D2) (mofkd/tp/forall D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mofkd (D1 a da) (D1' a da dm))
+	%<- (can-mkd-wf D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/cn/mu D1 D2) (mofkd/cn/mu D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mofkd (D1 a da) (D1' a da dm))
+	%<- (can-mkd-wf D2 D2') %.
+%term _ 
+	%pi (can-mofkd (ofkd/sub D1 DS) (mofkd/sub D1' DS'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mkd-sub DS DS') %.
+%term _ 
+	%pi (can-mofkd (ofkd/deq D1 DS) (mofkd/deq D1' DS'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mkd-deq DS DS') %.
+%term _ can-mkd-wf kd-wf/kd/unit mkd-wf/kd/unit %.
+%term _ can-mkd-wf kd-wf/kd/type mkd-wf/kd/type %.
+%term _ %pi (can-mkd-wf (kd-wf/kd/sing D1) (mkd-wf/kd/sing D1')) %<- (can-mofkd D1 D1') %.
+%term _ 
+	%pi (can-mkd-wf (kd-wf/kd/sgm D1 D2) (mkd-wf/kd/sgm D1' D2'))
+	%<- (can-mkd-wf D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-mkd-wf (D2 a da) (D2' a da dm)) %.
+%term _ 
+	%pi (can-mkd-wf (kd-wf/kd/pi D1 D2) (mkd-wf/kd/pi D1' D2'))
+	%<- (can-mkd-wf D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-mkd-wf (D2 a da) (D2' a da dm)) %.
+%term _ can-mkd-deq kd-deq/kd/unit mkd-deq/kd/unit %.
+%term _ can-mkd-deq kd-deq/kd/type mkd-deq/kd/type %.
+%term _ 
+	%pi (can-mkd-deq (kd-deq/kd/sing D1) (mkd-deq/kd/sing D1'))
+	%<- (can-mcn-deq D1 D1') %.
+%term _ 
+	%pi (can-mkd-deq (kd-deq/kd/sgm D1 D2) (mkd-deq/kd/sgm D1' D2'))
+	%<- (can-mkd-deq D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-mkd-deq (D2 a da) (D2' a da dm)) %.
+%term _ 
+	%pi (can-mkd-deq (kd-deq/kd/pi D1 D2) (mkd-deq/kd/pi D1' D2'))
+	%<- (can-mkd-deq D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-mkd-deq (D2 a da) (D2' a da dm)) %.
+%term _ can-mkd-sub kd-sub/kd/unit mkd-sub/kd/unit %.
+%term _ can-mkd-sub kd-sub/kd/type mkd-sub/kd/type %.
+%term _ 
+	%pi (can-mkd-sub (kd-sub/kd/sing-kd/sing D1) (mkd-sub/kd/sing-kd/sing D1'))
+	%<- (can-mcn-deq D1 D1') %.
+%term _ 
+	%pi (can-mkd-sub (kd-sub/kd/sing-kd/type D1) (mkd-sub/kd/sing-kd/type D1'))
+	%<- (can-mofkd D1 D1') %.
+%term _ 
+	%pi (can-mkd-sub (kd-sub/kd/sgm D1 D2 D3) (mkd-sub/kd/sgm D1' D2' D3'))
+	%<- (can-mkd-sub D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-mkd-sub (D2 a da) (D2' a da dm))
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-mkd-wf (D3 a da) (D3' a da dm)) %.
+%term _ 
+	%pi (can-mkd-sub (kd-sub/kd/pi D1 D2 D3) (mkd-sub/kd/pi D1' D2' D3'))
+	%<- (can-mkd-sub D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-mkd-sub (D2 a da) (D2' a da dm))
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-mkd-wf (D3 a da) (D3' a da dm)) %.
+%term _ can-mcn-deq cn-deq/cn/unit mcn-deq/cn/unit %.
+%term _ can-mcn-deq cn-deq/tp/unit mcn-deq/tp/unit %.
+%term _ can-mcn-deq cn-deq/tp/tagged mcn-deq/tp/tagged %.
+%term _ %pi (can-mcn-deq (cn-deq/sym D1) (mcn-deq/sym D1')) %<- (can-mcn-deq D1 D1') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/tp/ref D1) (mcn-deq/tp/ref D1'))
+	%<- (can-mcn-deq D1 D1') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/tp/tag D1) (mcn-deq/tp/tag D1'))
+	%<- (can-mcn-deq D1 D1') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/kd/sing D1) (mcn-deq/kd/sing D1'))
+	%<- (can-mofkd D1 D1') %.
+%term _ %pi (can-mcn-deq (cn-deq/refl D1) (mcn-deq/refl D1')) %<- (can-mofkd D1 D1') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/cn/pj1 D1) (mcn-deq/cn/pj1 D1'))
+	%<- (can-mcn-deq D1 D1') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/cn/pj2 D1) (mcn-deq/cn/pj2 D1'))
+	%<- (can-mcn-deq D1 D1') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/kd/unit D1 D2) (mcn-deq/kd/unit D1' D2'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mofkd D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/trans D1 D2) (mcn-deq/trans D1' D2'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mcn-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/cn/pair D1 D2) (mcn-deq/cn/pair D1' D2'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mcn-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/tp/cross D1 D2) (mcn-deq/tp/cross D1' D2'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mcn-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/tp/arrow D1 D2) (mcn-deq/tp/arrow D1' D2'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mcn-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/tp/sum D1 D2) (mcn-deq/tp/sum D1' D2'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mcn-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/sgm-ext D1 D2) (mcn-deq/sgm-ext D1' D2'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mcn-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/cn/app D1 D2) (mcn-deq/cn/app D1' D2'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mcn-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/pi-ext D1 D2 D3) (mcn-deq/pi-ext D1' D2' D3'))
+	%<- (can-mofkd D1 D1')
+	%<- (can-mofkd D2 D2')
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mcn-deq (D3 a da) (D3' a da dm)) %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/pi-ext-2 D1 D3) (mcn-deq/pi-ext-2 D1' D3'))
+	%<- (can-mcn-deq D1 D1')
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mcn-deq (D3 a da) (D3' a da dm)) %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/cn/lam D1 D2) (mcn-deq/cn/lam D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mcn-deq (D1 a da) (D1' a da dm))
+	%<- (can-mkd-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/tp/forall D1 D2) (mcn-deq/tp/forall D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mcn-deq (D1 a da) (D1' a da dm))
+	%<- (can-mkd-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/cn/mu D1 D2) (mcn-deq/cn/mu D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} {dcm can-mofkd da dm} can-mcn-deq (D1 a da) (D1' a da dm))
+	%<- (can-mkd-deq D2 D2') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/sub D1 DS) (mcn-deq/sub D1' DS'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mkd-sub DS DS') %.
+%term _ 
+	%pi (can-mcn-deq (cn-deq/deq D1 DS) (mcn-deq/deq D1' DS'))
+	%<- (can-mcn-deq D1 D1')
+	%<- (can-mkd-deq DS DS') %.
+%worlds (cn-block can-mofkd-block ovar-block) (can-mofkd _ _) (can-mkd-wf _ _) (can-mkd-deq _ _) (can-mkd-sub _ _) (can-mcn-deq _ _) %.
+%total (D1 D2 D3 D4 D5) (can-mofkd D1 _) (can-mkd-wf D2 _) (can-mkd-deq D4 _) (can-mkd-sub D3 _) (can-mcn-deq D5 _) %.
+%sort meofkd {_ eofkd G C K} {_ met} %.
+%sort mekd-wf {_ ekd-wf G K} {_ met} %.
+%sort mekd-sub {_ ekd-sub G K1 K2} {_ met} %.
+%sort mekd-deq {_ ekd-deq G K1 K2} {_ met} %.
+%sort mecn-deq {_ ecn-deq G C1 C2 K} {_ met} %.
+%term mekd-wf/kd/unit mekd-wf (ekd-wf/kd/unit _) met/unit %.
+%term mekd-wf/kd/type mekd-wf (ekd-wf/kd/type _) met/unit %.
+%term mekd-wf/kd/sing %pi (mekd-wf (ekd-wf/kd/sing D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term mekd-wf/kd/sgm 
+	%pi (mekd-wf (ekd-wf/kd/sgm D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} mekd-wf (D2 a da) D2')
+	%<- (mekd-wf D1 D1') %.
+%term mekd-wf/kd/pi 
+	%pi (mekd-wf (ekd-wf/kd/pi D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} mekd-wf (D2 a da) D2')
+	%<- (mekd-wf D1 D1') %.
+%term meofkd/cn/unit meofkd (eofkd/cn/unit _) met/unit %.
+%term meofkd/tp/unit meofkd (eofkd/tp/unit _) met/unit %.
+%term meofkd/tp/tagged meofkd (eofkd/tp/tagged _) met/unit %.
+%term meofkd/tp/ref %pi (meofkd (eofkd/tp/ref D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term meofkd/tp/tag %pi (meofkd (eofkd/tp/tag D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term meofkd/cn/pj1 %pi (meofkd (eofkd/cn/pj1 D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term meofkd/cn/pj2 %pi (meofkd (eofkd/cn/pj2 D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term meofkd/kd/sing %pi (meofkd (eofkd/kd/sing D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term meofkd/tp/cross 
+	%pi (meofkd (eofkd/tp/cross D1 D2) (met/pair D1' D2'))
+	%<- (meofkd D2 D2')
+	%<- (meofkd D1 D1') %.
+%term meofkd/tp/arrow 
+	%pi (meofkd (eofkd/tp/arrow D1 D2) (met/pair D1' D2'))
+	%<- (meofkd D2 D2')
+	%<- (meofkd D1 D1') %.
+%term meofkd/tp/sum 
+	%pi (meofkd (eofkd/tp/sum D1 D2) (met/pair D1' D2'))
+	%<- (meofkd D2 D2')
+	%<- (meofkd D1 D1') %.
+%term meofkd/cn/pair 
+	%pi (meofkd (eofkd/cn/pair D1 D2) (met/pair D1' D2'))
+	%<- (meofkd D2 D2')
+	%<- (meofkd D1 D1') %.
+%term meofkd/cn/app 
+	%pi (meofkd (eofkd/cn/app D1 D2) (met/pair D1' D2'))
+	%<- (meofkd D2 D2')
+	%<- (meofkd D1 D1') %.
+%term meofkd/sgm-ext 
+	%pi (meofkd (eofkd/sgm-ext D1 D2) (met/pair D1' D2'))
+	%<- (meofkd D2 D2')
+	%<- (meofkd D1 D1') %.
+%term meofkd/tp/forall 
+	%pi (meofkd (eofkd/tp/forall D1 D2) (met/pair D1' D2'))
+	%<- (mekd-wf D2 D2')
+	%<- ({a} {da} meofkd (D1 a da) D1') %.
+%term meofkd/cn/mu 
+	%pi (meofkd (eofkd/cn/mu D1 D2) (met/pair D1' D2'))
+	%<- (mekd-wf D2 D2')
+	%<- ({a} {da} meofkd (D1 a da) D1') %.
+%term meofkd/cn/lam 
+	%pi (meofkd (eofkd/cn/lam D1 D2) (met/pair D1' D2'))
+	%<- (mekd-wf D2 D2')
+	%<- ({a} {da} meofkd (D1 a da) D1') %.
+%term meofkd/pi-ext 
+	%pi (meofkd (eofkd/pi-ext D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} meofkd (D2 a da) D2')
+	%<- (meofkd D1 D1') %.
+%term meofkd/sub 
+	%pi (meofkd (eofkd/sub D1 DS) (met/pair D1' DS'))
+	%<- (mekd-sub DS DS')
+	%<- (meofkd D1 D1') %.
+%term meofkd/deq 
+	%pi (meofkd (eofkd/deq D1 DS) (met/pair D1' DS'))
+	%<- (mekd-deq DS DS')
+	%<- (meofkd D1 D1') %.
+%term meofkd/var meofkd (eofkd/var _) met/unit %.
+%term meofkd/closed %pi (meofkd (eofkd/closed D1 _) DM) %<- (mofkd D1 DM) %.
+%term mekd-deq/kd/unit mekd-deq (ekd-deq/kd/unit _) met/unit %.
+%term mekd-deq/kd/type mekd-deq (ekd-deq/kd/type _) met/unit %.
+%term mekd-deq/kd/sing %pi (mekd-deq (ekd-deq/kd/sing D1) (met/sing D1')) %<- (mecn-deq D1 D1') %.
+%term mekd-deq/kd/sgm 
+	%pi (mekd-deq (ekd-deq/kd/sgm D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} mekd-deq (D2 a da) D2')
+	%<- (mekd-deq D1 D1') %.
+%term mekd-deq/kd/pi 
+	%pi (mekd-deq (ekd-deq/kd/pi D1 D2) (met/pair D1' D2'))
+	%<- ({a} {da} mekd-deq (D2 a da) D2')
+	%<- (mekd-deq D1 D1') %.
+%term mekd-sub/kd/unit mekd-sub (ekd-sub/kd/unit _) met/unit %.
+%term mekd-sub/kd/type mekd-sub (ekd-sub/kd/type _) met/unit %.
+%term mekd-sub/kd/sing-kd/sing %pi (mekd-sub (ekd-sub/kd/sing-kd/sing D1) (met/sing D1')) %<- (mecn-deq D1 D1') %.
+%term mekd-sub/kd/sing-kd/type %pi (mekd-sub (ekd-sub/kd/sing-kd/type D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term mekd-sub/kd/sgm 
+	%pi (mekd-sub (ekd-sub/kd/sgm D1 D2 D3) (met/pair D1' (met/pair D2' D3')))
+	%<- ({a} {da} mekd-wf (D3 a da) D3')
+	%<- ({a} {da} mekd-sub (D2 a da) D2')
+	%<- (mekd-sub D1 D1') %.
+%term mekd-sub/kd/pi 
+	%pi (mekd-sub (ekd-sub/kd/pi D1 D2 D3) (met/pair D1' (met/pair D2' D3')))
+	%<- ({a} {da} mekd-wf (D3 a da) D3')
+	%<- ({a} {da} mekd-sub (D2 a da) D2')
+	%<- (mekd-sub D1 D1') %.
+%term mecn-deq/refl %pi (mecn-deq (ecn-deq/refl D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term mecn-deq/sym %pi (mecn-deq (ecn-deq/sym D1) (met/sing D1')) %<- (mecn-deq D1 D1') %.
+%term mecn-deq/trans 
+	%pi (mecn-deq (ecn-deq/trans D1 D2) (met/pair D1' D2'))
+	%<- (mecn-deq D2 D2')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/cn/unit mecn-deq (ecn-deq/cn/unit _) met/unit %.
+%term mecn-deq/tp/unit mecn-deq (ecn-deq/tp/unit _) met/unit %.
+%term mecn-deq/tp/tagged mecn-deq (ecn-deq/tp/tagged _) met/unit %.
+%term mecn-deq/tp/ref %pi (mecn-deq (ecn-deq/tp/ref D1) (met/sing D1')) %<- (mecn-deq D1 D1') %.
+%term mecn-deq/tp/tag %pi (mecn-deq (ecn-deq/tp/tag D1) (met/sing D1')) %<- (mecn-deq D1 D1') %.
+%term mecn-deq/cn/pj1 %pi (mecn-deq (ecn-deq/cn/pj1 D1) (met/sing D1')) %<- (mecn-deq D1 D1') %.
+%term mecn-deq/cn/pj2 %pi (mecn-deq (ecn-deq/cn/pj2 D1) (met/sing D1')) %<- (mecn-deq D1 D1') %.
+%term mecn-deq/kd/sing %pi (mecn-deq (ecn-deq/kd/sing D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term mecn-deq/tp/cross 
+	%pi (mecn-deq (ecn-deq/tp/cross D1 D2) (met/pair D1' D2'))
+	%<- (mecn-deq D2 D2')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/tp/arrow 
+	%pi (mecn-deq (ecn-deq/tp/arrow D1 D2) (met/pair D1' D2'))
+	%<- (mecn-deq D2 D2')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/tp/sum 
+	%pi (mecn-deq (ecn-deq/tp/sum D1 D2) (met/pair D1' D2'))
+	%<- (mecn-deq D2 D2')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/cn/pair 
+	%pi (mecn-deq (ecn-deq/cn/pair D1 D2) (met/pair D1' D2'))
+	%<- (mecn-deq D2 D2')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/cn/app 
+	%pi (mecn-deq (ecn-deq/cn/app D1 D2) (met/pair D1' D2'))
+	%<- (mecn-deq D2 D2')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/sgm-ext 
+	%pi (mecn-deq (ecn-deq/sgm-ext D1 D2) (met/pair D1' D2'))
+	%<- (mecn-deq D2 D2')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/kd/unit 
+	%pi (mecn-deq (ecn-deq/kd/unit D1 D2) (met/pair D1' D2'))
+	%<- (meofkd D2 D2')
+	%<- (meofkd D1 D1') %.
+%term mecn-deq/tp/forall 
+	%pi (mecn-deq (ecn-deq/tp/forall D1 D2) (met/pair D1' D2'))
+	%<- (mekd-deq D2 D2')
+	%<- ({a} {da} mecn-deq (D1 a da) D1') %.
+%term mecn-deq/cn/mu 
+	%pi (mecn-deq (ecn-deq/cn/mu D1 D2) (met/pair D1' D2'))
+	%<- (mekd-deq D2 D2')
+	%<- ({a} {da} mecn-deq (D1 a da) D1') %.
+%term mecn-deq/cn/lam 
+	%pi (mecn-deq (ecn-deq/cn/lam D1 D2) (met/pair D1' D2'))
+	%<- (mekd-deq D2 D2')
+	%<- ({a} {da} mecn-deq (D1 a da) D1') %.
+%term mecn-deq/pi-ext 
+	%pi (mecn-deq (ecn-deq/pi-ext D1 D2 D3) (met/pair D1' (met/pair D2' D3')))
+	%<- ({a} {da} mecn-deq (D3 a da) D3')
+	%<- (meofkd D2 D2')
+	%<- (meofkd D1 D1') %.
+%term mecn-deq/pi-ext-2 
+	%pi (mecn-deq (ecn-deq/pi-ext-2 D1 D3) (met/pair D1' D3'))
+	%<- ({a} {da} mecn-deq (D3 a da) D3')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/sub 
+	%pi (mecn-deq (ecn-deq/sub D1 DS) (met/pair D1' DS'))
+	%<- (mekd-sub DS DS')
+	%<- (mecn-deq D1 D1') %.
+%term mecn-deq/deq 
+	%pi (mecn-deq (ecn-deq/deq D1 DS) (met/pair D1' DS'))
+	%<- (mekd-deq DS DS')
+	%<- (mecn-deq D1 D1') %.
+%sort can-mekd-wf {D ekd-wf G K} {_ mekd-wf D Km} %.
+%mode can-mekd-wf %in %out %.
+%sort can-mekd-sub {D ekd-sub G K K'} {_ mekd-sub D Km} %.
+%mode can-mekd-sub %in %out %.
+%sort can-mekd-deq {D ekd-deq G K K'} {_ mekd-deq D Km} %.
+%mode can-mekd-deq %in %out %.
+%sort can-mecn-deq {D ecn-deq G C1 C2 K} {_ mecn-deq D Cm} %.
+%mode can-mecn-deq %in %out %.
+%sort can-meofkd {D eofkd G C2 K} {_ meofkd D Cm} %.
+%mode can-meofkd %in %out %.
+%term _ can-meofkd (eofkd/cn/unit _) meofkd/cn/unit %.
+%term _ can-meofkd (eofkd/tp/unit _) meofkd/tp/unit %.
+%term _ can-meofkd (eofkd/tp/tagged _) meofkd/tp/tagged %.
+%term _ %pi (can-meofkd (eofkd/tp/ref D1) (meofkd/tp/ref D1')) %<- (can-meofkd D1 D1') %.
+%term _ %pi (can-meofkd (eofkd/tp/tag D1) (meofkd/tp/tag D1')) %<- (can-meofkd D1 D1') %.
+%term _ %pi (can-meofkd (eofkd/kd/sing D1) (meofkd/kd/sing D1')) %<- (can-meofkd D1 D1') %.
+%term _ %pi (can-meofkd (eofkd/cn/pj1 D1) (meofkd/cn/pj1 D1')) %<- (can-meofkd D1 D1') %.
+%term _ %pi (can-meofkd (eofkd/cn/pj2 D1) (meofkd/cn/pj2 D1')) %<- (can-meofkd D1 D1') %.
+%term _ 
+	%pi (can-meofkd (eofkd/cn/pair D1 D2) (meofkd/cn/pair D1' D2'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-meofkd D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/tp/cross D1 D2) (meofkd/tp/cross D1' D2'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-meofkd D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/tp/arrow D1 D2) (meofkd/tp/arrow D1' D2'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-meofkd D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/tp/sum D1 D2) (meofkd/tp/sum D1' D2'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-meofkd D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/sgm-ext D1 D2) (meofkd/sgm-ext D1' D2'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-meofkd D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/cn/app D1 D2) (meofkd/cn/app D1' D2'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-meofkd D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/pi-ext D1 D2) (meofkd/pi-ext D1' D2'))
+	%<- (can-meofkd D1 D1')
+	%<- ({a} {da} can-meofkd (D2 a da) (D2' a da)) %.
+%term _ 
+	%pi (can-meofkd (eofkd/cn/lam D1 D2) (meofkd/cn/lam D1' D2'))
+	%<- ({a} {da} can-meofkd (D1 a da) (D1' a da))
+	%<- (can-mekd-wf D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/tp/forall D1 D2) (meofkd/tp/forall D1' D2'))
+	%<- ({a} {da} can-meofkd (D1 a da) (D1' a da))
+	%<- (can-mekd-wf D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/cn/mu D1 D2) (meofkd/cn/mu D1' D2'))
+	%<- ({a} {da} can-meofkd (D1 a da) (D1' a da))
+	%<- (can-mekd-wf D2 D2') %.
+%term _ 
+	%pi (can-meofkd (eofkd/sub D1 DS) (meofkd/sub D1' DS'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-mekd-sub DS DS') %.
+%term _ 
+	%pi (can-meofkd (eofkd/deq D1 DS) (meofkd/deq D1' DS'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-mekd-deq DS DS') %.
+%term _ can-meofkd (eofkd/var _) meofkd/var %.
+%term _ %pi (can-meofkd (eofkd/closed DC _) (meofkd/closed DM)) %<- (can-mofkd DC DM) %.
+%term _ can-mekd-wf (ekd-wf/kd/unit _) mekd-wf/kd/unit %.
+%term _ can-mekd-wf (ekd-wf/kd/type _) mekd-wf/kd/type %.
+%term _ 
+	%pi (can-mekd-wf (ekd-wf/kd/sing D1) (mekd-wf/kd/sing D1'))
+	%<- (can-meofkd D1 D1') %.
+%term _ 
+	%pi (can-mekd-wf (ekd-wf/kd/sgm D1 D2) (mekd-wf/kd/sgm D1' D2'))
+	%<- (can-mekd-wf D1 D1')
+	%<- ({a} {da} can-mekd-wf (D2 a da) (D2' a da)) %.
+%term _ 
+	%pi (can-mekd-wf (ekd-wf/kd/pi D1 D2) (mekd-wf/kd/pi D1' D2'))
+	%<- (can-mekd-wf D1 D1')
+	%<- ({a} {da} can-mekd-wf (D2 a da) (D2' a da)) %.
+%term _ can-mekd-deq (ekd-deq/kd/unit _) mekd-deq/kd/unit %.
+%term _ can-mekd-deq (ekd-deq/kd/type _) mekd-deq/kd/type %.
+%term _ 
+	%pi (can-mekd-deq (ekd-deq/kd/sing D1) (mekd-deq/kd/sing D1'))
+	%<- (can-mecn-deq D1 D1') %.
+%term _ 
+	%pi (can-mekd-deq (ekd-deq/kd/sgm D1 D2) (mekd-deq/kd/sgm D1' D2'))
+	%<- (can-mekd-deq D1 D1')
+	%<- ({a} {da} can-mekd-deq (D2 a da) (D2' a da)) %.
+%term _ 
+	%pi (can-mekd-deq (ekd-deq/kd/pi D1 D2) (mekd-deq/kd/pi D1' D2'))
+	%<- (can-mekd-deq D1 D1')
+	%<- ({a} {da} can-mekd-deq (D2 a da) (D2' a da)) %.
+%term _ can-mekd-sub (ekd-sub/kd/unit _) mekd-sub/kd/unit %.
+%term _ can-mekd-sub (ekd-sub/kd/type _) mekd-sub/kd/type %.
+%term _ 
+	%pi (can-mekd-sub (ekd-sub/kd/sing-kd/sing D1) (mekd-sub/kd/sing-kd/sing D1'))
+	%<- (can-mecn-deq D1 D1') %.
+%term _ 
+	%pi (can-mekd-sub (ekd-sub/kd/sing-kd/type D1) (mekd-sub/kd/sing-kd/type D1'))
+	%<- (can-meofkd D1 D1') %.
+%term _ 
+	%pi (can-mekd-sub (ekd-sub/kd/sgm D1 D2 D3) (mekd-sub/kd/sgm D1' D2' D3'))
+	%<- (can-mekd-sub D1 D1')
+	%<- ({a} {da} can-mekd-sub (D2 a da) (D2' a da))
+	%<- ({a} {da} can-mekd-wf (D3 a da) (D3' a da)) %.
+%term _ 
+	%pi (can-mekd-sub (ekd-sub/kd/pi D1 D2 D3) (mekd-sub/kd/pi D1' D2' D3'))
+	%<- (can-mekd-sub D1 D1')
+	%<- ({a} {da} can-mekd-sub (D2 a da) (D2' a da))
+	%<- ({a} {da} can-mekd-wf (D3 a da) (D3' a da)) %.
+%term _ can-mecn-deq (ecn-deq/cn/unit _) mecn-deq/cn/unit %.
+%term _ can-mecn-deq (ecn-deq/tp/unit _) mecn-deq/tp/unit %.
+%term _ can-mecn-deq (ecn-deq/tp/tagged _) mecn-deq/tp/tagged %.
+%term _ %pi (can-mecn-deq (ecn-deq/sym D1) (mecn-deq/sym D1')) %<- (can-mecn-deq D1 D1') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/tp/ref D1) (mecn-deq/tp/ref D1'))
+	%<- (can-mecn-deq D1 D1') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/tp/tag D1) (mecn-deq/tp/tag D1'))
+	%<- (can-mecn-deq D1 D1') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/kd/sing D1) (mecn-deq/kd/sing D1'))
+	%<- (can-meofkd D1 D1') %.
+%term _ %pi (can-mecn-deq (ecn-deq/refl D1) (mecn-deq/refl D1')) %<- (can-meofkd D1 D1') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/cn/pj1 D1) (mecn-deq/cn/pj1 D1'))
+	%<- (can-mecn-deq D1 D1') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/cn/pj2 D1) (mecn-deq/cn/pj2 D1'))
+	%<- (can-mecn-deq D1 D1') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/kd/unit D1 D2) (mecn-deq/kd/unit D1' D2'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-meofkd D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/trans D1 D2) (mecn-deq/trans D1' D2'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mecn-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/cn/pair D1 D2) (mecn-deq/cn/pair D1' D2'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mecn-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/tp/cross D1 D2) (mecn-deq/tp/cross D1' D2'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mecn-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/tp/arrow D1 D2) (mecn-deq/tp/arrow D1' D2'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mecn-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/tp/sum D1 D2) (mecn-deq/tp/sum D1' D2'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mecn-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/sgm-ext D1 D2) (mecn-deq/sgm-ext D1' D2'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mecn-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/cn/app D1 D2) (mecn-deq/cn/app D1' D2'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mecn-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/pi-ext D1 D2 D3) (mecn-deq/pi-ext D1' D2' D3'))
+	%<- (can-meofkd D1 D1')
+	%<- (can-meofkd D2 D2')
+	%<- ({a} {da} can-mecn-deq (D3 a da) (D3' a da)) %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/pi-ext-2 D1 D3) (mecn-deq/pi-ext-2 D1' D3'))
+	%<- (can-mecn-deq D1 D1')
+	%<- ({a} {da} can-mecn-deq (D3 a da) (D3' a da)) %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/cn/lam D1 D2) (mecn-deq/cn/lam D1' D2'))
+	%<- ({a} {da} can-mecn-deq (D1 a da) (D1' a da))
+	%<- (can-mekd-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/tp/forall D1 D2) (mecn-deq/tp/forall D1' D2'))
+	%<- ({a} {da} can-mecn-deq (D1 a da) (D1' a da))
+	%<- (can-mekd-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/cn/mu D1 D2) (mecn-deq/cn/mu D1' D2'))
+	%<- ({a} {da} can-mecn-deq (D1 a da) (D1' a da))
+	%<- (can-mekd-deq D2 D2') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/sub D1 DS) (mecn-deq/sub D1' DS'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mekd-sub DS DS') %.
+%term _ 
+	%pi (can-mecn-deq (ecn-deq/deq D1 DS) (mecn-deq/deq D1' DS'))
+	%<- (can-mecn-deq D1 D1')
+	%<- (can-mekd-deq DS DS') %.
+%worlds (cn-block can-mofkd-block ovar-block) (can-meofkd _ _) (can-mekd-wf _ _) (can-mekd-deq _ _) (can-mekd-sub _ _) (can-mecn-deq _ _) %.
+%total (D1 D2 D3 D4 D5) (can-meofkd D1 _) (can-mekd-wf D2 _) (can-mekd-deq D4 _) (can-mekd-sub D3 _) (can-mecn-deq D5 _) %.

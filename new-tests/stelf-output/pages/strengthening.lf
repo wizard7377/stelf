@@ -155,7 +155,7 @@ Here is the first: !}%
 %term /2 
 	%pi (st-lookup-strengthen ([v] st-lookup/2 (Dlook v)) (st-lookup/2 Dlook') Deq)
 	%<- (st-lookup-strengthen Dlook Dlook' Deq) %.
-%block tm-bind [v tm] [d tm-var v]%.
+%block tm-bind {v tm} {d tm-var v}%.
 %worlds (tm-bind) (st-lookup-strengthen _ _ _) %.
 %total D (st-lookup-strengthen D _ _) %.
 %{! It would be nice if we could just get rid of the ``v`` assumption on the ``st-lookup`` derivation, but we have in addition that the returned term ``T`` can depend on ``v``, so we must invent a new non-dependent ``T'`` and return an equality. Otherwise, this is a straightforward induction that demonstrates that we never use the assumption.

@@ -1,0 +1,7 @@
+%%% The Mini-ML Language
+%%% Version restricted to pure lambda-calculus
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort exp %.
+%name exp %.
+%term lam %pi (%pi exp %-> exp) %-> exp %.
+%term app %pi exp %-> exp %-> exp %.

@@ -61,7 +61,7 @@ C Machine and Focusing
 %% non-canonical
 %term cut- %pi (val- A-) %-> (cont- A- C) %-> (exp C) %.
 %% value variables can be used to stop right focus early
-%block valb {A} [x val+ A]%.
+%block valb [A] {x val+ A}%.
 %worlds (valb) (cont+ _ _) (cont- _ _) (val+ _) (exp _) (val- _) %.
 %{! ## Operational Semantics !}%
 %{! ### Composition !}%

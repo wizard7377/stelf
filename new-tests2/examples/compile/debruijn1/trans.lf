@@ -1,0 +1,17 @@
+%%% Translation to representation using de Bruijn indices
+%%% Version restricted to pure lambda-calculus
+%%% Author: Frank Pfenning, based on [Hannan & Pfenning 92]
+%sort trans {_ env} {_ exp'} {_ exp} %.
+%name trans %.
+%sort vtrans {_ val} {_ exp} %.
+%name vtrans %.
+% Functions
+%term tr_lam 
+	%pi (trans K (lam' F) (lam E))
+	%<- ({w val} {x exp} %pi (vtrans w x) %-> (trans (K ; w) F (E x))) %.
+%term tr_app %pi (trans K (app' F1 F2) (app E1 E2)) %<- (trans K F1 E1) %<- (trans K F2 E2) %.
+% Variables
+%term tr_1 %pi (trans (K ; W) 1 E) %<- (vtrans W E) %.
+%term tr_^ %pi (trans (K ; W) (F ^) E) %<- (trans K F E) %.
+% Values
+%term vtr_lam %pi (vtrans (clo K (lam' F)) (lam E)) %<- (trans K (lam' F) (lam E)) %.

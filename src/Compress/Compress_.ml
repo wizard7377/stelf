@@ -11,9 +11,14 @@ open! Reductio
 open! Basis
 
 exception Unimp
-let () = Printexc.register_printer (function Unimp -> Some "Unimp" | _ -> None)
+
+let () =
+  Printexc.register_printer (function Unimp -> Some "Unimp" | _ -> None)
+
 exception NoModes
-let () = Printexc.register_printer (function NoModes -> Some "NoModes" | _ -> None)
+
+let () =
+  Printexc.register_printer (function NoModes -> Some "NoModes" | _ -> None)
 
 module Compress (Compress__0 : sig
   module Global : GLOBAL

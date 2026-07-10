@@ -14,9 +14,16 @@ open! Basis
 (* Coverage Checking *)
 (* Author: Frank Pfenning *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 exception NotFinitary
-let () = Printexc.register_printer (function NotFinitary -> Some "Not finitary" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | NotFinitary -> Some "Not finitary"
+    | _ -> None)
 
 module MakeCover
     (Global : GLOBAL)
@@ -89,7 +96,6 @@ module MakeCover
     | M.Mapp (M.Marg (M.Star, x), ms') -> Skip (outCoverInst ms')
 
   let rec chatter chlev f = Display.chatter_s chlev (f ())
-
   let pluralize = function 1, s -> s | n, s -> s ^ "s"
   let rec abbrevCSpine (s_, ci) = s_
 

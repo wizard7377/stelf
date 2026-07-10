@@ -17,7 +17,7 @@ Twelf verifies
 %term app %pi (tm (arr A B)) %-> (tm A) %-> (tm B) %.
 %term ret %pi (val A) %-> (tm A) %.
 %term lam %pi (%pi (val A) %-> (tm B)) %-> (val (arr A B)) %.
-%block tmb {A tp} [x val A]%.
+%block tmb [A tp] {x val A}%.
 %worlds (tmb) (tm _) (val _) %.
 %sort ec %.
 %term ec/var ec ([x] x) %.

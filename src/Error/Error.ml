@@ -8,4 +8,7 @@ module Error : ERROR = struct
   let err ?(stage = Unknown) form = raise (Err (stage, form))
 end
 
-let () = Printexc.register_printer (function Error.Err (_, form) -> Some (Format.asprintf "%t" form) | _ -> None)
+let () =
+  Printexc.register_printer (function
+    | Error.Err (_, form) -> Some (Format.asprintf "%t" form)
+    | _ -> None)

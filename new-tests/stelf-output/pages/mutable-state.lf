@@ -174,7 +174,7 @@ a type in a specific store typing.
 variables can be introduced if they are related with ``var-of``
 to a well-formed type. This requirement is expressed by the [block](/wiki/percent-block/) 
 ``var-tp``. !}%
-%block var-tp {T tp} [x exp] [v var-of x T]%.
+%block var-tp [T tp] {x exp} {v var-of x T}%.
 %{! 
 We also define a judgment ``of-store``, that expresses a store being
 well-typed and containing only values.

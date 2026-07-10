@@ -191,7 +191,7 @@ use in most cases. !}%
 %sort exp %.
 %term lam %pi (%pi exp %-> exp) %-> exp %.
 %term app %pi exp %-> exp %-> exp %.
-%block blocksimple [v exp]%.
+%block blocksimple {v exp}%.
 %sort id-exp %.
 %term id-exp/refl id-exp E E %.
 %sort id-lam-cong {v} %.
@@ -211,7 +211,7 @@ all variables be accompanied by a judgment ``isvar v``; because these
 judgments cannot be defined, they can only be introduced as hypothetical
 judgments, so having (isvar E) ensures that E is a variable. !}%
 %sort isvar %.
-%block blockvar [v] [iv isvar v]%.
+%block blockvar {v} {iv isvar v}%.
 %{! However, we will need one more block declaration to be able to do everything
 we need. In particular, the block ``blockvar`` is not enough to ensure that 
 we always will be able to determine whether an open lambda term is a lambda, an
@@ -231,7 +231,7 @@ own computer, try deleting the line to see Twelf's error message. !}%
 %sort can-case {E} %.
 %sort fake %.
 %term _ %pi (fake E F) %<- ({d can-case X Y} can-case X' Y') %.
-%block blockcases [v] [iv isvar v] [d can-case v (case/var iv)]%.
+%block blockcases {v} {iv isvar v} {d can-case v (case/var iv)}%.
 %term can-case/lam can-case (lam ([x] E x)) case/lam %.
 %term can-case/app can-case (app E1 E2) case/app %.
 %mode can-case %in %out %.
@@ -560,7 +560,7 @@ effectiveness lemma! (Effectiveness lemmas can get out of control sometimes.) !}
 %sort can-can-case {C case E} %.
 %sort fake %.
 %term _ %pi fake %<- (%pi (can-can-case E V) %-> (can-can-case E' V')) %.
-%block blockcancases [v] [iv isvar v] [c can-case v (case/var iv)] [cc can-can-case (case/var iv) c]%.
+%block blockcancases {v} {iv isvar v} {c can-case v (case/var iv)} {cc can-can-case (case/var iv) c}%.
 %term _ can-can-case case/app can-case/app %.
 %term _ can-can-case case/lam can-case/lam %.
 %mode can-can-case %in %out %.

@@ -1,0 +1,64 @@
+% File: nj.elf
+% Intuitionistic, Natural Deduction
+%sort nj {_ o} %.
+%term nj_andi %pi (nj A) %-> (nj B) %-> (nj (A and B)) %.
+%term nj_andel %pi (nj (A and B)) %-> (nj A) %.
+%term nj_ander %pi (nj (A and B)) %-> (nj B) %.
+%term nj_impi %pi (%pi (nj A) %-> (nj B)) %-> (nj (A imp B)) %.
+%term nj_impe %pi (nj (A imp B)) %-> (nj A) %-> (nj B) %.
+%term nj_oril %pi (nj A) %-> (nj (A or B)) %.
+%term nj_orir %pi (nj B) %-> (nj (A or B)) %.
+%term nj_ore 
+	%pi (nj (A or B))
+	%-> (%pi (nj A) %-> (nj C))
+	%-> (%pi (nj B) %-> (nj C))
+	%-> (nj C) %.
+%term nj_noti %pi ({p o} %pi (nj A) %-> (nj p)) %-> (nj (not A)) %.
+%term nj_note %pi (nj (not A)) %-> ({C o} %pi (nj A) %-> (nj C)) %.
+%term nj_truei nj true %.
+%term nj_falsee %pi (nj false) %-> (nj C) %.
+%term nj_foralli %pi ({a i} nj (A a)) %-> (nj (forall A)) %.
+%term nj_foralle %pi (nj (forall A)) %-> ({T i} nj (A T)) %.
+%term nj_existsi {T i} %pi (nj (A T)) %-> (nj (exists A)) %.
+%term nj_existse %pi (nj (exists A)) %-> ({a i} %pi (nj (A a)) %-> (nj C)) %-> (nj C) %.
+% In intuitionistic/classical logic we have the following derivation
+% of A :- (not not A)
+%    --------- u
+%      not A        A [hyp]
+%    ---------------------- note(p)
+%                p
+%          ----------- noti^p^u
+%          (not not A)
+%theorem nj_dnotx_auto : forall* {A o} exists {D %pi (nj A) %-> (nj (not not A))} true %.
+%prove 10 {} (nj_dnotx_auto D) %.
+%define nj_dnotx [NJ] nj_noti ([p o] [u nj (not A)] nj_note u p NJ) %.
+% Lemma 1: 
+% In intuitionistic logic we have the 
+% following derivation of (not not not A):- (not A)
+%         ------------------- u
+%                  A
+%         ------------------- dnotx
+%                - - A                   - - - A [hyp] 
+%          ------------------------------------------- note(q) 
+%                           q 
+%                 ------------------ noti^q^u 
+%                          - A 
+% represented in Elf by the definition nj_triple_neg_red given by
+% [w:nj (not (not (not A)))] (nj_noti ([q:o] [u:nj A] (nj_note w q (noti ([p:o] [v:nj (not A)] (note v p u))))))
+% %theorem nj_triple_neg_red_auto : forall* {A:o} forall {D:nj (not not not A)} exists {D':nj (not A)} true.
+% %prove 7 {} (nj_triple_neg_red_auto D D').
+%define nj_triple_neg_red [NJ] nj_noti ([q o] [u nj A] nj_note NJ q (nj_dnotx u)) %.
+% Lemma 2:
+% In intuitionistic logic we have the following derivation
+% of (not not false) :- C
+%   -------- u
+%    false
+%   -------- falsee
+%      p
+%   --------- noti^p^u
+%   not false            not not false [hyp]
+%   ------------------------------------------ note(C)
+%               C
+%theorem nj_dneg_falser_auto : forall* {A o} exists {D %pi (nj (not not false)) %-> ({C o} nj C)} true %.
+%prove 10 {} (nk_dnotx_auto D) %.
+%define nj_dneg_falser [NJ1] [C] nj_note NJ1 C (nj_noti ([p] [u nj false] nj_falsee u)) %.

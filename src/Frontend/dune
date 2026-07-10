@@ -1,7 +1,8 @@
 ; (include sources.dune)
 
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name frontend)
  (public_name stelf.frontend)
  (modules

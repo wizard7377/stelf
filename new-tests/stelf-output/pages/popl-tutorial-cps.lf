@@ -13,14 +13,14 @@
 %term app %pi (e (A => B)) %-> (e A) %-> (e B) %.
 %term lam %pi (%pi (v A) %-> (e B)) %-> (v (A => B)) %.
 %term inj %pi (v A) %-> (e A) %.
-%block sourceb {A tp} [x v A]%.
+%block sourceb [A tp] {x v A}%.
 %worlds (sourceb) (e _) (v _) %.
 %sort ce %.
 %sort cv %.
 %term capp %pi (cv (A => B)) %-> (cv A) %-> (%pi (cv B) %-> ce) %-> ce %.
 %term clam %pi (%pi (cv A) %-> (%pi (cv B) %-> ce) %-> ce) %-> (cv (A => B)) %.
-%block targetb1 {A tp} [x cv A]%.
-%block targetb2 {A tp} [y %pi (cv A) %-> ce]%.
+%block targetb1 [A tp] {x cv A}%.
+%block targetb2 [A tp] {y %pi (cv A) %-> ce}%.
 %worlds (targetb1 targetb2) (ce) (cv _) %.
 %sort cps %.
 %mode cps %in %out %.
@@ -34,7 +34,7 @@
 	%<- (cpse E1 E1')
 	%<- (cpse E2 E2') %.
 %term cpse/inj %pi (cpse (inj E) ([c %pi (cv A) %-> ce] c E')) %<- (cps E E') %.
-%block cpsb {A tp} [x v A] [x' cv A] [d cps x x']%.
+%block cpsb [A tp] {x v A} {x' cv A} {d cps x x'}%.
 %worlds (cpsb) (cps _ _) (cpse _ _) %.
 %total (E V) (cps E _) (cpse V _) %.
 %{!

@@ -26,7 +26,7 @@ We can prove weakening for this hypothetical judgement as a metatheorem: !}%
 %sort wkn {T' tp} %.
 %mode wkn %in %in %out %.
 %term _ wkn T' D1 ([x] [dx of x T'] D1) %.
-%block of-block {T} [x exp] [dx of x T]%.
+%block of-block [T] {x exp} {dx of x T}%.
 %worlds (of-block) (wkn _ _ _) %.
 %total {} (wkn _ _ _) %.
 %{! The proof is direct: given any derivation ``D1``, we can wrap LF lambdas around it to create a derivation under the necessary hypotheses.  The fact that this works corresponds to the fact that weakening is admissible for LF, which is why we say that the object language inherits the hypothetical structure of the meta-language.  

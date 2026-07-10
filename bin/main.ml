@@ -7,11 +7,15 @@ let () =
   let version = P.version in
   let repl_cmd : int Cmd.t =
     let config_file =
-      Arg.(value & pos 0 (some file) None & info [] ~docv:"CONFIG"
-             ~doc:"Optional .toml project file to load before entering the REPL")
+      Arg.(
+        value
+        & pos 0 (some file) None
+        & info [] ~docv:"CONFIG"
+            ~doc:"Optional .toml project file to load before entering the REPL")
     in
     let repl_fn : int Term.t =
       let+ verbosity = Arg.value P.Opts.Opts.verbosity
+      and+ mute = Arg.value P.Opts.Opts.mute
       and+ color = Arg.value P.Opts.Opts.color
       and+ unicode = Arg.value P.Opts.Opts.unicode
       and+ config = config_file in
@@ -19,45 +23,46 @@ let () =
         let use_color = color
         let use_unicode = unicode
         let verbosity = verbosity
+        let mute = mute
       end in
       Lwt_main.run (top ?config:(Option.map Fpath.v config) (module N))
     and repl_info : Cmd.info =
-      Cmd.info "repl" ~doc:"Start the interactive REPL, optionally loading a project config"
+      Cmd.info "repl"
+        ~doc:"Start the interactive REPL, optionally loading a project config"
     in
     Cmd.v repl_info repl_fn
   in
   let check_cmd : int Cmd.t =
-    let file =
-      Arg.(required & pos 0 (some file) None & info [] ~docv:"FILE")
-    in
+    let file = Arg.(required & pos 0 (some file) None & info [] ~docv:"FILE") in
     Cmd.v
       (Cmd.info "check" ~doc:"Load a .cfg or source file")
       Term.(
-        const (fun verbosity f ->
+        const (fun verbosity mute f ->
             Fmt_tty.setup_std_outputs ();
-            M.chatter := Display.Info.to_int verbosity;
+            M.chatter := Display.Info.to_chatter verbosity;
             Display.register (fun m ->
-                if Display.Info.(m.level =< verbosity) then begin
+                if (not mute) && m.level <= verbosity then begin
                   let open Grace.Diagnostic.Severity in
                   let pp_diag fmt d = Grace_ansi_renderer.pp_diagnostic fmt d in
+                  let body = Display.Info.body_to_form m.msg in
                   let display_diag sev =
                     let diag =
-                      Grace.Diagnostic.create sev
-                        (fun ppf -> Display.fmt ppf m.msg)
+                      Grace.Diagnostic.create sev (fun ppf ->
+                          Display.fmt ppf body)
                     in
                     Format.printf "%a%!" pp_diag diag
                   in
                   match m.kind with
                   | Some Display.Error -> display_diag Error
                   | Some Display.Warning -> display_diag Warning
-                  | Some Display.Response ->
-                    Format.printf "=> %t\n%!" m.msg
+                  | Some Display.Response -> Format.printf "=> %t\n%!" body
                   | _ -> display_diag Note
                 end;
+
                 Lwt.return ());
-            status_to_exit @@ M.make (File (Fpath.v f)))
+            status_to_exit @@ P.Render.report @@ M.make (File (Fpath.v f)))
         $ Arg.value P.Opts.Opts.verbosity
-        $ file)
+        $ Arg.value P.Opts.Opts.mute $ file)
   in
   let version_cmd : int Cmd.t =
     Cmd.v
@@ -79,7 +84,8 @@ let () =
             Fmt_tty.setup_std_outputs ();
             Display.fmt Format.std_formatter @@ Pal.logo;
             0)
-        $ const ()) (* TODO Make this work *)
+        $ const ())
+    (* TODO Make this work *)
   in
   let main_cmd =
     Cmd.group

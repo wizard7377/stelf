@@ -1,0 +1,34 @@
+%%% Cut-Free Intuitionistic Sequent Calculus
+%%% First-order Logic
+%%% Tabling achieves loop-detection based sequent calculus
+%%% Author: Frank Pfenning
+%%% Modified: Brigitte Pientka
+%sort hyp {_ o} %.
+% Hypotheses (left)
+%sort conc {_ o} %.
+% Conclusion (right)
+%name hyp %.
+%name conc %.
+%tabled hyp %.
+%tabled conc %.
+%term axiom %pi (hyp (atom P)) %-> (conc (atom P)) %.
+%term truer conc true %.
+%term andr %pi (conc (A and B)) %<- (conc A) %<- (conc B) %.
+%term andl1 %pi (%pi (hyp (A and B)) %-> (conc C)) %<- (%pi (hyp A) %-> (conc C)) %.
+%term andl2 %pi (%pi (hyp (A and B)) %-> (conc C)) %<- (%pi (hyp B) %-> (conc C)) %.
+%term impr %pi (conc (A imp B)) %<- (%pi (hyp A) %-> (conc B)) %.
+%term impl %pi (%pi (hyp (A imp B)) %-> (conc C)) %<- (conc A) %<- (%pi (hyp B) %-> (conc C)) %.
+%term forallr %pi ({a i} conc (A a)) %-> (conc (forall A)) %.
+%term foralll {T i} %pi (%pi (hyp (A T)) %-> (conc C)) %-> (hyp (forall A)) %-> (conc C) %.
+%term orr1 %pi (conc A) %-> (conc (A or B)) %.
+%term orr2 %pi (conc B) %-> (conc (A or B)) %.
+%term orl 
+	%pi (%pi (hyp A) %-> (conc C))
+	%-> (%pi (hyp B) %-> (conc C))
+	%-> (hyp (A or B))
+	%-> (conc C) %.
+%term notr %pi ({p o} %pi (hyp A) %-> (conc p)) %-> (conc (not A)) %.
+%term notl %pi (conc A) %-> (hyp (not A)) %-> (conc C) %.
+%term falsel %pi (hyp false) %-> (conc C) %.
+%term existsr {T i} %pi (conc (A T)) %-> (conc (exists A)) %.
+%term existsl %pi ({a i} %pi (hyp (A a)) %-> (conc C)) %-> (hyp (exists A)) %-> (conc C) %.

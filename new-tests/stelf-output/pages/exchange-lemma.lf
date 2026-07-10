@@ -26,7 +26,7 @@ We can prove exchange for this judgement as follows: !}%
 %sort exchange {x exp} {dx of x T} {y exp} {dy of y T'} %.
 %mode exchange %in %out %.
 %term _ exchange ([x] [dx of x T] [y] [dy of y T'] D1 x dx y dy) ([y] [dy of y T'] [x] [dx of x T] D1 x dx y dy) %.
-%block of-block {T tp} [x exp] [dx of x T]%.
+%block of-block [T tp] {x exp} {dx of x T}%.
 %worlds (of-block) (exchange _ _) %.
 %total {} (exchange _ _) %.
 %{! The proof simply permutes the LF lambdas.

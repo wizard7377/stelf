@@ -17,12 +17,10 @@ let test_value (f : form) (input : string) : exn option =
 let test ?(skip = false) ?(failure = false) (name : string) (f : form)
     (input : string) : unit Alcotest.test_case =
   let () = Printexc.record_backtrace true in
-  let () = Logs.set_reporter (Logs_fmt.reporter ()) in
-  let () = Logs.set_level (Some Logs.Debug) in
   let () = Fmt_tty.setup_std_outputs () in
   let () =
     Display.register (fun m ->
-        let _ = Display.fmt Fmt.stderr m.msg in
+        let _ = Display.fmt Fmt.stderr (Display.Info.body_to_form m.msg) in
         Lwt.return ())
   in
   Alcotest.test_case name `Slow (fun () ->

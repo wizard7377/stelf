@@ -216,7 +216,7 @@ The LF representation of this formulation is quite direct: !}%
 	%<- (N => N') %.
 %term =>/app %pi (app M N => (app M' N')) %<- (N => N') %<- (M => M') %.
 %term =>/lam %pi (lam M => lam M') %<- ({x trm} %pi (x => x) %-> (M x => M' x)) %.
-%block =>b [x trm] [=>/x x => x]%.
+%block =>b {x trm} {=>/x x => x}%.
 %worlds (=>b) (=> _ _) %.
 %{! Derivations using <Math formula="\mathit{var}"/> are represented by LF variables representing the reduction assumptions in <Math formula="\Gamma"/>.  The Twelf ``%worlds`` declaration documents the form of <Math formula="\Gamma"/>  in our informal definition.
 
@@ -293,7 +293,7 @@ The LF representation looks like this: !}%
 %term =>/beta %pi (app (lam M) N => M' N') %<- ({x trm} M x => M' x) %<- (N => N') %.
 %term =>/app %pi (app M N => (app M' N')) %<- (N => N') %<- (M => M') %.
 %term =>/lam %pi (lam M => lam M') %<- ({x trm} M x => M' x) %.
-%block trmb [x trm]%.
+%block trmb {x trm}%.
 %worlds (trmb) (=> _ _) %.
 %{!
 
@@ -377,7 +377,7 @@ Unlike the first reformulation, where the <Math formula="\mathit{var}_1"/> rule 
 	%<- (N => N') %.
 %term =>/app %pi (app M N => (app M' N')) %<- (N => N') %<- (M => M') %.
 %term =>/lam %pi (lam M => lam M') %<- ({x trm} %pi (isvar x) %-> (M x => M' x)) %.
-%block isvarb [x trm] [isvar/x isvar x]%.
+%block isvarb {x trm} {isvar/x isvar x}%.
 %worlds (isvarb) (isvar _) (=> _ _) %.
 %{!
 
@@ -503,7 +503,7 @@ Then complete development is easy to define:
 The LF representation is direct: !}%
 %sort notlam %.
 %term notlam/app notlam (app _ _) %.
-%block nlb [x trm] [nlx notlam x]%.
+%block nlb {x trm} {nlx notlam x}%.
 %worlds (nlb) (notlam _) %.
 %{! Whenever we add a ``trm`` assumption to the LF context, we assume that it is not a lambda.  The Twelf ``%worlds`` declaration documents this fact, and causes Twelf to complain if we ever violate this convention.  
 
@@ -518,7 +518,7 @@ Then complete development is a simple twist on parallel reduction: !}%
 %term ==>/lam 
 	%pi (lam M ==> lam M')
 	%<- ({x trm} %pi (notlam x) %-> (x ==> x) %-> (M x ==> M' x)) %.
-%block ==>b [x trm] [nlx notlam x] [==>/x x ==> x]%.
+%block ==>b {x trm} {nlx notlam x} {==>/x x ==> x}%.
 %worlds (==>b) (==> _ _) %.
 %{! Every time we extend the context, we add an assumption ``notlam x`` for that variable.  We also add a reflexivity assumption for each variable because the informal definition of complete development still has a reflexivity rule for variables (even though the relation is not reflexive in general).  
 

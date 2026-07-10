@@ -1,0 +1,12 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Theorem 8 : Preservation of Cont-validity under beta-reduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort th8-1 {_ cvalE ([k ccont] cret (vlam ([v ctriv] E v k)) T)} {_ cvalE (E T)} %.
+%mode th8-1 %in %out %.
+%term th8-1_proof th8-1 (cval_cret (cval_vlam CVE) CVT) (CVE T CVT) %.
+%sort th8-2 {_ cvalE ([k ccont] capp (xlam ([x ctriv] klam (R x))) T (C k))} {_ cvalE ([k ccont] R T (C k))} %.
+%mode th8-2 %in %out %.
+%term th8-2_proof 
+	%pi (th8-2 (cval_capp CVC (cval_xlam ([x ctriv] [cvx cvalT x] cval_klam (CVE x cvx))) CVT) CVEreplCk)
+	%<- (lemma7_2b CVC (CVE T CVT) CVEreplCk) %.
+%terminates {} (th8-2 _ _) %.

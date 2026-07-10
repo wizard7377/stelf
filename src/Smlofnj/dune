@@ -1,5 +1,6 @@
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name smlofnj)
  (public_name stelf.smlofnj)
  (libraries display basis))

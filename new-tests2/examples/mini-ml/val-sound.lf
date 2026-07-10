@@ -1,0 +1,25 @@
+%%% Proof of Value Soundness
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort vs {_ eval E V} {_ value V} %.
+%mode vs %in %out %.
+% Natural Numbers
+%term vs_z vs ev_z val_z %.
+%term vs_s %pi (vs (ev_s D1) (val_s P1)) %<- (vs D1 P1) %.
+%term vs_case_z %pi (vs (ev_case_z D2 D1) P2) %<- (vs D2 P2) %.
+%term vs_case_s %pi (vs (ev_case_s D3 D1) P3) %<- (vs D3 P3) %.
+% Pairs
+%term vs_pair %pi (vs (ev_pair D2 D1) (val_pair P2 P1)) %<- (vs D1 P1) %<- (vs D2 P2) %.
+%term vs_fst %pi (vs (ev_fst D') P1) %<- (vs D' (val_pair P2 P1)) %.
+%term vs_snd %pi (vs (ev_snd D') P2) %<- (vs D' (val_pair P2 P1)) %.
+% Functions
+%term vs_lam vs ev_lam val_lam %.
+%term vs_app %pi (vs (ev_app D3 D2 D1) P3) %<- (vs D3 P3) %.
+% Definitions
+%term vs_letv %pi (vs (ev_letv D2 D1) P2) %<- (vs D2 P2) %.
+%term vs_letn %pi (vs (ev_letn D2) P2) %<- (vs D2 P2) %.
+% Recursion
+%term vs_fix %pi (vs (ev_fix D1) P1) %<- (vs D1 P1) %.
+%worlds () (vs D P) %.
+%terminates D (vs D _) %.
+%covers vs %in %out %.
+%total D (vs D _) %.

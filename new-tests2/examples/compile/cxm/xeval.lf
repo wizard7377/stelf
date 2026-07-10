@@ -1,0 +1,66 @@
+%%% Contextual Semantics
+%%% Author: Frank Pfenning
+%%% One-Step Reductions
+%sort ==> {_ exp} {_ exp} %.
+%prec %none 8 ==> %.
+%term red_z z ==> (vl z*) %.
+%term red_s s (vl V) ==> vl (s* V) %.
+%term red_case_z case (vl z*) E2 E3 ==> E2 %.
+%term red_case_s case (vl (s* V1')) E2 E3 ==> E3 V1' %.
+%term red_pair pair (vl V1) (vl V2) ==> vl (pair* V1 V2) %.
+%term red_fst fst (vl (pair* V1 V2)) ==> (vl V1) %.
+%term red_snd snd (vl (pair* V2 V2)) ==> (vl V2) %.
+%term red_lam lam E ==> vl (lam* E) %.
+%term red_app app (vl (lam* E1')) (vl V2) ==> E1' V2 %.
+%term red_letv letv (vl V1) E2 ==> E2 V1 %.
+%term red_letn letn E1 E2 ==> E2 E1 %.
+%term red_fix fix E ==> E (fix E) %.
+% no red_vl rule
+%%% Redices
+%sort redex {_ exp} %.
+%term rdx %pi (redex E) %<- (E ==> E') %.
+%%% Splitting an Expression
+%sort split {_ %pi exp %-> exp} {_ exp} {_ %pi exp %-> exp} {_ exp} %.
+%. %[ split C E C' E'
+   Evaluation context C and expression E are given,
+   C' and E' are constructed.
+   Invariant: (C E) == (C' E')
+}%
+% Redices
+%term sp_redex %pi (split C E C E) %<- (redex E) %.
+% Natural Numbers
+% no sp_z
+%term sp_s %pi (split C (s E1) C' E') %<- (split ([h exp] C (s h)) E1 C' E') %.
+%term sp_case 
+	%pi (split C (case E1 E2 E3) C' E')
+	%<- (split ([h exp] C (case h E2 E3)) E1 C' E') %.
+% Pairs
+%term sp_pair2 
+	%pi (split C (pair (vl V1) E2) C' E')
+	%<- (split ([h exp] C (pair (vl V1) h)) E2 C' E') %.
+%term sp_pair1 %pi (split C (pair E1 E2) C' E') %<- (split ([h exp] C (pair h E2)) E1 C' E') %.
+%term sp_fst %pi (split C (fst E) C' E') %<- (split ([h exp] C (fst h)) E C' E') %.
+%term sp_snd %pi (split C (snd E) C' E') %<- (split ([h exp] C (snd h)) E C' E') %.
+% Functions
+% no sp_lam
+%term sp_app2 
+	%pi (split C (app (vl V1) E2) C' E')
+	%<- (split ([h exp] C (app (vl V1) h)) E2 C' E') %.
+%term sp_app1 %pi (split C (app E1 E2) C' E') %<- (split ([h exp] C (app h E2)) E1 C' E') %.
+% Definitions
+%term sp_letv %pi (split C (letv E1 E2) C' E') %<- (split ([h exp] C (letv h E2)) E1 C' E') %.
+% no sp_letn
+% Recursion
+% no sp_fix
+% Values
+% no sp_vl
+%%% Top-Level Splitting
+%sort split_exp {_ exp} {_ %pi exp %-> exp} {_ exp} %.
+%term spe %pi (split_exp E C E') %<- (split ([h exp] h) E C E') %.
+%%% One-Step Contextual Evaluation
+%sort one_step {_ exp} {_ exp} %.
+%term ostp %pi (one_step E (C R')) %<- (split_exp E C R) %<- (R ==> R') %.
+%%% Full Contextual Evaluation
+%sort xeval {_ exp} {_ val} %.
+%term xev_vl xeval (vl V) V %.
+%term xev_step %pi (xeval E V) %<- (one_step E E') %<- (xeval E' V) %.

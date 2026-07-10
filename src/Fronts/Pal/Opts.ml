@@ -8,16 +8,29 @@ module Opts : OPTS = struct
   let verbosity : Display.Info.level t =
     begin
       let v_conv =
-        Arg.vflag Display.Info.Normal
+        Arg.vflag Display.Info.Level.normal
           [
-          (Display.Info.Terse, Arg.info ~doc:"Display less information" [ "q"; "quiet" ]);
-            (Display.Info.Detailed, Arg.info ~doc:"Display more information" [ "v"; "verbose" ]); 
-            (Display.Info.Exhaustive, Arg.info ~doc:"Display exhaustive information" [ "debug" ]);
-            (Display.Info.Minimal, Arg.info ~doc:"Display minimal information" [ "s"; "silent" ]);
-            (Display.Info.Off, Arg.info ~doc:"Display no information" [ "no-output" ]);
+            ( Display.Info.Level.quiet,
+              Arg.info ~doc:"Display less information" [ "q"; "quiet" ] );
+            ( Display.Info.Level.terse,
+              Arg.info ~doc:"Display slightly less information" [ "t"; "terse" ]
+            );
+            ( Display.Info.Level.verbose,
+              Arg.info ~doc:"Display more information" [ "v"; "verbose" ] );
+            ( Display.Info.Level.debug,
+              Arg.info ~doc:"Display debug information" [ "debug" ] );
           ]
       in
       v_conv
+    end
+
+  let mute : bool t =
+    begin
+      let doc : Arg.info =
+        Arg.info ~doc:"Suppress all output, including errors"
+          [ "s"; "silent"; "no-output" ]
+      in
+      Arg.flag doc
     end
 
   let color : bool t =

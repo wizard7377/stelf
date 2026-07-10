@@ -64,5 +64,5 @@
 	%<- ({x} %pi (isvar x I) %-> (wfe (cons G x A) (B x))) %.
 %term ofe/sing %pi (ofe G (at R) (sing R)) %<- (aofe G R t) %.
 %%%%%  Worlds  %%%%%
-%block ovar {n nat} [x atom] [d isvar x n]%.
-%block obind {a tp} {n nat} [x atom] [d vof x a] [d' isvar x n]%.
+%block ovar [n nat] {x atom} {d isvar x n}%.
+%block obind [a tp] [n nat] {x atom} {d vof x a} {d' isvar x n}%.

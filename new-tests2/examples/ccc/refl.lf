@@ -1,0 +1,13 @@
+% equality reflection:
+%sort eqrefl1 {_ abse G E F} {_ abse G E' F'} {_ F == F'} {_ conv E E'} %.
+%term eqrefl1_ 
+	%pi (eqrefl1 AP AP' EP (c_trans (c_sym CVE) (c_trans (CV MG) CVE')))
+	%<- (etoc EP CP CP' ([x] CV x))
+	%<- (invca AE CP (%the (exp _ MG) GG) CVE)
+	%<- (invca AE' CP' GG CVE') %.
+%sort eqrefl2 {_ conc F M} {_ conc F' M'} {_ {x} conv (M x) (M' x)} {_ F == F'} %.
+%term eqrefl2_ 
+	%pi (eqrefl2 CP CP' ([x] CVP x) (sym EPF then =@= EE refl then EPF'))
+	%<- ({x} ctoe (CVP x) (AP x) (AP' x) EE)
+	%<- (invac CP (zabs1 ([x] AP x)) EPF)
+	%<- (invac CP' (zabs1 ([x] AP' x)) EPF') %.

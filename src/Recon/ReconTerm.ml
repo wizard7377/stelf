@@ -192,12 +192,17 @@ struct
   let rec getFVarTypeApx name =
     begin match StringTree.lookup fvarApxTable name with
     | Some v_ ->
-        Logs.debug (fun m -> m "getFVarTypeApx: found existing for %s" name);
+        msg ~src:Group.approx ~level:Level.Debug
+          (Fmt.shown_exact
+             (fun name -> "getFVarTypeApx: found existing for " ^ name)
+             name);
         v_
     | None ->
         let v_ = Apx.newCVar () in
-        Logs.debug (fun m ->
-            m "getFVarTypeApx: creating fresh CVar for %s" name);
+        msg ~src:Group.approx ~level:Level.Debug
+          (Fmt.shown_exact
+             (fun name -> "getFVarTypeApx: creating fresh CVar for " ^ name)
+             name);
         begin
           StringTree.insert fvarApxTable (name, v_);
           v_
@@ -365,19 +370,21 @@ struct
     | V.Term.App (_, head, args) -> fold_app (cst_term_to_term head) args
     | V.Term.HasType (_, a, b) ->
         Hastype_ (cst_term_to_term a, cst_term_to_term b)
-    | V.Term.Lowercase (_, (ns, n)) -> Lcid_ (ns, n, ghost_r)
-    | V.Term.Uppercase (_, (ns, n)) -> Ucid_ (ns, n, ghost_r)
-    | V.Term.Qualified (_, (ns, n)) -> Quid_ (ns, n, ghost_r)
-    | V.Term.Text (_, s) -> Scon_ (s, ghost_r)
-    | V.Term.ExistVar (_, s) -> Evar_ (s, ghost_r)
-    | V.Term.FreeVar (_, s) -> Fvar_ (s, ghost_r)
-    | V.Term.Typ _ -> Typ_ ghost_r
+    | V.Term.Lowercase (loc, (ns, n)) -> Lcid_ (ns, n, loc_to_region loc)
+    | V.Term.Uppercase (loc, (ns, n)) -> Ucid_ (ns, n, loc_to_region loc)
+    | V.Term.Qualified (loc, (ns, n)) -> Quid_ (ns, n, loc_to_region loc)
+    | V.Term.Text (loc, s) -> Scon_ (s, loc_to_region loc)
+    | V.Term.ExistVar (loc, s) -> Evar_ (s, loc_to_region loc)
+    | V.Term.FreeVar (loc, s) -> Fvar_ (s, loc_to_region loc)
+    | V.Term.Typ loc -> Typ_ (loc_to_region loc)
     | V.Term.Local (_, ns_path, inner) ->
-        let qid = match List.rev ns_path with
+        let qid =
+          match List.rev ns_path with
           | [] -> failwith "%local: empty namespace path"
           | last :: prefix -> Names.Qid (List.rev prefix, last)
         in
-        let ns_comps = match Names.structLookup qid with
+        let ns_comps =
+          match Names.structLookup qid with
           | Some mid -> Names.getComponents mid
           | None -> Names.newNamespace ()
         in
@@ -385,15 +392,15 @@ struct
     | _ -> Omitted_ ghost_r
 
   and cst_decl_to_dec (d : Cst.decl) : dec =
-    let names, tm =
+    let names, tm, loc =
       match Cst.View.Decl.view d with
-      | Cst.View.Decl.Decl1 (_, names, tm, _) -> (names, tm)
-      | Cst.View.Decl.Decl0 (_, names, tm) -> (names, tm)
+      | Cst.View.Decl.Decl1 (loc, names, tm, _) -> (names, tm, loc)
+      | Cst.View.Decl.Decl0 (loc, names, tm) -> (names, tm, loc)
       | _ -> assert false
     in
     (* Cst.decl allows a list of names; internal dec has one name option. *)
     let name_opt = match names with [] -> None | n :: _ -> n in
-    Dec_ (name_opt, cst_term_to_term tm, loc_to_region Cst.ghost)
+    Dec_ (name_opt, cst_term_to_term tm, loc_to_region loc)
 
   let rec jwithctx (g, j) =
     let rec cvt = function
@@ -890,19 +897,19 @@ struct
       begin match Print.evarCnstrsToStringOpt xnames_ with
       | None -> ()
       | Some constr ->
-          Display.debug ~level:Detailed
+          Display.debug ~level:Display.Level.verbose
             (Display.Form.string (("Constraints:\n" ^ constr) ^ "\n"))
       end
     with Names.Unprintable ->
-      Display.debug ~level:Detailed
+      Display.debug ~level:Display.Level.verbose
         (Display.Form.string "%_constraints unprintable_%\n")
 
   let rec reportInst xnames_ =
     try
-      Display.debug ~level:Detailed
+      Display.debug ~level:Display.Level.verbose
         (Display.Form.string (Print.evarInstToString xnames_ ^ "\n"))
     with Names.Unprintable ->
-      Display.debug ~level:Detailed
+      Display.debug ~level:Display.Level.verbose
         (Display.Form.string "%_unifier unprintable_%\n")
 
   let rec delayMismatch (g_, v1_, v2_, r2, location_msg, problem_msg) =
@@ -948,7 +955,7 @@ struct
           F.hVbox [ F.string "Inferred:"; F.space; formatExp (g_, u_) ]
         in
         let fstr = F.makestring_fmt amb in
-        Display.debug ~level:Detailed
+        Display.debug ~level:Display.Level.verbose
           Display.Form.(
             nl ()
             ++ string "Ambiguous reconstruction of term: "
@@ -1010,12 +1017,12 @@ struct
             ]
         in
         let _ =
-          Display.debug ~level:Exhaustive
+          Display.debug ~level:Display.Level.debug
             (Display.Form.string (F.makestring_fmt eqnsFmt ^ "\n"))
         in
         let _ = reportConstraints xnames_ in
         let _ =
-          Display.debug ~level:Exhaustive
+          Display.debug ~level:Display.Level.debug
             (Display.Form.string
                ((("Failed: " ^ problem_msg) ^ "\n")
                ^ "Continuing with subterm replaced by _\n"))
@@ -1042,14 +1049,14 @@ struct
         ]
     in
     let _ =
-      Display.debug ~level:Exhaustive
+      Display.debug ~level:Display.Level.debug
         (Display.Form.string (F.makestring_fmt eqnsFmt ^ "\n"))
     in
     let _ =
       try unifyIdem (g_, vs1_, vs2_)
       with Unify.Unify msg as e ->
         begin
-          Display.debug ~level:Exhaustive
+          Display.debug ~level:Display.Level.debug
             (Display.Form.string
                ((("Failed: " ^ msg) ^ "\n")
                ^ "Continuing with subterm replaced by _\n"));
@@ -1100,7 +1107,7 @@ struct
             ]
         in
         let _ =
-          Display.debug ~level:Detailed
+          Display.debug ~level:Display.Level.verbose
             (Display.Form.string (F.makestring_fmt omit ^ "\n"))
         in
         let _ = reportConstraints xnames_ in
@@ -1130,7 +1137,7 @@ struct
             ]
         in
         let _ =
-          Display.debug ~level:Detailed
+          Display.debug ~level:Display.Level.verbose
             (Display.Form.string (F.makestring_fmt judg ^ "\n"))
         in
         let _ = reportConstraints xnames_ in
@@ -1154,7 +1161,8 @@ struct
         let (Dec (_, v_)) = IntSyn.ctxDec (g_, k) in
         (tm, Elim (bvarElim k), v_)
     | g_, (Evar_ (name, r) as tm) ->
-        Logs.debug (fun m -> m "inferring EVar %s" name);
+        msg ~src:Group.approx ~level:Level.Debug
+          (Fmt.shown_exact (fun name -> "inferring EVar " ^ name) name);
         let x_, v_ =
           try getEVar (name, false)
           with Apx.Ambiguous ->
@@ -1167,7 +1175,7 @@ struct
         let s = IntSyn.Shift (IntSyn.ctxLength g_) in
         (tm, Elim (elimSub (evarElim x_, s)), eClo_ (v_, s))
     | g_, (Fvar_ (name, r) as tm) ->
-        Display.debug ~level:Detailed
+        Display.debug ~level:Display.Level.verbose
           Display.Form.(
             nl ()
             ++ string "Inferring exact type of FVar"
@@ -1177,7 +1185,7 @@ struct
           with Apx.Ambiguous ->
             let v_ = getFVarType (name, true) in
             begin
-              Display.debug ~level:Detailed
+              Display.debug ~level:Display.Level.verbose
                 Display.Form.(
                   string "Type of FVar" ++ string name
                   ++ string
@@ -1217,7 +1225,7 @@ struct
         let tm1', b1_, v1_ = inferExact (g_, tm1) in
         let e1_ = toElim b1_ in
         Display.(
-          debug ~level:Detailed
+          debug ~level:Level.verbose
             Form.(
               nl ()
               ++ string "Inferring exact application of"
@@ -1275,7 +1283,7 @@ struct
           with Ambiguous ->
             let v'_ = Apx.apxToClass (g_, v_, l_, true) in
             begin
-              Display.debug ~level:Detailed
+              Display.debug ~level:Display.Level.verbose
                 Display.Form.(
                   string
                     "Classifier of omitted term is ambiguous, but continuing \
@@ -1299,7 +1307,7 @@ struct
           with Ambiguous ->
             let u'_ = Apx.apxToExact (g_, u_, (v'_, IntSyn.id), true) in
             begin
-              Display.debug ~level:Detailed
+              Display.debug ~level:Display.Level.verbose
                 Display.Form.(
                   string
                     "Exact term of omitted term is ambiguous, but continuing \
@@ -1400,7 +1408,7 @@ struct
 
   and checkExact (g_, tm, vs_, location_msg) =
     Display.(
-      debug ~level:Detailed
+      debug ~level:Level.verbose
         Form.(
           nl () ++ string "Checking exact term" ++ shown show_term tm ++ nl ()));
     begin if not !trace then

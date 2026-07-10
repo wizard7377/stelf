@@ -7,7 +7,7 @@
 	%pi (identity (lam M1) (lm R1))
 	%<- ({x term} {eqx x => x} %pi (identity x eqx) %-> (identity (M1 x) (R1 x eqx))) %.
 %term id_app %pi (identity (app M1 M2) (ap R1 R2)) %<- (identity M1 R1) %<- (identity M2 R2) %.
-%block lid [x term] [eqx x => x] [u identity x eqx]%.
+%block lid {x term} {eqx x => x} {u identity x eqx}%.
 %worlds (lid) (identity M R) %.
 %covers identity %in %out %.
 %terminates M (identity M _) %.

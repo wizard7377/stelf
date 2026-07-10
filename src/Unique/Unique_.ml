@@ -15,7 +15,9 @@ open! Basis
 (* Uniqueness Checking *)
 (* Author: Frank Pfenning *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MakeUnique
     (Global : GLOBAL)
@@ -48,7 +50,6 @@ module MakeUnique
     module T = Tomega
 
     let rec chatter chlev f = Display.chatter_s chlev (f ())
-
     let rec cName cid = N.qidToString (N.constQid cid)
 
     let rec pName = function

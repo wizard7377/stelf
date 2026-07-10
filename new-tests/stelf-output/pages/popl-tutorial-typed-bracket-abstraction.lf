@@ -177,7 +177,7 @@ below.
 %%% TODO: complete the application case for bracket abstraction
 %%%
 %term b-s bracket XXX-FILL_IN-XXX YYY-FILL_IN-YYY %.
-%block tbind {A tp} [x term A] [y cterm A] [dtrans trans x y]%.
+%block tbind [A tp] {x term A} {y cterm A} {dtrans trans x y}%.
 %worlds (tbind) (bracket _ _) %.
 %worlds (tbind) (trans _ _) %.
 %{! 

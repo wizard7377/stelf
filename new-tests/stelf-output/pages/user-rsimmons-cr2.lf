@@ -10,7 +10,7 @@ When we use this ``%block``, it expresses that we can be working in a
 context with arbitrary expression variables. 
 
 !}%
-%block exps [x exp]%.
+%block exps {x exp}%.
 %worlds (exps) (exp) %.
 %{! ## Reduction !}%
 %{! 
@@ -31,7 +31,7 @@ with the invariant that it can evaluate to itself.
 !}%
 %sort reduce %.
 %mode reduce %in %out %.
-%block exps_id [x exp] [d reduce x x]%.
+%block exps_id {x exp} {d reduce x x}%.
 %term reduce/lam 
 	%pi (reduce (lam E) (lam E'))
 	%<- ({x exp} %pi (reduce x x) %-> (reduce (E x) (E' x))) %.
@@ -64,7 +64,7 @@ The "variable case" of our lemma is one where the first argument is
 that, if 
 
 !}%
-%block exp_subst [x exp] [idx reduce x x] [subst {z exp} {z' exp} {red reduce z z'} substitute ([_] [_] idx) red idx]%.
+%block exp_subst {x exp} {idx reduce x x} {subst {z exp} {z' exp} {red reduce z z'} substitute ([_] [_] idx) red idx}%.
 %term _ substitute ([x] [idx reduce x x] idx) (%the (reduce Earg Earg') D) D %.
 %term _ 
 	%pi (substitute ([x] [idx reduce x x] reduce/lam (%the ({y} %pi (reduce y y) %-> (reduce (E x y) (E' x y))) (D x idx))) (%the (reduce Earg Earg') Darg) (%the (reduce (lam ([y] E Earg y)) (lam ([y] E' Earg' y))) (reduce/lam D')))

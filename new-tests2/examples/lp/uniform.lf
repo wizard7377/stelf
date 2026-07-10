@@ -1,0 +1,25 @@
+%%% Uniform Derivations
+%%% Author: Frank Pfenning
+%sort solve {_ o} %.
+% solve goal formulas
+%sort assume {_ o} %.
+% assume program formulas
+%sort >> {_ o} {_ p} %.
+% immediate entailment
+%prec %none 8 >> %.
+%name solve %.
+%name assume %.
+%name >> %.
+%mode solve %star %.
+%mode assume %star %.
+%mode >> %star %star %.
+%term s_and %pi (solve (A1 and A2)) %<- (solve A1) %<- (solve A2) %.
+%term s_imp %pi (solve (A2 imp A1)) %<- (%pi (assume A2) %-> (solve A1)) %.
+%term s_true solve true %.
+%term s_forall %pi (solve (forall A1)) %<- ({a i} solve (A1 a)) %.
+%term s_atom %pi (solve (atom P)) %<- (assume A) %<- (A >> P) %.
+%term i_andl %pi (A1 and A2 >> P) %<- (A1 >> P) %.
+%term i_andr %pi (A1 and A2 >> P) %<- (A2 >> P) %.
+%term i_imp %pi (A2 imp A1 >> P) %<- (A1 >> P) %<- (solve A2) %.
+%term i_forall {T i} %pi (forall A1 >> P) %<- (A1 T >> P) %.
+%term i_atom atom P >> P %.

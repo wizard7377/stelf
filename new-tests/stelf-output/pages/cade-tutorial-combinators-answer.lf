@@ -10,7 +10,7 @@ Adapted from the case study on [Typed combinators soundness and completeness](/w
 %name term %.
 %term app %pi term %-> term %-> term %.
 %term lam %pi (%pi term %-> term) %-> term %.
-%block term-block [x term]%.
+%block term-block {x term}%.
 %worlds (term-block) (term) %.
 % combinator calculus
 %sort comb %.
@@ -19,7 +19,7 @@ Adapted from the case study on [Typed combinators soundness and completeness](/w
 %term k comb %.
 %term i comb %.
 %term capp %pi comb %-> comb %-> comb %.
-%block comb-block [y comb]%.
+%block comb-block {y comb}%.
 %worlds (comb-block) (comb) %.
 %{! 
 
@@ -37,7 +37,7 @@ Adapted from the case study on [Typed combinators soundness and completeness](/w
 	%pi (bracket ([y] capp (A y) (B y)) (capp (capp s A') B'))
 	%<- (bracket ([y] A y) A')
 	%<- (bracket ([y] B y) B') %.
-%block bracket-block [y comb] [bracket/y bracket ([z] y) (capp k y)]%.
+%block bracket-block {y comb} {bracket/y bracket ([z] y) (capp k y)}%.
 %worlds (bracket-block) (bracket _ _) %.
 %total A (bracket A _) %.
 % translation
@@ -48,7 +48,7 @@ Adapted from the case study on [Typed combinators soundness and completeness](/w
 	%pi (translate (lam ([x] M x)) A')
 	%<- ({x} {y} %pi (bracket ([z] y) (capp k y)) %-> (translate x y) %-> (translate (M x) (A y)))
 	%<- (bracket ([y] A y) A') %.
-%block translate-block [x term] [y comb] [bracket/y bracket ([z] y) (capp k y)] [translate/x translate x y]%.
+%block translate-block {x term} {y comb} {bracket/y bracket ([z] y) (capp k y)} {translate/x translate x y}%.
 %worlds (translate-block) (translate _ _) %.
 %total M (translate M _) %.
 %{! 
@@ -101,7 +101,7 @@ Adapted from the case study on [Typed combinators soundness and completeness](/w
 	%pi (subst (bracket/app (%the (bracket ([y] B y) B') Dbrack2) (%the (bracket ([y] A y) A') Dbrack1)) C (ceq/trans (ceq/app Dceq2 Dceq1) ceq/s))
 	%<- (subst Dbrack1 C (%the (ceq (capp A' C) (A C)) Dceq1))
 	%<- (subst Dbrack2 C (%the (ceq (capp B' C) (B C)) Dceq2)) %.
-%block subst-block [y comb] [dbrack bracket ([z] y) (capp k y)] [thm-subst {C comb} subst dbrack C ceq/k]%.
+%block subst-block {y comb} {dbrack bracket ([z] y) (capp k y)} {thm-subst {C comb} subst dbrack C ceq/k}%.
 %worlds (subst-block) (subst _ _ _) %.
 %total D (subst D _ _) %.
 %{!

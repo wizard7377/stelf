@@ -1,0 +1,36 @@
+% File: nk.elf
+% Classical, Natural Deduction
+%sort nk {_ o} %.
+%term nk_andi %pi (nk A) %-> (nk B) %-> (nk (A and B)) %.
+%term nk_andel %pi (nk (A and B)) %-> (nk A) %.
+%term nk_ander %pi (nk (A and B)) %-> (nk B) %.
+%term nk_impi %pi (%pi (nk A) %-> (nk B)) %-> (nk (A imp B)) %.
+%term nk_impe %pi (nk (A imp B)) %-> (nk A) %-> (nk B) %.
+%term nk_oril %pi (nk A) %-> (nk (A or B)) %.
+%term nk_orir %pi (nk B) %-> (nk (A or B)) %.
+%term nk_ore 
+	%pi (nk (A or B))
+	%-> (%pi (nk A) %-> (nk C))
+	%-> (%pi (nk B) %-> (nk C))
+	%-> (nk C) %.
+%term nk_noti %pi ({p o} %pi (nk A) %-> (nk p)) %-> (nk (not A)) %.
+%term nk_note %pi (nk (not A)) %-> ({C o} %pi (nk A) %-> (nk C)) %.
+%term nk_truei nk true %.
+%term nk_falsee %pi (nk false) %-> (nk C) %.
+%term nk_foralli %pi ({a i} nk (A a)) %-> (nk (forall A)) %.
+%term nk_foralle %pi (nk (forall A)) %-> ({T i} nk (A T)) %.
+%term nk_existsi {T i} %pi (nk (A T)) %-> (nk (exists A)) %.
+%term nk_existse %pi (nk (exists A)) %-> ({a i} %pi (nk (A a)) %-> (nk C)) %-> (nk C) %.
+%term nk_dnotr %pi (nk A) %<- (nk (not (not A))) %.
+% double negation version of excluded middle
+% In intuitionistic/classical logic we have the following derivation
+% of A :- (not not A)
+%    --------- u
+%      not A        A [hyp]
+%    ---------------------- note(p)
+%                p
+%          ----------- noti^p^u
+%          (not not A)
+%theorem nk_dnotx_auto : forall* {A o} exists {D %pi (nk A) %-> (nk (not not A))} true %.
+%prove 10 {} (nk_dnotx_auto D) %.
+%define nk_dnotx [NK] nk_noti ([p o] [u nk (not A)] nk_note u p NK) %.

@@ -8088,7 +8088,7 @@ of terms.
 %term app %pi (term (s N)) %-> t %-> (term N) %.
 %term lam %pi (%pi t %-> (term N)) %-> (term (s N)) %.
 %term rec %pi (%pi (term (s N)) %-> (term (s N))) %-> (term (s N)) %.
-%block blocksimple {n} [v term n]%.
+%block blocksimple [n] {v term n}%.
 %{! ### Equality !}%
 %sort eq %.
 %term eq/ eq T T %.
@@ -8101,7 +8101,7 @@ complex relation that permits adjustment of the index level.
 !}%
 %sort varadjlevel %.
 %inline varlevel (%pi (term N) %-> nat %-> %type) [T] [L] varadjlevel T N L %.
-%block blockvar {n} {l} [v term n] [vl varlevel v (s l)]%.
+%block blockvar [n] [l] {v term n} {vl varlevel v (s l)}%.
 %{! ### Mapping !}%
 %{! 
 The bijection from terms to nat is called "tonat".    There
@@ -8240,7 +8240,7 @@ The raw case is used only internally and can be ignored in
 %sort fake %.
 %term _ %pi fake %<- ({i israw-total* T B I} israw-total* T' B' I') %.
 %term _ %pi fake %<- ({i israw-total* T B I} israw T' B') %.
-%block blockraw {n} [v term n] [rv rawvar v] [irt israw-total rv]%.
+%block blockraw [n] {v term n} {rv rawvar v} {irt israw-total rv}%.
 %worlds (blockraw) (israw-total* _ _ _) %.
 %total {} (israw-total* _ _ _) %.
 %{! 
@@ -8659,7 +8659,7 @@ In this section, we use the full generality of varadjlevel
 because we need to recurse in two different directions:
 the original var level and the term level.
 !}%
-%block blockvaradj {m} {n} {l} [v term n] [vl varadjlevel v m (s l)]%.
+%block blockvaradj [m] [n] [l] {v term n} {vl varadjlevel v m (s l)}%.
 %{! #### Equality (permitting variables with the same level). !}%
 %{! 
 Some variables are are bound with levels, others are not given levels.
@@ -8843,9 +8843,9 @@ index that will need to handle being shifted in both directions.
 %theorem varlevel-zero-shifts-down : forall* {N} {V term N} {L} forall {VL varadjlevel V z (s (s L))} exists {VL' varadjlevel' V z (s L)} true %.
 %theorem varlevel-nonzero-shifts-over : forall* {N} {V term N} {M} {L} forall {VL varadjlevel V (s M) (s L)} exists {VL' varadjlevel' V (s M) (s L)} true %.
 %theorem varlevel-shifts-back : forall* {N} {V term N} {M} {L} forall {VL' varadjlevel' V M (s L)} exists {VL varadjlevel V M (s L)} true %.
-%block shiftdown {l} {n} [v term n] [vl varadjlevel v z (s (s l))] [vl' varadjlevel' v z (s l)] [vsd varlevel-zero-shifts-down vl vl']%.
-%block noshift {l} {m} {n} [v term n] [vl varadjlevel v (s m) (s l)] [vl' varadjlevel' v (s m) (s l)] [vsd varlevel-nonzero-shifts-over vl vl'] [vsd varlevel-shifts-back vl' vl]%.
-%block shiftback {n} {m} {l} [v term n] [vl' varadjlevel' v m (s l)] [vl varadjlevel v m (s l)] [vsb varlevel-shifts-back vl' vl]%.
+%block shiftdown [l] [n] {v term n} {vl varadjlevel v z (s (s l))} {vl' varadjlevel' v z (s l)} {vsd varlevel-zero-shifts-down vl vl'}%.
+%block noshift [l] [m] [n] {v term n} {vl varadjlevel v (s m) (s l)} {vl' varadjlevel' v (s m) (s l)} {vsd varlevel-nonzero-shifts-over vl vl'} {vsd varlevel-shifts-back vl' vl}%.
+%block shiftback [n] [m] [l] {v term n} {vl' varadjlevel' v m (s l)} {vl varadjlevel v m (s l)} {vsb varlevel-shifts-back vl' vl}%.
 %sort fake %.
 %term _ %pi fake %<- ({x varlevel-zero-shifts-down X Y} varlevel-zero-shifts-down X' Y') %.
 %term _ 
@@ -8943,7 +8943,7 @@ all variables down if the minimum varlevel used is greater than zero.
 First we need some helper lemmas and the ubiquitous blocks.
 !}%
 %theorem varlevel-adjusts-down : forall* {N} {V term N} {M} {L} forall {VL varadjlevel V (s M) (s L)} exists {VL' varadjlevel' V M (s L)} true %.
-%block adjustdown {n} {m} {l} [v term n] [vl varadjlevel v (s m) (s l)] [vl' varadjlevel' v m (s l)] [vsd varlevel-adjusts-down vl vl']%.
+%block adjustdown [n] [m] [l] {v term n} {vl varadjlevel v (s m) (s l)} {vl' varadjlevel' v m (s l)} {vsd varlevel-adjusts-down vl vl'}%.
 %sort fake %.
 %term _ %pi fake %<- ({x varlevel-adjusts-down X Y} varlevel-adjusts-down X' Y') %.
 %worlds (blocksimple adjustdown) (varlevel-adjusts-down _ _) %.
@@ -9108,8 +9108,8 @@ All other variables are at least level 2 or non-zero adjusted index.
 "blockvar2" and "blockvaradj" makes this context explicit.
 (I probably could substitute noshift for blockvaradj
 !}%
-%block blockvar2 {l} {n} [v term n] [vl varadjlevel v z (s (s l))]%.
-%block blockvaradj {m} {l} {n} [v term n] [vl varadjlevel v (s m) (s l)]%.
+%block blockvar2 [l] [n] {v term n} {vl varadjlevel v z (s (s l))}%.
+%block blockvaradj [m] [l] [n] {v term n} {vl varadjlevel v (s m) (s l)}%.
 %theorem remove-one-var : forall* {N} {N'} {F1} {F2} {S} {A} {M} {NZ} {MN} {MM} forall {E {v term N} {vl varadjlevel v z (s z)} eql* N' A M (F1 v) (F2 v)} {ES {v} {vl} eqlsize (E v vl) S MN MM} {MC multiset`count M z (s NZ)} exists {E' {v term N} eql A M (F1 v) (F2 v)} {ES' {v} eqlsize (E' v) S MN MM} true %.
 %term _ remove-one-var ([v] [vl] eql/eq eq/) ([v] [vl] eqlsize/eq) _ ([v] eql/eq eq/) ([v] eqlsize/eq) %.
 %term _ 

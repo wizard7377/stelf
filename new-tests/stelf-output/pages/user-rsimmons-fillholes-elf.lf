@@ -5,7 +5,7 @@
 %sort list %.
 %term nil list %.
 %term cons %pi elem %-> list %-> list %.
-%block bl_elem [x elem]%.
+%block bl_elem {x elem}%.
 %sort id %.
 %term refl id L L %.
 %sort fillx %.

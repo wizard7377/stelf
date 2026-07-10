@@ -1,0 +1,28 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Theorem 15 : The control-stack and the bare machine are equivalent
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort th15-1 {_ cvalR R} {_ cstackR R A} {_ bareR R A} %.
+%sort th15-2 {_ cvalCS Phi} {_ cvalE E} {_ cstackE Phi E A} {_ cstack_substE E Phi E'} {_ {k ccont} {b {t ctriv} bareE (cret k t) t} bareE (E' k) A} %.
+%term th15-1_proof 
+	%pi (th15-1 (cval_klam CVE) (cstack_klam CE) (bare_klam ([k ccont] [b] BE k b)))
+	%<- (lemma14-1c CVE CSE')
+	%<- (th15-2 cvalCS_init CVE CE CSE' BE) %.
+%term th15-2_capp_k_k_init 
+	%pi (th15-2 cvalCS_init (cval_capp cval_k (cval_xlam ([t ctriv] [cvt cvalT t] cval_klam (CVE t cvt))) CVT) (cstack_capp CE cstack_phi_k) (csubst_capp csubst_k_init) ([k ccont] [b] bare_capp (BE k b)))
+	%<- (lemma14-1c (CVE T CVT) CSE')
+	%<- (th15-2 cvalCS_init (CVE T CVT) CE CSE' BE) %.
+%term th15-2_capp_k_vlam 
+	%pi (th15-2 CVS (cval_capp cval_k (cval_xlam ([t ctriv] [cvt cvalT t] cval_klam (CVE t cvt))) CVT) (cstack_capp CE cstack_phi_k) (csubst_capp (csubst_k_vlam CSE1)) ([k ccont] [b] bare_capp (BE k b)))
+	%<- (lemma14-1a CVS (CVE T CVT) CSE1 CSE')
+	%<- (th15-2 CVS (CVE T CVT) CE CSE' BE) %.
+%term th15-2_capp_vlam_phi 
+	%pi (th15-2 CVS (cval_capp (cval_vlam CVE1) (cval_xlam ([t ctriv] [cvt cvalT t] cval_klam (CVE t cvt))) CVT) (cstack_capp CE cstack_vlam) (csubst_capp (csubst_vlam CSE1)) ([k ccont] [b] bare_capp (BE k b)))
+	%<- (lemma14-1a (cvalCS_vlam CVE1 CVS) (CVE T CVT) CSE1 CSE')
+	%<- (th15-2 (cvalCS_vlam CVE1 CVS) (CVE T CVT) CE CSE' BE) %.
+%term th15-2_cret_k_init th15-2 cvalCS_init (cval_cret cval_k CVT) cstack_cret_k_init (csubst_cret csubst_k_init) ([k ccont] [b] b T) %.
+%term th15-2_cret_k_vlam 
+	%pi (th15-2 (cvalCS_vlam CVE CVS) (cval_cret cval_k CVT) (cstack_cret_k_vlam CE) (csubst_cret (csubst_k_vlam CSE)) ([k ccont] [b] bare_cret (BE k b)))
+	%<- (th15-2 CVS (CVE T CVT) CE (CSE T) BE) %.
+%term th15-2_cret_vlam_phi 
+	%pi (th15-2 CVS (cval_cret (cval_vlam CVE) CVT) (cstack_cret_vlam_phi CE) (csubst_cret (csubst_vlam CSE')) ([k ccont] [b] bare_cret (BE k b)))
+	%<- (th15-2 CVS (CVE T CVT) CE (CSE' T) BE) %.

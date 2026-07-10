@@ -1,0 +1,87 @@
+%querytabled _ _ %the ({A o} {B o} conc (A and B imp (B and A))) D %.
+%querytabled _ _ %the ({A o} {B o} %pi (hyp (A and B)) %-> (conc (B and A))) D %.
+%querytabled _ _ %the ({A o} {B o} conc (A imp B imp A)) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A imp B imp C)) %-> (conc (A and B imp C))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A and B imp C)) %-> (conc (A imp B imp C))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A imp B imp C)) %-> (conc (A imp B imp A imp C))) D %.
+% proof of S
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A imp B imp C imp (A imp B) imp A imp C)) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A and B and C)) %-> (conc (A and (B and C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A and (B and C))) %-> (conc (A and B and C))) D %.
+% impDef
+% 
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A and B or C)) %-> (conc (A or C and (B or C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A and (B or C))) %-> (conc (A and B or (A and C)))) D %.
+% new from ATP notes
+% 2
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A imp (B and C))) %-> (conc (A imp B and (A imp C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A imp B and (A imp C))) %-> (conc (A imp (B and C)))) D %.
+% 3
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A imp B or (A imp C))) %-> (conc (A imp (B or C)))) D %.
+% 4
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A or C and (B imp C))) %-> (conc (A imp B imp C))) D %.
+% 5
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A or B imp C)) %-> (conc (A imp C and (B imp C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A imp C and (B imp C))) %-> (conc (A or B imp C))) D %.
+% 6 
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A and (B or C))) %-> (conc (A and B or (A and C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A and B or (A and C))) %-> (conc (A and (B or C)))) D %.
+% 7
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A or (B and C))) %-> (conc (A or B and (A or C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} %pi (hyp (A or B and (A or C))) %-> (conc (A or (B and C)))) D %.
+% Id : A => A 
+%querytabled _ _ %the ({A o} conc (A imp A)) D %.
+% K : A => B => A 
+%querytabled _ _ %the ({A o} {B o} conc (A imp B imp A)) D %.
+% S : (A => B => C) => (A => B) => (A => C) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A imp (B imp C) imp (A imp B imp (A imp C)))) D %.
+% (A & B => C) <=> (A => B => C) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A and B imp C imp (A imp (B imp C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A imp (B imp C) imp (A and B imp C))) D %.
+% (A => B & C) <=> (A => B) & (A => C) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A imp (B and C) imp (A imp B) and (A imp C))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A imp B and (A imp C) imp (A imp (B and C)))) D %.
+% (A => T) <=> T 
+%querytabled _ _ %the ({A o} conc (A imp true imp true)) D %.
+%querytabled _ _ %the ({A o} conc (true imp (A imp true))) D %.
+% (A v B => C) <=> (A => C) & (B => C) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A or B imp C imp (A imp C and (B imp C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A imp C and (B imp C) imp (A or B imp C))) D %.
+% (F => C) <=> T 
+%querytabled _ _ %the ({C o} conc (false imp C imp true)) D %.
+%querytabled _ _ %the ({C o} conc (true imp (false imp C))) D %.
+% (A => B v C) =>(A => B) v (A => C) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A imp B or (A imp C) imp (A imp (B or C)))) D %.
+% F => C 
+%querytabled _ _ %the ({C o} conc (false imp C)) D %.
+% A => ((A => F) => F) 
+%querytabled _ _ %the ({A o} conc (A imp (A imp false imp false))) D %.
+% ((A => F) & A) => C 
+%querytabled _ _ %the ({A o} {C o} conc (A imp false and A imp C)) D %.
+% A & ~B => ~(A => B) 
+%querytabled _ _ %the ({A o} {B o} conc (A and (B imp false) imp (A imp B imp false))) D %.
+% A & (B v C) <=> (A & B) v (A & C) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A and (B or C) imp (A and B or (A and C)))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A and B or (A and C) imp (A and (B or C)))) D %.
+% A & F <=> F 
+%querytabled _ _ %the ({A o} conc (A and false imp false)) D %.
+%querytabled _ _ %the ({A o} conc (false imp (A and false))) D %.
+% A v (B & C) <=> (A v B) & (A v C) 
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A or (B and C) imp (A or B) and (A or C))) D %.
+%querytabled _ _ %the ({A o} {B o} {C o} conc (A or B and (A or C) imp (A or (B and C)))) D %.
+%querytabled _ _ %the ({A o} conc (A imp (A and A))) D %.
+%querytabled _ _ %the ({A o} conc (A and A imp A)) D %.
+%querytabled _ _ %the ({A o} conc (A imp (A or A))) D %.
+%querytabled _ _ %the ({A o} conc (A or A imp A)) D %.
+% ~A v ~B => ~(A & B)  
+%querytabled _ _ %the ({A o} {B o} conc (A imp false or (B imp false) imp (A and B imp false))) D %.
+% A => A v B  
+%querytabled _ _ %the ({A o} {B o} conc (A imp (A or B))) D %.
+% B => A v B  
+%querytabled _ _ %the ({A o} {B o} conc (B imp (A or B))) D %.
+% A & B => A  
+%querytabled _ _ %the ({A o} {B o} conc (A and B imp A)) D %.
+% A & B => B  
+%querytabled _ _ %the ({A o} {B o} conc (A and B imp B)) D %.
+% A v ~A => ((A => B) => A) => A 
+%querytabled _ _ %the ({A o} {B o} conc (A or (A imp false) imp (A imp B imp A imp A))) D %.

@@ -1,0 +1,130 @@
+%%%%% Static Semantics for  mods + terms %%%%%%
+%inline tt lt %.
+% abstract tag typings.
+%inline ht lt %.
+% abstract heap typings.
+%sort assm/tm {_ tm} {_ cn} %.
+%mode assm/tm %star %star %.
+%sort oftp {_ ht} {_ tt} {_ tm} {_ cn} %.
+%mode oftp %star %star %star %star %.
+%sort fst-md {_ md} {_ cn} %.
+%mode fst-md %star %star %.
+%sort assm/md {_ md} {_ sg} %.
+%mode assm/md %star %star %.
+%sort ofsg {_ ht} {_ tt} {_ pty} {_ md} {_ sg} %.
+%mode ofsg %star %star %star %star %star %.
+%term oftp/var %pi (oftp L T E C) %<- (assm/tm E C) %.
+%term oftp/tm/unit oftp L T tm/unit tp/unit %.
+%term oftp/tm/pair 
+	%pi (oftp L T (tm/pair E1 E2) (tp/cross C1 C2))
+	%<- (oftp L T E2 C2)
+	%<- (oftp L T E1 C1) %.
+%term oftp/tm/pj1 %pi (oftp L T (tm/pj1 E) C1) %<- (oftp L T E (tp/cross C1 C2)) %.
+%term oftp/tm/pj2 %pi (oftp L T (tm/pj2 E) C2) %<- (oftp L T E (tp/cross C1 C2)) %.
+%term oftp/tm/fun 
+	%pi (oftp L T (tm/fun C1 C2 E) (tp/arrow C1 C2))
+	%<- (ofkd (tp/arrow C1 C2) kd/type)
+	%<- ({x tm} {dx assm/tm x C1} {f tm} {df assm/tm f (tp/arrow C1 C2)} oftp L T (E x f) C2) %.
+%term oftp/tm/tmapp 
+	%pi (oftp L T (tm/tmapp E1 E2) C2)
+	%<- (oftp L T E2 C1)
+	%<- (oftp L T E1 (tp/arrow C1 C2)) %.
+%term oftp/tm/cnabs 
+	%pi (oftp L T (tm/cnabs K E) (tp/forall K C))
+	%<- (kd-wf K)
+	%<- ({a cn} {da ofkd a K} oftp L T (E a) (C a)) %.
+%term oftp/tm/cnapp 
+	%pi (oftp L T (tm/cnapp E C) (D C))
+	%<- (ofkd C K)
+	%<- (oftp L T E (tp/forall K D)) %.
+%term oftp/tm/term %pi (oftp L T (tm/term M) C) %<- (ofsg L T _ M (sg/cn C)) %.
+%term oftp/deq %pi (oftp L T E C) %<- (cn-deq C' C kd/type) %<- (oftp L T E C') %.
+%term oftp/tm/loc %pi (oftp L T (tm/loc LC) (tp/ref C)) %<- (ofkd C kd/type) %<- (lt-look L LC C) %.
+%term oftp/tm/ref %pi (oftp L T (tm/ref E) (tp/ref C)) %<- (oftp L T E C) %.
+%term oftp/tm/set 
+	%pi (oftp L T (tm/set E1 E2) tp/unit)
+	%<- (oftp L T E2 C)
+	%<- (oftp L T E1 (tp/ref C)) %.
+%term oftp/tm/get %pi (oftp L T (tm/get E) C) %<- (oftp L T E (tp/ref C)) %.
+%term oftp/tm/inl 
+	%pi (oftp L T (tm/inl (tp/sum C1 C2) E) (tp/sum C1 C2))
+	%<- (ofkd C2 kd/type)
+	%<- (oftp L T E C1) %.
+%term oftp/tm/inr 
+	%pi (oftp L T (tm/inr (tp/sum C1 C2) E) (tp/sum C1 C2))
+	%<- (ofkd C1 kd/type)
+	%<- (oftp L T E C2) %.
+%term oftp/tm/case 
+	%pi (oftp L T (tm/case E E1 E2) C)
+	%<- ({x tm} {dx assm/tm x C2} oftp L T (E2 x) C)
+	%<- ({x tm} {dx assm/tm x C1} oftp L T (E1 x) C)
+	%<- (oftp L T E (tp/sum C1 C2)) %.
+%term oftp/tm/raise %pi (oftp L T (tm/raise E) C) %<- (ofkd C kd/type) %<- (oftp L T E tp/tagged) %.
+%term oftp/tm/try 
+	%pi (oftp L T (tm/try E1 E2) C)
+	%<- ({x tm} {dx assm/tm x tp/tagged} oftp L T (E2 x) C)
+	%<- (oftp L T E1 C) %.
+%term oftp/tm/new-tag %pi (oftp L T (tm/new-tag C) (tp/tag C)) %<- (ofkd C kd/type) %.
+%term oftp/tm/tagloc %pi (oftp L T (tm/tagloc LC) (tp/tag C)) %<- (ofkd C kd/type) %<- (lt-look T LC C) %.
+%term oftp/tm/tag 
+	%pi (oftp L T (tm/tag E1 E2) tp/tagged)
+	%<- (oftp L T E2 C)
+	%<- (oftp L T E1 (tp/tag C)) %.
+%term oftp/tm/iftag 
+	%pi (oftp L T (tm/iftag E1 E2 E3 E4) C)
+	%<- (oftp L T E4 C)
+	%<- ({x} {dx assm/tm x C'} oftp L T (E3 x) C)
+	%<- (oftp L T E2 (tp/tag C'))
+	%<- (oftp L T E1 tp/tagged) %.
+%term oftp/tm/roll 
+	%pi (oftp L T (tm/roll (cn/mu K C') E) (cn/mu K C'))
+	%<- (ofkd (cn/mu K C') kd/type)
+	%<- (oftp L T E (C' (cn/mu K C'))) %.
+%term oftp/tm/unroll %pi (oftp L T (tm/unroll E) (C' (cn/mu K C'))) %<- (oftp L T E (cn/mu K C')) %.
+%term fst-md/unit fst-md md/unit cn/unit %.
+%term fst-md/cn fst-md (md/cn C) C %.
+%term fst-md/tm fst-md (md/tm _) cn/unit %.
+%term fst-md/pair %pi (fst-md (md/pair M1 M2) (cn/pair C1 C2)) %<- (fst-md M2 C2) %<- (fst-md M1 C1) %.
+%term fst-md/pj1 %pi (fst-md (md/pj1 M) (cn/pj1 C)) %<- (fst-md M C) %.
+%term fst-md/pj2 %pi (fst-md (md/pj2 M) (cn/pj2 C)) %<- (fst-md M C) %.
+%term fst-md/lam fst-md (md/lam _ _ _) cn/unit %.
+%term ofsg/var %pi (ofsg L T pty/p M S) %<- (assm/md M S) %.
+%term ofsg/md/unit ofsg L T pty/p md/unit sg/unit %.
+%term ofsg/md/cn %pi (ofsg L T pty/p (md/cn C) (sg/kd K)) %<- (ofkd C K) %.
+%term ofsg/md/tm %pi (ofsg L T pty/p (md/tm E) (sg/cn C)) %<- (oftp L T E C) %.
+%term ofsg/md/pair 
+	%pi (ofsg L T Y (md/pair M1 M2) (sg/sgm S1 ([c cn] S2)))
+	%<- (ofsg L T Y M2 S2)
+	%<- (ofsg L T Y M1 S1) %.
+%term ofsg/md/pj1 %pi (ofsg L T Y (md/pj1 M) S1) %<- (ofsg L T Y M (sg/sgm S1 _)) %.
+%term ofsg/md/pj2 
+	%pi (ofsg L T pty/p (md/pj2 M) (S2 (cn/pj1 C)))
+	%<- (fst-md M C)
+	%<- (ofsg L T pty/p M (sg/sgm S1 S2)) %.
+%term ofsg/md/lam 
+	%pi (ofsg L T pty/p (md/lam S1 S2 M') (sg/pi S1 S2))
+	%<- (fst-sg S1 K1)
+	%<- (sg-wf S1)
+	%<- ({s md} {dm assm/md s S1} {a cn} {da ofkd a K1} {dm fst-md s a} ofsg L T Y (M' s a) (S2 a)) %.
+%term ofsg/md/app 
+	%pi (ofsg L T pty/i (md/app M1 M2) (S2 C))
+	%<- (fst-md M2 C)
+	%<- (ofsg L T pty/p M2 S1)
+	%<- (ofsg L T Y M1 (sg/pi S1 S2)) %.
+%term ofsg/md/let 
+	%pi (ofsg L T pty/i (md/let M1 M2 S) S)
+	%<- (fst-sg S1 K1)
+	%<- (sg-wf S)
+	%<- ({s md} {dm assm/md s S1} {a cn} {da ofkd a K1} {dm fst-md s a} ofsg L T Y (M2 s a) S)
+	%<- (ofsg L T Y' M1 S1) %.
+%term ofsg/md/seal %pi (ofsg L T pty/i (md/seal M S) S) %<- (ofsg L T _ M S) %.
+%term ofsg/sgm-ext 
+	%pi (ofsg L T pty/p M (sg/sgm S1 ([a cn] S2)))
+	%<- (ofsg L T pty/p (md/pj2 M) S2)
+	%<- (ofsg L T pty/p (md/pj1 M) S1) %.
+%term ofsg/kd-ext 
+	%pi (ofsg L T pty/p M (sg/kd K))
+	%<- (ofkd C K)
+	%<- (fst-md M C)
+	%<- (ofsg L T pty/p M (sg/kd K')) %.
+%term ofsg/sub %pi (ofsg L T Y M S) %<- (pty-sub Y' Y) %<- (sg-sub S' S) %<- (ofsg L T Y' M S') %.

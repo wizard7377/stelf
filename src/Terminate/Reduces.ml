@@ -16,7 +16,9 @@ open! Basis
    tech report CMU-CS-01-115
  *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Reduces (Reduces__0 : sig
   module Global : GLOBAL

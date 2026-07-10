@@ -1,48 +1,43 @@
-let setup_log ~level () =
-  Logs.set_reporter (Logs_fmt.reporter ());
-  Logs.set_level (Some level)
-
 module Level = struct
   type t = Debug | Info | Warning | Error | App
-
-  let log_level = function
-    | Debug -> Logs.Debug
-    | Info -> Logs.Info
-    | Warning -> Logs.Warning
-    | Error -> Logs.Error
-    | App -> Logs.App
-
-  let from_chatter x =
-    assert (x >= 0);
-    match x with
-    | 0 -> Error
-    | 1 | 2 | 3 -> Warning
-    | 4 -> Info
-    | _ -> Debug
 end
 
 module Group = struct
-  let approx = Logs.Src.create "stelf.approx"
-  let check = Logs.Src.create "stelf.check"
-  let compile = Logs.Src.create "stelf.compile"
-  let typecheck = Logs.Src.create "stelf.typecheck"
-  let unify = Logs.Src.create "stelf.unify"
-  let cover = Logs.Src.create "stelf.cover"
-  let parse = Logs.Src.create "stelf.parse"
-  let reduce = Logs.Src.create "stelf.reduce"
-  let meta = Logs.Src.create "stelf.meta"
-  let pal = Logs.Src.create "stelf.pal"
-  let default = Logs.Src.create "stelf"
+  let approx = Display.Info.Approx
+  let check = Display.Info.Check
+  let compile = Display.Info.Compile
+  let typecheck = Display.Info.Typecheck
+  let unify = Display.Info.Unify
+  let cover = Display.Info.Cover
+  let parse = Display.Info.Parse
+  let reduce = Display.Info.Reduce
+  let meta = Display.Info.Meta
+  let pal = Display.Info.Pal
+  let default = Display.Info.Default
 end
+
+let msg'' ?(src = Group.default) ?(level = Level.Info) (fmt : 'a Fmt.t)
+    (args : 'a) : unit =
+  match level with
+  | Level.Debug ->
+      Display.message ~src ~level:Display.Level.debug (fun f ->
+          Format.fprintf f "%a" fmt args)
+  | Level.Info ->
+      Display.message ~src ~level:Display.Level.normal (fun f ->
+          Format.fprintf f "%a" fmt args)
+  | Level.Warning ->
+      Display.message ~src ~level:Display.Level.terse (fun f ->
+          Format.fprintf f "%a" fmt args)
+  | Level.Error ->
+      Display.message ~src ~level:Display.Level.quiet (fun f ->
+          Format.fprintf f "%a" fmt args)
+  | Level.App ->
+      Display.message ~src ~level:Display.Level.normal (fun f ->
+          Format.fprintf f "%a" fmt args)
 
 let msg' ?(src = Group.default) ?(level = Level.Info) (fmt : 'a Fmt.t)
     (args : 'a) : unit =
-  match level with
-  | Level.Debug -> Logs.debug ~src (fun m -> m "%a" fmt args)
-  | Level.Info -> Logs.info ~src (fun m -> m "%a" fmt args)
-  | Level.Warning -> Logs.warn ~src (fun m -> m "%a" fmt args)
-  | Level.Error -> Logs.err ~src (fun m -> m "%a" fmt args)
-  | Level.App -> Logs.app ~src (fun m -> m "%a" fmt args)
+  msg'' ~src ~level fmt args
 
 let msg ?(src = Group.default) ?(level = Level.Info) (fmt : unit Fmt.t) : unit =
   msg' ~src ~level fmt ()

@@ -13,9 +13,16 @@ open! Basis
 (* Approximate language for term reconstruction *)
 (* Author: Kevin Watkins *)
 exception Ambiguous
-let () = Printexc.register_printer (function Ambiguous -> Some "Ambiguous term" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Ambiguous -> Some "Ambiguous term"
+    | _ -> None)
+
 exception Unify of string
-let () = Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
 
 module MakeApprox (Whnf : WHNF) : APPROX = struct
   (*! structure IntSyn = IntSyn' !*)
@@ -164,7 +171,8 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
     begin match varLookupName name with
     | Some (uvl_, _) -> uvl_
     | None ->
-        Logs.debug (fun m -> m "Failed to find name");
+        Debug.msg ~src:Debug.Group.approx ~level:Debug.Level.Debug
+          (Debug.Fmt.exact "Failed to find name");
         raise (Fail "Name not found")
     end
   (* must be in list by invariant *)

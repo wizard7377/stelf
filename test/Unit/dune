@@ -1,6 +1,7 @@
 (include_subdirs unqualified)
 
 (test
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name UnitTest)
  (libraries alcotest table trail intsyn display basis))

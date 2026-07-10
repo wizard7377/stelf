@@ -7,7 +7,11 @@ open Field
 (* Integers Modulo a Prime Number *)
 (* Author: Roberto Virga *)
 exception Div
-let () = Printexc.register_printer (function Div -> Some "Division by zero" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Div -> Some "Division by zero"
+    | _ -> None)
 
 module IntegersMod (IntegersMod__0 : sig
   val p : int

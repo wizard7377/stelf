@@ -1,0 +1,60 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% storetp.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Typings
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%term nil_sttp sttp %.
+%term cons_sttp %pi loc %-> tp %-> sttp %-> sttp %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Typings WF
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort sttp_wf {_ sttp} %.
+%mode sttp_wf %in %.
+%term sttp_wf_nil sttp_wf nil_sttp %.
+%term sttp_wf_cons_nil sttp_wf (cons_sttp L T nil_sttp) %.
+%term sttp_wf_cons_cons 
+	%pi (sttp_wf (cons_sttp L' T' ST''))
+	%-> (loc_lt L' L)
+	%-> (sttp_wf (cons_sttp L T (cons_sttp L' T' ST''))) %.
+%terminates ST (sttp_wf ST) %.
+%worlds () (sttp_wf _) %.
+%covers sttp_wf %in %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Typing Lookup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort sttp_lookup {_ sttp} {_ loc} {_ tp} %.
+%mode sttp_lookup %in %in %out %.
+%term sttp_lookup_hit sttp_lookup (cons_sttp L T _) L T %.
+%term sttp_lookup_miss 
+	%pi (sttp_lookup ST' L T)
+	%-> (loc_lt L L')
+	%-> (sttp_lookup (cons_sttp L' _ ST') L T) %.
+%terminates ST (sttp_lookup ST _ _) %.
+%worlds () (sttp_lookup _ _ _) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Typing Alloc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort sttp_alloc {_ sttp} {_ tp} {_ sttp} {_ loc} %.
+%mode sttp_alloc %in %in %out %out %.
+%term sttp_alloc_nil sttp_alloc nil_sttp T'' (cons_sttp (mkLoc z_nat) T'' nil_sttp) (mkLoc z_nat) %.
+%term sttp_alloc_cons sttp_alloc (cons_sttp (mkLoc N) T ST) T'' (cons_sttp (mkLoc (s_nat N)) T'' (cons_sttp (mkLoc N) T ST)) (mkLoc (s_nat N)) %.
+%terminates ST (sttp_alloc ST _ _ _) %.
+%worlds () (sttp_alloc _ _ _ _) %.
+%covers sttp_alloc %in %in %out %out %.
+%total ST (sttp_alloc ST _ _ _) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Typing Extend
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort sttp_extend {_ sttp} {_ sttp} %.
+%mode sttp_extend %in %in %.
+%term sttp_extend_nil sttp_extend nil_sttp ST2 %.
+%term sttp_extend_cons_hit 
+	%pi (sttp_extend ST1' ST2')
+	%-> (sttp_extend (cons_sttp L T ST1') (cons_sttp L T ST2')) %.
+%term sttp_extend_cons_miss 
+	%pi (sttp_extend (cons_sttp L1 T1 ST1') ST2')
+	%-> (loc_lt L1 L2)
+	%-> (sttp_extend (cons_sttp L1 T1 ST1') (cons_sttp L2 T2 ST2')) %.
+%terminates ST2 (sttp_extend _ ST2) %.
+%worlds () (sttp_extend _ _) %.

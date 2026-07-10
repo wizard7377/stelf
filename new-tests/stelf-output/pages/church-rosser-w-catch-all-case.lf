@@ -10,7 +10,7 @@ When we use this ``%block``, it expresses that we can be working in a
 context with arbitrary expression variables. 
 
 !}%
-%block exps [x exp]%.
+%block exps {x exp}%.
 %worlds (exps) (exp) %.
 %{! ## Reduction !}%
 %{! 
@@ -39,7 +39,7 @@ with the invariant that it can evaluate to itself.
 	%pi (reduce (app (lam E1) E2) (E1' E2'))
 	%<- ({x exp} %pi (reduce x x) %-> (reduce (E1 x) (E1' x)))
 	%<- (reduce E2 E2') %.
-%block exps_red [x exp] [d reduce x x]%.
+%block exps_red {x exp} {d reduce x x}%.
 %worlds (exps_red) (reduce _ _) %.
 %total E (reduce E _) %.
 %{! ### Reduction is reflexive !}%
@@ -61,7 +61,7 @@ case of this theorem.
 	%pi (identity (app E1 E2) (reduce/app D2 D1))
 	%<- (identity E1 (%the (reduce E1 E1) D1))
 	%<- (identity E2 (%the (reduce E2 E2) D2)) %.
-%block exps_id [x exp] [redx reduce x x] [idx identity x redx]%.
+%block exps_id {x exp} {redx reduce x x} {idx identity x redx}%.
 %worlds (exps_id) (identity _ _) %.
 %total T (identity T _) %.
 %{! ## Substitution !}%

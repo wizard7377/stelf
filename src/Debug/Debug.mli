@@ -1,38 +1,29 @@
-val setup_log : level:Logs.level -> unit -> unit
-
 module Level : sig
   type t = Debug | Info | Warning | Error | App
-
-  val log_level : t -> Logs.level
-
-  val from_chatter : int -> t
-  [@@depracated
-    "Don't use this, it's only for backwards compatibility with the old \
-     chatter levels. Use the log levels directly instead."]
 end
 
 module Group : sig
-  val approx : Logs.src
-  val check : Logs.src
-  val compile : Logs.src
-  val typecheck : Logs.src
-  val unify : Logs.src
-  val cover : Logs.src
-  val parse : Logs.src
-  val reduce : Logs.src
-  val meta : Logs.src
-  val pal : Logs.src
-  val default : Logs.src
+  val approx : Display.Info.src
+  val check : Display.Info.src
+  val compile : Display.Info.src
+  val typecheck : Display.Info.src
+  val unify : Display.Info.src
+  val cover : Display.Info.src
+  val parse : Display.Info.src
+  val reduce : Display.Info.src
+  val meta : Display.Info.src
+  val pal : Display.Info.src
+  val default : Display.Info.src
 end
 
 val msg' :
-  ?src:Logs.src ->
+  ?src:Display.Info.src ->
   ?level:Level.t ->
   (Format.formatter -> 'a -> unit) ->
   'a ->
   unit
 
-val msg : ?src:Logs.src -> ?level:Level.t -> unit Fmt.t -> unit
+val msg : ?src:Display.Info.src -> ?level:Level.t -> unit Fmt.t -> unit
 
 module Fmt : sig
   include module type of Fmt

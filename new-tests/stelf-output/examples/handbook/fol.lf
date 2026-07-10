@@ -33,9 +33,9 @@
 %term note %pi (nd (not A)) %-> ({C o} %pi (nd A) %-> (nd C)) %.
 %term foralli %pi ({a i} nd (A a)) %-> (nd (forall A)) %.
 %term foralle %pi (nd (forall A)) %-> ({T i} nd (A T)) %.
-%block lnd {A o} [u nd A]%.
-%block lo [p o]%.
-%block li [a i]%.
+%block lnd [A o] {u nd A}%.
+%block lo {p o}%.
+%block li {a i}%.
 %worlds (lnd lo li) (nd A) %.
 % Example
 %define _ (nd (A imp (B imp A))) impi ([u nd A] impi ([v nd B] u)) %.
@@ -101,7 +101,7 @@
 %term ded_ug 
 	%pi (ded ([u hil A] ug (H1 u)) (mp f2 (ug H1')))
 	%<- ({a i} ded ([u hil A] H1 u a) (H1' a)) %.
-%block lded {A o} [u nd A] [v hil A] [h {C o} ded ([w hil C] v) (mp k v)]%.
+%block lded [A o] {u nd A} {v hil A} {h {C o} ded ([w hil C] v) (mp k v)}%.
 %mode ded %in %out %.
 %worlds (li lo lded) (ded H H') %.
 %terminates H (ded H _) %.
@@ -126,7 +126,7 @@
 %term ndh_foralli %pi (ndhil (foralli D1) (ug H1)) %<- ({a i} ndhil (D1 a) (H1 a)) %.
 %term ndh_foralle %pi (ndhil (foralle D1 T) (mp (f1 T) H1)) %<- (ndhil D1 H1) %.
 %mode ndhil %in %out %.
-%block lndhil {A o} [u nd A] [v hil A] [h {C o} ded ([w hil C] v) (mp k v)] [nh ndhil u v]%.
+%block lndhil [A o] {u nd A} {v hil A} {h {C o} ded ([w hil C] v) (mp k v)} {nh ndhil u v}%.
 %worlds (li lo lndhil) (ndhil D H) %.
 %terminates D (ndhil D _) %.
 %covers ndhil %in %out %.

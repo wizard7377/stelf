@@ -16,7 +16,9 @@ include TRAVERSE
 open! Basis
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Traverse (Traverse__0 : sig
   (*! structure IntSyn' : INTSYN !*)

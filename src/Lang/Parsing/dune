@@ -1,5 +1,6 @@
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name parsing)
  (public_name stelf.parsing)
  (libraries display lexing tag angstrom))

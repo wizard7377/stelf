@@ -1,0 +1,25 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Lemma 14 : Control-stack substitution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort lemma14-1a {_ cvalCS ([k ccont] Phi k ; (vlam ([v ctriv] E1 v k)))} {_ cvalE E} {_ {v ctriv} cstack_substE (E1 v) Phi (E1' v)} {_ cstack_substE E ([k ccont] Phi k ; vlam ([v ctriv] E1 v k)) ([k ccont] E (vlam ([v ctriv] E1' v k)))} %.
+%sort lemma14-1c {_ cvalE E} {_ cstack_substE E ([k ccont] cdot) E} %.
+%sort lemma14-2a {_ cvalCS ([k ccont] Phi k ; (vlam ([v ctriv] E1 v k)))} {_ cvalC C} {_ {v ctriv} cstack_substE (E1 v) Phi (E1' v)} {_ cstack_substC C ([k ccont] Phi k ; vlam ([v ctriv] E1 v k)) ([k ccont] C (vlam ([v ctriv] E1' v k)))} %.
+%sort lemma14-2b {_ cvalC C} {_ cstack_substC C ([k ccont] cdot) C} %.
+%term lemma14-1a_cret 
+	%pi (lemma14-1a CVS (cval_cret CVC CVT) SE1 (csubst_cret SC))
+	%<- (lemma14-2a CVS CVC SE1 SC) %.
+%term lemma14-1a_capp 
+	%pi (lemma14-1a CVS (cval_capp CVC CVT0 CVT1) SE1 (csubst_capp SC))
+	%<- (lemma14-2a CVS CVC SE1 SC) %.
+%term lemma14-1c_cret %pi (lemma14-1c (cval_cret CVC CVT) (csubst_cret SC)) %<- (lemma14-2b CVC SC) %.
+%term lemma14-1c_capp 
+	%pi (lemma14-1c (cval_capp CVC CVT0 CVT1) (csubst_capp SC))
+	%<- (lemma14-2b CVC SC) %.
+%term lemma14-2a_k lemma14-2a CVS cval_k SE1 (csubst_k_vlam SE1) %.
+%term lemma14-2a_vlam 
+	%pi (lemma14-2a CVS (cval_vlam CVE) SE1 (csubst_vlam SE2))
+	%<- ({v ctriv} {cvv cvalT v} lemma14-1a CVS (CVE v cvv) SE1 (SE2 v)) %.
+%term lemma14-2b_k lemma14-2b cval_k csubst_k_init %.
+%term lemma14-2b_vlam 
+	%pi (lemma14-2b (cval_vlam CVE) (csubst_vlam SE))
+	%<- ({v ctriv} {cvv cvalT v} lemma14-1c (CVE v cvv) (SE v)) %.

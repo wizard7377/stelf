@@ -24,6 +24,6 @@
 %term cmpai_foralle 
 	%pi (cmpai (foralle D1 T) (atm_foralle AT1) ([P p] [i] I1 P (i_forall T i)))
 	%<- (cmpai D1 AT1 I1) %.
-%block l_cmpai {A o} [u pf A] [a atm u] [d assume A] [cai cmpai u a ([P p] [i A >> P] s_atom i d)]%.
+%block l_cmpai [A o] {u pf A} {a atm u} {d assume A} {cai cmpai u a ([P p] [i A >> P] s_atom i d)}%.
 %worlds (l_i l_cmpai) (cmpcs CN S) (cmpai D AT S') %.
 %total (CN AT) (cmpcs CN _) (cmpai D AT _) %.

@@ -1,0 +1,4 @@
+% terminates after 3 stages (variant)
+% terminates after 3 stages (subsumption)
+%querytabled _ 6 of z T %.
+%querytabled _ 7 of (case z z ([x] x)) T %.

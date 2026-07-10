@@ -1,0 +1,13 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% BNF of direct-style terms
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort droot %.
+%name droot %.
+%sort dexp %.
+%name dexp %.
+%sort dtriv %.
+%name dtriv %.
+%term dexp->droot %pi dexp %-> droot %.
+%term dapp %pi dexp %-> dexp %-> dexp %.
+%term dtriv->dexp %pi dtriv %-> dexp %.
+%term dlam %pi (%pi dtriv %-> droot) %-> dtriv %.

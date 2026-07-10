@@ -1,5 +1,5 @@
-%block bind-block {c cn} {k kd} [da ofkd c k] [dm mofkd da met/unit]%.
-%block wbind-block {c cn} {k kd} [da ofkd c k]%.
+%block bind-block [c cn] [k kd] {da ofkd c k} {dm mofkd da met/unit}%.
+%block wbind-block [c cn] [k kd] {da ofkd c k}%.
 %sort ekd-wf-ordered %.
 %mode ekd-wf-ordered %in %out %.
 %sort eofkd-ordered %.

@@ -1,0 +1,25 @@
+%%% Continuation Machine for Mini-ML
+%%% Author: Frank Pfenning
+% Machine Instructions
+%sort inst %.
+%name inst %.
+%term ev %pi exp %-> inst %.
+%term return %pi val %-> inst %.
+%term case1 %pi val %-> exp %-> (%pi val %-> exp) %-> inst %.
+%term pair1 %pi val %-> exp %-> inst %.
+%term fst1 %pi val %-> inst %.
+%term snd1 %pi val %-> inst %.
+%term app1 %pi val %-> exp %-> inst %.
+%term app2 %pi val %-> val %-> inst %.
+% Continuations
+%sort cont %.
+%name cont %.
+%term init cont %.
+%term ; %pi cont %-> (%pi val %-> inst) %-> cont %.
+%prec %left 8 ; %.
+% Continuation Machine States
+%sort state %.
+%name state %.
+%term # %pi cont %-> inst %-> state %.
+%term answer %pi val %-> state %.
+%prec %none 7 # %.

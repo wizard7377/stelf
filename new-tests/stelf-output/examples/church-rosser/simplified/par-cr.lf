@@ -17,7 +17,7 @@
 	%pi (subst ([x term] [idx x => x] lm (R1 x idx)) ([x] [y] [r] lm (R1' x y r)))
 	%<- ({z} {idz} subst ([x] [idx x => x] R1 x idx z idz) ([x] [y] [r] R1' x y r z idz)) %.
 %term subst_lmBase subst ([x] [idx] R) ([x] [y] [r] R) %.
-%block l1 [x term] [idx x => x]%.
+%block l1 {x term} {idx x => x}%.
 %worlds (l1) (subst R R') %.
 %covers subst %in %out %.
 %terminates R (subst R _) %.
@@ -61,7 +61,7 @@
 	%<- ({x term} {idx x => x} 
 	%pi (dia idx idx idx idx)
 	%-> (dia (R1' x idx) (R1'' x idx) (S1' x idx) (S1'' x idx))) %.
-%block l2 [x term] [idx x => x] [hd dia idx idx idx idx]%.
+%block l2 {x term} {idx x => x} {hd dia idx idx idx idx}%.
 %worlds (l2) (dia _ _ _ _) %.
 %covers dia %in %in %out %out %.
 %terminates [R' R''] (dia R' R'' _ _) %.

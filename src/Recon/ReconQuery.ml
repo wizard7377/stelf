@@ -59,9 +59,7 @@ module Make_ReconQuery
         IntSyn.AbbrevDef (name, None, i, u'_, v'_, l_)
     in
     let cd = Names.nameConDec cd in
-    let _ =
-      Display.chatter_s 3 (Print.conDecToString cd ^ "\n")
-    in
+    let _ = Display.chatter_s 3 (Print.conDecToString cd ^ "\n") in
     let _ =
       if !Global.doubleCheck then begin
         Typecheck.Typecheck_.TypeCheck.check (v'_, IntSyn.Uni l_);
@@ -86,9 +84,7 @@ module Make_ReconQuery
         IntSyn.AbbrevDef (name, None, i, u'_, v'_, IntSyn.Type)
     in
     let cd = Names.nameConDec cd in
-    let _ =
-      Display.chatter_s 3 (Print.conDecToString cd ^ "\n")
-    in
+    let _ = Display.chatter_s 3 (Print.conDecToString cd ^ "\n") in
     let _ =
       if !Global.doubleCheck then begin
         Typecheck.Typecheck_.TypeCheck.check (v'_, IntSyn.Uni IntSyn.Type);

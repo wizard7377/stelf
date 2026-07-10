@@ -1,0 +1,27 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% store-lemmas.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store WF Lemmas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort st!wf_tail {_ st_wf (cons_st L V S')} {_ st_wf S'} %.
+%mode st!wf_tail %in %out %.
+%scope st!wf_tail %term cons_nil st!wf_tail st_wf_cons_nil st_wf_nil %.
+%term cons_cons st!wf_tail (st_wf_cons_cons DSWf' _) DSWf' %.
+%terminates {} (st!wf_tail _ _) %.
+%worlds () (st!wf_tail _ _) %.
+%covers st!wf_tail %in %out %.
+%total {} (st!wf_tail _ _) %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Store Alloc Lemmas
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort st!alloc_preserves_wf {_ st_wf S1} {_ st_alloc S1 V S2 L} {_ st_wf S2} %.
+%mode st!alloc_preserves_wf %in %in %out %.
+%scope st!alloc_preserves_wf %term nil st!alloc_preserves_wf st_wf_nil st_alloc_nil st_wf_cons_nil %.
+%term cons 
+	%pi (st!alloc_preserves_wf DSWf st_alloc_cons (st_wf_cons_cons DSWf (loc_lt_ DNatLt)))
+	%<- (nat!N_lt_sN _ DNatLt) %.
+%terminates DStAlloc (st!alloc_preserves_wf _ DStAlloc _) %.
+%worlds () (st!alloc_preserves_wf _ _ _) %.
+%covers st!alloc_preserves_wf %in %in %out %.
+%total DStAlloc (st!alloc_preserves_wf _ DStAlloc _) %.

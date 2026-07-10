@@ -1,0 +1,34 @@
+%%% The language and inference rules of natural deduction
+%%% This contains only the positive fragment
+%%% Author: Frank Pfenning
+%sort i %.
+% individuals
+%sort o %.
+% formulas
+%sort p %.
+% atomic formulas
+%name i %.
+% S
+%name o %.
+% B C
+%name p %.
+% Q
+%term atom %pi p %-> o %.
+%term and %pi o %-> o %-> o %.
+%prec %right 11 and %.
+%term imp %pi o %-> o %-> o %.
+%prec %right 10 imp %.
+%term true o %.
+%term forall %pi (%pi i %-> o) %-> o %.
+%sort pf {_ o} %.
+% natural deductions
+%name pf %.
+% E
+%term andi %pi (pf A) %-> (pf B) %-> (pf (A and B)) %.
+%term andel %pi (pf (A and B)) %-> (pf A) %.
+%term ander %pi (pf (A and B)) %-> (pf B) %.
+%term impi %pi (%pi (pf A) %-> (pf B)) %-> (pf (A imp B)) %.
+%term impe %pi (pf (A imp B)) %-> (pf A) %-> (pf B) %.
+%term truei pf true %.
+%term foralli %pi ({a i} pf (A a)) %-> (pf (forall A)) %.
+%term foralle %pi (pf (forall A)) %-> ({T i} pf (A T)) %.

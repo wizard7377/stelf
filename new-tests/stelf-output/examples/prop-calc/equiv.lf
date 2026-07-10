@@ -29,7 +29,7 @@
 	%<- ({x} {y} %pi (comb x y) %-> ({B o} abs ([z |- B] y) (MP K y)) %-> (comb (PP x) (PP' y)))
 	%<- (abs PP' Q) %.
 %term cimpliesE %pi (comb (impliesE P Q) (MP P' Q')) %<- (comb P P') %<- (comb Q Q') %.
-%block l {A o} [x ! A] [y |- A] [u comb x y] [v {B o} abs ([z |- B] y) (MP K y)]%.
+%block l [A o] {x ! A} {y |- A} {u comb x y} {v {B o} abs ([z |- B] y) (MP K y)}%.
 %worlds (l) (abs D F) %.
 %worlds (l) (comb _ _) %.
 % Now the translation from Hilbert deduction into natural deductions.

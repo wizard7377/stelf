@@ -49,6 +49,6 @@
 	%pi (r_comp (i_forall T I1) (pg_forall PG1) (r_forall R1) (s'_exists T S'1))
 	%<- (r_comp I1 (PG1 T) (R1 T) S'1) %.
 %term rs'_atom r_comp i_atom pg_atom r_atom s'_eqp %.
-%block l_h'_comp {A o} {D prog} {PG pg A D} [h assume A] [h' assume' D] [hc h'_comp h PG h']%.
+%block l_h'_comp [A o] [D prog] [PG pg A D] {h assume A} {h' assume' D} {hc h'_comp h PG h'}%.
 %worlds (l_i l_h'_comp) (s'_comp S GL S') (h'_comp H PG H') (r_comp I PG R S'') %.
 %total (S H I) (s'_comp S GL _) (h'_comp H _ _) (r_comp I PG R _) %.

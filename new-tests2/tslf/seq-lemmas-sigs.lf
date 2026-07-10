@@ -1,0 +1,30 @@
+%sort sg-wf/seq {_ seq/cn C1 C2} {_ sg-wf (K C1)} {_ sg-wf (K C2)} %.
+%mode sg-wf/seq %in %in %out %.
+%term _ sg-wf/seq seq/cn/refl D1 D1 %.
+%worlds (ofkd+vdt-block) (sg-wf/seq _ _ _) %.
+%total {} (sg-wf/seq _ _ _) %.
+%sort fst-sg/seq {_ seq/cn C1 C2} {_ fst-sg S (K C1)} {_ fst-sg S (K C2)} %.
+%mode fst-sg/seq %in %in %out %.
+%term _ fst-sg/seq seq/cn/refl D1 D1 %.
+%worlds (ofkd+vdt-block) (fst-sg/seq _ _ _) %.
+%total {} (fst-sg/seq _ _ _) %.
+%sort sg-sub/seq-a {_ seq/kd K1 K2} {_ {a cn} {da ofkd a K1} sg-sub (K3 a) (K4 a)} {_ {a cn} {da ofkd a K2} sg-sub (K3 a) (K4 a)} %.
+%mode sg-sub/seq-a %in %in %out %.
+%term _ sg-sub/seq-a seq/kd/refl D1 D1 %.
+%worlds (ofkd+vdt-block) (sg-sub/seq-a _ _ _) %.
+%total {} (sg-sub/seq-a _ _ _) %.
+%sort sg-wf/seq-a {_ seq/kd K1 K2} {_ {a cn} {da ofkd a K1} sg-wf (K3 a)} {_ {a cn} {da ofkd a K2} sg-wf (K3 a)} %.
+%mode sg-wf/seq-a %in %in %out %.
+%term _ sg-wf/seq-a seq/kd/refl D1 D1 %.
+%worlds (ofkd+vdt-block) (sg-wf/seq-a _ _ _) %.
+%total {} (sg-wf/seq-a _ _ _) %.
+%sort seq/cn/sg-sub-o {S1 %pi cn %-> sg} {_ seq/cn C1 C2} {_ sg-sub S' (S1 C1)} {_ sg-sub S' (S1 C2)} %.
+%mode seq/cn/sg-sub-o %in %in %in %out %.
+%term _ seq/cn/sg-sub-o _ seq/cn/refl D1 D1 %.
+%worlds (ofkd+vdt-block) (seq/cn/sg-sub-o _ _ _ _) %.
+%total {} (seq/cn/sg-sub-o _ _ _ _) %.
+%sort seq/cn/sg-sub-ol {S1 %pi cn %-> sg} {_ seq/cn C1 C2} {_ sg-sub (S1 C1) S'} {_ sg-sub (S1 C2) S'} %.
+%mode seq/cn/sg-sub-ol %in %in %in %out %.
+%term _ seq/cn/sg-sub-ol _ seq/cn/refl D1 D1 %.
+%worlds () (seq/cn/sg-sub-ol _ _ _ _) %.
+%total {} (seq/cn/sg-sub-ol _ _ _ _) %.

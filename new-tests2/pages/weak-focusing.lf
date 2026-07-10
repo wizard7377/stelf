@@ -1,0 +1,431 @@
+%                         
+%. %[[ ## Polarized logic %]]
+%sort polarity %.
+%name polarity %.
+%term pos polarity %.
+%term neg polarity %.
+%sort atm {_ polarity} %.
+%name atm %.
+%sort prop {_ polarity} %.
+%name prop %.
+%term atom %pi (atm S) %-> (prop S) %.
+%term up %pi (prop pos) %-> (prop neg) %.
+%term down %pi (prop neg) %-> (prop pos) %.
+%term * %pi (prop pos) %-> (prop pos) %-> (prop pos) %.
+%prec %right 10 * %.
+%term + %pi (prop pos) %-> (prop pos) %-> (prop pos) %.
+%prec %right 9 + %.
+%scope + %term o %pi (prop pos) %-> (prop neg) %-> (prop neg) %.
+%prec %right 8 -o %.
+%block bl_atmpos {qp atm pos}%.
+%block bl_atmneg {qn atm neg}%.
+%. %[[ ## Sequent calculus for polarized logic %]]
+%. %[[ ### Logic definition %]]
+%. %[[ 
+A sequent is written
+ h1: hyp A1, ..., hn: hyp An |- conc A 
+ A1, ..., An |- A
+%]]
+%sort hyp {_ prop S} %.
+%name hyp %.
+%sort conc {_ prop S} %.
+%name conc %.
+%block bl_hyp [S polarity] [A prop S] {h hyp A}%.
+%term init %pi (hyp (atom Q)) %-> (conc (atom Q)) %.
+%term upR %pi (conc P) %-> (conc (up P)) %.
+%term upL %pi (%pi (hyp P) %-> (conc C)) %-> (hyp (up P)) %-> (conc C) %.
+%term downL %pi (%pi (hyp N) %-> (conc C)) %-> (hyp (down N)) %-> (conc C) %.
+%term downR %pi (conc N) %-> (conc (down N)) %.
+%term *R %pi (conc P1) %-> (conc P2) %-> (conc (P1 * P2)) %.
+%term *L %pi (%pi (hyp P1) %-> (hyp P2) %-> (conc C)) %-> (hyp (P1 * P2)) %-> (conc C) %.
+%term +R1 %pi (conc P1) %-> (conc (P1 + P2)) %.
+%term +R2 %pi (conc P2) %-> (conc (P1 + P2)) %.
+%term +L 
+	%pi (%pi (hyp P1) %-> (conc C))
+	%-> (%pi (hyp P2) %-> (conc C))
+	%-> (hyp (P1 + P2))
+	%-> (conc C) %.
+%scope +L %term oR %pi (%pi (hyp P) %-> (conc N)) %-> (conc (P -o N)) %.
+%term oL %pi (conc P) %-> (%pi (hyp N) %-> (conc C)) %-> (hyp (P -o N)) %-> (conc C) %.
+%worlds (bl_atmpos bl_atmneg bl_hyp) (hyp A) (conc C) %.
+%. %[[ ## Focused sequent calculus %]]
+%. %[[ ### Logic definition %]]
+%. %[[ 
+Neutral sequent:
+ l1:left P1, ..., ln:left Pn |- right N
+ P1, ..., Pn |- N
+
+Left-focused sequent:
+ l1:left P1, ..., ln:left Pn |- lfoc N1 N2
+ P1, ..., Pn [N1] |- N2
+
+Right-focused sequent:
+ l1:left P1, ..., ln:left Pn |- rfoc P
+ P1, ..., Pn |- [P]
+
+These can be generically expressed as:
+ l1:left P1, ..., ln:left Pn |- conseq C
+ P1, ..., Pn |- C
+%]]
+%sort left {_ prop pos} %.
+%name left %.
+%sort conclusion %.
+%name conclusion %.
+%sort conseq {_ conclusion} %.
+%name conseq %.
+%term conc-lfoc %pi (prop neg) %-> (prop neg) %-> conclusion %.
+%term conc-rfoc %pi (prop pos) %-> conclusion %.
+%term conc-right %pi (prop neg) %-> conclusion %.
+%inline rfoc [P] conseq (conc-rfoc P) %.
+%inline lfoc [N] [N'] conseq (conc-lfoc N N') %.
+%inline right [N] conseq (conc-right N) %.
+%block bl_left [P prop pos] {l left P}%.
+%term initR' %pi (left (atom Qp)) %-> (rfoc (atom Qp)) %.
+%term initL' lfoc (atom Qn) (atom Qn) %.
+%term upR' %pi (rfoc P) %-> (right (up P)) %.
+%term upL' %pi (%pi (left P) %-> (right N)) %-> (lfoc (up P) N) %.
+%term downR' %pi (right N) %-> (rfoc (down N)) %.
+%term downL' %pi (lfoc N N') %-> (left (down N)) %-> (right N') %.
+%term *R' %pi (rfoc P1) %-> (rfoc P2) %-> (rfoc (P1 * P2)) %.
+%term *L' 
+	%pi (%pi (left P1) %-> (left P2) %-> (right N'))
+	%-> (left (P1 * P2))
+	%-> (right N') %.
+%term +R1' %pi (rfoc P1) %-> (rfoc (P1 + P2)) %.
+%term +R2' %pi (rfoc P2) %-> (rfoc (P1 + P2)) %.
+%term +L' 
+	%pi (%pi (left P1) %-> (right N'))
+	%-> (%pi (left P2) %-> (right N'))
+	%-> (left (P1 + P2))
+	%-> (right N') %.
+%scope +L' %term oR' %pi (%pi (left P) %-> (right N)) %-> (right (P -o N)) %.
+%term oL' %pi (rfoc P) %-> (lfoc N N') %-> (lfoc (P -o N) N') %.
+%worlds (bl_atmpos bl_atmneg bl_left) (left P) (conseq C) %.
+% = (right N) (left N N') (rfoc P).
+%. %[[ ### Cut admissibility %]]
+%sort cut< {N} {_ lfoc N' N} {_ lfoc N NC} {_ lfoc N' NC} %.
+%sort cut- {N} {_ right N} {_ lfoc N NC} {_ right NC} %.
+%sort cut+ {P} {_ rfoc P} {_ %pi (left P) %-> (conseq C)} {_ conseq C} %.
+%mode cut< %in %in %in %out %.
+%mode cut- %in %in %in %out %.
+%mode cut+ %in %in %in %out %.
+%. %[[ #### Identity cuts %]]
+%term _ cut+ (atom Qp) (initR' D) ([l] initR' l) (initR' D) %.
+%term _ cut< (atom Qn) initL' initL' initL' %.
+%. %[[ #### Principal cuts %]]
+%term _ 
+	%pi (cut- (up P) (upR' (%the (rfoc P) D)) (upL' (%the (%pi (left P) %-> (right N)) E)) F)
+	%<- (cut+ P D E (%the (right N) F)) %.
+%term _ 
+	%pi (cut+ (down N) (downR' (%the (right N) D)) ([l left (down N)] downL' (%the (lfoc N NC) (E l)) l) G)
+	%<- (cut+ (down N) (downR' D) E (%the (lfoc N NC) F))
+	%<- (cut- N D F (%the (right NC) G)) %.
+%term _ 
+	%pi (cut+ (P1 * P2) (*R' (%the (rfoc P1) D1) (%the (rfoc P2) D2)) ([l left (P1 * P2)] *L' (%the (%pi (left P1) %-> (left P2) %-> (right N)) (E l)) l) G)
+	%<- ({l1 left P1} {l2 left P2} cut+ (P1 * P2) (*R' D1 D2) ([l left (P1 * P2)] E l l1 l2) (%the (right N) (F l1 l2)))
+	%<- ({l1 left P1} cut+ P2 D2 ([l2 left P2] F l1 l2) (%the (right N) (F' l1)))
+	%<- (cut+ P1 D1 F' (%the (right N) G)) %.
+%term _ 
+	%pi (cut+ (P1 + P2) (+R1' (%the (rfoc P1) D1)) ([l left (P1 + P2)] +L' (%the (%pi (left P1) %-> (right N)) (E1 l)) (E2 l) l) F)
+	%<- ({l1 left P1} cut+ (P1 + P2) (+R1' D1) ([l left (P1 + P2)] E1 l l1) (%the (right N) (E1' l1)))
+	%<- (cut+ P1 D1 E1' (%the (right N) F)) %.
+%term _ 
+	%pi (cut+ (P1 + P2) (+R2' (%the (rfoc P2) D2)) ([l left (P1 + P2)] +L' (E1 l) (%the (%pi (left P2) %-> (right N)) (E2 l)) l) F)
+	%<- ({l2 left P2} cut+ (P1 + P2) (+R2' D2) ([l left (P1 + P2)] E2 l l2) (%the (right N) (E2' l2)))
+	%<- (cut+ P2 D2 E2' (%the (right N) F)) %.
+%term _ 
+	%pi (cut- (N -o P) (-oR' (%the (%pi (left N) %-> (right P)) D1)) (-oL' (%the (rfoc N) E1) (%the (lfoc P NC) E2)) F)
+	%<- (cut+ N E1 D1 (%the (right P) F1))
+	%<- (cut- P F1 E2 (%the (right NC) F)) %.
+%. %[[ #### Left commutative cuts %]]
+%term _ %pi (cut< N (upL' D) E (upL' F)) %<- ({l1} cut- N (D l1) E (F l1)) %.
+%term _ %pi (cut- N (downL' D L) E (downL' F L)) %<- (cut< N D E F) %.
+%term _ %pi (cut- N (*L' D L) E (*L' F L)) %<- ({l1} {l2} cut- N (D l1 l2) E (F l1 l2)) %.
+%term _ 
+	%pi (cut- N (+L' D1 D2 L) E (+L' F1 F2 L))
+	%<- ({l1} cut- N (D1 l1) E (F1 l1))
+	%<- ({l2} cut- N (D2 l2) E (F2 l2)) %.
+%term _ %pi (cut< N (-oL' D1 D2) E (-oL' D1 F2)) %<- (cut< N D2 E F2) %.
+%. %[[ #### Right commutative cuts %]]
+%term _ cut+ P D ([l] initR' L) (initR' L) %.
+%term _ cut+ P D ([l] initL') initL' %.
+%term _ %pi (cut+ P D ([l] upR' (E l)) (upR' F)) %<- (cut+ P D ([l] E l) F) %.
+%term _ 
+	%pi (cut+ P D ([l] upL' ([l1] E l l1)) (upL' F))
+	%<- ({l1} cut+ P D ([l] E l l1) (F l1)) %.
+%term _ %pi (cut+ P D ([l] downR' (E l)) (downR' F)) %<- (cut+ P D ([l] E l) F) %.
+%term _ %pi (cut+ P D ([l] downL' (E l) L) (downL' F L)) %<- (cut+ P D ([l] E l) F) %.
+%term _ 
+	%pi (cut+ P D ([l] *R' (E1 l) (E2 l)) (*R' F1 F2))
+	%<- (cut+ P D ([l] E1 l) F1)
+	%<- (cut+ P D ([l] E2 l) F2) %.
+%term _ 
+	%pi (cut+ P D ([l] *L' ([l1] [l2] E l l1 l2) L) (*L' ([l1] [l2] F l1 l2) L))
+	%<- ({l1} {l2} cut+ P D ([l] E l l1 l2) (F l1 l2)) %.
+%term _ %pi (cut+ P D ([l] +R1' (E l)) (+R1' F)) %<- (cut+ P D ([l] E l) F) %.
+%term _ %pi (cut+ P D ([l] +R2' (E l)) (+R2' F)) %<- (cut+ P D ([l] E l) F) %.
+%term _ 
+	%pi (cut+ P D ([l] +L' ([l1] E1 l l1) ([l2] E2 l l2) L) (+L' F1 F2 L))
+	%<- ({l1} cut+ P D ([l] E1 l l1) (F1 l1))
+	%<- ({l2} cut+ P D ([l] E2 l l2) (F2 l2)) %.
+%term _ %pi (cut+ P D ([l] -oR' (E l)) (-oR' F)) %<- ({l1} cut+ P D ([l] E l l1) (F l1)) %.
+%term _ 
+	%pi (cut+ P D ([l] -oL' (E1 l) (E2 l)) (-oL' F1 F2))
+	%<- (cut+ P D ([l] E1 l) F1)
+	%<- (cut+ P D ([l] E2 l) F2) %.
+%worlds (bl_atmpos bl_atmneg bl_left) (cut< _ _ _ _) (cut- _ _ _ _) (cut+ _ _ _ _) %.
+%total {(N1 N2 P3) [(D1 D2 D3) (E1 E2 E3)]} (cut< N1 D1 E1 _) (cut+ N2 D2 E2 _) (cut- P3 D3 E3 _) %.
+%. %[[ #### Corollary - unfocused cut %]]
+%sort cut-unfoc+ {_ right (up P)} {_ %pi (left P) %-> (right N)} {_ right N} %.
+%mode cut-unfoc+ %in %in %out %.
+%term _ %pi (cut-unfoc+ D E F) %<- (cut- (up P) D (upL' E) F) %.
+%worlds (bl_atmpos bl_atmneg bl_left) (cut-unfoc+ _ _ _) %.
+%total [] (cut-unfoc+ _ _ _) %.
+%sort cut-unfoc- {_ right A} {_ %pi (left (down A)) %-> (right C)} {_ right C} %.
+%mode cut-unfoc- %in %in %out %.
+%term _ %pi (cut-unfoc- D E F) %<- (cut+ (down A) (downR' D) E F) %.
+%worlds (bl_atmpos bl_atmneg bl_left) (cut-unfoc- _ _ _) %.
+%total [] (cut-unfoc- _ _ _) %.
+%. %[[ ### Identity %]]
+%. %[[ #### Eta expansion lemmas %]]
+%sort eta- {N prop neg} {_ {N' prop neg} %pi (lfoc N N') %-> (right N')} {_ right N} %.
+%sort eta+ {P prop pos} {_ %pi (rfoc P) %-> (right N')} {_ %pi (left P) %-> (right N')} %.
+%mode eta- %in %in %out %.
+%mode eta+ %in %in %out %.
+%block bl_rfoc [P prop pos] {rf rfoc P}%.
+%term _ eta+ (atom Qp) ([rf] R rf) ([l] R (initR' l)) %.
+%term _ eta- (atom Qn) ([n'] [lf] R n' lf) (R (atom Qn) initL') %.
+%term _ 
+	%pi (eta- (up P) ([n'] [lf] R n' lf) (R (up P) (upL' ([l] R' l))))
+	%<- (eta+ P ([rf] upR' rf) ([l] R' l)) %.
+%term _ 
+	%pi (eta+ (down N) ([rf] R rf) ([l left (down N)] R (downR' (R' l))))
+	%<- ({l left (down N)} eta- N ([n'] [lf] downL' lf l) (R' l)) %.
+%term _ 
+	%pi (eta+ (P1 * P2) ([rf] R rf) ([l] *L' ([l1] [l2] R'' l1 l2) l))
+	%<- ({rf1 rfoc P1} eta+ P2 ([rf2] R (*R' rf1 rf2)) ([l2] R' rf1 l2))
+	%<- ({l2 left P2} eta+ P1 ([rf1] R' rf1 l2) ([l1] R'' l1 l2)) %.
+%term _ 
+	%pi (eta+ (P1 + P2) ([rf] R rf) (+L' R1 R2))
+	%<- (eta+ P1 ([rf1] R (+R1' rf1)) ([l1 left P1] %the (right N) (R1 l1)))
+	%<- (eta+ P2 ([rf1] R (+R2' rf1)) ([l2 left P2] %the (right N) (R2 l2))) %.
+%term _ 
+	%pi (eta- (P1 -o N2) ([n'] [lf] R n' lf) (-oR' ([l1] R1 l1)))
+	%<- ({rf1 rfoc P1} eta- N2 ([n'] [lf2] R n' (-oL' rf1 lf2)) (R2 rf1))
+	%<- (eta+ P1 ([rf1] R2 rf1) ([l1] R1 l1)) %.
+%worlds (bl_atmpos bl_atmneg bl_left bl_rfoc) (eta- N R R') (eta+ P R R') %.
+%total (N P) (eta- N _ _) (eta+ P _ _) %.
+%. %[[ #### Identity corollaries %]]
+%sort idp {P prop pos} {_ %pi (left P) %-> (right (up P))} %.
+%mode idp %in %out %.
+%term _ %pi (idp P R) %<- (eta+ P ([rf] upR' rf) R) %.
+%worlds (bl_atmpos bl_atmneg bl_left bl_rfoc) (idp _ _) %.
+%total [] (idp _ _) %.
+%sort idn {N prop neg} {_ %pi (left (down N)) %-> (right N)} %.
+%mode idn %in %out %.
+%term _ 
+	%pi (idn N ([l] R l))
+	%<- ({l left (down N)} eta- N ([qn] [lf] downL' lf l) (R l)) %.
+%worlds (bl_atmpos bl_atmneg bl_left bl_rfoc) (idn _ _) %.
+%total [] (idn _ _) %.
+%. %[[ ## Soundness %]]
+%sort sdR {_ right N} {_ conc N} %.
+%sort sd+ {_ rfoc P} {_ conc P} %.
+%sort sd- {_ lfoc N N'} {_ %pi (hyp N) %-> (conc N')} %.
+%sort sdL {_ left P} {_ hyp P} %.
+%mode sdR %in %out %.
+%mode sd+ %in %out %.
+%mode sd- %in %out %.
+%mode sdL %in %out %.
+%term _ %pi (sd+ (initR' L) (init H)) %<- (sdL L H) %.
+%term _ sd- initL' ([h] init h) %.
+%term _ %pi (sdR (upR' R) (upR D)) %<- (sd+ R D) %.
+%term _ 
+	%pi (sd- (upL' ([l] R l)) ([h] upL ([hp] D hp) h))
+	%<- ({l} {hp} %pi (sdL l hp) %-> (sdR (R l) (D hp))) %.
+%term _ %pi (sd+ (downR' R) (downR D)) %<- (sdR R D) %.
+%term _ %pi (sdR (downL' R L) (downL ([hn] D hn) H)) %<- (sd- R ([hn] D hn)) %<- (sdL L H) %.
+%term _ %pi (sd+ (*R' R1 R2) (*R D1 D2)) %<- (sd+ R1 D1) %<- (sd+ R2 D2) %.
+%term _ 
+	%pi (sdR (*L' ([l1] [l2] R l1 l2) L12) (*L ([h1] [h2] D h1 h2) H12))
+	%<- ({l1} {h1} %pi (sdL l1 h1) %-> ({l2} {h2} %pi (sdL l2 h2) %-> (sdR (R l1 l2) (D h1 h2))))
+	%<- (sdL L12 H12) %.
+%term _ %pi (sd+ (+R1' R1) (+R1 D1)) %<- (sd+ R1 D1) %.
+%term _ %pi (sd+ (+R2' R2) (+R2 D2)) %<- (sd+ R2 D2) %.
+%term _ 
+	%pi (sdR (+L' ([l1] R1 l1) ([l2] R2 l2) L) (+L ([h1] D1 h1) ([h2] D2 h2) H))
+	%<- ({l1} {h1} %pi (sdL l1 h1) %-> (sdR (R1 l1) (D1 h1)))
+	%<- ({l2} {h2} %pi (sdL l2 h2) %-> (sdR (R2 l2) (D2 h2)))
+	%<- (sdL L H) %.
+%term _ 
+	%pi (sdR (-oR' ([l] R l)) (-oR ([h] D h)))
+	%<- ({l} {h} %pi (sdL l h) %-> (sdR (R l) (D h))) %.
+%term _ 
+	%pi (sd- (-oL' R1 R2) ([h] -oL D1 ([h2] D2 h2) h))
+	%<- (sd+ R1 D1)
+	%<- (sd- R2 ([h2] D2 h2)) %.
+%block bl_sdL [P prop pos] {l left P} {h hyp P} {_ sdL l h}%.
+%worlds (bl_atmpos bl_atmneg bl_sdL) (sdR _ _) (sd+ _ _) (sd- _ _) (sdL _ _) %.
+%total [] (sdL _ _) %.
+%total (R1 R2 R3) (sdR R1 _) (sd+ R2 _) (sd- R3 _) %.
+%. %[[ ## Completeness %]]
+%. %[[ ### Unfocused admissibility %]]
+%sort adm*R {_ right (up P1)} {_ right (up P2)} {_ right (up (P1 * P2))} %.
+%mode adm*R %in %in %out %.
+%term _ 
+	%pi (adm*R (%the (right (up P1)) R1) (%the (right (up P2)) R2) R)
+	%<- ({rf1 rfoc P1} eta+ P2 ([rf2 rfoc P2] upR' (*R' rf1 rf2)) ([l2 left P2] R3 rf1 l2))
+	%<- ({l2 left P2} eta+ P1 ([rf1 rfoc P1] R3 rf1 l2) ([l1] R4 l1 l2))
+	%<- ({l2 left P2} cut-unfoc+ R1 ([l1 left P1] R4 l1 l2) (R5 l2))
+	%<- (cut-unfoc+ R2 ([l2 left P2] R5 l2) R) %.
+%worlds (bl_atmpos bl_atmneg bl_left) (adm*R _ _ _) %.
+%total [] (adm*R _ _ _) %.
+%sort adm+R1 {_ right (up P1)} {_ right (up (P1 + P2))} %.
+%mode {%in P1 prop pos} {%in P2 prop pos} {%in R1 right (up P1)} {%out R right (up (P1 + P2))} adm+R1 R1 R %.
+%term _ 
+	%pi (adm+R1 (%the (right (up P1)) R1) R)
+	%<- (eta+ P1 ([rf1 rfoc P1] upR' (+R1' rf1)) (%the (%pi (left P1) %-> (right (up (P1 + P2)))) R1'))
+	%<- (cut-unfoc+ R1 ([l1] R1' l1) R) %.
+%worlds (bl_atmpos bl_atmneg bl_left) (adm+R1 _ _) %.
+%total [] (adm+R1 _ _) %.
+%sort adm+R2 {_ right (up P2)} {_ right (up (P1 + P2))} %.
+%mode {%in P1 prop pos} {%in P2 prop pos} {%in R2 right (up P2)} {%out R right (up (P1 + P2))} adm+R2 R2 R %.
+%term _ 
+	%pi (adm+R2 (%the (right (up P2)) R2) R)
+	%<- (eta+ P2 ([rf2 rfoc P2] upR' (+R2' rf2)) (%the (%pi (left P2) %-> (right (up (P1 + P2)))) R2'))
+	%<- (cut-unfoc+ R2 ([l2] R2' l2) R) %.
+%worlds (bl_atmpos bl_atmneg bl_left) (adm+R2 _ _) %.
+%total [] (adm+R2 _ _) %.
+%sort adm-oL {_ right (up P1)} {_ %pi (left (down N2)) %-> (right N')} {_ %pi (left (down (P1 -o N2))) %-> (right N')} %.
+%mode adm-oL %in %in %out %.
+%term _ 
+	%pi (adm-oL (%the (right (up P1)) R1) (%the (%pi (left (down N2)) %-> (right N')) R2) (%the (%pi (left (down (P1 -o N2))) %-> (right N')) R))
+	%<- ({l left (down (P1 -o N2))} {rf1 rfoc P1} eta- N2 ([n] [lf2] downL' (-oL' rf1 lf2) l) (%the (right N2) (R3 rf1 l)))
+	%<- ({l} eta+ P1 ([rf1] R3 rf1 l) ([l1] R4 l l1))
+	%<- ({l} {l1} cut-unfoc- (R4 l l1) ([l2] R2 l2) (R5 l l1))
+	%<- ({l} cut-unfoc+ R1 ([l1] R5 l l1) (R l)) %.
+%worlds (bl_atmpos bl_atmneg bl_left) (adm-oL _ _ _) %.
+%total [] (adm-oL _ _ _) %.
+%. %[[ ### Completeness %]]
+%sort cph+ {_ hyp P} {_ left P} %.
+%sort cph- {_ hyp N} {_ left (down N)} %.
+%sort cp- {_ conc N} {_ right N} %.
+%sort cp+ {_ conc P} {_ right (up P)} %.
+%mode cph+ %in %out %.
+%mode cph- %in %out %.
+%mode cp- %in %out %.
+%mode cp+ %in %out %.
+%term _ %pi (cp+ (init Hp) (upR' (initR' L))) %<- (cph+ Hp L) %.
+%term _ %pi (cp- (init Hn) (downL' initL' L)) %<- (cph- Hn L) %.
+%term _ %pi (cp- (upR Dp) R) %<- (cp+ Dp R) %.
+%term _ 
+	%pi (cp- (upL ([hp] Dn1 hp) Hn) (downL' (upL' ([l] R1 l)) L))
+	%<- (cph- Hn L)
+	%<- ({hp hyp P} {l left P} %pi (cph+ hp l) %-> (cp- (Dn1 hp) (R1 l))) %.
+%term _ 
+	%pi (cp+ (upL ([hp] Dp1 hp) Hn) (downL' (upL' ([l] R1 l)) L))
+	%<- (cph- Hn L)
+	%<- ({hp hyp P} {l left P} %pi (cph+ hp l) %-> (cp+ (Dp1 hp) (R1 l))) %.
+%term _ %pi (cp+ (downR Dn) (upR' (downR' R))) %<- (cp- Dn R) %.
+%term _ 
+	%pi (cp- (downL ([hn] Dn hn) Hp) (R L))
+	%<- (cph+ Hp L)
+	%<- ({hn hyp N} {l left (down N)} %pi (cph- hn l) %-> (cp- (Dn hn) (R l))) %.
+%term _ 
+	%pi (cp+ (downL ([hn] Dp hn) Hp) (R L))
+	%<- (cph+ Hp L)
+	%<- ({hn hyp N} {l left (down N)} %pi (cph- hn l) %-> (cp+ (Dp hn) (R l))) %.
+%term _ %pi (cp+ (*R Dp1 Dp2) R12) %<- (cp+ Dp1 R1) %<- (cp+ Dp2 R2) %<- (adm*R R1 R2 R12) %.
+%term _ 
+	%pi (cp- (*L ([hp1] [hp2] Dn hp1 hp2) Hp) (*L' ([l1] [l2] R l1 l2) L))
+	%<- (cph+ Hp L)
+	%<- ({hp1 hyp P1} {l1 left P1} 
+	%pi (cph+ hp1 l1)
+	%-> ({hp2 hyp P2} {l2 left P2} %pi (cph+ hp2 l2) %-> (cp- (Dn hp1 hp2) (R l1 l2)))) %.
+%term _ 
+	%pi (cp+ (*L ([hp1] [hp2] Dp hp1 hp2) Hp) (*L' ([l1] [l2] R l1 l2) L))
+	%<- (cph+ Hp L)
+	%<- ({hp1 hyp P1} {l1 left P1} 
+	%pi (cph+ hp1 l1)
+	%-> ({hp2 hyp P2} {l2 left P2} %pi (cph+ hp2 l2) %-> (cp+ (Dp hp1 hp2) (R l1 l2)))) %.
+%term _ %pi (cp+ (+R1 Dp1) R12) %<- (cp+ Dp1 R1) %<- (adm+R1 R1 R12) %.
+%term _ %pi (cp+ (+R2 Dp2) R12) %<- (cp+ Dp2 R2) %<- (adm+R2 R2 R12) %.
+%term _ 
+	%pi (cp- (+L ([h1] D1 h1) ([h2] D2 h2) H) (+L' R1 R2 L))
+	%<- (cph+ H L)
+	%<- ({h1} {l1} %pi (cph+ h1 l1) %-> (cp- (D1 h1) (R1 l1)))
+	%<- ({h2} {l2} %pi (cph+ h2 l2) %-> (cp- (D2 h2) (R2 l2))) %.
+%term _ 
+	%pi (cp+ (+L ([h1] D1 h1) ([h2] D2 h2) H) (+L' R1 R2 L))
+	%<- (cph+ H L)
+	%<- ({h1} {l1} %pi (cph+ h1 l1) %-> (cp+ (D1 h1) (R1 l1)))
+	%<- ({h2} {l2} %pi (cph+ h2 l2) %-> (cp+ (D2 h2) (R2 l2))) %.
+%term _ 
+	%pi (cp- (-oR ([hp] Dn hp)) (-oR' ([l] R l)))
+	%<- ({hp hyp P} {l left P} %pi (cph+ hp l) %-> (cp- (Dn hp) (R l))) %.
+%term _ 
+	%pi (cp- (-oL Dp1 ([hn2] Dn2 hn2) Hn) (R12 L))
+	%<- (cph- Hn L)
+	%<- (cp+ Dp1 R1)
+	%<- ({hn2 hyp N2} {l2 left (down N2)} %pi (cph- hn2 l2) %-> (cp- (Dn2 hn2) (R2 l2)))
+	%<- (adm-oL R1 ([l2] R2 l2) ([l] R12 l)) %.
+%term _ 
+	%pi (cp+ (-oL Dp1 ([hn2] Dp2 hn2) Hn) (R12 L))
+	%<- (cph- Hn L)
+	%<- (cp+ Dp1 R1)
+	%<- ({hn2 hyp N2} {l2 left (down N2)} %pi (cph- hn2 l2) %-> (cp+ (Dp2 hn2) (R2 l2)))
+	%<- (adm-oL R1 ([l2] R2 l2) ([l] R12 l)) %.
+%block bl_cph+ [P prop pos] {hp hyp P} {l left P} {_ cph+ hp l}%.
+%block bl_cph- [N prop neg] {hn hyp N} {l left (down N)} {_ cph- hn l}%.
+%worlds (bl_atmpos bl_atmneg bl_cph+ bl_cph-) (cp- _ _) (cp+ _ _) (cph- _ _) (cph+ _ _) %.
+%total [] (cph+ Hp _) %.
+%total [] (cph- Hn _) %.
+%total (Dn Dp) (cp- Dn _) (cp+ Dp _) %.
+%. %[[ ## Translating into focused logic %]]
+%. %[[ A simple proof which is isomorphic in the unfocused and
+focused system, establishing ``|- a * b -o b * a``
+for positive a and b. %]]
+%inline ' [q] atom q %.
+%define r0 ({a atm pos} {b atm pos} right (' a * ' b -o up (' b * ' a))) [a] [b] -oR' ([lab] *L' ([la] [lb] upR' (*R' (initR' lb) (initR' la))) lab) %.
+%define d0 ({a atm pos} {b atm pos} conc (' a * ' b -o up (' b * ' a))) [a] [b] -oR ([hab] *L ([ha] [hb] upR (*R (init hb) (init ha))) hab) %.
+%. %[[ |check=decl %]]
+%query 1 _ _ {a} {b} sdR (r0 a b) (D0 a b) %.
+%. %[[ |check=decl %]]
+%query 1 _ _ {a} {b} cp- (d0 a b) (R0 a b) %.
+%. %[[ ### Reducing the number of proofs %]]
+%. %[[ This first example is already in "focused form" - invertible rules
+are applied only "before" upR is applied to prove 
+``|- (a + b) -> up (a + b)`` |check=decl %]]
+%query 1 _ _ {a atm pos} {b atm pos} cp- (-oR ([h hyp (atom a + atom b)] +L ([ha hyp (atom a)] upR (+R1 (init ha))) ([hb hyp (atom b)] upR (+R2 (init hb))) h)) (D a b) %.
+%. %[[ This a proof of the same sequent, but upR is applied before +L, which
+is fine in the unfocused system but not in the focused system, where upR
+starts a focusing phase and makes it impossible to apply invertible rules like
++L. Translation produces the same focused proof from these two different
+unfocused proofs. |check=decl %]]
+%query 1 _ _ {a atm pos} {b atm pos} cp- (-oR ([h hyp (atom a + atom b)] upR (+L ([ha hyp (atom a)] +R1 (init ha)) ([hb hyp (atom b)] +R2 (init hb)) h))) (D a b) %.
+%. %[[ ### Forward and backward chaining %]]
+%. %[[ Finally, consder the following unfocused sequent proof. The proof
+proceeds in what we generally consider a "forward-chaining" manner, using
+the hypothesis (atom A) to obtain the hypothesis (atom B), which is then
+used to obtain the hypothesis (atom C), which is then used to obtain
+the hypothesis (atom D), which is finally used to finish. %]]
+%define implies-proof [A atm neg] [B atm neg] [C atm neg] [D atm neg] -oR (downL ([ha hyp (atom A)] -oR (downL ([hab hyp (down (atom A) -o (atom B))] -oR (downL ([hbc hyp (down (atom B) -o (atom C))] -oR (downL ([hcd hyp (down (atom C) -o (atom D))] -oL (downR (init ha)) ([hb hyp (atom B)] -oL (downR (init hb)) ([hc hyp (atom C)] -oL (downR (init hc)) ([hd hyp (atom D)] init hd) hcd) hbc) hab)))))))) %.
+%. %[[ Because negative polarity forces search to be goal directed, translating
+this proof into the focused system will flip the order in which the 
+implications are considered, and no facts (beyond the four in the implication)
+will ever be added to the context. | check=decl %]]
+%query 1 _ _ {a atm neg} {b atm neg} {c atm neg} {d atm neg} cp- (implies-proof a b c d) _ %.
+%. %[[ Finally, we can show the proof of a successful attempt to prove
+``right (A -o (A -o B) -o (B -o C) -o C)`` in the weakly focused system.
+In general, this could cause an infinite loop as Twelf has no problem
+with deriving multiple copies of the same fact, but here we use all
+negative atoms, and the resulting backward-chaining semantics
+corresponds nicely to Twelf's built-in backward-chaining semantics. 
+|check=decl %]]
+%solve p : {a atm neg} {b atm neg} {c atm neg} right (down (' a) -o down (down (' a) -o ' b) -o down (down (' b) -o ' c) -o ' c) %.
+%. %[[
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Weak_focusing).
+%]]

@@ -1,4 +1,5 @@
-let nat_scope = {|
+let nat_scope =
+  {|
 # Natural Numbers Test
 
 This is going to be (hopefully) a simple test of the natural numbers and scopes

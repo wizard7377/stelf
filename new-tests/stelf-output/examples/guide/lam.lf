@@ -36,7 +36,7 @@
 	%<- (eval (E1' V2) V) %.
 % and [V2/x]E1' ==> V.
 % Regular world for type-checking
-%block tp_var {T tp} [x exp] [u of x T]%.
+%block tp_var [T tp] {x exp} {u of x T}%.
 %worlds (tp_var) (of E T) %.
 % Type inference terminates
 %terminates E (of E T) %.
@@ -76,7 +76,7 @@
 	%pi (cp (lam ([x] E x)) (lam ([x] F x)))
 	%<- ({x exp} %pi (cp x x) %-> (cp (E x) (F x))) %.
 %mode cp %in %out %.
-%block cp_var [x exp] [u cp x x]%.
+%block cp_var {x exp} {u cp x x}%.
 %worlds (cp_var) (cp E _) %.
 %total E (cp E _) %.
 % Following version cannot be checked

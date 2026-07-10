@@ -1,0 +1,76 @@
+%%% Simple Arithmetic Examples
+%%% Illustrate termination and reduction checking
+%%% Author: Brigitte Pientka
+%sort nat %.
+%name nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort bool %.
+%name bool %.
+%term true bool %.
+%term false bool %.
+%sort nt {_ nat} %.
+%name nt %.
+%term nt_z nt z %.
+%term nt_s %pi (nt (s X)) %<- (nt X) %.
+%sort plus {_ nat} {_ nat} {_ nat} %.
+%name plus %.
+%term p_z plus z Y Y %.
+%term p_s %pi (plus (s X) Y (s Z)) %<- (plus X Y Z) %.
+%sort acker {_ nat} {_ nat} {_ nat} %.
+%mode acker %in %in %out %.
+%term a_1 acker z Y (s Y) %.
+%term a_2 %pi (acker (s X) z Z) %<- (acker X (s z) Z) %.
+%term a_3 %pi (acker (s X) (s Y) Z) %<- (acker (s X) Y Z') %<- (acker X Z' Z) %.
+%sort sub {_ nat} {_ nat} {_ nat} %.
+%name sub %.
+%mode sub %in %in %out %.
+%term s_z1 sub X z X %.
+%term s_z2 sub z Y z %.
+%term s_ss %pi (sub (s X) (s Y) Z) %<- (sub X Y Z) %.
+%terminates X (sub X Y _) %.
+%reduces <= Z X (sub X Y Z) %.
+%sort minus {_ nat} {_ nat} {_ nat} %.
+%name minus %.
+%mode minus %in %in %out %.
+%sort min {_ nat} {_ nat} {_ nat} %.
+%name min %.
+%mode min %in %in %out %.
+%term m_z1 minus X z X %.
+%term m_z2 minus z Y z %.
+%term m_ss %pi (minus (s X) (s Y) Z) %<- (min X Y Z) %.
+%term m'_z1 min X z X %.
+%term m'_z2 min z Y z %.
+%term m'_ss %pi (min X Y Z) %<- (minus X Y Z) %.
+%terminates (X X') (minus X _ _) (min X' _ _) %.
+%reduces <= (Z Z') (X X') (minus X Y Z) (min X' _ Z') %.
+%sort rminus {_ nat} {_ nat} {_ nat} %.
+%name rminus %.
+%mode rminus %in %in %out %.
+%term rmin %pi (rminus (s X) (s Y) Z) %<- (sub X Y Z) %.
+%terminates [X Y] (rminus X Y _) %.
+%reduces < Z X (rminus X Y Z) %.
+%sort less {_ nat} {_ nat} {_ bool} %.
+%name less %.
+%mode less %in %in %out %.
+%term l_z1 less z (s X) true %.
+%term l_z2 less X z false %.
+%term l_ss %pi (less (s X) (s Y) B) %<- (less X Y B) %.
+%terminates X (less X Y _) %.
+%sort gcd {_ nat} {_ nat} {_ nat} %.
+%name gcd %.
+%mode gcd %in %in %out %.
+%term gcd_z1 gcd z Y Y %.
+%term gcd_z2 gcd X z X %.
+%term gcd_s1 
+	%pi (gcd (s X) (s Y) Z)
+	%<- (less (s X) (s Y) true)
+	%<- (rminus (s Y) (s X) Y')
+	%<- (gcd (s X) Y' Z) %.
+%term gcd_s1 
+	%pi (gcd (s X) (s Y) Z)
+	%<- (less (s X) (s Y) false)
+	%<- (rminus (s X) (s Y) X')
+	%<- (gcd X' (s Y) Z) %.
+%terminates [X Y] (gcd X Y _) %.
+%terminates {X Y} (gcd X Y Z) %.

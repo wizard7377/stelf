@@ -1,0 +1,54 @@
+%%% Cartesian closed category
+%% Categorical language
+% objects
+%sort obj %.
+%name obj %.
+% morphisms
+%sort mor {_ obj} {_ obj} %.
+%name mor %.
+% morphism equality
+%sort == {_ mor A B} {_ mor A B} %.
+%name == %.
+%prec %none 5 == %.
+% morphisms
+%term id mor A A %.
+%term @ %pi (mor B C) %-> (mor A B) %-> (mor A C) %.
+%prec %none 10 @ %.
+% equations
+%term refl F == F %.
+%term then %pi (F == F') %-> (F' == F'') %-> (F == F'') %.
+%prec %right 4 then %.
+%term sym %pi (F == F') %-> (F' == F) %.
+%term =@= %pi (F == F') %-> (G == G') %-> (F @ G == F' @ G') %.
+%term id_l id @ F == F %.
+%term id_r F @ id == F %.
+%term ass H @ (G @ F) == (H @ G) @ F %.
+%% Products
+% objects
+%term 1 obj %.
+%term * %pi obj %-> obj %-> obj %.
+%prec %none 10 * %.
+% morphisms
+%term drop mor A 1 %.
+%term fst mor (A * B) A %.
+%term snd mor (A * B) B %.
+%term pair %pi (mor A B) %-> (mor A C) %-> (mor A (B * C)) %.
+% equations
+%term =pair= %pi (F == F') %-> (G == G') %-> (pair F G == pair F' G') %.
+%term term_u H == drop %.
+%term prod_l fst @ (pair F G) == F %.
+%term prod_r snd @ (pair F G) == G %.
+%term prod_u pair (fst @ H) (snd @ H) == H %.
+% distp : pair F G @ H == pair (F @ H) (G @ H).
+%% Exponentials
+% objects
+%term => %pi obj %-> obj %-> obj %.
+%prec %right 7 => %.
+% morphisms
+%term app mor (B => C * B) C %.
+%term cur %pi (mor (A * B) C) %-> (mor A (B => C)) %.
+% equations
+%term =cur= %pi (F == F') %-> (cur F == (cur F')) %.
+%term exp_e app @ (pair (cur F @ fst) snd) == F %.
+%term exp_u cur (app @ (pair (G @ fst) snd)) == G %.
+% distc : (cur F) @ G == cur (F @ (pair (G @ fst) snd)).

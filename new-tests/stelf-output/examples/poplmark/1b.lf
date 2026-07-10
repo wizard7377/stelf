@@ -141,9 +141,9 @@
 %%%%%  Variables and Blocks  %%%%%
 %sort assm_var %.
 %mode assm_var %in %out %.
-%block bind {t tp} [x tp] [dv var x] [d assm x t] [thm assm_var d dv]%.
-%block vblock [t tp] [d var t]%.
-%block ablock {x tp} {dv var x} {t tp} [d assm x t] [thm assm_var d dv]%.
+%block bind [t tp] {x tp} {dv var x} {d assm x t} {thm assm_var d dv}%.
+%block vblock {t tp} {d var t}%.
+%block ablock [x tp] [dv var x] [t tp] {d assm x t} {thm assm_var d dv}%.
 %worlds (bind vblock ablock) (assm_var _ _) %.
 %total {} (assm_var _ _) %.
 %%%%% Metric %%%%% 
@@ -181,8 +181,8 @@
 %mode find_size %in %out %.
 %sort find_size_trow {TR} %.
 %mode find_size_trow %in %out %.
-%block sblock [t tp] [d var t] [thm find_size t (size_var d)]%.
-%block sbind {t tp} [x tp] [dv var x] [d assm x t] [thm assm_var d dv] [thm' find_size x (size_var dv)]%.
+%block sblock {t tp} {d var t} {thm find_size t (size_var d)}%.
+%block sbind [t tp] {x tp} {dv var x} {d assm x t} {thm assm_var d dv} {thm' find_size x (size_var dv)}%.
 %term _ find_size top size_top %.
 %term _ 
 	%pi (find_size (arrow T1 T2) (size_arrow Plus Size2 Size1))
@@ -438,7 +438,7 @@
 %sort reflx_trow {Nsize nat} %.
 %mode reflx_trow %in %in %out %.
 %%%%% Some blocks %%%%%
-%block rbind {t tp} [x tp] [dv var x] [d assm x t] [thm assm_var d dv] [thm find_size x (size_var dv)] [thm reflx z (size_var dv) (sub_refl d)]%.
+%block rbind [t tp] {x tp} {dv var x} {d assm x t} {thm assm_var d dv} {thm find_size x (size_var dv)} {thm reflx z (size_var dv) (sub_refl d)}%.
 %sort labelfree_trans_insert %.
 %mode labelfree_trans_insert %in %in %in %out %.
 %term _ labelfree_trans_insert trow_labelfree_nil trow_insert_nil Lneq (trow_labelfree_cons trow_labelfree_nil Lneq) %.
@@ -599,7 +599,7 @@
 %%%%% Proof that sub and sub_tp are equivalent %%%%%
 %sort assm_to_sub_tp %.
 %mode assm_to_sub_tp %in %out %.
-%block cblock {T tp} {S tp} [x tp] [d assm x T] [d' sub_tp x T] [thm assm_to_sub_tp d d']%.
+%block cblock [T tp] [S tp] {x tp} {d assm x T} {d' sub_tp x T} {thm assm_to_sub_tp d d'}%.
 %worlds (cblock) (assm_to_sub_tp _ _) %.
 %total [] (assm_to_sub_tp _ _) %.
 %sort completeness %.
@@ -637,7 +637,7 @@
 %mode soundness %in %out %.
 %sort soundness_trow %.
 %mode soundness_trow %in %out %.
-%block sbind {t tp} {d'' sub t t} [x tp] [dv var x] [d assm x t] [thm assm_var d dv] [thm' find_size x (size_var dv)] [thm' reflx z (size_var dv) (sub_refl d)] [d' sub_tp x t] [thm'' soundness d' (sub_trans d'' d)]%.
+%block sbind [t tp] [d'' sub t t] {x tp} {dv var x} {d assm x t} {thm assm_var d dv} {thm' find_size x (size_var dv)} {thm' reflx z (size_var dv) (sub_refl d)} {d' sub_tp x t} {thm'' soundness d' (sub_trans d'' d)}%.
 %term _ soundness sub_tp_top sub_top %.
 %term _ %pi (soundness sub_tp_refl D) %<- (find_size _ Dsize) %<- (reflx _ Dsize D) %.
 %term _ 

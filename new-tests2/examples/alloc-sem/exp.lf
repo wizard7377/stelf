@@ -1,0 +1,19 @@
+%%% Simply Typed Lambda Calculus w/ small-step, allocation semantics
+%%% Author: Matthew Fluet (June 2005)
+%%% exp.elf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Expressions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%term loc_e %pi loc %-> exp %.
+%term lam_e %pi tp %-> (%pi exp %-> exp) %-> exp %.
+%term app_e %pi exp %-> exp %-> exp %.
+%term unit_e exp %.
+%term letunit_e %pi exp %-> exp %-> exp %.
+%term pair_e %pi exp %-> exp %-> exp %.
+%term letpair_e %pi exp %-> (%pi exp %-> exp %-> exp) %-> exp %.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort exp_irred {_ exp} %.
+%mode exp_irred %in %.
+%term exp_irred_loc exp_irred (loc_e _) %.
+%terminates {} (exp_irred _) %.
+%worlds () (exp_irred _) %.

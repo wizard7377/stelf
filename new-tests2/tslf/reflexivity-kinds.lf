@@ -1,0 +1,31 @@
+%%%% reflexivity of kinds
+%sort kd-refl/deq {_ kd-wf K} {_ kd-deq K K} %.
+%mode kd-refl/deq %in %out %.
+%term _ kd-refl/deq kd-wf/kd/unit kd-deq/kd/unit %.
+%term _ kd-refl/deq kd-wf/kd/type kd-deq/kd/type %.
+%term _ kd-refl/deq (kd-wf/kd/sing D1) (kd-deq/kd/sing (cn-deq/refl D1)) %.
+%term _ 
+	%pi (kd-refl/deq (kd-wf/kd/sgm D1 D2) (kd-deq/kd/sgm D3 D4))
+	%<- (kd-refl/deq D1 D3)
+	%<- ({a cn} {da ofkd a _} kd-refl/deq (D2 a da) (D4 a da)) %.
+%term _ 
+	%pi (kd-refl/deq (kd-wf/kd/pi D1 D2) (kd-deq/kd/pi D3 D4))
+	%<- (kd-refl/deq D1 D3)
+	%<- ({a cn} {da ofkd a _} kd-refl/deq (D2 a da) (D4 a da)) %.
+%worlds (ofkd-block) (kd-refl/deq _ _) %.
+%total (D1) (kd-refl/deq D1 _) %.
+%sort kd-refl/sub {_ kd-wf K} {_ kd-sub K K} %.
+%mode kd-refl/sub %in %out %.
+%term _ kd-refl/sub kd-wf/kd/unit kd-sub/kd/unit %.
+%term _ kd-refl/sub kd-wf/kd/type kd-sub/kd/type %.
+%term _ kd-refl/sub (kd-wf/kd/sing D1) (kd-sub/kd/sing-kd/sing (cn-deq/refl D1)) %.
+%term _ 
+	%pi (kd-refl/sub (kd-wf/kd/sgm D1 D2) (kd-sub/kd/sgm D3 D4 D2))
+	%<- (kd-refl/sub D1 D3)
+	%<- ({a cn} {da ofkd a _} kd-refl/sub (D2 a da) (D4 a da)) %.
+%term _ 
+	%pi (kd-refl/sub (kd-wf/kd/pi D1 D2) (kd-sub/kd/pi D3 D4 D2))
+	%<- (kd-refl/sub D1 D3)
+	%<- ({a cn} {da ofkd a _} kd-refl/sub (D2 a da) (D4 a da)) %.
+%worlds (ofkd-block can-mofkd-block ofkd+vdt-block) (kd-refl/sub _ _) %.
+%total (D1) (kd-refl/sub D1 _) %.

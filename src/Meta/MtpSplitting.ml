@@ -20,7 +20,9 @@ open! Basis
 (* Splitting : Version 1.3 *)
 (* Author: Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MTPSplitting (MTPSplitting__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL

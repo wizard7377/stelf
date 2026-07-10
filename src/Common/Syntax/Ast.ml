@@ -4,11 +4,23 @@ open Common
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 exception UnexpectedFgnExp of exn
-let () = Printexc.register_printer (function UnexpectedFgnExp _ -> Some "UnexpectedFgnExp" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | UnexpectedFgnExp _ -> Some "UnexpectedFgnExp"
+    | _ -> None)
+
 exception UnexpectedFgnCnstr of exn
-let () = Printexc.register_printer (function UnexpectedFgnCnstr _ -> Some "UnexpectedFgnCnstr" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | UnexpectedFgnCnstr _ -> Some "UnexpectedFgnCnstr"
+    | _ -> None)
 
 module Make_Ast (Common : Common.COMMON) : AST.AST with module Common = Common =
 struct

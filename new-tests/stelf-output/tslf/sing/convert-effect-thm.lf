@@ -8,10 +8,10 @@
 %mode vsound %in %out %out %out %.
 %sort vtrans-variable %.
 %mode vtrans-variable %in %out %.
-%block sbind {a tp} {ea etp} {d_tconvert tconvert a ea} [x atom] [d vof x a] [ex eterm] [xt vtrans ex x] [ed evof ex ea] [dv variable ex] [thm1 vtrans-variable xt dv] [thm2 vsound d xt d_tconvert ed]%.
+%block sbind [a tp] [ea etp] [d_tconvert tconvert a ea] {x atom} {d vof x a} {ex eterm} {xt vtrans ex x} {ed evof ex ea} {dv variable ex} {thm1 vtrans-variable xt dv} {thm2 vsound d xt d_tconvert ed}%.
 %% Without the d_tconvert assumption, Twelf will split this.
-%block sbind' {a tp} {ea etp} [x atom] [d vof x a] [ex eterm] [xt vtrans ex x] [ed evof ex ea] [dv variable ex] [thm1 vtrans-variable xt dv]%.
-%block tvbind {r atom} [ex eterm] [tr vtrans ex r] [dv variable ex] [thm vtrans-variable tr dv]%.
+%block sbind' [a tp] [ea etp] {x atom} {d vof x a} {ex eterm} {xt vtrans ex x} {ed evof ex ea} {dv variable ex} {thm1 vtrans-variable xt dv}%.
+%block tvbind [r atom] {ex eterm} {tr vtrans ex r} {dv variable ex} {thm vtrans-variable tr dv}%.
 %worlds (sbind' ovar tvbind evar) (vtrans-variable _ _) %.
 %total {} (vtrans-variable _ _) %.
 %% force Twelf to split X

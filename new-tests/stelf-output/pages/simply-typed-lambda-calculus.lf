@@ -32,7 +32,7 @@ e ::= x \mid \langle\rangle \mid \lambda x{:}\tau.e \mid e_1\,e_2
 %term empty tm %.
 %term app %pi tm %-> tm %-> tm %.
 %term lam %pi tp %-> (%pi tm %-> tm) %-> tm %.
-%block tmvar [x tm]%.
+%block tmvar {x tm}%.
 %worlds (tmvar) (tm) %.
 %{! ## Encoding of judgments
 
@@ -75,7 +75,7 @@ This judgement is represented by the following LF signature: !}%
 	%pi (of (lam T2 ([x] E x)) (arrow T2 T))
 	%<- ({x tm} %pi (of x T2) %-> (of (E x) T)) %.
 %term of-app %pi (of (app E1 E2) T) %<- (of E1 (arrow T2 T)) %<- (of E2 T2) %.
-%block tmof {T tp} [x tm] [d of x T]%.
+%block tmof [T tp] {x tm} {d of x T}%.
 %worlds (tmof) (of _ _) %.
 %{! Assumptions <Math formula="x : \tau"/> in the typing context <Math formula="\gamma"/> are represented as a pair of objects `x:tm` and `d: of x T` in the LF context <Math formula="\Gamma"/> (where `T` is the LF representation of some type <Math formula="\tau"/>).  This can be seen in the encoding of the judgment ``of-lam``. There is no need to write out the equivalent of the `of-var` rule, because the necessary judgment is directly assumed by the ``of-lam`` rule. This method avoids the need for a [substitution lemma](/wiki/substitution-lemma/): the article on that subject discusses the matter further.
 

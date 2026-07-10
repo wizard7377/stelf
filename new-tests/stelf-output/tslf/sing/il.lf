@@ -105,6 +105,6 @@
 %term topen/pi %pi (topen (cpi Ac Bc) (pi A ([_] B))) %<- (topen Ac A) %<- (topen Bc B) %.
 %term kof/i %pi (kof C A') %<- (ckof C A) %<- (topen A A') %.
 %%%%%  Worlds  %%%%%
-%block var [x atom]%.
-%block bind {a tp} [x atom] [d vof x a]%.
-%block ofblock {x atom} {a tp} [d vof x a]%.
+%block var {x atom}%.
+%block bind [a tp] {x atom} {d vof x a}%.
+%block ofblock [x atom] [a tp] {d vof x a}%.

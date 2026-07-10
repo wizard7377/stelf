@@ -1,0 +1,61 @@
+%%%%%  Simple Types  %%%%%
+%sort stp %.
+%name stp %.
+%term st stp %.
+%term spi %pi stp %-> stp %-> stp %.
+%term ssigma %pi stp %-> stp %-> stp %.
+%sort simp {_ tp} {_ stp} %.
+%term simp/t simp t st %.
+%term simp/pi %pi (simp (pi A B) (spi S T)) %<- (simp A S) %<- ({x} simp (B x) T) %.
+%term simp/sigma %pi (simp (sigma A B) (ssigma S T)) %<- (simp A S) %<- ({x} simp (B x) T) %.
+%term simp/sing simp (sing R) st %.
+%sort stp-leq {_ stp} {_ stp} %.
+%term stp-leq/eq stp-leq T T %.
+%term stp-leq/pi1 %pi (stp-leq S (spi T1 T2)) %<- (stp-leq S T1) %.
+%term stp-leq/pi2 %pi (stp-leq S (spi T1 T2)) %<- (stp-leq S T2) %.
+%term stp-leq/sigma1 %pi (stp-leq S (ssigma T1 T2)) %<- (stp-leq S T1) %.
+%term stp-leq/sigma2 %pi (stp-leq S (ssigma T1 T2)) %<- (stp-leq S T2) %.
+%%%%%  Simple Contexts  %%%%%
+%sort sctx %.
+%name sctx %.
+%term snil sctx %.
+%term scons %pi sctx %-> atom %-> stp %-> sctx %.
+%sort sbounded {_ sctx} {_ atom} %.
+%term sbounded/nil %pi (sbounded snil X) %<- (isvar X _) %.
+%term sbounded/cons %pi (sbounded (scons G Y _) X) %<- (precedes Y X) %<- (sbounded G Y) %.
+%sort sordered {_ sctx} %.
+%term sordered/nil sordered snil %.
+%term sordered/cons %pi (sordered (scons G X _)) %<- (sbounded G X) %.
+%sort slookup {_ sctx} {_ atom} {_ stp} %.
+%term slookup/hit %pi (slookup (scons G X T) X T) %<- (sbounded G X) %.
+%term slookup/miss %pi (slookup (scons G Y _) X T) %<- (sbounded G Y) %<- (slookup G X T) %.
+%sort sappend {_ sctx} {_ sctx} {_ sctx} %.
+%term sappend/nil sappend G snil G %.
+%term sappend/cons %pi (sappend G1 (scons G2 X A) (scons G X A)) %<- (sappend G1 G2 G) %.
+%%%%%  Simple Typing with Explicit Contexts  %%%%%
+%sort wfes {_ sctx} {_ tp} %.
+%sort aofes {_ sctx} {_ atom} {_ stp} %.
+%sort ofes {_ sctx} {_ term} {_ stp} %.
+%term aofes/closed %pi (aofes G R T) %<- (aof R A) %<- (simp A T) %<- (sordered G) %.
+%term aofes/var %pi (aofes G X T) %<- (slookup G X T) %.
+%term aofes/forall %pi (aofes G (forall A) (spi (spi T st) st)) %<- (wfes G A) %<- (simp A T) %.
+%term aofes/app %pi (aofes G (app R M) T) %<- (aofes G R (spi S T)) %<- (ofes G M S) %.
+%term aofes/pi1 %pi (aofes G (pi1 R) S) %<- (aofes G R (ssigma S T)) %.
+%term aofes/pi2 %pi (aofes G (pi2 R) T) %<- (aofes G R (ssigma S T)) %.
+%term ofes/at %pi (ofes G (at R) st) %<- (aofes G R st) %.
+%term ofes/lam 
+	%pi (ofes G (lam M) (spi S T))
+	%<- ({x} %pi (isvar x I) %-> (ofes (scons G x S) (M x) T)) %.
+%term ofes/pair %pi (ofes G (pair M N) (ssigma S T)) %<- (ofes G M S) %<- (ofes G N T) %.
+%term wfes/t %pi (wfes G t) %<- (sordered G) %.
+%term wfes/pi 
+	%pi (wfes G (pi A B))
+	%<- (wfes G A)
+	%<- (simp A T)
+	%<- ({x} %pi (isvar x I) %-> (wfes (scons G x T) (B x))) %.
+%term wfes/sigma 
+	%pi (wfes G (sigma A B))
+	%<- (wfes G A)
+	%<- (simp A T)
+	%<- ({x} %pi (isvar x I) %-> (wfes (scons G x T) (B x))) %.
+%term wfes/sing %pi (wfes G (sing R)) %<- (aofes G R st) %.

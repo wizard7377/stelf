@@ -1,0 +1,8 @@
+%%% Definition of Values
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort value {_ exp} %.
+%name value %.
+%term val_z value z %.
+%term val_s %pi (value (s E)) %<- (value E) %.
+%term val_pair %pi (value (pair E1 E2)) %<- (value E1) %<- (value E2) %.
+%term val_lam value (lam E) %.

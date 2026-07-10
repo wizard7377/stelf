@@ -85,7 +85,7 @@
 	%pi (of (split E ([x] [y] Ebody x y)) T)
 	%<- (of E (prod T1 T2))
 	%<- ({x} %pi (of x T1) %-> ({y} %pi (of y T2) %-> (of (Ebody x y) T))) %.
-%block tbind {T tp} [x exp] [dx of x T]%.
+%block tbind [T tp] {x exp} {dx of x T}%.
 %worlds (tbind) (of _ _) %.
 %{! 
 

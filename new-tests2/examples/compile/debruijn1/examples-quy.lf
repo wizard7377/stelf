@@ -1,0 +1,4 @@
+%query 1 _ _ trans empty F (app (lam ([x] lam ([y] x))) (lam ([z] z))) %.
+%query 1 _ _ feval empty (app' (lam' (lam' (1 ^))) (lam' 1)) W %.
+%query 1 _ _ vtrans (clo (empty ; clo empty (lam' 1)) (lam' (1 ^))) V %.
+%query 2 _ _ trans empty F (lam ([x] lam ([y] app x x))) %.

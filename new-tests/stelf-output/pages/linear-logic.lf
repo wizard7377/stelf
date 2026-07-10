@@ -127,8 +127,8 @@ As a metatheoretic example, we may prove the subject reduction property using th
 %{! (options removed from twelftag: hidden="true") !}%
 %%%%%  Worlds  %%%%%
 %{!  !}%
-%block block [x term]%.
-%block bind {t tp} [x term] [d of x t]%.
+%block block {x term}%.
+%block bind [t tp] {x term} {d of x t}%.
 %{! Next we define reduction: !}%
 %{! (options removed from twelftag: hidden="true") !}%
 %%%%%  Reduction  %%%%%

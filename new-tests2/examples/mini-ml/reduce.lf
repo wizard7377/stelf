@@ -1,0 +1,36 @@
+%sort ==> {_ exp} {_ exp} %.
+%name ==> %.
+%prec %none 10 ==> %.
+%mode ==> %in %out %.
+%term red_z case z E1 E2 ==> E1 %.
+%term red_s case (s E) E1 E2 ==> E2 E %.
+%term red_fst fst (pair E1 E2) ==> E1 %.
+%term red_snd snd (pair E1 E2) ==> E2 %.
+%term red_app app (lam E1) E2 ==> E1 E2 %.
+%term red_letv letv E1 E2 ==> E2 E1 %.
+%term red_letn letn E1 E2 ==> E2 E1 %.
+%term red_fix fix E ==> E (fix E) %.
+%worlds () (==> D P) %.
+% The weakly congruent, reflexive, transitive closure of ==>*
+%sort ==>* {_ exp} {_ exp} %.
+%name ==>* %.
+%prec %none 10 ==>* %.
+%mode ==>* %in %out %.
+% Congruences
+% no red*_z
+%term red*_s %pi (s E ==>* s E') %<- (E ==>* E') %.
+%term red*_case %pi (case E1 E2 E3 ==>* case E1' E2 E3) %<- (E1 ==>* E1') %.
+%term red*_pair1 %pi (pair E1 E2 ==>* pair E1' E2) %<- (E1 ==>* E1') %.
+%term red*_pair2 %pi (pair E1 E2 ==>* pair E1 E2') %<- (E2 ==>* E2') %.
+%term red*_fst %pi (fst E ==>* fst E') %<- (E ==>* E') %.
+%term red*_snd %pi (snd E ==>* snd E') %<- (E ==>* E') %.
+% no red*_lam
+%term red*_app1 %pi (app E1 E2 ==>* app E1' E2) %<- (E1 ==>* E1') %.
+%term red*_app2 %pi (app E1 E2 ==>* app E1 E2') %<- (E2 ==>* E2') %.
+%term red*_letv %pi (letv E1 E2 ==>* letv E1' E2) %<- (E1 ==>* E1') %.
+%term red*_letn %pi (letn E1 E2 ==>* letn E1' E2) %<- (E1 ==>* E1') %.
+% no red*_fix
+%term red*_beta %pi (E ==>* E') %<- (E ==> E') %.
+%term red*_refl E ==>* E %.
+%term red*_trans %pi (E ==>* E'') %<- (E ==>* E') %<- (E' ==>* E'') %.
+%worlds () (==>* D P) %.

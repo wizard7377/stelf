@@ -27,5 +27,5 @@
 %term tp_letn %pi (of (letn E1 E2) T2) %<- (of E1 T1) %<- (of (E2 E1) T2) %.
 % Recursion
 %term tp_fix %pi (of (fix E) T) %<- ({x exp} %pi (of x T) %-> (of (E x) T)) %.
-%block l {T tp} [x exp] [d of x T]%.
+%block l [T tp] {x exp} {d of x T}%.
 %worlds (l) (of E T) %.

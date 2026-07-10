@@ -1,0 +1,29 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+% Sample queries from notes
+%
+
+%define l4 1 | 2 | 3 | 4 | nil %.
+% cons 1 (cons 2 (cons 3 (cons 4 nil))).
+%define l3 1 | 2 | 3 | nil %.
+% cons 1 (cons 2 (cons 3 nil)).
+%define l2 1 | 2 | nil %.
+% cons 1 (cons 2 nil).
+%term perm %pi (trm (list A)) %-> (trm (list A)) %-> atm %.
+%term rev %pi (trm (list A)) %-> (trm (list A)) %-> atm %.
+%term id %pi (trm (list A)) %-> (trm (list A)) %-> atm %.
+%term idl %pi (trm (list A)) %-> (trm (list A)) %-> atm %.
+%term elem %pi (trm int) %-> atm %.
+%term perm1 prog (^ (elem X) =0 ^ (perm L K) =0 ^ (perm (X | L) K)) %.
+%term perm2 prog (^ (perm nil K) =0 ^ (elem X) =0 ^ (perm nil (X | K))) %.
+%term perm3 prog (^ (perm nil nil)) %.
+%term rev1 prog (^ (elem X) =>> ^ (rev L K) =>> ^ (rev (X | L) K)) %.
+%term rev2 prog (^ (rev nil K) =>> ^ (elem X) =>> ^ (rev nil (X | K))) %.
+%term rev3 prog (^ (rev nil nil)) %.
+%term id1 prog (^ (elem X) >=> ^ (id L K) =>> ^ (id (X | L) K)) %.
+%term id2 prog (^ (id nil K) =>> ^ (elem X) =>> ^ (id nil (X | K))) %.
+%term id3 prog (^ (id nil nil)) %.
+%term idl1 prog (^ (elem X) >=> ^ (idl L K) >=> ^ (idl (X | L) K)) %.
+%term idl2 prog (^ (idl nil K) =>> ^ (elem X) =>> ^ (idl nil (X | K))) %.
+%term idl3 prog (^ (idl nil nil)) %.

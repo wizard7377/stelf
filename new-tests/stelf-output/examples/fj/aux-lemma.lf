@@ -19,7 +19,7 @@ they don't influence judgments such as fields or mtype.
 An alternative would be to prove strengthening lemmas about fields and mtype.
 (See the proof of narrowing and the definitions of sub_strengthen below.)
 }%
-%block var [x exp]%.
+%block var {x exp}%.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %{ 
 We also have to reason about when things are equal, even though equality is not 
@@ -429,7 +429,7 @@ type.
 %term _ 
 	%pi (ctth_ct REST LC2 NEQ1 CT2)
 	%-> (ctth_ct (ctt_cons REST CT _) (lookupClass_crcons2 NEQ LC2) NEQ1 CT2) %.
-%block b_typing {CT classTable} {C0 className} [x exp] [q typing CT x C0]%.
+%block b_typing [CT classTable] [C0 className] {x exp} {q typing CT x C0}%.
 %worlds (b_typing var) (ctth_ct WCT LCM NEQ CT) %.
 %total WCT (ctth_ct WCT LCM NEQ CT) %.
 %unique ctth_ct %in %in %out %out %.
@@ -533,7 +533,7 @@ type.
 %% a specialization of narrowing for the "this" variable.
 %sort narrowing_this %.
 %mode narrowing_this %in %in %in %out %out %.
-%block b_bind {CT classTable} {C0 className} [x exp] [q typing CT x C0] [N {WCT class_table_typing CT} {C1 className} {C2 className} {SB0 subtyping CT C1 C2} narrowing_exp WCT ([y] [qy] q) SB0 ([y] [qy] q) s_refl]%.
+%block b_bind [CT classTable] [C0 className] {x exp} {q typing CT x C0} {N {WCT class_table_typing CT} {C1 className} {C2 className} {SB0 subtyping CT C1 C2} narrowing_exp WCT ([y] [qy] q) SB0 ([y] [qy] q) s_refl}%.
 %term _ 
 	%pi (sub_strengthen SB2 SB3)
 	%-> ({this exp} {qthis typing CT this C0} {N {WCT} {C1} {C2} {SB0 subtyping CT C1 C2} narrowing_exp WCT ([x] [q typing CT x C2] qthis) SB0 ([x] [q typing CT x C1] qthis) s_refl} narrowing_exp WCT ([x] [q] Q x q this qthis) SB1 ([x] [q] Q2 x q this qthis) (SB2 this))

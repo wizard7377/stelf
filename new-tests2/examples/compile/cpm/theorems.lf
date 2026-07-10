@@ -1,0 +1,9 @@
+% Continuation style small step semantics refines the big step semantics
+%sort ccf {_ eval E V} {_ {K} {W} %pi (K # (return V) =>* (answer W)) %-> (K # (ev E) =>* (answer W))} %.
+%mode ccf %in %out %.
+% Completeness Proof implies  Soundness Proof
+%sort peq {_ csd C D C'} {_ ccp D C' C} %.
+%mode peq %in %out %.
+% Soundness Proof implies Completeness Proof
+%sort peqr {_ ccp D C' C} {_ csd C D C'} %.
+%mode peqr %in %out %.

@@ -13,7 +13,9 @@ include RECONQUERY
 open! Basis
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module ReconQuery (ReconQuery__0 : sig
   (* Reconstruct queries *)
@@ -137,7 +139,8 @@ end) : RECON_QUERY = struct
     in
     let cd = Names.nameConDec cd in
     let _ =
-      Display.chatter_s 3 (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
+      Display.chatter_s 3
+        (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
     in
     let _ =
       begin if !Global.doubleCheck then begin
@@ -175,7 +178,8 @@ end) : RECON_QUERY = struct
     in
     let cd = Names.nameConDec cd in
     let _ =
-      Display.chatter_s 3 (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
+      Display.chatter_s 3
+        (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
     in
     let _ =
       begin if !Global.doubleCheck then begin

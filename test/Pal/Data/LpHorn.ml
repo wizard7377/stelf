@@ -64,7 +64,7 @@ let lp_horn_sources_2 =
 *)
 let lp_horn_sources_3 =
   {|
-%sort whr {_ pf _} {_ pf _}
+%sort whr {_ pf A} {_ pf A}
 %name whr WHR
 
 %term whr_andl {{A B D E}} whr (andel (andi D E)) D
@@ -76,9 +76,9 @@ let lp_horn_sources_3 =
 %term whr_impe {{A B D D' E}} {_ whr D D'} whr (impe D E) (impe D' E)
 %term whr_foralle {{A D D' T}} {_ whr D D'} whr (foralle D T) (foralle D' T)
 
-%sort tocan {_ o} {_ pf _} {_ pf _}
+%sort tocan {A o} {_ pf A} {_ pf A}
 %name tocan TC
-%sort toatm {_ pf _} {_ pf _}
+%sort toatm {_ pf A} {_ pf A}
 %name toatm TA
 
 %term tc_and {{A B D D1' D2'}} {_ tocan A (andel D) D1'} {_ tocan B (ander D) D2'} tocan (A and B) D (andi D1' D2')
@@ -90,4 +90,3 @@ let lp_horn_sources_3 =
 %term ta_atom {{P D}} {_ atm D} toatm D D
 %term ta_whr {{D D' D''}} {_ whr D D'} {_ toatm D' D''} toatm D D''
 |}
-

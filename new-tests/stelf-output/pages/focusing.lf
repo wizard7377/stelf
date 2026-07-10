@@ -31,8 +31,8 @@ as the `id⁺` rule and `subst⁻` substitution principles are.
 %{! We define propositions in an environment with free atoms. !}%
 %sort atom %.
 %name atom %.
-%block atom⁺ [Q⁺ atom ⁺]%.
-%block atom⁻ [Q⁻ atom ⁻]%.
+%block atom⁺ {Q⁺ atom ⁺}%.
+%block atom⁻ {Q⁻ atom ⁻}%.
 %sort typ %.
 %name typ %.
 %term c %pi (atom P) %-> (typ P) %.
@@ -84,9 +84,9 @@ as the `id⁺` rule and `subst⁻` substitution principles are.
 %inline spine (%pi (typ ⁻) %-> suc %-> %type) [A⁻] [U] exp (hasleft (infoc A⁻) U) %.
 %sort hyp %.
 %name hyp %.
-%block nprop {A⁻ typ ⁻} [x hyp A⁻]%.
-%block aprop {Q⁺ atom ⁺} [z value (c Q⁺)]%.
-%block pprop {A⁺ typ ⁺} [z value A⁺]%.
+%block nprop [A⁻ typ ⁻] {x hyp A⁻}%.
+%block aprop [Q⁺ atom ⁺] {z value (c Q⁺)}%.
+%block pprop [A⁺ typ ⁺] {z value A⁺}%.
 %worlds (atom⁺ atom⁻ nprop) (hyp _) %.
 %block gamma_suspnormal%.
 % World for cut
@@ -663,7 +663,7 @@ a non-deeply-shifted proposition that erases to the same thing. !}%
 %name right %.
 %sort right' %.
 %name right' %.
-%block h {P} [h left P]%.
+%block h [P] {h left P}%.
 %term init %pi (left (a Q)) %-> (right (a Q)) %.
 %term ffL %pi (left ff) %-> (right P) %.
 %term orR₁ %pi (right P₁) %-> (right (or P₁ P₂)) %.
@@ -693,9 +693,9 @@ keeps the derivation size the same when we do case analysis. !}%
 %{! Soundness is established in a context where each polarized 
 hypothesis is mapped to its erasure. !}%
 %sort soundhyp %.
-%block soundhyps {A⁻} {P} {T t A⁻ P} [x hyp A⁻] [h left P] [_ soundhyp x T h]%.
+%block soundhyps [A⁻] [P] [T t A⁻ P] {x hyp A⁻} {h left P} {_ soundhyp x T h}%.
 %sort soundsusp %.
-%block soundsusps {Q⁺} [z value (c Q⁺)] [h left (a Q⁺)] [_ soundsusp z h]%.
+%block soundsusps [Q⁺] {z value (c Q⁺)} {h left (a Q⁺)} {_ soundsusp z h}%.
 %block soundctx%.
 %mode {%in A⁻} {%out P} {%in X hyp A⁻} {%out T t A⁻ P} {%out H left P} soundhyp X T H %.
 %worlds (soundctx) (soundhyp _ _ _) %.
@@ -797,8 +797,8 @@ interpretation runs the opposite way 'round. !}%
 %term cn %pi (hyp A⁻) %-> (completehyp_res A⁻) %.
 %term ca %pi (value (c Q⁺)) %-> (completehyp_res (c Q⁺)) %.
 %sort completehyp %.
-%block completehypn {A⁻ typ ⁻} {P} {T t A⁻ P} [x hyp A⁻] [h left P] [_ completehyp h T (cn x)]%.
-%block completehypa {Q⁺ atom ⁺} {P} {T t (c Q⁺) P} [z value (c Q⁺)] [h left P] [_ completehyp h T (ca z)]%.
+%block completehypn [A⁻ typ ⁻] [P] [T t A⁻ P] {x hyp A⁻} {h left P} {_ completehyp h T (cn x)}%.
+%block completehypa [Q⁺ atom ⁺] [P] [T t (c Q⁺) P] {z value (c Q⁺)} {h left P} {_ completehyp h T (ca z)}%.
 %block completectx%.
 %sort transnormal %.
 %mode transnormal %in %out %.
@@ -1006,7 +1006,7 @@ semi-focused lax logic. !}%
 	%<- (polarize P₂ T₂) %.
 %worlds (atom⁺ atom⁻) (polarize _ _) %.
 %total P (polarize P _) %.
-%block translate {A} {P} {TH t A P} [x hyp A] [h left P] [_ soundhyp x TH h] [_ completehyp h TH (cn x)]%.
+%block translate [A] [P] [TH t A P] {x hyp A} {h left P} {_ soundhyp x TH h} {_ completehyp h TH (cn x)}%.
 %sort unfocused-cut %.
 %mode unfocused-cut %in %in %out %.
 %term _ 

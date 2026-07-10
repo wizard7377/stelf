@@ -12,9 +12,10 @@ open Metasyn
 open Modetable
 open Timers
 
-
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Skolem (Skolem__0 : sig
   (* Skolem constant administration *)
@@ -83,9 +84,7 @@ end) : SKOLEM = struct
                   Timers.time Timers.compiling Compile.install I.Ordinary sk
                 in
                 let s_ = spine d in
-                let _ =
-                  Display.chatter_s 3 (Print.conDecToString sd_ ^ "\n")
-                in
+                let _ = Display.chatter_s 3 (Print.conDecToString sd_ ^ "\n") in
                 installSkolem'
                   (d, (v_, mS'), I.Dot (I.Exp (I.Root (h_, s_)), s), k)
             end

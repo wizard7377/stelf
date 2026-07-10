@@ -1,0 +1,533 @@
+%                            
+%. %[[ 
+This is a case study on pattern matching using Twelf.
+%]]
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+% 
+%sort map {_ nat} %.
+%term map/z map z %.
+%term map/s %pi nat %-> (map N) %-> (map (s N)) %.
+%sort tp %.
+%term o tp %.
+%term arrow %pi tp %-> tp %-> tp %.
+%term prod %pi tp %-> tp %-> tp %.
+%term sum %pi tp %-> tp %-> tp %.
+%sort tplist {_ %pi nat %-> nat} %.
+%term tplist/z tplist ([n] n) %.
+%term tplist/s %pi tp %-> (tplist N) %-> (tplist ([n] s (N n))) %.
+%. %[[ A ``pat N`` is a pattern that binds (N z) variables. %]]
+%sort pat {_ %pi nat %-> nat} %.
+%term pat/underscore pat ([n] n) %.
+%term pat/pair %pi (pat N1) %-> (pat N2) %-> (pat ([n] N1 (N2 n))) %.
+%term pat/inl %pi (pat N) %-> (pat N) %.
+%term pat/inr %pi (pat N) %-> (pat N) %.
+%term pat/var pat s %.
+%term pat/as %pi (pat N1) %-> (pat N2) %-> (pat ([n] N1 (N2 n))) %.
+%term pat/or %pi (pat N) %-> (map (N z)) %-> (pat N) %-> (pat N) %.
+%sort exp %.
+%sort oexp {_ nat} %.
+% oexp N is an expression with N bound vars
+%sort match %.
+%term exp/unit exp %.
+%term exp/lam %pi match %-> exp %.
+%term exp/app %pi exp %-> exp %-> exp %.
+%term exp/pair %pi exp %-> exp %-> exp %.
+%term exp/inl %pi exp %-> exp %.
+%term exp/inr %pi exp %-> exp %.
+%term exp/handle %pi exp %-> exp %-> exp %.
+%term oexp/z %pi exp %-> (oexp z) %.
+%term oexp/s %pi (%pi exp %-> (oexp N)) %-> (oexp (s N)) %.
+%term match/nil match %.
+%term match/cons %pi (pat N) %-> (oexp (N z)) %-> match %-> match %.
+%. %[[ static semantics %]]
+%sort tplist-append {_ tplist N1} {_ tplist N2} {_ tplist ([n] N1 (N2 n))} %.
+%term tplist-append/z tplist-append tplist/z TL TL %.
+%term tplist-append/s 
+	%pi (tplist-append (tplist/s T TL) TL' (tplist/s T TL''))
+	%<- (tplist-append TL TL' TL'') %.
+%sort tplist-get {_ nat} {_ tplist N} {_ tp} %.
+%term tplist-get/hit tplist-get z (tplist/s T TL) T %.
+%term tplist-get/miss %pi (tplist-get (s N) (tplist/s T TL) T') %<- (tplist-get N TL T') %.
+%sort tplist-map {_ tplist N} {_ map (N' z)} {_ tplist N'} %.
+%term tplist-map/z tplist-map TL map/z tplist/z %.
+%term tplist-map/s 
+	%pi (tplist-map TL (map/s N M) (tplist/s T TL'))
+	%<- (tplist-get N TL T)
+	%<- (tplist-map TL M TL') %.
+%sort of-pat {_ pat N} {_ tp} {_ tplist N} %.
+%term of-pat/underscore of-pat pat/underscore T tplist/z %.
+%term of-pat/pair 
+	%pi (of-pat (pat/pair P1 P2) (prod T1 T2) TL')
+	%<- (of-pat P1 T1 TL1)
+	%<- (of-pat P2 T2 TL2)
+	%<- (tplist-append TL1 TL2 TL') %.
+%term of-pat/inl %pi (of-pat (pat/inl P) (sum T1 T2) TL) %<- (of-pat P T1 TL) %.
+%term of-pat/inr %pi (of-pat (pat/inr P) (sum T1 T2) TL) %<- (of-pat P T2 TL) %.
+%term of-pat/var of-pat pat/var T (tplist/s T tplist/z) %.
+%term of-pat/as 
+	%pi (of-pat (pat/as P1 P2) T TL3)
+	%<- (of-pat P1 T TL1)
+	%<- (of-pat P2 T TL2)
+	%<- (tplist-append TL1 TL2 TL3) %.
+%term of-pat/or 
+	%pi (of-pat (pat/or P1 NM P2) T TL)
+	%<- (of-pat P1 T (%the (tplist N) TL))
+	%<- (of-pat P2 T (%the (tplist N) TL'))
+	%<- (tplist-map TL' NM TL) %.
+% or patterns are limited
+%sort of-exp {_ exp} {_ tp} %.
+%sort of-match {_ match} {_ tp} {_ tp} %.
+%sort of-oexp {_ tplist N} {_ oexp (N z)} {_ tp} %.
+%term of-oexp/z %pi (of-oexp tplist/z (oexp/z E) T) %<- (of-exp E T) %.
+%term of-oexp/s 
+	%pi (of-oexp (tplist/s T TL) (oexp/s ([x] EL x)) T')
+	%<- ({x} %pi (of-exp x T) %-> (of-oexp TL (EL x) T')) %.
+%term of-match/nil of-match match/nil T T' %.
+%term of-match/cons 
+	%pi (of-match (match/cons P OE M) T T')
+	%<- (of-pat P T TL)
+	%<- (of-oexp TL OE T')
+	%<- (of-match M T T') %.
+%term of-exp/unit of-exp exp/unit o %.
+%term of-exp/lam %pi (of-exp (exp/lam M) (arrow T1 T2)) %<- (of-match M T1 T2) %.
+%term of-exp/app %pi (of-exp (exp/app E1 E2) T2) %<- (of-exp E1 (arrow T1 T2)) %<- (of-exp E2 T1) %.
+%term of-exp/pair %pi (of-exp (exp/pair E1 E2) (prod T1 T2)) %<- (of-exp E1 T1) %<- (of-exp E2 T2) %.
+%term of-exp/inl %pi (of-exp (exp/inl E) (sum T1 T2)) %<- (of-exp E T1) %.
+%term of-exp/inr %pi (of-exp (exp/inr E) (sum T1 T2)) %<- (of-exp E T2) %.
+%term of-exp/handle %pi (of-exp (exp/handle E1 E2) T) %<- (of-exp E1 T) %<- (of-exp E2 T) %.
+% syntax only needed for dynamic semantics of the language
+%sort explist {_ %pi nat %-> nat} %.
+%term explist/z explist ([n] n) %.
+%term explist/s %pi exp %-> (explist N) %-> (explist ([n] s (N n))) %.
+% static semantics of explists
+%sort of-explist {_ explist N} {_ tplist N} %.
+%term of-explist/z of-explist explist/z tplist/z %.
+%term of-explist/s 
+	%pi (of-explist (explist/s E EL) (tplist/s T TL))
+	%<- (of-exp E T)
+	%<- (of-explist EL TL) %.
+%sort subst-oexp {_ explist N} {_ oexp (N z)} {_ exp} %.
+%term subst-oexp/z subst-oexp explist/z (oexp/z E) E %.
+%term subst-oexp/s 
+	%pi (subst-oexp (explist/s E EL) (oexp/s ([x] OE x)) E')
+	%<- (subst-oexp EL (OE E) E') %.
+%sort explist-get {_ nat} {_ explist N} {_ exp} %.
+%term explist-get/hit explist-get z (explist/s T TL) T %.
+%term explist-get/miss %pi (explist-get (s N) (explist/s T TL) T') %<- (explist-get N TL T') %.
+%sort explist-map {_ explist N} {_ map (N' z)} {_ explist N'} %.
+%term explist-map/z explist-map TL map/z explist/z %.
+%term explist-map/s 
+	%pi (explist-map TL (map/s N M) (explist/s T TL'))
+	%<- (explist-get N TL T)
+	%<- (explist-map TL M TL') %.
+%sort explist-append {_ explist N1} {_ explist N2} {_ explist ([n] N1 (N2 n))} %.
+%term explist-append/z explist-append explist/z EL EL %.
+%term explist-append/s 
+	%pi (explist-append (explist/s E EL) EL' (explist/s E EL''))
+	%<- (explist-append EL EL' EL'') %.
+%sort apply-pat {_ pat N} {_ exp} {_ explist N} %.
+% only have to define failure over well-typed pattern/expression pairs
+% failures arise from inl/inr mismatches
+%sort fail-pat {_ pat N} {_ exp} %.
+%term apply-pat/underscore apply-pat pat/underscore E explist/z %.
+%term apply-pat/pair 
+	%pi (apply-pat (pat/pair P1 P2) (exp/pair E1 E2) EL')
+	%<- (apply-pat P1 E1 EL1)
+	%<- (apply-pat P2 E2 EL2)
+	%<- (explist-append EL1 EL2 EL') %.
+%term apply-pat/inl %pi (apply-pat (pat/inl P) (exp/inl E) EL) %<- (apply-pat P E EL) %.
+%term apply-pat/inr %pi (apply-pat (pat/inr P) (exp/inr E) EL) %<- (apply-pat P E EL) %.
+%term apply-pat/var apply-pat pat/var E (explist/s E explist/z) %.
+%term apply-pat/as 
+	%pi (apply-pat (pat/as P1 P2) E EL')
+	%<- (apply-pat P1 E EL1)
+	%<- (apply-pat P2 E EL2)
+	%<- (explist-append EL1 EL2 EL') %.
+%term apply-pat/or-1 %pi (apply-pat (pat/or P1 M P2) E EL) %<- (apply-pat P1 E EL) %.
+%term apply-pat/or-2 
+	%pi (apply-pat (pat/or P1 M P2) E EL')
+	%<- (fail-pat P1 E)
+	%<- (apply-pat P2 E EL)
+	%<- (explist-map EL M EL') %.
+%term fail-pat/pair-1 %pi (fail-pat (pat/pair P1 P2) (exp/pair E1 E2)) %<- (fail-pat P1 E1) %.
+%term fail-pat/pair-2 
+	%pi (fail-pat (pat/pair P1 P2) (exp/pair E1 E2))
+	%<- (apply-pat P1 E1 EL)
+	%<- (fail-pat P2 E2) %.
+%term fail-pat/inl-t %pi (fail-pat (pat/inl P) (exp/inl E)) %<- (fail-pat P E) %.
+%term fail-pat/inl-f fail-pat (pat/inl P) (exp/inr E) %.
+%term fail-pat/inr-t %pi (fail-pat (pat/inr P) (exp/inr E)) %<- (fail-pat P E) %.
+%term fail-pat/inr-f fail-pat (pat/inr P) (exp/inl E) %.
+%term fail-pat/as-1 %pi (fail-pat (pat/as P1 P2) E) %<- (fail-pat P1 E) %.
+%term fail-pat/as-2 %pi (fail-pat (pat/as P1 P2) E) %<- (apply-pat P1 E EL) %<- (fail-pat P2 E) %.
+%term fail-pat/or %pi (fail-pat (pat/or P1 M P2) E) %<- (fail-pat P1 E) %<- (fail-pat P2 E) %.
+%sort apply-or-fail-pat {_ pat N} {_ exp} %.
+%term apply-or-fail-pat/apply %pi (apply-or-fail-pat P E) %<- (apply-pat P E EL) %.
+%term apply-or-fail-pat/fail %pi (apply-or-fail-pat P E) %<- (fail-pat P E) %.
+%sort apply-match {_ match} {_ exp} {_ exp} %.
+%term apply-match/cons-1 
+	%pi (apply-match (match/cons P OE M) E E')
+	%<- (apply-pat P E EL)
+	%<- (subst-oexp EL OE E') %.
+%term apply-match/cons-2 
+	%pi (apply-match (match/cons P OE M) E E')
+	%<- (fail-pat P E)
+	%<- (apply-match M E E') %.
+%sort fail-match {_ match} {_ exp} %.
+%term fail-match/nil fail-match match/nil E %.
+%term fail-match/cons %pi (fail-match (match/cons P OE M) E) %<- (fail-pat P E) %<- (fail-match M E) %.
+%sort apply-or-fail-match {_ match} {_ exp} %.
+%term apply-or-fail-match/apply %pi (apply-or-fail-match M E) %<- (apply-match M E E') %.
+%term apply-or-fail-match/fail %pi (apply-or-fail-match M E) %<- (fail-match M E) %.
+%sort exception %.
+%term exception/match exception %.
+%sort value {_ exp} %.
+%term value/unit value exp/unit %.
+%term value/lam value (exp/lam M) %.
+%term value/pair %pi (value (exp/pair E1 E2)) %<- (value E1) %<- (value E2) %.
+%term value/inl %pi (value (exp/inl E)) %<- (value E) %.
+%term value/inr %pi (value (exp/inr E)) %<- (value E) %.
+%sort raises {_ exp} {_ exception} %.
+%term raises/app-1 %pi (raises (exp/app E1 E2) X) %<- (raises E1 X) %.
+%term raises/app-2 %pi (raises (exp/app E1 E2) X) %<- (value E1) %<- (raises E2 X) %.
+%term raises/app-fail 
+	%pi (raises (exp/app (exp/lam M) E2) exception/match)
+	%<- (value E2)
+	%<- (fail-match M E2) %.
+%term raises/pair-1 %pi (raises (exp/pair E1 E2) X) %<- (raises E1 X) %.
+%term raises/pair-2 %pi (raises (exp/pair E1 E2) X) %<- (value E1) %<- (raises E2 X) %.
+%term raises/inl %pi (raises (exp/inl E) X) %<- (raises E X) %.
+%term raises/inr %pi (raises (exp/inr E) X) %<- (raises E X) %.
+%sort step {_ exp} {_ exp} %.
+%term step/app-1 %pi (step (exp/app E1 E2) (exp/app E1' E2)) %<- (step E1 E1') %.
+%term step/app-2 %pi (step (exp/app E1 E2) (exp/app E1 E2')) %<- (value E1) %<- (step E2 E2') %.
+%term step/app-beta %pi (step (exp/app (exp/lam M) E) E') %<- (value E2) %<- (apply-match M E E') %.
+%term step/pair-1 %pi (step (exp/pair E1 E2) (exp/pair E1' E2)) %<- (step E1 E1') %.
+%term step/pair-2 %pi (step (exp/pair E1 E2) (exp/pair E1 E2')) %<- (value E1) %<- (step E2 E2') %.
+%term step/inl %pi (step (exp/inl E) (exp/inl E')) %<- (step E E') %.
+%term step/inr %pi (step (exp/inr E) (exp/inr E')) %<- (step E E') %.
+%term step/handle %pi (step (exp/handle E1 E2) (exp/handle E1' E2)) %<- (step E1 E1') %.
+%term step/handle-beta %pi (step (exp/handle E1 E2) E1) %<- (value E1) %.
+%term step/handle-fail %pi (step (exp/handle E1 E2) E2) %<- (raises E1 X) %.
+%sort notstuck {_ exp} %.
+%term notstuck/value %pi (notstuck E) %<- (value E) %.
+%term notstuck/raises %pi (notstuck E) %<- (raises E X) %.
+%term notstuck/step %pi (notstuck E) %<- (step E E') %.
+%sort can-explist-append {EL1 explist N1} {EL2 explist N2} {_ explist-append EL1 EL2 EL3} %.
+%mode can-explist-append %in %in %out %.
+%term _ can-explist-append _ _ explist-append/z %.
+%term _ 
+	%pi (can-explist-append (explist/s E EL) EL' (explist-append/s D1))
+	%<- (can-explist-append EL EL' D1) %.
+%worlds () (can-explist-append _ _ _) %.
+%total (D1) (can-explist-append D1 _ _) %.
+%sort can-explist-get {EL explist N'} {_ tplist-get N (%the (tplist N') TL) T} {_ explist-get N EL E} %.
+%mode can-explist-get %in %in %out %.
+%term _ can-explist-get _ tplist-get/hit explist-get/hit %.
+%term _ 
+	%pi (can-explist-get _ (tplist-get/miss D2) (explist-get/miss D'))
+	%<- (can-explist-get _ D2 D') %.
+%worlds () (can-explist-get _ _ _) %.
+%total (D2) (can-explist-get _ D2 _) %.
+%sort can-explist-map {EL explist N'} {_ tplist-map (%the (tplist N') TL) (%the (map (N z)) M) (%the (tplist N) TL')} {_ explist-map EL M (%the (explist N) EL')} %.
+%mode can-explist-map %in %in %out %.
+%term _ can-explist-map _ tplist-map/z explist-map/z %.
+%term _ 
+	%pi (can-explist-map D1 (tplist-map/s D2 D) (explist-map/s D3 D'))
+	%<- (can-explist-get D1 D D')
+	%<- (can-explist-map D1 D2 D3) %.
+%worlds () (can-explist-map _ _ _) %.
+%total (D1) (can-explist-map _ D1 _) %.
+%sort progress-pat-pair {_ apply-or-fail-pat P1 E1} {_ apply-or-fail-pat P2 E2} {_ apply-or-fail-pat (pat/pair P1 P2) (exp/pair E1 E2)} %.
+%mode progress-pat-pair %in %in %out %.
+%term _ progress-pat-pair (apply-or-fail-pat/fail DF) _ (apply-or-fail-pat/fail (fail-pat/pair-1 DF)) %.
+%term _ progress-pat-pair (apply-or-fail-pat/apply DA) (apply-or-fail-pat/fail DF) (apply-or-fail-pat/fail (fail-pat/pair-2 DF DA)) %.
+%term _ 
+	%pi (progress-pat-pair (apply-or-fail-pat/apply DA) (apply-or-fail-pat/apply DA') (apply-or-fail-pat/apply (apply-pat/pair Dap DA' DA)))
+	%<- (can-explist-append _ _ Dap) %.
+%worlds () (progress-pat-pair _ _ _) %.
+%total {} (progress-pat-pair _ _ _) %.
+%sort progress-pat-as {_ apply-or-fail-pat P1 E} {_ apply-or-fail-pat P2 E} {_ apply-or-fail-pat (pat/as P1 P2) E} %.
+%mode progress-pat-as %in %in %out %.
+%term _ progress-pat-as (apply-or-fail-pat/fail DF) _ (apply-or-fail-pat/fail (fail-pat/as-1 DF)) %.
+%term _ progress-pat-as (apply-or-fail-pat/apply DA) (apply-or-fail-pat/fail DF) (apply-or-fail-pat/fail (fail-pat/as-2 DF DA)) %.
+%term _ 
+	%pi (progress-pat-as (apply-or-fail-pat/apply DA) (apply-or-fail-pat/apply DA') (apply-or-fail-pat/apply (apply-pat/as Dap DA' DA)))
+	%<- (can-explist-append _ _ Dap) %.
+%worlds () (progress-pat-as _ _ _) %.
+%total {} (progress-pat-as _ _ _) %.
+%sort progress-pat-inl {_ apply-or-fail-pat P1 E1} {_ apply-or-fail-pat (pat/inl P1) (exp/inl E1)} %.
+%mode progress-pat-inl %in %out %.
+%term _ progress-pat-inl (apply-or-fail-pat/fail DF) (apply-or-fail-pat/fail (fail-pat/inl-t DF)) %.
+%term _ progress-pat-inl (apply-or-fail-pat/apply DA) (apply-or-fail-pat/apply (apply-pat/inl DA)) %.
+%worlds () (progress-pat-inl _ _) %.
+%total {} (progress-pat-inl _ _) %.
+%sort progress-pat-inr {_ apply-or-fail-pat P1 E1} {_ apply-or-fail-pat (pat/inr P1) (exp/inr E1)} %.
+%mode progress-pat-inr %in %out %.
+%term _ progress-pat-inr (apply-or-fail-pat/fail DF) (apply-or-fail-pat/fail (fail-pat/inr-t DF)) %.
+%term _ progress-pat-inr (apply-or-fail-pat/apply DA) (apply-or-fail-pat/apply (apply-pat/inr DA)) %.
+%worlds () (progress-pat-inr _ _) %.
+%total {} (progress-pat-inr _ _) %.
+%sort progress-pat-or {_ tplist-map (%the (tplist N) TL) M (%the (tplist N) TL')} {_ apply-or-fail-pat (%the (pat N) P1) E} {_ apply-or-fail-pat P2 E} {_ apply-or-fail-pat (pat/or P1 M P2) E} %.
+%mode progress-pat-or %in %in %in %out %.
+%term _ progress-pat-or _ (apply-or-fail-pat/fail DF1) (apply-or-fail-pat/fail DF2) (apply-or-fail-pat/fail (fail-pat/or DF2 DF1)) %.
+%term _ progress-pat-or _ (apply-or-fail-pat/apply DA1) _ (apply-or-fail-pat/apply (apply-pat/or-1 DA1)) %.
+%term _ 
+	%pi (progress-pat-or DM (apply-or-fail-pat/fail DF1) (apply-or-fail-pat/apply DA2) (apply-or-fail-pat/apply (apply-pat/or-2 DMap DA2 DF1)))
+	%<- (can-explist-map _ DM DMap) %.
+%worlds () (progress-pat-or _ _ _ _) %.
+%total {} (progress-pat-or _ _ _ _) %.
+%sort progress-pat {_ value E} {_ of-exp E T} {_ of-pat P T TL} {_ apply-or-fail-pat P E} %.
+%mode progress-pat %in %in %in %out %.
+%term _ progress-pat _ D1 of-pat/underscore (apply-or-fail-pat/apply apply-pat/underscore) %.
+%term _ progress-pat _ D1 of-pat/var (apply-or-fail-pat/apply apply-pat/var) %.
+%term _ 
+	%pi (progress-pat (value/pair DV2 DV1) (of-exp/pair D2 D1) (of-pat/pair _ D2' D1') DAF3)
+	%<- (progress-pat DV1 D1 D1' DAF1)
+	%<- (progress-pat DV2 D2 D2' DAF2)
+	%<- (progress-pat-pair DAF1 DAF2 DAF3) %.
+%term _ 
+	%pi (progress-pat DV D1 (of-pat/as _ D2' D1') DAF3)
+	%<- (progress-pat DV D1 D1' DAF1)
+	%<- (progress-pat DV D1 D2' DAF2)
+	%<- (progress-pat-as DAF1 DAF2 DAF3) %.
+%term _ 
+	%pi (progress-pat (value/inl DV1) (of-exp/inl D1) (of-pat/inl D1') DAF2)
+	%<- (progress-pat DV1 D1 D1' DAF1)
+	%<- (progress-pat-inl DAF1 DAF2) %.
+%term _ 
+	%pi (progress-pat (value/inr DV1) (of-exp/inr D1) (of-pat/inr D1') DAF2)
+	%<- (progress-pat DV1 D1 D1' DAF1)
+	%<- (progress-pat-inr DAF1 DAF2) %.
+%term _ progress-pat (value/inr DV1) (of-exp/inr D1) (of-pat/inl D1') (apply-or-fail-pat/fail fail-pat/inl-f) %.
+%term _ progress-pat (value/inl DV1) (of-exp/inl D1) (of-pat/inr D1') (apply-or-fail-pat/fail fail-pat/inr-f) %.
+%term _ 
+	%pi (progress-pat DV D1 (of-pat/or DM D2' D1') DAF3)
+	%<- (progress-pat DV D1 D1' (%the (apply-or-fail-pat X4 X1) DAF1))
+	%<- (progress-pat DV D1 D2' (%the (apply-or-fail-pat X6 X1) DAF2))
+	%<- (progress-pat-or DM DAF1 DAF2 DAF3) %.
+%worlds () (progress-pat _ _ _ _) %.
+%total (D1) (progress-pat _ _ D1 _) %.
+%sort can-subst-oexp {EL explist N} {OE oexp (N z)} {_ subst-oexp EL OE E} %.
+%mode can-subst-oexp %in %in %out %.
+%term _ can-subst-oexp _ _ subst-oexp/z %.
+%term _ 
+	%pi (can-subst-oexp (explist/s E EL) _ (subst-oexp/s D1))
+	%<- (can-subst-oexp EL _ D1) %.
+%worlds () (can-subst-oexp _ _ _) %.
+%total (D1) (can-subst-oexp D1 _ _) %.
+%sort progress-match-cons {OE} {_ apply-or-fail-pat P E} {_ apply-or-fail-match M E} {_ apply-or-fail-match (match/cons P OE M) E} %.
+%mode progress-match-cons %in %in %in %out %.
+%term _ progress-match-cons _ (apply-or-fail-pat/fail DF) (apply-or-fail-match/fail DF') (apply-or-fail-match/fail (fail-match/cons DF' DF)) %.
+%term _ progress-match-cons _ (apply-or-fail-pat/fail DF) (apply-or-fail-match/apply DA) (apply-or-fail-match/apply (apply-match/cons-2 DA DF)) %.
+%term _ 
+	%pi (progress-match-cons _ (apply-or-fail-pat/apply DA) _ (apply-or-fail-match/apply (apply-match/cons-1 DS DA)))
+	%<- (can-subst-oexp _ _ DS) %.
+%worlds () (progress-match-cons _ _ _ _) %.
+%total {} (progress-match-cons _ _ _ _) %.
+%sort progress-match {_ value E} {_ of-exp E T} {_ of-match M T T'} {_ apply-or-fail-match M E} %.
+%mode progress-match %in %in %in %out %.
+%term _ progress-match _ _ of-match/nil (apply-or-fail-match/fail fail-match/nil) %.
+%term _ 
+	%pi (progress-match DV DE (of-match/cons D2 _ D1) DAF3)
+	%<- (progress-pat DV DE D1 DAF1)
+	%<- (progress-match DV DE D2 DAF2)
+	%<- (progress-match-cons _ DAF1 DAF2 DAF3) %.
+%worlds () (progress-match _ _ _ _) %.
+%total (D1) (progress-match _ _ D1 _) %.
+%sort progress-app-beta {_ value E} {_ apply-or-fail-match M E} {_ notstuck (exp/app (exp/lam M) E)} %.
+%mode progress-app-beta %in %in %out %.
+%term _ progress-app-beta DV (apply-or-fail-match/fail DF) (notstuck/raises (raises/app-fail DF DV)) %.
+%term _ progress-app-beta DV (apply-or-fail-match/apply DA) (notstuck/step (step/app-beta DA DV)) %.
+%worlds () (progress-app-beta _ _ _) %.
+%total {} (progress-app-beta _ _ _) %.
+%sort progress-app {_ of-exp E1 (arrow T1 T2)} {_ of-exp E2 T1} {_ notstuck E1} {_ notstuck E2} {_ notstuck (exp/app E1 E2)} %.
+%mode progress-app %in %in %in %in %out %.
+%term _ progress-app _ _ (notstuck/step DS) _ (notstuck/step (step/app-1 DS)) %.
+%term _ progress-app _ _ (notstuck/value V) (notstuck/step DS) (notstuck/step (step/app-2 DS V)) %.
+%term _ progress-app _ _ (notstuck/raises DS) _ (notstuck/raises (raises/app-1 DS)) %.
+%term _ progress-app _ _ (notstuck/value V) (notstuck/raises DS) (notstuck/raises (raises/app-2 DS V)) %.
+%term _ 
+	%pi (progress-app (of-exp/lam DM) D2 (notstuck/value value/lam) (notstuck/value DV) NS)
+	%<- (progress-match DV D2 DM DAF)
+	%<- (progress-app-beta DV DAF NS) %.
+%worlds () (progress-app _ _ _ _ _) %.
+%total {} (progress-app _ _ _ _ _) %.
+%sort progress-pair {_ notstuck E1} {_ notstuck E2} {_ notstuck (exp/pair E1 E2)} %.
+%mode progress-pair %in %in %out %.
+%term _ progress-pair (notstuck/step DS) _ (notstuck/step (step/pair-1 DS)) %.
+%term _ progress-pair (notstuck/value V) (notstuck/step DS) (notstuck/step (step/pair-2 DS V)) %.
+%term _ progress-pair (notstuck/raises DS) _ (notstuck/raises (raises/pair-1 DS)) %.
+%term _ progress-pair (notstuck/value V) (notstuck/raises DS) (notstuck/raises (raises/pair-2 DS V)) %.
+%term _ progress-pair (notstuck/value DV1) (notstuck/value DV2) (notstuck/value (value/pair DV2 DV1)) %.
+%worlds () (progress-pair _ _ _) %.
+%total {} (progress-pair _ _ _) %.
+%sort progress-inl {_ notstuck E1} {_ notstuck (exp/inl E1)} %.
+%mode progress-inl %in %out %.
+%term _ progress-inl (notstuck/step DS) (notstuck/step (step/inl DS)) %.
+%term _ progress-inl (notstuck/raises DS) (notstuck/raises (raises/inl DS)) %.
+%term _ progress-inl (notstuck/value DV1) (notstuck/value (value/inl DV1)) %.
+%worlds () (progress-inl _ _) %.
+%total {} (progress-inl _ _) %.
+%sort progress-inr {_ notstuck E1} {_ notstuck (exp/inr E1)} %.
+%mode progress-inr %in %out %.
+%term _ progress-inr (notstuck/step DS) (notstuck/step (step/inr DS)) %.
+%term _ progress-inr (notstuck/raises DS) (notstuck/raises (raises/inr DS)) %.
+%term _ progress-inr (notstuck/value DV1) (notstuck/value (value/inr DV1)) %.
+%worlds () (progress-inr _ _) %.
+%total {} (progress-inr _ _) %.
+%sort progress-handle {E2} {_ notstuck E1} {_ notstuck (exp/handle E1 E2)} %.
+%mode progress-handle %in %in %out %.
+%term _ progress-handle _ (notstuck/step DS) (notstuck/step (step/handle DS)) %.
+%term _ progress-handle _ (notstuck/raises DR) (notstuck/step (step/handle-fail DR)) %.
+%term _ progress-handle _ (notstuck/value DV1) (notstuck/step (step/handle-beta DV1)) %.
+%worlds () (progress-handle _ _ _) %.
+%total {} (progress-handle _ _ _) %.
+%sort progress {_ of-exp E T} {_ notstuck E} %.
+%mode progress %in %out %.
+%term _ progress of-exp/unit (notstuck/value value/unit) %.
+%term _ progress (of-exp/lam _) (notstuck/value value/lam) %.
+%term _ 
+	%pi (progress (of-exp/app D2 D1) NS3)
+	%<- (progress D1 NS1)
+	%<- (progress D2 NS2)
+	%<- (progress-app D1 D2 NS1 NS2 NS3) %.
+%term _ 
+	%pi (progress (of-exp/pair D2 D1) NS3)
+	%<- (progress D1 NS1)
+	%<- (progress D2 NS2)
+	%<- (progress-pair NS1 NS2 NS3) %.
+%term _ 
+	%pi (progress (of-exp/inl D1) NS2)
+	%<- (progress D1 NS1)
+	%<- (progress-inl NS1 NS2) %.
+%term _ 
+	%pi (progress (of-exp/inr D1) NS2)
+	%<- (progress D1 NS1)
+	%<- (progress-inr NS1 NS2) %.
+%term _ 
+	%pi (progress (of-exp/handle D2 D1) NS2)
+	%<- (progress D1 NS1)
+	%<- (progress-handle _ NS1 NS2) %.
+%worlds () (progress _ _) %.
+%total (D1) (progress D1 _) %.
+%sort preservation-subst-oexp {_ of-explist EL TL} {_ of-oexp TL OE T} {_ subst-oexp EL OE E} {_ of-exp E T} %.
+%mode preservation-subst-oexp %in %in %in %out %.
+%term _ preservation-subst-oexp _ (of-oexp/z D1) subst-oexp/z D1 %.
+%term _ 
+	%pi (preservation-subst-oexp (of-explist/s D1 D) (of-oexp/s D2) (subst-oexp/s D3) D4)
+	%<- (preservation-subst-oexp D1 (D2 _ D) D3 D4) %.
+%worlds () (preservation-subst-oexp _ _ _ _) %.
+%total (D1) (preservation-subst-oexp _ _ D1 _) %.
+%sort preservation-append {_ of-explist EL1 TL1} {_ of-explist EL2 TL2} {_ explist-append EL1 EL2 EL3} {_ tplist-append TL1 TL2 TL3} {_ of-explist EL3 TL3} %.
+%mode preservation-append %in %in %in %in %out %.
+%term _ preservation-append _ D explist-append/z tplist-append/z D %.
+%term _ 
+	%pi (preservation-append (of-explist/s D1 D) D2 (explist-append/s D3) (tplist-append/s D4) (of-explist/s D5 D))
+	%<- (preservation-append D1 D2 D3 D4 D5) %.
+%worlds () (preservation-append _ _ _ _ _) %.
+%total (D1) (preservation-append _ _ _ D1 _) %.
+%sort preservation-get {_ of-explist EL TL} {_ explist-get M EL E} {_ tplist-get M TL T} {_ of-exp E T} %.
+%mode preservation-get %in %in %in %out %.
+%term _ preservation-get (of-explist/s _ D) explist-get/hit tplist-get/hit D %.
+%term _ 
+	%pi (preservation-get (of-explist/s DL _) (explist-get/miss D') (tplist-get/miss D'') D)
+	%<- (preservation-get DL D' D'' D) %.
+%worlds () (preservation-get _ _ _ _) %.
+%total (D1) (preservation-get _ _ D1 _) %.
+%sort preservation-map {_ of-explist EL TL} {_ explist-map EL M EL'} {_ tplist-map TL M TL'} {_ of-explist EL' TL'} %.
+%mode preservation-map %in %in %in %out %.
+%term _ preservation-map DL explist-map/z tplist-map/z of-explist/z %.
+%term _ 
+	%pi (preservation-map DL (explist-map/s DEM DEG) (tplist-map/s DTM DTG) (of-explist/s DL' D1'))
+	%<- (preservation-get DL DEG DTG D1')
+	%<- (preservation-map DL DEM DTM DL') %.
+%worlds () (preservation-map _ _ _ _) %.
+%total (D1) (preservation-map _ _ D1 _) %.
+%sort preservation-apply-pat {_ of-exp E T} {_ of-pat P T TL} {_ apply-pat P E EL} {_ of-explist EL TL} %.
+%mode preservation-apply-pat %in %in %in %out %.
+%term _ preservation-apply-pat D1 of-pat/underscore apply-pat/underscore of-explist/z %.
+%term _ 
+	%pi (preservation-apply-pat (of-exp/pair DE2 DE1) (of-pat/pair DTA DP2 DP1) (apply-pat/pair DEA DA2 DA1) D3)
+	%<- (preservation-apply-pat DE1 DP1 DA1 D1)
+	%<- (preservation-apply-pat DE2 DP2 DA2 D2)
+	%<- (preservation-append D1 D2 DEA DTA D3) %.
+%term _ 
+	%pi (preservation-apply-pat DE (of-pat/as DTA DP2 DP1) (apply-pat/as DEA DA2 DA1) D3)
+	%<- (preservation-apply-pat DE DP1 DA1 D1)
+	%<- (preservation-apply-pat DE DP2 DA2 D2)
+	%<- (preservation-append D1 D2 DEA DTA D3) %.
+%term _ 
+	%pi (preservation-apply-pat (of-exp/inl DE) (of-pat/inl DP) (apply-pat/inl DA) D)
+	%<- (preservation-apply-pat DE DP DA D) %.
+%term _ 
+	%pi (preservation-apply-pat (of-exp/inr DE) (of-pat/inr DP) (apply-pat/inr DA) D)
+	%<- (preservation-apply-pat DE DP DA D) %.
+%term _ preservation-apply-pat D1 of-pat/var apply-pat/var (of-explist/s of-explist/z D1) %.
+%term _ 
+	%pi (preservation-apply-pat DE (of-pat/or _ _ DP) (apply-pat/or-1 DA) D)
+	%<- (preservation-apply-pat DE DP DA D) %.
+%term _ 
+	%pi (preservation-apply-pat DE (of-pat/or DTM DP _) (apply-pat/or-2 DEM DA _) D')
+	%<- (preservation-apply-pat DE DP DA D)
+	%<- (preservation-map D DEM DTM D') %.
+%worlds () (preservation-apply-pat _ _ _ _) %.
+%total (D1) (preservation-apply-pat _ _ D1 _) %.
+%sort preservation-apply-match {_ of-exp E T} {_ of-match M T T'} {_ apply-match M E E'} {_ of-exp E' T'} %.
+%mode preservation-apply-match %in %in %in %out %.
+%term _ 
+	%pi (preservation-apply-match D1 (of-match/cons _ DOE D2) (apply-match/cons-1 DS DA) D')
+	%<- (preservation-apply-pat D1 D2 DA D)
+	%<- (preservation-subst-oexp D DOE DS D') %.
+%term _ 
+	%pi (preservation-apply-match D1 (of-match/cons D2 _ _) (apply-match/cons-2 DA _) D')
+	%<- (preservation-apply-match D1 D2 DA D') %.
+%worlds () (preservation-apply-match _ _ _ _) %.
+%total (D1) (preservation-apply-match _ _ D1 _) %.
+%sort preservation {_ of-exp E T} {_ step E E'} {_ of-exp E' T} %.
+%mode preservation %in %in %out %.
+%term _ 
+	%pi (preservation (of-exp/app D2 D1) (step/app-1 DS) (of-exp/app D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/app D2 D1) (step/app-2 DS V) (of-exp/app D2' D1))
+	%<- (preservation D2 DS D2') %.
+%term _ 
+	%pi (preservation (of-exp/app D2 (of-exp/lam D1)) (step/app-beta DA _) D)
+	%<- (preservation-apply-match D2 D1 DA D) %.
+%term _ 
+	%pi (preservation (of-exp/pair D2 D1) (step/pair-1 DS) (of-exp/pair D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/pair D2 D1) (step/pair-2 DS V) (of-exp/pair D2' D1))
+	%<- (preservation D2 DS D2') %.
+%term _ 
+	%pi (preservation (of-exp/handle D2 D1) (step/handle DS) (of-exp/handle D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/inl D1) (step/inl DS) (of-exp/inl D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/inr D1) (step/inr DS) (of-exp/inr D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ 
+	%pi (preservation (of-exp/handle D2 D1) (step/handle DS) (of-exp/handle D2 D1'))
+	%<- (preservation D1 DS D1') %.
+%term _ preservation (of-exp/handle D2 D1) (step/handle-beta _) D1 %.
+%term _ preservation (of-exp/handle D2 D1) (step/handle-fail _) D2 %.
+%worlds () (preservation _ _ _) %.
+%total (D1) (preservation _ D1 _) %.
+%. %[[ 
+--[DanielKLee](/wiki/user-danielklee/) 01:46, 11 October 2007 (EDT)
+
+TODO: Finish commentary.
+\{\{stub\}\}
+%]]
+%. %[[
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Pattern_matching).
+%]]

@@ -14,7 +14,7 @@
 %term asm %pi rtm %-> mtm %.
 %term lam %pi (%pi rtm %-> mtm) %-> mtm %.
 %term pair %pi mtm %-> mtm %-> mtm %.
-%block rtm_block [x rtm]%.
+%block rtm_block {x rtm}%.
 %worlds (rtm_block) (tp) (rtm) (mtm) %.
 %sort atom %.
 %mode atom %in %out %.
@@ -31,7 +31,7 @@
 	%pi (canon (lam M) (arrow A2 A))
 	%<- ({x rtm} %pi (atom x A2) %-> (canon (M x) A)) %.
 %term canon_pair %pi (canon (pair M1 M2) (prod A1 A2)) %<- (canon M1 A1) %<- (canon M2 A2) %.
-%block atom_block {A tp} [x rtm] [dx atom x A]%.
+%block atom_block [A tp] {x rtm} {dx atom x A}%.
 %worlds (atom_block) (atom _ _) (canon _ _) %.
 %terminates (R M) (atom R _) (canon M _) %.
 %sort hsubst_m %.
@@ -445,7 +445,7 @@
 %term asm %pi rtm %-> mtm %.
 %term lam %pi (%pi rtm %-> mtm) %-> mtm %.
 %term pair %pi mtm %-> mtm %-> mtm %.
-%block rtm_block [x rtm]%.
+%block rtm_block {x rtm}%.
 %worlds (rtm_block) (tp) (rtm) (mtm) %.
 %sort atom %.
 %mode atom %in %out %.
@@ -462,7 +462,7 @@
 	%pi (canon (lam M) (arrow A2 A))
 	%<- ({x rtm} %pi (atom x A2) %-> (canon (M x) A)) %.
 %term canon_pair %pi (canon (pair M1 M2) (prod A1 A2)) %<- (canon M1 A1) %<- (canon M2 A2) %.
-%block atom_block {A tp} [x rtm] [dx atom x A]%.
+%block atom_block [A tp] {x rtm} {dx atom x A}%.
 %worlds (atom_block) (atom _ _) (canon _ _) %.
 %terminates (R M) (atom R _) (canon M _) %.
 %sort hsubst_m %.
@@ -878,7 +878,7 @@ The external language syntax is a copy of the internal language, where we additi
 %term el_asm %pi el_rtm %-> el_mtm %.
 %term el_lam %pi (%pi el_rtm %-> el_mtm) %-> el_mtm %.
 %term el_pair %pi el_mtm %-> el_mtm %-> el_mtm %.
-%block el_rtm_block [x el_rtm]%.
+%block el_rtm_block {x el_rtm}%.
 %{! Modulo the placement of type annotations, this grammar lets you write any term that you can write without the syntactic stratification.  
 
 ### Typing judgements
@@ -902,7 +902,7 @@ The typing judgements for the external language extand the judgements for canoni
 	%pi (check (el_lam M) (arrow A2 A))
 	%<- ({x el_rtm} %pi (synth x A2) %-> (check (M x) A)) %.
 %term check_pair %pi (check (el_pair M1 M2) (prod A1 A2)) %<- (check M1 A1) %<- (check M2 A2) %.
-%block synth_block {A tp} [x el_rtm] [dx synth x A]%.
+%block synth_block [A tp] {x el_rtm} {dx synth x A}%.
 %worlds (synth_block) (synth _ _) (check _ _) %.
 %{! It is possible to show that any well-typed term in a standard presentation of the λ-calculus can be translated into a term in this syntax that is well-typed by these rules.  However, we have not formulated this step here, choosing instead to take these rules as the definition of the external language.  
 
@@ -946,7 +946,7 @@ We now define elaboration.  We define three mutually recursive elaboration judge
 %term elab_r_to_m_snd 
 	%pi (elab_r_to_m (el_snd ER) M2 A2)
 	%<- (elab_r_to_m ER (pair M1 M2) (prod A1 A2)) %.
-%block elab_block {A tp} [el_x el_rtm] [x rtm] [dex elab_r_to_r el_x x A]%.
+%block elab_block [A tp] {el_x el_rtm} {x rtm} {dex elab_r_to_r el_x x A}%.
 %{! The inductive structure of the elaboration judgements is similar to the structure of hereditary substitution.  Elaboration uses hereditary substitution in the key rule ``elab_r_to_m_app`` to compute the canonical result of a function application.  Elaboration also uses expansion to expand atomic terms into canonical ones.
 
 ## External Language: Metatheory
@@ -1011,7 +1011,7 @@ First, we prove that the elaboration of a well-typed term is well-typed. !}%
 %% atom_block/synth_block and elab_block.
 %%
 %% this order matches atom_block/synth_block but not elab_block.
-%block elab_reg_block {A tp} [el_x el_rtm] [delx synth el_x A] [x rtm] [dx atom x A] [delabx elab_r_to_r el_x x A] [_ elab_r2r_reg delabx delx dx]%.
+%block elab_reg_block [A tp] {el_x el_rtm} {delx synth el_x A} {x rtm} {dx atom x A} {delabx elab_r_to_r el_x x A} {_ elab_r2r_reg delabx delx dx}%.
 %worlds (elab_reg_block) (elab_m_reg _ _ _) (elab_r2r_reg _ _ _) (elab_r2m_reg _ _ _) %.
 %total (D1 D2 D3) (elab_m_reg D1 _ _) (elab_r2r_reg D2 _ _) (elab_r2m_reg D3 _ _) %.
 %{! The proof is a straightforward induction, using ``hsubst_m_exists`` and ``expand_exists``.  Because these two lemmas _output_ a hereditary substitution or expansion, along with the typing derivation for the result of the operation, we use uniqueness here to show well-typedness of the outputs of the hereditary substitution and expansion derivations given by elaboration.  In retrospect, we should have factored this reasoning into separate lemmas that are like ``hsubst_m_exists`` and ``expand_exists`` but take the the hereditary substitution or expansion as an input.
@@ -1121,7 +1121,7 @@ Next, we prove that all well-typed terms elaborate.  Analogously to hereditary s
 	%pi (elab_r_exists (synth_annot DcM) (elab_r_exists_sum_r2m (elab_r_to_m_annot DeM)))
 	%<- (elab_m_exists DcM DeM) %.
 % maintains all the invariants from elab_reg_block because the above lemmas use call regularity
-%block elab_exists_block {A tp} [el_x el_rtm] [delx synth el_x A] [x rtm] [dx atom x A] [delabx elab_r_to_r el_x x A] [_ elab_r2r_reg delabx delx dx] [_ elab_r_exists delx (elab_r_exists_sum_r2r delabx)]%.
+%block elab_exists_block [A tp] {el_x el_rtm} {delx synth el_x A} {x rtm} {dx atom x A} {delabx elab_r_to_r el_x x A} {_ elab_r2r_reg delabx delx dx} {_ elab_r_exists delx (elab_r_exists_sum_r2r delabx)}%.
 %worlds (elab_exists_block) (elab_m_exists _ _) (elab_r_exists _ _) %.
 %total (D1 D2) (elab_m_exists D1 _) (elab_r_exists D2 _) %.
 %{! ``>All Twelf code for this tutorial.``

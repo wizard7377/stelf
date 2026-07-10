@@ -43,7 +43,7 @@ from Bob Harper's book,  [http://www.cs.cmu.edu/~rwh/plbook/book.pdf Practical F
 	%-> ({x} %pi (of x T1) %-> (of (E2 x) T2))
 	%-> (of (let E1 ([x] E2 x)) T2) %.
 % Assumption block for typing judgment (coming from of/let)
-%block of_bind {T typ} [x exp] [ofx of x T]%.
+%block of_bind [T typ] {x exp} {ofx of x T}%.
 %%%%%%%%%%%%%%%% L{num str}: Dynamic Semantics %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Values
 %sort val %.
@@ -96,7 +96,7 @@ from Bob Harper's book,  [http://www.cs.cmu.edu/~rwh/plbook/book.pdf Practical F
 	%<- (lemma9-1 OjE11 OjE21 E1)
 	%<- (cong_of E1 OjE12 OjE12')
 	%<- ({x} {ofx2} %pi (lemma9-1 ofx2 ofx2 refl_t) %-> (lemma9-1 (OjE12' x ofx2) (OjE22 x ofx2) Q)) %.
-%block lemma_block {T typ} [x exp] [ofx of x T] [u lemma9-1 ofx ofx refl_t]%.
+%block lemma_block [T typ] {x exp} {ofx of x T} {u lemma9-1 ofx ofx refl_t}%.
 %worlds (lemma_block) (lemma9-1 _ _ _) %.
 %total OjT2 (lemma9-1 _ OjT2 _) %.
 %{! ## Problem 2: Determinacy of Reduction !}%

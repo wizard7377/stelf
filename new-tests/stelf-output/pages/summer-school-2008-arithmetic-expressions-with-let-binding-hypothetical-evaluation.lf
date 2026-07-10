@@ -80,7 +80,7 @@ We do this by
 - defining a block ``eval_block`` describing that pattern
 - stating ``eval`` for a world containing contexts made up of ``eval_block``s
 !}%
-%block eval_block {A ans} [x val] [_ eval (ret x) A]%.
+%block eval_block [A ans] {x val} {_ eval (ret x) A}%.
 %worlds (eval_block) (eval _ _) %.
 %{! 
 

@@ -1,0 +1,5 @@
+%require %[ lam %] %.
+%require %[ ord-red %] %.
+%require %[ par-red %] %.
+%require %[ par-lemmas %] %.
+%require %[ church-rosser-thm %] %.

@@ -1,0 +1,2 @@
+%require %[ arith %] %.
+%require %[ arith-thm %] %.

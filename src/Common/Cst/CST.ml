@@ -92,38 +92,46 @@ module type CST = sig
   type symbol = namespace * name
   (** Qualified symbol as [(namespace, name)]. *)
 
-  val[@deprecated "Use View equivalent instead"] mk_loc : int -> int -> loc
+  val [@deprecated "Use View equivalent instead"] mk_loc : int -> int -> loc
   (** Create a location from start and end lexer positions. *)
 
-  val[@deprecated "Use View equivalent instead"] loc_to_region : loc -> Paths.region
+  val [@deprecated "Use View equivalent instead"] loc_to_region :
+    loc -> Paths.region
   (** Convert a source location to a Paths region. *)
 
-  val[@deprecated "Use View equivalent instead"] ghost : loc
+  val [@deprecated "Use View equivalent instead"] ghost : loc
   (** Synthetic location used for generated nodes. *)
 
   (** {3 Term Syntax} *)
   module Term : sig
     type t = term
 
-    val[@deprecated "Use View equivalent instead"] lowercase : ?fc:loc -> symbol -> term
+    val [@deprecated "Use View equivalent instead"] lowercase :
+      ?fc:loc -> symbol -> term
     (** Lowercase identifier (does not start with [_]). *)
 
-    val[@deprecated "Use View equivalent instead"] uppercase : ?fc:loc -> symbol -> term
+    val [@deprecated "Use View equivalent instead"] uppercase :
+      ?fc:loc -> symbol -> term
     (** Uppercase identifier. *)
 
-    val[@deprecated "Use View equivalent instead"] qualified : ?fc:loc -> symbol -> term
+    val [@deprecated "Use View equivalent instead"] qualified :
+      ?fc:loc -> symbol -> term
     (** Qualified identifier. *)
 
-    val[@deprecated "Use View equivalent instead"] text : ?fc:loc -> string -> term
+    val [@deprecated "Use View equivalent instead"] text :
+      ?fc:loc -> string -> term
     (** Quoted text literal (currently not parsed from source). *)
 
-    val[@deprecated "Use View equivalent instead"] exist_var : ?fc:loc -> string -> term
+    val [@deprecated "Use View equivalent instead"] exist_var :
+      ?fc:loc -> string -> term
     (** Existential variable, usually written as [?x]. *)
 
-    val[@deprecated "Use View equivalent instead"] free_var : ?fc:loc -> string -> term
+    val [@deprecated "Use View equivalent instead"] free_var :
+      ?fc:loc -> string -> term
     (** Free variable identifier. *)
 
-    val[@deprecated "Use View equivalent instead"] pi : ?fc:loc -> decl list -> term -> term
+    val [@deprecated "Use View equivalent instead"] pi :
+      ?fc:loc -> decl list -> term -> term
     (** The pi type, which covers both kinds and types
         @param fc Optional source location for the node.
         @param decls
@@ -131,7 +139,8 @@ module type CST = sig
           the context
         @param body The body of the pi type *)
 
-    val[@deprecated "Use View equivalent instead"][@deprecated] lam : ?fc:loc -> decl list -> term -> term
+    val [@deprecated "Use View equivalent instead"] [@deprecated] lam :
+      ?fc:loc -> decl list -> term -> term
     (** Lambda abstraction over a list of declarations
         @param fc Optional source location for the node.
         @param decls
@@ -139,28 +148,33 @@ module type CST = sig
           the context
         @param body The body of the lambda *)
 
-    val[@deprecated "Use View equivalent instead"] app : ?fc:loc -> term -> term list -> term
+    val [@deprecated "Use View equivalent instead"] app :
+      ?fc:loc -> term -> term list -> term
     (** Application of a head term to arguments, which applies both to terms in
         normal form and not in normal form *)
 
-    val[@deprecated "Use View equivalent instead"] has_type : ?fc:loc -> term -> term -> term
+    val [@deprecated "Use View equivalent instead"] has_type :
+      ?fc:loc -> term -> term -> term
     (** Explicit type ascription. *)
 
-    val[@deprecated "Use View equivalent instead"] omitted : ?fc:loc -> term
+    val [@deprecated "Use View equivalent instead"] omitted : ?fc:loc -> term
     (** Placeholder [_] for an omitted term. *)
 
-    val[@deprecated "Use View equivalent instead"] typ : ?fc:loc -> unit -> term
+    val [@deprecated "Use View equivalent instead"] typ :
+      ?fc:loc -> unit -> term
     (** Note that while this term does not exist externally, internally, we
         translate [%sort] to use this, as to be similar to the original Twelf *)
 
     (** {4 Syntax Sugar} *)
     module Sugar : sig
       (** Function type constructor (not used directly). *)
-      val[@deprecated "Use View equivalent instead"] arrow : ?fc:loc -> term -> term -> term
+      val [@deprecated "Use View equivalent instead"] arrow :
+        ?fc:loc -> term -> term -> term
       (** This isn't used *)
 
       (* tm -> tm *)
-      val[@deprecated "Use View equivalent instead"] backarrow : ?fc:loc -> term -> term -> term
+      val [@deprecated "Use View equivalent instead"] backarrow :
+        ?fc:loc -> term -> term -> term
       (** this isnt used *)
     end
   end
@@ -169,14 +183,16 @@ module type CST = sig
   module Decl : sig
     type t = decl
 
-    val[@deprecated "Use View equivalent instead"] decl1 : ?fc:loc -> string option list -> term -> decl
+    val [@deprecated "Use View equivalent instead"] decl1 :
+      ?fc:loc -> string option list -> term -> decl
     (** [decl1 names typ] creates a declaration that binds [names] with type
         [typ].
 
         The [names] list corresponds to grouped declarations such as
         [(x y z) T]. *)
 
-    val[@deprecated "Use View equivalent instead"] decl0 : ?fc:loc -> string option list -> decl
+    val [@deprecated "Use View equivalent instead"] decl0 :
+      ?fc:loc -> string option list -> decl
     (** [decl0 names] is like {!decl1} but without an explicit type. *)
   end
 
@@ -184,17 +200,22 @@ module type CST = sig
   module ConDec : sig
     type t = conDec
 
-    val[@deprecated "Use View equivalent instead"] constant_decl : ?fc:loc -> decl -> t
+    val [@deprecated "Use View equivalent instead"] constant_decl :
+      ?fc:loc -> decl -> t
     (** Lift a local declaration into a top-level [%term] declaration. *)
 
-    val[@deprecated "Use View equivalent instead"] block_decl : ?fc:loc -> string -> decl list -> decl list -> t
+    val [@deprecated "Use View equivalent instead"] block_decl :
+      ?fc:loc -> string -> decl list -> decl list -> t
     (** Block declaration.
 
         [%block B X Y] declares block [B] with declaration groups [X] and [Y].
     *)
 
-    val[@deprecated "Use View equivalent instead"] block_def : ?fc:loc -> string -> symbol list -> t
-    val[@deprecated "Use View equivalent instead"] constant_def : ?fc:loc -> string -> term -> term option -> t
+    val [@deprecated "Use View equivalent instead"] block_def :
+      ?fc:loc -> string -> symbol list -> t
+
+    val [@deprecated "Use View equivalent instead"] constant_def :
+      ?fc:loc -> string -> term -> term option -> t
   end
 
   (** Mode syntax constructors. *)
@@ -202,16 +223,20 @@ module type CST = sig
     type mode
     type nonrec modeTerm = modeTerm
 
-    val[@deprecated "Use View equivalent instead"] plus : ?fc:loc -> unit -> mode
+    val [@deprecated "Use View equivalent instead"] plus :
+      ?fc:loc -> unit -> mode
     (** Positive mode marker. *)
 
-    val[@deprecated "Use View equivalent instead"] star : ?fc:loc -> unit -> mode
+    val [@deprecated "Use View equivalent instead"] star :
+      ?fc:loc -> unit -> mode
     (** Star mode marker. *)
 
-    val[@deprecated "Use View equivalent instead"] minus : ?fc:loc -> unit -> mode
+    val [@deprecated "Use View equivalent instead"] minus :
+      ?fc:loc -> unit -> mode
     (** Negative mode marker. *)
 
-    val[@deprecated "Use View equivalent instead"] minus1 : ?fc:loc -> unit -> mode
+    val [@deprecated "Use View equivalent instead"] minus1 :
+      ?fc:loc -> unit -> mode
     (** Strict negative mode marker. *)
 
     type modedec = modeDec
@@ -221,28 +246,35 @@ module type CST = sig
       type nonrec modeTerm = modeTerm
       type nonrec modeSpine = modeSpine
 
-      val[@deprecated "Use View equivalent instead"] mode_nil : ?fc:loc -> unit -> modeSpine
+      val [@deprecated "Use View equivalent instead"] mode_nil :
+        ?fc:loc -> unit -> modeSpine
       (** Empty mode spine. *)
 
-      val[@deprecated "Use View equivalent instead"] mode_app : ?fc:loc -> mode * string option -> modeSpine -> modeSpine
+      val [@deprecated "Use View equivalent instead"] mode_app :
+        ?fc:loc -> mode * string option -> modeSpine -> modeSpine
       (** Extend a mode spine with one argument mode. *)
 
-      val[@deprecated "Use View equivalent instead"] mode_root : ?fc:loc -> symbol -> modeSpine -> modeTerm
+      val [@deprecated "Use View equivalent instead"] mode_root :
+        ?fc:loc -> symbol -> modeSpine -> modeTerm
       (** Build a short mode root from a symbol and spine. *)
 
-      val[@deprecated "Use View equivalent instead"] to_modeDec : ?fc:loc -> modeTerm -> modeDec
+      val [@deprecated "Use View equivalent instead"] to_modeDec :
+        ?fc:loc -> modeTerm -> modeDec
       (** Convert a short mode term into a mode declaration. *)
     end
 
     (** Full mode syntax. *)
     module Full : sig
-      val[@deprecated "Use View equivalent instead"] mode_root : ?fc:loc -> term -> modeTerm
+      val [@deprecated "Use View equivalent instead"] mode_root :
+        ?fc:loc -> term -> modeTerm
       (** Root mode term from a regular term. *)
 
-      val[@deprecated "Use View equivalent instead"] mode_pi : ?fc:loc -> mode -> decl -> modeTerm -> modeTerm
+      val [@deprecated "Use View equivalent instead"] mode_pi :
+        ?fc:loc -> mode -> decl -> modeTerm -> modeTerm
       (** Pi-mode binder. *)
 
-      val[@deprecated "Use View equivalent instead"] to_modeDec : ?fc:loc -> modeTerm -> modeDec
+      val [@deprecated "Use View equivalent instead"] to_modeDec :
+        ?fc:loc -> modeTerm -> modeDec
       (** Convert a full mode term into a mode declaration. *)
     end
   end
@@ -251,69 +283,84 @@ module type CST = sig
   module Struct : sig
     type strexp
 
-    val[@deprecated "Use View equivalent instead"] str_exp : ?fc:loc -> symbol -> strexp
+    val [@deprecated "Use View equivalent instead"] str_exp :
+      ?fc:loc -> symbol -> strexp
 
     type inst
 
-    val[@deprecated "Use View equivalent instead"] con_inst : ?fc:loc -> symbol * loc -> term -> inst
-    val[@deprecated "Use View equivalent instead"] str_inst : ?fc:loc -> symbol * loc -> strexp -> inst
+    val [@deprecated "Use View equivalent instead"] con_inst :
+      ?fc:loc -> symbol * loc -> term -> inst
+
+    val [@deprecated "Use View equivalent instead"] str_inst :
+      ?fc:loc -> symbol * loc -> strexp -> inst
 
     type sigexp
 
-    val[@deprecated "Use View equivalent instead"] thesig : ?fc:loc -> sigexp
-    val[@deprecated "Use View equivalent instead"] sig_id : ?fc:loc -> string -> sigexp
-    val[@deprecated "Use View equivalent instead"] where_sig : ?fc:loc -> sigexp -> inst list -> sigexp
+    val [@deprecated "Use View equivalent instead"] thesig : ?fc:loc -> sigexp
+
+    val [@deprecated "Use View equivalent instead"] sig_id :
+      ?fc:loc -> string -> sigexp
+
+    val [@deprecated "Use View equivalent instead"] where_sig :
+      ?fc:loc -> sigexp -> inst list -> sigexp
 
     type sigdef
 
-    val[@deprecated "Use View equivalent instead"] sig_def : ?fc:loc -> string option -> sigexp -> sigdef
+    val [@deprecated "Use View equivalent instead"] sig_def :
+      ?fc:loc -> string option -> sigexp -> sigdef
 
     type structdec = structDec
 
-    val[@deprecated "Use View equivalent instead"] struct_decl : ?fc:loc -> string option -> sigexp -> structdec
-    val[@deprecated "Use View equivalent instead"] struct_def : ?fc:loc -> string option -> strexp -> structdec
+    val [@deprecated "Use View equivalent instead"] struct_decl :
+      ?fc:loc -> string option -> sigexp -> structdec
+
+    val [@deprecated "Use View equivalent instead"] struct_def :
+      ?fc:loc -> string option -> strexp -> structdec
   end
 
   module Query : sig
     type query
 
-    val[@deprecated "Use View equivalent instead"] query : ?fc:loc -> string option -> term -> query
+    val [@deprecated "Use View equivalent instead"] query :
+      ?fc:loc -> string option -> term -> query
     (** Query declaration. *)
 
     type define
     (** Define declaration. *)
 
-    val[@deprecated "Use View equivalent instead"] define : ?fc:loc -> string option -> term -> term option -> define
+    val [@deprecated "Use View equivalent instead"] define :
+      ?fc:loc -> string option -> term -> term option -> define
     (** Define declaration with optional right-hand side. *)
 
     type solve
 
-    val[@deprecated "Use View equivalent instead"] solve : ?fc:loc -> string option -> term -> solve
+    val [@deprecated "Use View equivalent instead"] solve :
+      ?fc:loc -> string option -> term -> solve
     (** Solve declaration. *)
   end
 
   (** Fixity constructors. *)
   module Fixity : sig
-    val[@deprecated "Use View equivalent instead"] left : fixity
-    val[@deprecated "Use View equivalent instead"] right : fixity
-    val[@deprecated "Use View equivalent instead"] prefix : fixity
-    val[@deprecated "Use View equivalent instead"] postfix : fixity
-    val[@deprecated "Use View equivalent instead"] middle : fixity
-    val[@deprecated "Use View equivalent instead"] none : fixity
+    val [@deprecated "Use View equivalent instead"] left : fixity
+    val [@deprecated "Use View equivalent instead"] right : fixity
+    val [@deprecated "Use View equivalent instead"] prefix : fixity
+    val [@deprecated "Use View equivalent instead"] postfix : fixity
+    val [@deprecated "Use View equivalent instead"] middle : fixity
+    val [@deprecated "Use View equivalent instead"] none : fixity
   end
 
   (** Block item constructors for %block declarations. *)
   module BlockItem : sig
-    val[@deprecated "Use View equivalent instead"] some : decl -> block_item
+    val [@deprecated "Use View equivalent instead"] some : decl -> block_item
     (** [{decl}] — existentially bound hypothesis. *)
 
-    val[@deprecated "Use View equivalent instead"] pi : decl -> block_item
+    val [@deprecated "Use View equivalent instead"] pi : decl -> block_item
     (** [[decl]] — universally bound hypothesis. *)
   end
 
   (** Top-level command constructors. *)
   module Cmd : sig
-    val[@deprecated "Use View equivalent instead"] query :
+    val [@deprecated "Use View equivalent instead"] query :
       ?fc:loc ->
       n:int option ->
       b:int option ->
@@ -322,7 +369,7 @@ module type CST = sig
       cmd
     (** [%query n b d expr] — logic programming query with bounds. *)
 
-    val[@deprecated "Use View equivalent instead"] query_tabled :
+    val [@deprecated "Use View equivalent instead"] query_tabled :
       ?fc:loc ->
       n:int option ->
       b:int option ->
@@ -331,85 +378,118 @@ module type CST = sig
       cmd
     (** [%querytabled n b d expr] — tabled query with bounds. *)
 
-    val[@deprecated "Use View equivalent instead"] adhoc_query : ?fc:loc -> Query.query -> cmd
+    val [@deprecated "Use View equivalent instead"] adhoc_query :
+      ?fc:loc -> Query.query -> cmd
     (** [%? expr] — ad-hoc REPL query. *)
 
-    val[@deprecated "Use View equivalent instead"] unique : ?fc:loc -> term -> cmd
+    val [@deprecated "Use View equivalent instead"] unique :
+      ?fc:loc -> term -> cmd
     (** [%unique expr] — assert expr has at most one inhabitant. *)
 
-    val[@deprecated "Use View equivalent instead"] mode : ?fc:loc -> modeDec -> cmd
+    val [@deprecated "Use View equivalent instead"] mode :
+      ?fc:loc -> modeDec -> cmd
     (** [%mode hyps] — declare input/output polarity. *)
 
-    val[@deprecated "Use View equivalent instead"] define : ?fc:loc -> Query.define -> cmd
+    val [@deprecated "Use View equivalent instead"] define :
+      ?fc:loc -> Query.define -> cmd
     (** [%define id expr] — transparent definition. *)
 
-    val[@deprecated "Use View equivalent instead"] decl_cmd : ?fc:loc -> term -> cmd
+    val [@deprecated "Use View equivalent instead"] decl_cmd :
+      ?fc:loc -> term -> cmd
     (** [%decl expr] — raw elaboration-level declaration. *)
 
-    val[@deprecated "Use View equivalent instead"] inline : ?fc:loc -> string -> term -> cmd
+    val [@deprecated "Use View equivalent instead"] inline :
+      ?fc:loc -> string -> term -> cmd
     (** [%inline id expr] — always-unfolded definition. *)
 
-    val[@deprecated "Use View equivalent instead"] symbol : ?fc:loc -> string -> string -> cmd
+    val [@deprecated "Use View equivalent instead"] symbol :
+      ?fc:loc -> string -> string -> cmd
     (** [%symbol id id] — associate a symbolic name. *)
 
-    val[@deprecated "Use View equivalent instead"] freeze : ?fc:loc -> string list -> cmd
+    val [@deprecated "Use View equivalent instead"] freeze :
+      ?fc:loc -> string list -> cmd
     (** [%freeze id_list] — freeze type families. *)
 
-    val[@deprecated "Use View equivalent instead"] thaw : ?fc:loc -> string list -> cmd
+    val [@deprecated "Use View equivalent instead"] thaw :
+      ?fc:loc -> string list -> cmd
     (** [%thaw id_list] — unfreeze type families. *)
 
-    val[@deprecated "Use View equivalent instead"] sort : ?fc:loc -> string list -> decl list -> cmd
+    val [@deprecated "Use View equivalent instead"] sort :
+      ?fc:loc -> string list -> decl list -> cmd
     (** [%sort id {decl}+] — declare a type family. *)
 
-    val[@deprecated "Use View equivalent instead"] term : ?fc:loc -> decl -> cmd
+    val [@deprecated "Use View equivalent instead"] term :
+      ?fc:loc -> decl -> cmd
     (** [%term decl] — declare a term-level constant. *)
 
-    val[@deprecated "Use View equivalent instead"] block : ?fc:loc -> string -> block_item list -> cmd
+    val [@deprecated "Use View equivalent instead"] block :
+      ?fc:loc -> string -> block_item list -> cmd
     (** [%block id block_item*] — define a named context schema. *)
 
-    val[@deprecated "Use View equivalent instead"] union : ?fc:loc -> string -> string list -> cmd
+    val [@deprecated "Use View equivalent instead"] union :
+      ?fc:loc -> string -> string list -> cmd
     (** [%union id ids] — union of block labels. *)
 
-    val[@deprecated "Use View equivalent instead"] worlds : ?fc:loc -> string list -> term list -> cmd
+    val [@deprecated "Use View equivalent instead"] worlds :
+      ?fc:loc -> string list -> term list -> cmd
     (** [%worlds ids exprs] — assert exprs live in the named world. *)
 
-    val[@deprecated "Use View equivalent instead"] deterministic : ?fc:loc -> string list -> cmd
+    val [@deprecated "Use View equivalent instead"] deterministic :
+      ?fc:loc -> string list -> cmd
     (** [%deterministic id_list] — mark type families as deterministic. *)
 
-    val[@deprecated "Use View equivalent instead"] eval : ?fc:loc -> cmd list -> cmd
+    val [@deprecated "Use View equivalent instead"] eval :
+      ?fc:loc -> cmd list -> cmd
     (** [%eval %{ cmds %}] — evaluate a command block. *)
 
-    val[@deprecated "Use View equivalent instead"] prec : ?fc:loc -> fixity -> int -> string list -> cmd
+    val [@deprecated "Use View equivalent instead"] prec :
+      ?fc:loc -> fixity -> int -> string list -> cmd
     (** [%prec fixity n id_list] — set operator fixity and precedence. *)
 
-    val[@deprecated "Use View equivalent instead"] solve : ?fc:loc -> Query.solve -> cmd
+    val [@deprecated "Use View equivalent instead"] solve :
+      ?fc:loc -> Query.solve -> cmd
     (** [%solve] — solve command. *)
 
-    val[@deprecated "Use View equivalent instead"] stop : ?fc:loc -> unit -> cmd
+    val [@deprecated "Use View equivalent instead"] stop :
+      ?fc:loc -> unit -> cmd
     (** [%.] — end-of-command marker. *)
 
     (** REPL-specific commands. *)
     module Repl : sig
-      val[@deprecated "Use View equivalent instead"] quit : ?fc:loc -> unit -> cmd
-      val[@deprecated "Use View equivalent instead"] help : ?fc:loc -> string option -> cmd
-      val[@deprecated "Use View equivalent instead"] get : ?fc:loc -> string -> cmd
-      val[@deprecated "Use View equivalent instead"] set : ?fc:loc -> string -> string -> cmd
-      val[@deprecated "Use View equivalent instead"] version : ?fc:loc -> unit -> cmd
+      val [@deprecated "Use View equivalent instead"] quit :
+        ?fc:loc -> unit -> cmd
+
+      val [@deprecated "Use View equivalent instead"] help :
+        ?fc:loc -> string option -> cmd
+
+      val [@deprecated "Use View equivalent instead"] get :
+        ?fc:loc -> string -> cmd
+
+      val [@deprecated "Use View equivalent instead"] set :
+        ?fc:loc -> string -> string -> cmd
+
+      val [@deprecated "Use View equivalent instead"] version :
+        ?fc:loc -> unit -> cmd
     end
 
-    val[@deprecated "Use View equivalent instead"] total : ?fc:loc -> order list -> term list -> cmd
+    val [@deprecated "Use View equivalent instead"] total :
+      ?fc:loc -> order list -> term list -> cmd
     (** [%total hyps modes] — declare a totality check. *)
 
-    val[@deprecated "Use View equivalent instead"] terminates : ?fc:loc -> order list -> term list -> cmd
+    val [@deprecated "Use View equivalent instead"] terminates :
+      ?fc:loc -> order list -> term list -> cmd
     (** [%terminates hyps modes] — declare a termination check. *)
 
-    val[@deprecated "Use View equivalent instead"] covers : ?fc:loc -> modeDec -> cmd
+    val [@deprecated "Use View equivalent instead"] covers :
+      ?fc:loc -> modeDec -> cmd
     (** [%covers hyps modes] — declare a coverage check. *)
 
-    val[@deprecated "Use View equivalent instead"] name : ?fc:loc -> string -> cmd
+    val [@deprecated "Use View equivalent instead"] name :
+      ?fc:loc -> string -> cmd
     (** [%name id] — declare a name for the next definition. *)
 
-    val[@deprecated "Use View equivalent instead"] reduces : ?fc:loc -> string -> term list -> cmd
+    val [@deprecated "Use View equivalent instead"] reduces :
+      ?fc:loc -> string -> term list -> cmd
     (** [%reduces pred order_out order_in call_pats] — declare a reduction
         relation. *)
   end
@@ -418,71 +498,96 @@ module type CST = sig
     (*! structure Paths : PATHS  !*)
     type order
 
-    val[@deprecated "Use View equivalent instead"] varg : loc * string list -> order
-    val[@deprecated "Use View equivalent instead"] lex : loc * order list -> order
-    val[@deprecated "Use View equivalent instead"] simul : loc * order list -> order
+    val [@deprecated "Use View equivalent instead"] varg :
+      loc * string list -> order
+
+    val [@deprecated "Use View equivalent instead"] lex :
+      loc * order list -> order
+
+    val [@deprecated "Use View equivalent instead"] simul :
+      loc * order list -> order
 
     type callpats
 
-    val[@deprecated "Use View equivalent instead"] callpats : (string * string option list * loc) list -> callpats
+    val [@deprecated "Use View equivalent instead"] callpats :
+      (string * string option list * loc) list -> callpats
 
     type tdecl
 
-    val[@deprecated "Use View equivalent instead"] tdecl : order * callpats -> tdecl
+    val [@deprecated "Use View equivalent instead"] tdecl :
+      order * callpats -> tdecl
 
     (* -bp *)
     type predicate
 
-    val[@deprecated "Use View equivalent instead"] predicate : string * loc -> predicate
+    val [@deprecated "Use View equivalent instead"] predicate :
+      string * loc -> predicate
 
     (* -bp *)
     type rdecl
 
-    val[@deprecated "Use View equivalent instead"] rdecl : predicate * order * order * callpats -> rdecl
+    val [@deprecated "Use View equivalent instead"] rdecl :
+      predicate * order * order * callpats -> rdecl
 
     type tableddecl
 
-    val[@deprecated "Use View equivalent instead"] tableddecl : string * loc -> tableddecl
+    val [@deprecated "Use View equivalent instead"] tableddecl :
+      string * loc -> tableddecl
 
     type keepTabledecl
 
-    val[@deprecated "Use View equivalent instead"] keepTabledecl : string * loc -> keepTabledecl
+    val [@deprecated "Use View equivalent instead"] keepTabledecl :
+      string * loc -> keepTabledecl
 
     type prove
 
-    val[@deprecated "Use View equivalent instead"] prove : int * tdecl -> prove
+    val [@deprecated "Use View equivalent instead"] prove : int * tdecl -> prove
 
     type establish
 
-    val[@deprecated "Use View equivalent instead"] establish : int * tdecl -> establish
+    val [@deprecated "Use View equivalent instead"] establish :
+      int * tdecl -> establish
 
     type assert_
 
-    val[@deprecated "Use View equivalent instead"] assert_ : callpats -> assert_
+    val [@deprecated "Use View equivalent instead"] assert_ :
+      callpats -> assert_
 
     type decs
     type theorem
     type theoremdec
 
-    val[@deprecated "Use View equivalent instead"] null : decs
-    val[@deprecated "Use View equivalent instead"] decl : decs * decl -> decs
-    val[@deprecated "Use View equivalent instead"] top : theorem
-    val[@deprecated "Use View equivalent instead"] exists : decs * theorem -> theorem
-    val[@deprecated "Use View equivalent instead"] forall : decs * theorem -> theorem
-    val[@deprecated "Use View equivalent instead"] forallStar : decs * theorem -> theorem
-    val[@deprecated "Use View equivalent instead"] forallG : (decs * decs) list * theorem -> theorem
-    val[@deprecated "Use View equivalent instead"] dec : string * theorem -> theoremdec
+    val [@deprecated "Use View equivalent instead"] null : decs
+    val [@deprecated "Use View equivalent instead"] decl : decs * decl -> decs
+    val [@deprecated "Use View equivalent instead"] top : theorem
+
+    val [@deprecated "Use View equivalent instead"] exists :
+      decs * theorem -> theorem
+
+    val [@deprecated "Use View equivalent instead"] forall :
+      decs * theorem -> theorem
+
+    val [@deprecated "Use View equivalent instead"] forallStar :
+      decs * theorem -> theorem
+
+    val [@deprecated "Use View equivalent instead"] forallG :
+      (decs * decs) list * theorem -> theorem
+
+    val [@deprecated "Use View equivalent instead"] dec :
+      string * theorem -> theoremdec
 
     (* world checker *)
     type wdecl
 
-    val[@deprecated "Use View equivalent instead"] wdecl : (string list * string) list * callpats -> wdecl
+    val [@deprecated "Use View equivalent instead"] wdecl :
+      (string list * string) list * callpats -> wdecl
   end
 
-  val[@deprecated "Use View equivalent instead"] show_term : term -> string
+  val [@deprecated "Use View equivalent instead"] show_term : term -> string
   (** Debug-print a term to a string. *)
 
-  val[@deprecated "Use View equivalent instead"] pp_term : Stdlib.Format.formatter -> term -> unit
+  val [@deprecated "Use View equivalent instead"] pp_term :
+    Stdlib.Format.formatter -> term -> unit
   (** Pretty-print a term to a formatter. *)
 
   (** {2 Views} *)

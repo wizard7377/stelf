@@ -39,9 +39,9 @@
 %mode tequiv-comp %in %out %out %.
 %sort equiv-comp %.
 %mode equiv-comp %in %out %out %out %out %out %.
-%block cbind {x atom} {a tp} {ea etp} {d_ttrans ttrans ea a} {d_vof vof x a} [ex eterm] [xt vtrans ex x] [ed evof ex ea] [thm1 vof-comp ed d_ttrans xt d_vof]%.
+%block cbind [x atom] [a tp] [ea etp] [d_ttrans ttrans ea a] [d_vof vof x a] {ex eterm} {xt vtrans ex x} {ed evof ex ea} {thm1 vof-comp ed d_ttrans xt d_vof}%.
 %% combine sbind & cbind
-%block scbind {a tp} {ea etp} {d_tconvert tconvert a ea} {d_ttrans ttrans ea a} {d_wf wf a} [x atom] [d vof x a] [ex eterm] [xt vtrans ex x] [ed evof ex ea] [dv variable ex] [thm1 vtrans-variable xt dv] [thm2 vsound d xt d_tconvert ed] [thm3 vof-comp ed d_ttrans xt d]%.
+%block scbind [a tp] [ea etp] [d_tconvert tconvert a ea] [d_ttrans ttrans ea a] [d_wf wf a] {x atom} {d vof x a} {ex eterm} {xt vtrans ex x} {ed evof ex ea} {dv variable ex} {thm1 vtrans-variable xt dv} {thm2 vsound d xt d_tconvert ed} {thm3 vof-comp ed d_ttrans xt d}%.
 %scope equiv-comp %term var 
 	%pi (of-comp (eof/var _ (%the (evof EX EA) Devof)) DtransA (trans/var Dself Dexpand DwfA Dvof DtransX) Dsubtype)
 	%<- (vof-comp Devof (%the (ttrans EA A) DtransA) (%the (vtrans EX X) DtransX) (%the (vof X A) Dvof))

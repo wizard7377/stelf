@@ -154,7 +154,8 @@ let cases () =
               "%terminates ({A [B C] G} [D E] F) (max A (max B C) max D (max E \
                C))";
             test "Nested (mutual)" Cmd1
-              "%terminates ({A [B C]} [D E]) ((max A) (max B C) (max D (max E C)))";
+              "%terminates ({A [B C]} [D E]) ((max A) (max B C) (max D (max E \
+               C)))";
           ] );
         ( "%query",
           [
@@ -185,16 +186,17 @@ let cases () =
           ] );
         ( "String literals",
           [
-            test "Empty (single)"              Term  "%[%]";
-            test "Simple (single)"             Term  "%[hello world%]";
-            test "With percent (single)"       Term  "%[hello%world%]";
-            test "As small expr (single)"      Term1 "%[hello%]";
-            test "Empty (double)"              Term  "%[[%]]";
-            test "Simple (double)"             Term  "%[[hello world%]]";
-            test "Embed single-close (double)" Term  "%[[hello%]world%]]";
-            test "Triple-bracket is double"    Term  "%[[[a%]]";
-            test ~failure:true "Unclosed (single)"       Term "%[hello";
-            test ~failure:true "Unclosed (double)"       Term "%[[hello%]";
+            test "Empty (single)" Term "%[%]";
+            test "Simple (single)" Term "%[hello world%]";
+            test "With percent (single)" Term "%[hello%world%]";
+            test "As small expr (single)" Term1 "%[hello%]";
+            test "Empty (double)" Term "%[[%]]";
+            test "Simple (double)" Term "%[[hello world%]]";
+            test "Embed single-close (double)" Term "%[[hello%]world%]]";
+            test "Triple (exact close)" Term "%[[[a%]]]";
+            test "Quadruple (exact close)" Term "%[[[[a%]]]]";
+            test ~failure:true "Unclosed (single)" Term "%[hello";
+            test ~failure:true "Unclosed (double)" Term "%[[hello%]";
             test ~failure:true "Bracket-only is unclosed" Term "%[]";
           ] );
       ]

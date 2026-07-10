@@ -10,11 +10,19 @@ include OPSEM
 open! Basis
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 exception Abort
-let () = Printexc.register_printer (function Abort -> Some "Abort" | _ -> None)
+
+let () =
+  Printexc.register_printer (function Abort -> Some "Abort" | _ -> None)
+
 exception NoMatch
-let () = Printexc.register_printer (function NoMatch -> Some "NoMatch" | _ -> None)
+
+let () =
+  Printexc.register_printer (function NoMatch -> Some "NoMatch" | _ -> None)
 
 module MakeOpsem
     (Whnf : WHNF)

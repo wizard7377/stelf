@@ -11,7 +11,9 @@ open MemoTable
 (* Instance Checking *)
 (* Author: Brigitte Pientka *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MemoTableInst (MemoTableInst__0 : sig
   (*! structure IntSyn' : INTSYN !*)

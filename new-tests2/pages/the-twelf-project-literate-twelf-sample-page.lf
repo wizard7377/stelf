@@ -1,0 +1,29 @@
+%                                                        
+%. %[[ 
+Some natural numbers; a demo of [[Project:Literate Twelf|Literate Twelf]]. 
+%]]
+%. %[[ ## Syntax %]]
+%sort nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%. %[[ ## Judgments %]]
+%. %[[ ### Equality %]]
+%sort id-nat {_ nat} {_ nat} %.
+%term id-nat/refl id-nat N N %.
+%. %[[ ### Addition === | %]]
+%sort plus {_ nat} {_ nat} {_ nat} %.
+%term plus/z plus z N N %.
+%term plus/s %pi (plus N1 N2 N3) %-> (plus (s N1) N2 (s N3)) %.
+%. %[[ Now we can see what it looks like to run a query: |check=decl %]]
+%solve _ : plus (s (s (s z))) (s (s z)) N %.
+%. %[[
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/The_Twelf_Project:Literate_Twelf/Sample_Page).
+%]]
+%. 
+ 
+This is a pretty boring presentation of the natural numbers;
+it is roughly like all the other ones, like the article on [natural numbers](/wiki/natural-numbers/).
+

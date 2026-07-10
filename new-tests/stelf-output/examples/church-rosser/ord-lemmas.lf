@@ -2,7 +2,7 @@
 %%% Author: Frank Pfenning
 % Terms can contain free variables without explicitl
 % assumptions about them (for multi-step reduction)
-%block ltm [x term]%.
+%block ltm {x term}%.
 % Transitivity of multi-step reduction
 %sort appd %.
 %mode appd %in %in %out %.

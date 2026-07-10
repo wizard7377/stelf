@@ -1,0 +1,15 @@
+%%%%%%%%%%%%%%%%%%
+%%% Tamaki, Sato
+%%%
+%sort nat %.
+%term 0 nat %.
+%term suc %pi nat %-> nat %.
+%sort pts {_ nat} %.
+%sort qts {_ nat} %.
+%sort rts %.
+%tabled qts %.
+%term c1 %pi (pts X) %<- (qts X) %<- rts %.
+%term c2 %pi (qts (suc X)) %<- (qts X) %.
+%term c3 qts 0 %.
+%term c4 rts %.
+%querytabled _ 10 pts X %.

@@ -13,7 +13,7 @@ but we have to define specific fluid variables for the dynamic semantics. !}%
 %term b fluid %.
 %term c fluid %.
 %term d fluid %.
-%block bfluid [f fluid]%.
+%block bfluid {f fluid}%.
 %sort eqfluid %.
 %term eqfluid/refl eqfluid A A %.
 %sort neqfluid %.
@@ -157,7 +157,7 @@ but we have to define specific fluid variables for the dynamic semantics. !}%
 %term eqty/refl eqty T T %.
 %{! #### Individual fluid types !}%
 %sort fluidty %.
-%block ftyblock {T ty} [f fluid] [d fluidty f T]%.
+%block ftyblock [T ty] {f fluid} {d fluidty f T}%.
 %term fluidty/a fluidty a ty/nat %.
 %term fluidty/b fluidty b (ty/arrow ty/nat (ty/mayuse ty/nat (a , c , #))) %.
 %term fluidty/c fluidty c ty/nat %.

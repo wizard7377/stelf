@@ -1,0 +1,22 @@
+%%%%%  Defs  %%%%%
+%sort nat %.
+%name nat %.
+%term 0 nat %.
+%term s %pi nat %-> nat %.
+%sort false %.
+%sort nat-eq {_ nat} {_ nat} %.
+%term nat-eq/i nat-eq N N %.
+%sort sum {_ nat} {_ nat} {_ nat} %.
+%term sum/z sum 0 N N %.
+%term sum/s %pi (sum (s N1) N2 (s N3)) %<- (sum N1 N2 N3) %.
+%sort leq {_ nat} {_ nat} %.
+%term leq/z leq 0 _ %.
+%term leq/s %pi (leq (s N1) (s N2)) %<- (leq N1 N2) %.
+%sort lt {_ nat} {_ nat} %.
+%term lt/z lt 0 (s _) %.
+%term lt/s %pi (lt (s N1) (s N2)) %<- (lt N1 N2) %.
+%worlds () (lt _ _) %.
+%sort max {_ nat} {_ nat} {_ nat} %.
+%term max/z* max 0 N N %.
+%term max/*z max N 0 N %.
+%term max/s %pi (max (s N1) (s N2) (s N3)) %<- (max N1 N2 N3) %.

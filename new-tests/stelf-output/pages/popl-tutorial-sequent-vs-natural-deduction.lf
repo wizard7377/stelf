@@ -66,7 +66,7 @@ the [admissibility of cut](/wiki/admissibility-of-cut/).
 The natural deduction system exists in a world with arbitrary assumptions <Math formula="\texttt{hyp}~A"/>.
 
 !}%
-%block bhyp {A prop} [H hyp A]%.
+%block bhyp [A prop] {H hyp A}%.
 %{! 
 
 ## Translation: Natural Deduction to Sequent Calculus
@@ -98,7 +98,7 @@ something similar in the translation for the other direction.
 	%pi (nd-to-seq (impE (%the (true A) DtrueA) (%the (true (imp A B)) DtrueAB)) (cut (impL ([hB hyp B] init hB) DconcA) DconcAB))
 	%<- (nd-to-seq DtrueA (%the (conc A) DconcA))
 	%<- (nd-to-seq DtrueAB (%the (conc (imp A B)) DconcAB)) %.
-%block truetohyp {A prop} [DA true A] [HA hyp A] [Dtrans nd-to-seq DA (init HA)]%.
+%block truetohyp [A prop] {DA true A} {HA hyp A} {Dtrans nd-to-seq DA (init HA)}%.
 %worlds (truetohyp) (nd-to-seq _ _) %.
 %total D (nd-to-seq D _) %.
 %{! 
@@ -113,7 +113,7 @@ The following (incomplete) proof establishes that whenever a proposition is deri
 !}%
 %sort hyp-to-true %.
 %mode hyp-to-true %in %out %.
-%block hyptotrue {A prop} [HA hyp A] [DA true A] [Dtrans hyp-to-true HA DA]%.
+%block hyptotrue [A prop] {HA hyp A} {DA true A} {Dtrans hyp-to-true HA DA}%.
 %worlds (hyptotrue) (hyp-to-true _ _) %.
 %total {} (hyp-to-true _ _) %.
 %sort seq-to-nd %.

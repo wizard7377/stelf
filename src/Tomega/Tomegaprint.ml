@@ -15,7 +15,9 @@ open! Basis
 (* Printing of functional proof terms *)
 (* Author: Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module TomegaPrint (TomegaPrint__0 : sig
   (*! structure IntSyn' : INTSYN !*)

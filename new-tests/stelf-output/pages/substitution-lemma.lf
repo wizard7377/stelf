@@ -27,7 +27,7 @@ Consider the following encoding of a simply typed λ-calculus: !}%
 %sort subst %.
 %mode subst %in %in %out %.
 %term _ subst D1 D2 (D2 E1 D1) %.
-%block of-block {T tp} [x exp] [dx of x T]%.
+%block of-block [T tp] {x exp} {dx of x T}%.
 %worlds (of-block) (subst _ _ _) %.
 %total {} (subst _ _ _) %.
 %{! The typing derivation for the substitution is created by applying the LF function ``D2``, which represents the hypothetical typing derivation, to the LF term ``D1``, which represents the typing derivation for the substituted term.  
@@ -101,7 +101,7 @@ can be given as the second argument to the inductive call. !}%
 	%pi (subst D1 ([x] [dx] of/app (D2 x dx) (D3 x dx)) (of/app D2' D3'))
 	%<- (subst D1 D2 D2')
 	%<- (subst D1 D3 D3') %.
-%block assm-block {T tp} [x exp] [dx assm x T]%.
+%block assm-block [T tp] {x exp} {dx assm x T}%.
 %worlds (assm-block) (subst _ _ _) %.
 %total (D1) (subst _ D1 _) %.
 %{! ## Substitution lemmas with dependent types [Advanced topic]
@@ -128,7 +128,7 @@ The following example studies a very simple singleton calculus with the dependen
 	%<- ({x exp} %pi (assm x T) %-> (of (E x) (T' x))) %.
 %term of/app %pi (of (exp/app E1 E2) (T' E2)) %<- (of E2 T) %<- (of E1 (tp/pi T T')) %.
 %term of/sing %pi (of E (tp/sing E)) %<- (of E tp/unit) %.
-%block assm-block {T tp} [x exp] [dx assm x T]%.
+%block assm-block [T tp] {x exp} {dx assm x T}%.
 %{! The following metatheorem is actually true, but the naive attempt at proving it will fail. !}%
 %sort subst-wontwork %.
 %mode subst-wontwork %in %in %out %.

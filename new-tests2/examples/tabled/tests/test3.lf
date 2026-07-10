@@ -1,0 +1,15 @@
+%sort node %.
+%term a node %.
+%term b node %.
+%sort p {_ node} %.
+%tabled p %.
+%term p1 p a %.
+%term p2 %pi (p a) %<- (p b) %.
+%term p3 %pi (p b) %<- (p a) %.
+%querytabled _ 5 %the (p a) A %.
+%sort q {_ node} %.
+%tabled q %.
+%term q2 %pi (q a) %<- (q b) %.
+%term q3 %pi (q b) %<- (q a) %.
+%term q1 q a %.
+%querytabled _ 5 %the (q a) A %.

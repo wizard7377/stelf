@@ -48,8 +48,8 @@
 %term vtr_lam %pi (vtrans (clo K (lam' F)) (lam E)) %<- (trans K (lam' F) (lam E)) %.
 %mode trans %in %in %out %.
 %mode vtrans %in %out %.
-%block tr {K env} [f exp'] [x exp] [u trans K f x]%.
-%block vtr [w val] [x exp] [v vtrans w x]%.
+%block tr [K env] {f exp'} {x exp} {u trans K f x}%.
+%block vtr {w val} {x exp} {v vtrans w x}%.
 %worlds (tr vtr) (trans K F E) (vtrans W V) %.
 % cases for F are covered, although totality is not obvious
 %covers trans %star %in %star %.

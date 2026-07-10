@@ -1,0 +1,146 @@
+%%%%%  Variable Identification  %%%%%
+%sort variable {_ eterm} %.
+%mode variable %in %.
+%block evvar {x eterm} {dv variable x}%.
+%block evbind [a etp] {x eterm} {d evof x a} {dv variable x}%.
+%block evblock [x eterm] {dv variable x}%.
+%%%%%  Beta Normalization  %%%%%
+%sort oa {_ eterm} %.
+%% outermost atomic
+%mode oa %in %.
+%term oa/const oa (econst C) %.
+%term oa/forall oa (eforall A) %.
+%term oa/var %pi (oa X) %<- (variable X) %.
+%term oa/app oa (eapp M N) %.
+%term oa/pi1 oa (epi1 M) %.
+%term oa/pi2 oa (epi2 M) %.
+%sort reduce {_ eterm} {_ eterm} %.
+%mode reduce %in %out %.
+%sort treduce {_ etp} {_ etp} %.
+%mode treduce %in %out %.
+%sort reduce-app {_ eterm} {_ eterm} {_ eterm} %.
+%mode reduce-app %in %in %out %.
+%sort reduce-pi1 {_ eterm} {_ eterm} %.
+%mode reduce-pi1 %in %out %.
+%sort reduce-pi2 {_ eterm} {_ eterm} %.
+%mode reduce-pi2 %in %out %.
+%term reduce/const reduce (econst C) (econst C) %.
+%term reduce/forall %pi (reduce (eforall A) (eforall A')) %<- (treduce A A') %.
+%term reduce/var %pi (reduce X X) %<- (variable X) %.
+%term reduce/lam 
+	%pi (reduce (elam A M) (elam A' M'))
+	%<- (treduce A A')
+	%<- ({x} %pi (variable x) %-> (reduce (M x) (M' x))) %.
+%term reduce/app 
+	%pi (reduce (eapp M N) O)
+	%<- (reduce M M')
+	%<- (reduce N N')
+	%<- (reduce-app M' N' O) %.
+%term reduce-app/atom %pi (reduce-app M N (eapp M N)) %<- (oa M) %.
+%term reduce-app/beta %pi (reduce-app (elam A M) N O) %<- (reduce (M N) O) %.
+%term reduce/pair %pi (reduce (epair M N) (epair M' N')) %<- (reduce M M') %<- (reduce N N') %.
+%term reduce/pi1 %pi (reduce (epi1 M) N) %<- (reduce M M') %<- (reduce-pi1 M' N) %.
+%term reduce-pi1/atom %pi (reduce-pi1 M (epi1 M)) %<- (oa M) %.
+%term reduce-pi1/beta reduce-pi1 (epair M N) M %.
+%term reduce/pi2 %pi (reduce (epi2 M) N) %<- (reduce M M') %<- (reduce-pi2 M' N) %.
+%term reduce-pi2/atom %pi (reduce-pi2 M (epi2 M)) %<- (oa M) %.
+%term reduce-pi2/beta reduce-pi2 (epair M N) N %.
+%term treduce/t treduce et et %.
+%term treduce/pi 
+	%pi (treduce (epi A B) (epi A' B'))
+	%<- (treduce A A')
+	%<- ({x} %pi (variable x) %-> (treduce (B x) (B' x))) %.
+%term treduce/sigma 
+	%pi (treduce (esigma A B) (esigma A' B'))
+	%<- (treduce A A')
+	%<- ({x} %pi (variable x) %-> (treduce (B x) (B' x))) %.
+%term treduce/sing %pi (treduce (esing M) (esing M')) %<- (reduce M M') %.
+%%%%%  Eta Expansion  %%%%%
+%sort selfify {_ eterm} {_ etp} {_ eterm} {_ etp} %.
+%mode selfify %in %in %out %out %.
+%term selfify/t selfify M et M (esing M) %.
+%term selfify/pi 
+	%pi (selfify M (epi A B) (elam A O) (epi A Bs))
+	%<- ({x} selfify x A (N x) _)
+	%<- ({x} selfify (eapp M (N x)) (B x) (O x) (Bs x)) %.
+%term selfify/sigma 
+	%pi (selfify M (esigma A B) (epair N O) (esigma As ([_] Bs)))
+	%<- (selfify (epi1 M) A N As)
+	%<- (selfify (epi2 M) (B (epi1 M)) O Bs) %.
+%term selfify/sing selfify M (esing N) N (esing N) %.
+%%%%%  Coercion  %%%%%
+%sort coerce {_ etp} {_ etp} {_ %pi eterm %-> eterm} %.
+%mode coerce %in %in %out %.
+%term coerce/t coerce et et ([x] x) %.
+%term coerce/pi 
+	%pi (coerce (epi A1 A2) (epi B1 B2) ([f] elam B1 ([x] M2 x (eapp f (M1 x)))))
+	%<- (coerce B1 A1 ([x] M1 x))
+	%<- ({x} %pi (variable x) %-> (treduce (A2 (M1 x)) (A2' x)))
+	%<- ({x} %pi (variable x) %-> (coerce (A2' x) (B2 x) ([y] M2 x y))) %.
+%term coerce/sigma 
+	%pi (coerce (esigma A1 A2) (esigma B1 B2) ([p] epair (M1 (epi1 p)) (M2 (epi1 p) (epi2 p))))
+	%<- (coerce A1 B1 ([x] M1 x))
+	%<- ({x} %pi (variable x) %-> (treduce (B2 (M1 x)) (B2' x)))
+	%<- ({x} %pi (variable x) %-> (coerce (A2 x) (B2' x) ([y] M2 x y))) %.
+%term coerce/sing_t coerce (esing M) et ([x] M) %.
+%term coerce/sing coerce (esing M) (esing M) ([x] M) %.
+%%%%%  Canonization  %%%%%
+%sort canonize {_ eterm} {_ etp} %.
+%sort tcanonize {_ etp} {_ etp} %.
+%mode ekof %in %out %.
+%mode evof %in %out %.
+%mode canonize %in %out %.
+%mode tcanonize %in %out %.
+%term canonize/const %pi (canonize (econst K) As) %<- (ekof K A) %<- (selfify (econst K) A M As) %.
+%term canonize/forall 
+	%pi (canonize (eforall A) B)
+	%<- (tcanonize A A')
+	%<- (selfify (eforall A') (qetp A') M B) %.
+%term canonize/var %pi (canonize X As) %<- (evof X A) %<- (selfify X A M As) %.
+%term canonize/app 
+	%pi (canonize (eapp M N) D)
+	%<- (canonize M (epi A B))
+	%<- (canonize N C)
+	%<- (coerce C A ([_] N'))
+	%<- (treduce (B N') D) %.
+%term canonize/pi1 %pi (canonize (epi1 M) A) %<- (canonize M (esigma A ([_] B))) %.
+%term canonize/pi2 %pi (canonize (epi2 M) B) %<- (canonize M (esigma A ([_] B))) %.
+%term canonize/lam 
+	%pi (canonize (elam A M) (epi A' B))
+	%<- (tcanonize A A')
+	%<- ({x} %pi (evof x A') %-> (variable x) %-> (canonize (M x) (B x))) %.
+%term canonize/pair 
+	%pi (canonize (epair M N) (esigma A ([_] B)))
+	%<- (canonize M A)
+	%<- (canonize N B) %.
+%term tcanonize/t tcanonize et et %.
+%term tcanonize/pi 
+	%pi (tcanonize (epi A B) (epi A' B'))
+	%<- (tcanonize A A')
+	%<- ({x} %pi (evof x A') %-> (variable x) %-> (tcanonize (B x) (B' x))) %.
+%term tcanonize/sigma 
+	%pi (tcanonize (esigma A B) (esigma A' B'))
+	%<- (tcanonize A A')
+	%<- ({x} %pi (evof x A') %-> (variable x) %-> (tcanonize (B x) (B' x))) %.
+%term tcanonize/sing %pi (tcanonize (esing M) (esing M')) %<- (canonize M (esing M')) %.
+%%%%%  Entry Points  %%%%%
+%sort check-eof {_ eterm} {_ etp} %.
+%term check-eof/i %pi (check-eof M A) %<- (canonize M B) %<- (tcanonize A A') %<- (coerce B A' _) %.
+%sort check-equiv {_ eterm} {_ eterm} {_ etp} %.
+%term check-equiv/i 
+	%pi (check-equiv M N C)
+	%<- (canonize M A)
+	%<- (canonize N B)
+	%<- (tcanonize C C')
+	%<- (coerce A C' ([_] O))
+	%<- (coerce B C' ([_] O)) %.
+%sort check-ewf {_ etp} %.
+%term check-ewf/i %pi (check-ewf A) %<- (tcanonize A _) %.
+%sort check-subtp {_ etp} {_ etp} %.
+%term check-subtp/i 
+	%pi (check-subtp A B)
+	%<- (tcanonize A A')
+	%<- (tcanonize B B')
+	%<- (coerce A' B' _) %.
+%sort check-tequiv {_ etp} {_ etp} %.
+%term check-tequiv/i %pi (check-tequiv A B) %<- (tcanonize A C) %<- (tcanonize B C) %.

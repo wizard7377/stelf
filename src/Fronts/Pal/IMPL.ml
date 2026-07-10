@@ -16,7 +16,7 @@ module type IMPL = sig
   (** New elaboration layer: reconstruction / type-inference sub-modules. *)
 
   (** Input source for loading: a file path or an inline string. *)
-  type source = File of Fpath.t | Input of string
+  type source = Loader.source = File of Fpath.t | Input of string
 
   val mode : [ `Repl | `Lsp | `Other ] ref
   (** Operating mode: affects error formatting and REPL behaviour. *)
@@ -43,7 +43,7 @@ module type IMPL = sig
   (* -------------------------------------------------------------------- *)
   (** {1 Result status} *)
 
-  type status =
+  type status = Loader.status =
     | Ok
     | Abort  (** Return status of loading and evaluation operations. *)
 
@@ -51,11 +51,14 @@ module type IMPL = sig
   (** {1 Signature installation} *)
 
   module Install : sig
-    val install1 : ?path:Fpath.t option -> Names.namespace -> Cst.cmd -> unit
-    (** Install a single parsed command into the global signature. *)
+    val install1 :
+      ?path:Fpath.t option -> Names.namespace -> Cst.cmd -> Reply.t list
+    (** Install a single parsed command into the global signature, returning
+        what it produced. *)
 
-    val install : ?path:Fpath.t option -> Names.namespace -> Cst.cmd list -> unit
-    (** Install a list of commands in order. *)
+    val install :
+      ?path:Fpath.t option -> Names.namespace -> Cst.cmd list -> Reply.t list
+    (** Install a list of commands in order, stopping early on [Reply.Quit]. *)
 
     val reset : unit -> unit
     (** Erase the entire global state: signature, name tables, indices, etc. *)
@@ -64,14 +67,15 @@ module type IMPL = sig
   (* -------------------------------------------------------------------- *)
   (** {1 Loading} *)
 
-  val load : Names.namespace -> source -> status
+  val load : Names.namespace -> source -> Reply.outcome
   (** Parse and install all declarations from a source. *)
 
-  val read_decl : unit -> status
+  val read_decl : unit -> Reply.outcome
   (** Read and install a single declaration typed interactively on stdin. *)
 
-  val decl : string -> status
-  (** Print the declaration of the constant identified by a qualified name. *)
+  val decl : string -> Reply.outcome
+  (** Look up the declaration of the constant identified by a qualified
+      name. *)
 
   val top : unit -> unit
   (** Enter the interactive query loop. *)
@@ -82,12 +86,12 @@ module type IMPL = sig
   module Config : sig
     type t = Project.Format.file
     (** The type of configuration objects. *)
-    val read : source -> t 
-    val load : t -> status
+    val read : source -> t
+    val load : t -> Reply.outcome
 
   end
 
-  val make : source -> status
+  val make : source -> Reply.outcome
   (** Convenience: {!Config.read} then {!Config.load} in one step. *)
 
   (* -------------------------------------------------------------------- *)
@@ -265,7 +269,7 @@ module type IMPL = sig
   (** {1 Interactive evaluation} *)
 
   module Eval : sig
-    val eval : Cst.cmd -> unit
+    val eval : Cst.cmd -> Reply.t list
     (** Evaluate a single parsed command (used by REPL and LSP handlers). *)
   end
 

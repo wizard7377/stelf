@@ -17,7 +17,9 @@ open MemoTable
 (* Author: Brigitte Pientka *)
 (* Based on abstract machine in Absmachine.fun *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Tabled (Tabled__0 : sig
   (*! structure IntSyn' : INTSYN !*)

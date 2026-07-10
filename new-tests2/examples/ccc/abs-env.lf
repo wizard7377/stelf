@@ -1,0 +1,21 @@
+%% With explicit environments (as in Curien)
+%sort env {_ obj} %.
+%name env %.
+%term empty env 1 %.
+%term addv %pi (env P) %-> (term A) %-> (env (P * A)) %.
+% look up variable
+%sort absv {_ env A} {_ term B} {_ mor A B} %.
+%term av_x absv (addv G X) X snd %.
+%term av_y %pi (absv (addv G Y) X (M @ fst)) %<- (absv G X M) %.
+% translate term
+%sort abse {_ env A} {_ term B} {_ mor A B} %.
+%term avar %pi (abse G X M) %<- (absv G X M) %.
+%term aunit abse G lunit drop %.
+%term apair %pi (abse G (lpair E1 E2) (pair F1 F2)) %<- (abse G E2 F2) %<- (abse G E1 F1) %.
+%term afst %pi (abse G (lfst E) (fst @ F)) %<- (abse G E F) %.
+%term asnd %pi (abse G (lsnd E) (snd @ F)) %<- (abse G E F) %.
+%term alam %pi (abse G (llam ([x] E x)) (cur F)) %<- ({x} abse (addv G x) (E x) F) %.
+%term aapp 
+	%pi (abse G (lapp E1 E2) (app @ (pair F1 F2)))
+	%<- (abse G E2 F2)
+	%<- (abse G E1 F1) %.

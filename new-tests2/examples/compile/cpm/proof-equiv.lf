@@ -1,0 +1,43 @@
+%%% Equivalence between soundness and completeness proofs
+%%% Author: Frank Pfenning
+%sort peq {_ csd C D C'} {_ ccp D C' C} %.
+%mode peq %in %out %.
+% Natural Numbers
+%term peq_z peq csd_z ccp_z %.
+%term peq_s %pi (peq (csd_s SD1) (ccp_s CP1)) %<- (peq SD1 CP1) %.
+%term peq_case_z 
+	%pi (peq (csd_case_z SD2 SD1) (ccp_case_z CP1 CP2))
+	%<- (peq SD1 CP1)
+	%<- (peq SD2 CP2) %.
+%term peq_case_s 
+	%pi (peq (csd_case_s SD3 SD1) (ccp_case_s CP1 CP3))
+	%<- (peq SD1 CP1)
+	%<- (peq SD3 CP3) %.
+% Pairs
+%term peq_pair 
+	%pi (peq (csd_pair SD2 SD1) (ccp_pair CP1 CP2))
+	%<- (peq SD1 CP1)
+	%<- (peq SD2 CP2) %.
+%term peq_fst %pi (peq (csd_fst SD1) (ccp_fst CP1)) %<- (peq SD1 CP1) %.
+%term peq_snd %pi (peq (csd_snd SD1) (ccp_snd CP1)) %<- (peq SD1 CP1) %.
+% Functions
+%term peq_lam peq csd_lam ccp_lam %.
+%term peq_app 
+	%pi (peq (csd_app SD3 SD2 SD1) (ccp_app CP1 CP2 CP3))
+	%<- (peq SD1 CP1)
+	%<- (peq SD2 CP2)
+	%<- (peq SD3 CP3) %.
+% Definitions
+%term peq_letv 
+	%pi (peq (csd_letv SD2 SD1) (ccp_letv CP1 CP2))
+	%<- (peq SD1 CP1)
+	%<- (peq SD2 CP2) %.
+%term peq_letn %pi (peq (csd_letn SD1) (ccp_letn CP1)) %<- (peq SD1 CP1) %.
+% Recursion
+%term peq_fix %pi (peq (csd_fix SD1) (ccp_fix CP1)) %<- (peq SD1 CP1) %.
+% Values
+%term peq_vl peq csd_vl ccp_vl %.
+%worlds () (peq _ _) %.
+%%% For complete evaluations
+%sort proof_equiv {_ ceval_sound CE D} {_ ceval_complete D CE} %.
+%term pequiv %pi (proof_equiv (cevsd SD) (cevcp CP)) %<- (peq SD CP) %.

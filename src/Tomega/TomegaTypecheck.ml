@@ -12,7 +12,9 @@ include TOMEGATYPECHECK
 open! Basis
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module TomegaTypeCheck (TomegaTypeCheck__0 : sig
   (* Type checking for Tomega *)

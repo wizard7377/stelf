@@ -1,0 +1,110 @@
+%%%%%  Syntax  %%%%%
+%sort tp %.
+%name tp %.
+%sort atom %.
+%name atom %.
+%sort term %.
+%name term %.
+%term t tp %.
+%term pi %pi tp %-> (%pi atom %-> tp) %-> tp %.
+%term sigma %pi tp %-> (%pi atom %-> tp) %-> tp %.
+%term sing %pi atom %-> tp %.
+%term const %pi constant %-> atom %.
+%term forall %pi tp %-> atom %.
+%term app %pi atom %-> term %-> atom %.
+%term pi1 %pi atom %-> atom %.
+%term pi2 %pi atom %-> atom %.
+%term at %pi atom %-> term %.
+%term lam %pi (%pi atom %-> term) %-> term %.
+%term pair %pi term %-> term %-> term %.
+%%%%%  Substitution  %%%%%
+%sort aasub {_ %pi atom %-> atom} {_ term} {_ atom} %.
+%mode aasub %in %in %out %.
+%sort aosub {_ %pi atom %-> atom} {_ term} {_ term} %.
+%mode aosub %in %in %out %.
+%sort sub {_ %pi atom %-> term} {_ term} {_ term} %.
+%mode sub %in %in %out %.
+%sort tsub {_ %pi atom %-> tp} {_ term} {_ tp} %.
+%mode tsub %in %in %out %.
+%term aasub/closed aasub ([_] R) _ R %.
+%term aasub/forall %pi (aasub ([x] forall (A x)) M (forall A')) %<- (tsub A M A') %.
+%term aosub/var aosub ([x] x) M M %.
+%term aasub/app 
+	%pi (aasub ([x] app (R x) (M x)) N (app R' M'))
+	%<- (aasub R N R')
+	%<- (sub M N M') %.
+%term aosub/app 
+	%pi (aosub ([x] app (R x) (M x)) N M1')
+	%<- (aosub R N (lam M1))
+	%<- (sub M N M')
+	%<- (sub M1 M' M1') %.
+%term aasub/pi1 %pi (aasub ([x] pi1 (R x)) M (pi1 R')) %<- (aasub R M R') %.
+%term aosub/pi1 %pi (aosub ([x] pi1 (R x)) M M1) %<- (aosub R M (pair M1 M2)) %.
+%term aasub/pi2 %pi (aasub ([x] pi2 (R x)) M (pi2 R')) %<- (aasub R M R') %.
+%term aosub/pi2 %pi (aosub ([x] pi2 (R x)) M M2) %<- (aosub R M (pair M1 M2)) %.
+%term sub/aa %pi (sub ([x] at (R x)) M (at R')) %<- (aasub R M R') %.
+%term sub/ao %pi (sub ([x] at (R x)) M M') %<- (aosub R M M') %.
+%term sub/lam 
+	%pi (sub ([x] lam ([y] M x y)) N (lam ([y] M' y)))
+	%<- ({y} sub ([x] M x y) N (M' y)) %.
+%term sub/pair 
+	%pi (sub ([x] pair (M1 x) (M2 x)) N (pair M1' M2'))
+	%<- (sub M1 N M1')
+	%<- (sub M2 N M2') %.
+%term tsub/t tsub ([_] t) _ t %.
+%term tsub/pi 
+	%pi (tsub ([x] pi (A x) ([y] B x y)) M (pi A' ([y] B' y)))
+	%<- (tsub A M A')
+	%<- ({y} tsub ([x] B x y) M (B' y)) %.
+%term tsub/sigma 
+	%pi (tsub ([x] sigma (A x) ([y] B x y)) M (sigma A' ([y] B' y)))
+	%<- (tsub A M A')
+	%<- ({y} tsub ([x] B x y) M (B' y)) %.
+%term tsub/singa %pi (tsub ([x] sing (R x)) M (sing R')) %<- (aasub R M R') %.
+%term tsub/singo %pi (tsub ([x] sing (R x)) M (sing R')) %<- (aosub R M (at R')) %.
+%%%%%  Typing Rules  %%%%%
+%sort kof {_ constant} {_ tp} %.
+%mode kof %in %out %.
+%sort wf {_ tp} %.
+%mode wf %in %.
+%sort vof {_ atom} {_ tp} %.
+%mode vof %in %out %.
+%sort aof {_ atom} {_ tp} %.
+%mode aof %in %out %.
+%sort of {_ term} {_ tp} %.
+%mode of %in %in %.
+%term wf/t wf t %.
+%term wf/pi %pi (wf (pi A B)) %<- (wf A) %<- ({x} %pi (vof x A) %-> (wf (B x))) %.
+%term wf/sigma %pi (wf (sigma A B)) %<- (wf A) %<- ({x} %pi (vof x A) %-> (wf (B x))) %.
+%term wf/sing %pi (wf (sing R)) %<- (aof R t) %.
+%term aof/const %pi (aof (const C) A) %<- (kof C A) %<- (wf A) %.
+%define qtp (%pi tp %-> tp) [a] pi (pi a ([_] t)) ([_] t) %.
+%term aof/forall %pi (aof (forall A) (qtp A)) %<- (wf A) %.
+%term aof/var %pi (aof X A) %<- (vof X A) %<- (wf A) %.
+%term aof/app 
+	%pi (aof (app R M) B')
+	%<- (aof R (pi A B))
+	%<- (of M A)
+	%<- (tsub B M B')
+	%<- (wf B') %.
+%term aof/pi1 %pi (aof (pi1 R) A) %<- (aof R (sigma A B)) %.
+%term aof/pi2 %pi (aof (pi2 R) (B (pi1 R))) %<- (aof R (sigma A B)) %.
+%term of/at %pi (of (at R) t) %<- (aof R t) %.
+%term of/lam %pi (of (lam M) (pi A B)) %<- (wf A) %<- ({x} %pi (vof x A) %-> (of (M x) (B x))) %.
+%term of/pair 
+	%pi (of (pair M N) (sigma A B))
+	%<- (of M A)
+	%<- (tsub B M B')
+	%<- (of N B')
+	%<- ({x} %pi (vof x A) %-> (wf (B x))) %.
+%term of/sing %pi (of (at R) (sing R)) %<- (aof R t) %.
+%%%%%  Constants  %%%%%
+%sort topen {_ ctp} {_ tp} %.
+%mode topen %in %out %.
+%term topen/t topen ct t %.
+%term topen/pi %pi (topen (cpi Ac Bc) (pi A ([_] B))) %<- (topen Ac A) %<- (topen Bc B) %.
+%term kof/i %pi (kof C A') %<- (ckof C A) %<- (topen A A') %.
+%%%%%  Worlds  %%%%%
+%block var {x atom}%.
+%block bind [a tp] {x atom} {d vof x a}%.
+%block ofblock [x atom] [a tp] {d vof x a}%.

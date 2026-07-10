@@ -1,0 +1,46 @@
+%                                       
+%. %[[ ## CPS Conversion %]]
+%sort tp %.
+%term o tp %.
+%term => %pi tp %-> tp %-> tp %.
+%prec %right 3 => %.
+%sort exp {_ tp} %.
+%sort value {_ tp} %.
+%term app %pi (exp (A => B)) %-> (exp A) %-> (exp B) %.
+%term lam %pi (%pi (value A) %-> (exp B)) %-> (value (A => B)) %.
+%term ret %pi (value A) %-> (exp A) %.
+%block sourceb [A tp] {x value A}%.
+%worlds (sourceb) (exp _) (value _) %.
+%sort contra %.
+%sort cvalue {_ tp} %.
+%sort ccont {_ tp} %.
+%term capp %pi (cvalue (A => B)) %-> (cvalue A) %-> (ccont B) %-> contra %.
+%term clam %pi (%pi (cvalue A) %-> (ccont B) %-> contra) %-> (cvalue (A => B)) %.
+%term cfalsei %pi (%pi (cvalue A) %-> contra) %-> (ccont A) %.
+%term cthrow %pi (ccont A) %-> (cvalue A) %-> contra %.
+%block targetb1 [A tp] {x cvalue A}%.
+%block targetb2 [A tp] {x ccont A}%.
+%worlds (targetb1 targetb2) (contra) (cvalue _) (ccont _) %.
+%sort cps {_ value A} {_ cvalue A} %.
+%mode cps %in %out %.
+%sort cpse {_ exp A} {_ %pi (ccont A) %-> contra} %.
+%mode cpse %in %out %.
+%term cps/lam 
+	%pi (cps (lam (%the (%pi (value A) %-> (exp B)) E)) (clam (%the (%pi (cvalue A) %-> (ccont B) %-> contra) E')))
+	%<- ({x value A} {x' cvalue A} %pi (cps x x') %-> (cpse (E x) (E' x'))) %.
+%term cpse/app 
+	%pi (cpse (app (%the (exp (B => A)) E1) (%the (exp B) E2)) ([c ccont A] E1' (cfalsei ([f cvalue (B => A)] E2' (cfalsei ([x cvalue B] capp f x c))))))
+	%<- (cpse E1 (%the (%pi (ccont (B => A)) %-> contra) E1'))
+	%<- (cpse E2 (%the (%pi (ccont B) %-> contra) E2')) %.
+%term cpse/ret 
+	%pi (cpse (ret (%the (value A) V)) ([c ccont A] cthrow c V'))
+	%<- (cps V (%the (cvalue A) V')) %.
+%block cpsb [A tp] {x value A} {x' cvalue A} {d cps x x'}%.
+%worlds (cpsb) (cps _ _) (cpse _ _) %.
+%total (E V) (cps E _) (cpse V _) %.
+%. %[[
+-----
+This page was copied from the MediaWiki version of the Twelf Wiki.
+If anything looks wrong, you can refer to the
+[wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/POPL_Tutorial/cps-truefalse).
+%]]

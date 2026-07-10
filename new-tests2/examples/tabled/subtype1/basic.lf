@@ -1,0 +1,52 @@
+%%% Mini-ML types.
+%%% Extended with some atomic subtyping
+%%% Author: Frank Pfenning
+%sort tp %.
+%name tp %.
+%term nat tp %.
+% Natural Numbers
+%term pos tp %.
+% Positive Numbers
+%term zero tp %.
+% Singleton Zero
+%term int tp %.
+%term neg tp %.
+%%% Subtyping
+%%% Specification, not executable
+%sort sub {_ tp} {_ tp} %.
+%name sub %.
+%mode sub %star %star %.
+%tabled sub %.
+%term sub_refl sub T T %.
+%term sub_trans %pi (sub S R) %<- (sub T R) %<- (sub S T) %.
+% sub_trans : sub S T -> sub T R -> sub S R.
+%term sub_pn sub pos nat %.
+%term sub_zn sub zero nat %.
+%term sub_nan sub nat int %.
+%term sub_nen sub neg int %.
+%
+
+%% Typing rules
+%%% Specification, not executable
+%sort of {_ exp} {_ tp} %.
+%name of %.
+%tabled of %.
+% Subtyping
+%term tp_sub %pi (of E T) %<- (of E T') %<- (sub T' T) %.
+% Natural Numbers
+% Standard rules
+%term tp_z_nat of z nat %.
+%term tp_s_nat %pi (of (s E) nat) %<- (of E nat) %.
+%term tp_case_nat 
+	%pi (of (case E1 E2 E3) T)
+	%<- (of E1 nat)
+	%<- (of E2 T)
+	%<- ({x exp} %pi (of x nat) %-> (of (E3 x) T)) %.
+% New rules
+%term tp_z_zero of z zero %.
+%term tp_s_pos %pi (of (s E) pos) %<- (of E nat) %.
+%term tp_case_zero %pi (of (case E1 E2 E3) T) %<- (of E1 zero) %<- (of E2 T) %.
+%term tp_case_pos 
+	%pi (of (case E1 E2 E3) T)
+	%<- (of E1 pos)
+	%<- ({x exp} %pi (of x nat) %-> (of (E3 x) T)) %.

@@ -1,0 +1,26 @@
+%%% Canonical forms for natural deductions.
+%%% Author: Frank Pfenning
+%sort can {A o} {_ pf A} %.
+% Canonical deductions
+%sort atm {_ pf A} %.
+% Atomic deductions
+%name can %.
+%name atm %.
+%mode can %in %in %.
+%mode atm %in %.
+%term can_andi %pi (can (A and B) (andi D E)) %<- (can A D) %<- (can B E) %.
+%. %[
+can_impi : can (A imp B) (impi D)
+	    <- {u:pf A} atm u -> can B (D u).
+}%
+%term can_truei can true truei %.
+%. %[
+can_foralli : can (forall A) (foralli D)
+	       <- {a:i} can (A a) (D a).
+}%
+%term can_atm %pi (can (atom P) D) %<- (atm D) %.
+%term atm_andel %pi (atm (andel D)) %<- (atm D) %.
+%term atm_ander %pi (atm (ander D)) %<- (atm D) %.
+%term atm_impe %pi (atm (impe D (%the (pf B) E))) %<- (atm D) %<- (can B E) %.
+%term atm_foralle %pi (atm (foralle D T)) %<- (atm D) %.
+%worlds () (can _ _) (atm _) %.

@@ -1,0 +1,22 @@
+%sort nat %.
+%name nat %.
+%term z nat %.
+%term s %pi nat %-> nat %.
+%sort nt {_ nat} %.
+%name nt %.
+%term nt_z nt z %.
+%term nt_s %pi (nt (s X)) %<- (nt X) %.
+%sort plus {_ nat} {_ nat} {_ nat} %.
+%name plus %.
+%term p_z plus z Y Y %.
+%term p_s %pi (plus (s X) Y (s Z)) %<- (plus X Y Z) %.
+%sort acker {_ nat} {_ nat} {_ nat} %.
+%mode acker %in %in %out %.
+%term a_1 acker z Y (s Y) %.
+%term a_2 %pi (acker (s X) z Z) %<- (acker X (s z) Z) %.
+%term a_3 %pi (acker (s X) (s Y) Z) %<- (acker (s X) Y Z') %<- (acker X Z' Z) %.
+%worlds () (acker _ _ _) %.
+%define arg1 s (s (s z)) %.
+%define arg2 s (s (s (s (s z)))) %.
+% query 1 1  (acker arg1 arg2 Z).
+% fquery (acker arg1 arg2 Z).

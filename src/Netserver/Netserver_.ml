@@ -9,11 +9,18 @@ include NETSERVER
 (* filesystem directory where stelf examples are kept *)
 (* signature SERVER *)
 exception Eof
-let () = Printexc.register_printer (function Eof -> Some "End of file" | _ -> None)
+
+let () =
+  Printexc.register_printer (function Eof -> Some "End of file" | _ -> None)
+
 exception Quit
+
 let () = Printexc.register_printer (function Quit -> Some "Quit" | _ -> None)
+
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module NetServer : NETSERVER = struct
   let rec join arg__1 arg__2 =

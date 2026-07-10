@@ -15,9 +15,16 @@ open! Basis
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
 exception Unify of string
-let () = Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Unify msg -> Some msg | _ -> None)
+
 exception NotInvertible
-let () = Printexc.register_printer (function NotInvertible -> Some "Not invertible" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | NotInvertible -> Some "Not invertible"
+    | _ -> None)
 
 module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
   (*! structure IntSyn = IntSyn' !*)

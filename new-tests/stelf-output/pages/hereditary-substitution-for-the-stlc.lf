@@ -45,7 +45,7 @@ We consider a calculus with function and pair types, as well as a single base ty
 %term asm %pi rtm %-> mtm %.
 %term lam %pi (%pi rtm %-> mtm) %-> mtm %.
 %term pair %pi mtm %-> mtm %-> mtm %.
-%block rtm_block [x rtm]%.
+%block rtm_block {x rtm}%.
 %worlds (rtm_block) (tp) (rtm) (mtm) %.
 %{! The syntax of types is standard.  There are a few subtleties in the syntax of terms:
 * The syntax of terms is stratified into atomic terms ``rtm`` and canonical terms ``mtm`` in order to syntactically prevent β-redices.  For example, pairs are canonical but the argument of a projection (``fst`` and ``snd``) is atomic, so we can never project from a term that is syntactically a pair.  
@@ -69,7 +69,7 @@ We consider a calculus with function and pair types, as well as a single base ty
 	%pi (canon (lam M) (arrow A2 A))
 	%<- ({x rtm} %pi (atom x A2) %-> (canon (M x) A)) %.
 %term canon_pair %pi (canon (pair M1 M2) (prod A1 A2)) %<- (canon M1 A1) %<- (canon M2 A2) %.
-%block atom_block {A tp} [x rtm] [dx atom x A]%.
+%block atom_block [A tp] {x rtm} {dx atom x A}%.
 %worlds (atom_block) (atom _ _) (canon _ _) %.
 %terminates (R M) (atom R _) (canon M _) %.
 %{! We define two mutually-recursive judgements, ``atom R A`` and ``canon M A``.  The typing judgements for the two syntactic categories have a bidirectional operational interpretation: an ``mtm`` is checked against a type, whereas an ``rtm`` synthesizes a type.  The rules are the standard typing rules for the λ-calculus,  modified to follow the restrictions of the syntax.  Additionally, the rule ``canon_asm`` applies only at base type, which forces an ``mtm`` to be η-long.

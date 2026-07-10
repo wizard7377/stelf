@@ -19,9 +19,14 @@ open! Basis
 (* Filling  Version 1.3*)
 (* Author: Carsten Schuermann *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
 exception TimeOut
-let () = Printexc.register_printer (function TimeOut -> Some "TimeOut" | _ -> None)
+
+let () =
+  Printexc.register_printer (function TimeOut -> Some "TimeOut" | _ -> None)
 
 module MTPFilling (MTPFilling__0 : sig
   module MTPGlobal : MtpGlobal.MTPGLOBAL

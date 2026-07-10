@@ -18,7 +18,11 @@ include RING
 (* Rings (aka cyclic lists) *)
 (* Author: Carsten Schuermann *)
 exception Empty
-let () = Printexc.register_printer (function Empty -> Some "Ring is empty" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Empty -> Some "Ring is empty"
+    | _ -> None)
 
 module Ring : RING = struct
   exception Empty = Empty

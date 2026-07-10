@@ -1,0 +1,28 @@
+%%% Cut-Free Classical Sequent Calculus
+%%% Author: Frank Pfenning
+%sort # %.
+% Token (for contradiction)
+%sort neg {_ o} %.
+% Hypotheses (left)
+%sort pos {_ o} %.
+% Conclusions (right)
+%name # %.
+%name neg %.
+%name pos %.
+%term axiom' %pi (neg A) %-> (pos A) %-> # %.
+%term andr' %pi (%pi (pos A) %-> #) %-> (%pi (pos B) %-> #) %-> (pos (A and B)) %-> # %.
+%term andl1' %pi (%pi (neg A) %-> #) %-> (neg (A and B)) %-> # %.
+%term andl2' %pi (%pi (neg B) %-> #) %-> (neg (A and B)) %-> # %.
+%term impr' %pi (%pi (neg A) %-> (pos B) %-> #) %-> (pos (A imp B)) %-> # %.
+%term impl' %pi (%pi (pos A) %-> #) %-> (%pi (neg B) %-> #) %-> (neg (A imp B)) %-> # %.
+%term orr1' %pi (%pi (pos A) %-> #) %-> (pos (A or B)) %-> # %.
+%term orr2' %pi (%pi (pos B) %-> #) %-> (pos (A or B)) %-> # %.
+%term orl' %pi (%pi (neg A) %-> #) %-> (%pi (neg B) %-> #) %-> (neg (A or B)) %-> # %.
+%term notr' %pi (%pi (neg A) %-> #) %-> (pos (not A)) %-> # %.
+%term notl' %pi (%pi (pos A) %-> #) %-> (neg (not A)) %-> # %.
+%term truer' %pi (pos true) %-> # %.
+%term falsel' %pi (neg false) %-> # %.
+%term forallr' %pi ({a i} %pi (pos (A a)) %-> #) %-> (pos (forall A)) %-> # %.
+%term foralll' {T i} %pi (%pi (neg (A T)) %-> #) %-> (neg (forall A)) %-> # %.
+%term existsr' {T i} %pi (%pi (pos (A T)) %-> #) %-> (pos (exists A)) %-> # %.
+%term existsl' %pi ({a i} %pi (neg (A a)) %-> #) %-> (neg (exists A)) %-> # %.

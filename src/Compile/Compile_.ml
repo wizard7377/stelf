@@ -21,7 +21,9 @@ open Cprint
 (* Modified: Jeff Polakow, Carsten Schuermann, Larry Greenfield,
              Roberto Virga, Brigitte Pientka *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MakeCompile
     (Whnf : WHNF)
@@ -345,7 +347,8 @@ module MakeCompile
     let g'_ = convertKRes (g_, List.rev k_, left) in
     begin
       Display.chatter_s 6 "\nClause Sbt Eqn";
-      Display.chatter_s 6 (CPrint.clauseToString "\t" (g'_, C.Assign (h'_, eqs_)));
+      Display.chatter_s 6
+        (CPrint.clauseToString "\t" (g'_, C.Assign (h'_, eqs_)));
       (g'_, Some (h'_, eqs_))
     end
   (* insert R' together with Eqs and G and sc C.True *)

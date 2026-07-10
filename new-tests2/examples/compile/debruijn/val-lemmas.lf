@@ -1,0 +1,26 @@
+%%% Lemmas about values.
+%%% Author: Frank Pfenning
+%%% Values correspond to value expressions.
+%sort vtrans_val {_ vtrans W E} {_ value E} %.
+%term vtrv_z vtrans_val vtr_z val_z %.
+%term vtrv_s %pi (vtrans_val (vtr_s U1) (val_s P1)) %<- (vtrans_val U1 P1) %.
+%term vtrv_pair 
+	%pi (vtrans_val (vtr_pair U2 U1) (val_pair P2 P1))
+	%<- (vtrans_val U1 P1)
+	%<- (vtrans_val U2 P2) %.
+%term vtrv_lam vtrans_val (vtr_lam U1) val_lam %.
+%mode vtrans_val %in %out %.
+%worlds () (vtrans_val U P) %.
+%covers vtrans_val %in %out %.
+%%% Values evaluate only to themselves.
+%sort val_eval {_ value E} {_ eval E E} %.
+%term vev_z val_eval val_z ev_z %.
+%term vev_s %pi (val_eval (val_s P1) (ev_s D1)) %<- (val_eval P1 D1) %.
+%term vev_pair 
+	%pi (val_eval (val_pair P2 P1) (ev_pair D2 D1))
+	%<- (val_eval P1 D1)
+	%<- (val_eval P2 D2) %.
+%term vev_lam val_eval val_lam ev_lam %.
+%mode val_eval %in %out %.
+%worlds () (val_eval P D) %.
+%covers val_eval %in %out %.

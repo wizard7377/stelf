@@ -1,0 +1,723 @@
+%%%%%  Extra Worlds  %%%%%
+%worlds () (constant) %.
+%worlds (evar) (etp) (eterm) %.
+%%%%%  Equalities  %%%%%
+%sort atom-eq {_ atom} {_ atom} %.
+%term atom-eq/i atom-eq R R %.
+%sort constant-eq {_ constant} {_ constant} %.
+%term constant-eq/i constant-eq C C %.
+%sort ctp-eq {_ ctp} {_ ctp} %.
+%term ctp-eq/i ctp-eq A A %.
+%sort ctx-eq {_ ctx} {_ ctx} %.
+%term ctx-eq/i ctx-eq G G %.
+%sort eterm-eq {_ eterm} {_ eterm} %.
+%term eterm-eq/i eterm-eq M M %.
+%sort etp-eq {_ etp} {_ etp} %.
+%term etp-eq/i etp-eq A A %.
+%sort sctx-eq {_ sctx} {_ sctx} %.
+%term sctx-eq/i sctx-eq G G %.
+%sort stp-eq {_ stp} {_ stp} %.
+%term stp-eq/i stp-eq T T %.
+%sort term-eq {_ term} {_ term} %.
+%term term-eq/i term-eq M M %.
+%sort tp-eq {_ tp} {_ tp} %.
+%term tp-eq/i tp-eq T T %.
+%%%%%  A Closed Atom  %%%%%
+%define aca atom const unit %.
+%%%%%  Symmetry  %%%%%
+%sort atom-eq-symm {_ atom-eq R R'} {_ atom-eq R' R} %.
+%mode atom-eq-symm %in %out %.
+%term _ atom-eq-symm atom-eq/i atom-eq/i %.
+%worlds (var) (atom-eq-symm _ _) %.
+%total {} (atom-eq-symm _ _) %.
+%sort eterm-eq-symm {_ eterm-eq M N} {_ eterm-eq N M} %.
+%mode eterm-eq-symm %in %out %.
+%term _ eterm-eq-symm eterm-eq/i eterm-eq/i %.
+%worlds (evar) (eterm-eq-symm _ _) %.
+%total {} (eterm-eq-symm _ _) %.
+%sort etp-eq-symm {_ etp-eq A B} {_ etp-eq B A} %.
+%mode etp-eq-symm %in %out %.
+%term _ etp-eq-symm etp-eq/i etp-eq/i %.
+%worlds (evar) (etp-eq-symm _ _) %.
+%total {} (etp-eq-symm _ _) %.
+%sort term-eq-symm {_ term-eq M N} {_ term-eq N M} %.
+%mode term-eq-symm %in %out %.
+%term _ term-eq-symm term-eq/i term-eq/i %.
+%worlds (var) (term-eq-symm _ _) %.
+%total {} (term-eq-symm _ _) %.
+%sort tp-eq-symm {_ tp-eq A B} {_ tp-eq B A} %.
+%mode tp-eq-symm %in %out %.
+%term _ tp-eq-symm tp-eq/i tp-eq/i %.
+%worlds (var) (tp-eq-symm _ _) %.
+%total {} (tp-eq-symm _ _) %.
+%%%%%  Transitivity  %%%%%
+%sort atom-eq-trans {_ atom-eq R1 R2} {_ atom-eq R2 R3} {_ atom-eq R1 R3} %.
+%mode atom-eq-trans %in %in %out %.
+%term _ atom-eq-trans atom-eq/i atom-eq/i atom-eq/i %.
+%worlds (var) (atom-eq-trans _ _ _) %.
+%total {} (atom-eq-trans _ _ _) %.
+%sort stp-eq-trans {_ stp-eq T1 T2} {_ stp-eq T2 T3} {_ stp-eq T1 T3} %.
+%mode stp-eq-trans %in %in %out %.
+%term _ stp-eq-trans stp-eq/i stp-eq/i stp-eq/i %.
+%worlds () (stp-eq-trans _ _ _) %.
+%total {} (stp-eq-trans _ _ _) %.
+%sort term-eq-trans {_ term-eq M N} {_ term-eq N O} {_ term-eq M O} %.
+%mode term-eq-trans %in %in %out %.
+%term _ term-eq-trans term-eq/i term-eq/i term-eq/i %.
+%worlds (var) (term-eq-trans _ _ _) %.
+%total {} (term-eq-trans _ _ _) %.
+%sort tp-eq-trans {_ tp-eq A B} {_ tp-eq B C} {_ tp-eq A C} %.
+%mode tp-eq-trans %in %in %out %.
+%term _ tp-eq-trans tp-eq/i tp-eq/i tp-eq/i %.
+%worlds (var) (tp-eq-trans _ _ _) %.
+%total {} (tp-eq-trans _ _ _) %.
+%%%%%  Cons Lemmas  %%%%%
+%sort app-resp {_ atom-eq R R'} {_ term-eq M M'} {_ atom-eq (app R M) (app R' M')} %.
+%mode app-resp %in %in %out %.
+%term _ app-resp atom-eq/i term-eq/i atom-eq/i %.
+%worlds (var) (app-resp _ _ _) %.
+%total {} (app-resp _ _ _) %.
+%sort atom-resp-atom {R %pi atom %-> atom} {_ atom-eq Q Q'} {_ atom-eq (R Q) (R Q')} %.
+%mode atom-resp-atom %in %in %out %.
+%term _ atom-resp-atom _ atom-eq/i atom-eq/i %.
+%worlds (var) (atom-resp-atom _ _ _) %.
+%total {} (atom-resp-atom _ _ _) %.
+%sort atom-resp-term {R %pi term %-> atom} {_ term-eq M M'} {_ atom-eq (R M) (R M')} %.
+%mode atom-resp-term %in %in %out %.
+%term _ atom-resp-term _ term-eq/i atom-eq/i %.
+%worlds (var) (atom-resp-term _ _ _) %.
+%total {} (atom-resp-term _ _ _) %.
+%sort atom-resp-tp {R %pi tp %-> atom} {_ tp-eq A A'} {_ atom-eq (R A) (R A')} %.
+%mode atom-resp-tp %in %in %out %.
+%term _ atom-resp-tp _ tp-eq/i atom-eq/i %.
+%worlds (var) (atom-resp-tp _ _ _) %.
+%total {} (atom-resp-tp _ _ _) %.
+%sort cons-resp {_ ctx-eq G G'} {_ atom-eq X X'} {_ tp-eq A A'} {_ ctx-eq (cons G X A) (cons G' X' A')} %.
+%mode cons-resp %in %in %in %out %.
+%term _ cons-resp ctx-eq/i atom-eq/i tp-eq/i ctx-eq/i %.
+%worlds (var) (cons-resp _ _ _ _) %.
+%total {} (cons-resp _ _ _ _) %.
+%sort elam-resp {_ etp-eq A A'} {_ {x} eterm-eq (M x) (M' x)} {_ eterm-eq (elam A M) (elam A' M')} %.
+%mode elam-resp %in %in %out %.
+%term _ elam-resp etp-eq/i ([_] eterm-eq/i) eterm-eq/i %.
+%worlds (evar) (elam-resp _ _ _) %.
+%total {} (elam-resp _ _ _) %.
+%sort epair-resp {_ eterm-eq M M'} {_ eterm-eq N N'} {_ eterm-eq (epair M N) (epair M' N')} %.
+%mode epair-resp %in %in %out %.
+%term _ epair-resp eterm-eq/i eterm-eq/i eterm-eq/i %.
+%worlds (evar) (epair-resp _ _ _) %.
+%total {} (epair-resp _ _ _) %.
+%sort epi-resp {_ etp-eq A A'} {_ {x} etp-eq (B x) (B' x)} {_ etp-eq (epi A B) (epi A' B')} %.
+%mode epi-resp %in %in %out %.
+%term _ epi-resp etp-eq/i ([_] etp-eq/i) etp-eq/i %.
+%worlds (evar) (epi-resp _ _ _) %.
+%total {} (epi-resp _ _ _) %.
+%sort equiv-resp {_ eterm-eq M M'} {_ eterm-eq N N'} {_ etp-eq A A'} {_ equiv M N A} {_ equiv M' N' A'} %.
+%mode equiv-resp %in %in %in %in %out %.
+%term _ equiv-resp eterm-eq/i eterm-eq/i etp-eq/i D D %.
+%worlds (evar ebind eofblock) (equiv-resp _ _ _ _ _) %.
+%total {} (equiv-resp _ _ _ _ _) %.
+%sort esigma-resp {_ etp-eq A A'} {_ {x} etp-eq (B x) (B' x)} {_ etp-eq (esigma A B) (esigma A' B')} %.
+%mode esigma-resp %in %in %out %.
+%term _ esigma-resp etp-eq/i ([_] etp-eq/i) etp-eq/i %.
+%worlds (evar) (esigma-resp _ _ _) %.
+%total {} (esigma-resp _ _ _) %.
+%sort eterm-resp-bind {M %pi etp %-> (%pi eterm %-> eterm) %-> eterm} {_ etp-eq A A'} {_ {x} eterm-eq (N x) (N' x)} {_ eterm-eq (M A N) (M A' N')} %.
+%mode eterm-resp-bind %in %in %in %out %.
+%term _ eterm-resp-bind _ etp-eq/i ([_] eterm-eq/i) eterm-eq/i %.
+%worlds (evar) (eterm-resp-bind _ _ _ _) %.
+%total {} (eterm-resp-bind _ _ _ _) %.
+%sort eterm-resp-eterm {M %pi eterm %-> eterm} {_ eterm-eq N N'} {_ eterm-eq (M N) (M N')} %.
+%mode eterm-resp-eterm %in %in %out %.
+%term _ eterm-resp-eterm _ eterm-eq/i eterm-eq/i %.
+%worlds (evar) (eterm-resp-eterm _ _ _) %.
+%total {} (eterm-resp-eterm _ _ _) %.
+%sort eterm-resp-eterm2 {M %pi eterm %-> eterm %-> eterm} {_ eterm-eq N N'} {_ eterm-eq O O'} {_ eterm-eq (M N O) (M N' O')} %.
+%mode eterm-resp-eterm2 %in %in %in %out %.
+%term _ eterm-resp-eterm2 _ eterm-eq/i eterm-eq/i eterm-eq/i %.
+%worlds (evar) (eterm-resp-eterm2 _ _ _ _) %.
+%total {} (eterm-resp-eterm2 _ _ _ _) %.
+%sort eterm-resp-eterm-fun {_ {x} eterm-eq (M x) (M' x)} {_ eterm-eq N N'} {_ eterm-eq (M N) (M' N')} %.
+%mode eterm-resp-eterm-fun %in %in %out %.
+%term _ eterm-resp-eterm-fun ([_] eterm-eq/i) eterm-eq/i eterm-eq/i %.
+%worlds (evar) (eterm-resp-eterm-fun _ _ _) %.
+%total {} (eterm-resp-eterm-fun _ _ _) %.
+%sort eterm-resp-etp {M %pi etp %-> eterm} {_ etp-eq A A'} {_ eterm-eq (M A) (M A')} %.
+%mode eterm-resp-etp %in %in %out %.
+%term _ eterm-resp-etp _ etp-eq/i eterm-eq/i %.
+%worlds (evar) (eterm-resp-etp _ _ _) %.
+%total {} (eterm-resp-etp _ _ _) %.
+%sort eterm-resp-halfbind {M %pi (%pi eterm %-> eterm) %-> eterm} {_ {x} eterm-eq (N x) (N' x)} {_ eterm-eq (M N) (M N')} %.
+%mode eterm-resp-halfbind %in %in %out %.
+%term _ eterm-resp-halfbind _ ([_] eterm-eq/i) eterm-eq/i %.
+%worlds (evar) (eterm-resp-halfbind _ _ _) %.
+%total {} (eterm-resp-halfbind _ _ _) %.
+%sort etp-resp-bind {A %pi etp %-> (%pi eterm %-> etp) %-> etp} {_ etp-eq B B'} {_ {x} etp-eq (M x) (M' x)} {_ etp-eq (A B M) (A B' M')} %.
+%mode etp-resp-bind %in %in %in %out %.
+%term _ etp-resp-bind _ etp-eq/i ([_] etp-eq/i) etp-eq/i %.
+%worlds (evar) (etp-resp-bind _ _ _ _) %.
+%total {} (etp-resp-bind _ _ _ _) %.
+%sort etp-resp-eterm {A %pi eterm %-> etp} {_ eterm-eq M M'} {_ etp-eq (A M) (A M')} %.
+%mode etp-resp-eterm %in %in %out %.
+%term _ etp-resp-eterm _ eterm-eq/i etp-eq/i %.
+%worlds (evar) (etp-resp-eterm _ _ _) %.
+%total {} (etp-resp-eterm _ _ _) %.
+%sort etp-resp-eterm-fun {_ {x} etp-eq (A x) (A' x)} {_ eterm-eq M M'} {_ etp-eq (A M) (A' M')} %.
+%mode etp-resp-eterm-fun %in %in %out %.
+%term _ etp-resp-eterm-fun ([_] etp-eq/i) eterm-eq/i etp-eq/i %.
+%worlds (evar) (etp-resp-eterm-fun _ _ _) %.
+%total {} (etp-resp-eterm-fun _ _ _) %.
+%sort etp2-resp-eterm {A %pi (%pi eterm %-> eterm) %-> etp} {_ {x} eterm-eq (M x) (M' x)} {_ etp-eq (A M) (A M')} %.
+%mode etp2-resp-eterm %in %in %out %.
+%term _ etp2-resp-eterm _ ([_] eterm-eq/i) etp-eq/i %.
+%worlds (evar) (etp2-resp-eterm _ _ _) %.
+%total {} (etp2-resp-eterm _ _ _) %.
+%sort etp-resp-etp {A %pi etp %-> etp} {_ etp-eq B B'} {_ etp-eq (A B) (A B')} %.
+%mode etp-resp-etp %in %in %out %.
+%term _ etp-resp-etp _ etp-eq/i etp-eq/i %.
+%worlds (evar) (etp-resp-etp _ _ _) %.
+%total {} (etp-resp-etp _ _ _) %.
+%sort lam-resp {_ {x} term-eq (M x) (M' x)} {_ term-eq (lam M) (lam M')} %.
+%mode lam-resp %in %out %.
+%term _ lam-resp ([_] term-eq/i) term-eq/i %.
+%worlds (var) (lam-resp _ _) %.
+%total {} (lam-resp _ _) %.
+%sort pair-resp {_ term-eq M1 M1'} {_ term-eq M2 M2'} {_ term-eq (pair M1 M2) (pair M1' M2')} %.
+%mode pair-resp %in %in %out %.
+%term _ pair-resp term-eq/i term-eq/i term-eq/i %.
+%worlds (var) (pair-resp _ _ _) %.
+%total {} (pair-resp _ _ _) %.
+%sort pi-resp {_ tp-eq A A'} {_ {x} tp-eq (B x) (B' x)} {_ tp-eq (pi A B) (pi A' B')} %.
+%mode pi-resp %in %in %out %.
+%term _ pi-resp tp-eq/i ([_] tp-eq/i) tp-eq/i %.
+%worlds (var) (pi-resp _ _ _) %.
+%total {} (pi-resp _ _ _) %.
+%sort scons-resp {_ sctx-eq G G'} {_ atom-eq R R'} {_ stp-eq T T'} {_ sctx-eq (scons G R T) (scons G' R' T')} %.
+%mode scons-resp %in %in %in %out %.
+%term _ scons-resp sctx-eq/i atom-eq/i stp-eq/i sctx-eq/i %.
+%worlds (var ovar bind) (scons-resp _ _ _ _) %.
+%total {} (scons-resp _ _ _ _) %.
+%sort sigma-resp {_ tp-eq A A'} {_ {x} tp-eq (B x) (B' x)} {_ tp-eq (sigma A B) (sigma A' B')} %.
+%mode sigma-resp %in %in %out %.
+%term _ sigma-resp tp-eq/i ([_] tp-eq/i) tp-eq/i %.
+%worlds (var) (sigma-resp _ _ _) %.
+%total {} (sigma-resp _ _ _) %.
+%sort stp-resp-stp {T %pi stp %-> stp} {_ stp-eq T1 T2} {_ stp-eq (T T1) (T T2)} %.
+%mode stp-resp-stp %in %in %out %.
+%term _ stp-resp-stp _ stp-eq/i stp-eq/i %.
+%worlds () (stp-resp-stp _ _ _) %.
+%total {} (stp-resp-stp _ _ _) %.
+%sort term-resp-atom {M %pi atom %-> term} {_ atom-eq R R'} {_ term-eq (M R) (M R')} %.
+%mode term-resp-atom %in %in %out %.
+%term _ term-resp-atom _ atom-eq/i term-eq/i %.
+%worlds (var) (term-resp-atom _ _ _) %.
+%total {} (term-resp-atom _ _ _) %.
+%sort term-resp-term {M %pi term %-> term} {_ term-eq N N'} {_ term-eq (M N) (M N')} %.
+%mode term-resp-term %in %in %out %.
+%term _ term-resp-term _ term-eq/i term-eq/i %.
+%worlds (var) (term-resp-term _ _ _) %.
+%total {} (term-resp-term _ _ _) %.
+%sort topen-resp {_ ctp-eq Ac Ac'} {_ tp-eq A A'} {_ topen Ac A} {_ topen Ac' A'} %.
+%mode topen-resp %in %in %in %out %.
+%term _ topen-resp ctp-eq/i tp-eq/i D D %.
+%worlds (var) (topen-resp _ _ _ _) %.
+%total {} (topen-resp _ _ _ _) %.
+%sort tp-resp-atom {A %pi atom %-> tp} {_ atom-eq R R'} {_ tp-eq (A R) (A R')} %.
+%mode tp-resp-atom %in %in %out %.
+%term _ tp-resp-atom _ atom-eq/i tp-eq/i %.
+%worlds (var) (tp-resp-atom _ _ _) %.
+%total {} (tp-resp-atom _ _ _) %.
+%sort tp-resp-term {A %pi term %-> tp} {_ term-eq M M'} {_ tp-eq (A M) (A M')} %.
+%mode tp-resp-term %in %in %out %.
+%term _ tp-resp-term _ term-eq/i tp-eq/i %.
+%worlds (var) (tp-resp-term _ _ _) %.
+%total {} (tp-resp-term _ _ _) %.
+%sort tp-resp-tp {A %pi tp %-> tp} {_ tp-eq B B'} {_ tp-eq (A B) (A B')} %.
+%mode tp-resp-tp %in %in %out %.
+%term _ tp-resp-tp _ tp-eq/i tp-eq/i %.
+%worlds (var) (tp-resp-tp _ _ _) %.
+%total {} (tp-resp-tp _ _ _) %.
+%sort tp-resp-atom-fun {_ {x} tp-eq (A x) (A' x)} {_ atom-eq R R'} {_ tp-eq (A R) (A' R')} %.
+%mode tp-resp-atom-fun %in %in %out %.
+%term _ tp-resp-atom-fun ([_] tp-eq/i) atom-eq/i tp-eq/i %.
+%worlds (var) (tp-resp-atom-fun _ _ _) %.
+%total {} (tp-resp-atom-fun _ _ _) %.
+%%%%%  Cdr Lemmas  %%%%%
+%sort atom-eq-cdr-app {_ atom-eq (app R M) (app R' M')} {_ atom-eq R R'} {_ term-eq M M'} %.
+%mode atom-eq-cdr-app %in %out %out %.
+%term _ atom-eq-cdr-app atom-eq/i atom-eq/i term-eq/i %.
+%worlds (var) (atom-eq-cdr-app _ _ _) %.
+%total {} (atom-eq-cdr-app _ _ _) %.
+%sort atom-eq-cdr-const {_ atom-eq (const C) (const C')} {_ constant-eq C C'} %.
+%mode atom-eq-cdr-const %in %out %.
+%term _ atom-eq-cdr-const atom-eq/i constant-eq/i %.
+%worlds (var) (atom-eq-cdr-const _ _) %.
+%total {} (atom-eq-cdr-const _ _) %.
+%sort atom-eq-cdr-forall {_ atom-eq (forall A) (forall A')} {_ tp-eq A A'} %.
+%mode atom-eq-cdr-forall %in %out %.
+%term _ atom-eq-cdr-forall atom-eq/i tp-eq/i %.
+%worlds (var) (atom-eq-cdr-forall _ _) %.
+%total {} (atom-eq-cdr-forall _ _) %.
+%sort etp-eq-cdr-epi {_ etp-eq (epi A B) (epi A' B')} {_ etp-eq A A'} {_ {x} etp-eq (B x) (B' x)} %.
+%mode etp-eq-cdr-epi %in %out %out %.
+%term _ etp-eq-cdr-epi etp-eq/i etp-eq/i ([_] etp-eq/i) %.
+%worlds (evar) (etp-eq-cdr-epi _ _ _) %.
+%total {} (etp-eq-cdr-epi _ _ _) %.
+%sort etp-eq-cdr-esigma {_ etp-eq (esigma A B) (esigma A' B')} {_ etp-eq A A'} {_ {x} etp-eq (B x) (B' x)} %.
+%mode etp-eq-cdr-esigma %in %out %out %.
+%term _ etp-eq-cdr-esigma etp-eq/i etp-eq/i ([_] etp-eq/i) %.
+%worlds (evar) (etp-eq-cdr-esigma _ _ _) %.
+%total {} (etp-eq-cdr-esigma _ _ _) %.
+%sort term-eq-cdr-at {_ term-eq (at R) (at R')} {_ atom-eq R R'} %.
+%mode term-eq-cdr-at %in %out %.
+%term _ term-eq-cdr-at term-eq/i atom-eq/i %.
+%worlds (var) (term-eq-cdr-at _ _) %.
+%total {} (term-eq-cdr-at _ _) %.
+%sort term-eq-cdr-lam {_ term-eq (lam M) (lam N)} {_ {x} term-eq (M x) (N x)} %.
+%mode term-eq-cdr-lam %in %out %.
+%term _ term-eq-cdr-lam term-eq/i ([_] term-eq/i) %.
+%worlds (var) (term-eq-cdr-lam _ _) %.
+%total {} (term-eq-cdr-lam _ _) %.
+%sort term-eq-cdr-pair {_ term-eq (pair M1 M2) (pair N1 N2)} {_ term-eq M1 N1} {_ term-eq M2 N2} %.
+%mode term-eq-cdr-pair %in %out %out %.
+%term _ term-eq-cdr-pair term-eq/i term-eq/i term-eq/i %.
+%worlds (var) (term-eq-cdr-pair _ _ _) %.
+%total {} (term-eq-cdr-pair _ _ _) %.
+%sort tp-eq-cdr-pi {_ tp-eq (pi A B) (pi A' B')} {_ tp-eq A A'} {_ {x} tp-eq (B x) (B' x)} %.
+%mode tp-eq-cdr-pi %in %out %out %.
+%term _ tp-eq-cdr-pi tp-eq/i tp-eq/i ([_] tp-eq/i) %.
+%worlds (var) (tp-eq-cdr-pi _ _ _) %.
+%total {} (tp-eq-cdr-pi _ _ _) %.
+%sort tp-eq-cdr-sigma {_ tp-eq (sigma A B) (sigma A' B')} {_ tp-eq A A'} {_ {x} tp-eq (B x) (B' x)} %.
+%mode tp-eq-cdr-sigma %in %out %out %.
+%term _ tp-eq-cdr-sigma tp-eq/i tp-eq/i ([_] tp-eq/i) %.
+%worlds (var) (tp-eq-cdr-sigma _ _ _) %.
+%total {} (tp-eq-cdr-sigma _ _ _) %.
+%sort tp-eq-pi-strengthen {_ {x atom} tp-eq (pi (A x) ([y] B x y)) C} {_ tp-eq C (pi A' B')} %.
+%mode tp-eq-pi-strengthen %in %out %.
+%term _ tp-eq-pi-strengthen ([x] tp-eq/i) tp-eq/i %.
+%worlds (var) (tp-eq-pi-strengthen _ _) %.
+%total {} (tp-eq-pi-strengthen _ _) %.
+%sort tp-eq-sigma-strengthen {_ {x atom} tp-eq (sigma (A x) ([y] B x y)) C} {_ tp-eq C (sigma A' B')} %.
+%mode tp-eq-sigma-strengthen %in %out %.
+%term _ tp-eq-sigma-strengthen ([x] tp-eq/i) tp-eq/i %.
+%worlds (var) (tp-eq-sigma-strengthen _ _) %.
+%total {} (tp-eq-sigma-strengthen _ _) %.
+%%%%%  Equality Respection  %%%%%
+%sort aasub-resp {_ {x} atom-eq (R x) (R' x)} {_ term-eq M M'} {_ atom-eq S S'} {_ aasub R M S} {_ aasub R' M' S'} %.
+%mode aasub-resp %in %in %in %in %out %.
+%term _ aasub-resp ([_] atom-eq/i) term-eq/i atom-eq/i D D %.
+%worlds (var) (aasub-resp _ _ _ _ _) %.
+%total {} (aasub-resp _ _ _ _ _) %.
+%sort aconvert-resp {_ atom-eq R R'} {_ tp-eq A A'} {_ eterm-eq EM EM'} {_ aconvert R A EM} {_ aconvert R' A' EM'} %.
+%mode aconvert-resp %in %in %in %in %out %.
+%term _ aconvert-resp atom-eq/i tp-eq/i eterm-eq/i D D %.
+%worlds (bind tbind var ofblock) (aconvert-resp _ _ _ _ _) %.
+%total {} (aconvert-resp _ _ _ _ _) %.
+%sort aconverte-resp {_ ctx-eq G G'} {_ atom-eq R R'} {_ tp-eq A A'} {_ eterm-eq EM EM'} {_ aconverte G R A EM} {_ aconverte G' R' A' EM'} %.
+%mode aconverte-resp %in %in %in %in %in %out %.
+%term _ aconverte-resp ctx-eq/i atom-eq/i tp-eq/i eterm-eq/i D D %.
+%worlds (var bind tbind ovar evar) (aconverte-resp _ _ _ _ _ _) %.
+%total {} (aconverte-resp _ _ _ _ _ _) %.
+%sort aof-resp {_ atom-eq R R'} {_ tp-eq A A'} {_ aof R A} {_ aof R' A'} %.
+%mode aof-resp %in %in %in %out %.
+%term _ aof-resp atom-eq/i tp-eq/i D D %.
+%worlds (var bind) (aof-resp _ _ _ _) %.
+%total {} (aof-resp _ _ _ _) %.
+%sort aofe-resp {_ ctx-eq G G'} {_ atom-eq R R'} {_ tp-eq A A'} {_ aofe G R A} {_ aofe G' R' A'} %.
+%mode aofe-resp %in %in %in %in %out %.
+%term _ aofe-resp ctx-eq/i atom-eq/i tp-eq/i D D %.
+%worlds (bind ovar var) (aofe-resp _ _ _ _ _) %.
+%total {} (aofe-resp _ _ _ _ _) %.
+%sort aofes-resp {_ sctx-eq G G'} {_ atom-eq R R'} {_ stp-eq A A'} {_ aofes G R A} {_ aofes G' R' A'} %.
+%mode aofes-resp %in %in %in %in %out %.
+%term _ aofes-resp sctx-eq/i atom-eq/i stp-eq/i D D %.
+%worlds (var bind ovar) (aofes-resp _ _ _ _ _) %.
+%total {} (aofes-resp _ _ _ _ _) %.
+%sort aosub-resp {_ {x} atom-eq (R x) (R' x)} {_ term-eq M M'} {_ term-eq N N'} {_ aosub R M N} {_ aosub R' M' N'} %.
+%mode aosub-resp %in %in %in %in %out %.
+%term _ aosub-resp ([_] atom-eq/i) term-eq/i term-eq/i D D %.
+%worlds (var) (aosub-resp _ _ _ _ _) %.
+%total {} (aosub-resp _ _ _ _ _) %.
+%sort canonize-resp {_ eterm-eq M M'} {_ etp-eq A A'} {_ canonize M A} {_ canonize M' A'} %.
+%mode canonize-resp %in %in %in %out %.
+%term _ canonize-resp eterm-eq/i etp-eq/i D D %.
+%worlds (evar evvar evbind bind tbind eofblock evblock) (canonize-resp _ _ _ _) %.
+%total {} (canonize-resp _ _ _ _) %.
+%sort canonize-resp-underbind {_ etp-eq A A'} {_ {x} %pi (evof x A) %-> (variable x) %-> (canonize (M x) (B x))} {_ {x} %pi (evof x A') %-> (variable x) %-> (canonize (M x) (B x))} %.
+%mode canonize-resp-underbind %in %in %out %.
+%term _ canonize-resp-underbind etp-eq/i D D %.
+%worlds (evar evvar evbind bind tbind eofblock evblock) (canonize-resp-underbind _ _ _) %.
+%total {} (canonize-resp-underbind _ _ _) %.
+%sort coerce-resp {_ etp-eq A A'} {_ etp-eq B B'} {_ {x} eterm-eq (M x) (M' x)} {_ coerce A B M} {_ coerce A' B' M'} %.
+%mode coerce-resp %in %in %in %in %out %.
+%term _ coerce-resp etp-eq/i etp-eq/i ([_] eterm-eq/i) D D %.
+%worlds (evar evvar evbind bind tbind eofblock evblock) (coerce-resp _ _ _ _ _) %.
+%total {} (coerce-resp _ _ _ _ _) %.
+%sort convert-resp {_ term-eq M M'} {_ tp-eq A A'} {_ eterm-eq EM EM'} {_ convert M A EM} {_ convert M' A' EM'} %.
+%mode convert-resp %in %in %in %in %out %.
+%term _ convert-resp term-eq/i tp-eq/i eterm-eq/i D D %.
+%worlds (bind tbind) (convert-resp _ _ _ _ _) %.
+%total {} (convert-resp _ _ _ _ _) %.
+%sort convert-resp-underbind {_ tp-eq A A'} {_ {x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))} {_ {x} %pi (vof x A') %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))} %.
+%mode convert-resp-underbind %in %in %out %.
+%term _ convert-resp-underbind tp-eq/i D D %.
+%worlds (bind tbind) (convert-resp-underbind _ _ _) %.
+%total {} (convert-resp-underbind _ _ _) %.
+%sort converte-resp {_ ctx-eq G G'} {_ term-eq M M'} {_ tp-eq A A'} {_ eterm-eq EM EM'} {_ converte G M A EM} {_ converte G' M' A' EM'} %.
+%mode converte-resp %in %in %in %in %in %out %.
+%term _ converte-resp ctx-eq/i term-eq/i tp-eq/i eterm-eq/i D D %.
+%worlds (var bind tbind ovar evar) (converte-resp _ _ _ _ _ _) %.
+%total {} (converte-resp _ _ _ _ _ _) %.
+%sort ekof-resp {_ etp-eq A A'} {_ ekof C A} {_ ekof C A'} %.
+%mode ekof-resp %in %in %out %.
+%term _ ekof-resp etp-eq/i D D %.
+%worlds (evar) (ekof-resp _ _ _) %.
+%total {} (ekof-resp _ _ _) %.
+%sort eof-resp {_ eterm-eq EM EM'} {_ etp-eq EA EA'} {_ eof EM EA} {_ eof EM' EA'} %.
+%mode eof-resp %in %in %in %out %.
+%term _ eof-resp eterm-eq/i etp-eq/i D D %.
+%worlds (evar eofblock ebind) (eof-resp _ _ _ _) %.
+%total {} (eof-resp _ _ _ _) %.
+%sort etopen-resp {_ ctp-eq Ac Ac'} {_ etp-eq A A'} {_ etopen Ac A} {_ etopen Ac' A'} %.
+%mode etopen-resp %in %in %in %out %.
+%term _ etopen-resp ctp-eq/i etp-eq/i D D %.
+%worlds (evar) (etopen-resp _ _ _ _) %.
+%total {} (etopen-resp _ _ _ _) %.
+%sort evof-resp {_ eterm-eq EM EM'} {_ etp-eq EA EA'} {_ evof EM EA} {_ evof EM' EA'} %.
+%mode evof-resp %in %in %in %out %.
+%term _ evof-resp eterm-eq/i etp-eq/i D D %.
+%worlds (evar eofblock) (evof-resp _ _ _ _) %.
+%total {} (evof-resp _ _ _ _) %.
+%sort ewf-resp {_ etp-eq A A'} {_ ewf A} {_ ewf A'} %.
+%mode ewf-resp %in %in %out %.
+%term _ ewf-resp etp-eq/i D D %.
+%worlds (evar eofblock) (ewf-resp _ _ _) %.
+%total {} (ewf-resp _ _ _) %.
+%sort expand-resp {_ atom-eq R R'} {_ tp-eq A A'} {_ term-eq M M'} {_ expand R A M} {_ expand R' A' M'} %.
+%mode expand-resp %in %in %in %in %out %.
+%term _ expand-resp atom-eq/i tp-eq/i term-eq/i D D %.
+%worlds (var) (expand-resp _ _ _ _ _) %.
+%total {} (expand-resp _ _ _ _ _) %.
+%reduces = D D' (expand-resp _ _ _ D D') %.
+%sort kof-resp {_ tp-eq A A'} {_ kof C A} {_ kof C A'} %.
+%mode kof-resp %in %in %out %.
+%term _ kof-resp tp-eq/i D D %.
+%worlds (var) (kof-resp _ _ _) %.
+%total {} (kof-resp _ _ _) %.
+%sort lookup-resp {_ ctx-eq G G'} {_ atom-eq X X'} {_ tp-eq A A'} {_ lookup G X A} {_ lookup G' X' A'} %.
+%mode lookup-resp %in %in %in %in %out %.
+%term _ lookup-resp ctx-eq/i atom-eq/i tp-eq/i D D %.
+%worlds (var bind ovar) (lookup-resp _ _ _ _ _) %.
+%total {} (lookup-resp _ _ _ _ _) %.
+%sort of-resp {_ term-eq M M'} {_ tp-eq A A'} {_ of M A} {_ of M' A'} %.
+%mode of-resp %in %in %in %out %.
+%term _ of-resp term-eq/i tp-eq/i D D %.
+%worlds (var bind) (of-resp _ _ _ _) %.
+%total {} (of-resp _ _ _ _) %.
+%sort of-bind-resp {_ tp-eq A A'} {_ {x} %pi (vof x A) %-> (of (M x) (B x))} {_ {x} %pi (vof x A') %-> (of (M x) (B x))} %.
+%mode of-bind-resp %in %in %out %.
+%term _ of-bind-resp tp-eq/i D D %.
+%worlds (var bind) (of-bind-resp _ _ _) %.
+%total {} (of-bind-resp _ _ _) %.
+%reduces = D D' (of-bind-resp _ D D') %.
+%sort of-bind-resp1 {_ {y atom} tp-eq (A y) (A' y)} {_ {y} {x} %pi (vof x (A y)) %-> (of (M x y) (B x y))} {_ {y} {x} %pi (vof x (A' y)) %-> (of (M x y) (B x y))} %.
+%mode of-bind-resp1 %in %in %out %.
+%term _ of-bind-resp1 ([_] tp-eq/i) D D %.
+%worlds (var bind) (of-bind-resp1 _ _ _) %.
+%total {} (of-bind-resp1 _ _ _) %.
+%reduces = D D' (of-bind-resp1 _ D D') %.
+%sort ofe-resp {_ ctx-eq G G'} {_ term-eq M M'} {_ tp-eq A A'} {_ ofe G M A} {_ ofe G' M' A'} %.
+%mode ofe-resp %in %in %in %in %out %.
+%term _ ofe-resp ctx-eq/i term-eq/i tp-eq/i D D %.
+%worlds (bind ovar var) (ofe-resp _ _ _ _ _) %.
+%total {} (ofe-resp _ _ _ _ _) %.
+%sort ofes-resp {_ sctx-eq G G'} {_ term-eq M M'} {_ stp-eq T T'} {_ ofes G M T} {_ ofes G' M' T'} %.
+%mode ofes-resp %in %in %in %in %out %.
+%term _ ofes-resp sctx-eq/i term-eq/i stp-eq/i D D %.
+%worlds (var ovar bind) (ofes-resp _ _ _ _ _) %.
+%total {} (ofes-resp _ _ _ _ _) %.
+%sort principal-resp {_ tp-eq A A'} {_ principal A} {_ principal A'} %.
+%mode principal-resp %in %in %out %.
+%term _ principal-resp tp-eq/i D D %.
+%worlds (var) (principal-resp _ _ _) %.
+%total {} (principal-resp _ _ _) %.
+%sort reduce-resp {_ eterm-eq M M'} {_ eterm-eq N N'} {_ reduce M N} {_ reduce M' N'} %.
+%mode reduce-resp %in %in %in %out %.
+%term _ reduce-resp eterm-eq/i eterm-eq/i D D %.
+%worlds (bind tbind ovar eofblock evblock evar) (reduce-resp _ _ _ _) %.
+%total {} (reduce-resp _ _ _ _) %.
+%sort reduce-app-resp {_ eterm-eq M M'} {_ eterm-eq N N'} {_ eterm-eq O O'} {_ reduce-app M N O} {_ reduce-app M' N' O'} %.
+%mode reduce-app-resp %in %in %in %in %out %.
+%term _ reduce-app-resp eterm-eq/i eterm-eq/i eterm-eq/i D D %.
+%worlds (evvar evbind bind tbind evblock) (reduce-app-resp _ _ _ _ _) %.
+%total {} (reduce-app-resp _ _ _ _ _) %.
+%sort reduce-pi1-resp {_ eterm-eq M M'} {_ eterm-eq N N'} {_ reduce-pi1 M N} {_ reduce-pi1 M' N'} %.
+%mode reduce-pi1-resp %in %in %in %out %.
+%term _ reduce-pi1-resp eterm-eq/i eterm-eq/i D D %.
+%worlds (evvar evbind bind tbind evblock) (reduce-pi1-resp _ _ _ _) %.
+%total {} (reduce-pi1-resp _ _ _ _) %.
+%sort reduce-pi2-resp {_ eterm-eq M M'} {_ eterm-eq N N'} {_ reduce-pi2 M N} {_ reduce-pi2 M' N'} %.
+%mode reduce-pi2-resp %in %in %in %out %.
+%term _ reduce-pi2-resp eterm-eq/i eterm-eq/i D D %.
+%worlds (evvar evbind bind tbind evblock) (reduce-pi2-resp _ _ _ _) %.
+%total {} (reduce-pi2-resp _ _ _ _) %.
+%sort self-resp {_ term-eq M M'} {_ tp-eq A A'} {_ tp-eq B B'} {_ self M A B} {_ self M' A' B'} %.
+%mode self-resp %in %in %in %in %out %.
+%term _ self-resp term-eq/i tp-eq/i tp-eq/i D D %.
+%worlds (var bind) (self-resp _ _ _ _ _) %.
+%total {} (self-resp _ _ _ _ _) %.
+%sort selfify-resp {_ eterm-eq M M'} {_ etp-eq A A'} {_ eterm-eq N N'} {_ etp-eq B B'} {_ selfify M A N B} {_ selfify M' A' N' B'} %.
+%mode selfify-resp %in %in %in %in %in %out %.
+%term _ selfify-resp eterm-eq/i etp-eq/i eterm-eq/i etp-eq/i D D %.
+%worlds (evar) (selfify-resp _ _ _ _ _ _) %.
+%total {} (selfify-resp _ _ _ _ _ _) %.
+%sort simp-resp {_ tp-eq A A'} {_ stp-eq T T'} {_ simp A T} {_ simp A' T'} %.
+%mode simp-resp %in %in %in %out %.
+%term _ simp-resp tp-eq/i stp-eq/i D D %.
+%worlds (var) (simp-resp _ _ _ _) %.
+%total {} (simp-resp _ _ _ _) %.
+%sort slookup-resp {_ sctx-eq G G'} {_ atom-eq X X'} {_ stp-eq T T'} {_ slookup G X T} {_ slookup G' X' T'} %.
+%mode slookup-resp %in %in %in %in %out %.
+%term _ slookup-resp sctx-eq/i atom-eq/i stp-eq/i D D %.
+%worlds (var ovar) (slookup-resp _ _ _ _ _) %.
+%total {} (slookup-resp _ _ _ _ _) %.
+%sort stp-leq-resp {_ stp-eq S S'} {_ stp-eq T T'} {_ stp-leq S T} {_ stp-leq S' T'} %.
+%mode stp-leq-resp %in %in %in %out %.
+%term _ stp-leq-resp stp-eq/i stp-eq/i D D %.
+%worlds () (stp-leq-resp _ _ _ _) %.
+%total {} (stp-leq-resp _ _ _ _) %.
+%sort sub-resp {_ {x} term-eq (O x) (O' x)} {_ term-eq M M'} {_ term-eq N N'} {_ sub O M N} {_ sub O' M' N'} %.
+%mode sub-resp %in %in %in %in %out %.
+%term _ sub-resp ([_] term-eq/i) term-eq/i term-eq/i D D %.
+%worlds (var) (sub-resp _ _ _ _ _) %.
+%total {} (sub-resp _ _ _ _ _) %.
+%reduces = D D' (sub-resp _ _ _ D D') %.
+%sort sub-resp1 {_ {x atom} {y} term-eq (O x y) (O' x y)} {_ {x} term-eq (M x) (M' x)} {_ {x} term-eq (N x) (N' x)} {_ {x} sub (O x) (M x) (N x)} {_ {x} sub (O' x) (M' x) (N' x)} %.
+%mode sub-resp1 %in %in %in %in %out %.
+%term _ sub-resp1 ([_] [_] term-eq/i) ([_] term-eq/i) ([_] term-eq/i) D D %.
+%worlds (var) (sub-resp1 _ _ _ _ _) %.
+%total {} (sub-resp1 _ _ _ _ _) %.
+%reduces = D D' (sub-resp1 _ _ _ D D') %.
+%sort sub-resp-strengthen {_ {y atom} {x} term-eq (O x y) (O' x)} {_ {y} term-eq (M y) M'} {_ {y} term-eq (N y) N'} {_ {y} sub ([x] O x y) (M y) (N y)} {_ sub O' M' N'} %.
+%mode sub-resp-strengthen %in %in %in %in %out %.
+%term _ sub-resp-strengthen ([_] [_] term-eq/i) ([_] term-eq/i) ([_] term-eq/i) Dsub (Dsub aca) %.
+%worlds (var) (sub-resp-strengthen _ _ _ _ _) %.
+%total {} (sub-resp-strengthen _ _ _ _ _) %.
+%sort subtp-resp {_ etp-eq A A'} {_ etp-eq B B'} {_ subtp A B} {_ subtp A' B'} %.
+%mode subtp-resp %in %in %in %out %.
+%term _ subtp-resp etp-eq/i etp-eq/i D D %.
+%worlds (evar eofblock) (subtp-resp _ _ _ _) %.
+%total {} (subtp-resp _ _ _ _) %.
+%sort subtype-resp {_ tp-eq A A'} {_ tp-eq B B'} {_ {x} term-eq (M x) (M' x)} {_ subtype A B M} {_ subtype A' B' M'} %.
+%mode subtype-resp %in %in %in %in %out %.
+%term _ subtype-resp tp-eq/i tp-eq/i ([_] term-eq/i) D D %.
+%worlds (var bind ovar) (subtype-resp _ _ _ _ _) %.
+%total {} (subtype-resp _ _ _ _ _) %.
+%sort sum-resp {_ nat-eq N1 N1'} {_ nat-eq N2 N2'} {_ nat-eq N3 N3'} {_ sum N1 N2 N3} {_ sum N1' N2' N3'} %.
+%mode sum-resp %in %in %in %in %out %.
+%term _ sum-resp nat-eq/i nat-eq/i nat-eq/i D D %.
+%worlds () (sum-resp _ _ _ _ _) %.
+%total {} (sum-resp _ _ _ _ _) %.
+%sort tcanonize-resp {_ etp-eq A A'} {_ etp-eq B B'} {_ tcanonize A B} {_ tcanonize A' B'} %.
+%mode tcanonize-resp %in %in %in %out %.
+%term _ tcanonize-resp etp-eq/i etp-eq/i D D %.
+%worlds (evar evvar evbind bind tbind eofblock evblock) (tcanonize-resp _ _ _ _) %.
+%total {} (tcanonize-resp _ _ _ _) %.
+%sort tcanonize-resp-underbind {_ etp-eq A A'} {_ {x} %pi (evof x A) %-> (variable x) %-> (tcanonize (C x) (B x))} {_ {x} %pi (evof x A') %-> (variable x) %-> (tcanonize (C x) (B x))} %.
+%mode tcanonize-resp-underbind %in %in %out %.
+%term _ tcanonize-resp-underbind etp-eq/i D D %.
+%worlds (evar evvar evbind bind tbind eofblock evblock) (tcanonize-resp-underbind _ _ _) %.
+%total {} (tcanonize-resp-underbind _ _ _) %.
+%sort tconvert-resp {_ tp-eq A A'} {_ etp-eq EA EA'} {_ tconvert A EA} {_ tconvert A' EA'} %.
+%mode tconvert-resp %in %in %in %out %.
+%term _ tconvert-resp tp-eq/i etp-eq/i D D %.
+%worlds (bind tbind) (tconvert-resp _ _ _ _) %.
+%total {} (tconvert-resp _ _ _ _) %.
+%sort tconvert-resp-underbind {_ tp-eq A A'} {_ {x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EM ex)))} {_ {x} %pi (vof x A') %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EM ex)))} %.
+%mode tconvert-resp-underbind %in %in %out %.
+%term _ tconvert-resp-underbind tp-eq/i D D %.
+%worlds (bind tbind) (tconvert-resp-underbind _ _ _) %.
+%total {} (tconvert-resp-underbind _ _ _) %.
+%sort tequiv-resp {_ etp-eq EA EA'} {_ etp-eq EB EB'} {_ tequiv EA EB} {_ tequiv EA' EB'} %.
+%mode tequiv-resp %in %in %in %out %.
+%term _ tequiv-resp etp-eq/i etp-eq/i D D %.
+%worlds (evar eofblock) (tequiv-resp _ _ _ _) %.
+%total {} (tequiv-resp _ _ _ _) %.
+%reduces = D D' (tequiv-resp _ _ D D') %.
+%sort trans-resp {_ eterm-eq EM EM'} {_ tp-eq A A'} {_ trans EM A} {_ trans EM' A'} %.
+%mode trans-resp %in %in %in %out %.
+%term _ trans-resp eterm-eq/i tp-eq/i D D %.
+%worlds (var bind ovar tbind) (trans-resp _ _ _ _) %.
+%total {} (trans-resp _ _ _ _) %.
+%sort trans-resp-underbind {_ tp-eq A A'} {_ {x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (trans (EM ex) (B x)))} {_ {x} %pi (vof x A') %-> ({ex} %pi (vtrans ex x) %-> (trans (EM ex) (B x)))} %.
+%mode trans-resp-underbind %in %in %out %.
+%term _ trans-resp-underbind tp-eq/i D D %.
+%worlds (var bind tbind) (trans-resp-underbind _ _ _) %.
+%total {} (trans-resp-underbind _ _ _) %.
+%sort transe-resp {_ ctx-eq G G'} {_ eterm-eq EM EM'} {_ tp-eq A A'} {_ transe G EM A} {_ transe G' EM' A'} %.
+%mode transe-resp %in %in %in %in %out %.
+%term _ transe-resp ctx-eq/i eterm-eq/i tp-eq/i D D %.
+%worlds (bind ovar tbind) (transe-resp _ _ _ _ _) %.
+%total {} (transe-resp _ _ _ _ _) %.
+%sort treduce-resp {_ etp-eq A A'} {_ etp-eq B B'} {_ treduce A B} {_ treduce A' B'} %.
+%mode treduce-resp %in %in %in %out %.
+%term _ treduce-resp etp-eq/i etp-eq/i D D %.
+%worlds (evar evvar evbind bind tbind evblock) (treduce-resp _ _ _ _) %.
+%total {} (treduce-resp _ _ _ _) %.
+%sort tsub-resp {_ {x} tp-eq (A x) (A' x)} {_ term-eq M M'} {_ tp-eq B B'} {_ tsub A M B} {_ tsub A' M' B'} %.
+%mode tsub-resp %in %in %in %in %out %.
+%term _ tsub-resp ([_] tp-eq/i) term-eq/i tp-eq/i D D %.
+%worlds (var) (tsub-resp _ _ _ _ _) %.
+%total {} (tsub-resp _ _ _ _ _) %.
+%sort ttrans-resp {_ etp-eq EA EA'} {_ tp-eq A A'} {_ ttrans EA A} {_ ttrans EA' A'} %.
+%mode ttrans-resp %in %in %in %out %.
+%term _ ttrans-resp etp-eq/i tp-eq/i D D %.
+%worlds (var bind tbind) (ttrans-resp _ _ _ _) %.
+%total {} (ttrans-resp _ _ _ _) %.
+%sort ttrans-resp-underbind {_ tp-eq A A'} {_ {x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (ttrans (EB ex) (B x)))} {_ {x} %pi (vof x A') %-> ({ex} %pi (vtrans ex x) %-> (ttrans (EB ex) (B x)))} %.
+%mode ttrans-resp-underbind %in %in %out %.
+%term _ ttrans-resp-underbind tp-eq/i D D %.
+%worlds (var bind tbind) (ttrans-resp-underbind _ _ _) %.
+%total {} (ttrans-resp-underbind _ _ _) %.
+%sort vof-resp {_ atom-eq X X'} {_ tp-eq A A'} {_ vof X A} {_ vof X' A'} %.
+%mode vof-resp %in %in %in %out %.
+%term _ vof-resp atom-eq/i tp-eq/i D D %.
+%worlds (var bind) (vof-resp _ _ _ _) %.
+%total {} (vof-resp _ _ _ _) %.
+%sort vtrans-resp {_ eterm-eq EX EX'} {_ atom-eq X X'} {_ vtrans EX X} {_ vtrans EX' X'} %.
+%mode vtrans-resp %in %in %in %out %.
+%term _ vtrans-resp eterm-eq/i atom-eq/i D D %.
+%worlds (var evar tbind) (vtrans-resp _ _ _ _) %.
+%total {} (vtrans-resp _ _ _ _) %.
+%sort wf-bind-resp1 {_ {y atom} tp-eq (A y) (A' y)} {_ {y} {x} %pi (vof x (A y)) %-> (wf (B x y))} {_ {y} {x} %pi (vof x (A' y)) %-> (wf (B x y))} %.
+%mode wf-bind-resp1 %in %in %out %.
+%term _ wf-bind-resp1 ([_] tp-eq/i) D D %.
+%worlds (var bind) (wf-bind-resp1 _ _ _) %.
+%total {} (wf-bind-resp1 _ _ _) %.
+%reduces = D D' (wf-bind-resp1 _ D D') %.
+%sort wf-resp {_ tp-eq A A'} {_ wf A} {_ wf A'} %.
+%mode wf-resp %in %in %out %.
+%term _ wf-resp tp-eq/i D D %.
+%worlds (var bind) (wf-resp _ _ _) %.
+%total {} (wf-resp _ _ _) %.
+%reduces = D D' (wf-resp _ D D') %.
+%sort wfe-resp {_ ctx-eq G G'} {_ tp-eq A A'} {_ wfe G A} {_ wfe G' A'} %.
+%mode wfe-resp %in %in %in %out %.
+%term _ wfe-resp ctx-eq/i tp-eq/i D D %.
+%worlds (var bind ovar) (wfe-resp _ _ _ _) %.
+%total {} (wfe-resp _ _ _ _) %.
+%sort wfes-resp {_ sctx-eq G G'} {_ tp-eq A A'} {_ wfes G A} {_ wfes G' A'} %.
+%mode wfes-resp %in %in %in %out %.
+%term _ wfes-resp sctx-eq/i tp-eq/i D D %.
+%worlds (var ovar bind) (wfes-resp _ _ _ _) %.
+%total {} (wfes-resp _ _ _ _) %.
+%%%%%  Reductio Ad Absurdio  %%%%%
+%sort false-implies-aconverte {_ false} {_ aconverte G R A EM} %.
+%mode {%in G ctx} {%in R atom} {%in A tp} {%in EM eterm} {%in X1 false} {%out X2 aconverte G R A EM} false-implies-aconverte X1 X2 %.
+%worlds (var bind tbind ovar evar) (false-implies-aconverte _ _) %.
+%total {} (false-implies-aconverte _ _) %.
+%sort false-implies-aofe {_ false} {_ aofe G R A} %.
+%mode {%in G ctx} {%in R atom} {%in A tp} {%in X1 false} {%out X2 aofe G R A} false-implies-aofe X1 X2 %.
+%worlds (bind ovar var) (false-implies-aofe _ _) %.
+%total {} (false-implies-aofe _ _) %.
+%sort false-implies-aofes {_ false} {_ aofes G R T} %.
+%mode {%in G sctx} {%in R atom} {%in T stp} {%in X1 false} {%out X2 aofes G R T} false-implies-aofes X1 X2 %.
+%worlds (bind ovar var) (false-implies-aofes _ _) %.
+%total {} (false-implies-aofes _ _) %.
+%sort false-implies-aosub {_ false} {_ aosub R M N} %.
+%mode {%in R %pi atom %-> atom} {%in M term} {%in N term} {%in X1 false} {%out X2 aosub ([r atom] R r) M N} false-implies-aosub X1 X2 %.
+%worlds (var bind ovar) (false-implies-aosub _ _) %.
+%total {} (false-implies-aosub _ _) %.
+%sort false-implies-bounded {_ false} {_ bounded G X} %.
+%mode {%in G ctx} {%in X atom} {%in X1 false} {%out X2 bounded G X} false-implies-bounded X1 X2 %.
+%worlds (var bind ovar) (false-implies-bounded _ _) %.
+%total {} (false-implies-bounded _ _) %.
+%sort false-implies-converte {_ false} {_ converte G M A EM} %.
+%mode {%in G ctx} {%in M term} {%in A tp} {%in EM eterm} {%in X1 false} {%out X2 converte G M A EM} false-implies-converte X1 X2 %.
+%worlds (var bind tbind ovar evar) (false-implies-converte _ _) %.
+%total {} (false-implies-converte _ _) %.
+%sort false-implies-eof {_ false} {_ eof EM EA} %.
+%mode {%in EM eterm} {%in EA etp} {%in X1 false} {%out X2 eof EM EA} false-implies-eof X1 X2 %.
+%worlds (evar eofblock ebind) (false-implies-eof _ _) %.
+%total {} (false-implies-eof _ _) %.
+%sort false-implies-evof {_ false} {_ evof EM EA} %.
+%mode {%in EM eterm} {%in EA etp} {%in X1 false} {%out X2 evof EM EA} false-implies-evof X1 X2 %.
+%worlds (evar eofblock ebind) (false-implies-evof _ _) %.
+%total {} (false-implies-evof _ _) %.
+%sort false-implies-eterm-eq {_ false} {_ eterm-eq EM EM'} %.
+%mode {%in EM eterm} {%in EM' eterm} {%in X1 false} {%out X2 eterm-eq EM EM'} false-implies-eterm-eq X1 X2 %.
+%worlds (evar) (false-implies-eterm-eq _ _) %.
+%total {} (false-implies-eterm-eq _ _) %.
+%sort false-implies-lookup {_ false} {_ lookup G X A} %.
+%mode {%in G ctx} {%in X atom} {%in A tp} {%in X1 false} {%out X2 lookup G X A} false-implies-lookup X1 X2 %.
+%worlds (var bind ovar) (false-implies-lookup _ _) %.
+%total {} (false-implies-lookup _ _) %.
+%sort false-implies-ofe {_ false} {_ ofe G M A} %.
+%mode {%in G ctx} {%in M term} {%in A tp} {%in X1 false} {%out X2 ofe G M A} false-implies-ofe X1 X2 %.
+%worlds (bind ovar var) (false-implies-ofe _ _) %.
+%total {} (false-implies-ofe _ _) %.
+%sort false-implies-ofes {_ false} {_ ofes G M T} %.
+%mode {%in G sctx} {%in M term} {%in T stp} {%in X1 false} {%out X2 ofes G M T} false-implies-ofes X1 X2 %.
+%worlds (var bind ovar) (false-implies-ofes _ _) %.
+%total {} (false-implies-ofes _ _) %.
+%sort false-implies-ordered {_ false} {_ ordered G} %.
+%mode {%in G ctx} {%in X1 false} {%out X2 ordered G} false-implies-ordered X1 X2 %.
+%worlds (var bind ovar) (false-implies-ordered _ _) %.
+%total {} (false-implies-ordered _ _) %.
+%sort false-implies-reduce {_ false} {_ reduce M N} %.
+%mode {%in M eterm} {%in N eterm} {%in X1 false} {%out X2 reduce M N} false-implies-reduce X1 X2 %.
+%worlds (bind tbind ovar eofblock evblock evar) (false-implies-reduce _ _) %.
+%total {} (false-implies-reduce _ _) %.
+%sort false-implies-self {_ false} {_ self M A B} %.
+%mode {%in M term} {%in A tp} {%in B tp} {%in X1 false} {%out X2 self M A B} false-implies-self X1 X2 %.
+%worlds (var) (false-implies-self _ _) %.
+%total {} (false-implies-self _ _) %.
+%sort false-implies-simp {_ false} {_ simp A T} %.
+%mode {%in A tp} {%in T stp} {%in X1 false} {%out X2 simp A T} false-implies-simp X1 X2 %.
+%worlds (var) (false-implies-simp _ _) %.
+%total {} (false-implies-simp _ _) %.
+%sort false-implies-stp-eq {_ false} {_ stp-eq T T'} %.
+%mode {%in T stp} {%in T' stp} {%in X1 false} {%out X2 stp-eq T T'} false-implies-stp-eq X1 X2 %.
+%worlds () (false-implies-stp-eq _ _) %.
+%total {} (false-implies-stp-eq _ _) %.
+%sort false-implies-stp-leq {_ false} {_ stp-leq T T'} %.
+%mode {%in T stp} {%in T' stp} {%in X1 false} {%out X2 stp-leq T T'} false-implies-stp-leq X1 X2 %.
+%worlds () (false-implies-stp-leq _ _) %.
+%total {} (false-implies-stp-leq _ _) %.
+%sort false-implies-sub {_ false} {_ sub M N O} %.
+%mode {%in M %pi atom %-> term} {%in N term} {%in O term} {%in X1 false} {%out X2 sub ([r atom] M r) N O} false-implies-sub X1 X2 %.
+%worlds (var) (false-implies-sub _ _) %.
+%total {} (false-implies-sub _ _) %.
+%sort false-implies-subtype {_ false} {_ subtype A B O} %.
+%mode {%in A tp} {%in B tp} {%in O %pi atom %-> term} {%in X1 false} {%out X2 subtype A B ([r atom] O r)} false-implies-subtype X1 X2 %.
+%worlds (var) (false-implies-subtype _ _) %.
+%total {} (false-implies-subtype _ _) %.
+%sort false-implies-tconvert {_ false} {_ tconvert A EA} %.
+%mode {%in A tp} {%in EA etp} {%in X1 false} {%out X2 tconvert A EA} false-implies-tconvert X1 X2 %.
+%worlds (bind tbind) (false-implies-tconvert _ _) %.
+%total {} (false-implies-tconvert _ _) %.
+%sort false-implies-term-eq {_ false} {_ term-eq M N} %.
+%mode {%in M term} {%in N term} {%in X1 false} {%out X2 term-eq M N} false-implies-term-eq X1 X2 %.
+%worlds (var) (false-implies-term-eq _ _) %.
+%total {} (false-implies-term-eq _ _) %.
+%sort false-implies-tp-eq {_ false} {_ tp-eq A B} %.
+%mode {%in A tp} {%in B tp} {%in X1 false} {%out X2 tp-eq A B} false-implies-tp-eq X1 X2 %.
+%worlds (var) (false-implies-tp-eq _ _) %.
+%total {} (false-implies-tp-eq _ _) %.
+%sort false-implies-tsub {_ false} {_ tsub A M B} %.
+%mode {%in A %pi atom %-> tp} {%in M term} {%in B tp} {%in X1 false} {%out X2 tsub ([r atom] A r) M B} false-implies-tsub X1 X2 %.
+%worlds (var) (false-implies-tsub _ _) %.
+%total {} (false-implies-tsub _ _) %.
+%sort false-implies-vtrans {_ false} {_ vtrans EX X} %.
+%mode {%in EX eterm} {%in X atom} {%in X1 false} {%out X2 vtrans EX X} false-implies-vtrans X1 X2 %.
+%worlds (bind tbind) (false-implies-vtrans _ _) %.
+%total {} (false-implies-vtrans _ _) %.
+%sort false-implies-wfe {_ false} {_ wfe G A} %.
+%mode {%in G ctx} {%in A tp} {%in X1 false} {%out X2 wfe G A} false-implies-wfe X1 X2 %.
+%worlds (var bind ovar) (false-implies-wfe _ _) %.
+%total {} (false-implies-wfe _ _) %.
+%sort false-implies-wfes {_ false} {_ wfes G A} %.
+%mode {%in G sctx} {%in A tp} {%in X1 false} {%out X2 wfes G A} false-implies-wfes X1 X2 %.
+%worlds (var bind ovar) (false-implies-wfes _ _) %.
+%total {} (false-implies-wfes _ _) %.

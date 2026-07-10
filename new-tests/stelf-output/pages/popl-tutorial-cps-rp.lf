@@ -9,7 +9,7 @@
 %term app %pi (e (A => B)) %-> (e A) %-> (e B) %.
 %term lam %pi (%pi (v A) %-> (e B)) %-> (v (A => B)) %.
 %term inj %pi (v A) %-> (e A) %.
-%block sourceb {A tp} [x v A]%.
+%block sourceb [A tp] {x v A}%.
 %worlds (sourceb) (e _) (v _) %.
 %sort ctp %.
 %term co ctp %.
@@ -18,8 +18,8 @@
 %sort cv %.
 %term capp %pi (cv (carr A B)) %-> (cv A) %-> (%pi (cv B) %-> ce) %-> ce %.
 %term clam %pi (%pi (cv A) %-> (%pi (cv B) %-> ce) %-> ce) %-> (cv (carr A B)) %.
-%block targetb1 {A ctp} [x cv A]%.
-%block targetb2 {A ctp} [y %pi (cv A) %-> ce]%.
+%block targetb1 [A ctp] {x cv A}%.
+%block targetb2 [A ctp] {y %pi (cv A) %-> ce}%.
 %worlds (targetb1 targetb2) (ce) (cv _) %.
 %sort trans-tp %.
 %term trans-tp/o trans-tp o co %.
@@ -75,7 +75,7 @@
 	%<- (cpse E D1' E')
 	%<- (trans-tp-unique D1' D1 DQ)
 	%<- (ceo-resp-ctp-eq DQ E' E'') %.
-%block cpsb {A tp} {A' ctp} {D1 trans-tp A A'} [x v A] [x' cv A'] [d cps x D1 x']%.
+%block cpsb [A tp] [A' ctp] [D1 trans-tp A A'] {x v A} {x' cv A'} {d cps x D1 x'}%.
 %worlds (cpsb) (cps _ _ _) (cpse _ _ _) (cpse+ _ _ _) %.
 %total (E V E') (cps E _ _) (cpse V _ _) (cpse+ E' _ _) %.
 %{!

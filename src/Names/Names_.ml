@@ -121,18 +121,29 @@ module MakeNames
   let rec checkAtomic = function
     | name, IntSyn.Pi (d_, v_), 0 -> true
     | name, IntSyn.Pi (d_, v_), n ->
-        Logs.debug (fun m ->
-            m "checkAtomic: %s %s %d" name (IntSyn.show_exp v_) n);
+        Debug.msg' ~level:Debug.Level.Debug
+          (fun f (name, v_, n) ->
+            Format.fprintf f "checkAtomic: %s %s %d" name v_ n)
+          (name, IntSyn.show_exp v_, n);
         checkAtomic (name, v_, n - 1)
     | name, IntSyn.Uni _, 0 ->
-        Logs.debug (fun m -> m "checkAtomic: %s is a universe" name);
+        Debug.msg ~level:Debug.Level.Debug
+          (Debug.Fmt.shown_exact
+             (fun name -> "checkAtomic: " ^ name ^ " is a universe")
+             name);
         true
     | name, IntSyn.Root _, 0 ->
-        Logs.debug (fun m -> m "checkAtomic: %s is a root" name);
+        Debug.msg ~level:Debug.Level.Debug
+          (Debug.Fmt.shown_exact
+             (fun name -> "checkAtomic: " ^ name ^ " is a root")
+             name);
         true
     | name, v, n ->
-        Logs.debug (fun m ->
-            m "checkAtomic: %s is neither a universe nor a root" name);
+        Debug.msg ~level:Debug.Level.Debug
+          (Debug.Fmt.shown_exact
+             (fun name ->
+               "checkAtomic: " ^ name ^ " is neither a universe nor a root")
+             name);
         false
 
   (* raise Error (""Constant "" ^ name ^ "" takes too many explicit arguments for given fixity"") *)
@@ -303,8 +314,7 @@ module MakeNames
     | Some (_, cid') -> Array.update (shadowArray, cid, Some cid')
     end
 
-  let rec installAlias (name, cid) =
-    ignore (topInsert (name, cid))
+  let rec installAlias (name, cid) = ignore (topInsert (name, cid))
 
   let rec insertConstAlias ((structTable, constTable), name, cid) =
     ignore (StringTree.insertShadow constTable (name, cid))
@@ -869,11 +879,7 @@ module MakeNames
     end
 
   let rec findNameLocal (g_, base, i) =
-    let name =
-      base
-      ^ Int.toString i
-      
-    in
+    let name = base ^ Int.toString i in
     begin if varDefined name || conDefined name || ctxDefined (g_, name) then
       findNameLocal (g_, base, i + 1)
     else name
@@ -1085,5 +1091,11 @@ module Names =
     (TableInstances.StringRedBlackTree)
 
 include Names
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
-let () = Printexc.register_printer (function Unprintable -> Some "Unprintable" | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Unprintable -> Some "Unprintable"
+    | _ -> None)

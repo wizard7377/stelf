@@ -1,0 +1,44 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Definition 3 + 6 + Figure 5 : Var-validity of cps terms
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort stack %.
+%term dot stack %.
+%term , %pi stack %-> ctriv %-> stack %.
+%prec %left 10 , %.
+% moved from lemma9.elf Thu Mar 10 20:45:28 2005 -fp
+%term & %pi stack %-> stack %-> stack %.
+%prec %left 10 & %.
+%sort vvalR {_ croot} %.
+%name vvalR %.
+%sort vvalE {_ stack} {_ cexp} %.
+%sort vvalT {_ stack} {_ ctriv} {_ stack} %.
+%sort vvalC {_ stack} {_ ccont} %.
+%sort vvalK {_ stack} {_ %pi ctriv %-> cexp} %.
+%mode vvalR %in %.
+%mode vvalE %in %in %.
+%mode vvalT %in %in %out %.
+%mode vvalC %in %in %.
+%mode vvalK %in %in %.
+%term vval_klam %pi (vvalR (klam E)) %<- ({k ccont} %pi (vvalC dot k) %-> (vvalE dot (E k))) %.
+%term vval_capp 
+	%pi (vvalE Xi (capp T0 T1 C))
+	%<- (vvalT Xi T1 Xi1)
+	%<- (vvalT Xi1 T0 Xi0)
+	%<- (vvalC Xi0 C) %.
+%term vval_cret %pi (vvalE Xi (cret C T)) %<- (vvalT Xi T Xi') %<- (vvalC Xi' C) %.
+%term vval_xlam 
+	%pi (vvalT Xi (xlam R) Xi)
+	%<- ({x ctriv} %pi ({Xi' stack} vvalT Xi' x Xi') %-> (vvalR (R x))) %.
+%term vval_vlam 
+	%pi (vvalC Xi (vlam E))
+	%<- ({v ctriv} %pi ({Xi' stack} vvalT (Xi' , v) v Xi') %-> (vvalE (Xi , v) (E v))) %.
+%term vval_kappa 
+	%pi (vvalK Xi Kappa)
+	%<- ({v ctriv} %pi ({Xi' stack} vvalT (Xi' , v) v Xi') %-> (vvalE (Xi , v) (Kappa v)))
+	%<- ({t ctriv} %pi ({Xi' stack} vvalT Xi' t Xi') %-> (vvalE Xi (Kappa t))) %.
+%name vvalE %.
+%name vvalT %.
+%name vvalC %.
+%name vvalK %.
+%terminates (R E T C) (vvalR R) (vvalE _ E) (vvalT _ T _) (vvalC _ C) %.
+%terminates K (vvalK _ K) %.

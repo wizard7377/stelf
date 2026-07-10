@@ -1,0 +1,34 @@
+%%% Mini-ML Natural Semantics
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort feval {_ env} {_ exp'} {_ val} %.
+%name feval %.
+%mode feval %in %in %out %.
+% Variables
+%term fev_1 feval (K ; W) 1 W %.
+%term fev_^ %pi (feval (K ; W') (F ^) W) %<- (feval K F W) %.
+%term fev_1+ %pi (feval (K + F) 1 W) %<- (feval K F W) %.
+%term fev_^+ %pi (feval (K + F') (F ^) W) %<- (feval K F W) %.
+% Natural Numbers
+%term fev_z feval K z' z* %.
+%term fev_s %pi (feval K (s' F) (s* W)) %<- (feval K F W) %.
+%term fev_case_z %pi (feval K (case' F1 F2 F3) W) %<- (feval K F1 z*) %<- (feval K F2 W) %.
+%term fev_case_s 
+	%pi (feval K (case' F1 F2 F3) W)
+	%<- (feval K F1 (s* W1))
+	%<- (feval (K ; W1) F3 W) %.
+% Pairs
+%term fev_pair %pi (feval K (pair' F1 F2) (pair* W1 W2)) %<- (feval K F1 W1) %<- (feval K F2 W2) %.
+%term fev_fst %pi (feval K (fst' F) W1) %<- (feval K F (pair* W1 W2)) %.
+%term fev_snd %pi (feval K (snd' F) W2) %<- (feval K F (pair* W1 W2)) %.
+% Functions
+%term fev_lam feval K (lam' F) (clo K (lam' F)) %.
+%term fev_app 
+	%pi (feval K (app' F1 F2) W)
+	%<- (feval K F1 (clo K' (lam' F1')))
+	%<- (feval K F2 W2)
+	%<- (feval (K' ; W2) F1' W) %.
+% Definitions
+%term fev_letv %pi (feval K (letv' F1 F2) W) %<- (feval K F1 W1) %<- (feval (K ; W1) F2 W) %.
+%term fev_letn %pi (feval K (letn' F1 F2) W) %<- (feval (K + F1) F2 W) %.
+% Recursion
+%term fev_fix %pi (feval K (fix' F) W) %<- (feval (K + (fix' F)) F W) %.

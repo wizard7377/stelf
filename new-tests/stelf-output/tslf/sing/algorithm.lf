@@ -1,9 +1,9 @@
 %%%%%  Variable Identification  %%%%%
 %sort variable %.
 %mode variable %in %.
-%block evvar [x eterm] [dv variable x]%.
-%block evbind {a etp} [x eterm] [d evof x a] [dv variable x]%.
-%block evblock {x eterm} [dv variable x]%.
+%block evvar {x eterm} {dv variable x}%.
+%block evbind [a etp] {x eterm} {d evof x a} {dv variable x}%.
+%block evblock [x eterm] {dv variable x}%.
 %%%%%  Beta Normalization  %%%%%
 %sort oa %.
 %% outermost atomic

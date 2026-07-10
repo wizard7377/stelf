@@ -10,7 +10,7 @@ with the exception that the head variable ``x`` has been pulled out into the fro
 %{! ## Propositions and rules !}%
 %sort prop %.
 %sort atom %.
-%block bl_atom [qp atom]%.
+%block bl_atom {qp atom}%.
 %term a %pi atom %-> prop %.
 %term ⊃ %pi prop %-> prop %-> prop %.
 %prec %right 9 ⊃ %.
@@ -19,7 +19,7 @@ with the exception that the head variable ``x`` has been pulled out into the fro
 %sort hyp %.
 %sort verif %.
 %sort use %.
-%block bl_hyp {A prop} [x hyp A]%.
+%block bl_hyp [A prop] {x hyp A}%.
 %term end use A A %.
 %term atm %pi (hyp A) %-> (use A (a Q)) %-> (verif (a Q)) %.
 %term ⊃I %pi (%pi (hyp A) %-> (verif B)) %-> (verif (A ⊃ B)) %.

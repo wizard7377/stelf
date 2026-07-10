@@ -1,0 +1,26 @@
+%%% Ordinary reduction for the untyped lambda-calculus
+%%% Author: Frank Pfenning
+%scope app %sort -> {_ term} {_ term} %.
+%prec %none 10 --> %.
+%name --> %.
+%term beta1 app (lam M1) M2 --> M1 M2 %.
+%term lm1 %pi ({x term} M x --> M' x) %-> (lam M --> (lam M')) %.
+%term apl1 %pi (M1 --> M1') %-> (app M1 M2 --> (app M1' M2)) %.
+%term apr1 %pi (M2 --> M2') %-> (app M1 M2 --> (app M1 M2')) %.
+% Multi-step reduction
+%scope apr1 %sort ->* {_ term} {_ term} %.
+%prec %none 10 -->* %.
+%name -->* %.
+%term id1 M -->* M %.
+% step1 :    M' --> M'' ->  M  -->* M' -> M  -->* M''.
+% Bug here:
+% Fri Dec 14 18:37:26 2001 -fp !!!
+%term step1 %pi (M --> M') %-> (M' -->* M'') %-> (M -->* M'') %.
+% Conversion
+%sort <-> {_ term} {_ term} %.
+%prec %none 10 <-> %.
+%name <-> %.
+%term refl M <-> M %.
+%term sym %pi (M <-> M') %<- (M' <-> M) %.
+%term trans %pi (M <-> M'') %<- (M <-> M') %<- (M' <-> M'') %.
+%term red %pi (M <-> M') %<- (M -->* M') %.

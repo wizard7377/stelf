@@ -20,7 +20,11 @@ open Intsyn_
 (* Author: Jeff Polakow, Frank Pfenning *)
 (* Modified: Roberto Virga *)
 exception Error of IntSyn.cnstr list
-let () = Printexc.register_printer (function Error _ -> Some "Constraint error" | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | Error _ -> Some "Constraint error"
+    | _ -> None)
 
 module MakeConstraints (Conv : CONV) : CONSTRAINTS = struct
   (*! structure IntSyn = IntSyn' !*)

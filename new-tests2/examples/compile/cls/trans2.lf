@@ -1,0 +1,51 @@
+%%% Translation to representation using de Bruijn indices
+%%% Author: Frank Pfenning, based on [Hannan & Pfenning 92]
+%sort trans {_ env} {_ exp'} {_ exp} %.
+%name trans %.
+%sort vtrans {_ val} {_ exp} %.
+%name vtrans %.
+%mode trans %in %in %out %.
+% and other modes!
+%mode vtrans %in %out %.
+% Natural numbers
+%term tr_z trans K z' z %.
+%term tr_s %pi (trans K (s' F) (s E)) %<- (trans K F E) %.
+%term tr_case 
+	%pi (trans K (case' F1 F2 F3) (case E1 E2 E3))
+	%<- (trans K F1 E1)
+	%<- (trans K F2 E2)
+	%<- ({w val} {x exp} %pi (vtrans w x) %-> (trans (K ; w) F3 (E3 x))) %.
+% Pairs
+%term tr_pair %pi (trans K (pair' F1 F2) (pair E1 E2)) %<- (trans K F1 E1) %<- (trans K F2 E2) %.
+%term tr_fst %pi (trans K (fst' F1) (fst E1)) %<- (trans K F1 E1) %.
+%term tr_snd %pi (trans K (snd' F1) (snd E1)) %<- (trans K F1 E1) %.
+% Functions
+%term tr_lam 
+	%pi (trans K (lam' F) (lam E))
+	%<- ({w val} {x exp} %pi (vtrans w x) %-> (trans (K ; w) F (E x))) %.
+%term tr_app %pi (trans K (app' F1 F2) (app E1 E2)) %<- (trans K F1 E1) %<- (trans K F2 E2) %.
+% Definitions
+%term tr_letv 
+	%pi (trans K (letv' F1 F2) (letv E1 E2))
+	%<- (trans K F1 E1)
+	%<- ({w val} {x exp} %pi (vtrans w x) %-> (trans (K ; w) F2 (E2 x))) %.
+%term tr_letn 
+	%pi (trans K (letn' F1 F2) (letn E1 E2))
+	%<- (trans K F1 E1)
+	%<- ({f exp'} {x exp} %pi (trans K f x) %-> (trans (K + f) F2 (E2 x))) %.
+% Recursion
+%term tr_fix 
+	%pi (trans K (fix' F) (fix E))
+	%<- ({f exp'} {x exp} %pi (trans K f x) %-> (trans (K + f) F (E x))) %.
+% Variables
+%term tr_1 %pi (trans (K ; W) 1 E) %<- (vtrans W E) %.
+%term tr_^ %pi (trans (K ; W) (F ^) E) %<- (trans K F E) %.
+%term tr_1+ %pi (trans (K + F) 1 E) %<- (trans K F E) %.
+%term tr_^+ %pi (trans (K + F') (F ^) E) %<- (trans K F E) %.
+% Natural number values
+%term vtr_z vtrans z* z %.
+%term vtr_s %pi (vtrans (s* W) (s V)) %<- (vtrans W V) %.
+% Pair values
+%term vtr_pair %pi (vtrans (pair* W1 W2) (pair V1 V2)) %<- (vtrans W1 V1) %<- (vtrans W2 V2) %.
+% Function values
+%term vtr_lam %pi (vtrans (clo K (lam' F)) (lam E)) %<- (trans K (lam' F) (lam E)) %.

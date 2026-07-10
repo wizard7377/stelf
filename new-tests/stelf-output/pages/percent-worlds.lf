@@ -89,7 +89,7 @@ The correct world for this type family consists of blocks of the form defined in
 %total T (max T _ _) %.
 %{!! end hidden !!}%
 %{!! begin checked !!}%
-%block var-height [x exp] [_ height x (s z)]%.
+%block var-height {x exp} {_ height x (s z)}%.
 %mode height %in %out %.
 %worlds (var-height) (height _ _) %.
 %{!! end checked !!}%

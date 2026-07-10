@@ -22,7 +22,7 @@
 %term isa_andel %pi (isatm (ta_andel TA1) (atm_andel AT1)) %<- (isatm TA1 AT1) %.
 %term isa_ander %pi (isatm (ta_ander TA1) (atm_ander AT1)) %<- (isatm TA1 AT1) %.
 %term isa_foralle %pi (isatm (ta_foralle TA1) (atm_foralle AT1)) %<- (isatm TA1 AT1) %.
-%block l_isatm {A o} [u pf A] [ta toatm u u] [at atm u] [is isatm ta at]%.
-%block l_i [a i]%.
+%block l_isatm [A o] {u pf A} {ta toatm u u} {at atm u} {is isatm ta at}%.
+%block l_i {a i}%.
 %worlds (l_i l_isatm) (isatm _ _) (iscan _ _) %.
 %total (TA TC) (isatm TA CA) (iscan TC CN) %.

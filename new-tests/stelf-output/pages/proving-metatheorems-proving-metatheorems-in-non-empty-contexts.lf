@@ -127,7 +127,7 @@ By using Twelf's ability to prove totality assertions for type families in gener
 %term size-empty size empty (s z) %.
 %term size-lam %pi (size (lam _ E) (s N)) %<- ({x} {dx size x (s z)} size (E x) N) %.
 %term size-app %pi (size (app E1 E2) (s N)) %<- (size E1 N1) %<- (size E2 N2) %<- (plus N1 N2 N) %.
-%block size-block [x tm] [dx size x (s z)]%.
+%block size-block {x tm} {dx size x (s z)}%.
 %worlds (size-block) (size _ _) %.
 %total E (size E _) %.
 %{!! end hidden !!}%
@@ -246,7 +246,7 @@ To correct the proof, we work over contexts of a different form.  Only the ``siz
 	%<- (plus-s-rh DplusRes DplusRes') %.
 %{!! end hidden !!}%
 %{!! begin checked !!}%
-%block ssblock [y tm] [dy size y (s z)] [_ {E' tm} subst-size E' ([x] [dx] dy) dy plus-z]%.
+%block ssblock {y tm} {dy size y (s z)} {_ {E' tm} subst-size E' ([x] [dx] dy) dy plus-z}%.
 %worlds (ssblock) (subst-size _ _ _ _) %.
 %total D (subst-size _ D _ _) %.
 %{!! end checked !!}%

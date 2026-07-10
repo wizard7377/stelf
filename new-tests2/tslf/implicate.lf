@@ -1,0 +1,302 @@
+%%%% implicate lemma.  explicit system to implicit system.
+%sort implicate/kd-wf {_ ekd-wf G K} {_ ikd-wf G K} %.
+%mode implicate/kd-wf %in %out %.
+%sort implicate/kd-deq {_ ekd-deq G K1 K2} {_ ikd-deq G K1 K2} %.
+%mode implicate/kd-deq %in %out %.
+%sort implicate/kd-sub {_ ekd-sub G K1 K2} {_ ikd-sub G K1 K2} %.
+%mode implicate/kd-sub %in %out %.
+%sort implicate/ofkd {_ eofkd G C K} {_ iofkd G C K} %.
+%mode implicate/ofkd %in %out %.
+%sort implicate/cn-deq {_ ecn-deq G C C' K} {_ icn-deq G C C' K} %.
+%mode implicate/cn-deq %in %out %.
+%term _ 
+	%pi (implicate/kd-wf (ekd-wf/kd/unit _) D)
+	%<- (kd-wf-to-ikd-wf G kd-wf/kd/unit D) %.
+%term _ 
+	%pi (implicate/kd-wf (ekd-wf/kd/type _) D)
+	%<- (kd-wf-to-ikd-wf G kd-wf/kd/type D) %.
+%term _ 
+	%pi (implicate/kd-wf (ekd-wf/kd/sing D) D'')
+	%<- (implicate/ofkd D D')
+	%<- (ikd-wf/kd/sing D' D'') %.
+%term _ 
+	%pi (implicate/kd-wf (ekd-wf/kd/sgm D1 D2) D'')
+	%<- (implicate/kd-wf D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/kd-wf (D2 c d) (ikd-wf/cons (D2' c)))
+	%<- (ikd-wf/kd/sgm D1' D2' D'') %.
+%term _ 
+	%pi (implicate/kd-wf (ekd-wf/kd/pi D1 D2) D'')
+	%<- (implicate/kd-wf D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/kd-wf (D2 c d) (ikd-wf/cons (D2' c)))
+	%<- (ikd-wf/kd/pi D1' D2' D'') %.
+%term _ 
+	%pi (implicate/kd-deq (ekd-deq/kd/unit _) D)
+	%<- (kd-deq-to-ikd-deq G kd-deq/kd/unit D) %.
+%term _ 
+	%pi (implicate/kd-deq (ekd-deq/kd/type _) D)
+	%<- (kd-deq-to-ikd-deq G kd-deq/kd/type D) %.
+%term _ 
+	%pi (implicate/kd-deq (ekd-deq/kd/sing D) D'')
+	%<- (implicate/cn-deq D D')
+	%<- (ikd-deq/kd/sing D' D'') %.
+%term _ 
+	%pi (implicate/kd-deq (ekd-deq/kd/sgm D1 D2) D'')
+	%<- (implicate/kd-deq D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/kd-deq (D2 c d) (ikd-deq/cons (D2' c)))
+	%<- (ikd-deq/kd/sgm D1' D2' D'') %.
+%term _ 
+	%pi (implicate/kd-deq (ekd-deq/kd/pi D1 D2) D'')
+	%<- (implicate/kd-deq D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/kd-deq (D2 c d) (ikd-deq/cons (D2' c)))
+	%<- (ikd-deq/kd/pi D1' D2' D'') %.
+%term _ 
+	%pi (implicate/kd-sub (ekd-sub/kd/unit _) D)
+	%<- (kd-sub-to-ikd-sub G kd-sub/kd/unit D) %.
+%term _ 
+	%pi (implicate/kd-sub (ekd-sub/kd/type _) D)
+	%<- (kd-sub-to-ikd-sub G kd-sub/kd/type D) %.
+%term _ 
+	%pi (implicate/kd-sub (ekd-sub/kd/sing-kd/sing D) D'')
+	%<- (implicate/cn-deq D D')
+	%<- (ikd-sub/kd/sing-kd/sing D' D'') %.
+%term _ 
+	%pi (implicate/kd-sub (ekd-sub/kd/sing-kd/type D) D'')
+	%<- (implicate/ofkd D D')
+	%<- (ikd-sub/kd/sing-kd/type D' D'') %.
+%term _ 
+	%pi (implicate/kd-sub (ekd-sub/kd/sgm D1 D2 D3) D'')
+	%<- (implicate/kd-sub D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/kd-sub (D2 c d) (ikd-sub/cons (D2' c)))
+	%<- ({c cn} {d isvar c I} implicate/kd-wf (D3 c d) (ikd-wf/cons (D3' c)))
+	%<- (ikd-sub/kd/sgm D1' D2' D3' D'') %.
+%term _ 
+	%pi (implicate/kd-sub (ekd-sub/kd/pi D1 D2 D3) D'')
+	%<- (implicate/kd-sub D1 D1')
+	%<- ({c cn} {d isvar c I} implicate/kd-sub (D2 c d) (ikd-sub/cons (D2' c)))
+	%<- ({c cn} {d isvar c I} implicate/kd-wf (D3 c d) (ikd-wf/cons (D3' c)))
+	%<- (ikd-sub/kd/pi D1' D2' D3' D'') %.
+%term _ %pi (implicate/ofkd (eofkd/cn/unit _) D) %<- (ofkd-to-iofkd _ ofkd/cn/unit D) %.
+%term _ %pi (implicate/ofkd (eofkd/tp/unit _) D) %<- (ofkd-to-iofkd _ ofkd/tp/unit D) %.
+%term _ %pi (implicate/ofkd (eofkd/tp/tagged _) D) %<- (ofkd-to-iofkd _ ofkd/tp/tagged D) %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/tp/cross D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/ofkd D2 D2')
+	%<- (iofkd/tp/cross D1' D2' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/tp/arrow D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/ofkd D2 D2')
+	%<- (iofkd/tp/arrow D1' D2' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/tp/sum D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/ofkd D2 D2')
+	%<- (iofkd/tp/sum D1' D2' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/tp/forall D1 DW) D')
+	%<- ({c cn} {d isvar c I} implicate/ofkd (D1 c d) (iofkd/cons (D1' c)))
+	%<- (implicate/kd-wf DW DW')
+	%<- (iofkd/tp/forall D1' DW' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/tp/ref D1) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (iofkd/tp/ref D1' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/tp/tag D1) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (iofkd/tp/tag D1' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/cn/pair D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/ofkd D2 D2')
+	%<- (iofkd/cn/pair D1' D2' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/cn/pj1 D1) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (iofkd/cn/pj1 D1' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/cn/pj2 D1) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (iofkd/cn/pj2 D1' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/cn/lam D1 DW) D')
+	%<- ({c cn} {d isvar c I} implicate/ofkd (D1 c d) (iofkd/cons (D1' c)))
+	%<- (implicate/kd-wf DW DW')
+	%<- (iofkd/cn/lam D1' DW' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/cn/mu D1 DW) D')
+	%<- ({c cn} {d isvar c I} implicate/ofkd (D1 c d) (iofkd/cons (D1' c)))
+	%<- (implicate/kd-wf DW DW')
+	%<- (iofkd/cn/mu D1' DW' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/cn/app D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/ofkd D2 D2')
+	%<- (iofkd/cn/app D1' D2' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/kd/sing D1) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (iofkd/kd/sing D1' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/sgm-ext D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/ofkd D2 D2')
+	%<- (iofkd/sgm-ext D1' D2' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/pi-ext D1 D2) D')
+	%<- ({c cn} {d isvar c I} implicate/ofkd (D2 c d) (iofkd/cons (D2' c)))
+	%<- (implicate/ofkd D1 D1')
+	%<- (iofkd/pi-ext D1' D2' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/sub D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/kd-sub D2 D2')
+	%<- (iofkd/sub D1' D2' D') %.
+%term _ 
+	%pi (implicate/ofkd (eofkd/deq D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/kd-deq D2 D2')
+	%<- (iofkd/deq D1' D2' D') %.
+%term _ %pi (implicate/ofkd (eofkd/var D) D') %<- (implicate-cxt-lookup D D') %.
+%term _ %pi (implicate/ofkd (eofkd/closed D _) D') %<- (ofkd-to-iofkd _ D D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/refl D) D'')
+	%<- (implicate/ofkd D D')
+	%<- (icn-deq/refl D' D'') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/sym D) D'')
+	%<- (implicate/cn-deq D D')
+	%<- (icn-deq/sym D' D'') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/trans D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/cn-deq D2 D2')
+	%<- (icn-deq/trans D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/cn/unit _) D)
+	%<- (cn-deq-to-icn-deq _ cn-deq/cn/unit D) %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/tp/unit _) D)
+	%<- (cn-deq-to-icn-deq _ cn-deq/tp/unit D) %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/tp/tagged _) D)
+	%<- (cn-deq-to-icn-deq _ cn-deq/tp/tagged D) %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/tp/cross D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/cn-deq D2 D2')
+	%<- (icn-deq/tp/cross D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/tp/arrow D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/cn-deq D2 D2')
+	%<- (icn-deq/tp/arrow D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/tp/sum D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/cn-deq D2 D2')
+	%<- (icn-deq/tp/sum D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/tp/forall D1 DW) D')
+	%<- ({c cn} {d isvar c I} implicate/cn-deq (D1 c d) (icn-deq/cons (D1' c)))
+	%<- (implicate/kd-deq DW DW')
+	%<- (icn-deq/tp/forall D1' DW' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/tp/ref D1) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (icn-deq/tp/ref D1' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/tp/tag D1) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (icn-deq/tp/tag D1' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/cn/pair D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/cn-deq D2 D2')
+	%<- (icn-deq/cn/pair D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/cn/pj1 D1) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (icn-deq/cn/pj1 D1' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/cn/pj2 D1) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (icn-deq/cn/pj2 D1' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/cn/lam D1 DW) D')
+	%<- ({c cn} {d isvar c I} implicate/cn-deq (D1 c d) (icn-deq/cons (D1' c)))
+	%<- (implicate/kd-deq DW DW')
+	%<- (icn-deq/cn/lam D1' DW' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/cn/mu D1 DW) D')
+	%<- ({c cn} {d isvar c I} implicate/cn-deq (D1 c d) (icn-deq/cons (D1' c)))
+	%<- (implicate/kd-deq DW DW')
+	%<- (icn-deq/cn/mu D1' DW' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/cn/app D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/cn-deq D2 D2')
+	%<- (icn-deq/cn/app D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/kd/unit D1 D2) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/ofkd D2 D2')
+	%<- (icn-deq/kd/unit D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/kd/sing D1) D')
+	%<- (implicate/ofkd D1 D1')
+	%<- (icn-deq/kd/sing D1' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/sgm-ext D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/cn-deq D2 D2')
+	%<- (icn-deq/sgm-ext D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/pi-ext D1 D3 D2) D')
+	%<- ({c cn} {d isvar c I} implicate/cn-deq (D2 c d) (icn-deq/cons (D2' c)))
+	%<- (implicate/ofkd D1 D1')
+	%<- (implicate/ofkd D3 D3')
+	%<- (icn-deq/pi-ext D1' D3' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/pi-ext-2 D1 D2) D')
+	%<- ({c cn} {d isvar c I} implicate/cn-deq (D2 c d) (icn-deq/cons (D2' c)))
+	%<- (implicate/cn-deq D1 D1')
+	%<- (icn-deq/pi-ext-2 D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/sub D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/kd-sub D2 D2')
+	%<- (icn-deq/sub D1' D2' D') %.
+%term _ 
+	%pi (implicate/cn-deq (ecn-deq/deq D1 D2) D')
+	%<- (implicate/cn-deq D1 D1')
+	%<- (implicate/kd-deq D2 D2')
+	%<- (icn-deq/deq D1' D2' D') %.
+%worlds (ovar-block ofkd-block) (implicate/kd-wf _ _) (implicate/kd-deq _ _) (implicate/kd-sub _ _) (implicate/ofkd _ _) (implicate/cn-deq _ _) %.
+%total (D1 D2 D3 D4 D5) (implicate/kd-wf D1 _) (implicate/kd-deq D4 _) (implicate/kd-sub D3 _) (implicate/ofkd D2 _) (implicate/cn-deq D5 _) %.
+%sort implicate-closed/kd-wf {_ ekd-wf cxt/nil K} {_ kd-wf K} %.
+%mode implicate-closed/kd-wf %in %out %.
+%term _ %pi (implicate-closed/kd-wf D D') %<- (implicate/kd-wf D (ikd-wf/nil D')) %.
+%worlds (ofkd-block) (implicate-closed/kd-wf _ _) %.
+%total {} (implicate-closed/kd-wf _ _) %.
+%sort implicate-closed/kd-deq {_ ekd-deq cxt/nil K1 K2} {_ kd-deq K1 K2} %.
+%mode implicate-closed/kd-deq %in %out %.
+%term _ %pi (implicate-closed/kd-deq D D') %<- (implicate/kd-deq D (ikd-deq/nil D')) %.
+%worlds (ofkd-block) (implicate-closed/kd-deq _ _) %.
+%total {} (implicate-closed/kd-deq _ _) %.
+%sort implicate-closed/kd-sub {_ ekd-sub cxt/nil K1 K2} {_ kd-sub K1 K2} %.
+%mode implicate-closed/kd-sub %in %out %.
+%term _ %pi (implicate-closed/kd-sub D D') %<- (implicate/kd-sub D (ikd-sub/nil D')) %.
+%worlds (ofkd-block) (implicate-closed/kd-sub _ _) %.
+%total {} (implicate-closed/kd-sub _ _) %.
+%sort implicate-closed/ofkd {_ eofkd cxt/nil C K} {_ ofkd C K} %.
+%mode implicate-closed/ofkd %in %out %.
+%term _ %pi (implicate-closed/ofkd D D') %<- (implicate/ofkd D (iofkd/nil D')) %.
+%worlds (ofkd-block) (implicate-closed/ofkd _ _) %.
+%total {} (implicate-closed/ofkd _ _) %.
+%sort implicate-closed/cn-deq {_ ecn-deq cxt/nil C1 C2 K} {_ cn-deq C1 C2 K} %.
+%mode implicate-closed/cn-deq %in %out %.
+%term _ %pi (implicate-closed/cn-deq D D') %<- (implicate/cn-deq D (icn-deq/nil D')) %.
+%worlds (ofkd-block) (implicate-closed/cn-deq _ _) %.
+%total {} (implicate-closed/cn-deq _ _) %.

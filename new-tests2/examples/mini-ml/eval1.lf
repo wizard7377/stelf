@@ -1,0 +1,25 @@
+% The literal translation of the LF signature into Elf
+% This is not operationally adequate, because of the
+% wrong order of subgoals.
+%sort eval {_ exp} {_ exp} %.
+% Natural Numbers
+%term ev_z eval z z %.
+%term ev_s {E exp} {V exp} %pi (eval E V) %-> (eval (s E) (s V)) %.
+%term ev_case_z {E1 exp} {E2 exp} {E3 %pi exp %-> exp} {V exp} %pi (eval E1 z) %-> (eval E2 V) %-> (eval (case E1 E2 E3) V) %.
+%term ev_case_s {E1 exp} {E2 exp} {E3 %pi exp %-> exp} {V1' exp} {V exp} %pi (eval E1 (s V1')) %-> (eval (E3 V1') V) %-> (eval (case E1 E2 E3) V) %.
+% Pairs
+%term ev_pair {E1 exp} {E2 exp} {V1 exp} {V2 exp} %pi (eval E1 V1) %-> (eval E2 V2) %-> (eval (pair E1 E2) (pair V1 V2)) %.
+%term ev_fst {E exp} {V1 exp} {V2 exp} %pi (eval E (pair V1 V2)) %-> (eval (fst E) V1) %.
+%term ev_snd {E exp} {V1 exp} {V2 exp} %pi (eval E (pair V1 V2)) %-> (eval (snd E) V2) %.
+% Functions
+%term ev_lam {E %pi exp %-> exp} eval (lam E) (lam E) %.
+%term ev_app {E1 exp} {E2 exp} {E1' %pi exp %-> exp} {V2 exp} {V exp} 
+	%pi (eval E1 (lam E1'))
+	%-> (eval E2 V2)
+	%-> (eval (E1' V2) V)
+	%-> (eval (app E1 E2) V) %.
+% Definitions
+%term ev_letv {E1 exp} {E2 %pi exp %-> exp} {V1 exp} {V exp} %pi (eval E1 V1) %-> (eval (E2 V1) V) %-> (eval (letv E1 E2) V) %.
+%term ev_letn {E1 exp} {E2 %pi exp %-> exp} {V exp} %pi (eval (E2 E1) V) %-> (eval (letn E1 E2) V) %.
+% Recursion
+%term ev_fix {E %pi exp %-> exp} {V exp} %pi (eval (E (fix E)) V) %-> (eval (fix E) V) %.

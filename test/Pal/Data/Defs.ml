@@ -1,4 +1,5 @@
-let def_basic_test = {|
+let def_basic_test =
+  {|
 %sort df_nat %.
 %term df_zero df_nat %.
 %term df_succ {_ df_nat} df_nat %.
@@ -9,7 +10,8 @@ let def_basic_test = {|
 %term df_singleton df_vec df_one %.
 |}
 
-let def_inferred_test = {|
+let def_inferred_test =
+  {|
 %sort di_nat %.
 %term di_zero di_nat %.
 %term di_succ {_ di_nat} di_nat %.
@@ -18,7 +20,8 @@ let def_inferred_test = {|
 %term di_base di_using di_two %.
 |}
 
-let def_prop_test = {|
+let def_prop_test =
+  {|
 %sort dp_prop %.
 %term dp_imp {_ dp_prop} {_ dp_prop} dp_prop %.
 %term dp_false dp_prop %.

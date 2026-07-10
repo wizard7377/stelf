@@ -344,7 +344,7 @@ The frame stack is a stack of evaluation frames that provides a context on which
 %freeze frameapply %.
 %total D (frameapply D _ _) %.
 %{! I should move you: !}%
-%block blam [y term]%.
+%block blam {y term}%.
 %{! ### Equalities on frame stacks
 I also need some equational reasoning on frame stacks: !}%
 %sort eqf %.
@@ -1002,7 +1002,7 @@ I encode linearity as a predicate on LF functions. Thus if linear([x].F) then we
 %term linear_tens2 %pi (linear ([x] tens E1 (E2 x))) %<- (linear ([x] E2 x)) %.
 %term linear_lett1 %pi (linear ([x] lett (E x) F)) %<- (linear ([x] E x)) %.
 %term linear_lett2 %pi (linear ([x] lett E ([y] [z] F x y z))) %<- ({y} {z} linear ([x] F x y z)) %.
-%block btlam [t tp]%.
+%block btlam {t tp}%.
 %worlds (blam btlam) (linear _) %.
 %freeze linear %.
 %sort sub_linear %.
@@ -1029,8 +1029,8 @@ I encode linearity as a predicate on LF functions. Thus if linear([x].F) then we
 	%<- ({y} {z} sub_linear (L1 y z) L2 (L3 y z)) %.
 %term sub_linear_tens1 %pi (sub_linear (linear_tens1 L1) L2 (linear_tens1 L3)) %<- (sub_linear L1 L2 L3) %.
 %term sub_linear_tens2 %pi (sub_linear (linear_tens2 L1) L2 (linear_tens2 L3)) %<- (sub_linear L1 L2 L3) %.
-%block bsub_linear_lam1 [y term]%.
-%block bsub_linear_lam2 [y tp]%.
+%block bsub_linear_lam1 {y term}%.
+%block bsub_linear_lam2 {y tp}%.
 %worlds (bsub_linear_lam1 bsub_linear_lam2) (sub_linear _ _ _) %.
 %freeze sub_linear %.
 %total D (sub_linear D _ _) %.
@@ -1132,8 +1132,8 @@ I encode linearity as a predicate on LF functions. Thus if linear([x].F) then we
 	%<- ({x} %pi (x ? T) %-> ({y} %pi (y ? T') %-> (N x y ? T'')))
 	%<- ({y} linear ([x] N x y))
 	%<- ({x} linear ([y] N x y)) %.
-%block blam_t {T tp} [x term] [u x ? T]%.
-%block btlam_t [t tp]%.
+%block blam_t [T tp] {x term} {u x ? T}%.
+%block btlam_t {t tp}%.
 %worlds (blam_t btlam_t) (? _ _) %.
 %covers ? %in %out %.
 %freeze ? %.
@@ -1225,7 +1225,7 @@ As we have a type system we should prove soundness of it. !}%
 %freeze tpres_s %.
 %total D (tpres_s _ D _) %.
 %{! ### Equalities and inversions !}%
-%block bts_tlam [t tp]%.
+%block bts_tlam {t tp}%.
 %sort eq_typings %.
 %mode eq_typings %in %out %.
 %term eq_typings_ref eq_typings D D %.

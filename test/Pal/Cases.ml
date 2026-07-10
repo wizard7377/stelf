@@ -27,7 +27,10 @@ let total_add_mul_test =
 let cwd : string = Sys.getcwd ()
 let new_tests_pages : string = cwd ^ "/../../new-tests/pages"
 let new_tests_output_pages : string = cwd ^ "/../../new-tests/output/pages"
-let new_tests_stelf_output_tslf : string = cwd ^ "/../../new-tests/stelf-output/tslf"
+
+let new_tests_stelf_output_tslf : string =
+  cwd ^ "/../../new-tests/stelf-output/tslf"
+
 let cases () =
   Alcotest.run "PAL"
     begin
@@ -64,12 +67,7 @@ let cases () =
         test "LAM" Source.[ lam_1; lam_2; lam_3; lam_4; lam_5 ];
         test "POLYLAM" Source.[ polylam ];
         test "PROP-CALC"
-          Source.
-            [
-              prop_calc_types;
-              prop_calc_hilbert;
-              prop_calc_nd;
-            ];
+          Source.[ prop_calc_types; prop_calc_hilbert; prop_calc_nd ];
         test "MINI-ML" Source.[ mini_ml_exp; mini_ml_value; mini_ml_tp ];
         test "ARITH" Source.[ arith_nat; arith_nt; arith_plus; arith_acker ];
         test "GUIDE-LISTS"
@@ -78,8 +76,7 @@ let cases () =
         test "LP-HORN-ND" Source.[ lp_horn_nd ];
         test "CHURCH-ROSSER-LAM" Source.[ church_rosser_lam ];
         test "CUT-ELIM-FORMULAS" Source.[ cut_elim_formulas ];
-        test "cut_elim/sources"
-          Source.[ cut_elim_formulas; cut_elim_sources_2 ];
+        test "cut_elim/sources" Source.[ cut_elim_formulas; cut_elim_sources_2 ];
         test "GUIDE-ND" Source.[ guide_nd ];
         test "CPSOCC-DSBNF" Source.[ cpsocc_dsbnf ];
         test "CPSOCC-CPSBF" Source.[ cpsocc_cpsBNF ];
@@ -124,8 +121,7 @@ let cases () =
             ];
         test "POPLMARK-1A"
           Source.[ poplmark_1a_syntax; poplmark_1b_syntax; poplmark_2b_syntax ];
-        test "POPLMARK-2A"
-          Source.[ poplmark_1a_syntax; poplmark_2a_syntax ];
+        test "POPLMARK-2A" Source.[ poplmark_1a_syntax; poplmark_2a_syntax ];
         test "CCC" Source.[ ccc_syntax ];
         test "INCLL" Source.[ incll_syntax ];
         test "CRARY-LINEAR" Source.[ crary_linear_syntax; crary_linear_linear ];
@@ -191,12 +187,7 @@ let cases () =
             ];
         (* examples/prop_calc/sources.cfg: types + hilbert + nd cumulative *)
         test "prop_calc/sources"
-          Source.
-            [
-              prop_calc_types;
-              prop_calc_hilbert;
-              prop_calc_nd;
-            ];
+          Source.[ prop_calc_types; prop_calc_hilbert; prop_calc_nd ];
         (* examples/crary/explicit/excon *)
         test "crary/explicit/excon" Source.[ crary_excon ];
         (* examples/crary/explicit/excon-rev *)
@@ -209,7 +200,6 @@ let cases () =
         (* examples/crary/substruct/modal *)
         test "crary/substruct/modal" Source.[ crary_modal_syntax ];
         (* Tier 2: single-elf cfg files *)
-
         test "handbook/sources" Source.[ handbook_sources_1 ];
         (* examples/ccc/spass.cfg → spass.elf: CCC with categorical laws.
        Uses dependent sort indices (== : mor A B -> mor A B -> type) —
@@ -236,11 +226,9 @@ let cases () =
           Source.[ wiki_failures_unsatisfiable_query_1 ];
         (* examples/crary/standard/standard.cfg → standard.elf (1602 lines).
        Higher-order CBV lambda calculus. *)
-        test "crary/standard/standard"
-          Source.[ crary_standard_standard_1 ];
+        test "crary/standard/standard" Source.[ crary_standard_standard_1 ];
         (* examples/tabled/parsing/arithml.cfg: grammar with numeric identifiers. *)
-        test "tabled/parsing/arithml"
-          Source.[ tabled_parsing_arithml_1 ];
+        test "tabled/parsing/arithml" Source.[ tabled_parsing_arithml_1 ];
         (* examples/tabled/parsing/foll.cfg: FOL grammar with %tabled. *)
         test "tabled/parsing/foll" Source.[ tabled_parsing_foll_1 ];
         (* examples/tabled/parsing/tab.cfg: DCG grammar with single-quoted tokens. *)
@@ -251,10 +239,8 @@ let cases () =
         file_test "require" [ cwd ^ "/require/main.lf" ];
         (* Name shadowing: redeclaring a constant in the same namespace raises
            Names_.Error "Shadowing: ..." thanks to the insertShadow fix. *)
-        test ~failure:true "Name shadowing / sort"
-          Source.[ shadow_sort_redecl ];
-        test ~failure:true "Name shadowing / term"
-          Source.[ shadow_term_redecl ];
+        test ~failure:true "Name shadowing / sort" Source.[ shadow_sort_redecl ];
+        test ~failure:true "Name shadowing / term" Source.[ shadow_term_redecl ];
         (* Targeted error-kind tests: verify that specific bad inputs fail *)
         test ~failure:true "Error / parse / sort-no-name"
           Source.[ error_parse_sort_empty ];
@@ -266,11 +252,9 @@ let cases () =
         file_test ~failure:true "require/missing"
           [ cwd ^ "/require/missing/main.lf" ];
         (* Circular %require is handled gracefully: the dedup table breaks the cycle *)
-        file_test "require/circular"
-          [ cwd ^ "/require/circular/a.lf" ];
+        file_test "require/circular" [ cwd ^ "/require/circular/a.lf" ];
         (* Second %require of the same file is a no-op (idempotent) *)
-        file_test "require/dedup"
-          [ cwd ^ "/require/dedup/main.lf" ];
+        file_test "require/dedup" [ cwd ^ "/require/dedup/main.lf" ];
         (* %require inside %scope escapes to group_ns, not the inner scope's ns *)
         file_test "require/scope-require"
           [ cwd ^ "/require/scope-require/outer.lf" ];
@@ -281,14 +265,11 @@ let cases () =
         (* %open inside a %scope body (inner scope can open outer scope) *)
         test "scope/open-inside" Source.[ scope_open_inside_test ];
         (* TOML: single group *)
-        file_test "toml/single"
-          [ cwd ^ "/require/toml/single/stelf.toml" ];
+        file_test "toml/single" [ cwd ^ "/require/toml/single/stelf.toml" ];
         (* TOML: multi-group with local dep — dep group loaded before main *)
-        file_test "toml/multi"
-          [ cwd ^ "/require/toml/multi/stelf.toml" ];
+        file_test "toml/multi" [ cwd ^ "/require/toml/multi/stelf.toml" ];
         (* TOML: local dep with alias — dep accessible under aliased struct name *)
-        file_test "toml/alias"
-          [ cwd ^ "/require/toml/alias/stelf.toml" ];
+        file_test "toml/alias" [ cwd ^ "/require/toml/alias/stelf.toml" ];
         (* %local: qualify names in inner expr against given namespace *)
         test "local/basic" Source.[ local_basic_test ];
         (* %local: names not in namespace are resolved from surrounding context *)
@@ -327,17 +308,24 @@ let cases () =
           [ new_tests_pages ^ "/lexicographical-orderings-with-density.lf" ];
         (* popl-church-rosser: uses (1) zero-arg sort kind inference (%sort reduce %.,
            %sort diamond %.) (2) %the type ascription (3) %block [x exp] notation *)
-        file_test ~skip:true "new-tests/pages/popl-tutorial-church-rosser-problem"
+        file_test ~skip:true
+          "new-tests/pages/popl-tutorial-church-rosser-problem"
           [ new_tests_pages ^ "/popl-tutorial-church-rosser-problem.lf" ];
         (* popl-properties: uses (1) % (percent-space) inter-command comments which
            skip_outer doesn't handle (2) zero-arg sort kind inference (3) %block
            with {T typ} [x exp] [ofx ...] mixed notation *)
-        file_test ~skip:true "new-tests/pages/popl-tutorial-properties-of-typing-and-reduction"
-          [ new_tests_pages ^ "/popl-tutorial-properties-of-typing-and-reduction.lf" ];
+        file_test ~skip:true
+          "new-tests/pages/popl-tutorial-properties-of-typing-and-reduction"
+          [
+            new_tests_pages
+            ^ "/popl-tutorial-properties-of-typing-and-reduction.lf";
+          ];
         (* odd-even: uses zero-arg sort kind inference (%sort plus without
            {_ nat} {_ nat} {_ nat}) — separate reconstructor limitation *)
         file_test ~skip:true "new-tests/pages/odd-even"
-          [ new_tests_pages ^ "/proving-metatheorems-solutions-odd-even-succ.lf" ];
+          [
+            new_tests_pages ^ "/proving-metatheorems-solutions-odd-even-succ.lf";
+          ];
         (* Only %%! metadata + %{! !}% prose — parse to zero commands *)
         file_test "new-tests/pages/proving-metatheorems-with-twelf"
           [ new_tests_pages ^ "/proving-metatheorems-with-twelf.lf" ];
@@ -369,32 +357,61 @@ let cases () =
           [ new_tests_pages ^ "/user-jaked.lf" ];
         (* new-tests/output/pages: identical content to pages/ above;
            separate test group so divergence is caught when files differ *)
-        file_test "new-tests/output/pages/computation-and-deduction-2009-20090203"
-          [ new_tests_output_pages ^ "/computation-and-deduction-2009-20090203.lf" ];
-        file_test "new-tests/output/pages/computation-and-deduction-2009-20090316"
-          [ new_tests_output_pages ^ "/computation-and-deduction-2009-20090316.lf" ];
-        file_test "new-tests/output/pages/computation-and-deduction-2009-20090408"
-          [ new_tests_output_pages ^ "/computation-and-deduction-2009-20090408.lf" ];
+        file_test
+          "new-tests/output/pages/computation-and-deduction-2009-20090203"
+          [
+            new_tests_output_pages
+            ^ "/computation-and-deduction-2009-20090203.lf";
+          ];
+        file_test
+          "new-tests/output/pages/computation-and-deduction-2009-20090316"
+          [
+            new_tests_output_pages
+            ^ "/computation-and-deduction-2009-20090316.lf";
+          ];
+        file_test
+          "new-tests/output/pages/computation-and-deduction-2009-20090408"
+          [
+            new_tests_output_pages
+            ^ "/computation-and-deduction-2009-20090408.lf";
+          ];
         file_test "new-tests/output/pages/lex-orderings"
-          [ new_tests_output_pages ^ "/lexicographical-orderings-with-density.lf" ];
-        file_test ~skip:true "new-tests/output/pages/popl-tutorial-church-rosser-problem"
+          [
+            new_tests_output_pages
+            ^ "/lexicographical-orderings-with-density.lf";
+          ];
+        file_test ~skip:true
+          "new-tests/output/pages/popl-tutorial-church-rosser-problem"
           [ new_tests_output_pages ^ "/popl-tutorial-church-rosser-problem.lf" ];
-        file_test ~skip:true "new-tests/output/pages/popl-tutorial-properties-of-typing-and-reduction"
-          [ new_tests_output_pages ^ "/popl-tutorial-properties-of-typing-and-reduction.lf" ];
+        file_test ~skip:true
+          "new-tests/output/pages/popl-tutorial-properties-of-typing-and-reduction"
+          [
+            new_tests_output_pages
+            ^ "/popl-tutorial-properties-of-typing-and-reduction.lf";
+          ];
         file_test ~skip:true "new-tests/output/pages/odd-even"
-          [ new_tests_output_pages ^ "/proving-metatheorems-solutions-odd-even-succ.lf" ];
+          [
+            new_tests_output_pages
+            ^ "/proving-metatheorems-solutions-odd-even-succ.lf";
+          ];
         file_test "new-tests/output/pages/proving-metatheorems-with-twelf"
           [ new_tests_output_pages ^ "/proving-metatheorems-with-twelf.lf" ];
         file_test "new-tests/output/pages/talk-effectiveness-lemma"
           [ new_tests_output_pages ^ "/talk-effectiveness-lemma.lf" ];
-        file_test "new-tests/output/pages/talk-incremental-metatheorem-development"
-          [ new_tests_output_pages ^ "/talk-incremental-metatheorem-development.lf" ];
+        file_test
+          "new-tests/output/pages/talk-incremental-metatheorem-development"
+          [
+            new_tests_output_pages
+            ^ "/talk-incremental-metatheorem-development.lf";
+          ];
         file_test "new-tests/output/pages/talk-metatheorem"
           [ new_tests_output_pages ^ "/talk-metatheorem.lf" ];
         file_test "new-tests/output/pages/talk-mutable-state"
           [ new_tests_output_pages ^ "/talk-mutable-state.lf" ];
         file_test "new-tests/output/pages/talk-natural-numbers-with-inequality"
-          [ new_tests_output_pages ^ "/talk-natural-numbers-with-inequality.lf" ];
+          [
+            new_tests_output_pages ^ "/talk-natural-numbers-with-inequality.lf";
+          ];
         file_test "new-tests/output/pages/talk-thaw"
           [ new_tests_output_pages ^ "/talk-thaw.lf" ];
         file_test "new-tests/output/pages/template-bibtex-pierce02tapl"
@@ -411,6 +428,5 @@ let cases () =
           [ new_tests_output_pages ^ "/user-jaked.lf" ];
         file_test "new-tests/stelf-output/tslf"
           [ new_tests_stelf_output_tslf ^ "/stelf.toml" ];
-      ];
-
+      ]
     end

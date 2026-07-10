@@ -1,0 +1,28 @@
+%%% Parallel reduction in the untyped lambda calculus
+%%% Author: Frank Pfenning
+%sort => {_ term} {_ term} %.
+%prec %none 10 => %.
+%name => %.
+%term beta 
+	%pi ({x term} %pi (x => x) %-> (M1 x => M1' x))
+	%-> (M2 => M2')
+	%-> (app (lam M1) M2 => M1' M2') %.
+%term ap %pi (M1 => M1') %-> (M2 => M2') %-> (app M1 M2 => (app M1' M2')) %.
+%term lm %pi ({x term} %pi (x => x) %-> (M x => M' x)) %-> (lam M => lam M') %.
+% Parallel, multi-step reduction
+%sort =>* {_ term} {_ term} %.
+%prec %none 10 =>* %.
+%name =>* %.
+%tabled =>* %.
+%term id M =>* M %.
+%term ; %pi (M =>* M'') %<- (M => M') %<- (M' =>* M'') %.
+%prec %right 10 ; %.
+% Parallel conversion
+%sort <=> {_ term} {_ term} %.
+%prec %none 10 <=> %.
+%name <=> %.
+%tabled <=> %.
+%term reduce %pi (M =>* M') %-> (M <=> M') %.
+%term expand %pi (M =>* M') %-> (M' <=> M) %.
+%term ;; %pi (M <=> M') %-> (M' <=> M'') %-> (M <=> M'') %.
+%prec %none 8 ;; %.

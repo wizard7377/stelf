@@ -1,0 +1,47 @@
+%
+
+% twelf signature for INCLL
+%
+
+%sort sort %.
+%term arrow %pi sort %-> sort %-> sort %.
+%term cross %pi sort %-> sort %-> sort %.
+%sort trm {_ sort} %.
+%term app %pi (trm (arrow A B)) %-> (trm A) %-> (trm B) %.
+%term lam %pi (%pi (trm A) %-> (trm B)) %-> (trm (arrow A B)) %.
+%term pair %pi (trm A) %-> (trm B) %-> (trm (cross A B)) %.
+%sort eval {_ trm A} {_ trm A} %.
+%term eval_lam eval (lam E) (lam E) %.
+%term eval_app %pi (eval (app (lam E) E') V) %<- (eval E' V') %<- (eval (E V') V) %.
+%sort atm %.
+%sort frm %.
+%term int sort %.
+%term 1 trm int %.
+%term 2 trm int %.
+%term 3 trm int %.
+%term 4 trm int %.
+%term 5 trm int %.
+%term list %pi sort %-> sort %.
+%term nil trm (list A) %.
+%term | %pi (trm A) %-> (trm (list A)) %-> (trm (list A)) %.
+%prec %right 30 | %.
+%term ^ %pi atm %-> frm %.
+%prec %prefix 50 ^ %.
+%term => %pi frm %-> frm %-> frm %.
+%prec %right 20 => %.
+%term =0 %pi frm %-> frm %-> frm %.
+%prec %right 20 =0 %.
+%term =>> %pi frm %-> frm %-> frm %.
+%prec %right 20 =>> %.
+%term >=> %pi frm %-> frm %-> frm %.
+%prec %right 20 >=> %.
+%term forall {s} %pi (%pi (trm s) %-> frm) %-> frm %.
+%term forall2 {s1} {s2} %pi (%pi (%pi (trm s1) %-> (trm s2)) %-> frm) %-> frm %.
+%define <= [x] [y] y => x %.
+%prec %left 10 <= %.
+%define 0= [x] [y] y =0 x %.
+%prec %left 10 0= %.
+%define <<= [x] [y] y =>> x %.
+%prec %left 10 <<= %.
+%define <=< [x] [y] y >=> x %.
+%prec %left 10 <=< %.

@@ -37,6 +37,6 @@
 	%pi (r_sound (r_forall R1) (s'_exists T S'1) (pg_forall PG1) (i_forall T I1))
 	%<- (r_sound (R1 T) S'1 (PG1 T) I1) %.
 %term rs'_atom r_sound r_atom s'_eqp pg_atom i_atom %.
-%block l_h'_sound {A o} {D prog} {PG pg A D} [h' assume' D] [h assume A] [hs h'_sound h' PG h]%.
+%block l_h'_sound [A o] [D prog] [PG pg A D] {h' assume' D} {h assume A} {hs h'_sound h' PG h}%.
 %worlds (l_i l_h'_sound) (s'_sound S' GL S) (h'_sound H' PG H) (r_sound R S' PG I) %.
 %total (S' H' S'') (s'_sound S' GL _) (h'_sound H' _ _) (r_sound R S'' PG _) %.

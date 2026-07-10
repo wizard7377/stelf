@@ -140,6 +140,6 @@
 %term etopen/pi %pi (etopen (cpi Ac Bc) (epi A ([_] B))) %<- (etopen Ac A) %<- (etopen Bc B) %.
 %term ekof/i %pi (ekof K A') %<- (ckof K A) %<- (etopen A A') %.
 %%%%%  Worlds  %%%%%
-%block evar [ex eterm]%.
-%block ebind {ea etp} [ex eterm] [ed evof ex ea]%.
-%block eofblock {ex eterm} {ea etp} [ed evof ex ea]%.
+%block evar {ex eterm}%.
+%block ebind [ea etp] {ex eterm} {ed evof ex ea}%.
+%block eofblock [ex eterm] [ea etp] {ed evof ex ea}%.

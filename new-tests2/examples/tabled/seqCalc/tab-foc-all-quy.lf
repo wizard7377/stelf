@@ -1,0 +1,88 @@
+%querytabled _ _ %the ({A p} {B p} search (atom A and (atom B) imp (atom B and (atom A)))) D %.
+%querytabled _ _ %the ({A p} {B p} search (atom A imp (atom B) imp (atom A))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B) imp (atom C) imp (atom A and (atom B) imp (atom C)))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B) imp (atom C) imp (atom A imp (atom B) imp (atom C)))) D %.
+% %querytabled * * D :  {A:p}{B:p}{C:p}search (((atom A) imp (atom B) imp (atom C)) imp (((atom A) imp (atom B)) imp (atom A) imp (atom C))).
+% proof of S
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B) imp (atom C) imp (atom A imp (atom B)) imp (atom A) imp (atom C))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B) and (atom C) imp (atom A and (atom B and (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B and (atom C)) imp (atom A and (atom B) and (atom C)))) D %.
+% impDef
+% 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B) or (atom C) imp (atom A or (atom C) and (atom B or (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B or (atom C)) imp (atom A and (atom B) or (atom A and (atom C))))) D %.
+% new from (atom A)TP notes
+% 2
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B and (atom C)) imp (atom A imp (atom B) and (atom A imp (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B) and (atom A imp (atom C)) imp (atom A imp (atom B and (atom C))))) D %.
+% 3
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B or (atom C)) imp (atom A imp (atom B) or (atom A imp (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B) or (atom A imp (atom C)) imp (atom A imp (atom B or (atom C))))) D %.
+% 4
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B) imp (atom C) imp (atom A or (atom C) and (atom B imp (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A or (atom C) and (atom B imp (atom C)) imp (atom A imp (atom B) imp (atom C)))) D %.
+% 5
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A or (atom B) imp (atom C) imp (atom A imp (atom C) and (atom B imp (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom C) and (atom B imp (atom C)) imp (atom A or (atom B) imp (atom C)))) D %.
+% 6 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B or (atom C)) imp (atom A and (atom B) or (atom A and (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B) or (atom A and (atom C)) imp (atom A and (atom B or (atom C))))) D %.
+% 7
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A or (atom B and (atom C)) imp (atom A or (atom B) and (atom A or (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A or (atom B) and (atom A or (atom C)) imp (atom A or (atom B and (atom C))))) D %.
+% Id : (atom A) => (atom A) 
+%querytabled _ _ %the ({A p} search (atom A imp (atom A))) D %.
+% K : (atom A) => (atom B) => (atom A) 
+%querytabled _ _ %the ({A p} {B p} search (atom A imp (atom B) imp (atom A))) D %.
+% S : ((atom A) => (atom B) => (atom C)) => ((atom A) => (atom B)) => ((atom A) => (atom C)) 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B imp (atom C)) imp (atom A imp (atom B) imp (atom A imp (atom C))))) D %.
+% ((atom A) & (atom B) => (atom C)) <=> ((atom A) => (atom B) => (atom C)) 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B) imp (atom C) imp (atom A imp (atom B imp (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B imp (atom C)) imp (atom A and (atom B) imp (atom C)))) D %.
+% ((atom A) => (atom B) & (atom C)) <=> ((atom A) => (atom B)) & ((atom A) => (atom C)) 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B and (atom C)) imp (atom A imp (atom B)) and (atom A imp (atom C)))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B) and (atom A imp (atom C)) imp (atom A imp (atom B and (atom C))))) D %.
+% ((atom A) => T) <=> T 
+%querytabled _ _ %the ({A p} search (atom A imp true imp true)) D %.
+%querytabled _ _ %the ({A p} search (true imp (atom A imp true))) D %.
+% ((atom A) v (atom B) => (atom C)) <=> ((atom A) => (atom C)) & ((atom B) => (atom C)) 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A or (atom B) imp (atom C) imp (atom A imp (atom C) and (atom B imp (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom C) and (atom B imp (atom C)) imp (atom A or (atom B) imp (atom C)))) D %.
+% (F => (atom C)) <=> T 
+%querytabled _ _ %the ({C p} search (false imp (atom C) imp true)) D %.
+%querytabled _ _ %the ({C p} search (true imp (false imp (atom C)))) D %.
+% ((atom A) => (atom B) v (atom C)) =>((atom A) => (atom B)) v ((atom A) => (atom C)) 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A imp (atom B) or (atom A imp (atom C)) imp (atom A imp (atom B or (atom C))))) D %.
+% F => (atom C) 
+%querytabled _ _ %the ({C p} search (false imp (atom C))) D %.
+% (atom A) => (((atom A) => F) => F) 
+%querytabled _ _ %the ({A p} search (atom A imp (atom A imp false imp false))) D %.
+% (((atom A) => F) & (atom A)) => (atom C) 
+%querytabled _ _ %the ({A p} {C p} search (atom A imp false and (atom A) imp (atom C))) D %.
+% (atom A) & ~(atom B) => ~((atom A) => (atom B)) 
+%querytabled _ _ %the ({A p} {B p} search (atom A and (atom B imp false) imp (atom A imp (atom B) imp false))) D %.
+% (atom A) & ((atom B) v (atom C)) <=> ((atom A) & (atom B)) v ((atom A) & (atom C)) 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B or (atom C)) imp (atom A and (atom B) or (atom A and (atom C))))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A and (atom B) or (atom A and (atom C)) imp (atom A and (atom B or (atom C))))) D %.
+% (atom A) & F <=> F 
+%querytabled _ _ %the ({A p} search (atom A and false imp false)) D %.
+%querytabled _ _ %the ({A p} search (false imp (atom A and false))) D %.
+% (atom A) v ((atom B) & (atom C)) <=> ((atom A) v (atom B)) & ((atom A) v (atom C)) 
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A or (atom B and (atom C)) imp (atom A or (atom B)) and (atom A or (atom C)))) D %.
+%querytabled _ _ %the ({A p} {B p} {C p} search (atom A or (atom B) and (atom A or (atom C)) imp (atom A or (atom B and (atom C))))) D %.
+%querytabled _ _ %the ({A p} search (atom A imp (atom A and (atom A)))) D %.
+%querytabled _ _ %the ({A p} search (atom A and (atom A) imp (atom A))) D %.
+%querytabled _ _ %the ({A p} search (atom A imp (atom A or (atom A)))) D %.
+%querytabled _ _ %the ({A p} search (atom A or (atom A) imp (atom A))) D %.
+% ~(atom A) v ~(atom B) => ~((atom A) & (atom B))  
+%querytabled _ _ %the ({A p} {B p} search (atom A imp false or (atom B imp false) imp (atom A and (atom B) imp false))) D %.
+% (atom A) => (atom A) v (atom B)  
+%querytabled _ _ %the ({A p} {B p} search (atom A imp (atom A or (atom B)))) D %.
+% (atom B) => (atom A) v (atom B)  
+%querytabled _ _ %the ({A p} {B p} search (atom B imp (atom A or (atom B)))) D %.
+% (atom A) & (atom B) => (atom A)  
+%querytabled _ _ %the ({A p} {B p} search (atom A and (atom B) imp (atom A))) D %.
+% (atom A) & (atom B) => (atom B)  
+%querytabled _ _ %the ({A p} {B p} search (atom A and (atom B) imp (atom B))) D %.
+% (atom A) v ~(atom A) => (((atom A) => (atom B)) => (atom A)) => (atom A) 
+%querytabled _ _ %the ({A p} {B p} search (atom A or (atom A imp false) imp (atom A imp (atom B) imp (atom A) imp (atom A)))) D %.

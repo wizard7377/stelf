@@ -17,7 +17,7 @@
 %term icn-deq/cons 
 	%pi (icn-deq (cxt/cons G C K) C1 C2 K')
 	%<- (%pi (ofkd C K) %-> (icn-deq G C1 C2 K')) %.
-%block iofkd-block {c cn} {k kd} [d ofkd c k]%.
+%block iofkd-block [c cn] [k kd] {d ofkd c k}%.
 %sort kd-wf-to-ikd-wf {G cxt} %.
 %mode kd-wf-to-ikd-wf %in %in %out %.
 %term _ kd-wf-to-ikd-wf cxt/nil D (ikd-wf/nil D) %.

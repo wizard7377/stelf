@@ -19,7 +19,9 @@ open MemoTable
 (* Modified: Jeff Polakow, Frank Pfenning, Larry Greenfield, Roberto Virga, Brigitte Pientka *)
 (* Proof term reconstruction from proof skeleton *)
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module PtRecon (PtRecon__0 : sig
   (*! structure IntSyn' : INTSYN !*)

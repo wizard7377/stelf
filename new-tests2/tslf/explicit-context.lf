@@ -1,0 +1,38 @@
+%%%% Explicit contexts
+%sort cxt %.
+%name cxt %.
+%term cxt/nil cxt %.
+%term cxt/cons %pi cxt %-> cn %-> kd %-> cxt %.
+%sort cxt-append {_ cxt} {_ cxt} {_ cxt} %.
+%mode cxt-append %star %star %star %.
+%term cxt-append/nil cxt-append G cxt/nil G %.
+%term cxt-append/cons %pi (cxt-append G (cxt/cons G' C K) (cxt/cons G'' C K)) %<- (cxt-append G G' G'') %.
+%sort isvar {_ cn} {_ loc} %.
+%mode isvar %star %star %.
+%sort cxt-precedes {_ cn} {_ cn} %.
+%mode cxt-precedes %star %star %.
+%term cxt-precedes/i %pi (cxt-precedes C D) %<- (loc-less I J) %<- (isvar D J) %<- (isvar C I) %.
+%sort cxt-bounded {_ cxt} {_ cn} %.
+%mode cxt-bounded %star %star %.
+%term cxt-bounded/nil %pi (cxt-bounded cxt/nil C) %<- (isvar C _) %.
+%term cxt-bounded/cons %pi (cxt-bounded (cxt/cons G Y _) X) %<- (cxt-precedes Y X) %<- (cxt-bounded G Y) %.
+%sort cxt-ordered {_ cxt} %.
+%mode cxt-ordered %star %.
+%term cxt-ordered/nil cxt-ordered cxt/nil %.
+%term cxt-ordered/cons %pi (cxt-ordered (cxt/cons G X _)) %<- (cxt-bounded G X) %.
+%block ovar-block [l loc] {a cn} {do isvar a l}%.
+%%%% context lookup for explicit contexts
+%sort cxt-lookup {_ cxt} {_ cn} {_ kd} %.
+%mode cxt-lookup %star %star %star %.
+%term cxt-lookup/hit %pi (cxt-lookup (cxt/cons G A K) A K) %<- (cxt-bounded G A) %.
+%term cxt-lookup/miss 
+	%pi (cxt-lookup (cxt/cons G B L) A K)
+	%<- (cxt-bounded G B)
+	%<- (cxt-precedes A B)
+	%<- (cxt-lookup G A K) %.
+%sort cxt-append-sub {_ cxt} {_ %pi cn %-> cxt} {_ cn} {_ cxt} %.
+%mode cxt-append-sub %star %star %star %star %.
+%term cxt-append-sub/nil cxt-append-sub G ([x] cxt/nil) _ G %.
+%term cxt-append-sub/cons 
+	%pi (cxt-append-sub G ([x] cxt/cons (G' x) C' (K x)) C (cxt/cons G'' C' (K C)))
+	%<- (cxt-append-sub G G' C G'') %.

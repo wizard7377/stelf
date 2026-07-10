@@ -1,5 +1,6 @@
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name error)
  (public_name stelf.error)
  (libraries paths display))

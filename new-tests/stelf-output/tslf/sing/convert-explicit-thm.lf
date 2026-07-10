@@ -1,6 +1,6 @@
 %%%%%  Worlds  %%%%%
-%block fbind {a tp} [x atom] [d vof x a] [ex eterm] [xt vtrans ex x]%.
-%block fobind {n nat} [x atom] [d isvar x n] [ex eterm] [xt vtrans ex x]%.
+%block fbind [a tp] {x atom} {d vof x a} {ex eterm} {xt vtrans ex x}%.
+%block fobind [n nat] {x atom} {d isvar x n} {ex eterm} {xt vtrans ex x}%.
 %%%%%  Context Regularity  %%%%%
 %sort aconverte-context %.
 %mode aconverte-context %in %out %.

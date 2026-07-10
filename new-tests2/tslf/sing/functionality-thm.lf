@@ -1,0 +1,686 @@
+%%%%%  Contexts  %%%%%
+%sort eisvar {_ eterm} %.
+%block eovar [n nat] {x eterm} {d eisvar x}%.
+%sort ectx %.
+%name ectx %.
+%term enil ectx %.
+%term econs %pi ectx %-> eterm %-> etp %-> ectx %.
+%sort clean {_ ectx} %.
+%term clean/nil clean enil %.
+%term clean/cons %pi (clean (econs G X A)) %<- (clean G) %<- (eisvar X) %.
+%sort elookup {_ ectx} {_ eterm} {_ etp} %.
+%term elookup/hit elookup (econs G X A) X A %.
+%term elookup/miss %pi (elookup (econs G Y _) X A) %<- (elookup G X A) %.
+%%%%%  Context Lemmas  %%%%%
+%sort eisvar-closed {_ {x eterm} eisvar (Y x)} {_ {x} eterm-eq (Y x) Y'} %.
+%mode eisvar-closed %in %out %.
+%term _ eisvar-closed ([_] D) ([_] eterm-eq/i) %.
+%worlds (nbind ebind evar eovar eofblock) (eisvar-closed _ _) %.
+%total {} (eisvar-closed _ _) %.
+%sort lookup-clean {_ {x eterm} elookup (G x) (X x) (A x)} {_ {x} clean (G x)} {_ {x} eterm-eq (X x) X'} %.
+%mode lookup-clean %in %in %out %.
+%term _ 
+	%pi (lookup-clean ([x] elookup/hit) ([x] clean/cons (Disvar x) _) Deq)
+	%<- (eisvar-closed Disvar Deq) %.
+%term _ 
+	%pi (lookup-clean ([x] elookup/miss (Dlook x)) ([x] clean/cons _ (Dclean x)) Deq)
+	%<- (lookup-clean Dlook Dclean Deq) %.
+%worlds (nbind ebind evar eovar eofblock) (lookup-clean _ _ _) %.
+%total D (lookup-clean D _ _) %.
+%%%%%  Explicit/Implicit Context System  %%%%%
+%sort ewfi {_ ectx} {_ etp} %.
+%sort eofi {_ ectx} {_ eterm} {_ etp} %.
+%sort subtpi {_ ectx} {_ etp} {_ etp} %.
+%sort tequivi {_ ectx} {_ etp} {_ etp} %.
+%sort equivi {_ ectx} {_ eterm} {_ eterm} {_ etp} %.
+%term ewfi/nil %pi (ewfi enil A) %<- (ewf A) %.
+%term ewfi/cons %pi (ewfi (econs G X A) B) %<- (%pi (evof X A) %-> (ewfi G B)) %.
+%term eofi/nil %pi (eofi enil M A) %<- (eof M A) %.
+%term eofi/cons %pi (eofi (econs G X A) M B) %<- (%pi (evof X A) %-> (eofi G M B)) %.
+%term subtpi/nil %pi (subtpi enil B C) %<- (subtp B C) %.
+%term subtpi/cons %pi (subtpi (econs G X A) B C) %<- (%pi (evof X A) %-> (subtpi G B C)) %.
+%term tequivi/nil %pi (tequivi enil B C) %<- (tequiv B C) %.
+%term tequivi/cons %pi (tequivi (econs G X A) B C) %<- (%pi (evof X A) %-> (tequivi G B C)) %.
+%term equivi/nil %pi (equivi enil M N B) %<- (equiv M N B) %.
+%term equivi/cons %pi (equivi (econs G X A) M N B) %<- (%pi (evof X A) %-> (equivi G M N B)) %.
+%%%%%  Equality  %%%%%
+%sort ectx-eq {_ ectx} {_ ectx} %.
+%term ectx-eq/i ectx-eq G G %.
+%sort eofi-resp {_ ectx-eq G G'} {_ eterm-eq M M'} {_ etp-eq A A'} {_ eofi G M A} {_ eofi G' M' A'} %.
+%mode eofi-resp %in %in %in %in %out %.
+%term _ eofi-resp ectx-eq/i eterm-eq/i etp-eq/i D D %.
+%worlds (nbind ebind evar eovar eofblock) (eofi-resp _ _ _ _ _) %.
+%total {} (eofi-resp _ _ _ _ _) %.
+%sort equivi-resp {_ ectx-eq G G'} {_ eterm-eq M M'} {_ eterm-eq N N'} {_ etp-eq A A'} {_ equivi G M N A} {_ equivi G' M' N' A'} %.
+%mode equivi-resp %in %in %in %in %in %out %.
+%term _ equivi-resp ectx-eq/i eterm-eq/i eterm-eq/i etp-eq/i D D %.
+%worlds (nbind ebind evar eovar eofblock) (equivi-resp _ _ _ _ _ _) %.
+%total {} (equivi-resp _ _ _ _ _ _) %.
+%sort tequivi-resp {_ ectx-eq G G'} {_ etp-eq A A'} {_ etp-eq B B'} {_ tequivi G A B} {_ tequivi G' A' B'} %.
+%mode tequivi-resp %in %in %in %in %out %.
+%term _ tequivi-resp ectx-eq/i etp-eq/i etp-eq/i D D %.
+%worlds (nbind ebind evar eofblock eovar) (tequivi-resp _ _ _ _ _) %.
+%total {} (tequivi-resp _ _ _ _ _) %.
+%%%%%  Proof Skeletons  %%%%%
+%sort metp %.
+%sort meterm %.
+%term metp/t metp %.
+%term metp/pi %pi metp %-> metp %-> metp %.
+%term metp/sigma %pi metp %-> metp %-> metp %.
+%term metp/sing %pi meterm %-> metp %.
+%term meterm/var meterm %.
+%term meterm/const meterm %.
+%term meterm/forall %pi metp %-> meterm %.
+%term meterm/lam %pi meterm %-> metp %-> meterm %.
+%term meterm/app %pi meterm %-> meterm %-> meterm %.
+%term meterm/pair %pi meterm %-> meterm %-> meterm %.
+%term meterm/pi1 %pi meterm %-> meterm %.
+%term meterm/pi2 %pi meterm %-> meterm %.
+%term meterm/sing %pi meterm %-> meterm %.
+%term meterm/extpi %pi meterm %-> meterm %-> meterm %.
+%term meterm/extsigma %pi meterm %-> meterm %-> meterm %.
+%term meterm/subsume %pi meterm %-> meterm %.
+%sort mewf {_ ewf A} {_ metp} %.
+%sort meof {_ eof M A} {_ meterm} %.
+%term mewf/t mewf ewf/t metp/t %.
+%term mewf/pi 
+	%pi (mewf (ewf/pi D2 D1) (metp/pi A2 A1))
+	%<- (mewf D1 A1)
+	%<- ({x} {d} mewf (D2 x d) A2) %.
+%term mewf/sigma 
+	%pi (mewf (ewf/sigma D2 D1) (metp/sigma A2 A1))
+	%<- (mewf D1 A1)
+	%<- ({x} {d} mewf (D2 x d) A2) %.
+%term mewf/sing %pi (mewf (ewf/sing D) (metp/sing M)) %<- (meof D M) %.
+%term meof/var meof (eof/var _ _) meterm/var %.
+%term meof/const meof (eof/const _ _) meterm/const %.
+%term meof/forall %pi (meof (eof/forall D) (meterm/forall A)) %<- (mewf D A) %.
+%term meof/lam 
+	%pi (meof (eof/lam D2 D1) (meterm/lam M A))
+	%<- (mewf D1 A)
+	%<- ({x} {d} meof (D2 x d) M) %.
+%term meof/app %pi (meof (eof/app D2 D1) (meterm/app M2 M1)) %<- (meof D1 M1) %<- (meof D2 M2) %.
+%term meof/pair 
+	%pi (meof (eof/pair _ D2 D1) (meterm/pair M2 M1))
+	%<- (meof D1 M1)
+	%<- (meof D2 M2) %.
+%term meof/pi1 %pi (meof (eof/pi1 D) (meterm/pi1 M)) %<- (meof D M) %.
+%term meof/pi2 %pi (meof (eof/pi2 D) (meterm/pi2 M)) %<- (meof D M) %.
+%term meof/sing %pi (meof (eof/sing D) (meterm/sing M)) %<- (meof D M) %.
+%term meof/extpi 
+	%pi (meof (eof/extpi D2 D1) (meterm/extpi M2 M1))
+	%<- (meof D1 M1)
+	%<- ({x} {d} meof (D2 x d) M2) %.
+%term meof/extsigma 
+	%pi (meof (eof/extsigma _ D2 D1) (meterm/extsigma M2 M1))
+	%<- (meof D1 M1)
+	%<- (meof D2 M2) %.
+%term meof/subsume %pi (meof (eof/subsume _ D) (meterm/subsume M)) %<- (meof D M) %.
+%sort mewfi {_ ewfi G A} {_ metp} %.
+%term mewfi/nil %pi (mewfi (ewfi/nil D) M) %<- (mewf D M) %.
+%term mewfi/cons %pi (mewfi (ewfi/cons D) M) %<- ({d} mewfi (D d) M) %.
+%sort meofi {_ eofi G M A} {_ meterm} %.
+%term meofi/nil %pi (meofi (eofi/nil D) M) %<- (meof D M) %.
+%term meofi/cons %pi (meofi (eofi/cons D) M) %<- ({d} meofi (D d) M) %.
+%%%%%  Substitution  %%%%%
+%sort eofi-subst-gen {_ %pi (evof M A) %-> (eofi G N B)} {_ %pi (eof M A) %-> (eofi G N B)} %.
+%mode eofi-subst-gen %in %out %.
+%term _ 
+	%pi (eofi-subst-gen ([d] eofi/nil (D d)) ([d] eofi/nil (D' d)))
+	%<- (esubst-of-gen D D') %.
+%term _ 
+	%pi (eofi-subst-gen ([d] eofi/cons (D d)) ([d] eofi/cons (D' d)))
+	%<- ({e} eofi-subst-gen ([d] D d e) ([d] D' d e)) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-subst-gen _ _) %.
+%total D (eofi-subst-gen D _) %.
+%sort ewfi-subst-gen {_ %pi (evof M A) %-> (ewfi G B)} {_ %pi (eof M A) %-> (ewfi G B)} %.
+%mode ewfi-subst-gen %in %out %.
+%term _ 
+	%pi (ewfi-subst-gen ([d] ewfi/nil (D d)) ([d] ewfi/nil (D' d)))
+	%<- (esubst-wf-gen D D') %.
+%term _ 
+	%pi (ewfi-subst-gen ([d] ewfi/cons (D d)) ([d] ewfi/cons (D' d)))
+	%<- ({e} ewfi-subst-gen ([d] D d e) ([d] D' d e)) %.
+%worlds (nbind ebind evar eofblock eovar) (ewfi-subst-gen _ _) %.
+%total D (ewfi-subst-gen D _) %.
+%sort subtpi-subst-gen {_ %pi (evof M A) %-> (subtpi G B C)} {_ %pi (eof M A) %-> (subtpi G B C)} %.
+%mode subtpi-subst-gen %in %out %.
+%term _ 
+	%pi (subtpi-subst-gen ([d] subtpi/nil (D d)) ([d] subtpi/nil (D' d)))
+	%<- (esubst-subtp-gen D D') %.
+%term _ 
+	%pi (subtpi-subst-gen ([d] subtpi/cons (D d)) ([d] subtpi/cons (D' d)))
+	%<- ({e} subtpi-subst-gen ([d] D d e) ([d] D' d e)) %.
+%worlds (nbind ebind evar eofblock eovar) (subtpi-subst-gen _ _) %.
+%total D (subtpi-subst-gen D _) %.
+%sort eofi-subst {_ {x} %pi (evof x A) %-> (eofi (G x) (N x) (B x))} {_ eof M A} {_ eofi (G M) (N M) (B M)} %.
+%mode eofi-subst %in %in %out %.
+%term _ %pi (eofi-subst D1 D2 (D1' D2)) %<- (eofi-subst-gen (D1 _) D1') %.
+%worlds (nbind ebind evar eovar eofblock) (eofi-subst _ _ _) %.
+%total {} (eofi-subst _ _ _) %.
+%sort ewfi-subst {_ {x} %pi (evof x A) %-> (ewfi (G x) (B x))} {_ eof M A} {_ ewfi (G M) (B M)} %.
+%mode ewfi-subst %in %in %out %.
+%term _ %pi (ewfi-subst D1 D2 (D1' D2)) %<- (ewfi-subst-gen (D1 _) D1') %.
+%worlds (nbind ebind evar eovar eofblock) (ewfi-subst _ _ _) %.
+%total {} (ewfi-subst _ _ _) %.
+%sort subtpi-subst {_ {x} %pi (evof x A) %-> (subtpi (G x) (B x) (C x))} {_ eof M A} {_ subtpi (G M) (B M) (C M)} %.
+%mode subtpi-subst %in %in %out %.
+%term _ %pi (subtpi-subst D1 D2 (D1' D2)) %<- (subtpi-subst-gen (D1 _) D1') %.
+%worlds (nbind ebind evar eofblock eovar) (subtpi-subst _ _ _) %.
+%total {} (subtpi-subst _ _ _) %.
+%%%%%  Destructors  %%%%%
+%sort elookup? {_ ectx} {_ eterm} {_ etp} %.
+%term elookup?/look %pi (elookup? G X A) %<- (elookup G X A) %.
+%term elookup?/not %pi (elookup? G X A) %<- (evof X A) %.
+%sort elookup?-cons {_ %pi (evof X A) %-> (elookup? G Y B)} {_ elookup? (econs G X A) Y B} %.
+%mode elookup?-cons %in %out %.
+%term _ elookup?-cons ([d] elookup?/look D) (elookup?/look (elookup/miss D)) %.
+%term _ elookup?-cons ([d] elookup?/not D) (elookup?/not D) %.
+%term _ elookup?-cons ([d] elookup?/not d) (elookup?/look elookup/hit) %.
+%worlds (nbind ebind evar eovar eofblock) (elookup?-cons _ _) %.
+%total {} (elookup?-cons _ _) %.
+%sort eofi-var-invert {D eofi G M A} {_ meofi D meterm/var} {_ elookup? G M A} {_ ewfi G A} %.
+%mode eofi-var-invert %in %in %out %out %.
+%term _ eofi-var-invert (eofi/nil (eof/var Dwf Dvof)) (meofi/nil meof/var) (elookup?/not Dvof) (ewfi/nil Dwf) %.
+%term _ 
+	%pi (eofi-var-invert (eofi/cons Dof) (meofi/cons Dmof) Dlookup?' (ewfi/cons Dewfi))
+	%<- ({d} eofi-var-invert (Dof d) (Dmof d) (Dlookup? d) (Dewfi d))
+	%<- (elookup?-cons Dlookup? Dlookup?') %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-var-invert _ _ _ _) %.
+%total D (eofi-var-invert D _ _ _) %.
+%sort eofi-const-invert {D eofi G M A} {_ meofi D meterm/const} {_ eterm-eq (econst C) M} {_ ekof C A} {_ ewfi G A} %.
+%mode eofi-const-invert %in %in %out %out %out %.
+%term _ eofi-const-invert (eofi/nil (eof/const D2 D1)) _ eterm-eq/i D1 (ewfi/nil D2) %.
+%term _ 
+	%pi (eofi-const-invert (eofi/cons D) (meofi/cons Dm) Deq Dkof (ewfi/cons Dwf))
+	%<- ({d} eofi-const-invert (D d) (Dm d) Deq Dkof (Dwf d)) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-const-invert _ _ _ _ _) %.
+%total D (eofi-const-invert D _ _ _ _) %.
+%sort eofi-forall-invert {D eofi G M C} {_ meofi D (meterm/forall Am)} {_ eterm-eq (eforall A) M} {_ etp-eq (epi (epi A ([_] et)) ([_] et)) C} {D' ewfi G A} {_ mewfi D' Am} %.
+%mode eofi-forall-invert %in %in %out %out %out %out %.
+%term _ eofi-forall-invert (eofi/nil (eof/forall D)) (meofi/nil (meof/forall DM)) eterm-eq/i etp-eq/i (ewfi/nil D) (mewfi/nil DM) %.
+%term _ 
+	%pi (eofi-forall-invert (eofi/cons D) (meofi/cons DM) Deq Deq' (ewfi/cons D1) (mewfi/cons DM1))
+	%<- ({d} eofi-forall-invert (D d) (DM d) Deq Deq' (D1 d) (DM1 d)) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-forall-invert _ _ _ _ _ _) %.
+%total D (eofi-forall-invert D _ _ _ _ _) %.
+%sort eofi-lam-invert {D eofi G O C} {_ meofi D (meterm/lam Mm Am)} {_ eterm-eq (elam A M) O} {_ etp-eq (epi A B) C} {D1 ewfi G A} {_ mewfi D1 Am} {D2 {x} eofi (econs G x A) (M x) (B x)} {_ {x} meofi (D2 x) Mm} %.
+%mode eofi-lam-invert %in %in %out %out %out %out %out %out %.
+%term _ eofi-lam-invert (eofi/nil (eof/lam D2 D1)) (meofi/nil (meof/lam DM2 DM1)) eterm-eq/i etp-eq/i (ewfi/nil D1) (mewfi/nil DM1) ([x] eofi/cons ([d] eofi/nil (D2 x d))) ([x] meofi/cons ([d] meofi/nil (DM2 x d))) %.
+%term _ 
+	%pi (eofi-lam-invert (eofi/cons D) (meofi/cons DM) Deq Deq' (ewfi/cons D1) (mewfi/cons DM1) ([y] eofi/cons ([e] eofi/cons ([d] D2 d y e))) ([y] meofi/cons ([e] meofi/cons ([d] DM2 d y e))))
+	%<- ({d} eofi-lam-invert (D d) (DM d) Deq Deq' (D1 d) (DM1 d) ([y] eofi/cons ([e] D2 d y e)) ([y] meofi/cons ([e] DM2 d y e))) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-lam-invert _ _ _ _ _ _ _ _) %.
+%total D (eofi-lam-invert D _ _ _ _ _ _ _) %.
+%sort eofi-app-invert {D eofi G O C} {_ meofi D (meterm/app Nm Mm)} {_ eterm-eq (eapp M N) O} {_ etp-eq (B N) C} {D1 eofi G M (epi A B)} {_ meofi D1 Mm} {D2 eofi G N A} {_ meofi D2 Nm} %.
+%mode eofi-app-invert %in %in %out %out %out %out %out %out %.
+%term _ eofi-app-invert (eofi/nil (eof/app D2 D1)) (meofi/nil (meof/app DM2 DM1)) eterm-eq/i etp-eq/i (eofi/nil D1) (meofi/nil DM1) (eofi/nil D2) (meofi/nil DM2) %.
+%term _ 
+	%pi (eofi-app-invert (eofi/cons D) (meofi/cons DM) Deq Deq' (eofi/cons D1) (meofi/cons DM1) (eofi/cons D2) (meofi/cons DM2))
+	%<- ({d} eofi-app-invert (D d) (DM d) Deq Deq' (D1 d) (DM1 d) (D2 d) (DM2 d)) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-app-invert _ _ _ _ _ _ _ _) %.
+%total D (eofi-app-invert D _ _ _ _ _ _ _) %.
+%sort eofi-pair-invert {D eofi G O C} {_ meofi D (meterm/pair Nm Mm)} {_ eterm-eq (epair M N) O} {_ etp-eq (esigma A B) C} {D1 eofi G M A} {_ meofi D1 Mm} {D2 eofi G N (B M)} {_ meofi D2 Nm} {_ {x} ewfi (econs G x A) (B x)} %.
+%mode eofi-pair-invert %in %in %out %out %out %out %out %out %out %.
+%term _ eofi-pair-invert (eofi/nil (eof/pair D3 D2 D1)) (meofi/nil (meof/pair DM2 DM1)) eterm-eq/i etp-eq/i (eofi/nil D1) (meofi/nil DM1) (eofi/nil D2) (meofi/nil DM2) ([x] ewfi/cons ([d] ewfi/nil (D3 x d))) %.
+%term _ 
+	%pi (eofi-pair-invert (eofi/cons D) (meofi/cons DM) Deq Deq' (eofi/cons D1) (meofi/cons DM1) (eofi/cons D2) (meofi/cons DM2) ([y] ewfi/cons ([e] ewfi/cons ([d] D3 d y e))))
+	%<- ({d} eofi-pair-invert (D d) (DM d) Deq Deq' (D1 d) (DM1 d) (D2 d) (DM2 d) ([y] ewfi/cons ([e] D3 d y e))) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-pair-invert _ _ _ _ _ _ _ _ _) %.
+%total D (eofi-pair-invert D _ _ _ _ _ _ _ _) %.
+%sort eofi-pi1-invert {D eofi G O A} {_ meofi D (meterm/pi1 Mm)} {_ eterm-eq (epi1 M) O} {D1 eofi G M (esigma A B)} {_ meofi D1 Mm} %.
+%mode eofi-pi1-invert %in %in %out %out %out %.
+%term _ eofi-pi1-invert (eofi/nil (eof/pi1 D)) (meofi/nil (meof/pi1 DM)) eterm-eq/i (eofi/nil D) (meofi/nil DM) %.
+%term _ 
+	%pi (eofi-pi1-invert (eofi/cons D) (meofi/cons DM) Deq (eofi/cons D1) (meofi/cons DM1))
+	%<- ({d} eofi-pi1-invert (D d) (DM d) Deq (D1 d) (DM1 d)) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-pi1-invert _ _ _ _ _) %.
+%total D (eofi-pi1-invert D _ _ _ _) %.
+%sort eofi-pi2-invert {D eofi G O C} {_ meofi D (meterm/pi2 Mm)} {_ eterm-eq (epi2 M) O} {_ etp-eq (B (epi1 M)) C} {D1 eofi G M (esigma A B)} {_ meofi D1 Mm} %.
+%mode eofi-pi2-invert %in %in %out %out %out %out %.
+%term _ eofi-pi2-invert (eofi/nil (eof/pi2 D)) (meofi/nil (meof/pi2 DM)) eterm-eq/i etp-eq/i (eofi/nil D) (meofi/nil DM) %.
+%term _ 
+	%pi (eofi-pi2-invert (eofi/cons D) (meofi/cons DM) Deq Deq' (eofi/cons D1) (meofi/cons DM1))
+	%<- ({d} eofi-pi2-invert (D d) (DM d) Deq Deq' (D1 d) (DM1 d)) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-pi2-invert _ _ _ _ _ _) %.
+%total D (eofi-pi2-invert D _ _ _ _ _) %.
+%sort eofi-sing-invert {D eofi G M C} {_ meofi D (meterm/sing Mm)} {_ etp-eq (esing M) C} {D1 eofi G M et} {_ meofi D1 Mm} %.
+%mode eofi-sing-invert %in %in %out %out %out %.
+%term _ eofi-sing-invert (eofi/nil (eof/sing D)) (meofi/nil (meof/sing DM)) etp-eq/i (eofi/nil D) (meofi/nil DM) %.
+%term _ 
+	%pi (eofi-sing-invert (eofi/cons D) (meofi/cons DM) Deq (eofi/cons D1) (meofi/cons DM1))
+	%<- ({d} eofi-sing-invert (D d) (DM d) Deq (D1 d) (DM1 d)) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-sing-invert _ _ _ _ _) %.
+%total D (eofi-sing-invert D _ _ _ _) %.
+%sort eofi-extpi-invert {D eofi G M C} {_ meofi D (meterm/extpi Nm Mm)} {_ etp-eq (epi A B) C} {D1 eofi G M (epi A B')} {_ meofi D1 Mm} {D2 {x} eofi (econs G x A) (eapp M x) (B x)} {_ {x} meofi (D2 x) Nm} %.
+%mode eofi-extpi-invert %in %in %out %out %out %out %out %.
+%term _ eofi-extpi-invert (eofi/nil (eof/extpi D2 D1)) (meofi/nil (meof/extpi DM2 DM1)) etp-eq/i (eofi/nil D1) (meofi/nil DM1) ([x] eofi/cons ([d] eofi/nil (D2 x d))) ([x] meofi/cons ([d] meofi/nil (DM2 x d))) %.
+%term _ 
+	%pi (eofi-extpi-invert (eofi/cons D) (meofi/cons DM) Deq (eofi/cons D1) (meofi/cons DM1) ([y] eofi/cons ([e] eofi/cons ([d] D2 d y e))) ([y] meofi/cons ([e] meofi/cons ([d] DM2 d y e))))
+	%<- ({d} eofi-extpi-invert (D d) (DM d) Deq (D1 d) (DM1 d) ([y] eofi/cons ([e] D2 d y e)) ([y] meofi/cons ([e] DM2 d y e))) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-extpi-invert _ _ _ _ _ _ _) %.
+%total D (eofi-extpi-invert D _ _ _ _ _ _) %.
+%sort eofi-extsigma-invert {D eofi G M C} {_ meofi D (meterm/extsigma Nm Mm)} {_ etp-eq (esigma A B) C} {D1 eofi G (epi1 M) A} {_ meofi D1 Mm} {D2 eofi G (epi2 M) (B (epi1 M))} {_ meofi D2 Nm} {_ {x} ewfi (econs G x A) (B x)} %.
+%mode eofi-extsigma-invert %in %in %out %out %out %out %out %out %.
+%term _ eofi-extsigma-invert (eofi/nil (eof/extsigma D3 D2 D1)) (meofi/nil (meof/extsigma DM2 DM1)) etp-eq/i (eofi/nil D1) (meofi/nil DM1) (eofi/nil D2) (meofi/nil DM2) ([x] ewfi/cons ([d] ewfi/nil (D3 x d))) %.
+%term _ 
+	%pi (eofi-extsigma-invert (eofi/cons D) (meofi/cons DM) Deq (eofi/cons D1) (meofi/cons DM1) (eofi/cons D2) (meofi/cons DM2) ([y] ewfi/cons ([e] ewfi/cons ([d] D3 d y e))))
+	%<- ({d} eofi-extsigma-invert (D d) (DM d) Deq (D1 d) (DM1 d) (D2 d) (DM2 d) ([y] ewfi/cons ([e] D3 d y e))) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-extsigma-invert _ _ _ _ _ _ _ _) %.
+%total D (eofi-extsigma-invert D _ _ _ _ _ _ _) %.
+%sort eofi-subsume-invert {D eofi G M A} {_ meofi D (meterm/subsume Mm)} {D1 eofi G M B} {_ meofi D1 Mm} {_ subtpi G B A} %.
+%mode eofi-subsume-invert %in %in %out %out %out %.
+%term _ eofi-subsume-invert (eofi/nil (eof/subsume D2 D1)) (meofi/nil (meof/subsume DM1)) (eofi/nil D1) (meofi/nil DM1) (subtpi/nil D2) %.
+%term _ 
+	%pi (eofi-subsume-invert (eofi/cons D) (meofi/cons DM) (eofi/cons D1) (meofi/cons DM1) (subtpi/cons D2))
+	%<- ({d} eofi-subsume-invert (D d) (DM d) (D1 d) (DM1 d) (D2 d)) %.
+%worlds (nbind ebind evar eofblock eovar) (eofi-subsume-invert _ _ _ _ _) %.
+%total D (eofi-subsume-invert D _ _ _ _) %.
+%sort ewfi-t-invert {D ewfi G C} {_ mewfi D metp/t} {_ etp-eq et C} %.
+%mode ewfi-t-invert %in %in %out %.
+%term _ ewfi-t-invert (ewfi/nil ewf/t) _ etp-eq/i %.
+%term _ 
+	%pi (ewfi-t-invert (ewfi/cons D) (mewfi/cons DM) Deq)
+	%<- ({d} ewfi-t-invert (D d) (DM d) Deq) %.
+%worlds (nbind ebind evar eofblock eovar) (ewfi-t-invert _ _ _) %.
+%total D (ewfi-t-invert D _ _) %.
+%sort ewfi-pi-invert {D ewfi G C} {_ mewfi D (metp/pi Bm Am)} {_ etp-eq (epi A B) C} {D1 ewfi G A} {_ mewfi D1 Am} {D2 {x} ewfi (econs G x A) (B x)} {_ {x} mewfi (D2 x) Bm} %.
+%mode ewfi-pi-invert %in %in %out %out %out %out %out %.
+%term _ ewfi-pi-invert (ewfi/nil (ewf/pi D2 D1)) (mewfi/nil (mewf/pi DM2 DM1)) etp-eq/i (ewfi/nil D1) (mewfi/nil DM1) ([x] ewfi/cons ([d] ewfi/nil (D2 x d))) ([x] mewfi/cons ([d] mewfi/nil (DM2 x d))) %.
+%term _ 
+	%pi (ewfi-pi-invert (ewfi/cons D) (mewfi/cons DM) Deq (ewfi/cons D1) (mewfi/cons DM1) ([y] ewfi/cons ([e] ewfi/cons ([d] D2 d y e))) ([y] mewfi/cons ([e] mewfi/cons ([d] DM2 d y e))))
+	%<- ({d} ewfi-pi-invert (D d) (DM d) Deq (D1 d) (DM1 d) ([y] ewfi/cons ([e] D2 d y e)) ([y] mewfi/cons ([e] DM2 d y e))) %.
+%worlds (nbind ebind evar eofblock eovar) (ewfi-pi-invert _ _ _ _ _ _ _) %.
+%total D (ewfi-pi-invert D _ _ _ _ _ _) %.
+%sort ewfi-sigma-invert {D ewfi G C} {_ mewfi D (metp/sigma Bm Am)} {_ etp-eq (esigma A B) C} {D1 ewfi G A} {_ mewfi D1 Am} {D2 {x} ewfi (econs G x A) (B x)} {_ {x} mewfi (D2 x) Bm} %.
+%mode ewfi-sigma-invert %in %in %out %out %out %out %out %.
+%term _ ewfi-sigma-invert (ewfi/nil (ewf/sigma D2 D1)) (mewfi/nil (mewf/sigma DM2 DM1)) etp-eq/i (ewfi/nil D1) (mewfi/nil DM1) ([x] ewfi/cons ([d] ewfi/nil (D2 x d))) ([x] mewfi/cons ([d] mewfi/nil (DM2 x d))) %.
+%term _ 
+	%pi (ewfi-sigma-invert (ewfi/cons D) (mewfi/cons DM) Deq (ewfi/cons D1) (mewfi/cons DM1) ([y] ewfi/cons ([e] ewfi/cons ([d] D2 d y e))) ([y] mewfi/cons ([e] mewfi/cons ([d] DM2 d y e))))
+	%<- ({d} ewfi-sigma-invert (D d) (DM d) Deq (D1 d) (DM1 d) ([y] ewfi/cons ([e] D2 d y e)) ([y] mewfi/cons ([e] DM2 d y e))) %.
+%worlds (nbind ebind evar eofblock eovar) (ewfi-sigma-invert _ _ _ _ _ _ _) %.
+%total D (ewfi-sigma-invert D _ _ _ _ _ _) %.
+%sort ewfi-sing-invert {D ewfi G C} {_ mewfi D (metp/sing Mm)} {_ etp-eq (esing M) C} {D1 eofi G M et} {_ meofi D1 Mm} %.
+%mode ewfi-sing-invert %in %in %out %out %out %.
+%term _ ewfi-sing-invert (ewfi/nil (ewf/sing D)) (mewfi/nil (mewf/sing DM)) etp-eq/i (eofi/nil D) (meofi/nil DM) %.
+%term _ 
+	%pi (ewfi-sing-invert (ewfi/cons D) (mewfi/cons DM) Deq (eofi/cons D1) (meofi/cons DM1))
+	%<- ({d} ewfi-sing-invert (D d) (DM d) Deq (D1 d) (DM1 d)) %.
+%worlds (nbind ebind evar eofblock eovar) (ewfi-sing-invert _ _ _ _ _) %.
+%total D (ewfi-sing-invert D _ _ _ _) %.
+%%%%%  Constructors  %%%%%
+%sort equiv-to-equivi {G} {_ equiv M N A} {_ equivi G M N A} %.
+%mode equiv-to-equivi %in %in %out %.
+%term _ equiv-to-equivi enil D (equivi/nil D) %.
+%term _ 
+	%pi (equiv-to-equivi (econs G X A) D (equivi/cons D'))
+	%<- ({d} equiv-to-equivi G D (D' d)) %.
+%worlds (nbind ebind evar eovar eofblock) (equiv-to-equivi _ _ _) %.
+%total G (equiv-to-equivi G _ _) %.
+%sort tequiv-to-tequivi {G} {_ tequiv A B} {_ tequivi G A B} %.
+%mode tequiv-to-tequivi %in %in %out %.
+%term _ tequiv-to-tequivi enil D (tequivi/nil D) %.
+%term _ 
+	%pi (tequiv-to-tequivi (econs G X A) D (tequivi/cons D'))
+	%<- ({d} tequiv-to-tequivi G D (D' d)) %.
+%worlds (nbind ebind evar eofblock eovar) (tequiv-to-tequivi _ _ _) %.
+%total G (tequiv-to-tequivi G _ _) %.
+%sort eofi-evof {_ evof X A} {_ ewfi G A} {_ eofi G X A} %.
+%mode eofi-evof %in %in %out %.
+%term _ eofi-evof Dvof (ewfi/nil Dwf) (eofi/nil (eof/var Dwf Dvof)) %.
+%term _ 
+	%pi (eofi-evof Dvof (ewfi/cons Dwf) (eofi/cons Dof))
+	%<- ({d} eofi-evof Dvof (Dwf d) (Dof d)) %.
+%worlds (nbind ebind evar eovar eofblock) (eofi-evof _ _ _) %.
+%total D (eofi-evof _ D _) %.
+%sort eofi-lookup {_ elookup G X A} {_ ewfi G A} {_ eofi G X A} %.
+%mode eofi-lookup %in %in %out %.
+%term _ 
+	%pi (eofi-lookup elookup/hit (ewfi/cons Dwf) (eofi/cons Dof))
+	%<- ({d} eofi-evof d (Dwf d) (Dof d)) %.
+%term _ 
+	%pi (eofi-lookup (elookup/miss Dlook) (ewfi/cons Dwf) (eofi/cons Dof))
+	%<- ({d} eofi-lookup Dlook (Dwf d) (Dof d)) %.
+%worlds (nbind ebind evar eovar eofblock) (eofi-lookup _ _ _) %.
+%total D (eofi-lookup D _ _) %.
+%sort eofi-const {_ ekof K A} {_ ewfi G A} {_ eofi G (econst K) A} %.
+%mode eofi-const %in %in %out %.
+%term _ eofi-const Dkof (ewfi/nil Dwf) (eofi/nil (eof/const Dwf Dkof)) %.
+%term _ 
+	%pi (eofi-const Dkof (ewfi/cons Dwf) (eofi/cons Dof))
+	%<- ({d} eofi-const Dkof (Dwf d) (Dof d)) %.
+%worlds (nbind ebind evar eovar eofblock) (eofi-const _ _ _) %.
+%total D (eofi-const _ D _) %.
+%sort equivi-reflex {_ eofi G M A} {_ equivi G M M A} %.
+%mode equivi-reflex %in %out %.
+%term _ equivi-reflex (eofi/nil D) (equivi/nil (equiv/reflex D)) %.
+%term _ 
+	%pi (equivi-reflex (eofi/cons D) (equivi/cons D'))
+	%<- ({d} equivi-reflex (D d) (D' d)) %.
+%worlds (nbind ebind evar eovar eofblock) (equivi-reflex _ _) %.
+%total D (equivi-reflex D _) %.
+%sort equivi-forall {_ tequivi G A A'} {_ equivi G (eforall A) (eforall A') (epi (epi A ([_] et)) ([_] et))} %.
+%mode equivi-forall %in %out %.
+%term _ equivi-forall (tequivi/nil D) (equivi/nil (equiv/forall D)) %.
+%term _ 
+	%pi (equivi-forall (tequivi/cons D) (equivi/cons D'))
+	%<- ({d} equivi-forall (D d) (D' d)) %.
+%worlds (nbind ebind evar eovar eofblock) (equivi-forall _ _) %.
+%total D (equivi-forall D _) %.
+%sort equivi-lam {_ tequivi G A A'} {_ {x} equivi (econs G x A) (M x) (M' x) (B x)} {_ equivi G (elam A M) (elam A' M') (epi A B)} %.
+%mode equivi-lam %in %in %out %.
+%term _ equivi-lam (tequivi/nil D1) ([x] equivi/cons ([d] equivi/nil (D2 x d))) (equivi/nil (equiv/lam D2 D1)) %.
+%term _ 
+	%pi (equivi-lam (tequivi/cons D1) ([x] equivi/cons ([d] equivi/cons ([e] D2 x d e))) (equivi/cons D))
+	%<- ({e} equivi-lam (D1 e) ([x] equivi/cons ([d] D2 x d e)) (D e)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-lam _ _ _) %.
+%total D (equivi-lam D _ _) %.
+%sort equivi-app {_ equivi G M M' (epi A B)} {_ equivi G N N' A} {_ equivi G (eapp M N) (eapp M' N') (B N)} %.
+%mode equivi-app %in %in %out %.
+%term _ equivi-app (equivi/nil D1) (equivi/nil D2) (equivi/nil (equiv/app D2 D1)) %.
+%term _ 
+	%pi (equivi-app (equivi/cons D1) (equivi/cons D2) (equivi/cons D))
+	%<- ({d} equivi-app (D1 d) (D2 d) (D d)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-app _ _ _) %.
+%total D (equivi-app D _ _) %.
+%sort equivi-pair {_ equivi G M M' A} {_ equivi G N N' (B M)} {_ {x} ewfi (econs G x A) (B x)} {_ equivi G (epair M N) (epair M' N') (esigma A B)} %.
+%mode equivi-pair %in %in %in %out %.
+%term _ equivi-pair (equivi/nil D1) (equivi/nil D2) ([x] ewfi/cons ([d] ewfi/nil (D3 x d))) (equivi/nil (equiv/pair D3 D2 D1)) %.
+%term _ 
+	%pi (equivi-pair (equivi/cons D1) (equivi/cons D2) ([x] ewfi/cons ([d] ewfi/cons ([e] D3 x d e))) (equivi/cons D))
+	%<- ({e} equivi-pair (D1 e) (D2 e) ([x] ewfi/cons ([d] D3 x d e)) (D e)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-pair _ _ _ _) %.
+%total D (equivi-pair D _ _ _) %.
+%sort equivi-pi1 {_ equivi G M M' (esigma A B)} {_ equivi G (epi1 M) (epi1 M') A} %.
+%mode equivi-pi1 %in %out %.
+%term _ equivi-pi1 (equivi/nil D) (equivi/nil (equiv/pi1 D)) %.
+%term _ 
+	%pi (equivi-pi1 (equivi/cons D1) (equivi/cons D))
+	%<- ({d} equivi-pi1 (D1 d) (D d)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-pi1 _ _) %.
+%total D (equivi-pi1 D _) %.
+%sort equivi-pi2 {_ equivi G M M' (esigma A B)} {_ equivi G (epi2 M) (epi2 M') (B (epi1 M))} %.
+%mode equivi-pi2 %in %out %.
+%term _ equivi-pi2 (equivi/nil D) (equivi/nil (equiv/pi2 D)) %.
+%term _ 
+	%pi (equivi-pi2 (equivi/cons D1) (equivi/cons D))
+	%<- ({d} equivi-pi2 (D1 d) (D d)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-pi2 _ _) %.
+%total D (equivi-pi2 D _) %.
+%sort equivi-sing {_ equivi G M M' et} {_ equivi G M M' (esing M)} %.
+%mode equivi-sing %in %out %.
+%term _ equivi-sing (equivi/nil D) (equivi/nil (equiv/sing D)) %.
+%term _ 
+	%pi (equivi-sing (equivi/cons D1) (equivi/cons D))
+	%<- ({d} equivi-sing (D1 d) (D d)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-sing _ _) %.
+%total D (equivi-sing D _) %.
+%sort equivi-extpiw {_ equivi G M N (epi A B')} {_ {x} equivi (econs G x A) (eapp M x) (eapp N x) (B x)} {_ equivi G M N (epi A B)} %.
+%mode equivi-extpiw %in %in %out %.
+%term _ equivi-extpiw (equivi/nil D1) ([x] equivi/cons ([d] equivi/nil (D2 x d))) (equivi/nil (equiv/extpiw D2 D1)) %.
+%term _ 
+	%pi (equivi-extpiw (equivi/cons D1) ([x] equivi/cons ([d] equivi/cons ([e] D2 x d e))) (equivi/cons D))
+	%<- ({e} equivi-extpiw (D1 e) ([x] equivi/cons ([d] D2 x d e)) (D e)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-extpiw _ _ _) %.
+%total D (equivi-extpiw D _ _) %.
+%sort equivi-extsigma {_ equivi G (epi1 M) (epi1 N) A} {_ equivi G (epi2 M) (epi2 N) (B (epi1 M))} {_ {x} ewfi (econs G x A) (B x)} {_ equivi G M N (esigma A B)} %.
+%mode equivi-extsigma %in %in %in %out %.
+%term _ equivi-extsigma (equivi/nil D1) (equivi/nil D2) ([x] ewfi/cons ([d] ewfi/nil (D3 x d))) (equivi/nil (equiv/extsigma D3 D2 D1)) %.
+%term _ 
+	%pi (equivi-extsigma (equivi/cons D1) (equivi/cons D2) ([x] ewfi/cons ([d] ewfi/cons ([e] D3 x d e))) (equivi/cons D))
+	%<- ({e} equivi-extsigma (D1 e) (D2 e) ([x] ewfi/cons ([d] D3 x d e)) (D e)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-extsigma _ _ _ _) %.
+%total D (equivi-extsigma D _ _ _) %.
+%sort equivi-subsume {_ equivi G M N A} {_ subtpi G A B} {_ equivi G M N B} %.
+%mode equivi-subsume %in %in %out %.
+%term _ equivi-subsume (equivi/nil D1) (subtpi/nil D2) (equivi/nil (equiv/subsume D2 D1)) %.
+%term _ 
+	%pi (equivi-subsume (equivi/cons D1) (subtpi/cons D2) (equivi/cons D))
+	%<- ({d} equivi-subsume (D1 d) (D2 d) (D d)) %.
+%worlds (nbind ebind evar eofblock eovar) (equivi-subsume _ _ _) %.
+%total D (equivi-subsume D _ _) %.
+%sort tequivi-pi {_ tequivi G A A'} {_ {x} tequivi (econs G x A) (B x) (B' x)} {_ tequivi G (epi A B) (epi A' B')} %.
+%mode tequivi-pi %in %in %out %.
+%term _ tequivi-pi (tequivi/nil D1) ([x] tequivi/cons ([d] tequivi/nil (D2 x d))) (tequivi/nil (tequiv/pi D2 D1)) %.
+%term _ 
+	%pi (tequivi-pi (tequivi/cons D1) ([x] tequivi/cons ([d] tequivi/cons ([e] D2 x d e))) (tequivi/cons D))
+	%<- ({e} tequivi-pi (D1 e) ([x] tequivi/cons ([d] D2 x d e)) (D e)) %.
+%worlds (nbind ebind evar eofblock eovar) (tequivi-pi _ _ _) %.
+%total D (tequivi-pi D _ _) %.
+%sort tequivi-sigma {_ tequivi G A A'} {_ {x} tequivi (econs G x A) (B x) (B' x)} {_ tequivi G (esigma A B) (esigma A' B')} %.
+%mode tequivi-sigma %in %in %out %.
+%term _ tequivi-sigma (tequivi/nil D1) ([x] tequivi/cons ([d] tequivi/nil (D2 x d))) (tequivi/nil (tequiv/sigma D2 D1)) %.
+%term _ 
+	%pi (tequivi-sigma (tequivi/cons D1) ([x] tequivi/cons ([d] tequivi/cons ([e] D2 x d e))) (tequivi/cons D))
+	%<- ({e} tequivi-sigma (D1 e) ([x] tequivi/cons ([d] D2 x d e)) (D e)) %.
+%worlds (nbind ebind evar eofblock eovar) (tequivi-sigma _ _ _) %.
+%total D (tequivi-sigma D _ _) %.
+%sort tequivi-sing {_ equivi G M N et} {_ tequivi G (esing M) (esing N)} %.
+%mode tequivi-sing %in %out %.
+%term _ tequivi-sing (equivi/nil D1) (tequivi/nil (tequiv/sing D1)) %.
+%term _ 
+	%pi (tequivi-sing (equivi/cons D1) (tequivi/cons D))
+	%<- ({d} tequivi-sing (D1 d) (D d)) %.
+%worlds (nbind ebind evar eofblock eovar) (tequivi-sing _ _) %.
+%total D (tequivi-sing D _) %.
+%%%%%  Functionality (Explicit/Implicit Context)  %%%%%
+%sort tfunctionality-e {Am} {D {x} %pi (evof x A) %-> (ewfi (G x) (B x))} {_ {x} {d} mewfi (D x d) Am} {_ {x} clean (G x)} {_ equiv M N A} {_ eof M A} {_ tequivi (G M) (B M) (B N)} %.
+%mode tfunctionality-e %in %in %in %in %in %in %out %.
+%sort functionality-e {Mm} {D {x} %pi (evof x A) %-> (eofi (G x) (O x) (B x))} {_ {x} {d} meofi (D x d) Mm} {_ {x} clean (G x)} {_ equiv M N A} {_ eof M A} {_ equivi (G M) (O M) (O N) (B M)} %.
+%mode functionality-e %in %in %in %in %in %in %out %.
+%sort functionality-e! {_ {x} %pi (evof x A) %-> (elookup? (G x) (X x) (B x))} {_ {x} %pi (evof x A) %-> (ewfi (G x) (B x))} {_ {x} clean (G x)} {_ equiv M N A} {_ eof M A} {_ equivi (G M) (X M) (X N) (B M)} %.
+%mode functionality-e! %in %in %in %in %in %out %.
+%scope functionality-e! %term var 
+	%pi (functionality-e _ (%the ({x} %pi (evof x A) %-> (eofi (G x) (Y x) (B x))) Dof) (%the ({x} {d} meofi (Dof x d) meterm/var) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) Dequiv) (%the (eof M A) DofM) D)
+	%<- ({x} {d} eofi-var-invert (Dof x d) (Dmof x d) (%the (elookup? (G x) (Y x) (B x)) (Dlookup x d)) (%the (ewfi (G x) (B x)) (Dwf x d)))
+	%<- (functionality-e! Dlookup Dwf Dclean Dequiv DofM D) %.
+%term varsam 
+	%pi (functionality-e! ([x] [d] elookup?/not d) (%the ({x} %pi (evof x A) %-> (ewfi (G x) A)) Dwf) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) DequivMN) (%the (eof M A) DofM) Dequiv')
+	%<- (equiv-to-equivi _ DequivMN Dequiv') %.
+%scope functionality-e! %term varoth 
+	%pi (functionality-e! ([x] [d] elookup?/not (%the (evof X B) Dvof)) (%the ({x} %pi (evof x A) %-> (ewfi (G x) B)) Dwf) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) DequivMN) (%the (eof M A) DofM) Dequiv)
+	%<- (ewfi-subst Dwf DofM (%the (ewfi (G M) B) Dwf'))
+	%<- (eofi-evof Dvof Dwf' (%the (eofi (G M) X B) Dof))
+	%<- (equivi-reflex Dof (%the (equivi (G M) X X B) Dequiv)) %.
+%term varoth 
+	%pi (functionality-e! ([x] [d] elookup?/look (%the (elookup (G x) (Y x) (B x)) (Dlookup x))) (%the ({x} %pi (evof x A) %-> (ewfi (G x) (B x))) Dwf) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) DequivMN) (%the (eof M A) DofM) Dequiv'')
+	%<- (lookup-clean Dlookup Dclean (%the ({x} eterm-eq (Y x) Y') Deq))
+	%<- ({x} eterm-eq-symm (Deq x) (%the (eterm-eq Y' (Y x)) (Deq' x)))
+	%<- ({x} {d} eofi-lookup (Dlookup x) (Dwf x d) (%the (eofi (G x) (Y x) (B x)) (Dof x d)))
+	%<- ({x} {d} eofi-resp ectx-eq/i (Deq x) etp-eq/i (Dof x d) (%the (eofi (G x) Y' (B x)) (Dof' x d)))
+	%<- (eofi-subst Dof' DofM (%the (eofi (G M) Y' (B M)) Dof''))
+	%<- (equivi-reflex Dof'' (%the (equivi (G M) Y' Y' (B M)) Dequiv'))
+	%<- (equivi-resp ectx-eq/i (Deq' M) (Deq' N) etp-eq/i Dequiv' (%the (equivi (G M) (Y M) (Y N) (B M)) Dequiv'')) %.
+%worlds (nbind ebind evar eovar eofblock) (functionality-e! _ _ _ _ _ _) %.
+%total {} (functionality-e! _ _ _ _ _ _) %.
+%scope functionality-e! %term const 
+	%pi (functionality-e _ (%the ({x} %pi (evof x A) %-> (eofi (G x) (O x) (B x))) Dof) (%the ({x} {d} meofi (Dof x d) meterm/const) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) DequivMN) (%the (eof M A) DofM) Dequiv')
+	%<- ({x} {d} eofi-const-invert (Dof x d) (Dmof x d) (%the (eterm-eq (econst K) (O x)) (Deq x)) (%the (ekof K (B x)) (Dkof x)) (%the (ewfi (G x) (B x)) (Dwf x d)))
+	%<- (ewfi-subst Dwf DofM (%the (ewfi (G M) (B M)) Dwf'))
+	%<- (eofi-const (Dkof M) Dwf' (%the (eofi (G M) (econst K) (B M)) Dof'))
+	%<- (equivi-reflex Dof' Dequiv)
+	%<- (equivi-resp ectx-eq/i (Deq M) (Deq N) etp-eq/i Dequiv Dequiv') %.
+%term forall 
+	%pi (functionality-e _ (%the ({x} %pi (evof x A) %-> (eofi (G x) (O x) (B x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/forall Cm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) DequivMN) (%the (eof M A) DofM) Dequiv'')
+	%<- ({x} {d} eofi-forall-invert (Dof x d) (Dmof x d) (%the (eterm-eq (eforall (C x)) (O x)) (DeqO x)) (%the (etp-eq (epi (epi (C x) ([_] et)) ([_] et)) (B x)) (DeqB x)) (%the (ewfi (G x) (C x)) (DwfC x d)) (%the (mewfi (DwfC x d) Cm) (DmwfC x d)))
+	%<- (tfunctionality-e _ DwfC DmwfC Dclean DequivMN DofM (%the (tequivi (G M) (C M) (C N)) Dequiv))
+	%<- (equivi-forall Dequiv (%the (equivi (G M) (eforall (C M)) (eforall (C N)) (epi (epi (C M) ([_] et)) ([_] et))) Dequiv'))
+	%<- (equivi-resp ectx-eq/i (DeqO M) (DeqO N) (DeqB M) Dequiv' Dequiv'') %.
+%scope functionality-e! %term lam 
+	%pi (functionality-e _ (%the ({x} %pi (evof x A) %-> (eofi (G x) (O x) (B x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/lam Mm Cm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' A) DequivP) (%the (eof P A) DofP) Dequiv')
+	%<- ({x} {d} eofi-lam-invert (Dof x d) (Dmof x d) (%the (eterm-eq (elam (C x) ([y] M x y)) (O x)) (DeqO x)) (%the (etp-eq (epi (C x) (D x)) (B x)) (DeqB x)) (%the (ewfi (G x) (C x)) (DwfC x d)) (%the (mewfi (DwfC x d) Cm) (DmwfC x d)) (%the ({y} eofi (econs (G x) y (C x)) (M x y) (D x y)) (DofM x d)) (%the ({y} meofi (DofM x d y) Mm) (DmofM x d)))
+	%<- (tfunctionality-e _ DwfC DmwfC Dclean DequivP DofP (%the (tequivi (G P) (C P) (C P')) DequivC))
+	%<- ({y} {e eisvar y} functionality-e _ ([x] [d] DofM x d y) ([x] [d] DmofM x d y) ([x] clean/cons e (Dclean x)) DequivP DofP (%the (equivi (econs (G P) y (C P)) (M P y) (M P' y) (D P y)) (DequivM y)))
+	%<- (equivi-lam DequivC DequivM (%the (equivi (G P) (elam (C P) (M P)) (elam (C P') (M P')) (epi (C P) (D P))) Dequiv))
+	%<- (equivi-resp ectx-eq/i (DeqO P) (DeqO P') (DeqB P) Dequiv (%the (equivi (G P) (O P) (O P') (B P)) Dequiv')) %.
+%term app 
+	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (O x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/app Nm Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} eofi-app-invert (Dof x d) (Dmof x d) (%the (eterm-eq (eapp (M x) (N x)) (O x)) (DeqO x)) (%the (etp-eq (B x (N x)) (C x)) (DeqC x)) (%the (eofi (G x) (M x) (epi (A x) (B x))) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)) (%the (eofi (G x) (N x) (A x)) (D2 x d)) (%the (meofi (D2 x d) Nm) (DM2 x d)))
+	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (epi (A P) (B P))) DequivM))
+	%<- (functionality-e _ D2 DM2 Dclean DequivP DofP (%the (equivi (G P) (N P) (N P') (A P)) DequivN))
+	%<- (equivi-app DequivM DequivN (%the (equivi (G P) (eapp (M P) (N P)) (eapp (M P') (N P')) (B P (N P))) Dequiv))
+	%<- (equivi-resp ectx-eq/i (DeqO P) (DeqO P') (DeqC P) Dequiv (%the (equivi (G P) (O P) (O P') (C P)) Dequiv')) %.
+%scope functionality-e! %term pair 
+	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (O x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/pair Nm Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} eofi-pair-invert (Dof x d) (Dmof x d) (%the (eterm-eq (epair (M x) (N x)) (O x)) (DeqO x)) (%the (etp-eq (esigma (A x) (B x)) (C x)) (DeqC x)) (%the (eofi (G x) (M x) (A x)) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)) (%the (eofi (G x) (N x) (B x (M x))) (D2 x d)) (%the (meofi (D2 x d) Nm) (DM2 x d)) (%the ({y} ewfi (econs (G x) y (A x)) (B x y)) (D3 x d)))
+	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (A P)) DequivM))
+	%<- (functionality-e _ D2 DM2 Dclean DequivP DofP (%the (equivi (G P) (N P) (N P') (B P (M P))) DequivN))
+	%<- ({y} ewfi-subst-gen ([d] D3 P d y) ([d eof P D] %the (ewfi (econs (G P) y (A P)) (B P y)) (D3' d y)))
+	%<- (equivi-pair DequivM DequivN ([x] D3' DofP x) (%the (equivi (G P) (epair (M P) (N P)) (epair (M P') (N P')) (esigma (A P) (B P))) Dequiv))
+	%<- (equivi-resp ectx-eq/i (DeqO P) (DeqO P') (DeqC P) Dequiv (%the (equivi (G P) (O P) (O P') (C P)) Dequiv')) %.
+%term pi1 
+	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (O x) (A x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/pi1 Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} eofi-pi1-invert (Dof x d) (Dmof x d) (%the (eterm-eq (epi1 (M x)) (O x)) (DeqO x)) (%the (eofi (G x) (M x) (esigma (A x) (B x))) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)))
+	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (esigma (A P) (B P))) DequivM))
+	%<- (equivi-pi1 DequivM (%the (equivi (G P) (epi1 (M P)) (epi1 (M P')) (A P)) Dequiv))
+	%<- (equivi-resp ectx-eq/i (DeqO P) (DeqO P') etp-eq/i Dequiv (%the (equivi (G P) (O P) (O P') (A P)) Dequiv')) %.
+%scope functionality-e! %term pi2 
+	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (O x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/pi2 Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} eofi-pi2-invert (Dof x d) (Dmof x d) (%the (eterm-eq (epi2 (M x)) (O x)) (DeqO x)) (%the (etp-eq (B x (epi1 (M x))) (C x)) (DeqC x)) (%the (eofi (G x) (M x) (esigma (A x) (B x))) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)))
+	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (esigma (A P) (B P))) DequivM))
+	%<- (equivi-pi2 DequivM (%the (equivi (G P) (epi2 (M P)) (epi2 (M P')) (B P (epi1 (M P)))) Dequiv))
+	%<- (equivi-resp ectx-eq/i (DeqO P) (DeqO P') (DeqC P) Dequiv (%the (equivi (G P) (O P) (O P') (C P)) Dequiv')) %.
+%term sing 
+	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (M x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/sing Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} eofi-sing-invert (Dof x d) (Dmof x d) (%the (etp-eq (esing (M x)) (C x)) (DeqC x)) (%the (eofi (G x) (M x) et) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)))
+	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') et) DequivM))
+	%<- (equivi-sing DequivM (%the (equivi (G P) (M P) (M P') (esing (M P))) Dequiv))
+	%<- (equivi-resp ectx-eq/i eterm-eq/i eterm-eq/i (DeqC P) Dequiv (%the (equivi (G P) (M P) (M P') (C P)) Dequiv')) %.
+%scope functionality-e! %term extpi 
+	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (M x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/extpi Nm Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} eofi-extpi-invert (Dof x d) (Dmof x d) (%the (etp-eq (epi (A x) (B x)) (C x)) (DeqC x)) (%the (eofi (G x) (M x) (epi (A x) (B' x))) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)) (%the ({y} eofi (econs (G x) y (A x)) (eapp (M x) y) (B x y)) (D2 x d)) (%the ({y} meofi (D2 x d y) Nm) (DM2 x d)))
+	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (epi (A P) (B' P))) Dequiv1))
+	%<- ({y} {e eisvar y} functionality-e _ ([x] [d] D2 x d y) ([x] [d] DM2 x d y) ([x] clean/cons e (Dclean x)) DequivP DofP (%the (equivi (econs (G P) y (A P)) (eapp (M P) y) (eapp (M P') y) (B P y)) (Dequiv2 y)))
+	%<- (equivi-extpiw Dequiv1 Dequiv2 (%the (equivi (G P) (M P) (M P') (epi (A P) (B P))) Dequiv))
+	%<- (equivi-resp ectx-eq/i eterm-eq/i eterm-eq/i (DeqC P) Dequiv (%the (equivi (G P) (M P) (M P') (C P)) Dequiv')) %.
+%term extsig 
+	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (M x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/extsigma Nm Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} eofi-extsigma-invert (Dof x d) (Dmof x d) (%the (etp-eq (esigma (A x) (B x)) (C x)) (DeqC x)) (%the (eofi (G x) (epi1 (M x)) (A x)) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)) (%the (eofi (G x) (epi2 (M x)) (B x (epi1 (M x)))) (D2 x d)) (%the (meofi (D2 x d) Nm) (DM2 x d)) (%the ({y} ewfi (econs (G x) y (A x)) (B x y)) (Dwf x d)))
+	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (epi1 (M P)) (epi1 (M P')) (A P)) Dequiv1))
+	%<- (functionality-e _ D2 DM2 Dclean DequivP DofP (%the (equivi (G P) (epi2 (M P)) (epi2 (M P')) (B P (epi1 (M P)))) Dequiv2))
+	%<- ({y} ewfi-subst ([x] [d] Dwf x d y) DofP (%the (ewfi (econs (G P) y (A P)) (B P y)) (Dwf' y)))
+	%<- (equivi-extsigma Dequiv1 Dequiv2 Dwf' (%the (equivi (G P) (M P) (M P') (esigma (A P) (B P))) Dequiv))
+	%<- (equivi-resp ectx-eq/i eterm-eq/i eterm-eq/i (DeqC P) Dequiv (%the (equivi (G P) (M P) (M P') (C P)) Dequiv')) %.
+%scope functionality-e! %term subsum 
+	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (M x) (A x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/subsume Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} eofi-subsume-invert (Dof x d) (Dmof x d) (%the (eofi (G x) (M x) (B x)) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)) (%the (subtpi (G x) (B x) (A x)) (Dsub x d)))
+	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (B P)) Dequiv))
+	%<- (subtpi-subst Dsub DofP (%the (subtpi (G P) (B P) (A P)) Dsub'))
+	%<- (equivi-subsume Dequiv Dsub' (%the (equivi (G P) (M P) (M P') (A P)) Dequiv')) %.
+%term t 
+	%pi (tfunctionality-e _ (%the ({x} %pi (evof x D) %-> (ewfi (G x) (C x))) Dwf) (%the ({x} {d} mewfi (Dwf x d) metp/t) Dmwf) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} ewfi-t-invert (Dwf x d) (Dmwf x d) (%the (etp-eq et (C x)) (DeqC x)))
+	%<- (tequiv-to-tequivi (G P) (tequiv/reflex ewf/t) (%the (tequivi (G P) et et) Dequiv))
+	%<- (tequivi-resp ectx-eq/i (DeqC P) (DeqC P') Dequiv (%the (tequivi (G P) (C P) (C P')) Dequiv')) %.
+%scope functionality-e! %term pi 
+	%pi (tfunctionality-e _ (%the ({x} %pi (evof x D) %-> (ewfi (G x) (C x))) Dwf) (%the ({x} {d} mewfi (Dwf x d) (metp/pi Bm Am)) Dmwf) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} ewfi-pi-invert (Dwf x d) (Dmwf x d) (%the (etp-eq (epi (A x) (B x)) (C x)) (DeqC x)) (%the (ewfi (G x) (A x)) (DwfA x d)) (%the (mewfi (DwfA x d) Am) (DmwfA x d)) (%the ({y} ewfi (econs (G x) y (A x)) (B x y)) (DwfB x d)) (%the ({y} mewfi (DwfB x d y) Bm) (DmwfB x d)))
+	%<- (tfunctionality-e _ DwfA DmwfA Dclean DequivP DofP (%the (tequivi (G P) (A P) (A P')) DequivA))
+	%<- ({y} {e eisvar y} tfunctionality-e _ ([x] [d] DwfB x d y) ([x] [d] DmwfB x d y) ([x] clean/cons e (Dclean x)) DequivP DofP (%the (tequivi (econs (G P) y (A P)) (B P y) (B P' y)) (DequivB y)))
+	%<- (tequivi-pi DequivA DequivB (%the (tequivi (G P) (epi (A P) (B P)) (epi (A P') (B P'))) Dequiv))
+	%<- (tequivi-resp ectx-eq/i (DeqC P) (DeqC P') Dequiv (%the (tequivi (G P) (C P) (C P')) Dequiv')) %.
+%term sigma 
+	%pi (tfunctionality-e _ (%the ({x} %pi (evof x D) %-> (ewfi (G x) (C x))) Dwf) (%the ({x} {d} mewfi (Dwf x d) (metp/sigma Bm Am)) Dmwf) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} ewfi-sigma-invert (Dwf x d) (Dmwf x d) (%the (etp-eq (esigma (A x) (B x)) (C x)) (DeqC x)) (%the (ewfi (G x) (A x)) (DwfA x d)) (%the (mewfi (DwfA x d) Am) (DmwfA x d)) (%the ({y} ewfi (econs (G x) y (A x)) (B x y)) (DwfB x d)) (%the ({y} mewfi (DwfB x d y) Bm) (DmwfB x d)))
+	%<- (tfunctionality-e _ DwfA DmwfA Dclean DequivP DofP (%the (tequivi (G P) (A P) (A P')) DequivA))
+	%<- ({y} {e eisvar y} tfunctionality-e _ ([x] [d] DwfB x d y) ([x] [d] DmwfB x d y) ([x] clean/cons e (Dclean x)) DequivP DofP (%the (tequivi (econs (G P) y (A P)) (B P y) (B P' y)) (DequivB y)))
+	%<- (tequivi-sigma DequivA DequivB (%the (tequivi (G P) (esigma (A P) (B P)) (esigma (A P') (B P'))) Dequiv))
+	%<- (tequivi-resp ectx-eq/i (DeqC P) (DeqC P') Dequiv (%the (tequivi (G P) (C P) (C P')) Dequiv')) %.
+%scope functionality-e! %term sing 
+	%pi (tfunctionality-e _ (%the ({x} %pi (evof x D) %-> (ewfi (G x) (C x))) Dwf) (%the ({x} {d} mewfi (Dwf x d) (metp/sing Mm)) Dmwf) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
+	%<- ({x} {d} ewfi-sing-invert (Dwf x d) (Dmwf x d) (%the (etp-eq (esing (M x)) (C x)) (DeqC x)) (%the (eofi (G x) (M x) et) (DofM x d)) (%the (meofi (DofM x d) Mm) (DmofM x d)))
+	%<- (functionality-e _ DofM DmofM Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') et) DequivM))
+	%<- (tequivi-sing DequivM (%the (tequivi (G P) (esing (M P)) (esing (M P'))) Dequiv))
+	%<- (tequivi-resp ectx-eq/i (DeqC P) (DeqC P') Dequiv (%the (tequivi (G P) (C P) (C P')) Dequiv')) %.
+%worlds (nbind ebind evar eovar) (tfunctionality-e _ _ _ _ _ _ _) (functionality-e _ _ _ _ _ _ _) %.
+%total (D1 D2) (functionality-e D1 _ _ _ _ _ _) (tfunctionality-e D2 _ _ _ _ _ _) %.
+%sort can-meof {D eof M A} {_ meof D Mm} %.
+%mode can-meof %in %out %.
+%sort can-mewf {D ewf A} {_ mewf D Am} %.
+%mode can-mewf %in %out %.
+%term _ can-meof (eof/var _ _) meof/var %.
+%term _ can-meof (eof/const _ _) meof/const %.
+%term _ %pi (can-meof (eof/forall D) (meof/forall D')) %<- (can-mewf D D') %.
+%term _ 
+	%pi (can-meof (eof/lam D2 D1) (meof/lam D2' D1'))
+	%<- (can-mewf D1 D1')
+	%<- ({x} {d} can-meof (D2 x d) (D2' x d)) %.
+%term _ 
+	%pi (can-meof (eof/app D2 D1) (meof/app D2' D1'))
+	%<- (can-meof D1 D1')
+	%<- (can-meof D2 D2') %.
+%term _ 
+	%pi (can-meof (eof/pair _ D2 D1) (meof/pair D2' D1'))
+	%<- (can-meof D1 D1')
+	%<- (can-meof D2 D2') %.
+%term _ %pi (can-meof (eof/pi1 D) (meof/pi1 D')) %<- (can-meof D D') %.
+%term _ %pi (can-meof (eof/pi2 D) (meof/pi2 D')) %<- (can-meof D D') %.
+%term _ %pi (can-meof (eof/sing D) (meof/sing D')) %<- (can-meof D D') %.
+%term _ 
+	%pi (can-meof (eof/extpi D2 D1) (meof/extpi D2' D1'))
+	%<- (can-meof D1 D1')
+	%<- ({x} {d} can-meof (D2 x d) (D2' x d)) %.
+%term _ 
+	%pi (can-meof (eof/extsigma _ D2 D1) (meof/extsigma D2' D1'))
+	%<- (can-meof D1 D1')
+	%<- (can-meof D2 D2') %.
+%term _ %pi (can-meof (eof/subsume _ D) (meof/subsume D')) %<- (can-meof D D') %.
+%term _ can-mewf ewf/t mewf/t %.
+%term _ 
+	%pi (can-mewf (ewf/pi D2 D1) (mewf/pi D2' D1'))
+	%<- (can-mewf D1 D1')
+	%<- ({x} {d} can-mewf (D2 x d) (D2' x d)) %.
+%term _ 
+	%pi (can-mewf (ewf/sigma D2 D1) (mewf/sigma D2' D1'))
+	%<- (can-mewf D1 D1')
+	%<- ({x} {d} can-mewf (D2 x d) (D2' x d)) %.
+%term _ %pi (can-mewf (ewf/sing D) (mewf/sing D')) %<- (can-meof D D') %.
+%worlds (nbind ebind evar eofblock eovar) (can-meof _ _) (can-mewf _ _) %.
+%total (D1 D2) (can-meof D1 _) (can-mewf D2 _) %.
+%%%%%  Functionality (Implicit Context)  %%%%%
+%sort tequivi-nil-invert {_ tequivi enil A B} {_ tequiv A B} %.
+%mode tequivi-nil-invert %in %out %.
+%term _ tequivi-nil-invert (tequivi/nil D) D %.
+%worlds (nbind ebind evar eofblock eovar) (tequivi-nil-invert _ _) %.
+%total {} (tequivi-nil-invert _ _) %.
+%sort tfunctionality* {_ {x} %pi (evof x A) %-> (ewf (B x))} {_ equiv M N A} {_ eof M A} {_ tequiv (B M) (B N)} %.
+%mode tfunctionality* %in %in %in %out %.
+%term _ 
+	%pi (tfunctionality* Dwf Dequiv Dof Dtequiv)
+	%<- ({x} {d} can-mewf (Dwf x d) (Dmwf x d))
+	%<- (tfunctionality-e _ ([x] [d] ewfi/nil (Dwf x d)) ([x] [d] mewfi/nil (Dmwf x d)) ([x] clean/nil) Dequiv Dof Dtequivi)
+	%<- (tequivi-nil-invert Dtequivi Dtequiv) %.
+%worlds (nbind ebind) (tfunctionality* _ _ _ _) %.
+%total {} (tfunctionality* _ _ _ _) %.
+%sort tequivi-cons1-invert {_ {x} tequivi (econs enil x A) (B x) (C x)} {_ {x} %pi (evof x A) %-> (tequiv (B x) (C x))} %.
+%mode tequivi-cons1-invert %in %out %.
+%term _ tequivi-cons1-invert ([x] tequivi/cons ([d] tequivi/nil (D x d))) D %.
+%worlds (nbind ebind) (tequivi-cons1-invert _ _) %.
+%total {} (tequivi-cons1-invert _ _) %.
+%sort tfunctionality1* {_ {x} %pi (evof x A) %-> ({y} %pi (evof y (B x)) %-> (ewf (C x y)))} {_ equiv M N A} {_ eof M A} {_ {y} %pi (evof y (B M)) %-> (tequiv (C M y) (C N y))} %.
+%mode tfunctionality1* %in %in %in %out %.
+%term _ 
+	%pi (tfunctionality1* Dwf Dequiv Dof Dtequiv)
+	%<- ({x} {d} {y} {e} can-mewf (Dwf x d y e) (%the (mewf _ Mm) (Dmwf x d y e)))
+	%<- ({y} {ev eisvar y} tfunctionality-e _ ([x] [d] ewfi/cons ([e] ewfi/nil (Dwf x d y e))) ([x] [d] mewfi/cons ([e] mewfi/nil (Dmwf x d y e))) ([x] clean/cons ev clean/nil) Dequiv Dof (Dtequivi y))
+	%<- (tequivi-cons1-invert Dtequivi Dtequiv) %.
+%worlds (nbind ebind) (tfunctionality1* _ _ _ _) %.
+%total {} (tfunctionality1* _ _ _ _) %.
+%sort tequivi-cons2-invert {_ {x} {y} tequivi (econs (econs enil x A) y (B x)) (C x y) (D x y)} {_ {x} %pi (evof x A) %-> ({y} %pi (evof y (B x)) %-> (tequiv (C x y) (D x y)))} %.
+%mode tequivi-cons2-invert %in %out %.
+%term _ tequivi-cons2-invert ([x] [y] tequivi/cons ([e] tequivi/cons ([d] tequivi/nil (D x d y e)))) D %.
+%worlds (nbind ebind) (tequivi-cons2-invert _ _) %.
+%total {} (tequivi-cons2-invert _ _) %.
+%sort tfunctionality2* {_ {x} 
+	%pi (evof x A)
+	%-> ({y} %pi (evof y (B x)) %-> ({z} %pi (evof z (C x y)) %-> (ewf (D x y z))))} {_ equiv M N A} {_ eof M A} {_ {y} 
+	%pi (evof y (B M))
+	%-> ({z} %pi (evof z (C M y)) %-> (tequiv (D M y z) (D N y z)))} %.
+%mode tfunctionality2* %in %in %in %out %.
+%term _ 
+	%pi (tfunctionality2* Dwf Dequiv Dof Dtequiv)
+	%<- ({x} {d} {y} {e} {z} {f} can-mewf (Dwf x d y e z f) (%the (mewf _ Mm) (Dmwf x d y e z f)))
+	%<- ({y} {ev eisvar y} {z} {fv eisvar z} tfunctionality-e _ ([x] [d] ewfi/cons ([f] ewfi/cons ([e] ewfi/nil (Dwf x d y e z f)))) ([x] [d] mewfi/cons ([f] mewfi/cons ([e] mewfi/nil (Dmwf x d y e z f)))) ([x] clean/cons fv (clean/cons ev clean/nil)) Dequiv Dof (Dtequivi y z))
+	%<- (tequivi-cons2-invert Dtequivi Dtequiv) %.
+%worlds (nbind ebind) (tfunctionality2* _ _ _ _) %.
+%total {} (tfunctionality2* _ _ _ _) %.

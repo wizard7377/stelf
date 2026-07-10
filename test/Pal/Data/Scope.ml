@@ -1,4 +1,5 @@
-let scope_open_test = {|
+let scope_open_test =
+  {|
 %sort sc_nat %.
 %scope sc_nat %{
   %term sc_z sc_nat
@@ -9,7 +10,8 @@ let scope_open_test = {|
 %term sc_add_z {y sc_nat} sc_add sc_z y y %.
 |}
 
-let scope_qualified_test = {|
+let scope_qualified_test =
+  {|
 %sort sq_nat %.
 %scope sq_nat %{
   %term sq_z sq_nat
@@ -19,7 +21,8 @@ let scope_qualified_test = {|
 %term sq_zz sq_pair %(sq_z sq_nat) %(sq_z sq_nat) %.
 |}
 
-let scope_open_inside_test = {|
+let scope_open_inside_test =
+  {|
 %sort oi_bool %.
 %scope oi_bool %{
   %term oi_true oi_bool
@@ -33,7 +36,8 @@ let scope_open_inside_test = {|
 %}
 |}
 
-let local_basic_test = {|
+let local_basic_test =
+  {|
 %sort loc_nat %.
 %scope loc_nat %{
   %term loc_z loc_nat
@@ -43,7 +47,8 @@ let local_basic_test = {|
 %term loc_pair_zz loc_pair (%local loc_nat loc_z) (%local loc_nat loc_z) %.
 |}
 
-let local_fallthrough_test = {|
+let local_fallthrough_test =
+  {|
 %sort lo_nat %.
 %scope lo_nat %{
   %term lo_z lo_nat

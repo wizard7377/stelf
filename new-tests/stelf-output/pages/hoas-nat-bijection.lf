@@ -3684,7 +3684,7 @@ handle any number of variables).
 %term a t %.
 %term b %pi t %-> t %.
 %term f %pi (%pi t %-> t) %-> t %.
-%block blocksimple [v t]%.
+%block blocksimple {v t}%.
 %{! ### Equality !}%
 %sort eq %.
 %term eq/ eq T T %.
@@ -3694,7 +3694,7 @@ A variable level is the (nonzero) natural number for a variable.
 This value is used to determine the mapping for a variable.
 !}%
 %sort varlevel %.
-%block blockvar {l} [v] [vl varlevel v (s l)]%.
+%block blockvar [l] {v} {vl varlevel v (s l)}%.
 %{! ### Mapping !}%
 %{! 
 The bijection from t to nat is called "tonat".  In its more general
@@ -3800,7 +3800,7 @@ The definition "fake" is never used again.  It has no "meaning."
 %sort fake %.
 %term _ %pi fake %<- ({i israw-total* T B I} israw-total* T' B' I') %.
 %term _ %pi fake %<- ({i israw-total* T B I} israw T' B') %.
-%block blockraw [v] [rv rawvar v] [irt israw-total rv]%.
+%block blockraw {v} {rv rawvar v} {irt israw-total rv}%.
 %worlds (blockraw) (israw-total* _ _ _) %.
 %total {} (israw-total* _ _ _) %.
 %{! 
@@ -4106,7 +4106,7 @@ The following block is used when we remove the outmost variable:
 all other variables are at least level 2.  "blockvar2"
 makes this context explicit.
 !}%
-%block blockvar2 {l} [v] [vl varlevel v (s (s l))]%.
+%block blockvar2 [l] {v} {vl varlevel v (s (s l))}%.
 %theorem remove-one-var : forall* {F1} {F2} {N} {S} forall {E {v} {vl varlevel v (s z)} eql* (s N) (F1 v) (F2 v)} {ES {v} {vl} eqlsize (E v vl) S} exists {E' {v} eql* (s N) (F1 v) (F2 v)} {ES' {v} eqlsize (E' v) S} true %.
 %term _ remove-one-var ([v] [vl] eql/eq eq/) ([v] [vl] eqlsize/eq) ([v] eql/eq eq/) ([v] eqlsize/eq) %.
 %term _ 
@@ -4137,7 +4137,7 @@ Adding to the complexity is the fact that we need to track the
 size of the equality rules for termination proof (later).
 !}%
 %theorem varlevel-shifts-down : forall* {V} {L} forall {VL varlevel V (s (s L))} exists {VL' varlevel' V (s L)} true %.
-%block shiftdown {l} [v] [vl varlevel v (s (s l))] [vl' varlevel' v (s l)] [vsd varlevel-shifts-down vl vl']%.
+%block shiftdown [l] {v} {vl varlevel v (s (s l))} {vl' varlevel' v (s l)} {vsd varlevel-shifts-down vl vl'}%.
 %sort fake %.
 %term _ %pi fake %<- ({x varlevel-shifts-down X Y} varlevel-shifts-down X' Y') %.
 %worlds (blocksimple shiftdown) (varlevel-shifts-down _ _) %.
@@ -4160,7 +4160,7 @@ size of the equality rules for termination proof (later).
 %worlds (blocksimple shiftdown) (shift-varlevel/L1 _ _ _ _) %.
 %total (E) (shift-varlevel/L1 E _ _ _) %.
 %theorem varlevel-shifts-back : forall* {V} {L} forall {VL' varlevel' V (s L)} exists {VL varlevel V (s L)} true %.
-%block shiftback {l} [v] [vl' varlevel' v (s l)] [vl varlevel v (s l)] [vsb varlevel-shifts-back vl' vl]%.
+%block shiftback [l] {v} {vl' varlevel' v (s l)} {vl varlevel v (s l)} {vsb varlevel-shifts-back vl' vl}%.
 %sort fake %.
 %term _ %pi fake %<- ({x varlevel-shifts-back X Y} varlevel-shifts-back X' Y') %.
 %worlds (blocksimple shiftback) (varlevel-shifts-back _ _) %.

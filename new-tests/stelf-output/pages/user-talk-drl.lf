@@ -35,7 +35,7 @@ I'm showering, driving to school, and emailing! — [Rob](/wiki/user-rsimmons/) 
 %term of/app %pi (of (app E1 E2) T) %<- (of E1 (arrow T2 T)) %<- (of E2 T2) %.
 %term of/lam %pi (of (lam E) (arrow T2 T)) %<- ({x exp} %pi (of x T2) %-> (of (E x) T)) %.
 %sort false %.
-%block ofb {T tp} [x exp] [dx of x T]%.
+%block ofb [T tp] {x exp} {dx of x T}%.
 %sort id %.
 %term refl id T T %.
 %sort lemma {x} {dx of x T} %.
@@ -58,11 +58,11 @@ I'm showering, driving to school, and emailing! — [Rob](/wiki/user-rsimmons/) 
 %sort of %.
 %term of_app %pi (of E1 (T1 ar T2)) %-> (of E2 T1) %-> (of (app E1 E2) T2) %.
 %term of_lam %pi ({x} %pi (of x T1) %-> (of (E x) T2)) %-> (of (lam E) (T1 ar T2)) %.
-%block ofblock {T tp} [x exp] [u of x T]%.
+%block ofblock [T tp] {x exp} {u of x T}%.
 %worlds (ofblock) (of _ _) %.
 %sort false %.
 %sort isvar %.
-%block varBlock {T tp} [x exp] [u of x T] [v isvar x]%.
+%block varBlock [T tp] {x exp} {u of x T} {v isvar x}%.
 %sort contra %.
 %mode contra %in %in %in %out %.
 %worlds (varBlock) (contra _ _ _ _) %.

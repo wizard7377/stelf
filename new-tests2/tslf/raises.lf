@@ -1,0 +1,37 @@
+%%%% raises judgment
+%sort raises/tm {_ tm} {_ tm} %.
+%mode raises/tm %star %star %.
+%sort raises/md {_ md} {_ tm} %.
+%mode raises/md %star %star %.
+%term raises/tm/pair-1 %pi (raises/tm (tm/pair E1 E2) EX) %<- (raises/tm E1 EX) %.
+%term raises/tm/pair-2 %pi (raises/tm (tm/pair E1 E2) EX) %<- (raises/tm E2 EX) %<- (val/tm E1) %.
+%term raises/tm/pj1 %pi (raises/tm (tm/pj1 E) EX) %<- (raises/tm E EX) %.
+%term raises/tm/pj2 %pi (raises/tm (tm/pj2 E) EX) %<- (raises/tm E EX) %.
+%term raises/tm/tmapp-1 %pi (raises/tm (tm/tmapp E1 E2) EX) %<- (raises/tm E1 EX) %.
+%term raises/tm/tmapp-2 %pi (raises/tm (tm/tmapp E1 E2) EX) %<- (raises/tm E2 EX) %<- (val/tm E1) %.
+%term raises/tm/cnapp %pi (raises/tm (tm/cnapp E1 C) EX) %<- (raises/tm E1 EX) %.
+%term raises/tm/term %pi (raises/tm (tm/term M) EX) %<- (raises/md M EX) %.
+%term raises/tm/ref %pi (raises/tm (tm/ref E) EX) %<- (raises/tm E EX) %.
+%term raises/tm/set-1 %pi (raises/tm (tm/set E1 E2) EX) %<- (raises/tm E1 EX) %.
+%term raises/tm/set-2 %pi (raises/tm (tm/set E1 E2) EX) %<- (raises/tm E2 EX) %<- (val/tm E1) %.
+%term raises/tm/get %pi (raises/tm (tm/get E) EX) %<- (raises/tm E EX) %.
+%term raises/tm/inl %pi (raises/tm (tm/inl (tp/sum C1 C2) E) EX) %<- (raises/tm E EX) %.
+%term raises/tm/inr %pi (raises/tm (tm/inr (tp/sum C1 C2) E) EX) %<- (raises/tm E EX) %.
+%term raises/tm/case %pi (raises/tm (tm/case E E1 E2) EX) %<- (raises/tm E EX) %.
+%term raises/tm/raise-1 %pi (raises/tm (tm/raise E) E) %<- (val/tm E) %.
+%term raises/tm/raise-2 %pi (raises/tm (tm/raise E) V) %<- (raises/tm E V) %.
+%term raises/tm/tag-1 %pi (raises/tm (tm/tag E1 E2) EX) %<- (raises/tm E1 EX) %.
+%term raises/tm/tag-2 %pi (raises/tm (tm/tag E1 E2) EX) %<- (raises/tm E2 EX) %<- (val/tm E1) %.
+%term raises/tm/iftag-1 %pi (raises/tm (tm/iftag E E1 E2 E3) EX) %<- (raises/tm E EX) %.
+%term raises/tm/iftag-2 %pi (raises/tm (tm/iftag E E1 E2 E3) EX) %<- (raises/tm E1 EX) %<- (val/tm E) %.
+%term raises/tm/roll %pi (raises/tm (tm/roll (cn/mu K1 C2) E) V) %<- (raises/tm E V) %.
+%term raises/tm/unroll %pi (raises/tm (tm/unroll E) V) %<- (raises/tm E V) %.
+%term raises/md/pair-1 %pi (raises/md (md/pair M1 M2) M1') %<- (raises/md M1 M1') %.
+%term raises/md/pair-2 %pi (raises/md (md/pair M1 M2) M2') %<- (raises/md M2 M2') %<- (val/md M1) %.
+%term raises/md/pj1 %pi (raises/md (md/pj1 M) M') %<- (raises/md M M') %.
+%term raises/md/pj2 %pi (raises/md (md/pj2 M) M') %<- (raises/md M M') %.
+%term raises/md/app-1 %pi (raises/md (md/app M1 M2) M1') %<- (raises/md M1 M1') %.
+%term raises/md/app-2 %pi (raises/md (md/app M1 M2) M2') %<- (raises/md M2 M2') %<- (val/md M1) %.
+%term raises/md/tm %pi (raises/md (md/tm E) E') %<- (raises/tm E E') %.
+%term raises/md/seal %pi (raises/md (md/seal M S) M') %<- (raises/md M M') %.
+%term raises/md/let %pi (raises/md (md/let M1 M2 S) M1') %<- (raises/md M1 M1') %.

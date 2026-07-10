@@ -137,10 +137,10 @@
 %term sound_dnotr 
 	%pi (sound (nk_dnotr NK1) KA (nj_triple_neg_red (nj_triple_neg_red (nj_triple_neg_red NJ1))))
 	%<- (sound NK1 (kolm_not (kolm_not KA)) NJ1) %.
-%block l1 [a i]%.
-%block l2 {A o} {A* o} [NK' nk A] [K' kolm A A*] [NJ' nj A*]%.
-%block l3 {A o} {A* o} {KA kolm A A*} [u nk A] [v nj A*] [h sound u KA v]%.
-%block l4 {A o} {A* o} {K kolm A A*} [p o] [u nk A] [v nj A*] [kp kolm p (n p)] [h1 existskolm p (n p) kp] [h2 sound u K v]%.
+%block l1 {a i}%.
+%block l2 [A o] [A* o] {NK' nk A} {K' kolm A A*} {NJ' nj A*}%.
+%block l3 [A o] [A* o] [KA kolm A A*] {u nk A} {v nj A*} {h sound u KA v}%.
+%block l4 [A o] [A* o] [K kolm A A*] {p o} {u nk A} {v nj A*} {kp kolm p (n p)} {h1 existskolm p (n p) kp} {h2 sound u K v}%.
 %mode kolm %in %out %.
 %worlds (l1 l2 l3 l4) (kolm _ _) %.
 %total A (kolm A A*) %.

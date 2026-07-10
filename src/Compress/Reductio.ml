@@ -585,8 +585,20 @@ module Reductio = struct
 end
 
 include Reductio
-let () = Printexc.register_printer (function Unimp -> Some "Unimp" | _ -> None)
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
-let () = Printexc.register_printer (function Matching msg -> Some msg | _ -> None)
-let () = Printexc.register_printer (function NonPattern -> Some "NonPattern" | _ -> None)
-let () = Printexc.register_printer (function NotFound msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Unimp -> Some "Unimp" | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Matching msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function
+    | NonPattern -> Some "NonPattern"
+    | _ -> None)
+
+let () =
+  Printexc.register_printer (function NotFound msg -> Some msg | _ -> None)

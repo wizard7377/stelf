@@ -1,5 +1,6 @@
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name lexing)
  (public_name stelf.lexing)
  (libraries display tag containers fpath)

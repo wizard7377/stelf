@@ -1,0 +1,31 @@
+%sort ctoe {_ conv E E'} {_ abse G E F} {_ abse G E' F'} {_ F == F'} %.
+%term ctoe_refl ctoe c_refl AP AP refl %.
+%term ctoe_trans 
+	%pi (ctoe (c_trans CP1 CP2) AP1 AP2 (EP1 then EP2))
+	%<- (ctoe CP1 AP1 AP3 EP1)
+	%<- (ctoe CP2 AP3 AP2 EP2) %.
+%term ctoe_sym %pi (ctoe (c_sym CP) AP1 AP2 (sym EP)) %<- (ctoe CP AP2 AP1 EP) %.
+%term ctoe_fst %pi (ctoe (c_fst CP) (afst AP) (afst AP') (=@= refl EP)) %<- (ctoe CP AP AP' EP) %.
+%term ctoe_snd %pi (ctoe (c_snd CP) (asnd AP) (asnd AP') (=@= refl EP)) %<- (ctoe CP AP AP' EP) %.
+%term ctoe_pair 
+	%pi (ctoe (c_pair CP1 CP2) (apair AP1 AP2) (apair AP1' AP2') (=pair= EP1 EP2))
+	%<- (ctoe CP1 AP1 AP1' EP1)
+	%<- (ctoe CP2 AP2 AP2' EP2) %.
+%term ctoe_lam 
+	%pi (ctoe (c_lam ([x] CP x)) (alam ([x] AP x)) (alam ([x] AP' x)) (=cur= EP))
+	%<- ({x} ctoe (CP x) (AP x) (AP' x) EP) %.
+%term ctoe_app 
+	%pi (ctoe (c_app CP1 CP2) (aapp AP1 AP2) (aapp AP1' AP2') (=@= refl (=pair= EP1 EP2)))
+	%<- (ctoe CP1 AP1 AP1' EP1)
+	%<- (ctoe CP2 AP2 AP2' EP2) %.
+%term ctoe_unit ctoe c_unit aunit AP (sym term_u) %.
+%term ctoe_prl ctoe c_prl (afst (apair AP1 AP2)) AP1 prod_l %.
+%term ctoe_prr ctoe c_prr (asnd (apair AP1 AP2)) AP2 prod_r %.
+%term ctoe_surj ctoe c_surj (apair (afst AP) (asnd AP)) AP prod_u %.
+%term ctoe_beta 
+	%pi (ctoe c_beta (aapp (alam ([x] AP1 x)) AP2) AP (=@= refl (=pair= (sym id_r) refl) then EE then EP))
+	%<- (subst AP2 AP1 AP EP)
+	%<- (appl EE) %.
+%term ctoe_eta 
+	%pi (ctoe c_eta (alam ([x] aapp (AP x) (avar av_x))) AP' (=cur= (=@= refl (=pair= (sym EP) refl)) then exp_u))
+	%<- ({x} weak AP' (AP x) EP) %.

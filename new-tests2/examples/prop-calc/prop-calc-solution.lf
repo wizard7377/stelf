@@ -1,0 +1,47 @@
+%%% Intuitionistic propositional calculus
+%%% Positive fragment with implies, and, true.
+%%% Operational meaning of derivations as programs.
+%%% Author: Frank Pfenning, Carsten Schuermann
+% Type of propositions.
+%sort o %.
+%name o %.
+% Syntax: implication, plus a few constants.
+%term => %pi o %-> o %-> o %.
+%prec %right 10 => %.
+%term & %pi o %-> o %-> o %.
+%prec %right 11 & %.
+%term true o %.
+% Provability.
+%sort |- {_ o} %.
+%prec %prefix 9 |- %.
+%name |- %.
+% Axioms.
+%term K |- A => B => A %.
+%term S |- (A => B => C) => (A => B) => A => C %.
+%term ONE |- true %.
+%term PAIR |- A => B => A & B %.
+%term LEFT |- A & B => A %.
+%term RIGHT |- A & B => B %.
+% Inference Rule.
+%term MP %pi (|- A => B) %-> (|- A) %-> (|- B) %.
+% Operational semantics
+% Basic reductions
+%sort ==> {_ |- A} {_ |- A} %.
+%prec %right 9 ==> %.
+%term stepK MP (MP K X) Y ==> X %.
+%term stepS MP (MP (MP S X) Y) Z ==> MP (MP X Z) (MP Y Z) %.
+%term stepL MP LEFT (MP (MP PAIR X) Y) ==> X %.
+%term stepR MP RIGHT (MP (MP PAIR X) Y) ==> Y %.
+% Congruence rules
+%term congMPL %pi (MP P1 P2 ==> MP P1 P2) %<- (P1 ==> P1') %.
+%term congMPR %pi (MP P1 P2 ==> MP P1 P2') %<- (P2 ==> P2') %.
+%sort ==>* {_ |- A} {_ |- A} %.
+%prec %right 9 ==>* %.
+%term refl P ==>* P %.
+%term step %pi (P1 ==> P2) %-> (P2 ==>* P3) %-> (P1 ==>* P3) %.
+% Examples:
+%define p1 MP (MP K S) S %.
+%define p2 MP (MP S (MP (MP S (MP K PAIR)) (MP (MP S (MP K RIGHT)) (MP (MP S K) K)))) (MP (MP S (MP K LEFT)) (MP (MP S K) K)) %.
+%define q1 MP (MP S K) K %.
+%define q2 MP (MP (MP S K) K) (MP (MP S K) K) %.
+%solve r : q2 ==> Q %.

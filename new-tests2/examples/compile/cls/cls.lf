@@ -1,0 +1,25 @@
+%%% The CLS machine (a variant of the SECD machine)
+%%% Author: Frank Pfenning, based on [Hannan & Pfenning 92]
+%sort instruction %.
+%name instruction %.
+%sort program %.
+%name program %.
+%sort envstack %.
+%name envstack %.
+%sort state %.
+%name state %.
+%term ev %pi exp' %-> instruction %.
+%term add1 instruction %.
+%term branch instruction %.
+%term mkpair instruction %.
+%term getfst instruction %.
+%term getsnd instruction %.
+%term apply instruction %.
+%term bind instruction %.
+%term done program %.
+%term & %pi instruction %-> program %-> program %.
+%prec %right 10 & %.
+%term emptys envstack %.
+%term ;; %pi envstack %-> env %-> envstack %.
+%prec %left 10 ;; %.
+%term st %pi envstack %-> program %-> env %-> state %.

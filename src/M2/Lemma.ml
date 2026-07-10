@@ -16,7 +16,9 @@ open MetaAbstract
 (* Author: Carsten Schuermann *)
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Lemma (Lemma__0 : sig
   module MetaSyn' : Metasyn.METASYN

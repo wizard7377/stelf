@@ -1,0 +1,4 @@
+[[group]]
+name = "tab"
+main = "tab.lf"
+src = ["."]

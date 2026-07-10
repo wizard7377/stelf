@@ -1,0 +1,6 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Figure 11 : Var-valid data stacks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort vvalDS {_ stack} {_ stack} %.
+%term vvalDS_init vvalDS dot dot %.
+%term vvalDS_stack %pi (vvalDS (XXi , V) (Xi , T)) %<- ({xi stack} vvalT xi T xi) %<- (vvalDS XXi Xi) %.

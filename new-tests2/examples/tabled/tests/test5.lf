@@ -1,0 +1,20 @@
+%%%%%%%%%
+%% Sagonas, Swift
+%sort node %.
+%term a node %.
+%term b node %.
+%term c node %.
+%term d node %.
+%sort pt {_ node} {_ node} %.
+%sort et {_ node} {_ node} %.
+%sort qt {_ node} %.
+%tabled pt %.
+%term p2 %pi (pt X Z) %<- (et X Z) %<- (qt Z) %.
+%term p1 %pi (pt X Z) %<- (pt X Y) %<- (pt Y Z) %.
+%term e1 et a b %.
+%term e2 et a d %.
+%term e3 et b c %.
+%term q1 qt a %.
+%term q2 qt b %.
+%term q3 qt c %.
+%querytabled _ 6 pt a X %.

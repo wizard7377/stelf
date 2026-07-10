@@ -19,7 +19,7 @@
 	%<- ({y term} {idy y => y} 
 	%pi ({N} {N'} {S' N => N'} subst ([x term] [idx x => x] idy) S' idy)
 	%-> (subst ([x term] [idx x => x] R1 x idx y idy) S (R1' y idy))) %.
-%block l1 [x term] [idx x => x] [hs {N term} {N' term} {S' N => N'} subst ([y term] [idy y => y] idx) S' idx]%.
+%block l1 {x term} {idx x => x} {hs {N term} {N' term} {S' N => N'} subst ([y term] [idy y => y] idx) S' idx}%.
 %worlds (l1) (subst R S R') %.
 %covers subst %in %in %out %.
 %terminates R (subst R S _) %.
@@ -67,7 +67,7 @@
 	%pi ({N} {N'} {S' N => N'} subst ([y term] [idy y => y] idx) S' idx)
 	%-> (dia idx idx idx idx)
 	%-> (dia (R1' x idx) (R1'' x idx) (S1' x idx) (S1'' x idx))) %.
-%block l2 [x term] [idx x => x] [hs {N term} {N' term} {S' N => N'} subst ([y term] [idy y => y] idx) S' idx] [hd dia idx idx idx idx]%.
+%block l2 {x term} {idx x => x} {hs {N term} {N' term} {S' N => N'} subst ([y term] [idy y => y] idx) S' idx} {hd dia idx idx idx idx}%.
 %worlds (l2) (dia _ _ _ _) %.
 %covers dia %in %in %out %out %.
 %terminates [R' R''] (dia R' R'' _ _) %.

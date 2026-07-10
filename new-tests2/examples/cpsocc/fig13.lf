@@ -1,0 +1,6 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Figure 13 : Cont-valid data stacks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%sort cvalDS {_ stack} %.
+%term cvalDS_init cvalDS dot %.
+%term cvalDS_stack %pi (cvalDS (Xi , T)) %<- (cvalT T) %<- (cvalDS Xi) %.

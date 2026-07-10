@@ -1,0 +1,4 @@
+%require %[ formulas %] %.
+%require %[ int-atom %] %.
+%require %[ tab-ex-all-quy %] %.
+%require %[ tab-ex-np-quy %] %.

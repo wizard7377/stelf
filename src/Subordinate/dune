@@ -1,7 +1,8 @@
 ; (include sources.dune)
 
 (library
- (instrumentation (backend bisect_ppx))
+ (instrumentation
+  (backend bisect_ppx))
  (name subordinate)
  (public_name stelf.subordinate)
  (modules Intset Subordinate_ INTSET SUBORDINATE)

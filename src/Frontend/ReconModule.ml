@@ -9,7 +9,9 @@ include RECONMODULE
 open! Basis
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module ReconModule (ReconModule__0 : sig
   (* Elaboration for module expressions *)

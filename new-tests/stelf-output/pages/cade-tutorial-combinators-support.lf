@@ -47,7 +47,7 @@ Adapted from the case study on [Typed combinators soundness and completeness](/w
 %term ceq/refl ceq A A %.
 %term ceq/symm %pi (ceq A A') %<- (ceq A' A) %.
 %term ceq/trans %pi (ceq A A') %<- (ceq A B) %<- (ceq B A') %.
-%block comb-block [y comb]%.
+%block comb-block {y comb}%.
 %worlds (comb-block) (ceq _ _) %.
 %{! 
 

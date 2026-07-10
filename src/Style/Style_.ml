@@ -13,7 +13,9 @@ open! Basis
 open Origins
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
   STYLECHECK = struct

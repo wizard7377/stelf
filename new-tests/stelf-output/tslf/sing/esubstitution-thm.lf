@@ -1,5 +1,5 @@
 %%%%%  Worlds  %%%%%
-%block nbind {a tp} {ea etp} [x atom] [d vof x a] [ex eterm] [xt vtrans ex x] [ed evof ex ea]%.
+%block nbind [a tp] [ea etp] {x atom} {d vof x a} {ex eterm} {xt vtrans ex x} {ed evof ex ea}%.
 %%%%%  Substitution  %%%%%
 %sort esubst-of-gen %.
 %mode esubst-of-gen %in %out %.

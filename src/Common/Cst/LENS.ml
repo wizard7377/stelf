@@ -123,7 +123,7 @@ module type VIEW = sig
           (** Macro parameter reference with optional binding level and index.
           *)
       | Local of Loc.t * namespace * t
-        (** A local scope, similar to [N.(...)] in OCaml *)
+          (** A local scope, similar to [N.(...)] in OCaml *)
 
     include LENS with type t := t and type u := u
   end

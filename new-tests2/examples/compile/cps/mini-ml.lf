@@ -1,0 +1,15 @@
+%%% The Mini-ML Language
+%%% Author: Frank Pfenning, based on [Michaylov & Pfenning 92]
+%sort exp %.
+%name exp %.
+%term z exp %.
+%term s %pi exp %-> exp %.
+%term case %pi exp %-> exp %-> (%pi exp %-> exp) %-> exp %.
+%term pair %pi exp %-> exp %-> exp %.
+%term fst %pi exp %-> exp %.
+%term snd %pi exp %-> exp %.
+%term lam %pi (%pi exp %-> exp) %-> exp %.
+%term app %pi exp %-> exp %-> exp %.
+%term letv %pi exp %-> (%pi exp %-> exp) %-> exp %.
+%term letn %pi exp %-> (%pi exp %-> exp) %-> exp %.
+%term fix %pi (%pi exp %-> exp) %-> exp %.

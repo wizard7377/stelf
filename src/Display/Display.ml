@@ -14,7 +14,8 @@ module Display : DISPLAY = struct
 
   let registered : bool ref = ref false
   let rep : (t -> unit Lwt.t) ref = ref (fun _ -> Lwt.return ())
-  let fallback_verbosity : Info.level ref = ref Info.Normal
+  let fallback_verbosity : Info.level ref = ref Info.Level.normal
+  let lock = Lwt_mutex.create ()
 
   let register f =
     registered := true;
@@ -23,26 +24,34 @@ module Display : DISPLAY = struct
   let set_fallback_verbosity v = fallback_verbosity := v
 
   let display' info =
-    if not !registered then () else
-    Lwt.dont_wait
-      (fun () -> !rep info)
-      (fun exn ->
-        Printf.eprintf "Error in display handler: %s\n%!"
-          (Printexc.to_string exn))
+    if not !registered then ()
+    else
+      Lwt.dont_wait
+        (fun () -> Lwt_mutex.with_lock lock (fun () -> !rep info))
+        (fun exn ->
+          Printf.eprintf "Error in display handler: %s\n%!"
+            (Printexc.to_string exn))
 
-  let message ?src ?kind ?(level = Terse) t =
-    if not !registered then begin
-      if Info.( >= ) !fallback_verbosity level then
-        Printf.eprintf "%s\n%!" (Format.asprintf "%t" t)
-    end else
-    Lwt.dont_wait
-      (fun () -> !rep { src; kind; level; msg = t })
-      (fun exn ->
-        Printf.eprintf "Error in display handler: %s\n%!"
-          (Printexc.to_string exn))
+  let emit ?src ?kind ?(level = Info.Level.terse) (body : Info.body) =
+    if not !registered then
+      begin if !fallback_verbosity >= level then
+        Printf.eprintf "%s\n%!" (Format.asprintf "%t" (Info.body_to_form body))
+      end
+    else
+      Lwt.dont_wait
+        (fun () ->
+          Lwt_mutex.with_lock lock (fun () ->
+              !rep { src; kind; level; msg = body }))
+        (fun exn ->
+          Printf.eprintf "Error in display handler: %s\n%!"
+            (Printexc.to_string exn))
 
+  let message ?src ?kind ?level t = emit ?src ?kind ?level (Info.Fmt t)
+  let rich ?src ?kind ?level r = emit ?src ?kind ?level (Info.Rich r)
   let chatter ?src ?kind n t = message ?src ?kind ~level:(Info.from_chatter n) t
-  let chatter_s ?src ?kind n s = chatter ?src ?kind n (fun ppf -> Format.pp_print_string ppf s)
+
+  let chatter_s ?src ?kind n s =
+    chatter ?src ?kind n (fun ppf -> Format.pp_print_string ppf s)
 
   let debug ?src ?level t = message ?src ~kind:Info.Debug ?level t
   let info ?src ?level t = message ?src ~kind:Info.Info ?level t
@@ -60,21 +69,45 @@ include Display
 
 let string s ppf = Format.pp_print_string ppf s
 let empty _ppf = ()
-let ( +++ ) a b ppf = a ppf; b ppf
-let ( ++ ) a b ppf = a ppf; Format.pp_print_char ppf ' '; b ppf
-let nl ?(n=1) () ppf = for _ = 1 to n do Format.pp_print_newline ppf () done
-let space ?(n=1) () ppf = for _ = 1 to n do Format.pp_print_char ppf ' ' done
+
+let ( +++ ) a b ppf =
+  a ppf;
+  b ppf
+
+let ( ++ ) a b ppf =
+  a ppf;
+  Format.pp_print_char ppf ' ';
+  b ppf
+
+let nl ?(n = 1) () ppf =
+  for _ = 1 to n do
+    Format.pp_print_newline ppf ()
+  done
+
+let space ?(n = 1) () ppf =
+  for _ = 1 to n do
+    Format.pp_print_char ppf ' '
+  done
+
 let shown f x ppf = Format.pp_print_string ppf (f x)
 
-let concat ?(sep=empty) xs ppf =
+let concat ?(sep = empty) xs ppf =
   let first = ref true in
-  List.iter (fun x -> if !first then first := false else sep ppf; x ppf) xs
+  List.iter
+    (fun x ->
+      if !first then first := false else sep ppf;
+      x ppf)
+    xs
 
-let each ?(sep=empty) f xs = concat ~sep (List.map f xs)
-let inside (l, r) x ppf = l ppf; x ppf; r ppf
+let each ?(sep = empty) f xs = concat ~sep (List.map f xs)
+
+let inside (l, r) x ppf =
+  l ppf;
+  x ppf;
+  r ppf
 
 let optional ?def f = function
-  | None -> (match def with Some d -> d | None -> empty)
+  | None -> ( match def with Some d -> d | None -> empty)
   | Some x -> f x
 
 let to_plain t = Format.asprintf "%t" t
@@ -82,9 +115,15 @@ let fmt ppf t = t ppf
 let style f x = f x
 let styles fs x = List.fold_left (fun acc f -> style f acc) x fs
 let hbox xs ppf = List.iter (fun x -> x ppf) xs
+
 let vbox xs ppf =
   let first = ref true in
-  List.iter (fun x -> if !first then first := false else Format.pp_print_newline ppf (); x ppf) xs
+  List.iter
+    (fun x ->
+      if !first then first := false else Format.pp_print_newline ppf ();
+      x ppf)
+    xs
+
 let hvbox xs ppf = List.iter (fun x -> x ppf) xs
 
 (** Compat re-export as Display.Form.* — deprecated, use Format/Fmt directly *)

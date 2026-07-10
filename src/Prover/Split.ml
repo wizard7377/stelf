@@ -10,7 +10,9 @@ include SPLIT
 open! Basis
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Split (Split__0 : sig
   (* State definition for Proof Search *)
@@ -242,7 +244,8 @@ end) : SPLIT with module State = Split__0.State' = struct
         | (g_, i), ([], _, _, _) -> []
         | (g_, i), (x_ :: xs_, f_, w_, sc) ->
             let _ =
-              Display.chatter_s 6 (("Split " ^ Print.expToString (I.Null, x_)) ^ ".\n")
+              Display.chatter_s 6
+                (("Split " ^ Print.expToString (I.Null, x_)) ^ ".\n")
             in
             let os_ = splitXs (g_, i + 1) (xs_, f_, w_, sc) in
             let _ = resetCases () in
@@ -256,7 +259,8 @@ end) : SPLIT with module State = Split__0.State' = struct
                 end
               with Constraints.Error constrs ->
                 begin
-                  Display.chatter_s 6 (("Inactive split:\n" ^ Print.cnstrsToString constrs) ^ "\n");
+                  Display.chatter_s 6
+                    (("Inactive split:\n" ^ Print.cnstrsToString constrs) ^ "\n");
                   os_
                 end
             in

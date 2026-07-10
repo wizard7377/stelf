@@ -13,7 +13,9 @@ open! Basis
 (* Author: Carsten Schuermann *)
 
 exception Error of string
-let () = Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
 
 module Make_MetaSyn (Whnf : WHNF) : METASYN = struct
   (*! structure IntSyn = IntSyn' !*)
