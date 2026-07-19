@@ -69,9 +69,9 @@ end) : INFERENCE.INFERENCE = struct
       | g_, (I.Pi ((I.Dec (_, v_), meta_), v'_), s) ->
           let x_ = I.newEVar (g_, I.EClo (v_, s)) in
           let x'_ = Whnf.lowerEVar x_ in
-          let xs_, fVs'_ = createEVars (g_, (v'_, I.Dot (I.Exp x_, s))) in
-          (x'_ :: xs_, fVs'_)
-      | g_, ((_, s) as fVs_) -> ([], fVs_)
+          let xs_, fVs' = createEVars (g_, (v'_, I.Dot (I.Exp x_, s))) in
+          (x'_ :: xs_, fVs')
+      | g_, ((_, s) as fVs) -> ([], fVs)
 
     let forward = function
       | g_, b_, (I.Pi ((_, meta_), _) as v_) -> (
@@ -91,55 +91,55 @@ end) : INFERENCE.INFERENCE = struct
                   | [] -> [ Whnf.normalize (v'_, s') ]
                   | _ -> raise (UniqueSearch.Error "Too many solutions") )
             with
-            | vf''_ :: [] -> Some vf''_
+            | vf'' :: [] -> Some vf''
             | [] -> None
             end
           with UniqueSearch.Error _ -> None)
       | g_, b_, v_ -> None
 
     let rec expand' = function
-      | (g0_, b0_), (I.Null, I.Null), n ->
+      | (g0_, b0), (I.Null, I.Null), n ->
           ((I.Null, I.Null), function (g'_, b'_), w' -> ((g'_, b'_), w'))
-      | ( (g0_, b0_),
+      | ( (g0_, b0),
           (I.Decl (g_, (I.Dec (_, v_) as d_)), I.Decl (b_, (S.Lemma rl_ as t_))),
           n ) ->
-          let (g0'_, b0'_), sc' = expand' ((g0_, b0_), (g_, b_), n + 1) in
+          let (g0'_, b0'), sc' = expand' ((g0_, b0), (g_, b_), n + 1) in
           let s = I.Shift (n + 1) in
           let vs_ = Whnf.normalize (v_, s) in
-          begin match forward (g0_, b0_, vs_) with
-          | None -> ((I.Decl (g0'_, d_), I.Decl (b0'_, t_)), sc')
+          begin match forward (g0_, b0, vs_) with
+          | None -> ((I.Decl (g0'_, d_), I.Decl (b0', t_)), sc')
           | Some v'_ ->
-              ( (I.Decl (g0'_, d_), I.Decl (b0'_, S.Lemma S.RLdone)),
+              ( (I.Decl (g0'_, d_), I.Decl (b0', S.Lemma S.RLdone)),
                 function
                 | (g'_, b'_), w' ->
-                    let v''_ = Whnf.normalize (v'_, w') in
+                    let v'' = Whnf.normalize (v'_, w') in
                     sc'
-                      ( ( I.Decl (g'_, I.Dec (None, v''_)),
+                      ( ( I.Decl (g'_, I.Dec (None, v'')),
                           I.Decl (b'_, S.Lemma (S.Splits !MTPGlobal.maxSplit))
                         ),
                         I.comp (w', I.shift) ) )
           end
-      | gb0_, (I.Decl (g_, d_), I.Decl (b_, t_)), n ->
-          let (g0'_, b0'_), sc' = expand' (gb0_, (g_, b_), n + 1) in
-          ((I.Decl (g0'_, d_), I.Decl (b0'_, t_)), sc')
+      | gb0, (I.Decl (g_, d_), I.Decl (b_, t_)), n ->
+          let (g0'_, b0'), sc' = expand' (gb0, (g_, b_), n + 1) in
+          ((I.Decl (g0'_, d_), I.Decl (b0', t_)), sc')
 
-    let expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
+    let expand (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_) as s_) =
       let _ =
         begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g_ else ()
         end
       in
-      let (gnew_, bnew_), sc = expand' ((g_, b_), (g_, b_), 0) in
+      let (gnew, bnew), sc = expand' ((g_, b_), (g_, b_), 0) in
       let _ =
-        begin if !Global.doubleCheck then TypeCheck.typeCheckCtx gnew_ else ()
+        begin if !Global.doubleCheck then TypeCheck.typeCheckCtx gnew else ()
         end
       in
-      let (g'_, b'_), w' = sc ((gnew_, bnew_), I.id) in
+      let (g'_, b'_), w' = sc ((gnew, bnew), I.id) in
       ignore (TypeCheck.typeCheckCtx g'_);
       let s'_ =
         S.State
           ( n,
             (g'_, b'_),
-            (ih_, oh_),
+            (ih_, oh),
             d,
             S.orderSub (o_, w'),
             map (function i, f'_ -> (i, F.forSub (f'_, w'))) h_,

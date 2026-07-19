@@ -61,7 +61,7 @@ module type TABLEPARAM = sig
     | RepeatedEntry of (IntSyn.sub * IntSyn.sub) * answer * status
     | DivergingEntry of IntSyn.sub * answer
 
-  type answState = New_ | Repeated_
+  type answState = New_ | Repeated
 
   (* ---------------------------------------------------------------------- *)
   type strategy = Variant | Subsumption

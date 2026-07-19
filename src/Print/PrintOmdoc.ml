@@ -104,7 +104,7 @@ module MakePrintOMDoc
       begin if !namesafe then ((start ^ name) ^ "__c") ^ Int.toString cid else n
       end
 
-    let varName_ (x, n) =
+    let varName (x, n) =
       let name = String.translate replace n in
       let start =
         begin if
@@ -130,7 +130,7 @@ module MakePrintOMDoc
           sexp
             [
               str_
-                (("<om:OMV name=\"" ^ varName_ (I.ctxLength g_ - x + 1, n))
+                (("<om:OMV name=\"" ^ varName (I.ctxLength g_ - x + 1, n))
                 ^ "\"/>");
             ]
       | g_, I.Const cid ->
@@ -148,20 +148,20 @@ module MakePrintOMDoc
       | g_, (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s), imp ->
           begin match p_ with
           | I.Maybe ->
-              let (I.Dec (Some name, v1'_) as d'_) = Names.decLUName (g_, d_) in
+              let (I.Dec (Some name, v1') as d'_) = Names.decLUName (g_, d_) in
               let g'_ = I.Decl (g_, d'_) in
               ignore (ind 1);
               let fmtBody =
                 fmtExp (g'_, (v2_, I.dot1 s), Int.max (0, imp - 1))
               in
               ignore (ind 1);
-              let fmtType = fmtExp (g_, (v1'_, s), 0) in
+              let fmtType = fmtExp (g_, (v1', s), 0) in
               ignore (unind 2);
               let pi_ =
                 begin if imp > 0 then "implicit_Pi" else "Pi"
                 end
               in
-              let id = varName_ (I.ctxLength g'_, name) in
+              let id = varName (I.ctxLength g'_, name) in
               fmtBinder (pi_, name, id, fmtType, fmtBody)
           | I.No ->
               let g'_ = I.Decl (g_, d_) in
@@ -228,7 +228,7 @@ module MakePrintOMDoc
             begin if imp > 0 then "implicit_lambda" else "lambda"
             end
           in
-          let id = varName_ (I.ctxLength g'_, name) in
+          let id = varName (I.ctxLength g'_, name) in
           fmtBinder (lam_, name, id, fmtType, fmtBody)
       | g_, (I.FgnExp (csid, f_), s), 0 -> sexp [ str_ "FgnExp" ]
 
@@ -487,7 +487,7 @@ module MakePrintOMDoc
     ignore (namesafe := ns);
     ignore (ind_reset ());
     let file = TextIO.openOut filename in
-    let oMDocPrefix_ =
+    let oMDocPrefix =
       ((((((("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
            ^ "<!DOCTYPE omdoc PUBLIC \"-//OMDoc//DTD OMDoc V1.2//EN\" ")
            ^ "\"../../dtd/omdoc.dtd\">\n")
@@ -500,7 +500,7 @@ module MakePrintOMDoc
       (* ""\""https://svn.mathweb.org/repos/mathweb.org/branches/omdoc-1.2/dtd/omdoc.dtd\"">\n"" ^ *)
     in
     let _ =
-      TextIO.output (file, oMDocPrefix_ ^ "<theory xml:id=\"global\">\n\n")
+      TextIO.output (file, oMDocPrefix ^ "<theory xml:id=\"global\">\n\n")
     in
     let _ =
       IntSyn.sgnApp (function cid ->

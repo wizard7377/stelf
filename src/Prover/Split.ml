@@ -81,23 +81,23 @@ end) : SPLIT with module State = Split__0.State' = struct
       let x_ = I.EClo (x'_, w) in
       x_
 
-    let rec instEVars (vs_, p, xsRev_) = instEVarsW (Whnf.whnf vs_, p, xsRev_)
+    let rec instEVars (vs_, p, xsRev) = instEVarsW (Whnf.whnf vs_, p, xsRev)
 
     and instEVarsW = function
-      | vs_, 0, xsRev_ -> (vs_, xsRev_)
-      | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev_ ->
+      | vs_, 0, xsRev -> (vs_, xsRev)
+      | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev ->
           let x1_ = I.newEVar (I.Null, I.EClo (v1_, s)) in
-          instEVars ((v2_, I.Dot (I.Exp x1_, s)), p - 1, Some x1_ :: xsRev_)
-      | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev_ ->
+          instEVars ((v2_, I.Dot (I.Exp x1_, s)), p - 1, Some x1_ :: xsRev)
+      | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev ->
           let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
-          instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev_)
+          instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev)
 
     open! struct
       let caseList : (T.dec I.ctx * T.sub) list ref = ref []
     end
 
     let resetCases () = caseList := []
-    let addCase (psi_, t) = caseList := (psi_, t) :: !caseList
+    let addCase (psi, t) = caseList := (psi, t) :: !caseList
     let getCases () = !caseList
 
     let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
@@ -204,7 +204,7 @@ end) : SPLIT with module State = Split__0.State' = struct
       ignore (worldCases (g_, vs_, w_, sc));
       ()
 
-    let splitEVar ((I.EVar (_, gx_, v_, _) as x_), w_, sc) =
+    let splitEVar ((I.EVar (_, gx, v_, _) as x_), w_, sc) =
       lowerSplit
         ( I.Null,
           (v_, I.id),
@@ -218,27 +218,27 @@ end) : SPLIT with module State = Split__0.State' = struct
 
     let rec createSub = function
       | I.Null -> T.id
-      | I.Decl (psi_, T.UDec (I.Dec (xOpt, v1_))) ->
-          let t' = createSub psi_ in
-          let v1'_, s'_ = Whnf.whnf (v1_, T.coerceSub t') in
-          let x_ = I.newEVar (I.Null, I.EClo (v1'_, s'_)) in
+      | I.Decl (psi, T.UDec (I.Dec (xOpt, v1_))) ->
+          let t' = createSub psi in
+          let v1', s'_ = Whnf.whnf (v1_, T.coerceSub t') in
+          let x_ = I.newEVar (I.Null, I.EClo (v1', s'_)) in
           T.Dot (T.Exp x_, t')
-      | I.Decl (psi_, T.UDec (I.BDec (_, (l, s)))) ->
-          let t' = createSub psi_ in
+      | I.Decl (psi, T.UDec (I.BDec (_, (l, s)))) ->
+          let t' = createSub psi in
           let l_ = I.newLVar (I.Shift 0, (l, I.comp (s, T.coerceSub t'))) in
           T.Dot (T.Block l_, t')
-      | I.Decl (psi_, T.PDec (_, f_, tc1_, tc2_)) ->
-          let t' = createSub psi_ in
-          let y_ = T.newEVarTC (I.Null, T.FClo (f_, t'), tc1_, tc2_) in
+      | I.Decl (psi, T.PDec (_, f_, tc1, tc2)) ->
+          let t' = createSub psi in
+          let y_ = T.newEVarTC (I.Null, T.FClo (f_, t'), tc1, tc2) in
           T.Dot (T.Prg y_, t')
 
     let rec mkCases = function
       | [], f_ -> []
-      | (psi_, t) :: cs, f_ ->
-          let x_ = T.newEVar (psi_, T.FClo (f_, t)) in
-          (psi_, t, x_) :: mkCases (cs, f_)
+      | (psi, t) :: cs, f_ ->
+          let x_ = T.newEVar (psi, T.FClo (f_, t)) in
+          (psi, t, x_) :: mkCases (cs, f_)
 
-    let split (S.Focus (T.EVar (psi_, r, f_, None, None, _), w_)) =
+    let split (S.Focus (T.EVar (psi, r, f_, None, None, _), w_)) =
       let rec splitXs arg__1 arg__2 =
         begin match (arg__1, arg__2) with
         | (g_, i), ([], _, _, _) -> []
@@ -250,7 +250,7 @@ end) : SPLIT with module State = Split__0.State' = struct
             let os_ = splitXs (g_, i + 1) (xs_, f_, w_, sc) in
             ignore (resetCases ());
             let s = Print.expToString (g_, x_) in
-            let os'_ =
+            let os' =
               try
                 begin
                   splitEVar (x_, w_, sc);
@@ -264,18 +264,18 @@ end) : SPLIT with module State = Split__0.State' = struct
                   os_
                 end
             in
-            os'_
+            os'
         end
       in
-      let t = createSub psi_ in
+      let t = createSub psi in
       let xs_ = State.collectLFSub t in
       let init () = addCase (Abstract.abstractTomegaSub t) in
-      let g_ = T.coerceCtx psi_ in
+      let g_ = T.coerceCtx psi in
       let os_ = splitXs (g_, 1) (xs_, f_, w_, init) in
       os_
 
-    let expand (S.Focus (T.EVar (psi_, r, f_, None, None, _), w_) as s_) =
-      begin if Abstract.closedCTX psi_ then split s_ else []
+    let expand (S.Focus (T.EVar (psi, r, f_, None, None, _), w_) as s_) =
+      begin if Abstract.closedCTX psi then split s_ else []
       end
 
     let apply (Split (r, p_, s)) = r := Some p_

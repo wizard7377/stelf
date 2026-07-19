@@ -564,8 +564,8 @@ end) : Cs.CS = struct
       else Positive
       end
 
-    let delayMon (Mon (_n, usL_), cnstr) =
-      List.app (function us_ -> Unify.delay (us_, cnstr)) usL_
+    let delayMon (Mon (_n, usL), cnstr) =
+      List.app (function us_ -> Unify.delay (us_, cnstr)) usL
 
     let unifyRestr (Restr (g_, proof, _strict), proof') =
       begin if Unify.unifiable (g_, (proof, id), (proof', id)) then ()
@@ -583,14 +583,14 @@ end) : Cs.CS = struct
       (-d, List.map (function d, pos -> (-d, pos)) wposL)
 
     let rec decomposeSum (g_, Sum (m, monL)) =
-      let monToWPos (Mon (n, usL_) as mon) =
+      let monToWPos (Mon (n, usL) as mon) =
         begin match findMon mon with
         | Some pos -> (n, pos)
         | None ->
             let new_ = incrNCols () in
             let l =
               {
-                owner = Var (g_, Mon (one, usL_));
+                owner = Var (g_, Mon (one, usL));
                 tag = ref 0;
                 restr = ref None;
                 dead = ref false;

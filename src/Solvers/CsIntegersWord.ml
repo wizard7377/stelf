@@ -268,233 +268,233 @@ end) : Cs.CS = struct
       | App (_, s_), s -> trd (s_, s)
       | SClo (s_, s'), s -> fth (s_, comp (s', s))
 
-    let rec toInternalPlus (g_, u1_, u2_, u3_) () =
-      [ (g_, plusExp (u1_, u2_, u3_)) ]
+    let rec toInternalPlus (g_, u1_, u2_, u3) () =
+      [ (g_, plusExp (u1_, u2_, u3)) ]
 
-    and awakePlus (g_, proof, u1_, u2_, u3_) () =
-      begin match solvePlus (g_, App (u1_, App (u2_, App (u3_, Nil))), 0) with
+    and awakePlus (g_, proof, u1_, u2_, u3) () =
+      begin match solvePlus (g_, App (u1_, App (u2_, App (u3, Nil))), 0) with
       | Some proof' -> Unify.unifiable (g_, (proof, id), (proof', id))
       | None -> false
       end
 
-    and makeCnstrPlus (g_, proof, u1_, u2_, u3_) =
-      FgnCnstr (!myID, MyFgnCnstrRepPlus (g_, proof, u1_, u2_, u3_))
+    and makeCnstrPlus (g_, proof, u1_, u2_, u3) =
+      FgnCnstr (!myID, MyFgnCnstrRepPlus (g_, proof, u1_, u2_, u3))
 
     and solvePlus = function
       | g_, s_, 0 ->
-          let us1_ = fst (s_, id) in
-          let us2_ = snd (s_, id) in
-          let us3_ = trd (s_, id) in
-          begin match (fromExp us1_, fromExp us2_, fromExp us3_) with
+          let us1 = fst (s_, id) in
+          let us2 = snd (s_, id) in
+          let us3 = trd (s_, id) in
+          begin match (fromExp us1, fromExp us2, fromExp us3) with
           | Num d1, Num d2, Num d3 ->
               begin if (d3 = W.(d1 + d2)) && plusCheck (d1, d2) then
                 Some (plusPfExp (d1, d2))
               else None
               end
-          | Expr us1_, Num d2, Num d3 ->
+          | Expr us1, Num d2, Num d3 ->
               begin if
                 W.(d3 >= d2)
-                && Unify.unifiable (g_, us1_, (numberExp W.(d3 - d2), id))
+                && Unify.unifiable (g_, us1, (numberExp W.(d3 - d2), id))
               then Some (plusPfExp (W.(d3 - d2), d2))
               else None
               end
-          | Num d1, Expr us2_, Num d3 ->
+          | Num d1, Expr us2, Num d3 ->
               begin if
                 W.(d3 >= d1)
-                && Unify.unifiable (g_, us2_, (numberExp W.(d3 - d1), id))
+                && Unify.unifiable (g_, us2, (numberExp W.(d3 - d1), id))
               then Some (plusPfExp (d1, W.(d3 - d1)))
               else None
               end
-          | Num d1, Num d2, Expr us3_ ->
+          | Num d1, Num d2, Expr us3 ->
               begin if
                 plusCheck (d1, d2)
-                && Unify.unifiable (g_, us3_, (numberExp W.(d1 + d2), id))
+                && Unify.unifiable (g_, us3, (numberExp W.(d1 + d2), id))
               then Some (plusPfExp (d1, d2))
               else None
               end
           | _ ->
               let proof =
-                newEVar (g_, plusExp (eclo_ us1_, eclo_ us2_, eclo_ us3_))
+                newEVar (g_, plusExp (eclo_ us1, eclo_ us2, eclo_ us3))
               in
               let cnstr =
-                makeCnstrPlus (g_, proof, eclo_ us1_, eclo_ us2_, eclo_ us3_)
+                makeCnstrPlus (g_, proof, eclo_ us1, eclo_ us2, eclo_ us3)
               in
               let _ =
                 List.app
                   (function us_ -> Unify.delay (us_, ref cnstr))
-                  [ us1_; us2_; us3_ ]
+                  [ us1; us2; us3 ]
               in
               Some proof
           end
       | g_, s_, n -> None
 
-    and toInternalTimes (g_, u1_, u2_, u3_) () =
-      [ (g_, timesExp (u1_, u2_, u3_)) ]
+    and toInternalTimes (g_, u1_, u2_, u3) () =
+      [ (g_, timesExp (u1_, u2_, u3)) ]
 
-    and awakeTimes (g_, proof, u1_, u2_, u3_) () =
-      begin match solveTimes (g_, App (u1_, App (u2_, App (u3_, Nil))), 0) with
+    and awakeTimes (g_, proof, u1_, u2_, u3) () =
+      begin match solveTimes (g_, App (u1_, App (u2_, App (u3, Nil))), 0) with
       | Some proof' -> Unify.unifiable (g_, (proof, id), (proof', id))
       | None -> false
       end
 
-    and makeCnstrTimes (g_, proof, u1_, u2_, u3_) =
-      FgnCnstr (!myID, MyFgnCnstrRepTimes (g_, proof, u1_, u2_, u3_))
+    and makeCnstrTimes (g_, proof, u1_, u2_, u3) =
+      FgnCnstr (!myID, MyFgnCnstrRepTimes (g_, proof, u1_, u2_, u3))
 
     and solveTimes = function
       | g_, s_, 0 ->
-          let us1_ = fst (s_, id) in
-          let us2_ = snd (s_, id) in
-          let us3_ = trd (s_, id) in
-          begin match (fromExp us1_, fromExp us2_, fromExp us3_) with
+          let us1 = fst (s_, id) in
+          let us2 = snd (s_, id) in
+          let us3 = trd (s_, id) in
+          begin match (fromExp us1, fromExp us2, fromExp us3) with
           | Num d1, Num d2, Num d3 ->
               begin if (d3 = W.(d1 * d2)) && timesCheck (d1, d2) then
                 Some (timesPfExp (d1, d2))
               else None
               end
-          | Expr us1_, Num d2, Num d3 ->
+          | Expr us1, Num d2, Num d3 ->
               begin if
-                d3 = zero && Unify.unifiable (g_, us1_, (numberExp zero, id))
+                d3 = zero && Unify.unifiable (g_, us1, (numberExp zero, id))
               then Some (timesPfExp (zero, d2))
               else
                 begin if
                   W.(d2 > zero)
                   && W.(d3 > zero)
                   && W.(d3 mod d2) = zero
-                  && Unify.unifiable (g_, us1_, (numberExp (W.div (d3, d2)), id))
+                  && Unify.unifiable (g_, us1, (numberExp (W.div (d3, d2)), id))
                 then Some (timesPfExp (W.div (d3, d2), d2))
                 else None
                 end
               end
-          | Num d1, Expr us2_, Num d3 ->
+          | Num d1, Expr us2, Num d3 ->
               begin if
-                d3 = zero && Unify.unifiable (g_, us2_, (numberExp zero, id))
+                d3 = zero && Unify.unifiable (g_, us2, (numberExp zero, id))
               then Some (timesPfExp (d1, zero))
               else
                 begin if
                   W.(d1 > zero)
                   && W.(d3 > zero)
                   && W.(d3 mod d1) = zero
-                  && Unify.unifiable (g_, us2_, (numberExp (W.div (d3, d1)), id))
+                  && Unify.unifiable (g_, us2, (numberExp (W.div (d3, d1)), id))
                 then Some (timesPfExp (d1, W.div (d3, d1)))
                 else None
                 end
               end
-          | Num d1, Num d2, Expr us3_ ->
+          | Num d1, Num d2, Expr us3 ->
               begin if
                 timesCheck (d1, d2)
-                && Unify.unifiable (g_, us3_, (numberExp W.(d1 * d2), id))
+                && Unify.unifiable (g_, us3, (numberExp W.(d1 * d2), id))
               then Some (timesPfExp (d1, d2))
               else None
               end
           | _ ->
               let proof =
-                newEVar (g_, timesExp (eclo_ us1_, eclo_ us2_, eclo_ us3_))
+                newEVar (g_, timesExp (eclo_ us1, eclo_ us2, eclo_ us3))
               in
               let cnstr =
-                makeCnstrTimes (g_, proof, eclo_ us1_, eclo_ us2_, eclo_ us3_)
+                makeCnstrTimes (g_, proof, eclo_ us1, eclo_ us2, eclo_ us3)
               in
               let _ =
                 List.app
                   (function us_ -> Unify.delay (us_, ref cnstr))
-                  [ us1_; us2_; us3_ ]
+                  [ us1; us2; us3 ]
               in
               Some proof
           end
       | g_, s_, n -> None
 
-    and toInternalQuot (g_, u1_, u2_, u3_) () =
-      [ (g_, quotExp (u1_, u2_, u3_)) ]
+    and toInternalQuot (g_, u1_, u2_, u3) () =
+      [ (g_, quotExp (u1_, u2_, u3)) ]
 
-    and awakeQuot (g_, proof, u1_, u2_, u3_) () =
-      begin match solveQuot (g_, App (u1_, App (u2_, App (u3_, Nil))), 0) with
+    and awakeQuot (g_, proof, u1_, u2_, u3) () =
+      begin match solveQuot (g_, App (u1_, App (u2_, App (u3, Nil))), 0) with
       | Some proof' -> Unify.unifiable (g_, (proof, id), (proof', id))
       | None -> false
       end
 
-    and makeCnstrQuot (g_, proof, u1_, u2_, u3_) =
-      FgnCnstr (!myID, MyFgnCnstrRepQuot (g_, proof, u1_, u2_, u3_))
+    and makeCnstrQuot (g_, proof, u1_, u2_, u3) =
+      FgnCnstr (!myID, MyFgnCnstrRepQuot (g_, proof, u1_, u2_, u3))
 
     and solveQuot = function
       | g_, s_, 0 ->
-          let us1_ = fst (s_, id) in
-          let us2_ = snd (s_, id) in
-          let us3_ = trd (s_, id) in
-          begin match (fromExp us1_, fromExp us2_, fromExp us3_) with
+          let us1 = fst (s_, id) in
+          let us2 = snd (s_, id) in
+          let us3 = trd (s_, id) in
+          begin match (fromExp us1, fromExp us2, fromExp us3) with
           | Num d1, Num d2, Num d3 ->
               begin if quotCheck (d1, d2) && d3 = W.div (d1, d2) then
                 Some (quotPfExp (d1, d2))
               else None
               end
-          | Num d1, Num d2, Expr us3_ ->
+          | Num d1, Num d2, Expr us3 ->
               begin if
                 quotCheck (d1, d2)
-                && Unify.unifiable (g_, us3_, (numberExp (W.div (d1, d2)), id))
+                && Unify.unifiable (g_, us3, (numberExp (W.div (d1, d2)), id))
               then Some (quotPfExp (d1, d2))
               else None
               end
           | _ ->
               let proof =
-                newEVar (g_, quotExp (eclo_ us1_, eclo_ us2_, eclo_ us3_))
+                newEVar (g_, quotExp (eclo_ us1, eclo_ us2, eclo_ us3))
               in
               let cnstr =
-                makeCnstrQuot (g_, proof, eclo_ us1_, eclo_ us2_, eclo_ us3_)
+                makeCnstrQuot (g_, proof, eclo_ us1, eclo_ us2, eclo_ us3)
               in
               let _ =
                 List.app
                   (function us_ -> Unify.delay (us_, ref cnstr))
-                  [ us1_; us2_; us3_ ]
+                  [ us1; us2; us3 ]
               in
               Some proof
           end
       | g_, s_, n -> None
 
     let solveProvePlus (g_, s_, k) =
-      let us1_ = fst (s_, id) in
-      let us2_ = snd (s_, id) in
-      let us3_ = trd (s_, id) in
-      let us4_ = fth (s_, id) in
+      let us1 = fst (s_, id) in
+      let us2 = snd (s_, id) in
+      let us3 = trd (s_, id) in
+      let us4 = fth (s_, id) in
       begin match
         solvePlus
-          (g_, App (eclo_ us1_, App (eclo_ us2_, App (eclo_ us3_, Nil))), k)
+          (g_, App (eclo_ us1, App (eclo_ us2, App (eclo_ us3, Nil))), k)
       with
       | Some u_ ->
-          begin if Unify.unifiable (g_, us4_, (u_, id)) then
-            Some (proofPlusExp (eclo_ us1_, eclo_ us2_, eclo_ us3_, eclo_ us4_))
+          begin if Unify.unifiable (g_, us4, (u_, id)) then
+            Some (proofPlusExp (eclo_ us1, eclo_ us2, eclo_ us3, eclo_ us4))
           else None
           end
       | None -> None
       end
 
     let solveProveTimes (g_, s_, k) =
-      let us1_ = fst (s_, id) in
-      let us2_ = snd (s_, id) in
-      let us3_ = trd (s_, id) in
-      let us4_ = fth (s_, id) in
+      let us1 = fst (s_, id) in
+      let us2 = snd (s_, id) in
+      let us3 = trd (s_, id) in
+      let us4 = fth (s_, id) in
       begin match
         solveTimes
-          (g_, App (eclo_ us1_, App (eclo_ us2_, App (eclo_ us3_, Nil))), k)
+          (g_, App (eclo_ us1, App (eclo_ us2, App (eclo_ us3, Nil))), k)
       with
       | Some u_ ->
-          begin if Unify.unifiable (g_, us4_, (u_, id)) then
+          begin if Unify.unifiable (g_, us4, (u_, id)) then
             Some
-              (proofTimesExp (eclo_ us1_, eclo_ us2_, eclo_ us3_, eclo_ us4_))
+              (proofTimesExp (eclo_ us1, eclo_ us2, eclo_ us3, eclo_ us4))
           else None
           end
       | None -> None
       end
 
     let solveProveQuot (g_, s_, k) =
-      let us1_ = fst (s_, id) in
-      let us2_ = snd (s_, id) in
-      let us3_ = trd (s_, id) in
-      let us4_ = fth (s_, id) in
+      let us1 = fst (s_, id) in
+      let us2 = snd (s_, id) in
+      let us3 = trd (s_, id) in
+      let us4 = fth (s_, id) in
       begin match
         solveQuot
-          (g_, App (eclo_ us1_, App (eclo_ us2_, App (eclo_ us3_, Nil))), k)
+          (g_, App (eclo_ us1, App (eclo_ us2, App (eclo_ us3, Nil))), k)
       with
       | Some u_ ->
-          begin if Unify.unifiable (g_, us4_, (u_, id)) then
-            Some (proofQuotExp (eclo_ us1_, eclo_ us2_, eclo_ us3_, eclo_ us4_))
+          begin if Unify.unifiable (g_, us4, (u_, id)) then
+            Some (proofQuotExp (eclo_ us1, eclo_ us2, eclo_ us3, eclo_ us4))
           else None
           end
       | None -> None
@@ -510,24 +510,24 @@ end) : Cs.CS = struct
         FgnCnstrStd.ToInternal.install
           ( csid,
             function
-            | MyFgnCnstrRepPlus (g_, _, u1_, u2_, u3_) ->
-                toInternalPlus (g_, u1_, u2_, u3_)
-            | MyFgnCnstrRepTimes (g_, _, u1_, u2_, u3_) ->
-                toInternalTimes (g_, u1_, u2_, u3_)
-            | MyFgnCnstrRepQuot (g_, _, u1_, u2_, u3_) ->
-                toInternalQuot (g_, u1_, u2_, u3_)
+            | MyFgnCnstrRepPlus (g_, _, u1_, u2_, u3) ->
+                toInternalPlus (g_, u1_, u2_, u3)
+            | MyFgnCnstrRepTimes (g_, _, u1_, u2_, u3) ->
+                toInternalTimes (g_, u1_, u2_, u3)
+            | MyFgnCnstrRepQuot (g_, _, u1_, u2_, u3) ->
+                toInternalQuot (g_, u1_, u2_, u3)
             | fc -> raise (UnexpectedFgnCnstr fc) )
       in
       let _ =
         FgnCnstrStd.Awake.install
           ( csid,
             function
-            | MyFgnCnstrRepPlus (g_, proof, u1_, u2_, u3_) ->
-                awakePlus (g_, proof, u1_, u2_, u3_)
-            | MyFgnCnstrRepTimes (g_, proof, u1_, u2_, u3_) ->
-                awakeTimes (g_, proof, u1_, u2_, u3_)
-            | MyFgnCnstrRepQuot (g_, proof, u1_, u2_, u3_) ->
-                awakeQuot (g_, proof, u1_, u2_, u3_)
+            | MyFgnCnstrRepPlus (g_, proof, u1_, u2_, u3) ->
+                awakePlus (g_, proof, u1_, u2_, u3)
+            | MyFgnCnstrRepTimes (g_, proof, u1_, u2_, u3) ->
+                awakeTimes (g_, proof, u1_, u2_, u3)
+            | MyFgnCnstrRepQuot (g_, proof, u1_, u2_, u3) ->
+                awakeQuot (g_, proof, u1_, u2_, u3)
             | fc -> raise (UnexpectedFgnCnstr fc) )
       in
       let _ =

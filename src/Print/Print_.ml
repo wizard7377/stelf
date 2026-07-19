@@ -93,13 +93,13 @@ module MakePrint
       Int.toString (find !lvars 0)
 
     let str_ = F.string
-    let rec str0_ (s, n) = F.string0 n s
-    let rec sym s = str0_ (Symbol.sym s)
+    let rec str0 (s, n) = F.string0 n s
+    let rec sym s = str0 (Symbol.sym s)
     let nameOf = function Some id -> id | None -> "_"
-    let rec fmtEVar (g_, x_) = str0_ (Symbol.evar (Names.evarName (g_, x_)))
+    let rec fmtEVar (g_, x_) = str0 (Symbol.evar (Names.evarName (g_, x_)))
 
     let rec fmtAVar (g_, x_) =
-      str0_ (Symbol.evar (Names.evarName (g_, x_) ^ "_"))
+      str0 (Symbol.evar (Names.evarName (g_, x_) ^ "_"))
 
     let rec isNil = function
       | I.Nil -> true
@@ -194,10 +194,10 @@ module MakePrint
       if !showConstPath then
         F.hVbox
           (foldr
-             (function id, fmt -> str0_ (Symbol.str id) :: full_stop :: fmt)
-             [ str0_ (f id) ]
+             (function id, fmt -> str0 (Symbol.str id) :: full_stop :: fmt)
+             [ str0 (f id) ]
              ids)
-      else str0_ (f id)
+      else str0 (f id)
 
     let rec parmDec = function
       | d_ :: l_, 1 -> d_
@@ -236,14 +236,14 @@ module MakePrint
     let rec worldsToString w_ = F.makestring_fmt (formatWorlds w_)
 
     let rec fmtCon = function
-      | g_, I.BVar n -> str0_ (Symbol.bvar (Names.bvarName (g_, n)))
+      | g_, I.BVar n -> str0 (Symbol.bvar (Names.bvarName (g_, n)))
       | g_, I.Const cid -> fmtConstPath (Symbol.const, constQid cid)
       | g_, I.Skonst cid -> fmtConstPath (Symbol.skonst, constQid cid)
       | g_, I.Def cid -> fmtConstPath (Symbol.def, constQid cid)
       | g_, I.NSDef cid -> fmtConstPath (Symbol.def, constQid cid)
-      | g_, I.FVar (name, _, _) -> str0_ (Symbol.fvar name)
+      | g_, I.FVar (name, _, _) -> str0 (Symbol.fvar name)
       | g_, (I.Proj (I.Bidx k, i) as h_) ->
-          str0_ (Symbol.const (projName (g_, h_)))
+          str0 (Symbol.const (projName (g_, h_)))
       | ( g_,
           (I.Proj (I.LVar (({ contents = None } as r), sk, (cid, t)), i) as h_)
         ) ->
@@ -256,8 +256,8 @@ module MakePrint
       | g_, I.FgnConst (cs, conDec) ->
           let name = I.conDecName conDec in
           begin match (Names.constLookup (Names.Qid ([], name)), !noShadow) with
-          | Some _, false -> str0_ (Symbol.const (("%" ^ name) ^ "%"))
-          | _ -> str0_ (Symbol.const name)
+          | Some _, false -> str0 (Symbol.const (("%" ^ name) ^ "%"))
+          | _ -> str0 (Symbol.const name)
           end
 
     let rec evarArgs (g_, d, x_, s) =
@@ -573,17 +573,17 @@ module MakePrint
       | g_, d, (I.Dec (x, v_), s) ->
           F.hVbox
             [
-              str0_ (Symbol.bvar (nameOf x));
+              str0 (Symbol.bvar (nameOf x));
               F.space;
               fmtExp (g_, d + 1, noCtxt, (v_, s));
             ]
       | g_, d, (I.BDec (x, (cid, t)), s) ->
           let gsome_, gblock_ = I.constBlock cid in
           F.hVbox
-            ([ str0_ (Symbol.const (nameOf x)); F.space ]
+            ([ str0 (Symbol.const (nameOf x)); F.space ]
             @ fmtDecList' (g_, (gblock_, I.comp (t, s))))
       | g_, d, (I.ADec (x, _), s) ->
-          F.hVbox [ str0_ (Symbol.bvar (nameOf x)); sym "_" ]
+          F.hVbox [ str0 (Symbol.bvar (nameOf x)); sym "_" ]
       | g_, d, (I.NDec (Some name), s) -> F.hVbox [ sym name ]
 
     and fmtDecList' = function
@@ -660,7 +660,7 @@ module MakePrint
                 @ (if binders = [] then [] else [ F.space ])
                 @ binders)
           | I.Type ->
-              let vfmt_ = fmtExp (g_, 0, noCtxt, (v_, I.id)) in
+              let vfmt = fmtExp (g_, 0, noCtxt, (v_, I.id)) in
               F.hVbox
                 [
                   sym "%term";
@@ -668,7 +668,7 @@ module MakePrint
                   fmtConstPath (Symbol.const, qid);
                   F.space;
                   F.break;
-                  vfmt_;
+                  vfmt;
                 ]
           end
       | hide, (I.SkoDec (_, _, imp, v_, l_) as condec) ->
@@ -678,7 +678,7 @@ module MakePrint
             begin if hide then skipI (imp, I.Null, v_) else (I.Null, v_)
             end
           in
-          let vfmt_ = fmtExp (g_, 0, noCtxt, (v_, I.id)) in
+          let vfmt = fmtExp (g_, 0, noCtxt, (v_, I.id)) in
           F.hVbox
             [
               sym "%skolem";
@@ -686,7 +686,7 @@ module MakePrint
               fmtConstPath (Symbol.skonst, qid);
               F.space;
               F.break;
-              vfmt_;
+              vfmt;
             ]
       | hide, (I.BlockDec (_, _, gsome_, lblock_) as condec) ->
           let qid = Names.conDecQid condec in
@@ -720,8 +720,8 @@ module MakePrint
             begin if hide then skipI2 (imp, I.Null, v_, u_) else (I.Null, v_, u_)
             end
           in
-          let vfmt_ = fmtExp (g_, 0, noCtxt, (v_, I.id)) in
-          let ufmt_ = fmtExp (g_, 0, noCtxt, (u_, I.id)) in
+          let vfmt = fmtExp (g_, 0, noCtxt, (v_, I.id)) in
+          let ufmt = fmtExp (g_, 0, noCtxt, (u_, I.id)) in
           F.hVbox
             [
               sym "%def";
@@ -729,10 +729,10 @@ module MakePrint
               fmtConstPath (Symbol.def, qid);
               F.space;
               F.break;
-              vfmt_;
+              vfmt;
               F.break;
               F.space;
-              ufmt_;
+              ufmt;
             ]
       | hide, (I.AbbrevDef (_, _, imp, u_, v_, l_) as condec) ->
           let qid = Names.conDecQid condec in
@@ -741,18 +741,18 @@ module MakePrint
             begin if hide then skipI2 (imp, I.Null, v_, u_) else (I.Null, v_, u_)
             end
           in
-          let vfmt_ = fmtExp (g_, 0, noCtxt, (v_, I.id)) in
-          let ufmt_ = fmtExp (g_, 0, noCtxt, (u_, I.id)) in
+          let vfmt = fmtExp (g_, 0, noCtxt, (v_, I.id)) in
+          let ufmt = fmtExp (g_, 0, noCtxt, (u_, I.id)) in
           F.hVbox
             [
               sym "%inline";
               fmtConstPath (Symbol.def, qid);
               F.space;
               F.break;
-              vfmt_;
+              vfmt;
               F.break;
               F.space;
-              ufmt_;
+              ufmt;
             ]
 
     let rec fmtCnstr = function
@@ -799,7 +799,7 @@ module MakePrint
           let u'_ = abstractLam (g_, u_) in
           F.hVbox
             [
-              str0_ (Symbol.evar name);
+              str0 (Symbol.evar name);
               F.space;
               sym "=";
               F.break;
@@ -808,7 +808,7 @@ module MakePrint
       | u_, name ->
           F.hVbox
             [
-              str0_ (Symbol.evar name);
+              str0 (Symbol.evar name);
               F.space;
               sym "=";
               F.break;
@@ -823,8 +823,8 @@ module MakePrint
 
     let rec collectEVars = function
       | [], xs_ -> xs_
-      | (u_, _) :: xnames_, xs_ ->
-          collectEVars (xnames_, Abstract.collectEVars (I.Null, (u_, I.id), xs_))
+      | (u_, _) :: xnames, xs_ ->
+          collectEVars (xnames, Abstract.collectEVars (I.Null, (u_, I.id), xs_))
 
     let rec eqCnstr r1 r2 = r1 == r2
 
@@ -1160,11 +1160,11 @@ module MakePrint
   let rec cnstrsToString cnstrL = F.makestring_fmt (formatCnstrs cnstrL)
   let rec ctxToString (g0_, g_) = F.makestring_fmt (formatCtx (g0_, g_))
 
-  let rec evarInstToString xnames_ =
-    F.makestring_fmt (F.hbox [ F.vbox0 0 1 (fmtEVarInst xnames_); str_ "." ])
+  let rec evarInstToString xnames =
+    F.makestring_fmt (F.hbox [ F.vbox0 0 1 (fmtEVarInst xnames); str_ "." ])
 
-  let rec evarCnstrsToStringOpt xnames_ =
-    let ys_ = collectEVars (xnames_, []) in
+  let rec evarCnstrsToStringOpt xnames =
+    let ys_ = collectEVars (xnames, []) in
     let cnstrL = collectConstraints ys_ in
     begin match cnstrL with [] -> None | _ -> Some (cnstrsToString cnstrL)
     end

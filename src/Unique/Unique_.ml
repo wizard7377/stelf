@@ -77,13 +77,13 @@ module MakeUnique
       | g_, (I.Nil, s), (I.Nil, s'), M.Mnil -> true
       | ( g_,
           (I.App (u1_, s2_), s),
-          (I.App (u1'_, s2'_), s'),
+          (I.App (u1', s2'_), s'),
           M.Mapp (M.Marg (M.Plus, _), ms2) ) ->
-          unifiable (g_, (u1_, s), (u1'_, s'))
+          unifiable (g_, (u1_, s), (u1', s'))
           && unifiableSpines (g_, (s2_, s), (s2'_, s'), ms2)
       | ( g_,
           (I.App (u1_, s2_), s),
-          (I.App (u1'_, s2'_), s'),
+          (I.App (u1', s2'_), s'),
           M.Mapp (M.Marg (mode, _), ms2) ) ->
           unifiableSpines (g_, (s2_, s), (s2'_, s'), ms2)
 

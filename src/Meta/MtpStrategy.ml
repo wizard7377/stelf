@@ -122,7 +122,7 @@ end) : MTPSTRATEGY = struct
           let sl_ = Timers.time Timers.splitting MTPSplitting.apply splitOp in
           ignore (printCloseBracket ());
           ignore (printRecursion ());
-          let sl'_ =
+          let sl' =
             map
               (function
                 | s_ ->
@@ -131,15 +131,15 @@ end) : MTPSTRATEGY = struct
               sl_
           in
           ignore (printInference ());
-          let sl''_ =
+          let sl'' =
             map
               (function
                 | s_ ->
                     Timers.time Timers.inference Inference.apply
                       (Inference.expand (Obj.magic s_)))
-              sl'_
+              sl'
           in
-          fill (Obj.magic sl''_ @ givenStates, os)
+          fill (Obj.magic sl'' @ givenStates, os)
       end
 
     and fill = function

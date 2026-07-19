@@ -258,9 +258,9 @@ module Make_Thm
                     (function (a, _), l_ -> O.Lt (a, l_)),
                     O.Empty ) )
           in
-          let o1'_ = argROrder (o1_, p_, I.constImp a) in
-          let o2'_ = argROrder (o2_, p_, I.constImp a) in
-          let pr = argPredicate (pred_, o1'_, o2'_) in
+          let o1' = argROrder (o1_, p_, I.constImp a) in
+          let o2' = argROrder (o2_, p_, I.constImp a) in
+          let pr = argPredicate (pred_, o1', o2') in
           let s''_ = O.installROrder (a, O.RDec (pr, m'_)) in
           installPredicate (L.RedOrder (pred_, o1_, o2_), thmsLE, aP :: thmsLT)
 

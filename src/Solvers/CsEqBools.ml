@@ -105,27 +105,27 @@ end) : Cs.CS = struct
 
     and toExpMon = function
       | Mon (us_ :: []) -> toExpEClo us_
-      | Mon (us_ :: usL_) -> andExp (toExpMon (Mon usL_), toExpEClo us_)
+      | Mon (us_ :: usL) -> andExp (toExpMon (Mon usL), toExpEClo us_)
 
     and toExpEClo = function u_, Shift 0 -> u_ | u_, s_ -> EClo (u_, s_)
 
-    let rec compatibleMon (Mon usL1_, Mon usL2_) =
-      equalSet (function us1_, us2_ -> sameExp (us1_, us2_)) (usL1_, usL2_)
+    let rec compatibleMon (Mon usL1, Mon usL2) =
+      equalSet (function us1, us2 -> sameExp (us1, us2)) (usL1, usL2)
 
     and sameExpW = function
-      | ((Root (h1_, s1_), s1) as us1_), ((Root (h2_, s2_), s2) as us2_) ->
+      | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
           begin match (h1_, h2_) with
           | BVar k1, BVar k2 -> k1 = k2 && sameSpine ((s1_, s1), (s2_, s2))
           | FVar (n1, _, _), FVar (n2, _, _) ->
               n1 = n2 && sameSpine ((s1_, s1), (s2_, s2))
           | _ -> false
           end
-      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1_),
-          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2_) ) ->
+      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1),
+          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2) ) ->
           r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
-    and sameExp (us1_, us2_) = sameExpW (Whnf.whnf us1_, Whnf.whnf us2_)
+    and sameExp (us1, us2) = sameExpW (Whnf.whnf us1, Whnf.whnf us2)
 
     and sameSpine = function
       | (Nil, s1), (Nil, s2) -> true
@@ -158,9 +158,9 @@ end) : Cs.CS = struct
     and andSumMon = function
       | Sum (true, []), mon -> Sum (false, [ mon ])
       | (Sum (false, []) as sum1), mon -> sum1
-      | Sum (m1, Mon usL1_ :: monL1), (Mon usL2_ as mon2) ->
-          let usL_ = unionSet sameExp (usL1_, usL2_) in
-          xorSum (Sum (false, [ Mon usL_ ]), andSumMon (Sum (m1, monL1), mon2))
+      | Sum (m1, Mon usL1 :: monL1), (Mon usL2 as mon2) ->
+          let usL = unionSet sameExp (usL1, usL2) in
+          xorSum (Sum (false, [ Mon usL ]), andSumMon (Sum (m1, monL1), mon2))
 
     let notSum (Sum (m, monL)) = Sum (not m, monL)
 
@@ -189,20 +189,20 @@ end) : Cs.CS = struct
 
     and normalizeMon = function
       | Mon (us_ :: []) -> fromExp us_
-      | Mon (us_ :: usL_) -> andSum (fromExp us_, normalizeMon (Mon usL_))
+      | Mon (us_ :: usL) -> andSum (fromExp us_, normalizeMon (Mon usL))
 
     and mapSum (f, Sum (m, monL)) =
       Sum (m, List.map (function mon -> mapMon (f, mon)) monL)
 
-    and mapMon (f, Mon usL_) =
+    and mapMon (f, Mon usL) =
       Mon
-        (List.map (function u_, s_ -> Whnf.whnf (f (EClo (u_, s_)), id)) usL_)
+        (List.map (function u_, s_ -> Whnf.whnf (f (EClo (u_, s_)), id)) usL)
 
     let rec appSum (f, Sum (m, monL)) =
       List.app (function mon -> appMon (f, mon)) monL
 
-    and appMon (f, Mon usL_) =
-      List.app (function u_, s_ -> f (EClo (u_, s_))) usL_
+    and appMon (f, Mon usL) =
+      List.app (function u_, s_ -> f (EClo (u_, s_))) usL
 
     let findMon f (g_, Sum (m, monL)) =
       let rec findMon' = function

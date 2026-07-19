@@ -37,7 +37,7 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
       begin if b <= 0 then "" else Int.toString b
       end
 
-    let fmtPrefix gm_ =
+    let fmtPrefix gm =
       let rec fmtPrefix' = function
         | M.Prefix (I.Null, I.Null, I.Null), fmt_ -> fmt_
         | ( M.Prefix
@@ -62,17 +62,17 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
                 ]
                 @ fmt_ )
       in
-      F.hVbox (fmtPrefix' (gm_, []))
+      F.hVbox (fmtPrefix' (gm, []))
 
-    let prefixToString gm_ = F.makestring_fmt (fmtPrefix gm_)
+    let prefixToString gm = F.makestring_fmt (fmtPrefix gm)
 
-    let stateToString (M.State (name, (M.Prefix (g_, m_, b_) as gm_), v_)) =
-      ((((name ^ ":\n") ^ prefixToString gm_) ^ "\n--------------\n")
+    let stateToString (M.State (name, (M.Prefix (g_, m_, b_) as gm), v_)) =
+      ((((name ^ ":\n") ^ prefixToString gm) ^ "\n--------------\n")
       ^ ClausePrint.clauseToString (g_, v_))
       ^ "\n\n"
 
     let rec sgnToString = function
-      | sgnEmpty_ -> ""
+      | sgnEmpty -> ""
       | M.ConDec (e, s_) ->
           begin if !Global.chatter >= 4 then Print.conDecToString e ^ "\n"
           else

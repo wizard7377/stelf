@@ -49,7 +49,7 @@ module MakePrintTwega
     module F = Formatter
 
     let str_ = F.string
-    let str0_ (s, n) = F.string0 n s
+    let str0 (s, n) = F.string0 n s
     let name_ x = F.string (("\"" ^ x) ^ "\"")
     let integer_ n = F.string (Int.toString n)
     let sexp fmts = F.hbox [ str_ "("; F.hVbox fmts; str_ ")" ]

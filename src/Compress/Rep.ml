@@ -59,21 +59,21 @@ module Rep = struct
           Reductio.check_kind ([], kindOf (Sgn.classifier cid))
       | I.ConDef (_, _, _, _, _, I.Type, _) ->
           let (Sgn.Def_term y) = Sgn.def cid in
-          let (Syntax.Tclass_ z) = Sgn.classifier cid in
+          let (Syntax.Tclass z) = Sgn.classifier cid in
           Reductio.check ([], y, z)
           (*				     l := (y,z):: !l; *)
       | I.ConDef (_, _, _, _, _, I.Kind, _) ->
           let (Sgn.Def_type y) = Sgn.def cid in
-          let (Syntax.Kclass_ z) = Sgn.classifier cid in
+          let (Syntax.Kclass z) = Sgn.classifier cid in
           Reductio.check_type Reductio.Con_lf (Syntax.explodeKind z, y)
       | I.AbbrevDef (_, _, _, _, _, I.Type) ->
           let (Sgn.Def_term y) = Sgn.def cid in
-          let (Syntax.Tclass_ z) = Sgn.classifier cid in
+          let (Syntax.Tclass z) = Sgn.classifier cid in
           Reductio.check ([], y, z)
           (*				     l := (y,z):: !l; *)
       | I.AbbrevDef (_, _, _, _, _, I.Kind) ->
           let (Sgn.Def_type y) = Sgn.def cid in
-          let (Syntax.Kclass_ z) = Sgn.classifier cid in
+          let (Syntax.Kclass z) = Sgn.classifier cid in
           Reductio.check_type Reductio.Con_lf (Syntax.explodeKind z, y)
       | _ -> true
       end

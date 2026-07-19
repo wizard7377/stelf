@@ -113,8 +113,8 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
      formats expression as a string.
      Abbreviate as empty string if chatter level is < 3.
   *)
-  let expToString gu_ =
-    begin if !Global.chatter >= 3 then Print.expToString gu_ else ""
+  let expToString gu =
+    begin if !Global.chatter >= 3 then Print.expToString gu else ""
     end
 
   (* exception AbortQuery
@@ -285,23 +285,23 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
             (Timers.time Timers.solving AbsMachineSbt.solve)
             ( (g, IntSyn.id),
               CompSyn.DProg (IntSyn.Null, IntSyn.Null),
-              function skel_ -> raise (SolutionSkel skel_) );
+              function skel -> raise (SolutionSkel skel) );
           raise (AbortQuery "No solution to %solve found")
         end
         (* Call to solve raises Solution _ if there is a solution,
           returns () if there is none.  It could also not terminate
           *)
-      with SolutionSkel skel_ -> (
+      with SolutionSkel skel -> (
         try
           begin
             Display.chatter_s 2 " OK\n";
             try
               begin
                 Timers.time Timers.ptrecon PtRecon.solve
-                  ( skel_,
+                  ( skel,
                     (g, IntSyn.id),
                     CompSyn.DProg (IntSyn.Null, IntSyn.Null),
-                    function skel_, m_ -> raise (Solution m_) );
+                    function skel, m_ -> raise (Solution m_) );
                 raise (AbortQuery "Proof reconstruction for %solve failed")
               end
             with Solution m_ -> finish m_

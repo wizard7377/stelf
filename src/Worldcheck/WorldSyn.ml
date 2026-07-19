@@ -101,7 +101,7 @@ end) : WORLDSYN = struct
             (Error
                (("Family " ^ Names.qidToString (Names.constQid b))
                ^ " has no worlds declaration"))
-      | Some wb_ -> wb_
+      | Some wb -> wb
       end
 
     let subsumedTable : unit Table.table = Table.new_ 0
@@ -144,7 +144,7 @@ end) : WORLDSYN = struct
       | One -> F.string "1"
       end
 
-    let formatSubsump msg (g_, dl, rb_, b) =
+    let formatSubsump msg (g_, dl, rb, b) =
       F.hVbox
         [
           F.string msg;
@@ -157,7 +157,7 @@ end) : WORLDSYN = struct
           F.break_;
           F.string "</:";
           F.space;
-          formatReg rb_;
+          formatReg rb;
         ]
 
     let rec createEVarSub = function
@@ -266,9 +266,9 @@ end) : WORLDSYN = struct
         else ()
         end
 
-      let mismatch (g_, vs1_, vs2_) =
+      let mismatch (g_, vs1, vs2) =
         begin if !Global.chatter > 7 then
-          print (("Mismatch:\n" ^ mismatchToString (g_, vs1_, vs2_)) ^ "\n")
+          print (("Mismatch:\n" ^ mismatchToString (g_, vs1, vs2)) ^ "\n")
         else ()
         end
 
@@ -313,8 +313,8 @@ end) : WORLDSYN = struct
           let t = createEVarSub (g_, someDecs) in
           ignore (Trace.matchBlock (gl_, Seq (piDecs, t)));
           let k' = function
-            | gl'_ ->
-                begin if noConstraints (g_, t) then k gl'_
+            | gl' ->
+                begin if noConstraints (g_, t) then k gl'
                 else begin
                   Trace.constraintsRemain ();
                   ()
@@ -323,14 +323,14 @@ end) : WORLDSYN = struct
           in
           accR (gl_, Seq (piDecs, t), b, k')
       | ( (g_, ((I.Dec (_, v1_) as d_) :: l2_ as l_)),
-          (Seq ((I.Dec (_, v1'_) :: l2'_ as b'_), t) as l'_),
+          (Seq ((I.Dec (_, v1') :: l2'_ as b'_), t) as l'_),
           b,
           k ) ->
-          begin if Unify.unifiable (g_, (v1_, I.id), (v1'_, t)) then
+          begin if Unify.unifiable (g_, (v1_, I.id), (v1', t)) then
             accR ((decUName (g_, d_), l2_), Seq (l2'_, I.dot1 t), b, k)
           else
             begin if Subordinate.belowEq (I.targetFam v1_, b) then begin
-              Trace.mismatch (g_, (v1_, I.id), (v1'_, t));
+              Trace.mismatch (g_, (v1_, I.id), (v1', t));
               ()
             end
             else
@@ -350,42 +350,42 @@ end) : WORLDSYN = struct
       | gl_, Star One, b, k -> k gl_
       | gl_, (Star r' as r), b, k -> begin
           CsManager.trail (function () -> k gl_);
-          accR (gl_, r', b, function gl'_ -> accR (gl'_, r, b, k))
+          accR (gl_, r', b, function gl' -> accR (gl', r, b, k))
         end
 
-    let checkSubsumedBlock (g_, l'_, rb_, b) =
+    let checkSubsumedBlock (g_, l'_, rb, b) =
       try
         begin
-          accR ((g_, l'_), rb_, b, init b);
+          accR ((g_, l'_), rb, b, init b);
           raise
             (Error
                (F.makestring_fmt
-                  (formatSubsump "World subsumption failure" (g_, l'_, rb_, b))))
+                  (formatSubsump "World subsumption failure" (g_, l'_, rb, b))))
         end
       with Success -> ()
 
     let rec checkSubsumedWorlds = function
-      | [], rb_, b -> ()
-      | cid :: cids, rb_, b ->
+      | [], rb, b -> ()
+      | cid :: cids, rb, b ->
           let someDecs, piDecs = I.constBlock cid in
           begin
-            checkSubsumedBlock (Names.ctxName someDecs, piDecs, rb_, b);
-            checkSubsumedWorlds (cids, rb_, b)
+            checkSubsumedBlock (Names.ctxName someDecs, piDecs, rb, b);
+            checkSubsumedWorlds (cids, rb, b)
           end
 
     let checkBlocks (T.Worlds cids) (g_, v_, occ) =
       try
         let b = I.targetFam v_ in
-        let wb_ =
+        let wb =
           try getWorlds b with Error msg -> raise (Error' (occ, msg))
         in
-        let rb_ = worldsToReg wb_ in
+        let rb = worldsToReg wb in
         let _ =
           begin if subsumedLookup b then ()
           else
             try
               begin
-                checkSubsumedWorlds (cids, rb_, b);
+                checkSubsumedWorlds (cids, rb, b);
                 subsumedInsert b
               end
             with Error msg -> raise (Error' (occ, msg))
@@ -393,12 +393,12 @@ end) : WORLDSYN = struct
         in
         let l_ = subGoalToDList v_ in
         begin
-          accR ((g_, l_), rb_, b, init b);
+          accR ((g_, l_), rb, b, init b);
           raise
             (Error'
                ( occ,
                  F.makestring_fmt
-                   (formatSubsump "World violation" (g_, l_, rb_, b)) ))
+                   (formatSubsump "World violation" (g_, l_, rb, b)) ))
         end
       with Success -> ()
 
@@ -474,7 +474,7 @@ end) : WORLDSYN = struct
       | g_, [] -> ()
 
     let conDecBlock = function
-      | I.BlockDec (_, _, gsome_, lpi_) -> (gsome_, lpi_)
+      | I.BlockDec (_, _, gsome_, lpi) -> (gsome_, lpi)
       | condec_ ->
           raise
             (Error
@@ -509,19 +509,19 @@ end) : WORLDSYN = struct
 
     let lookup a = getWorlds a
 
-    let ctxToList gin_ =
+    let ctxToList gin =
       let rec ctxToList' = function
         | I.Null, g_ -> g_
         | I.Decl (g_, d_), g'_ -> ctxToList' (g_, d_ :: g'_)
       in
-      ctxToList' (gin_, [])
+      ctxToList' (gin, [])
 
     let isSubsumed (T.Worlds cids) b =
-      let wb_ = getWorlds b in
-      let rb_ = worldsToReg wb_ in
+      let wb = getWorlds b in
+      let rb = worldsToReg wb in
       begin if subsumedLookup b then ()
       else begin
-        checkSubsumedWorlds (cids, rb_, b);
+        checkSubsumedWorlds (cids, rb, b);
         subsumedInsert b
       end
       end

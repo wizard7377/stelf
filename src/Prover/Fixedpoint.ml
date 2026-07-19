@@ -27,10 +27,10 @@ end) : FIXEDPOINT with module State = FixedPoint__0.State' = struct
 
     type nonrec operator = T.prg option ref * T.prg
 
-    let expand (S.Focus (T.EVar (psi_, r, f_, _, tCs_, _), w_), o_) =
-      let (I.NDec x) = Names.decName (T.coerceCtx psi_, I.NDec None) in
+    let expand (S.Focus (T.EVar (psi, r, f_, _, tCs, _), w_), o_) =
+      let (I.NDec x) = Names.decName (T.coerceCtx psi, I.NDec None) in
       let d_ = T.PDec (x, f_, None, None) in
-      let x_ = T.newEVar (I.Decl (psi_, d_), T.forSub (f_, T.Shift 1)) in
+      let x_ = T.newEVar (I.Decl (psi, d_), T.forSub (f_, T.Shift 1)) in
       (r, T.Rec (d_, x_))
 
     let apply (r, p_) = r := Some p_

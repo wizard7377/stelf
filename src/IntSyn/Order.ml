@@ -62,34 +62,34 @@ end) : ORDER = struct
   (* RDec ::= (P, C)            *)
   module I = IntSyn
 
-  let orderTable_ : tDec Table.table = Table.new_ 0
-  let redOrderTable_ : rDec Table.table = Table.new_ 0
-  let reset () = Table.clear orderTable_
-  let reset_r_order () = Table.clear redOrderTable_
-  let install (cid, o_) = Table.insert orderTable_ (cid, o_)
+  let orderTable : tDec Table.table = Table.new_ 0
+  let redOrderTable : rDec Table.table = Table.new_ 0
+  let reset () = Table.clear orderTable
+  let reset_r_order () = Table.clear redOrderTable
+  let install (cid, o_) = Table.insert orderTable (cid, o_)
 
   let uninstall cid =
-    begin match Table.lookup orderTable_ cid with
+    begin match Table.lookup orderTable cid with
     | None -> false
     | Some _ -> begin
-        Table.delete orderTable_ cid;
+        Table.delete orderTable cid;
         true
       end
     end
 
-  let install_r_order (cid, p_) = Table.insert redOrderTable_ (cid, p_)
+  let install_r_order (cid, p_) = Table.insert redOrderTable (cid, p_)
 
   let uninstall_r_order cid =
-    begin match Table.lookup redOrderTable_ cid with
+    begin match Table.lookup redOrderTable cid with
     | None -> false
     | Some _ -> begin
-        Table.delete redOrderTable_ cid;
+        Table.delete redOrderTable cid;
         true
       end
     end
 
-  let lookup cid = Table.lookup orderTable_ cid
-  let lookup_r_order cid = Table.lookup redOrderTable_ cid
+  let lookup cid = Table.lookup orderTable cid
+  let lookup_r_order cid = Table.lookup redOrderTable cid
 
   let sel_lookup a =
     begin match lookup a with

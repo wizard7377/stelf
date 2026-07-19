@@ -53,7 +53,7 @@ end) : NORMALIZE = struct
       | T.Redex (p_, s_), t -> T.Redex (normalizePrg (p_, t), normalizeSpine s_)
       | T.Rec (d_, p_), t -> T.Rec (d_, normalizePrg (p_, t))
       | (T.Case _ as p_), t -> p_
-      | (T.EVar (psi_, { contents = Some p'_ }, _, _, _, _) as p_), t ->
+      | (T.EVar (psi, { contents = Some p'_ }, _, _, _, _) as p_), t ->
           normalizePrg (p'_, t)
 
     and normalizeSpine = function

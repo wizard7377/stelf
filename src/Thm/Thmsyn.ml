@@ -82,7 +82,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
     module I = IntSyn
     module M = ModeSyn
 
-    let theoremDecToConDec ((name, ThDecl (gBs_, g_, mg_, i)), r) =
+    let theoremDecToConDec ((name, ThDecl (gBs, g_, mg, i)), r) =
       let rec theoremToConDec' = function
         | I.Null, v_ -> v_
         | I.Decl (g_, d_), v_ ->
@@ -94,18 +94,18 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
             else error (r, "Free variables in theorem declaration")
             end
       in
-      ( gBs_,
+      ( gBs,
         I.ConDec
           (name, None, i, I.Normal, theoremToConDec' (g_, I.Uni I.Type), I.Kind)
       )
 
-    let theoremDecToModeSpine ((name, ThDecl (gBs_, g_, mg_, i)), r) =
+    let theoremDecToModeSpine ((name, ThDecl (gBs, g_, mg, i)), r) =
       let rec theoremToModeSpine' = function
         | I.Null, I.Null, mS -> mS
-        | I.Decl (g_, I.Dec (x, _)), I.Decl (mg_, m), mS ->
-            theoremToModeSpine' (g_, mg_, M.Mapp (M.Marg (m, x), mS))
+        | I.Decl (g_, I.Dec (x, _)), I.Decl (mg, m), mS ->
+            theoremToModeSpine' (g_, mg, M.Mapp (M.Marg (m, x), mS))
       in
-      theoremToModeSpine' (g_, mg_, M.Mnil)
+      theoremToModeSpine' (g_, mg, M.Mnil)
   end
 
   (* theoremDecToConDec (name, T) = D'

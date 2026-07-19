@@ -291,25 +291,25 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       ignore (checkFreevars (g0_, (g1'_, g2'_), r));
       (g1'_, g2'_)
 
-    let top (gBs_, g, m_, k) = (gBs_, g, m_, k)
+    let top (gBs, g, m_, k) = (gBs, g, m_, k)
 
-    let exists (g', t) (gBs_, g, m_, k) =
+    let exists (g', t) (gBs, g, m_, k) =
       t
-        ( gBs_,
+        ( gBs,
           ctxAppend (g, g'),
           ctxAppend (m_, ctxMap (function _ -> M.Minus) g'),
           k )
 
-    let forall (g', t) (gBs_, g, m_, k) =
+    let forall (g', t) (gBs, g, m_, k) =
       t
-        ( gBs_,
+        ( gBs,
           ctxAppend (g, g'),
           ctxAppend (m_, ctxMap (function _ -> M.Plus) g'),
           k )
 
-    let forallStar (g', t) (gBs_, g, m_, _) =
+    let forallStar (g', t) (gBs, g, m_, _) =
       t
-        ( gBs_,
+        ( gBs,
           ctxAppend (g, g'),
           ctxAppend (m_, ctxMap (function _ -> M.Plus) g'),
           I.ctxLength g' )
@@ -320,9 +320,9 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     let theoremToTheorem t =
       let gbs, g, m_, k = t ([], IntSyn.Null, IntSyn.Null, 0) in
       ignore (Names.varReset IntSyn.Null);
-      let gBs_ = List.map abstractCtxPair gbs in
+      let gBs = List.map abstractCtxPair gbs in
       let (T.JWithCtx (g_, _)) = T.recon (T.jwithctx (g, T.jnothing)) in
-      L.ThDecl (gBs_, g_, m_, k)
+      L.ThDecl (gBs, g_, m_, k)
 
     let theoremDecToTheoremDec (name, t) = (name, theoremToTheorem t)
 

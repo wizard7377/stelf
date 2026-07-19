@@ -116,28 +116,28 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
           begin if n = one then toExpEClo us_
           else timesExp (toExpMon (Mon (n, [])), toExpEClo us_)
           end
-      | Mon (n, us_ :: usL_) ->
-          timesExp (toExpMon (Mon (n, usL_)), toExpEClo us_)
+      | Mon (n, us_ :: usL) ->
+          timesExp (toExpMon (Mon (n, usL)), toExpEClo us_)
 
     and toExpEClo = function u_, Shift 0 -> u_ | u_, s_ -> EClo (u_, s_)
 
-    let rec compatibleMon (Mon (_, usL1_), Mon (_, usL2_)) =
-      equalMSet (function us1_, us2_ -> sameExpW (us1_, us2_)) (usL1_, usL2_)
+    let rec compatibleMon (Mon (_, usL1), Mon (_, usL2)) =
+      equalMSet (function us1, us2 -> sameExpW (us1, us2)) (usL1, usL2)
 
     and sameExpW = function
-      | ((Root (h1_, s1_), s1) as us1_), ((Root (h2_, s2_), s2) as us2_) ->
+      | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
           begin match (h1_, h2_) with
           | BVar k1, BVar k2 -> k1 = k2 && sameSpine ((s1_, s1), (s2_, s2))
           | FVar (n1, _, _), FVar (n2, _, _) ->
               n1 = n2 && sameSpine ((s1_, s1), (s2_, s2))
           | _ -> false
           end
-      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1_),
-          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2_) ) ->
+      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1),
+          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2) ) ->
           r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
-    and sameExp (us1_, us2_) = sameExpW (Whnf.whnf us1_, Whnf.whnf us2_)
+    and sameExp (us1, us2) = sameExpW (Whnf.whnf us1, Whnf.whnf us2)
 
     and sameSpine = function
       | (Nil, s1), (Nil, s2) -> true
@@ -164,12 +164,12 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
 
     and plusSumMon = function
       | Sum (m, []), mon -> Sum (m, [ mon ])
-      | Sum (m, monL), (Mon (n, usL_) as mon) ->
+      | Sum (m, monL), (Mon (n, usL) as mon) ->
           begin match findMSet compatibleMon (mon, monL) with
           | Some (Mon (n', _), monL') ->
               let n'' = n + n' in
               begin if n'' = zero then Sum (m, monL')
-              else Sum (m, Mon (n'', usL_) :: monL')
+              else Sum (m, Mon (n'', usL) :: monL')
               end
           | None -> Sum (m, mon :: monL)
           end
@@ -182,16 +182,16 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
           plusSum (timesSumMon (sum1, mon2), timesSum (sum1, Sum (m2, monL2)))
 
     and timesSumMon = function
-      | Sum (m, []), Mon (n, usL_) ->
+      | Sum (m, []), Mon (n, usL) ->
           let n' = m * n in
           begin if n' = zero then Sum (n', [])
-          else Sum (zero, [ Mon (n', usL_) ])
+          else Sum (zero, [ Mon (n', usL) ])
           end
-      | Sum (m, Mon (n', usL'_) :: monL), (Mon (n, usL_) as mon) ->
+      | Sum (m, Mon (n', usL') :: monL), (Mon (n, usL) as mon) ->
           let n'' = n * n' in
-          let usL''_ = usL_ @ usL'_ in
+          let usL'' = usL @ usL' in
           let (Sum (m', monL')) = timesSumMon (Sum (m, monL), mon) in
-          Sum (m', Mon (n'', usL''_) :: monL')
+          Sum (m', Mon (n'', usL'') :: monL')
 
     let unaryMinusSum sum = timesSum (Sum (-one, []), sum)
     let minusSum (sum1, sum2) = plusSum (sum1, unaryMinusSum sum2)
@@ -222,24 +222,24 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
     and normalizeMon = function
       | Mon (n, []) as mon -> Sum (n, [])
       | Mon (n, us_ :: []) -> timesSum (Sum (n, []), fromExp us_)
-      | Mon (n, us_ :: usL_) as mon ->
-          timesSum (fromExp us_, normalizeMon (Mon (n, usL_)))
+      | Mon (n, us_ :: usL) as mon ->
+          timesSum (fromExp us_, normalizeMon (Mon (n, usL)))
 
     and mapSum (f, Sum (m, monL)) =
       Sum (m, List.map (function mon -> mapMon (f, mon)) monL)
 
-    and mapMon (f, Mon (n, usL_)) =
+    and mapMon (f, Mon (n, usL)) =
       Mon
         ( n,
           List.map
             (function us_1, us_2 -> Whnf.whnf (f (EClo (us_1, us_2)), id))
-            usL_ )
+            usL )
 
     let rec appSum (f, Sum (m, monL)) =
       List.app (function mon -> appMon (f, mon)) monL
 
-    and appMon (f, Mon (n, usL_)) =
-      List.app (function us_1, us_2 -> f (EClo (us_1, us_2))) usL_
+    and appMon (f, Mon (n, usL)) =
+      List.app (function us_1, us_2 -> f (EClo (us_1, us_2))) usL
 
     let findMon f (g_, Sum (m, monL)) =
       let rec findMon' = function

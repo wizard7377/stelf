@@ -76,9 +76,9 @@ end) : STATESYN.STATESYN = struct
       | Simul os_ -> Simul (map normalizeOrder os_)
 
     let rec convOrder = function
-      | Arg (us1_, _), Arg (us2_, _) -> Conv.conv (us1_, us2_)
-      | Lex os1_, Lex os2_ -> convOrders (os1_, os2_)
-      | Simul os1_, Simul os2_ -> convOrders (os1_, os2_)
+      | Arg (us1, _), Arg (us2, _) -> Conv.conv (us1, us2)
+      | Lex os1, Lex os2 -> convOrders (os1, os2)
+      | Simul os1, Simul os2 -> convOrders (os1, os2)
 
     and convOrders = function
       | [], [] -> true

@@ -531,8 +531,8 @@ struct
         end
       end
 
-    let delayMon (Mon (n, usL_), cnstr) =
-      List.app (function us_ -> Unify.delay (us_, cnstr)) usL_
+    let delayMon (Mon (n, usL), cnstr) =
+      List.app (function us_ -> Unify.delay (us_, cnstr)) usL
 
     let unifyRestr (Restr (g_, proof), proof') =
       begin if Unify.unifiable (g_, (proof, id), (proof', id)) then ()
@@ -562,14 +562,14 @@ struct
       | BranchDivide of int * branchResult * branchResult
 
     let rec decomposeSum (g_, Sum (m, monL)) =
-      let monToWPos (Mon (n, usL_) as mon) =
+      let monToWPos (Mon (n, usL) as mon) =
         begin match findMon mon with
         | Some pos -> (fromInteger n, pos)
         | None ->
             let new_ = incrNCols () in
             let l =
               {
-                owner = Var (g_, Mon (one_int, usL_));
+                owner = Var (g_, Mon (one_int, usL));
                 tag = ref 0;
                 restr = ref None;
                 dead = ref false;

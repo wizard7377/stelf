@@ -68,8 +68,8 @@ module MakeClausePrint
     module F = Print.Formatter
 
     let str_ = F.string
-    let str0_ (s, n) = F.string0 n s
-    let sym s = str0_ (Symbol.sym s)
+    let str0 (s, n) = F.string0 n s
+    let sym s = str0 (Symbol.sym s)
     let parens fmt = F.hbox [ sym "("; fmt; sym ")" ]
 
     let rec fmtDQuants = function
@@ -138,10 +138,10 @@ module MakeClausePrint
     let fmtConDec = function
       | I.ConDec (id, parent, i, _, v_, I.Type) ->
           ignore (Names.varReset IntSyn.Null);
-          let vfmt_ = fmtClauseI (i, I.Null, v_) in
+          let vfmt = fmtClauseI (i, I.Null, v_) in
           F.hVbox
             [
-              str0_ (Symbol.const id); F.space; sym ":"; F.break; vfmt_; sym ".";
+              str0 (Symbol.const id); F.space; sym ":"; F.break; vfmt; sym ".";
             ]
       | condec_ -> Print.formatConDec condec_
   end

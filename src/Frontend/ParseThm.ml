@@ -178,15 +178,15 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       (dec, f'')
 
     and parseDecs' = function
-      | drs_, (LS.Cons ((L.Lbrace, r), s') as bs_) ->
-          let dr_, f' = parseDec (r, LS.expose s') in
-          parseDecs' (E.decl (drs_, dr_), f')
-      | drs_ -> drs_
+      | drs, (LS.Cons ((L.Lbrace, r), s') as bs_) ->
+          let dr, f' = parseDec (r, LS.expose s') in
+          parseDecs' (E.decl (drs, dr), f')
+      | drs -> drs
 
     and parseDecs = function
       | LS.Cons ((L.Lbrace, r), s') as bs_ ->
-          let dr_, f' = parseDec (r, LS.expose s') in
-          parseDecs' (E.decl (E.null, dr_), f')
+          let dr, f' = parseDec (r, LS.expose s') in
+          parseDecs' (E.decl (E.null, dr), f')
       | LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected `{', found " ^ L.toString t)
 

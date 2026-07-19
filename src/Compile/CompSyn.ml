@@ -180,11 +180,11 @@ module Make_CompSyn
   *)
   let rec goalSub = function
     | Atom p, s -> Atom (IntSyn.EClo (p, s))
-    | Impl (d, a_, ha_, g), s ->
+    | Impl (d, a_, ha, g), s ->
         Impl
           ( resGoalSub (d, s),
             IntSyn.EClo (a_, s),
-            ha_,
+            ha,
             goalSub (g, IntSyn.dot1 s) )
     | All (d_, g), s -> All (IntSyn.decSub (d_, s), goalSub (g, IntSyn.dot1 s))
 

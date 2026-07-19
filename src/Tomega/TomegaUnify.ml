@@ -57,30 +57,30 @@ end) : TOMEGAUNIFY = struct
     module I = IntSyn
     module T = Tomega
 
-    let rec unifyFor (psi_, f1_, f2_) =
-      unifyForN (psi_, T.forSub (f1_, T.id), T.forSub (f2_, T.id))
+    let rec unifyFor (psi, f1_, f2_) =
+      unifyForN (psi, T.forSub (f1_, T.id), T.forSub (f2_, T.id))
 
     and unifyForN = function
-      | psi_, T.True, T.True -> ()
-      | psi_, T.Ex ((d1_, _), f1_), T.Ex ((d2_, _), f2_) -> begin
-          unifyDec (psi_, T.UDec d1_, T.UDec d2_);
-          unifyFor (I.Decl (psi_, T.UDec d1_), f1_, f2_)
+      | psi, T.True, T.True -> ()
+      | psi, T.Ex ((d1_, _), f1_), T.Ex ((d2_, _), f2_) -> begin
+          unifyDec (psi, T.UDec d1_, T.UDec d2_);
+          unifyFor (I.Decl (psi, T.UDec d1_), f1_, f2_)
         end
-      | psi_, T.All ((d1_, _), f1_), T.All ((d2_, _), f2_) -> begin
-          unifyDec (psi_, d1_, d2_);
-          unifyFor (I.Decl (psi_, d1_), f1_, f2_)
+      | psi, T.All ((d1_, _), f1_), T.All ((d2_, _), f2_) -> begin
+          unifyDec (psi, d1_, d2_);
+          unifyFor (I.Decl (psi, d1_), f1_, f2_)
         end
-      | psi_, T.FVar (_, r), f_ -> r := Some f_
-      | psi_, f_, T.FVar (_, r) -> r := Some f_
-      | psi_, _, _ -> raise (Unify "Formula mismatch")
+      | psi, T.FVar (_, r), f_ -> r := Some f_
+      | psi, f_, T.FVar (_, r) -> r := Some f_
+      | psi, _, _ -> raise (Unify "Formula mismatch")
 
     and unifyDec = function
-      | psi_, T.UDec d1_, T.UDec d2_ ->
+      | psi, T.UDec d1_, T.UDec d2_ ->
           begin if Conv.convDec ((d1_, I.id), (d2_, I.id)) then ()
           else raise (Unify "Declaration mismatch")
           end
-      | psi_, T.PDec (_, f1_, _, _), T.PDec (_, f2_, _, _) ->
-          unifyFor (psi_, f1_, f2_)
+      | psi, T.PDec (_, f1_, _, _), T.PDec (_, f2_, _, _) ->
+          unifyFor (psi, f1_, f2_)
   end
 
   (* unifyFor (Psi, F1, F2) = R

@@ -35,7 +35,7 @@ module MakeTabledSyn
 
   exception Error = Error
 
-  type tabled = Yes_ | No_ [@@deriving eq, ord, show]
+  type tabled = Yes | No_ [@@deriving eq, ord, show]
 
   (*  datatype ModeSpine = Mnil | Mapp of Marg * ModeSpine
   and  Marg = Marg of Mode * string option

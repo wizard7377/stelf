@@ -67,10 +67,10 @@ module Timing : TIMING = struct
   let stdTime (n, time) = StringCvt.padLeft ' ' n (Time.toString time)
 
   let timesToString
-      (name, (({ usr = t1; sys = _t2; gc = t3 } as cPUTime_), realTime)) =
+      (name, (({ usr = t1; sys = _t2; gc = t3 } as cPUTime), realTime)) =
     ((((((((((((name ^ ": ") ^ "Real = ") ^ stdTime (7, realTime)) ^ ", ")
            ^ "Run = ")
-          ^ stdTime (7, sum cPUTime_))
+          ^ stdTime (7, sum cPUTime))
          ^ " ")
         ^ "(")
        ^ stdTime (7, t1))
@@ -81,14 +81,14 @@ module Timing : TIMING = struct
   (* ^ stdTime (5, t2) ^ "" sys, "" ^ *)
   (* elide sys time *)
 
-  let toString (name, { contents = cPUTime_, realTime }) =
-    timesToString (name, (cPUTime_, realTime))
+  let toString (name, { contents = cPUTime, realTime }) =
+    timesToString (name, (cPUTime, realTime))
 
   let sumToString (name, centers) =
     let rec sumup = function
-      | [], (cPUTime_, realTime) -> timesToString (name, (cPUTime_, realTime))
-      | (_, { contents = c_, r_ }) :: centers, (cPUTime_, realTime) ->
-          sumup (centers, (plus (cPUTime_, c_), Time.( + ) realTime r_))
+      | [], (cPUTime, realTime) -> timesToString (name, (cPUTime, realTime))
+      | (_, { contents = c_, r_ }) :: centers, (cPUTime, realTime) ->
+          sumup (centers, (plus (cPUTime, c_), Time.( + ) realTime r_))
     in
     sumup (centers, (zero, Time.zeroTime))
 end

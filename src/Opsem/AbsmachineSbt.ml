@@ -114,24 +114,24 @@ end) : ABSMACHINESBT = struct
         end
 
     let rec ctxToEVarSub = function
-      | gglobal_, I.Null, s -> s
-      | gglobal_, I.Decl (g_, I.Dec (_, a_)), s ->
-          let s' = ctxToEVarSub (gglobal_, g_, s) in
-          let x_ = I.newEVar (gglobal_, I.EClo (a_, s')) in
+      | gglobal, I.Null, s -> s
+      | gglobal, I.Decl (g_, I.Dec (_, a_)), s ->
+          let s' = ctxToEVarSub (gglobal, g_, s) in
+          let x_ = I.newEVar (gglobal, I.EClo (a_, s')) in
           I.Dot (I.Exp x_, s')
-      | gglobal_, I.Decl (g_, I.ADec (_, d)), s ->
+      | gglobal, I.Decl (g_, I.ADec (_, d)), s ->
           let x_ = I.newAVar () in
           I.Dot
-            (I.Exp (I.EClo (x_, I.Shift (-d))), ctxToEVarSub (gglobal_, g_, s))
+            (I.Exp (I.EClo (x_, I.Shift (-d))), ctxToEVarSub (gglobal, g_, s))
 
     let rec solve' = function
       | (C.Atom p, s), (C.DProg (g_, dpool) as dp), sc ->
           matchAtom ((p, s), dp, sc)
-      | (C.Impl (r, a_, ha_, g), s), C.DProg (g_, dPool), sc ->
+      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
           solve'
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
               sc )
       | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = Names.decLUName (g_, I.decSub (d_, s)) in
@@ -185,48 +185,48 @@ end) : ABSMACHINESBT = struct
 
     and sSolve = function
       | (C.True, s), dp, sc -> sc []
-      | (C.Conjunct (g, a_, sgoals_), s), (C.DProg (g_, dPool) as dp), sc ->
+      | (C.Conjunct (g, a_, sgoals), s), (C.DProg (g_, dPool) as dp), sc ->
           solve'
             ( (g, s),
               dp,
               function
               | skel1 ->
                   sSolve
-                    ((sgoals_, s), dp, function skel2 -> sc (skel1 @ skel2)) )
+                    ((sgoals, s), dp, function skel2 -> sc (skel1 @ skel2)) )
 
     and matchSig
-        (((I.Root (ha_, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
+        (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
       let rec mSig = function
         | [] -> ()
-        | (I.Const c as hc_) :: sgn' ->
-            let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+        | (I.Const c as hc) :: sgn' ->
+            let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
             begin
               CsManager.trail (function () ->
                   rSolve (ps', (r, I.id), dp, function s_ -> sc (C.Pc c :: s_)));
               mSig sgn'
             end
       in
-      mSig (Index.lookup (cidFromHead ha_))
+      mSig (Index.lookup (cidFromHead ha))
 
     and matchIndexSig
-        (((I.Root (ha_, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
+        (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
       SubTree.matchSig
-        ( cidFromHead ha_,
+        ( cidFromHead ha,
           g_,
           ps',
           function
-          | (conjGoals_, s), clauseName ->
+          | (conjGoals, s), clauseName ->
               sSolve
-                ( (conjGoals_, s),
+                ( (conjGoals, s),
                   dp,
                   function s_ -> sc (C.Pc clauseName :: s_) ) )
 
     and matchAtom
-        (((I.Root (ha_, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
+        (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
       let rec matchDProg = function
         | I.Null, _ -> ( ! ) mSig (ps', dp, sc)
-        | I.Decl (dPool', C.Dec (r, s, ha'_)), k ->
-            begin if eqHead (ha_, ha'_) then begin
+        | I.Decl (dPool', C.Dec (r, s, ha')), k ->
+            begin if eqHead (ha, ha') then begin
               CsManager.trail (function () ->
                   rSolve
                     ( ps',
@@ -253,7 +253,7 @@ end) : ABSMACHINESBT = struct
         begin if succeeded then matchConstraint (solve_fn, try_ + 1) else ()
         end
       in
-      begin match I.constStatus (cidFromHead ha_) with
+      begin match I.constStatus (cidFromHead ha) with
       | I.Constraint (cs, solve_fn) -> matchConstraint (solve_fn, 0)
       | _ -> matchDProg (dPool, 1)
       end

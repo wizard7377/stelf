@@ -25,25 +25,25 @@ end) : FUNWEAKEN.FUNWEAKEN = struct
 
     let rec strengthenPsi = function
       | I.Null, s -> (I.Null, s)
-      | I.Decl (psi_, F.Prim d_), s ->
-          let psi'_, s' = strengthenPsi (psi_, s) in
-          (I.Decl (psi'_, F.Prim (Weaken.strengthenDec (d_, s'))), I.dot1 s')
-      | I.Decl (psi_, F.Block (F.CtxBlock (l, g_))), s ->
-          let psi'_, s' = strengthenPsi (psi_, s) in
+      | I.Decl (psi, F.Prim d_), s ->
+          let psi', s' = strengthenPsi (psi, s) in
+          (I.Decl (psi', F.Prim (Weaken.strengthenDec (d_, s'))), I.dot1 s')
+      | I.Decl (psi, F.Block (F.CtxBlock (l, g_))), s ->
+          let psi', s' = strengthenPsi (psi, s) in
           let g''_, s'' = Weaken.strengthenCtx (g_, s') in
-          (I.Decl (psi'_, F.Block (F.CtxBlock (l, g''_))), s'')
+          (I.Decl (psi', F.Block (F.CtxBlock (l, g''_))), s'')
 
     let rec strengthenPsi' = function
       | [], s -> ([], s)
-      | F.Prim d_ :: psi_, s ->
+      | F.Prim d_ :: psi, s ->
           let d'_ = Weaken.strengthenDec (d_, s) in
           let s' = I.dot1 s in
-          let psi''_, s'' = strengthenPsi' (psi_, s') in
-          (F.Prim d'_ :: psi''_, s'')
-      | F.Block (F.CtxBlock (l, g_)) :: psi_, s ->
+          let psi'', s'' = strengthenPsi' (psi, s') in
+          (F.Prim d'_ :: psi'', s'')
+      | F.Block (F.CtxBlock (l, g_)) :: psi, s ->
           let g'_, s' = Weaken.strengthenCtx (g_, s) in
-          let psi''_, s'' = strengthenPsi' (psi_, s') in
-          (F.Block (F.CtxBlock (l, g'_)) :: psi''_, s'')
+          let psi'', s'' = strengthenPsi' (psi, s') in
+          (F.Block (F.CtxBlock (l, g'_)) :: psi'', s'')
   end
 
   (* strengthenPsi (Psi, s) = (Psi', s')

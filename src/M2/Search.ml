@@ -173,32 +173,32 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
           end
 
     and matchAtom
-        ( ((I.Root (ha_, _), _) as ps'),
+        ( ((I.Root (ha, _), _) as ps'),
           (C.DProg (g_, dPool) as dp),
           sc,
           (acc, k) ) =
       let matchSig acc' =
         let rec matchSig' = function
           | [], acc'' -> acc''
-          | hc_ :: sgn', acc'' ->
-              let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+          | hc :: sgn', acc'' ->
+              let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
               let acc''' =
                 CsManager.trail (function () ->
                     rSolve
                       ( ps',
                         (r, I.id),
                         dp,
-                        (function s_, acck' -> sc (I.Root (hc_, s_), acck')),
+                        (function s_, acck' -> sc (I.Root (hc, s_), acck')),
                         (acc'', k - 1) ))
               in
               matchSig' (sgn', acc''')
         in
-        matchSig' (Index.lookup (cidFromHead ha_), acc')
+        matchSig' (Index.lookup (cidFromHead ha), acc')
       in
       let rec matchDProg = function
         | I.Null, _, acc' -> matchSig acc'
-        | I.Decl (dPool', C.Dec (r, s, ha'_)), n, acc' ->
-            begin if eqHead (ha_, ha'_) then
+        | I.Decl (dPool', C.Dec (r, s, ha')), n, acc' ->
+            begin if eqHead (ha, ha') then
               let acc'' =
                 CsManager.trail (function () ->
                     rSolve
@@ -228,8 +228,8 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       | r, (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
       | r, (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
-      | r, (I.FgnExp (csid_, fge_), s) ->
-          I.FgnExpStd.fold (csid_, fge_)
+      | r, (I.FgnExp (csid_, fge), s) ->
+          I.FgnExpStd.fold (csid_, fge)
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
@@ -243,28 +243,28 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
 
     let rec nonIndex = function
       | _, [] -> true
-      | r, I.EVar (_, _, v_, _) :: ge_ ->
-          (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge_)
+      | r, I.EVar (_, _, v_, _) :: ge ->
+          (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge)
 
     let rec selectEVar = function
       | [], _, acc -> acc
-      | (I.EVar (r, _, _, _) as x_) :: ge_, vs_, acc ->
+      | (I.EVar (r, _, _, _) as x_) :: ge, vs_, acc ->
           begin if occursInExp (r, vs_) && nonIndex (r, acc) then
-            selectEVar (ge_, vs_, x_ :: acc)
-          else selectEVar (ge_, vs_, acc)
+            selectEVar (ge, vs_, x_ :: acc)
+          else selectEVar (ge, vs_, acc)
           end
 
     let rec searchEx' arg__1 arg__2 =
       begin match (arg__1, arg__2) with
       | max, ([], sc) -> [ sc () ]
-      | max, (I.EVar (r, g_, v_, _) :: ge_, sc) ->
+      | max, (I.EVar (r, g_, v_, _) :: ge, sc) ->
           solve
             ( (Compile.compileGoal (g_, v_), I.id),
               Compile.compileCtx false g_,
               (function
               | u'_, (acc', _) -> begin
                   Unify.instantiateEVar (r, u'_, []);
-                  searchEx' max (ge_, sc)
+                  searchEx' max (ge, sc)
                 end),
               ([], max) )
       end
@@ -281,13 +281,13 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       in
       deepen' (1, [])
 
-    let searchEx (g_, ge_, vs_, sc) =
+    let searchEx (g_, ge, vs_, sc) =
       begin
         begin if !Global.chatter > 5 then print "[Search: " else ()
         end;
         let results =
           deepen searchEx'
-            (selectEVar (ge_, vs_, []), function params_ -> sc params_)
+            (selectEVar (ge, vs_, []), function params_ -> sc params_)
         in
         begin match results with
         | [] ->
@@ -303,19 +303,19 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
 
     let rec searchAll' = function
       | [], acc, sc -> sc acc
-      | I.EVar (r, g_, v_, _) :: ge_, acc, sc ->
+      | I.EVar (r, g_, v_, _) :: ge, acc, sc ->
           solve
             ( (Compile.compileGoal (g_, v_), I.id),
               Compile.compileCtx false g_,
               (function
               | u'_, (acc', _) -> begin
                   Unify.instantiateEVar (r, u'_, []);
-                  searchAll' (ge_, acc', sc)
+                  searchAll' (ge, acc', sc)
                 end),
               (acc, !MetaGlobal.maxFill) )
 
-    let searchAll (g_, ge_, vs_, sc) =
-      searchAll' (selectEVar (ge_, vs_, []), [], sc)
+    let searchAll (g_, ge, vs_, sc) =
+      searchAll' (selectEVar (ge, vs_, []), [], sc)
   end
 
   (* only used for type families of compiled clauses *)

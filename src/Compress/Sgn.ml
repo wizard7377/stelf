@@ -54,8 +54,8 @@ module Sgn = struct
   let condec (s, a, oa) =
     {
       name = s;
-      classifier = Tclass_ a;
-      o_classifier = Tclass_ oa;
+      classifier = Tclass a;
+      o_classifier = Tclass oa;
       def = Def_none;
       o_def = Def_none;
       abbreviation = false;
@@ -64,8 +64,8 @@ module Sgn = struct
   let tycondec (s, k, ok) =
     {
       name = s;
-      classifier = Kclass_ k;
-      o_classifier = Kclass_ ok;
+      classifier = Kclass k;
+      o_classifier = Kclass ok;
       def = Def_none;
       o_def = Def_none;
       abbreviation = false;
@@ -74,8 +74,8 @@ module Sgn = struct
   let defn (s, a, oa, m, om) =
     {
       name = s;
-      classifier = Tclass_ a;
-      o_classifier = Tclass_ oa;
+      classifier = Tclass a;
+      o_classifier = Tclass oa;
       def = Def_term m;
       o_def = Def_term om;
       abbreviation = false;
@@ -84,8 +84,8 @@ module Sgn = struct
   let tydefn (s, k, ok, a, oa) =
     {
       name = s;
-      classifier = Kclass_ k;
-      o_classifier = Kclass_ ok;
+      classifier = Kclass k;
+      o_classifier = Kclass ok;
       def = Def_type a;
       o_def = Def_type oa;
       abbreviation = false;
@@ -94,8 +94,8 @@ module Sgn = struct
   let abbrev (s, a, oa, m, om) =
     {
       name = s;
-      classifier = Tclass_ a;
-      o_classifier = Tclass_ oa;
+      classifier = Tclass a;
+      o_classifier = Tclass oa;
       def = Def_term m;
       o_def = Def_term om;
       abbreviation = true;
@@ -104,8 +104,8 @@ module Sgn = struct
   let tyabbrev (s, k, ok, a, oa) =
     {
       name = s;
-      classifier = Kclass_ k;
-      o_classifier = Kclass_ ok;
+      classifier = Kclass k;
+      o_classifier = Kclass ok;
       def = Def_type a;
       o_def = Def_type oa;
       abbreviation = true;

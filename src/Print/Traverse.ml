@@ -99,12 +99,12 @@ end) : TRAVERSE = struct
             )
       | _ -> raise (Error "Object not recognized")
 
-    and fromObj (g_, us_, vt_) = fromObjW (g_, Whnf.whnf us_, Whnf.whnf vt_)
+    and fromObj (g_, us_, vt) = fromObjW (g_, Whnf.whnf us_, Whnf.whnf vt)
 
     and fromSpine = function
-      | i, g_, (I.Nil, s), vt_ -> T.nils
-      | i, g_, (I.SClo (s_, s'), s), vt_ ->
-          fromSpine (i, g_, (s_, I.comp (s', s)), vt_)
+      | i, g_, (I.Nil, s), vt -> T.nils
+      | i, g_, (I.SClo (s_, s'), s), vt ->
+          fromSpine (i, g_, (s_, I.comp (s', s)), vt)
       | i, g_, (I.App (u_, s_), s), (I.Pi ((I.Dec (_, v1_), _), v2_), t) ->
           begin if i > 0 then
             fromSpine

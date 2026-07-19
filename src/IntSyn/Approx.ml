@@ -169,7 +169,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
          then u : v : l *)
   let findByReplacementName name =
     begin match varLookupName name with
-    | Some (uvl_, _) -> uvl_
+    | Some (uvl, _) -> uvl
     | None ->
         Debug.msg ~src:Debug.Group.approx ~level:Debug.Level.Debug
           (Debug.Fmt.exact "Failed to find name");
@@ -189,9 +189,9 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         let l'_ = uniToApx l_ in
         (Uni l'_, Uni (whnfUni (Next l'_)))
     | I.Pi ((I.Dec (_, v1_), _), v2_) ->
-        let v1'_, _ (* Type *) = expToApx v1_ in
-        let v2'_, l'_ = expToApx v2_ in
-        (Arrow (v1'_, v2'_), l'_)
+        let v1', _ (* Type *) = expToApx v1_ in
+        let v2', l'_ = expToApx v2_ in
+        (Arrow (v1', v2'), l'_)
     | I.Root (I.FVar (name, _, _), _) ->
         let u_, v_, l_ = findByReplacementName name in
         (u_, v_)
@@ -208,8 +208,8 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
      or G |- V "":"" L = ""hyperkind"" *)
   let classToApx v_ =
     let v'_, l'_ = expToApx v_ in
-    let (Uni l''_) = whnf l'_ in
-    (v'_, l''_)
+    let (Uni l'') = whnf l'_ in
+    (v'_, l'')
 
   (* exactToApx (U, V) = (U-, V-)
      if G |- U : V *)
@@ -253,10 +253,10 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   let rec apxToClassW = function
     | g_, Uni l_, _, allowed (* Next L *) -> I.Uni (apxToUni l_)
     | g_, Arrow (v1_, v2_), l_, allowed ->
-        let v1'_ = apxToClass (g_, v1_, type_, allowed) in
-        let d_ = I.Dec (None, v1'_) in
-        let v2'_ = apxToClass (I.Decl (g_, d_), v2_, l_, allowed) in
-        I.Pi ((d_, I.Maybe), v2'_)
+        let v1' = apxToClass (g_, v1_, type_, allowed) in
+        let d_ = I.Dec (None, v1') in
+        let v2' = apxToClass (I.Decl (g_, d_), v2_, l_, allowed) in
+        I.Pi ((d_, I.Maybe), v2')
     | g_, (CVar r as v_), l_, allowed (* Type or Kind *) ->
         let name = getReplacementName (v_, Uni l_, Next l_, allowed) in
         let s = I.Shift (I.ctxLength g_) in
@@ -389,14 +389,14 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         | I.NSDef d1, _ -> match_ (constDefApx d1, v2_)
         | _, I.NSDef d2 -> match_ (v1_, constDefApx d2)
         end
-    | Arrow (v1_, v2_), Arrow (v3_, v4_) -> begin
-        (try match_ (v1_, v3_)
+    | Arrow (v1_, v2_), Arrow (v3, v4) -> begin
+        (try match_ (v1_, v3)
          with e ->
            begin
-             match_ (v2_, v4_);
+             match_ (v2_, v4);
              raise e
            end);
-        match_ (v2_, v4_)
+        match_ (v2_, v4)
       end
     | (Arrow _ as v1_), Const (I.Def d2) -> match_ (v1_, constDefApx d2)
     | Const (I.Def d1), (Arrow _ as v2_) -> match_ (constDefApx d1, v2_)

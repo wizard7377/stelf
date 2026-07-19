@@ -48,8 +48,8 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
      formats expression as a string.
      Abbreviate as empty string if chatter level is < 3.
   *)
-  let expToString gu_ =
-    begin if !Global.chatter >= 3 then Print.expToString gu_ else ""
+  let expToString gu =
+    begin if !Global.chatter >= 3 then Print.expToString gu else ""
     end
 
   let rec lower = function
@@ -70,9 +70,9 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     let g_, v2_ = lower (k, I.Null, v1_) in
     let a = I.targetFam v2_ in
     let w_ = W.lookup a in
-    let v3_ = Worldify.worldifyGoal (g_, v2_) in
-    ignore (TypeCheck.typeCheck (g_, (v3_, I.Uni I.Type)));
-    let p_ = Converter.convertGoal (T.embedCtx g_, v3_) in
+    let v3 = Worldify.worldifyGoal (g_, v2_) in
+    ignore (TypeCheck.typeCheck (g_, (v3, I.Uni I.Type)));
+    let p_ = Converter.convertGoal (T.embedCtx g_, v3) in
     let v_ = Timers.time Timers.delphin Opsem.evalPrg p_ in
     print (("Delphin: " ^ TomegaPrint.prgToString (I.Null, v_)) ^ "\n")
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)

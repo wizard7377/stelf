@@ -79,7 +79,7 @@ module Reductio = struct
       n = n' && (def = Sgn.Def_none || not (Sgn.abbreviation n))
     in
     let redux t n sp =
-      reduce (SrTerm_ (t, typeOf (Sgn.classifier n)), sp)
+      reduce (SrTerm (t, typeOf (Sgn.classifier n)), sp)
     in
     begin match (eq_and_strict, def, def') with
     | true, _, _ -> sp_eq (sp, sp')
@@ -294,7 +294,7 @@ module Reductio = struct
       n = n' && (def = Sgn.Def_none || not (Sgn.abbreviation n))
     in
     let redux t n sp =
-      reduce (SrTerm_ (t, typeOf (Sgn.classifier n)), sp)
+      reduce (SrTerm (t, typeOf (Sgn.classifier n)), sp)
     in
     let eq =
       begin match (eq_and_strict, def, def') with
@@ -366,7 +366,7 @@ module Reductio = struct
     | g_, ([], TRoot (n, s), Cg_synth) -> ([], [], Some (TRoot (n, s)))
     | g_, (Omit :: s, TPi (Omit, a, z), c) ->
         let ev : evar = (ref None, a) in
-        let z' = subst_tp (eVarDotId_ ev) z in
+        let z' = subst_tp (eVarDotId ev) z in
         let p, q, aa = constraint_gen' g_ (s, z', c) in
         (p, q, aa)
     | g_, (Elt m :: s, TPi (Minus, a, z), c) ->
@@ -394,7 +394,7 @@ module Reductio = struct
     | g_, ([], Type) -> ([], [])
     | g_, (Omit :: s, KPi (Omit, a, z)) ->
         let ev : evar = (ref None, a) in
-        let z' = subst_knd (eVarDotId_ ev) z in
+        let z' = subst_knd (eVarDotId ev) z in
         let p, q = tp_constraint_gen g_ (s, z') in
         (p, q)
     | g_, (Elt m :: s, KPi (Minus, a, z)) ->
@@ -445,7 +445,7 @@ module Reductio = struct
     | g_, NTerm (NRoot (Const n, s)), a ->
         let b =
           begin match Sgn.classifier n with
-          | Tclass_ b -> b
+          | Tclass b -> b
           | _ -> raise (Error "signature invariant violated!")
           end
         in
@@ -468,7 +468,7 @@ module Reductio = struct
     | _, (g_, TRoot (n, s)) ->
         let k =
           begin match Sgn.classifier n with
-          | Kclass_ k -> k
+          | Kclass k -> k
           | _ -> raise (Error "signature invariant violated!")
           end
         in
@@ -512,7 +512,7 @@ module Reductio = struct
     | g_, ARoot (Const n, s) ->
         let b =
           begin match Sgn.classifier n with
-          | Tclass_ b -> b
+          | Tclass b -> b
           | _ -> raise (Error "signature invariant violated!")
           end
         in

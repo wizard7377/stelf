@@ -159,8 +159,8 @@ end) : TOTAL = struct
 
   and checkClauseW = function
     | g_, (I.Pi ((d1_, Maybe), v2_), s), occ ->
-        let d1'_ = N.decEName (g_, I.decSub (d1_, s)) in
-        checkClause (I.Decl (g_, d1'_), (v2_, I.dot1 s), P.body occ)
+        let d1' = N.decEName (g_, I.decSub (d1_, s)) in
+        checkClause (I.Decl (g_, d1'), (v2_, I.dot1 s), P.body occ)
     | g_, (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s), occ ->
         ignore (checkClause (I.Decl (g_, d1_), (v2_, I.dot1 s), P.body occ));
         checkGoal (g_, (v1_, s), P.label occ)

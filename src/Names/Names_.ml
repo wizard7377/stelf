@@ -1044,7 +1044,7 @@ module MakeNames
        Used for implicit EVar in constant definitions after abstraction.
     *)
   let rec defEName' = function
-    | g_, 0, uv_ -> uv_
+    | g_, 0, uv -> uv
     | g_, i, (IntSyn.Lam (d_, u_), IntSyn.Pi ((_, p_ (* = D *)), v_)) ->
         let d'_ = decEName (g_, d_) in
         let u'_, v'_ = defEName' (IntSyn.Decl (g_, d'_), i - 1, (u_, v_)) in
@@ -1052,7 +1052,7 @@ module MakeNames
   (* i > 0 *)
 
   (* | defEName' (G, i, (U, V)) = (U, V) *)
-  let rec defEName (imp, uv_) = defEName' (IntSyn.Null, imp, uv_)
+  let rec defEName (imp, uv) = defEName' (IntSyn.Null, imp, uv)
 
   let rec nameConDec' = function
     | IntSyn.ConDec (name, parent, imp, status, v_, l_) ->

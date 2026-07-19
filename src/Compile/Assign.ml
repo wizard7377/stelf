@@ -38,8 +38,8 @@ end) : ASSIGN = struct
     let rec assignExpW = function
       | g_, (Uni l1_, _), (Uni l2_, _), cnstr -> cnstr
       | ( g_,
-          ((Root (h1_, s1_), s1) as us1_),
-          ((Root (h2_, s2_), s2) as us2_),
+          ((Root (h1_, s1_), s1) as us1),
+          ((Root (h2_, s2_), s2) as us2),
           cnstr ) ->
           begin match (h1_, h2_) with
           | Const c1, Const c2 ->
@@ -57,10 +57,10 @@ end) : ASSIGN = struct
           | Def d1, Def d2 ->
               begin if d1 = d2 then assignSpine (g_, (s1_, s1), (s2_, s2), cnstr)
               else
-                assignExp (g_, Whnf.expandDef us1_, Whnf.expandDef us2_, cnstr)
+                assignExp (g_, Whnf.expandDef us1, Whnf.expandDef us2, cnstr)
               end
-          | Def d1, _ -> assignExp (g_, Whnf.expandDef us1_, us2_, cnstr)
-          | _, Def d2 -> assignExp (g_, us1_, Whnf.expandDef us2_, cnstr)
+          | Def d1, _ -> assignExp (g_, Whnf.expandDef us1, us2, cnstr)
+          | _, Def d2 -> assignExp (g_, us1, Whnf.expandDef us2, cnstr)
           | ( FgnConst (cs1, ConDec (n1, _, _, _, _, _)),
               FgnConst (cs2, ConDec (n2, _, _, _, _, _)) ) ->
               begin if cs1 = cs2 && n1 = n2 then cnstr
@@ -72,9 +72,9 @@ end) : ASSIGN = struct
               else assignExp (g_, (w1_, s1), (w2_, s2), cnstr)
               end
           | FgnConst (_, ConDef (_, _, _, w1_, _, _, _)), _ ->
-              assignExp (g_, (w1_, s1), us2_, cnstr)
+              assignExp (g_, (w1_, s1), us2, cnstr)
           | _, FgnConst (_, ConDef (_, _, _, w2_, _, _, _)) ->
-              assignExp (g_, us1_, (w2_, s2), cnstr)
+              assignExp (g_, us1, (w2_, s2), cnstr)
           | _ -> raise (Assignment "Head mismatch ")
           end
       | g_, (Lam (d1_, u1_), s1), (Lam (d2_, u2_), s2), cnstr ->
@@ -93,13 +93,13 @@ end) : ASSIGN = struct
           let cnstr' = assignExp (g_, (v1_, s1), (v2_, s2), cnstr) in
           assignExp
             (Decl (g_, decSub (d1_, s1)), (u1_, dot1 s1), (u2_, dot1 s2), cnstr')
-      | g_, ((u_, s1) as us1_), ((EVar (r2, _, _, _), s2) as us2_), cnstr ->
+      | g_, ((u_, s1) as us1), ((EVar (r2, _, _, _), s2) as us2), cnstr ->
         begin
-          r2 := Some (EClo (fst us1_, snd us1_));
+          r2 := Some (EClo (fst us1, snd us1));
           cnstr
         end
-      | g_, ((u_, s1) as us1_), ((AVar r2, s2) as us2_), cnstr -> begin
-          r2 := Some (EClo (fst us1_, snd us1_));
+      | g_, ((u_, s1) as us1), ((AVar r2, s2) as us2), cnstr -> begin
+          r2 := Some (EClo (fst us1, snd us1));
           cnstr
         end
       | g_, (Lam (d1_, u1_), s1), (u2_, s2), cnstr ->
@@ -108,18 +108,18 @@ end) : ASSIGN = struct
               (u1_, dot1 s1),
               (Redex (EClo (u2_, shift), App (Root (BVar 1, Nil), Nil)), dot1 s2),
               cnstr )
-      | g_, us1_, ((EClo (u_, s'), s) as us2_), cnstr ->
-          assignExp (g_, us1_, (u_, comp (s', s)), cnstr)
-      | g_, ((EVar (r, _, v_, cnstr_), s) as us1_), us2_, cnstr ->
-          Eqn (g_, EClo (fst us1_, snd us1_), EClo (fst us2_, snd us2_))
+      | g_, us1, ((EClo (u_, s'), s) as us2), cnstr ->
+          assignExp (g_, us1, (u_, comp (s', s)), cnstr)
+      | g_, ((EVar (r, _, v_, cnstr_), s) as us1), us2, cnstr ->
+          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2))
           :: cnstr
-      | g_, ((EClo (u_, s'), s) as us1_), us2_, cnstr ->
-          assignExp (g_, (u_, comp (s', s)), us2_, cnstr)
-      | g_, ((FgnExp (_, fe), _) as us1_), us2_, cnstr ->
-          Eqn (g_, EClo (fst us1_, snd us1_), EClo (fst us2_, snd us2_))
+      | g_, ((EClo (u_, s'), s) as us1), us2, cnstr ->
+          assignExp (g_, (u_, comp (s', s)), us2, cnstr)
+      | g_, ((FgnExp (_, fe), _) as us1), us2, cnstr ->
+          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2))
           :: cnstr
-      | g_, us1_, ((FgnExp (_, fe), _) as us2_), cnstr ->
-          Eqn (g_, EClo (fst us1_, snd us1_), EClo (fst us2_, snd us2_))
+      | g_, us1, ((FgnExp (_, fe), _) as us2), cnstr ->
+          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2))
           :: cnstr
 
     and assignSpine = function
@@ -132,8 +132,8 @@ end) : ASSIGN = struct
           let cnstr' = assignExp (g_, (u1_, s1), (u2_, s2), cnstr) in
           assignSpine (g_, (s1_, s1), (s2_, s2), cnstr')
 
-    and assignExp (g_, us1_, ((u2_, s2) as us2_), cnstr) =
-      assignExpW (g_, Whnf.whnf us1_, Whnf.whnf us2_, cnstr)
+    and assignExp (g_, us1, ((u2_, s2) as us2), cnstr) =
+      assignExpW (g_, Whnf.whnf us1, Whnf.whnf us2, cnstr)
 
     let rec solveCnstr = function
       | [] -> true
@@ -172,18 +172,18 @@ end) : ASSIGN = struct
         end
 
     let unifyW = function
-      | g_, ((AVar ({ contents = None } as r) as xs1_), s), us2_ ->
-          r := Some (EClo (fst us2_, snd us2_))
-      | g_, xs1_, us2_ -> Unify.unifyW (g_, xs1_, us2_)
+      | g_, ((AVar ({ contents = None } as r) as xs1), s), us2 ->
+          r := Some (EClo (fst us2, snd us2))
+      | g_, xs1, us2 -> Unify.unifyW (g_, xs1, us2)
 
-    let unify (g_, xs1_, us2_) = unifyW (g_, Whnf.whnf xs1_, Whnf.whnf us2_)
+    let unify (g_, xs1, us2) = unifyW (g_, Whnf.whnf xs1, Whnf.whnf us2)
 
     let matchW = function
-      | g_, ((AVar ({ contents = None } as r) as xs1_), s), us2_ ->
-          r := Some (EClo (fst us2_, snd us2_))
-      | g_, xs1_, us2_ -> Match.matchW (g_, xs1_, us2_)
+      | g_, ((AVar ({ contents = None } as r) as xs1), s), us2 ->
+          r := Some (EClo (fst us2, snd us2))
+      | g_, xs1, us2 -> Match.matchW (g_, xs1, us2)
 
-    let match_ (g_, xs1_, us2_) = matchW (g_, Whnf.whnf xs1_, Whnf.whnf us2_)
+    let match_ (g_, xs1, us2) = matchW (g_, Whnf.whnf xs1, Whnf.whnf us2)
   end
 
   (*
@@ -231,18 +231,18 @@ end) : ASSIGN = struct
   (* Xs1 should not contain any uninstantiated AVar anymore *)
   let solveCnstr = solveCnstr
 
-  let unifiable (g_, us1_, us2_) =
+  let unifiable (g_, us1, us2) =
     try
       begin
-        unify (g_, us1_, us2_);
+        unify (g_, us1, us2);
         true
       end
     with Unify.Unify msg -> false
 
-  let instance (g_, us1_, us2_) =
+  let instance (g_, us1, us2) =
     try
       begin
-        match_ (g_, us1_, us2_);
+        match_ (g_, us1, us2);
         true
       end
     with Match.Match msg -> false
@@ -250,8 +250,8 @@ end) : ASSIGN = struct
   (*
     fun assign(G, Us1, Us2) = assignExp(G, Us1, Us2, [])
     *)
-  let assignable (g_, us1_, uts2_) =
-    try Some (assignExp (g_, us1_, uts2_, [])) with Assignment msg -> None
+  let assignable (g_, us1, uts2) =
+    try Some (assignExp (g_, us1, uts2, [])) with Assignment msg -> None
 
   let firstConstArg ((IntSyn.Root ((IntSyn.Const c as h), s_) as a_), s) =
     let i = IntSyn.conDecImp (IntSyn.sgnLookup c) in

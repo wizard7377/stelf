@@ -37,8 +37,8 @@ end) : TRACE = struct
     | g_, I.Def d -> N.qidToString (N.constQid d)
     | g_, I.BVar k -> N.bvarName (g_, k)
 
-  let expToString gu_ = P.expToString gu_ ^ ". "
-  let decToString gd_ = P.decToString gd_ ^ ". "
+  let expToString gu = P.expToString gu ^ ". "
+  let decToString gd = P.decToString gd ^ ". "
 
   let eqnToString (g_, u1_, u2_) =
     ((P.expToString (g_, u1_) ^ " = ") ^ P.expToString (g_, u2_)) ^ ". "
@@ -56,9 +56,9 @@ end) : TRACE = struct
         end
       end
 
-  let evarsToString xnames_ =
-    let inst = P.evarInstToString xnames_ in
-    let constrOpt = P.evarCnstrsToStringOpt xnames_ in
+  let evarsToString xnames =
+    let inst = P.evarInstToString xnames in
+    let constrOpt = P.evarCnstrsToStringOpt xnames in
     begin match constrOpt with
     | None -> inst
     | Some constr -> (inst ^ "\nConstraints:\n") ^ constr
@@ -289,30 +289,30 @@ end) : TRACE = struct
     | g_, DischargeHyp (_, I.Dec (Some x, _)) -> "% Discharging hypothesis " ^ x
     | g_, IntroParm (_, d_) -> "% Introducing parameter\n" ^ decToString (g_, d_)
     | g_, DischargeParm (_, I.Dec (Some x, _)) -> "% Discharging parameter " ^ x
-    | g_, Resolved (hc_, ha_) ->
-        (("% Resolved with clause " ^ headToString (g_, hc_)) ^ "\n")
+    | g_, Resolved (hc, ha) ->
+        (("% Resolved with clause " ^ headToString (g_, hc)) ^ "\n")
         ^ evarsToString (List.rev !currentEVarInst)
-    | g_, Subgoal ((hc_, ha_), msg) ->
+    | g_, Subgoal ((hc, ha), msg) ->
         (("% Solving subgoal (" ^ Int.toString (msg ())) ^ ") of clause ")
-        ^ headToString (g_, hc_)
+        ^ headToString (g_, hc)
     | g_, SolveGoal (Some tag, _, v_) ->
         (("% Goal " ^ Int.toString tag) ^ ":\n") ^ expToString (g_, v_)
     | g_, SucceedGoal (Some tag, _, v_) ->
         ("% Goal " ^ Int.toString tag) ^ " succeeded"
     | g_, CommitGoal (Some tag, _, v_) ->
         ("% Goal " ^ Int.toString tag) ^ " committed to first solution"
-    | g_, RetryGoal (Some tag, (hc_, ha_), v_) ->
-        ((((("% Backtracking from clause " ^ headToString (g_, hc_)) ^ "\n")
+    | g_, RetryGoal (Some tag, (hc, ha), v_) ->
+        ((((("% Backtracking from clause " ^ headToString (g_, hc)) ^ "\n")
           ^ "% Retrying goal ")
          ^ Int.toString tag)
         ^ ":\n")
         ^ expToString (g_, v_)
     | g_, FailGoal (Some tag, _, v_) -> "% Failed goal " ^ Int.toString tag
-    | g_, Unify ((hc_, ha_), q_, p_) ->
-        (("% Trying clause " ^ headToString (g_, hc_)) ^ "\n")
+    | g_, Unify ((hc, ha), q_, p_) ->
+        (("% Trying clause " ^ headToString (g_, hc)) ^ "\n")
         ^ eqnToString (g_, q_, p_)
-    | g_, FailUnify ((hc_, ha_), msg) ->
-        (("% Unification failed with clause " ^ headToString (g_, hc_)) ^ ":\n")
+    | g_, FailUnify ((hc, ha), msg) ->
+        (("% Unification failed with clause " ^ headToString (g_, hc)) ^ ":\n")
         ^ msg
 
   let traceEvent (g_, e) = print (eventToString (g_, e))
@@ -322,8 +322,8 @@ end) : TRACE = struct
     | cids, I.Def d -> List.exists (function c' -> d = c') cids
     | cids, I.BVar k -> false
 
-  let monitorHeads (cids, (hc_, ha_)) =
-    monitorHead (cids, hc_) || monitorHead (cids, ha_)
+  let monitorHeads (cids, (hc, ha)) =
+    monitorHead (cids, hc) || monitorHead (cids, ha)
 
   let monitorEvent = function
     | cids, IntroHyp (h_, _) -> monitorHead (cids, h_)
@@ -331,14 +331,14 @@ end) : TRACE = struct
     | cids, IntroParm (h_, _) -> monitorHead (cids, h_)
     | cids, DischargeParm (h_, _) -> monitorHead (cids, h_)
     | cids, SolveGoal (_, h_, v_) -> monitorHead (cids, h_)
-    | cids, SucceedGoal (_, (hc_, ha_), _) -> monitorHeads (cids, (hc_, ha_))
-    | cids, CommitGoal (_, (hc_, ha_), _) -> monitorHeads (cids, (hc_, ha_))
-    | cids, RetryGoal (_, (hc_, ha_), _) -> monitorHeads (cids, (hc_, ha_))
+    | cids, SucceedGoal (_, (hc, ha), _) -> monitorHeads (cids, (hc, ha))
+    | cids, CommitGoal (_, (hc, ha), _) -> monitorHeads (cids, (hc, ha))
+    | cids, RetryGoal (_, (hc, ha), _) -> monitorHeads (cids, (hc, ha))
     | cids, FailGoal (_, h_, _) -> monitorHead (cids, h_)
-    | cids, Resolved (hc_, ha_) -> monitorHeads (cids, (hc_, ha_))
-    | cids, Subgoal ((hc_, ha_), _) -> monitorHeads (cids, (hc_, ha_))
-    | cids, Unify ((hc_, ha_), _, _) -> monitorHeads (cids, (hc_, ha_))
-    | cids, FailUnify ((hc_, ha_), _) -> monitorHeads (cids, (hc_, ha_))
+    | cids, Resolved (hc, ha) -> monitorHeads (cids, (hc, ha))
+    | cids, Subgoal ((hc, ha), _) -> monitorHeads (cids, (hc, ha))
+    | cids, Unify ((hc, ha), _, _) -> monitorHeads (cids, (hc, ha))
+    | cids, FailUnify ((hc, ha), _) -> monitorHeads (cids, (hc, ha))
 
   let monitorDetail = function
     | Unify _ -> !detail >= 2

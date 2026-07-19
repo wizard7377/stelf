@@ -54,13 +54,13 @@ end) : LEMMA with module MetaSyn = Lemma__0.MetaSyn' = struct
           let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
           (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'))
 
-    let apply (M.State (name, gm_, v_), a) =
-      let (M.Prefix (g'_, m'_, b'_) as gm'_), s' = createEVars gm_ in
+    let apply (M.State (name, gm, v_), a) =
+      let (M.Prefix (g'_, m'_, b'_) as gm'), s' = createEVars gm in
       let u'_, vs'_ = M.createAtomConst (g'_, I.Const a) in
       A.abstract
         (M.State
            ( name,
-             gm'_,
+             gm',
              I.Pi ((I.Dec (None, u'_), I.No), I.EClo (v_, I.comp (s', I.shift)))
            ))
   end

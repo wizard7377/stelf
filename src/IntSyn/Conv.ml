@@ -29,7 +29,7 @@ end) : CONV = struct
 
   let rec convExpW = function
     | (Uni l1_, _), (Uni l2_, _) -> eqUni (l1_, l2_)
-    | ((Root (h1_, s1_), s1) as us1_), ((Root (h2_, s2_), s2) as us2_) ->
+    | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
         begin match (h1_, h2_) with
         | BVar k1, BVar k2 -> k1 = k2 && convSpine ((s1_, s1), (s2_, s2))
         | Const c1, Const c2 -> c1 = c2 && convSpine ((s1_, s1), (s2_, s2))
@@ -44,18 +44,18 @@ end) : CONV = struct
             && convSpine ((s1_, s1), (s2_, s2))
         | Def d1, Def d2 ->
             (d1 = d2 && convSpine ((s1_, s1), (s2_, s2)))
-            || convExpW (Whnf.expandDef us1_, Whnf.expandDef us2_)
-        | Def d1, _ -> convExpW (Whnf.expandDef us1_, us2_)
-        | _, Def d2 -> convExpW (us1_, Whnf.expandDef us2_)
+            || convExpW (Whnf.expandDef us1, Whnf.expandDef us2)
+        | Def d1, _ -> convExpW (Whnf.expandDef us1, us2)
+        | _, Def d2 -> convExpW (us1, Whnf.expandDef us2)
         | _ -> false
         end
-    | (Pi (dp1_, v1_), s1), (Pi (dp2_, v2_), s2) ->
-        convDecP ((dp1_, s1), (dp2_, s2))
+    | (Pi (dp1, v1_), s1), (Pi (dp2, v2_), s2) ->
+        convDecP ((dp1, s1), (dp2, s2))
         && convExp ((v1_, dot1 s1), (v2_, dot1 s2))
-    | ((Pi _, _) as us1_), ((Root (Def _, _), _) as us2_) ->
-        convExpW (us1_, Whnf.expandDef us2_)
-    | ((Root (Def _, _), _) as us1_), ((Pi _, _) as us2_) ->
-        convExpW (Whnf.expandDef us1_, us2_)
+    | ((Pi _, _) as us1), ((Root (Def _, _), _) as us2) ->
+        convExpW (us1, Whnf.expandDef us2)
+    | ((Root (Def _, _), _) as us1), ((Pi _, _) as us2) ->
+        convExpW (Whnf.expandDef us1, us2)
     | (Lam (d1_, u1_), s1), (Lam (d2_, u2_), s2) ->
         convExp ((u1_, dot1 s1), (u2_, dot1 s2))
     | (Lam (d1_, u1_), s1), (u2_, s2) ->
@@ -67,17 +67,17 @@ end) : CONV = struct
         convExp
           ( (Redex (EClo (u1_, shift), App (Root (BVar 1, Nil), Nil)), dot1 s1),
             (u2_, dot1 s2) )
-    | (FgnExp (csfe1_csid, csfe1_ops), s1), us2_ ->
-        let us2_e, us2_s = us2_ in
+    | (FgnExp (csfe1_csid, csfe1_ops), s1), us2 ->
+        let us2_e, us2_s = us2 in
         FgnExpStd.EqualTo.apply (csfe1_csid, csfe1_ops) (EClo (us2_e, us2_s))
-    | us1_, (FgnExp (csfe2_csid, csfe2_ops), s2) ->
-        let us1_e, us1_s = us1_ in
+    | us1, (FgnExp (csfe2_csid, csfe2_ops), s2) ->
+        let us1_e, us1_s = us1 in
         FgnExpStd.EqualTo.apply (csfe2_csid, csfe2_ops) (EClo (us1_e, us1_s))
     | (EVar (r1, _, _, _), s1), (EVar (r2, _, _, _), s2) ->
         r1 == r2 && convSub (s1, s2)
     | _ -> false
 
-  and convExp (us1_, us2_) = convExpW (Whnf.whnf us1_, Whnf.whnf us2_)
+  and convExp (us1, us2) = convExpW (Whnf.whnf us1, Whnf.whnf us2)
 
   and convSpine = function
     | (Nil, _), (Nil, _) -> true
@@ -91,8 +91,8 @@ end) : CONV = struct
     | Shift n, Shift m -> true
     | Shift n, (Dot _ as s2) -> convSub (Dot (Idx (n + 1), Shift (n + 1)), s2)
     | (Dot _ as s1), Shift m -> convSub (s1, Dot (Idx (m + 1), Shift (m + 1)))
-    | Dot (ft1_, s1), Dot (ft2_, s2) ->
-        begin match (ft1_, ft2_) with
+    | Dot (ft1, s1), Dot (ft2, s2) ->
+        begin match (ft1, ft2) with
         | Idx n1, Idx n2 -> n1 = n2
         | Exp u1_, Exp u2_ -> convExp ((u1_, id), (u2_, id))
         | Block (Bidx k1), Block (Bidx k2) -> k1 = k2

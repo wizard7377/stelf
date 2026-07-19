@@ -145,13 +145,13 @@ end) : INTERACTIVE = struct
 
     let focus_ : S.state list ref = ref []
     let menu_ : menuItem list option ref = ref None
-    let splittingToMenu_ (o_, a_) = Split o_ :: a_
+    let splittingToMenu (o_, a_) = Split o_ :: a_
     let initFocus () = focus_ := []
 
     let normalize () =
       begin match !focus_ with
-      | S.State (w_, psi_, p_, f_) :: rest_ ->
-          focus_ := S.State (w_, psi_, T.derefPrg p_, f_) :: rest_
+      | S.State (w_, psi, p_, f_) :: rest_ ->
+          focus_ := S.State (w_, psi, T.derefPrg p_, f_) :: rest_
       | _ -> ()
       end
 
@@ -206,20 +206,20 @@ end) : INTERACTIVE = struct
     let printmenu () =
       begin match !focus_ with
       | [] -> abort "QED"
-      | S.State (w_, psi_, p_, f_) :: r_ -> begin
+      | S.State (w_, psi, p_, f_) :: r_ -> begin
           print "\n=======================";
           begin
             print "\n= META THEOREM PROVER =\n";
             begin
-              print (TomegaPrint.ctxToString psi_);
+              print (TomegaPrint.ctxToString psi);
               begin
                 print "\n-----------------------\n";
                 begin
-                  print (TomegaPrint.forToString (psi_, f_));
+                  print (TomegaPrint.forToString (psi, f_));
                   begin
                     print "\n-----------------------\n";
                     begin
-                      print (TomegaPrint.prgToString (psi_, p_));
+                      print (TomegaPrint.prgToString (psi, p_));
                       begin
                         print "\n-----------------------";
                         begin
@@ -267,15 +267,15 @@ end) : INTERACTIVE = struct
     let menu () =
       begin match !focus_ with
       | [] -> print "Please initialize first\n"
-      | S.State (w_, psi_, p_, f_) :: _ ->
+      | S.State (w_, psi, p_, f_) :: _ ->
           let xs_ = S.collectT p_ in
           let f1_ =
             map
               (function
-                | T.EVar (psi_, r, f_, tc_, tCs_, x_) -> begin
+                | T.EVar (psi, r, f_, tc, tCs, x_) -> begin
                     Names.varReset I.Null;
                     S.Focus
-                      ( T.EVar (TomegaPrint.nameCtx psi_, r, f_, tc_, tCs_, x_),
+                      ( T.EVar (TomegaPrint.nameCtx psi, r, f_, tc, tCs, x_),
                         w_ )
                   end)
               xs_
@@ -359,28 +359,28 @@ end) : INTERACTIVE = struct
       let select c =
         try Intsyn.Order.selLookup c with _ -> Intsyn.Order.Lex []
       in
-      let tc_ = Tomega.transformTC (I.Null, f_, map select cL) in
+      let tc = Tomega.transformTC (I.Null, f_, map select cL) in
       let (w_ :: _) = ws_ in
       ignore (focus_ := [ S.init (f_, w_) ]);
       let p_ =
         begin match !focus_ with
         | [] -> abort "Initialization of proof goal failed\n"
-        | S.State (w_, psi_, p_, f_) :: _ -> p_
+        | S.State (w_, psi, p_, f_) :: _ -> p_
         end
       in
       let xs_ = S.collectT p_ in
       let f_ =
         map
           (function
-            | T.EVar (psi_, r, f_, tc_, tCs_, x_) -> begin
+            | T.EVar (psi, r, f_, tc, tCs, x_) -> begin
                 Names.varReset I.Null;
                 S.Focus
-                  (T.EVar (TomegaPrint.nameCtx psi_, r, f_, tc_, tCs_, x_), w_)
+                  (T.EVar (TomegaPrint.nameCtx psi, r, f_, tc, tCs, x_), w_)
               end)
           xs_
       in
-      let (ofix_ :: []) = map (function f -> FixedPoint.expand (f, tc_)) f_ in
-      ignore (FixedPoint.apply ofix_);
+      let (ofix :: []) = map (function f -> FixedPoint.expand (f, tc)) f_ in
+      ignore (FixedPoint.apply ofix);
       ignore (normalize ());
       ignore (menu ());
       ignore (printmenu ());
@@ -389,11 +389,11 @@ end) : INTERACTIVE = struct
     let focus n =
       begin match !focus_ with
       | [] -> print "Please initialize first\n"
-      | S.State (w_, psi_, p_, f_) :: _ ->
+      | S.State (w_, psi, p_, f_) :: _ ->
           let rec findIEVar = function
             | [] -> raise (Error ("cannot focus on " ^ n))
             | y_ :: ys_ ->
-                begin if Names.evarName (T.coerceCtx psi_, y_) = n then begin
+                begin if Names.evarName (T.coerceCtx psi, y_) = n then begin
                   focus_ := S.StateLF y_ :: !focus_;
                   begin
                     normalize ();
@@ -408,10 +408,10 @@ end) : INTERACTIVE = struct
           in
           let rec findTEVar = function
             | [] -> findIEVar (S.collectLF p_)
-            | (T.EVar (psi_, r, f_, tc_, tCs_, y_) as x_) :: xs_ ->
-                begin if Names.evarName (T.coerceCtx psi_, y_) = n then begin
+            | (T.EVar (psi, r, f_, tc, tCs, y_) as x_) :: xs_ ->
+                begin if Names.evarName (T.coerceCtx psi, y_) = n then begin
                   focus_ :=
-                    S.State (w_, TomegaPrint.nameCtx psi_, x_, f_) :: !focus_;
+                    S.State (w_, TomegaPrint.nameCtx psi, x_, f_) :: !focus_;
                   begin
                     normalize ();
                     begin

@@ -127,17 +127,17 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
 
     let rec nonIndex = function
       | _, [] -> true
-      | r, I.EVar (_, _, v_, _) :: ge_ ->
-          (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge_)
+      | r, I.EVar (_, _, v_, _) :: ge ->
+          (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge)
 
     let rec selectEVar = function
       | [] -> []
-      | (I.EVar (r, _, _, { contents = [] }) as x_) :: ge_ ->
-          let xs_ = selectEVar ge_ in
+      | (I.EVar (r, _, _, { contents = [] }) as x_) :: ge ->
+          let xs_ = selectEVar ge in
           begin if nonIndex (r, xs_) then xs_ @ [ x_ ] else xs_
           end
-      | (I.EVar (r, _, _, cnstrs) as x_) :: ge_ ->
-          let xs_ = selectEVar ge_ in
+      | (I.EVar (r, _, _, cnstrs) as x_) :: ge ->
+          let xs_ = selectEVar ge in
           begin if nonIndex (r, xs_) then x_ :: xs_ else xs_
           end
 
@@ -305,14 +305,14 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
       | 0, _, _, _, _, acc -> acc
       | ( max,
           depth,
-          ((I.Root (ha_, _), _) as ps'),
+          ((I.Root (ha, _), _) as ps'),
           (C.DProg (g_, dPool) as dp),
           sc,
           acc ) ->
           let rec matchSig' = function
             | [], acc' -> acc'
-            | hc_ :: sgn', acc' ->
-                let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+            | hc :: sgn', acc' ->
+                let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
                 let acc''' =
                   CsManager.trail (function () ->
                       rSolve
@@ -321,15 +321,15 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
                           ps',
                           (r, I.id),
                           dp,
-                          (fun (s_, acc'') -> sc (I.Root (hc_, s_), acc'')),
+                          (fun (s_, acc'') -> sc (I.Root (hc, s_), acc'')),
                           acc' ))
                 in
                 matchSig' (sgn', acc''')
           in
           let rec matchDProg = function
-            | I.Null, _, acc' -> matchSig' (Index.lookup (cidFromHead ha_), acc')
-            | I.Decl (dPool', C.Dec (r, s, ha'_)), n, acc' ->
-                begin if eqHead (ha_, ha'_) then
+            | I.Null, _, acc' -> matchSig' (Index.lookup (cidFromHead ha), acc')
+            | I.Decl (dPool', C.Dec (r, s, ha')), n, acc' ->
+                begin if eqHead (ha, ha') then
                   let acc''' =
                     CsManager.trail (function () ->
                         rSolve
@@ -353,7 +353,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
     and searchEx' arg__1 arg__2 =
       begin match (arg__1, arg__2) with
       | max, ([], sc, acc) -> sc acc
-      | max, ((I.EVar (r, g_, v_, _) as x_) :: ge_, sc, acc) ->
+      | max, ((I.EVar (r, g_, v_, _) as x_) :: ge, sc, acc) ->
           solve
             ( max,
               0,
@@ -362,30 +362,30 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
               (fun (u'_, acc') ->
                 try
                   Unify.unify (g_, (x_, I.id), (u'_, I.id));
-                  searchEx' max (ge_, sc, acc')
+                  searchEx' max (ge, sc, acc')
                 with Unify.Unify _ -> acc'),
               acc )
       end
 
-    let rec searchEx (it, depth) (ge_, sc, acc) =
+    let rec searchEx (it, depth) (ge, sc, acc) =
       begin
         begin if !Global.chatter > 5 then print "[Search: " else ()
         end;
         searchEx' depth
-          ( selectEVar ge_,
+          ( selectEVar ge,
             (fun acc' ->
               begin if !Global.chatter > 5 then print "OK]\n" else ()
               end;
-              let ge'_ =
+              let ge' =
                 foldr
                   (function
                     | (I.EVar (_, g_, _, _) as x_), l_ ->
                         Abstract.collectEVars (g_, (x_, I.id), l_))
-                  [] ge_
+                  [] ge
               in
-              let gE' = List.length ge'_ in
+              let gE' = List.length ge' in
               begin if gE' > 0 then
-                begin if it > 0 then searchEx (it - 1, depth) (ge'_, sc, acc')
+                begin if it > 0 then searchEx (it - 1, depth) (ge', sc, acc')
                 else raise (Error "not found")
                 end
               else sc acc'
@@ -393,7 +393,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
             acc )
       end
 
-    let search (maxFill, ge_, sc) = searchEx (1, maxFill) (ge_, sc, [])
+    let search (maxFill, ge, sc) = searchEx (1, maxFill) (ge, sc, [])
   end
 
   (* isInstantiated (V) = SOME(cid) or NONE

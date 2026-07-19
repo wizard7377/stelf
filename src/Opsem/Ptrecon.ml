@@ -107,7 +107,7 @@ end) : PTRECON = struct
   let rec solve' = function
     | o_, (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
         matchAtom (o_, (p, s), dp, sc)
-    | o_, (C.Impl (r, a_, ha_, g), s), C.DProg (g_, dPool), sc ->
+    | o_, (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
         let d'_ = I.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
           begin match MT.memberCtx ((g_, I.EClo (a_, s)), g_) with
@@ -123,14 +123,14 @@ end) : PTRECON = struct
               solve'
                 ( o_,
                   (g, I.dot1 s),
-                  C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+                  C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
                   function o_, m_ -> sc (o_, I.Lam (d'_, m_)) )
           end
         else
           solve'
             ( o_,
               (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
               function o_, m_ -> sc (o_, I.Lam (d'_, m_)) )
         end
         (*      solve' (O, (g, I.dot1 s), C.DProg (I.Decl(G, D'), I.Decl (dPool, C.Dec (r, s, Ha))),
@@ -210,32 +210,32 @@ end) : PTRECON = struct
         && aSolve ((eqns, s), dp, cnstr)
 
   and matchAtom
-      ( ho_ :: o_,
-        ((I.Root (ha_, s_), s) as ps'),
+      ( ho :: o_,
+        ((I.Root (ha, s_), s) as ps'),
         (C.DProg (g_, dPool) as dp),
         sc ) =
     let rec matchSig = function
       | [], k -> raise (Error " \noracle #Pc does not exist \n")
-      | (I.Const c as hc_) :: sgn', k ->
+      | (I.Const c as hc) :: sgn', k ->
           begin if c = k then
-            let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+            let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
             rSolve
               ( o_,
                 ps',
                 (r, I.id),
                 dp,
-                function o_, s_ -> sc (o_, I.Root (hc_, s_)) )
+                function o_, s_ -> sc (o_, I.Root (hc, s_)) )
           else matchSig (sgn', k)
           end
-      | (I.Def d as hc_) :: sgn', k ->
+      | (I.Def d as hc) :: sgn', k ->
           begin if d = k then
-            let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+            let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
             rSolve
               ( o_,
                 ps',
                 (r, I.id),
                 dp,
-                function o_, s_ -> sc (o_, I.Root (hc_, s_)) )
+                function o_, s_ -> sc (o_, I.Root (hc, s_)) )
           else matchSig (sgn', k)
           end
       (* should not happen *)
@@ -247,8 +247,8 @@ end) : PTRECON = struct
                "\n\
                \ selected dynamic clause number does not exist in current \
                 dynamic clause pool!\n")
-      | I.Decl (dPool', C.Dec (r, s, ha'_)), 1, k ->
-          begin if eqHead (ha_, ha'_) then
+      | I.Decl (dPool', C.Dec (r, s, ha')), 1, k ->
+          begin if eqHead (ha, ha') then
             rSolve
               ( o_,
                 ps',
@@ -261,8 +261,8 @@ end) : PTRECON = struct
           end
       | I.Decl (dPool', dc), i, k -> matchDProg (dPool', i - 1, k)
     in
-    begin match ho_ with
-    | C.Pc i -> matchSig (Index.lookup (cidFromHead ha_), i)
+    begin match ho with
+    | C.Pc i -> matchSig (Index.lookup (cidFromHead ha), i)
     | C.Dc i -> matchDProg (dPool, i, i)
     | C.Csolver u_ -> sc (o_, u_)
     end

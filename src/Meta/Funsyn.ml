@@ -158,19 +158,19 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
 
     let lemmaSize () = !nextLemma
 
-    let listToCtx gin_ =
+    let listToCtx gin =
       let rec listToCtx' = function
         | g_, [] -> g_
         | g_, d_ :: ds_ -> listToCtx' (I.Decl (g_, d_), ds_)
       in
-      listToCtx' (I.Null, gin_)
+      listToCtx' (I.Null, gin)
 
-    let ctxToList gin_ =
+    let ctxToList gin =
       let rec ctxToList' = function
         | I.Null, g_ -> g_
         | I.Decl (g_, d_), g'_ -> ctxToList' (g_, d_ :: g'_)
       in
-      ctxToList' (gin_, [])
+      ctxToList' (gin, [])
 
     let rec union = function
       | g_, I.Null -> g_
@@ -183,21 +183,21 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
 
     let rec lfctxLength = function
       | I.Null -> 0
-      | I.Decl (psi_, Prim _) -> lfctxLength psi_ + 1
-      | I.Decl (psi_, Block (CtxBlock (_, g_))) ->
-          lfctxLength psi_ + I.ctxLength g_
+      | I.Decl (psi, Prim _) -> lfctxLength psi + 1
+      | I.Decl (psi, Block (CtxBlock (_, g_))) ->
+          lfctxLength psi + I.ctxLength g_
 
-    let lfctxLFDec (psi_, k) =
+    let lfctxLFDec (psi, k) =
       let rec lfctxLFDec' = function
-        | I.Decl (psi'_, (Prim (I.Dec (x, v'_)) as ld_)), 1 -> (ld_, I.Shift k)
-        | I.Decl (psi'_, Prim _), k' -> lfctxLFDec' (psi'_, k' - 1)
-        | I.Decl (psi'_, (Block (CtxBlock (_, g_)) as ld_)), k' ->
+        | I.Decl (psi', (Prim (I.Dec (x, v'_)) as ld)), 1 -> (ld, I.Shift k)
+        | I.Decl (psi', Prim _), k' -> lfctxLFDec' (psi', k' - 1)
+        | I.Decl (psi', (Block (CtxBlock (_, g_)) as ld)), k' ->
             let l = I.ctxLength g_ in
-            begin if k' <= l then (ld_, I.Shift (k - k' + 1))
-            else lfctxLFDec' (psi'_, k' - l)
+            begin if k' <= l then (ld, I.Shift (k - k' + 1))
+            else lfctxLFDec' (psi', k' - l)
             end
       in
-      lfctxLFDec' (psi_, k)
+      lfctxLFDec' (psi, k)
 
     let rec dot1n = function
       | I.Null, s -> s
@@ -214,8 +214,8 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       | (Ex (d1_, f1_), s1), (Ex (d2_, f2_), s2) ->
           Conv.convDec ((d1_, s1), (d2_, s2))
           && convFor ((f1_, I.dot1 s1), (f2_, I.dot1 s2))
-      | (And (f1_, f1'_), s1), (And (f2_, f2'_), s2) ->
-          convFor ((f1_, s1), (f2_, s2)) && convFor ((f1'_, s1), (f2'_, s2))
+      | (And (f1_, f1'), s1), (And (f2_, f2'), s2) ->
+          convFor ((f1_, s1), (f2_, s2)) && convFor ((f1', s1), (f2', s2))
       | _ -> false
 
     and convForBlock = function

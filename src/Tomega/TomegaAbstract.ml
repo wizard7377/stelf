@@ -66,30 +66,30 @@ end) : TOMEGAABSTRACT = struct
     let rec raiseFor = function
       | b'_, (T.True, t) -> T.True
       | b'_, (T.And (f1_, f2_), t) ->
-          let f1'_ = raiseFor (b'_, (f1_, t)) in
-          let f2'_ = raiseFor (b'_, (f2_, t)) in
-          T.And (f1'_, f2'_)
+          let f1' = raiseFor (b'_, (f1_, t)) in
+          let f2' = raiseFor (b'_, (f2_, t)) in
+          T.And (f1', f2')
       | b'_, (T.Ex ((I.Dec (x, v_), q_), f_), t) ->
           let w = S.weaken (b'_, I.targetFam v_) in
           let iw = Whnf.invert w in
-          let b''_ = Whnf.strengthen (iw, b'_) in
-          let v'_ = A.raiseType (b''_, I.EClo (v_, I.comp (t, iw))) in
-          let b'''_, _ = shiftCtx (b'_, I.shift) in
+          let b'' = Whnf.strengthen (iw, b'_) in
+          let v'_ = A.raiseType (b'', I.EClo (v_, I.comp (t, iw))) in
+          let b''', _ = shiftCtx (b'_, I.shift) in
           let t'' = dotn (I.shift, I.ctxLength b'_) in
           let t' = I.comp (t, t'') in
           let s_ = strengthenToSpine (iw, I.ctxLength b'_, (1, I.Nil)) in
-          let u_ = I.Root (I.BVar (I.ctxLength b'''_ + 1), s_) in
+          let u_ = I.Root (I.BVar (I.ctxLength b''' + 1), s_) in
           let t''' = Whnf.dotEta (I.Exp u_, t') in
-          let f'_ = raiseFor (b'''_, (f_, t''')) in
+          let f'_ = raiseFor (b''', (f_, t''')) in
           T.Ex ((I.Dec (x, v'_), q_), f'_)
       | _, (T.All _, _) -> raise Domain
 
     let rec raisePrg = function
       | g_, (T.Unit, t), _ -> T.Unit
       | g_, (T.PairPrg (p1_, p2_), t), T.And (f1_, f2_) ->
-          let p1'_ = raisePrg (g_, (p1_, t), f1_) in
-          let p2'_ = raisePrg (g_, (p2_, t), f2_) in
-          T.PairPrg (p1'_, p2'_)
+          let p1' = raisePrg (g_, (p1_, t), f1_) in
+          let p2' = raisePrg (g_, (p2_, t), f2_) in
+          T.PairPrg (p1', p2')
       | g_, (T.PairExp (u_, p_), t), T.Ex ((I.Dec (_, v_), _), f_) ->
           let w = S.weaken (g_, I.targetFam v_) in
           let iw = Whnf.invert w in
@@ -101,8 +101,8 @@ end) : TOMEGAABSTRACT = struct
     let raiseP (g_, p_, f_) =
       let g'_, s = T.deblockify g_ in
       let f'_ = T.forSub (f_, s) in
-      let p''_ = raisePrg (g'_, (p_, T.coerceSub s), f'_) in
-      p''_
+      let p'' = raisePrg (g'_, (p_, T.coerceSub s), f'_) in
+      p''
 
     let raiseF (g_, (f_, t)) =
       let g'_, s = T.deblockify g_ in

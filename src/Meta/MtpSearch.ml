@@ -124,17 +124,17 @@ end) : MTPSEARCH.MTPSEARCH = struct
 
     let rec nonIndex = function
       | _, [] -> true
-      | r, I.EVar (_, _, v_, _) :: ge_ ->
-          (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge_)
+      | r, I.EVar (_, _, v_, _) :: ge ->
+          (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge)
 
     let rec selectEVar = function
       | [] -> []
-      | (I.EVar (r, _, _, { contents = [] }) as x_) :: ge_ ->
-          let xs_ = selectEVar ge_ in
+      | (I.EVar (r, _, _, { contents = [] }) as x_) :: ge ->
+          let xs_ = selectEVar ge in
           begin if nonIndex (r, xs_) then xs_ @ [ x_ ] else xs_
           end
-      | (I.EVar (r, _, _, cnstrs) as x_) :: ge_ ->
-          let xs_ = selectEVar ge_ in
+      | (I.EVar (r, _, _, cnstrs) as x_) :: ge ->
+          let xs_ = selectEVar ge in
           begin if nonIndex (r, xs_) then x_ :: xs_ else xs_
           end
 
@@ -155,13 +155,13 @@ end) : MTPSEARCH.MTPSEARCH = struct
     let rec solve = function
       | max, depth, (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
           matchAtom (max, depth, (p, s), dp, sc)
-      | max, depth, (C.Impl (r, a_, ha_, g), s), C.DProg (g_, dPool), sc ->
+      | max, depth, (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
           solve
             ( max,
               depth + 1,
               (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
               function m_ -> sc (I.Lam (d'_, m_)) )
       | max, depth, (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.decSub (d_, s) in
@@ -285,13 +285,13 @@ end) : MTPSEARCH.MTPSEARCH = struct
       | 0, _, _, _, _ -> ()
       | ( max,
           depth,
-          ((I.Root (ha_, _), _) as ps'),
+          ((I.Root (ha, _), _) as ps'),
           (C.DProg (g_, dPool) as dp),
           sc ) ->
           let rec matchSig' = function
             | [] -> ()
-            | hc_ :: sgn' ->
-                let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+            | hc :: sgn' ->
+                let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
                 let _ =
                   CsManager.trail (function () ->
                       rSolve
@@ -300,14 +300,14 @@ end) : MTPSEARCH.MTPSEARCH = struct
                           ps',
                           (r, I.id),
                           dp,
-                          function s_ -> sc (I.Root (hc_, s_)) ))
+                          function s_ -> sc (I.Root (hc, s_)) ))
                 in
                 matchSig' sgn'
           in
           let rec matchDProg = function
-            | I.Null, _ -> matchSig' (Index.lookup (cidFromHead ha_))
-            | I.Decl (dPool', C.Dec (r, s, ha'_)), n ->
-                begin if eqHead (ha_, ha'_) then
+            | I.Null, _ -> matchSig' (Index.lookup (cidFromHead ha))
+            | I.Decl (dPool', C.Dec (r, s, ha')), n ->
+                begin if eqHead (ha, ha') then
                   let _ =
                     CsManager.trail (function () ->
                         rSolve
@@ -328,7 +328,7 @@ end) : MTPSEARCH.MTPSEARCH = struct
     and searchEx' arg__1 arg__2 =
       begin match (arg__1, arg__2) with
       | max, ([], sc) -> sc max
-      | max, ((I.EVar (r, g_, v_, _) as x_) :: ge_, sc) ->
+      | max, ((I.EVar (r, g_, v_, _) as x_) :: ge, sc) ->
           solve
             ( max,
               0,
@@ -339,7 +339,7 @@ end) : MTPSEARCH.MTPSEARCH = struct
                   try
                     begin
                       Unify.unify (g_, (x_, I.id), (u'_, I.id));
-                      searchEx' max (ge_, sc)
+                      searchEx' max (ge, sc)
                     end
                   with Unify.Unify _ -> ()) )
       end
@@ -359,27 +359,27 @@ end) : MTPSEARCH.MTPSEARCH = struct
       in
       deepen' 1
 
-    let rec searchEx (it, depth) (ge_, sc) =
+    let rec searchEx (it, depth) (ge, sc) =
       begin
         begin if !Global.chatter > 5 then print "[Search: " else ()
         end;
         begin
           deepen depth searchEx'
-            ( selectEVar ge_,
+            ( selectEVar ge,
               function
               | max -> begin
                   begin if !Global.chatter > 5 then print "OK]\n" else ()
                   end;
-                  let ge'_ =
+                  let ge' =
                     foldr
                       (function
                         | (I.EVar (_, g_, _, _) as x_), l_ ->
                             Abstract.collectEVars (g_, (x_, I.id), l_))
-                      [] ge_
+                      [] ge
                   in
-                  let gE' = List.length ge'_ in
+                  let gE' = List.length ge' in
                   begin if gE' > 0 then
-                    begin if it > 0 then searchEx (it - 1, 1) (ge'_, sc) else ()
+                    begin if it > 0 then searchEx (it - 1, 1) (ge', sc) else ()
                     end
                   else sc max
                   end
@@ -392,7 +392,7 @@ end) : MTPSEARCH.MTPSEARCH = struct
         end
       end
 
-    let search (maxFill, ge_, sc) = searchEx (1, maxFill) (ge_, sc)
+    let search (maxFill, ge, sc) = searchEx (1, maxFill) (ge, sc)
   end
 
   (* isInstantiated (V) = SOME(cid) or NONE

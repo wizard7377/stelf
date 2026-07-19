@@ -150,8 +150,8 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       | k, I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExp (k + 1, v_)
       | k, I.Root (c_, s_) -> occursInCon (k, c_) || occursInSpine (k, s_)
       | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
-      | k, I.FgnExp (csid_, fge_) ->
-          I.FgnExpStd.fold (csid_, fge_)
+      | k, I.FgnExp (csid_, fge) ->
+          I.FgnExpStd.fold (csid_, fge)
             (function
               | u_, b_ -> b_ || occursInExp (k, Whnf.normalize (u_, I.id)))
             false
@@ -201,47 +201,47 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       | _ -> false
 
     let rec inheritBelow = function
-      | b', k', I.Lam (d'_, u'_), bdd'_ ->
-          inheritBelow (b', k' + 1, u'_, inheritBelowDec (b', k', d'_, bdd'_))
-      | b', k', I.Pi ((d'_, _), v'_), bdd'_ ->
-          inheritBelow (b', k' + 1, v'_, inheritBelowDec (b', k', d'_, bdd'_))
+      | b', k', I.Lam (d'_, u'_), bdd' ->
+          inheritBelow (b', k' + 1, u'_, inheritBelowDec (b', k', d'_, bdd'))
+      | b', k', I.Pi ((d'_, _), v'_), bdd' ->
+          inheritBelow (b', k' + 1, v'_, inheritBelowDec (b', k', d'_, bdd'))
       | b', k', I.Root (I.BVar n', s'_), (b'_, d, d') ->
           begin if n' = k' + d' && n' > k' then
             inheritBelowSpine (b', k', s'_, (I.Decl (b'_, b'), d, d' - 1))
           else inheritBelowSpine (b', k', s'_, (b'_, d, d'))
           end
-      | b', k', I.Root (c_, s'_), bdd'_ -> inheritBelowSpine (b', k', s'_, bdd'_)
+      | b', k', I.Root (c_, s'_), bdd' -> inheritBelowSpine (b', k', s'_, bdd')
 
     and inheritBelowSpine = function
-      | b', k', I.Nil, bdd'_ -> bdd'_
-      | b', k', I.App (u'_, s'_), bdd'_ ->
-          inheritBelowSpine (b', k', s'_, inheritBelow (b', k', u'_, bdd'_))
+      | b', k', I.Nil, bdd' -> bdd'
+      | b', k', I.App (u'_, s'_), bdd' ->
+          inheritBelowSpine (b', k', s'_, inheritBelow (b', k', u'_, bdd'))
 
-    and inheritBelowDec (b', k', I.Dec (x, v'_), bdd'_) =
-      inheritBelow (b', k', v'_, bdd'_)
+    and inheritBelowDec (b', k', I.Dec (x, v'_), bdd') =
+      inheritBelow (b', k', v'_, bdd')
 
     let rec skip = function
-      | k, I.Lam (d_, u_), bdd'_ -> skip (k + 1, u_, skipDec (k, d_, bdd'_))
-      | k, I.Pi ((d_, _), v_), bdd'_ -> skip (k + 1, v_, skipDec (k, d_, bdd'_))
+      | k, I.Lam (d_, u_), bdd' -> skip (k + 1, u_, skipDec (k, d_, bdd'))
+      | k, I.Pi ((d_, _), v_), bdd' -> skip (k + 1, v_, skipDec (k, d_, bdd'))
       | k, I.Root (I.BVar n, s_), (b'_, d, d') ->
           begin if n = k + d && n > k then skipSpine (k, s_, (b'_, d - 1, d'))
           else skipSpine (k, s_, (b'_, d, d'))
           end
-      | k, I.Root (c_, s_), bdd'_ -> skipSpine (k, s_, bdd'_)
+      | k, I.Root (c_, s_), bdd' -> skipSpine (k, s_, bdd')
 
     and skipSpine = function
-      | k, I.Nil, bdd'_ -> bdd'_
-      | k, I.App (u_, s_), bdd'_ -> skipSpine (k, s_, skip (k, u_, bdd'_))
+      | k, I.Nil, bdd' -> bdd'
+      | k, I.App (u_, s_), bdd' -> skipSpine (k, s_, skip (k, u_, bdd'))
 
-    and skipDec (k, I.Dec (x, v_), bdd'_) = skip (k, v_, bdd'_)
+    and skipDec (k, I.Dec (x, v_), bdd') = skip (k, v_, bdd')
 
     let rec inheritExp = function
-      | b_, k, I.Lam (d_, u_), k', I.Lam (d'_, u'_), bdd'_ ->
+      | b_, k, I.Lam (d_, u_), k', I.Lam (d'_, u'_), bdd' ->
           inheritExp
-            (b_, k + 1, u_, k' + 1, u'_, inheritDec (b_, k, d_, k', d'_, bdd'_))
-      | b_, k, I.Pi ((d_, _), v_), k', I.Pi ((d'_, _), v'_), bdd'_ ->
+            (b_, k + 1, u_, k' + 1, u'_, inheritDec (b_, k, d_, k', d'_, bdd'))
+      | b_, k, I.Pi ((d_, _), v_), k', I.Pi ((d'_, _), v'_), bdd' ->
           inheritExp
-            (b_, k + 1, v_, k' + 1, v'_, inheritDec (b_, k, d_, k', d'_, bdd'_))
+            (b_, k + 1, v_, k' + 1, v'_, inheritDec (b_, k, d_, k', d'_, bdd'))
       | b_, k, (I.Root (I.BVar n, s_) as v_), k', v'_, (b'_, d, d') ->
           begin if n = k + d && n > k then
             skipSpine
@@ -261,8 +261,8 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               inheritSpine (b_, k, s_, k', s'_, (b'_, d, d'))
             end
           end
-      | b_, k, I.Root (c_, s_), k', I.Root (c'_, s'_), bdd'_ ->
-          inheritSpine (b_, k, s_, k', s'_, bdd'_)
+      | b_, k, I.Root (c_, s_), k', I.Root (c'_, s'_), bdd' ->
+          inheritSpine (b_, k, s_, k', s'_, bdd')
 
     and inheritNewRoot = function
       | ( b_,
@@ -280,49 +280,49 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           inheritBelow (b - 1, k', v'_, (b'_, d - 1, d'))
 
     and inheritSpine = function
-      | b_, k, I.Nil, k', I.Nil, bdd'_ -> bdd'_
-      | b_, k, I.App (u_, s_), k', I.App (u'_, s'_), bdd'_ ->
+      | b_, k, I.Nil, k', I.Nil, bdd' -> bdd'
+      | b_, k, I.App (u_, s_), k', I.App (u'_, s'_), bdd' ->
           inheritSpine
-            (b_, k, s_, k', s'_, inheritExp (b_, k, u_, k', u'_, bdd'_))
+            (b_, k, s_, k', s'_, inheritExp (b_, k, u_, k', u'_, bdd'))
 
-    and inheritDec (b_, k, I.Dec (_, v_), k', I.Dec (_, v'_), bdd'_) =
-      inheritExp (b_, k, v_, k', v'_, bdd'_)
+    and inheritDec (b_, k, I.Dec (_, v_), k', I.Dec (_, v'_), bdd') =
+      inheritExp (b_, k, v_, k', v'_, bdd')
 
     let rec inheritDTop = function
       | ( b_,
           k,
           I.Pi ((I.Dec (_, v1_), I.No), v2_),
           k',
-          I.Pi ((I.Dec (_, v1'_), I.No), v2'_),
-          bdd'_ ) ->
+          I.Pi ((I.Dec (_, v1'), I.No), v2'),
+          bdd' ) ->
           inheritG
             ( b_,
               k,
               v1_,
               k',
-              v1'_,
-              inheritDTop (b_, k + 1, v2_, k' + 1, v2'_, bdd'_) )
+              v1',
+              inheritDTop (b_, k + 1, v2_, k' + 1, v2', bdd') )
       | ( b_,
           k,
           (I.Root (I.Const cid, s_) as v_),
           k',
           (I.Root (I.Const cid', s'_) as v'_),
-          bdd'_ ) ->
+          bdd' ) ->
           let mS = valOf (ModeTable.modeLookup cid) in
-          inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd'_)
+          inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd')
 
     and inheritDBot = function
       | ( b_,
           k,
           I.Pi ((I.Dec (_, v1_), I.No), v2_),
           k',
-          I.Pi ((I.Dec (_, v1'_), I.No), v2'_),
-          bdd'_ ) ->
-          inheritDBot (b_, k + 1, v2_, k' + 1, v2'_, bdd'_)
-      | b_, k, I.Root (I.Const cid, s_), k', I.Root (I.Const cid', s'_), bdd'_
+          I.Pi ((I.Dec (_, v1'), I.No), v2'),
+          bdd' ) ->
+          inheritDBot (b_, k + 1, v2_, k' + 1, v2', bdd')
+      | b_, k, I.Root (I.Const cid, s_), k', I.Root (I.Const cid', s'_), bdd'
         ->
           let mS = valOf (ModeTable.modeLookup cid) in
-          inheritSpineMode (M.Bot, mS, b_, k, s_, k', s'_, bdd'_)
+          inheritSpineMode (M.Bot, mS, b_, k, s_, k', s'_, bdd')
 
     and inheritG
         ( b_,
@@ -330,7 +330,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           I.Root (I.Const cid, s_),
           k',
           (I.Root (I.Const cid', s'_) as v'_),
-          bdd'_ ) =
+          bdd' ) =
       let mS = valOf (ModeTable.modeLookup cid) in
       inheritSpineMode
         ( M.Bot,
@@ -340,11 +340,11 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           s_,
           k',
           s'_,
-          inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd'_) )
+          inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd') )
 
     and inheritSpineMode = function
-      | mode, Modes.Modesyn.ModeSyn.Mnil, b_, k, I.Nil, k', I.Nil, bdd'_ ->
-          bdd'_
+      | mode, Modes.Modesyn.ModeSyn.Mnil, b_, k, I.Nil, k', I.Nil, bdd' ->
+          bdd'
       | ( mode,
           Modes.Modesyn.ModeSyn.Mapp (m, mS),
           b_,
@@ -352,7 +352,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           I.App (u_, s_),
           k',
           I.App (u'_, s'_),
-          bdd'_ ) ->
+          bdd' ) ->
           begin if modeEq (m, mode) then
             inheritSpineMode
               ( mode,
@@ -362,8 +362,8 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
                 s_,
                 k',
                 s'_,
-                inheritExp (b_, k, u_, k', u'_, bdd'_) )
-          else inheritSpineMode (mode, mS, b_, k, s_, k', s'_, bdd'_)
+                inheritExp (b_, k, u_, k', u'_, bdd') )
+          else inheritSpineMode (mode, mS, b_, k, s_, k', s'_, bdd')
           end
 
     let inheritSplitDepth
@@ -373,16 +373,16 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       let d' = I.ctxLength g'_ in
       let v_ = Whnf.normalize (v_, I.id) in
       let v'_ = Whnf.normalize (v'_, I.id) in
-      let b''_, 0, 0 =
+      let b'', 0, 0 =
         inheritDBot
           (b_, 0, v_, 0, v'_, inheritDTop (b_, 0, v_, 0, v'_, (I.Null, d, d')))
       in
-      M.State (name', M.Prefix (g'_, m'_, b''_), v'_)
+      M.State (name', M.Prefix (g'_, m'_, b''), v'_)
 
-    let abstractInit (M.State (name, gm_, v_))
+    let abstractInit (M.State (name, gm, v_))
         (name', M.Prefix (g'_, m'_, b'_), s') =
       inheritSplitDepth
-        ( M.State (name, gm_, v_),
+        ( M.State (name, gm, v_),
           MetaAbstract.abstract
             (M.State (name ^ name', M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
         )

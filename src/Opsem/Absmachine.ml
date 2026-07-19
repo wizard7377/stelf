@@ -68,11 +68,11 @@ end) : ABSMACHINE = struct
     let rec solve = function
       | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
           matchAtom ((p, s), dp, sc)
-      | (C.Impl (r, a_, ha_, g), s), C.DProg (g_, dPool), sc ->
+      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
           solve
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
               function m_ -> sc (I.Lam (d'_, m_)) )
       | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = Names.decLUName (g_, I.decSub (d_, s)) in
@@ -138,24 +138,24 @@ end) : ABSMACHINE = struct
           end
 
     and matchAtom
-        (((I.Root (ha_, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
-      let deterministic = C.detTableCheck (cidFromHead ha_) in
+        (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
+      let deterministic = C.detTableCheck (cidFromHead ha) in
       let exception SucceedOnce of I.spine in
       let rec matchSig = function
         | [] -> ()
-        | hc_ :: sgn' ->
-            let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+        | hc :: sgn' ->
+            let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
             begin
               CsManager.trail (function () ->
                   rSolve
-                    (ps', (r, I.id), dp, function s_ -> sc (I.Root (hc_, s_))));
+                    (ps', (r, I.id), dp, function s_ -> sc (I.Root (hc, s_))));
               matchSig sgn'
             end
       in
       let rec matchSigDet = function
         | [] -> ()
-        | hc_ :: sgn' -> (
-            let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+        | hc :: sgn' -> (
+            let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
             try
               begin
                 CsManager.trail (function () ->
@@ -166,16 +166,16 @@ end) : ABSMACHINE = struct
                         function s_ -> raise (SucceedOnce s_) ));
                 matchSigDet sgn'
               end
-            with SucceedOnce s_ -> sc (I.Root (hc_, s_)))
+            with SucceedOnce s_ -> sc (I.Root (hc, s_)))
       in
       let rec matchDProg = function
         | I.Null, _ ->
             begin if deterministic then
-              matchSigDet (Index.lookup (cidFromHead ha_))
-            else matchSig (Index.lookup (cidFromHead ha_))
+              matchSigDet (Index.lookup (cidFromHead ha))
+            else matchSig (Index.lookup (cidFromHead ha))
             end
-        | I.Decl (dPool', C.Dec (r, s, ha'_)), k ->
-            begin if eqHead (ha_, ha'_) then
+        | I.Decl (dPool', C.Dec (r, s, ha')), k ->
+            begin if eqHead (ha, ha') then
               begin if deterministic then
                 try
                   begin
@@ -216,7 +216,7 @@ end) : ABSMACHINE = struct
         begin if succeeded then matchConstraint (cnstrSolve, try_ + 1) else ()
         end
       in
-      begin match I.constStatus (cidFromHead ha_) with
+      begin match I.constStatus (cidFromHead ha) with
       | I.Constraint (cs, cnstrSolve) -> matchConstraint (cnstrSolve, 0)
       | _ -> matchDProg (dPool, 1)
       end

@@ -102,11 +102,11 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     let popHistory () =
       begin match !history_ with
       | [] -> raise (Error "History stack empty")
-      | (open'_, solved'_) :: history'_ -> begin
-          history_ := history'_;
+      | (open'_, solved') :: history' -> begin
+          history_ := history';
           begin
             openRing := open'_;
-            solvedRing := solved'_
+            solvedRing := solved'
           end
         end
       end
@@ -134,32 +134,32 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | c :: [] -> I.conDecName (I.sgnLookup c)
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
-    let rec splittingToMenu_ = function
+    let rec splittingToMenu = function
       | [], a_ -> a_
-      | o_ :: l_, a_ -> splittingToMenu_ (l_, Splitting o_ :: a_)
+      | o_ :: l_, a_ -> splittingToMenu (l_, Splitting o_ :: a_)
 
-    let rec fillingToMenu_ = function
+    let rec fillingToMenu = function
       | [], a_ -> a_
-      | o_ :: l_, a_ -> fillingToMenu_ (l_, Filling o_ :: a_)
+      | o_ :: l_, a_ -> fillingToMenu (l_, Filling o_ :: a_)
 
-    let rec recursionToMenu_ = function
+    let rec recursionToMenu = function
       | [], a_ -> a_
-      | o_ :: l_, a_ -> recursionToMenu_ (l_, Recursion o_ :: a_)
+      | o_ :: l_, a_ -> recursionToMenu (l_, Recursion o_ :: a_)
 
     let menu () =
       begin if empty () then menu_ := None
       else
         let s_ = current () in
-        let splitO_ = Splitting.expand s_ in
-        let recO_ = Recursion.expandEager s_ in
-        let fillO_, fillC_ = Filling.expand s_ in
+        let splitO = Splitting.expand s_ in
+        let recO = Recursion.expandEager s_ in
+        let fillO, fillC = Filling.expand s_ in
         menu_ :=
           Some
-            (fillingToMenu_
-               ( [ fillC_ ],
-                 fillingToMenu_
-                   ( fillO_,
-                     recursionToMenu_ (recO_, splittingToMenu_ (splitO_, [])) )
+            (fillingToMenu
+               ( [ fillC ],
+                 fillingToMenu
+                   ( fillO,
+                     recursionToMenu (recO, splittingToMenu (splitO, [])) )
                ))
       end
 
@@ -356,7 +356,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       begin if empty () then raise (Error "Nothing to prove")
       else
         let s_ = current () in
-        let open'_, solved'_ =
+        let open'_, solved' =
           try Strategy.run [ s_ ] with
           | Splitting.Error s -> abort ("Splitting Error: " ^ s)
           | Filling.Error s -> abort ("Filling Error: " ^ s)
@@ -366,7 +366,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         ignore (pushHistory ());
         ignore (delete ());
         ignore (map insertOpen open'_);
-        ignore (map insertSolved solved'_);
+        ignore (map insertSolved solved');
         begin
           menu ();
           printMenu ()
@@ -374,7 +374,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       end
 
     let auto () =
-      let open'_, solved'_ =
+      let open'_, solved' =
         try Strategy.run (collectOpen ()) with
         | Splitting.Error s -> abort ("Splitting Error: " ^ s)
         | Filling.Error s -> abort ("Filling Error: " ^ s)
@@ -384,7 +384,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       ignore (pushHistory ());
       ignore (initOpen ());
       ignore (map insertOpen open'_);
-      ignore (map insertSolved solved'_);
+      ignore (map insertSolved solved');
       begin
         menu ();
         printMenu ()

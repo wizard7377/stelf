@@ -125,7 +125,7 @@ module MakePaths () : PATHS = struct
     | Bind_ of region * occExp option * occExp
     | Root_ of region * occExp * int * int * occSpine
 
-  and occSpine = App_ of occExp * occSpine | Nils_
+  and occSpine = App_ of occExp * occSpine | Nils
 
   (* occurrences in expressions *)
   (* _ or identifier *)
@@ -187,7 +187,7 @@ module MakePaths () : PATHS = struct
           end
     (* check? mark? *)
     and toPathSpine = function
-      | Nils_, n -> None
+      | Nils, n -> None
       | App_ (u, s), n ->
           begin if inside u then Some (n, toPath u) else toPathSpine (s, n + 1)
           end
@@ -206,7 +206,7 @@ module MakePaths () : PATHS = struct
 
   (* toRegionSpine (s, r) = r', the join of all regions in s and r *)
   let rec toRegionSpine = function
-    | Nils_, r -> r
+    | Nils, r -> r
     | App_ (u, s), r -> join (toRegion u, toRegionSpine (s, r))
 
   (* order? *)
@@ -293,7 +293,7 @@ module MakePaths () : PATHS = struct
   let bind (r, v, u) = Bind_ (r, v, u)
   let root (r, h, i, a, s) = Root_ (r, h, i, a, s)
   let app (u, s) = App_ (u, s)
-  let nils = Nils_
+  let nils = Nils
   let dec (n, v) = Dec_ (n, v)
   let def (n, u, v) = Def_ (n, u, v)
 end

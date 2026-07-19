@@ -783,7 +783,7 @@ module Flit(Flit__0: sig
             in let _ = IHT.app (function 
                                          | x -> r := ((x :: ! r))) t
                  in sort Int.compare (map (fun (r, _) -> r) (! r));;
-        exception NoPriorEntry_ of string ;;
+        exception NoPriorEntry of string ;;
         exception Error of string ;;
         let rec valOfE arg__26 arg__27 =
           begin
@@ -796,7 +796,7 @@ module Flit(Flit__0: sig
         let rec isShadowedBy cid =
           let name = I.conDecName (I.sgnLookup cid)
             in let currentcid =
-                 valOfE ((NoPriorEntry_ name)) (SHT.lookup shadowTable name)
+                 valOfE ((NoPriorEntry name)) (SHT.lookup shadowTable name)
                  in (name, begin
                      if currentcid <> cid then (Some currentcid) else None
                      end);;
@@ -891,7 +891,7 @@ module Flit(Flit__0: sig
                                     processCid
                                     (sortedKeys recordTable)
                                 with 
-                                     | (NoPriorEntry_ s as e)
+                                     | (NoPriorEntry s as e)
                                          -> begin
                                               print
                                               (("Error: No Prior Entry: " ^ s)

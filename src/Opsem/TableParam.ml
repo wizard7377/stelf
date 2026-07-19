@@ -55,12 +55,12 @@ module MakeTableParam (Global : GLOBAL) : TABLEPARAM = struct
   let emptyAnsw () = ref { solutions = []; lookup = 0 }
 
   let addSolution (s_, answRef) =
-    let { solutions = sList_; lookup = k } = !answRef in
-    answRef := { solutions = s_ :: sList_; lookup = k }
+    let { solutions = sList; lookup = k } = !answRef in
+    answRef := { solutions = s_ :: sList; lookup = k }
 
   let updateAnswLookup (k', answRef) =
-    let { solutions = sList_; lookup = k } = !answRef in
-    answRef := { solutions = sList_; lookup = k' }
+    let { solutions = sList; lookup = k } = !answRef in
+    answRef := { solutions = sList; lookup = k' }
 
   let solutions ({ contents = { solutions = s_; lookup = i } } as answ) = s_
   let lookup ({ contents = { solutions = s_; lookup = i } } as answ) = i
@@ -81,7 +81,7 @@ module MakeTableParam (Global : GLOBAL) : TABLEPARAM = struct
     | RepeatedEntry of (IntSyn.sub * IntSyn.sub) * answer * status
     | DivergingEntry of IntSyn.sub * answer
 
-  type answState = New_ | Repeated_
+  type answState = New_ | Repeated
 
   (* ---------------------------------------------------------------------- *)
   (* global search parameters *)

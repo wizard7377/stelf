@@ -54,10 +54,10 @@ end) : MTPPRINT.MTPRINT = struct
 
     let printFmt f = Fmt.string (PrintFmt.makestring_fmt f)
 
-    let nameState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
+    let nameState (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_)) =
       ignore (Names.varReset I.Null);
       let g'_ = Names.ctxName g_ in
-      S.State (n, (g'_, b_), (ih_, oh_), d, o_, h_, f_)
+      S.State (n, (g'_, b_), (ih_, oh), d, o_, h_, f_)
 
     let rec formatOrder = function
       | g_, S.Arg (us_, vs_) ->
@@ -122,7 +122,7 @@ end) : MTPPRINT.MTPRINT = struct
             @ [ Fmt.break_; printFmt (Print.formatDec (g_, d_)) ]
           end
 
-    let formatState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
+    let formatState (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_)) =
       Fmt.vbox0 0 1
         [
           Fmt.hVbox0 1 0 1 (formatOrder (g_, o_));

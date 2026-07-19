@@ -77,8 +77,8 @@ module Whnf () : WHNF = struct
     let dotEta = function
       | (Idx _ as ft_), s -> Dot (ft_, s)
       | (Exp u_ as ft_), s ->
-          let ft'_ = try Idx (etaContract (u_, id, 0)) with Eta -> ft_ in
-          Dot (ft'_, s)
+          let ft' = try Idx (etaContract (u_, id, 0)) with Eta -> ft_ in
+          Dot (ft', s)
       | (Undef as ft_), s -> Dot (ft_, s)
 
     let rec appendSpine = function
@@ -89,7 +89,7 @@ module Whnf () : WHNF = struct
 
     let rec whnfRedex = function
       | us_, (SClo (s_, s2'), s2) -> whnfRedex (us_, (s_, comp (s2', s2)))
-      | ((Root (h_, s_) as us1_), s1), (Nil, s2) -> (us1_, s1)
+      | ((Root (h_, s_) as us1), s1), (Nil, s2) -> (us1, s1)
       | (Root (h1_, s1_), s1), (s2_, s2) ->
           (Root (h1_, appendSpine ((s1_, s1), (s2_, s2))), id)
       | (Lam (_, u1_), s1), (App (u2_, s_), s2) ->
@@ -176,8 +176,8 @@ module Whnf () : WHNF = struct
           end
       | EClo (u_, s'), s -> whnf (u_, comp (s', s))
       | (FgnExp _, Shift 0) as us_ -> us_
-      | (FgnExp (csid_, fge_), s) as us_ ->
-          (FgnExpStd.Map.apply (csid_, fge_) (function u_ -> EClo (u_, s)), id)
+      | (FgnExp (csid_, fge), s) as us_ ->
+          (FgnExpStd.Map.apply (csid_, fge) (function u_ -> EClo (u_, s)), id)
 
     and expandDef (Root (Def d, s_), s) =
       whnfRedex (whnf (constDef d, id), (s_, s))
@@ -197,9 +197,9 @@ module Whnf () : WHNF = struct
     and newLoweredEVar (g_, vs_) = newLoweredEVarW (g_, whnfExpandDef vs_)
 
     let rec newSpineVarW = function
-      | g_, (Pi ((Dec (_, va_), _), vr_), s) ->
-          let x_ = newLoweredEVar (g_, (va_, s)) in
-          App (x_, newSpineVar (g_, (vr_, dotEta (Exp x_, s))))
+      | g_, (Pi ((Dec (_, va), _), vr), s) ->
+          let x_ = newLoweredEVar (g_, (va, s)) in
+          App (x_, newSpineVar (g_, (vr, dotEta (Exp x_, s))))
       | g_, _ -> Nil
 
     and newSpineVar (g_, vs_) = newSpineVarW (g_, whnfExpandDef vs_)
@@ -235,16 +235,16 @@ module Whnf () : WHNF = struct
     let rec whnfEta (us_, vs_) = whnfEtaW (whnf us_, whnf vs_)
 
     and whnfEtaW = function
-      | (_, (Root _, _)) as usVs_ -> usVs_
-      | ((Lam _, _), (Pi _, _)) as usVs_ -> usVs_
-      | (u_, s1), ((Pi ((d_, p_), v_), s2) as vs2_) ->
+      | (_, (Root _, _)) as usVs -> usVs
+      | ((Lam _, _), (Pi _, _)) as usVs -> usVs
+      | (u_, s1), ((Pi ((d_, p_), v_), s2) as vs2) ->
           ( ( Lam
                 ( decSub (d_, s2),
                   Redex
                     (EClo (u_, comp (s1, shift)), App (Root (BVar 1, Nil), Nil))
                 ),
               id ),
-            vs2_ )
+            vs2 )
 
     let rec normalizeExp us_ = normalizeExpW (whnf us_)
 
@@ -254,8 +254,8 @@ module Whnf () : WHNF = struct
       | (Root (h_, s_) as u_), s -> Root (h_, normalizeSpine (s_, s))
       | Lam (d_, u_), s -> Lam (normalizeDec (d_, s), normalizeExp (u_, dot1 s))
       | (EVar (_, _, _, _) as e_), s -> EClo (e_, s)
-      | FgnExp (csid_, fge_), s ->
-          FgnExpStd.Map.apply (csid_, fge_) (function u_ ->
+      | FgnExp (csid_, fge), s ->
+          FgnExpStd.Map.apply (csid_, fge) (function u_ ->
               normalizeExp (u_, s))
       | (AVar { contents = Some u_ }, s) as us_ -> normalizeExpW (u_, s)
       | (AVar _, s) as us_ -> begin

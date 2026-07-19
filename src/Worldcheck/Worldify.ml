@@ -226,9 +226,9 @@ end) : WORLDIFY = struct
         else ()
         end
 
-      let mismatch (g_, vs1_, vs2_) =
+      let mismatch (g_, vs1, vs2) =
         begin if !Global.chatter > 7 then
-          print (("Mismatch:\n" ^ mismatchToString (g_, vs1_, vs2_)) ^ "\n")
+          print (("Mismatch:\n" ^ mismatchToString (g_, vs1, vs2)) ^ "\n")
         else ()
         end
 
@@ -368,8 +368,8 @@ end) : WORLDIFY = struct
         end
 
     let rec accR = function
-      | gVs_, One, k -> k gVs_
-      | ((g_, (v_, s)) as gVs_), Block (c, (someDecs, piDecs)), k -> (
+      | gVs, One, k -> k gVs
+      | ((g_, (v_, s)) as gVs), Block (c, (someDecs, piDecs)), k -> (
           let t = createEVarSub (g_, someDecs) in
           let _ =
             Trace.matchBlock
@@ -395,9 +395,9 @@ end) : WORLDIFY = struct
                  (Whnf.normalize
                     (I.Pi ((I.BDec (None, (c, t)), I.Maybe), v_), I.id))))
       | ( (g_, ((I.Pi (((I.Dec (_, v1_) as d_), _), v2_) as v_), s)),
-          (Seq (j, I.Dec (_, v1'_) :: l2'_, t) as l'_),
+          (Seq (j, I.Dec (_, v1') :: l2'_, t) as l'_),
           k ) ->
-          begin if Unify.unifiable (g_, (v1_, s), (v1'_, t)) then
+          begin if Unify.unifiable (g_, (v1_, s), (v1', t)) then
             accR
               ( ( g_,
                   (v2_, I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, j), I.Nil)), s))
@@ -408,32 +408,32 @@ end) : WORLDIFY = struct
                     I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, j), I.Nil)), t) ),
                 k )
           else begin
-            Trace.mismatch (g_, (v1_, I.id), (v1'_, t));
+            Trace.mismatch (g_, (v1_, I.id), (v1', t));
             ()
           end
           end
-      | gVs_, Seq (_, [], t), k -> k gVs_
-      | ((g_, (I.Root _, s)) as gVs_), (Seq (_, l'_, t) as r_), k -> begin
+      | gVs, Seq (_, [], t), k -> k gVs
+      | ((g_, (I.Root _, s)) as gVs), (Seq (_, l'_, t) as r_), k -> begin
           Trace.missing (g_, r_);
           ()
         end
-      | gVs_, Plus (r1, r2), k -> begin
-          CsManager.trail (function () -> accR (gVs_, r1, k));
-          accR (gVs_, r2, k)
+      | gVs, Plus (r1, r2), k -> begin
+          CsManager.trail (function () -> accR (gVs, r1, k));
+          accR (gVs, r2, k)
         end
-      | gVs_, Star One, k -> k gVs_
-      | gVs_, (Star r' as r), k -> begin
-          CsManager.trail (function () -> k gVs_);
-          accR (gVs_, r', function gVs'_ -> accR (gVs'_, r, k))
+      | gVs, Star One, k -> k gVs
+      | gVs, (Star r' as r), k -> begin
+          CsManager.trail (function () -> k gVs);
+          accR (gVs, r', function gVs' -> accR (gVs', r, k))
         end
 
     let worldifyGoal (g_, v_, (T.Worlds cids as w_), occ) =
       try
         let b = I.targetFam v_ in
-        let wb_ = W.getWorlds b in
-        let rb_ = worldsToReg wb_ in
+        let wb = W.getWorlds b in
+        let rb = worldsToReg wb in
         begin
-          accR ((g_, (v_, I.id)), rb_, init);
+          accR ((g_, (v_, I.id)), rb, init);
           raise (Error' (occ, "World violation"))
         end
       with Success v'_ -> v'_

@@ -129,18 +129,18 @@ end) : REDUCES = struct
     let select (c, (s_, s)) =
       let so_ = R.selLookup c in
       let vid_ : I.eclo = (I.constType c, I.id) in
-      let rec select'' (n, (ss'_, vs''_)) : I.eclo * I.eclo =
-        select''W (n, (ss'_, Whnf.whnf vs''_))
+      let rec select'' (n, (ss'_, vs'')) : I.eclo * I.eclo =
+        select''W (n, (ss'_, Whnf.whnf vs''))
       and select''W = function
-        | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''_), _), _), s'')) ->
-            ((u'_, s'), (v''_, s''))
-        | n, ((I.SClo (s'_, s1'), s2'), vs''_) ->
-            select''W (n, ((s'_, I.comp (s1', s2')), vs''_))
-        | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''_), _), v2''_), s''))
+        | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''), _), _), s'')) ->
+            ((u'_, s'), (v'', s''))
+        | n, ((I.SClo (s'_, s1'), s2'), vs'') ->
+            select''W (n, ((s'_, I.comp (s1', s2')), vs''))
+        | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select''
               ( n - 1,
-                ((s'_, s'), (v2''_, I.Dot (I.Exp (I.EClo (u'_, s')), s''))) )
+                ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))) )
       in
       let rec select' = function
         | R.Arg n -> R.Arg (select'' (n, ((s_, s), vid_)))
@@ -160,18 +160,18 @@ end) : REDUCES = struct
 
     let selectROrder (c, (s_, s)) =
       let vid_ : I.eclo = (I.constType c, I.id) in
-      let rec select'' (n, (ss'_, vs''_)) : I.eclo * I.eclo =
-        select''W (n, (ss'_, Whnf.whnf vs''_))
+      let rec select'' (n, (ss'_, vs'')) : I.eclo * I.eclo =
+        select''W (n, (ss'_, Whnf.whnf vs''))
       and select''W = function
-        | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''_), _), _), s'')) ->
-            ((u'_, s'), (v''_, s''))
-        | n, ((I.SClo (s'_, s1'), s2'), vs''_) ->
-            select''W (n, ((s'_, I.comp (s1', s2')), vs''_))
-        | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''_), _), v2''_), s''))
+        | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''), _), _), s'')) ->
+            ((u'_, s'), (v'', s''))
+        | n, ((I.SClo (s'_, s1'), s2'), vs'') ->
+            select''W (n, ((s'_, I.comp (s1', s2')), vs''))
+        | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select''
               ( n - 1,
-                ((s'_, s'), (v2''_, I.Dot (I.Exp (I.EClo (u'_, s')), s''))) )
+                ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))) )
       in
       let rec select' = function
         | R.Arg n -> R.Arg (select'' (n, ((s_, s), vid_)))
@@ -342,45 +342,45 @@ end) : REDUCES = struct
           (I.Decl (g_, (I.Dec (_, v'_) as d_)), I.Decl (q_, C.And occ)) ) ->
           ignore (checkGoal (g0_, q0_, rl_, (v'_, I.Shift (n + 1)), vs_, occ));
           let ro_ = getROrder (g0_, q0_, (v'_, I.Shift (n + 1)), occ) in
-          let rl'_ =
+          let rl' =
             begin match ro_ with None -> rl_ | Some o_ -> o_ :: rl_
             end
           in
-          checkSubgoals (g0_, q0_, rl'_, vs_, n + 1, (g_, q_))
+          checkSubgoals (g0_, q0_, rl', vs_, n + 1, (g_, q_))
       | g0_, q0_, rl_, vs_, n, (I.Decl (g_, d_), I.Decl (q_, C.Exist)) ->
           checkSubgoals (g0_, q0_, rl_, vs_, n + 1, (g_, q_))
       | g0_, q0_, rl_, vs_, n, (I.Decl (g_, d_), I.Decl (q_, C.All)) ->
           checkSubgoals (g0_, q0_, rl_, vs_, n + 1, (g_, q_))
       | g0_, q0_, rl_, vs_, n, (_, _) -> ()
 
-    and checkClause (gqr_, g_, q_, vs_, occ) =
-      checkClauseW (gqr_, g_, q_, Whnf.whnf vs_, occ)
+    and checkClause (gqr, g_, q_, vs_, occ) =
+      checkClauseW (gqr, g_, q_, Whnf.whnf vs_, occ)
 
     and checkClauseW = function
-      | gqr_, g_, q_, (I.Pi ((d_, Maybe), v_), s), occ ->
+      | gqr, g_, q_, (I.Pi ((d_, Maybe), v_), s), occ ->
           checkClause
-            ( gqr_,
+            ( gqr,
               I.Decl (g_, N.decEName (g_, I.decSub (d_, s))),
               I.Decl (q_, C.Exist),
               (v_, I.dot1 s),
               P.body occ )
-      | gqr_, g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
+      | gqr, g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
           checkClause
-            ( gqr_,
+            ( gqr,
               I.Decl (g_, I.decSub (d_, s)),
               I.Decl (q_, C.And (P.label occ)),
               (v2_, I.dot1 s),
               P.body occ )
-      | ( ((g0_, q0_, rl_) as gqr_),
+      | ( ((g0_, q0_, rl_) as gqr),
           g_,
           q_,
           ((I.Root (I.Const a, s_), s) as vs_),
           occ ) ->
           let n = I.ctxLength g_ in
-          let rl'_ = C.shiftRCtx rl_ (function s -> I.comp (s, I.Shift n)) in
+          let rl' = C.shiftRCtx rl_ (function s -> I.comp (s, I.Shift n)) in
           checkSubgoals
-            (concat (g0_, g_), concat (q0_, q_), rl'_, vs_, 0, (g_, q_))
-      | gqr_, g_, q_, (I.Root (I.Def a, s_), s), occ ->
+            (concat (g0_, g_), concat (q0_, q_), rl', vs_, 0, (g_, q_))
+      | gqr, g_, q_, (I.Root (I.Def a, s_), s), occ ->
           raise
             (Error'
                ( occ,
@@ -435,13 +435,13 @@ end) : REDUCES = struct
           (I.Pi (((I.Dec (_, v1_) as d'_), No), v2_), s'),
           (v_, s),
           occ ) ->
-          let rl'_ =
+          let rl' =
             begin match getROrder (g_, q_, (v1_, s'), occ) with
             | None -> rl_
             | Some o_ -> o_ :: rl_
             end
           in
-          checkRImp (g_, q_, rl'_, (v2_, I.comp (I.invShift, s')), (v_, s), occ)
+          checkRImp (g_, q_, rl', (v2_, I.comp (I.invShift, s')), (v_, s), occ)
       | g_, q_, rl_, ((I.Root (I.Const a, s_), s) as vs'_), vs_, occ ->
           checkRGoal (g_, q_, rl_, vs_, occ)
       | g_, q_, rl_, ((I.Root (I.Def a, s_), s) as vs'_), vs_, occ ->
@@ -467,21 +467,21 @@ end) : REDUCES = struct
       | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
           let g'_ = I.Decl (g_, I.decSub (d_, s)) in
           let q'_ = I.Decl (q_, C.Exist) in
-          let rl'_ = C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)) in
-          let rl''_ =
+          let rl' = C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)) in
+          let rl'' =
             begin match
               getROrder (g'_, q'_, (v1_, I.comp (s, I.shift)), occ)
             with
-            | None -> rl'_
-            | Some o_ -> o_ :: rl'_
+            | None -> rl'
+            | Some o_ -> o_ :: rl'
             end
           in
           begin
-            checkRClause (g'_, q'_, rl''_, (v2_, I.dot1 s), P.body occ);
+            checkRClause (g'_, q'_, rl'', (v2_, I.dot1 s), P.body occ);
             checkRImp
               ( g'_,
                 q'_,
-                rl''_,
+                rl'',
                 (v2_, I.dot1 s),
                 (v1_, I.comp (s, I.shift)),
                 P.label occ )

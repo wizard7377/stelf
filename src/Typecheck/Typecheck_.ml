@@ -51,17 +51,17 @@ module MakeTypeCheck
           ^ "]"
 
     let rec checkExp (g_, us_, vs_) =
-      let us'_ = inferExp (g_, us_) in
-      begin if Conv.conv (us'_, vs_) then ()
+      let us' = inferExp (g_, us_) in
+      begin if Conv.conv (us', vs_) then ()
       else begin
-        let ie_, is_ = us'_ in
-        let ee_, es_ = vs_ in
+        let ie_, is_ = us' in
+        let ee, es_ = vs_ in
         let inferred_s =
           try Print.expToString (g_, I.EClo (ie_, is_))
           with _ -> "<print-error>"
         in
         let expected_s =
-          try Print.expToString (g_, I.EClo (ee_, es_))
+          try Print.expToString (g_, I.EClo (ee, es_))
           with _ -> "<print-error>"
         in
         let rec show_exp_raw = function
@@ -92,7 +92,7 @@ module MakeTypeCheck
         in
         Printf.eprintf "RAW inferred: %s\nRAW expected: %s\n%!"
           (show_exp_raw (I.EClo (ie_, is_)))
-          (show_exp_raw (I.EClo (ee_, es_)));
+          (show_exp_raw (I.EClo (ee, es_)));
         let msg =
           Printf.sprintf "Type mismatch\n  inferred: %s\n  expected: %s"
             inferred_s expected_s

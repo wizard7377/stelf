@@ -119,11 +119,11 @@ end) : MTPI = struct
     let popHistory () =
       begin match !history_ with
       | [] -> raise (Error "History stack empty")
-      | (open'_, solved'_) :: history'_ -> begin
-          history_ := history'_;
+      | (open'_, solved') :: history' -> begin
+          history_ := history';
           begin
             open_ := open'_;
-            solved_ := solved'_
+            solved_ := solved'
           end
         end
       end
@@ -170,35 +170,35 @@ end) : MTPI = struct
               ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
         end
       in
-      let (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) = current () in
+      let (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_)) = current () in
       TextIO.print
         (("Filling successful with proof term:\n"
          ^ Formatter.makestring_fmt (formatTuple (g_, p_)))
         ^ "\n")
 
-    let rec splittingToMenu_ = function
+    let rec splittingToMenu = function
       | [], a_ -> a_
-      | o_ :: l_, a_ -> splittingToMenu_ (l_, Splitting o_ :: a_)
+      | o_ :: l_, a_ -> splittingToMenu (l_, Splitting o_ :: a_)
 
-    let fillingToMenu_ (o_, a_) = Filling o_ :: a_
-    let recursionToMenu_ (o_, a_) = Recursion o_ :: a_
-    let inferenceToMenu_ (o_, a_) = Inference o_ :: a_
+    let fillingToMenu (o_, a_) = Filling o_ :: a_
+    let recursionToMenu (o_, a_) = Recursion o_ :: a_
+    let inferenceToMenu (o_, a_) = Inference o_ :: a_
 
     let menu () =
       begin if empty () then menu_ := None
       else
         let s_ = current () in
-        let splitO_ = MTPSplitting.expand (Obj.magic s_) in
-        let infO_ = Inference.expand (Obj.magic s_) in
-        let recO_ = MTPRecursion.expand (Obj.magic s_) in
-        let fillO_ = MTPFilling.expand (Obj.magic s_) in
+        let splitO = MTPSplitting.expand (Obj.magic s_) in
+        let infO = Inference.expand (Obj.magic s_) in
+        let recO = MTPRecursion.expand (Obj.magic s_) in
+        let fillO = MTPFilling.expand (Obj.magic s_) in
         menu_ :=
           Some
-            (fillingToMenu_
-               ( fillO_,
-                 recursionToMenu_
-                   ( recO_,
-                     inferenceToMenu_ (infO_, splittingToMenu_ (splitO_, [])) )
+            (fillingToMenu
+               ( fillO,
+                 recursionToMenu
+                   ( recO,
+                     inferenceToMenu (infO, splittingToMenu (splitO, [])) )
                ))
       end
 
@@ -322,9 +322,9 @@ end) : MTPI = struct
       ignore (reset ());
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.Null, f_, map select cL) in
-      let slist_ = MTPInit.init (f_, Obj.magic o_) in
+      let slist = MTPInit.init (f_, Obj.magic o_) in
       let _ =
-        begin if List.length slist_ = 0 then raise Domain else ()
+        begin if List.length slist = 0 then raise Domain else ()
         end
       in
       try
@@ -333,7 +333,7 @@ end) : MTPI = struct
             (map
                (function
                  | s_ -> insert (Obj.magic (MTPrint.nameState (Obj.magic s_))))
-               slist_);
+               slist);
           begin
             menu ();
             printMenu ()
@@ -415,7 +415,7 @@ end) : MTPI = struct
       begin if empty () then raise (Error "Nothing to prove")
       else
         let s_ = current () in
-        let open'_, solved'_ =
+        let open'_, solved' =
           try MTPStrategy.run [ Obj.magic s_ ] with
           | MTPSplitting.Error s -> abort ("MTPSplitting. Error: " ^ s)
           | MTPFilling.Error s -> abort ("Filling Error: " ^ s)
@@ -426,7 +426,7 @@ end) : MTPI = struct
         ignore (pushHistory ());
         ignore (delete ());
         ignore (ignore (map insertOpen (Obj.magic open'_)));
-        ignore (ignore (map insertSolved (Obj.magic solved'_)));
+        ignore (ignore (map insertSolved (Obj.magic solved')));
         begin
           menu ();
           printMenu ()
@@ -441,7 +441,7 @@ end) : MTPI = struct
       end
 
     let auto () =
-      let open'_, solved'_ =
+      let open'_, solved' =
         try MTPStrategy.run (Obj.magic (collectOpen ())) with
         | MTPSplitting.Error s -> abort ("MTPSplitting. Error: " ^ s)
         | MTPFilling.Error s -> abort ("Filling Error: " ^ s)
@@ -452,7 +452,7 @@ end) : MTPI = struct
       ignore (pushHistory ());
       ignore (initOpen ());
       ignore (ignore (map insertOpen (Obj.magic open'_)));
-      ignore (ignore (map insertSolved (Obj.magic solved'_)));
+      ignore (ignore (map insertSolved (Obj.magic solved')));
       begin
         menu ();
         printMenu ()

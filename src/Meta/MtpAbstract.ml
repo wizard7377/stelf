@@ -142,14 +142,14 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
 
     let rec restore = function
-      | 0, gp_ -> (gp_, I.Null)
+      | 0, gp -> (gp, I.Null)
       | n, I.Decl (g_, d_) ->
-          let gp'_, gx'_ = restore (n - 1, g_) in
-          (gp'_, I.Decl (gx'_, d_))
+          let gp', gx' = restore (n - 1, g_) in
+          (gp', I.Decl (gx', d_))
 
     let rec concat = function
-      | gp_, I.Null -> gp_
-      | gp_, I.Decl (g_, d_) -> I.Decl (concat (gp_, g_), d_)
+      | gp, I.Null -> gp
+      | gp, I.Decl (g_, d_) -> I.Decl (concat (gp, g_), d_)
 
     let rec collectExpW = function
       | tag_, d, g_, (I.Uni l_, s), k_ -> k_
@@ -169,26 +169,26 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
               I.Decl (g_, I.decSub (d_, s)),
               (u_, I.dot1 s),
               collectDec (tag_, d, g_, (d_, s), k_) )
-      | tag_, d, g_, ((I.EVar (r, gdX_, v_, cnstrs) as x_), s), k_ ->
+      | tag_, d, g_, ((I.EVar (r, gdX, v_, cnstrs) as x_), s), k_ ->
           begin if exists (eqEVar x_) k_ then collectSub (tag_, d, g_, s, k_)
           else
-            let gp_, gx_ = restore (I.ctxLength gdX_ - d, gdX_) in
+            let gp, gx = restore (I.ctxLength gdX - d, gdX) in
             ignore (checkEmpty !cnstrs);
-            let w = weaken (gx_, I.targetFam v_) in
+            let w = weaken (gx, I.targetFam v_) in
             let iw = Whnf.invert w in
-            let gx'_ = Whnf.strengthen (iw, gx_) in
+            let gx' = Whnf.strengthen (iw, gx) in
             let (I.EVar (r', _, _, _) as x'_) =
-              I.newEVar (concat (gp_, gx'_), I.EClo (v_, iw))
+              I.newEVar (concat (gp, gx'), I.EClo (v_, iw))
             in
             ignore (Unify.instantiateEVar (r, I.EClo (x'_, w), []));
-            let v'_ = raiseType (gx'_, I.EClo (v_, iw)) in
+            let v'_ = raiseType (gx', I.EClo (v_, iw)) in
             collectSub
               ( tag_,
                 d,
                 g_,
                 I.comp (w, s),
                 I.Decl
-                  ( collectExp (tag_, d, gp_, (v'_, I.id), k_),
+                  ( collectExp (tag_, d, gp, (v'_, I.id), k_),
                     Ev (r', v'_, tag_, d) ) )
           end
       | tag_, d, g_, (I.FgnExp (csid_, csfe), s), k_ ->
@@ -311,16 +311,16 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
     let rec abstractCtx = function
       | I.Null -> (I.Null, I.Null)
       | I.Decl (k'_, Ev (_, v'_, (S.Lemma _b as t_), _)) ->
-          let v''_ = abstractExp (k'_, 0, (v'_, I.id)) in
-          ignore (checkType v''_);
+          let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
+          ignore (checkType v'');
           let g'_, b'_ = abstractCtx k'_ in
-          let d'_ = I.Dec (None, v''_) in
+          let d'_ = I.Dec (None, v'') in
           (I.Decl (g'_, d'_), I.Decl (b'_, t_))
       | I.Decl (k'_, Ev (_, v'_, (S.None as t_), _)) ->
-          let v''_ = abstractExp (k'_, 0, (v'_, I.id)) in
-          ignore (checkType v''_);
+          let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
+          ignore (checkType v'');
           let g'_, b'_ = abstractCtx k'_ in
-          let d'_ = I.Dec (None, v''_) in
+          let d'_ = I.Dec (None, v'') in
           (I.Decl (g'_, d'_), I.Decl (b'_, S.None))
       | I.Decl (k'_, Bv (d_, tag_)) ->
           let d'_ = abstractDec (k'_, 0, (d_, I.id)) in
@@ -362,23 +362,23 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
               b_,
               function d, k_ -> collect (d + 1, I.Decl (k_, Bv (d_, t_))) )
 
-    let abstractNew ((g0_, b0_), s, b_) =
+    let abstractNew ((g0_, b0), s, b_) =
       let cf = collectGlobalSub (g0_, s, b_, function _, k'_ -> k'_) in
       let k_ = cf (0, I.Null) in
       (abstractCtx k_, abstractGlobalSub (k_, s, b_))
 
-    let abstractSubAll (t, b1_, (g0_, b0_), s, b_) =
+    let abstractSubAll (t, b1_, (g0_, b0), s, b_) =
       let rec skip'' = function
         | k_, (I.Null, I.Null) -> k_
-        | k_, (I.Decl (g0_, d_), I.Decl (b0_, tag_)) ->
-            I.Decl (skip'' (k_, (g0_, b0_)), Bv (d_, tag_))
+        | k_, (I.Decl (g0_, d_), I.Decl (b0, tag_)) ->
+            I.Decl (skip'' (k_, (g0_, b0)), Bv (d_, tag_))
       in
       let collect2 = collectGlobalSub (g0_, s, b_, function _, k'_ -> k'_) in
       let collect0 =
         collectGlobalSub (I.Null, t, b1_, function _, k'_ -> k'_)
       in
       let k0_ = collect0 (0, I.Null) in
-      let k1_ = skip'' (k0_, (g0_, b0_)) in
+      let k1_ = skip'' (k0_, (g0_, b0)) in
       let d = I.ctxLength g0_ in
       let k_ = collect2 (d, k1_) in
       (abstractCtx k_, abstractGlobalSub (k_, s, b_))
@@ -400,7 +400,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
 
     let rec allClo = function
       | I.Null, f_ -> f_
-      | I.Decl (gx_, d_), f_ -> allClo (gx_, F.All (F.Prim d_, f_))
+      | I.Decl (gx, d_), f_ -> allClo (gx, F.All (F.Prim d_, f_))
 
     let rec convert = function
       | I.Null -> I.Null
@@ -444,43 +444,43 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
             (g_, Abstract.piDepend ((Whnf.normalizeDec (d_, I.id), I.Maybe), v_))
 
     let rec raiseFor = function
-      | k, gorig_, (F.True as f_), w, sc -> f_
-      | k, gorig_, F.Ex (I.Dec (name, v_), f_), w, sc ->
-          let g_ = F.listToCtx (ctxSub (F.ctxToList gorig_, w)) in
+      | k, gorig, (F.True as f_), w, sc -> f_
+      | k, gorig, F.Ex (I.Dec (name, v_), f_), w, sc ->
+          let g_ = F.listToCtx (ctxSub (F.ctxToList gorig, w)) in
           let g = I.ctxLength g_ in
           let s = sc (w, k) in
           let v'_ = I.EClo (v_, s) in
           let nw, s_ = weaken2 (g_, I.targetFam v_, 1) in
           let iw = Whnf.invert nw in
           let gw_ = Whnf.strengthen (iw, g_) in
-          let v''_ = Whnf.normalize (v'_, iw) in
-          let v'''_ = Whnf.normalize (raiseType (gw_, v''_), I.id) in
-          let s'''_ = s_ I.Nil in
+          let v'' = Whnf.normalize (v'_, iw) in
+          let v''' = Whnf.normalize (raiseType (gw_, v''), I.id) in
+          let s''' = s_ I.Nil in
           let sc' = function
             | w', k' ->
                 let s' = sc (w', k') in
-                I.Dot (I.Exp (I.Root (I.BVar (g + k' - k), s'''_)), s')
+                I.Dot (I.Exp (I.Root (I.BVar (g + k' - k), s''')), s')
           in
-          let f'_ = raiseFor (k + 1, gorig_, f_, I.comp (w, I.shift), sc') in
-          F.Ex (I.Dec (name, v'''_), f'_)
-      | k, gorig_, F.All (F.Prim (I.Dec (name, v_)), f_), w, sc ->
-          let g_ = F.listToCtx (ctxSub (F.ctxToList gorig_, w)) in
+          let f'_ = raiseFor (k + 1, gorig, f_, I.comp (w, I.shift), sc') in
+          F.Ex (I.Dec (name, v'''), f'_)
+      | k, gorig, F.All (F.Prim (I.Dec (name, v_)), f_), w, sc ->
+          let g_ = F.listToCtx (ctxSub (F.ctxToList gorig, w)) in
           let g = I.ctxLength g_ in
           let s = sc (w, k) in
           let v'_ = I.EClo (v_, s) in
           let nw, s_ = weaken2 (g_, I.targetFam v_, 1) in
           let iw = Whnf.invert nw in
           let gw_ = Whnf.strengthen (iw, g_) in
-          let v''_ = Whnf.normalize (v'_, iw) in
-          let v'''_ = Whnf.normalize (raiseType (gw_, v''_), I.id) in
-          let s'''_ = s_ I.Nil in
+          let v'' = Whnf.normalize (v'_, iw) in
+          let v''' = Whnf.normalize (raiseType (gw_, v''), I.id) in
+          let s''' = s_ I.Nil in
           let sc' = function
             | w', k' ->
                 let s' = sc (w', k') in
-                I.Dot (I.Exp (I.Root (I.BVar (g + k' - k), s'''_)), s')
+                I.Dot (I.Exp (I.Root (I.BVar (g + k' - k), s''')), s')
           in
-          let f'_ = raiseFor (k + 1, gorig_, f_, I.comp (w, I.shift), sc') in
-          F.All (F.Prim (I.Dec (name, v'''_)), f'_)
+          let f'_ = raiseFor (k + 1, gorig, f_, I.comp (w, I.shift), sc') in
+          F.All (F.Prim (I.Dec (name, v''')), f'_)
 
     let rec extend = function
       | k_, [] -> k_
@@ -494,20 +494,20 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           let k = I.ctxLength k_ in
           let k'_ = cf (I.ctxLength g_, k_) in
           let k' = I.ctxLength k'_ in
-          let gk_, bk_ = abstractCtx k'_ in
+          let gk_, bk = abstractCtx k'_ in
           let _ =
             begin if !Global.doubleCheck then TypeCheck.typeCheckCtx gk_ else ()
             end
           in
           let w' = I.comp (w, I.Shift (k' - k)) in
-          let fk_ = abstractFor (k'_, 0, (f_, s)) in
+          let fk = abstractFor (k'_, 0, (f_, s)) in
           let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor (gk_, fk_)
+            begin if !Global.doubleCheck then FunTypeCheck.isFor (gk_, fk)
             else ()
             end
           in
-          let gk1_, gk2_ = split (gk_, k' - k) in
-          (gk1_, allClo (gk2_, fk_))
+          let gk1, gk2 = split (gk_, k' - k) in
+          (gk1, allClo (gk2, fk))
       | k_, w, Block ((g_, t, d, g2_), af_) ->
           let k = I.ctxLength k_ in
           let collect =
@@ -523,23 +523,23 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
             else ()
             end
           in
-          let gk1_, gk2_ = split (gk_, List.length g2_) in
+          let gk1, gk2 = split (gk_, List.length g2_) in
           let f''_ =
-            raiseFor (0, gk2_, f'_, I.id, function w, _ -> F.dot1n (gk2_, w))
+            raiseFor (0, gk2, f'_, I.id, function w, _ -> F.dot1n (gk2, w))
           in
           let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor (gk1_, f''_)
+            begin if !Global.doubleCheck then FunTypeCheck.isFor (gk1, f''_)
             else ()
             end
           in
-          let gk11_, gk12_ = split (gk1_, k' - k) in
-          let f'''_ = allClo (gk12_, f''_) in
+          let gk11, gk12 = split (gk1, k' - k) in
+          let f'''_ = allClo (gk12, f''_) in
           let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor (gk11_, f'''_)
+            begin if !Global.doubleCheck then FunTypeCheck.isFor (gk11, f'''_)
             else ()
             end
           in
-          (gk11_, f'''_)
+          (gk11, f'''_)
 
     let abstractApproxFor = function
       | Head (g_, _, _) as af_ ->

@@ -93,7 +93,7 @@ end) : TABLED = struct
     | Loop
     | Divergence of (IntSyn.exp * IntSyn.sub) * CompSyn.dProg
 
-  let suspGoals_ :
+  let suspGoals :
       (suspType
       * (IntSyn.dctx * IntSyn.exp * IntSyn.sub)
       * (CompSyn.pskeleton -> unit)
@@ -197,17 +197,17 @@ end) : TABLED = struct
       end
     with Unify.Unify msg -> false
 
-  let unify (g_, us_, us'_) =
+  let unify (g_, us_, us') =
     try
       begin
-        Unify.unify (g_, us_, us'_);
+        Unify.unify (g_, us_, us');
         true
       end
     with Unify.Unify msg -> false
 
   let rec getHypGoal = function
     | (C.DProg _ as dp), (C.Atom p, s) -> (dp, (p, s))
-    | C.DProg (g_, dPool), (C.Impl (r, a_, ha_, g), s) ->
+    | C.DProg (g_, dPool), (C.Impl (r, a_, ha, g), s) ->
         let d'_ = IntSyn.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
           begin match MT.memberCtx ((g_, I.EClo (a_, s)), g_) with
@@ -218,12 +218,12 @@ end) : TABLED = struct
               (* is g always atomic? *)
           | None ->
               getHypGoal
-                ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+                ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
                   (g, I.dot1 s) )
           end
         else
           getHypGoal
-            ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+            ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
               (g, I.dot1 s) )
         end
     | C.DProg (g_, dPool), (C.All (d_, g), s) ->
@@ -236,7 +236,7 @@ end) : TABLED = struct
     let (C.DProg (g_, dPool) as dProg), (p, s) =
       getHypGoal (C.DProg (I.Null, I.Null), (goal, I.id))
     in
-    let g'_, dAVars_, dEVars_, u'_, eqn', s' =
+    let g'_, dAVars, dEVars, u'_, eqn', s' =
       A.abstractEVarCtx (dProg, p, s)
     in
     let _ =
@@ -249,10 +249,10 @@ end) : TABLED = struct
       end
     in
     begin if TabledSyn.keepTable (IntSyn.targetFam u'_) then
-      begin match MT.callCheck (dAVars_, dEVars_, g'_, u'_, eqn', status) with
+      begin match MT.callCheck (dAVars, dEVars, g'_, u'_, eqn', status) with
       | T.RepeatedEntry (_, answRef, _) ->
           TableParam.globalTable :=
-            (dAVars_, dEVars_, g'_, u'_, eqn', answRef, status)
+            (dAVars, dEVars, g'_, u'_, eqn', answRef, status)
             :: !TableParam.globalTable
       | _ -> raise (Error "Top level goal should always in the table\n")
       end
@@ -264,9 +264,9 @@ end) : TABLED = struct
   let fillTable () =
     let rec insert = function
       | [] -> ()
-      | (dAVars_, dEVars_, g'_, u'_, eqn', answRef, status) :: rest ->
+      | (dAVars, dEVars, g'_, u'_, eqn', answRef, status) :: rest ->
           begin match
-            MT.insertIntoTree (dAVars_, dEVars_, g'_, u'_, eqn', answRef, status)
+            MT.insertIntoTree (dAVars, dEVars, g'_, u'_, eqn', answRef, status)
           with
           | T.NewEntry _ -> insert rest
           | _ -> ()
@@ -343,9 +343,9 @@ end) : TABLED = struct
    *)
   let rec retrieveV = function
     | (g_, u_, s), [], sc -> ()
-    | (g_, u_, s), ((dEVars_, s1), o1_) :: a_, sc ->
+    | (g_, u_, s), ((dEVars, s1), o1_) :: a_, sc ->
         let s1' =
-          ctxToEVarSub (dEVars_, I.Shift (I.ctxLength dEVars_))
+          ctxToEVarSub (dEVars, I.Shift (I.ctxLength dEVars))
           (* I.id *)
         in
         let scomp = I.comp (s1, s1') in
@@ -359,8 +359,8 @@ end) : TABLED = struct
         end
   (* for subsumption we must combine it with asumb!!! *)
 
-  let retrieveSW ((g_, u_, s), asub, answL_, sc) =
-    retrieve' ((g_, u_, s), asub, answL_, sc)
+  let retrieveSW ((g_, u_, s), asub, answL, sc) =
+    retrieve' ((g_, u_, s), asub, answL, sc)
 
   (* currently not used -- however, it may be better to  not use the same retrieval function for
       subsumption and variant retrieval, and we want to revive this function *)
@@ -410,7 +410,7 @@ end) : TABLED = struct
   let rec solve = function
     | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
         begin if TabledSyn.tabledLookup (I.targetFam p) then
-          let g'_, dAVars_, dEVars_, u'_, eqn', s' =
+          let g'_, dAVars, dEVars, u'_, eqn', s' =
             A.abstractEVarCtx (dp, p, s)
           in
           let _ =
@@ -422,7 +422,7 @@ end) : TABLED = struct
             end
           in
           begin match
-            MT.callCheck (dAVars_, dEVars_, g'_, u'_, eqn', T.Incomplete)
+            MT.callCheck (dAVars, dEVars, g'_, u'_, eqn', T.Incomplete)
           with
           | T.NewEntry answRef ->
               matchAtom
@@ -436,27 +436,27 @@ end) : TABLED = struct
                       end )
           | T.RepeatedEntry (asub, answRef, Incomplete) ->
               begin if T.noAnswers answRef then begin
-                suspGoals_ :=
+                suspGoals :=
                   ( Loop,
                     (g'_, u'_, s'),
                     sc,
                     Unify.suspend (),
                     (asub, answRef),
                     ref 0 )
-                  :: !suspGoals_;
+                  :: !suspGoals;
                 ()
               end
               else
                 let le = T.lookup answRef in
                 begin
-                  suspGoals_ :=
+                  suspGoals :=
                     ( Loop,
                       (g'_, u'_, s'),
                       sc,
                       Unify.suspend (),
                       (asub, answRef),
                       ref le )
-                    :: !suspGoals_;
+                    :: !suspGoals;
                   retrieve (ref 0, (g'_, u'_, s'), (asub, answRef), sc)
                 end
               end
@@ -465,14 +465,14 @@ end) : TABLED = struct
               else retrieve (ref 0, (g'_, u'_, s'), (asub, answRef), sc)
               end
           | T.DivergingEntry (asub, answRef) -> begin
-              suspGoals_ :=
+              suspGoals :=
                 ( Divergence ((p, s), dp),
                   (g'_, u'_, s'),
                   sc,
                   Unify.suspend (),
                   ((I.id, asub) (* this is a hack *), answRef),
                   ref 0 )
-                :: !suspGoals_;
+                :: !suspGoals;
               ()
             end
           end
@@ -485,7 +485,7 @@ end) : TABLED = struct
                . |- [s'](Pi G'. U')     and  G |- [s'^k]U' = [s]p *)
         else matchAtom ((p, s), dp, sc)
         end
-    | (C.Impl (r, a_, ha_, g), s), C.DProg (g_, dPool), sc ->
+    | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
         let d'_ = I.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
           begin match MT.memberCtx ((g_, I.EClo (a_, s)), g_) with
@@ -498,13 +498,13 @@ end) : TABLED = struct
           | None ->
               !solve_fn_ref
                 ( (g, I.dot1 s),
-                  C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+                  C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
                   function o_ -> sc o_ )
           end
         else
           !solve_fn_ref
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
+              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
               function o_ -> sc o_ )
         end
     | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
@@ -558,12 +558,12 @@ end) : TABLED = struct
         else ()
         end
 
-  and matchAtom (((I.Root (ha_, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc)
+  and matchAtom (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc)
       =
     let rec matchSig = function
       | [] -> ()
-      | (I.Const c as hc_) :: sgn' ->
-          let (C.SClause r) = C.sProgLookup (cidFromHead hc_) in
+      | (I.Const c as hc) :: sgn' ->
+          let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
           begin
             CsManager.trail (function () ->
                 rSolve (ps', (r, I.id), dp, function s_ -> sc (C.Pc c :: s_)));
@@ -573,9 +573,9 @@ end) : TABLED = struct
       (* return indicates failure *)
     in
     let rec matchDProg = function
-      | I.Null, I.Null, _ -> matchSig (Index.lookup (cidFromHead ha_))
-      | I.Decl (g_, _), I.Decl (dPool', C.Dec (r, s, ha'_)), k ->
-          begin if eqHead (ha_, ha'_) then begin
+      | I.Null, I.Null, _ -> matchSig (Index.lookup (cidFromHead ha))
+      | I.Decl (g_, _), I.Decl (dPool', C.Dec (r, s, ha')), k ->
+          begin if eqHead (ha, ha') then begin
             CsManager.trail (function () ->
                 rSolve
                   ( ps',
@@ -604,7 +604,7 @@ end) : TABLED = struct
       begin if succeeded then matchConstraint (solve_fn, try_ + 1) else ()
       end
     in
-    begin match I.constStatus (cidFromHead ha_) with
+    begin match I.constStatus (cidFromHead ha) with
     | I.Constraint (cs, solve_fn) -> matchConstraint (solve_fn, 0)
     | _ -> matchDProg (g_, dPool, 1)
     end
@@ -682,7 +682,7 @@ end) : TABLED = struct
                 end )
 
   let tableSize () = MT.tableSize ()
-  let suspGoalNo () = List.length !suspGoals_
+  let suspGoalNo () = List.length !suspGoals
 
   (*  nextStage () = bool
      Side effect: advances lookup pointers
@@ -690,16 +690,16 @@ end) : TABLED = struct
   let nextStage () =
     let rec resume = function
       | [] -> ()
-      | (susp_, s, sc, trail, (asub, answRef), k) :: goals_ -> begin
+      | (susp, s, sc, trail, (asub, answRef), k) :: goals_ -> begin
           CsManager.trail (function () ->
               begin
                 Unify.resume trail;
-                retrieval (susp_, s, sc, (asub, answRef), k)
+                retrieval (susp, s, sc, (asub, answRef), k)
               end);
           resume goals_
         end
     in
-    let sg_ = rev !suspGoals_ in
+    let sg_ = rev !suspGoals in
     begin if MT.updateTable () then begin
       TableParam.stageCtr := !TableParam.stageCtr + 1;
       begin
@@ -714,7 +714,7 @@ end) : TABLED = struct
 
   let reset () =
     begin
-      suspGoals_ := [];
+      suspGoals := [];
       begin
         MT.reset ();
         TableParam.stageCtr := 0

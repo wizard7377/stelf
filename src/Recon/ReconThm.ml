@@ -329,9 +329,9 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     in
     let gbs_cst, g_cst, m_ctx, k = go t ([], IntSyn.Null, IntSyn.Null, 0) in
     ignore (Names.varReset IntSyn.Null);
-    let gBs_ = List.map abstractCtxPair gbs_cst in
+    let gBs = List.map abstractCtxPair gbs_cst in
     let (RT.JWithCtx (g_, _)) = RT.recon (RT.jwithctx (g_cst, RT.jnothing)) in
-    ThmSyn.ThDecl (gBs_, g_, m_ctx, k)
+    ThmSyn.ThDecl (gBs, g_, m_ctx, k)
 
   let theoremDecToTheoremDec td =
     let module ThmDec = Cst.View.Thm.ThmDec in

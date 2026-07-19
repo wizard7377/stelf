@@ -73,9 +73,9 @@ end) : SKOLEM = struct
                              ((Whnf.normalizeDec (d_, s), I.Meta), v_)) )
             | M.Mapp (M.Marg (M.Minus, _), mS') ->
                 let (I.Dec (_, v'_)) = d_ in
-                let v''_ = k (Whnf.normalize (v'_, s)) in
+                let v'' = k (Whnf.normalize (v'_, s)) in
                 let name' = Names.skonstName (name ^ "#") in
-                let sd_ = I.SkoDec (name', None, imp, v''_, l_) in
+                let sd_ = I.SkoDec (name', None, imp, v'', l_) in
                 let sk = I.sgnAdd sd_ in
                 let h_ = I.Skonst sk in
                 ignore (IndexSkolem.install I.Ordinary h_);

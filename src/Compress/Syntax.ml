@@ -41,13 +41,13 @@ module Syntax = struct
   (* Shift n m = 0.1.2. ... .n-1.n+m.n+m+1.n+m+2. ... *)
   (* X[sl] . s *)
   (* special hack for type functions used only in tp_reduce *)
-  type tpfn = TpfnType_ of tp | TpfnLam_ of tpfn
+  type tpfn = TpfnType of tp | TpfnLam of tpfn
 
-  let eVarDotId_ ev = EVarDot (ev, [], Id)
+  let eVarDotId ev = EVarDot (ev, [], Id)
 
   (*	type decl = string * Parse.term *)
   (*	type ctx = decl list *)
-  type class_ = Kclass_ of knd | Tclass_ of tp
+  type class_ = Kclass of knd | Tclass of tp
 
   (* termof elm
         returns the term part of the spine element elm *)
@@ -60,9 +60,9 @@ module Syntax = struct
           (Syntax "invariant violated: arguments to variables cannot be omitted")
 
   type subst_result =
-    | SrVar_ of int
-    | SrTerm_ of (term * tp)
-    | SrEVar_ of evar * subst list
+    | SrVar of int
+    | SrTerm of (term * tp)
+    | SrEVar of evar * subst list
 
   exception Debugs of subst_result * spinelt list
 
@@ -91,39 +91,39 @@ module Syntax = struct
 	    end *)
 
   and substNth = function
-    | Id, n -> SrVar_ n
+    | Id, n -> SrVar n
     | ZeroDotShift s, n ->
-        begin if n = 0 then SrVar_ 0
+        begin if n = 0 then SrVar 0
         else
           begin match substNth (s, n - 1) with
-          | SrTerm_ (t, a) -> SrTerm_ (shift t, shift_tp 0 a)
-          | SrVar_ n -> SrVar_ (n + 1)
-          | SrEVar_ (ev, sl) -> SrEVar_ (ev, Shift (0, 1) :: sl)
+          | SrTerm (t, a) -> SrTerm (shift t, shift_tp 0 a)
+          | SrVar n -> SrVar (n + 1)
+          | SrEVar (ev, sl) -> SrEVar (ev, Shift (0, 1) :: sl)
           end
         end
     | TermDot (m, a, s), n ->
-        begin if n = 0 then SrTerm_ (m, a) else substNth (s, n - 1)
+        begin if n = 0 then SrTerm (m, a) else substNth (s, n - 1)
         end
     | EVarDot (ev, sl, s), n ->
-        begin if n = 0 then SrEVar_ (ev, sl) else substNth (s, n - 1)
+        begin if n = 0 then SrEVar (ev, sl) else substNth (s, n - 1)
         end
     | Shift (n, m), n' ->
-        begin if n' >= n then SrVar_ (n' + m) else SrVar_ n'
+        begin if n' >= n then SrVar (n' + m) else SrVar n'
         end
     | VarOptDot (no, s), n' ->
         begin if n' = 0 then
-          begin match no with Some n -> SrVar_ n | None -> raise MissingVar
+          begin match no with Some n -> SrVar n | None -> raise MissingVar
           end
         else substNth (s, n' - 1)
         end
-    | Compose [], n -> SrVar_ n
+    | Compose [], n -> SrVar n
     | Compose (h :: tl), n -> subst_sr h (substNth (Compose tl, n))
 
   and subst_sr arg__2 arg__3 =
     begin match (arg__2, arg__3) with
-    | s, SrTerm_ (t, a) -> SrTerm_ (subst_term s t, subst_tp s a)
-    | s, SrVar_ n -> substNth (s, n)
-    | s, SrEVar_ (ev, sl) -> SrEVar_ (ev, s :: sl)
+    | s, SrTerm (t, a) -> SrTerm (subst_term s t, subst_tp s a)
+    | s, SrVar n -> substNth (s, n)
+    | s, SrEVar (ev, sl) -> SrEVar (ev, s :: sl)
     end
 
   and subst_spinelt arg__4 arg__5 =
@@ -181,37 +181,37 @@ module Syntax = struct
     end
 
   and reduce = function
-    | SrVar_ n, sp -> ATerm (ARoot (Var n, sp))
-    | SrTerm_ (NTerm (Lam n), TPi (_, a, b)), h :: sp ->
+    | SrVar n, sp -> ATerm (ARoot (Var n, sp))
+    | SrTerm (NTerm (Lam n), TPi (_, a, b)), h :: sp ->
         let s = TermDot (termof h, a, Id) in
         let n' = subst_term s n in
         let b' = subst_tp s b in
-        reduce (SrTerm_ (n', b'), sp)
-    | SrTerm_ ((NTerm (NRoot (h, sp)) as t), a), [] -> t
-    | SrTerm_ ((ATerm (ARoot (h, sp)) as t), a), [] -> t
-    | SrTerm_ (ATerm (ERoot (({ contents = Some _ }, _), _) as t), a), [] ->
-        reduce (SrTerm_ (eroot_elim t, a), [])
-    | SrTerm_ (ATerm (ERoot (({ contents = None }, _), _) as t), a), [] ->
+        reduce (SrTerm (n', b'), sp)
+    | SrTerm ((NTerm (NRoot (h, sp)) as t), a), [] -> t
+    | SrTerm ((ATerm (ARoot (h, sp)) as t), a), [] -> t
+    | SrTerm (ATerm (ERoot (({ contents = Some _ }, _), _) as t), a), [] ->
+        reduce (SrTerm (eroot_elim t, a), [])
+    | SrTerm (ATerm (ERoot (({ contents = None }, _), _) as t), a), [] ->
         ATerm t
-    | SrEVar_ ((x, a), sl), sp ->
+    | SrEVar ((x, a), sl), sp ->
         let a', subst = lower (substs_comp sl) (a, sp) in
         ATerm (ERoot ((x, a'), subst))
     | _ -> raise (Syntax "simplified-type mismatch in reduction")
 
   and reduce_plus = function
-    | SrVar_ n, sp -> AElt (ARoot (Var n, sp))
-    | SrTerm_ (NTerm (Lam n), TPi (_, a, b)), h :: sp ->
+    | SrVar n, sp -> AElt (ARoot (Var n, sp))
+    | SrTerm (NTerm (Lam n), TPi (_, a, b)), h :: sp ->
         let s = TermDot (termof h, a, Id) in
         let n' = subst_term s n in
         let b' = subst_tp s b in
-        reduce_plus (SrTerm_ (n', b'), sp)
-    | SrTerm_ (NTerm (NRoot (h, sp) as t), a), [] -> Ascribe (t, a)
-    | SrTerm_ (ATerm (ARoot (h, sp) as t), a), [] -> AElt t
-    | SrTerm_ (ATerm (ERoot (({ contents = Some _ }, _), _) as t), a), [] ->
-        reduce_plus (SrTerm_ (eroot_elim t, a), [])
-    | SrTerm_ (ATerm (ERoot (({ contents = None }, _), _) as t), a), [] ->
+        reduce_plus (SrTerm (n', b'), sp)
+    | SrTerm (NTerm (NRoot (h, sp) as t), a), [] -> Ascribe (t, a)
+    | SrTerm (ATerm (ARoot (h, sp) as t), a), [] -> AElt t
+    | SrTerm (ATerm (ERoot (({ contents = Some _ }, _), _) as t), a), [] ->
+        reduce_plus (SrTerm (eroot_elim t, a), [])
+    | SrTerm (ATerm (ERoot (({ contents = None }, _), _) as t), a), [] ->
         AElt t
-    | SrEVar_ ((x, a), sl), sp ->
+    | SrEVar ((x, a), sl), sp ->
         let a', subst = lower (substs_comp sl) (a, sp) in
         AElt (ERoot ((x, a'), subst))
     | x, y -> begin
@@ -222,22 +222,22 @@ module Syntax = struct
   and tp_reduce (a, k, sp) =
     let rec subst_tpfn arg__18 arg__19 =
       begin match (arg__18, arg__19) with
-      | s, TpfnLam_ a -> TpfnLam_ (subst_tpfn (ZeroDotShift s) a)
-      | s, TpfnType_ a -> TpfnType_ (subst_tp s a)
+      | s, TpfnLam a -> TpfnLam (subst_tpfn (ZeroDotShift s) a)
+      | s, TpfnType a -> TpfnType (subst_tp s a)
       end
     in
     let rec tp_reduce' = function
-      | TpfnLam_ a, KPi (_, b, k), h :: sp ->
+      | TpfnLam a, KPi (_, b, k), h :: sp ->
           let s = TermDot (termof h, b, Id) in
           let a' = subst_tpfn s a in
           let k' = subst_knd s k in
           tp_reduce' (a', k', sp)
-      | TpfnType_ a, Type, [] -> a
+      | TpfnType a, Type, [] -> a
       | _ -> raise (Syntax "simplified-kind mismatch in type reduction")
     in
     let rec wrap = function
-      | a, KPi (_, b, k) -> TpfnLam_ (wrap (a, k))
-      | a, Type -> TpfnType_ a
+      | a, KPi (_, b, k) -> TpfnLam (wrap (a, k))
+      | a, Type -> TpfnType a
     in
     let aw = wrap (a, k) in
     tp_reduce' (aw, k, sp)
@@ -261,9 +261,9 @@ module Syntax = struct
   and composeNth (s, n, s') =
     let s'' = subst_compose (s, s') in
     begin match substNth (s, n) with
-    | SrVar_ n' -> VarOptDot (Some n', s'')
-    | SrTerm_ (t, a) -> TermDot (t, a, s'')
-    | SrEVar_ (ev, sl) -> EVarDot (ev, sl, s'')
+    | SrVar n' -> VarOptDot (Some n', s'')
+    | SrTerm (t, a) -> TermDot (t, a, s'')
+    | SrEVar (ev, sl) -> EVarDot (ev, sl, s'')
     end
 
   and subst_compose = function
@@ -387,8 +387,8 @@ module Syntax = struct
     | x -> x
 
   let ctxLookup (g_, n) = subst_tp (Shift (0, n + 1)) (List.nth (g_, n))
-  let typeOf (Tclass_ a) = a
-  let kindOf (Kclass_ k) = k
+  let typeOf (Tclass a) = a
+  let kindOf (Kclass k) = k
   let sum = foldl (fun (x__op, y__op) -> x__op + y__op) 0
 
   let rec size_term = function

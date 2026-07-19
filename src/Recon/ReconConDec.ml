@@ -142,7 +142,7 @@ module Make_ReconConDec
           | _ -> assert false
         in
         let _ = RT.checkErrors r in
-        let i, (u''_, v''_) =
+        let i, (u'', v'') =
           try Abstract.abstractDef (u_, v_)
           with Abstract.Error msg ->
             raise (Abstract.Error (Paths.wrap (r, msg)))
@@ -151,23 +151,23 @@ module Make_ReconConDec
         let ocd = Paths.def (i, oc1, oc2_opt) in
         let cd =
           if abbFlag then
-            Names.nameConDec (IntSyn.AbbrevDef (name, None, i, u''_, v''_, l_))
+            Names.nameConDec (IntSyn.AbbrevDef (name, None, i, u'', v'', l_))
           else begin
-            Typecheck.Typecheck_.Strict.check ((u''_, v''_), None);
+            Typecheck.Typecheck_.Strict.check ((u'', v''), None);
             Names.nameConDec
               (IntSyn.ConDef
-                 (name, None, i, u''_, v''_, l_, IntSyn.ancestor u''_))
+                 (name, None, i, u'', v'', l_, IntSyn.ancestor u''))
           end
         in
         let _ = Display.chatter_s 3 (Print.conDecToString cd ^ "\n") in
         let _ =
           if !Global.doubleCheck then begin
-            (try Typecheck.Typecheck_.TypeCheck.check (v''_, IntSyn.Uni l_)
+            (try Typecheck.Typecheck_.TypeCheck.check (v'', IntSyn.Uni l_)
              with Typecheck.Typecheck_.TypeCheck.Error msg ->
                Printf.eprintf "DOUBLE-CHECK FAIL on ConDef %s (type): %s\n%!"
                  name msg;
                raise (Typecheck.Typecheck_.TypeCheck.Error msg));
-            try Typecheck.Typecheck_.TypeCheck.check (u''_, v''_)
+            try Typecheck.Typecheck_.TypeCheck.check (u'', v'')
             with Typecheck.Typecheck_.TypeCheck.Error msg ->
               Printf.eprintf "DOUBLE-CHECK FAIL on ConDef %s (term): %s\n%!"
                 name msg;
@@ -202,13 +202,13 @@ module Make_ReconConDec
                    ^ ctxBlockToString (IntSyn.Null, (gsome_, gblock_))
                    ^ "\n" ^ Print.cnstrsToString c_ ))
         in
-        let gsome'_, gblock'_ =
+        let gsome', gblock' =
           match ctxs with [ a; b ] -> (a, b) | _ -> assert false
         in
-        let _ = checkFreevars (g0_, (gsome'_, gblock'_), r') in
+        let _ = checkFreevars (g0_, (gsome', gblock'), r') in
         let bd =
           Names.nameConDec
-            (IntSyn.BlockDec (name, None, gsome'_, ctxToList gblock'_))
+            (IntSyn.BlockDec (name, None, gsome', ctxToList gblock'))
         in
         let _ = Display.chatter_s 3 (Print.conDecToString bd ^ "\n") in
         (Some bd, None)

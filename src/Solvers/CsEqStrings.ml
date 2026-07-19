@@ -62,17 +62,17 @@ end) : Cs.CS = struct
       | Concat (String str :: []) -> stringExp str
       | Concat (Exp (u_, Shift 0) :: []) -> u_
       | Concat (Exp (u_, s_) :: []) -> EClo (u_, s_)
-      | Concat (a_ :: al_) ->
-          concatExp (toExp (Concat [ a_ ]), toExp (Concat al_))
+      | Concat (a_ :: al) ->
+          concatExp (toExp (Concat [ a_ ]), toExp (Concat al))
 
     let catConcat = function
       | Concat [], concat2 -> concat2
       | concat1, Concat [] -> concat1
-      | Concat al1_, Concat al2_ ->
-          begin match (List.rev al1_, al2_) with
-          | String str1 :: revAL1', String str2 :: al2'_ ->
-              Concat (List.rev revAL1' @ (String (str1 ^ str2) :: al2'_))
-          | _, _ -> Concat (al1_ @ al2_)
+      | Concat al1, Concat al2 ->
+          begin match (List.rev al1, al2) with
+          | String str1 :: revAL1', String str2 :: al2' ->
+              Concat (List.rev revAL1' @ (String (str1 ^ str2) :: al2'))
+          | _, _ -> Concat (al1 @ al2)
           end
 
     let rec fromExpW = function
@@ -97,23 +97,23 @@ end) : Cs.CS = struct
       | Concat [] as concat -> concat
       | Concat (String str :: []) as concat -> concat
       | Concat (Exp us_ :: []) -> fromExp us_
-      | Concat (a_ :: al_) ->
-          catConcat (normalize (Concat [ a_ ]), normalize (Concat al_))
+      | Concat (a_ :: al) ->
+          catConcat (normalize (Concat [ a_ ]), normalize (Concat al))
 
-    let mapConcat (f, Concat al_) =
+    let mapConcat (f, Concat al) =
       let rec mapConcat' = function
         | [] -> []
-        | Exp (u_, s_) :: al_ -> Exp (f (EClo (u_, s_)), id) :: mapConcat' al_
-        | String str :: al_ -> String str :: mapConcat' al_
+        | Exp (u_, s_) :: al -> Exp (f (EClo (u_, s_)), id) :: mapConcat' al
+        | String str :: al -> String str :: mapConcat' al
       in
-      Concat (mapConcat' al_)
+      Concat (mapConcat' al)
 
-    let appConcat (f, Concat al_) =
+    let appConcat (f, Concat al) =
       let appAtom = function
         | Exp (u_, s_) -> f (EClo (u_, s_))
         | String _ -> ()
       in
-      List.app appAtom al_
+      List.app appAtom al
 
     type split = Split of string * string
     type decomp = Decomp of string * string list
@@ -140,31 +140,31 @@ end) : Cs.CS = struct
       in
       List.map split' (index (str1, str2))
 
-    let rec sameConcat (Concat al1_, Concat al2_) =
+    let rec sameConcat (Concat al1, Concat al2) =
       let rec sameConcat' = function
         | [], [] -> true
-        | String str1 :: al1_, String str2 :: al2_ ->
-            str1 = str2 && sameConcat' (al1_, al2_)
-        | Exp us1_ :: al1_, Exp us2_ :: al2_ ->
-            sameExp (us1_, us2_) && sameConcat' (al1_, al2_)
+        | String str1 :: al1, String str2 :: al2 ->
+            str1 = str2 && sameConcat' (al1, al2)
+        | Exp us1 :: al1, Exp us2 :: al2 ->
+            sameExp (us1, us2) && sameConcat' (al1, al2)
         | _ -> false
       in
-      sameConcat' (al1_, al2_)
+      sameConcat' (al1, al2)
 
     and sameExpW = function
-      | ((Root (h1_, s1_), s1) as us1_), ((Root (h2_, s2_), s2) as us2_) ->
+      | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
           begin match (h1_, h2_) with
           | BVar k1, BVar k2 -> k1 = k2 && sameSpine ((s1_, s1), (s2_, s2))
           | FVar (n1, _, _), FVar (n2, _, _) ->
               n1 = n2 && sameSpine ((s1_, s1), (s2_, s2))
           | _ -> false
           end
-      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1_),
-          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2_) ) ->
+      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1),
+          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2) ) ->
           r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
-    and sameExp (us1_, us2_) = sameExpW (Whnf.whnf us1_, Whnf.whnf us2_)
+    and sameExp (us1, us2) = sameExpW (Whnf.whnf us1, Whnf.whnf us2)
 
     and sameSpine = function
       | (Nil, s1), (Nil, s2) -> true
@@ -198,63 +198,63 @@ end) : Cs.CS = struct
           IntSyn.Succeed (List.map (function u_ -> Delay (u_, cnstr)) ul_)
       | Failure -> Fail
 
-    and unifyRigid (g_, Concat al1_, Concat al2_) =
+    and unifyRigid (g_, Concat al1, Concat al2) =
       let rec unifyRigid' = function
         | [], [] -> MultAssign []
-        | String str1 :: al1_, String str2 :: al2_ ->
-            begin if str1 = str2 then unifyRigid' (al1_, al2_) else Failure
+        | String str1 :: al1, String str2 :: al2 ->
+            begin if str1 = str2 then unifyRigid' (al1, al2) else Failure
             end
-        | ( Exp ((EVar (r, _, _, _) as u1_), s) :: al1_,
-            Exp ((Root (FVar _, _) as u2_), _) :: al2_ ) ->
+        | ( Exp ((EVar (r, _, _, _) as u1_), s) :: al1,
+            Exp ((Root (FVar _, _) as u2_), _) :: al2 ) ->
             let ss = Whnf.invert s in
             begin if Unify.invertible (g_, (u2_, id), ss, r) then
-              begin match unifyRigid' (al1_, al2_) with
+              begin match unifyRigid' (al1, al2) with
               | MultAssign l -> MultAssign ((g_, u1_, u2_, ss) :: l)
               | Failure -> Failure
               end
             else Failure
             end
-        | ( Exp ((Root (FVar _, _) as u1_), _) :: al1_,
-            Exp ((EVar (r, _, _, _) as u2_), s) :: al2_ ) ->
+        | ( Exp ((Root (FVar _, _) as u1_), _) :: al1,
+            Exp ((EVar (r, _, _, _) as u2_), s) :: al2 ) ->
             let ss = Whnf.invert s in
             begin if Unify.invertible (g_, (u1_, id), ss, r) then
-              begin match unifyRigid' (al1_, al2_) with
+              begin match unifyRigid' (al1, al2) with
               | MultAssign l -> MultAssign ((g_, u2_, u1_, ss) :: l)
               | Failure -> Failure
               end
             else Failure
             end
-        | ( Exp ((Root (FVar _, _), _) as us1_) :: al1_,
-            Exp ((Root (FVar _, _), _) as us2_) :: al2_ ) ->
-            begin if sameExpW (us1_, us2_) then unifyRigid' (al1_, al2_)
+        | ( Exp ((Root (FVar _, _), _) as us1) :: al1,
+            Exp ((Root (FVar _, _), _) as us2) :: al2 ) ->
+            begin if sameExpW (us1, us2) then unifyRigid' (al1, al2)
             else Failure
             end
-        | ( Exp ((EVar (_, _, _, _), _) as us1_) :: al1_,
-            Exp ((EVar (_, _, _, _), _) as us2_) :: al2_ ) ->
-            begin if sameExpW (us1_, us2_) then unifyRigid' (al1_, al2_)
+        | ( Exp ((EVar (_, _, _, _), _) as us1) :: al1,
+            Exp ((EVar (_, _, _, _), _) as us2) :: al2 ) ->
+            begin if sameExpW (us1, us2) then unifyRigid' (al1, al2)
             else Failure
             end
         | _ -> Failure
       in
-      unifyRigid' (al1_, al2_)
+      unifyRigid' (al1, al2)
 
     let rec unifyString = function
-      | g_, Concat (String prefix :: al_), str, cnstr ->
+      | g_, Concat (String prefix :: al), str, cnstr ->
           begin if String.isPrefix prefix str then
             let suffix = String.extract (str, String.size prefix, None) in
-            unifyString (g_, Concat al_, suffix, cnstr)
+            unifyString (g_, Concat al, suffix, cnstr)
           else Failure
           end
-      | g_, Concat al_, str, cnstr ->
+      | g_, Concat al, str, cnstr ->
           let rec unifyString' = function
-            | al_, [] -> (Failure, [])
+            | al, [] -> (Failure, [])
             | [], Decomp (parse, parsedL) :: [] ->
                 (MultAssign [], parse :: parsedL)
             | [], candidates -> (MultDelay ([], cnstr), [])
-            | Exp (us1_1, us1_2) :: Exp (us2_1, us2_2) :: al_, _ ->
+            | Exp (us1_1, us1_2) :: Exp (us2_1, us2_2) :: al, _ ->
                 ( MultDelay ([ EClo (us1_1, us1_2); EClo (us2_1, us2_2) ], cnstr),
                   [] )
-            | Exp ((EVar (r, _, _, _) as u_), s) :: al_, candidates ->
+            | Exp ((EVar (r, _, _, _) as u_), s) :: al, candidates ->
                 begin if Whnf.isPatSub s then
                   let rec assign arg__1 arg__2 =
                     begin match (arg__1, arg__2) with
@@ -271,7 +271,7 @@ end) : Cs.CS = struct
                     | r, _ :: l_ -> assign r l_
                     end
                   in
-                  begin match unifyString' (al_, candidates) with
+                  begin match unifyString' (al, candidates) with
                   | MultAssign l_, parsed :: parsedL ->
                       begin match assign r l_ with
                       | None ->
@@ -289,7 +289,7 @@ end) : Cs.CS = struct
                   end
                 else (MultDelay ([ EClo (u_, s) ], cnstr), [])
                 end
-            | Exp (u_, s_) :: al_, _ ->
+            | Exp (u_, s_) :: al, _ ->
                 (MultDelay ([ EClo (u_, s_) ], cnstr), [])
             | String str :: [], candidates ->
                 let successors (Decomp (parse, parsedL)) =
@@ -306,7 +306,7 @@ end) : Cs.CS = struct
                     (List.map successors candidates)
                 in
                 unifyString' ([], candidates')
-            | String str :: al_, candidates ->
+            | String str :: al, candidates ->
                 let successors (Decomp (parse, parsedL)) =
                   List.map
                     (function
@@ -320,20 +320,20 @@ end) : Cs.CS = struct
                     []
                     (List.map successors candidates)
                 in
-                unifyString' (al_, candidates')
+                unifyString' (al, candidates')
           in
-          begin match unifyString' (al_, [ Decomp (str, []) ]) with
+          begin match unifyString' (al, [ Decomp (str, []) ]) with
           | result, [] -> result
           | result, "" :: [] -> result
           | result, parsedL -> Failure
           end
 
-    let rec unifyConcat (g_, (Concat al1_ as concat1), (Concat al2_ as concat2))
+    let rec unifyConcat (g_, (Concat al1 as concat1), (Concat al2 as concat2))
         =
       let u1_ = toFgn concat1 in
       let u2_ = toFgn concat2 in
       let cnstr = ref (Eqn (g_, u1_, u2_)) in
-      begin match (al1_, al2_) with
+      begin match (al1, al2) with
       | [], [] -> MultAssign []
       | [], _ -> Failure
       | _, [] -> Failure

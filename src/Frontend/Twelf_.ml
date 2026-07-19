@@ -260,8 +260,8 @@ end) : TWELF.STELF = struct
       begin if !Global.chatter >= 3 then Print.evarInstToString xs_ else ""
       end
 
-    let expToString gu_ =
-      begin if !Global.chatter >= 3 then Print.expToString gu_ else ""
+    let expToString gu =
+      begin if !Global.chatter >= 3 then Print.expToString gu else ""
       end
 
     let printProgTeX () =
@@ -998,7 +998,7 @@ end) : TWELF.STELF = struct
       | fileName, (Parser.TheoremDec tdec, r) ->
           let tdec_ = ReconThm.theoremDecToTheoremDec tdec in
           ignore (ReconTerm.checkErrors r);
-          let gBs_, (IntSyn.ConDec (name, _, k, _, v_, l_) as e_) =
+          let gBs, (IntSyn.ConDec (name, _, k, _, v_, l_) as e_) =
             ThmSyn.theoremDecToConDec (tdec_, r)
           in
           ignore (FunSyn.labelReset ());
@@ -1011,7 +1011,7 @@ end) : TWELF.STELF = struct
                          ( Int.toString k,
                            FunSyn.ctxToList g1_,
                            FunSyn.ctxToList g2_ )))
-              0 gBs_
+              0 gBs
           in
           let cid = installConDec IntSyn.Ordinary (e_, (fileName, None), r) in
           let ms_ = ThmSyn.theoremDecToModeSpine (tdec_, r) in
@@ -1336,9 +1336,9 @@ end) : TWELF.STELF = struct
       ignore (Display.chatter_s 4 "\n% begin subsignature\n");
       let rec install s = install' (Timers.time Timers.parsing S.expose s)
       and install' = function
-        | S.Cons ((beginSubsig_, _), s') ->
+        | S.Cons ((beginSubsig, _), s') ->
             install (installSubsig (fileName, s'))
-        | S.Cons ((endSubsig_, _), s') -> s'
+        | S.Cons ((endSubsig, _), s') -> s'
         | S.Cons (declr, s') -> begin
             install1 (fileName, declr);
             install s'
@@ -1394,7 +1394,7 @@ end) : TWELF.STELF = struct
             let rec install s = install' (Timers.time Timers.parsing S.expose s)
             and install' = function
               | empty_ -> Ok
-              | S.Cons ((beginSubsig_, _), s') ->
+              | S.Cons ((beginSubsig, _), s') ->
                   install (installSubsig ("string", s'))
               | S.Cons (decl, s') -> begin
                   install1 ("string", decl);
@@ -1550,7 +1550,7 @@ end) : TWELF.STELF = struct
                 install' (Timers.time Timers.parsing S.expose s)
               and install' = function
                 | empty_ -> Abort
-                | S.Cons ((beginSubsig_, _), s') -> begin
+                | S.Cons ((beginSubsig, _), s') -> begin
                     ignore (installSubsig ("stdIn", s'));
                     Ok
                   end

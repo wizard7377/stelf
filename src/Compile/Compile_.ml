@@ -130,14 +130,14 @@ module MakeCompile
   let rec collectSpine = function
     | I.Nil, k_, vars_, depth -> (k_, vars_)
     | I.App (u_, s_), k_, vars_, depth ->
-        let k'_, vars'_ = collectExp (u_, k_, vars_, depth) in
-        collectSpine (s_, k'_, vars'_, depth)
+        let k'_, vars' = collectExp (u_, k_, vars_, depth) in
+        collectSpine (s_, k'_, vars', depth)
 
   and collectExp = function
     | I.Root ((I.BVar k as h), s_), k_, vars_, depth ->
-        let k'_, vars'_, replaced = collectHead (h, s_, k_, vars_, depth) in
-        begin if replaced then (k'_, vars'_)
-        else collectSpine (s_, k'_, vars'_, depth)
+        let k'_, vars', replaced = collectHead (h, s_, k_, vars_, depth) in
+        begin if replaced then (k'_, vars')
+        else collectSpine (s_, k'_, vars', depth)
         end
     | (I.Root (I.Def k, s_) as u_), k_, vars_, depth ->
         ((depth, Def k) :: k_, vars_)
@@ -249,7 +249,7 @@ module MakeCompile
         let u'_ = shiftExp (u_, depth, total) in
         (left - 1, vars_, n_, C.UnifyEq (gl_, u'_, n_, eqns))
     | gl_, (I.Root (h, s_) as u_), left, vars_, depth, total, eqns ->
-        let left', vars'_, h', replaced =
+        let left', vars', h', replaced =
           linearHead (gl_, h, s_, left, vars_, depth, total)
         in
         begin if replaced then
@@ -257,18 +257,18 @@ module MakeCompile
           let u'_ = shiftExp (u_, depth, total) in
           (left', vars_, n_, C.UnifyEq (gl_, u'_, n_, eqns))
         else
-          let left'', vars''_, s'_, eqns' =
-            linearSpine (gl_, s_, left', vars'_, depth, total, eqns)
+          let left'', vars'', s'_, eqns' =
+            linearSpine (gl_, s_, left', vars', depth, total, eqns)
           in
-          (left'', vars''_, I.Root (h', s'_), eqns')
+          (left'', vars'', I.Root (h', s'_), eqns')
         end
         (* h = h' not replaced *)
     | gl_, I.Lam (d_, u_), left, vars_, depth, total, eqns ->
         let d'_ = shiftDec (d_, depth, total) in
-        let left', vars'_, u'_, eqns' =
+        let left', vars', u'_, eqns' =
           linearExp (I.Decl (gl_, d'_), u_, left, vars_, depth + 1, total, eqns)
         in
-        (left', vars'_, I.Lam (d'_, u'_), eqns')
+        (left', vars', I.Lam (d'_, u'_), eqns')
     | gl_, (I.FgnExp (cs, ops) as u_), left, vars_, depth, total, eqns ->
         let n_ = I.Root (I.BVar (left + depth), I.Nil) in
         let u'_ = shiftExp (u_, depth, total) in
@@ -282,13 +282,13 @@ module MakeCompile
   and linearSpine = function
     | gl_, I.Nil, left, vars_, depth, total, eqns -> (left, vars_, I.Nil, eqns)
     | gl_, I.App (u_, s_), left, vars_, depth, total, eqns ->
-        let left', vars'_, u'_, eqns' =
+        let left', vars', u'_, eqns' =
           linearExp (gl_, u_, left, vars_, depth, total, eqns)
         in
-        let left'', vars''_, s'_, eqns'' =
-          linearSpine (gl_, s_, left', vars'_, depth, total, eqns')
+        let left'', vars'', s'_, eqns'' =
+          linearSpine (gl_, s_, left', vars', depth, total, eqns')
         in
-        (left'', vars''_, I.App (u'_, s'_), eqns'')
+        (left'', vars'', I.App (u'_, s'_), eqns'')
 
   (* SClo(S, s') cannot occur *)
   (*  compileLinearHead (G, R as I.Root (h, S)) = r
@@ -309,11 +309,11 @@ module MakeCompile
       linearExp (I.Null, r_, left, [], 0, left, C.Trivial)
     in
     let rec convertKRes = function
-      | resG_, [], 0 -> resG_
-      | resG_, (d, k) :: k_, i ->
+      | resG, [], 0 -> resG
+      | resG, (d, k) :: k_, i ->
           C.Axists
             ( I.ADec (Some ("A" ^ Int.toString i), d),
-              convertKRes (resG_, k_, i - 1) )
+              convertKRes (resG, k_, i - 1) )
     in
     let r = convertKRes (C.Assign (r'_, eqs_), List.rev k_, left) in
     begin
@@ -371,10 +371,10 @@ module MakeCompile
     begin match (arg__1, arg__2) with
     | fromCS, (g_, (I.Root _ as r_)) -> C.Atom r_
     | fromCS, (g_, I.Pi ((I.Dec (_, a1_), I.No), a2_)) ->
-        let ha1_ = I.targetHead a1_ in
+        let ha1 = I.targetHead a1_ in
         let r_ = compileDClauseN fromCS false (g_, a1_) in
         let goal = compileGoalN fromCS (I.Decl (g_, I.Dec (None, a1_)), a2_) in
-        C.Impl (r_, a1_, ha1_, goal)
+        C.Impl (r_, a1_, ha1, goal)
         (* A1 is used to build the proof term, Ha1 for indexing *)
         (* never optimize when compiling local assumptions *)
     | fromCS, (g_, I.Pi (((I.Dec (_, a1_) as d_), I.Maybe), a2_)) ->
@@ -470,8 +470,8 @@ module MakeCompile
     | fromCS, (stack_, g_, (I.Root (h, s_) as r_)) ->
         let g'_, head_ = compileSbtHead (g_, r_) in
         let d = I.ctxLength g'_ - I.ctxLength g_ in
-        let sgoals_ = compileSubgoals fromCS g'_ (d, stack_, g_) in
-        ((g'_, head_), sgoals_)
+        let sgoals = compileSubgoals fromCS g'_ (d, stack_, g_) in
+        ((g'_, head_), sgoals)
         (* G' |- Sgoals  and G' |- ^d : G *)
     | fromCS, (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), I.No), a2_)) ->
         compileSClauseN fromCS (I.Decl (stack_, I.No), I.Decl (g_, d_), a2_)
@@ -498,8 +498,8 @@ module MakeCompile
     let rec compileBlock = function
       | [], s, (n, i) -> []
       | I.Dec (_, v_) :: vs_, t, (n, i) ->
-          let vt_ = I.EClo (v_, t) in
-          (compileDClause opt (g_, vt_), I.id, I.targetHead vt_)
+          let vt = I.EClo (v_, t) in
+          (compileDClause opt (g_, vt), I.id, I.targetHead vt)
           :: compileBlock
                ( vs_,
                  I.Dot (I.Exp (I.Root (I.Proj (I.Bidx n, i), I.Nil)), t),
@@ -510,10 +510,10 @@ module MakeCompile
       function
       | I.Null -> I.Null
       | I.Decl (g_, I.Dec (_, a_)) ->
-          let ha_ = I.targetHead a_ in
+          let ha = I.targetHead a_ in
           I.Decl
             ( compileCtx' g_,
-              CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha_) )
+              CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha) )
       | I.Decl (g_, I.BDec (_, (c, s))) ->
           let g_, l_ = I.constBlock c in
           let dpool = compileCtx' g_ in
@@ -530,12 +530,12 @@ module MakeCompile
      then |- G ~> dPool  (context G compile to clause pool dPool)
      and  |- dPool  dpool
   *)
-  let compilePsi opt psi_ =
+  let compilePsi opt psi =
     let rec compileBlock = function
       | [], s, (n, i) -> []
       | I.Dec (_, v_) :: vs_, t, (n, i) ->
-          let vt_ = I.EClo (v_, t) in
-          (compileDClause opt (T.coerceCtx psi_, vt_), I.id, I.targetHead vt_)
+          let vt = I.EClo (v_, t) in
+          (compileDClause opt (T.coerceCtx psi, vt), I.id, I.targetHead vt)
           :: compileBlock
                ( vs_,
                  I.Dot (I.Exp (I.Root (I.Proj (I.Bidx n, i), I.Nil)), t),
@@ -544,10 +544,10 @@ module MakeCompile
     let rec compileCtx' = function
       | I.Null -> I.Null
       | I.Decl (g_, I.Dec (_, a_)) ->
-          let ha_ = I.targetHead a_ in
+          let ha = I.targetHead a_ in
           I.Decl
             ( compileCtx' g_,
-              CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha_) )
+              CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha) )
       | I.Decl (g_, I.BDec (_, (c, s))) ->
           let g_, l_ = I.constBlock c in
           let dpool = compileCtx' g_ in
@@ -557,21 +557,21 @@ module MakeCompile
     in
     let rec compilePsi' = function
       | I.Null -> I.Null
-      | I.Decl (psi_, T.UDec (I.Dec (_, a_))) ->
-          let ha_ = I.targetHead a_ in
+      | I.Decl (psi, T.UDec (I.Dec (_, a_))) ->
+          let ha = I.targetHead a_ in
           I.Decl
-            ( compilePsi' psi_,
-              CompSyn.Dec (compileDClause opt (T.coerceCtx psi_, a_), I.id, ha_)
+            ( compilePsi' psi,
+              CompSyn.Dec (compileDClause opt (T.coerceCtx psi, a_), I.id, ha)
             )
-      | I.Decl (psi_, T.UDec (I.BDec (_, (c, s)))) ->
+      | I.Decl (psi, T.UDec (I.BDec (_, (c, s)))) ->
           let g_, l_ = I.constBlock c in
           let dpool = compileCtx' g_ in
           let n = I.ctxLength dpool in
           I.Decl (dpool, CompSyn.BDec (compileBlock (l_, s, (n, 1))))
           (* this is inefficient! -cs *)
-      | I.Decl (psi_, T.PDec _) -> I.Decl (compilePsi' psi_, CompSyn.PDec)
+      | I.Decl (psi, T.PDec _) -> I.Decl (compilePsi' psi, CompSyn.PDec)
     in
-    C.DProg (T.coerceCtx psi_, compilePsi' psi_)
+    C.DProg (T.coerceCtx psi, compilePsi' psi)
 
   (* installClause fromCS (a, A) = ()
      Effect: compiles and installs compiled form of A according to

@@ -88,10 +88,10 @@ end) : TOMEGAPRINT = struct
           @ formatWorld cids
 
     let rec formatFor' = function
-      | psi_, T.All ((d_, explicit_), f_) ->
+      | psi, T.All ((d_, explicit_), f_) ->
           begin match d_ with
           | T.UDec d_ ->
-              let g_ = T.coerceCtx psi_ in
+              let g_ = T.coerceCtx psi in
               let d'_ = Names.decName (g_, d_) in
               [
                 Fmt.string "all {";
@@ -99,12 +99,12 @@ end) : TOMEGAPRINT = struct
                 Fmt.string "}";
                 Fmt.break_;
               ]
-              @ formatFor' (I.Decl (psi_, T.UDec d'_), f_)
+              @ formatFor' (I.Decl (psi, T.UDec d'_), f_)
           end
-      | psi_, T.All ((d_, implicit_), f_) ->
+      | psi, T.All ((d_, implicit_), f_) ->
           begin match d_ with
           | T.UDec d_ ->
-              let g_ = T.coerceCtx psi_ in
+              let g_ = T.coerceCtx psi in
               let d'_ = Names.decName (g_, d_) in
               [
                 Fmt.string "all^ {";
@@ -112,10 +112,10 @@ end) : TOMEGAPRINT = struct
                 Fmt.string "}";
                 Fmt.break_;
               ]
-              @ formatFor' (I.Decl (psi_, T.UDec d'_), f_)
+              @ formatFor' (I.Decl (psi, T.UDec d'_), f_)
           end
-      | psi_, T.Ex ((d_, explicit_), f_) ->
-          let g_ = T.coerceCtx psi_ in
+      | psi, T.Ex ((d_, explicit_), f_) ->
+          let g_ = T.coerceCtx psi in
           let d'_ = Names.decName (g_, d_) in
           [
             Fmt.string "exists {";
@@ -123,9 +123,9 @@ end) : TOMEGAPRINT = struct
             Fmt.string "}";
             Fmt.break_;
           ]
-          @ formatFor' (I.Decl (psi_, T.UDec d'_), f_)
-      | psi_, T.Ex ((d_, implicit_), f_) ->
-          let g_ = T.coerceCtx psi_ in
+          @ formatFor' (I.Decl (psi, T.UDec d'_), f_)
+      | psi, T.Ex ((d_, implicit_), f_) ->
+          let g_ = T.coerceCtx psi in
           let d'_ = Names.decName (g_, d_) in
           [
             Fmt.string "exists^ {";
@@ -133,56 +133,56 @@ end) : TOMEGAPRINT = struct
             Fmt.string "}";
             Fmt.break_;
           ]
-          @ formatFor' (I.Decl (psi_, T.UDec d'_), f_)
-      | psi_, T.And (f1_, f2_) ->
+          @ formatFor' (I.Decl (psi, T.UDec d'_), f_)
+      | psi, T.And (f1_, f2_) ->
           [
             Fmt.string "(";
-            Fmt.hVbox (formatFor' (psi_, f1_));
+            Fmt.hVbox (formatFor' (psi, f1_));
             Fmt.string ")";
             Fmt.break_;
             Fmt.string "/\\";
             Fmt.space;
             Fmt.string "(";
-            Fmt.hVbox (formatFor' (psi_, f2_));
+            Fmt.hVbox (formatFor' (psi, f2_));
             Fmt.string ")";
           ]
-      | psi_, T.True -> [ Fmt.string "true" ]
-      | psi_, T.World (T.Worlds l_, f_) ->
+      | psi, T.True -> [ Fmt.string "true" ]
+      | psi, T.World (T.Worlds l_, f_) ->
           [
             Fmt.string "world (";
             Fmt.hVbox (formatWorld l_);
             Fmt.string ")";
             Fmt.break_;
           ]
-          @ formatFor' (psi_, f_)
+          @ formatFor' (psi, f_)
 
     let formatFor (g_, f_) =
       Fmt.hVbox (formatFor' (g_, T.forSub (f_, T.id)))
 
-    let forToString (psi_, f_) = Fmt.makestring_fmt (formatFor (psi_, f_))
+    let forToString (psi, f_) = Fmt.makestring_fmt (formatFor (psi, f_))
 
     let decName = function
       | g_, T.UDec d_ -> T.UDec (Names.decName (g_, d_))
-      | g_, T.PDec (None, f_, tc1_, tc2_) -> T.PDec (Some "xx", f_, tc1_, tc2_)
+      | g_, T.PDec (None, f_, tc1, tc2) -> T.PDec (Some "xx", f_, tc1, tc2)
       | g_, d_ -> d_
 
-    let psiName (psi1_, s, psi2_, l) =
+    let psiName (psi1, s, psi2, l) =
       let nameDec = function
         | (I.Dec (Some _, _) as d_), name -> d_
         | I.Dec (None, v_), name -> I.Dec (Some name, v_)
       in
       let rec namePsi = function
-        | I.Decl (psi_, T.UDec d_), 1, name ->
-            I.Decl (psi_, T.UDec (nameDec (d_, name)))
-        | I.Decl (psi_, (T.UDec d_ as ld_)), n, name ->
-            I.Decl (namePsi (psi_, n - 1, name), ld_)
+        | I.Decl (psi, T.UDec d_), 1, name ->
+            I.Decl (psi, T.UDec (nameDec (d_, name)))
+        | I.Decl (psi, (T.UDec d_ as ld)), n, name ->
+            I.Decl (namePsi (psi, n - 1, name), ld)
       and nameG = function
-        | psi_, I.Null, n, name, k -> (k n, I.Null)
-        | psi_, I.Decl (g_, d_), 1, name, k ->
-            (psi_, I.Decl (g_, nameDec (d_, name)))
-        | psi_, I.Decl (g_, d_), n, name, k ->
-            let psi'_, g'_ = nameG (psi_, g_, n - 1, name, k) in
-            (psi'_, I.Decl (g'_, d_))
+        | psi, I.Null, n, name, k -> (k n, I.Null)
+        | psi, I.Decl (g_, d_), 1, name, k ->
+            (psi, I.Decl (g_, nameDec (d_, name)))
+        | psi, I.Decl (g_, d_), n, name, k ->
+            let psi', g'_ = nameG (psi, g_, n - 1, name, k) in
+            (psi', I.Decl (g'_, d_))
       in
       let rec ignore = function
         | s, 0 -> s
@@ -191,45 +191,45 @@ end) : TOMEGAPRINT = struct
       in
       let rec copyNames arg__1 arg__2 =
         begin match (arg__1, arg__2) with
-        | (T.Shift n, (I.Decl _ as g_)), psi1_ ->
-            copyNames (T.Dot (T.Idx (n + 1), T.Shift (n + 1)), g_) psi1_
-        | (T.Dot (T.Exp _, s), I.Decl (g_, _)), psi1_ -> copyNames (s, g_) psi1_
-        | (T.Dot (T.Idx k, s), I.Decl (g_, T.UDec (I.Dec (None, _)))), psi1_ ->
-            copyNames (s, g_) psi1_
+        | (T.Shift n, (I.Decl _ as g_)), psi1 ->
+            copyNames (T.Dot (T.Idx (n + 1), T.Shift (n + 1)), g_) psi1
+        | (T.Dot (T.Exp _, s), I.Decl (g_, _)), psi1 -> copyNames (s, g_) psi1
+        | (T.Dot (T.Idx k, s), I.Decl (g_, T.UDec (I.Dec (None, _)))), psi1 ->
+            copyNames (s, g_) psi1
         | ( (T.Dot (T.Idx k, s), I.Decl (g_, T.UDec (I.Dec (Some name, _)))),
-            psi1_ ) ->
-            let psi1'_ = namePsi (psi1_, k, name) in
-            copyNames (s, g_) psi1'_
-        | (T.Dot (T.Prg k, s), I.Decl (g_, T.PDec (None, _, _, _))), psi1_ ->
-            copyNames (s, g_) psi1_
-        | (T.Dot (T.Prg k, s), I.Decl (g_, T.PDec (Some name, _, _, _))), psi1_
+            psi1 ) ->
+            let psi1' = namePsi (psi1, k, name) in
+            copyNames (s, g_) psi1'
+        | (T.Dot (T.Prg k, s), I.Decl (g_, T.PDec (None, _, _, _))), psi1 ->
+            copyNames (s, g_) psi1
+        | (T.Dot (T.Prg k, s), I.Decl (g_, T.PDec (Some name, _, _, _))), psi1
           ->
-            copyNames (s, g_) psi1_
-        | (T.Shift _, I.Null), psi1_ -> psi1_
+            copyNames (s, g_) psi1
+        | (T.Shift _, I.Null), psi1 -> psi1
         end
       in
       let rec psiName' = function
         | I.Null -> I.Null
-        | I.Decl (psi_, d_) ->
-            let psi'_ = psiName' psi_ in
-            I.Decl (psi'_, decName (T.coerceCtx psi'_, d_))
+        | I.Decl (psi, d_) ->
+            let psi' = psiName' psi in
+            I.Decl (psi', decName (T.coerceCtx psi', d_))
       in
-      psiName' psi1_
+      psiName' psi1
 
     let rec fmtSpine arg__3 arg__4 =
       begin match (arg__3, arg__4) with
-      | callname, (psi_, T.Nil) -> []
-      | callname, (psi_, T.AppExp (u_, s_)) ->
-          Fmt.hVbox (P.formatSpine (T.coerceCtx psi_, I.App (u_, I.Nil)))
-          :: fmtSpine' callname (psi_, s_)
-      | callname, (psi_, T.AppPrg (p_, s_)) ->
-          formatPrg3 callname (psi_, p_) :: fmtSpine' callname (psi_, s_)
+      | callname, (psi, T.Nil) -> []
+      | callname, (psi, T.AppExp (u_, s_)) ->
+          Fmt.hVbox (P.formatSpine (T.coerceCtx psi, I.App (u_, I.Nil)))
+          :: fmtSpine' callname (psi, s_)
+      | callname, (psi, T.AppPrg (p_, s_)) ->
+          formatPrg3 callname (psi, p_) :: fmtSpine' callname (psi, s_)
       end
 
     and fmtSpine' arg__5 arg__6 =
       begin match (arg__5, arg__6) with
-      | callname, (psi_, T.Nil) -> []
-      | callname, (psi_, s_) -> Fmt.break_ :: fmtSpine callname (psi_, s_)
+      | callname, (psi, T.Nil) -> []
+      | callname, (psi, s_) -> Fmt.break_ :: fmtSpine callname (psi, s_)
       end
 
     and argsToSpine = function
@@ -241,12 +241,12 @@ end) : TOMEGAPRINT = struct
       | T.Dot (T.Exp u_, s), k, s_ -> argsToSpine (s, k - 1, T.AppExp (u_, s_))
       | T.Dot (T.Prg p_, s), k, s_ -> argsToSpine (s, k - 1, T.AppPrg (p_, s_))
 
-    and formatTuple (psi_, p_) =
+    and formatTuple (psi, p_) =
       let rec formatTuple' = function
         | T.Unit -> []
-        | T.PairExp (m_, T.Unit) -> [ P.formatExp (T.coerceCtx psi_, m_) ]
+        | T.PairExp (m_, T.Unit) -> [ P.formatExp (T.coerceCtx psi, m_) ]
         | T.PairExp (m_, p'_) ->
-            P.formatExp (T.coerceCtx psi_, m_)
+            P.formatExp (T.coerceCtx psi, m_)
             :: Fmt.string "," :: Fmt.break_ :: formatTuple' p'_
       in
       begin match p_ with
@@ -258,96 +258,96 @@ end) : TOMEGAPRINT = struct
 
     and formatRedex arg__7 arg__8 =
       begin match (arg__7, arg__8) with
-      | callname, (psi_, T.Var k, s_) ->
-          let (T.PDec (Some name, _, _, _)) = I.ctxLookup (psi_, k) in
-          let fspine_ = fmtSpine callname (psi_, s_) in
+      | callname, (psi, T.Var k, s_) ->
+          let (T.PDec (Some name, _, _, _)) = I.ctxLookup (psi, k) in
+          let fspine = fmtSpine callname (psi, s_) in
           Fmt.hbox
-            [ Fmt.space; Fmt.hVbox (Fmt.string name :: Fmt.break_ :: fspine_) ]
-      | callname, (psi_, T.Const l, s_) ->
+            [ Fmt.space; Fmt.hVbox (Fmt.string name :: Fmt.break_ :: fspine) ]
+      | callname, (psi, T.Const l, s_) ->
           let (T.ValDec (name, _, _)) = T.lemmaLookup l in
-          let fspine_ = fmtSpine callname (psi_, s_) in
+          let fspine = fmtSpine callname (psi, s_) in
           Fmt.hbox
-            [ Fmt.space; Fmt.hVbox (Fmt.string name :: Fmt.break_ :: fspine_) ]
-      | callname, (psi_, T.Redex (T.Const l, _), s_) ->
+            [ Fmt.space; Fmt.hVbox (Fmt.string name :: Fmt.break_ :: fspine) ]
+      | callname, (psi, T.Redex (T.Const l, _), s_) ->
           let name = callname l in
-          let fspine_ = fmtSpine callname (psi_, s_) in
+          let fspine = fmtSpine callname (psi, s_) in
           Fmt.hbox
-            [ Fmt.space; Fmt.hVbox (Fmt.string name :: Fmt.break_ :: fspine_) ]
+            [ Fmt.space; Fmt.hVbox (Fmt.string name :: Fmt.break_ :: fspine) ]
       end
 
-    and formatCase callname (max, psi'_, s, psi_) =
-      let s_ = argsToSpine (s, I.ctxLength psi_ - max, T.Nil) in
-      let fspine_ = fmtSpine callname (psi'_, s_) in
-      Fmt.hbox [ Fmt.hVbox fspine_ ]
+    and formatCase callname (max, psi', s, psi) =
+      let s_ = argsToSpine (s, I.ctxLength psi - max, T.Nil) in
+      let fspine = fmtSpine callname (psi', s_) in
+      Fmt.hbox [ Fmt.hVbox fspine ]
 
     and formatCases = function
-      | max, psi_, [], callname -> []
-      | max, psi_, (psi'_, s, p_) :: [], callname ->
-          let psi''_ = psiName (psi'_, s, psi_, 0) in
+      | max, psi, [], callname -> []
+      | max, psi, (psi', s, p_) :: [], callname ->
+          let psi'' = psiName (psi', s, psi, 0) in
           ignore (Names.varReset I.Null);
           [
             Fmt.hVbox0 1 5 1
               [
-                formatCase callname (max, psi''_, s, psi_);
+                formatCase callname (max, psi'', s, psi);
                 Fmt.space;
                 Fmt.string "=";
                 Fmt.break_;
-                formatPrg3 callname (psi''_, p_);
+                formatPrg3 callname (psi'', p_);
               ];
             Fmt.break_;
           ]
-      | max, psi_, (psi'_, s, p_) :: o_, callname ->
-          let psi''_ = psiName (psi'_, s, psi_, 0) in
+      | max, psi, (psi', s, p_) :: o_, callname ->
+          let psi'' = psiName (psi', s, psi, 0) in
           ignore (Names.varReset I.Null);
-          formatCases (max, psi_, o_, callname)
+          formatCases (max, psi, o_, callname)
           @ [
               Fmt.hVbox0 1 5 1
                 [
                   Fmt.string "|";
                   Fmt.space;
-                  formatCase callname (max, psi''_, s, psi_);
+                  formatCase callname (max, psi'', s, psi);
                   Fmt.space;
                   Fmt.string "=";
                   Fmt.break_;
-                  formatPrg3 callname (psi''_, p_);
+                  formatPrg3 callname (psi'', p_);
                 ];
               Fmt.break_;
             ]
 
     and formatPrg3 arg__9 arg__10 =
       begin match (arg__9, arg__10) with
-      | callname, (psi_, T.Unit) -> Fmt.string "<>"
-      | callname, (psi_, T.PairExp (u_, p_)) ->
+      | callname, (psi, T.Unit) -> Fmt.string "<>"
+      | callname, (psi, T.PairExp (u_, p_)) ->
           Fmt.hVbox
             [
               Fmt.string "<";
-              P.formatExp (T.coerceCtx psi_, u_);
+              P.formatExp (T.coerceCtx psi, u_);
               Fmt.string ",";
               Fmt.break_;
-              formatPrg3 callname (psi_, p_);
+              formatPrg3 callname (psi, p_);
               Fmt.string ">";
             ]
-      | callname, (psi_, (T.Let _ as p_)) -> formatLet callname (psi_, p_, [])
-      | callname, (psi_, (T.LetPairExp (d1_, d2_, p1_, p2_) as p_)) ->
-          formatLet callname (psi_, p_, [])
-      | callname, (psi_, (T.LetUnit (p1_, p2_) as p_)) ->
-          formatLet callname (psi_, p_, [])
-      | callname, (psi_, (T.New (T.Lam (T.UDec (I.BDec (l, (c, s))), _)) as p_))
+      | callname, (psi, (T.Let _ as p_)) -> formatLet callname (psi, p_, [])
+      | callname, (psi, (T.LetPairExp (d1_, d2_, p1_, p2_) as p_)) ->
+          formatLet callname (psi, p_, [])
+      | callname, (psi, (T.LetUnit (p1_, p2_) as p_)) ->
+          formatLet callname (psi, p_, [])
+      | callname, (psi, (T.New (T.Lam (T.UDec (I.BDec (l, (c, s))), _)) as p_))
         ->
-          formatNew callname (psi_, p_, [])
-      | callname, (psi_, T.Redex (p_, s_)) -> formatRedex callname (psi_, p_, s_)
-      | callname, (psi_, T.Lam ((T.UDec d'_ as d_), p_)) ->
+          formatNew callname (psi, p_, [])
+      | callname, (psi, T.Redex (p_, s_)) -> formatRedex callname (psi, p_, s_)
+      | callname, (psi, T.Lam ((T.UDec d'_ as d_), p_)) ->
           Fmt.hVbox
             [
               Fmt.string "lam";
               Fmt.space;
               Fmt.string "(";
-              P.formatDec (T.coerceCtx psi_, d'_);
+              P.formatDec (T.coerceCtx psi, d'_);
               Fmt.string ")";
               Fmt.space;
-              formatPrg3 callname (I.Decl (psi_, d_), p_);
+              formatPrg3 callname (I.Decl (psi, d_), p_);
             ]
-      | callname, (psi_, T.Rec ((T.PDec (Some name, f_, None, None) as d_), p_))
+      | callname, (psi, T.Rec ((T.PDec (Some name, f_, None, None) as d_), p_))
         ->
           Fmt.hVbox
             [
@@ -356,14 +356,14 @@ end) : TOMEGAPRINT = struct
               Fmt.string "(";
               Fmt.string name;
               Fmt.string ":";
-              formatFor (psi_, f_);
+              formatFor (psi, f_);
               Fmt.string ")";
               Fmt.space;
-              formatPrg3 callname (I.Decl (psi_, d_), p_);
+              formatPrg3 callname (I.Decl (psi, d_), p_);
             ]
       | ( callname,
-          ( psi_,
-            T.Rec ((T.PDec (Some name, f_, Some tc1_, Some tc2_) as d_), p_) ) )
+          ( psi,
+            T.Rec ((T.PDec (Some name, f_, Some tc1, Some tc2) as d_), p_) ) )
         ->
           Fmt.hVbox
             [
@@ -372,25 +372,25 @@ end) : TOMEGAPRINT = struct
               Fmt.string "(";
               Fmt.string name;
               Fmt.string ":";
-              formatFor (psi_, f_);
+              formatFor (psi, f_);
               Fmt.string ")";
               Fmt.space;
-              formatPrg3 callname (I.Decl (psi_, d_), p_);
+              formatPrg3 callname (I.Decl (psi, d_), p_);
             ]
-      | callname, (psi_, T.PClo (p_, t)) ->
-          Fmt.hVbox [ formatPrg3 callname (psi_, p_); Fmt.string "..." ]
-      | callname, (psi_, (T.EVar (_, { contents = Some p_ }, _, _, _, _) as x_))
+      | callname, (psi, T.PClo (p_, t)) ->
+          Fmt.hVbox [ formatPrg3 callname (psi, p_); Fmt.string "..." ]
+      | callname, (psi, (T.EVar (_, { contents = Some p_ }, _, _, _, _) as x_))
         ->
-          formatPrg3 callname (psi_, p_)
-      | callname, (psi_, (T.EVar (_, { contents = None }, _, _, _, _) as x_)) ->
+          formatPrg3 callname (psi, p_)
+      | callname, (psi, (T.EVar (_, { contents = None }, _, _, _, _) as x_)) ->
           Fmt.string (nameEVar x_)
-      | callname, (psi_, T.Case (T.Cases cs_)) ->
+      | callname, (psi, T.Case (T.Cases cs_)) ->
           Fmt.hVbox
             (Fmt.string "case" :: Fmt.break_
-             :: formatCases (1, psi_, cs_, callname)
+             :: formatCases (1, psi, cs_, callname)
             @ [ Fmt.string "." ])
-      | callname, (psi_, T.Var n) ->
-          let (T.PDec (Some n, _, _, _)) = I.ctxLookup (psi_, n) in
+      | callname, (psi, T.Var n) ->
+          let (T.PDec (Some n, _, _, _)) = I.ctxLookup (psi, n) in
           Fmt.string n
       | callname, _ -> Fmt.string "missing case"
       end
@@ -398,15 +398,15 @@ end) : TOMEGAPRINT = struct
     and formatNew arg__11 arg__12 =
       begin match (arg__11, arg__12) with
       | ( callname,
-          (psi_, T.New (T.Lam (T.UDec (I.BDec (l, (c, s)) as d_), p_)), fmts) )
+          (psi, T.New (T.Lam (T.UDec (I.BDec (l, (c, s)) as d_), p_)), fmts) )
         ->
-          let g_ = T.coerceCtx psi_ in
+          let g_ = T.coerceCtx psi in
           let d'_ = Names.decName (g_, d_) in
           formatNew callname
-            ( I.Decl (psi_, T.UDec d'_),
+            ( I.Decl (psi, T.UDec d'_),
               p_,
               Fmt.break_ :: Fmt.hVbox [ P.formatDec (g_, d'_) ] :: fmts )
-      | callname, (psi_, p_, fmts) ->
+      | callname, (psi, p_, fmts) ->
           Fmt.vbox0 0 1
             [
               Fmt.string "new";
@@ -415,7 +415,7 @@ end) : TOMEGAPRINT = struct
               Fmt.string "in";
               Fmt.break_;
               Fmt.spaces 2;
-              formatPrg3 callname (psi_, p_);
+              formatPrg3 callname (psi, p_);
               Fmt.break_;
               Fmt.string "end";
             ]
@@ -424,16 +424,16 @@ end) : TOMEGAPRINT = struct
     and formatLet arg__13 arg__14 =
       begin match (arg__13, arg__14) with
       | ( callname,
-          ( psi_,
+          ( psi,
             T.Let
-              (d_, p1_, T.Case (T.Cases ((psi1_, s1, (T.Let _ as p2_)) :: []))),
+              (d_, p1_, T.Case (T.Cases ((psi1, s1, (T.Let _ as p2_)) :: []))),
             fmts ) ) ->
-          let psi1'_ = psiName (psi1_, s1, psi_, 1) in
-          let f1_ = Fmt.hVbox [ formatPrg3 callname (psi_, p1_) ] in
+          let psi1' = psiName (psi1, s1, psi, 1) in
+          let f1_ = Fmt.hVbox [ formatPrg3 callname (psi, p1_) ] in
           let s_ = argsToSpine (s1, 1, T.Nil) in
-          let fspine_ = fmtSpine callname (psi1_, s_) in
-          let fpattern_ = Fmt.hVbox [ Fmt.hbox fspine_ ] in
-          let fbody_ = Fmt.hVbox [ f1_ ] in
+          let fspine = fmtSpine callname (psi1, s_) in
+          let fpattern = Fmt.hVbox [ Fmt.hbox fspine ] in
+          let fbody = Fmt.hVbox [ f1_ ] in
           let fmt =
             Fmt.hVbox
               [
@@ -441,25 +441,25 @@ end) : TOMEGAPRINT = struct
                   [
                     Fmt.string "val";
                     Fmt.space;
-                    fpattern_;
+                    fpattern;
                     Fmt.space;
                     Fmt.string "=";
                   ];
                 Fmt.break_;
-                fbody_;
+                fbody;
               ]
           in
-          formatLet callname (psi1'_, p2_, fmts @ [ Fmt.break_; fmt ])
+          formatLet callname (psi1', p2_, fmts @ [ Fmt.break_; fmt ])
       | ( callname,
-          ( psi_,
-            T.Let (d_, p1_, T.Case (T.Cases ((psi1_, s1, p2_) :: []))),
+          ( psi,
+            T.Let (d_, p1_, T.Case (T.Cases ((psi1, s1, p2_) :: []))),
             fmts ) ) ->
-          let psi1'_ = psiName (psi1_, s1, psi_, 1) in
-          let f1_ = Fmt.hVbox [ formatPrg3 callname (psi_, p1_) ] in
+          let psi1' = psiName (psi1, s1, psi, 1) in
+          let f1_ = Fmt.hVbox [ formatPrg3 callname (psi, p1_) ] in
           let s_ = argsToSpine (s1, 1, T.Nil) in
-          let fspine_ = fmtSpine callname (psi1_, s_) in
-          let fpattern_ = Fmt.hVbox [ Fmt.hbox fspine_ ] in
-          let fbody_ = Fmt.hVbox [ f1_ ] in
+          let fspine = fmtSpine callname (psi1, s_) in
+          let fpattern = Fmt.hVbox [ Fmt.hbox fspine ] in
+          let fbody = Fmt.hVbox [ f1_ ] in
           let fmt =
             Fmt.hVbox
               [
@@ -467,12 +467,12 @@ end) : TOMEGAPRINT = struct
                   [
                     Fmt.string "val";
                     Fmt.space;
-                    fpattern_;
+                    fpattern;
                     Fmt.space;
                     Fmt.string "=";
                   ];
                 Fmt.break_;
-                fbody_;
+                fbody;
               ]
           in
           Fmt.vbox0 0 1
@@ -483,68 +483,68 @@ end) : TOMEGAPRINT = struct
               Fmt.string "in";
               Fmt.break_;
               Fmt.spaces 2;
-              formatPrg3 callname (psi1'_, p2_);
+              formatPrg3 callname (psi1', p2_);
               Fmt.break_;
               Fmt.string "end";
             ]
-      | callname, (psi_, T.Let (d_, p1_, T.Case (T.Cases l_)), []) ->
+      | callname, (psi, T.Let (d_, p1_, T.Case (T.Cases l_)), []) ->
           let rec fmtCaseRest = function
             | [] -> []
-            | (psi1_, s1, p2_) :: l_ ->
-                let psi1'_ = psiName (psi1_, s1, psi_, 1) in
+            | (psi1, s1, p2_) :: l_ ->
+                let psi1' = psiName (psi1, s1, psi, 1) in
                 let s_ = argsToSpine (s1, 1, T.Nil) in
-                let fspine_ = fmtSpine callname (psi1_, s_) in
-                let fpattern_ = Fmt.hVbox [ Fmt.hbox fspine_ ] in
+                let fspine = fmtSpine callname (psi1, s_) in
+                let fpattern = Fmt.hVbox [ Fmt.hbox fspine ] in
                 [
                   Fmt.hVbox
                     [
                       Fmt.space;
                       Fmt.string "|";
                       Fmt.space;
-                      fpattern_;
+                      fpattern;
                       Fmt.space;
                       Fmt.string "-->";
                     ];
                   Fmt.spaces 2;
-                  Fmt.vbox0 0 1 [ formatPrg3 callname (psi1'_, p2_) ];
+                  Fmt.vbox0 0 1 [ formatPrg3 callname (psi1', p2_) ];
                   Fmt.break_;
                 ]
                 @ fmtCaseRest l_
           in
-          let fmtCase ((psi1_, s1, p2_) :: l_) =
-            let psi1'_ = psiName (psi1_, s1, psi_, 1) in
+          let fmtCase ((psi1, s1, p2_) :: l_) =
+            let psi1' = psiName (psi1, s1, psi, 1) in
             let s_ = argsToSpine (s1, 1, T.Nil) in
-            let fspine_ = fmtSpine callname (psi1_, s_) in
-            let fpattern_ = Fmt.hVbox [ Fmt.hbox fspine_ ] in
+            let fspine = fmtSpine callname (psi1, s_) in
+            let fpattern = Fmt.hVbox [ Fmt.hbox fspine ] in
             Fmt.vbox0 0 1
               ([
                  Fmt.hVbox
                    [
                      Fmt.string "of";
                      Fmt.space;
-                     fpattern_;
+                     fpattern;
                      Fmt.space;
                      Fmt.string "-->";
                    ];
                  Fmt.spaces 2;
-                 Fmt.vbox0 0 1 [ formatPrg3 callname (psi1'_, p2_) ];
+                 Fmt.vbox0 0 1 [ formatPrg3 callname (psi1', p2_) ];
                  Fmt.break_;
                ]
               @ fmtCaseRest l_)
           in
-          let f1_ = Fmt.hVbox [ formatPrg3 callname (psi_, p1_) ] in
-          let fbody_ = Fmt.hVbox [ f1_ ] in
+          let f1_ = Fmt.hVbox [ formatPrg3 callname (psi, p1_) ] in
+          let fbody = Fmt.hVbox [ f1_ ] in
           let fmt = fmtCase l_ in
           Fmt.vbox0 0 1
             [
               Fmt.string "case (";
-              fbody_;
+              fbody;
               Fmt.space;
               Fmt.string ")";
               Fmt.break_;
               fmt;
             ]
-      | callname, (psi_, (T.Let (d_, p1_, T.Case (T.Cases l_)) as r_), fmts) ->
+      | callname, (psi, (T.Let (d_, p1_, T.Case (T.Cases l_)) as r_), fmts) ->
           Fmt.vbox0 0 1
             [
               Fmt.string "let";
@@ -553,12 +553,12 @@ end) : TOMEGAPRINT = struct
               Fmt.string "in";
               Fmt.break_;
               Fmt.spaces 2;
-              formatLet callname (psi_, r_, []);
+              formatLet callname (psi, r_, []);
               Fmt.break_;
               Fmt.string "end";
             ]
       | ( callname,
-          ( psi_,
+          ( psi,
             (T.Let ((T.PDec (Some name, f_, _, _) as d_), p1_, p2_) as r_),
             fmts ) ) ->
           Fmt.vbox0 0 1
@@ -570,18 +570,18 @@ end) : TOMEGAPRINT = struct
                   Fmt.string name;
                   Fmt.space;
                   Fmt.string "=";
-                  formatPrg3 callname (psi_, p1_);
+                  formatPrg3 callname (psi, p1_);
                 ];
               Fmt.break_;
               Fmt.string "in";
               Fmt.break_;
               Fmt.spaces 2;
-              formatPrg3 callname (I.Decl (psi_, d_), p2_);
+              formatPrg3 callname (I.Decl (psi, d_), p2_);
               Fmt.break_;
               Fmt.string "end";
             ]
       | ( callname,
-          ( psi_,
+          ( psi,
             (T.LetPairExp
                ( (I.Dec (Some n1, _) as d1_),
                  (T.PDec (Some n2, f_, _, _) as d2_),
@@ -604,17 +604,17 @@ end) : TOMEGAPRINT = struct
                   Fmt.space;
                   Fmt.string "=";
                   Fmt.space;
-                  formatPrg3 callname (psi_, p1_);
+                  formatPrg3 callname (psi, p1_);
                 ];
               Fmt.break_;
               Fmt.string "in";
               Fmt.break_;
               Fmt.spaces 2;
-              formatPrg3 callname (I.Decl (I.Decl (psi_, T.UDec d1_), d2_), p2_);
+              formatPrg3 callname (I.Decl (I.Decl (psi, T.UDec d1_), d2_), p2_);
               Fmt.break_;
               Fmt.string "end";
             ]
-      | callname, (psi_, (T.LetUnit (p1_, p2_) as r_), fmts) ->
+      | callname, (psi, (T.LetUnit (p1_, p2_) as r_), fmts) ->
           Fmt.vbox0 0 1
             [
               Fmt.string "let";
@@ -626,77 +626,77 @@ end) : TOMEGAPRINT = struct
                   Fmt.space;
                   Fmt.string "=";
                   Fmt.space;
-                  formatPrg3 callname (psi_, p1_);
+                  formatPrg3 callname (psi, p1_);
                 ];
               Fmt.break_;
               Fmt.string "in";
               Fmt.break_;
               Fmt.spaces 2;
-              formatPrg3 callname (psi_, p2_);
+              formatPrg3 callname (psi, p2_);
               Fmt.break_;
               Fmt.string "end";
             ]
       end
 
-    and formatHead callname (name, (max, index), psi'_, s, psi_) =
-      let s_ = argsToSpine (s, I.ctxLength psi_ - max, T.Nil) in
-      let fspine_ = fmtSpine callname (psi'_, s_) in
+    and formatHead callname (name, (max, index), psi', s, psi) =
+      let s_ = argsToSpine (s, I.ctxLength psi - max, T.Nil) in
+      let fspine = fmtSpine callname (psi', s_) in
       Fmt.hbox
-        [ Fmt.space; Fmt.hVbox (Fmt.string name :: Fmt.break_ :: fspine_) ]
+        [ Fmt.space; Fmt.hVbox (Fmt.string name :: Fmt.break_ :: fspine) ]
 
     let rec formatPrg2 = function
-      | name, (max, index), psi_, [], callname -> []
-      | name, (max, index), psi_, (psi'_, s, p_) :: [], callname ->
-          let psi''_ = psiName (psi'_, s, psi_, 0) in
+      | name, (max, index), psi, [], callname -> []
+      | name, (max, index), psi, (psi', s, p_) :: [], callname ->
+          let psi'' = psiName (psi', s, psi, 0) in
           let fhead =
-            begin if index = I.ctxLength psi_ then "fun" else "and"
+            begin if index = I.ctxLength psi then "fun" else "and"
             end
           in
           [
             Fmt.hVbox0 1 5 1
               [
                 Fmt.string fhead;
-                formatHead callname (name, (max, index), psi''_, s, psi_);
+                formatHead callname (name, (max, index), psi'', s, psi);
                 Fmt.space;
                 Fmt.string "=";
                 Fmt.break_;
-                formatPrg3 callname (psi''_, p_);
+                formatPrg3 callname (psi'', p_);
               ];
             Fmt.break_;
           ]
-      | name, (max, index), psi_, (psi'_, s, p_) :: o_, callname ->
-          let psi''_ = psiName (psi'_, s, psi_, 0) in
-          formatPrg2 (name, (max, index), psi_, o_, callname)
+      | name, (max, index), psi, (psi', s, p_) :: o_, callname ->
+          let psi'' = psiName (psi', s, psi, 0) in
+          formatPrg2 (name, (max, index), psi, o_, callname)
           @ [
               Fmt.hVbox0 1 5 1
                 [
                   Fmt.string "  |";
-                  formatHead callname (name, (max, index), psi''_, s, psi_);
+                  formatHead callname (name, (max, index), psi'', s, psi);
                   Fmt.space;
                   Fmt.string "=";
                   Fmt.break_;
-                  formatPrg3 callname (psi''_, p_);
+                  formatPrg3 callname (psi'', p_);
                 ];
               Fmt.break_;
             ]
 
     let rec formatPrg11 = function
-      | name, (max, index), psi_, T.Lam (d_, p_), callname ->
+      | name, (max, index), psi, T.Lam (d_, p_), callname ->
           formatPrg11
             ( name,
               (max, index + 1),
-              I.Decl (psi_, decName (T.coerceCtx psi_, d_)),
+              I.Decl (psi, decName (T.coerceCtx psi, d_)),
               p_,
               callname )
-      | name, (max, index), psi_, T.Case (T.Cases os_), callname ->
-          formatPrg2 (name, (max, index), psi_, os_, callname)
+      | name, (max, index), psi, T.Case (T.Cases os_), callname ->
+          formatPrg2 (name, (max, index), psi, os_, callname)
 
     let rec formatPrg1 = function
-      | name :: names, (max, index), psi_, T.PairPrg (p1_, p2_), callname ->
-          formatPrg11 (name, (max, index), psi_, p1_, callname)
-          @ formatPrg1 (names, (max, index - 1), psi_, p2_, callname)
-      | name :: [], (max, index), psi_, p_, callname ->
-          formatPrg11 (name, (max, index), psi_, p_, callname)
+      | name :: names, (max, index), psi, T.PairPrg (p1_, p2_), callname ->
+          formatPrg11 (name, (max, index), psi, p1_, callname)
+          @ formatPrg1 (names, (max, index - 1), psi, p2_, callname)
+      | name :: [], (max, index), psi, p_, callname ->
+          formatPrg11 (name, (max, index), psi, p_, callname)
 
     let rec lookup (name :: names, proj :: projs) lemma =
       begin if lemma = proj then name else lookup (names, projs) lemma
@@ -726,14 +726,14 @@ end) : TOMEGAPRINT = struct
 
     let rec nameCtx = function
       | I.Null -> I.Null
-      | I.Decl (psi_, T.UDec d_) ->
-          I.Decl (nameCtx psi_, T.UDec (Names.decName (T.coerceCtx psi_, d_)))
-      | I.Decl (psi_, T.PDec (None, f_, tc1_, tc2_)) ->
-          let psi'_ = nameCtx psi_ in
-          let (I.NDec x) = Names.decName (T.coerceCtx psi'_, I.NDec None) in
-          I.Decl (psi'_, T.PDec (x, f_, tc1_, tc2_))
-      | I.Decl (psi_, (T.PDec (Some n, f_, _, _) as d_)) ->
-          I.Decl (nameCtx psi_, d_)
+      | I.Decl (psi, T.UDec d_) ->
+          I.Decl (nameCtx psi, T.UDec (Names.decName (T.coerceCtx psi, d_)))
+      | I.Decl (psi, T.PDec (None, f_, tc1, tc2)) ->
+          let psi' = nameCtx psi in
+          let (I.NDec x) = Names.decName (T.coerceCtx psi', I.NDec None) in
+          I.Decl (psi', T.PDec (x, f_, tc1, tc2))
+      | I.Decl (psi, (T.PDec (Some n, f_, _, _) as d_)) ->
+          I.Decl (nameCtx psi, d_)
 
     let flag = function None -> "" | Some _ -> "*"
 
@@ -744,7 +744,7 @@ end) : TOMEGAPRINT = struct
             [ Fmt.hVbox [ Fmt.break_; P.formatDec (I.Null, d_) ] ]
           else [ P.formatDec (I.Null, d_) ]
           end
-      | I.Decl (I.Null, T.PDec (Some s, f_, tc1_, tc2_)) ->
+      | I.Decl (I.Null, T.PDec (Some s, f_, tc1, tc2)) ->
           begin if !Global.chatter >= 4 then
             [
               Fmt.hVbox
@@ -752,7 +752,7 @@ end) : TOMEGAPRINT = struct
                   Fmt.break_;
                   Fmt.string s;
                   Fmt.space;
-                  Fmt.string ("::" ^ flag tc1_);
+                  Fmt.string ("::" ^ flag tc1);
                   Fmt.space;
                   formatFor (I.Null, f_);
                 ];
@@ -761,25 +761,25 @@ end) : TOMEGAPRINT = struct
             [
               Fmt.string s;
               Fmt.space;
-              Fmt.string ("::" ^ flag tc1_);
+              Fmt.string ("::" ^ flag tc1);
               Fmt.space;
               formatFor (I.Null, f_);
             ]
           end
-      | I.Decl (psi_, T.UDec d_) ->
-          let g_ = T.coerceCtx psi_ in
+      | I.Decl (psi, T.UDec d_) ->
+          let g_ = T.coerceCtx psi in
           begin if !Global.chatter >= 4 then
-            formatCtx psi_
+            formatCtx psi
             @ [ Fmt.string ","; Fmt.break_; Fmt.break_ ]
             @ [ Fmt.hVbox [ Fmt.break_; P.formatDec (g_, d_) ] ]
           else
-            formatCtx psi_
+            formatCtx psi
             @ [ Fmt.string ","; Fmt.break_ ]
             @ [ Fmt.break_; P.formatDec (g_, d_) ]
           end
-      | I.Decl (psi_, T.PDec (Some s, f_, tc1_, tc2_)) ->
+      | I.Decl (psi, T.PDec (Some s, f_, tc1, tc2)) ->
           begin if !Global.chatter >= 4 then
-            formatCtx psi_
+            formatCtx psi
             @ [ Fmt.string ","; Fmt.break_; Fmt.break_ ]
             @ [
                 Fmt.hVbox
@@ -787,25 +787,25 @@ end) : TOMEGAPRINT = struct
                     Fmt.break_;
                     Fmt.string s;
                     Fmt.space;
-                    Fmt.string ("::" ^ flag tc1_);
+                    Fmt.string ("::" ^ flag tc1);
                     Fmt.space;
-                    formatFor (psi_, f_);
+                    formatFor (psi, f_);
                   ];
               ]
           else
-            formatCtx psi_
+            formatCtx psi
             @ [ Fmt.string ","; Fmt.break_ ]
             @ [
                 Fmt.break_;
                 Fmt.string s;
                 Fmt.space;
-                Fmt.string ("::" ^ flag tc1_);
+                Fmt.string ("::" ^ flag tc1);
                 Fmt.space;
-                formatFor (psi_, f_);
+                formatFor (psi, f_);
               ]
           end
 
-    let ctxToString psi_ = Fmt.makestring_fmt (Fmt.hVbox (formatCtx psi_))
+    let ctxToString psi = Fmt.makestring_fmt (Fmt.hVbox (formatCtx psi))
   end
 
   (* Invariant:
@@ -1210,7 +1210,7 @@ end) : TOMEGAPRINT = struct
   let prgToString = prgToString
   let funToString = funToString
   let nameCtx = nameCtx
-  let formatCtx psi_ = Fmt.hVbox (formatCtx psi_)
+  let formatCtx psi = Fmt.hVbox (formatCtx psi)
   let ctxToString = ctxToString
   (*    val lemmaDecToString = lemmaDecToString *)
 end

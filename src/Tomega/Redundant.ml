@@ -79,14 +79,14 @@ end) : REDUNDANT = struct
     | _ -> false
 
   and caseEqual = function
-    | (psi1_, t1, p1_) :: o1_, ((psi2_, t2, p2_) :: o2_, tAfter) ->
+    | (psi1, t1, p1_) :: o1_, ((psi2, t2, p2_) :: o2_, tAfter) ->
         let t2' = T.comp (T.invertSub tAfter, t2) in
-        let t = Opsem.createVarSub (psi1_, psi2_) in
+        let t = Opsem.createVarSub (psi1, psi2) in
         let t' = T.comp (t2', t) in
         let doMatch =
           try
             begin
-              Opsem.matchSub (psi1_, t1, t');
+              Opsem.matchSub (psi1, t1, t');
               true
             end
           with Opsem.NoMatch -> false
@@ -129,8 +129,8 @@ end) : REDUNDANT = struct
     | T.PairBlock (b1_, p1_), (T.PairBlock (b2_, p2_), t2) ->
         blockEqual (b1_, I.blockSub (b2_, T.coerceSub t2))
         && prgEqual (p1_, (p2_, t2))
-    | T.PairPrg (p1a_, p1b_), (T.PairPrg (p2a_, p2b_), t2) ->
-        prgEqual (p1a_, (p2a_, t2)) && prgEqual (p1b_, (p2b_, t2))
+    | T.PairPrg (p1a, p1b), (T.PairPrg (p2a, p2b), t2) ->
+        prgEqual (p1a, (p2a, t2)) && prgEqual (p1b, (p2b, t2))
     | T.Unit, (T.Unit, t2) -> true
     | T.Const lemma1, (T.Const lemma2, _) -> lemma1 = lemma2
     | T.Var x1, (T.Var x2, t2) ->
@@ -144,12 +144,12 @@ end) : REDUNDANT = struct
         decEqual (d1_, (d2_, t2)) && prgEqual (p1_, (p2_, T.dot1 t2))
     | T.Case (T.Cases o1_), (T.Case (T.Cases o2_), t2) ->
         caseEqual (o1_, (o2_, t2))
-    | T.Let (d1_, p1a_, p1b_), (T.Let (d2_, p2a_, p2b_), t2) ->
-        decEqual (d1_, (d2_, t2)) && prgEqual (p1a_, (p2a_, t2))
+    | T.Let (d1_, p1a, p1b), (T.Let (d2_, p2a, p2b), t2) ->
+        decEqual (d1_, (d2_, t2)) && prgEqual (p1a, (p2a, t2))
     | T.PClo (p1_, t1), (T.PClo (p2_, t2a), t2b) ->
         raise (Error "PClo should not exist!")
-    | ( T.EVar (psi1_, p1optRef_, f1_, _, _, _),
-        (T.EVar (psi2_, p2optref_, f2_, _, _, _), t2) ) ->
+    | ( T.EVar (psi1, p1optRef, f1_, _, _, _),
+        (T.EVar (psi2, p2optref, f2_, _, _, _), t2) ) ->
         raise (Error "No EVARs should exist!")
     | _ -> false
   (* there are no PClo created in converter *)
@@ -165,16 +165,16 @@ end) : REDUNDANT = struct
 
   and convertCases = function
     | a_ :: c_ ->
-        let (psi_, t, p_), c'_ = removeRedundancy (a_, c_) in
-        (psi_, t, convert p_) :: convertCases c'_
+        let (psi, t, p_), c'_ = removeRedundancy (a_, c_) in
+        (psi, t, convert p_) :: convertCases c'_
     | c_ -> c_
 
   and removeRedundancy = function
     | c_, [] -> (c_, [])
     | c_, c'_ :: rest ->
         let (c''_ :: cs_) = mergeIfNecessary (c_, c'_) in
-        let c'''_, rest' = removeRedundancy (c''_, rest) in
-        (c'''_, cs_ @ rest')
+        let c''', rest' = removeRedundancy (c''_, rest) in
+        (c''', cs_ @ rest')
 
   and getFrontIndex = function
     | T.Idx k -> Some k
@@ -209,16 +209,16 @@ end) : REDUNDANT = struct
 
   and cleanSub = function
     | T.Shift _ as s_ -> s_
-    | T.Dot (ft1_, s1) ->
-        begin match getFrontIndex ft1_ with
-        | None -> T.Dot (ft1_, cleanSub s1)
+    | T.Dot (ft1, s1) ->
+        begin match getFrontIndex ft1 with
+        | None -> T.Dot (ft1, cleanSub s1)
         | Some index -> T.Dot (T.Idx index, cleanSub s1)
         end
 
   and isSubRenamingOnly = function
     | T.Shift n -> true
-    | T.Dot (ft1_, s1) ->
-        begin match getFrontIndex ft1_ with None -> false | Some _ -> true
+    | T.Dot (ft1, s1) ->
+        begin match getFrontIndex ft1 with None -> false | Some _ -> true
         end
         && isSubRenamingOnly s1
 
@@ -265,14 +265,14 @@ end) : REDUNDANT = struct
         else raise (Error "cannot merge PairExp")
         end
     | T.PairBlock (b1_, p1_), (T.PairBlock (b2_, p2_), t2) ->
-        let b2'_ = I.blockSub (b2_, T.coerceSub t2) in
-        begin if blockEqual (b1_, b2'_) then
+        let b2' = I.blockSub (b2_, T.coerceSub t2) in
+        begin if blockEqual (b1_, b2') then
           T.PairBlock (b1_, mergePrgs (p1_, (p2_, t2)))
         else raise (Error "cannot merge PairBlock")
         end
-    | T.PairPrg (p1a_, p1b_), (T.PairPrg (p2a_, p2b_), t2) ->
-        begin if prgEqual (p1a_, (p2a_, t2)) then
-          T.PairPrg (p1a_, mergePrgs (p1b_, (p2b_, t2)))
+    | T.PairPrg (p1a, p1b), (T.PairPrg (p2a, p2b), t2) ->
+        begin if prgEqual (p1a, (p2a, t2)) then
+          T.PairPrg (p1a, mergePrgs (p1b, (p2b, t2)))
         else raise (Error "cannot merge PairPrg")
         end
     | T.Unit, (T.Unit, t2) -> T.Unit
@@ -303,13 +303,13 @@ end) : REDUNDANT = struct
     | T.Case o1_, (T.Case o2_, t2) -> raise (Error "Invariant Violated")
     | T.PClo (p1_, t1), (T.PClo (p2_, t2a), t2b) ->
         raise (Error "PClo should not exist!")
-    | T.Let (d1_, p1a_, p1b_), (T.Let (d2_, p2a_, p2b_), t2) ->
-        begin if decEqual (d1_, (d2_, t2)) && prgEqual (p1a_, (p2a_, t2)) then
-          T.Let (d1_, p1a_, mergePrgs (p1b_, (p2b_, T.dot1 t2)))
+    | T.Let (d1_, p1a, p1b), (T.Let (d2_, p2a, p2b), t2) ->
+        begin if decEqual (d1_, (d2_, t2)) && prgEqual (p1a, (p2a, t2)) then
+          T.Let (d1_, p1a, mergePrgs (p1b, (p2b, T.dot1 t2)))
         else raise (Error "Let don't match")
         end
-    | ( T.EVar (psi1_, p1optRef_, f1_, _, _, _),
-        (T.EVar (psi2_, p2optref_, f2_, _, _, _), t2) ) ->
+    | ( T.EVar (psi1, p1optRef, f1_, _, _, _),
+        (T.EVar (psi2, p2optref, f2_, _, _, _), t2) ) ->
         raise (Error "No EVARs should exist!")
     | _ ->
         raise (Error "Redundancy in cases could not automatically be removed.")
@@ -399,15 +399,15 @@ end) : REDUNDANT = struct
 
   and mergeCase = function
     | [], c_ -> raise (Error "Case incompatible, cannot merge")
-    | ((psi1_, t1, p1_) :: o_ as l_), (((psi2_, t2, p2_), tAfter) as c_) ->
+    | ((psi1, t1, p1_) :: o_ as l_), (((psi2, t2, p2_), tAfter) as c_) ->
         let tAfterInv = T.invertSub tAfter in
         let t3 = T.comp (tAfterInv, t2) in
-        let t = Opsem.createVarSub (psi1_, psi2_) in
+        let t = Opsem.createVarSub (psi1, psi2) in
         let t' = T.comp (t3, t) in
         let doMatch =
           try
             begin
-              Opsem.matchSub (psi1_, t1, t');
+              Opsem.matchSub (psi1, t1, t');
               true
             end
           with Opsem.NoMatch -> false
@@ -416,10 +416,10 @@ end) : REDUNDANT = struct
           let newT = T.normalizeSub t in
           let stillMatch = isSubRenamingOnly newT in
           begin if stillMatch then
-            (psi1_, t1, mergePrgs (p1_, (p2_, cleanSub newT))) :: o_
+            (psi1, t1, mergePrgs (p1_, (p2_, cleanSub newT))) :: o_
           else
-            begin if length o_ = 0 then (psi2_, t3, p2_) :: l_
-            else (psi1_, t1, p1_) :: mergeCase (o_, c_)
+            begin if length o_ = 0 then (psi2, t3, p2_) :: l_
+            else (psi1, t1, p1_) :: mergeCase (o_, c_)
             end
             (* We tried all the cases, and we can now add it *)
             (* Try other cases *)
@@ -430,8 +430,8 @@ end) : REDUNDANT = struct
            *)
         (* Note that tAfter and newT are both renaming substitutions *)
           else
-          begin if length o_ = 0 then (psi2_, t3, p2_) :: l_
-          else (psi1_, t1, p1_) :: mergeCase (o_, c_)
+          begin if length o_ = 0 then (psi2, t3, p2_) :: l_
+          else (psi1, t1, p1_) :: mergeCase (o_, c_)
           end
           (* We tried all the cases, and we can now add it *)
           (* Try other cases *)
@@ -457,13 +457,13 @@ end) : REDUNDANT = struct
   (* Psi1 |- t : Psi2 *)
   (* Psi1 |- t' : Psi1' *)
   (* If we can get this to match, then Psi1 |- P2[t] *)
-  and mergeIfNecessary (((psi1_, s1, p1_) as c_), ((psi2_, s2, p2_) as c'_)) =
-    let t = Opsem.createVarSub (psi1_, psi2_) in
+  and mergeIfNecessary (((psi1, s1, p1_) as c_), ((psi2, s2, p2_) as c'_)) =
+    let t = Opsem.createVarSub (psi1, psi2) in
     let t' = T.comp (s2, t) in
     let doMatch =
       try
         begin
-          Opsem.matchSub (psi1_, s1, t');
+          Opsem.matchSub (psi1, s1, t');
           true
         end
       with Opsem.NoMatch -> false
@@ -472,7 +472,7 @@ end) : REDUNDANT = struct
     else
       let newT = T.normalizeSub t in
       begin if isSubRenamingOnly newT then
-        try [ (psi1_, s1, mergePrgs (p1_, (p2_, cleanSub newT))) ]
+        try [ (psi1, s1, mergePrgs (p1_, (p2_, cleanSub newT))) ]
         with Error s ->
           raise
             (Error

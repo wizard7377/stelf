@@ -814,8 +814,8 @@ module MakeModeCheck
     let checkD (conDec, fileName, occOpt) =
       ignore (checkFree := false);
       let rec checkable = function
-        | I.Root (ha_, _) ->
-            begin match ModeTable.mmodeLookup (cidFromHead ha_) with
+        | I.Root (ha, _) ->
+            begin match ModeTable.mmodeLookup (cidFromHead ha) with
             | [] -> false
             | _ -> true
             end

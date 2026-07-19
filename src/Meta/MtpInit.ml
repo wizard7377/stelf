@@ -65,12 +65,12 @@ end) : MTPINIT.MTPINIT = struct
                 o_,
                 f'_,
                 ss_ )
-        | gb_, S.And (o1_, o2_), F.And (f1_, f2_), ss_ ->
-            init' (gb_, o1_, f1_, init' (gb_, o2_, f2_, ss_))
-        | gb_, o_, (F.Ex _ as f'_), ss_ ->
-            S.State (List.length ss_ + 1, gb_, (f_, of_), 1, o_, [], f'_) :: ss_
-        | gb_, o_, (True as f'_), ss_ ->
-            S.State (List.length ss_ + 1, gb_, (f_, of_), 1, o_, [], f'_) :: ss_
+        | gb, S.And (o1_, o2_), F.And (f1_, f2_), ss_ ->
+            init' (gb, o1_, f1_, init' (gb, o2_, f2_, ss_))
+        | gb, o_, (F.Ex _ as f'_), ss_ ->
+            S.State (List.length ss_ + 1, gb, (f_, of_), 1, o_, [], f'_) :: ss_
+        | gb, o_, (True as f'_), ss_ ->
+            S.State (List.length ss_ + 1, gb, (f_, of_), 1, o_, [], f'_) :: ss_
       in
       begin
         Names.varReset I.Null;

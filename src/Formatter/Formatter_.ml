@@ -39,35 +39,35 @@ places.
 The {\tt Spmod} function is used when {\tt Bailout} is active.
 *)
   open! struct
-    let rec spaces'_ arg__0 arg__1 =
+    let rec spaces' arg__0 arg__1 =
       begin match (arg__0, arg__1) with
       | 0, s -> s
-      | n, s -> spaces'_ (n - 1) (s ^ " ")
+      | n, s -> spaces' (n - 1) (s ^ " ")
       end
 
     let spaces_ n =
-      begin if n > 0 then spaces'_ n "" else ""
+      begin if n > 0 then spaces' n "" else ""
       end
 
-    let rec newlines'_ arg__2 arg__3 =
+    let rec newlines' arg__2 arg__3 =
       begin match (arg__2, arg__3) with
       | 0, s -> s
-      | n, s -> newlines'_ (n - 1) (s ^ "\n")
+      | n, s -> newlines' (n - 1) (s ^ "\n")
       end
 
     let newlines_ n =
-      begin if n > 0 then newlines'_ n "" else ""
+      begin if n > 0 then newlines' n "" else ""
       end
   end
 
   let sp_ = spaces_
 
   (* return a number of spaces *)
-  let spmod_ n = spaces_ (n mod !pagewidth_)
+  let spmod n = spaces_ (n mod !pagewidth_)
   let nl_ = newlines_
 
   (* return a number of newlines *)
-  let np_ () = "\n\012\n"
+  let np () = "\n\012\n"
 
   (* CTRL_L == ""\012"" *)
   (*
@@ -130,7 +130,7 @@ The argument {\ml m} is the current mode in effect, {\ml b} is the
 horizontal blanks and {\ml i} is the indent currently in effect.
 These are used to determine the width of breaks and default breaks.
 *)
-  let width0_ = function
+  let width0 = function
     | _m, _b, _i, Str (n, _) -> (n, n)
     | Hori, _b, _i, Brk (m, _) -> (m, m)
     | Vert, _b, _i, Brk (_, n) -> (n, n)
@@ -142,7 +142,7 @@ These are used to determine the width of breaks and default breaks.
     | _m, _b, _i, Hvx (((min, max), _), _, _, _, _) -> (min, max)
     | _m, _b, _i, Hov (((min, max), _), _, _, _, _) -> (min, max)
 
-  let width_ fmt = width0_ (Hori, !blanks_, !indent_, fmt)
+  let width_ fmt = width0 (Hori, !blanks_, !indent_, fmt)
   let unused_ = -9999
 
   (* a bad value to mark unused arguments of Width0 *)
@@ -223,19 +223,19 @@ then simply starts the auxiliary function
             ( i,
               t,
               (max_ (totmin, tmmin), max_ (totmax, tmmax)),
-              width0_ (Vert, unused_, i, Dbk) )
+              width0 (Vert, unused_, i, Dbk) )
       | i, (Brk _ as b) :: t, (totmin, totmax), (tmmin, tmmax) ->
           vlistWidth'
             ( i,
               t,
               (max_ (totmin, tmmin), max_ (totmax, tmmax)),
-              width0_ (Vert, unused_, i, b) )
+              width0 (Vert, unused_, i, b) )
       | i, x :: t, (totmin, totmax), (tmmin, tmmax) ->
           vlistWidth'
             ( i,
               t,
               (totmin, totmax),
-              sumpair (width0_ (Vert, unused_, i, x), (tmmin, tmmax)) )
+              sumpair (width0 (Vert, unused_, i, x), (tmmin, tmmax)) )
   end
 
   let vlistWidth (l, indent) = vlistWidth' (indent, l, (0, 0), (0, 0))
@@ -250,7 +250,7 @@ to the {\ml Width0} function.
   let hlistWidth (l, blanks) =
     List.foldr
       (function
-        | fmt, (x, y) -> sumpair (width0_ (Hori, blanks, unused_, fmt), (x, y)))
+        | fmt, (x, y) -> sumpair (width0 (Hori, blanks, unused_, fmt), (x, y)))
       (0, 0) l
 
   (*
@@ -340,7 +340,7 @@ break.  This ensures that the first item is indented as much as all the others.
 
   and hOVbox0 b i s l = Hov (hovlistWidth (l, b, i), b, i, s, l)
 
-  let newpage_ () = Str (0, np_ ())
+  let newpage_ () = Str (0, np ())
 
   (*
 %***********************************************************************
@@ -385,7 +385,7 @@ determine the maximum width do not contain breaks, all but the last
     List.foldr
       (function
         | fmt, ysum ->
-            let _, y = width0_ (Hori, unused_, unused_, fmt) in
+            let _, y = width0 (Hori, unused_, unused_, fmt) in
             y + ysum)
       0 l
 
@@ -512,7 +512,7 @@ We thus get:
         let ch1, s1, mp =
           begin if
             lb = Ebk
-            || li + ch + fst (width0_ (Hori, bl, unused_, lb)) + gpwdth <= mw
+            || li + ch + fst (width0 (Hori, bl, unused_, lb)) + gpwdth <= mw
           then
             let n, s = print'p (mw, li, bl, is, ss, Hori, lb, res) in
             (ch + n, s, mp)
@@ -553,22 +553,22 @@ We thus get:
     | _mw, _id, _bl, _is, _ss, _mo, Str (n, s), res -> (n, s :: res)
     | _mw, _id, _bl, _is, _ss, Hori, Brk (b, _i), res ->
         ( b,
-          begin if !bailout_ then spmod_ b else sp_ b
+          begin if !bailout_ then spmod b else sp_ b
           end
           :: res )
     | _mw, id, _bl, _is, ss, Vert, Brk (_b, i), res ->
         ( i,
-          begin if !bailout_ then spmod_ (id + i) else sp_ (id + i)
+          begin if !bailout_ then spmod (id + i) else sp_ (id + i)
           end
           :: nl_ ss :: res )
     | _mw, _id, bl, _is, _ss, Hori, Dbk, res ->
         ( bl,
-          begin if !bailout_ then spmod_ bl else sp_ bl
+          begin if !bailout_ then spmod bl else sp_ bl
           end
           :: res )
     | _mw, id, _bl, is, ss, Vert, Dbk, res ->
         ( is,
-          begin if !bailout_ then spmod_ (id + is) else sp_ (id + is)
+          begin if !bailout_ then spmod (id + is) else sp_ (id + is)
           end
           :: nl_ ss :: res )
     | _mw, _id, _bl, _is, _ss, _mo, Ebk, res -> (0, res)

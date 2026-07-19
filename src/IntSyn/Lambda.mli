@@ -24,4 +24,4 @@ module Abstract : ABSTRACT
 open! Approx
 module Approx : APPROX
 open! Lambda_
-module Lambda_ : LAMBDA_
+module Lambda_ : LAMBDA
