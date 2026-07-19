@@ -80,8 +80,8 @@ end) : PROVER = struct
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
     let init (k, (c :: _ as cL)) =
-      let _ = MetaGlobal.maxFill := k in
-      let _ = reset () in
+      ignore (MetaGlobal.maxFill := k);
+      ignore (reset ());
       let cL' = try Order.closure c with Order.Error _ -> cL in
       begin if equiv (cL, cL') then
         List.app (function s_ -> insertState s_) (Init.init cL)
@@ -94,7 +94,7 @@ end) : PROVER = struct
       end
 
     let auto () =
-      let _ = print "M2.Prover.auto\n" in
+      ignore (print "M2.Prover.auto\n");
       let open', solvedStates' =
         try Strategy.run !openStates with
         | Splitting.Error s -> error ("Splitting Error: " ^ s)
@@ -104,8 +104,8 @@ end) : PROVER = struct
         | Filling.TimeOut ->
             error "A proof could not be found -- Exceeding Time Limit\n"
       in
-      let _ = openStates := open' in
-      let _ = solvedStates := !solvedStates @ solvedStates' in
+      ignore (openStates := open');
+      ignore (solvedStates := !solvedStates @ solvedStates');
       begin if List.length !openStates > 0 then
         raise (Error "A proof could not be found")
       else ()
@@ -127,7 +127,7 @@ end) : PROVER = struct
       let rec install' = function
         | M.SgnEmpty -> ()
         | M.ConDec (e, s_) -> begin
-            let _ = installConDec e in
+            ignore (installConDec e);
             install' s_
           end
       in

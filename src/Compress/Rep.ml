@@ -85,7 +85,7 @@ module Rep = struct
       end
 
   let gen_graph n autoCompress =
-    let _ = autoCompress n in
+    ignore (autoCompress n);
     let rec sanity n =
       begin if n < 0 then true
       else
@@ -98,7 +98,7 @@ module Rep = struct
         end
       end
     in
-    let _ = sanity n in
+    ignore (sanity n);
     let pairs =
       List.tabulate (n + 1, function x -> (o_cidSize x, cidSize x))
     in
@@ -111,8 +111,8 @@ module Rep = struct
            pairs)
     in
     let f = TextIO.openOut "/tmp/graph" in
-    let _ = TextIO.output (f, s) in
-    let _ = TextIO.closeOut f in
+    ignore (TextIO.output (f, s));
+    ignore (TextIO.closeOut f);
     ()
 
   (* DEBUG  handle Reductio.Matching2 s => (print ""doesn'tmatch""; k := SOME s); *)

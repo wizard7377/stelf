@@ -150,13 +150,13 @@ module MakePrintOMDoc
           | I.Maybe ->
               let (I.Dec (Some name, v1'_) as d'_) = Names.decLUName (g_, d_) in
               let g'_ = I.Decl (g_, d'_) in
-              let _ = ind 1 in
+              ignore (ind 1);
               let fmtBody =
                 fmtExp (g'_, (v2_, I.dot1 s), Int.max (0, imp - 1))
               in
-              let _ = ind 1 in
+              ignore (ind 1);
               let fmtType = fmtExp (g_, (v1'_, s), 0) in
-              let _ = unind 2 in
+              ignore (unind 2);
               let pi_ =
                 begin if imp > 0 then "implicit_Pi" else "Pi"
                 end
@@ -184,7 +184,7 @@ module MakePrintOMDoc
           let _ =
             begin if l = 0 then out := !out ^ fmtCon (g_, h_)
             else
-              let _ = out := (!out ^ "<om:OMA>") ^ nl_ind () in
+              ignore (out := (!out ^ "<om:OMA>") ^ nl_ind ());
               let test, cid =
                 begin match h_ with
                 | I.Const c -> (true, c)
@@ -219,11 +219,11 @@ module MakePrintOMDoc
       | g_, (I.Lam (d_, u_), s), imp ->
           let (I.Dec (Some name, v_) as d'_) = Names.decLUName (g_, d_) in
           let g'_ = I.Decl (g_, d'_) in
-          let _ = ind 1 in
+          ignore (ind 1);
           let fmtBody = fmtExp (g'_, (u_, I.dot1 s), Int.max (0, imp - 1)) in
-          let _ = ind 1 in
+          ignore (ind 1);
           let fmtType = fmtExp (g_, (v_, s), 0) in
-          let _ = unind 2 in
+          ignore (unind 2);
           let lam_ =
             begin if imp > 0 then "implicit_lambda" else "lambda"
             end
@@ -380,17 +380,17 @@ module MakePrintOMDoc
 
     let fmtConDec = function
       | cid, I.ConDec (name, parent, imp, _, v_, l_) ->
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let name = name_ cid in
           fmtSymbol (name, v_, imp)
       | _, I.SkoDec (name, parent, imp, v_, l_) ->
           str_ (("<!-- Skipping Skolem constant " ^ name) ^ "-->")
       | cid, I.ConDef (name, parent, imp, u_, v_, l_, _) ->
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let name = name_ cid in
           (fmtSymbol (name, v_, imp) ^ nl ()) ^ fmtDefinition (name, u_, imp)
       | cid, I.AbbrevDef (name, parent, imp, u_, v_, l_) ->
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let name = name_ cid in
           (fmtSymbol (name, v_, imp) ^ nl ()) ^ fmtDefinition (name, u_, imp)
       | _, I.BlockDec (name, _, _, _) ->
@@ -484,8 +484,8 @@ module MakePrintOMDoc
     end
 
   let printSgn filename ns =
-    let _ = namesafe := ns in
-    let _ = ind_reset () in
+    ignore (namesafe := ns);
+    ignore (ind_reset ());
     let file = TextIO.openOut filename in
     let oMDocPrefix_ =
       ((((((("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -509,8 +509,8 @@ module MakePrintOMDoc
             TextIO.output (file, "\n\n")
           end)
     in
-    let _ = TextIO.output (file, "</theory>\n\n</omdoc>") in
-    let _ = TextIO.closeOut file in
+    ignore (TextIO.output (file, "</theory>\n\n</omdoc>"));
+    ignore (TextIO.closeOut file);
     ()
 end
 (* local ... *)

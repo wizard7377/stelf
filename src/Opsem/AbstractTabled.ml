@@ -332,7 +332,7 @@ end) : ABSTRACTTABLED = struct
       let iw = Whnf.invert w in
       let gx'_ = Whnf.strengthen (iw, gx_) in
       let (I.EVar (r', _, _, _) as x'_) = I.newEVar (gx'_, I.EClo (v_, iw)) in
-      let _ = Unify.instantiateEVar (r, I.EClo (x'_, w), []) in
+      ignore (Unify.instantiateEVar (r, I.EClo (x'_, w), []));
       let v'_ = raiseType (gx'_, I.EClo (v_, iw)) in
       begin if isId (I.comp (w, I.comp (ss, s))) then
         collectEVarFapStr

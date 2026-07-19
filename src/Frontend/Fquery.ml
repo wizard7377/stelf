@@ -60,8 +60,8 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     let v_, optName, xs_ =
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
-    let _ = Display.chatter_s 3 "%fquery" in
-    let _ = Display.chatter_s 3 " " in
+    ignore (Display.chatter_s 3 "%fquery");
+    ignore (Display.chatter_s 3 " ");
     let _ =
       Display.chatter_s 3
         (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n")
@@ -71,7 +71,7 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     let a = I.targetFam v2_ in
     let w_ = W.lookup a in
     let v3_ = Worldify.worldifyGoal (g_, v2_) in
-    let _ = TypeCheck.typeCheck (g_, (v3_, I.Uni I.Type)) in
+    ignore (TypeCheck.typeCheck (g_, (v3_, I.Uni I.Type)));
     let p_ = Converter.convertGoal (T.embedCtx g_, v3_) in
     let v_ = Timers.time Timers.delphin Opsem.evalPrg p_ in
     print (("Delphin: " ^ TomegaPrint.prgToString (I.Null, v_)) ^ "\n")

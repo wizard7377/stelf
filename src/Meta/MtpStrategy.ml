@@ -118,10 +118,10 @@ end) : MTPSTRATEGY = struct
       with
       | None -> fill (givenStates, (s_ :: openStates, solvedStates))
       | Some splitOp ->
-          let _ = printSplitting splitOp in
+          ignore (printSplitting splitOp);
           let sl_ = Timers.time Timers.splitting MTPSplitting.apply splitOp in
-          let _ = printCloseBracket () in
-          let _ = printRecursion () in
+          ignore (printCloseBracket ());
+          ignore (printRecursion ());
           let sl'_ =
             map
               (function
@@ -130,7 +130,7 @@ end) : MTPSTRATEGY = struct
                       (MTPRecursion.expand (Obj.magic s_)))
               sl_
           in
-          let _ = printInference () in
+          ignore (printInference ());
           let sl''_ =
             map
               (function
@@ -150,19 +150,19 @@ end) : MTPSTRATEGY = struct
           with
           | fillingOp -> (
               try
-                let _ = printFilling () in
+                ignore (printFilling ());
                 let max, p_ =
                   TimeLimit.timeLimit !Global.timeLimit
                     (Timers.time Timers.filling MTPFilling.apply)
                     fillingOp
                 in
-                let _ = printCloseBracket () in
+                ignore (printCloseBracket ());
                 fill (givenStates, os)
               with MTPFilling.Error _ -> split (s_ :: givenStates, os))
           end
 
     let run (givenStates : S.state list) =
-      let _ = printInit () in
+      ignore (printInit ());
       let openStates, solvedStates = fill (Obj.magic givenStates, ([], [])) in
       let openStates' = map MTPrint.nameState (Obj.magic openStates) in
       let solvedStates' = map MTPrint.nameState (Obj.magic solvedStates) in

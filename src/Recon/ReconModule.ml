@@ -163,7 +163,7 @@ module Make_ReconModule
       | None -> IntTree.insert table (cid, ref [ (inst_, r) ])
       | Some rl -> rl := (inst_, r) :: !rl
     in
-    let _ = List.app add eqns in
+    ignore (List.app add eqns);
     let doInst ((inst_, r), conDec_) =
       match inst_ with
       | Internal cid -> (
@@ -188,6 +188,6 @@ module Make_ReconModule
   let moduleWhere (module_, wherecl) =
     let mark, markStruct = IntSyn.sgnSize () in
     let module' = ModSyn.instantiateModule (module_, applyEqns wherecl) in
-    let _ = Names.resetFrom (mark, markStruct) in
+    ignore (Names.resetFrom (mark, markStruct));
     module'
 end

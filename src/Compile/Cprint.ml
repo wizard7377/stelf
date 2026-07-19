@@ -96,7 +96,7 @@ module Make_CPrint (Print_ : PRINT) (Formatter_ : FORMATTER) (Names_ : NAMES) :
   (* conDecToString (c, clause) printed representation of static clause *)
   let conDecToString = function
     | c, SClause r ->
-        let _ = Names.varReset IntSyn.Null in
+        ignore (Names.varReset IntSyn.Null);
         let name = IntSyn.conDecName (IntSyn.sgnLookup c) in
         let l = String.size name in
         (name

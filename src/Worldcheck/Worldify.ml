@@ -441,9 +441,9 @@ end) : WORLDIFY = struct
     let rec worldifyClause = function
       | g_, (I.Root (a, s_) as v_), w_, occ -> v_
       | g_, I.Pi (((I.Dec (x, v1_) as d_), Maybe), v2_), w_, occ ->
-          let _ = print "{" in
+          ignore (print "{");
           let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
-          let _ = print "}" in
+          ignore (print "}");
           I.Pi ((I.Dec (x, v1_), I.Maybe), w2_)
       | g_, I.Pi (((I.Dec (x, v1_) as d_), No), v2_), w_, occ ->
           let w1_ = worldifyGoal (g_, v1_, w_, P.label occ) in
@@ -479,9 +479,9 @@ end) : WORLDIFY = struct
     let rec worldifyBlocks = function
       | [] -> ()
       | b :: bs_ -> (
-          let _ = worldifyBlocks bs_ in
+          ignore (worldifyBlocks bs_);
           let gsome_, lblock_ = I.constBlock b in
-          let _ = print "|" in
+          ignore (print "|");
           try worldifyBlock (gsome_, lblock_)
           with Error' (occ, s) ->
             raise
@@ -491,9 +491,9 @@ end) : WORLDIFY = struct
 
     let worldify a =
       let w_ = W.getWorlds a in
-      let _ = print "[?" in
+      ignore (print "[?");
       let w'_ = worldifyWorld w_ in
-      let _ = print ";" in
+      ignore (print ";");
       let _ =
         begin if !Global.chatter > 3 then
           print
@@ -519,7 +519,7 @@ end) : WORLDIFY = struct
               end)
           condecs
       in
-      let _ = print "]" in
+      ignore (print "]");
       let _ =
         begin if !Global.chatter = 4 then print "\n" else ()
         end

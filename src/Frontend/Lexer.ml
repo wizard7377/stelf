@@ -184,7 +184,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
   *)
   let lex (inputFun : int -> string) =
     let s = ref "" and left = ref 0 and right = ref 0 in
-    let _ = P.resetLines () in
+    ignore (P.resetLines ());
     let eOFString_ = String.str '\004' in
     let readNext () =
       let nextLine = inputFun !right in

@@ -92,8 +92,8 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
         else ()
         end
       in
-      let _ = Array.update (csArray, cs, Solver (solver, ref false)) in
-      let _ = nextCS := !nextCS + 1 in
+      ignore (Array.update (csArray, cs, Solver (solver, ref false)));
+      ignore (nextCS := !nextCS + 1);
       cs
 
     let _ = installSolver unifySolver
@@ -230,9 +230,9 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
 
     let trail f =
       let current = !markCount in
-      let _ = mark () in
+      ignore (mark ());
       let r = f () in
-      let _ = unwind current in
+      ignore (unwind current);
       r
   end
 

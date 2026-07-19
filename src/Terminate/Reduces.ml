@@ -340,7 +340,7 @@ end) : REDUCES = struct
           vs_,
           n,
           (I.Decl (g_, (I.Dec (_, v'_) as d_)), I.Decl (q_, C.And occ)) ) ->
-          let _ = checkGoal (g0_, q0_, rl_, (v'_, I.Shift (n + 1)), vs_, occ) in
+          ignore (checkGoal (g0_, q0_, rl_, (v'_, I.Shift (n + 1)), vs_, occ));
           let ro_ = getROrder (g0_, q0_, (v'_, I.Shift (n + 1)), occ) in
           let rl'_ =
             begin match ro_ with None -> rl_ | Some o_ -> o_ :: rl_

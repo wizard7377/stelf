@@ -407,7 +407,7 @@ module MakeUnique
       chatter 4 (function () ->
           ("Uniqueness checking family " ^ cName a) ^ "\n")
     in
-    let _ = checkNoDef a in
+    ignore (checkNoDef a);
     let _ =
       try Subordinate.checkNoDef a
       with Subordinate.Error msg ->

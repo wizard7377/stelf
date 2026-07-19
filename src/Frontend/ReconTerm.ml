@@ -670,7 +670,7 @@ end) : RECON_TERM = struct
       begin
         let r = termRegion tm in
         let tm'', u''_ = checkApx (g_, Omitted_ r, v_, l_, location_msg) in
-        let _ = addDelayed (fun () -> ignore (Apx.makeGroundUni l'_)) in
+        ignore (addDelayed (fun () -> ignore (Apx.makeGroundUni l'_)));
         (Mismatch_ (tm', tm'', location_msg, problem_msg), u''_)
       end
   (* just in case *)
@@ -691,15 +691,15 @@ end) : RECON_TERM = struct
           | IntSyn.Null -> (g_, IntSyn.Null)
           | Decl (g, tm) ->
               let g'_, g' = ia g in
-              let _ = clearDelayed () in
+              ignore (clearDelayed ());
               let tm', d_ = inferApxDec (g'_, tm) in
-              let _ = runDelayed () in
+              ignore (runDelayed ());
               (decl_ (g'_, d_), decl_ (g', tm'))
         in
         let g'_, g' = ia g in
         Jwithctx_ (g', inferApxJob (g'_, j))
     | g_, Jterm_ tm ->
-        let _ = clearDelayed () in
+        ignore (clearDelayed ());
         let tm', u_, v_, l_ = inferApx (g_, tm) in
         let _ =
           filterLevel
@@ -708,10 +708,10 @@ end) : RECON_TERM = struct
               2,
               "The term in this position must be an object or a type family" )
         in
-        let _ = runDelayed () in
+        ignore (runDelayed ());
         Jterm_ tm'
     | g_, Jclass_ tm ->
-        let _ = clearDelayed () in
+        ignore (clearDelayed ());
         let l_ = Apx.newLVar () in
         let tm', v_ =
           checkApx
@@ -728,10 +728,10 @@ end) : RECON_TERM = struct
               3,
               "The term in this position must be a type or a kind" )
         in
-        let _ = runDelayed () in
+        ignore (runDelayed ());
         Jclass_ tm'
     | g_, Jof_ (tm1, tm2) ->
-        let _ = clearDelayed () in
+        ignore (clearDelayed ());
         let l_ = Apx.newLVar () in
         let tm2', v2_ =
           checkApx
@@ -751,10 +751,10 @@ end) : RECON_TERM = struct
               2,
               "The term in this position must be an object or a type family" )
         in
-        let _ = runDelayed () in
+        ignore (runDelayed ());
         Jof_ (tm1', tm2')
     | g_, Jof'_ (tm1, v_) ->
-        let _ = clearDelayed () in
+        ignore (clearDelayed ());
         let l_ = Apx.newLVar () in
         let v2_, _ = Apx.classToApx v_ in
         let tm1', u1_ =
@@ -767,7 +767,7 @@ end) : RECON_TERM = struct
               2,
               "The term in this position must be an object or a type family" )
         in
-        let _ = runDelayed () in
+        ignore (runDelayed ());
         Jof'_ (tm1', v_)
 
   let rec ctxToApx = function
@@ -933,7 +933,7 @@ end) : RECON_TERM = struct
           ))
 
   let unifyIdem x =
-    let _ = Unify.reset () in
+    ignore (Unify.reset ());
     let _ =
       try Unify.unify x
       with Unify.Unify _ as e ->
@@ -942,12 +942,12 @@ end) : RECON_TERM = struct
           raise e
         end
     in
-    let _ = Unify.reset () in
+    ignore (Unify.reset ());
     ()
   (* this reset should be unnecessary -- for safety only *)
 
   let unifiableIdem x =
-    let _ = Unify.reset () in
+    ignore (Unify.reset ());
     let ok = Unify.unifiable x in
     let _ =
       begin if ok then Unify.reset () else Unify.unwind ()
@@ -988,8 +988,8 @@ end) : RECON_TERM = struct
               formatExp (g_, eClo_ vs2_);
             ]
         in
-        let _ = Msg.message (F.makestring_fmt eqnsFmt ^ "\n") in
-        let _ = reportConstraints xnames_ in
+        ignore (Msg.message (F.makestring_fmt eqnsFmt ^ "\n"));
+        ignore (reportConstraints xnames_);
         let _ =
           Msg.message
             ((("Failed: " ^ problem_msg) ^ "\n")
@@ -1016,7 +1016,7 @@ end) : RECON_TERM = struct
           formatExp (g_, eClo_ vs2_);
         ]
     in
-    let _ = Msg.message (F.makestring_fmt eqnsFmt ^ "\n") in
+    ignore (Msg.message (F.makestring_fmt eqnsFmt ^ "\n"));
     let _ =
       try unifyIdem (g_, vs1_, vs2_)
       with Unify.Unify msg as e ->
@@ -1027,8 +1027,8 @@ end) : RECON_TERM = struct
           raise e
         end
     in
-    let _ = reportInst xnames_ in
-    let _ = reportConstraints xnames_ in
+    ignore (reportInst xnames_);
+    ignore (reportConstraints xnames_);
     ()
 
   let reportUnify (g_, vs1_, vs2_) =
@@ -1070,8 +1070,8 @@ end) : RECON_TERM = struct
               formatExp (g_, v_);
             ]
         in
-        let _ = Msg.message (F.makestring_fmt omit ^ "\n") in
-        let _ = reportConstraints xnames_ in
+        ignore (Msg.message (F.makestring_fmt omit ^ "\n"));
+        ignore (reportConstraints xnames_);
         ()
     | g_, Mismatch_ (tm1, tm2, _, _), u_, v_ -> reportInfer' (g_, tm2, u_, v_)
     | g_, Hastype_ _, u_, v_ -> ()
@@ -1097,8 +1097,8 @@ end) : RECON_TERM = struct
               formatExp (g_, v_);
             ]
         in
-        let _ = Msg.message (F.makestring_fmt judg ^ "\n") in
-        let _ = reportConstraints xnames_ in
+        ignore (Msg.message (F.makestring_fmt judg ^ "\n"));
+        ignore (reportConstraints xnames_);
         ()
 
   let reportInfer x = report (function () -> reportInfer' x)
@@ -1588,14 +1588,14 @@ end) : RECON_TERM = struct
   (*          val (Uni L2, _) = Whnf.whnf (L2, id) *)
 
   let recon' j =
-    let _ = Apx.varReset () in
+    ignore (Apx.varReset ());
     StringTree.clear evarApxTable;
     StringTree.clear fvarApxTable;
     StringTree.clear fvarTable;
     let j' = inferApxJob (IntSyn.Null, j) in
-    let _ = clearDelayed () in
+    ignore (clearDelayed ());
     let j'' = inferExactJob (IntSyn.Null, j') in
-    let _ = runDelayed () in
+    ignore (runDelayed ());
     j''
   (* we leave it to the context to call Names.varReset
              reason: this code allows reconstructing terms containing
@@ -1620,12 +1620,12 @@ end) : RECON_TERM = struct
 
   (* Invariant, G must be named! *)
   let reconWithCtx' (g_, j) =
-    let _ = Apx.varReset () in
-    let _ = varReset () in
+    ignore (Apx.varReset ());
+    ignore (varReset ());
     let j' = inferApxJob' (g_, j) in
-    let _ = clearDelayed () in
+    ignore (clearDelayed ());
     let j'' = inferExactJob (g_, j') in
-    let _ = runDelayed () in
+    ignore (runDelayed ());
     j''
   (* we leave it to the context to call Names.varReset
              reason: this code allows reconstructing terms containing

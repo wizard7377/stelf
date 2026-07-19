@@ -55,7 +55,7 @@ end) : MTPPRINT.MTPRINT = struct
     let printFmt f = Fmt.string (PrintFmt.makestring_fmt f)
 
     let nameState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
-      let _ = Names.varReset I.Null in
+      ignore (Names.varReset I.Null);
       let g'_ = Names.ctxName g_ in
       S.State (n, (g'_, b_), (ih_, oh_), d, o_, h_, f_)
 

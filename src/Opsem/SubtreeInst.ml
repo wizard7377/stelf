@@ -293,12 +293,12 @@ end) : MEMOTABLE = struct
           let x_ =
             lowerEVar1 (e_, I.EVar (r, I.Null, v_, cnstr), Whnf.whnf (v_, I.id))
           in
-          let _ = r := Some u_ in
+          ignore (r := Some u_);
           S.insert asub (k - d, I.Exp x_)
       | d, (I.ADec (n, d') as dec1_), (I.Root (I.BVar k, s1_) as e1_), u_, asub
         ->
           let (I.AVar r as a_) = I.newAVar () in
-          let _ = r := Some u_ in
+          ignore (r := Some u_);
           let us_ = Whnf.whnf (u_, I.Shift (-d')) in
           S.insert asub (k - d, I.Exp (I.EClo (a_, I.Shift (-d'))))
 
@@ -1251,9 +1251,9 @@ end) : MEMOTABLE = struct
       let dAEVars_ = compose (dEVars_, dAVars_) in
       let dq_ = emptyCtx () in
       let n = I.ctxLength g_ in
-      let _ = makeCtx (n + 1, dAEVars_, (dq_ : ctx)) in
+      ignore (makeCtx (n + 1, dAEVars_, (dq_ : ctx)));
       let l = I.ctxLength dAEVars_ in
-      let _ = S.insert sq (1, (0, u_)) in
+      ignore (S.insert sq (1, (0, u_)));
       let gr_ =
         ((l, n + 1), g_, eqn, emptyAnswer (), !TableParam.stageCtr, status)
       in
@@ -1285,9 +1285,9 @@ end) : MEMOTABLE = struct
       let dAEVars_ = compose (dEVars_, dAVars_) in
       let dq_ = emptyCtx () in
       let n = I.ctxLength g_ in
-      let _ = makeCtx (n + 1, dAEVars_, (dq_ : ctx)) in
+      ignore (makeCtx (n + 1, dAEVars_, (dq_ : ctx)));
       let l = I.ctxLength dAEVars_ in
-      let _ = S.insert sq (1, (0, u_)) in
+      ignore (S.insert sq (1, (0, u_)));
       let gr_ =
         ((l, n + 1), g_, eqn, emptyAnswer (), !TableParam.stageCtr, status)
       in

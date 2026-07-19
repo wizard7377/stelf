@@ -234,8 +234,8 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
 
     let init' (k, (c :: _ as cL)) =
-      let _ = MetaGlobal.maxFill := k in
-      let _ = reset () in
+      ignore (MetaGlobal.maxFill := k);
+      ignore (reset ());
       let cL' = try Order.closure c with Order.Error _ -> cL in
       begin if equiv (cL, cL') then
         List.app (function s_ -> insert s_) (Init.init cL)
@@ -283,18 +283,18 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         | k, [] -> abort "No such menu item"
         | 1, Splitting o_ :: _ ->
             let s'_ = Timers.time Timers.splitting Splitting.apply o_ in
-            let _ = pushHistory () in
-            let _ = delete () in
-            let _ = map insert s'_ in
+            ignore (pushHistory ());
+            ignore (delete ());
+            ignore (map insert s'_);
             begin
               menu ();
               printMenu ()
             end
         | 1, Recursion o_ :: _ ->
             let s'_ = Timers.time Timers.recursion Recursion.apply o_ in
-            let _ = pushHistory () in
-            let _ = delete () in
-            let _ = insert s'_ in
+            ignore (pushHistory ());
+            ignore (delete ());
+            ignore (insert s'_);
             begin
               menu ();
               printMenu ()
@@ -343,9 +343,9 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
           | Recursion.Error s -> abort ("Recursion Error: " ^ s)
           | Error s -> abort ("Mpi Error: " ^ s)
         in
-        let _ = pushHistory () in
-        let _ = delete () in
-        let _ = insert s'_ in
+        ignore (pushHistory ());
+        ignore (delete ());
+        ignore (insert s'_);
         begin
           menu ();
           printMenu ()
@@ -363,10 +363,10 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
           | Recursion.Error s -> abort ("Recursion Error: " ^ s)
           | Error s -> abort ("Mpi Error: " ^ s)
         in
-        let _ = pushHistory () in
-        let _ = delete () in
-        let _ = map insertOpen open'_ in
-        let _ = map insertSolved solved'_ in
+        ignore (pushHistory ());
+        ignore (delete ());
+        ignore (map insertOpen open'_);
+        ignore (map insertSolved solved'_);
         begin
           menu ();
           printMenu ()
@@ -381,10 +381,10 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         | Recursion.Error s -> abort ("Recursion Error: " ^ s)
         | Error s -> abort ("Mpi Error: " ^ s)
       in
-      let _ = pushHistory () in
-      let _ = initOpen () in
-      let _ = map insertOpen open'_ in
-      let _ = map insertSolved solved'_ in
+      ignore (pushHistory ());
+      ignore (initOpen ());
+      ignore (map insertOpen open'_);
+      ignore (map insertSolved solved'_);
       begin
         menu ();
         printMenu ()

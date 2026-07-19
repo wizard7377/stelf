@@ -85,7 +85,7 @@ end) : RECON_MODE = struct
         let (T.JWithCtx (g_, T.JOf ((v_, _), _, _))) =
           T.recon (T.jwithctx (g, T.jof (tm, T.typ r)))
         in
-        let _ = T.checkErrors r in
+        ignore (T.checkErrors r);
         let rec convertSpine = function
           | I.Nil -> M.Mnil
           | I.App (u_, s_) ->
@@ -113,7 +113,7 @@ end) : RECON_MODE = struct
         end
 
       let toModedec t =
-        let _ = Names.varReset I.Null in
+        ignore (Names.varReset I.Null);
         let (a, mS), r = t (I.Null, I.Null) in
         ((Some a, None, mS), r)
     end

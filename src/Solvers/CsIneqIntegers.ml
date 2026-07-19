@@ -1046,13 +1046,13 @@ struct
           let value = fromInteger (floor (const row)) in
           let decomp = (zero, [ (one, Row row) ]) in
           let g_ = ownerContext (label (Row row)).owner in
-          let _ = restrict (boundLower (g_, decomp, value)) in
+          ignore (restrict (boundLower (g_, decomp, value)));
           restrictBB resultL
       | BranchDivide (row, BranchFail, resultR) ->
           let value = fromInteger (ceiling (const row)) in
           let decomp = (zero, [ (one, Row row) ]) in
           let g_ = ownerContext (label (Row row)).owner in
-          let _ = restrict (boundUpper (g_, decomp, value)) in
+          ignore (restrict (boundUpper (g_, decomp, value)));
           restrictBB resultR
       | BranchSucceed result ->
           begin match result with Some row -> minimizeBB row | None -> ()

@@ -67,13 +67,13 @@ module NetServer : NETSERVER = struct
   let fileText fname =
     let s = TextIO.openIn fname in
     let txt = TextIO.inputAll s in
-    let _ = TextIO.closeIn s in
+    ignore (TextIO.closeIn s);
     txt
 
   let fileData fname =
     let s = TextIO.openIn fname in
     let data = TextIO.inputAll s in
-    let _ = TextIO.closeIn s in
+    ignore (TextIO.closeIn s);
     data
 
   exception Eof = Eof

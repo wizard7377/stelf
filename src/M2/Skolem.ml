@@ -78,13 +78,13 @@ end) : SKOLEM = struct
                 let sd_ = I.SkoDec (name', None, imp, v''_, l_) in
                 let sk = I.sgnAdd sd_ in
                 let h_ = I.Skonst sk in
-                let _ = IndexSkolem.install I.Ordinary h_ in
-                let _ = Names.installConstName sk in
+                ignore (IndexSkolem.install I.Ordinary h_);
+                ignore (Names.installConstName sk);
                 let _ =
                   Timers.time Timers.compiling Compile.install I.Ordinary sk
                 in
                 let s_ = spine d in
-                let _ = Display.chatter_s 3 (Print.conDecToString sd_ ^ "\n") in
+                ignore (Display.chatter_s 3 (Print.conDecToString sd_ ^ "\n"));
                 installSkolem'
                   (d, (v_, mS'), I.Dot (I.Exp (I.Root (h_, s_)), s), k)
             end
@@ -97,7 +97,7 @@ end) : SKOLEM = struct
       | a :: aL ->
           let (I.ConDec (name, _, imp, _, v_, l_)) = I.sgnLookup a in
           let (Some mS) = ModeTable.modeLookup a in
-          let _ = installSkolem (name, imp, (v_, mS), I.Type) in
+          ignore (installSkolem (name, imp, (v_, mS), I.Type));
           install aL
   end
 

@@ -175,7 +175,7 @@ end) : TRAVERSE = struct
       | Some cid -> IntSyn.sgnLookup cid
     in
     let conDec = getConDec cidOpt in
-    let _ = Names.varReset IntSyn.Null in
+    ignore (Names.varReset IntSyn.Null);
     let result = function
       | None -> raise (Error "Wrong kind of declaration")
       | Some r -> r

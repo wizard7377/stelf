@@ -162,7 +162,7 @@ end) : TOTAL = struct
         let d1'_ = N.decEName (g_, I.decSub (d1_, s)) in
         checkClause (I.Decl (g_, d1'_), (v2_, I.dot1 s), P.body occ)
     | g_, (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s), occ ->
-        let _ = checkClause (I.Decl (g_, d1_), (v2_, I.dot1 s), P.body occ) in
+        ignore (checkClause (I.Decl (g_, d1_), (v2_, I.dot1 s), P.body occ));
         checkGoal (g_, (v1_, s), P.label occ)
     | g_, (I.Root _, s), occ -> ()
   (* clause head *)
@@ -183,7 +183,7 @@ end) : TOTAL = struct
       else ()
       end
     in
-    let _ = checkDynOrderW (g_, (v_, s), 2, occ) in
+    ignore (checkDynOrderW (g_, (v_, s), 2, occ));
     try Cover.checkOut (g_, (v_, s))
     with Cover.Error msg ->
       raise (Error' (occ, "Totality: Output of subgoal not covered\n" ^ msg))
@@ -248,7 +248,7 @@ end) : TOTAL = struct
        Effect: raises Error (msg) otherwise, where msg has filename and location.
     *)
   let checkFam a =
-    let _ = Cover.checkNoDef a in
+    ignore (Cover.checkNoDef a);
     let _ =
       try Subordinate.checkNoDef a
       with Subordinate.Error msg ->
@@ -268,7 +268,7 @@ end) : TOTAL = struct
       with Reduces.Error msg -> raise (Reduces.Error msg)
     in
     let (Some ms) = ModeTable.modeLookup a in
-    let _ = checkDefinite (a, ms) in
+    ignore (checkDefinite (a, ms));
     let _ =
       try
         begin
@@ -283,7 +283,7 @@ end) : TOTAL = struct
         (("Output coverage checking family " ^ N.qidToString (N.constQid a))
         ^ "\n")
     in
-    let _ = ModeCheck.checkFreeOut (a, ms) in
+    ignore (ModeCheck.checkFreeOut (a, ms));
     let cs = Index.lookup a in
     let _ =
       try

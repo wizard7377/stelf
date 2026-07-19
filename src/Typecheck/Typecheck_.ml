@@ -167,7 +167,7 @@ module MakeTypeCheck
       | g'_, I.Shift k, g_ ->
           checkSub (g'_, I.Dot (I.Idx (k + 1), I.Shift (k + 1)), g_)
       | g'_, I.Dot (I.Idx k, s'), I.Decl (g_, I.Dec (_, v2_)) ->
-          let _ = checkSub (g'_, s', g_) in
+          ignore (checkSub (g'_, s', g_));
           let (I.Dec (_, v1_)) = I.ctxDec (g'_, k) in
           begin if Conv.conv ((v1_, I.id), (v2_, s')) then ()
           else
@@ -179,11 +179,11 @@ module MakeTypeCheck
                  ^ Print.expToString (g'_, I.EClo (v2_, s'))))
           end
       | g'_, I.Dot (I.Exp u_, s'), I.Decl (g_, I.Dec (_, v2_)) ->
-          let _ = checkSub (g'_, s', g_) in
-          let _ = typeCheck (g'_, (u_, I.EClo (v2_, s'))) in
+          ignore (checkSub (g'_, s', g_));
+          ignore (typeCheck (g'_, (u_, I.EClo (v2_, s'))));
           ()
       | g'_, I.Dot (I.Idx w, t), I.Decl (g_, I.BDec (_, (l, s))) ->
-          let _ = checkSub (g'_, t, g_) in
+          ignore (checkSub (g'_, t, g_));
           let (I.BDec (_, (l', s'))) = I.ctxDec (g'_, w) in
           begin if l <> l' then raise (Error "Incompatible block labels found")
           else
@@ -193,9 +193,9 @@ module MakeTypeCheck
             end
           end
       | g'_, I.Dot (I.Block (I.Inst i_), t), I.Decl (g_, I.BDec (_, (l, s))) ->
-          let _ = checkSub (g'_, t, g_) in
+          ignore (checkSub (g'_, t, g_));
           let g_, l_ = I.constBlock l in
-          let _ = checkBlock (g'_, i_, (I.comp (s, t), l_)) in
+          ignore (checkBlock (g'_, i_, (I.comp (s, t), l_)));
           ()
       | g'_, (I.Dot (_, _) as s), IntSyn.Null ->
           raise (Error (("Long substitution" ^ "\n") ^ subToString (g'_, s)))

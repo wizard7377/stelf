@@ -162,7 +162,7 @@ module MakePrintXML
 
     let fmtConDec = function
       | I.ConDec (name, parent, imp, _, v_, l_) ->
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           sexp
             [
               str_ "<Condec name=";
@@ -180,7 +180,7 @@ module MakePrintXML
       | I.SkoDec (name, parent, imp, v_, l_) ->
           str_ (("<! Skipping Skolem constant " ^ name) ^ ">")
       | I.ConDef (name, parent, imp, u_, v_, l_, _) ->
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           sexp
             [
               str_ "<Condef name=";
@@ -198,7 +198,7 @@ module MakePrintXML
               str_ "</Condef>";
             ]
       | I.AbbrevDef (name, parent, imp, u_, v_, l_) ->
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           sexp
             [
               str_ "<Abbrevdef name=";
@@ -312,8 +312,8 @@ module MakePrintXML
             TextIO.output (file, "\n")
           end)
     in
-    let _ = TextIO.output (file, "</Signature>") in
-    let _ = TextIO.closeOut file in
+    ignore (TextIO.output (file, "</Signature>"));
+    ignore (TextIO.closeOut file);
     ()
 end
 (* local ... *)

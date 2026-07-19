@@ -89,12 +89,12 @@ end) : RECON_QUERY = struct
   (* call TypeCheck... if !doubleCheck = true? *)
   (* Wed May 20 08:00:28 1998 -fp *)
   let queryToQuery (Query_ (optName, tm), Paths.Loc (fileName, r)) =
-    let _ = Names.varReset IntSyn.Null in
-    let _ = T.resetErrors fileName in
+    ignore (Names.varReset IntSyn.Null);
+    ignore (T.resetErrors fileName);
     let (T.JClass ((v_, oc), l_)) =
       Timers.time Timers.recon T.reconQuery (T.jclass tm)
     in
-    let _ = T.checkErrors r in
+    ignore (T.checkErrors r);
     let _ =
       begin match l_ with
       | IntSyn.Type -> ()
@@ -209,8 +209,8 @@ end) : RECON_QUERY = struct
   (* Wed May 20 08:00:28 1998 -fp *)
   let solveToSolve
       (defines, (Solve_ (optName, tm, r0) as sol), Paths.Loc (fileName, r)) =
-    let _ = Names.varReset IntSyn.Null in
-    let _ = T.resetErrors fileName in
+    ignore (Names.varReset IntSyn.Null);
+    ignore (T.resetErrors fileName);
     let mkd = function
       | Define_ (_, tm1, None) -> T.jterm tm1
       | Define_ (_, tm1, Some tm2) -> T.jof (tm1, tm2)
@@ -222,7 +222,7 @@ end) : RECON_QUERY = struct
     let (T.JAnd (defines', T.JClass ((v_, _), l_))) =
       Timers.time Timers.recon T.reconQuery (T.jand (mkj defines, T.jclass tm))
     in
-    let _ = T.checkErrors r in
+    ignore (T.checkErrors r);
     let _ =
       begin match l_ with
       | IntSyn.Type -> ()

@@ -121,7 +121,7 @@ module Whnf () : WHNF = struct
     and lowerEVar1 = function
       | EVar (r, g_, _, _), ((Pi _, _) as vs_) ->
           let x'_, u_ = lowerEVar' (g_, vs_) in
-          let _ = r := Some u_ in
+          ignore (r := Some u_);
           x'_
       | x_, _ -> x_
 
@@ -344,7 +344,7 @@ module Whnf () : WHNF = struct
             | Dot (Idx n', s') -> n <> n' && checkBVar s'
             | Dot (Undef, s') -> checkBVar s'
           in
-          let _ = checkBVar s' in
+          ignore (checkBVar s');
           Dot (Idx n, s')
       | Dot (Undef, s) -> Dot (Undef, mkPatSub s)
       | Dot (Exp u_, s) ->

@@ -291,12 +291,12 @@ module MakeOpsem
     | psi_, T.Dot (T.Idx k, t1), T.Dot (T.Block (I.LVar (r, s1, (c, s2))), t2)
       ->
         let s1' = Whnf.invert s1 in
-        let _ = r := Some (I.blockSub (I.Bidx k, s1')) in
+        ignore (r := Some (I.blockSub (I.Bidx k, s1')));
         matchSub (psi_, t1, t2)
     | psi_, T.Dot (T.Block b_, t1), T.Dot (T.Block (I.LVar (r, s1, (c, s2))), t2)
       ->
         let s1' = Whnf.invert s1 in
-        let _ = r := Some (I.blockSub (b_, s1')) in
+        ignore (r := Some (I.blockSub (b_, s1')));
         matchSub (psi_, t1, t2)
   (* By Invariant *)
 
@@ -400,7 +400,7 @@ module MakeOpsem
           | (_, _, _), 0 -> ()
           | (g_, I.Dot (I.Exp u_, s'), I.Decl (g'_, I.Dec (Some name, v_))), k
             ->
-              let _ = printLF (g_, s', g'_) (k - 1) in
+              ignore (printLF (g_, s', g'_) (k - 1));
               print
                 (((((("def " ^ name) ^ " = ") ^ Print.expToString (g_, u_))
                   ^ " : ")
@@ -412,7 +412,7 @@ module MakeOpsem
           let t = createVarSub (psi_, psi'_) in
           let t' = T.comp (t2, t) in
           let m = I.ctxLength psi'_ in
-          let _ = matchSub (psi_, t1, t') in
+          ignore (matchSub (psi_, t1, t'));
           let t'' = t in
           let _ =
             printLF
@@ -439,9 +439,9 @@ module MakeOpsem
               T.Lam ((T.UDec (I.BDec (Some name, (cid, s))) as d'_), p1_),
               p2_ ),
           t ) ) ->
-        let _ = print (("new " ^ name) ^ "\n") in
+        ignore (print (("new " ^ name) ^ "\n"));
         let d''_ = T.decSub (d'_, t) in
-        let _ = topLevel (I.Decl (psi_, d''_), d + 1, (p1_, T.dot1 t)) in
+        ignore (topLevel (I.Decl (psi_, d''_), d + 1, (p1_, T.dot1 t)));
         ()
     | psi_, d, (T.Let (d_, p1_, p2_), t) ->
         let (T.PDec (Some name, f_, _, _)) = d_ in

@@ -318,7 +318,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
                 let gy_ = pruneCtx (wi, gx_, rOccur) in
                 let y_ = newEVar (gy_, v'_) in
                 let yw_ = EClo (y_, w) in
-                let _ = instantiateEVar (r, yw_, !cnstrs) in
+                ignore (instantiateEVar (r, yw_, !cnstrs));
                 EClo (yw_, comp (s, ss))
               end
             else

@@ -663,9 +663,9 @@ end) : MEMOTABLE = struct
       let dAEVars_ = compose (dEVars_, dAVars_) in
       let d_ = emptyCtx () in
       let n = I.ctxLength g_ in
-      let _ = makeCtx (n + 1, dAEVars_, (d_ : ctx)) in
+      ignore (makeCtx (n + 1, dAEVars_, (d_ : ctx)));
       let l = I.ctxLength dAEVars_ in
-      let _ = S.insert nsub_goal (1, u_) in
+      ignore (S.insert nsub_goal (1, u_));
       let result =
         insert
           ( tree,
@@ -710,9 +710,9 @@ end) : MEMOTABLE = struct
       let dAEVars_ = compose (dEVars_, dAVars_) in
       let d_ = emptyCtx () in
       let n = I.ctxLength g_ in
-      let _ = makeCtx (n + 1, dAEVars_, (d_ : ctx)) in
+      ignore (makeCtx (n + 1, dAEVars_, (d_ : ctx)));
       let l = I.ctxLength dAEVars_ in
-      let _ = S.insert nsub_goal (1, u_) in
+      ignore (S.insert nsub_goal (1, u_));
       let result =
         insert
           ( tree,

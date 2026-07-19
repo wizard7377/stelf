@@ -812,7 +812,7 @@ module MakeModeCheck
        (occOpt is used in error messages)
     *)
     let checkD (conDec, fileName, occOpt) =
-      let _ = checkFree := false in
+      ignore (checkFree := false);
       let rec checkable = function
         | I.Root (ha_, _) ->
             begin match ModeTable.mmodeLookup (cidFromHead ha_) with
@@ -865,8 +865,8 @@ module MakeModeCheck
         end
       in
       let clist = Index.lookup a in
-      let _ = checkFree := false in
-      let _ = checkAll clist in
+      ignore (checkFree := false);
+      ignore (checkAll clist);
       let _ =
         begin if !Global.chatter > 3 then print' "\n" else ()
         end
@@ -884,8 +884,8 @@ module MakeModeCheck
         end
       in
       let clist = Index.lookup a in
-      let _ = checkFree := true in
-      let _ = checkAll clist in
+      ignore (checkFree := true);
+      ignore (checkAll clist);
       let _ =
         begin if !Global.chatter > 3 then print' "\n" else ()
         end

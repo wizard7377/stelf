@@ -287,7 +287,7 @@ end) : INTERACTIVE = struct
             | operators :: l ->
                 map (function o_ -> Split o_) operators @ splitMenu l
           in
-          let _ = Global.doubleCheck := true in
+          ignore (Global.doubleCheck := true);
           let rec introMenu = function
             | [] -> []
             | Some oper :: l -> Introduce oper :: introMenu l
@@ -347,7 +347,7 @@ end) : INTERACTIVE = struct
       end
 
     let init names =
-      let _ = TomegaPrint.evarReset () in
+      ignore (TomegaPrint.evarReset ());
       let cL =
         map
           (function
@@ -361,7 +361,7 @@ end) : INTERACTIVE = struct
       in
       let tc_ = Tomega.transformTC (I.Null, f_, map select cL) in
       let (w_ :: _) = ws_ in
-      let _ = focus_ := [ S.init (f_, w_) ] in
+      ignore (focus_ := [ S.init (f_, w_) ]);
       let p_ =
         begin match !focus_ with
         | [] -> abort "Initialization of proof goal failed\n"
@@ -380,10 +380,10 @@ end) : INTERACTIVE = struct
           xs_
       in
       let (ofix_ :: []) = map (function f -> FixedPoint.expand (f, tc_)) f_ in
-      let _ = FixedPoint.apply ofix_ in
-      let _ = normalize () in
-      let _ = menu () in
-      let _ = printmenu () in
+      ignore (FixedPoint.apply ofix_);
+      ignore (normalize ());
+      ignore (menu ());
+      ignore (printmenu ());
       ()
 
     let focus n =

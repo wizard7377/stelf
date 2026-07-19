@@ -284,11 +284,11 @@ end) : Cs.CS = struct
 
     let installFgnExpOps () =
       let csid = !myID in
-      let _ = FgnExpStd.ToInternal.install (csid, toInternal) in
-      let _ = FgnExpStd.Map.install (csid, map) in
-      let _ = FgnExpStd.App.install (csid, app) in
-      let _ = FgnExpStd.UnifyWith.install (csid, unifyWith) in
-      let _ = FgnExpStd.EqualTo.install (csid, equalTo) in
+      ignore (FgnExpStd.ToInternal.install (csid, toInternal));
+      ignore (FgnExpStd.Map.install (csid, map));
+      ignore (FgnExpStd.App.install (csid, app));
+      ignore (FgnExpStd.UnifyWith.install (csid, unifyWith));
+      ignore (FgnExpStd.EqualTo.install (csid, equalTo));
       ()
 
     let makeFgn (arity, opExp) s_ =

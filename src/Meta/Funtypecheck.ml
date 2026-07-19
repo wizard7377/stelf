@@ -276,7 +276,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
       | psi_, delta_, F.PApp ((kk, k), ds_) ->
           begin match infer (delta_, kk) with
           | F.MDec (name, F.All (F.Block (F.CtxBlock (l, g_)), f_)), s ->
-              let _ = validBlock (psi_, k, (l, g_)) in
+              ignore (validBlock (psi_, k, (l, g_)));
               let dd_ = F.MDec (name, F.forSub (f_, psub (k, g_, s))) in
               let psi'_, delta'_, s' =
                 assume (psi_, I.Decl (delta_, dd_), ds_)
@@ -339,7 +339,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           end
       | psi'_, I.Dot (I.Exp u_, s'), I.Decl (psi_, F.Prim (I.Dec (_, v2_))) ->
           let g'_ = F.makectx psi'_ in
-          let _ = TypeCheck.typeCheck (g'_, (u_, I.EClo (v2_, s'))) in
+          ignore (TypeCheck.typeCheck (g'_, (u_, I.EClo (v2_, s'))));
           checkSub (psi'_, s', psi_)
       | ( psi'_,
           (I.Dot (I.Idx k, _) as s),

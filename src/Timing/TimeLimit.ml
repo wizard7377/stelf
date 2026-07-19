@@ -26,7 +26,7 @@ end = struct
     begin match (arg__0, arg__1, arg__2) with
     | None, f, x -> f x
     | Some t, f, x ->
-        let _ = print (("TIME LIMIT : " ^ Time.toString t) ^ "sec \n") in
+        ignore (print (("TIME LIMIT : " ^ Time.toString t) ^ "sec \n"));
         let setitimer = SMLofNJ.IntervalTimer.setIntTimer in
         let rec timerOn () = ignore (setitimer (Some t)) in
         let rec timerOff () = ignore (setitimer None) in
@@ -45,7 +45,7 @@ end = struct
           Signals.setHandler (Signals.sigALRM, Signals.HANDLER handler);
           begin
             timerOn ();
-            let _ = timerOff () in
+            ignore (timerOff ());
             try f x
             with ex ->
               begin

@@ -76,7 +76,7 @@ end) : ABSMACHINE = struct
           let (I.Dec (Some x, _) as d'_) =
             N.decUName (g_, I.Dec (None, I.EClo (a_, s)))
           in
-          let _ = T.signal (g_, T.IntroHyp (ha_, d'_)) in
+          ignore (T.signal (g_, T.IntroHyp (ha_, d'_)));
           solve'
             ( (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha_))),
@@ -88,7 +88,7 @@ end) : ABSMACHINE = struct
       | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
           let (I.Dec (Some x, v_) as d'_) = N.decUName (g_, I.decSub (d_, s)) in
           let ha_ = I.targetHead v_ in
-          let _ = T.signal (g_, T.IntroParm (ha_, d'_)) in
+          ignore (T.signal (g_, T.IntroParm (ha_, d'_)));
           solve'
             ( (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),

@@ -173,14 +173,14 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           begin if exists (eqEVar x_) k_ then collectSub (tag_, d, g_, s, k_)
           else
             let gp_, gx_ = restore (I.ctxLength gdX_ - d, gdX_) in
-            let _ = checkEmpty !cnstrs in
+            ignore (checkEmpty !cnstrs);
             let w = weaken (gx_, I.targetFam v_) in
             let iw = Whnf.invert w in
             let gx'_ = Whnf.strengthen (iw, gx_) in
             let (I.EVar (r', _, _, _) as x'_) =
               I.newEVar (concat (gp_, gx'_), I.EClo (v_, iw))
             in
-            let _ = Unify.instantiateEVar (r, I.EClo (x'_, w), []) in
+            ignore (Unify.instantiateEVar (r, I.EClo (x'_, w), []));
             let v'_ = raiseType (gx'_, I.EClo (v_, iw)) in
             collectSub
               ( tag_,
@@ -312,13 +312,13 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       | I.Null -> (I.Null, I.Null)
       | I.Decl (k'_, Ev (_, v'_, (S.Lemma _b as t_), _)) ->
           let v''_ = abstractExp (k'_, 0, (v'_, I.id)) in
-          let _ = checkType v''_ in
+          ignore (checkType v''_);
           let g'_, b'_ = abstractCtx k'_ in
           let d'_ = I.Dec (None, v''_) in
           (I.Decl (g'_, d'_), I.Decl (b'_, t_))
       | I.Decl (k'_, Ev (_, v'_, (S.None as t_), _)) ->
           let v''_ = abstractExp (k'_, 0, (v'_, I.id)) in
-          let _ = checkType v''_ in
+          ignore (checkType v''_);
           let g'_, b'_ = abstractCtx k'_ in
           let d'_ = I.Dec (None, v''_) in
           (I.Decl (g'_, d'_), I.Decl (b'_, S.None))

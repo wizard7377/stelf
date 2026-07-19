@@ -107,7 +107,7 @@ module Counting : TIMING = struct
   let reset (_, counters) = counters := 0
 
   let time (_, counters) (f : 'a -> 'b) (x : 'a) =
-    let _ = counters := !counters + 1 in
+    ignore (counters := !counters + 1);
     f x
 
   let sumCenter (name, l) = (name, l)

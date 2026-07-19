@@ -336,11 +336,11 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
             let _ =
               begin if !Global.doubleCheck then
                 let psi''_ = aux (g''_, b''_) in
-                let _ = TypeCheck.typeCheckCtx (F.makectx psi''_) in
+                ignore (TypeCheck.typeCheckCtx (F.makectx psi''_));
                 let psi_ =
                   aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0_, t_)))
                 in
-                let _ = TypeCheck.typeCheckCtx (F.makectx psi_) in
+                ignore (TypeCheck.typeCheckCtx (F.makectx psi_));
                 FunTypeCheck.checkSub (psi''_, s'', psi_)
               else ()
               end
@@ -374,11 +374,11 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
               let _ =
                 begin if !Global.doubleCheck then
                   let psi''_ = aux (g''_, b''_) in
-                  let _ = TypeCheck.typeCheckCtx (F.makectx psi''_) in
+                  ignore (TypeCheck.typeCheckCtx (F.makectx psi''_));
                   let psi_ =
                     aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0_, t_)))
                   in
-                  let _ = TypeCheck.typeCheckCtx (F.makectx psi_) in
+                  ignore (TypeCheck.typeCheckCtx (F.makectx psi_));
                   FunTypeCheck.checkSub (psi''_, s'', psi_)
                 else ()
                 end

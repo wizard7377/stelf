@@ -311,7 +311,7 @@ end) : WORLDSYN = struct
       | gl_, One, b, k -> k gl_
       | ((g_, l_) as gl_), Block (someDecs, piDecs), b, k ->
           let t = createEVarSub (g_, someDecs) in
-          let _ = Trace.matchBlock (gl_, Seq (piDecs, t)) in
+          ignore (Trace.matchBlock (gl_, Seq (piDecs, t)));
           let k' = function
             | gl'_ ->
                 begin if noConstraints (g_, t) then k gl'_
@@ -432,7 +432,7 @@ end) : WORLDSYN = struct
         else ()
         end
       in
-      let _ = subsumedReset () in
+      ignore (subsumedReset ());
       let rec checkAll = function
         | [] -> ()
         | I.Const c :: clist ->
@@ -452,7 +452,7 @@ end) : WORLDSYN = struct
              with Error' (occ, msg) -> raise (Error (wrapMsg (d, occ, msg))));
             checkAll clist
       in
-      let _ = checkAll (Index.lookup a) in
+      ignore (checkAll (Index.lookup a));
       let _ =
         begin if !Global.chatter = 4 then print "\n" else ()
         end

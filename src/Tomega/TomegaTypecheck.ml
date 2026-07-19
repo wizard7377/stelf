@@ -53,10 +53,10 @@ end) : TOMEGATYPECHECK = struct
     and inferSpineW = function
       | psi_, T.Nil, (f_, t) -> (f_, t)
       | psi_, T.AppExp (m_, s_), (T.All ((T.UDec (I.Dec (_, a_)), _), f_), t) ->
-          let _ = chatter 4 (function () -> "[appExp") in
+          ignore (chatter 4 (function () -> "[appExp"));
           let g_ = T.coerceCtx psi_ in
-          let _ = TypeCheck.typeCheck (g_, (m_, I.EClo (a_, T.coerceSub t))) in
-          let _ = chatter 4 (function () -> "]") in
+          ignore (TypeCheck.typeCheck (g_, (m_, I.EClo (a_, T.coerceSub t))));
+          ignore (chatter 4 (function () -> "]"));
           inferSpine (psi_, s_, (f_, T.Dot (T.Exp m_, t)))
       | ( psi_,
           T.AppBlock (I.Bidx k, s_),
@@ -69,10 +69,10 @@ end) : TOMEGATYPECHECK = struct
             end
           in
           let s'' = T.coerceSub (T.comp (T.embedSub s, t2)) in
-          let _ = Conv.convSub (s', s'') in
+          ignore (Conv.convSub (s', s''));
           inferSpine (psi_, s_, (f2_, T.Dot (T.Block (I.Bidx k), t2)))
       | psi_, T.AppPrg (p_, s_), (T.All ((T.PDec (_, f1_, _, _), _), f2_), t) ->
-          let _ = checkPrg (psi_, (p_, (f1_, t))) in
+          ignore (checkPrg (psi_, (p_, (f1_, t))));
           inferSpine (psi_, s_, (f2_, T.dot1 t))
       | psi_, _, _ -> raise (Error "applied, but not of function type.")
 
@@ -107,10 +107,10 @@ end) : TOMEGATYPECHECK = struct
           let f2_ = inferSpine (psi_, s_, (f1_, T.id)) in
           T.forSub f2_
       | psi_, T.Rec ((T.PDec (_, f_, _, _) as d_), p_) ->
-          let _ = checkPrg (I.Decl (psi_, d_), (p_, (f_, T.id))) in
+          ignore (checkPrg (I.Decl (psi_, d_), (p_, (f_, T.id))));
           f_
       | psi_, T.Let ((T.PDec (_, f1_, _, _) as d_), p1_, p2_) ->
-          let _ = checkPrg (psi_, (p1_, (f1_, T.id))) in
+          ignore (checkPrg (psi_, (p1_, (f1_, T.id))));
           let f2_ = inferPrg (I.Decl (psi_, d_), p2_) in
           f2_
 
@@ -118,7 +118,7 @@ end) : TOMEGATYPECHECK = struct
 
     and checkPrgW = function
       | _, (Unit, (True, _)) ->
-          let _ = chatter 4 (function () -> "[true]") in
+          ignore (chatter 4 (function () -> "[true]"));
           ()
       | psi_, (T.Const lemma, (f_, t)) ->
           convFor (psi_, (inferLemma lemma, T.id), (f_, t))
@@ -129,20 +129,20 @@ end) : TOMEGATYPECHECK = struct
       | ( psi_,
           ( T.Lam ((T.PDec (x, f1_, _, _) as d_), p_),
             (T.All ((T.PDec (x', f1'_, _, _), _), f2_), t) ) ) ->
-          let _ = chatter 4 (function () -> "[lam[p]") in
-          let _ = convFor (psi_, (f1_, T.id), (f1'_, t)) in
-          let _ = chatter 4 (function () -> "]") in
+          ignore (chatter 4 (function () -> "[lam[p]"));
+          ignore (convFor (psi_, (f1_, T.id), (f1'_, t)));
+          ignore (chatter 4 (function () -> "]"));
           checkPrg (I.Decl (psi_, d_), (p_, (f2_, T.dot1 t)))
       | psi_, (T.Lam (T.UDec d_, p_), (T.All ((T.UDec d'_, _), f_), t2)) ->
-          let _ = chatter 4 (function () -> "[lam[u]") in
-          let _ = Conv.convDec ((d_, I.id), (d'_, T.coerceSub t2)) in
-          let _ = chatter 4 (function () -> "]") in
+          ignore (chatter 4 (function () -> "[lam[u]"));
+          ignore (Conv.convDec ((d_, I.id), (d'_, T.coerceSub t2)));
+          ignore (chatter 4 (function () -> "]"));
           checkPrg (I.Decl (psi_, T.UDec d_), (p_, (f_, T.dot1 t2)))
       | psi_, (T.PairExp (m_, p_), (T.Ex ((I.Dec (x, a_), _), f2_), t)) ->
-          let _ = chatter 4 (function () -> "[pair [e]") in
+          ignore (chatter 4 (function () -> "[pair [e]"));
           let g_ = T.coerceCtx psi_ in
-          let _ = TypeCheck.typeCheck (g_, (m_, I.EClo (a_, T.coerceSub t))) in
-          let _ = chatter 4 (function () -> "]") in
+          ignore (TypeCheck.typeCheck (g_, (m_, I.EClo (a_, T.coerceSub t))));
+          ignore (chatter 4 (function () -> "]"));
           checkPrg (psi_, (p_, (f2_, T.Dot (T.Exp m_, t))))
       | ( psi_,
           ( T.PairBlock (I.Bidx k, p_),
@@ -160,33 +160,33 @@ end) : TOMEGATYPECHECK = struct
           in
           checkPrg (psi_, (p_, (f2_, T.Dot (T.Block (I.Bidx k), t))))
       | psi_, (T.PairPrg (p1_, p2_), (T.And (f1_, f2_), t)) ->
-          let _ = chatter 4 (function () -> "[and") in
-          let _ = checkPrg (psi_, (p1_, (f1_, t))) in
-          let _ = chatter 4 (function () -> "...") in
-          let _ = checkPrg (psi_, (p2_, (f2_, t))) in
-          let _ = chatter 4 (function () -> "]") in
+          ignore (chatter 4 (function () -> "[and"));
+          ignore (checkPrg (psi_, (p1_, (f1_, t))));
+          ignore (chatter 4 (function () -> "..."));
+          ignore (checkPrg (psi_, (p2_, (f2_, t))));
+          ignore (chatter 4 (function () -> "]"));
           ()
       | psi_, (T.Case omega_, ft_) -> checkCases (psi_, (omega_, ft_))
       | psi_, (T.Rec ((T.PDec (x, f_, _, _) as d_), p_), (f'_, t)) ->
-          let _ = chatter 4 (function () -> "[rec") in
-          let _ = convFor (psi_, (f_, T.id), (f'_, t)) in
-          let _ = chatter 4 (function () -> "]\n") in
+          ignore (chatter 4 (function () -> "[rec"));
+          ignore (convFor (psi_, (f_, T.id), (f'_, t)));
+          ignore (chatter 4 (function () -> "]\n"));
           checkPrg (I.Decl (psi_, d_), (p_, (f'_, t)))
       | psi_, (T.Let ((T.PDec (_, f1_, _, _) as d_), p1_, p2_), (f2_, t)) ->
-          let _ = chatter 4 (function () -> "[let") in
-          let _ = checkPrg (psi_, (p1_, (f1_, T.id))) in
-          let _ = chatter 4 (function () -> ".") in
+          ignore (chatter 4 (function () -> "[let"));
+          ignore (checkPrg (psi_, (p1_, (f1_, T.id))));
+          ignore (chatter 4 (function () -> "."));
           let _ =
             checkPrg (I.Decl (psi_, d_), (p2_, (f2_, T.comp (t, T.shift))))
           in
-          let _ = chatter 4 (function () -> "]\n") in
+          ignore (chatter 4 (function () -> "]\n"));
           ()
       | ( psi_,
           ( T.New (T.Lam (T.UDec (I.BDec (_, (cid, s)) as d_), p_) as p'_),
             (f_, t) ) ) ->
-          let _ = chatter 5 (function () -> "[new1...") in
+          ignore (chatter 5 (function () -> "[new1..."));
           let (T.All ((T.UDec d''_, _), f'_)) = inferPrg (psi_, p'_) in
-          let _ = chatter 5 (function () -> "][new2...") in
+          ignore (chatter 5 (function () -> "][new2..."));
           let f''_ = TA.raiseF (I.Decl (I.Null, d_), (f'_, I.id)) in
           begin
             convFor (psi_, (f''_, T.id), (f_, t));
@@ -221,17 +221,17 @@ end) : TOMEGATYPECHECK = struct
     and checkCases = function
       | psi_, (T.Cases [], (f2_, t2)) -> ()
       | psi_, (T.Cases ((psi'_, t', p_) :: omega_), (f2_, t2)) ->
-          let _ = chatter 4 (function () -> "[case... ") in
-          let _ = chatter 4 (function () -> "sub... ") in
-          let _ = checkSub (psi'_, t', psi_) in
-          let _ = chatter 4 (function () -> "prg... ") in
+          ignore (chatter 4 (function () -> "[case... "));
+          ignore (chatter 4 (function () -> "sub... "));
+          ignore (checkSub (psi'_, t', psi_));
+          ignore (chatter 4 (function () -> "prg... "));
           let t2' = T.comp (t2, t') in
-          let _ = checkCtx psi_ in
-          let _ = checkCtx psi'_ in
-          let _ = chatter 4 (function () -> "]") in
-          let _ = checkPrg (psi'_, (p_, (f2_, t2'))) in
-          let _ = chatter 4 (function () -> "]\n") in
-          let _ = checkCases (psi_, (T.Cases omega_, (f2_, t2))) in
+          ignore (checkCtx psi_);
+          ignore (checkCtx psi'_);
+          ignore (chatter 4 (function () -> "]"));
+          ignore (checkPrg (psi'_, (p_, (f2_, t2'))));
+          ignore (chatter 4 (function () -> "]\n"));
+          ignore (checkCases (psi_, (T.Cases omega_, (f2_, t2))));
           ()
 
     and inferLemma lemma =
@@ -251,9 +251,9 @@ end) : TOMEGATYPECHECK = struct
           let g_ = T.coerceCtx psi_ in
           let s1 = T.coerceSub t1 in
           let s2 = T.coerceSub t2 in
-          let _ = Conv.conv ((a1_, s1), (a2_, s2)) in
-          let _ = TypeCheck.typeCheck (g_, (I.EClo (a1_, s1), I.Uni I.Type)) in
-          let _ = TypeCheck.typeCheck (g_, (I.EClo (a2_, s2), I.Uni I.Type)) in
+          ignore (Conv.conv ((a1_, s1), (a2_, s2)));
+          ignore (TypeCheck.typeCheck (g_, (I.EClo (a1_, s1), I.Uni I.Type)));
+          ignore (TypeCheck.typeCheck (g_, (I.EClo (a2_, s2), I.Uni I.Type)));
           let d'_ = T.decSub (d_, t1) in
           let _ =
             convFor (I.Decl (psi_, d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2))
@@ -285,9 +285,9 @@ end) : TOMEGATYPECHECK = struct
           let g_ = T.coerceCtx psi_ in
           let s1 = T.coerceSub t1 in
           let s2 = T.coerceSub t2 in
-          let _ = Conv.conv ((a1_, s1), (a2_, s2)) in
-          let _ = TypeCheck.typeCheck (g_, (I.EClo (a1_, s1), I.Uni I.Type)) in
-          let _ = TypeCheck.typeCheck (g_, (I.EClo (a2_, s2), I.Uni I.Type)) in
+          ignore (Conv.conv ((a1_, s1), (a2_, s2)));
+          ignore (TypeCheck.typeCheck (g_, (I.EClo (a1_, s1), I.Uni I.Type)));
+          ignore (TypeCheck.typeCheck (g_, (I.EClo (a2_, s2), I.Uni I.Type)));
           let d'_ = I.decSub (d_, s1) in
           let _ =
             convFor
@@ -317,20 +317,20 @@ end) : TOMEGATYPECHECK = struct
           in
           ()
       | psi_, (T.And (f1_, f1'_), t1), (T.And (f2_, f2'_), t2) ->
-          let _ = convFor (psi_, (f1_, t1), (f2_, t2)) in
-          let _ = convFor (psi_, (f1'_, t1), (f2'_, t2)) in
+          ignore (convFor (psi_, (f1_, t1), (f2_, t2)));
+          ignore (convFor (psi_, (f1'_, t1), (f2'_, t2)));
           ()
       | ( psi_,
           (T.All (((T.PDec (_, f1_, _, _) as d_), _), f1'_), t1),
           (T.All ((T.PDec (_, f2_, _, _), _), f2'_), t2) ) ->
-          let _ = convFor (psi_, (f1_, t1), (f2_, t2)) in
+          ignore (convFor (psi_, (f1_, t1), (f2_, t2)));
           let d'_ = T.decSub (d_, t1) in
           let _ =
             convFor (I.Decl (psi_, d'_), (f1'_, T.dot1 t1), (f2'_, T.dot1 t2))
           in
           ()
       | psi_, (T.World (w1_, f1_), t1), (T.World (w2_, f2_), t2) ->
-          let _ = convFor (psi_, (f1_, t1), (f2_, t2)) in
+          ignore (convFor (psi_, (f1_, t1), (f2_, t2)));
           ()
       | _ -> raise (Error "Typecheck error")
 
@@ -350,8 +350,8 @@ end) : TOMEGATYPECHECK = struct
           T.Dot (T.Exp m1_, s1),
           T.Dot (T.Exp m2_, s2),
           I.Decl (g'_, T.UDec (I.Dec (_, a_))) ) ->
-          let _ = TypeCheck.checkConv (m1_, m2_) in
-          let _ = TypeCheck.typeCheck (T.coerceCtx g_, (m1_, a_)) in
+          ignore (TypeCheck.checkConv (m1_, m2_));
+          ignore (TypeCheck.typeCheck (T.coerceCtx g_, (m1_, a_)));
           convSub (g_, s1, s2, g'_)
       | ( g_,
           T.Dot (T.Block (I.Bidx v1), s1),
@@ -379,37 +379,37 @@ end) : TOMEGATYPECHECK = struct
           T.Dot (T.Prg p1_, s1),
           T.Dot (T.Prg p2_, s2),
           I.Decl (g'_, T.PDec (_, f_, _, _)) ) ->
-          let _ = isValue p1_ in
-          let _ = isValue p2_ in
-          let _ = convValue (g_, p1_, p2_, f_) in
+          ignore (isValue p1_);
+          ignore (isValue p2_);
+          ignore (convValue (g_, p1_, p2_, f_));
           convSub (g_, s1, s2, g'_)
       | ( g_,
           T.Dot (T.Idx k1, s1),
           T.Dot (T.Exp m2_, s2),
           I.Decl (g'_, T.UDec (I.Dec (_, a_))) ) ->
-          let _ = TypeCheck.checkConv (I.Root (I.BVar k1, I.Nil), m2_) in
-          let _ = TypeCheck.typeCheck (T.coerceCtx g_, (m2_, a_)) in
+          ignore (TypeCheck.checkConv (I.Root (I.BVar k1, I.Nil), m2_));
+          ignore (TypeCheck.typeCheck (T.coerceCtx g_, (m2_, a_)));
           convSub (g_, s1, s2, g'_)
       | ( g_,
           T.Dot (T.Exp m1_, s1),
           T.Dot (T.Idx k2, s2),
           I.Decl (g'_, T.UDec (I.Dec (_, a_))) ) ->
-          let _ = TypeCheck.checkConv (m1_, I.Root (I.BVar k2, I.Nil)) in
-          let _ = TypeCheck.typeCheck (T.coerceCtx g_, (m1_, a_)) in
+          ignore (TypeCheck.checkConv (m1_, I.Root (I.BVar k2, I.Nil)));
+          ignore (TypeCheck.typeCheck (T.coerceCtx g_, (m1_, a_)));
           convSub (g_, s1, s2, g'_)
       | ( g_,
           T.Dot (T.Idx k1, s1),
           T.Dot (T.Prg p2_, s2),
           I.Decl (g'_, T.PDec (_, f_, _, _)) ) ->
-          let _ = isValue p2_ in
-          let _ = convValue (g_, T.Var k1, p2_, f_) in
+          ignore (isValue p2_);
+          ignore (convValue (g_, T.Var k1, p2_, f_));
           convSub (g_, s1, s2, g'_)
       | ( g_,
           T.Dot (T.Prg p1_, s1),
           T.Dot (T.Idx k2, s2),
           I.Decl (g'_, T.PDec (_, f_, _, _)) ) ->
-          let _ = isValue p1_ in
-          let _ = convValue (g_, p1_, T.Var k2, f_) in
+          ignore (isValue p1_);
+          ignore (convValue (g_, p1_, T.Var k2, f_));
           convSub (g_, s1, s2, g'_)
 
     and convValue (g_, p1_, p2_, f_) = ()
@@ -455,13 +455,13 @@ end) : TOMEGATYPECHECK = struct
       | g_, T.Shift k, g'_ ->
           checkSub (g_, T.Dot (T.Idx (k + 1), T.Shift (k + 1)), g'_)
       | g_, T.Dot (T.Idx k, s'), I.Decl (g'_, T.UDec (I.Dec (_, a_))) ->
-          let _ = checkSub (g_, s', g'_) in
+          ignore (checkSub (g_, s', g'_));
           let (T.UDec (I.Dec (_, a'_))) = T.ctxDec (g_, k) in
           begin if Conv.conv ((a'_, I.id), (a_, T.coerceSub s')) then ()
           else raise (Error "Sub isn't well typed!")
           end
       | g_, T.Dot (T.Idx k, s'), I.Decl (g'_, T.UDec (I.BDec (l, (_, s)))) ->
-          let _ = checkSub (g_, s', g'_) in
+          ignore (checkSub (g_, s', g'_));
           let (T.UDec (I.BDec (l1, (_, s1)))) = T.ctxDec (g_, k) in
           begin if l <> l1 then raise (Error "Sub isn't well typed!")
           else
@@ -470,24 +470,24 @@ end) : TOMEGATYPECHECK = struct
             end
           end
       | g_, T.Dot (T.Idx k, s), I.Decl (g'_, T.PDec (_, f'_, _, _)) ->
-          let _ = checkSub (g_, s, g'_) in
+          ignore (checkSub (g_, s, g'_));
           let (T.PDec (_, f1_, _, _)) = T.ctxDec (g_, k) in
           convFor (g_, (f1_, T.id), (f'_, s))
       | g_, T.Dot (T.Exp m_, s), I.Decl (g'_, T.UDec (I.Dec (_, a_))) ->
-          let _ = checkSub (g_, s, g'_) in
+          ignore (checkSub (g_, s, g'_));
           TypeCheck.typeCheck (T.coerceCtx g_, (m_, I.EClo (a_, T.coerceSub s)))
       | psi_, T.Dot (T.Prg p_, t), I.Decl (psi'_, T.PDec (_, f'_, _, _)) ->
-          let _ = chatter 4 (function () -> "$") in
-          let _ = checkSub (psi_, t, psi'_) in
-          let _ = isValue p_ in
+          ignore (chatter 4 (function () -> "$"));
+          ignore (checkSub (psi_, t, psi'_));
+          ignore (isValue p_);
           checkPrg (psi_, (p_, (f'_, t)))
       | ( psi_,
           T.Dot (T.Block b_, t),
           I.Decl (psi'_, T.UDec (I.BDec (l2, (c, s2)))) ) ->
-          let _ = chatter 4 (function () -> "$") in
-          let _ = checkSub (psi_, t, psi'_) in
+          ignore (chatter 4 (function () -> "$"));
+          ignore (checkSub (psi_, t, psi'_));
           let g_, l_ = I.constBlock c in
-          let _ = TypeCheck.typeCheckSub (T.coerceCtx psi'_, s2, g_) in
+          ignore (TypeCheck.typeCheckSub (T.coerceCtx psi'_, s2, g_));
           checkBlock (psi_, (b_, (c, I.comp (s2, T.coerceSub t))))
       | psi_, T.Dot _, I.Null -> raise (Error "Sub is not well typed")
 
@@ -502,7 +502,7 @@ end) : TOMEGATYPECHECK = struct
           end
       | psi_, (I.Inst ul_, (c2, s2)) ->
           let g_, l_ = I.constBlock c2 in
-          let _ = TypeCheck.typeCheckSub (T.coerceCtx psi_, s2, g_) in
+          ignore (TypeCheck.typeCheckSub (T.coerceCtx psi_, s2, g_));
           checkInst (psi_, ul_, (1, l_, s2))
 
     and checkInst = function
@@ -510,7 +510,7 @@ end) : TOMEGATYPECHECK = struct
       | psi_, u_ :: ul_, (n, d_ :: l_, s2) ->
           let g_ = T.coerceCtx psi_ in
           let (I.Dec (_, v_)) = I.decSub (d_, s2) in
-          let _ = TypeCheck.typeCheck (g_, (u_, v_)) in
+          ignore (TypeCheck.typeCheck (g_, (u_, v_)));
           checkInst (psi_, ul_, (n + 1, l_, I.dot1 s2))
 
     and isValue = function

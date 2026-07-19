@@ -207,7 +207,7 @@ end) : MODSYN = struct
         end
       in
       let ns = Names.newNamespace () in
-      let _ = Names.installComponents (mid', ns) in
+      ignore (Names.installComponents (mid', ns));
       IntTree.insert structMap (mid, mid')
     in
     let doConst (cid, ConstInfo (condec_var, fixity, namePrefOpt, origin)) =
@@ -232,7 +232,7 @@ end) : MODSYN = struct
         begin match parent with None -> Names.installConstName cid' | _ -> ()
         end
       in
-      let _ = installAction (cid', origin) in
+      ignore (installAction (cid', origin));
       let _ =
         begin match fixity with
         | Names.Fixity.Nonfix -> ()
@@ -266,9 +266,9 @@ end) : MODSYN = struct
       | _ -> ()
       end
     in
-    let _ = Names.installStructName mid in
+    ignore (Names.installStructName mid);
     let ns = Names.newNamespace () in
-    let _ = Names.installComponents (mid, ns) in
+    ignore (Names.installComponents (mid, ns));
     installModule (module_, Some mid, None, installAction, transformConDec)
 
   let installSig (module_, nsOpt, installAction, isDef) =
@@ -321,7 +321,7 @@ end) : MODSYN = struct
     let transformConDec = transform namespace in
     let mid = IntSyn.sgnStructAdd (IntSyn.StrDec ("wheresubj", None)) in
     let ns = Names.newNamespace () in
-    let _ = Names.installComponents (mid, ns) in
+    ignore (Names.installComponents (mid, ns));
     let _ =
       installModule (module_, Some mid, None, (fun _ -> ()), transformConDec)
     in

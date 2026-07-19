@@ -189,7 +189,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
       | Some rl -> rl := (inst_, r) :: !rl
       end
     in
-    let _ = List.app add eqns in
+    ignore (List.app add eqns);
     let doInst = function
       | (Internal cid, r), conDec_ ->
           begin try
@@ -218,7 +218,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
     | module_, wherecl ->
         let mark, markStruct = IntSyn.sgnSize () in
         let module' = ModSyn.instantiateModule (module_, applyEqns wherecl) in
-        let _ = Names.resetFrom (mark, markStruct) in
+        ignore (Names.resetFrom (mark, markStruct));
         module'
   (* val _ = IntSyn.resetFrom (mark, markStruct) *)
 end

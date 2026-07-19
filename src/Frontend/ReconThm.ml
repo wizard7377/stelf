@@ -244,7 +244,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       end
 
     let ctxBlockToString (g0_, (g1_, g2_)) =
-      let _ = Names.varReset IntSyn.Null in
+      ignore (Names.varReset IntSyn.Null);
       let g0'_ = Names.ctxName g0_ in
       let g1'_ = Names.ctxLUName g1_ in
       let g2'_ = Names.ctxLUName g2_ in
@@ -259,7 +259,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     let checkFreevars = function
       | IntSyn.Null, (g1_, g2_), r -> ()
       | g0_, (g1_, g2_), r ->
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let g0'_ = Names.ctxName g0_ in
           let g1'_ = Names.ctxLUName g1_ in
           let g2'_ = Names.ctxLUName g2_ in
@@ -288,7 +288,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
               ^ "\n")
               ^ Print.cnstrsToString c_ )
       in
-      let _ = checkFreevars (g0_, (g1'_, g2'_), r) in
+      ignore (checkFreevars (g0_, (g1'_, g2'_), r));
       (g1'_, g2'_)
 
     let top (gBs_, g, m_, k) = (gBs_, g, m_, k)
@@ -319,7 +319,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let theoremToTheorem t =
       let gbs, g, m_, k = t ([], IntSyn.Null, IntSyn.Null, 0) in
-      let _ = Names.varReset IntSyn.Null in
+      ignore (Names.varReset IntSyn.Null);
       let gBs_ = List.map abstractCtxPair gbs in
       let (T.JWithCtx (g_, _)) = T.recon (T.jwithctx (g, T.jnothing)) in
       L.ThDecl (gBs_, g_, m_, k)

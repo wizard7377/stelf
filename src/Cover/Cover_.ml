@@ -112,7 +112,7 @@ module MakeCover
     | g_, I.Root (a, s_), ci -> I.Root (a, abbrevCSpine (s_, ci))
 
   let formatCGoal (v_, p, ci) =
-    let _ = N.varReset I.Null in
+    ignore (N.varReset I.Null);
     let g_, v'_ = abbrevCGoal (I.Null, v_, p, ci) in
     F.hVbox
       [
@@ -135,7 +135,7 @@ module MakeCover
       (F.hbox [ F.vbox0 0 1 (formatCGoals (vs_, ci)); F.string "." ])
 
   let showSplitVar (v_, p, k, ci) =
-    let _ = N.varReset I.Null in
+    ignore (N.varReset I.Null);
     let g_, v'_ = abbrevCGoal (I.Null, v_, p, ci) in
     let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
     (("Split " ^ x) ^ " in ") ^ Print.expToString (g_, v'_)
@@ -301,7 +301,7 @@ module MakeCover
               let cands2 =
                 matchSub (g_, d, t1, I.comp (t2, I.Shift k2), cands)
               in
-              let _ = Unify.instantiateLVar (r2, I.Bidx (k1 - k2)) in
+              ignore (Unify.instantiateLVar (r2, I.Bidx (k1 - k2)));
               matchSpine (g_, d, (s1_, s1), (s2_, s2), cands2)
             end
         | I.BVar k1, I.Proj _ ->
@@ -645,8 +645,8 @@ module MakeCover
               else ()
               end
         in
-        let _ = paramCases (g_, (v_, I.id), I.ctxLength g_, sc') in
-        let _ = worldCases (g_, (v_, I.id), w_, sc') in
+        ignore (paramCases (g_, (v_, I.id), I.ctxLength g_, sc'));
+        ignore (worldCases (g_, (v_, I.id), w_, sc'));
         let _ =
           constCases (g_, (v_, I.id), Index.lookup (I.targetFam v_), sc')
         in
@@ -677,10 +677,10 @@ module MakeCover
 
   let splitVar (v_, p, k, (w_, ci)) =
     try
-      let _ = chatter 6 (function () -> showSplitVar (v_, p, k, ci) ^ "\n") in
+      ignore (chatter 6 (function () -> showSplitVar (v_, p, k, ci) ^ "\n"));
       let (v1_, s), xsRev_ = instEVars ((v_, I.id), p, []) in
       let (Some x_) = List.nth (xsRev_, k - 1) in
-      let _ = resetCases () in
+      ignore (resetCases ());
       let _ =
         splitEVar (x_, w_, function () -> addCase (abstract (v1_, s)))
       in
@@ -1863,7 +1863,7 @@ val _ = pr ()
           ("Input coverage checking family " ^ N.qidToString (N.constQid a))
           ^ "\n")
     in
-    let _ = checkNoDef a in
+    ignore (checkNoDef a);
     let _ =
       try Subordinate.checkNoDef a
       with Subordinate.Error msg ->
@@ -1879,7 +1879,7 @@ val _ = pr ()
       else ()
       end
     in
-    let _ = CsManager.reset () in
+    ignore (CsManager.reset ());
     let cIn = inCoverInst ms in
     let cs = Index.lookup a in
     let ccs = constsToTypes cs in
@@ -1958,7 +1958,7 @@ val _ = pr ()
   type coverClause = CClause of I.dctx * I.spine
 
   let formatCGoal (CGoal (g_, s_)) =
-    let _ = N.varReset I.Null in
+    ignore (N.varReset I.Null);
     F.hVbox
       ([
          Print.formatCtx (I.Null, g_);
@@ -1981,11 +1981,11 @@ val _ = pr ()
          ])
 
   let showCClause (CClause (g_, s_)) =
-    let _ = N.varReset I.Null in
+    ignore (N.varReset I.Null);
     F.makestring_fmt (F.hVbox ([ F.string "!- " ] @ Print.formatSpine (g_, s_)))
 
   let showSplitVar (CGoal (g_, s_), k) =
-    let _ = N.varReset I.Null in
+    ignore (N.varReset I.Null);
     let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
     (("Split " ^ x) ^ " in ")
     ^ F.makestring_fmt (F.hVbox (Print.formatSpine (g_, s_)))
@@ -2138,10 +2138,10 @@ val _ = pr ()
     *)
   let splitVar ((CGoal (g_, s_) as cg), k, w) =
     try
-      let _ = chatter 6 (function () -> showSplitVar (cg, k) ^ "\n") in
+      ignore (chatter 6 (function () -> showSplitVar (cg, k) ^ "\n"));
       let s = newEVarSubst (I.Null, g_) in
       let x_ = kthSub (s, k) in
-      let _ = resetCases () in
+      ignore (resetCases ());
       let _ =
         splitEVar (x_, w, function () -> addCase (abstractSpine (s_, s)))
       in
@@ -2394,18 +2394,18 @@ val _ = pr ()
        s.t.  sk o t = s
     *)
   let coverageCheckCases (w, cs_, g_) =
-    let _ = chatter 4 (function () -> "[Tomega coverage checker...") in
-    let _ = chatter 4 (function () -> "\n") in
+    ignore (chatter 4 (function () -> "[Tomega coverage checker..."));
+    ignore (chatter 4 (function () -> "\n"));
     let ccs =
       List.map (function gi_, si -> CClause (gi_, substToSpine (si, g_))) cs_
     in
-    let _ = chatter 6 (function () -> "[Begin covering clauses]\n") in
+    ignore (chatter 6 (function () -> "[Begin covering clauses]\n"));
     let _ =
       List.app
         (function cc -> chatter 6 (function () -> showCClause cc ^ "\n"))
         ccs
     in
-    let _ = chatter 6 (function () -> "[End covering clauses]\n") in
+    ignore (chatter 6 (function () -> "[End covering clauses]\n"));
     let pureG = purify g_ in
     let namedG = N.ctxLUName pureG in
     let r0_ = substToSpine (I.id, namedG) in
@@ -2418,7 +2418,7 @@ val _ = pr ()
       end
       (* all cases covered *)
     in
-    let _ = chatter 4 (function () -> "]\n") in
+    ignore (chatter 4 (function () -> "]\n"));
     ()
   (* Question: are all the Gi's above named already? *)
 end

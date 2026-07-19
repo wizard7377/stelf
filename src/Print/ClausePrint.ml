@@ -137,7 +137,7 @@ module MakeClausePrint
 
     let fmtConDec = function
       | I.ConDec (id, parent, i, _, v_, I.Type) ->
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let vfmt_ = fmtClauseI (i, I.Null, v_) in
           F.hVbox
             [

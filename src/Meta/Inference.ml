@@ -134,7 +134,7 @@ end) : INFERENCE.INFERENCE = struct
         end
       in
       let (g'_, b'_), w' = sc ((gnew_, bnew_), I.id) in
-      let _ = TypeCheck.typeCheckCtx g'_ in
+      ignore (TypeCheck.typeCheckCtx g'_);
       let s'_ =
         S.State
           ( n,

@@ -345,8 +345,8 @@ struct
     begin match c with
     | None ->
         let c' = compress (cid, I.sgnLookup cid) in
-        let _ = Sgn.update (cid, c') in
-        let _ = print (Int.toString cid ^ "\n") in
+        ignore (Sgn.update (cid, c'));
+        ignore (print (Int.toString cid ^ "\n"));
         c'
     | Some x -> x
     end
@@ -400,7 +400,7 @@ struct
     in
     let total_args = count_args ak in
     let can_omit ms =
-      let _ = Sgn.set_modes (cid, ms) in
+      ignore (Sgn.set_modes (cid, ms));
       let s = compress (cid, I.sgnLookup cid) in
       let t = Sgn.typeOfSigent s in
       let isValid = Reductio.check_plusconst_strictness t in

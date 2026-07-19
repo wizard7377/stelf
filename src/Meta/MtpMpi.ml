@@ -318,8 +318,8 @@ end) : MTPI = struct
             | x -> valOf (Names.constLookup (valOf (Names.stringToQid x))))
           names
       in
-      let _ = MTPGlobal.maxFill := k in
-      let _ = reset () in
+      ignore (MTPGlobal.maxFill := k);
+      ignore (reset ());
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.Null, f_, map select cL) in
       let slist_ = MTPInit.init (f_, Obj.magic o_) in
@@ -351,8 +351,8 @@ end) : MTPI = struct
         | k, [] -> abort "No such menu item"
         | 1, Splitting o_ :: _ ->
             let s'_ = Timers.time Timers.splitting MTPSplitting.apply o_ in
-            let _ = pushHistory () in
-            let _ = delete () in
+            ignore (pushHistory ());
+            ignore (delete ());
             let _ =
               ignore
                 (map
@@ -367,18 +367,18 @@ end) : MTPI = struct
             end
         | 1, Recursion o_ :: _ ->
             let s'_ = Timers.time Timers.recursion MTPRecursion.apply o_ in
-            let _ = pushHistory () in
-            let _ = delete () in
-            let _ = insert (Obj.magic (MTPrint.nameState (Obj.magic s'_))) in
+            ignore (pushHistory ());
+            ignore (delete ());
+            ignore (insert (Obj.magic (MTPrint.nameState (Obj.magic s'_))));
             begin
               menu ();
               printMenu ()
             end
         | 1, Inference o_ :: _ ->
             let s'_ = Timers.time Timers.recursion Inference.apply o_ in
-            let _ = pushHistory () in
-            let _ = delete () in
-            let _ = insert (Obj.magic (MTPrint.nameState (Obj.magic s'_))) in
+            ignore (pushHistory ());
+            ignore (delete ());
+            ignore (insert (Obj.magic (MTPrint.nameState (Obj.magic s'_))));
             begin
               menu ();
               printMenu ()
@@ -389,10 +389,10 @@ end) : MTPI = struct
               with MTPFilling.Error _ ->
                 abort "Filling unsuccessful: no object found"
             in
-            let _ = printFillResult p_ in
-            let _ = delete () in
-            let _ = print "\n[Subgoal finished]\n" in
-            let _ = print "\n" in
+            ignore (printFillResult p_);
+            ignore (delete ());
+            ignore (print "\n[Subgoal finished]\n");
+            ignore (print "\n");
             begin
               menu ();
               printMenu ()
@@ -423,10 +423,10 @@ end) : MTPI = struct
           | Inference.Error s -> abort ("Inference Errror: " ^ s)
           | Error s -> abort ("Mpi Error: " ^ s)
         in
-        let _ = pushHistory () in
-        let _ = delete () in
-        let _ = ignore (map insertOpen (Obj.magic open'_)) in
-        let _ = ignore (map insertSolved (Obj.magic solved'_)) in
+        ignore (pushHistory ());
+        ignore (delete ());
+        ignore (ignore (map insertOpen (Obj.magic open'_)));
+        ignore (ignore (map insertSolved (Obj.magic solved'_)));
         begin
           menu ();
           printMenu ()
@@ -449,10 +449,10 @@ end) : MTPI = struct
         | Inference.Error s -> abort ("Inference Errror: " ^ s)
         | Error s -> abort ("Mpi Error: " ^ s)
       in
-      let _ = pushHistory () in
-      let _ = initOpen () in
-      let _ = ignore (map insertOpen (Obj.magic open'_)) in
-      let _ = ignore (map insertSolved (Obj.magic solved'_)) in
+      ignore (pushHistory ());
+      ignore (initOpen ());
+      ignore (ignore (map insertOpen (Obj.magic open'_)));
+      ignore (ignore (map insertSolved (Obj.magic solved'_)));
       begin
         menu ();
         printMenu ()

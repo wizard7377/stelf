@@ -284,7 +284,7 @@ end) : TOMEGAPRINT = struct
       | max, psi_, [], callname -> []
       | max, psi_, (psi'_, s, p_) :: [], callname ->
           let psi''_ = psiName (psi'_, s, psi_, 0) in
-          let _ = Names.varReset I.Null in
+          ignore (Names.varReset I.Null);
           [
             Fmt.hVbox0 1 5 1
               [
@@ -298,7 +298,7 @@ end) : TOMEGAPRINT = struct
           ]
       | max, psi_, (psi'_, s, p_) :: o_, callname ->
           let psi''_ = psiName (psi'_, s, psi_, 0) in
-          let _ = Names.varReset I.Null in
+          ignore (Names.varReset I.Null);
           formatCases (max, psi_, o_, callname)
           @ [
               Fmt.hVbox0 1 5 1

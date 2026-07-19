@@ -96,8 +96,8 @@ end) : MTPPROVER.MTPROVER = struct
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
     let init (k, (c :: _ as cL)) =
-      let _ = MTPGlobal.maxFill := k in
-      let _ = reset () in
+      ignore (MTPGlobal.maxFill := k);
+      ignore (reset ());
       let cL' = try Order.closure c with Order.Error _ -> cL in
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.Null, f_, map select cL) in
@@ -115,8 +115,8 @@ end) : MTPPROVER.MTPROVER = struct
 
     let auto () =
       let open_, solvedStates' = MTPStrategy.run (Obj.magic !openStates) in
-      let _ = openStates := Obj.magic open_ in
-      let _ = solvedStates := !solvedStates @ Obj.magic solvedStates' in
+      ignore (openStates := Obj.magic open_);
+      ignore (solvedStates := !solvedStates @ Obj.magic solvedStates');
       begin if List.length !openStates > 0 then
         raise (Error "A proof could not be found")
       else ()

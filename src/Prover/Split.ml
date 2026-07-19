@@ -199,9 +199,9 @@ end) : SPLIT with module State = Split__0.State' = struct
       lowerSplitW (g_, Whnf.whnf vs_, w_, sc)
 
     and lowerSplitW (g_, ((I.Root (I.Const a, _), s) as vs_), w_, sc) =
-      let _ = constCases (g_, vs_, Index.lookup a, sc) in
-      let _ = paramCases (g_, vs_, I.ctxLength g_, sc) in
-      let _ = worldCases (g_, vs_, w_, sc) in
+      ignore (constCases (g_, vs_, Index.lookup a, sc));
+      ignore (paramCases (g_, vs_, I.ctxLength g_, sc));
+      ignore (worldCases (g_, vs_, w_, sc));
       ()
 
     let splitEVar ((I.EVar (_, gx_, v_, _) as x_), w_, sc) =
@@ -248,7 +248,7 @@ end) : SPLIT with module State = Split__0.State' = struct
                 (("Split " ^ Print.expToString (I.Null, x_)) ^ ".\n")
             in
             let os_ = splitXs (g_, i + 1) (xs_, f_, w_, sc) in
-            let _ = resetCases () in
+            ignore (resetCases ());
             let s = Print.expToString (g_, x_) in
             let os'_ =
               try

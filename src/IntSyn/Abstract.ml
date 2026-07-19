@@ -357,28 +357,28 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
 
     let abstractDecImp v_ =
       let k_ = collectExp (I.Null, (v_, I.id), I.Null) in
-      let _ = checkConstraints k_ in
+      ignore (checkConstraints k_);
       (I.ctxLength k_, abstractKPi (k_, abstractExp (k_, 0, (v_, I.id))))
 
     let abstractDef (u_, v_) =
       let k_ =
         collectExp (I.Null, (u_, I.id), collectExp (I.Null, (v_, I.id), I.Null))
       in
-      let _ = checkConstraints k_ in
+      ignore (checkConstraints k_);
       ( I.ctxLength k_,
         ( abstractKLam (k_, abstractExp (k_, 0, (u_, I.id))),
           abstractKPi (k_, abstractExp (k_, 0, (v_, I.id))) ) )
 
     let abstractSpineExt (s_, s) =
       let k_ = collectSpine (I.Null, (s_, s), I.Null) in
-      let _ = checkConstraints k_ in
+      ignore (checkConstraints k_);
       let g_ = abstractKCtx k_ in
       let s_ = abstractSpine (k_, 0, (s_, s)) in
       (g_, s_)
 
     let abstractCtxs gs_ =
       let k_ = collectCtxs (I.Null, gs_, I.Null) in
-      let _ = checkConstraints k_ in
+      ignore (checkConstraints k_);
       (abstractKCtx k_, abstractCtxlist (k_, 0, gs_))
 
     let closedDec (g_, (I.Dec (_, v_), s)) =

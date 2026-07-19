@@ -201,7 +201,7 @@ end) : TRACE = struct
     | Some n -> watchForTag := Some n
 
   let rec breakAction g_ =
-    let _ = print " " in
+    ignore (print " ");
     let line = input_line stdin in
     begin match String.sub (line, 0) with
     | '\n' -> ()

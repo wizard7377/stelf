@@ -218,7 +218,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let a_, finish =
       ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
     in
-    let _ = Display.chatter_s 3 "%solve " in
+    ignore (Display.chatter_s 3 "%solve ");
     let _ =
       Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
@@ -268,7 +268,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let a_, finish =
       ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
     in
-    let _ = Display.chatter_s 3 "%solve " in
+    ignore (Display.chatter_s 3 "%solve ");
     let _ =
       Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
@@ -332,7 +332,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
         (((("%query " ^ boundToString expected) ^ " ") ^ boundToString try_)
         ^ "\n")
     in
-    let _ = Display.chatter_s 4 " " in
+    ignore (Display.chatter_s 4 " ");
     let _ =
       Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
@@ -436,7 +436,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
         (((("%query " ^ boundToString expected) ^ " ") ^ boundToString try_)
         ^ "\n")
     in
-    let _ = Display.chatter_s 4 " " in
+    ignore (Display.chatter_s 4 " ");
     let _ =
       Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
@@ -569,7 +569,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     let a_, optName, xs_ =
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
-    let _ = Display.chatter_s 4 " " in
+    ignore (Display.chatter_s 4 " ");
     let _ =
       Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
@@ -689,8 +689,8 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
         end
       end
     in
-    let _ = Tabled.reset () in
-    let _ = Tabled.fillTable () in
+    ignore (Tabled.reset ());
+    ignore (Tabled.fillTable ());
     let tabledSearch () =
       begin
         Tabled.solve
@@ -830,7 +830,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
             end
           end
         in
-        let _ = Display.chatter_s 3 "Solving...\n" in
+        ignore (Display.chatter_s 3 "Solving...\n");
         begin try
           begin
             Timers.time Timers.solving AbsMachine.solve
@@ -869,7 +869,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
         let g =
           Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
         in
-        let _ = Tabled.reset () in
+        ignore (Tabled.reset ());
         let scInit o_ =
           begin
             Display.chatter_s 1
@@ -909,7 +909,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
            * we check for *all* solutions
            *)
         in
-        let _ = Display.chatter_s 3 "Solving...\n" in
+        ignore (Display.chatter_s 3 "Solving...\n");
         begin try
           begin
             Timers.time Timers.solving Tabled.solve

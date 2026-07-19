@@ -151,7 +151,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           ((a_, depth) as adepth_) ) ->
           begin match atxLookup (a_, r) with
           | None ->
-              let _ = checkEmpty !cnstrs in
+              ignore (checkEmpty !cnstrs);
               let lGp' = I.ctxLength gx_ - lG0 + depth in
               let w = weaken (lGp', gx_, I.targetFam v_) in
               let iw = Whnf.invert w in
@@ -161,7 +161,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               let (I.EVar (r', _, _, _) as x'_) =
                 I.newEVar (gx'_, I.EClo (v_, iw))
               in
-              let _ = Unify.instantiateEVar (r, I.EClo (x'_, w), []) in
+              ignore (Unify.instantiateEVar (r, I.EClo (x'_, w), []));
               collectSub
                 ( lG0,
                   g_,
@@ -426,7 +426,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
 
     let abstract
         (MetaSyn.State (name, (MetaSyn.Prefix (g_, m_, b_) as gm_), v_) as s_) =
-      let _ = Names.varReset I.Null in
+      ignore (Names.varReset I.Null);
       let a_ = collect (gm_, v_) in
       let gm'_, _ = abstractCtx (a_, gm_) in
       let v'_ = abstractExp (a_, g_, 0, (v_, I.id)) in

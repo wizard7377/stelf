@@ -143,7 +143,7 @@ module MakeSubordinate
     let freezeList : IntSet.intset ref = ref IntSet.empty
 
     let freeze l_ =
-      let _ = freezeList := IntSet.empty in
+      ignore (freezeList := IntSet.empty);
       let l'_ = map expandFamilyAbbrevs l_ in
       let _ =
         List.app
@@ -216,9 +216,9 @@ module MakeSubordinate
 
     let thaw a's =
       let a's' = map expandFamilyAbbrevs a's in
-      let _ = aboveList := [] in
-      let _ = Table.app (function b, _ -> addIfBelowEq a's' b) soGraph in
-      let _ = List.app (function b -> fSet (b, false)) !aboveList in
+      ignore (aboveList := []);
+      ignore (Table.app (function b, _ -> addIfBelowEq a's' b) soGraph);
+      ignore (List.app (function b -> fSet (b, false)) !aboveList);
       !aboveList
 
     let defGraph : IntSet.intset Table.table = Table.new_ 32
@@ -438,12 +438,12 @@ module MakeSubordinate
       | _ -> inc other
 
     let showDef () =
-      let _ = reset () in
-      let _ = I.sgnApp (function c -> analyze (I.sgnLookup c)) in
-      let _ = print (("Declared: " ^ Int.toString !declared) ^ "\n") in
-      let _ = print (("Defined : " ^ Int.toString !defined) ^ "\n") in
-      let _ = print (("Abbrevs : " ^ Int.toString !abbrev) ^ "\n") in
-      let _ = print (("Other   : " ^ Int.toString !other) ^ "\n") in
+      ignore (reset ());
+      ignore (I.sgnApp (function c -> analyze (I.sgnLookup c)));
+      ignore (print (("Declared: " ^ Int.toString !declared) ^ "\n"));
+      ignore (print (("Defined : " ^ Int.toString !defined) ^ "\n"));
+      ignore (print (("Abbrevs : " ^ Int.toString !abbrev) ^ "\n"));
+      ignore (print (("Other   : " ^ Int.toString !other) ^ "\n"));
       let _ =
         print (("Max definition height: " ^ Int.toString !maxHeight) ^ "\n")
       in

@@ -84,7 +84,7 @@ module MakeTomegaCoverage
 
     let purify (psi0_, t, psi_) =
       let t', psi'_, s' = purifyCtx (t, psi_) in
-      let _ = TomegaTypeCheck.checkSub (psi0_, t', psi'_) in
+      ignore (TomegaTypeCheck.checkSub (psi0_, t', psi'_));
       (psi0_, t', psi'_)
 
     let rec coverageCheckPrg = function

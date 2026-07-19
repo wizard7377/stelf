@@ -228,7 +228,7 @@ module MakeConverter
         | Some mS -> mS
         end
       in
-      let _ = validMode mS in
+      ignore (validMode mS);
       let rec convertFor' = function
         | I.Pi ((d_, _), v_), M.Mapp (M.Marg (M.Plus, _), mS), w1, w2, n ->
             let f'_, f''_ =
@@ -535,7 +535,7 @@ module MakeConverter
           let w0 = I.Shift (I.ctxLength psi_) in
           let psi'_, w', _ = strengthen (psi1_, (a, s_), w0, M.Plus) in
           let w'', s'' = transformInit (psi'_, l_, (a, s_), w') in
-          let _ = TomegaTypeCheck.checkCtx psi'_ in
+          ignore (TomegaTypeCheck.checkCtx psi'_);
           Some
             ( w',
               ((function p_ -> (psi'_, s'', p_)), transformConc ((a, s_), w)) )
@@ -667,7 +667,7 @@ module MakeConverter
                 lift (g_, T.New (T.Lam (T.UDec d_, p_)))
           in
           let p'''_ = lift (b'_, p''_) in
-          let _ = TomegaTypeCheck.checkCtx (append (psi0_, g_)) in
+          ignore (TomegaTypeCheck.checkCtx (append (psi0_, g_)));
           let _ =
             TomegaTypeCheck.checkFor
               (append (psi0_, g_), T.forSub (f'''_, T.embedSub w1'))
@@ -678,8 +678,8 @@ module MakeConverter
           let psi2_, b3'_ = popn (b, psi1''_) in
           let pat'_ = transformConc ((a, s_), w2) in
           let f4_ = T.forSub (f'''_, T.embedSub z3) in
-          let _ = TomegaTypeCheck.checkCtx psi1''_ in
-          let _ = TomegaTypeCheck.checkCtx (append (psi2_, T.embedCtx b3'_)) in
+          ignore (TomegaTypeCheck.checkCtx psi1''_);
+          ignore (TomegaTypeCheck.checkCtx (append (psi2_, T.embedCtx b3'_)));
           let _ =
             try TomegaTypeCheck.checkFor (psi2_, f4_)
             with _ -> raise (Error "")
@@ -687,7 +687,7 @@ module MakeConverter
           let b3_, sigma3 = T.deblockify b3'_ in
           let pat''_ = T.normalizePrg (pat'_, sigma3) in
           let pat_ = TA.raisePrg (b3_, pat''_, f4_) in
-          let _ = TomegaTypeCheck.checkPrg (psi2_, (pat_, f4_)) in
+          ignore (TomegaTypeCheck.checkPrg (psi2_, (pat_, f4_)));
           let t = T.Dot (T.Prg pat_, T.embedSub z3) in
           Some
             ( w3,
@@ -824,8 +824,8 @@ module MakeConverter
               | I.ConDec (_, _, _, _, u_, v_) -> TypeCheck.check (u_, I.Uni v_))
             sig_
         in
-        let _ = validSig (psi0_, statSig) in
-        let _ = validSig (psi0_, dynSig) in
+        ignore (validSig (psi0_, statSig));
+        ignore (validSig (psi0_, dynSig));
         let c0_ = traverse (psi0_, l_, dynSig, wmap, projs) in
         let rec init = function
           | T.All ((d_, _), f'_) -> (
@@ -849,7 +849,7 @@ module MakeConverter
     let installFor (cid :: []) =
       let f_ = convertFor [ cid ] in
       let name = I.conDecName (I.sgnLookup cid) in
-      let _ = T.lemmaAdd (T.ForDec (name, f_)) in
+      ignore (T.lemmaAdd (T.ForDec (name, f_)));
       ()
 
     let rec depthConj = function
@@ -883,7 +883,7 @@ module MakeConverter
           let p_ = T.Lam (T.PDec (None, f_, None, None), p'_) in
           let f''_ = T.All ((T.PDec (None, f_, None, None), T.Explicit), f'_) in
           let name = I.conDecName (I.sgnLookup cid) in
-          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f''_)) in
+          ignore (TomegaTypeCheck.checkPrg (I.Null, (p_, f''_)));
           let lemma = T.lemmaAdd (T.ValDec ("#" ^ name, p_, f''_)) in
           lemma :: installProjection (cids, n - 1, f_, proj)
 
@@ -891,13 +891,13 @@ module MakeConverter
       | cid :: [], lemma :: [], f1_, main ->
           let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Const main, T.Nil)) in
           let name = I.conDecName (I.sgnLookup cid) in
-          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f1_)) in
+          ignore (TomegaTypeCheck.checkPrg (I.Null, (p_, f1_)));
           let lemma' = T.lemmaAdd (T.ValDec (name, p_, f1_)) in
           [ lemma' ]
       | cid :: cids, lemma :: lemmas, T.And (f1_, f2_), main ->
           let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Const main, T.Nil)) in
           let name = I.conDecName (I.sgnLookup cid) in
-          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f1_)) in
+          ignore (TomegaTypeCheck.checkPrg (I.Null, (p_, f1_)));
           let lemma' = T.lemmaAdd (T.ValDec (name, p_, f1_)) in
           lemma' :: installSelection (cids, lemmas, f2_, main)
 
@@ -906,23 +906,23 @@ module MakeConverter
           let f_ = convertFor [ cid ] in
           let p_ = convertPrg ([ cid ], None) in
           let name = I.conDecName (I.sgnLookup cid) in
-          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f_)) in
-          let _ = Display.chatter_s 4 "[Redundancy Checker (factoring) ..." in
+          ignore (TomegaTypeCheck.checkPrg (I.Null, (p_, f_)));
+          ignore (Display.chatter_s 4 "[Redundancy Checker (factoring) ...");
           let factP = Redundant.convert p_ in
-          let _ = Display.chatter_s 4 "done]\n" in
+          ignore (Display.chatter_s 4 "done]\n");
           let lemma = T.lemmaAdd (T.ValDec (name, factP, f_)) in
           (lemma, [], [])
       | cids ->
           let f_ = convertFor cids in
-          let _ = TomegaTypeCheck.checkFor (I.Null, f_) in
+          ignore (TomegaTypeCheck.checkFor (I.Null, f_));
           let proj = createProjection (I.Null, 0, f_, T.Var 1) in
           let projs = installProjection (cids, depthConj f_, f_, proj) in
           let p_ = convertPrg (cids, Some projs) in
           let s = name cids in
-          let _ = TomegaTypeCheck.checkPrg (I.Null, (p_, f_)) in
-          let _ = Display.chatter_s 4 "[Redundancy Checker (factoring) ..." in
+          ignore (TomegaTypeCheck.checkPrg (I.Null, (p_, f_)));
+          ignore (Display.chatter_s 4 "[Redundancy Checker (factoring) ...");
           let factP = Redundant.convert p_ in
-          let _ = Display.chatter_s 4 "done]\n" in
+          ignore (Display.chatter_s 4 "done]\n");
           let lemma = T.lemmaAdd (T.ValDec (s, factP, f_)) in
           let sels = installSelection (cids, projs, f_, lemma) in
           (lemma, projs, sels)

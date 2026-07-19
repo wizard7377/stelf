@@ -104,9 +104,9 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
       with
       | None -> fill (givenStates, (s_ :: openStates, solvedStates))
       | Some splitOp -> (
-          let _ = printSplitting () in
+          ignore (printSplitting ());
           let sl_ = Timers.time Timers.splitting Splitting.apply splitOp in
-          let _ = printCloseBracket () in
+          ignore (printCloseBracket ());
           try fill (sl_ @ givenStates, os)
           with Splitting.Error _ ->
             fill (givenStates, (s_ :: openStates, solvedStates)))
@@ -116,9 +116,9 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
       begin match Timers.time Timers.recursion Recursion.expandEager s_ with
       | [] -> split (s_ :: givenStates, os)
       | recursionOp :: _ -> (
-          let _ = printRecursion () in
+          ignore (printRecursion ());
           let s'_ = Timers.time Timers.recursion Recursion.apply recursionOp in
-          let _ = printCloseBracket () in
+          ignore (printCloseBracket ());
           try fill (s'_ :: givenStates, (openStates, solvedStates))
           with Recursion.Error _ -> split (s_ :: givenStates, os))
       end
@@ -130,11 +130,11 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
             begin match Timers.time Timers.filling Filling.expand s_ with
             | _, fillingOp -> (
                 try
-                  let _ = printFilling () in
+                  ignore (printFilling ());
                   let (s'_ :: []) =
                     Timers.time Timers.filling Filling.apply fillingOp
                   in
-                  let _ = printCloseBracket () in
+                  ignore (printCloseBracket ());
                   begin if Qed.subgoal s'_ then begin
                     printFinish s'_;
                     fill (givenStates, (openStates, s'_ :: solvedStates))
@@ -152,7 +152,7 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
             end)
 
     let run givenStates =
-      let _ = printInit () in
+      ignore (printInit ());
       let os = fill (givenStates, ([], [])) in
       let _ =
         begin match os with [], _ -> printQed () | _ -> ()
@@ -274,9 +274,9 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
       with
       | None -> recurse (givenStates, (s_ :: openStates, solvedStates))
       | Some splitOp -> (
-          let _ = printSplitting () in
+          ignore (printSplitting ());
           let sl_ = Timers.time Timers.splitting Splitting.apply splitOp in
-          let _ = printCloseBracket () in
+          ignore (printCloseBracket ());
           try recurse (sl_ @ givenStates, os)
           with Splitting.Error _ ->
             recurse (givenStates, (s_ :: openStates, solvedStates)))
@@ -288,11 +288,11 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
           begin match Timers.time Timers.filling Filling.expand s_ with
           | _, fillingOp -> (
               try
-                let _ = printFilling () in
+                ignore (printFilling ());
                 let (s'_ :: []) =
                   Timers.time Timers.filling Filling.apply fillingOp
                 in
-                let _ = printCloseBracket () in
+                ignore (printCloseBracket ());
                 begin if Qed.subgoal s'_ then begin
                   printFinish s'_;
                   recurse (givenStates, (openStates, s'_ :: solvedStates))
@@ -308,17 +308,17 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
           begin match Timers.time Timers.recursion Recursion.expandEager s_ with
           | [] -> fill (s_ :: givenStates, os)
           | recursionOp :: _ -> (
-              let _ = printRecursion () in
+              ignore (printRecursion ());
               let s'_ =
                 Timers.time Timers.recursion Recursion.apply recursionOp
               in
-              let _ = printCloseBracket () in
+              ignore (printCloseBracket ());
               try recurse (s'_ :: givenStates, (openStates, solvedStates))
               with Recursion.Error _ -> fill (s_ :: givenStates, os))
           end
 
     let run givenStates =
-      let _ = printInit () in
+      ignore (printInit ());
       let os = recurse (givenStates, ([], [])) in
       let _ =
         begin match os with [], _ -> printQed () | _ -> ()

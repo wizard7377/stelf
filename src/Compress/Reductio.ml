@@ -232,7 +232,7 @@ module Reductio = struct
         in
         let ppsi = pp_invert pps in
         let rhs' = subst_term ppsi (termof rhs) in
-        let _ = r := Some rhs' in
+        ignore (r := Some rhs');
         ()
     | _ -> raise (Error "evar invariant violated")
 
@@ -517,7 +517,7 @@ module Reductio = struct
           end
         in
         let p, q, aopt = constraint_gen g_ (s, b, Cg_synth) in
-        let _ = matching_succeeds g_ (p, q) in
+        ignore (matching_succeeds g_ (p, q));
         Option.valOf aopt
         (* creates ref cells for evars *)
         (* DEBUG		 val _ = l3 := (p, q, aopt)::(!l3) *)
