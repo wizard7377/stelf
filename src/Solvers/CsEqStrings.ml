@@ -22,17 +22,17 @@ end) : Cs.CS = struct
 
     let myID = (ref (-1) : IntSyn.csid ref)
     let stringID = (ref (-1) : IntSyn.cid ref)
-    let rec string () = Root (Const !stringID, Nil)
+    let string () = Root (Const !stringID, Nil)
     let concatID = (ref (-1) : IntSyn.cid ref)
-    let rec concatExp (u_, v_) = Root (Const !concatID, App (u_, App (v_, Nil)))
-    let rec toString s = ("\"" ^ s) ^ "\""
+    let concatExp (u_, v_) = Root (Const !concatID, App (u_, App (v_, Nil)))
+    let toString s = ("\"" ^ s) ^ "\""
 
-    let rec stringConDec str =
+    let stringConDec str =
       ConDec (toString str, None, 0, Normal, string (), Type)
 
-    let rec stringExp str = Root (FgnConst (!myID, stringConDec str), Nil)
+    let stringExp str = Root (FgnConst (!myID, stringConDec str), Nil)
 
-    let rec fromString string =
+    let fromString string =
       let len = String.size string in
       begin if
         String.sub (string, 0) = '"' && String.sub (string, len - 1) = '"'
@@ -40,20 +40,20 @@ end) : Cs.CS = struct
       else None
       end
 
-    let rec parseString string =
+    let parseString string =
       begin match fromString string with
       | Some str -> Some (stringConDec str)
       | None -> None
       end
 
-    let rec solveString (g_, s_, k) = Some (stringExp (Int.toString k))
+    let solveString (g_, s_, k) = Some (stringExp (Int.toString k))
 
     type concat_ = Concat of atom list
     and atom = String of string | Exp of IntSyn.eclo
 
     exception MyIntsynRep of concat_
 
-    let rec extractConcat = function
+    let extractConcat = function
       | MyIntsynRep concat -> concat
       | fe -> raise (UnexpectedFgnExp fe)
 
@@ -65,7 +65,7 @@ end) : Cs.CS = struct
       | Concat (a_ :: al_) ->
           concatExp (toExp (Concat [ a_ ]), toExp (Concat al_))
 
-    let rec catConcat = function
+    let catConcat = function
       | Concat [], concat2 -> concat2
       | concat1, Concat [] -> concat1
       | Concat al1_, Concat al2_ ->
@@ -100,7 +100,7 @@ end) : Cs.CS = struct
       | Concat (a_ :: al_) ->
           catConcat (normalize (Concat [ a_ ]), normalize (Concat al_))
 
-    let rec mapConcat (f, Concat al_) =
+    let mapConcat (f, Concat al_) =
       let rec mapConcat' = function
         | [] -> []
         | Exp (u_, s_) :: al_ -> Exp (f (EClo (u_, s_)), id) :: mapConcat' al_
@@ -108,8 +108,8 @@ end) : Cs.CS = struct
       in
       Concat (mapConcat' al_)
 
-    let rec appConcat (f, Concat al_) =
-      let rec appAtom = function
+    let appConcat (f, Concat al_) =
+      let appAtom = function
         | Exp (u_, s_) -> f (EClo (u_, s_))
         | String _ -> ()
       in
@@ -118,7 +118,7 @@ end) : Cs.CS = struct
     type split = Split of string * string
     type decomp = Decomp of string * string list
 
-    let rec index (str1, str2) =
+    let index (str1, str2) =
       let max = String.size str2 - String.size str1 in
       let rec index' i =
         begin if i <= max then
@@ -131,9 +131,9 @@ end) : Cs.CS = struct
       in
       index' 0
 
-    let rec split (str1, str2) =
+    let split (str1, str2) =
       let len = String.size str1 in
-      let rec split' i =
+      let split' i =
         Split
           ( String.extract (str2, 0, Some i),
             String.extract (str2, i + len, None) )
@@ -188,7 +188,7 @@ end) : Cs.CS = struct
       | MultDelay of exp list * cnstr_ ref
       | Failure
 
-    let rec toFgnUnify = function
+    let toFgnUnify = function
       | MultAssign l_ ->
           IntSyn.Succeed
             (List.map
@@ -292,7 +292,7 @@ end) : Cs.CS = struct
             | Exp (u_, s_) :: al_, _ ->
                 (MultDelay ([ EClo (u_, s_) ], cnstr), [])
             | String str :: [], candidates ->
-                let rec successors (Decomp (parse, parsedL)) =
+                let successors (Decomp (parse, parsedL)) =
                   List.mapPartial
                     (function
                       | Split (prefix, "") -> Some (Decomp (prefix, parsedL))
@@ -307,7 +307,7 @@ end) : Cs.CS = struct
                 in
                 unifyString' ([], candidates')
             | String str :: al_, candidates ->
-                let rec successors (Decomp (parse, parsedL)) =
+                let successors (Decomp (parse, parsedL)) =
                   List.map
                     (function
                       | Split (prefix, suffix) ->
@@ -375,39 +375,39 @@ end) : Cs.CS = struct
       | Concat (Exp (u_, id) :: []) as concat -> u_
       | concat -> FgnExp (!myID, MyIntsynRep concat)
 
-    let rec toInternal arg__3 arg__4 =
+    let toInternal arg__3 arg__4 =
       begin match (arg__3, arg__4) with
       | MyIntsynRep concat, () -> toExp (normalize concat)
       | fe, () -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec map arg__5 arg__6 =
+    let map arg__5 arg__6 =
       begin match (arg__5, arg__6) with
       | MyIntsynRep concat, f -> toFgn (normalize (mapConcat (f, concat)))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec app arg__7 arg__8 =
+    let app arg__7 arg__8 =
       begin match (arg__7, arg__8) with
       | MyIntsynRep concat, f -> appConcat (f, concat)
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec equalTo arg__9 arg__10 =
+    let equalTo arg__9 arg__10 =
       begin match (arg__9, arg__10) with
       | MyIntsynRep concat, u2_ ->
           sameConcat (normalize concat, fromExp (u2_, id))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec unifyWith arg__11 arg__12 =
+    let unifyWith arg__11 arg__12 =
       begin match (arg__11, arg__12) with
       | MyIntsynRep concat, (g_, u2_) ->
           toFgnUnify (unifyConcat (g_, normalize concat, fromExp (u2_, id)))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec installFgnExpOps () =
+    let installFgnExpOps () =
       let csid = !myID in
       let _ = FgnExpStd.ToInternal.install (csid, toInternal) in
       let _ = FgnExpStd.Map.install (csid, map) in
@@ -416,7 +416,7 @@ end) : Cs.CS = struct
       let _ = FgnExpStd.EqualTo.install (csid, equalTo) in
       ()
 
-    let rec makeFgn (arity, opExp) s_ =
+    let makeFgn (arity, opExp) s_ =
       let rec makeParams = function
         | 0 -> Nil
         | n -> App (Root (BVar n, Nil), makeParams (n - 1))
@@ -437,16 +437,16 @@ end) : Cs.CS = struct
       let s'_, arity' = expand ((s_, id), arity) in
       makeLam (toFgn (opExp s'_)) arity'
 
-    let rec makeFgnBinary opConcat =
+    let makeFgnBinary opConcat =
       makeFgn
         ( 2,
           function
           | App (u1_, App (u2_, Nil)) ->
               opConcat (fromExp (u1_, id), fromExp (u2_, id)) )
 
-    let rec arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
+    let arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
 
-    let rec init (cs, installF) =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin

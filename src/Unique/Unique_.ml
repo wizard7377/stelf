@@ -49,10 +49,10 @@ module MakeUnique
     module N = Names
     module T = Tomega
 
-    let rec chatter chlev f = Display.chatter_s chlev (f ())
-    let rec cName cid = N.qidToString (N.constQid cid)
+    let chatter chlev f = Display.chatter_s chlev (f ())
+    let cName cid = N.qidToString (N.constQid cid)
 
-    let rec pName = function
+    let pName = function
       | cid, Some x -> (("#" ^ cName cid) ^ "_") ^ x
       | cid, None -> ("#" ^ cName cid) ^ "_?"
 
@@ -70,7 +70,7 @@ module MakeUnique
           let x_ = I.newEVar (g_, v'_) in
           I.Dot (I.Exp x_, s)
 
-    let rec unifiable (g_, (u_, s), (u'_, s')) =
+    let unifiable (g_, (u_, s), (u'_, s')) =
       Unify.unifiable (g_, (u_, s), (u'_, s'))
 
     let rec unifiableSpines = function
@@ -87,11 +87,11 @@ module MakeUnique
           M.Mapp (M.Marg (mode, _), ms2) ) ->
           unifiableSpines (g_, (s2_, s), (s2'_, s'), ms2)
 
-    let rec unifiableRoots
+    let unifiableRoots
         (g_, (I.Root (I.Const a, s_), s), (I.Root (I.Const a', s'_), s'), ms) =
       a = a' && unifiableSpines (g_, (s_, s), (s'_, s'), ms)
 
-    let rec checkNotUnifiableTypes (g_, vs_, vs'_, ms, (bx, by)) =
+    let checkNotUnifiableTypes (g_, vs_, vs'_, ms, (bx, by)) =
       begin
         chatter 6 (function () ->
             ((("?- " ^ pName bx) ^ " ~ ") ^ pName by) ^ "\n");
@@ -104,7 +104,7 @@ module MakeUnique
             end)
       end
 
-    let rec checkDiffConstConst (I.Const cid, I.Const cid', ms) =
+    let checkDiffConstConst (I.Const cid, I.Const cid', ms) =
       let _ =
         chatter 6 (function () ->
             ((("?- " ^ cName cid) ^ " ~ ") ^ cName cid') ^ "\n")
@@ -179,7 +179,7 @@ module MakeUnique
           checkUniqueBlockInternal'
             (I.Decl (g_, d_), (I.dot1 t, piDecs), (a, ms), b)
 
-    let rec checkUniqueBlockInternal ((gsome_, piDecs), (a, ms), b) =
+    let checkUniqueBlockInternal ((gsome_, piDecs), (a, ms), b) =
       let t = createEVarSub (I.Null, gsome_) in
       checkUniqueBlockInternal' (I.Null, (t, piDecs), (a, ms), b)
 
@@ -272,7 +272,7 @@ module MakeUnique
           checkUniqueBlock'
             (I.Decl (g_, d_), (I.dot1 t, piDecs), bs, cs, (a, ms), b)
 
-    let rec checkUniqueBlock ((gsome_, piDecs), bs, cs, (a, ms), b) =
+    let checkUniqueBlock ((gsome_, piDecs), bs, cs, (a, ms), b) =
       let t = createEVarSub (I.Null, gsome_) in
       checkUniqueBlock' (I.Null, (t, piDecs), bs, cs, (a, ms), b)
 
@@ -388,7 +388,7 @@ module MakeUnique
   (* checkNoDef (a) = ()
        Effect: raises Error if a is a defined type family
     *)
-  let rec checkNoDef a =
+  let checkNoDef a =
     begin match I.sgnLookup a with
     | I.ConDef _ ->
         raise
@@ -402,7 +402,7 @@ module MakeUnique
        checks uniqueness of applicable cases with respect to mode spine ms
        Effect: raises Error (msg) otherwise
     *)
-  let rec checkUnique (a, ms) =
+  let checkUnique (a, ms) =
     let _ =
       chatter 4 (function () ->
           ("Uniqueness checking family " ^ cName a) ^ "\n")

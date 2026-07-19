@@ -45,7 +45,7 @@ end) : ABSMACHINE = struct
 
     let cidFromHead = function I.Const a -> a | I.Def a -> a
 
-    let rec eqHead = function
+    let eqHead = function
       | I.Const a, I.Const a' -> a = a'
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
@@ -479,7 +479,7 @@ end) : ABSMACHINE = struct
   (* #succeeds >= 1 -- allows backtracking *)
   (* deep backtracking *)
   (* shallow backtracking *)
-  let rec solve (gs, dp, sc) =
+  let solve (gs, dp, sc) =
     begin
       T.init ();
       solve' (gs, dp, sc)

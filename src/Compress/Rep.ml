@@ -16,13 +16,13 @@ module Rep = struct
   module I = IntSyn
   module S = Syntax
 
-  let rec defSize x =
+  let defSize x =
     begin match x with
     | Sgn.Def_term y -> S.size_term y
     | Sgn.Def_type y -> S.size_tp y
     end
 
-  let rec cidSize cid =
+  let cidSize cid =
     begin match I.sgnLookup cid with
     | I.ConDec (_, _, _, _, _, I.Type) ->
         S.size_tp (S.typeOf (Sgn.classifier cid))
@@ -33,7 +33,7 @@ module Rep = struct
     | _ -> 0
     end
 
-  let rec o_cidSize cid =
+  let o_cidSize cid =
     begin match I.sgnLookup cid with
     | I.ConDec (_, _, _, _, _, I.Type) ->
         S.size_tp (S.typeOf (Sgn.o_classifier cid))
@@ -50,7 +50,7 @@ module Rep = struct
 
   exception Crap = Crap
 
-  let rec sanityCheck cid =
+  let sanityCheck cid =
     try
       begin match I.sgnLookup cid with
       | I.ConDec (_, _, _, _, _, I.Type) ->
@@ -84,7 +84,7 @@ module Rep = struct
         raise Match
       end
 
-  let rec gen_graph n autoCompress =
+  let gen_graph n autoCompress =
     let _ = autoCompress n in
     let rec sanity n =
       begin if n < 0 then true

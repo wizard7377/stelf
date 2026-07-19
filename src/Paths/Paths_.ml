@@ -29,7 +29,7 @@ module MakePaths () : PATHS = struct
   (* loc ::= (filename, region) *)
   type nonrec linesInfo = pos list
 
-  let rec posToLineCol' (linesInfo, i) =
+  let posToLineCol' (linesInfo, i) =
     let rec ptlc = function
       | j :: js ->
           begin if i >= j then (List.length js, i - j) else ptlc js
@@ -47,37 +47,37 @@ module MakePaths () : PATHS = struct
   (* !linePosList is a list of starting character positions for each input line *)
   (* used to convert character positions into line.column format *)
   (* maintained with state *)
-  let rec resetLines () = linePosList := []
-  let rec newLine i = linePosList := i :: !linePosList
-  let rec getLinesInfo () = !linePosList
+  let resetLines () = linePosList := []
+  let newLine i = linePosList := i :: !linePosList
+  let getLinesInfo () = !linePosList
 
   (* posToLineCol (i) = (line,column) for character position i *)
-  let rec posToLineCol i = posToLineCol' (!linePosList, i)
+  let posToLineCol i = posToLineCol' (!linePosList, i)
 
   (* join (r1, r2) = r
      where r is the  smallest region containing both r1 and r2
   *)
-  let rec join (Reg (i1, j1), Reg (i2, j2)) =
+  let join (Reg (i1, j1), Reg (i2, j2)) =
     Reg (Int.min (i1, i2), Int.max (j1, j2))
 
   (* The right endpoint of the interval counts IN RANGE *)
-  let rec posInRegion (k, Reg (i, j)) = i <= k && k <= j
+  let posInRegion (k, Reg (i, j)) = i <= k && k <= j
 
-  let rec lineColToString (line, col) =
+  let lineColToString (line, col) =
     (Int.toString (line + 1) ^ ".") ^ Int.toString (col + 1)
 
   (* toString r = ""line1.col1-line2.col2"", a format parsable by Emacs *)
-  let rec toString (Reg (i, j)) =
+  let toString (Reg (i, j)) =
     (lineColToString (posToLineCol i) ^ "-") ^ lineColToString (posToLineCol j)
 
   (* wrap (r, msg) = msg' which contains region *)
-  let rec wrap (r, msg) = (toString r ^ " Error: \n") ^ msg
+  let wrap (r, msg) = (toString r ^ " Error: \n") ^ msg
 
   (* wrapLoc ((loc, r), msg) = msg' which contains region and filename
      This should be used for locations retrieved from origins, where
      the region is given in character positions, rather than lines and columns
   *)
-  let rec wrapLoc0 (Loc (filename, Reg (i, j)), msg) =
+  let wrapLoc0 (Loc (filename, Reg (i, j)), msg) =
     ((((((filename ^ ":") ^ Int.toString (i + 1)) ^ "-") ^ Int.toString (j + 1))
      ^ " ")
     ^ "Error: \n")
@@ -87,7 +87,7 @@ module MakePaths () : PATHS = struct
      like wrapLoc, but converts character positions to line.col format based
      on linesInfo, if possible
   *)
-  let rec wrapLoc' = function
+  let wrapLoc' = function
     | Loc (filename, Reg (i, j)), Some linesInfo, msg ->
         let lcfrom = posToLineCol' (linesInfo, i) in
         let lcto = posToLineCol' (linesInfo, j) in
@@ -95,7 +95,7 @@ module MakePaths () : PATHS = struct
         ((((filename ^ ":") ^ regString) ^ " ") ^ "Error: \n") ^ msg
     | loc, None, msg -> wrapLoc0 (loc, msg)
 
-  let rec wrapLoc (loc, msg) = wrapLoc' (loc, Some (getLinesInfo ()), msg)
+  let wrapLoc (loc, msg) = wrapLoc' (loc, Some (getLinesInfo ()), msg)
 
   (* Paths, occurrences and occurrence trees only work well for normal forms *)
   (* In the general case, regions only approximate true source location *)
@@ -160,8 +160,8 @@ module MakePaths () : PATHS = struct
      5,6 => ""x""
      8,9 => ""y""
   *)
-  let rec posToPath u k =
-    let rec inside = function
+  let posToPath u k =
+    let inside = function
       | Leaf_ r -> posInRegion (k, r)
       | Bind_ (r, _, _) -> posInRegion (k, r)
       | Root_ (r, _, _, _, _) -> posInRegion (k, r)
@@ -199,7 +199,7 @@ module MakePaths () : PATHS = struct
   (* might give a larger term than anticipated *)
 
   (* toRegion (u) = r, the region associated with the whole occurrence tree u *)
-  let rec toRegion = function
+  let toRegion = function
     | Leaf_ r -> r
     | Bind_ (r, _, _) -> r
     | Root_ (r, _, _, _, _) -> r
@@ -240,7 +240,7 @@ module MakePaths () : PATHS = struct
   (* occToRegionExp u occ = r,
      where r is the closest region including occ in occurrence tree u
   *)
-  let rec occToRegionExp u occ = pathToRegion (u, occToPath (occ, Here))
+  let occToRegionExp u occ = pathToRegion (u, occToPath (occ, Here))
 
   let rec skipImplicit = function
     | 0, path -> path
@@ -255,19 +255,19 @@ module MakePaths () : PATHS = struct
   (* occToRegionDec d occ = r
      where r is the closest region in v including occ for declaration c : V
   *)
-  let rec occToRegionDec (Dec_ (n, v)) occ =
+  let occToRegionDec (Dec_ (n, v)) occ =
     pathToRegion (v, skipImplicit (n, occToPath (occ, Here)))
 
   (* occToRegionDef1 d occ = r
      where r is the closest region in u including occ for declaration c : V = U
   *)
-  let rec occToRegionDef1 (Def_ (n, u, vOpt)) occ =
+  let occToRegionDef1 (Def_ (n, u, vOpt)) occ =
     pathToRegion (u, skipImplicit (n, occToPath (occ, Here)))
 
   (* occToRegionDef2 d occ = r
      where r is the closest region in V including occ for declaration c : V = U
   *)
-  let rec occToRegionDef2 arg__0 arg__1 =
+  let occToRegionDef2 arg__0 arg__1 =
     begin match (arg__0, arg__1) with
     | Def_ (n, u, Some v), occ ->
         pathToRegion (v, skipImplicit (n, occToPath (occ, Here)))
@@ -278,7 +278,7 @@ module MakePaths () : PATHS = struct
      where r is the closest region in V including occ for declaration
      c : V or c : V = U.
   *)
-  let rec occToRegionClause arg__2 arg__3 =
+  let occToRegionClause arg__2 arg__3 =
     begin match (arg__2, arg__3) with
     | (Dec_ _ as d), occ -> occToRegionDec d occ
     | (Def_ _ as d), occ -> occToRegionDef2 d occ

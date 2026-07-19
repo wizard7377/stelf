@@ -68,9 +68,9 @@ module MakeClausePrint
     module F = Print.Formatter
 
     let str_ = F.string
-    let rec str0_ (s, n) = F.string0 n s
-    let rec sym s = str0_ (Symbol.sym s)
-    let rec parens fmt = F.hbox [ sym "("; fmt; sym ")" ]
+    let str0_ (s, n) = F.string0 n s
+    let sym s = str0_ (Symbol.sym s)
+    let parens fmt = F.hbox [ sym "("; fmt; sym ")" ]
 
     let rec fmtDQuants = function
       | g_, I.Pi (((I.Dec (_, v1_) as d_), I.Maybe), v2_) ->
@@ -128,14 +128,14 @@ module MakeClausePrint
       | g_, (I.Pi _ as v_) -> [ F.hVbox (fmtGQuants (g_, v_)) ]
       | g_, v_ -> [ Print.formatExp (g_, v_) ]
 
-    let rec fmtClause (g_, v_) = F.hVbox (fmtDQuants (g_, v_))
+    let fmtClause (g_, v_) = F.hVbox (fmtDQuants (g_, v_))
 
     let rec fmtClauseI = function
       | 0, g_, v_ -> fmtClause (g_, v_)
       | i, g_, I.Pi ((d_, _), v_) ->
           fmtClauseI (i - 1, I.Decl (g_, Names.decEName (g_, d_)), v_)
 
-    let rec fmtConDec = function
+    let fmtConDec = function
       | I.ConDec (id, parent, i, _, v_, I.Type) ->
           let _ = Names.varReset IntSyn.Null in
           let vfmt_ = fmtClauseI (i, I.Null, v_) in
@@ -158,12 +158,12 @@ module MakeClausePrint
   (* P = I.Maybe *)
   (* V = Root _ *)
   (* type family declaration, definition, or Skolem constant *)
-  let rec formatClause (g_, v_) = fmtClause (g_, v_)
-  let rec formatConDec condec_ = fmtConDec condec_
-  let rec clauseToString (g_, v_) = F.makestring_fmt (formatClause (g_, v_))
-  let rec conDecToString condec_ = F.makestring_fmt (formatConDec condec_)
+  let formatClause (g_, v_) = fmtClause (g_, v_)
+  let formatConDec condec_ = fmtConDec condec_
+  let clauseToString (g_, v_) = F.makestring_fmt (formatClause (g_, v_))
+  let conDecToString condec_ = F.makestring_fmt (formatConDec condec_)
 
-  let rec printSgn () =
+  let printSgn () =
     IntSyn.sgnApp (function cid ->
         begin
           print (conDecToString (IntSyn.sgnLookup cid));

@@ -20,19 +20,19 @@ module MakeModePrint (Names : NAMES) (Formatter : FORMATTER) (Print : PRINT) :
     module F = Print.Formatter
     module P = Print
 
-    let rec modeToString = function
+    let modeToString = function
       | M.Plus -> "+"
       | M.Star -> "*"
       | M.Minus -> "-"
       | M.Minus1 -> "-1"
 
-    let rec argToString (M.Marg (m, _)) = modeToString m
+    let argToString (M.Marg (m, _)) = modeToString m
 
-    let rec nameDec = function
+    let nameDec = function
       | I.Dec (_, v_), M.Marg (_, (Some _ as name)) -> I.Dec (name, v_)
       | d_, M.Marg (_, None) -> d_
 
-    let rec makeSpine g_ =
+    let makeSpine g_ =
       let rec makeSpine' = function
         | I.Null, _, s_ -> s_
         | I.Decl (g_, _), k, s_ ->
@@ -40,7 +40,7 @@ module MakeModePrint (Names : NAMES) (Formatter : FORMATTER) (Print : PRINT) :
       in
       makeSpine' (g_, 1, I.Nil)
 
-    let rec fmtModeDec (cid, mS) =
+    let fmtModeDec (cid, mS) =
       let v_ = I.constType cid in
       let rec fmtModeDec' = function
         | g_, _, M.Mnil ->
@@ -68,9 +68,9 @@ module MakeModePrint (Names : NAMES) (Formatter : FORMATTER) (Print : PRINT) :
       | (cid, mS) :: mdecs ->
           fmtModeDec (cid, mS) :: F.break :: fmtModeDecs mdecs
 
-    let rec modeToString cM = F.makestring_fmt (fmtModeDec cM)
+    let modeToString cM = F.makestring_fmt (fmtModeDec cM)
 
-    let rec modesToString mdecs =
+    let modesToString mdecs =
       F.makestring_fmt (F.vbox0 0 1 (fmtModeDecs mdecs))
   end
 

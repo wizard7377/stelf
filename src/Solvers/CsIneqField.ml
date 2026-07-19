@@ -44,27 +44,27 @@ end) : Cs.CS = struct
     let myID = (ref (-1) : cid ref)
     let gtID = (ref (-1) : cid ref)
     let geqID = (ref (-1) : cid ref)
-    let rec gt (u_, v_) = Root (Const !gtID, App (u_, App (v_, Nil)))
-    let rec geq (u_, v_) = Root (Const !geqID, App (u_, App (v_, Nil)))
-    let rec gt0 u_ = gt (u_, constant zero)
-    let rec geq0 u_ = geq (u_, constant zero)
+    let gt (u_, v_) = Root (Const !gtID, App (u_, App (v_, Nil)))
+    let geq (u_, v_) = Root (Const !geqID, App (u_, App (v_, Nil)))
+    let gt0 u_ = gt (u_, constant zero)
+    let geq0 u_ = geq (u_, constant zero)
     let gtAddID = (ref (-1) : cid ref)
     let geqAddID = (ref (-1) : cid ref)
     let gtGeqID = (ref (-1) : cid ref)
     let geq00ID = (ref (-1) : cid ref)
 
-    let rec gtAdd (u1_, u2_, v_, w_) =
+    let gtAdd (u1_, u2_, v_, w_) =
       Root (Const !gtAddID, App (u1_, App (u2_, App (v_, App (w_, Nil)))))
 
-    let rec geqAdd (u1_, u2_, v_, w_) =
+    let geqAdd (u1_, u2_, v_, w_) =
       Root (Const !geqAddID, App (u1_, App (u2_, App (v_, App (w_, Nil)))))
 
-    let rec gtGeq (u_, v_, w_) =
+    let gtGeq (u_, v_, w_) =
       Root (Const !gtGeqID, App (u_, App (v_, App (w_, Nil))))
 
-    let rec geq00 () = Root (Const !geq00ID, Nil)
+    let geq00 () = Root (Const !geq00ID, Nil)
 
-    let rec gtNConDec d =
+    let gtNConDec d =
       ConDec
         ( (toString d ^ ">") ^ toString zero,
           None,
@@ -73,14 +73,14 @@ end) : Cs.CS = struct
           gt0 (constant d),
           Type )
 
-    let rec gtNExp d = Root (FgnConst (!myID, gtNConDec d), Nil)
+    let gtNExp d = Root (FgnConst (!myID, gtNConDec d), Nil)
 
-    let rec geqN0 d =
+    let geqN0 d =
       begin if d = zero then geq00 ()
       else gtGeq (constant d, constant zero, gtNExp d)
       end
 
-    let rec parseGtN string =
+    let parseGtN string =
       let suffix = ">" ^ toString zero in
       let stringLen = String.size string in
       let suffixLen = String.size suffix in
@@ -135,8 +135,8 @@ end) : Cs.CS = struct
       let seed = ref 1999.0
     end
 
-    let rec rand (min, size) =
-      let rec nextrand () =
+    let rand (min, size) =
+      let nextrand () =
         let t = a *. !seed in
         begin
           seed := t -. (m *. Float.of_int (Float.to_int (t /. m)));
@@ -165,70 +165,70 @@ end) : Cs.CS = struct
        }
         : tableau)
 
-    let rec rlabel i = Array.sub (tableau.rlabels, i)
-    let rec clabel j = Array.sub (tableau.clabels, j)
-    let rec const i = Array.sub (tableau.consts, i)
-    let rec coeff (i, j) = Array2.sub (tableau.coeffs, i, j)
-    let rec nRows () = !(tableau.nrows)
-    let rec nCols () = !(tableau.ncols)
+    let rlabel i = Array.sub (tableau.rlabels, i)
+    let clabel j = Array.sub (tableau.clabels, j)
+    let const i = Array.sub (tableau.consts, i)
+    let coeff (i, j) = Array2.sub (tableau.coeffs, i, j)
+    let nRows () = !(tableau.nrows)
+    let nCols () = !(tableau.ncols)
 
-    let rec incrNRows () =
+    let incrNRows () =
       let old = nRows () in
       begin
         tableau.nrows := Stdlib.( + ) old 1;
         old
       end
 
-    let rec incrNCols () =
+    let incrNCols () =
       let old = nCols () in
       begin
         tableau.ncols := Stdlib.( + ) old 1;
         old
       end
 
-    let rec decrNRows () = tableau.nrows := Stdlib.( - ) (nRows ()) 1
-    let rec decrNCols () = tableau.ncols := Stdlib.( - ) (nCols ()) 1
+    let decrNRows () = tableau.nrows := Stdlib.( - ) (nRows ()) 1
+    let decrNCols () = tableau.ncols := Stdlib.( - ) (nCols ()) 1
 
-    let rec incrArray (array, i, value) =
+    let incrArray (array, i, value) =
       Array.update (array, i, Array.sub (array, i) + value)
 
-    let rec incrArray2 (array, i, j, value) =
+    let incrArray2 (array, i, j, value) =
       Array2.update (array, i, j, Array2.sub (array, i, j) + value)
 
-    let rec incrArray2Row (array, i, (j, len), f) =
+    let incrArray2Row (array, i, (j, len), f) =
       ignore
         (Vector.mapi
            (function j, value -> Array2.update (array, i, j, value + f j))
            (Array2.row (array, i, (j, len))))
 
-    let rec incrArray2Col (array, j, (i, len), f) =
+    let incrArray2Col (array, j, (i, len), f) =
       ignore
         (Vector.mapi
            (function i, value -> Array2.update (array, i, j, value + f i))
            (Array2.column (array, j, (i, len))))
 
-    let rec clearArray2Row (array, i, (j, len)) =
+    let clearArray2Row (array, i, (j, len)) =
       ignore
         (Vector.mapi
            (function j, _value -> Array2.update (array, i, j, zero))
            (Array2.row (array, i, (j, len))))
 
-    let rec clearArray2Col (array, j, (i, len)) =
+    let clearArray2Col (array, j, (i, len)) =
       ignore
         (Vector.mapi
            (function i, _value -> Array2.update (array, i, j, zero))
            (Array2.column (array, j, (i, len))))
 
-    let rec label = function Row i -> rlabel i | Col j -> clabel j
-    let rec restriction (l : label) = !(l.restr)
+    let label = function Row i -> rlabel i | Col j -> clabel j
+    let restriction (l : label) = !(l.restr)
 
-    let rec restricted (l : label) =
+    let restricted (l : label) =
       begin match restriction l with Some _ -> true | None -> false
       end
 
-    let rec dead (l : label) = !(l.dead)
+    let dead (l : label) = !(l.dead)
 
-    let rec setOwnership (pos, owner, tag) =
+    let setOwnership (pos, owner, tag) =
       let old = label pos in
       let new_ =
         { owner; tag; restr = ref (restriction old); dead = ref (dead old) }
@@ -238,15 +238,15 @@ end) : Cs.CS = struct
       | Col j -> Array.update (tableau.clabels, j, new_)
       end
 
-    let rec ownerContext = function
+    let ownerContext = function
       | Var (g_, _mon) -> g_
       | Exp (g_, _sum) -> g_
 
-    let rec ownerSum = function
+    let ownerSum = function
       | Var (_g_, mon) -> Sum (zero, [ mon ])
       | Exp (_g_, sum) -> sum
 
-    let rec displayPos = function
+    let displayPos = function
       | Row row -> print (("row " ^ Int.toString row) ^ "\n")
       | Col col -> print (("column " ^ Int.toString col) ^ "\n")
 
@@ -263,8 +263,8 @@ end) : Cs.CS = struct
           print " >= 0\n"
         end
 
-    let rec display () =
-      let rec printLabel (_col, (l : label)) =
+    let display () =
+      let printLabel (_col, (l : label)) =
         begin
           print "\t";
           begin
@@ -279,8 +279,8 @@ end) : Cs.CS = struct
           end
         end
       in
-      let rec printRow (row, (l : label)) =
-        let rec printCol (_col, (d : number)) =
+      let printRow (row, (l : label)) =
+        let printCol (_col, (d : number)) =
           begin
             print "\t";
             print (toString d)
@@ -341,9 +341,9 @@ end) : Cs.CS = struct
         end
       end
 
-    let rec findMon mon =
+    let findMon mon =
       let exception Found of int in
-      let rec find (i, (l : label)) =
+      let find (i, (l : label)) =
         begin match l.owner with
         | Var (_g_, mon') ->
             begin if compatibleMon (mon, mon') then raise (Found i) else ()
@@ -363,9 +363,9 @@ end) : Cs.CS = struct
         end
       with Found j -> Some (Col j)
 
-    let rec findTag t =
+    let findTag t =
       let exception Found of int in
-      let rec find (i, (l : label)) =
+      let find (i, (l : label)) =
         begin if l.tag = t then raise (Found i) else ()
         end
       in
@@ -381,15 +381,15 @@ end) : Cs.CS = struct
         end
       with Found j -> Some (Col j)
 
-    let rec isConstant row =
+    let isConstant row =
       Array.foldl
         (function j, l, rest -> (dead l || coeff (row, j) = zero) && rest)
         true
         (tableau.clabels, 0, nCols ())
 
-    let rec isSubsumed row =
+    let isSubsumed row =
       let constRow = const row in
-      let rec isSubsumedByRow () =
+      let isSubsumedByRow () =
         let candidates =
           Array.foldl
             (function
@@ -401,7 +401,7 @@ end) : Cs.CS = struct
             []
             (tableau.rlabels, 0, nRows ())
         in
-        let rec filter = function
+        let filter = function
           | _j, _l, [] -> []
           | j, (l : label), candidates ->
               begin if not (dead l) then
@@ -418,7 +418,7 @@ end) : Cs.CS = struct
         | i :: _ -> Some i
         end
       in
-      let rec isSubsumedByCol () =
+      let isSubsumedByCol () =
         begin if constRow = zero then
           let non_null =
             Array.foldl
@@ -451,16 +451,16 @@ end) : Cs.CS = struct
           end
       end
 
-    let rec findPivot row =
-      let rec compareScore = function
+    let findPivot row =
+      let compareScore = function
         | Some d, Some d' -> compare (d, d')
         | Some _d, None -> Less
         | None, Some _d' -> Greater
         | None, None -> Equal
       in
-      let rec findPivotCol (j, (l : label), ((score, champs) as result)) =
+      let findPivotCol (j, (l : label), ((score, champs) as result)) =
         let value = coeff (row, j) in
-        let rec findPivotRow sgn (i, (l : label), ((score, champs) as result)) =
+        let findPivotRow sgn (i, (l : label), ((score, champs) as result)) =
           let value = coeff (i, j) in
           begin if
             (not (dead l))
@@ -502,12 +502,12 @@ end) : Cs.CS = struct
       | _, champs -> Some (List.nth (champs, rand (0, List.length champs)))
       end
 
-    let rec pivot (row, col) =
+    let pivot (row, col) =
       let pCoeffInverse = inverse (coeff (row, col)) in
       let pRowVector = Array2.row (tableau.coeffs, row, (0, nCols ())) in
-      let rec pRow j = Vector.sub (pRowVector, j) in
+      let pRow j = Vector.sub (pRowVector, j) in
       let pColVector = Array2.column (tableau.coeffs, col, (0, nRows ())) in
-      let rec pCol i = Vector.sub (pColVector, i) in
+      let pCol i = Vector.sub (pColVector, i) in
       let pConst = const row in
       let pRLabel = rlabel row in
       let pCLabel = clabel col in
@@ -564,26 +564,26 @@ end) : Cs.CS = struct
       else Positive
       end
 
-    let rec delayMon (Mon (_n, usL_), cnstr) =
+    let delayMon (Mon (_n, usL_), cnstr) =
       List.app (function us_ -> Unify.delay (us_, cnstr)) usL_
 
-    let rec unifyRestr (Restr (g_, proof, _strict), proof') =
+    let unifyRestr (Restr (g_, proof, _strict), proof') =
       begin if Unify.unifiable (g_, (proof, id), (proof', id)) then ()
       else raise Error
       end
 
-    let rec unifySum (g_, sum, d) =
+    let unifySum (g_, sum, d) =
       begin if Unify.unifiable (g_, (toExp sum, id), (constant d, id)) then ()
       else raise Error
       end
 
     type nonrec decomp = number * (number * position) list
 
-    let rec unaryMinusDecomp (d, wposL) =
+    let unaryMinusDecomp (d, wposL) =
       (-d, List.map (function d, pos -> (-d, pos)) wposL)
 
     let rec decomposeSum (g_, Sum (m, monL)) =
-      let rec monToWPos (Mon (n, usL_) as mon) =
+      let monToWPos (Mon (n, usL_) as mon) =
         begin match findMon mon with
         | Some pos -> (n, pos)
         | None ->
@@ -612,7 +612,7 @@ end) : Cs.CS = struct
 
     and insertDecomp (((d, wposL) as decomp), owner) =
       let new_ = incrNRows () in
-      let rec insertWPos (d, pos) =
+      let insertWPos (d, pos) =
         begin match pos with
         | Row row -> begin
             incrArray2Row
@@ -659,7 +659,7 @@ end) : Cs.CS = struct
       insertDecomp (decomposeSum (g_, sum), Exp (g_, sum))
 
     and minimize row =
-      let rec killColumn (j, (l : label)) =
+      let killColumn (j, (l : label)) =
         begin if (not (dead l)) && coeff (row, j) <> zero then begin
           Trail.log (tableau.trail, Kill (Col j));
           begin
@@ -680,7 +680,7 @@ end) : Cs.CS = struct
         else ()
         end
       in
-      let rec killRow (i, (l : label)) =
+      let killRow (i, (l : label)) =
         begin if not (dead l) then
           begin if isConstant i then begin
             Trail.log (tableau.trail, Kill (Row i));
@@ -836,7 +836,7 @@ end) : Cs.CS = struct
             | Col _col -> unifySum (g_, sum, zero)
             end
           else
-            let rec isVar = function
+            let isVar = function
               | Sum (m, (Mon (n, _) as mon) :: []) ->
                   begin if m = zero && n = one then Some mon else None
                   end
@@ -864,8 +864,8 @@ end) : Cs.CS = struct
       end
 
     and restrictions pos =
-      let rec member (x, l) = List.exists (function y -> x = y) l in
-      let rec test l = restricted l && not (dead l) in
+      let member (x, l) = List.exists (function y -> x = y) l in
+      let test l = restricted l && not (dead l) in
       let rec reachable = function
         | (Row row as pos) :: candidates, tried, closure ->
             begin if member (pos, tried) then
@@ -911,7 +911,7 @@ end) : Cs.CS = struct
             end
         | [], _, closure -> closure
       in
-      let rec restrExp pos =
+      let restrExp pos =
         let l = label pos in
         let owner = l.owner in
         let g_ = ownerContext owner in
@@ -925,11 +925,11 @@ end) : Cs.CS = struct
 
     and makeCnstr tag = FgnCnstr (!myID, MyFgnCnstrRep tag)
 
-    let rec toInternal tag () =
+    let toInternal tag () =
       begin match findTag tag with None -> [] | Some pos -> restrictions pos
       end
 
-    let rec awake tag () =
+    let awake tag () =
       try
         begin match findTag tag with
         | Some pos ->
@@ -944,11 +944,11 @@ end) : Cs.CS = struct
         end
       with Error -> false
 
-    let rec simplify tag () =
+    let simplify tag () =
       begin match toInternal tag () with [] -> true | _ :: _ -> false
       end
 
-    let rec undo = function
+    let undo = function
       | Insert (Row row) -> begin
           (Array.sub (tableau.rlabels, row)).dead := true;
           begin
@@ -971,7 +971,7 @@ end) : Cs.CS = struct
       | Restrict pos -> (label pos).restr := None
       | UpdateOwner (pos, owner, tag) -> setOwnership (pos, owner, tag)
 
-    let rec reset () =
+    let reset () =
       let l =
         {
           owner = Exp (Null, Sum (zero, []));
@@ -1008,8 +1008,8 @@ end) : Cs.CS = struct
         end
       end
 
-    let rec mark () = Trail.mark tableau.trail
-    let rec unwind () = Trail.unwind (tableau.trail, undo)
+    let mark () = Trail.mark tableau.trail
+    let unwind () = Trail.unwind (tableau.trail, undo)
 
     let rec fst = function
       | App (u1_, _), s -> (u1_, s)
@@ -1019,17 +1019,17 @@ end) : Cs.CS = struct
       | App (_u1_, s_), s -> fst (s_, s)
       | SClo (s_, s'), s -> snd (s_, comp (s', s))
 
-    let rec isConstantExp u_ =
+    let isConstantExp u_ =
       begin match fromExp (u_, id) with Sum (m, []) -> Some m | _ -> None
       end
 
-    let rec isZeroExp u_ =
+    let isZeroExp u_ =
       begin match isConstantExp u_ with Some d -> d = zero | None -> false
       end
 
-    let rec solveGt = function
+    let solveGt = function
       | g_, s_, 0 -> (
-          let rec solveGt0 w_ =
+          let solveGt0 w_ =
             begin match isConstantExp w_ with
             | Some d ->
                 begin if d > zero then gtNExp d else raise Error
@@ -1062,9 +1062,9 @@ end) : Cs.CS = struct
           with Error -> None)
       | _g_, _s_, _n -> None
 
-    let rec solveGeq = function
+    let solveGeq = function
       | g_, s_, 0 -> (
-          let rec solveGeq0 w_ =
+          let solveGeq0 w_ =
             begin match isConstantExp w_ with
             | Some d ->
                 begin if d >= zero then geqN0 d else raise Error
@@ -1095,10 +1095,10 @@ end) : Cs.CS = struct
           with Error -> None)
       | _g_, _s_, _n -> None
 
-    let rec pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
-    let rec arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
+    let pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
+    let arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
 
-    let rec installFgnCnstrOps () =
+    let installFgnCnstrOps () =
       let csid = !myID in
       let _ =
         FgnCnstrStd.ToInternal.install
@@ -1123,7 +1123,7 @@ end) : Cs.CS = struct
       in
       ()
 
-    let rec init (cs, installF) =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin

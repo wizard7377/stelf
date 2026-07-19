@@ -53,13 +53,13 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     module P = Paths
     module T = ReconThm__0.ReconTerm'
 
-    let rec error (r, msg) = raise (Error (P.wrap (r, msg)))
+    let error (r, msg) = raise (Error (P.wrap (r, msg)))
 
     type nonrec order = ThmSyn.order * Paths.region
 
-    let rec varg (r, l_) = (ThmSyn.Varg l_, r)
+    let varg (r, l_) = (ThmSyn.Varg l_, r)
 
-    let rec lex (r0, l_) =
+    let lex (r0, l_) =
       let rec lex' = function
         | [] -> ([], r0)
         | (o_, r) :: l_ ->
@@ -69,7 +69,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       let os_, r1 = lex' l_ in
       (ThmSyn.Lex os_, r1)
 
-    let rec simul (r0, l_) =
+    let simul (r0, l_) =
       let rec simul' = function
         | [] -> ([], r0)
         | (o_, r) :: l_ ->
@@ -89,7 +89,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
           error (r, "Extraneous arguments in call pattern")
       | i, I.Pi (_, v2_), args, r -> checkArgNumber (i - 1, v2_, args, r)
 
-    let rec checkCallPat = function
+    let checkCallPat = function
       | I.ConDec (_, _, i, I.Normal, v_, I.Kind), p_, r ->
           checkArgNumber (i, v_, p_, r)
       | I.ConDec (a, _, _, I.Constraint _, _, _), p_, r ->
@@ -107,7 +107,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       | I.SkoDec (a, _, _, _, _), p_, r ->
           error (r, ("Illegal Skolem constant " ^ a) ^ " in call pattern")
 
-    let rec resolveCallPat = function
+    let resolveCallPat = function
       | name, p_, r ->
           let qid = Names.Qid ([], name) in
           begin match Names.constLookup qid with
@@ -122,7 +122,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
               ((cid, p_), r)
           end
 
-    let rec resolveCallpats l_ =
+    let resolveCallpats l_ =
       let rec callpats' = function
         | [] -> ([], [])
         | cp :: l_ ->
@@ -133,20 +133,20 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       let cps, rs = callpats' l_ in
       (ThmSyn.Callpats cps, rs)
 
-    let rec callpats l_ = l_
+    let callpats l_ = l_
 
     type nonrec tdecl = (ThmSyn.order * callpats) * Paths.region
 
-    let rec tdecl ((o_, r), c_) = ((o_, c_), r)
+    let tdecl ((o_, r), c_) = ((o_, c_), r)
 
-    let rec tdeclTotDecl = function
+    let tdeclTotDecl = function
       | (o_, c_), r ->
           let c'_, rs = resolveCallpats c_ in
           (ThmSyn.TDecl (o_, c'_), (r, rs))
 
     type nonrec predicate = ThmSyn.predicate * Paths.region
 
-    let rec predicate = function
+    let predicate = function
       | "LESS", r -> (ThmSyn.Less, r)
       | "LEQ", r -> (ThmSyn.Leq, r)
       | "EQUAL", r -> (ThmSyn.Eq, r)
@@ -154,20 +154,20 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     type nonrec rdecl =
       (ThmSyn.predicate * ThmSyn.order * ThmSyn.order * callpats) * Paths.region
 
-    let rec rdecl ((p_, r0), (o1_, r1), (o2_, r2), c_) =
+    let rdecl ((p_, r0), (o1_, r1), (o2_, r2), c_) =
       let r = Paths.join (r1, r2) in
       ((p_, o1_, o2_, c_), Paths.join (r0, r))
 
-    let rec rdeclTorDecl = function
+    let rdeclTorDecl = function
       | (p_, o1_, o2_, c_), r ->
           let c'_, rs = resolveCallpats c_ in
           (ThmSyn.RDecl (ThmSyn.RedOrder (p_, o1_, o2_), c'_), (r, rs))
 
     type nonrec tableddecl = string * Paths.region
 
-    let rec tableddecl t_ = t_
+    let tableddecl t_ = t_
 
-    let rec tableddeclTotabledDecl = function
+    let tableddeclTotabledDecl = function
       | name, r ->
           let qid = Names.Qid ([], name) in
           begin match Names.constLookup qid with
@@ -182,9 +182,9 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     type nonrec keepTabledecl = string * Paths.region
 
-    let rec keepTabledecl t_ = t_
+    let keepTabledecl t_ = t_
 
-    let rec keepTabledeclToktDecl = function
+    let keepTabledeclToktDecl = function
       | name, r ->
           let qid = Names.Qid ([], name) in
           begin match Names.constLookup qid with
@@ -199,24 +199,24 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     type nonrec prove = ThmSyn.pDecl * (Paths.region * Paths.region list)
 
-    let rec prove (n, td) =
+    let prove (n, td) =
       let td_, rrs = tdeclTotDecl td in
       (ThmSyn.PDecl (n, td_), rrs)
 
-    let rec proveToProve p_ = p_
+    let proveToProve p_ = p_
 
     type nonrec establish = ThmSyn.pDecl * (Paths.region * Paths.region list)
 
-    let rec establish (n, td) =
+    let establish (n, td) =
       let td_, rrs = tdeclTotDecl td in
       (ThmSyn.PDecl (n, td_), rrs)
 
-    let rec establishToEstablish p_ = p_
+    let establishToEstablish p_ = p_
 
     type nonrec assert_ = callpats
 
-    let rec assert_ cp = cp
-    let rec assertToAssert cp = resolveCallpats cp
+    let assert_ cp = cp
+    let assertToAssert cp = resolveCallpats cp
 
     type nonrec decs = ExtSyn.dec I.ctx
 
@@ -231,7 +231,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     type nonrec theorem = thm -> thm
     type nonrec theoremdec = string * theorem
 
-    let rec dec (name, t) = (name, t)
+    let dec (name, t) = (name, t)
 
     let rec ctxAppend = function
       | g_, IntSyn.Null -> g_
@@ -243,7 +243,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       | f, I.Decl (g_, d_) -> I.Decl (ctxMap f g_, f d_)
       end
 
-    let rec ctxBlockToString (g0_, (g1_, g2_)) =
+    let ctxBlockToString (g0_, (g1_, g2_)) =
       let _ = Names.varReset IntSyn.Null in
       let g0'_ = Names.ctxName g0_ in
       let g1'_ = Names.ctxLUName g1_ in
@@ -256,7 +256,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       ^ "pi ")
       ^ Print.ctxToString (ctxAppend (g0'_, g1'_), g2'_)
 
-    let rec checkFreevars = function
+    let checkFreevars = function
       | IntSyn.Null, (g1_, g2_), r -> ()
       | g0_, (g1_, g2_), r ->
           let _ = Names.varReset IntSyn.Null in
@@ -268,7 +268,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
               "Free variables in context block after term reconstruction:\n"
               ^ ctxBlockToString (g0'_, (g1'_, g2'_)) )
 
-    let rec abstractCtxPair (g1, g2) =
+    let abstractCtxPair (g1, g2) =
       let r =
         begin match (T.ctxRegion g1, T.ctxRegion g2) with
         | Some r1, Some r2 -> Paths.join (r1, r2)
@@ -291,50 +291,50 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       let _ = checkFreevars (g0_, (g1'_, g2'_), r) in
       (g1'_, g2'_)
 
-    let rec top (gBs_, g, m_, k) = (gBs_, g, m_, k)
+    let top (gBs_, g, m_, k) = (gBs_, g, m_, k)
 
-    let rec exists (g', t) (gBs_, g, m_, k) =
+    let exists (g', t) (gBs_, g, m_, k) =
       t
         ( gBs_,
           ctxAppend (g, g'),
           ctxAppend (m_, ctxMap (function _ -> M.Minus) g'),
           k )
 
-    let rec forall (g', t) (gBs_, g, m_, k) =
+    let forall (g', t) (gBs_, g, m_, k) =
       t
         ( gBs_,
           ctxAppend (g, g'),
           ctxAppend (m_, ctxMap (function _ -> M.Plus) g'),
           k )
 
-    let rec forallStar (g', t) (gBs_, g, m_, _) =
+    let forallStar (g', t) (gBs_, g, m_, _) =
       t
         ( gBs_,
           ctxAppend (g, g'),
           ctxAppend (m_, ctxMap (function _ -> M.Plus) g'),
           I.ctxLength g' )
 
-    let rec forallG (gbs, (t : thm -> thm)) (_ : thm) =
+    let forallG (gbs, (t : thm -> thm)) (_ : thm) =
       (t (gbs, IntSyn.Null, IntSyn.Null, 0) : thm)
 
-    let rec theoremToTheorem t =
+    let theoremToTheorem t =
       let gbs, g, m_, k = t ([], IntSyn.Null, IntSyn.Null, 0) in
       let _ = Names.varReset IntSyn.Null in
       let gBs_ = List.map abstractCtxPair gbs in
       let (T.JWithCtx (g_, _)) = T.recon (T.jwithctx (g, T.jnothing)) in
       L.ThDecl (gBs_, g_, m_, k)
 
-    let rec theoremDecToTheoremDec (name, t) = (name, theoremToTheorem t)
+    let theoremDecToTheoremDec (name, t) = (name, theoremToTheorem t)
 
-    let rec abstractWDecl w_ =
+    let abstractWDecl w_ =
       let w'_ = List.map (fun (ids, id) -> ThmSyn.Names.Qid (ids, id)) w_ in
       w'_
 
     type nonrec wdecl = (string list * string) list * callpats
 
-    let rec wdecl t_ = t_
+    let wdecl t_ = t_
 
-    let rec wdeclTowDecl = function
+    let wdeclTowDecl = function
       | w_, cp ->
           let cp'_, rs = resolveCallpats cp in
           (ThmSyn.WDecl (abstractWDecl w_, cp'_), rs)

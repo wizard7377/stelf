@@ -43,7 +43,7 @@ module Syntax = struct
   (* special hack for type functions used only in tp_reduce *)
   type tpfn = TpfnType_ of tp | TpfnLam_ of tpfn
 
-  let rec eVarDotId_ ev = EVarDot (ev, [], Id)
+  let eVarDotId_ ev = EVarDot (ev, [], Id)
 
   (*	type decl = string * Parse.term *)
   (*	type ctx = decl list *)
@@ -51,7 +51,7 @@ module Syntax = struct
 
   (* termof elm
         returns the term part of the spine element elm *)
-  let rec termof = function
+  let termof = function
     | Elt t -> t
     | AElt t -> ATerm t
     | Ascribe (t, a) -> NTerm t
@@ -66,7 +66,7 @@ module Syntax = struct
 
   exception Debugs of subst_result * spinelt list
 
-  let rec curryfoldr sf sl x = foldr (function s, x' -> sf s x') x sl
+  let curryfoldr sf sl x = foldr (function s, x' -> sf s x') x sl
 
   (* lower (a, sp)
            supposing we have an evar of (potentially higher-order)
@@ -377,18 +377,18 @@ module Syntax = struct
         shifts all deBruijn indices in the object t by one, as long
         as they refer to positions in the current context 
         greater than or equal to n. *)
-  let rec elt_eroot_elim = function
+  let elt_eroot_elim = function
     | AElt t -> eroot_elim_plus t
     | Elt (ATerm t) -> Elt (eroot_elim t)
     | x -> x
 
-  let rec ntm_eroot_elim = function
+  let ntm_eroot_elim = function
     | Lam (ATerm t) -> Lam (eroot_elim t)
     | x -> x
 
-  let rec ctxLookup (g_, n) = subst_tp (Shift (0, n + 1)) (List.nth (g_, n))
-  let rec typeOf (Tclass_ a) = a
-  let rec kindOf (Kclass_ k) = k
+  let ctxLookup (g_, n) = subst_tp (Shift (0, n + 1)) (List.nth (g_, n))
+  let typeOf (Tclass_ a) = a
+  let kindOf (Kclass_ k) = k
   let sum = foldl (fun (x__op, y__op) -> x__op + y__op) 0
 
   let rec size_term = function

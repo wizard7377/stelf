@@ -49,36 +49,36 @@ end) : Cs.CS = struct
     let wordSize' = Int.min (CSIntWord__0.wordSize, W.wordSize)
     let zero = W.fromInt 0
     let max = W.(W.notb zero >> Word.fromInt (W.wordSize - wordSize'))
-    let rec numCheck d = W.( <= ) d max
+    let numCheck d = W.( <= ) d max
 
-    let rec plusCheck (d1, d2) =
+    let plusCheck (d1, d2) =
       let d3 = W.(d1 + d2) in
       W.(d3 >= d1) && W.(d3 >= d2) && W.( <= ) d3 max
 
-    let rec timesCheck (d1, d2) =
+    let timesCheck (d1, d2) =
       begin if d1 = zero || d2 = zero then true
       else
         let d3 = W.div (W.div (max, d1), d2) in
         W.(d3 > zero)
       end
 
-    let rec quotCheck (d1, d2) = W.(d2 > zero)
+    let quotCheck (d1, d2) = W.(d2 > zero)
     let myID = (ref (-1) : csid ref)
     let wordID = (ref (-1) : cid ref)
-    let rec word () = Root (Const !wordID, Nil)
+    let word () = Root (Const !wordID, Nil)
     let plusID = (ref (-1) : cid ref)
     let timesID = (ref (-1) : cid ref)
     let quotID = (ref (-1) : cid ref)
 
-    let rec plusExp (u_, v_, w_) =
+    let plusExp (u_, v_, w_) =
       Root (Const !plusID, App (u_, App (v_, App (w_, Nil))))
 
     let pi_ (name, ty, body) = Pi ((Dec (Some name, ty), No), body)
 
-    let rec timesExp (u_, v_, w_) =
+    let timesExp (u_, v_, w_) =
       Root (Const !timesID, App (u_, App (v_, App (w_, Nil))))
 
-    let rec quotExp (u_, v_, w_) =
+    let quotExp (u_, v_, w_) =
       Root (Const !quotID, App (u_, App (v_, App (w_, Nil))))
 
     let provePlusID = (ref (-1) : cid ref)
@@ -88,31 +88,31 @@ end) : Cs.CS = struct
     let proofTimesID = (ref (-1) : cid ref)
     let proofQuotID = (ref (-1) : cid ref)
 
-    let rec provePlusExp (u_, v_, w_, p_) =
+    let provePlusExp (u_, v_, w_, p_) =
       Root (Const !provePlusID, App (u_, App (v_, App (w_, App (p_, Nil)))))
 
-    let rec proofPlusExp (u_, v_, w_, p_) =
+    let proofPlusExp (u_, v_, w_, p_) =
       Root (Const !proofPlusID, App (u_, App (v_, App (w_, App (p_, Nil)))))
 
-    let rec proofTimesExp (u_, v_, w_, p_) =
+    let proofTimesExp (u_, v_, w_, p_) =
       Root (Const !proofTimesID, App (u_, App (v_, App (w_, App (p_, Nil)))))
 
-    let rec proveTimesExp (u_, v_, w_, p_) =
+    let proveTimesExp (u_, v_, w_, p_) =
       Root (Const !proveTimesID, App (u_, App (v_, App (w_, App (p_, Nil)))))
 
-    let rec proveQuotExp (u_, v_, w_, p_) =
+    let proveQuotExp (u_, v_, w_, p_) =
       Root (Const !proveQuotID, App (u_, App (v_, App (w_, App (p_, Nil)))))
 
-    let rec proofQuotExp (u_, v_, w_, p_) =
+    let proofQuotExp (u_, v_, w_, p_) =
       Root (Const !proofQuotID, App (u_, App (v_, App (w_, App (p_, Nil)))))
 
-    let rec numberConDec d =
+    let numberConDec d =
       ConDec (W.fmt StringCvt.Dec d, None, 0, Normal, word (), Type)
 
-    let rec numberExp d = Root (FgnConst (!myID, numberConDec d), Nil)
+    let numberExp d = Root (FgnConst (!myID, numberConDec d), Nil)
 
-    let rec scanNumber str =
-      let rec check = function
+    let scanNumber str =
+      let check = function
         | _ :: _ as chars -> List.all Char.isDigit chars
         | [] -> false
       in
@@ -126,13 +126,13 @@ end) : Cs.CS = struct
       else None
       end
 
-    let rec parseNumber string =
+    let parseNumber string =
       begin match scanNumber string with
       | Some d -> Some (numberConDec d)
       | None -> None
       end
 
-    let rec plusPfConDec (d1, d2) =
+    let plusPfConDec (d1, d2) =
       let d3 = W.(d1 + d2) in
       ConDec
         ( (W.fmt StringCvt.Dec d1 ^ "+") ^ W.fmt StringCvt.Dec d2,
@@ -142,9 +142,9 @@ end) : Cs.CS = struct
           plusExp (numberExp d1, numberExp d2, numberExp d3),
           Type )
 
-    let rec plusPfExp ds = Root (FgnConst (!myID, plusPfConDec ds), Nil)
+    let plusPfExp ds = Root (FgnConst (!myID, plusPfConDec ds), Nil)
 
-    let rec timesPfConDec (d1, d2) =
+    let timesPfConDec (d1, d2) =
       let d3 = W.(d1 * d2) in
       ConDec
         ( (W.fmt StringCvt.Dec d1 ^ "*") ^ W.fmt StringCvt.Dec d2,
@@ -154,9 +154,9 @@ end) : Cs.CS = struct
           timesExp (numberExp d1, numberExp d2, numberExp d3),
           Type )
 
-    let rec timesPfExp ds = Root (FgnConst (!myID, timesPfConDec ds), Nil)
+    let timesPfExp ds = Root (FgnConst (!myID, timesPfConDec ds), Nil)
 
-    let rec quotPfConDec (d1, d2) =
+    let quotPfConDec (d1, d2) =
       let d3 = W.div (d1, d2) in
       ConDec
         ( (W.fmt StringCvt.Dec d1 ^ "/") ^ W.fmt StringCvt.Dec d2,
@@ -166,9 +166,9 @@ end) : Cs.CS = struct
           quotExp (numberExp d1, numberExp d2, numberExp d3),
           Type )
 
-    let rec quotPfExp ds = Root (FgnConst (!myID, quotPfConDec ds), Nil)
+    let quotPfExp ds = Root (FgnConst (!myID, quotPfConDec ds), Nil)
 
-    let rec scanBinopPf oper string =
+    let scanBinopPf oper string =
       let args = String.tokens (function c -> c = oper) string in
       begin match args with
       | [ arg1; arg2 ] ->
@@ -182,7 +182,7 @@ end) : Cs.CS = struct
       | _ -> None
       end
 
-    let rec parseBinopPf oper string =
+    let parseBinopPf oper string =
       begin match (oper, scanBinopPf oper string) with
       | '+', Some ds -> Some (plusPfConDec ds)
       | '*', Some ds -> Some (timesPfConDec ds)
@@ -194,7 +194,7 @@ end) : Cs.CS = struct
     let parseTimesPf = parseBinopPf '*'
     let parseQuotPf = parseBinopPf '/'
 
-    let rec parseAll string =
+    let parseAll string =
       begin match parseNumber string with
       | Some conDec -> Some conDec
       | None ->
@@ -242,14 +242,14 @@ end) : Cs.CS = struct
 
     and fromExp us_ = fromExpW (Whnf.whnf us_)
 
-    let rec toExp = function
+    let toExp = function
       | Num d -> numberExp d
       | PlusPf (d1, d2) -> plusPfExp (d1, d2)
       | TimesPf (d1, d2) -> timesPfExp (d1, d2)
       | QuotPf (d1, d2) -> quotPfExp (d1, d2)
       | Expr (u_, s_) -> EClo (u_, s_)
 
-    let rec solveNumber (g_, s_, k) = Some (numberExp (W.fromInt k))
+    let solveNumber (g_, s_, k) = Some (numberExp (W.fromInt k))
     let eclo_ (u_, s_) = EClo (u_, s_)
 
     let rec fst = function
@@ -448,7 +448,7 @@ end) : Cs.CS = struct
           end
       | g_, s_, n -> None
 
-    let rec solveProvePlus (g_, s_, k) =
+    let solveProvePlus (g_, s_, k) =
       let us1_ = fst (s_, id) in
       let us2_ = snd (s_, id) in
       let us3_ = trd (s_, id) in
@@ -465,7 +465,7 @@ end) : Cs.CS = struct
       | None -> None
       end
 
-    let rec solveProveTimes (g_, s_, k) =
+    let solveProveTimes (g_, s_, k) =
       let us1_ = fst (s_, id) in
       let us2_ = snd (s_, id) in
       let us3_ = trd (s_, id) in
@@ -483,7 +483,7 @@ end) : Cs.CS = struct
       | None -> None
       end
 
-    let rec solveProveQuot (g_, s_, k) =
+    let solveProveQuot (g_, s_, k) =
       let us1_ = fst (s_, id) in
       let us2_ = snd (s_, id) in
       let us3_ = trd (s_, id) in
@@ -500,11 +500,11 @@ end) : Cs.CS = struct
       | None -> None
       end
 
-    let rec arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
-    let rec pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
-    let rec bvar n = Root (BVar n, Nil)
+    let arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
+    let pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
+    let bvar n = Root (BVar n, Nil)
 
-    let rec installFgnCnstrOps () =
+    let installFgnCnstrOps () =
       let csid = !myID in
       let _ =
         FgnCnstrStd.ToInternal.install
@@ -541,7 +541,7 @@ end) : Cs.CS = struct
       in
       ()
 
-    let rec init (cs, installF) =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin

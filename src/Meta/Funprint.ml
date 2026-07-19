@@ -72,8 +72,8 @@ end) : FUNPRINT.FUNPRINT = struct
           @ formatFor' (I.Decl (g_, d'_), (f_, I.dot1 s))
       | g_, (True, s) -> [ Fmt.string "True" ]
 
-    let rec formatFor (psi_, f_) names =
-      let rec nameLookup index = List.nth (names, index) in
+    let formatFor (psi_, f_) names =
+      let nameLookup index = List.nth (names, index) in
       let rec formatFor1 = function
         | index, g_, (F.And (f1_, f2_), s) ->
             formatFor1 (index, g_, (f1_, s))
@@ -88,17 +88,17 @@ end) : FUNPRINT.FUNPRINT = struct
               Fmt.hVbox (formatFor' (g_, (f_, s)));
             ]
       in
-      let rec formatFor0 args_ = Fmt.vbox0 0 1 (formatFor1 args_) in
+      let formatFor0 args_ = Fmt.vbox0 0 1 (formatFor1 args_) in
       begin
         Names.varReset I.Null;
         formatFor0 (0, F.makectx psi_, (f_, I.id))
       end
 
-    let rec formatForBare (g_, f_) = Fmt.hVbox (formatFor' (g_, (f_, I.id)))
+    let formatForBare (g_, f_) = Fmt.hVbox (formatFor' (g_, (f_, I.id)))
 
-    let rec formatPro args_ names =
-      let rec nameLookup index = List.nth (names, index) in
-      let rec blockName (g1_, g2_) =
+    let formatPro args_ names =
+      let nameLookup index = List.nth (names, index) in
+      let blockName (g1_, g2_) =
         let rec blockName' = function
           | g1_, I.Null -> (g1_, I.Null)
           | g1_, I.Decl (g2_, d_) ->
@@ -109,14 +109,14 @@ end) : FUNPRINT.FUNPRINT = struct
         let g1'_, g2'_ = blockName' (g1_, g2_) in
         g2'_
       in
-      let rec ctxBlockName (g1_, F.CtxBlock (name, g2_)) =
+      let ctxBlockName (g1_, F.CtxBlock (name, g2_)) =
         F.CtxBlock (name, blockName (g1_, g2_))
       in
-      let rec decName = function
+      let decName = function
         | g_, F.Prim d_ -> F.Prim (Names.decName (g_, d_))
         | g_, F.Block cb_ -> F.Block (ctxBlockName (g_, cb_))
       in
-      let rec numberOfSplits ds_ =
+      let numberOfSplits ds_ =
         let rec numberOfSplits' = function
           | empty_, n -> n
           | F.New (_, ds_), n -> numberOfSplits' (ds_, n)
@@ -128,8 +128,8 @@ end) : FUNPRINT.FUNPRINT = struct
         in
         numberOfSplits' (ds_, 0)
       in
-      let rec psiName (psi1_, s, psi2_, l) =
-        let rec nameDec = function
+      let psiName (psi1_, s, psi2_, l) =
+        let nameDec = function
           | (I.Dec (Some _, _) as d_), name -> d_
           | I.Dec (None, v_), name -> I.Dec (Some name, v_)
         in
@@ -184,7 +184,7 @@ end) : FUNPRINT.FUNPRINT = struct
         | g1_, I.Null -> g1_
         | g1_, I.Decl (g2_, d_) -> I.Decl (merge (g1_, g2_), d_)
       in
-      let rec formatCtx (psi_, g_) =
+      let formatCtx (psi_, g_) =
         let g0_ = F.makectx psi_ in
         let rec formatCtx' = function
           | I.Null -> []
@@ -202,7 +202,7 @@ end) : FUNPRINT.FUNPRINT = struct
         in
         Fmt.hbox ((Fmt.string "|" :: formatCtx' g_) @ [ Fmt.string "|" ])
       in
-      let rec formatTuple (psi_, p_) =
+      let formatTuple (psi_, p_) =
         let rec formatTuple' = function
           | F.Unit -> []
           | F.Inx (m_, F.Unit) -> [ Print.formatExp (F.makectx psi_, m_) ]
@@ -217,7 +217,7 @@ end) : FUNPRINT.FUNPRINT = struct
               ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
         end
       in
-      let rec formatSplitArgs (psi_, l_) =
+      let formatSplitArgs (psi_, l_) =
         let rec formatSplitArgs' = function
           | [] -> []
           | m_ :: [] -> [ Print.formatExp (F.makectx psi_, m_) ]
@@ -231,7 +231,7 @@ end) : FUNPRINT.FUNPRINT = struct
             ((Fmt.string "(" :: formatSplitArgs' l_) @ [ Fmt.string ")" ])
         end
       in
-      let rec frontToExp = function
+      let frontToExp = function
         | I.Idx k -> I.Root (I.BVar k, I.Nil)
         | I.Exp u_ -> u_
       in
@@ -327,7 +327,7 @@ end) : FUNPRINT.FUNPRINT = struct
         | I.Dot (ft_, s), I.Decl (psi_, d_), s_ ->
             argsToSpine (s, psi_, I.App (frontToExp ft_, s_))
       in
-      let rec formatHead (index, psi'_, s, psi_) =
+      let formatHead (index, psi'_, s, psi_) =
         Fmt.hbox
           [
             Fmt.space;
@@ -381,7 +381,7 @@ end) : FUNPRINT.FUNPRINT = struct
         | index, psi_, F.Pair (p1_, p2_) ->
             formatPro1 (index, psi_, p1_) @ formatPro1 (index + 1, psi_, p2_)
       in
-      let rec formatPro0 (psi_, F.Rec (dd_, p_)) =
+      let formatPro0 (psi_, F.Rec (dd_, p_)) =
         Fmt.vbox0 0 1 (formatPro1 (0, psi_, p_))
       in
       begin
@@ -389,15 +389,15 @@ end) : FUNPRINT.FUNPRINT = struct
         formatPro0 args_
       end
 
-    let rec formatLemmaDec (F.LemmaDec (names, p_, f_)) =
+    let formatLemmaDec (F.LemmaDec (names, p_, f_)) =
       Fmt.vbox0 0 1
         [
           formatFor (I.Null, f_) names; Fmt.break_; formatPro (I.Null, p_) names;
         ]
 
-    let rec forToString args_ names = Fmt.makestring_fmt (formatFor args_ names)
-    let rec proToString args_ names = Fmt.makestring_fmt (formatPro args_ names)
-    let rec lemmaDecToString args_ = Fmt.makestring_fmt (formatLemmaDec args_)
+    let forToString args_ names = Fmt.makestring_fmt (formatFor args_ names)
+    let proToString args_ names = Fmt.makestring_fmt (formatPro args_ names)
+    let lemmaDecToString args_ = Fmt.makestring_fmt (formatLemmaDec args_)
   end
 
   (* Invariant:

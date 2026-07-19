@@ -214,7 +214,7 @@ end) :
     module L = Parsing.Lexer
     module LS = Parsing.Stream
 
-    let rec stripDot = function
+    let stripDot = function
       | LS.Cons ((L.Dot, r), s) -> s
       | LS.Cons ((L.Rparen, r), s) ->
           Parsing.error (r, "Unexpected right parenthesis")
@@ -226,7 +226,7 @@ end) :
       | LS.Cons ((t, r), s) ->
           Parsing.error (r, "Expected `.', found " ^ L.toString t)
 
-    let rec parseBound' = function
+    let parseBound' = function
       | LS.Cons ((L.Id (_, "*"), r), s') -> (None, s')
       | LS.Cons ((L.Id (_, name), r), s') -> (
           try (Some (L.stringToNat name), s') with
@@ -246,7 +246,7 @@ end) :
       begin match recparser f with
       | Parsing.Done x, f' -> sc (x, f')
       | Parsing.Continuation k, LS.Cons ((L.Lbrace, r1), s') ->
-          let rec finish = function
+          let finish = function
             | LS.Cons ((L.Rbrace, r2), s'') ->
                 Stream.Cons
                   ((EndSubsig, r2), recParse (s'', k, theSigParser, sc))
@@ -433,7 +433,7 @@ end) :
       Stream.Cons ((AssertDec ldec, r), parseStream (stripDot f', sc))
 
     and parseTrustMe' ((LS.Cons ((_, r0), s) as f), sc) =
-      let rec parseNextDec' = function
+      let parseNextDec' = function
         | Stream.Cons ((dec, r), s') -> Stream.Cons ((TrustMe (dec, r), r0), s')
         | empty_ -> Parsing.error (r0, "No declaration after `%trustme'")
       in
@@ -486,14 +486,14 @@ end) :
       Stream.Cons ((Compile qids, r), parseStream (stripDot f', sc))
 
     and parseSigDef' ((LS.Cons ((_, r1), _) as f), sc) =
-      let rec finish (sigdef, (LS.Cons ((_, r2), _) as f')) =
+      let finish (sigdef, (LS.Cons ((_, r2), _) as f')) =
         Stream.Cons
           ((SigDef sigdef, Paths.join (r1, r2)), parseStream (stripDot f', sc))
       in
       recParse' (f, ParseModule.parseSigDef', parseStream, finish)
 
     and parseStructDec' ((LS.Cons ((_, r1), _) as f), sc) =
-      let rec finish (structdec, (LS.Cons ((_, r2), _) as f')) =
+      let finish (structdec, (LS.Cons ((_, r2), _) as f')) =
         Stream.Cons
           ( (StructDec structdec, Paths.join (r1, r2)),
             parseStream (stripDot f', sc) )
@@ -501,7 +501,7 @@ end) :
       recParse' (f, ParseModule.parseStructDec', parseStream, finish)
 
     and parseInclude' ((LS.Cons ((_, r1), _) as f), sc) =
-      let rec finish (sigexp, (LS.Cons ((_, r2), _) as f')) =
+      let finish (sigexp, (LS.Cons ((_, r2), _) as f')) =
         Stream.Cons
           ((Include sigexp, Paths.join (r1, r2)), parseStream (stripDot f', sc))
       in
@@ -532,8 +532,8 @@ end) :
           | L.Stream.Empty -> LS.Empty
           | L.Stream.Cons (x, s') -> LS.Cons (x, lexStreamToParsing s')))
 
-    let rec parseTLStream instream =
-      let rec finish = function
+    let parseTLStream instream =
+      let finish = function
         | LS.Cons ((L.Eof, r), s) -> Stream.Empty
         | LS.Cons ((L.Rbrace, r), s) -> Parsing.error (r, "Unmatched `}'")
       in
@@ -560,7 +560,7 @@ end) :
   (* ABP 4/4/03 *)
   let parseStream = parseTLStream
 
-  let rec parseTerminalQ prompts =
+  let parseTerminalQ prompts =
     parseQ (lexStreamToParsing (L.lexTerminal prompts))
 end
 (*! sharing ParseTerm.Lexer = Parsing'.Lexer !*)

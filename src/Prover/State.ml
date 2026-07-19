@@ -149,11 +149,11 @@ end) : STATE = struct
       | (psi_, T.Undef), k_ -> k_
       end
 
-    let rec init (f_, w_) =
+    let init (f_, w_) =
       let x_ = T.newEVar (I.Null, f_) in
       State (w_, I.Null, x_, f_)
 
-    let rec close (State (w_, _, p_, _)) =
+    let close (State (w_, _, p_, _)) =
       begin match (findPrg p_, findExp (I.Null, p_) []) with
       | [], [] -> true
       | _ -> false

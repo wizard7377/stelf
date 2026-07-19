@@ -98,13 +98,13 @@ end) : TOMEGAABSTRACT = struct
           let p'_ = raisePrg (g_, (p_, t), f_) in
           T.PairExp (u'_, p'_)
 
-    let rec raiseP (g_, p_, f_) =
+    let raiseP (g_, p_, f_) =
       let g'_, s = T.deblockify g_ in
       let f'_ = T.forSub (f_, s) in
       let p''_ = raisePrg (g'_, (p_, T.coerceSub s), f'_) in
       p''_
 
-    let rec raiseF (g_, (f_, t)) =
+    let raiseF (g_, (f_, t)) =
       let g'_, s = T.deblockify g_ in
       let f'_ = raiseFor (g'_, (f_, I.comp (t, T.coerceSub s))) in
       f'_

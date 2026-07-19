@@ -44,14 +44,14 @@ end) : TRAVERSE = struct
     module I = IntSyn
     module T = Traverser
 
-    let rec inferConW = function
+    let inferConW = function
       | g_, I.BVar k' ->
           let (I.Dec (_, v_)) = I.ctxDec (g_, k') in
           Whnf.whnf (v_, I.id)
       | g_, I.Const c -> (I.constType c, I.id)
       | g_, I.Def d -> (I.constType d, I.id)
 
-    let rec fromHead = function
+    let fromHead = function
       | g_, I.BVar n -> T.bvar (Names.bvarName (g_, n))
       | g_, I.Const cid ->
           let (Names.Qid (ids, id)) = Names.constQid cid in
@@ -61,7 +61,7 @@ end) : TRAVERSE = struct
           T.def (ids, id)
       | _ -> raise (Error "Head not recognized")
 
-    let rec impCon = function
+    let impCon = function
       | I.Const cid -> I.constImp cid
       | I.Def cid -> I.constImp cid
       | _ -> 0
@@ -124,7 +124,7 @@ end) : TRAVERSE = struct
 
     and fromDec (g_, (I.Dec (Some x, v_), s)) = T.dec (x, fromTp (g_, (v_, s)))
 
-    let rec fromConDec = function
+    let fromConDec = function
       | I.ConDec (c, parent, i, _, v_, I.Type) ->
           Some (T.objdec (c, fromTp (I.Null, (v_, I.id))))
       | _ -> None
@@ -162,7 +162,7 @@ end) : TRAVERSE = struct
   (* ignore a : K, d : A = M, b : K = A, and skolem constants *)
   let fromConDec = fromConDec
 
-  let rec const name =
+  let const name =
     let qid =
       begin match Names.stringToQid name with
       | None -> raise (Error ("Malformed qualified identifier " ^ name))
@@ -170,13 +170,13 @@ end) : TRAVERSE = struct
       end
     in
     let cidOpt = Names.constLookup qid in
-    let rec getConDec = function
+    let getConDec = function
       | None -> raise (Error ("Undeclared identifier " ^ Names.qidToString qid))
       | Some cid -> IntSyn.sgnLookup cid
     in
     let conDec = getConDec cidOpt in
     let _ = Names.varReset IntSyn.Null in
-    let rec result = function
+    let result = function
       | None -> raise (Error "Wrong kind of declaration")
       | Some r -> r
     in

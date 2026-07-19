@@ -143,7 +143,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
   (* string constants *)
   exception Error of string
 
-  let rec error (r, msg) = raise (Error (P.wrap (r, msg)))
+  let error (r, msg) = raise (Error (P.wrap (r, msg)))
 
   (* isSym (c) = B iff c is a legal symbolic identifier constituent *)
   (* excludes quote character and digits, which are treated specially *)
@@ -154,20 +154,20 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
      part of a UTF8 Unicode encoding.  Treat these as lowercase
      identifiers.  Somewhat of a hack until there is native Unicode
      string support. *)
-  let rec isUTF8 c = not (Char.isAscii c)
+  let isUTF8 c = not (Char.isAscii c)
 
   (* isQuote (c) = B iff c is the quote character *)
-  let rec isQuote c = c = '\''
+  let isQuote c = c = '\''
 
   (* isIdChar (c) = B iff c is legal identifier constituent *)
-  let rec isIdChar c =
+  let isIdChar c =
     Char.isLower c || Char.isUpper c || Char.isDigit c || isSym c || isQuote c
     || isUTF8 c
 
   (* stringToToken (idCase, string, region) = (token, region)
      converts special identifiers into tokens, returns ID token otherwise
   *)
-  let rec stringToToken = function
+  let stringToToken = function
     | Lower, "<-", r -> (Backarrow, r)
     | Lower, "->", r -> (Arrow, r)
     | Upper, "_", r -> (Underscore, r)
@@ -182,11 +182,11 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
      The end of the stream is signalled by a string consisting only of ^D
      Argument to inputFun is the character position.
   *)
-  let rec lex (inputFun : int -> string) =
+  let lex (inputFun : int -> string) =
     let s = ref "" and left = ref 0 and right = ref 0 in
     let _ = P.resetLines () in
     let eOFString_ = String.str '\004' in
-    let rec readNext () =
+    let readNext () =
       let nextLine = inputFun !right in
       let nextSize = String.size nextLine in
       begin if nextSize = 0 then begin
@@ -218,11 +218,11 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
       else String.sub (!s, i - !left)
       end
     in
-    let rec string (i, j) = String.substring (!s, i - !left, j - i) in
-    let rec idToToken (idCase, P.Reg (i, j)) =
+    let string (i, j) = String.substring (!s, i - !left, j - i) in
+    let idToToken (idCase, P.Reg (i, j)) =
       stringToToken (idCase, string (i, j), P.Reg (i, j))
     in
-    let rec qidToToken (P.Reg (i, j)) =
+    let qidToToken (P.Reg (i, j)) =
       (Id (Lower, string (i, j + 1)), P.Reg (i, j + 1))
     in
     let rec lexInitial = function
@@ -459,17 +459,17 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
   (* functions lexing delimited comments below take nesting level l *)
 
   (* fun lex (inputFun) = let ... in ... end *)
-  let rec inputLine97 instream =
+  let inputLine97 instream =
     begin match TextIO.inputLine instream with Some s -> s | None -> ""
     end
 
   (** [lexStream instream] returns an infinite token stream terminated by [Eof].
   *)
-  let rec lexStream instream = lex (function i -> inputLine97 instream)
+  let lexStream instream = lex (function i -> inputLine97 instream)
 
   (** [lexTerminal (prompt0, prompt1)] lexes from standard input using the given
       prompts. *)
-  let rec lexTerminal (prompt0, prompt1) =
+  let lexTerminal (prompt0, prompt1) =
     lex (function
       | 0 -> begin
           print prompt0;
@@ -480,7 +480,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
           inputLine97 TextIO.stdIn
         end)
 
-  let rec toString' = function
+  let toString' = function
     | Dot -> "."
     | Pathsep -> "."
     | Colon -> ":"
@@ -541,7 +541,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
   (* -ABP 4/4/03 *)
   (* -rv 8/27/01 *)
 
-  let rec toString = function
+  let toString = function
     | Id (_, s) -> ("identifier `" ^ s) ^ "'"
     | Eof -> "end of file or `%.'"
     | String s -> "constant string " ^ s
@@ -551,7 +551,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
 
   (* charToNat(c) = n converts character c to decimal equivalent *)
   (* raises NotDigit(c) if c is not a digit 0-9 *)
-  let rec charToNat c =
+  let charToNat c =
     let digit = Char.ord c - Char.ord '0' in
     begin if digit < 0 || digit > 9 then raise (NotDigit c) else digit
     end
@@ -560,7 +560,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
   (* raises NotDigit(c) if s contains character c which is not a digit *)
 
   (** Convert a decimal string to an integer. *)
-  let rec stringToNat s =
+  let stringToNat s =
     let l = String.size s in
     let rec stn (i, n) =
       begin if i = l then n
@@ -574,7 +574,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
   *)
 
   (** True when a string starts with an uppercase letter or underscore. *)
-  let rec isUpper = function
+  let isUpper = function
     | "" -> false
     | s ->
         let c = String.sub (s, 0) in

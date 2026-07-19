@@ -74,7 +74,7 @@ end) : FILL with module State = Fill__0.State' = struct
 
     exception Success of int
 
-    let rec expand (S.FocusLF (I.EVar (r, g_, v_, _) as y_)) =
+    let expand (S.FocusLF (I.EVar (r, g_, v_, _) as y_)) =
       let rec try_ = function
         | ((I.Root _, _) as vs_), fs_, o_ -> (
             try
@@ -110,7 +110,7 @@ end) : FILL with module State = Fill__0.State' = struct
       in
       matchCtx (g_, 0, matchSig (Index.lookup (I.targetFam v_), []))
 
-    let rec apply = function
+    let apply = function
       | FillWithBVar ((I.EVar (r, g_, v_, _) as y_), n) ->
           let rec doit = function
             | ((I.Root _, _) as vs_), k -> begin
@@ -150,7 +150,7 @@ end) : FILL with module State = Fill__0.State' = struct
                   Unify.unify (g0_, (y_, I.id), (I.Root (I.Const c, s_), I.id))
             )
 
-    let rec menu = function
+    let menu = function
       | FillWithBVar ((I.EVar (_, g_, _, _) as x_), n) ->
           begin match I.ctxLookup (Names.ctxName g_, n) with
           | I.Dec (Some x, _) ->

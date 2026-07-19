@@ -56,25 +56,25 @@ module MakePrintOMDoc
       begin if n <= 0 then "" else tabstring ^ tabs (n - 1)
       end
 
-    let rec ind_reset () = indent := 0
-    let rec ind n = indent := !indent + n
-    let rec unind n = indent := !indent - n
+    let ind_reset () = indent := 0
+    let ind n = indent := !indent + n
+    let unind n = indent := !indent - n
 
-    let rec nl_ind () =
+    let nl_ind () =
       begin
         indent := !indent + 1;
         "\n" ^ tabs !indent
       end
 
-    let rec nl_unind () =
+    let nl_unind () =
       begin
         indent := !indent - 1;
         "\n" ^ tabs !indent
       end
 
-    let rec nl () = "\n" ^ tabs !indent
+    let nl () = "\n" ^ tabs !indent
 
-    let rec escape s =
+    let escape s =
       let rec escapelist = function
         | [] -> []
         | '&' :: rest -> String.explode "&amp;" @ escapelist rest
@@ -86,12 +86,12 @@ module MakePrintOMDoc
 
     let namesafe = ref true
 
-    let rec replace c =
+    let replace c =
       begin if Char.isAlphaNum c || Char.contains ":_-." c then String.str c
       else "_"
       end
 
-    let rec name_ cid =
+    let name_ cid =
       let n = I.conDecName (I.sgnLookup cid) in
       let name = String.translate replace n in
       let start =
@@ -104,7 +104,7 @@ module MakePrintOMDoc
       begin if !namesafe then ((start ^ name) ^ "__c") ^ Int.toString cid else n
       end
 
-    let rec varName_ (x, n) =
+    let varName_ (x, n) =
       let name = String.translate replace n in
       let start =
         begin if
@@ -116,15 +116,15 @@ module MakePrintOMDoc
       begin if !namesafe then ((start ^ name) ^ "__v") ^ Int.toString x else n
       end
 
-    let rec str_ s = s
-    let rec sexp l = String.concat l
+    let str_ s = s
+    let sexp l = String.concat l
 
     let rec spineLength = function
       | I.Nil -> 0
       | I.SClo (s_, _) -> spineLength s_
       | I.App (_, s_) -> 1 + spineLength s_
 
-    let rec fmtCon = function
+    let fmtCon = function
       | g_, I.BVar x ->
           let (I.Dec (Some n, _)) = I.ctxDec (g_, x) in
           sexp
@@ -139,7 +139,7 @@ module MakePrintOMDoc
           sexp [ str_ "<om:OMS cd=\"global\" name=\""; name_ cid; str_ "\"/>" ]
       | g_, I.FgnConst (csid, conDec_) -> sexp [ str_ "FgnConst" ]
 
-    let rec fmtUni = function
+    let fmtUni = function
       | I.Type -> str_ "<om:OMS cd=\"stelf\" name=\"type\"/>"
       | I.Kind -> str_ "<om:OMS cd=\"stelf\" name=\"kind\"/>"
 
@@ -378,7 +378,7 @@ module MakePrintOMDoc
         ^ "</private>"
       end
 
-    let rec fmtConDec = function
+    let fmtConDec = function
       | cid, I.ConDec (name, parent, imp, _, v_, l_) ->
           let _ = Names.varReset IntSyn.Null in
           let name = name_ cid in
@@ -465,25 +465,25 @@ module MakePrintOMDoc
          actually applied in the scope (typically, using Names.decName)
      (b) types need not be well-formed, since they are not used
   *)
-  let rec formatExp (g_, u_, imp) = fmtExp (g_, (u_, I.id), imp)
+  let formatExp (g_, u_, imp) = fmtExp (g_, (u_, I.id), imp)
 
   (*  fun formatSpine (G, S) = sexp (fmtSpine (G, (S, I.id))) *)
-  let rec formatConDec conDec_ = fmtConDec conDec_
+  let formatConDec conDec_ = fmtConDec conDec_
 
   (* fun expToString (G, U) = F.makestring_fmt (formatExp (G, U, 0)) *)
-  let rec conDecToString conDec_ = formatConDec conDec_
+  let conDecToString conDec_ = formatConDec conDec_
 
-  let rec fmtConst cid =
+  let fmtConst cid =
     ((formatConDec (cid, IntSyn.sgnLookup cid) ^ "\n") ^ fmtPresentation cid)
     ^ fmtFixity cid
 
-  let rec printConst cid =
+  let printConst cid =
     begin
       namesafe := false;
       fmtConst cid
     end
 
-  let rec printSgn filename ns =
+  let printSgn filename ns =
     let _ = namesafe := ns in
     let _ = ind_reset () in
     let file = TextIO.openOut filename in

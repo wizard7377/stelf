@@ -85,7 +85,7 @@ end) : WORLDIFY = struct
   exception Error' = Error'
 
   (* copied from terminates/Reduces.fun *)
-  let rec wrapMsg (c, occ, msg) =
+  let wrapMsg (c, occ, msg) =
     begin match Origins.originLookup c with
     | fileName, None -> (fileName ^ ":") ^ msg
     | fileName, Some occDec ->
@@ -96,7 +96,7 @@ end) : WORLDIFY = struct
           )
     end
 
-  let rec wrapMsgBlock (c, occ, msg) =
+  let wrapMsgBlock (c, occ, msg) =
     begin match Origins.originLookup c with
     | fileName, None -> (fileName ^ ":") ^ msg
     | fileName, Some occDec ->
@@ -139,13 +139,13 @@ end) : WORLDIFY = struct
           collectEVars (g_, s, Abstract.collectEVars (g_, (x_, I.id), xs_))
       | g_, I.Shift _, xs_ -> xs_
 
-    let rec noConstraints (g_, s) =
+    let noConstraints (g_, s) =
       begin match collectConstraints (collectEVars (g_, s, [])) with
       | [] -> true
       | _ -> false
       end
 
-    let rec formatD (g_, d_) =
+    let formatD (g_, d_) =
       F.hbox [ F.string "{"; Print.formatDec (g_, d_); F.string "}" ]
 
     let rec formatDList = function
@@ -159,7 +159,7 @@ end) : WORLDIFY = struct
           :: F.break_
           :: formatDList (I.Decl (g_, d'_), l_, I.dot1 t)
 
-    let rec wGoalToString ((g_, l_), Seq (_, piDecs, t)) =
+    let wGoalToString ((g_, l_), Seq (_, piDecs, t)) =
       F.makestring_fmt
         (F.hVbox
            [
@@ -170,13 +170,13 @@ end) : WORLDIFY = struct
              F.hVbox (formatDList (g_, piDecs, t));
            ])
 
-    let rec worldToString (g_, Seq (_, piDecs, t)) =
+    let worldToString (g_, Seq (_, piDecs, t)) =
       F.makestring_fmt (F.hVbox (formatDList (g_, piDecs, t)))
 
-    let rec hypsToString (g_, l_) =
+    let hypsToString (g_, l_) =
       F.makestring_fmt (F.hVbox (formatDList (g_, l_, I.id)))
 
-    let rec mismatchToString (g_, (v1_, s1), (v2_, s2)) =
+    let mismatchToString (g_, (v1_, s1), (v2_, s2)) =
       F.makestring_fmt
         (F.hVbox
            [
@@ -196,49 +196,49 @@ end) : WORLDIFY = struct
       val mismatch : I.dctx * I.eclo * I.eclo -> unit
       val success : unit -> unit
     end = struct
-      let rec clause c =
+      let clause c =
         print
           (("World checking clause " ^ Names.qidToString (Names.constQid c))
           ^ "\n")
 
-      let rec constraintsRemain () =
+      let constraintsRemain () =
         begin if !Global.chatter > 7 then
           print
             "Constraints remain after matching hypotheses against context block\n"
         else ()
         end
 
-      let rec matchBlock (gl_, r_) =
+      let matchBlock (gl_, r_) =
         begin if !Global.chatter > 7 then
           print (("Matching:\n" ^ wGoalToString (gl_, r_)) ^ "\n")
         else ()
         end
 
-      let rec unmatched gl_ =
+      let unmatched gl_ =
         begin if !Global.chatter > 7 then
           print (("Unmatched hypotheses:\n" ^ hypsToString gl_) ^ "\n")
         else ()
         end
 
-      let rec missing (g_, r_) =
+      let missing (g_, r_) =
         begin if !Global.chatter > 7 then
           print (("Missing hypotheses:\n" ^ worldToString (g_, r_)) ^ "\n")
         else ()
         end
 
-      let rec mismatch (g_, vs1_, vs2_) =
+      let mismatch (g_, vs1_, vs2_) =
         begin if !Global.chatter > 7 then
           print (("Mismatch:\n" ^ mismatchToString (g_, vs1_, vs2_)) ^ "\n")
         else ()
         end
 
-      let rec success () =
+      let success () =
         begin if !Global.chatter > 7 then print "Success\n" else ()
         end
     end
 
-    let rec decUName (g_, d_) = I.Decl (g_, Names.decUName (g_, d_))
-    let rec decEName (g_, d_) = I.Decl (g_, Names.decEName (g_, d_))
+    let decUName (g_, d_) = I.Decl (g_, Names.decUName (g_, d_))
+    let decEName (g_, d_) = I.Decl (g_, Names.decEName (g_, d_))
 
     let rec equivList = function
       | g_, (_, []), [] -> true
@@ -252,7 +252,7 @@ end) : WORLDIFY = struct
           | Unify.Unify _ -> false
           | _ -> false)
 
-    let rec equivBlock ((g_, l_), l'_) =
+    let equivBlock ((g_, l_), l'_) =
       let t = createEVarSub (I.Null, g_) in
       equivList (I.Null, (t, l_), l'_)
 
@@ -273,7 +273,7 @@ end) : WORLDIFY = struct
           end
       end
 
-    let rec subsumedBlock a w1_ (g_, l_) =
+    let subsumedBlock a w1_ (g_, l_) =
       let t = createEVarSub (I.Null, g_) in
       let l'_ = strengthen a (t, l_) in
       begin if equivBlocks w1_ l'_ then ()
@@ -289,7 +289,7 @@ end) : WORLDIFY = struct
         end
       end
 
-    let rec subsumedWorld a (T.Worlds w1_) (T.Worlds w2_) =
+    let subsumedWorld a (T.Worlds w1_) (T.Worlds w2_) =
       subsumedBlocks a w1_ w2_
 
     let rec eqCtx = function
@@ -304,7 +304,7 @@ end) : WORLDIFY = struct
           Conv.convDec ((d1_, I.id), (d2_, I.id)) && eqList (l1_, l2_)
       | _ -> false
 
-    let rec eqBlock (b1, b2) =
+    let eqBlock (b1, b2) =
       let g1_, l1_ = I.constBlock b1 in
       let g2_, l2_ = I.constBlock b2 in
       eqCtx (g1_, g2_) && eqList (l1_, l2_)
@@ -342,7 +342,7 @@ end) : WORLDIFY = struct
         end
       end
 
-    let rec checkConDec w_ (I.ConDec (s, m, k, status, v_, l_)) =
+    let checkConDec w_ (I.ConDec (s, m, k, status, v_, l_)) =
       checkClause w_ (I.Null, v_, P.top)
 
     let rec subGoalToDList = function
@@ -357,7 +357,7 @@ end) : WORLDIFY = struct
       | cid :: [] -> Block (cid, I.constBlock cid)
       | cid :: cids -> Plus (Block (cid, I.constBlock cid), worldsToReg' cids)
 
-    let rec init = function
+    let init = function
       | _, ((I.Root _, s) as vs_) -> begin
           Trace.success ();
           raise (Success (Whnf.normalize vs_))
@@ -427,7 +427,7 @@ end) : WORLDIFY = struct
           accR (gVs_, r', function gVs'_ -> accR (gVs'_, r, k))
         end
 
-    let rec worldifyGoal (g_, v_, (T.Worlds cids as w_), occ) =
+    let worldifyGoal (g_, v_, (T.Worlds cids as w_), occ) =
       try
         let b = I.targetFam v_ in
         let wb_ = W.getWorlds b in
@@ -450,7 +450,7 @@ end) : WORLDIFY = struct
           let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
           I.Pi ((I.Dec (x, w1_), I.No), w2_)
 
-    let rec worldifyConDec w_ (c, I.ConDec (s, m, k, status, v_, l_)) =
+    let worldifyConDec w_ (c, I.ConDec (s, m, k, status, v_, l_)) =
       begin
         begin if !Global.chatter = 4 then
           print (Names.qidToString (Names.constQid c) ^ " ")
@@ -487,9 +487,9 @@ end) : WORLDIFY = struct
             raise
               (Error (wrapMsgBlock (b, occ, "World not hereditarily closed"))))
 
-    let rec worldifyWorld (T.Worlds bs_) = worldifyBlocks bs_
+    let worldifyWorld (T.Worlds bs_) = worldifyBlocks bs_
 
-    let rec worldify a =
+    let worldify a =
       let w_ = W.getWorlds a in
       let _ = print "[?" in
       let w'_ = worldifyWorld w_ in

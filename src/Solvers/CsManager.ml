@@ -82,9 +82,9 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
     let _ = Array.update (csArray, 0, Solver (unifySolver, ref true))
     let nextCS = (ref 1 : int ref)
     let installFN = (ref (function _ -> -1) : (sigEntry -> IntSyn.cid) ref)
-    let rec setInstallFN f = installFN := f
+    let setInstallFN f = installFN := f
 
-    let rec installSolver solver =
+    let installSolver solver =
       let cs = !nextCS in
       let _ =
         begin if !nextCS > maxCS then
@@ -119,7 +119,7 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
 
     and useSolver name =
       let exception Found of IntSyn.csid in
-      let rec findSolver name =
+      let findSolver name =
         try
           begin
             ArraySlice.appi
@@ -164,9 +164,9 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
       | None -> raise (Error (("solver " ^ name) ^ " not found"))
       end
 
-    let rec parse string =
+    let parse string =
       let exception Parsed of IntSyn.csid * IntSyn.conDec in
-      let rec parse' (cs, (solver : solver)) =
+      let parse' (cs, (solver : solver)) =
         begin match (fun r -> r.fgnConst) solver with
         | None -> ()
         | Some fgnConDec ->
@@ -190,7 +190,7 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
 
     let markCount = (ref 0 : int ref)
 
-    let rec reset () =
+    let reset () =
       ArraySlice.appi
         (function
           | _, Solver (solver, active) ->
@@ -202,7 +202,7 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
               end)
         (ArraySlice.slice (csArray, 0, Some !nextCS))
 
-    let rec mark () =
+    let mark () =
       begin
         markCount := !markCount + 1;
         ArraySlice.appi
@@ -213,7 +213,7 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
           (ArraySlice.slice (csArray, 0, Some !nextCS))
       end
 
-    let rec unwind targetCount =
+    let unwind targetCount =
       let rec unwind' = function
         | 0 -> markCount := targetCount
         | k -> begin
@@ -228,7 +228,7 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
       in
       unwind' (!markCount - targetCount)
 
-    let rec trail f =
+    let trail f =
       let current = !markCount in
       let _ = mark () in
       let r = f () in

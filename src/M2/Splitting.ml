@@ -136,7 +136,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               (v_, I.dot1 s'),
               function name, u_ -> abstract (name, I.Lam (d'_, u_)) )
 
-    let rec split (M.Prefix (g_, m_, b_), ((I.Dec (_, v_) as d_), s), abstract)
+    let split (M.Prefix (g_, m_, b_), ((I.Dec (_, v_) as d_), s), abstract)
         =
       lowerSplitDest
         ( I.Null,
@@ -169,9 +169,9 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
 
-    let rec isIndexInit k = false
-    let rec isIndexSucc (d_, isIndex) k = occursInDec (k, d_) || isIndex (k + 1)
-    let rec isIndexFail (d_, isIndex) k = isIndex (k + 1)
+    let isIndexInit k = false
+    let isIndexSucc (d_, isIndex) k = occursInDec (k, d_) || isIndex (k + 1)
+    let isIndexFail (d_, isIndex) k = isIndex (k + 1)
 
     let rec checkVar = function
       | I.Decl (m_, M.Top), 1 -> true
@@ -193,7 +193,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
 
     and checkDec (m_, I.Dec (_, v_)) = checkExp (m_, v_)
 
-    let rec modeEq = function
+    let modeEq = function
       | Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Plus, _), M.Top ->
           true
       | Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Minus, _), M.Bot ->
@@ -366,7 +366,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           else inheritSpineMode (mode, mS, b_, k, s_, k', s'_, bdd'_)
           end
 
-    let rec inheritSplitDepth
+    let inheritSplitDepth
         ( (M.State (_, M.Prefix (g_, m_, b_), v_) as s_),
           (M.State (name', M.Prefix (g'_, m'_, b'_), v'_) as s'_) ) =
       let d = I.ctxLength g_ in
@@ -379,7 +379,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       in
       M.State (name', M.Prefix (g'_, m'_, b''_), v'_)
 
-    let rec abstractInit (M.State (name, gm_, v_))
+    let abstractInit (M.State (name, gm_, v_))
         (name', M.Prefix (g'_, m'_, b'_), s') =
       inheritSplitDepth
         ( M.State (name, gm_, v_),
@@ -387,7 +387,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
             (M.State (name ^ name', M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
         )
 
-    let rec abstractCont ((d_, mode, b), abstract)
+    let abstractCont ((d_, mode, b), abstract)
         (name', M.Prefix (g'_, m'_, b'_), s') =
       abstract
         ( name',
@@ -397,8 +397,8 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               I.Decl (b'_, b) ),
           I.dot1 s' )
 
-    let rec makeAddressInit s_ k = (s_, k)
-    let rec makeAddressCont makeAddress k = makeAddress (k + 1)
+    let makeAddressInit s_ k = (s_, k)
+    let makeAddressCont makeAddress k = makeAddress (k + 1)
 
     let rec expand' = function
       | M.Prefix (I.Null, I.Null, I.Null), isIndex, abstract, makeAddress ->
@@ -445,7 +445,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
             I.dot1 s',
             ops )
 
-    let rec expand (M.State (name, M.Prefix (g_, m_, b_), v_) as s_) =
+    let expand (M.State (name, M.Prefix (g_, m_, b_), v_) as s_) =
       let _, _, ops =
         expand'
           ( M.Prefix (g_, m_, b_),
@@ -455,16 +455,16 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       in
       ops
 
-    let rec index (_, sl_) = List.length sl_
+    let index (_, sl_) = List.length sl_
 
-    let rec apply (_, sl_) =
+    let apply (_, sl_) =
       map
         (function
           | Active s_ -> s_
           | InActive -> raise (Error "Not applicable: leftover constraints"))
         sl_
 
-    let rec menu (((M.State (name, M.Prefix (g_, m_, b_), v_), i), sl_) as op_)
+    let menu (((M.State (name, M.Prefix (g_, m_, b_), v_), i), sl_) as op_)
         =
       let rec active = function
         | [], n -> n
@@ -476,12 +476,12 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
         | InActive :: l_, n -> inactive (l_, n + 1)
         | Active _ :: l_, n -> inactive (l_, n)
       in
-      let rec indexToString = function
+      let indexToString = function
         | 0 -> "zero cases"
         | 1 -> "1 case"
         | n -> Int.toString n ^ " cases"
       in
-      let rec flagToString = function
+      let flagToString = function
         | _, 0 -> ""
         | n, m ->
             (((" [active: " ^ Int.toString n) ^ " inactive: ") ^ Int.toString m)
@@ -492,7 +492,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       ^ flagToString (active (sl_, 0), inactive (sl_, 0)))
       ^ ")"
 
-    let rec var ((_, i), _) = i
+    let var ((_, i), _) = i
   end
 
   (* constCases (G, (V, s), I, abstract, C) = C'

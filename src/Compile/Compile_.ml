@@ -56,17 +56,17 @@ module MakeCompile
 
   type duplicates = Bvar of int | Fgn | Def of int
 
-  let rec notCS = function fromCS_ -> false | _ -> true
+  let notCS = function fromCS_ -> false | _ -> true
 
   type opt = CompSyn.opt
 
   let optimize = CompSyn.optimize
-  let rec cidFromHead = function I.Const c -> c | I.Def c -> c
+  let cidFromHead = function I.Const c -> c | I.Def c -> c
 
   (* isConstraint(H) = B
        where B iff H is a constant with constraint status
     *)
-  let rec isConstraint = function
+  let isConstraint = function
     | I.Const c ->
         begin match I.constStatus c with I.Constraint _ -> true | _ -> false
         end
@@ -79,7 +79,7 @@ module MakeCompile
        A = H @ S
     *)
   let rec head = function I.Root (h, _) -> h | I.Pi (_, a_) -> head a_
-  let rec seen (i, vars_) = List.exists (function d, x -> x = i) vars_
+  let seen (i, vars_) = List.exists (function d, x -> x = i) vars_
 
   (* etaSpine (S, n) = true
 
@@ -103,7 +103,7 @@ module MakeCompile
   (* collectHead (h, K, Vars, depth) = (K', Vars', replaced)
      adds to K and Vars as in collectExp and collectSpine
    *)
-  let rec collectHead = function
+  let collectHead = function
     | (I.BVar k as h), s_, k_, vars_, depth ->
         begin if k > depth then
           begin if etaSpine (s_, depth) then
@@ -159,7 +159,7 @@ module MakeCompile
 
      Invariants: U is NF, S is in NF
   *)
-  let rec shiftHead = function
+  let shiftHead = function
     | (I.BVar k as h), depth, total ->
         begin if k > depth then I.BVar (k + total) else I.BVar k
         end
@@ -207,7 +207,7 @@ module MakeCompile
    and
       Eqn accumulates residual equation UnifyEq(Gl, M, N)
   *)
-  let rec linearHead = function
+  let linearHead = function
     | g_, (I.BVar k as h), s_, left, vars_, depth, total ->
         begin if k > depth then
           begin if etaSpine (s_, depth) then
@@ -302,7 +302,7 @@ module MakeCompile
        and of the form
            (Axists(_ , Axists( _, ....., Axists( _, Assign (E, AuxG)))))
   *)
-  let rec compileLinearHead (g_, (I.Root (h, s_) as r_)) =
+  let compileLinearHead (g_, (I.Root (h, s_) as r_)) =
     let k_, _ = collectExp (r_, [], [], 0) in
     let left = List.length k_ in
     let left', _, r'_, eqs_ =
@@ -332,7 +332,7 @@ module MakeCompile
            G |- H ResGoal  and H is linear
 
   *)
-  let rec compileSbtHead (g_, (I.Root (h, s_) as h_)) =
+  let compileSbtHead (g_, (I.Root (h, s_) as h_)) =
     let k_, _ = collectExp (h_, [], [], 0) in
     let left = List.length k_ in
     let left', _, h'_, eqs_ =
@@ -481,10 +481,10 @@ module MakeCompile
         compileSClauseN fromCS (I.Decl (stack_, I.Maybe), I.Decl (g_, d_), a2_)
     end
 
-  let rec compileDClause opt (g_, a_) =
+  let compileDClause opt (g_, a_) =
     compileDClauseN I.Ordinary opt (g_, Whnf.normalize (a_, I.id))
 
-  let rec compileGoal (g_, a_) =
+  let compileGoal (g_, a_) =
     compileGoalN I.Ordinary (g_, Whnf.normalize (a_, I.id))
 
   (* compileCtx G = (G, dPool)
@@ -494,7 +494,7 @@ module MakeCompile
      then |- G ~> dPool  (context G compile to clause pool dPool)
      and  |- dPool  dpool
   *)
-  let rec compileCtx opt g_ =
+  let compileCtx opt g_ =
     let rec compileBlock = function
       | [], s, (n, i) -> []
       | I.Dec (_, v_) :: vs_, t, (n, i) ->
@@ -530,7 +530,7 @@ module MakeCompile
      then |- G ~> dPool  (context G compile to clause pool dPool)
      and  |- dPool  dpool
   *)
-  let rec compilePsi opt psi_ =
+  let compilePsi opt psi_ =
     let rec compileBlock = function
       | [], s, (n, i) -> []
       | I.Dec (_, v_) :: vs_, t, (n, i) ->
@@ -577,7 +577,7 @@ module MakeCompile
      Effect: compiles and installs compiled form of A according to
              the specified compilation strategy
   *)
-  let rec installClause fromCS (a, a_) =
+  let installClause fromCS (a, a_) =
     begin match !C.optimize with
     | No ->
         C.sProgInstall (a, C.SClause (compileDClauseN fromCS true (I.Null, a_)))
@@ -604,7 +604,7 @@ module MakeCompile
              No effect if condec has no operational meaning
   *)
   (* Defined constants are currently not compiled *)
-  let rec compileConDec arg__11 arg__12 =
+  let compileConDec arg__11 arg__12 =
     begin match (arg__11, arg__12) with
     | fromCS, (a, I.ConDec (_, _, _, _, a_, Type)) ->
         installClause fromCS (a, a_)
@@ -627,9 +627,9 @@ module MakeCompile
     end
   (* we don't use substitution tree indexing for skolem constants yet -bp*)
 
-  let rec install fromCS cid = compileConDec fromCS (cid, I.sgnLookup cid)
+  let install fromCS cid = compileConDec fromCS (cid, I.sgnLookup cid)
 
-  let rec sProgReset () =
+  let sProgReset () =
     begin
       SubTree.sProgReset ();
       C.sProgReset ()

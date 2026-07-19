@@ -73,7 +73,7 @@ end) : INFERENCE.INFERENCE = struct
           (x'_ :: xs_, fVs'_)
       | g_, ((_, s) as fVs_) -> ([], fVs_)
 
-    let rec forward = function
+    let forward = function
       | g_, b_, (I.Pi ((_, meta_), _) as v_) -> (
           let _ =
             begin if !Global.doubleCheck then
@@ -123,7 +123,7 @@ end) : INFERENCE.INFERENCE = struct
           let (g0'_, b0'_), sc' = expand' (gb0_, (g_, b_), n + 1) in
           ((I.Decl (g0'_, d_), I.Decl (b0'_, t_)), sc')
 
-    let rec expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
+    let expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
       let _ =
         begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g_ else ()
         end
@@ -152,8 +152,8 @@ end) : INFERENCE.INFERENCE = struct
       in
       function () -> s'_
 
-    let rec apply f = f ()
-    let rec menu _ = "Inference"
+    let apply f = f ()
+    let menu _ = "Inference"
   end
 
   (* createEVars (G, (F, V, s)) = (Xs', (F', V', s'))

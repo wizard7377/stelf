@@ -221,17 +221,17 @@ module MakeTypeCheck
           checkDec (g_, (d_, I.id))
         end
 
-    let rec check (u_, v_) = checkExp (I.Null, (u_, I.id), (v_, I.id))
+    let check (u_, v_) = checkExp (I.Null, (u_, I.id), (v_, I.id))
 
-    let rec infer u_ =
+    let infer u_ =
       let v_ie_, s_ie_ = inferExp (I.Null, (u_, I.id)) in
       I.EClo (v_ie_, s_ie_)
 
-    let rec infer' (g_, u_) =
+    let infer' (g_, u_) =
       let v_ie_, s_ie_ = inferExp (g_, (u_, I.id)) in
       I.EClo (v_ie_, s_ie_)
 
-    let rec checkConv (u1_, u2_) =
+    let checkConv (u1_, u2_) =
       begin if Conv.conv ((u1_, I.id), (u2_, I.id)) then ()
       else
         raise

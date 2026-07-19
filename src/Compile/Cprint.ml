@@ -94,7 +94,7 @@ module Make_CPrint (Print_ : PRINT) (Formatter_ : FORMATTER) (Names_ : NAMES) :
     end
 
   (* conDecToString (c, clause) printed representation of static clause *)
-  let rec conDecToString = function
+  let conDecToString = function
     | c, SClause r ->
         let _ = Names.varReset IntSyn.Null in
         let name = IntSyn.conDecName (IntSyn.sgnLookup c) in
@@ -107,7 +107,7 @@ module Make_CPrint (Print_ : PRINT) (Formatter_ : FORMATTER) (Names_ : NAMES) :
     | c, Void -> Print.conDecToString (IntSyn.sgnLookup c) ^ "\n\n"
 
   (* sProgToString () = printed representation of static program *)
-  let rec sProgToString () =
+  let sProgToString () =
     let size, _ = IntSyn.sgnSize () in
     let rec ts cid =
       begin if cid < size then

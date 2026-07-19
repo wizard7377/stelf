@@ -42,7 +42,7 @@ module Sgn = struct
     | [], n -> split [ None ] n
     end
 
-  let rec clear () =
+  let clear () =
     begin
       Array.modify (function _ -> None) sigma;
       begin
@@ -51,7 +51,7 @@ module Sgn = struct
       end
     end
 
-  let rec condec (s, a, oa) =
+  let condec (s, a, oa) =
     {
       name = s;
       classifier = Tclass_ a;
@@ -61,7 +61,7 @@ module Sgn = struct
       abbreviation = false;
     }
 
-  let rec tycondec (s, k, ok) =
+  let tycondec (s, k, ok) =
     {
       name = s;
       classifier = Kclass_ k;
@@ -71,7 +71,7 @@ module Sgn = struct
       abbreviation = false;
     }
 
-  let rec defn (s, a, oa, m, om) =
+  let defn (s, a, oa, m, om) =
     {
       name = s;
       classifier = Tclass_ a;
@@ -81,7 +81,7 @@ module Sgn = struct
       abbreviation = false;
     }
 
-  let rec tydefn (s, k, ok, a, oa) =
+  let tydefn (s, k, ok, a, oa) =
     {
       name = s;
       classifier = Kclass_ k;
@@ -91,7 +91,7 @@ module Sgn = struct
       abbreviation = false;
     }
 
-  let rec abbrev (s, a, oa, m, om) =
+  let abbrev (s, a, oa, m, om) =
     {
       name = s;
       classifier = Tclass_ a;
@@ -101,7 +101,7 @@ module Sgn = struct
       abbreviation = true;
     }
 
-  let rec tyabbrev (s, k, ok, a, oa) =
+  let tyabbrev (s, k, ok, a, oa) =
     {
       name = s;
       classifier = Kclass_ k;
@@ -111,9 +111,9 @@ module Sgn = struct
       abbreviation = true;
     }
 
-  let rec typeOfSigent (e : sigent) = Syntax.typeOf ((fun r -> r.classifier) e)
-  let rec setter table (n, x) = Array.update (table, n, Some x)
-  let rec getter table id = Array.sub (table, id)
+  let typeOfSigent (e : sigent) = Syntax.typeOf ((fun r -> r.classifier) e)
+  let setter table (n, x) = Array.update (table, n, Some x)
+  let getter table id = Array.sub (table, id)
   let set_modes = setter all_modes
   let get_modes = getter all_modes
   let set_p = setter all_ps
@@ -121,23 +121,23 @@ module Sgn = struct
   let update = setter sigma
   let sub = getter sigma
 
-  let rec classifier id =
+  let classifier id =
     try (fun r -> r.classifier) (Option.valOf (sub id))
     with Option.Option -> raise (NoSuch id)
 
-  let rec o_classifier id =
+  let o_classifier id =
     try (fun r -> r.o_classifier) (Option.valOf (sub id))
     with Option.Option -> raise (NoSuch id)
 
-  let rec def id =
+  let def id =
     try (fun r -> r.def) (Option.valOf (sub id))
     with Option.Option -> raise (NoSuch id)
 
-  let rec o_def id =
+  let o_def id =
     try (fun r -> r.o_def) (Option.valOf (sub id))
     with Option.Option -> raise (NoSuch id)
 
-  let rec abbreviation id =
+  let abbreviation id =
     try (fun r -> r.abbreviation) (Option.valOf (sub id))
     with Option.Option -> raise (NoSuch id)
 end

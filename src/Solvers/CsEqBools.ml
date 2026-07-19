@@ -40,19 +40,19 @@ end) : Cs.CS = struct
 
     exception MyIntsynRep of sum_
 
-    let rec extractSum = function
+    let extractSum = function
       | MyIntsynRep sum -> sum
       | fe -> raise (UnexpectedFgnExp fe)
 
     let myID = (ref (-1) : csid ref)
     let boolID = (ref (-1) : cid ref)
-    let rec bool () = Root (Const !boolID, Nil)
+    let bool () = Root (Const !boolID, Nil)
     let trueID = (ref (-1) : cid ref)
     let falseID = (ref (-1) : cid ref)
-    let rec trueExp () = Root (Const !trueID, Nil)
-    let rec falseExp () = Root (Const !falseID, Nil)
+    let trueExp () = Root (Const !trueID, Nil)
+    let falseExp () = Root (Const !falseID, Nil)
 
-    let rec solveBool = function
+    let solveBool = function
       | g_, s_, 0 -> Some (trueExp ())
       | g_, s_, 1 -> Some (falseExp ())
       | g_, s_, k -> None
@@ -63,29 +63,29 @@ end) : Cs.CS = struct
     let orID = (ref (-1) : cid ref)
     let impliesID = (ref (-1) : cid ref)
     let iffID = (ref (-1) : cid ref)
-    let rec notExp u_ = Root (Const !notID, App (u_, Nil))
-    let rec xorExp (u_, v_) = Root (Const !xorID, App (u_, App (v_, Nil)))
-    let rec andExp (u_, v_) = Root (Const !andID, App (u_, App (v_, Nil)))
-    let rec orExp (u_, v_) = Root (Const !orID, App (u_, App (v_, Nil)))
+    let notExp u_ = Root (Const !notID, App (u_, Nil))
+    let xorExp (u_, v_) = Root (Const !xorID, App (u_, App (v_, Nil)))
+    let andExp (u_, v_) = Root (Const !andID, App (u_, App (v_, Nil)))
+    let orExp (u_, v_) = Root (Const !orID, App (u_, App (v_, Nil)))
 
-    let rec impliesExp (u_, v_) =
+    let impliesExp (u_, v_) =
       Root (Const !impliesID, App (u_, App (v_, Nil)))
 
-    let rec iffExp (u_, v_) = Root (Const !iffID, App (u_, App (v_, Nil)))
-    let rec member eq (x, l_) = List.exists (function y -> eq (x, y)) l_
+    let iffExp (u_, v_) = Root (Const !iffID, App (u_, App (v_, Nil)))
+    let member eq (x, l_) = List.exists (function y -> eq (x, y)) l_
 
-    let rec differenceSet eq (l1_, l2_) =
+    let differenceSet eq (l1_, l2_) =
       let l1'_ = List.filter (function x -> not (member eq (x, l2_))) l1_ in
       let l2'_ = List.filter (function x -> not (member eq (x, l1_))) l2_ in
       l1'_ @ l2'_
 
-    let rec equalSet eq (l1_, l2_) =
+    let equalSet eq (l1_, l2_) =
       begin match differenceSet eq (l1_, l2_) with
       | [] -> true
       | _ :: _ -> false
       end
 
-    let rec unionSet eq (l1_, l2_) =
+    let unionSet eq (l1_, l2_) =
       let l2'_ = List.filter (function x -> not (member eq (x, l1_))) l2_ in
       l1_ @ l2'_
 
@@ -144,7 +144,7 @@ end) : Cs.CS = struct
           sameSub (Dot (Idx (k1 + 1), Shift (k1 + 1)), s2)
       | _ -> false
 
-    let rec xorSum (Sum (m1, monL1), Sum (m2, monL2)) =
+    let xorSum (Sum (m1, monL1), Sum (m2, monL2)) =
       Sum (not (m1 = m2), differenceSet compatibleMon (monL1, monL2))
 
     let rec andSum = function
@@ -162,15 +162,15 @@ end) : Cs.CS = struct
           let usL_ = unionSet sameExp (usL1_, usL2_) in
           xorSum (Sum (false, [ Mon usL_ ]), andSumMon (Sum (m1, monL1), mon2))
 
-    let rec notSum (Sum (m, monL)) = Sum (not m, monL)
+    let notSum (Sum (m, monL)) = Sum (not m, monL)
 
-    let rec orSum (sum1, sum2) =
+    let orSum (sum1, sum2) =
       xorSum (sum1, xorSum (sum2, andSum (sum1, sum2)))
 
-    let rec impliesSum (sum1, sum2) =
+    let impliesSum (sum1, sum2) =
       notSum (xorSum (sum1, andSum (sum1, sum2)))
 
-    let rec iffSum (sum1, sum2) = notSum (xorSum (sum1, sum2))
+    let iffSum (sum1, sum2) = notSum (xorSum (sum1, sum2))
 
     let rec fromExpW = function
       | (FgnExp (cs, fe), _) as us_ ->
@@ -204,7 +204,7 @@ end) : Cs.CS = struct
     and appMon (f, Mon usL_) =
       List.app (function u_, s_ -> f (EClo (u_, s_))) usL_
 
-    let rec findMon f (g_, Sum (m, monL)) =
+    let findMon f (g_, Sum (m, monL)) =
       let rec findMon' = function
         | [], monL2 -> None
         | mon :: monL1, monL2 ->
@@ -216,7 +216,7 @@ end) : Cs.CS = struct
       findMon' (monL, [])
 
     let rec unifySum (g_, sum1, sum2) =
-      let rec invertMon = function
+      let invertMon = function
         | g_, Mon (((EVar (r, _, _, _) as lhs_), s) :: []), sum ->
             begin if Whnf.isPatSub s then
               let ss = Whnf.invert s in
@@ -247,25 +247,25 @@ end) : Cs.CS = struct
       | Sum (m, []) as sum -> toExp sum
       | Sum (m, monL) as sum -> FgnExp (!myID, MyIntsynRep sum)
 
-    let rec toInternal arg__1 arg__2 =
+    let toInternal arg__1 arg__2 =
       begin match (arg__1, arg__2) with
       | MyIntsynRep sum, () -> toExp (normalizeSum sum)
       | fe, () -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec map arg__3 arg__4 =
+    let map arg__3 arg__4 =
       begin match (arg__3, arg__4) with
       | MyIntsynRep sum, f -> toFgn (normalizeSum (mapSum (f, sum)))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec app arg__5 arg__6 =
+    let app arg__5 arg__6 =
       begin match (arg__5, arg__6) with
       | MyIntsynRep sum, f -> appSum (f, sum)
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec equalTo arg__7 arg__8 =
+    let equalTo arg__7 arg__8 =
       begin match (arg__7, arg__8) with
       | MyIntsynRep sum, u2_ ->
           begin match xorSum (normalizeSum sum, fromExp (u2_, id)) with
@@ -275,14 +275,14 @@ end) : Cs.CS = struct
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec unifyWith arg__9 arg__10 =
+    let unifyWith arg__9 arg__10 =
       begin match (arg__9, arg__10) with
       | MyIntsynRep sum, (g_, u2_) ->
           unifySum (g_, normalizeSum sum, fromExp (u2_, id))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec installFgnExpOps () =
+    let installFgnExpOps () =
       let csid = !myID in
       let _ = FgnExpStd.ToInternal.install (csid, toInternal) in
       let _ = FgnExpStd.Map.install (csid, map) in
@@ -291,7 +291,7 @@ end) : Cs.CS = struct
       let _ = FgnExpStd.EqualTo.install (csid, equalTo) in
       ()
 
-    let rec makeFgn (arity, opExp) s_ =
+    let makeFgn (arity, opExp) s_ =
       let rec makeParams = function
         | 0 -> Nil
         | n -> App (Root (BVar n, Nil), makeParams (n - 1))
@@ -312,19 +312,19 @@ end) : Cs.CS = struct
       let s'_, arity' = expand ((s_, id), arity) in
       makeLam (toFgn (opExp s'_)) arity'
 
-    let rec makeFgnUnary opSum =
+    let makeFgnUnary opSum =
       makeFgn (1, function App (u_, Nil) -> opSum (fromExp (u_, id)))
 
-    let rec makeFgnBinary opSum =
+    let makeFgnBinary opSum =
       makeFgn
         ( 2,
           function
           | App (u1_, App (u2_, Nil)) ->
               opSum (fromExp (u1_, id), fromExp (u2_, id)) )
 
-    let rec arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
+    let arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
 
-    let rec init (cs, installF) =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin

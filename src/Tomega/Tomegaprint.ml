@@ -50,9 +50,9 @@ end) : TOMEGAPRINT = struct
     module Names = TomegaPrint__0.Names
 
     let evarList : T.prg list ref = ref []
-    let rec evarReset () = evarList := []
+    let evarReset () = evarList := []
 
-    let rec evarName n =
+    let evarName n =
       let rec evarName' = function
         | [] -> raise (Error "not found")
         | (T.EVar (_, _, _, _, _, (I.EVar (_, g_, r, _) as x_)) as y_) :: l_ ->
@@ -61,7 +61,7 @@ end) : TOMEGAPRINT = struct
       in
       evarName' !evarList
 
-    let rec nameEVar (T.EVar (_, _, _, _, _, (I.EVar (_, g_, r, _) as x_))) =
+    let nameEVar (T.EVar (_, _, _, _, _, (I.EVar (_, g_, r, _) as x_))) =
       Names.evarName (g_, x_)
 
     let rec formatCtxBlock = function
@@ -78,7 +78,7 @@ end) : TOMEGAPRINT = struct
             I.dot1 s'',
             fmts @ [ Fmt.string ","; Fmt.break_; fmt ] )
 
-    let rec constName c = I.conDecName (I.sgnLookup c)
+    let constName c = I.conDecName (I.sgnLookup c)
 
     let rec formatWorld = function
       | [] -> []
@@ -156,18 +156,18 @@ end) : TOMEGAPRINT = struct
           ]
           @ formatFor' (psi_, f_)
 
-    let rec formatFor (g_, f_) =
+    let formatFor (g_, f_) =
       Fmt.hVbox (formatFor' (g_, T.forSub (f_, T.id)))
 
-    let rec forToString (psi_, f_) = Fmt.makestring_fmt (formatFor (psi_, f_))
+    let forToString (psi_, f_) = Fmt.makestring_fmt (formatFor (psi_, f_))
 
-    let rec decName = function
+    let decName = function
       | g_, T.UDec d_ -> T.UDec (Names.decName (g_, d_))
       | g_, T.PDec (None, f_, tc1_, tc2_) -> T.PDec (Some "xx", f_, tc1_, tc2_)
       | g_, d_ -> d_
 
-    let rec psiName (psi1_, s, psi2_, l) =
-      let rec nameDec = function
+    let psiName (psi1_, s, psi2_, l) =
+      let nameDec = function
         | (I.Dec (Some _, _) as d_), name -> d_
         | I.Dec (None, v_), name -> I.Dec (Some name, v_)
       in
@@ -511,7 +511,7 @@ end) : TOMEGAPRINT = struct
                 ]
                 @ fmtCaseRest l_
           in
-          let rec fmtCase ((psi1_, s1, p2_) :: l_) =
+          let fmtCase ((psi1_, s1, p2_) :: l_) =
             let psi1'_ = psiName (psi1_, s1, psi_, 1) in
             let s_ = argsToSpine (s1, 1, T.Nil) in
             let fspine_ = fmtSpine callname (psi1_, s_) in
@@ -702,7 +702,7 @@ end) : TOMEGAPRINT = struct
       begin if lemma = proj then name else lookup (names, projs) lemma
       end
 
-    let rec formatPrg0
+    let formatPrg0
         ((names, projs), T.Rec ((T.PDec (Some _, f_, _, _) as d_), p_)) =
       let max = 1 in
       Fmt.vbox0 0 1
@@ -713,15 +713,15 @@ end) : TOMEGAPRINT = struct
              p_,
              function lemma -> lookup (names, projs) lemma ))
 
-    let rec formatFun args_ =
+    let formatFun args_ =
       begin
         Names.varReset I.Null;
         formatPrg0 args_
       end
 
-    let rec funToString args_ = Fmt.makestring_fmt (formatFun args_)
+    let funToString args_ = Fmt.makestring_fmt (formatFun args_)
 
-    let rec prgToString args_ =
+    let prgToString args_ =
       Fmt.makestring_fmt (formatPrg3 (function _ -> "?") args_)
 
     let rec nameCtx = function
@@ -805,7 +805,7 @@ end) : TOMEGAPRINT = struct
               ]
           end
 
-    let rec ctxToString psi_ = Fmt.makestring_fmt (Fmt.hVbox (formatCtx psi_))
+    let ctxToString psi_ = Fmt.makestring_fmt (Fmt.hVbox (formatCtx psi_))
   end
 
   (* Invariant:

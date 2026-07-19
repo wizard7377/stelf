@@ -55,13 +55,13 @@ end) : ELIM with module State = Elim__0.State' = struct
 
     exception Success of int
 
-    let rec stripTC tc_ = tc_
+    let stripTC tc_ = tc_
 
-    let rec stripTCOpt = function
+    let stripTCOpt = function
       | None -> None
       | Some tc_ -> Some (stripTC tc_)
 
-    let rec stripDec = function
+    let stripDec = function
       | T.UDec d_ -> T.UDec d_
       | T.PDec (name, f_, tc1_, tc2_) -> T.PDec (name, f_, tc1_, stripTCOpt tc2_)
 
@@ -69,7 +69,7 @@ end) : ELIM with module State = Elim__0.State' = struct
       | I.Null -> I.Null
       | I.Decl (psi_, d_) -> I.Decl (strip psi_, stripDec d_)
 
-    let rec expand (S.Focus ((T.EVar (psi_, r, g_, v_, _, _) as y_), w_)) =
+    let expand (S.Focus ((T.EVar (psi_, r, g_, v_, _, _) as y_), w_)) =
       let rec matchCtx = function
         | I.Null, _, fs_ -> fs_
         | I.Decl (g_, T.PDec (x, f_, _, _)), n, fs_ ->
@@ -107,7 +107,7 @@ end) : ELIM with module State = Elim__0.State' = struct
       | Local (T.EVar (psi_, r, T.FClo (f_, s), tc1_, tc2_, x_), n) ->
           apply (Local (T.EVar (psi_, r, T.forSub (f_, s), tc1_, tc2_, x_), n))
 
-    let rec menu (Local ((T.EVar (psi_, _, _, _, _, _) as x_), n)) =
+    let menu (Local ((T.EVar (psi_, _, _, _, _, _) as x_), n)) =
       begin match I.ctxLookup (psi_, n) with
       | T.PDec (Some x, _, _, _) ->
           (("Elim " ^ TomegaPrint.nameEVar x_) ^ " with variable ") ^ x

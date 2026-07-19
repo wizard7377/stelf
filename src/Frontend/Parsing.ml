@@ -33,7 +33,7 @@ module MakeParsing (Stream : STREAM) (Lexer : Lexer.LEXER) : PARSING = struct
 
   exception Error of string
 
-  let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 end
 
 (*! structure Lexer' : LEXER !*)

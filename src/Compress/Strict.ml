@@ -40,11 +40,11 @@ module Strict = struct
   let rec pattern_spine' = function
     | d_, [] -> true
     | d_, n :: s ->
-        let rec isn x = x = n in
-        let rec hasn s = List.exists isn s in
+        let isn x = x = n in
+        let hasn s = List.exists isn s in
         hasn d_ && (not (hasn s)) && pattern_spine' (d_, s)
 
-  let rec pattern_spine (d_, s) =
+  let pattern_spine (d_, s) =
     try pattern_spine' (d_, map eta_contract_var s) with EtaContract -> false
 
   let rec spine_occ arg__4 arg__5 =
@@ -115,8 +115,8 @@ module Strict = struct
     end
 
   (* p is whether we should imagine we are checking a c+ (rather than c-) constant *)
-  let rec check_strict_type p b = check_strict_type' 0 p b
-  let rec check_strict_kind k = check_strict_kind' 0 k
+  let check_strict_type p b = check_strict_type' 0 p b
+  let check_strict_kind k = check_strict_kind' 0 k
 end
 
 include Strict

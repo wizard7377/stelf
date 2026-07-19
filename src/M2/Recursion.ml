@@ -76,7 +76,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
 
     type quantifier = Universal | Existential
 
-    let rec vectorToString (g_, o_) =
+    let vectorToString (g_, o_) =
       let rec fmtOrder = function
         | Order.Arg (us_, vs_) ->
             [
@@ -94,7 +94,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       in
       F.makestring_fmt (F.hVbox (fmtOrder o_))
 
-    let rec vector (c, (s_, s)) =
+    let vector (c, (s_, s)) =
       let vid_ = (I.constType c, I.id) in
       let rec select' (n, (ss'_, vs''_)) = select'W (n, (ss'_, Whnf.whnf vs''_))
       and select'W = function
@@ -115,7 +115,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       in
       select (O.selLookup c)
 
-    let rec set_parameter (g_, (I.EVar (r, _, v_, _) as x_), k, sc, ops) =
+    let set_parameter (g_, (I.EVar (r, _, v_, _) as x_), k, sc, ops) =
       let rec set_parameter' = function
         | 0, ops' -> ops'
         | k', ops' ->
@@ -378,7 +378,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
         ( I.Decl (g_, I.decSub (d_, s)),
           ((v1_, I.comp (s, I.shift)), (v2_, I.dot1 s)) )
 
-    let rec lemma (s_, t, ops) =
+    let lemma (s_, t, ops) =
       let (M.State (name, gm_, v_)) = Lemma.apply (s_, t) in
       let M.Prefix (g'_, m'_, b'_), s' = createEVars gm_ in
       let g''_, ((I.Root (I.Const a1, s1_), s1), (I.Root (I.Const a2, s2_), s2))
@@ -400,14 +400,14 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       | s_, O.Le (t, l_), ops -> expandLazy' (s_, l_, ordle (lemma (s_, t, ops)))
       | s_, O.Lt (t, l_), ops -> expandLazy' (s_, l_, ordlt (lemma (s_, t, ops)))
 
-    let rec recursionDepth v_ =
+    let recursionDepth v_ =
       let rec recursionDepth' = function
         | I.Root _, n -> n
         | I.Pi (_, v_), n -> recursionDepth' (v_, n + 1)
       in
       recursionDepth' (v_, 0)
 
-    let rec expandLazy (M.State (_, _, v_) as s_) =
+    let expandLazy (M.State (_, _, v_) as s_) =
       begin if recursionDepth v_ > !MetaGlobal.maxRecurse then []
       else expandLazy' (s_, O.mutLookup (I.targetFam v_), [])
       end
@@ -475,22 +475,22 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     let rec fillOps = function
       | [] -> []
       | s'_ :: ops ->
-          let rec fillOps' = function
+          let fillOps' = function
             | [] -> []
             | o_ :: _ -> Filling.apply o_
           in
           let fillop, _ = Filling.expand s'_ in
           fillOps' fillop @ fillOps ops
 
-    let rec expandEager s_ = removeDuplicates (fillOps (expandLazy s_))
-    let rec apply s_ = s_
+    let expandEager s_ = removeDuplicates (fillOps (expandLazy s_))
+    let apply s_ = s_
 
-    let rec menu
+    let menu
         (M.State (name, M.Prefix (g'_, m'_, b'_), I.Pi ((I.Dec (_, v_), _), _))
          as s_) =
       "Recursion : " ^ Print.expToString (g'_, v_)
 
-    let rec handleExceptions f p_ =
+    let handleExceptions f p_ =
       try f p_ with Order.Error s -> raise (Error s)
   end
 

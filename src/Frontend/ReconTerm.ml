@@ -70,10 +70,10 @@ end) : RECON_TERM = struct
 
   (* Error handling *)
   let delayedList : (unit -> unit) list ref = ref []
-  let rec clearDelayed () = delayedList := []
-  let rec addDelayed f = delayedList := f :: !delayedList
+  let clearDelayed () = delayedList := []
+  let addDelayed f = delayedList := f :: !delayedList
 
-  let rec runDelayed () =
+  let runDelayed () =
     let rec run' = function
       | [] -> ()
       | h :: t -> begin
@@ -90,13 +90,13 @@ end) : RECON_TERM = struct
   let errorThreshold = ref (Some 20)
   let exceeds = function i, None -> false | i, Some j -> i > j
 
-  let rec resetErrors fileName =
+  let resetErrors fileName =
     begin
       errorCount := 0;
       errorFileName := fileName
     end
 
-  let rec die r =
+  let die r =
     raise
       (Error
          (Paths.wrap
@@ -106,7 +106,7 @@ end) : RECON_TERM = struct
               end)
               ^ " found" )))
 
-  let rec checkErrors r =
+  let checkErrors r =
     begin if !errorCount > 0 then die r else ()
     end
 
@@ -117,12 +117,12 @@ end) : RECON_TERM = struct
      when chatter = 1, the first such error will appear on the same line
      as ""[Loading file ..."", terribly confusing the Emacs error parsing code.
    *)
-  let rec chatterOneNewline () =
+  let chatterOneNewline () =
     begin if !Global.chatter = 1 && !errorCount = 1 then Msg.message "\n"
     else ()
     end
 
-  let rec fatalError (r, msg) =
+  let fatalError (r, msg) =
     begin
       errorCount := !errorCount + 1;
       begin
@@ -134,7 +134,7 @@ end) : RECON_TERM = struct
       end
     end
 
-  let rec error (r, msg) =
+  let error (r, msg) =
     begin
       errorCount := !errorCount + 1;
       begin
@@ -158,7 +158,7 @@ end) : RECON_TERM = struct
       Print.showConstPath := old;
       raise exn
 
-  let rec formatExp (g_, u_) =
+  let formatExp (g_, u_) =
     withConstPath false (fun () ->
         try Print.formatExp (g_, u_)
         with unprintable_ -> F.string "%_unprintable_%")
@@ -173,17 +173,17 @@ end) : RECON_TERM = struct
   let decl_ = function g_, d_ -> IntSyn.Decl (g_, d_)
   let eClo_ = function v_, s -> IntSyn.EClo (v_, s)
   let root_ = function h_, s_ -> IntSyn.Root (h_, s_)
-  let rec bVar_ n = IntSyn.BVar n
+  let bVar_ n = IntSyn.BVar n
   let redex_ = function u_, s_ -> IntSyn.Redex (u_, s_)
   let fVar_ = function name, v_, s -> IntSyn.FVar (name, v_, s)
-  let rec exp_ u_ = IntSyn.Exp u_
+  let exp_ u_ = IntSyn.Exp u_
   let undefined_ = Apx.Undefined
-  let rec uni_ l_ = Apx.Uni (Apx.uniToApx l_)
+  let uni_ l_ = Apx.Uni (Apx.uniToApx l_)
   let kind_ = Apx.kind
   let hyperkind_ = Apx.hyperkind
-  let rec next_ l_ = Apx.Next l_
+  let next_ l_ = Apx.Next l_
 
-  let rec headConDec (h_ : IntSyn.head) =
+  let headConDec (h_ : IntSyn.head) =
     begin match h_ with
     | IntSyn.Const c -> IntSyn.sgnLookup c
     | IntSyn.Skonst c -> IntSyn.sgnLookup c
@@ -223,7 +223,7 @@ end) : RECON_TERM = struct
 
   let fvarApxTable_ref_check () = fvarApxTable
 
-  let rec getEVarTypeApx name =
+  let getEVarTypeApx name =
     begin match StringTree.lookup evarApxTable name with
     | Some v_ -> v_
     | None ->
@@ -243,7 +243,7 @@ end) : RECON_TERM = struct
         end
     end
 
-  let rec getFVarTypeApx name =
+  let getFVarTypeApx name =
     begin match StringTree.lookup fvarApxTable name with
     | Some v_ ->
         Debug.(
@@ -265,7 +265,7 @@ end) : RECON_TERM = struct
         end
     end
 
-  let rec getEVar (name, allowed) =
+  let getEVar (name, allowed) =
     begin match Names.getEVarOpt name with
     | Some (IntSyn.EVar (_, g_, v_, _) as x_) -> (x_, raiseType (g_, v_))
     | None ->
@@ -279,7 +279,7 @@ end) : RECON_TERM = struct
         end
     end
 
-  let rec getFVarType (name, allowed) =
+  let getFVarType (name, allowed) =
     begin match StringTree.lookup fvarTable name with
     | Some v_ -> v_
     | None ->
@@ -316,20 +316,20 @@ end) : RECON_TERM = struct
 
   and dec = Dec_ of string option * term * Paths.region
 
-  let rec lcid (ids, name, r) = Lcid_ (ids, name, r)
-  let rec ucid (ids, name, r) = Ucid_ (ids, name, r)
-  let rec quid (ids, name, r) = Quid_ (ids, name, r)
-  let rec scon (value, r) = Scon_ (value, r)
-  let rec evar (name, r) = Evar_ (name, r)
-  let rec fvar (name, r) = Fvar_ (name, r)
-  let rec typ r = Typ_ r
-  let rec arrow (tm1, tm2) = Arrow_ (tm1, tm2)
-  let rec pi (d, tm) = Pi_ (d, tm)
-  let rec lam (d, tm) = Lam_ (d, tm)
-  let rec app (tm1, tm2) = App_ (tm1, tm2)
-  let rec hastype (tm1, tm2) = Hastype_ (tm1, tm2)
-  let rec omitted r = Omitted_ r
-  let rec dec (nameOpt, tm, r) = Dec_ (nameOpt, tm, r)
+  let lcid (ids, name, r) = Lcid_ (ids, name, r)
+  let ucid (ids, name, r) = Ucid_ (ids, name, r)
+  let quid (ids, name, r) = Quid_ (ids, name, r)
+  let scon (value, r) = Scon_ (value, r)
+  let evar (name, r) = Evar_ (name, r)
+  let fvar (name, r) = Fvar_ (name, r)
+  let typ r = Typ_ r
+  let arrow (tm1, tm2) = Arrow_ (tm1, tm2)
+  let pi (d, tm) = Pi_ (d, tm)
+  let lam (d, tm) = Lam_ (d, tm)
+  let app (tm1, tm2) = App_ (tm1, tm2)
+  let hastype (tm1, tm2) = Hastype_ (tm1, tm2)
+  let omitted r = Omitted_ r
+  let dec (nameOpt, tm, r) = Dec_ (nameOpt, tm, r)
 
   (* (U, V, r) *)
   (* G |- U : V nf where V : L or V == kind *)
@@ -341,10 +341,10 @@ end) : RECON_TERM = struct
   (* (U, V, L, r) where U ~:~ V ~:~ L *)
   (* U undefined unless L >= kind *)
   (* Phase 3 only *)
-  let rec backarrow (tm1, tm2) = Arrow_ (tm2, tm1)
+  let backarrow (tm1, tm2) = Arrow_ (tm2, tm1)
 
   (* for now *)
-  let rec dec0 (nameOpt, r) = Dec_ (nameOpt, Omitted_ r, r)
+  let dec0 (nameOpt, r) = Dec_ (nameOpt, Omitted_ r, r)
 
   type job =
     | Jnothing_
@@ -356,12 +356,12 @@ end) : RECON_TERM = struct
     | Jof'_ of term * IntSyn.exp
 
   let jnothing = Jnothing_
-  let rec jand (j1, j2) = Jand_ (j1, j2)
-  let rec jwithctx (g, j) = Jwithctx_ (g, j)
-  let rec jterm tm = Jterm_ tm
-  let rec jclass tm = Jclass_ tm
-  let rec jof (tm1, tm2) = Jof_ (tm1, tm2)
-  let rec jof' (tm, v_) = Jof'_ (tm, v_)
+  let jand (j1, j2) = Jand_ (j1, j2)
+  let jwithctx (g, j) = Jwithctx_ (g, j)
+  let jterm tm = Jterm_ tm
+  let jclass tm = Jclass_ tm
+  let jof (tm1, tm2) = Jof_ (tm1, tm2)
+  let jof' (tm, v_) = Jof'_ (tm, v_)
 
   let rec termRegion = function
     | Internal_ (u_, v_, r) -> r
@@ -429,7 +429,7 @@ end) : RECON_TERM = struct
              G |- U ~:~ V ~:~ L
              termToExp tm' = U
      *)
-  let rec filterLevel (tm, l_, max, msg) =
+  let filterLevel (tm, l_, max, msg) =
     let notGround = Apx.makeGroundUni l_ in
     let (Apx.Level i) = Apx.whnfUni l_ in
     begin if i > max then fatalError (termRegion tm, "Level too high\n" ^ msg)
@@ -450,7 +450,7 @@ end) : RECON_TERM = struct
       end
     end
 
-  let rec findOmitted (g_, qid, r) =
+  let findOmitted (g_, qid, r) =
     begin
       error
         ( r,
@@ -467,7 +467,7 @@ end) : RECON_TERM = struct
         begin if name = name' then Some k else findBVar' (g_, name, k + 1)
         end
 
-  let rec findBVar fc (g_, qid, r) =
+  let findBVar fc (g_, qid, r) =
     begin match Names.unqualified qid with
     | None -> fc (g_, qid, r)
     | Some name ->
@@ -477,7 +477,7 @@ end) : RECON_TERM = struct
         end
     end
 
-  let rec findConst fc (g_, qid, r) =
+  let findConst fc (g_, qid, r) =
     begin match Names.constLookup qid with
     | None -> fc (g_, qid, r)
     | Some cid ->
@@ -496,7 +496,7 @@ end) : RECON_TERM = struct
         end
     end
 
-  let rec findCSConst fc (g_, qid, r) =
+  let findCSConst fc (g_, qid, r) =
     begin match Names.unqualified qid with
     | None -> fc (g_, qid, r)
     | Some name ->
@@ -506,7 +506,7 @@ end) : RECON_TERM = struct
         end
     end
 
-  let rec findEFVar fc (g_, qid, r) =
+  let findEFVar fc (g_, qid, r) =
     begin match Names.unqualified qid with
     | None -> fc (g_, qid, r)
     | Some name ->
@@ -514,12 +514,12 @@ end) : RECON_TERM = struct
         end
     end
 
-  let rec findLCID x = findBVar (findConst (findCSConst findOmitted)) x
+  let findLCID x = findBVar (findConst (findCSConst findOmitted)) x
 
-  let rec findUCID x =
+  let findUCID x =
     findBVar (findConst (findCSConst (findEFVar findOmitted))) x
 
-  let rec findQUID x = findConst (findCSConst findOmitted) x
+  let findQUID x = findConst (findCSConst findOmitted) x
 
   let rec inferApx = function
     | g_, (Internal_ (u_, v_, r) as tm) ->
@@ -777,7 +777,7 @@ end) : RECON_TERM = struct
         let v'_, _ = Apx.classToApx v_ in
         IntSyn.Decl (ctxToApx g_, Dec (name, v'_))
 
-  let rec inferApxJob' (g_, t) = inferApxJob (ctxToApx g_, t)
+  let inferApxJob' (g_, t) = inferApxJob (ctxToApx g_, t)
 
   (* open Apx *)
   open! struct
@@ -801,26 +801,26 @@ end) : RECON_TERM = struct
     | Elim of (IntSyn.sub * IntSyn.spine -> IntSyn.exp)
     | Intro of IntSyn.exp
 
-  let rec elimSub (e_, s) = function s', s_ -> e_ (IntSyn.comp (s, s'), s_)
+  let elimSub (e_, s) = function s', s_ -> e_ (IntSyn.comp (s, s'), s_)
 
-  let rec elimApp (e_, u_) = function
+  let elimApp (e_, u_) = function
     | s, s_ -> e_ (s, IntSyn.App (eClo_ (u_, s), s_))
 
-  let rec bvarElim n = function
+  let bvarElim n = function
     | s, s_ ->
         begin match IntSyn.bvarSub (n, s) with
         | Idx n' -> root_ (bVar_ n', s_)
         | Exp u_ -> redex_ (u_, s_)
         end
 
-  let rec fvarElim (name, v_, s) = function
+  let fvarElim (name, v_, s) = function
     | s', s_ -> root_ (fVar_ (name, v_, IntSyn.comp (s, s')), s_)
 
-  let rec redexElim u_ = function s, s_ -> redex_ (eClo_ (u_, s), s_)
+  let redexElim u_ = function s, s_ -> redex_ (eClo_ (u_, s), s_)
 
   (* headElim (H) = E
      assumes H not Proj _ *)
-  let rec headElim = function
+  let headElim = function
     | IntSyn.BVar n -> bvarElim n
     | IntSyn.FVar (name, v_, s) -> fvarElim (name, v_, s)
     | IntSyn.NSDef d -> redexElim (IntSyn.constDef d)
@@ -834,7 +834,7 @@ end) : RECON_TERM = struct
      raised elim forms.
      this conforms to the external interpretation:
      the type of the returned elim form is ([[G]] V) *)
-  let rec evarElim (IntSyn.EVar _ as x_) = function
+  let evarElim (IntSyn.EVar _ as x_) = function
     | s, s_ -> eClo_ (x_, Whnf.spineToSub (s_, s))
 
   let rec etaExpandW = function
@@ -855,7 +855,7 @@ end) : RECON_TERM = struct
   (* preserves redices *)
   let toElim = function Elim e_ -> e_ | Intro u_ -> redexElim u_
 
-  let rec toIntro = function
+  let toIntro = function
     | Elim e_, vs_ -> etaExpand (e_, vs_)
     | Intro u_, vs_ -> u_
 
@@ -871,7 +871,7 @@ end) : RECON_TERM = struct
   (* if no implicit arguments, do not expand Vs!!! *)
   (* Report mismatches after the entire process finishes -- yields better
      error messages *)
-  let rec reportConstraints xnames_ =
+  let reportConstraints xnames_ =
     withConstPath false (fun () ->
         try
           begin match Print.evarCnstrsToStringOpt xnames_ with
@@ -880,12 +880,12 @@ end) : RECON_TERM = struct
           end
         with unprintable_ -> print "%_constraints unprintable_%\n")
 
-  let rec reportInst xnames_ =
+  let reportInst xnames_ =
     withConstPath false (fun () ->
         try Msg.message (Print.evarInstToString xnames_ ^ "\n")
         with unprintable_ -> Msg.message "%_unifier unprintable_%\n")
 
-  let rec delayMismatch (g_, v1_, v2_, r2, location_msg, problem_msg) =
+  let delayMismatch (g_, v1_, v2_, r2, location_msg, problem_msg) =
     addDelayed (function () ->
         let xs_ =
           Abstract.collectEVars
@@ -921,7 +921,7 @@ end) : RECON_TERM = struct
             (((("Type mismatch\n" ^ diff) ^ "\n") ^ problem_msg) ^ "\n")
             ^ location_msg ))
 
-  let rec delayAmbiguous (g_, u_, r, msg) =
+  let delayAmbiguous (g_, u_, r, msg) =
     addDelayed (function () ->
         let ufmt_ = formatExp (g_, u_) in
         let amb =
@@ -932,7 +932,7 @@ end) : RECON_TERM = struct
             (("Ambiguous reconstruction\n" ^ F.makestring_fmt amb) ^ "\n") ^ msg
           ))
 
-  let rec unifyIdem x =
+  let unifyIdem x =
     let _ = Unify.reset () in
     let _ =
       try Unify.unify x
@@ -946,7 +946,7 @@ end) : RECON_TERM = struct
     ()
   (* this reset should be unnecessary -- for safety only *)
 
-  let rec unifiableIdem x =
+  let unifiableIdem x =
     let _ = Unify.reset () in
     let ok = Unify.unifiable x in
     let _ =
@@ -962,13 +962,13 @@ end) : RECON_TERM = struct
   let trace = ref false
   let traceMode = ref Omniscient
 
-  let rec report f =
+  let report f =
     begin match !traceMode with
     | Progressive -> f ()
     | Omniscient -> addDelayed f
     end
 
-  let rec reportMismatch (g_, vs1_, vs2_, problem_msg) =
+  let reportMismatch (g_, vs1_, vs2_, problem_msg) =
     report (function () ->
         let xs_ =
           Abstract.collectEVars (g_, vs2_, Abstract.collectEVars (g_, vs1_, []))
@@ -997,7 +997,7 @@ end) : RECON_TERM = struct
         in
         ())
 
-  let rec reportUnify' (g_, vs1_, vs2_) =
+  let reportUnify' (g_, vs1_, vs2_) =
     let xs_ =
       Abstract.collectEVars (g_, vs2_, Abstract.collectEVars (g_, vs1_, []))
     in
@@ -1031,7 +1031,7 @@ end) : RECON_TERM = struct
     let _ = reportConstraints xnames_ in
     ()
 
-  let rec reportUnify (g_, vs1_, vs2_) =
+  let reportUnify (g_, vs1_, vs2_) =
     begin match !traceMode with
     | Progressive -> reportUnify' (g_, vs1_, vs2_)
     | Omniscient -> (
@@ -1101,7 +1101,7 @@ end) : RECON_TERM = struct
         let _ = reportConstraints xnames_ in
         ()
 
-  let rec reportInfer x = report (function () -> reportInfer' x)
+  let reportInfer x = report (function () -> reportInfer' x)
 
   (* inferExact (G, tm) = (tm', U, V)
        if  tm is approximately well typed
@@ -1587,7 +1587,7 @@ end) : RECON_TERM = struct
   (*          val (oc2, r2) = occIntro tm2' *)
   (*          val (Uni L2, _) = Whnf.whnf (L2, id) *)
 
-  let rec recon' j =
+  let recon' j =
     let _ = Apx.varReset () in
     StringTree.clear evarApxTable;
     StringTree.clear fvarApxTable;
@@ -1606,20 +1606,20 @@ end) : RECON_TERM = struct
              the ""best effort"" result returned, even if there were
              errors *)
 
-  let rec recon j =
+  let recon j =
     begin
       queryMode := false;
       recon' j
     end
 
-  let rec reconQuery j =
+  let reconQuery j =
     begin
       queryMode := true;
       recon' j
     end
 
   (* Invariant, G must be named! *)
-  let rec reconWithCtx' (g_, j) =
+  let reconWithCtx' (g_, j) =
     let _ = Apx.varReset () in
     let _ = varReset () in
     let j' = inferApxJob' (g_, j) in
@@ -1636,20 +1636,20 @@ end) : RECON_TERM = struct
              the ""best effort"" result returned, even if there were
              errors *)
 
-  let rec reconWithCtx (g_, j) =
+  let reconWithCtx (g_, j) =
     begin
       queryMode := false;
       reconWithCtx' (g_, j)
     end
 
-  let rec reconQueryWithCtx (g_, j) =
+  let reconQueryWithCtx (g_, j) =
     begin
       queryMode := true;
       reconWithCtx' (g_, j)
     end
 
-  let rec internalInst x = raise Match
-  let rec externalInst x = raise Match
+  let internalInst x = raise Match
+  let externalInst x = raise Match
 end
 (* open IntSyn *)
 (* functor ReconTerm *)

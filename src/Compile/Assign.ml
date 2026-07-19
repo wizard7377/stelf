@@ -171,19 +171,19 @@ end) : ASSIGN = struct
           printSub s
         end
 
-    let rec unifyW = function
+    let unifyW = function
       | g_, ((AVar ({ contents = None } as r) as xs1_), s), us2_ ->
           r := Some (EClo (fst us2_, snd us2_))
       | g_, xs1_, us2_ -> Unify.unifyW (g_, xs1_, us2_)
 
-    let rec unify (g_, xs1_, us2_) = unifyW (g_, Whnf.whnf xs1_, Whnf.whnf us2_)
+    let unify (g_, xs1_, us2_) = unifyW (g_, Whnf.whnf xs1_, Whnf.whnf us2_)
 
-    let rec matchW = function
+    let matchW = function
       | g_, ((AVar ({ contents = None } as r) as xs1_), s), us2_ ->
           r := Some (EClo (fst us2_, snd us2_))
       | g_, xs1_, us2_ -> Match.matchW (g_, xs1_, us2_)
 
-    let rec match_ (g_, xs1_, us2_) = matchW (g_, Whnf.whnf xs1_, Whnf.whnf us2_)
+    let match_ (g_, xs1_, us2_) = matchW (g_, Whnf.whnf xs1_, Whnf.whnf us2_)
   end
 
   (*
@@ -231,7 +231,7 @@ end) : ASSIGN = struct
   (* Xs1 should not contain any uninstantiated AVar anymore *)
   let solveCnstr = solveCnstr
 
-  let rec unifiable (g_, us1_, us2_) =
+  let unifiable (g_, us1_, us2_) =
     try
       begin
         unify (g_, us1_, us2_);
@@ -239,7 +239,7 @@ end) : ASSIGN = struct
       end
     with Unify.Unify msg -> false
 
-  let rec instance (g_, us1_, us2_) =
+  let instance (g_, us1_, us2_) =
     try
       begin
         match_ (g_, us1_, us2_);
@@ -250,10 +250,10 @@ end) : ASSIGN = struct
   (*
     fun assign(G, Us1, Us2) = assignExp(G, Us1, Us2, [])
     *)
-  let rec assignable (g_, us1_, uts2_) =
+  let assignable (g_, us1_, uts2_) =
     try Some (assignExp (g_, us1_, uts2_, [])) with Assignment msg -> None
 
-  let rec firstConstArg ((IntSyn.Root ((IntSyn.Const c as h), s_) as a_), s) =
+  let firstConstArg ((IntSyn.Root ((IntSyn.Const c as h), s_) as a_), s) =
     let i = IntSyn.conDecImp (IntSyn.sgnLookup c) in
     let rec constExp (u_, s) = constExpW (Whnf.whnf (u_, s))
     and constExpW = function

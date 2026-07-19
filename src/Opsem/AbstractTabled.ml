@@ -80,18 +80,18 @@ end) : ABSTRACTTABLED = struct
       | I.Decl (g_, d_), s, I.Null, s' -> false
       | I.Null, s, I.Decl (g'_, d'_), s' -> false
 
-    let rec eqEVarW arg__1 arg__2 =
+    let eqEVarW arg__1 arg__2 =
       begin match (arg__1, arg__2) with
       | I.EVar (r1, _, _, _), Ev (I.EVar (r2, _, _, _)) -> r1 == r2
       | _, _ -> false
       end
 
-    let rec eqEVar x1_ (Ev x2_) =
+    let eqEVar x1_ (Ev x2_) =
       let x1'_, s = Whnf.whnf (x1_, I.id) in
       let x2'_, s = Whnf.whnf (x2_, I.id) in
       eqEVarW x1'_ (Ev x2'_)
 
-    let rec member' p_ k_ =
+    let member' p_ k_ =
       let rec exists' = function
         | I.Null -> None
         | I.Decl (k'_, (l, Ev y_)) ->
@@ -100,7 +100,7 @@ end) : ABSTRACTTABLED = struct
       in
       exists' k_
 
-    let rec member p_ k_ =
+    let member p_ k_ =
       let rec exists' = function
         | I.Null -> None
         | I.Decl (k'_, (i, y_)) ->
@@ -109,7 +109,7 @@ end) : ABSTRACTTABLED = struct
       in
       exists' k_
 
-    let rec update' p_ k_ =
+    let update' p_ k_ =
       let rec update' = function
         | I.Null -> I.Null
         | I.Decl (k'_, (label, y_)) ->
@@ -119,7 +119,7 @@ end) : ABSTRACTTABLED = struct
       in
       update' k_
 
-    let rec update p_ k_ =
+    let update p_ k_ =
       let rec update' = function
         | I.Null -> I.Null
         | I.Decl (k'_, ((label, i), y_)) ->
@@ -129,7 +129,7 @@ end) : ABSTRACTTABLED = struct
       in
       update' k_
 
-    let rec ( or ) = function
+    let ( or ) = function
       | I.Maybe, _ -> I.Maybe
       | _, I.Maybe -> I.Maybe
       | I.Meta, _ -> I.Meta
@@ -168,7 +168,7 @@ end) : ABSTRACTTABLED = struct
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
 
-    let rec piDepend = function
+    let piDepend = function
       | (d_, I.No), v_ -> I.Pi ((d_, I.No), v_)
       | (d_, I.Meta), v_ -> I.Pi ((d_, I.Meta), v_)
       | (d_, I.Maybe), v_ -> I.Pi ((d_, occursInExp (1, v_)), v_)
@@ -936,7 +936,7 @@ end) : ABSTRACTTABLED = struct
               I.Decl (g'_, d'_),
               eqn )
 
-    let rec abstractCtx (gs_, epos, vars_, total, depth, dProg) =
+    let abstractCtx (gs_, epos, vars_, total, depth, dProg) =
       abstractCtx'
         (gs_, epos, vars_, total, depth, dProg, I.Null, TableParam.Trivial)
 
@@ -964,7 +964,7 @@ end) : ABSTRACTTABLED = struct
           let dEVars''_ = I.Decl (dEVars'_, I.Dec (None, v''_)) in
           dEVars''_
 
-    let rec makeAVarCtx (vars_, dupVars_) =
+    let makeAVarCtx (vars_, dupVars_) =
       let rec avarCtx = function
         | vars_, I.Null, k -> I.Null
         | ( vars_,
@@ -1034,7 +1034,7 @@ end) : ABSTRACTTABLED = struct
           let (I.AVar r as x'_) = I.newAVar () in
           I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s')
 
-    let rec abstractEVarCtx ((C.DProg (g_, dPool) as dp), p, s) =
+    let abstractEVarCtx ((C.DProg (g_, dPool) as dp), p, s) =
       let gs_, ss, d =
         begin if !TableParam.strengthen then
           let w' = Subordinate.weaken (g_, I.targetFam p) in

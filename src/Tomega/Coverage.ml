@@ -45,7 +45,7 @@ module MakeTomegaCoverage
     module Cover = Cover
     module TomegaTypeCheck = TomegaTypeCheck
 
-    let rec chatter chlev f = Display.chatter_s chlev ("[coverage] " ^ f ())
+    let chatter chlev f = Display.chatter_s chlev ("[coverage] " ^ f ())
 
     let rec purifyFor = function
       | (T.Unit, t), (psi_, T.True), s -> (t, psi_, s)
@@ -82,7 +82,7 @@ module MakeTomegaCoverage
             I.Decl (psi'_, T.UDec (I.decSub (d_, T.coerceSub s'))),
             T.dot1 s' )
 
-    let rec purify (psi0_, t, psi_) =
+    let purify (psi0_, t, psi_) =
       let t', psi'_, s' = purifyCtx (t, psi_) in
       let _ = TomegaTypeCheck.checkSub (psi0_, t', psi'_) in
       (psi0_, t', psi'_)

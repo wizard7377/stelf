@@ -21,7 +21,7 @@ module Server : SERVER = struct
      reads a command and and its arguments from the command line.
   *)
   let rec readLine () =
-    let rec inputLine97 ins =
+    let inputLine97 ins =
       begin match TextIO.inputLine ins with Some line -> line | None -> ""
       end
     in
@@ -29,8 +29,8 @@ module Server : SERVER = struct
       try inputLine97 TextIO.stdIn with OS.SysErr (_, Some _) -> getLine ()
     in
     let line = getLine () in
-    let rec triml ss = Substring.dropl Char.isSpace ss in
-    let rec trimr ss = Substring.dropr Char.isSpace ss in
+    let triml ss = Substring.dropl Char.isSpace ss in
+    let trimr ss = Substring.dropr Char.isSpace ss in
     let line' = triml (trimr (Substring.full line)) in
     begin if line = "" then ("OS.exit", "")
     else
@@ -513,7 +513,7 @@ module Server : SERVER = struct
         serveTop Stelf.Abort
       end
 
-  let rec server (name, _) =
+  let server (name, _) =
     begin
       print (Stelf.version ^ "\n");
       begin

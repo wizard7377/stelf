@@ -84,18 +84,18 @@ end) : STATESYN.STATESYN = struct
       | [], [] -> true
       | o1_ :: l1_, o2_ :: l2_ -> convOrder (o1_, o2_) && convOrders (l1_, l2_)
 
-    let rec decreaseInfo = function
+    let decreaseInfo = function
       | Splits k -> Splits (k - 1)
       | Rl -> Rl
       | RLdone -> RLdone
 
-    let rec decrease = function
+    let decrease = function
       | Lemma sp_ -> Lemma (decreaseInfo sp_)
       | None -> None
 
-    let rec splitDepth (Splits k) = k
+    let splitDepth (Splits k) = k
 
-    let rec normalizeTag = function
+    let normalizeTag = function
       | (Parameter _ as t_), _ -> t_
       | Lemma k_, s -> Lemma k_
   end

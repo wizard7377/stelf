@@ -19,12 +19,12 @@ module MakeOrigins (Global : GLOBAL) (Table : TABLE with type key = string) :
   (*! structure Paths = Paths' !*)
   open! struct
     let linesInfoTable : Paths.linesInfo Table.table = Table.new_ 31
-    let rec reset () = Table.clear linesInfoTable
+    let reset () = Table.clear linesInfoTable
 
-    let rec install (string, linesInfo) =
+    let install (string, linesInfo) =
       Table.insert linesInfoTable (string, linesInfo)
 
-    let rec lookup string = Table.lookup linesInfoTable string
+    let lookup string = Table.lookup linesInfoTable string
   end
 
   let reset = reset
@@ -37,10 +37,10 @@ module MakeOrigins (Global : GLOBAL) (Table : TABLE with type key = string) :
         : (string * Paths.occConDec option) Array.array)
   end
 
-  let rec installOrigin (cid, fileNameOpt) =
+  let installOrigin (cid, fileNameOpt) =
     Array.update (originArray, cid, fileNameOpt)
 
-  let rec originLookup cid = Array.sub (originArray, cid)
+  let originLookup cid = Array.sub (originArray, cid)
 end
 
 (*! structure IntSyn' : INTSYN !*)

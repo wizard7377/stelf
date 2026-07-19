@@ -54,9 +54,9 @@ end) : PROVER = struct
 
     let openStates : MetaSyn.state list ref = ref []
     let solvedStates : MetaSyn.state list ref = ref []
-    let rec error s = raise (Error s)
+    let error s = raise (Error s)
 
-    let rec reset () =
+    let reset () =
       begin
         openStates := [];
         solvedStates := []
@@ -67,9 +67,9 @@ end) : PROVER = struct
       | x :: l_, l'_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
-    let rec equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
 
-    let rec insertState s_ =
+    let insertState s_ =
       begin if Qed.subgoal s_ then solvedStates := s_ :: !solvedStates
       else openStates := s_ :: !openStates
       end
@@ -79,7 +79,7 @@ end) : PROVER = struct
       | c :: [] -> I.conDecName (I.sgnLookup c)
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
-    let rec init (k, (c :: _ as cL)) =
+    let init (k, (c :: _ as cL)) =
       let _ = MetaGlobal.maxFill := k in
       let _ = reset () in
       let cL' = try Order.closure c with Order.Error _ -> cL in
@@ -93,7 +93,7 @@ end) : PROVER = struct
              ^ cLToString cL'))
       end
 
-    let rec auto () =
+    let auto () =
       let _ = print "M2.Prover.auto\n" in
       let open', solvedStates' =
         try Strategy.run !openStates with
@@ -111,7 +111,7 @@ end) : PROVER = struct
       else ()
       end
 
-    let rec makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
+    let makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
       let rec makeConDec' = function
         | I.Null, v_, k -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
         | I.Decl (g_, d_), v_, k ->
@@ -123,7 +123,7 @@ end) : PROVER = struct
       | [] -> M.SgnEmpty
       | s_ :: sl_ -> M.ConDec (makeConDec s_, makeSignature sl_)
 
-    let rec install installConDec =
+    let install installConDec =
       let rec install' = function
         | M.SgnEmpty -> ()
         | M.ConDec (e, s_) -> begin
@@ -150,7 +150,7 @@ end) : PROVER = struct
         end
       end
 
-    let rec printState () =
+    let printState () =
       let rec print' = function
         | [] -> ()
         | s_ :: l_ -> begin

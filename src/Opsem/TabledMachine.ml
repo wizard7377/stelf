@@ -107,9 +107,9 @@ end) : TABLED = struct
   exception Error = Error
 
   (* ---------------------------------------------------------------------- *)
-  let rec cidFromHead = function I.Const a -> a | I.Def a -> a
+  let cidFromHead = function I.Const a -> a | I.Def a -> a
 
-  let rec eqHead = function
+  let eqHead = function
     | I.Const a, I.Const a' -> a = a'
     | I.Def a, I.Def a' -> a = a'
     | _ -> false
@@ -189,7 +189,7 @@ end) : TABLED = struct
   (* . |- s : D *)
   (* D, G, G' |- e1 and D, G, G' |- N and D, G |- eqns *)
 
-  let rec unifySub' (g_, s1, s2) =
+  let unifySub' (g_, s1, s2) =
     try
       begin
         Unify.unifySub (g_, s1, s2);
@@ -197,7 +197,7 @@ end) : TABLED = struct
       end
     with Unify.Unify msg -> false
 
-  let rec unify (g_, us_, us'_) =
+  let unify (g_, us_, us'_) =
     try
       begin
         Unify.unify (g_, us_, us'_);
@@ -232,7 +232,7 @@ end) : TABLED = struct
           ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
             (g, I.dot1 s) )
 
-  let rec updateGlobalTable (goal, flag) =
+  let updateGlobalTable (goal, flag) =
     let (C.DProg (g_, dPool) as dProg), (p, s) =
       getHypGoal (C.DProg (I.Null, I.Null), (goal, I.id))
     in
@@ -259,9 +259,9 @@ end) : TABLED = struct
     else ()
     end
 
-  let rec keepTable c = TabledSyn.keepTable c
+  let keepTable c = TabledSyn.keepTable c
 
-  let rec fillTable () =
+  let fillTable () =
     let rec insert = function
       | [] -> ()
       | (dAVars_, dEVars_, g'_, u'_, eqn', answRef, status) :: rest ->
@@ -359,7 +359,7 @@ end) : TABLED = struct
         end
   (* for subsumption we must combine it with asumb!!! *)
 
-  let rec retrieveSW ((g_, u_, s), asub, answL_, sc) =
+  let retrieveSW ((g_, u_, s), asub, answL_, sc) =
     retrieve' ((g_, u_, s), asub, answL_, sc)
 
   (* currently not used -- however, it may be better to  not use the same retrieval function for
@@ -381,7 +381,7 @@ end) : TABLED = struct
 
      Effects: instantiation of EVars in s, and asub
    *)
-  let rec retrieve (k, (g_, u_, s), (asub, answRef), sc) =
+  let retrieve (k, (g_, u_, s), (asub, answRef), sc) =
     let lkp = T.lookup answRef in
     let asw' = List.take (rev (T.solutions answRef), T.lookup answRef) in
     let answ' = List.drop (asw', !k) in
@@ -665,7 +665,7 @@ end) : TABLED = struct
       then retrieve all new answers
      else fail
      *)
-  let rec retrieval = function
+  let retrieval = function
     | Loop, (g'_, u'_, s'), sc, (asub, answRef), n ->
         begin if T.noAnswers answRef then ()
         else retrieve (n, (g'_, u'_, s'), (asub, answRef), sc)
@@ -681,13 +681,13 @@ end) : TABLED = struct
                 | new_ -> sc pskeleton
                 end )
 
-  let rec tableSize () = MT.tableSize ()
-  let rec suspGoalNo () = List.length !suspGoals_
+  let tableSize () = MT.tableSize ()
+  let suspGoalNo () = List.length !suspGoals_
 
   (*  nextStage () = bool
      Side effect: advances lookup pointers
    *)
-  let rec nextStage () =
+  let nextStage () =
     let rec resume = function
       | [] -> ()
       | (susp_, s, sc, trail, (asub, answRef), k) :: goals_ -> begin
@@ -712,7 +712,7 @@ end) : TABLED = struct
   (* table changed during previous stage *)
   (* table did not change during previous stage *)
 
-  let rec reset () =
+  let reset () =
     begin
       suspGoals_ := [];
       begin
@@ -721,7 +721,7 @@ end) : TABLED = struct
       end
     end
 
-  let rec solveQuery ((g, s), (C.DProg (g_, dPool) as dp), sc) =
+  let solveQuery ((g, s), (C.DProg (g_, dPool) as dp), sc) =
     !solve_fn_ref ((g, s), dp, sc)
   (* only works when query is atomic -- if query is not atomic,
       then the subordination relation might be extended and strengthening may not be sound *)

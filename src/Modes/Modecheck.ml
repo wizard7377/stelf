@@ -55,7 +55,7 @@ module MakeModeCheck
     let checkFree = ref false
 
     (** copied from worldcheck/worldsyn.fun *)
-    let rec wrapMsg (c, occ, msg) =
+    let wrapMsg (c, occ, msg) =
       begin match Origins.originLookup c with
       | fileName, None -> (fileName ^ ":") ^ msg
       | fileName, Some occDec ->
@@ -66,7 +66,7 @@ module MakeModeCheck
               ^ msg )
       end
 
-    let rec wrapMsg' (fileName, r, msg) = P.wrapLoc (P.Loc (fileName, r), msg)
+    let wrapMsg' (fileName, r, msg) = P.wrapLoc (P.Loc (fileName, r), msg)
 
     exception ModeError of P.occ * string
     exception Error' of P.occ * string
@@ -79,7 +79,7 @@ module MakeModeCheck
        Raises an error if no mode for a has declared.
        (occ is used in error message)
     *)
-    let rec lookup (a, occ) =
+    let lookup (a, occ) =
       begin match ModeTable.mmodeLookup a with
       | [] ->
           raise
@@ -88,7 +88,7 @@ module MakeModeCheck
       | sMs -> sMs
       end
 
-    let rec nameOf = function
+    let nameOf = function
       | Existential (_, None) -> "?"
       | Existential (_, Some name) -> name
       | _ -> "?"
@@ -118,14 +118,14 @@ module MakeModeCheck
     (** uniqueness S = u
        where u is the uniqueness property of status S
     *)
-    let rec uniqueness = function
+    let uniqueness = function
       | Existential (Ground u, _) -> u
       | Universal -> Unique
 
     (** ambiguate (mode) = mode'
        where mode' forgets uniqueness properties
     *)
-    let rec ambiguate = function
+    let ambiguate = function
       | M.Plus -> M.Plus
       | M.Minus -> M.Minus
       | M.Minus1 -> M.Minus
@@ -186,7 +186,7 @@ module MakeModeCheck
           else raise Eta
           end
 
-    let rec isPattern (d_, k, s_) =
+    let isPattern (d_, k, s_) =
       try
         begin
           checkPattern (d_, k, [], s_);
@@ -474,7 +474,7 @@ module MakeModeCheck
     (** updateAtom (D, m, S, a, mS, (p, occ))
        see updateAtom', and performs additional freeness check if required
     *)
-    let rec updateAtom (d_, mode, s_, a, mS, (p, occ)) =
+    let updateAtom (d_, mode, s_, a, mS, (p, occ)) =
       let _ =
         begin if !checkFree then
           freeAtom (d_, ambiguate mode, s_, (I.constType a, I.id), mS, (p, occ))
@@ -623,8 +623,8 @@ module MakeModeCheck
       | d_, mode, I.App (u_, s_), M.Mapp (_, mS), (p, occ) ->
           groundAtom (d_, mode, s_, mS, (p + 1, occ))
 
-    let rec ctxPush (m, ds_) = List.map (function d_ -> I.Decl (d_, m)) ds_
-    let rec ctxPop ds_ = List.map (function I.Decl (d_, m) -> d_) ds_
+    let ctxPush (m, ds_) = List.map (function d_ -> I.Decl (d_, m)) ds_
+    let ctxPop ds_ = List.map (function I.Decl (d_, m) -> d_) ds_
 
     (* ------------------------------------------- mode checking first phase *)
     (* ctxPush (Ds, m) = Ds'
@@ -797,7 +797,7 @@ module MakeModeCheck
 
        otherwise exception ModeError is raised (occ used in error messages)
     *)
-    let rec checkDlocal (d_, v_, occ) =
+    let checkDlocal (d_, v_, occ) =
       try checkD1 (d_, v_, occ, function d'_ -> [ d'_ ])
       with ModeError (occ, msg) -> error'' ( (occ, msg))
 
@@ -811,7 +811,7 @@ module MakeModeCheck
 
        (occOpt is used in error messages)
     *)
-    let rec checkD (conDec, fileName, occOpt) =
+    let checkD (conDec, fileName, occOpt) =
       let _ = checkFree := false in
       let rec checkable = function
         | I.Root (ha_, _) ->
@@ -855,7 +855,7 @@ module MakeModeCheck
           checkAll clist
         end
 
-    let rec checkMode (a, ms) =
+    let checkMode (a, ms) =
       let _ =
         begin if !Global.chatter > 3 then
           print'
@@ -873,7 +873,7 @@ module MakeModeCheck
       in
       ()
 
-    let rec checkFreeOut (a, ms) =
+    let checkFreeOut (a, ms) =
       let _ =
         begin if !Global.chatter > 3 then
           print'

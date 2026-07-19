@@ -12,7 +12,7 @@ module Version = struct
   let build_date = "unknown-date"
   let build_hostname = "unknown-host"
 
-  let rec maybe arg__0 arg__1 =
+  let maybe arg__0 arg__1 =
     begin match (arg__0, arg__1) with true, x -> x | false, x -> ""
     end
 

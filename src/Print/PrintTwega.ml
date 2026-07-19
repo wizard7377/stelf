@@ -49,17 +49,17 @@ module MakePrintTwega
     module F = Formatter
 
     let str_ = F.string
-    let rec str0_ (s, n) = F.string0 n s
-    let rec name_ x = F.string (("\"" ^ x) ^ "\"")
-    let rec integer_ n = F.string (Int.toString n)
-    let rec sexp fmts = F.hbox [ str_ "("; F.hVbox fmts; str_ ")" ]
+    let str0_ (s, n) = F.string0 n s
+    let name_ x = F.string (("\"" ^ x) ^ "\"")
+    let integer_ n = F.string (Int.toString n)
+    let sexp fmts = F.hbox [ str_ "("; F.hVbox fmts; str_ ")" ]
 
-    let rec fmtCon = function
+    let fmtCon = function
       | g_, I.BVar n -> sexp [ str_ "tw~bvar"; F.break; integer_ n ]
       | g_, I.Const cid -> sexp [ str_ "tw~const"; F.break; integer_ cid ]
       | g_, I.Def cid -> sexp [ str_ "tw~def"; F.break; integer_ cid ]
 
-    let rec fmtUni = function
+    let fmtUni = function
       | I.Type -> str_ "tw*type"
       | I.Kind -> str_ "tw*kind"
 
@@ -139,7 +139,7 @@ module MakePrintTwega
           sexp
             [ str_ "tw~decl"; F.break; name_ x; F.break; fmtExp (g_, (v_, s)) ]
 
-    let rec fmtConDec = function
+    let fmtConDec = function
       | I.ConDec (name, parent, imp, _, v_, l_) ->
           let _ = Names.varReset IntSyn.Null in
           sexp
@@ -189,7 +189,7 @@ module MakePrintTwega
               fmtUni l_;
             ]
 
-    let rec fmtEqn (I.Eqn (g_, u1_, u2_)) =
+    let fmtEqn (I.Eqn (g_, u1_, u2_)) =
       sexp
         [
           str_ "tw*eqn";
@@ -199,7 +199,7 @@ module MakePrintTwega
           fmtExp (g_, (u2_, I.id));
         ]
 
-    let rec fmtEqnName (I.Eqn (g_, u1_, u2_)) =
+    let fmtEqnName (I.Eqn (g_, u1_, u2_)) =
       fmtEqn (I.Eqn (Names.ctxLUName g_, u1_, u2_))
   end
 
@@ -243,24 +243,24 @@ module MakePrintTwega
          actually applied in the scope (typically, using Names.decName)
      (b) types need not be well-formed, since they are not used
   *)
-  let rec formatDec (g_, d_) = fmtDec (g_, (d_, I.id))
-  let rec formatExp (g_, u_) = fmtExp (g_, (u_, I.id))
-  let rec formatSpine (g_, s_) = fmtSpine (g_, (s_, I.id))
-  let rec formatConDec condec_ = fmtConDec condec_
-  let rec formatEqn e_ = fmtEqn e_
-  let rec decToString (g_, d_) = F.makestring_fmt (formatDec (g_, d_))
-  let rec expToString (g_, u_) = F.makestring_fmt (formatExp (g_, u_))
-  let rec conDecToString condec_ = F.makestring_fmt (formatConDec condec_)
-  let rec eqnToString e_ = F.makestring_fmt (formatEqn e_)
+  let formatDec (g_, d_) = fmtDec (g_, (d_, I.id))
+  let formatExp (g_, u_) = fmtExp (g_, (u_, I.id))
+  let formatSpine (g_, s_) = fmtSpine (g_, (s_, I.id))
+  let formatConDec condec_ = fmtConDec condec_
+  let formatEqn e_ = fmtEqn e_
+  let decToString (g_, d_) = F.makestring_fmt (formatDec (g_, d_))
+  let expToString (g_, u_) = F.makestring_fmt (formatExp (g_, u_))
+  let conDecToString condec_ = F.makestring_fmt (formatConDec condec_)
+  let eqnToString e_ = F.makestring_fmt (formatEqn e_)
 
-  let rec printSgn () =
+  let printSgn () =
     IntSyn.sgnApp (function cid ->
         begin
           print (F.makestring_fmt (formatConDec (IntSyn.sgnLookup cid)));
           print "\n"
         end)
 
-  let rec printSgnToFile filename =
+  let printSgnToFile filename =
     let file = TextIO.openOut filename in
     let _ =
       IntSyn.sgnApp (function cid ->

@@ -18,9 +18,9 @@ end) : WEAKEN = struct
   open! struct
     module I = IntSyn
 
-    let rec strengthenExp (u_, s) = Whnf.normalize (Whnf.cloInv (u_, s), I.id)
+    let strengthenExp (u_, s) = Whnf.normalize (Whnf.cloInv (u_, s), I.id)
 
-    let rec strengthenDec (I.Dec (name, v_), s) =
+    let strengthenDec (I.Dec (name, v_), s) =
       I.Dec (name, strengthenExp (v_, s))
 
     let rec strengthenCtx = function
@@ -29,7 +29,7 @@ end) : WEAKEN = struct
           let g'_, s' = strengthenCtx (g_, s) in
           (I.Decl (g'_, strengthenDec (d_, s')), I.dot1 s')
 
-    let rec strengthenSub (s, t) = Whnf.compInv (s, t)
+    let strengthenSub (s, t) = Whnf.compInv (s, t)
 
     let rec strengthenSpine = function
       | I.Nil, t -> I.Nil

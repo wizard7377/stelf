@@ -61,7 +61,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
     module F = FunSyn
     module S = StateSyn
 
-    let rec conv (gs_, gs'_) =
+    let conv (gs_, gs'_) =
       let exception Conv in
       let rec conv = function
         | (I.Null, s), (I.Null, s') -> (s, s')
@@ -83,7 +83,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
       | g_, [] -> g_
       | g_, d_ :: l_ -> extend (I.Decl (g_, d_), l_)
 
-    let rec validBlock (psi_, k, (l, g_)) =
+    let validBlock (psi_, k, (l, g_)) =
       let rec skipBlock = function
         | I.Null, k -> k
         | I.Decl (g'_, _), k -> skipBlock (g'_, k - 1)
@@ -102,7 +102,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
       in
       validBlock' (psi_, k)
 
-    let rec raiseSub (g_, psi'_) =
+    let raiseSub (g_, psi'_) =
       let n = I.ctxLength g_ in
       let m = I.ctxLength psi'_ in
       let rec args = function
@@ -114,7 +114,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
             else args (n' - 1, a, s_)
             end
       in
-      let rec term m' =
+      let term m' =
         let (I.Dec (_, v_)) = I.ctxDec (psi'_, m') in
         I.Exp (I.Root (I.BVar (n + m'), args (n, I.targetFam v_, I.Nil)))
       in
@@ -128,7 +128,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
       in
       raiseSub' (n, I.Shift (n + m))
 
-    let rec raiseType (F.CtxBlock (l, g_), psi'_) =
+    let raiseType (F.CtxBlock (l, g_), psi'_) =
       let rec raiseType'' = function
         | I.Null, vn_, a -> vn_
         | I.Decl (g'_, (I.Dec (_, v'_) as d_)), vn_, a ->
@@ -162,19 +162,19 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
       | I.Decl (delta_, dd_), s ->
           I.Decl (deltaSub (delta_, s), F.mdecSub (dd_, s))
 
-    let rec shift delta_ = deltaSub (delta_, I.shift)
+    let shift delta_ = deltaSub (delta_, I.shift)
 
     let rec shifts = function
       | I.Null, delta_ -> delta_
       | I.Decl (g_, _), delta_ -> shifts (g_, shift delta_)
 
-    let rec shiftBlock (F.CtxBlock (_, g_), delta_) = shifts (g_, delta_)
+    let shiftBlock (F.CtxBlock (_, g_), delta_) = shifts (g_, delta_)
 
     let rec shiftSub = function
       | I.Null, s -> s
       | I.Decl (g_, _), s -> shiftSub (g_, I.comp (I.shift, s))
 
-    let rec shiftSubBlock (F.CtxBlock (_, g_), s) = shiftSub (g_, s)
+    let shiftSubBlock (F.CtxBlock (_, g_), s) = shiftSub (g_, s)
 
     let rec check = function
       | psi_, delta_, F.Unit, (F.True, _) -> ()
@@ -371,7 +371,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           end
         end
 
-    let rec checkRec (p_, t_) = check (I.Null, I.Null, p_, (t_, I.id))
+    let checkRec (p_, t_) = check (I.Null, I.Null, p_, (t_, I.id))
 
     let rec isFor = function
       | g_, F.All (F.Prim d_, f_) -> (
@@ -413,7 +413,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           end
         end
 
-    let rec isState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
+    let isState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
       begin
         TypeCheck.typeCheckCtx g_;
         begin

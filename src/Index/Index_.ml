@@ -26,12 +26,12 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
     let indexArray : IntSyn.head Queue.queue Array.array =
       Array.array (Global.maxCid + 1, Queue.empty)
 
-    let rec reset () = Array.modify (function _ -> Queue.empty) indexArray
+    let reset () = Array.modify (function _ -> Queue.empty) indexArray
 
-    let rec update (a, c) =
+    let update (a, c) =
       Array.update (indexArray, a, Queue.insert (c, Array.sub (indexArray, a)))
 
-    let rec install fromCS (I.Const c as h_) =
+    let install fromCS (I.Const c as h_) =
       begin match (fromCS, I.sgnLookup c) with
       | _, I.ConDec (_, _, _, _, a_, I.Type) ->
           update (cidFromHead (I.targetHead a_), h_)
@@ -40,7 +40,7 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
       | _ -> ()
       end
 
-    let rec remove (a, cid) =
+    let remove (a, cid) =
       begin match Queue.deleteEnd (Array.sub (indexArray, a)) with
       | None -> ()
       | Some ((I.Const cid' as c), queue') ->
@@ -48,7 +48,7 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
           end
       end
 
-    let rec uninstall cid =
+    let uninstall cid =
       begin match I.sgnLookup cid with
       | I.ConDec (_, _, _, _, a_, I.Type) ->
           remove (cidFromHead (I.targetHead a_), cid)
@@ -57,9 +57,9 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
       | _ -> ()
       end
 
-    let rec resetFrom mark =
+    let resetFrom mark =
       let limit, _ = I.sgnSize () in
-      let rec iter i =
+      let iter i =
         begin if i < mark then ()
         else begin
           uninstall i;
@@ -69,8 +69,8 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
       in
       iter (limit - 1)
 
-    let rec lookup a =
-      let rec lk = function
+    let lookup a =
+      let lk = function
         | l, None -> l
         | l, Some q' -> begin
             Array.update (indexArray, a, q');

@@ -103,20 +103,20 @@ end) : MTPI = struct
       ref []
 
     let menu_ : menuItem list option ref = ref None
-    let rec initOpen () = open_ := Ring.init []
-    let rec initSolved () = solved_ := Ring.init []
-    let rec empty () = Ring.empty !open_
-    let rec current () = Ring.current !open_
-    let rec delete () = open_ := Ring.delete !open_
-    let rec insertOpen s_ = open_ := Ring.insert (!open_, s_)
-    let rec insertSolved s_ = solved_ := Ring.insert (!solved_, s_)
-    let rec insert s_ = insertOpen s_
-    let rec collectOpen () = Ring.foldr (fun (a, b) -> a :: b) [] !open_
-    let rec collectSolved () = Ring.foldr (fun (a, b) -> a :: b) [] !solved_
-    let rec nextOpen () = open_ := Ring.next !open_
-    let rec pushHistory () = history_ := (!open_, !solved_) :: !history_
+    let initOpen () = open_ := Ring.init []
+    let initSolved () = solved_ := Ring.init []
+    let empty () = Ring.empty !open_
+    let current () = Ring.current !open_
+    let delete () = open_ := Ring.delete !open_
+    let insertOpen s_ = open_ := Ring.insert (!open_, s_)
+    let insertSolved s_ = solved_ := Ring.insert (!solved_, s_)
+    let insert s_ = insertOpen s_
+    let collectOpen () = Ring.foldr (fun (a, b) -> a :: b) [] !open_
+    let collectSolved () = Ring.foldr (fun (a, b) -> a :: b) [] !solved_
+    let nextOpen () = open_ := Ring.next !open_
+    let pushHistory () = history_ := (!open_, !solved_) :: !history_
 
-    let rec popHistory () =
+    let popHistory () =
       begin match !history_ with
       | [] -> raise (Error "History stack empty")
       | (open'_, solved'_) :: history'_ -> begin
@@ -128,13 +128,13 @@ end) : MTPI = struct
         end
       end
 
-    let rec abort s =
+    let abort s =
       begin
         print ("* " ^ s);
         raise (Error s)
       end
 
-    let rec reset () =
+    let reset () =
       begin
         initOpen ();
         begin
@@ -154,8 +154,8 @@ end) : MTPI = struct
     let printFmt (f : Print.Formatter.format) : Fmt.format =
       Fmt.string (Print.Formatter.makestring_fmt f)
 
-    let rec printFillResult (_, p_) =
-      let rec formatTuple (g_, p_) =
+    let printFillResult (_, p_) =
+      let formatTuple (g_, p_) =
         let rec formatTuple' = function
           | F.Unit -> []
           | F.Inx (m_, F.Unit) -> [ printFmt (Print.formatExp (g_, m_)) ]
@@ -180,11 +180,11 @@ end) : MTPI = struct
       | [], a_ -> a_
       | o_ :: l_, a_ -> splittingToMenu_ (l_, Splitting o_ :: a_)
 
-    let rec fillingToMenu_ (o_, a_) = Filling o_ :: a_
-    let rec recursionToMenu_ (o_, a_) = Recursion o_ :: a_
-    let rec inferenceToMenu_ (o_, a_) = Inference o_ :: a_
+    let fillingToMenu_ (o_, a_) = Filling o_ :: a_
+    let recursionToMenu_ (o_, a_) = Recursion o_ :: a_
+    let inferenceToMenu_ (o_, a_) = Inference o_ :: a_
 
-    let rec menu () =
+    let menu () =
       begin if empty () then menu_ := None
       else
         let s_ = current () in
@@ -202,11 +202,11 @@ end) : MTPI = struct
                ))
       end
 
-    let rec format k =
+    let format k =
       begin if k < 10 then Int.toString k ^ ".  " else Int.toString k ^ ". "
       end
 
-    let rec menuToString () =
+    let menuToString () =
       let rec menuToString' = function
         | k, [], (None, _) -> (Some k, "")
         | k, [], ((Some _ as kopt'), _) -> (kopt', "")
@@ -255,7 +255,7 @@ end) : MTPI = struct
           s
       end
 
-    let rec printMenu () =
+    let printMenu () =
       begin if empty () then begin
         print "[QED]\n";
         print
@@ -290,7 +290,7 @@ end) : MTPI = struct
       | x :: l_, l'_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
-    let rec equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
 
     let rec transformOrder' = function
       | g_, Order.Arg k ->
@@ -309,9 +309,9 @@ end) : MTPI = struct
           S.And (transformOrder (g_, f1_, [ o_ ]), transformOrder (g_, f2_, os_))
       | g_, F.Ex _, o_ :: [] -> transformOrder' (g_, o_)
 
-    let rec select c = try Order.selLookup c with _ -> Order.Lex []
+    let select c = try Order.selLookup c with _ -> Order.Lex []
 
-    let rec init (k, names) =
+    let init (k, names) =
       let cL =
         map
           (function
@@ -346,7 +346,7 @@ end) : MTPI = struct
       | Inference.Error s -> abort ("Inference Error: " ^ s)
       | Error s -> abort ("Mpi Error: " ^ s)
 
-    let rec select k =
+    let select k =
       let rec select' = function
         | k, [] -> abort "No such menu item"
         | 1, Splitting o_ :: _ ->
@@ -411,7 +411,7 @@ end) : MTPI = struct
       | Inference.Error s -> abort ("Inference Errror: " ^ s)
       | Error s -> abort ("Mpi Error: " ^ s)
 
-    let rec solve () =
+    let solve () =
       begin if empty () then raise (Error "Nothing to prove")
       else
         let s_ = current () in
@@ -433,14 +433,14 @@ end) : MTPI = struct
         end
       end
 
-    let rec check () =
+    let check () =
       begin if empty () then raise (Error "Nothing to check")
       else
         let s_ = current () in
         FunTypeCheck.isState (Obj.magic s_)
       end
 
-    let rec auto () =
+    let auto () =
       let open'_, solved'_ =
         try MTPStrategy.run (Obj.magic (collectOpen ())) with
         | MTPSplitting.Error s -> abort ("MTPSplitting. Error: " ^ s)
@@ -458,7 +458,7 @@ end) : MTPI = struct
         printMenu ()
       end
 
-    let rec next () =
+    let next () =
       begin
         nextOpen ();
         begin
@@ -467,7 +467,7 @@ end) : MTPI = struct
         end
       end
 
-    let rec undo () =
+    let undo () =
       begin
         popHistory ();
         begin

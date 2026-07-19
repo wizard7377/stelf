@@ -42,43 +42,43 @@ end) : MTPSTRATEGY = struct
   open! struct
     module S = StateSyn
 
-    let rec printInit () =
+    let printInit () =
       begin if !Global.chatter > 3 then print "Strategy\n" else ()
       end
 
-    let rec printFilling () =
+    let printFilling () =
       begin if !Global.chatter > 5 then print "[Filling ... "
       else
         begin if !Global.chatter > 4 then print "F" else ()
         end
       end
 
-    let rec printRecursion () =
+    let printRecursion () =
       begin if !Global.chatter > 5 then print "[Recursion ..."
       else
         begin if !Global.chatter > 4 then print "R" else ()
         end
       end
 
-    let rec printInference () =
+    let printInference () =
       begin if !Global.chatter > 5 then print "[Inference ..."
       else
         begin if !Global.chatter > 4 then print "I" else ()
         end
       end
 
-    let rec printSplitting splitOp =
+    let printSplitting splitOp =
       begin if !Global.chatter > 5 then print "[Splitting ..."
       else
         begin if !Global.chatter > 4 then print "S" else ()
         end
       end
 
-    let rec printCloseBracket () =
+    let printCloseBracket () =
       begin if !Global.chatter > 5 then print "]\n" else ()
       end
 
-    let rec printQed () =
+    let printQed () =
       begin
         begin if !Global.chatter > 3 then print "[QED]\n" else ()
         end;
@@ -91,7 +91,7 @@ end) : MTPSTRATEGY = struct
         end
       end
 
-    let rec findMin = function
+    let findMin = function
       | [] -> None
       | l_ ->
           let rec findMin' = function
@@ -161,7 +161,7 @@ end) : MTPSTRATEGY = struct
               with MTPFilling.Error _ -> split (s_ :: givenStates, os))
           end
 
-    let rec run (givenStates : S.state list) =
+    let run (givenStates : S.state list) =
       let _ = printInit () in
       let openStates, solvedStates = fill (Obj.magic givenStates, ([], [])) in
       let openStates' = map MTPrint.nameState (Obj.magic openStates) in

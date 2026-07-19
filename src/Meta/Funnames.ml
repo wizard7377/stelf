@@ -67,7 +67,7 @@ end) : FUNNAMES.FUNNAMES = struct
     let sgnHashTable : IntSyn.cid HashTable.table = HashTable.new_ 4096
     let hashInsert = HashTable.insertShadow sgnHashTable
     let hashLookup = HashTable.lookup sgnHashTable
-    let rec hashClear () = HashTable.clear sgnHashTable
+    let hashClear () = HashTable.clear sgnHashTable
   end
 
   (* nameArray maps constants to print names and fixity *)
@@ -80,16 +80,16 @@ end) : FUNNAMES.FUNNAMES = struct
        nameArray does not need to be reset, since it is reset individually
        for every constant as it is declared
     *)
-  let rec reset () = hashClear ()
+  let reset () = hashClear ()
 
   (* override (cid, nameInfo) = ()
        Effect: mark cid as shadowed --- it will henceforth print as %name%
     *)
-  let rec override (cid, NameInfo name) =
+  let override (cid, NameInfo name) =
     Array.update (nameArray, cid, NameInfo (("%" ^ name) ^ "%"))
   (* should shadowed identifiers keep their fixity? *)
 
-  let rec shadow = function
+  let shadow = function
     | None -> ()
     | Some (_, cid) -> override (cid, Array.sub (nameArray, cid))
 
@@ -97,7 +97,7 @@ end) : FUNNAMES.FUNNAMES = struct
        Effect: update mappings from constants to print names and identifiers
                to constants, taking into account shadowing
     *)
-  let rec installName (name, lemma) =
+  let installName (name, lemma) =
     let shadowed = hashInsert (name, lemma) in
     begin
       Array.update (nameArray, lemma, NameInfo name);
@@ -108,12 +108,12 @@ end) : FUNNAMES.FUNNAMES = struct
   (* nameLookup (name) = SOME(cid),  if cid has name and is not shadowed,
                          = NONE,   if there is no such constant
     *)
-  let rec nameLookup name = hashLookup name
+  let nameLookup name = hashLookup name
 
   (* constName (cid) = name,
        where `name' is the print name of cid
     *)
-  let rec constName cid =
+  let constName cid =
     begin match Array.sub (nameArray, cid) with NameInfo name -> name
     end
 end

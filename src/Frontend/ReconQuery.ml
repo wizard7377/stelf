@@ -54,26 +54,26 @@ end) : RECON_QUERY = struct
   exception Error = Error
 
   (* error (r, msg) raises a syntax error within region r with text msg *)
-  let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
   type nonrec name = string
 
   (* Queries, with optional proof term variable *)
   type query = Query_ of name option * T.term
 
-  let rec query (nameOpt, tm) = Query_ (nameOpt, tm)
+  let query (nameOpt, tm) = Query_ (nameOpt, tm)
 
   (* define := <constant name> option * <def body> * <type> option *)
   type define = Define_ of string option * T.term * T.term option
   type solve = Solve_ of string option * T.term * Paths.region
 
-  let rec define (nameOpt, tm1, tm2Opt) = Define_ (nameOpt, tm1, tm2Opt)
-  let rec solve (nameOpt, tm, r) = Solve_ (nameOpt, tm, r)
+  let define (nameOpt, tm1, tm2Opt) = Define_ (nameOpt, tm1, tm2Opt)
+  let solve (nameOpt, tm, r) = Solve_ (nameOpt, tm, r)
 
   (* freeVar (XOpt, [(X1,""X1""),...,(Xn,""Xn"")]) = true
      iff XOpt = SOME(""Xi""), false otherwise
   *)
-  let rec freeVar = function
+  let freeVar = function
     | Some name, xs_ -> List.exists (function _, name' -> name = name') xs_
     | _ -> false
 
@@ -88,7 +88,7 @@ end) : RECON_QUERY = struct
   *)
   (* call TypeCheck... if !doubleCheck = true? *)
   (* Wed May 20 08:00:28 1998 -fp *)
-  let rec queryToQuery (Query_ (optName, tm), Paths.Loc (fileName, r)) =
+  let queryToQuery (Query_ (optName, tm), Paths.Loc (fileName, r)) =
     let _ = Names.varReset IntSyn.Null in
     let _ = T.resetErrors fileName in
     let (T.JClass ((v_, oc), l_)) =
@@ -117,7 +117,7 @@ end) : RECON_QUERY = struct
            couldn't optName ""occur"" in a constraint involving the type
            without being detected by this test?  -kw *)
 
-  let rec finishDefine
+  let finishDefine
       (Define_ (optName, tm, clsOpt), ((u_, oc1), (v_, oc2Opt), l_)) =
     let i, (u'_, v'_) =
       try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
@@ -157,7 +157,7 @@ end) : RECON_QUERY = struct
     (conDecOpt, Some ocd)
   (* is this necessary? -kw *)
 
-  let rec finishSolve (Solve_ (nameOpt, tm, r), u_, v_) =
+  let finishSolve (Solve_ (nameOpt, tm, r), u_, v_) =
     let i, (u'_, v'_) =
       try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
       with Abstract.Error msg -> raise (Abstract.Error (Paths.wrap (r, msg)))
@@ -207,11 +207,11 @@ end) : RECON_QUERY = struct
   *)
   (* call TypeCheck... if !doubleCheck = true? *)
   (* Wed May 20 08:00:28 1998 -fp *)
-  let rec solveToSolve
+  let solveToSolve
       (defines, (Solve_ (optName, tm, r0) as sol), Paths.Loc (fileName, r)) =
     let _ = Names.varReset IntSyn.Null in
     let _ = T.resetErrors fileName in
-    let rec mkd = function
+    let mkd = function
       | Define_ (_, tm1, None) -> T.jterm tm1
       | Define_ (_, tm1, Some tm2) -> T.jof (tm1, tm2)
     in

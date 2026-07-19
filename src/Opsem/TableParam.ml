@@ -51,21 +51,21 @@ module MakeTableParam (Global : GLOBAL) : TABLEPARAM = struct
       ref =
     ref []
 
-  let rec resetGlobalTable () = globalTable := []
-  let rec emptyAnsw () = ref { solutions = []; lookup = 0 }
+  let resetGlobalTable () = globalTable := []
+  let emptyAnsw () = ref { solutions = []; lookup = 0 }
 
-  let rec addSolution (s_, answRef) =
+  let addSolution (s_, answRef) =
     let { solutions = sList_; lookup = k } = !answRef in
     answRef := { solutions = s_ :: sList_; lookup = k }
 
-  let rec updateAnswLookup (k', answRef) =
+  let updateAnswLookup (k', answRef) =
     let { solutions = sList_; lookup = k } = !answRef in
     answRef := { solutions = sList_; lookup = k' }
 
-  let rec solutions ({ contents = { solutions = s_; lookup = i } } as answ) = s_
-  let rec lookup ({ contents = { solutions = s_; lookup = i } } as answ) = i
+  let solutions ({ contents = { solutions = s_; lookup = i } } as answ) = s_
+  let lookup ({ contents = { solutions = s_; lookup = i } } as answ) = i
 
-  let rec noAnswers answ =
+  let noAnswers answ =
     begin match List.take (solutions answ, lookup answ) with
     | [] -> true
     | l_ -> false

@@ -41,11 +41,11 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
   open! struct
     module M = MetaSyn
 
-    let rec printInit () =
+    let printInit () =
       begin if !Global.chatter > 3 then print "Strategy 1.0: FRS\n" else ()
       end
 
-    let rec printFinish (M.State (name, _, _)) =
+    let printFinish (M.State (name, _, _)) =
       begin if !Global.chatter > 5 then print (("[Finished: " ^ name) ^ "]\n")
       else
         begin if !Global.chatter > 4 then print (("[" ^ name) ^ "]\n")
@@ -55,36 +55,36 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
         end
       end
 
-    let rec printFilling () =
+    let printFilling () =
       begin if !Global.chatter > 5 then print "[Filling ... "
       else
         begin if !Global.chatter > 4 then print "F" else ()
         end
       end
 
-    let rec printRecursion () =
+    let printRecursion () =
       begin if !Global.chatter > 5 then print "[Recursion ..."
       else
         begin if !Global.chatter > 4 then print "R" else ()
         end
       end
 
-    let rec printSplitting () =
+    let printSplitting () =
       begin if !Global.chatter > 5 then print "[Splitting ..."
       else
         begin if !Global.chatter > 4 then print "S" else ()
         end
       end
 
-    let rec printCloseBracket () =
+    let printCloseBracket () =
       begin if !Global.chatter > 5 then print "]\n" else ()
       end
 
-    let rec printQed () =
+    let printQed () =
       begin if !Global.chatter > 3 then print "[QED]\n" else ()
       end
 
-    let rec findMin = function
+    let findMin = function
       | [] -> None
       | o_ :: l_ ->
           let rec findMin' = function
@@ -126,7 +126,7 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
     and fill = function
       | [], os -> os
       | s_ :: givenStates, ((openStates, solvedStates) as os) -> (
-          let rec fillOp () =
+          let fillOp () =
             begin match Timers.time Timers.filling Filling.expand s_ with
             | _, fillingOp -> (
                 try
@@ -151,7 +151,7 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
               raise Filling.TimeOut
             end)
 
-    let rec run givenStates =
+    let run givenStates =
       let _ = printInit () in
       let os = fill (givenStates, ([], [])) in
       let _ =
@@ -211,11 +211,11 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
   open! struct
     module M = MetaSyn
 
-    let rec printInit () =
+    let printInit () =
       begin if !Global.chatter > 3 then print "Strategy 1.0: RFS\n" else ()
       end
 
-    let rec printFinish (M.State (name, _, _)) =
+    let printFinish (M.State (name, _, _)) =
       begin if !Global.chatter > 5 then print (("[Finished: " ^ name) ^ "]\n")
       else
         begin if !Global.chatter > 4 then print (("[" ^ name) ^ "]\n")
@@ -225,36 +225,36 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
         end
       end
 
-    let rec printFilling () =
+    let printFilling () =
       begin if !Global.chatter > 5 then print "[Filling ... "
       else
         begin if !Global.chatter > 4 then print "F" else ()
         end
       end
 
-    let rec printRecursion () =
+    let printRecursion () =
       begin if !Global.chatter > 5 then print "[Recursion ..."
       else
         begin if !Global.chatter > 4 then print "R" else ()
         end
       end
 
-    let rec printSplitting () =
+    let printSplitting () =
       begin if !Global.chatter > 5 then print "[Splitting ..."
       else
         begin if !Global.chatter > 4 then print "S" else ()
         end
       end
 
-    let rec printCloseBracket () =
+    let printCloseBracket () =
       begin if !Global.chatter > 5 then print "]\n" else ()
       end
 
-    let rec printQed () =
+    let printQed () =
       begin if !Global.chatter > 3 then print "[QED]\n" else ()
       end
 
-    let rec findMin = function
+    let findMin = function
       | [] -> None
       | o_ :: l_ ->
           let rec findMin' = function
@@ -317,7 +317,7 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
               with Recursion.Error _ -> fill (s_ :: givenStates, os))
           end
 
-    let rec run givenStates =
+    let run givenStates =
       let _ = printInit () in
       let os = recurse (givenStates, ([], [])) in
       let _ =
@@ -369,7 +369,7 @@ end) : STRATEGY.STRATEGY with module MetaSyn = Strategy__2.MetaSyn' = struct
   open Strategy__2
   module MetaSyn = MetaSyn'
 
-  let rec run sl_ =
+  let run sl_ =
     begin match !MetaGlobal.strategy with
     | MetaGlobal.Rfs -> StrategyRFS.run sl_
     | MetaGlobal.Frs -> StrategyFRS.run sl_

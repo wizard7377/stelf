@@ -28,7 +28,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (*! structure IntSyn = IntSyn' !*)
   module I = IntSyn
 
-  let rec headConDec = function
+  let headConDec = function
     | I.Const c -> I.sgnLookup c
     | I.Skonst c -> I.sgnLookup c
     | I.Def d -> I.sgnLookup d
@@ -100,8 +100,8 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   let type_ = Level 1
   let kind = Level 2
   let hyperkind = Level 3
-  let rec newLVar () = LVar (ref None)
-  let rec newCVar () = CVar (ref None)
+  let newLVar () = LVar (ref None)
+  let newCVar () = CVar (ref None)
 
   (* whnfUni (l) = l'
        where l = l' and l' is in whnf *)
@@ -123,15 +123,15 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   end
 
   (* just a little list since these are only for printing errors *)
-  let rec varReset () = varList := []
+  let varReset () = varList := []
 
-  let rec varLookupRef r =
+  let varLookupRef r =
     List.find (function (CVar r', _, _), _ -> r == r') !varList
 
-  let rec varLookupName name =
+  let varLookupName name =
     List.find (function _, name' -> name = name') !varList
 
-  let rec varInsert ((u_, v_, l_), name) =
+  let varInsert ((u_, v_, l_), name) =
     varList := ((u_, v_, l_), name) :: !varList
 
   exception Ambiguous = Ambiguous
@@ -139,7 +139,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (* getReplacementName (u, v, l, allowed) = name
          if u : v : l
          and u is a CVar at type family or kind level *)
-  let rec getReplacementName ((CVar r as u_), v_, l_, allowed) =
+  let getReplacementName ((CVar r as u_), v_, l_, allowed) =
     begin match varLookupRef r with
     | Some (_, name) -> name
     | None ->
@@ -167,7 +167,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (* findByReplacementName (name) = (u, v, l)
          if getReplacementName (u, v, l, allowed) = name was already called
          then u : v : l *)
-  let rec findByReplacementName name =
+  let findByReplacementName name =
     begin match varLookupName name with
     | Some (uvl_, _) -> uvl_
     | None ->
@@ -179,7 +179,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
 
   (* converting exact terms to approximate terms *)
   (* uniToApx (L) = L- *)
-  let rec uniToApx = function I.Type -> type_ | I.Kind -> kind
+  let uniToApx = function I.Type -> type_ | I.Kind -> kind
 
   (* expToApx (U) = (U-, V-)
      if G |- U : V
@@ -206,14 +206,14 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (* classToApx (V) = (V-, L-)
      if G |- V : L
      or G |- V "":"" L = ""hyperkind"" *)
-  let rec classToApx v_ =
+  let classToApx v_ =
     let v'_, l'_ = expToApx v_ in
     let (Uni l''_) = whnf l'_ in
     (v'_, l''_)
 
   (* exactToApx (U, V) = (U-, V-)
      if G |- U : V *)
-  let rec exactToApx (u_, v_) =
+  let exactToApx (u_, v_) =
     let v'_, l'_ = classToApx v_ in
     begin match whnfUni l'_ with
     | Level 1 -> (Undefined, v'_, l'_)
@@ -227,7 +227,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
 
   (* constDefApx (d) = V-
      if |- d = V : type *)
-  let rec constDefApx d =
+  let constDefApx d =
     begin match I.sgnLookup d with
     | I.ConDef (_, _, _, u_, _, _, _) ->
         let v'_, _ (* Uni Type *) = expToApx u_ in
@@ -239,10 +239,10 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
 
   (* converting approximate terms to exact terms *)
   (* apxToUni (L-) = L *)
-  let rec apxToUniW = function Level 1 -> I.Type | Level 2 -> I.Kind
+  let apxToUniW = function Level 1 -> I.Type | Level 2 -> I.Kind
 
   (* others impossible by invariant *)
-  let rec apxToUni l_ = apxToUniW (whnfUni l_)
+  let apxToUni l_ = apxToUniW (whnfUni l_)
 
   (* apxToClass (G, v, L-, allowed) = V
      pre: L is ground and <= Hyperkind,
@@ -317,7 +317,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         end
     | r, _ -> ()
 
-  let rec occurUni (r, l_) = occurUniW (r, whnfUni l_)
+  let occurUni (r, l_) = occurUniW (r, whnfUni l_)
 
   (* matchUni (l1, l2) = ()
        iff l1<I> = l2<I> for some most general instantiation I
@@ -348,7 +348,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         r2 := Some l1_
       end
 
-  let rec matchUni (l1_, l2_) = matchUniW (whnfUni l1_, whnfUni l2_)
+  let matchUni (l1_, l2_) = matchUniW (whnfUni l1_, whnfUni l2_)
 
   (* occur (r, u) = ()
        iff r does not occur in u,
@@ -430,7 +430,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
 
   and match_ (u1_, u2_) = matchW (whnf u1_, whnf u2_)
 
-  let rec matchable (u1_, u2_) =
+  let matchable (u1_, u2_) =
     try
       begin
         match_ (u1_, u2_);

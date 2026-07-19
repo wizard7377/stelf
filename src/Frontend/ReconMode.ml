@@ -41,7 +41,7 @@ end) : RECON_MODE = struct
   (*! structure Paths = Paths' !*)
   exception Error = Error
 
-  let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
   open! struct
     module M = Modes.Modesyn.ModeSyn
@@ -51,10 +51,10 @@ end) : RECON_MODE = struct
 
     type nonrec mode = M.mode * P.region
 
-    let rec plus r = (M.Plus, r)
-    let rec star r = (M.Star, r)
-    let rec minus r = (M.Minus, r)
-    let rec minus1 r = (M.Minus1, r)
+    let plus r = (M.Plus, r)
+    let star r = (M.Star, r)
+    let minus r = (M.Minus, r)
+    let minus1 r = (M.Minus1, r)
 
     type nonrec modedec =
       (I.cid option * (string list * string) option * M.modeSpine) * P.region
@@ -63,25 +63,25 @@ end) : RECON_MODE = struct
       type nonrec mterm = modedec
       type nonrec mspine = M.modeSpine * P.region
 
-      let rec mnil r = (M.Mnil, r)
+      let mnil r = (M.Mnil, r)
 
-      let rec mapp (((m, r1), name), (mS, r2)) =
+      let mapp (((m, r1), name), (mS, r2)) =
         (M.Mapp (M.Marg (m, name), mS), P.join (r1, r2))
 
-      let rec mroot (ids, id, r1, (mS, r2)) =
+      let mroot (ids, id, r1, (mS, r2)) =
         let r = P.join (r1, r2) in
         (((None, Some (ids, id), mS), r) : mterm)
 
-      let rec toModedec nmS = nmS
+      let toModedec nmS = nmS
     end
 
     module Full = struct
       type nonrec mterm =
         T.dec I.ctx * M.mode I.ctx -> (I.cid * M.modeSpine) * P.region
 
-      let rec mpi ((m, _), d, t) (g, d_) = t (I.Decl (g, d), I.Decl (d_, m))
+      let mpi ((m, _), d, t) (g, d_) = t (I.Decl (g, d), I.Decl (d_, m))
 
-      let rec mroot (tm, r) (g, d_) =
+      let mroot (tm, r) (g, d_) =
         let (T.JWithCtx (g_, T.JOf ((v_, _), _, _))) =
           T.recon (T.jwithctx (g, T.jof (tm, T.typ r)))
         in
@@ -101,7 +101,7 @@ end) : RECON_MODE = struct
               let mode = I.ctxLookup (d_, k) in
               M.Mapp (M.Marg (mode, name), convertSpine s_)
         in
-        let rec convertExp = function
+        let convertExp = function
           | I.Root (I.Const a, s_) -> (a, convertSpine s_)
           | I.Root (I.Def d, s_) -> (d, convertSpine s_)
           | _ -> error (r, "Call pattern not an atomic type")
@@ -112,13 +112,13 @@ end) : RECON_MODE = struct
           ((a, mS), r)
         end
 
-      let rec toModedec t =
+      let toModedec t =
         let _ = Names.varReset I.Null in
         let (a, mS), r = t (I.Null, I.Null) in
         ((Some a, None, mS), r)
     end
 
-    let rec modeToMode = function
+    let modeToMode = function
       | (Some a, None, mS), r -> ((a, mS), r)
       | (None, Some (ids, id), mS), r ->
           let qid = Names.Qid (ids, id) in

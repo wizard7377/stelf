@@ -138,13 +138,13 @@ end) : SUBTREE = struct
   let querySubId : unit -> querySubsts = RedBlackSet.RBSet.new_
 
   (* Identity substitution *)
-  let rec isId s = RedBlackSet.RBSet.isEmpty s
+  let isId s = RedBlackSet.RBSet.isEmpty s
 
   (* Initialize substitution tree *)
-  let rec makeTree () = ref (Node (nid (), RedBlackSet.RBSet.new_ ()))
+  let makeTree () = ref (Node (nid (), RedBlackSet.RBSet.new_ ()))
 
   (* Test if node has any children *)
-  let rec noChildren c_ = RedBlackSet.RBSet.isEmpty c_
+  let noChildren c_ = RedBlackSet.RBSet.isEmpty c_
 
   (* Index array
 
@@ -214,19 +214,19 @@ end) : SUBTREE = struct
 
     let nctr = ref 1
 
-    let rec newNVar () =
+    let newNVar () =
       begin
         nctr := !nctr + 1;
         I.NVar !nctr
       end
 
-    let rec eqHeads = function
+    let eqHeads = function
       | I.Const k, I.Const k' -> k = k'
       | I.BVar k, I.BVar k' -> k = k'
       | I.Def k, I.Def k' -> k = k'
       | _, _ -> false
 
-    let rec compatible (label, t_, u_, rho_t, rho_u) =
+    let compatible (label, t_, u_, rho_t, rho_u) =
       let rec genExp = function
         | label, b, (I.NVar n as t_), (I.Root (h_, s_) as u_) -> begin
             S.insert rho_u (n, (label, u_));
@@ -302,7 +302,7 @@ end) : SUBTREE = struct
       in
       try Some (genTop (label, t_, u_)) with Generalization msg -> None
 
-    let rec compatibleSub (nsub_t, nsub_e) =
+    let compatibleSub (nsub_t, nsub_e) =
       let sg, rho_t, rho_e = (nid (), nid (), nid ()) in
       let _ =
         S.forall nsub_e (function nv, (l', e_) ->
@@ -324,7 +324,7 @@ end) : SUBTREE = struct
       begin if isId sg then None else Some (sg, rho_t, rho_e)
       end
 
-    let rec mkNode = function
+    let mkNode = function
       | Node (_, children_), sg, rho1, ((g_, rc_) as gr_), rho2 ->
           let c = S.new_ () in
           begin
@@ -406,7 +406,7 @@ end) : SUBTREE = struct
     and normalizeNDec (I.Dec (n_, e_), nsub) =
       I.Dec (n_, normalizeNExp (e_, nsub))
 
-    let rec assign
+    let assign
         (nvaronly, glocal_u1_, us1_, u2_, nsub_goal, asub, csub, cnstr) =
       let depth = I.ctxLength glocal_u1_ in
       let rec assignHead
@@ -622,11 +622,11 @@ end) : SUBTREE = struct
       in
       assignExp (nvaronly, depth, glocal_u1_, us1_, u2_, cnstr)
 
-    let rec assignableLazy
+    let assignableLazy
         (nsub, nsub_query, assignSub, (nsub_left, cnstrSub), cnstr) =
       let nsub_query' = querySubId () in
       let cref = ref cnstr in
-      let rec assign' (nsub_query, nsub) =
+      let assign' (nsub_query, nsub) =
         let nsub_query_left, nsub_left1 =
           S.differenceModulo nsub_query nsub (function glocal_u_, (l, u_) ->
               (function
@@ -653,10 +653,10 @@ end) : SUBTREE = struct
       in
       try assign' (nsub_query, nsub) with Assignment msg -> None
 
-    let rec assignableEager (nsub, nsub_query, assignSub, cnstrSub, cnstr) =
+    let assignableEager (nsub, nsub_query, assignSub, cnstrSub, cnstr) =
       let nsub_query' = querySubId () in
       let cref = ref cnstr in
-      let rec assign' (nsub_query, nsub) =
+      let assign' (nsub_query, nsub) =
         let nsub_query_left, nsub_left =
           S.differenceModulo nsub_query nsub (function glocal_u_, (l, u_) ->
               (function
@@ -683,7 +683,7 @@ end) : SUBTREE = struct
       in
       try assign' (nsub_query, nsub) with Assignment msg -> None
 
-    let rec unifyW = function
+    let unifyW = function
       | g_, ((I.AVar ({ contents = None } as r) as x_), I.Shift 0), us2_ ->
           r := Some (I.EClo (fst us2_, snd us2_))
       | g_, ((I.AVar ({ contents = None } as r) as x_), s), ((u_, s2) as us2_)
@@ -698,9 +698,9 @@ end) : SUBTREE = struct
         end
       | g_, xs1_, us2_ -> Unify.unifyW (g_, xs1_, us2_)
 
-    let rec unify (g_, xs1_, us2_) = unifyW (g_, Whnf.whnf xs1_, Whnf.whnf us2_)
+    let unify (g_, xs1_, us2_) = unifyW (g_, Whnf.whnf xs1_, Whnf.whnf us2_)
 
-    let rec unifiable (g_, us1_, us2_) =
+    let unifiable (g_, us1_, us2_) =
       try
         begin
           unify (g_, us1_, us2_);
@@ -752,7 +752,7 @@ end) : SUBTREE = struct
             (compose' (gquery_, glocal_), (u1_, I.id), (u2_, shift (glocal_, s)))
           && solveCnstr (gquery_, gclause_, cnstr, s)
 
-    let rec solveResiduals
+    let solveResiduals
         (gquery_, gclause_, CGoals (auxG_, cid, conjGoals_, i), asub, cnstr', sc)
         =
       let s = ctxToExplicitSub (1, gquery_, gclause_, asub) in
@@ -763,9 +763,9 @@ end) : SUBTREE = struct
       begin if success then sc ((conjGoals_, s), cid) else ()
       end
 
-    let rec ithChild (CGoals (_, _, _, i), n) = i = n
+    let ithChild (CGoals (_, _, _, i), n) = i = n
 
-    let rec retrieveChild
+    let retrieveChild
         (num, child_, nsub_query, assignSub, cnstr, gquery_, sc) =
       let rec retrieve = function
         | ( Leaf (nsub, gclause_, residuals_),
@@ -807,7 +807,7 @@ end) : SUBTREE = struct
       in
       retrieve (child_, nsub_query, assignSub, cnstrSubId (), cnstr)
 
-    let rec retrieval (n, (Node (s, children_) as sTree_), g_, r, sc) =
+    let retrieval (n, (Node (s, children_) as sTree_), g_, r, sc) =
       let nsub_query, assignSub = (querySubId (), assignSubId ()) in
       begin
         S.insert nsub_query (1, (I.Null, (Body, r)));
@@ -815,7 +815,7 @@ end) : SUBTREE = struct
             retrieveChild (n, c_, nsub_query, assignSub, [], g_, sc))
       end
 
-    let rec retrieveAll (num, child_, nsub_query, assignSub, cnstr, candSet) =
+    let retrieveAll (num, child_, nsub_query, assignSub, cnstr, candSet) =
       let i = ref 0 in
       let rec retrieve = function
         | ( Leaf (nsub, gclause_, residuals_),
@@ -868,7 +868,7 @@ end) : SUBTREE = struct
       in
       retrieve (child_, nsub_query, assignSub, (nid (), cnstrSubId ()), cnstr)
 
-    let rec retrieveCandidates
+    let retrieveCandidates
         (n, (Node (s, children_) as sTree_), gquery_, r, sc) =
       let nsub_query, assignSub = (querySubId (), assignSubId ()) in
       let candSet = S.new_ () in
@@ -900,15 +900,15 @@ end) : SUBTREE = struct
         end
       end
 
-    let rec matchSig (a, g_, ((I.Root (ha_, s_), s) as ps), sc) =
+    let matchSig (a, g_, ((I.Root (ha_, s_), s) as ps), sc) =
       let n, tree = Array.sub (indexArray, a) in
       retrieveCandidates (n, !tree, g_, I.EClo (fst ps, snd ps), sc)
 
-    let rec matchSigIt (a, g_, ((I.Root (ha_, s_), s) as ps), sc) =
+    let matchSigIt (a, g_, ((I.Root (ha_, s_), s) as ps), sc) =
       let n, tree = Array.sub (indexArray, a) in
       retrieval (n, !tree, g_, I.EClo (fst ps, snd ps), sc)
 
-    let rec sProgReset () =
+    let sProgReset () =
       begin
         nctr := 1;
         Array.modify
@@ -923,7 +923,7 @@ end) : SUBTREE = struct
           indexArray
       end
 
-    let rec sProgInstall (a, C.Head (e_, g_, eqs_, cid), r_) =
+    let sProgInstall (a, C.Head (e_, g_, eqs_, cid), r_) =
       let n, tree = Array.sub (indexArray, a) in
       let nsub_goal = S.new_ () in
       begin

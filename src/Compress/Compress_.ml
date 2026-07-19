@@ -33,7 +33,7 @@ struct
 
   (* modes are not appropriate for the given I.ConDec *)
   let debug = ref (-1)
-  let rec sgnReset () = Sgn.clear ()
+  let sgnReset () = Sgn.clear ()
 
   (* xlate_type : IntSyn.Exp -> Syntax.tp *)
   let rec xlate_type = function
@@ -304,7 +304,7 @@ struct
     end
 
   (* compress : cid * IntSyn.ConDec -> ConDec *)
-  let rec compress = function
+  let compress = function
     | cid, IntSyn.ConDec (name, None, _, normal_, a, I.Type) ->
         let x = xlate_type a in
         let x = eta_expand_tp [] x in
@@ -340,7 +340,7 @@ struct
         Sgn.tyabbrev (name, kstar, k, astar, a)
     | _ -> raise Unimp
 
-  let rec sgnLookup cid =
+  let sgnLookup cid =
     let c = Sgn.sub cid in
     begin match c with
     | None ->
@@ -385,7 +385,7 @@ struct
 
   (* val log : Sgn.sigent list ref = ref [] *)
   (* given a cid, pick some vaguely plausible omission modes *)
-  let rec naiveModes cid =
+  let naiveModes cid =
     let ak, omitted_args, uni =
       begin match I.sgnLookup cid with
       | I.ConDec (name, package, o_a, status, ak, uni) -> (ak, o_a, uni)
@@ -399,7 +399,7 @@ struct
       | _ -> 0
     in
     let total_args = count_args ak in
-    let rec can_omit ms =
+    let can_omit ms =
       let _ = Sgn.set_modes (cid, ms) in
       let s = compress (cid, I.sgnLookup cid) in
       let t = Sgn.typeOfSigent s in
@@ -423,7 +423,7 @@ struct
           end
       end
     in
-    let rec optimize ms = optimize' [] ms in
+    let optimize ms = optimize' [] ms in
     begin if uni = I.Kind then
       List.tabulate (total_args, function _ -> S.Minus)
     else
@@ -439,7 +439,7 @@ struct
   (* Given a cid, return the ""ideal"" modes specified by stelf-
      omitted arguments. It is cheating to really use these for
      compression: the resulting signature will not Typecheck. *)
-  let rec idealModes cid =
+  let idealModes cid =
     let ak, omitted_args =
       begin match I.sgnLookup cid with
       | I.ConDec (name, package, o_a, status, ak, uni) -> (ak, o_a)
@@ -473,7 +473,7 @@ struct
     end
     end
 
-  let rec sgnAutoCompress n f =
+  let sgnAutoCompress n f =
     try
       let modes = f n in
       begin
@@ -508,7 +508,7 @@ struct
       (* has this entry already been processed? *)
     end
 
-  let rec sgnAutoCompressUpTo n f = sgnAutoCompressUpTo' 0 n f
+  let sgnAutoCompressUpTo n f = sgnAutoCompressUpTo' 0 n f
   let check = Reductio.check
 end
 (*

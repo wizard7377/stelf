@@ -22,7 +22,7 @@ end) : CONV = struct
   module Whnf = Conv__0.Whnf
   open IntSyn
 
-  let rec eqUni = function
+  let eqUni = function
     | Type, Type -> true
     | Kind, Kind -> true
     | _ -> false

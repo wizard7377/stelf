@@ -116,10 +116,10 @@ end) : MODSYN = struct
     end
   (* reconstruct Anc?? -fp *)
 
-  let rec mapStrDecParent f (IntSyn.StrDec (name, parent)) =
+  let mapStrDecParent f (IntSyn.StrDec (name, parent)) =
     IntSyn.StrDec (name, f parent)
 
-  let rec mapConDecParent arg__3 arg__4 =
+  let mapConDecParent arg__3 arg__4 =
     begin match (arg__3, arg__4) with
     | f, IntSyn.ConDec (name, parent, i, status, v_, l_) ->
         IntSyn.ConDec (name, f parent, i, status, v_, l_)
@@ -132,7 +132,7 @@ end) : MODSYN = struct
     end
   (* reconstruct Anc?? -fp *)
 
-  let rec strictify = function
+  let strictify = function
     | IntSyn.AbbrevDef (name, parent, i, u_, v_, I.Type) as condec -> (
         try
           begin
@@ -143,7 +143,7 @@ end) : MODSYN = struct
         with Strict.Error _ -> condec)
     | IntSyn.AbbrevDef _ as condec -> condec
 
-  let rec abbrevify (cid, condec_) =
+  let abbrevify (cid, condec_) =
     begin match condec_ with
     | I.ConDec (name, parent, i, _, v_, l_) ->
         let u_ = Whnf.normalize (I.Root (I.Const cid, I.Nil), I.id) in
@@ -167,7 +167,7 @@ end) : MODSYN = struct
      cids; that is, it might refer to global cids not defined by the
      module.  It is a global invariant that such cids will still be in
      scope whenever a module that refers to them is installed. *)
-  let rec installModule
+  let installModule
       ( (structTable, constTable, namespace),
         topOpt,
         nsOpt,
@@ -175,18 +175,18 @@ end) : MODSYN = struct
         transformConDec ) =
     let structMap : IntSyn.mid IntTree.table = IntTree.new_ 0 in
     let constMap : IntSyn.cid IntTree.table = IntTree.new_ 0 in
-    let rec mapStruct mid = valOf (IntTree.lookup structMap mid) in
-    let rec mapParent = function
+    let mapStruct mid = valOf (IntTree.lookup structMap mid) in
+    let mapParent = function
       | None -> topOpt
       | Some parent -> Some (mapStruct parent)
     in
-    let rec mapConst cid =
+    let mapConst cid =
       begin match IntTree.lookup constMap cid with
       | None -> cid
       | Some cid' -> cid'
       end
     in
-    let rec doStruct (mid, StructInfo strdec) =
+    let doStruct (mid, StructInfo strdec) =
       let strdec' = mapStrDecParent mapParent strdec in
       let mid' = IntSyn.sgnStructAdd strdec' in
       let parent = IntSyn.strDecParent strdec' in
@@ -210,7 +210,7 @@ end) : MODSYN = struct
       let _ = Names.installComponents (mid', ns) in
       IntTree.insert structMap (mid, mid')
     in
-    let rec doConst (cid, ConstInfo (condec_var, fixity, namePrefOpt, origin)) =
+    let doConst (cid, ConstInfo (condec_var, fixity, namePrefOpt, origin)) =
       let condec1 = mapConDecParent mapParent condec_var in
       let condec2 = mapConDecConsts mapConst condec1 in
       let condec3 = transformConDec (cid, condec2) in
@@ -254,7 +254,7 @@ end) : MODSYN = struct
 
   let decToDef x = strictify (abbrevify x)
 
-  let rec installStruct (strdec, module_, nsOpt, installAction, isDef) =
+  let installStruct (strdec, module_, nsOpt, installAction, isDef) =
     let transformConDec =
       begin if isDef then decToDef else function _, condec_var -> condec_var
       end
@@ -271,14 +271,14 @@ end) : MODSYN = struct
     let _ = Names.installComponents (mid, ns) in
     installModule (module_, Some mid, None, installAction, transformConDec)
 
-  let rec installSig (module_, nsOpt, installAction, isDef) =
+  let installSig (module_, nsOpt, installAction, isDef) =
     let transformConDec =
       begin if isDef then decToDef else function _, condec_var -> condec_var
       end
     in
     installModule (module_, None, nsOpt, installAction, transformConDec)
 
-  let rec abstractModule (namespace, topOpt) =
+  let abstractModule (namespace, topOpt) =
     let structTable : structInfo IntTree.table = IntTree.new_ 0 in
     let constTable : constInfo IntTree.table = IntTree.new_ 0 in
     let mapParent =
@@ -317,7 +317,7 @@ end) : MODSYN = struct
       (structTable, constTable, namespace)
     end
 
-  let rec instantiateModule (((_, _, namespace) as module_), transform) =
+  let instantiateModule (((_, _, namespace) as module_), transform) =
     let transformConDec = transform namespace in
     let mid = IntSyn.sgnStructAdd (IntSyn.StrDec ("wheresubj", None)) in
     let ns = Names.newNamespace () in
@@ -331,13 +331,13 @@ end) : MODSYN = struct
     let defList : string list ref = ref []
     let defCount : int ref = ref 0
     let defs : module_ HashTable.table = HashTable.new_ 4096
-    let rec defsClear () = HashTable.clear defs
+    let defsClear () = HashTable.clear defs
     let defsInsert = HashTable.insertShadow defs
     let defsLookup = HashTable.lookup defs
     let defsDelete = HashTable.delete defs
   end
 
-  let rec reset () =
+  let reset () =
     begin
       defList := [];
       begin
@@ -346,7 +346,7 @@ end) : MODSYN = struct
       end
     end
 
-  let rec resetFrom mark =
+  let resetFrom mark =
     let rec ct (l, i) =
       begin if i <= mark then l
       else
@@ -362,9 +362,9 @@ end) : MODSYN = struct
       defCount := mark
     end
 
-  let rec sigDefSize () = !defCount
+  let sigDefSize () = !defCount
 
-  let rec installSigDef (id, module_) =
+  let installSigDef (id, module_) =
     begin match defsInsert (id, module_) with
     | None -> begin
         defList := id :: !defList;

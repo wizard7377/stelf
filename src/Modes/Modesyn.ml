@@ -25,7 +25,7 @@ module ModeSyn : MODESYN = struct
   and marg = Marg of mode * string option [@@deriving eq, ord, show]
 
   (* modeEqual (M1, M2) = true iff M1 = M2 *)
-  let rec modeEqual = function
+  let modeEqual = function
     | Plus, Plus -> true
     | Star, Star -> true
     | Minus, Minus -> true
@@ -36,7 +36,7 @@ module ModeSyn : MODESYN = struct
     
        converts a mode into a string for error messages
   *)
-  let rec modeToString = function
+  let modeToString = function
     | Plus -> "input (+)"
     | Star -> {|unrestricted (*)|}
     | Minus -> "output (-)"

@@ -64,7 +64,7 @@ module MakeConstraints (Conv : CONV) : CONSTRAINTS = struct
     | name :: [] -> name ^ "."
     | name :: names -> (name ^ ", ") ^ names_to_string names
 
-  let rec warn_constraints = function
+  let warn_constraints = function
     | [] -> ()
     | names -> print (("Constraints remain on " ^ names_to_string names) ^ "\n")
 

@@ -171,7 +171,7 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
                 EClo (us2_e_, us2_s_) )
           with
           | Succeed residualL ->
-              let rec execResidual = function
+              let execResidual = function
                 | Assign (g_, EVar (r, _, _, cnstrs), w_, ss) ->
                     let w'_ = pruneExp (g_, (w_, id), ss, r) in
                     Unify.instantiateEVar (r, w'_, !cnstrs)
@@ -188,7 +188,7 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
                 EClo (us1_e_, us1_s_) )
           with
           | Succeed opL ->
-              let rec execOp = function
+              let execOp = function
                 | Assign (g_, EVar (r, _, _, cnstrs), w_, ss) ->
                     let w'_ = pruneExp (g_, (w_, id), ss, r) in
                     Unify.instantiateEVar (r, w'_, !cnstrs)
@@ -422,13 +422,13 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
           else raise (Match "Foreign constraint violated")
           end
 
-    let rec matchW (g_, us1_, us2_) =
+    let matchW (g_, us1_, us2_) =
       begin
         Unify.resetAwakenCnstrs ();
         match1W (g_, us1_, us2_)
       end
 
-    let rec match_ (g_, us1_, us2_) =
+    let match_ (g_, us1_, us2_) =
       begin
         Unify.resetAwakenCnstrs ();
         match1 (g_, us1_, us2_)
@@ -678,7 +678,7 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
   let matchSub = matchSub
   let matchBlock = matchBlock
 
-  let rec instance (g_, us1_, us2_) =
+  let instance (g_, us1_, us2_) =
     try
       begin
         match_ (g_, us1_, us2_);
@@ -686,7 +686,7 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
       end
     with Match msg -> false
 
-  let rec instance' (g_, us1_, us2_) =
+  let instance' (g_, us1_, us2_) =
     try
       begin
         match_ (g_, us1_, us2_);

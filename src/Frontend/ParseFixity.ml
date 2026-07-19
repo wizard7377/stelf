@@ -24,9 +24,9 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
     module LS = Parsing.Stream
     module FX = Names.Fixity
 
-    let rec fixToString (FX.Strength p) = Int.toString p
+    let fixToString (FX.Strength p) = Int.toString p
 
-    let rec idToPrec (r, (_, name)) =
+    let idToPrec (r, (_, name)) =
       let prec =
         try FX.Strength (L.stringToNat name) with
         | Overflow -> Parsing.error (r, "Precedence too large")
@@ -41,20 +41,20 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
       else prec
       end
 
-    let rec parseFixCon = function
+    let parseFixCon = function
       | fixity, LS.Cons ((L.Id (_, name), r), s') ->
           (((Names.Qid ([], name), r), fixity), LS.expose s')
       | fixity, LS.Cons ((t, r), s') ->
           Parsing.error
             (r, "Expected identifier to assign fixity, found " ^ L.toString t)
 
-    let rec parseFixPrec = function
+    let parseFixPrec = function
       | fixity, LS.Cons ((L.Id (id_case, name), r), s') ->
           parseFixCon (fixity (idToPrec (r, (id_case, name))), LS.expose s')
       | fixity, LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected precedence, found " ^ L.toString t)
 
-    let rec parseInfix = function
+    let parseInfix = function
       | LS.Cons ((L.Id (L.Lower, "none"), r), s') ->
           parseFixPrec ((fun p -> FX.Infix (p, FX.None)), LS.expose s')
       | LS.Cons ((L.Id (L.Lower, "left"), r), s') ->
@@ -67,15 +67,15 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
               "Expected associatitivy `left', `right', or `none', found "
               ^ L.toString t )
 
-    let rec parsePrefix f = parseFixPrec ((fun p -> FX.Prefix p), f)
-    let rec parsePostfix f = parseFixPrec ((fun p -> FX.Postfix p), f)
+    let parsePrefix f = parseFixPrec ((fun p -> FX.Prefix p), f)
+    let parsePostfix f = parseFixPrec ((fun p -> FX.Postfix p), f)
 
-    let rec parseFixity' = function
+    let parseFixity' = function
       | LS.Cons ((L.Infix, r), s') -> parseInfix (LS.expose s')
       | LS.Cons ((L.Prefix, r), s') -> parsePrefix (LS.expose s')
       | LS.Cons ((L.Postfix, r), s') -> parsePostfix (LS.expose s')
 
-    let rec parseFixity s = parseFixity' (LS.expose s)
+    let parseFixity s = parseFixity' (LS.expose s)
 
     let rec parseName5 = function
       | name, r0, prefENames, prefUNames, LS.Cons ((L.Id (_, prefUName), r), s')
@@ -88,7 +88,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
           Parsing.error
             (r, "Expected name preference or ')', found " ^ L.toString t)
 
-    let rec parseName3 = function
+    let parseName3 = function
       | name, r0, prefEName, LS.Cons ((L.Id (_, prefUName), r), s') ->
           ( ((Names.Qid ([], name), r0), (prefEName, [ prefUName ])),
             LS.expose s' )
@@ -110,7 +110,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
           Parsing.error
             (r, "Expected name preference or ')', found " ^ L.toString t)
 
-    let rec parseName2 = function
+    let parseName2 = function
       | name, r0, LS.Cons ((L.Id (_, prefEName), r), s') ->
           begin if L.isUpper prefEName then
             parseName3 (name, r0, [ prefEName ], LS.expose s')
@@ -122,7 +122,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
       | name, r0, LS.Cons ((t, r), s') ->
           Parsing.error (r, "Expected name preference, found " ^ L.toString t)
 
-    let rec parseName1 = function
+    let parseName1 = function
       | LS.Cons ((L.Id (_, name), r), s') -> parseName2 (name, r, LS.expose s')
       | LS.Cons ((t, r), s') ->
           Parsing.error
@@ -130,10 +130,10 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
               "Expected identifer to assign name preference, found "
               ^ L.toString t )
 
-    let rec parseNamePref' (LS.Cons ((L.Name, r), s')) =
+    let parseNamePref' (LS.Cons ((L.Name, r), s')) =
       parseName1 (LS.expose s')
 
-    let rec parseNamePref s = parseNamePref' (LS.expose s)
+    let parseNamePref s = parseNamePref' (LS.expose s)
   end
 
   (* some shorthands *)

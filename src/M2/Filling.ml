@@ -46,11 +46,11 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    let rec delay (search, params_) () =
+    let delay (search, params_) () =
       try search params_ with Search.Error s -> raise (Error s)
 
-    let rec makeAddressInit s_ k = (s_, k)
-    let rec makeAddressCont makeAddress k = makeAddress (k + 1)
+    let makeAddressInit s_ k = (s_, k)
+    let makeAddressCont makeAddress k = makeAddress (k + 1)
 
     let rec operators (g_, ge_, vs_, abstractAll, abstractEx, makeAddress) =
       operatorsW (g_, ge_, Whnf.whnf vs_, abstractAll, abstractEx, makeAddress)
@@ -107,27 +107,27 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
           let x'_ = Whnf.lowerEVar x_ in
           (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'), x'_ :: ge'_)
 
-    let rec expand (M.State (name, M.Prefix (g_, m_, b_), v_) as s_) =
+    let expand (M.State (name, M.Prefix (g_, m_, b_), v_) as s_) =
       let M.Prefix (g'_, m'_, b'_), s', ge'_ =
         createEVars (M.Prefix (g_, m_, b_))
       in
-      let rec abstractAll acc =
+      let abstractAll acc =
         try
           MetaAbstract.abstract
             (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
           :: acc
         with MetaAbstract.Error s -> acc
       in
-      let rec abstractEx () =
+      let abstractEx () =
         MetaAbstract.abstract
           (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
       in
       operators
         (g'_, ge'_, (v_, s'), abstractAll, abstractEx, makeAddressInit s_)
 
-    let rec apply (_, f) = f ()
+    let apply (_, f) = f ()
 
-    let rec menu ((M.State (name, M.Prefix (g_, m_, b_), v_), k), sl_) =
+    let menu ((M.State (name, M.Prefix (g_, m_, b_), v_), k), sl_) =
       let rec toString = function
         | g_, I.Pi ((I.Dec (_, v_), _), _), 0 -> Print.expToString (g_, v_)
         | g_, (I.Root _ as v_), 0 -> Print.expToString (g_, v_)

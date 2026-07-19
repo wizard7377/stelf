@@ -67,7 +67,7 @@ end) : RELFUN.RELFUN = struct
           let g'_, s' = ctxSub (g_, s) in
           (I.Decl (g'_, I.decSub (d_, s')), I.dot1 s)
 
-    let rec convertOneFor cid =
+    let convertOneFor cid =
       let v_ =
         begin match I.sgnLookup cid with
         | I.ConDec (name, _, _, _, v_, I.Kind) -> v_
@@ -95,7 +95,7 @@ end) : RELFUN.RELFUN = struct
         | I.Uni I.Type, mnil_, _, _, _ -> ((fun f_ -> f_), F.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
-      let rec shiftPlus mS =
+      let shiftPlus mS =
         let rec shiftPlus' = function
           | mnil_, n -> n
           | M.Mapp (M.Marg (plus_, _), mS'), n -> shiftPlus' (mS', n + 1)
@@ -137,11 +137,11 @@ end) : RELFUN.RELFUN = struct
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
     and occursInExp (k, u_) = occursInExpN (k, Whnf.normalize (u_, I.id))
 
-    let rec dot1inv w = Weaken.strengthenSub (I.comp (I.shift, w), I.shift)
-    let rec shiftinv w = Weaken.strengthenSub (w, I.shift)
-    let rec eqIdx = function I.Idx n, I.Idx k -> n = k | _ -> false
+    let dot1inv w = Weaken.strengthenSub (I.comp (I.shift, w), I.shift)
+    let shiftinv w = Weaken.strengthenSub (w, I.shift)
+    let eqIdx = function I.Idx n, I.Idx k -> n = k | _ -> false
 
-    let rec peel w =
+    let peel w =
       begin if eqIdx (I.bvarSub (1, w), I.Idx 1) then dot1inv w else shiftinv w
       end
 
@@ -153,7 +153,7 @@ end) : RELFUN.RELFUN = struct
       | (I.Decl _ as g_), I.Shift 0 -> domain (g_, I.Dot (I.Idx 1, I.Shift 1))
       | I.Decl (g_, _), I.Shift n -> domain (g_, I.Shift (n - 1))
 
-    let rec strengthen (psi_, (a, s_), w, m) =
+    let strengthen (psi_, (a, s_), w, m) =
       let mS =
         begin match ModeTable.modeLookup a with
         | None -> raise (Error "Mode declaration expected")
@@ -186,7 +186,7 @@ end) : RELFUN.RELFUN = struct
             occursInG
               (n, g_, function n' -> occursInExp (n', v_) || k (n' + 1))
       in
-      let rec occursBlock (g_, (psi2_, l_)) =
+      let occursBlock (g_, (psi2_, l_)) =
         let rec occursBlock = function
           | I.Null, n -> false
           | I.Decl (g_, d_), n ->
@@ -246,7 +246,7 @@ end) : RELFUN.RELFUN = struct
       in
       strengthen' (psi_, [], args (s_, mS), w)
 
-    let rec recursion l_ =
+    let recursion l_ =
       let f_ = convertFor l_ in
       let rec name = function
         | a :: [] -> I.conDecName (I.sgnLookup a)
@@ -254,7 +254,7 @@ end) : RELFUN.RELFUN = struct
       in
       function p -> F.Rec (F.MDec (Some (name l_), f_), p)
 
-    let rec abstract a =
+    let abstract a =
       let mS =
         begin match ModeTable.modeLookup a with
         | None -> raise (Error "Mode declaration expected")
@@ -278,7 +278,7 @@ end) : RELFUN.RELFUN = struct
       in
       abstract' ((v_, mS), I.id)
 
-    let rec transformInit (psi_, (a, s_), w1) =
+    let transformInit (psi_, (a, s_), w1) =
       let mS =
         begin match ModeTable.modeLookup a with
         | None -> raise (Error "Mode declaration expected")
@@ -310,7 +310,7 @@ end) : RELFUN.RELFUN = struct
       in
       transformInit' ((s_, mS), v_, (I.id, I.Shift (F.lfctxLength psi_)))
 
-    let rec transformDec (ts_, (psi_, g0_), d, (a, s_), w1, w2, t0) =
+    let transformDec (ts_, (psi_, g0_), d, (a, s_), w1, w2, t0) =
       let mS =
         begin match ModeTable.modeLookup a with
         | None -> raise (Error "Mode declaration expected")
@@ -323,7 +323,7 @@ end) : RELFUN.RELFUN = struct
         | _ -> raise (Error "Type Constant declaration expected")
         end
       in
-      let rec raiseExp (g_, u_, a) =
+      let raiseExp (g_, u_, a) =
         let rec raiseExp' = function
           | I.Null -> (I.id, function x -> x)
           | I.Decl (g_, (I.Dec (_, v_) as d_)) ->
@@ -339,7 +339,7 @@ end) : RELFUN.RELFUN = struct
         let w, k = raiseExp' g_ in
         k (Weaken.strengthenExp (u_, w))
       in
-      let rec raiseType (g_, u_, a) =
+      let raiseType (g_, u_, a) =
         let rec raiseType' = function
           | I.Null, n -> (I.id, (function x -> x), function s_ -> s_)
           | I.Decl (g_, (I.Dec (_, v_) as d_)), n ->
@@ -357,7 +357,7 @@ end) : RELFUN.RELFUN = struct
         let w, k, k' = raiseType' (g_, 2) in
         (k (Weaken.strengthenExp (u_, w)), I.Root (I.BVar 1, k' I.Nil))
       in
-      let rec exchangeSub g0_ =
+      let exchangeSub g0_ =
         let g0 = I.ctxLength g0_ in
         let rec exchangeSub' = function
           | 0, s -> s
@@ -425,7 +425,7 @@ end) : RELFUN.RELFUN = struct
             (I.id, I.Shift (domain (psi_, t0) + I.ctxLength g0_)),
             (I.id, t0) )
       in
-      let rec varHead ts_ (w'', t'', (d', dplus_, dminus_)) =
+      let varHead ts_ (w'', t'', (d', dplus_, dminus_)) =
         let rec head' = function
           | a' :: [], d1, k1 -> (d1, k1)
           | a' :: ts'_, d1, k1 ->
@@ -438,7 +438,7 @@ end) : RELFUN.RELFUN = struct
         let d2, k2 = head' (ts_, d', function xx -> dplus_ (xx, dminus_)) in
         (d2, w'', t'', k2 d)
       in
-      let rec lemmaHead (w'', t'', (d', dplus_, dminus_)) =
+      let lemmaHead (w'', t'', (d', dplus_, dminus_)) =
         let name = I.conDecName (I.sgnLookup a) in
         let l =
           begin match FunNames.nameLookup name with
@@ -453,7 +453,7 @@ end) : RELFUN.RELFUN = struct
       else lemmaHead (w'', t'', (d', dplus_, dminus_))
       end
 
-    let rec transformConc ((a, s_), w) =
+    let transformConc ((a, s_), w) =
       let mS =
         begin match ModeTable.modeLookup a with
         | None -> raise (Error "Mode declaration expected")
@@ -469,7 +469,7 @@ end) : RELFUN.RELFUN = struct
       in
       transformConc' (s_, mS)
 
-    let rec traverse (ts_, c) =
+    let traverse (ts_, c) =
       let rec traverseNeg = function
         | c'', psi_, (I.Pi (((I.Dec (_, v1_) as d_), maybe_), v2_), v), l_ ->
             begin match
@@ -671,8 +671,8 @@ end) : RELFUN.RELFUN = struct
       in
       traverseSig' (0, [])
 
-    let rec convertPro ts_ =
-      let rec convertOnePro a =
+    let convertPro ts_ =
+      let convertOnePro a =
         let v_ =
           begin match I.sgnLookup a with
           | I.ConDec (name, _, _, _, v_, I.Kind) -> v_

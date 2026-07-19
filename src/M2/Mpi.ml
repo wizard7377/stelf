@@ -69,15 +69,15 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       ref []
 
     let menu_ : menuItem list option ref = ref None
-    let rec initOpen () = openRing := Ring.init []
-    let rec initSolved () = solvedRing := Ring.init []
-    let rec empty () = Ring.empty !openRing
-    let rec current () = Ring.current !openRing
-    let rec delete () = openRing := Ring.delete !openRing
-    let rec insertOpen s_ = openRing := Ring.insert (!openRing, s_)
-    let rec insertSolved s_ = solvedRing := Ring.insert (!solvedRing, s_)
+    let initOpen () = openRing := Ring.init []
+    let initSolved () = solvedRing := Ring.init []
+    let empty () = Ring.empty !openRing
+    let current () = Ring.current !openRing
+    let delete () = openRing := Ring.delete !openRing
+    let insertOpen s_ = openRing := Ring.insert (!openRing, s_)
+    let insertSolved s_ = solvedRing := Ring.insert (!solvedRing, s_)
 
-    let rec insert s_ =
+    let insert s_ =
       begin if Qed.subgoal s_ then begin
         insertSolved s_;
         begin
@@ -91,15 +91,15 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       else insertOpen s_
       end
 
-    let rec collectOpen () = Ring.foldr (fun (x, acc) -> x :: acc) [] !openRing
+    let collectOpen () = Ring.foldr (fun (x, acc) -> x :: acc) [] !openRing
 
-    let rec collectSolved () =
+    let collectSolved () =
       Ring.foldr (fun (x, acc) -> x :: acc) [] !solvedRing
 
-    let rec nextOpen () = openRing := Ring.next !openRing
-    let rec pushHistory () = history_ := (!openRing, !solvedRing) :: !history_
+    let nextOpen () = openRing := Ring.next !openRing
+    let pushHistory () = history_ := (!openRing, !solvedRing) :: !history_
 
-    let rec popHistory () =
+    let popHistory () =
       begin match !history_ with
       | [] -> raise (Error "History stack empty")
       | (open'_, solved'_) :: history'_ -> begin
@@ -111,13 +111,13 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         end
       end
 
-    let rec abort s =
+    let abort s =
       begin
         print ("* " ^ s);
         raise (Error s)
       end
 
-    let rec reset () =
+    let reset () =
       begin
         initOpen ();
         begin
@@ -146,7 +146,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | [], a_ -> a_
       | o_ :: l_, a_ -> recursionToMenu_ (l_, Recursion o_ :: a_)
 
-    let rec menu () =
+    let menu () =
       begin if empty () then menu_ := None
       else
         let s_ = current () in
@@ -163,11 +163,11 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
                ))
       end
 
-    let rec format k =
+    let format k =
       begin if k < 10 then Int.toString k ^ ".  " else Int.toString k ^ ". "
       end
 
-    let rec menuToString () =
+    let menuToString () =
       let rec menuToString' = function
         | k, [] -> ""
         | k, Splitting o_ :: m_ ->
@@ -182,7 +182,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | Some m_ -> menuToString' (1, m_)
       end
 
-    let rec makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
+    let makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
       let rec makeConDec' = function
         | I.Null, v_, k -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
         | I.Decl (g_, d_), v_, k ->
@@ -194,7 +194,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | [] -> M.SgnEmpty
       | s_ :: sl_ -> M.ConDec (makeConDec s_, makeSignature sl_)
 
-    let rec extract () =
+    let extract () =
       begin if empty () then makeSignature (collectSolved ())
       else begin
         print "[Error: Proof not completed yet]\n";
@@ -202,9 +202,9 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       end
       end
 
-    let rec show () = print (MetaPrint.sgnToString (extract ()) ^ "\n")
+    let show () = print (MetaPrint.sgnToString (extract ()) ^ "\n")
 
-    let rec printMenu () =
+    let printMenu () =
       begin if empty () then begin
         show ();
         print "[QED]\n"
@@ -231,9 +231,9 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | x :: l_, l'_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
-    let rec equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
 
-    let rec init' (k, (c :: _ as cL)) =
+    let init' (k, (c :: _ as cL)) =
       let _ = MetaGlobal.maxFill := k in
       let _ = reset () in
       let cL' = try Order.closure c with Order.Error _ -> cL in
@@ -247,7 +247,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
              ^ cLToString cL'))
       end
 
-    let rec init (k, nL) =
+    let init (k, nL) =
       let rec cids = function
         | [] -> []
         | name :: nL ->
@@ -278,7 +278,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | Recursion.Error s -> abort ("Recursion Error: " ^ s)
       | Error s -> abort ("Mpi Error: " ^ s)
 
-    let rec select k =
+    let select k =
       let rec select' = function
         | k, [] -> abort "No such menu item"
         | 1, Splitting o_ :: _ ->
@@ -329,7 +329,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | Recursion.Error s -> abort ("Recursion Error: " ^ s)
       | Error s -> abort ("Mpi Error: " ^ s)
 
-    let rec lemma name =
+    let lemma name =
       begin if empty () then raise (Error "Nothing to prove")
       else
         let s_ = current () in
@@ -352,7 +352,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         end
       end
 
-    let rec solve () =
+    let solve () =
       begin if empty () then raise (Error "Nothing to prove")
       else
         let s_ = current () in
@@ -373,7 +373,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         end
       end
 
-    let rec auto () =
+    let auto () =
       let open'_, solved'_ =
         try Strategy.run (collectOpen ()) with
         | Splitting.Error s -> abort ("Splitting Error: " ^ s)
@@ -390,7 +390,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         printMenu ()
       end
 
-    let rec next () =
+    let next () =
       begin
         nextOpen ();
         begin
@@ -399,7 +399,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         end
       end
 
-    let rec undo () =
+    let undo () =
       begin
         popHistory ();
         begin

@@ -44,22 +44,22 @@ module MakeTabledSyn
     module I = IntSyn
 
     let tabledSignature : bool Table.table = Table.new_ 0
-    let rec reset () = Table.clear tabledSignature
-    let rec installTabled a = Table.insert tabledSignature (a, false)
+    let reset () = Table.clear tabledSignature
+    let installTabled a = Table.insert tabledSignature (a, false)
 
-    let rec installKeepTable a =
+    let installKeepTable a =
       begin
         ignore (Table.insertShadow tabledSignature (a, true));
         ()
       end
 
-    let rec tabledLookup a =
+    let tabledLookup a =
       begin match Table.lookup tabledSignature a with
       | None -> false
       | Some _ -> true
       end
 
-    let rec keepTable a =
+    let keepTable a =
       begin match Table.lookup tabledSignature a with
       | None -> false
       | Some true -> true

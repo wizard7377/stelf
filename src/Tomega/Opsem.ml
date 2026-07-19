@@ -408,7 +408,7 @@ module MakeOpsem
                 ^ "\n")
           end
         in
-        let rec match_ (psi_, t1, T.Cases ((psi'_, t2, p_) :: c_)) =
+        let match_ (psi_, t1, T.Cases ((psi'_, t2, p_) :: c_)) =
           let t = createVarSub (psi_, psi'_) in
           let t' = T.comp (t2, t) in
           let m = I.ctxLength psi'_ in

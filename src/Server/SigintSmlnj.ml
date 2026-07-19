@@ -24,6 +24,6 @@ module SigINT : Sigint.SIGINT = struct
       loop ()
     end
     *)
-  let rec interruptLoop (loop : unit -> unit) = loop ()
+  let interruptLoop (loop : unit -> unit) = loop ()
 end
 (* structure SigINT *)

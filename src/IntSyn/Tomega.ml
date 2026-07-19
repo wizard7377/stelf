@@ -151,9 +151,9 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       (Array.array (maxLemma + 1, ForDec ("", True)) : conDec Array.array)
 
     let nextLemma = ref 0
-    let rec lemmaLookup lemma = Array.sub (lemmaArray, lemma)
+    let lemmaLookup lemma = Array.sub (lemmaArray, lemma)
 
-    let rec lemmaAdd lemmaDec =
+    let lemmaAdd lemmaDec =
       let lemma = !nextLemma in
       begin if lemma > maxLemma then
         raise
@@ -169,13 +169,13 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       end
       end
 
-    let rec lemmaSize () = !nextLemma
+    let lemmaSize () = !nextLemma
 
-    let rec lemmaDef lemma =
+    let lemmaDef lemma =
       begin match lemmaLookup lemma with ValDec (_, p_, _) -> p_
       end
 
-    let rec lemmaFor lemma =
+    let lemmaFor lemma =
       begin match lemmaLookup lemma with
       | ForDec (_, f_) -> f_
       | ValDec (_, _, f_) -> f_
@@ -197,14 +197,14 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
           end
       end
 
-    let rec coerceFront = function
+    let coerceFront = function
       | Idx k -> I.Idx k
       | Prg p_ -> I.Undef
       | Exp m_ -> I.Exp m_
       | Block b_ -> I.Block b_
       | Undef -> I.Undef
 
-    let rec embedFront = function
+    let embedFront = function
       | I.Idx k -> Idx k
       | I.Exp u_ -> Exp u_
       | I.Block b_ -> Block b_
@@ -218,7 +218,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | I.Shift n -> Shift n
       | I.Dot (ft_, s) -> Dot (embedFront ft_, embedSub s)
 
-    let rec revCoerceFront = function
+    let revCoerceFront = function
       | I.Idx k -> Idx k
       | I.Exp m_ -> Exp m_
       | I.Block b -> Block b
@@ -235,7 +235,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
 
     let id = Shift 0
 
-    let rec dotEta = function
+    let dotEta = function
       | (Idx _ as ft_), s -> Dot (ft_, s)
       | (Exp u_ as ft_), s ->
           let ft'_ = try Idx (Whnf.etaContract u_) with eta_ -> ft_ in
@@ -257,7 +257,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | Conj (tc1_, tc2_), s -> Conj (tCSub_ (tc1_, s), tCSub_ (tc2_, s))
       | Abs (d_, tc_), s -> Abs (I.decSub (d_, s), tCSub_ (tc_, I.dot1 s))
 
-    let rec tCSubOpt_ = function
+    let tCSubOpt_ = function
       | None, s -> None
       | Some tc_, s -> Some (tCSub_ (tc_, s))
 
@@ -272,7 +272,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | Conj (tc1_, tc2_) -> Conj (normalizeTC tc1_, normalizeTC tc2_)
       | Abs (d_, tc_) -> Abs (Whnf.normalizeDec (d_, I.id), normalizeTC tc_)
 
-    let rec normalizeTCOpt = function
+    let normalizeTCOpt = function
       | None -> None
       | Some tc_ -> Some (normalizeTC tc_)
 
@@ -293,7 +293,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
           Conv.convDec ((d_, I.id), (d'_, I.id)) && convTC (tc_, tc'_)
       | _ -> false
 
-    let rec convTCOpt = function
+    let convTCOpt = function
       | None, None -> true
       | Some tc1_, Some tc2_ -> convTC (tc1_, tc2_)
       | _ -> false
@@ -333,7 +333,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | Shift n, Shift m -> Shift (n + m)
       | Dot (ft_, t), t' -> Dot (frontSub (ft_, t'), comp (t, t'))
 
-    let rec dot1 = function
+    let dot1 = function
       | Shift 0 as t -> t
       | t -> Dot (Idx 1, comp (t, Shift 1))
 
@@ -360,7 +360,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
           PDec (x, forSub (f_, t), tCSubOpt_ (tc1_, s), None)
       | UDec d_, t -> UDec (I.decSub (d_, coerceSub t))
 
-    let rec invertSub s =
+    let invertSub s =
       let rec getFrontIndex = function
         | Idx k -> Some k
         | Prg p_ -> getPrgIndex p_
@@ -413,7 +413,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | I.Decl (psi_, UDec d_) -> I.Decl (coerceCtx psi_, d_)
       | I.Decl (psi_, PDec (x, _, _, _)) -> I.Decl (coerceCtx psi_, I.NDec x)
 
-    let rec strengthenCtx psi_ =
+    let strengthenCtx psi_ =
       let w = weakenSub psi_ in
       let s = invertSub w in
       (coerceCtx psi_, w, s)
@@ -442,7 +442,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
           end
         end
 
-    let rec newEVar (psi_, f_) =
+    let newEVar (psi_, f_) =
       EVar
         ( psi_,
           ref None,
@@ -451,7 +451,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
           None,
           I.newEVar (coerceCtx psi_, I.Uni I.Type) )
 
-    let rec newEVarTC (psi_, f_, tc_, tc'_) =
+    let newEVarTC (psi_, f_, tc_, tc'_) =
       EVar
         (psi_, ref None, f_, tc_, tc'_, I.newEVar (coerceCtx psi_, I.Uni I.Type))
 
@@ -463,10 +463,10 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | [], _ -> true
       | x :: w1_, w2_ -> exists (x, w2_) && subset (w1_, w2_)
 
-    let rec eqWorlds (Worlds w1_, Worlds w2_) =
+    let eqWorlds (Worlds w1_, Worlds w2_) =
       subset (w1_, w2_) && subset (w2_, w1_)
 
-    let rec ctxDec (g_, k) =
+    let ctxDec (g_, k) =
       let rec ctxDec' = function
         | I.Decl (g'_, UDec (I.Dec (x, v'_))), 1 ->
             UDec (I.Dec (x, I.EClo (v'_, I.Shift k)))

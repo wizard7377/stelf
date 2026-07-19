@@ -97,7 +97,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (*! structure Paths = ReconQuery.Paths !*)
   module S = Parser.Stream
 
-  let rec inputLine97 instream =
+  let inputLine97 instream =
     begin match TextIO.inputLine instream with Some s -> s | None -> ""
     end
 
@@ -105,7 +105,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
      formats instantiated EVars as a substitution.
      Abbreviate as empty string if chatter level is < 3.
   *)
-  let rec evarInstToString xs_ =
+  let evarInstToString xs_ =
     begin if !Global.chatter >= 3 then Print.evarInstToString xs_ else ""
     end
 
@@ -113,7 +113,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
      formats expression as a string.
      Abbreviate as empty string if chatter level is < 3.
   *)
-  let rec expToString gu_ =
+  let expToString gu_ =
     begin if !Global.chatter >= 3 then Print.expToString gu_ else ""
     end
 
@@ -128,13 +128,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   type nonrec bound = int option
 
   (* exceeds : bound * bound -> bool *)
-  let rec exceeds = function
+  let exceeds = function
     | Some n, Some m -> n >= m
     | Some n, None -> false
     | None, _ -> true
 
   (* boundEq : bound * bound -> bool *)
-  let rec boundEq = function
+  let boundEq = function
     | Some n, Some m -> n = m
     | None, None -> true
     | _ -> false
@@ -143,7 +143,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   let boundToString = function Some n -> Int.toString n | None -> "*"
 
   (* boundMin : bound * bound -> bound *)
-  let rec boundMin = function
+  let boundMin = function
     | Some n, Some m -> Some (Int.min (n, m))
     | b, None -> b
     | None, b -> b
@@ -151,7 +151,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (* checkSolutions : bound * bound * int -> unit *)
   (* raises AbortQuery(msg) if the actual solutions do not match *)
   (* the expected number, given the bound on the number of tries *)
-  let rec checkSolutions (expected, try_, solutions) =
+  let checkSolutions (expected, try_, solutions) =
     begin if boundEq (boundMin (expected, try_), Some solutions) then ()
     else
       raise
@@ -167,7 +167,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (* checkStages : bound * int -> unit *)
   (* raises AbortQuery(msg) if the actual #stages do not match *)
   (* the expected number, given the bound on the number of tries *)
-  let rec checkStages (try_, stages) =
+  let checkStages (try_, stages) =
     begin if boundEq (try_, Some stages) then ()
     else
       raise
@@ -181,7 +181,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
      Effects: inputs one line from standard input,
               raises exception AbortQuery(msg) is first character is ""q"" or ""Q""
   *)
-  let rec moreSolutions () =
+  let moreSolutions () =
     begin
       print "More? ";
       begin match String.sub (inputLine97 TextIO.stdIn, 0) with
@@ -214,7 +214,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
      error messages and finally returning the status (either OK or
      ABORT).
   *)
-  let rec solve' (defines, solve_, Paths.Loc (fileName, r)) =
+  let solve' (defines, solve_, Paths.Loc (fileName, r)) =
     let a_, finish =
       ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
     in
@@ -227,7 +227,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let g =
       Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
     in
-    let rec search () =
+    let search () =
       AbsMachine.solve
         ( (g, IntSyn.id),
           CompSyn.DProg (IntSyn.Null, IntSyn.Null),
@@ -264,7 +264,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   -- this version can be used to produce oracles, however no user
   directive is added yet.
 *)
-  let rec solveSbt (defines, solve_, Paths.Loc (fileName, r)) =
+  let solveSbt (defines, solve_, Paths.Loc (fileName, r)) =
     let a_, finish =
       ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
     in
@@ -312,7 +312,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (* self timing *)
   (* echo declaration, according to chatter level *)
 
-  let rec solve args =
+  let solve args =
     begin match !Compile.optimize with
     | CompSyn.Indexing -> solveSbt args
     | CompSyn.LinearHeads -> solve' args
@@ -323,7 +323,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
        *)
 
   (* %query <expected> <try> A or %query <expected> <try> X : A *)
-  let rec query' ((expected, try_, quy), Paths.Loc (fileName, r)) =
+  let query' ((expected, try_, quy), Paths.Loc (fileName, r)) =
     let a_, optName, xs_ =
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
@@ -342,7 +342,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
     in
     let solutions = ref 0 in
-    let rec scInit m_ =
+    let scInit m_ =
       begin
         solutions := !solutions + 1;
         begin
@@ -378,7 +378,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
         end
       end
     in
-    let rec search () =
+    let search () =
       AbsMachine.solve
         ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit)
     in
@@ -427,7 +427,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
        *)
 
   (* %query <expected> <try> A or %query <expected> <try> X : A *)
-  let rec querySbt ((expected, try_, quy), Paths.Loc (fileName, r)) =
+  let querySbt ((expected, try_, quy), Paths.Loc (fileName, r)) =
     let a_, optName, xs_ =
       ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
     in
@@ -446,7 +446,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
     in
     let solutions = ref 0 in
-    let rec scInit m_ =
+    let scInit m_ =
       begin
         solutions := !solutions + 1;
         begin
@@ -496,7 +496,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
         end
       end
     in
-    let rec search () =
+    let search () =
       AbsMachineSbt.solve
         ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit)
     in
@@ -546,7 +546,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
        *)
 
   (* %query <expected> <try> A or %query <expected> <try> X : A  *)
-  let rec query args =
+  let query args =
     begin match !Compile.optimize with
     | CompSyn.Indexing -> querySbt args
     | CompSyn.LinearHeads -> query' args
@@ -561,7 +561,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
 or  %querytabled <expected solutions> <max stages tried>  X : A
   note : %querytabled terminates if we have found the expected number of
   solutions or if we have reached the maximal number of stages *)
-  let rec querytabled ((numSol, try_, quy), Paths.Loc (fileName, r)) =
+  let querytabled ((numSol, try_, quy), Paths.Loc (fileName, r)) =
     let _ =
       Display.chatter_s 3
         ((("%querytabled " ^ boundToString numSol) ^ " ") ^ boundToString try_)
@@ -582,7 +582,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     let status = ref false in
     let solExists = ref false in
     let stages = ref 1 in
-    let rec scInit o_ =
+    let scInit o_ =
       begin
         solutions := !solutions + 1;
         begin
@@ -691,7 +691,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     in
     let _ = Tabled.reset () in
     let _ = Tabled.fillTable () in
-    let rec tabledSearch () =
+    let tabledSearch () =
       begin
         Tabled.solve
           ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit);
@@ -801,7 +801,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
         let g =
           Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
         in
-        let rec scInit m_ =
+        let scInit m_ =
           begin
             Display.chatter_s 1
               (Timers.time Timers.printing evarInstToString xs_ ^ "\n");
@@ -870,7 +870,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
         in
         let _ = Tabled.reset () in
-        let rec scInit o_ =
+        let scInit o_ =
           begin
             Display.chatter_s 1
               (Timers.time Timers.printing evarInstToString xs_ ^ "\n");

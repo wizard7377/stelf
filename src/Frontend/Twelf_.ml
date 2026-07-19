@@ -229,17 +229,17 @@ end) : TWELF.STELF = struct
     module TableParam = TableParam.TableParam
     module S = Parser.Stream
 
-    let rec msg s = Msg.message s
-    let rec chmsg n s = Global.chMessage n s msg
+    let msg s = Msg.message s
+    let chmsg n s = Global.chMessage n s msg
 
-    let rec fileOpenMsg fileName =
+    let fileOpenMsg fileName =
       begin match !Global.chatter with
       | 0 -> ()
       | 1 -> msg (("[Loading file " ^ fileName) ^ " ...")
       | _ -> msg (("[Opening file " ^ fileName) ^ "]\n")
       end
 
-    let rec fileCloseMsg fileName =
+    let fileCloseMsg fileName =
       begin match !Global.chatter with
       | 0 -> ()
       | 1 -> msg "]\n"
@@ -248,7 +248,7 @@ end) : TWELF.STELF = struct
 
     type 'a result = Value of 'a | Exception of exn
 
-    let rec withOpenIn fileName scope =
+    let withOpenIn fileName scope =
       let instream = TextIO.openIn (Stdlib.String.trim fileName) in
       let _ = fileOpenMsg fileName in
       let result = scope instream in
@@ -256,15 +256,15 @@ end) : TWELF.STELF = struct
       let _ = TextIO.closeIn instream in
       result
 
-    let rec evarInstToString xs_ =
+    let evarInstToString xs_ =
       begin if !Global.chatter >= 3 then Print.evarInstToString xs_ else ""
       end
 
-    let rec expToString gu_ =
+    let expToString gu_ =
       begin if !Global.chatter >= 3 then Print.expToString gu_ else ""
       end
 
-    let rec printProgTeX () =
+    let printProgTeX () =
       begin
         msg "\\begin{bigcode}\n";
         begin
@@ -273,7 +273,7 @@ end) : TWELF.STELF = struct
         end
       end
 
-    let rec printSgnTeX () =
+    let printSgnTeX () =
       begin
         msg "\\begin{bigcode}\n";
         begin
@@ -282,16 +282,16 @@ end) : TWELF.STELF = struct
         end
       end
 
-    let rec abort chlev msg =
+    let abort chlev msg =
       begin
         chmsg chlev (function () -> msg);
         Abort
       end
 
-    let rec abortFileMsg chlev (fileName, msg) =
+    let abortFileMsg chlev (fileName, msg) =
       abort chlev (((fileName ^ ":") ^ msg) ^ "\n")
 
-    let rec abortIO = function
+    let abortIO = function
       | fileName, _ -> begin
           msg (("IO Error on file " ^ fileName) ^ "\n");
           Abort
@@ -301,13 +301,13 @@ end) : TWELF.STELF = struct
       | r, [] -> r
       | r, r' :: rs -> joinregion (Paths.join (r, r'), rs)
 
-    let rec joinregions (r :: rs) = joinregion (r, rs)
+    let joinregions (r :: rs) = joinregion (r, rs)
 
-    let rec constraintsMsg cnstrL =
+    let constraintsMsg cnstrL =
       "Typing ambiguous -- unresolved constraints\n"
       ^ Print.cnstrsToString cnstrL
 
-    let rec handleExceptions chlev fileName (f : 'a -> status) (x : 'a) =
+    let handleExceptions chlev fileName (f : 'a -> status) (x : 'a) =
       try f x with
       | ReconTerm.Error msg -> abortFileMsg chlev (fileName, msg)
       | ReconConDec.Error msg -> abortFileMsg chlev (fileName, msg)
@@ -349,7 +349,7 @@ end) : TWELF.STELF = struct
 
     let context : ModSyn.Names.namespace option ref = ref None
 
-    let rec installConst fromCS (cid, fileNameocOpt) =
+    let installConst fromCS (cid, fileNameocOpt) =
       let _ = Origins.installOrigin (cid, fileNameocOpt) in
       let _ = Index.install fromCS (IntSyn.Const cid) in
       let _ = IndexSkolem.install fromCS (IntSyn.Const cid) in
@@ -358,7 +358,7 @@ end) : TWELF.STELF = struct
       let _ = Timers.time Timers.subordinate Subordinate.installDef cid in
       ()
 
-    let rec installConDec fromCS
+    let installConDec fromCS
         (conDec, ((fileName, ocOpt) as fileNameocOpt), r) =
       let _ =
         Timers.time Timers.modes ModeCheck.checkD (conDec, fileName, ocOpt)
@@ -388,7 +388,7 @@ end) : TWELF.STELF = struct
       in
       cid
 
-    let rec installBlockDec fromCS
+    let installBlockDec fromCS
         (conDec, ((fileName, ocOpt) as fileNameocOpt), r) =
       let cid = IntSyn.sgnAdd conDec in
       let _ =
@@ -409,7 +409,7 @@ end) : TWELF.STELF = struct
       let _ = Origins.installLinesInfo (fileName, Paths.getLinesInfo ()) in
       cid
 
-    let rec installBlockDef fromCS
+    let installBlockDef fromCS
         (conDec, ((fileName, ocOpt) as fileNameocOpt), r) =
       let cid = IntSyn.sgnAdd conDec in
       let _ =
@@ -425,8 +425,8 @@ end) : TWELF.STELF = struct
       let _ = Origins.installLinesInfo (fileName, Paths.getLinesInfo ()) in
       cid
 
-    let rec installStrDec (strdec, module_, r, isDef) =
-      let rec installAction ((cid, _) as data) =
+    let installStrDec (strdec, module_, r, isDef) =
+      let installAction ((cid, _) as data) =
         begin
           installConst IntSyn.Ordinary data;
           Display.chatter_s 4
@@ -440,8 +440,8 @@ end) : TWELF.STELF = struct
       in
       ()
 
-    let rec includeSig (module_, r, isDef) =
-      let rec installAction ((cid, _) as data) =
+    let includeSig (module_, r, isDef) =
+      let installAction ((cid, _) as data) =
         begin
           installConst IntSyn.Ordinary data;
           Display.chatter_s 4
@@ -454,9 +454,9 @@ end) : TWELF.STELF = struct
       in
       ()
 
-    let rec cidToString a = Names.qidToString (Names.constQid a)
+    let cidToString a = Names.qidToString (Names.constQid a)
 
-    let rec invalidate uninstallFun cids msg =
+    let invalidate uninstallFun cids msg =
       let uninstalledCids = List.filter (function a -> uninstallFun a) cids in
       let _ =
         begin match uninstalledCids with
@@ -478,7 +478,7 @@ end) : TWELF.STELF = struct
               ReconConDec.condecToConDec
                 (condec_, Paths.Loc (fileName, r), false)
             in
-            let rec icd = function
+            let icd = function
               | Some (IntSyn.BlockDec _ as conDec) ->
                   let cid =
                     installBlockDec IntSyn.Ordinary
@@ -506,7 +506,7 @@ end) : TWELF.STELF = struct
             let optConDec, ocOpt =
               ReconConDec.condecToConDec (condec_, Paths.Loc (fileName, r), true)
             in
-            let rec icd = function
+            let icd = function
               | Some conDec ->
                   let cid =
                     installConDec IntSyn.Ordinary (conDec, (fileName, ocOpt), r)
@@ -523,7 +523,7 @@ end) : TWELF.STELF = struct
               ReconConDec.condecToConDec
                 (condec_, Paths.Loc (fileName, r), false)
             in
-            let rec icd = function
+            let icd = function
               | Some conDec ->
                   let cid =
                     installConDec IntSyn.Clause (conDec, (fileName, ocOpt), r)
@@ -541,7 +541,7 @@ end) : TWELF.STELF = struct
               with Solve.AbortQuery msg ->
                 raise (Solve.AbortQuery (Paths.wrap (r, msg)))
             in
-            let rec icd (conDec, ocOpt) =
+            let icd (conDec, ocOpt) =
               let cid =
                 installConDec IntSyn.Ordinary (conDec, (fileName, ocOpt), r)
               in
@@ -588,7 +588,7 @@ end) : TWELF.STELF = struct
           let _ = chmsg 3 (function () -> "%]\n") in
           ()
       | fileName, (Parser.SubordDec qidpairs, r) ->
-          let rec toCid qid =
+          let toCid qid =
             begin match Names.constLookup qid with
             | None ->
                 raise
@@ -622,7 +622,7 @@ end) : TWELF.STELF = struct
                       ^ s)
                 ".\n" cidpairs)
       | fileName, (Parser.FreezeDec qids, r) ->
-          let rec toCid qid =
+          let toCid qid =
             begin match Names.constLookup qid with
             | None ->
                 raise
@@ -663,7 +663,7 @@ end) : TWELF.STELF = struct
             else ()
             end
           in
-          let rec toCid qid =
+          let toCid qid =
             begin match Names.constLookup qid with
             | None ->
                 raise
@@ -704,7 +704,7 @@ end) : TWELF.STELF = struct
           let _ = invalidate Total.uninstall thawed "totality" in
           ()
       | fileName, (Parser.DeterministicDec qids, r) ->
-          let rec toCid qid =
+          let toCid qid =
             begin match Names.constLookup qid with
             | None ->
                 raise
@@ -715,7 +715,7 @@ end) : TWELF.STELF = struct
             | Some cid -> cid
             end
           in
-          let rec insertCid cid = CompSyn.detTableInsert (cid, true) in
+          let insertCid cid = CompSyn.detTableInsert (cid, true) in
           let cids =
             try List.map toCid qids
             with Names.Error msg -> raise (Names.Error (Paths.wrap (r, msg)))
@@ -732,7 +732,7 @@ end) : TWELF.STELF = struct
                   ".\n" cids)
           end
       | fileName, (Parser.Compile qids, r) ->
-          let rec toCid qid =
+          let toCid qid =
             begin match Names.constLookup qid with
             | None ->
                 raise
@@ -759,7 +759,7 @@ end) : TWELF.STELF = struct
           let p_ = Tomega.lemmaDef lemma in
           let f_ = Converter.convertFor cids in
           let _ = TomegaTypeCheck.checkPrg (IntSyn.Null, (p_, f_)) in
-          let rec f cid = IntSyn.conDecName (IntSyn.sgnLookup cid) in
+          let f cid = IntSyn.conDecName (IntSyn.sgnLookup cid) in
           let _ =
             Display.chatter_s 2
               (("\n" ^ TomegaPrint.funToString ((map f cids, projs), p_)) ^ "\n")
@@ -1015,7 +1015,7 @@ end) : TWELF.STELF = struct
           in
           let cid = installConDec IntSyn.Ordinary (e_, (fileName, None), r) in
           let ms_ = ThmSyn.theoremDecToModeSpine (tdec_, r) in
-          let rec convert_mode = function
+          let convert_mode = function
             | ModeSyn.Plus -> Modes.Modesyn.ModeSyn.Plus
             | ModeSyn.Star -> Modes.Modesyn.ModeSyn.Star
             | ModeSyn.Minus -> Modes.Modesyn.ModeSyn.Minus
@@ -1368,7 +1368,7 @@ end) : TWELF.STELF = struct
       end
 
     (* Load a file *)
-    let rec loadFile fileName =
+    let loadFile fileName =
       handleExceptions 0 fileName (withOpenIn fileName) (function instream ->
           let _ = ReconTerm.resetErrors fileName in
           let rec install s = install' (Timers.time Timers.parsing S.expose s)
@@ -1383,7 +1383,7 @@ end) : TWELF.STELF = struct
           in
           install (Parser.parseStream instream))
 
-    let rec loadString str =
+    let loadString str =
       let tmpFile = ".stelf-load-string.tmp" in
       let outstream = TextIO.openOut tmpFile in
       let _ = TextIO.output (outstream, str) in
@@ -1406,7 +1406,7 @@ end) : TWELF.STELF = struct
       let _ = Sys.remove tmpFile in
       result
 
-    let rec sLoop () =
+    let sLoop () =
       begin if Solve.qLoop () then Ok else Abort
       end
 
@@ -1416,10 +1416,10 @@ end) : TWELF.STELF = struct
       | Ok -> ()
       end
 
-    let rec top () = topLoop ()
+    let top () = topLoop ()
 
-    let rec installCSMDec (conDec, optFixity, mdecL) =
-      let rec convert_mode = function
+    let installCSMDec (conDec, optFixity, mdecL) =
+      let convert_mode = function
         | Modes.Modes_.ModeSyn.Plus -> Modes.Modesyn.ModeSyn.Plus
         | Modes.Modes_.ModeSyn.Star -> Modes.Modesyn.ModeSyn.Star
         | Modes.Modes_.ModeSyn.Minus -> Modes.Modesyn.ModeSyn.Minus
@@ -1433,15 +1433,15 @@ end) : TWELF.STELF = struct
               ( Modes.Modesyn.ModeSyn.Marg (convert_mode m, name),
                 convert_mode_spine tail )
       in
-      let rec convert_assoc = function
+      let convert_assoc = function
         | CsManager.Fixity.Left -> Names.Fixity.Left
         | CsManager.Fixity.Right -> Names.Fixity.Right
         | CsManager.Fixity.None -> Names.Fixity.None
       in
-      let rec convert_prec = function
+      let convert_prec = function
         | CsManager.Fixity.Strength n -> Names.Fixity.Strength n
       in
-      let rec convert_fixity = function
+      let convert_fixity = function
         | CsManager.Fixity.Nonfix -> Names.Fixity.Nonfix
         | CsManager.Fixity.Infix (p, a) ->
             Names.Fixity.Infix (convert_prec p, convert_assoc a)
@@ -1484,7 +1484,7 @@ end) : TWELF.STELF = struct
 
     let _ = CsManager.setInstallFN installCSMDec
 
-    let rec reset () =
+    let reset () =
       begin
         IntSyn.sgnReset ();
         begin
@@ -1541,7 +1541,7 @@ end) : TWELF.STELF = struct
         end
       end
 
-    let rec readDecl () =
+    let readDecl () =
       handleExceptions 0 "stdIn"
         (function
           | () ->
@@ -1599,16 +1599,16 @@ end) : TWELF.STELF = struct
     end = struct
       type nonrec mfile = string * Time.time option ref
 
-      let rec create file = (file, ref None)
-      let rec fileName (file, _) = file
-      let rec editName edit (file, mtime) = (edit file, mtime)
+      let create file = (file, ref None)
+      let fileName (file, _) = file
+      let editName edit (file, mtime) = (edit file, mtime)
 
-      let rec modified = function
+      let modified = function
         | _, { contents = None } -> true
         | _, { contents = Some _ } -> false
 
-      let rec makeModified (_, mtime) = mtime := None
-      let rec makeUnmodified (_, mtime) = mtime := Some Time.zeroTime
+      let makeModified (_, mtime) = mtime := None
+      let makeUnmodified (_, mtime) = mtime := Some Time.zeroTime
     end
 
     module Config = struct
@@ -1616,14 +1616,14 @@ end) : TWELF.STELF = struct
 
       let suffix = ref "cfg"
 
-      let rec mkRel (prefix, path) =
+      let mkRel (prefix, path) =
         OS.Path.mkCanonical
           begin if OS.Path.isAbsolute path then path
           else OS.Path.concat (prefix, path)
           end
 
-      let rec read config =
-        let rec appendUniq (l1, l2) =
+      let read config =
+        let appendUniq (l1, l2) =
           let rec appendUniq' = function
             | x :: l2 ->
                 begin if List.exists (function y -> x = y) l1 then
@@ -1634,13 +1634,13 @@ end) : TWELF.STELF = struct
           in
           List.rev (appendUniq' (List.rev l2))
         in
-        let rec isConfig item =
+        let isConfig item =
           let suffix_size = String.size !suffix + 1 in
           let suffix_start = String.size item - suffix_size in
           suffix_start >= 0
           && String.substring (item, suffix_start, suffix_size) = "." ^ !suffix
         in
-        let rec fromUnixPath path =
+        let fromUnixPath path =
           let vol = OS.Path.getVolume config in
           let isAbs = String.isPrefix "/" path in
           let arcs = String.tokens (function c -> c = '/') path in
@@ -1649,7 +1649,7 @@ end) : TWELF.STELF = struct
         let rec read' (sources, configs) config =
           withOpenIn config (function instream ->
               let configDir = OS.Path.dir config in
-              let rec parseItem (sources, configs) item =
+              let parseItem (sources, configs) item =
                 begin if isConfig item then
                   begin if
                     List.exists (function config' -> item = config') configs
@@ -1697,17 +1697,17 @@ end) : TWELF.STELF = struct
           List.map ModFile.create
             ((fun (r, _) -> r) (read' ([], [ config ]) config)) )
 
-      let rec readWithout (s, c) =
+      let readWithout (s, c) =
         let d, fs = read s in
         let d', fs' = c in
         let fns' = map (function m -> mkRel (d', ModFile.fileName m)) fs' in
-        let rec redundant m =
+        let redundant m =
           let n = mkRel (d, ModFile.fileName m) in
           List.exists (function n' -> n = n') fns'
         in
         (d, List.filter (fun x -> not (redundant x)) fs)
 
-      let rec loadAbort = function
+      let loadAbort = function
         | mfile, Ok ->
             let status = loadFile (ModFile.fileName mfile) in
             begin
@@ -1735,7 +1735,7 @@ end) : TWELF.STELF = struct
               begin if ModFile.modified x then sources else fromFirstModified xs
               end
         in
-        let rec mkAbsolute p =
+        let mkAbsolute p =
           (* (* Compat. *)  *)
           OS.Path.mkAbsolute { path = p; relativeTo = pwdir }
         in
@@ -1747,11 +1747,11 @@ end) : TWELF.STELF = struct
         let sources'' = fromFirstModified sources' in
         List.foldl loadAbort Ok sources''
 
-      let rec define sources =
+      let define sources =
         (OS.FileSys.getDir (), List.map ModFile.create sources)
     end
 
-    let rec make fileName = Config.load (Config.read fileName)
+    let make fileName = Config.load (Config.read fileName)
   end
 
   (*! structure IntSyn = IntSyn' !*)
@@ -2111,15 +2111,15 @@ end) : TWELF.STELF = struct
     let indent = Print.Formatter.indent
     let width = Print.Formatter.pagewidth
     let noShadow = Print.noShadow
-    let rec sgn () = Print.printSgn ()
-    let rec prog () = ClausePrint.printSgn ()
-    let rec subord () = Subordinate.show ()
-    let rec def () = Subordinate.showDef ()
-    let rec domains () = msg CSInstaller.version
+    let sgn () = Print.printSgn ()
+    let prog () = ClausePrint.printSgn ()
+    let subord () = Subordinate.show ()
+    let def () = Subordinate.showDef ()
+    let domains () = msg CSInstaller.version
 
     module TeX = struct
-      let rec sgn () = printSgnTeX ()
-      let rec prog () = printProgTeX ()
+      let sgn () = printSgnTeX ()
+      let prog () = printProgTeX ()
     end
   end
 
@@ -2168,7 +2168,7 @@ end) : TWELF.STELF = struct
   end = struct
     let chDir = OS.FileSys.chDir
     let getDir = OS.FileSys.getDir
-    let rec exit () = OS.Process.exit OS.Process.success
+    let exit () = OS.Process.exit OS.Process.success
   end
 
   (** exit Stelf and ML *)
@@ -2274,8 +2274,8 @@ end) : TWELF.STELF = struct
     let resetGlobalTable = TableParam.resetGlobalTable
 
     (** top () = () starts interactive query loop *)
-    let rec top () =
-      let rec sLoopT () =
+    let top () =
+      let sLoopT () =
         begin if Solve.qLoopT () then Ok else Abort
         end
       in

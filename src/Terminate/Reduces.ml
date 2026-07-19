@@ -63,7 +63,7 @@ end) : REDUCES = struct
 
     exception Error' of P.occ * string
 
-    let rec error (c, occ, msg) =
+    let error (c, occ, msg) =
       begin match Origins.originLookup c with
       | fileName, None -> raise (Error ((fileName ^ ":") ^ msg))
       | fileName, Some occDec ->
@@ -79,7 +79,7 @@ end) : REDUCES = struct
       | g'_, I.Null -> g'_
       | g'_, I.Decl (g_, d_) -> I.Decl (concat (g'_, g_), d_)
 
-    let rec fmtOrder (g_, o_) =
+    let fmtOrder (g_, o_) =
       let rec fmtOrder' = function
         | R.Arg (((u_, s) as us_), ((v_, s') as vs_)) ->
             F.hbox
@@ -101,7 +101,7 @@ end) : REDUCES = struct
       in
       fmtOrder' o_
 
-    let rec fmtComparison (g_, o_, comp, o'_) =
+    let fmtComparison (g_, o_, comp, o'_) =
       F.hOVbox0 1 0 1
         [
           fmtOrder (g_, o_); F.break; F.string comp; F.break; fmtOrder (g_, o'_);
@@ -121,12 +121,12 @@ end) : REDUCES = struct
           (F.makestring_fmt (fmtPredicate (g_, p_)) ^ " ,")
           ^ rlistToString' (g_, rl_)
 
-    let rec rlistToString (g_, rl_) = rlistToString' (Names.ctxName g_, rl_)
+    let rlistToString (g_, rl_) = rlistToString' (Names.ctxName g_, rl_)
 
-    let rec orderToString (g_, p_) =
+    let orderToString (g_, p_) =
       F.makestring_fmt (fmtPredicate (Names.ctxName g_, p_))
 
-    let rec select (c, (s_, s)) =
+    let select (c, (s_, s)) =
       let so_ = R.selLookup c in
       let vid_ : I.eclo = (I.constType c, I.id) in
       let rec select'' (n, (ss'_, vs''_)) : I.eclo * I.eclo =
@@ -149,7 +149,7 @@ end) : REDUCES = struct
       in
       select' (R.selLookup c)
 
-    let rec selectOcc (c, (s_, s), occ) =
+    let selectOcc (c, (s_, s), occ) =
       try select (c, (s_, s))
       with R.Error msg ->
         raise
@@ -158,7 +158,7 @@ end) : REDUCES = struct
                "Termination violation: no order assigned for "
                ^ N.qidToString (N.constQid c) ))
 
-    let rec selectROrder (c, (s_, s)) =
+    let selectROrder (c, (s_, s)) =
       let vid_ : I.eclo = (I.constType c, I.id) in
       let rec select'' (n, (ss'_, vs''_)) : I.eclo * I.eclo =
         select''W (n, (ss'_, Whnf.whnf vs''_))
@@ -178,14 +178,14 @@ end) : REDUCES = struct
         | R.Lex l_ -> R.Lex (map select' l_)
         | R.Simul l_ -> R.Simul (map select' l_)
       in
-      let rec selectP = function
+      let selectP = function
         | R.Less (o1_, o2_) -> C.Less (select' o1_, select' o2_)
         | R.Leq (o1_, o2_) -> C.Leq (select' o1_, select' o2_)
         | R.Eq (o1_, o2_) -> C.Eq (select' o1_, select' o2_)
       in
       try Some (selectP (R.selLookupROrder c)) with R.Error s -> None
 
-    let rec abstractRO (g_, d_, o_) = C.Pi (d_, o_)
+    let abstractRO (g_, d_, o_) = C.Pi (d_, o_)
 
     let rec getROrder (g_, q_, vs_, occ) =
       getROrderW (g_, q_, Whnf.whnf vs_, occ)
@@ -389,7 +389,7 @@ end) : REDUCES = struct
                  ^ N.qidToString (N.constQid a))
                  ^ "." ))
 
-    let rec checkClause' (vs_, occ) =
+    let checkClause' (vs_, occ) =
       checkClause ((I.Null, I.Null, []), I.Null, I.Null, vs_, occ)
 
     let rec checkRGoal (g_, q_, rl_, vs_, occ) =
@@ -527,7 +527,7 @@ end) : REDUCES = struct
                  ^ N.qidToString (N.constQid a))
                  ^ "." ))
 
-    let rec checkFamReduction a =
+    let checkFamReduction a =
       let rec checkFam' = function
         | [] -> begin
             begin if !Global.chatter > 3 then print "\n" else ()
@@ -589,7 +589,7 @@ end) : REDUCES = struct
       in
       checkFam' (Index.lookup a)
 
-    let rec checkFam a =
+    let checkFam a =
       let rec checkFam' = function
         | [] -> begin
             begin if !Global.chatter > 3 then print "\n" else ()
@@ -647,7 +647,7 @@ end) : REDUCES = struct
       in
       checkFam' (Index.lookup a)
 
-    let rec reset () =
+    let reset () =
       begin
         R.reset ();
         R.resetROrder ()

@@ -32,13 +32,13 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
 
     type nonrec operator = T.prg * T.prg
 
-    let rec stripTC tc_ = tc_
+    let stripTC tc_ = tc_
 
-    let rec stripTCOpt = function
+    let stripTCOpt = function
       | None -> None
       | Some tc_ -> Some (stripTC tc_)
 
-    let rec stripDec = function
+    let stripDec = function
       | T.UDec d_ -> T.UDec d_
       | T.PDec (name, f_, tc1_, tc2_) -> T.PDec (name, f_, tc1_, stripTCOpt tc2_)
 
@@ -66,8 +66,8 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
             (S.Focus (T.EVar (psi_, r, T.forSub (f_, s), tc1_, tc2_, x_), w_))
       | S.Focus (T.EVar (psi_, r, _, _, _, _), w_) -> None
 
-    let rec apply (T.EVar (_, r, _, _, _, _), p_) = r := Some p_
-    let rec menu (r, p_) = "Intro " ^ TomegaPrint.nameEVar r
+    let apply (T.EVar (_, r, _, _, _, _), p_) = r := Some p_
+    let menu (r, p_) = "Intro " ^ TomegaPrint.nameEVar r
   end
 
   (*    fun stripTC (T.Abs (_, TC)) = TC *)

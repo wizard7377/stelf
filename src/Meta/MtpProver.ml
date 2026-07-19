@@ -73,10 +73,10 @@ end) : MTPPROVER.MTPROVER = struct
       | g_, F.Ex _, o_ :: [] -> transformOrder' (g_, o_)
       | g_, true_, o_ :: [] -> transformOrder' (g_, o_)
 
-    let rec select c = try Order.selLookup c with _ -> Order.Lex []
-    let rec error s = raise (Error s)
+    let select c = try Order.selLookup c with _ -> Order.Lex []
+    let error s = raise (Error s)
 
-    let rec reset () =
+    let reset () =
       begin
         openStates := [];
         solvedStates := []
@@ -87,15 +87,15 @@ end) : MTPPROVER.MTPROVER = struct
       | x :: l_, l'_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
-    let rec equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
-    let rec insertState s_ = openStates := s_ :: !openStates
+    let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
+    let insertState s_ = openStates := s_ :: !openStates
 
     let rec cLToString = function
       | [] -> ""
       | c :: [] -> I.conDecName (I.sgnLookup c)
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
-    let rec init (k, (c :: _ as cL)) =
+    let init (k, (c :: _ as cL)) =
       let _ = MTPGlobal.maxFill := k in
       let _ = reset () in
       let cL' = try Order.closure c with Order.Error _ -> cL in
@@ -113,7 +113,7 @@ end) : MTPPROVER.MTPROVER = struct
              ^ cLToString cL'))
       end
 
-    let rec auto () =
+    let auto () =
       let open_, solvedStates' = MTPStrategy.run (Obj.magic !openStates) in
       let _ = openStates := Obj.magic open_ in
       let _ = solvedStates := !solvedStates @ Obj.magic solvedStates' in
@@ -122,8 +122,8 @@ end) : MTPPROVER.MTPROVER = struct
       else ()
       end
 
-    let rec print () = ()
-    let rec install _ = ()
+    let print () = ()
+    let install _ = ()
   end
 
   (* DISCLAIMER: This functor is temporary. Its purpose is to
@@ -196,34 +196,34 @@ end) : MTPPROVER.MTPROVER = struct
   (*! structure IntSyn = IntSyn' !*)
   exception Error = Error
 
-  let rec he f =
+  let he f =
     try f () with
     | ProverNew.Error s -> raise (Error s)
     | ProverOld.Error s -> raise (Error s)
 
   open! struct
-    let rec init args_ =
+    let init args_ =
       he (function () ->
           begin match !MTPGlobal.prover with
           | New -> ProverNew.init args_
           | Old -> ProverOld.init args_
           end)
 
-    let rec auto args_ =
+    let auto args_ =
       he (function () ->
           begin match !MTPGlobal.prover with
           | New -> ProverNew.auto args_
           | Old -> ProverOld.auto args_
           end)
 
-    let rec print args_ =
+    let print args_ =
       he (function () ->
           begin match !MTPGlobal.prover with
           | New -> ProverNew.print args_
           | Old -> ProverOld.print args_
           end)
 
-    let rec install args_ =
+    let install args_ =
       he (function () ->
           begin match !MTPGlobal.prover with
           | New -> ProverNew.install args_

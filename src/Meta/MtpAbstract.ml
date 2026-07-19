@@ -71,7 +71,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       | Ev of I.exp option ref * I.exp * S.tag * int
       | Bv of I.dec * S.tag
 
-    let rec checkEmpty = function
+    let checkEmpty = function
       | [] -> ()
       | cnstrL ->
           begin match C.simplify cnstrL with
@@ -79,20 +79,20 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           | _ -> raise (Error "Typing ambiguous -- unresolved constraints")
           end
 
-    let rec eqEVar arg__1 arg__2 =
+    let eqEVar arg__1 arg__2 =
       begin match (arg__1, arg__2) with
       | I.EVar (r1, _, _, _), Ev (r2, _, _, _) -> r1 == r2
       | _, _ -> false
       end
 
-    let rec exists p_ k_ =
+    let exists p_ k_ =
       let rec exists' = function
         | I.Null -> false
         | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
       in
       exists' k_
 
-    let rec ( or ) = function
+    let ( or ) = function
       | I.Maybe, _ -> I.Maybe
       | _, I.Maybe -> I.Maybe
       | I.Meta, _ -> I.Meta
@@ -124,7 +124,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
 
-    let rec piDepend = function
+    let piDepend = function
       | (d_, I.No), v_ -> I.Pi ((d_, I.No), v_)
       | (d_, I.Meta), v_ -> I.Pi ((d_, I.Meta), v_)
       | (d_, I.Maybe), v_ -> I.Pi ((d_, occursInExp (1, v_)), v_)
@@ -223,7 +223,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           end
       | I.Decl (k'_, Bv _), depth, x_ -> abstractEVar (k'_, depth + 1, x_)
 
-    let rec lookupBV (k_, i) =
+    let lookupBV (k_, i) =
       let rec lookupBV' = function
         | I.Decl (k_, Ev (r, v_, _, _)), i, k -> lookupBV' (k_, i, k + 1)
         | I.Decl (k_, Bv _), 1, k -> k
@@ -302,7 +302,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       | I.Lam (_, u_) -> getLevel u_
       | I.EClo (u_, _) -> getLevel u_
 
-    let rec checkType v_ =
+    let checkType v_ =
       begin match getLevel v_ with
       | I.Type -> ()
       | _ -> raise (Error "Typing ambiguous -- free type variable")
@@ -362,12 +362,12 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
               b_,
               function d, k_ -> collect (d + 1, I.Decl (k_, Bv (d_, t_))) )
 
-    let rec abstractNew ((g0_, b0_), s, b_) =
+    let abstractNew ((g0_, b0_), s, b_) =
       let cf = collectGlobalSub (g0_, s, b_, function _, k'_ -> k'_) in
       let k_ = cf (0, I.Null) in
       (abstractCtx k_, abstractGlobalSub (k_, s, b_))
 
-    let rec abstractSubAll (t, b1_, (g0_, b0_), s, b_) =
+    let abstractSubAll (t, b1_, (g0_, b0_), s, b_) =
       let rec skip'' = function
         | k_, (I.Null, I.Null) -> k_
         | k_, (I.Decl (g0_, d_), I.Decl (b0_, tag_)) ->
@@ -541,7 +541,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           in
           (gk11_, f'''_)
 
-    let rec abstractApproxFor = function
+    let abstractApproxFor = function
       | Head (g_, _, _) as af_ ->
           let _, f_ = makeFor (convert g_, I.id, af_) in
           f_

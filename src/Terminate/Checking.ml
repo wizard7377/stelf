@@ -81,7 +81,7 @@ end) : CHECKING = struct
 
     let mkEClo (u, s) = I.EClo (u, s)
 
-    let rec atomicPredToString = function
+    let atomicPredToString = function
       | g_, Less ((us_, _), (us'_, _)) ->
           (Print.expToString (g_, mkEClo us_) ^ " < ")
           ^ Print.expToString (g_, mkEClo us'_)
@@ -113,9 +113,9 @@ end) : CHECKING = struct
       | Pi ((I.Dec (x_, v_) as d_), p_), f -> Pi (d_, shiftP p_ f)
       end
 
-    let rec shiftRCtx rl_ f = map (function p -> shiftP p f) rl_
+    let shiftRCtx rl_ f = map (function p -> shiftP p f) rl_
 
-    let rec shiftArg arg__5 arg__6 =
+    let shiftArg arg__5 arg__6 =
       begin match (arg__5, arg__6) with
       | Less (((u1_, s1), (v1_, s1')), ((u2_, s2), (v2_, s2'))), f ->
           Less (((u1_, f s1), (v1_, f s1')), ((u2_, f s2), (v2_, f s2')))
@@ -125,9 +125,9 @@ end) : CHECKING = struct
           Eq (((u1_, f s1), (v1_, f s1')), ((u2_, f s2), (v2_, f s2')))
       end
 
-    let rec shiftACtx rl_ f = map (function p -> shiftArg p f) rl_
+    let shiftACtx rl_ f = map (function p -> shiftArg p f) rl_
 
-    let rec fmtOrder (g_, o_) =
+    let fmtOrder (g_, o_) =
       let rec fmtOrder' = function
         | R.Arg (((u_, s) as us_), ((v_, s') as vs_)) ->
             F.hbox
@@ -145,7 +145,7 @@ end) : CHECKING = struct
       in
       fmtOrder' o_
 
-    let rec fmtComparison (g_, o_, comp, o'_) =
+    let fmtComparison (g_, o_, comp, o'_) =
       F.hOVbox0 1 0 1
         [
           fmtOrder (g_, o_); F.break; F.string comp; F.break; fmtOrder (g_, o'_);
@@ -158,7 +158,7 @@ end) : CHECKING = struct
       | g_, Pi (d_, p_) ->
           F.hbox [ F.string "Pi "; fmtPredicate' (I.Decl (g_, d_), p_) ]
 
-    let rec fmtPredicate (g_, p_) = fmtPredicate' (Names.ctxName g_, p_)
+    let fmtPredicate (g_, p_) = fmtPredicate' (Names.ctxName g_, p_)
 
     let rec fmtRGCtx' = function
       | g_, [] -> ""
@@ -167,19 +167,19 @@ end) : CHECKING = struct
           (F.makestring_fmt (fmtPredicate' (g_, p_)) ^ " ,")
           ^ fmtRGCtx' (g_, rl_)
 
-    let rec fmtRGCtx (g_, rl_) = fmtRGCtx' (Names.ctxName g_, rl_)
-    let rec init () = true
-    let rec eqCid (c, c') = c = c'
+    let fmtRGCtx (g_, rl_) = fmtRGCtx' (Names.ctxName g_, rl_)
+    let init () = true
+    let eqCid (c, c') = c = c'
 
-    let rec conv ((us_, vs_), (us'_, vs'_)) =
+    let conv ((us_, vs_), (us'_, vs'_)) =
       Conv.conv (vs_, vs'_) && Conv.conv (us_, us'_)
 
-    let rec isUniversal = function
+    let isUniversal = function
       | All -> true
       | Exist -> false
       | exist'_ -> false
 
-    let rec isExistential = function
+    let isExistential = function
       | All -> false
       | Exist -> true
       | exist'_ -> true
@@ -209,7 +209,7 @@ end) : CHECKING = struct
       | gq_, (I.SClo (s_, s'), s'') -> isAtomicS (gq_, (s_, I.comp (s', s'')))
       | gq_, (I.App (u'_, s'_), s1') -> false
 
-    let rec eq (g_, (us_, vs_), (us'_, vs'_)) =
+    let eq (g_, (us_, vs_), (us'_, vs'_)) =
       Unify.unifiable (g_, vs_, vs'_) && Unify.unifiable (g_, us_, us'_)
 
     let rec lookupEq = function
@@ -1387,7 +1387,7 @@ end) : CHECKING = struct
               ((s'_, s1'), (v2'_, I.Dot (I.Exp (I.EClo (u'_, s1')), s2'))),
               p_ )
 
-    let rec deduce (g_, q_, d_, p_) = leftDecompose ((g_, q_), d_, [], p_)
+    let deduce (g_, q_, d_, p_) = leftDecompose ((g_, q_), d_, [], p_)
   end
 
   (* Reasoning about order relations *)

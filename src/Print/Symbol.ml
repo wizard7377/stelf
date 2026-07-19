@@ -7,7 +7,7 @@ include SYMBOL
 open! Basis
 
 module MakeSymbolAscii () : SYMBOL = struct
-  let rec idSize s = (s, String.size s)
+  let idSize s = (s, String.size s)
   let str = idSize
   let evar = idSize
   let bvar = idSize
@@ -15,7 +15,7 @@ module MakeSymbolAscii () : SYMBOL = struct
   let skonst = idSize
   let label = idSize
   let def = idSize
-  let rec fvar s = idSize ("`" ^ s)
+  let fvar s = idSize ("`" ^ s)
   let sym = idSize
 end
 
@@ -23,7 +23,7 @@ end
 module SymbolTeXfp () : SYMBOL = struct
   (* Illegal constituents: \ _ $ # *)
   (* { } are also special, but cannot occur in identifiers *)
-  let rec quoteChar = function
+  let quoteChar = function
     | '\\' -> "\\\\"
     | '_' -> "\\_"
     | '$' -> "\\$"
@@ -47,7 +47,7 @@ module SymbolTeXfp () : SYMBOL = struct
   (* not in math mode *)
   (* not in math mode *)
 
-  let rec quote s = String.translate quoteChar s
+  let quote s = String.translate quoteChar s
 
   (*
   fun mathQuoteChar #""\\"" = ""\\\\""
@@ -69,16 +69,16 @@ module SymbolTeXfp () : SYMBOL = struct
 
   fun mathQuote s = String.translate mathQuoteChar s
   *)
-  let rec str s = (("\\Str{" ^ quote s) ^ "}", String.size s)
-  let rec evar s = (("\\EVar{" ^ quote s) ^ "}", String.size s)
-  let rec bvar s = (("\\BVar{" ^ quote s) ^ "}", String.size s)
-  let rec const s = (("\\Const{" ^ quote s) ^ "}", String.size s)
-  let rec label s = (("\\Label{" ^ quote s) ^ "}", String.size s)
-  let rec skonst s = (("\\Skonst{" ^ quote s) ^ "}", String.size s)
-  let rec def s = (("\\Def{" ^ quote s) ^ "}", String.size s)
-  let rec fvar s = (("\\FVar{" ^ quote s) ^ "}", String.size s)
+  let str s = (("\\Str{" ^ quote s) ^ "}", String.size s)
+  let evar s = (("\\EVar{" ^ quote s) ^ "}", String.size s)
+  let bvar s = (("\\BVar{" ^ quote s) ^ "}", String.size s)
+  let const s = (("\\Const{" ^ quote s) ^ "}", String.size s)
+  let label s = (("\\Label{" ^ quote s) ^ "}", String.size s)
+  let skonst s = (("\\Skonst{" ^ quote s) ^ "}", String.size s)
+  let def s = (("\\Def{" ^ quote s) ^ "}", String.size s)
+  let fvar s = (("\\FVar{" ^ quote s) ^ "}", String.size s)
 
-  let rec sym = function
+  let sym = function
     | "->" -> ("$\\rightarrow$", 1)
     | "<-" -> ("$\\leftarrow$", 1)
     | "{" -> ("$\\Pi$", 1)
@@ -101,7 +101,7 @@ end
 module MakeSymbolTeX () : SYMBOL = struct
   (* Illegal constituents: \ _ $ # *)
   (* { } are also special, but cannot occur in identifiers *)
-  let rec quoteChar = function
+  let quoteChar = function
     | '\\' -> "\\\\"
     | '_' -> "\\_"
     | '$' -> "\\$"
@@ -119,7 +119,7 @@ module MakeSymbolTeX () : SYMBOL = struct
     | '9' -> "$_9$"
     | c -> String.str c
 
-  let rec quote s = String.translate quoteChar s
+  let quote s = String.translate quoteChar s
 
   (*
   fun mathQuoteChar #""\\"" = ""\\\\""
@@ -141,16 +141,16 @@ module MakeSymbolTeX () : SYMBOL = struct
 
   fun mathQuote s = String.translate mathQuoteChar s
   *)
-  let rec str s = (("\\Str{" ^ quote s) ^ "}", String.size s)
-  let rec evar s = (("\\EVar{" ^ quote s) ^ "}", String.size s)
-  let rec bvar s = (("\\BVar{" ^ quote s) ^ "}", String.size s)
-  let rec const s = (("\\Const{" ^ quote s) ^ "}", String.size s)
-  let rec label s = (("\\Label{" ^ quote s) ^ "}", String.size s)
-  let rec skonst s = (("\\Skonst{" ^ quote s) ^ "}", String.size s)
-  let rec def s = (("\\Def{" ^ quote s) ^ "}", String.size s)
-  let rec fvar s = (("\\FVar{" ^ quote s) ^ "}", String.size s)
+  let str s = (("\\Str{" ^ quote s) ^ "}", String.size s)
+  let evar s = (("\\EVar{" ^ quote s) ^ "}", String.size s)
+  let bvar s = (("\\BVar{" ^ quote s) ^ "}", String.size s)
+  let const s = (("\\Const{" ^ quote s) ^ "}", String.size s)
+  let label s = (("\\Label{" ^ quote s) ^ "}", String.size s)
+  let skonst s = (("\\Skonst{" ^ quote s) ^ "}", String.size s)
+  let def s = (("\\Def{" ^ quote s) ^ "}", String.size s)
+  let fvar s = (("\\FVar{" ^ quote s) ^ "}", String.size s)
 
-  let rec sym = function
+  let sym = function
     | "->" -> ("$\\rightarrow$", 1)
     | "<-" -> ("$\\leftarrow$", 1)
     | "{" -> ("$\\Pi$", 1)

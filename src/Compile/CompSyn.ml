@@ -158,18 +158,18 @@ module Make_CompSyn
   (* Invariants *)
   (* 0 <= cid < I.sgnSize () *)
   (* program array indexed by clause names (no direct head access) *)
-  let rec sProgInstall (cid, conDec) = Array.update (sProgArray, cid, conDec)
-  let rec sProgLookup cid = Array.sub (sProgArray, cid)
-  let rec sProgReset () = Array.modify (function _ -> Void) sProgArray
+  let sProgInstall (cid, conDec) = Array.update (sProgArray, cid, conDec)
+  let sProgLookup cid = Array.sub (sProgArray, cid)
+  let sProgReset () = Array.modify (function _ -> Void) sProgArray
   let detTableInsert = Table.insert detTable
 
-  let rec detTableCheck cid =
+  let detTableCheck cid =
     begin match Table.lookup detTable cid with
     | Some deterministic -> deterministic
     | None -> false
     end
 
-  let rec detTableReset () = Table.clear detTable
+  let detTableReset () = Table.clear detTable
 
   (* goalSub (g, s) = g'
 

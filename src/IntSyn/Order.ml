@@ -64,11 +64,11 @@ end) : ORDER = struct
 
   let orderTable_ : tDec Table.table = Table.new_ 0
   let redOrderTable_ : rDec Table.table = Table.new_ 0
-  let rec reset () = Table.clear orderTable_
-  let rec reset_r_order () = Table.clear redOrderTable_
-  let rec install (cid, o_) = Table.insert orderTable_ (cid, o_)
+  let reset () = Table.clear orderTable_
+  let reset_r_order () = Table.clear redOrderTable_
+  let install (cid, o_) = Table.insert orderTable_ (cid, o_)
 
-  let rec uninstall cid =
+  let uninstall cid =
     begin match Table.lookup orderTable_ cid with
     | None -> false
     | Some _ -> begin
@@ -77,9 +77,9 @@ end) : ORDER = struct
       end
     end
 
-  let rec install_r_order (cid, p_) = Table.insert redOrderTable_ (cid, p_)
+  let install_r_order (cid, p_) = Table.insert redOrderTable_ (cid, p_)
 
-  let rec uninstall_r_order cid =
+  let uninstall_r_order cid =
     begin match Table.lookup redOrderTable_ cid with
     | None -> false
     | Some _ -> begin
@@ -88,10 +88,10 @@ end) : ORDER = struct
       end
     end
 
-  let rec lookup cid = Table.lookup orderTable_ cid
-  let rec lookup_r_order cid = Table.lookup redOrderTable_ cid
+  let lookup cid = Table.lookup orderTable_ cid
+  let lookup_r_order cid = Table.lookup redOrderTable_ cid
 
-  let rec sel_lookup a =
+  let sel_lookup a =
     begin match lookup a with
     | None ->
         raise
@@ -101,7 +101,7 @@ end) : ORDER = struct
     | Some (TDec (s_, _)) -> s_
     end
 
-  let rec sel_lookup_r_order a =
+  let sel_lookup_r_order a =
     begin match lookup_r_order a with
     | None ->
         raise
@@ -111,7 +111,7 @@ end) : ORDER = struct
     | Some (RDec (p_, _)) -> p_
     end
 
-  let rec mutLookupROrder a =
+  let mutLookupROrder a =
     begin match lookup_r_order a with
     | None ->
         raise
@@ -120,14 +120,14 @@ end) : ORDER = struct
     | Some (RDec (_, m_)) -> m_
     end
 
-  let rec mut_lookup a =
+  let mut_lookup a =
     begin match lookup a with
     | None ->
         raise (Error ("No order assigned for " ^ I.conDecName (I.sgnLookup a)))
     | Some (TDec (_, m_)) -> m_
     end
 
-  let rec mutual a =
+  let mutual a =
     let rec mutual' = function
       | Empty, a's -> a's
       | Le (a, m_), a's -> mutual' (m_, a :: a's)

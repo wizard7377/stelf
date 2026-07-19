@@ -33,11 +33,11 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
 
     let modeToString = function M.Top -> "+" | M.Bot -> "-"
 
-    let rec depthToString b =
+    let depthToString b =
       begin if b <= 0 then "" else Int.toString b
       end
 
-    let rec fmtPrefix gm_ =
+    let fmtPrefix gm_ =
       let rec fmtPrefix' = function
         | M.Prefix (I.Null, I.Null, I.Null), fmt_ -> fmt_
         | ( M.Prefix
@@ -64,9 +64,9 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
       in
       F.hVbox (fmtPrefix' (gm_, []))
 
-    let rec prefixToString gm_ = F.makestring_fmt (fmtPrefix gm_)
+    let prefixToString gm_ = F.makestring_fmt (fmtPrefix gm_)
 
-    let rec stateToString (M.State (name, (M.Prefix (g_, m_, b_) as gm_), v_)) =
+    let stateToString (M.State (name, (M.Prefix (g_, m_, b_) as gm_), v_)) =
       ((((name ^ ":\n") ^ prefixToString gm_) ^ "\n--------------\n")
       ^ ClausePrint.clauseToString (g_, v_))
       ^ "\n\n"

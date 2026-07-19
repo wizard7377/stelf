@@ -68,15 +68,15 @@ end) : STRICT = struct
       | p, (I.FgnExp _ as u_) -> strictExp (0, p, u_)
       | p, I.Lam (d_, u_) -> strictArgParm (p + 1, u_)
 
-    let rec occToString = function
+    let occToString = function
       | Some ocd, occ -> Paths.wrap (Paths.occToRegionDef1 ocd occ, "")
       | None, occ -> "Error: "
 
-    let rec decToVarName = function
+    let decToVarName = function
       | I.Dec (None, _) -> "implicit variable"
       | I.Dec (Some x, _) -> "variable " ^ x
 
-    let rec strictTop ((u_, v_), ocdOpt) =
+    let strictTop ((u_, v_), ocdOpt) =
       let rec strictArgParms = function
         | I.Root (I.BVar _, _), _, occ ->
             raise
@@ -99,7 +99,7 @@ end) : STRICT = struct
       in
       strictArgParms (u_, v_, Paths.top)
 
-    let rec occursInType ((i, v_), ocdOpt) =
+    let occursInType ((i, v_), ocdOpt) =
       let rec oit = function
         | (0, v_), occ -> ()
         | (i, I.Pi ((d_, p_), v_)), occ ->

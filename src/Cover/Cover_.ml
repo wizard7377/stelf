@@ -73,7 +73,7 @@ module MakeCover
         else I.comp (w', I.shift)
         end
 
-  let rec createEVar (g_, v_) =
+  let createEVar (g_, v_) =
     let w = weaken (g_, I.targetFam v_) in
     let iw = Whnf.invert w in
     let g'_ = Whnf.strengthen (iw, g_) in
@@ -95,9 +95,9 @@ module MakeCover
     | M.Mapp (M.Marg (M.Minus, x), ms') -> Match (outCoverInst ms')
     | M.Mapp (M.Marg (M.Star, x), ms') -> Skip (outCoverInst ms')
 
-  let rec chatter chlev f = Display.chatter_s chlev (f ())
+  let chatter chlev f = Display.chatter_s chlev (f ())
   let pluralize = function 1, s -> s | n, s -> s ^ "s"
-  let rec abbrevCSpine (s_, ci) = s_
+  let abbrevCSpine (s_, ci) = s_
 
   let rec abbrevCGoal = function
     | g_, v_, 0, ci -> (g_, abbrevCGoal' (g_, v_, ci))
@@ -111,7 +111,7 @@ module MakeCover
         I.Pi ((d'_, p_), abbrevCGoal' (I.Decl (g_, d'_), v_, ci))
     | g_, I.Root (a, s_), ci -> I.Root (a, abbrevCSpine (s_, ci))
 
-  let rec formatCGoal (v_, p, ci) =
+  let formatCGoal (v_, p, ci) =
     let _ = N.varReset I.Null in
     let g_, v'_ = abbrevCGoal (I.Null, v_, p, ci) in
     F.hVbox
@@ -130,17 +130,17 @@ module MakeCover
         :: F.string "," :: F.break_
         :: formatCGoals (vs_, ci)
 
-  let rec missingToString (vs_, ci) =
+  let missingToString (vs_, ci) =
     F.makestring_fmt
       (F.hbox [ F.vbox0 0 1 (formatCGoals (vs_, ci)); F.string "." ])
 
-  let rec showSplitVar (v_, p, k, ci) =
+  let showSplitVar (v_, p, k, ci) =
     let _ = N.varReset I.Null in
     let g_, v'_ = abbrevCGoal (I.Null, v_, p, ci) in
     let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
     (("Split " ^ x) ^ " in ") ^ Print.expToString (g_, v'_)
 
-  let rec showPendingGoal (v_, p, ci, lab) =
+  let showPendingGoal (v_, p, ci, lab) =
     F.makestring_fmt
       (F.hbox
          [
@@ -162,12 +162,12 @@ module MakeCover
         (I.Pi ((d'_, I.Maybe), v'_), p)
     | a, k, g_, I.Uni I.Type -> (I.Root (a, buildSpine k), k)
 
-  let rec initCGoal a = initCGoal' (I.Const a, 0, I.Null, I.constType a)
+  let initCGoal a = initCGoal' (I.Const a, 0, I.Null, I.constType a)
 
   type coverClauses = Input of I.exp list | Output of I.exp * int
   type equation = Eqn of I.dctx * I.eclo * I.eclo
 
-  let rec equationToString (Eqn (g_, us1_, us2_)) =
+  let equationToString (Eqn (g_, us1_, us2_)) =
     let g'_ = Names.ctxLUName g_ in
     let fmt =
       F.hVbox
@@ -191,30 +191,30 @@ module MakeCover
 
   type candidates_ = Eqns of equation list | Cands of int list | Fail
 
-  let rec candsToString = function
+  let candsToString = function
     | Fail -> "Fail"
     | Cands ks ->
         "Cands ["
         ^ List.foldl (function k, str -> (Int.toString k ^ ",") ^ str) "]" ks
     | Eqns eqns -> ("Eqns [\n" ^ eqnsToString eqns) ^ "]"
 
-  let rec fail msg =
+  let fail msg =
     begin
       chatter 7 (function () -> msg ^ "\n");
       Fail
     end
 
-  let rec failAdd = function
+  let failAdd = function
     | k, Eqns _ -> Cands [ k ]
     | k, Cands ks -> Cands (k :: ks)
     | k, Fail -> Fail
 
-  let rec addEqn = function
+  let addEqn = function
     | e, Eqns es -> Eqns (e :: es)
     | e, (Cands ks as cands) -> cands
     | e, Fail -> Fail
 
-  let rec unifiable (g_, us1_, us2_) = Unify.unifiable (g_, us1_, us2_)
+  let unifiable (g_, us1_, us2_) = Unify.unifiable (g_, us1_, us2_)
 
   let rec matchEqns = function
     | [] -> true
@@ -225,7 +225,7 @@ module MakeCover
         end
         && matchEqns es
 
-  let rec resolveCands = function
+  let resolveCands = function
     | Eqns es ->
         begin if matchEqns (List.rev es) then Eqns [] else Fail
         end
@@ -238,7 +238,7 @@ module MakeCover
     | I.EVar (_, _, _, { contents = constrs }) :: xs_ ->
         constrs @ collectConstraints xs_
 
-  let rec checkConstraints = function
+  let checkConstraints = function
     | g_, qs_, Cands ks -> Cands ks
     | g_, qs_, Fail -> Fail
     | g_, qs_, Eqns _ ->
@@ -249,7 +249,7 @@ module MakeCover
 
   type candList = Covered | CandList of candidates_ list
 
-  let rec addKs = function
+  let addKs = function
     | (Cands ks as ccs), CandList klist -> CandList (ccs :: klist)
     | (Eqns [] as ces), CandList klist -> Covered
     | (Fail as cfl), CandList klist -> CandList (cfl :: klist)
@@ -539,9 +539,9 @@ module MakeCover
     let caseList : (I.exp * int) list ref = ref []
   end
 
-  let rec resetCases () = caseList := []
-  let rec addCase (v_, p) = caseList := (v_, p) :: !caseList
-  let rec getCases () = !caseList
+  let resetCases () = caseList := []
+  let addCase (v_, p) = caseList := (v_, p) :: !caseList
+  let getCases () = !caseList
 
   let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
 
@@ -552,7 +552,7 @@ module MakeCover
         let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
         (I.App (x_, s_), vs_)
 
-  let rec createAtomConst (g_, h_) =
+  let createAtomConst (g_, h_) =
     let cid =
       match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false
     in
@@ -560,12 +560,12 @@ module MakeCover
     let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
     (I.Root (h_, s_), vs_)
 
-  let rec createAtomBVar (g_, k) =
+  let createAtomBVar (g_, k) =
     let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
     let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
     (I.Root (I.BVar k, s_), vs_)
 
-  let rec createAtomProj (g_, h_, (v_, s)) =
+  let createAtomProj (g_, h_, (v_, s)) =
     let s_, vs'_ = createEVarSpine (g_, (v_, s)) in
     (I.Root (h_, s_), vs'_)
 
@@ -609,7 +609,7 @@ module MakeCover
         let x_ = Whnf.newLoweredEVar (I.Null, (v_, s)) in
         I.Dot (I.Exp x_, s)
 
-  let rec blockName cid = I.conDecName (I.sgnLookup cid)
+  let blockName cid = I.conDecName (I.sgnLookup cid)
 
   let rec blockCases (g_, vs_, cid, (gsome_, piDecs), sc) =
     let t = createEVarSub gsome_ in
@@ -653,9 +653,9 @@ module MakeCover
         ()
     | I.Lam (d_, u_), w_, sc -> lowerSplitW (u_, w_, sc)
 
-  let rec splitEVar (x_, w_, sc) = lowerSplitW (x_, w_, sc)
+  let splitEVar (x_, w_, sc) = lowerSplitW (x_, w_, sc)
 
-  let rec abstract (v_, s) =
+  let abstract (v_, s) =
     let i, v'_ = Abstract.abstractDecImp (I.EClo (v_, s)) in
     let v''_ = Whnf.normalize (v'_, I.id) in
     let _ =
@@ -675,7 +675,7 @@ module MakeCover
     in
     (v''_, i)
 
-  let rec splitVar (v_, p, k, (w_, ci)) =
+  let splitVar (v_, p, k, (w_, ci)) =
     try
       let _ = chatter 6 (function () -> showSplitVar (v_, p, k, ci) ^ "\n") in
       let (v1_, s), xsRev_ = instEVars ((v_, I.id), p, []) in
@@ -735,7 +735,7 @@ module MakeCover
         let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
         instEVarsSkip ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev_, ci)
 
-  let rec targetBelowEq = function
+  let targetBelowEq = function
     | a, I.EVar ({ contents = None }, gy_, vy_, { contents = [] }) ->
         Subordinate.belowEq (a, I.targetFam vy_)
     | a, I.EVar ({ contents = None }, gy_, vy_, { contents = _ :: _ }) -> true
@@ -752,13 +752,13 @@ module MakeCover
     let counter = ref 0
   end
 
-  let rec resetCount () = counter := 0
-  let rec incCount () = counter := !counter + 1
-  let rec getCount () = !counter
+  let resetCount () = counter := 0
+  let incCount () = counter := !counter + 1
+  let getCount () = !counter
 
   exception NotFinitary = NotFinitary
 
-  let rec finitary1 (x_, k, w_, f, cands) =
+  let finitary1 (x_, k, w_, f, cands) =
     begin
       resetCount ();
       begin
@@ -806,7 +806,7 @@ module MakeCover
             f,
             CsManager.trail (function () -> finitary1 (x_, k, w_, f, cands)) )
 
-  let rec finitary (v_, p, w_, ci) =
+  let finitary (v_, p, w_, ci) =
     let _ =
       begin if !Global.doubleCheck then
         TypeCheck.typeCheck (I.Null, (v_, I.Uni I.Type))
@@ -817,7 +817,7 @@ module MakeCover
     finitarySplits
       (xsRev_, 1, w_, (function () -> ignore (abstract (v1_, s))), [])
 
-  let rec eqExp (us_, us'_) = Conv.conv (us_, us'_)
+  let eqExp (us_, us'_) = Conv.conv (us_, us'_)
 
   let rec eqInpSpine = function
     | ms, (I.SClo (s1_, s1'), s1), ss2_ ->
@@ -887,11 +887,11 @@ module MakeCover
     let (Some ms) = UniqueTable.modeLookup a1 in
     unifyUOutSpine (ms, (s1_, s1), (s2_, s2))
 
-  let rec unifyUOutEVars
+  let unifyUOutEVars
       (Some (I.EVar (_, g1_, v1_, _)), Some (I.EVar (_, g2_, v2_, _))) =
     unifyUOutType (v1_, v2_)
 
-  let rec unifyUOut2 (xsRev_, k1, k2) =
+  let unifyUOut2 (xsRev_, k1, k2) =
     unifyUOutEVars (List.nth (xsRev_, k1 - 1), List.nth (xsRev_, k2 - 1))
 
   let rec unifyUOut1 = function
@@ -904,12 +904,12 @@ module MakeCover
     | xsRev_, [] -> true
     | xsRev_, ks :: kss -> unifyUOut1 (xsRev_, ks) && unifyUOut (xsRev_, kss)
 
-  let rec contractAll (v_, p, ucands) =
+  let contractAll (v_, p, ucands) =
     let (v1_, s), xsRev_ = instEVars ((v_, I.id), p, []) in
     begin if unifyUOut (xsRev_, ucands) then Some (abstract (v1_, s)) else None
     end
 
-  let rec contract (v_, p, ci, lab) =
+  let contract (v_, p, ci, lab) =
     let g_, _ = isolateSplittable (I.Null, v_, p) in
     let ucands = contractionCands (g_, 1) in
     let n = List.length ucands in
@@ -1843,7 +1843,7 @@ val _ = pr ()
   (* replace output argument by new variable *)
   (* strengthen G based on subordination *)
   (* leave input ( + ) arguments as they are, ignore ( * ) impossible *)
-  let rec checkNoDef a =
+  let checkNoDef a =
     begin match I.sgnLookup a with
     | I.ConDef _ ->
         raise
@@ -1857,7 +1857,7 @@ val _ = pr ()
        checks coverage for type family a with respect to mode spine ms
        Effect: raises Error (msg) otherwise
     *)
-  let rec checkCovers (a, ms) =
+  let checkCovers (a, ms) =
     let _ =
       chatter 4 (function () ->
           ("Input coverage checking family " ^ N.qidToString (N.constQid a))
@@ -1912,7 +1912,7 @@ val _ = pr ()
        checks if the most general goal V' is locally output-covered by V
        Effect: raises Error (msg) otherwise
     *)
-  let rec checkOut (g_, (v_, s)) =
+  let checkOut (g_, (v_, s)) =
     let a = I.targetFam v_ in
     let (Some ms) = ModeTable.modeLookup a in
     let cOut = outCoverInst ms in
@@ -1957,7 +1957,7 @@ val _ = pr ()
   (* cc = CClause (Gi, Si) with  Gi |- Si : {{G}} type *)
   type coverClause = CClause of I.dctx * I.spine
 
-  let rec formatCGoal (CGoal (g_, s_)) =
+  let formatCGoal (CGoal (g_, s_)) =
     let _ = N.varReset I.Null in
     F.hVbox
       ([
@@ -1969,7 +1969,7 @@ val _ = pr ()
        ]
       @ Print.formatSpine (g_, s_))
 
-  let rec showPendingCGoal (CGoal (g_, s_), lab) =
+  let showPendingCGoal (CGoal (g_, s_), lab) =
     F.makestring_fmt
       (F.hbox
          [
@@ -1980,11 +1980,11 @@ val _ = pr ()
            F.string ".";
          ])
 
-  let rec showCClause (CClause (g_, s_)) =
+  let showCClause (CClause (g_, s_)) =
     let _ = N.varReset I.Null in
     F.makestring_fmt (F.hVbox ([ F.string "!- " ] @ Print.formatSpine (g_, s_)))
 
-  let rec showSplitVar (CGoal (g_, s_), k) =
+  let showSplitVar (CGoal (g_, s_), k) =
     let _ = N.varReset I.Null in
     let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
     (("Split " ^ x) ^ " in ")
@@ -2029,7 +2029,7 @@ val _ = pr ()
     *)
   (* This ignores LVars, because collectEVars does *)
   (* Why is that OK?  Sun Dec 16 09:01:40 2001 -fp !!! *)
-  let rec checkConstraints = function
+  let checkConstraints = function
     | g_, (si_, ti), Cands ks -> Cands ks
     | g_, (si_, ti), Fail -> Fail
     | g_, (si_, ti), Eqns _ ->
@@ -2047,7 +2047,7 @@ val _ = pr ()
        matching coverage goal cg against instantiated coverage clause Si[ti]
        yields splitting candidates klist
     *)
-  let rec matchClause (CGoal (g_, s_), (si_, ti)) =
+  let matchClause (CGoal (g_, s_), (si_, ti)) =
     let cands1 = matchSpine (g_, 0, (s_, I.id), (si_, ti), Eqns []) in
     let cands2 = resolveCands cands1 in
     let cands3 = checkConstraints (g_, (si_, ti), cands2) in
@@ -2074,14 +2074,14 @@ val _ = pr ()
        matching coverage goal cg against coverage clauses ccs
        yields candidates klist
     *)
-  let rec match_ (CGoal (g_, s_), ccs) =
+  let match_ (CGoal (g_, s_), ccs) =
     matchClauses (CGoal (g_, s_), ccs, CandList [])
 
   (* abstractSpine (S, s) = CGoal (G, S')
        Invariant: G abstracts all EVars in S[s]
        G |- S' : {{G'}}type
     *)
-  let rec abstractSpine (s_, s) =
+  let abstractSpine (s_, s) =
     let g'_, s'_ = Abstract.abstractSpine (s_, s) in
     let namedG' = N.ctxName g'_ in
     let _ =
@@ -2118,9 +2118,9 @@ val _ = pr ()
     let caseList : coverGoal list ref = ref []
   end
 
-  let rec resetCases () = caseList := []
-  let rec addCase cg = caseList := cg :: !caseList
-  let rec getCases () = !caseList
+  let resetCases () = caseList := []
+  let addCase cg = caseList := cg :: !caseList
+  let getCases () = !caseList
 
   (* splitVar (CGoal(G, S), k, w) = SOME [cg1,...,cgn]
                                   or NONE
@@ -2136,7 +2136,7 @@ val _ = pr ()
        G |- S : {{G'}} type
        cgi cover cg
     *)
-  let rec splitVar ((CGoal (g_, s_) as cg), k, w) =
+  let splitVar ((CGoal (g_, s_) as cg), k, w) =
     try
       let _ = chatter 6 (function () -> showSplitVar (cg, k) ^ "\n") in
       let s = newEVarSubst (I.Null, g_) in
@@ -2161,7 +2161,7 @@ val _ = pr ()
   (* finitary (CGoal (G, S), W) = [(k1,n1),...,(km,nm)]
        where ki are indices of splittable variables in G with ni possibilities
     *)
-  let rec finitary (CGoal (g_, s_), w) =
+  let finitary (CGoal (g_, s_), w) =
     let s = newEVarSubst (I.Null, g_) in
     let xsRev_ = subToXsRev s in
     finitarySplits
@@ -2176,7 +2176,7 @@ val _ = pr ()
   (* Contraction *)
   (***************)
   (* for explanation, see contract and contractAll above *)
-  let rec contractAll (CGoal (g_, s_), ucands) =
+  let contractAll (CGoal (g_, s_), ucands) =
     let s = newEVarSubst (I.Null, g_) in
     let xsRev_ = subToXsRev s in
     begin if unifyUOut (xsRev_, ucands) then Some (abstractSpine (s_, s))
@@ -2185,7 +2185,7 @@ val _ = pr ()
   (* as in splitVar, may raise Constraints.Error *)
   (* for unif, EVars are always global *)
 
-  let rec contract ((CGoal (g_, s_) as cg), lab) =
+  let contract ((CGoal (g_, s_) as cg), lab) =
     let ucands = contractionCands (g_, 1) in
     let n = List.length ucands in
     let _ =
@@ -2345,7 +2345,7 @@ val _ = pr ()
 
        Note: {{G}} erases void declarations in G
      *)
-  let rec substToSpine (s, g_) = substToSpine' (s, g_, I.Nil)
+  let substToSpine (s, g_) = substToSpine' (s, g_, I.Nil)
 
   (* purify' G = (G', s) where all NDec's have been erased from G
        If    |- G ctx
@@ -2381,7 +2381,7 @@ val _ = pr ()
        If   |- G ctx
        then |- G' ctx
     *)
-  let rec purify g_ = (fun (r, _) -> r) (purify' g_)
+  let purify g_ = (fun (r, _) -> r) (purify' g_)
 
   (* coverageCheckCases (W, Cs, G) = R
 
@@ -2393,7 +2393,7 @@ val _ = pr ()
        there exists at least one index k and substitution   Phi |- t : Gk
        s.t.  sk o t = s
     *)
-  let rec coverageCheckCases (w, cs_, g_) =
+  let coverageCheckCases (w, cs_, g_) =
     let _ = chatter 4 (function () -> "[Tomega coverage checker...") in
     let _ = chatter 4 (function () -> "\n") in
     let ccs =

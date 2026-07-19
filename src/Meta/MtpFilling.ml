@@ -71,7 +71,7 @@ end) : MTPFILLING.MTPFILLING = struct
           let xs_, p_ = createEVars (g_, (f_, I.Dot (I.Exp x_, s))) in
           (x'_ :: xs_, F.Inx (x_, p_))
 
-    let rec expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
+    let expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
       let _ =
         begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g_ else ()
         end
@@ -105,8 +105,8 @@ end) : MTPFILLING.MTPFILLING = struct
               (max, p_)
             end)
 
-    let rec apply f = f ()
-    let rec menu _ = "Filling   (tries to close this subgoal)"
+    let apply f = f ()
+    let menu _ = "Filling   (tries to close this subgoal)"
   end
 
   (* Checking for constraints: Used to be in abstract, now must be done explicitly! --cs*)

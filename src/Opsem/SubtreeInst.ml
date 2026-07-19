@@ -57,18 +57,18 @@ end) : MEMOTABLE = struct
   let nid : unit -> normalSubsts = RBSet.new_
   let asid : unit -> exSubsts = RBSet.new_
   let aid = TableParam.aid
-  let rec isId s = RBSet.isEmpty s
+  let isId s = RBSet.isEmpty s
 
   (* ---------------------------------------------------------------------- *)
   (* Context for existential variable *)
   type nonrec ctx = (int * IntSyn.dec) list ref
 
   (* functions for handling context for existential variables *)
-  let rec emptyCtx () = (ref [] : ctx)
-  let rec copy l_ = (ref !l_ : ctx)
+  let emptyCtx () = (ref [] : ctx)
+  let copy l_ = (ref !l_ : ctx)
 
   (* destructively updates L *)
-  let rec delete (x, (l_ : ctx)) =
+  let delete (x, (l_ : ctx)) =
     let rec del = function
       | x, [], l_ -> None
       | x, ((y, e_) as h_) :: l_, l'_ ->
@@ -84,7 +84,7 @@ end) : MEMOTABLE = struct
       end
     end
 
-  let rec member (x, (l_ : ctx)) =
+  let member (x, (l_ : ctx)) =
     let rec memb = function
       | x, [] -> None
       | x, ((y, (IntSyn.Dec (n, u_) as e_)) :: l_ as h_) ->
@@ -96,7 +96,7 @@ end) : MEMOTABLE = struct
     in
     memb (x, !l_)
 
-  let rec insertList (e_, l_) = l_ := e_ :: !l_
+  let insertList (e_, l_) = l_ := e_ :: !l_
 
   (* ---------------------------------------------------------------------- *)
   (* Substitution Tree *)
@@ -123,8 +123,8 @@ end) : MEMOTABLE = struct
     (* #EVar *)
     | Node of (ctx * normalSubsts) * tree ref list
 
-  let rec makeTree () = ref (Node ((emptyCtx (), nid ()), []))
-  let rec noChildren c_ = c_ = []
+  let makeTree () = ref (Node ((emptyCtx (), nid ()), []))
+  let noChildren c_ = c_ = []
 
   type retrieval = Variant of int * IntSyn.exp | NotCompatible
 
@@ -160,7 +160,7 @@ end) : MEMOTABLE = struct
     exception Generalization of string
     exception DifferentSpines
 
-    let rec emptyAnswer () = T.emptyAnsw ()
+    let emptyAnswer () = T.emptyAnsw ()
     let answList : TableParam.answer list ref = ref []
     let added = ref false
 
@@ -168,7 +168,7 @@ end) : MEMOTABLE = struct
     type nonrec bvar = int
     type nonrec bdepth = int
 
-    let rec expToS (g_, u_) = try Print.expToString (g_, u_) with _ -> " <_ >"
+    let expToS (g_, u_) = try Print.expToString (g_, u_) with _ -> " <_ >"
 
     let rec printSub = function
       | g_, I.Shift n -> print (("I.Shift " ^ Int.toString n) ^ "\n")
@@ -286,7 +286,7 @@ end) : MEMOTABLE = struct
           let x_ = I.newAVar () in
           I.Dot (I.Exp (I.EClo (x_, I.Shift (-d))), ctxToAVarSub (g'_, d_, s))
 
-    let rec assign = function
+    let assign = function
       | d, (I.Dec (n, v_) as dec1_), (I.Root (I.BVar k, s1_) as e1_), u_, asub
         ->
           let (I.EVar (r, _, _, cnstr) as e_) = I.newEVar (I.Null, v_) in
@@ -405,13 +405,13 @@ end) : MEMOTABLE = struct
 
     let nctr = ref 1
 
-    let rec newNVar () =
+    let newNVar () =
       begin
         nctr := !nctr + 1;
         I.NVar !nctr
       end
 
-    let rec equalDec = function
+    let equalDec = function
       | I.Dec (_, u_), I.Dec (_, u'_) -> Conv.conv ((u_, I.id), (u'_, I.id))
       | I.ADec (_, d), I.ADec (_, d') -> d = d'
       | _, _ -> false
@@ -491,7 +491,7 @@ end) : MEMOTABLE = struct
           d = d' && equalCtx' (dk_, d1_)
       | _, _ -> false
 
-    let rec instanceCtx (asub, (d1_, g1_), (d2_, g2_)) =
+    let instanceCtx (asub, (d1_, g1_), (d2_, g2_)) =
       let d1 = I.ctxLength g1_ in
       let d2 = I.ctxLength g2_ in
       begin if d1 = d2 then
@@ -507,7 +507,7 @@ end) : MEMOTABLE = struct
       else false
       end
 
-    let rec collectEVar (d_, nsub) =
+    let collectEVar (d_, nsub) =
       let d'_ = emptyCtx () in
       let rec collectExp = function
         | d, d'_, d_, I.Lam (_, u_) -> collectExp (d + 1, d'_, d_, u_)
@@ -554,12 +554,12 @@ end) : MEMOTABLE = struct
           I.Dot (I.Exp e'_, convAssSub' (g_, idx_k + 1, d_, asub, d + 1, evarsl))
       end
 
-    let rec convAssSub (g_, asub, glength_, d'_, evarsl) =
+    let convAssSub (g_, asub, glength_, d'_, evarsl) =
       convAssSub' (g_, 0, d'_, asub, glength_, evarsl)
 
-    let rec isExists (d, I.BVar k, d_) = member (k - d, d_)
+    let isExists (d, I.BVar k, d_) = member (k - d, d_)
 
-    let rec instance ((d_t_, (dt, t_v)), (d_u_, (du, u_)), rho_u, ac) =
+    let instance ((d_t_, (dt, t_v)), (d_u_, (du, u_)), rho_u, ac) =
       let rec instRoot = function
         | ( depth,
             (I.Root ((I.Const k as h1_), s1_) as t_),
@@ -715,7 +715,7 @@ end) : MEMOTABLE = struct
       in
       ac := instExp (dt, t_v, u_, !ac)
 
-    let rec compHeads = function
+    let compHeads = function
       | (d_1_, I.Const k), (d_2_, I.Const k') -> k = k'
       | (d_1_, I.Def k), (d_2_, I.Def k') -> k = k'
       | (d_1_, I.BVar k), (d_2_, I.BVar k') ->
@@ -730,9 +730,9 @@ end) : MEMOTABLE = struct
           end
       | (d_1_, h1_), (d_2_, h2_) -> false
 
-    let rec compatible' ((d_t_, (dt, t_v)), (d_u_, (du, u_)), ds_, rho_t, rho_u)
+    let compatible' ((d_t_, (dt, t_v)), (d_u_, (du, u_)), ds_, rho_t, rho_u)
         =
-      let rec genNVar ((rho_t, t_v), (rho_u, u_)) =
+      let genNVar ((rho_t, t_v), (rho_u, u_)) =
         begin
           S.insert rho_t (!nctr + 1, t_v);
           begin
@@ -840,7 +840,7 @@ end) : MEMOTABLE = struct
       in
       Variant (dt, genExp (dt, t_v, u_))
 
-    let rec compatible = function
+    let compatible = function
       | ( (d_t_, ((d1, I.Root (h1_, s1_)) as t_)),
           (d_u_, ((d2, I.Root (h2_, s2_)) as u_)),
           ds_,
@@ -863,7 +863,7 @@ end) : MEMOTABLE = struct
           else compatibleCtx (asub, (dsq_, gsq_, eqn_sq), gRlist_)
           end
 
-    let rec instanceSub ((d_t_, nsub_t), (dsq_, squery), asub) =
+    let instanceSub ((d_t_, nsub_t), (dsq_, squery), asub) =
       let rho_u = nid () in
       let d_r2_ = copy dsq_ in
       let ac = ref (function (asub : exSubsts) -> ()) in
@@ -882,13 +882,13 @@ end) : MEMOTABLE = struct
         end
       with Instance msg -> NoCompatibleSub
 
-    let rec instChild = function
+    let instChild = function
       | (Leaf ((d_t_, nsub_t), gList_) as n_), (d_sq_, sq), asub ->
           instanceSub ((d_t_, nsub_t), (d_sq_, sq), asub)
       | (Node ((d_t_, nsub_t), children'_) as n_), (d_sq_, sq), asub ->
           instanceSub ((d_t_, nsub_t), (d_sq_, sq), asub)
 
-    let rec findAllInst (g_r_, children, ds_, asub) =
+    let findAllInst (g_r_, children, ds_, asub) =
       let rec findAllCands = function
         | g_r_, [], (dsq_, sub_u), asub, iList_ -> iList_
         | g_r_, x :: l_, (dsq_, sub_u), asub, iList_ ->
@@ -926,7 +926,7 @@ end) : MEMOTABLE = struct
           Assign.instance (g''_, (e1, s'), (n_, s'))
           && solveEqnI' ((eqns, s), g_)
 
-    let rec retrieveInst (nref_, (dq_, sq), asub, gr_) =
+    let retrieveInst (nref_, (dq_, sq), asub, gr_) =
       let rec retrieve' = function
         | ( (Leaf ((d_, s), gRlistRef_) as n_),
             (dq_, sq),
@@ -977,7 +977,7 @@ end) : MEMOTABLE = struct
       in
       function () -> ((), retrieve' (!nref_, (dq_, sq), asub, gr_))
 
-    let rec compatibleSub ((d_t_, nsub_t), (dsq_, squery)) =
+    let compatibleSub ((d_t_, nsub_t), (dsq_, squery)) =
       let sigma, rho_t, rho_u = (nid (), nid (), nid ()) in
       let dsigma_ = emptyCtx () in
       let d_r1_ = copy d_t_ in
@@ -1022,7 +1022,7 @@ end) : MEMOTABLE = struct
       end
       end
 
-    let rec mkNode = function
+    let mkNode = function
       | ( Node (_, children_),
           ((ds_, sigma) as dsigma_),
           ((d1_, rho1) as drho1_),
@@ -1053,13 +1053,13 @@ end) : MEMOTABLE = struct
                 ref (Leaf (drho1_, gRlist_));
               ] )
 
-    let rec compChild = function
+    let compChild = function
       | (Leaf ((d_t_, nsub_t), gList_) as n_), (d_e_, nsub_e) ->
           compatibleSub ((d_t_, nsub_t), (d_e_, nsub_e))
       | (Node ((d_t_, nsub_t), children'_) as n_), (d_e_, nsub_e) ->
           compatibleSub ((d_t_, nsub_t), (d_e_, nsub_e))
 
-    let rec findAllCandidates (g_r_, children, ds_) =
+    let findAllCandidates (g_r_, children, ds_) =
       let rec findAllCands = function
         | g_r_, [], (dsq_, sub_u), vList_, sList_ -> (vList_, sList_)
         | g_r_, x :: l_, (dsq_, sub_u), vList_, sList_ ->
@@ -1081,7 +1081,7 @@ end) : MEMOTABLE = struct
       in
       findAllCands (g_r_, children, ds_, [], [])
 
-    let rec divergingCtx (stage, g_, gRlistRef_) =
+    let divergingCtx (stage, g_, gRlistRef_) =
       let l = I.ctxLength g_ + 3 in
       List.exists
         (function
@@ -1089,7 +1089,7 @@ end) : MEMOTABLE = struct
               stage = stage' && l > I.ctxLength g'_)
         !gRlistRef_
 
-    let rec eqHeads = function
+    let eqHeads = function
       | I.Const k, I.Const k' -> k = k'
       | I.BVar k, I.BVar k' -> k = k'
       | I.Def k, I.Def k' -> k = k'
@@ -1112,7 +1112,7 @@ end) : MEMOTABLE = struct
       | I.App (t2_, s2_), (I.App (t_v, s_), rho1) ->
           eqTerm (t2_, (t_v, rho1)) && eqSpine (s2_, (s_, rho1))
 
-    let rec divergingSub ((ds_, sigma), (dr1_, rho1), (dr2_, rho2)) =
+    let divergingSub ((ds_, sigma), (dr1_, rho1), (dr2_, rho2)) =
       S.exists rho2 (function n2, (dt2, t2) ->
           S.exists sigma (function _, (d, t) -> eqTerm (t2, (t, rho1))))
 
@@ -1125,7 +1125,7 @@ end) : MEMOTABLE = struct
           end
 
     let rec insert (nref_, (dsq_, sq), gr_) =
-      let rec insert' = function
+      let insert' = function
         | ( (Leaf (_, gRlistRef_) as n_),
             (dsq_, sq),
             ((l, g_r_, eqn, answRef, stage, status) as gr_) ) ->
@@ -1201,7 +1201,7 @@ end) : MEMOTABLE = struct
       in
       insert' (!nref_, (dsq_, sq), gr_)
 
-    let rec answCheckVariant (s', answRef, o_) =
+    let answCheckVariant (s', answRef, o_) =
       let rec member = function
         | (d_, sk), [] -> false
         | (d_, sk), ((d1_, s1), _) :: s_ ->
@@ -1217,7 +1217,7 @@ end) : MEMOTABLE = struct
       end
       end
 
-    let rec reset () =
+    let reset () =
       begin
         nctr := 1;
         Array.modify
@@ -1245,7 +1245,7 @@ end) : MEMOTABLE = struct
           makeCtx (n + 1, g_, dEVars_)
         end
 
-    let rec callCheck (a, dAVars_, dEVars_, g_, u_, eqn, status) =
+    let callCheck (a, dAVars_, dEVars_, g_, u_, eqn, status) =
       let n, tree = Array.sub (indexArray, a) in
       let sq = S.new_ () in
       let dAEVars_ = compose (dEVars_, dAVars_) in
@@ -1279,7 +1279,7 @@ end) : MEMOTABLE = struct
         end
       end
 
-    let rec insertIntoTree (a, dAVars_, dEVars_, g_, u_, eqn, answRef, status) =
+    let insertIntoTree (a, dAVars_, dEVars_, g_, u_, eqn, answRef, status) =
       let n, tree = Array.sub (indexArray, a) in
       let sq = S.new_ () in
       let dAEVars_ = compose (dEVars_, dAVars_) in
@@ -1314,9 +1314,9 @@ end) : MEMOTABLE = struct
         end
       end
 
-    let rec answCheck (s', answRef, o_) = answCheckVariant (s', answRef, o_)
+    let answCheck (s', answRef, o_) = answCheckVariant (s', answRef, o_)
 
-    let rec updateTable () =
+    let updateTable () =
       let rec update arg__1 arg__2 =
         begin match (arg__1, arg__2) with
         | [], flag_ -> flag_
@@ -1914,7 +1914,7 @@ end) : MEMOTABLE = struct
        then return true
          otherwise false
     *)
-  let rec memberCtx ((g_, v_), g'_) =
+  let memberCtx ((g_, v_), g'_) =
     let rec instanceCtx' = function
       | (g_, v_), I.Null, n -> None
       | (g_, v_), I.Decl (g'_, (I.Dec (_, v'_) as d'_)), n ->

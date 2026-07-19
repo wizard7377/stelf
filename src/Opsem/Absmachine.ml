@@ -48,7 +48,7 @@ end) : ABSMACHINE = struct
 
     let cidFromHead = function I.Const a -> a | I.Def a -> a
 
-    let rec eqHead = function
+    let eqHead = function
       | I.Const a, I.Const a' -> a = a'
       | I.Def a, I.Def a' -> a = a'
       | _ -> false

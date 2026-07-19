@@ -107,29 +107,29 @@ module MakeConverter
 
     let isIdx1 = function I.Idx 1 -> true | _ -> false
 
-    let rec modeSpine a =
+    let modeSpine a =
       begin match ModeTable.modeLookup a with
       | None -> raise (Error "Mode declaration expected")
       | Some mS -> mS
       end
 
-    let rec typeOf a =
+    let typeOf a =
       begin match I.sgnLookup a with
       | I.ConDec (name, _, _, _, v_, I.Kind) -> v_
       | _ -> raise (Error "Type Constant declaration expected")
       end
 
-    let rec nameOf a =
+    let nameOf a =
       begin match I.sgnLookup a with
       | I.ConDec (name, _, _, _, v_, I.Kind) -> name
       | _ -> raise (Error "Type Constant declaration expected")
       end
 
-    let rec chatter chlev f = Display.chatter_s chlev ("[tomega] " ^ f ())
-    let rec strengthenExp (u_, s) = Whnf.normalize (Whnf.cloInv (u_, s), I.id)
-    let rec strengthenSub (s, t) = Whnf.compInv (s, t)
+    let chatter chlev f = Display.chatter_s chlev ("[tomega] " ^ f ())
+    let strengthenExp (u_, s) = Whnf.normalize (Whnf.cloInv (u_, s), I.id)
+    let strengthenSub (s, t) = Whnf.compInv (s, t)
 
-    let rec strengthenDec = function
+    let strengthenDec = function
       | I.Dec (name, v_), s -> I.Dec (name, strengthenExp (v_, s))
       | I.BDec (name, (l_, t)), s -> I.BDec (name, (l_, strengthenSub (t, s)))
 
@@ -215,7 +215,7 @@ module MakeConverter
             validSig (psi0_, sig_)
           end
 
-    let rec convertOneFor cid =
+    let convertOneFor cid =
       let v_ =
         begin match I.sgnLookup cid with
         | I.ConDec (name, _, _, _, v_, I.Kind) -> v_
@@ -246,7 +246,7 @@ module MakeConverter
         | I.Uni I.Type, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
-      let rec shiftPlus mS =
+      let shiftPlus mS =
         let rec shiftPlus' = function
           | M.Mnil, n -> n
           | M.Mapp (M.Marg (M.Plus, _), mS'), n -> shiftPlus' (mS', n + 1)
@@ -270,7 +270,7 @@ module MakeConverter
           let name', f'_ = createIH l_ in
           ((name ^ "/") ^ name', T.And (f_, f'_))
 
-    let rec convertFor l_ =
+    let convertFor l_ =
       let _, f'_ = createIH l_ in
       f'_
 
@@ -300,10 +300,10 @@ module MakeConverter
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
     and occursInExp (k, u_) = occursInExpN (k, Whnf.normalize (u_, I.id))
 
-    let rec dot1inv w = strengthenSub (I.comp (I.shift, w), I.shift)
-    let rec shiftinv w = strengthenSub (w, I.shift)
+    let dot1inv w = strengthenSub (I.comp (I.shift, w), I.shift)
+    let shiftinv w = strengthenSub (w, I.shift)
 
-    let rec peel w =
+    let peel w =
       begin if isIdx1 (I.bvarSub (1, w)) then dot1inv w else shiftinv w
       end
 
@@ -321,7 +321,7 @@ module MakeConverter
       | (I.Decl _ as g_), I.Shift 0 -> domain (g_, I.Dot (I.Idx 1, I.Shift 1))
       | I.Decl (g_, _), I.Shift n -> domain (g_, I.Shift (n - 1))
 
-    let rec strengthen (psi_, (a, s_), w, m) =
+    let strengthen (psi_, (a, s_), w, m) =
       let mS = modeSpine a in
       let rec args = function
         | I.Nil, M.Mnil -> []
@@ -359,7 +359,7 @@ module MakeConverter
             occursInG
               (n, g_, function n' -> occursInExp (n', v_) || k (n' + 1))
       in
-      let rec occursBlock (g_, (psi2_, l_)) =
+      let occursBlock (g_, (psi2_, l_)) =
         let rec occursBlock = function
           | I.Null, n -> false
           | I.Decl (g_, d_), n ->
@@ -430,16 +430,16 @@ module MakeConverter
       in
       strengthen' (psi_, [], args (s_, mS), w)
 
-    let rec lookupIH (psi_, l_, a) =
+    let lookupIH (psi_, l_, a) =
       let rec lookupIH' (b :: l_, a, k) =
         begin if a = b then k else lookupIH' (l_, a, k - 1)
         end
       in
       lookupIH' (l_, a, I.ctxLength psi_)
 
-    let rec createIHSub (psi_, l_) = T.Shift (I.ctxLength psi_ - 1)
+    let createIHSub (psi_, l_) = T.Shift (I.ctxLength psi_ - 1)
 
-    let rec transformInit (psi_, l_, (a, s_), w1) =
+    let transformInit (psi_, l_, (a, s_), w1) =
       let mS = modeSpine a in
       let v_ = typeOf a in
       let rec transformInit' = function
@@ -461,7 +461,7 @@ module MakeConverter
       in
       transformInit' ((s_, mS), v_, (I.id, createIHSub (psi_, l_)))
 
-    let rec transformConc ((a, s_), w) =
+    let transformConc ((a, s_), w) =
       let rec transformConc' = function
         | I.Nil, M.Mnil -> T.Unit
         | I.App (u_, s'_), M.Mapp (M.Marg (M.Plus, _), mS') ->
@@ -493,7 +493,7 @@ module MakeConverter
       | f, I.App (u_, s_) -> I.App (renameExp f u_, renameSpine f s_)
       end
 
-    let rec rename (I.BDec (_, (c, s)), v_) =
+    let rename (I.BDec (_, (c, s)), v_) =
       let g_, l_ = I.constBlock c in
       let rec makeSubst = function
         | n, g_, s, [], f -> (g_, f)
@@ -585,7 +585,7 @@ module MakeConverter
           in
           let n = domain (psi1_, w1) in
           let m = I.ctxLength psi0_ in
-          let rec lookupbase a =
+          let lookupbase a =
             let s = I.conDecName (I.sgnLookup a) in
             let l = T.lemmaName s in
             let (T.ValDec (_, p_, f_)) = T.lemmaLookup l in
@@ -701,7 +701,7 @@ module MakeConverter
                 q_ ) )
       end
 
-    let rec traverse (psi0_, l_, sig_, wmap, projs) =
+    let traverse (psi0_, l_, sig_, wmap, projs) =
       let rec traverseSig' = function
         | [] -> []
         | (g_, v_) :: sig_ -> begin
@@ -716,7 +716,7 @@ module MakeConverter
       in
       traverseSig' sig_
 
-    let rec transformWorlds (fams, T.Worlds cids) =
+    let transformWorlds (fams, T.Worlds cids) =
       let rec transformList = function
         | [], w -> []
         | (I.Dec (x, v_) as d_) :: l_, w ->
@@ -746,7 +746,7 @@ module MakeConverter
       let cids', wmap = transformWorlds' cids in
       (T.Worlds cids', wmap)
 
-    let rec dynamicSig (psi0_, a, T.Worlds cids) =
+    let dynamicSig (psi0_, a, T.Worlds cids) =
       let rec findDec = function
         | g_, _, [], w, sig_ -> sig_
         | g_, n, d_ :: l_, w, sig_ ->
@@ -793,7 +793,7 @@ module MakeConverter
       | a :: [] -> I.conDecName (I.sgnLookup a)
       | a :: l_ -> (I.conDecName (I.sgnLookup a) ^ "/") ^ name l_
 
-    let rec convertPrg (l_, projs) =
+    let convertPrg (l_, projs) =
       let name, f0_ = createIH l_ in
       let d0_ = T.PDec (Some name, f0_, None, None) in
       let psi0_ = I.Decl (I.Null, d0_) in
@@ -811,7 +811,7 @@ module MakeConverter
       in
       let w_ = convertWorlds l_ in
       let w'_, wmap = transformWorlds (l_, w_) in
-      let rec convertOnePrg (a, f_) =
+      let convertOnePrg (a, f_) =
         let name = nameOf a in
         let v_ = typeOf a in
         let mS = modeSpine a in
@@ -846,7 +846,7 @@ module MakeConverter
       let p_ = prec_ (convertPrg' (l_, f0_)) in
       p_
 
-    let rec installFor (cid :: []) =
+    let installFor (cid :: []) =
       let f_ = convertFor [ cid ] in
       let name = I.conDecName (I.sgnLookup cid) in
       let _ = T.lemmaAdd (T.ForDec (name, f_)) in
@@ -901,7 +901,7 @@ module MakeConverter
           let lemma' = T.lemmaAdd (T.ValDec (name, p_, f1_)) in
           lemma' :: installSelection (cids, lemmas, f2_, main)
 
-    let rec installPrg = function
+    let installPrg = function
       | cid :: [] ->
           let f_ = convertFor [ cid ] in
           let p_ = convertPrg ([ cid ], None) in
@@ -931,7 +931,7 @@ module MakeConverter
       | 0 -> T.Unit
       | n -> T.PairExp (I.Root (I.BVar n, I.Nil), mkResult (n - 1))
 
-    let rec convertGoal (g_, v_) =
+    let convertGoal (g_, v_) =
       let a = I.targetFam v_ in
       let w_ = WorldSyn.lookup a in
       let w'_, wmap = transformWorlds ([ a ], w_) in

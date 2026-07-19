@@ -14,7 +14,7 @@ end) : ABSMACHINE = struct
 
   (*! structure IntSyn = AbsMachine.IntSyn !*)
   (*! structure CompSyn = AbsMachine.CompSyn !*)
-  let rec solve args =
+  let solve args =
     begin if Trace.tracing () then TMachine.solve args
     else AbsMachine.solve args
     end

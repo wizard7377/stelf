@@ -58,11 +58,11 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
 
     let orderTable_ : tDec Table.table = Table.new_ 0
     let redOrderTable_ : rDec Table.table = Table.new_ 0
-    let rec reset () = Table.clear orderTable_
-    let rec resetROrder () = Table.clear redOrderTable_
-    let rec install (cid, o_) = Table.insert orderTable_ (cid, o_)
+    let reset () = Table.clear orderTable_
+    let resetROrder () = Table.clear redOrderTable_
+    let install (cid, o_) = Table.insert orderTable_ (cid, o_)
 
-    let rec uninstall cid =
+    let uninstall cid =
       begin match Table.lookup orderTable_ cid with
       | None -> false
       | Some _ -> begin
@@ -71,9 +71,9 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
         end
       end
 
-    let rec installROrder (cid, p_) = Table.insert redOrderTable_ (cid, p_)
+    let installROrder (cid, p_) = Table.insert redOrderTable_ (cid, p_)
 
-    let rec uninstallROrder cid =
+    let uninstallROrder cid =
       begin match Table.lookup redOrderTable_ cid with
       | None -> false
       | Some _ -> begin
@@ -82,10 +82,10 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
         end
       end
 
-    let rec lookup cid = Table.lookup orderTable_ cid
-    let rec lookupROrder cid = Table.lookup redOrderTable_ cid
+    let lookup cid = Table.lookup orderTable_ cid
+    let lookupROrder cid = Table.lookup redOrderTable_ cid
 
-    let rec selLookup a =
+    let selLookup a =
       begin match lookup a with
       | None ->
           raise
@@ -95,7 +95,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
       | Some (TDec (s_, _)) -> s_
       end
 
-    let rec selLookupROrder a =
+    let selLookupROrder a =
       begin match lookupROrder a with
       | None ->
           raise
@@ -106,7 +106,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
       | Some (RDec (p_, _)) -> p_
       end
 
-    let rec mutLookupROrder a =
+    let mutLookupROrder a =
       begin match lookupROrder a with
       | None ->
           raise
@@ -115,7 +115,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
       | Some (RDec (_, m_)) -> m_
       end
 
-    let rec mutLookup a =
+    let mutLookup a =
       begin match lookup a with
       | None ->
           raise
@@ -123,7 +123,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
       | Some (TDec (_, m_)) -> m_
       end
 
-    let rec mutual a =
+    let mutual a =
       let rec mutual' = function
         | Empty, a's -> a's
         | Le (a, m_), a's -> mutual' (m_, a :: a's)

@@ -51,12 +51,12 @@ module MakePrintXML
     module F = Formatter
 
     let str_ = F.string
-    let rec str0_ (s, n) = F.string0 n s
-    let rec name_ x = F.string (("\"" ^ x) ^ "\"")
-    let rec integer_ n = F.string (("\"" ^ Int.toString n) ^ "\"")
-    let rec sexp fmts = F.hbox [ F.hVbox fmts ]
+    let str0_ (s, n) = F.string0 n s
+    let name_ x = F.string (("\"" ^ x) ^ "\"")
+    let integer_ n = F.string (("\"" ^ Int.toString n) ^ "\"")
+    let sexp fmts = F.hbox [ F.hVbox fmts ]
 
-    let rec fmtCon = function
+    let fmtCon = function
       | g_, I.BVar n ->
           let (I.Dec (Some n, _)) = I.ctxDec (g_, n) in
           sexp [ str_ (("<Var name = \"" ^ n) ^ "\"/>") ]
@@ -71,7 +71,7 @@ module MakePrintXML
           sexp [ str_ "<Def>"; F.break; integer_ cid; str_ "</Def>" ]
       | g_, I.FgnConst (csid, condec_) -> sexp [ str_ "FngConst" ]
 
-    let rec fmtUni = function
+    let fmtUni = function
       | I.Type -> str_ "<Type/>"
       | I.Kind -> str_ "<Kind/>"
 
@@ -160,7 +160,7 @@ module MakePrintXML
       | g_, (I.Dec (None, v_), s) -> sexp [ fmtExp (g_, (v_, s)) ]
       | g_, (I.Dec (Some x, v_), s) -> sexp [ fmtExp (g_, (v_, s)) ]
 
-    let rec fmtConDec = function
+    let fmtConDec = function
       | I.ConDec (name, parent, imp, _, v_, l_) ->
           let _ = Names.varReset IntSyn.Null in
           sexp
@@ -217,7 +217,7 @@ module MakePrintXML
       | I.BlockDec (name, _, _, _) ->
           str_ (("<! Skipping Skolem constant " ^ name) ^ ">")
 
-    let rec fmtEqn (I.Eqn (g_, u1_, u2_)) =
+    let fmtEqn (I.Eqn (g_, u1_, u2_)) =
       sexp
         [
           str_ "<Equation>";
@@ -228,7 +228,7 @@ module MakePrintXML
           str_ "</Equation>";
         ]
 
-    let rec fmtEqnName (I.Eqn (g_, u1_, u2_)) =
+    let fmtEqnName (I.Eqn (g_, u1_, u2_)) =
       fmtEqn (I.Eqn (Names.ctxLUName g_, u1_, u2_))
   end
 
@@ -276,25 +276,25 @@ module MakePrintXML
          actually applied in the scope (typically, using Names.decName)
      (b) types need not be well-formed, since they are not used
   *)
-  let rec formatDec (g_, d_) = fmtDec (g_, (d_, I.id))
-  let rec formatExp (g_, u_) = fmtExp (g_, (u_, I.id))
+  let formatDec (g_, d_) = fmtDec (g_, (d_, I.id))
+  let formatExp (g_, u_) = fmtExp (g_, (u_, I.id))
 
   (*  fun formatSpine (G, S) = sexp (fmtSpine (G, (S, I.id))) *)
-  let rec formatConDec condec_ = fmtConDec condec_
-  let rec formatEqn e_ = fmtEqn e_
-  let rec decToString (g_, d_) = F.makestring_fmt (formatDec (g_, d_))
-  let rec expToString (g_, u_) = F.makestring_fmt (formatExp (g_, u_))
-  let rec conDecToString condec_ = F.makestring_fmt (formatConDec condec_)
-  let rec eqnToString e_ = F.makestring_fmt (formatEqn e_)
+  let formatConDec condec_ = fmtConDec condec_
+  let formatEqn e_ = fmtEqn e_
+  let decToString (g_, d_) = F.makestring_fmt (formatDec (g_, d_))
+  let expToString (g_, u_) = F.makestring_fmt (formatExp (g_, u_))
+  let conDecToString condec_ = F.makestring_fmt (formatConDec condec_)
+  let eqnToString e_ = F.makestring_fmt (formatEqn e_)
 
-  let rec printSgn () =
+  let printSgn () =
     IntSyn.sgnApp (function cid ->
         begin
           print (F.makestring_fmt (formatConDec (IntSyn.sgnLookup cid)));
           print "\n"
         end)
 
-  let rec printSgnToFile path filename =
+  let printSgnToFile path filename =
     let file = TextIO.openOut (path ^ filename) in
     let _ =
       TextIO.output

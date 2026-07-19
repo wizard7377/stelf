@@ -59,7 +59,7 @@ module Make_MetaSyn (Whnf : WHNF) : METASYN = struct
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
           (I.App (x_, s_), vs_)
 
-    let rec createAtomConst (g_, h_) =
+    let createAtomConst (g_, h_) =
       let cid =
         begin match h_ with
         | I.Const cid -> cid
@@ -72,7 +72,7 @@ module Make_MetaSyn (Whnf : WHNF) : METASYN = struct
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (h_, s_), vs_)
 
-    let rec createAtomBVar (g_, k) =
+    let createAtomBVar (g_, k) =
       let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (I.BVar k, s_), vs_)

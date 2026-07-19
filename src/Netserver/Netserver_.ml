@@ -56,21 +56,21 @@ module NetServer : NETSERVER = struct
       loop f
     end
 
-  let rec vec2str v =
+  let vec2str v =
     String.implode
       (Vector.foldr (fun (x, acc) -> Char.chr (Word8.toInt x) :: acc) [] v)
 
-  let rec str2vec l : Word8Vector.vector =
+  let str2vec l : Word8Vector.vector =
     Vector.fromList
       (map (fun x -> Word8.fromInt (Char.ord x)) (String.explode l))
 
-  let rec fileText fname =
+  let fileText fname =
     let s = TextIO.openIn fname in
     let txt = TextIO.inputAll s in
     let _ = TextIO.closeIn s in
     txt
 
-  let rec fileData fname =
+  let fileData fname =
     let s = TextIO.openIn fname in
     let data = TextIO.inputAll s in
     let _ = TextIO.closeIn s in
@@ -79,26 +79,26 @@ module NetServer : NETSERVER = struct
   exception Eof = Eof
   exception Quit = Quit
 
-  let rec send _conn _str = ()
+  let send _conn _str = ()
 
   open! struct
     module SS = Substring
   end
 
-  let rec parseCmd s =
+  let parseCmd s =
     let c, a = SS.position " " (Substring.full s) in
     (SS.string c, SS.string (SS.dropl Char.isSpace a))
 
-  let rec quote string = ("`" ^ string) ^ "'"
+  let quote string = ("`" ^ string) ^ "'"
   let examplesDir : string option ref = ref None
-  let rec setExamplesDir s = examplesDir := Some s
+  let setExamplesDir s = examplesDir := Some s
 
   (* exception Error for server errors *)
   exception Error = Error
 
-  let rec error msg = raise (Error msg)
+  let error msg = raise (Error msg)
 
-  let rec serveExample e =
+  let serveExample e =
     begin if
       begin match e with
       | "ccc" -> true
@@ -137,25 +137,25 @@ module NetServer : NETSERVER = struct
     end
 
   (* Natural numbers *)
-  let rec getNat = function
+  let getNat = function
     | t :: [] -> (
         match Int.fromString t with
         | Some n when n >= 0 -> n
         | _ -> error (quote t ^ " is not a natural number"))
 
   (* Example specifiers *)
-  let rec getExample = function
+  let getExample = function
     | t :: [] -> t
     | [] -> error "Missing example"
     | ts -> error "Extraneous arguments"
 
   (* Setting Stelf parameters *)
-  let rec setParm = function
+  let setParm = function
     | "chatter" :: ts -> Stelf.chatter := getNat ts
     | t :: ts -> error ("Unknown parameter " ^ quote t)
     | [] -> error "Missing parameter"
 
-  let rec exec' arg__3 arg__4 =
+  let exec' arg__3 arg__4 =
     begin match (arg__3, arg__4) with
     | conn, ("quit", args) -> begin
         Msg.message "goodbye.\n";
@@ -172,7 +172,7 @@ module NetServer : NETSERVER = struct
     | conn, (t, args) -> raise (Error ("Unrecognized command " ^ quote t))
     end
 
-  let rec exec conn str =
+  let exec conn str =
     begin match
       try exec' conn (parseCmd str)
       with Error s ->
@@ -185,11 +185,11 @@ module NetServer : NETSERVER = struct
     | Stelf.Abort -> Msg.message "%%% ABORT %%%\n"
     end
 
-  let rec stripcr s =
+  let stripcr s =
     Substring.string
       (Substring.dropr (function x -> x = 'r') (Substring.full s))
 
-  let rec noopProto () =
+  let noopProto () =
     {
       init = (fun () -> ());
       reset = (fun () -> ());
@@ -198,17 +198,17 @@ module NetServer : NETSERVER = struct
       done_ = (fun () -> ());
     }
 
-  let rec flashProto () = noopProto ()
-  let rec humanProto () = noopProto ()
-  let rec httpProto _dir = noopProto ()
+  let flashProto () = noopProto ()
+  let humanProto () = noopProto ()
+  let httpProto _dir = noopProto ()
 
-  let rec protoServer (proto : protocol) portNum =
+  let protoServer (proto : protocol) portNum =
     raise
       (Error
          "NetServer unavailable: Socket support is not implemented in this \
           OCaml port")
 
-  let rec flashServer port = protoServer (flashProto ()) port
-  let rec humanServer port = protoServer (humanProto ()) port
-  let rec httpServer port dir = protoServer (httpProto dir) port
+  let flashServer port = protoServer (flashProto ()) port
+  let humanServer port = protoServer (humanProto ()) port
+  let httpServer port dir = protoServer (httpProto dir) port
 end

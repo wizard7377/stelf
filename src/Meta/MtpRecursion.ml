@@ -179,7 +179,7 @@ end) : MTPRECURSION = struct
       let af_ = af (A.Head (g'_, (fex_, t'), I.ctxLength gall_)) in
       let oex'_ = S.orderSub (oex_, t') in
       let ocurrent'_ = S.orderSub (ocurrent_, s') in
-      let rec sc ds_ =
+      let sc ds_ =
         let fnew_ = A.abstractApproxFor af_ in
         begin if
           List.exists
@@ -191,7 +191,7 @@ end) : MTPRECURSION = struct
         else Lemma (nih, fnew_) :: ds_
         end
       in
-      let rec ac ((g'_, b'_), vs_, ds_) =
+      let ac ((g'_, b'_), vs_, ds_) =
         begin match checkLabels ((g'_, b'_), vs_, ll, F.labelSize () - 1) with
         | None -> ds_
         | Some l' ->
@@ -568,7 +568,7 @@ end) : MTPRECURSION = struct
           in
           (nih + 1, updateState (s_, (ds_, I.id)))
 
-    let rec expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
+    let expand (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) =
       let _ =
         begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
         else ()
@@ -577,7 +577,7 @@ end) : MTPRECURSION = struct
       let _, s'_ = selectFormula (1, (I.Null, ih_, oh_), s_) in
       s'_
 
-    let rec apply s_ =
+    let apply s_ =
       begin
         begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
         else ()
@@ -585,10 +585,10 @@ end) : MTPRECURSION = struct
         s_
       end
 
-    let rec menu _ =
+    let menu _ =
       "Recursion (calculates ALL new assumptions & residual lemmas)"
 
-    let rec handleExceptions f p_ =
+    let handleExceptions f p_ =
       try f p_ with Order.Error s -> raise (Error s)
   end
 

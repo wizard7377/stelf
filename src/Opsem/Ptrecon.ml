@@ -61,9 +61,9 @@ end) : PTRECON = struct
 
   exception Error = Error
 
-  let rec cidFromHead = function I.Const a -> a | I.Def a -> a
+  let cidFromHead = function I.Const a -> a | I.Def a -> a
 
-  let rec eqHead = function
+  let eqHead = function
     | I.Const a, I.Const a' -> a = a'
     | I.Def a, I.Def a' -> a = a'
     | _ -> false
@@ -311,7 +311,7 @@ end) : PTRECON = struct
      This first tries the local assumptions in dp then
      the static signature.
   *)
-  let rec solve (o_, (g, s), (C.DProg (g_, dPool) as dp), sc) =
+  let solve (o_, (g, s), (C.DProg (g_, dPool) as dp), sc) =
     try solve' (o_, (g, s), dp, sc) with Error msg -> print msg
 end
 (*! sharing Names.IntSyn = IntSyn' !*)

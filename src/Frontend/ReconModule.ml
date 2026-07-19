@@ -41,11 +41,11 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
 
   exception Error = Error
 
-  let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
   type nonrec strexp = unit -> IntSyn.mid * Paths.region
 
-  let rec strexp (ids, id, r) () =
+  let strexp (ids, id, r) () =
     let qid = Names.Qid (ids, id) in
     begin match Names.structLookup qid with
     | None ->
@@ -56,13 +56,13 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
     | Some mid -> (mid, r)
     end
 
-  let rec strexpToStrexp (f : strexp) = (fun (r, _) -> r) (f ())
+  let strexpToStrexp (f : strexp) = (fun (r, _) -> r) (f ())
 
   type inst_ = External of ExtSyn.term | Internal of IntSyn.cid
   type nonrec eqn = IntSyn.cid * inst_ * Paths.region
   type nonrec inst = ModSyn.Names.namespace * eqn list -> eqn list
 
-  let rec coninst ((ids, id, r1), tm, r2) : inst =
+  let coninst ((ids, id, r1), tm, r2) : inst =
    fun (ns, eqns) ->
     let qid = ModSyn.Names.Qid (ids, id) in
     begin match ModSyn.Names.constLookupIn (ns, qid) with
@@ -79,8 +79,8 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
   let rec addStructEqn (rEqns, r1, r2, ids, mid1, mid2) =
     let ns1 = ModSyn.Names.getComponents mid1 in
     let ns2 = ModSyn.Names.getComponents mid2 in
-    let rec push eqn = rEqns := eqn :: !rEqns in
-    let rec doConst (name, cid1) =
+    let push eqn = rEqns := eqn :: !rEqns in
+    let doConst (name, cid1) =
       begin match
         ModSyn.Names.constLookupIn (ns2, ModSyn.Names.Qid ([], name))
       with
@@ -92,7 +92,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
       | Some cid2 -> push (cid1, Internal cid2, r2)
       end
     in
-    let rec doStruct (name, mid1) =
+    let doStruct (name, mid1) =
       begin match
         ModSyn.Names.structLookupIn (ns2, ModSyn.Names.Qid ([], name))
       with
@@ -109,7 +109,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
       ModSyn.Names.appStructs doStruct ns1
     end
 
-  let rec strinst ((ids, id, r1), strexp, r3) : inst =
+  let strinst ((ids, id, r1), strexp, r3) : inst =
    fun (ns, eqns) ->
     let qid = ModSyn.Names.Qid (ids, id) in
     let mid1 =
@@ -135,32 +135,32 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
   type nonrec sigexp =
     ModSyn.module_ option -> ModSyn.module_ * whereclause list
 
-  let rec thesig (Some module_) = (module_, [])
+  let thesig (Some module_) = (module_, [])
 
-  let rec sigid (id, r) None =
+  let sigid (id, r) None =
     begin match ModSyn.lookupSigDef id with
     | None -> error (r, "Undefined signature " ^ id)
     | Some module_ -> (module_, [])
     end
 
-  let rec wheresig (sigexp, instList) : sigexp =
+  let wheresig (sigexp, instList) : sigexp =
    fun moduleOpt ->
     let module_, wherecls = sigexp moduleOpt in
-    let rec wherecl ns =
+    let wherecl ns =
       foldr (function inst, eqns -> inst (ns, eqns)) [] instList
     in
     (module_, wherecls @ [ wherecl ])
 
-  let rec sigexpToSigexp (sigexp, moduleOpt) = sigexp moduleOpt
+  let sigexpToSigexp (sigexp, moduleOpt) = sigexp moduleOpt
 
   type nonrec sigdef =
     ModSyn.module_ option -> string option * ModSyn.module_ * whereclause list
 
-  let rec sigdef (idOpt, sigexp) moduleOpt =
+  let sigdef (idOpt, sigexp) moduleOpt =
     let module_, wherecls = sigexp moduleOpt in
     (idOpt, module_, wherecls)
 
-  let rec sigdefToSigdef (sigdef, moduleOpt) = sigdef moduleOpt
+  let sigdefToSigdef (sigdef, moduleOpt) = sigdef moduleOpt
 
   type structDec =
     | StructDec of string option * ModSyn.module_ * whereclause list
@@ -168,29 +168,29 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
 
   type nonrec structdec = ModSyn.module_ option -> structDec
 
-  let rec structdec (idOpt, sigexp) moduleOpt =
+  let structdec (idOpt, sigexp) moduleOpt =
     let module_, inst = sigexp moduleOpt in
     StructDec (idOpt, module_, inst)
 
-  let rec structdef (idOpt, strexp) None =
+  let structdef (idOpt, strexp) None =
     let mid = strexpToStrexp strexp in
     StructDef (idOpt, mid)
 
-  let rec structdecToStructDec (structdec, moduleOpt) = structdec moduleOpt
+  let structdecToStructDec (structdec, moduleOpt) = structdec moduleOpt
 
   type nonrec eqnTable = (inst_ * Paths.region) list ref IntTree.table
 
-  let rec applyEqns wherecl namespace =
+  let applyEqns wherecl namespace =
     let eqns = wherecl namespace in
     let table : eqnTable = IntTree.new_ 0 in
-    let rec add (cid, inst_, r) =
+    let add (cid, inst_, r) =
       begin match IntTree.lookup table cid with
       | None -> IntTree.insert table (cid, ref [ (inst_, r) ])
       | Some rl -> rl := (inst_, r) :: !rl
       end
     in
     let _ = List.app add eqns in
-    let rec doInst = function
+    let doInst = function
       | (Internal cid, r), conDec_ ->
           begin try
             ModSyn.strictify
@@ -205,7 +205,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
       | (External tm, r), conDec_ ->
           ModSyn.strictify (ExtSyn.externalInst (conDec_, tm, r))
     in
-    let rec transformConDec (cid, conDec_) =
+    let transformConDec (cid, conDec_) =
       begin match IntTree.lookup table cid with
       | None -> conDec_
       | Some { contents = l } -> List.foldr doInst conDec_ l
@@ -213,7 +213,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
     in
     transformConDec
 
-  let rec moduleWhere : ModSyn.module_ * whereclause -> ModSyn.module_ =
+  let moduleWhere : ModSyn.module_ * whereclause -> ModSyn.module_ =
     function
     | module_, wherecl ->
         let mark, markStruct = IntSyn.sgnSize () in

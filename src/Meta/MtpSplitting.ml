@@ -101,7 +101,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
     module S = StateSyn
     module H = Heuristic
 
-    let rec makeOperator = function
+    let makeOperator = function
       | (s_, k), l_, S.Splits n, g, i_, m, true ->
           Operator
             ( (s_, k),
@@ -128,7 +128,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           let psi'_, g'_ = aux' (g_, b_, n - 1) in
           (psi'_, I.Decl (g'_, d_))
 
-    let rec conv (gs_, gs'_) =
+    let conv (gs_, gs'_) =
       let exception Conv in
       let rec conv = function
         | (I.Null, s), (I.Null, s') -> (s, s')
@@ -156,7 +156,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
           (I.App (x_, s_), vs_)
 
-    let rec createAtomConst (g_, h_) =
+    let createAtomConst (g_, h_) =
       let cid =
         begin match h_ with
         | I.Const cid -> cid
@@ -169,7 +169,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (h_, s_), vs_)
 
-    let rec createAtomBVar (g_, k) =
+    let createAtomBVar (g_, k) =
       let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (I.BVar k, s_), vs_)
@@ -179,7 +179,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       | g_, I.Dec (_, v_) :: l_, s ->
           someEVars (g_, l_, I.Dot (I.Exp (I.newEVar (g_, I.EClo (v_, s))), s))
 
-    let rec maxNumberParams a =
+    let maxNumberParams a =
       let rec maxNumberParams' n =
         begin if n < 0 then 0
         else
@@ -204,9 +204,9 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           end
       | I.Root _, a -> 0
 
-    let rec maxNumberConstCases a = List.length (Index.lookup a)
+    let maxNumberConstCases a = List.length (Index.lookup a)
 
-    let rec maxNumberCases (v_, a) =
+    let maxNumberCases (v_, a) =
       maxNumberParams a + maxNumberLocalParams (v_, a) + maxNumberConstCases a
 
     let rec ctxSub = function
@@ -273,7 +273,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                      end
                    with MTPAbstract.Error _ -> InActive :: ops)) )
 
-    let rec constAndParamCases ops0 (c, g_, k, (v_, s'), abstract) =
+    let constAndParamCases ops0 (c, g_, k, (v_, s'), abstract) =
       constCases
         ( g_,
           (v_, s'),
@@ -281,7 +281,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           abstract,
           paramCases (g_, (v_, s'), k, abstract, ops0) )
 
-    let rec metaCases (d, ops0) (c, g_, k, vs_, abstract) =
+    let metaCases (d, ops0) (c, g_, k, vs_, abstract) =
       let g = I.ctxLength g_ in
       let rec select = function
         | 0, ops -> ops
@@ -317,17 +317,17 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
               (fun u_ -> abstract (I.Lam (d'_, u_))),
               cases )
 
-    let rec abstractErrorLeft ((g_, b_), s) =
+    let abstractErrorLeft ((g_, b_), s) =
       raise (MTPAbstract.Error "Cannot split left of parameters")
 
-    let rec abstractErrorRight ((g_, b_), s) =
+    let abstractErrorRight ((g_, b_), s) =
       raise (MTPAbstract.Error "Cannot split right of parameters")
 
-    let rec split (((I.Dec (_, v_) as d_), t_), sc, abstract) =
+    let split (((I.Dec (_, v_) as d_), t_), sc, abstract) =
       let rec split' (n, cases) =
         begin if n < 0 then
           let (g'_, b'_), s', (g0_, b0_), _ = sc (I.Null, I.Null) in
-          let rec abstract' u'_ =
+          let abstract' u'_ =
             let ((g''_, b''_), s'') : (I.dctx * S.tag I.ctx) * I.sub =
               Obj.magic
                 (MTPAbstract.abstractSub'
@@ -358,7 +358,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           let (g'_, b'_), s', (g0_, b0_), p =
             sc (Names.ctxName (F.listToCtx g2t_), b2_)
           in
-          let rec abstract' u'_ =
+          let abstract' u'_ =
             begin if p then
               raise (MTPAbstract.Error "Cannot split right of parameters")
             else
@@ -419,11 +419,11 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
 
-    let rec isIndexInit k = false
-    let rec isIndexSucc (d_, isIndex) k = occursInDec (k, d_) || isIndex (k + 1)
-    let rec isIndexFail (d_, isIndex) k = isIndex (k + 1)
+    let isIndexInit k = false
+    let isIndexSucc (d_, isIndex) k = occursInDec (k, d_) || isIndex (k + 1)
+    let isIndexFail (d_, isIndex) k = isIndex (k + 1)
 
-    let rec abstractInit
+    let abstractInit
         (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_) as s_) ((g'_, b'_), s')
         =
       begin
@@ -445,14 +445,14 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
         end
       end
 
-    let rec abstractCont ((d_, t_), abstract) ((g_, b_), s) =
+    let abstractCont ((d_, t_), abstract) ((g_, b_), s) =
       abstract
         ( ( I.Decl (g_, Whnf.normalizeDec (d_, s)),
             I.Decl (b_, S.normalizeTag (t_, s)) ),
           I.dot1 s )
 
-    let rec makeAddressInit s_ k = (s_, k)
-    let rec makeAddressCont makeAddress k = makeAddress (k + 1)
+    let makeAddressInit s_ k = (s_, k)
+    let makeAddressCont makeAddress k = makeAddress (k + 1)
 
     let rec occursInOrder = function
       | n, S.Arg (us_, vt_), k, sc ->
@@ -468,8 +468,8 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           occursInOrder
             (n, o_, k, function n' -> occursInOrders (n', os_, k, sc))
 
-    let rec inductionInit o_ k = occursInOrder (0, o_, k, function n -> None)
-    let rec inductionCont induction k = induction (k + 1)
+    let inductionInit o_ k = occursInOrder (0, o_, k, function n -> None)
+    let inductionCont induction k = induction (k + 1)
 
     let rec expand' = function
       | ((I.Null, I.Null) as gb_), isIndex, abstract, makeAddress, induction ->
@@ -491,7 +491,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                 inductionCont induction )
           in
           let (I.Dec (xOpt, v_)) = d_ in
-          let rec sc' (gp_, bp_) =
+          let sc' (gp_, bp_) =
             let (g'_, b'_), s', (g0_, b0_), p' = sc (gp_, bp_) in
             let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
             ( (g'_, b'_),
@@ -529,7 +529,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                 inductionCont induction )
           in
           let (I.Dec (xOpt, v_)) = d_ in
-          let rec sc' (gp_, bp_) =
+          let sc' (gp_, bp_) =
             let (g'_, b'_), s', (g0_, b0_), p' = sc (gp_, bp_) in
             let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
             ( (g'_, b'_),
@@ -552,7 +552,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                 inductionCont induction )
           in
           let (I.Dec (xOpt, v_)) = d_ in
-          let rec sc' (gp_, bp_) =
+          let sc' (gp_, bp_) =
             let (g'_, b'_), s', (g0_, b0_), p' = sc (gp_, bp_) in
             let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
             ( (g'_, b'_),
@@ -575,7 +575,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                 inductionCont induction )
           in
           let (I.Dec (xOpt, v_)) = d_ in
-          let rec sc' (gp_, bp_) =
+          let sc' (gp_, bp_) =
             let (g'_, b'_), s', (g0_, b0_), _ = sc (gp_, bp_) in
             ( ( I.Decl (g'_, Names.decName (g'_, I.decSub (d_, s'))),
                 I.Decl (b'_, t_) ),
@@ -585,7 +585,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           in
           (sc', ops)
 
-    let rec expand (S.State (n, (g0_, b0_), _, _, o_, _, _) as s0_) =
+    let expand (S.State (n, (g0_, b0_), _, _, o_, _, _) as s0_) =
       let _ =
         begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s0_)
         else ()
@@ -601,17 +601,17 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       in
       ops
 
-    let rec index (Operator ((s_, index), sl_, { c = k })) = k
+    let index (Operator ((s_, index), sl_, { c = k })) = k
 
-    let rec compare (Operator (_, _, i1_), Operator (_, _, i2_)) =
+    let compare (Operator (_, _, i1_), Operator (_, _, i2_)) =
       H.compare (i1_, i2_)
 
     let isInActive = function Active _ -> false | InActive -> true
 
-    let rec applicable (Operator (_, sl_, i_)) =
+    let applicable (Operator (_, sl_, i_)) =
       not (List.exists isInActive sl_)
 
-    let rec apply (Operator (_, sl_, i_)) =
+    let apply (Operator (_, sl_, i_)) =
       map
         (function
           | Active s_ -> begin
@@ -625,7 +625,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           | InActive -> raise (Error "Not applicable: leftover constraints"))
         sl_
 
-    let rec menu
+    let menu
         (Operator
            ((S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_), i), sl_, i_) as
          op_) =
@@ -639,12 +639,12 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
         | InActive :: l_, n -> inactive (l_, n + 1)
         | Active _ :: l_, n -> inactive (l_, n)
       in
-      let rec casesToString = function
+      let casesToString = function
         | 0 -> "zero cases"
         | 1 -> "1 case"
         | n -> Int.toString n ^ " cases"
       in
-      let rec flagToString = function
+      let flagToString = function
         | _, 0 -> ""
         | n, m ->
             (((" [active: " ^ Int.toString n) ^ " inactive: ") ^ Int.toString m)

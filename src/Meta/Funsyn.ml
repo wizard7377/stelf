@@ -118,9 +118,9 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
         : lemmaDec Array.array)
 
     let nextLemma = ref 0
-    let rec labelLookup label = Array.sub (labelArray, label)
+    let labelLookup label = Array.sub (labelArray, label)
 
-    let rec labelAdd labelDec =
+    let labelAdd labelDec =
       let label = !nextLabel in
       begin if label > maxLabel then
         raise
@@ -136,11 +136,11 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       end
       end
 
-    let rec labelSize () = !nextLabel
-    let rec labelReset () = nextLabel := 0
-    let rec lemmaLookup lemma = Array.sub (lemmaArray, lemma)
+    let labelSize () = !nextLabel
+    let labelReset () = nextLabel := 0
+    let lemmaLookup lemma = Array.sub (lemmaArray, lemma)
 
-    let rec lemmaAdd lemmaDec =
+    let lemmaAdd lemmaDec =
       let lemma = !nextLemma in
       begin if lemma > maxLemma then
         raise
@@ -156,16 +156,16 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       end
       end
 
-    let rec lemmaSize () = !nextLemma
+    let lemmaSize () = !nextLemma
 
-    let rec listToCtx gin_ =
+    let listToCtx gin_ =
       let rec listToCtx' = function
         | g_, [] -> g_
         | g_, d_ :: ds_ -> listToCtx' (I.Decl (g_, d_), ds_)
       in
       listToCtx' (I.Null, gin_)
 
-    let rec ctxToList gin_ =
+    let ctxToList gin_ =
       let rec ctxToList' = function
         | I.Null, g_ -> g_
         | I.Decl (g_, d_), g'_ -> ctxToList' (g_, d_ :: g'_)
@@ -187,7 +187,7 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       | I.Decl (psi_, Block (CtxBlock (_, g_))) ->
           lfctxLength psi_ + I.ctxLength g_
 
-    let rec lfctxLFDec (psi_, k) =
+    let lfctxLFDec (psi_, k) =
       let rec lfctxLFDec' = function
         | I.Decl (psi'_, (Prim (I.Dec (x, v'_)) as ld_)), 1 -> (ld_, I.Shift k)
         | I.Decl (psi'_, Prim _), k' -> lfctxLFDec' (psi'_, k' - 1)
@@ -241,7 +241,7 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       | True, s -> True
       | And (f1_, f2_), s -> And (forSub (f1_, s), forSub (f2_, s))
 
-    let rec mdecSub (MDec (name, f_), s) = MDec (name, forSub (f_, s))
+    let mdecSub (MDec (name, f_), s) = MDec (name, forSub (f_, s))
 
     let rec normalizeFor = function
       | All (Prim d_, f_), s ->

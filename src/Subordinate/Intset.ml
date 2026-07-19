@@ -27,7 +27,7 @@ module IntSet : INTSET = struct
         black nodes, called the black height of the tree.
   *)
   open! struct
-    let rec lookup dict x =
+    let lookup dict x =
       let rec lk = function
         | Empty -> false
         | Red (x1, left, right) -> lk' (x1, left, right)
@@ -41,7 +41,7 @@ module IntSet : INTSET = struct
       in
       lk dict
 
-    let rec restore_right = function
+    let restore_right = function
       | Black (e, Red lt, Red ((_, Red _, _) as rt)) ->
           Red (e, Black lt, Black rt)
       | Black (e, Red lt, Red ((_, _, Red _) as rt)) ->
@@ -52,7 +52,7 @@ module IntSet : INTSET = struct
           Black (re, Red (e, l, rl), rr)
       | dict -> dict
 
-    let rec restore_left = function
+    let restore_left = function
       | Black (e, Red ((_, Red _, _) as lt), Red rt) ->
           Red (e, Black lt, Black rt)
       | Black (e, Red ((_, _, Red _) as lt), Red rt) ->
@@ -63,7 +63,7 @@ module IntSet : INTSET = struct
           Black (lre, Red (le, ll, lrl), Red (e, lrr, r))
       | dict -> dict
 
-    let rec insert (dict, x) =
+    let insert (dict, x) =
       let rec ins = function
         | Empty -> Red (x, Empty, Empty)
         | Red (x1, left, right) ->
@@ -118,7 +118,7 @@ module IntSet : INTSET = struct
   let insert (x, t) = insert (t, x)
   let member (x, t) = lookup t x
 
-  let rec foldl f a t =
+  let foldl f a t =
     let rec fo = function
       | Empty, r -> r
       | Red (x, left, right), r -> fo (right, f (x, fo (left, r)))

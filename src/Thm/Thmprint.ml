@@ -38,7 +38,7 @@ end) : THMPRINT with module ThmSyn = ThmPrint__0.ThmSyn' = struct
       | Some n :: l_ -> [ F.string n; F.string " " ] @ fmtParams l_
       | None :: l_ -> [ F.string "_"; F.string " " ] @ fmtParams l_
 
-    let rec fmtType (c, l_) =
+    let fmtType (c, l_) =
       F.hVbox
         ([ F.string (I.conDecName (I.sgnLookup c)); F.string " " ]
         @ fmtParams l_)
@@ -48,7 +48,7 @@ end) : THMPRINT with module ThmSyn = ThmPrint__0.ThmSyn' = struct
       | t_ :: [] -> [ F.string "("; fmtType t_; F.string ")" ]
       | t_ :: l_ -> [ F.string "("; fmtType t_; F.string ") " ] @ fmtCallpats l_
 
-    let rec fmtOptions = function
+    let fmtOptions = function
       | _ :: [] as l_ -> [ F.hVbox (fmtIds l_) ]
       | l_ -> [ F.string "("; F.hVbox (fmtIds l_); F.string ") " ]
 
@@ -66,30 +66,30 @@ end) : THMPRINT with module ThmSyn = ThmPrint__0.ThmSyn' = struct
       | o_ :: [] -> fmtOrder o_
       | o_ :: l_ -> fmtOrder o_ @ (F.string " " :: fmtOrders l_)
 
-    let rec tDeclToString (L.TDecl (o_, L.Callpats l_)) =
+    let tDeclToString (L.TDecl (o_, L.Callpats l_)) =
       F.makestring_fmt
         (F.hVbox (fmtOrder o_ @ (F.string " " :: fmtCallpats l_)))
 
-    let rec callpatsToString (L.Callpats l_) =
+    let callpatsToString (L.Callpats l_) =
       F.makestring_fmt (F.hVbox (fmtCallpats l_))
 
-    let rec fmtROrder (L.RedOrder (p_, o_, o'_)) =
+    let fmtROrder (L.RedOrder (p_, o_, o'_)) =
       begin match p_ with
       | Less -> fmtOrder o_ @ (F.string " < " :: fmtOrder o'_)
       | Leq -> fmtOrder o_ @ (F.string " <= " :: fmtOrder o'_)
       | Eq -> fmtOrder o_ @ (F.string " = " :: fmtOrder o'_)
       end
 
-    let rec rOrderToString_ r_ = F.makestring_fmt (F.hVbox (fmtROrder r_))
+    let rOrderToString_ r_ = F.makestring_fmt (F.hVbox (fmtROrder r_))
 
-    let rec rDeclToString (L.RDecl (r_, L.Callpats l_)) =
+    let rDeclToString (L.RDecl (r_, L.Callpats l_)) =
       F.makestring_fmt
         (F.hVbox (fmtROrder r_ @ (F.string " " :: fmtCallpats l_)))
 
-    let rec tabledDeclToString (L.TabledDecl cid) =
+    let tabledDeclToString (L.TabledDecl cid) =
       F.makestring_fmt (F.hVbox [ F.string (I.conDecName (I.sgnLookup cid)) ])
 
-    let rec keepTableDeclToString (L.KeepTableDecl cid) =
+    let keepTableDeclToString (L.KeepTableDecl cid) =
       F.makestring_fmt (F.hVbox [ F.string (I.conDecName (I.sgnLookup cid)) ])
   end
 

@@ -9,10 +9,10 @@ open! Basis
 module MakeUnknownExn (UnknownExn : sig
   val exnHistory : exn -> string list
 end) : UNKNOWN_EXN = struct
-  let rec unknownExn exn =
+  let unknownExn exn =
     let history = rev (UnknownExn.exnHistory exn) in
-    let rec wrap1 x = ("  raised at: " ^ x) ^ "\n" in
-    let rec wrapn x = ("             " ^ x) ^ "\n" in
+    let wrap1 x = ("  raised at: " ^ x) ^ "\n" in
+    let wrapn x = ("             " ^ x) ^ "\n" in
     concat
       ("Unrecognized exception " :: exnName exn :: "\n"
       :: begin match history with

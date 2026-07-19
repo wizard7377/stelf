@@ -31,7 +31,7 @@ module MakeModeDec () : MODEDEC = struct
 
     type arg = Implicit | Explicit | Local [@@deriving eq, ord, show]
 
-    let rec error (r, msg) = raise (Error (P.toString r ^ ": " ^ msg))
+    let error (r, msg) = raise (Error (P.toString r ^ ": " ^ msg))
 
     let rec checkName = function
       | M.Mnil -> ()
@@ -48,7 +48,7 @@ module MakeModeDec () : MODEDEC = struct
           checkName' mS
       | M.Mapp (M.Marg (_, None), mS) -> checkName mS
 
-    let rec modeConsistent = function
+    let modeConsistent = function
       | M.Star, M.Plus -> false
       | M.Star, M.Minus -> false
       | M.Star, M.Minus1 -> false
@@ -126,7 +126,7 @@ module MakeModeDec () : MODEDEC = struct
           raise (Error "Expected type family, found object constant")
       | _ -> raise (Error "Not enough modes specified")
 
-    let rec abstractMode (ms, mS) =
+    let abstractMode (ms, mS) =
       let rec abstractMode' = function
         | I.Null, mS, _ -> mS
         | I.Decl (ms, (marg, _)), mS, k ->
@@ -134,8 +134,8 @@ module MakeModeDec () : MODEDEC = struct
       in
       abstractMode' (ms, mS, 1)
 
-    let rec shortToFull (a, mS, r) =
-      let rec calcImplicit' = function
+    let shortToFull (a, mS, r) =
+      let calcImplicit' = function
         | I.ConDec (_, _, k, _, v_, _) ->
             abstractMode (inferMode (empty (k, I.Null, v_), mS), mS)
         | I.ConDef (_, _, k, _, v_, _, _) ->
@@ -148,7 +148,7 @@ module MakeModeDec () : MODEDEC = struct
         end
       with Error msg -> error (r, msg)
 
-    let rec checkFull (a, mS, r) =
+    let checkFull (a, mS, r) =
       try
         begin
           checkName mS;

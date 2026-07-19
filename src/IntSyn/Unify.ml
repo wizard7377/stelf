@@ -57,7 +57,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
       | [] -> []
       | refC :: clist -> BindCnstr (refC, !refC) :: copyCnstr clist
 
-    let rec copy = function
+    let copy = function
       | Instantiate refU -> BindExp (refU, !refU)
       | InstantiateBlock refB -> BindBlock (refB, !refB)
       | Add ({ contents = cnstrs_ } as cnstrs) ->
@@ -71,7 +71,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
           refC :: resetCnstr l_
         end
 
-    let rec reset = function
+    let reset = function
       | BindExp (refU, u_) -> begin
           refU := u_;
           Instantiate refU
@@ -89,26 +89,26 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
           Solve (refCnstr, cnstr_)
         end
 
-    let rec suspend () = Trail.suspend (globalTrail, copy)
-    let rec resume trail = Trail.resume (trail, globalTrail, reset)
+    let suspend () = Trail.suspend (globalTrail, copy)
+    let resume trail = Trail.resume (trail, globalTrail, reset)
 
-    let rec undo = function
+    let undo = function
       | Instantiate refU -> refU := None
       | InstantiateBlock refB -> refB := None
       | Add ({ contents = cnstr :: cnstrL } as cnstrs) -> cnstrs := cnstrL
       | Solve (cnstr, cnstr_) -> cnstr := cnstr_
 
-    let rec reset () = Trail.reset globalTrail
-    let rec mark () = Trail.mark globalTrail
-    let rec unwind () = Trail.unwind (globalTrail, undo)
+    let reset () = Trail.reset globalTrail
+    let mark () = Trail.mark globalTrail
+    let unwind () = Trail.unwind (globalTrail, undo)
 
-    let rec addConstraint (cnstrs, cnstr) =
+    let addConstraint (cnstrs, cnstr) =
       begin
         cnstrs := cnstr :: !cnstrs;
         Trail.log (globalTrail, Add cnstrs)
       end
 
-    let rec solveConstraint ({ contents = cnstr_ } as cnstr) =
+    let solveConstraint ({ contents = cnstr_ } as cnstr) =
       begin
         cnstr := Solved;
         Trail.log (globalTrail, Solve (cnstr, cnstr_))
@@ -153,9 +153,9 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
       let awakenCnstrs = (ref [] : cnstr list ref)
     end
 
-    let rec resetAwakenCnstrs () = awakenCnstrs := []
+    let resetAwakenCnstrs () = awakenCnstrs := []
 
-    let rec nextCnstr () =
+    let nextCnstr () =
       begin match !awakenCnstrs with
       | [] -> None
       | cnstr :: cnstrL -> begin
@@ -164,7 +164,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
         end
       end
 
-    let rec instantiateEVar (refU, v_, cnstrL) =
+    let instantiateEVar (refU, v_, cnstrL) =
       begin
         refU := Some v_;
         begin
@@ -173,7 +173,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
         end
       end
 
-    let rec instantiateLVar (refB, b_) =
+    let instantiateLVar (refB, b_) =
       begin
         refB := Some b_;
         Trail.log (globalTrail, InstantiateBlock refB)
@@ -410,7 +410,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
                 EClo (us2_e_, us2_s_) )
           with
           | Succeed residualL ->
-              let rec execResidual = function
+              let execResidual = function
                 | Assign (g_, EVar (r, _, _, cnstrs), w_, ss) ->
                     let w'_ = pruneExp (g_, (w_, id), ss, r) in
                     instantiateEVar (r, w'_, !cnstrs)
@@ -427,7 +427,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
                 EClo (us1_e_, us1_s_) )
           with
           | Succeed opL ->
-              let rec execOp = function
+              let execOp = function
                 | Assign (g_, EVar (r, _, _, cnstrs), w_, ss) ->
                     let w'_ = pruneExp (g_, (w_, id), ss, r) in
                     instantiateEVar (r, w'_, !cnstrs)
@@ -732,13 +732,13 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
           else raise (Unify "Foreign constraint violated")
           end
 
-    let rec unifyW (g_, us1_, us2_) =
+    let unifyW (g_, us1_, us2_) =
       begin
         resetAwakenCnstrs ();
         unify1W (g_, us1_, us2_)
       end
 
-    let rec unify (g_, us1_, us2_) =
+    let unify (g_, us1_, us2_) =
       begin
         resetAwakenCnstrs ();
         unify1 (g_, us1_, us2_)
@@ -1028,7 +1028,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
   let unifySub = unifySub
   let unifyBlock = unifyBlock
 
-  let rec invertible (g_, us_, ss, rOccur) =
+  let invertible (g_, us_, ss, rOccur) =
     try
       begin
         ignore (invertExp (g_, us_, ss, rOccur));
@@ -1038,7 +1038,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
 
   let invertSub = invertSub
 
-  let rec unifiable (g_, us1_, us2_) =
+  let unifiable (g_, us1_, us2_) =
     try
       begin
         unify (g_, us1_, us2_);
@@ -1046,7 +1046,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
       end
     with Unify msg -> false
 
-  let rec unifiable' (g_, us1_, us2_) =
+  let unifiable' (g_, us1_, us2_) =
     try
       begin
         unify (g_, us1_, us2_);

@@ -29,45 +29,45 @@ end) : PARSE_QUERY with module ExtQuery = ParseQuery__0.ExtQuery' = struct
     module LS = Parsing.Stream
     module P = Paths
 
-    let rec returnQuery (optName, (tm, f)) = (ExtQuery.query (optName, tm), f)
+    let returnQuery (optName, (tm, f)) = (ExtQuery.query (optName, tm), f)
 
-    let rec parseQuery1 = function
+    let parseQuery1 = function
       | name, f, LS.Cons ((L.Colon, r), s') ->
           returnQuery (Some name, ParseTerm.parseTerm' (LS.expose s'))
       | name, f, _ -> returnQuery (None, ParseTerm.parseTerm' f)
 
-    let rec parseQuery' = function
+    let parseQuery' = function
       | LS.Cons ((L.Id (L.Upper, name), r), s') as f ->
           parseQuery1 (name, f, LS.expose s')
       | f -> returnQuery (None, ParseTerm.parseTerm' f)
 
-    let rec parseQuery s = parseQuery' (LS.expose s)
+    let parseQuery s = parseQuery' (LS.expose s)
 
-    let rec parseDefine4 (optName, optT, s) =
+    let parseDefine4 (optName, optT, s) =
       let tm', f' = ParseTerm.parseTerm' (LS.expose s) in
       (ExtQuery.define (optName, tm', optT), f')
 
-    let rec parseDefine3 = function
+    let parseDefine3 = function
       | optName, (tm, LS.Cons ((L.Equal, r), s')) ->
           parseDefine4 (optName, Some tm, s')
       | _, (tm, LS.Cons ((t, r), _)) ->
           Parsing.error (r, "Expected `=', found " ^ L.toString t)
 
-    let rec parseDefine2 = function
+    let parseDefine2 = function
       | optName, LS.Cons ((L.Colon, r), s') ->
           parseDefine3 (optName, ParseTerm.parseTerm' (LS.expose s'))
       | optName, LS.Cons ((L.Equal, r), s') -> parseDefine4 (optName, None, s')
       | _, LS.Cons ((t, r), _) ->
           Parsing.error (r, "Expected `:' or `=', found " ^ L.toString t)
 
-    let rec parseDefine1 = function
+    let parseDefine1 = function
       | LS.Cons ((L.Id (idCase, name), r), s') ->
           parseDefine2 (Some name, LS.expose s')
       | LS.Cons ((L.Underscore, r), s') -> parseDefine2 (None, LS.expose s')
       | LS.Cons ((t, r), _) ->
           Parsing.error (r, "Expected identifier or `_', found " ^ L.toString t)
 
-    let rec parseSolve3 = function
+    let parseSolve3 = function
       | defns, nameOpt, LS.Cons ((L.Colon, r), s'), r0 ->
           let tm, (LS.Cons ((_, r), _) as f') =
             ParseTerm.parseTerm' (LS.expose s')

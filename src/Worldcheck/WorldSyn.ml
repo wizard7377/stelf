@@ -75,7 +75,7 @@ end) : WORLDSYN = struct
   exception Error' = Error'
 
   (* copied from terminates/Reduces.fun *)
-  let rec wrapMsg (c, occ, msg) =
+  let wrapMsg (c, occ, msg) =
     begin match Origins.originLookup c with
     | fileName, None -> (fileName ^ ":") ^ msg
     | fileName, Some occDec ->
@@ -91,10 +91,10 @@ end) : WORLDSYN = struct
 
   open! struct
     let worldsTable : T.worlds Table.table = Table.new_ 0
-    let rec reset () = Table.clear worldsTable
-    let rec insert (cid, w_) = Table.insert worldsTable (cid, w_)
+    let reset () = Table.clear worldsTable
+    let insert (cid, w_) = Table.insert worldsTable (cid, w_)
 
-    let rec getWorlds b =
+    let getWorlds b =
       begin match Table.lookup worldsTable b with
       | None ->
           raise
@@ -105,10 +105,10 @@ end) : WORLDSYN = struct
       end
 
     let subsumedTable : unit Table.table = Table.new_ 0
-    let rec subsumedReset () = Table.clear subsumedTable
-    let rec subsumedInsert cid = Table.insert subsumedTable (cid, ())
+    let subsumedReset () = Table.clear subsumedTable
+    let subsumedInsert cid = Table.insert subsumedTable (cid, ())
 
-    let rec subsumedLookup cid =
+    let subsumedLookup cid =
       begin match Table.lookup subsumedTable cid with
       | None -> false
       | Some _ -> true
@@ -144,7 +144,7 @@ end) : WORLDSYN = struct
       | One -> F.string "1"
       end
 
-    let rec formatSubsump msg (g_, dl, rb_, b) =
+    let formatSubsump msg (g_, dl, rb_, b) =
       F.hVbox
         [
           F.string msg;
@@ -179,13 +179,13 @@ end) : WORLDSYN = struct
           collectEVars (g_, s, Abstract.collectEVars (g_, (x_, I.id), xs_))
       | g_, I.Shift _, xs_ -> xs_
 
-    let rec noConstraints (g_, s) =
+    let noConstraints (g_, s) =
       begin match collectConstraints (collectEVars (g_, s, [])) with
       | [] -> true
       | _ -> false
       end
 
-    let rec formatD (g_, d_) =
+    let formatD (g_, d_) =
       F.hbox [ F.string "{"; Print.formatDec (g_, d_); F.string "}" ]
 
     let rec formatDList = function
@@ -199,7 +199,7 @@ end) : WORLDSYN = struct
           :: F.break_
           :: formatDList (I.Decl (g_, d'_), l_, I.dot1 t)
 
-    let rec wGoalToString ((g_, l_), Seq (piDecs, t)) =
+    let wGoalToString ((g_, l_), Seq (piDecs, t)) =
       F.makestring_fmt
         (F.hVbox
            [
@@ -210,13 +210,13 @@ end) : WORLDSYN = struct
              F.hVbox (formatDList (g_, piDecs, t));
            ])
 
-    let rec worldToString (g_, Seq (piDecs, t)) =
+    let worldToString (g_, Seq (piDecs, t)) =
       F.makestring_fmt (F.hVbox (formatDList (g_, piDecs, t)))
 
-    let rec hypsToString (g_, l_) =
+    let hypsToString (g_, l_) =
       F.makestring_fmt (F.hVbox (formatDList (g_, l_, I.id)))
 
-    let rec mismatchToString (g_, (v1_, s1), (v2_, s2)) =
+    let mismatchToString (g_, (v1_, s1), (v2_, s2)) =
       F.makestring_fmt
         (F.hVbox
            [
@@ -236,49 +236,49 @@ end) : WORLDSYN = struct
       val mismatch : I.dctx * I.eclo * I.eclo -> unit
       val success : unit -> unit
     end = struct
-      let rec clause c =
+      let clause c =
         print
           (("World checking clause " ^ Names.qidToString (Names.constQid c))
           ^ "\n")
 
-      let rec constraintsRemain () =
+      let constraintsRemain () =
         begin if !Global.chatter > 7 then
           print
             "Constraints remain after matching hypotheses against context block\n"
         else ()
         end
 
-      let rec matchBlock (gl_, r_) =
+      let matchBlock (gl_, r_) =
         begin if !Global.chatter > 7 then
           print (("Matching:\n" ^ wGoalToString (gl_, r_)) ^ "\n")
         else ()
         end
 
-      let rec unmatched gl_ =
+      let unmatched gl_ =
         begin if !Global.chatter > 7 then
           print (("Unmatched hypotheses:\n" ^ hypsToString gl_) ^ "\n")
         else ()
         end
 
-      let rec missing (g_, r_) =
+      let missing (g_, r_) =
         begin if !Global.chatter > 7 then
           print (("Missing hypotheses:\n" ^ worldToString (g_, r_)) ^ "\n")
         else ()
         end
 
-      let rec mismatch (g_, vs1_, vs2_) =
+      let mismatch (g_, vs1_, vs2_) =
         begin if !Global.chatter > 7 then
           print (("Mismatch:\n" ^ mismatchToString (g_, vs1_, vs2_)) ^ "\n")
         else ()
         end
 
-      let rec success () =
+      let success () =
         begin if !Global.chatter > 7 then print "Success\n" else ()
         end
     end
 
-    let rec decUName (g_, d_) = I.Decl (g_, Names.decUName (g_, d_))
-    let rec decEName (g_, d_) = I.Decl (g_, Names.decEName (g_, d_))
+    let decUName (g_, d_) = I.Decl (g_, Names.decUName (g_, d_))
+    let decEName (g_, d_) = I.Decl (g_, Names.decEName (g_, d_))
 
     let rec subGoalToDList = function
       | I.Pi ((d_, _), v_) -> d_ :: subGoalToDList v_
@@ -353,7 +353,7 @@ end) : WORLDSYN = struct
           accR (gl_, r', b, function gl'_ -> accR (gl'_, r, b, k))
         end
 
-    let rec checkSubsumedBlock (g_, l'_, rb_, b) =
+    let checkSubsumedBlock (g_, l'_, rb_, b) =
       try
         begin
           accR ((g_, l'_), rb_, b, init b);
@@ -373,7 +373,7 @@ end) : WORLDSYN = struct
             checkSubsumedWorlds (cids, rb_, b)
           end
 
-    let rec checkBlocks (T.Worlds cids) (g_, v_, occ) =
+    let checkBlocks (T.Worlds cids) (g_, v_, occ) =
       try
         let b = I.targetFam v_ in
         let wb_ =
@@ -423,7 +423,7 @@ end) : WORLDSYN = struct
           checkClause (g_, v1_, w_, P.label occ)
         end
 
-    let rec worldcheck w_ a =
+    let worldcheck w_ a =
       let _ =
         begin if !Global.chatter > 3 then
           print
@@ -473,14 +473,14 @@ end) : WORLDSYN = struct
         end
       | g_, [] -> ()
 
-    let rec conDecBlock = function
+    let conDecBlock = function
       | I.BlockDec (_, _, gsome_, lpi_) -> (gsome_, lpi_)
       | condec_ ->
           raise
             (Error
                (("Identifier " ^ I.conDecName condec_) ^ " is not a block label"))
 
-    let rec constBlock cid = conDecBlock (I.sgnLookup cid)
+    let constBlock cid = conDecBlock (I.sgnLookup cid)
 
     let rec checkSubordWorlds = function
       | [] -> ()
@@ -491,14 +491,14 @@ end) : WORLDSYN = struct
             checkSubordWorlds cids
           end
 
-    let rec install (a, (T.Worlds cids as w_)) =
+    let install (a, (T.Worlds cids as w_)) =
       begin
         (try checkSubordWorlds cids
          with Subordinate.Error msg -> raise (Error msg));
         insert (a, w_)
       end
 
-    let rec uninstall a =
+    let uninstall a =
       begin match Table.lookup worldsTable a with
       | None -> false
       | Some _ -> begin
@@ -507,16 +507,16 @@ end) : WORLDSYN = struct
         end
       end
 
-    let rec lookup a = getWorlds a
+    let lookup a = getWorlds a
 
-    let rec ctxToList gin_ =
+    let ctxToList gin_ =
       let rec ctxToList' = function
         | I.Null, g_ -> g_
         | I.Decl (g_, d_), g'_ -> ctxToList' (g_, d_ :: g'_)
       in
       ctxToList' (gin_, [])
 
-    let rec isSubsumed (T.Worlds cids) b =
+    let isSubsumed (T.Worlds cids) b =
       let wb_ = getWorlds b in
       let rb_ = worldsToReg wb_ in
       begin if subsumedLookup b then ()

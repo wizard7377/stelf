@@ -81,13 +81,13 @@ end) : INTERACTIVE = struct
     module M = Modes.Modesyn.ModeSyn
     module W = WorldSyn
 
-    let rec abort s =
+    let abort s =
       begin
         print (("* " ^ s) ^ "\n");
         raise (Error s)
       end
 
-    let rec convertOneFor cid =
+    let convertOneFor cid =
       let v_ =
         begin match I.sgnLookup cid with
         | I.ConDec (name, _, _, _, v_, I.Kind) -> v_
@@ -119,7 +119,7 @@ end) : INTERACTIVE = struct
         | I.Uni I.Type, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
-      let rec shiftPlus mS =
+      let shiftPlus mS =
         let rec shiftPlus' = function
           | M.Mnil, n -> n
           | M.Mapp (M.Marg (M.Plus, _), mS'), n -> shiftPlus' (mS', n + 1)
@@ -145,27 +145,27 @@ end) : INTERACTIVE = struct
 
     let focus_ : S.state list ref = ref []
     let menu_ : menuItem list option ref = ref None
-    let rec splittingToMenu_ (o_, a_) = Split o_ :: a_
-    let rec initFocus () = focus_ := []
+    let splittingToMenu_ (o_, a_) = Split o_ :: a_
+    let initFocus () = focus_ := []
 
-    let rec normalize () =
+    let normalize () =
       begin match !focus_ with
       | S.State (w_, psi_, p_, f_) :: rest_ ->
           focus_ := S.State (w_, psi_, T.derefPrg p_, f_) :: rest_
       | _ -> ()
       end
 
-    let rec reset () =
+    let reset () =
       begin
         initFocus ();
         menu_ := None
       end
 
-    let rec format k =
+    let format k =
       begin if k < 10 then Int.toString k ^ ".  " else Int.toString k ^ ". "
       end
 
-    let rec menuToString () =
+    let menuToString () =
       let rec menuToString' = function
         | k, [] -> ""
         | k, Split o_ :: m_ ->
@@ -189,7 +189,7 @@ end) : INTERACTIVE = struct
       | Some m_ -> menuToString' (1, m_)
       end
 
-    let rec printStats () =
+    let printStats () =
       let nopen = 0 in
       let nsolved = 0 in
       begin
@@ -203,7 +203,7 @@ end) : INTERACTIVE = struct
         end
       end
 
-    let rec printmenu () =
+    let printmenu () =
       begin match !focus_ with
       | [] -> abort "QED"
       | S.State (w_, psi_, p_, f_) :: r_ -> begin
@@ -264,7 +264,7 @@ end) : INTERACTIVE = struct
         end
       end
 
-    let rec menu () =
+    let menu () =
       begin match !focus_ with
       | [] -> print "Please initialize first\n"
       | S.State (w_, psi_, p_, f_) :: _ ->
@@ -320,7 +320,7 @@ end) : INTERACTIVE = struct
           menu_ := Some fill
       end
 
-    let rec select k =
+    let select k =
       let rec select' = function
         | k, [] -> abort "No such menu item"
         | 1, Split o_ :: _ -> Timers.time Timers.splitting Split.apply o_
@@ -346,7 +346,7 @@ end) : INTERACTIVE = struct
           with S.Error s -> ())
       end
 
-    let rec init names =
+    let init names =
       let _ = TomegaPrint.evarReset () in
       let cL =
         map
@@ -356,7 +356,7 @@ end) : INTERACTIVE = struct
       in
       let f_ = convertFor cL in
       let ws_ = map W.lookup cL in
-      let rec select c =
+      let select c =
         try Intsyn.Order.selLookup c with _ -> Intsyn.Order.Lex []
       in
       let tc_ = Tomega.transformTC (I.Null, f_, map select cL) in
@@ -386,7 +386,7 @@ end) : INTERACTIVE = struct
       let _ = printmenu () in
       ()
 
-    let rec focus n =
+    let focus n =
       begin match !focus_ with
       | [] -> print "Please initialize first\n"
       | S.State (w_, psi_, p_, f_) :: _ ->
@@ -440,7 +440,7 @@ end) : INTERACTIVE = struct
           end
       end
 
-    let rec return () =
+    let return () =
       begin match !focus_ with
       | s_ :: [] ->
           begin if S.close s_ then print "[Q.E.D.]\n" else ()

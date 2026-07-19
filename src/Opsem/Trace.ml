@@ -32,18 +32,18 @@ end) : TRACE = struct
   end
 
   (* Printing Utilities *)
-  let rec headToString = function
+  let headToString = function
     | g_, I.Const c -> N.qidToString (N.constQid c)
     | g_, I.Def d -> N.qidToString (N.constQid d)
     | g_, I.BVar k -> N.bvarName (g_, k)
 
-  let rec expToString gu_ = P.expToString gu_ ^ ". "
-  let rec decToString gd_ = P.decToString gd_ ^ ". "
+  let expToString gu_ = P.expToString gu_ ^ ". "
+  let decToString gd_ = P.decToString gd_ ^ ". "
 
-  let rec eqnToString (g_, u1_, u2_) =
+  let eqnToString (g_, u1_, u2_) =
     ((P.expToString (g_, u1_) ^ " = ") ^ P.expToString (g_, u2_)) ^ ". "
 
-  let rec newline () = print "\n"
+  let newline () = print "\n"
 
   let rec printCtx = function
     | I.Null -> print "No hypotheses or parameters. "
@@ -56,7 +56,7 @@ end) : TRACE = struct
         end
       end
 
-  let rec evarsToString xnames_ =
+  let evarsToString xnames_ =
     let inst = P.evarInstToString xnames_ in
     let constrOpt = P.evarCnstrsToStringOpt xnames_ in
     begin match constrOpt with
@@ -75,9 +75,9 @@ end) : TRACE = struct
         | Some x_ -> (x_, name) :: varsToEVarInst names
         end
 
-  let rec printVars names = print (evarsToString (varsToEVarInst names))
+  let printVars names = print (evarsToString (varsToEVarInst names))
 
-  let rec printVarstring line =
+  let printVarstring line =
     printVars (List.tl (String.tokens Char.isSpace line))
 
   type 'a spec = None | Some of 'a list | All
@@ -85,19 +85,19 @@ end) : TRACE = struct
   let traceSpec : string spec ref = ref None
   let breakSpec : string spec ref = ref None
 
-  let rec trace = function
+  let trace = function
     | None -> traceSpec := None
     | Some names -> traceSpec := Some names
     | All -> traceSpec := All
 
-  let rec break = function
+  let break = function
     | None -> breakSpec := None
     | Some names -> breakSpec := Some names
     | All -> breakSpec := All
 
   let detail = ref 1
 
-  let rec setDetail : int option -> unit = function
+  let setDetail : int option -> unit = function
     | None -> print "Trace warning: detail is not a valid integer\n"
     | Some n ->
         begin if 0 <= n then detail := n
@@ -131,17 +131,17 @@ end) : TRACE = struct
             end
         end
 
-  let rec initTrace = function
+  let initTrace = function
     | None -> traceTSpec := None
     | Some names -> traceTSpec := Some (toCids names)
     | All -> traceTSpec := All
 
-  let rec initBreak = function
+  let initBreak = function
     | None -> breakTSpec := None
     | Some names -> breakTSpec := Some (toCids names)
     | All -> breakTSpec := All
 
-  let rec printHelp () =
+  let printHelp () =
     print
       "<newline> - continue --- execute with current settings\n\
        n - next --- take a single step\n\
@@ -162,11 +162,11 @@ end) : TRACE = struct
   (* dummy initialization *)
   let currentEVarInst : (I.exp * string) list ref = ref []
 
-  let rec setEVarInst xs_ =
+  let setEVarInst xs_ =
     currentEVarInst :=
       List.map (function x_ -> (x_, N.evarName (I.Null, x_))) xs_
 
-  let rec setGoal (g_, v_) =
+  let setGoal (g_, v_) =
     begin
       currentGoal := (g_, v_);
       setEVarInst (Abstract.collectEVars (g_, (v_, I.id), []))
@@ -176,7 +176,7 @@ end) : TRACE = struct
 
   let tag : goalTag ref = ref (None : goalTag)
 
-  let rec tagGoal () : goalTag =
+  let tagGoal () : goalTag =
     begin match !tag with
     | None -> None
     | Some n -> begin
@@ -187,7 +187,7 @@ end) : TRACE = struct
 
   let watchForTag : goalTag ref = ref (None : goalTag)
 
-  let rec initTag () =
+  let initTag () =
     begin
       watchForTag := None;
       begin match (!traceTSpec, !breakTSpec) with
@@ -196,7 +196,7 @@ end) : TRACE = struct
       end
     end
 
-  let rec setWatchForTag : goalTag -> unit = function
+  let setWatchForTag : goalTag -> unit = function
     | None -> watchForTag := !tag
     | Some n -> watchForTag := Some n
 
@@ -255,7 +255,7 @@ end) : TRACE = struct
       end
     end
 
-  let rec init () =
+  let init () =
     begin
       initTrace !traceSpec;
       begin
@@ -284,7 +284,7 @@ end) : TRACE = struct
   (* clause c failed, fam a *)
   (* clause head == goal *)
   (* failure message *)
-  let rec eventToString = function
+  let eventToString = function
     | g_, IntroHyp (_, d_) -> "% Introducing hypothesis\n" ^ decToString (g_, d_)
     | g_, DischargeHyp (_, I.Dec (Some x, _)) -> "% Discharging hypothesis " ^ x
     | g_, IntroParm (_, d_) -> "% Introducing parameter\n" ^ decToString (g_, d_)
@@ -315,17 +315,17 @@ end) : TRACE = struct
         (("% Unification failed with clause " ^ headToString (g_, hc_)) ^ ":\n")
         ^ msg
 
-  let rec traceEvent (g_, e) = print (eventToString (g_, e))
+  let traceEvent (g_, e) = print (eventToString (g_, e))
 
-  let rec monitorHead = function
+  let monitorHead = function
     | cids, I.Const c -> List.exists (function c' -> c = c') cids
     | cids, I.Def d -> List.exists (function c' -> d = c') cids
     | cids, I.BVar k -> false
 
-  let rec monitorHeads (cids, (hc_, ha_)) =
+  let monitorHeads (cids, (hc_, ha_)) =
     monitorHead (cids, hc_) || monitorHead (cids, ha_)
 
-  let rec monitorEvent = function
+  let monitorEvent = function
     | cids, IntroHyp (h_, _) -> monitorHead (cids, h_)
     | cids, DischargeHyp (h_, _) -> monitorHead (cids, h_)
     | cids, IntroParm (h_, _) -> monitorHead (cids, h_)
@@ -340,7 +340,7 @@ end) : TRACE = struct
     | cids, Unify ((hc_, ha_), _, _) -> monitorHeads (cids, (hc_, ha_))
     | cids, FailUnify ((hc_, ha_), _) -> monitorHeads (cids, (hc_, ha_))
 
-  let rec monitorDetail = function
+  let monitorDetail = function
     | Unify _ -> !detail >= 2
     | FailUnify _ -> !detail >= 2
     | _ -> !detail >= 1
@@ -348,7 +348,7 @@ end) : TRACE = struct
   (* expensive if tracing Unify! *)
   (* but: maintain only if break or trace is on *)
   (* may not be sufficient for some information *)
-  let rec maintain = function
+  let maintain = function
     | g_, SolveGoal (_, _, v_) -> setGoal (g_, v_)
     | g_, RetryGoal (_, _, v_) -> setGoal (g_, v_)
     | g_, FailGoal (_, _, v_) -> setGoal (g_, v_)
@@ -359,7 +359,7 @@ end) : TRACE = struct
     | _ -> ()
   (* show substitution for variables in clause head if tracing unification *)
 
-  let rec monitorBreak = function
+  let monitorBreak = function
     | None, g_, e -> false
     | Some cids, g_, e ->
         begin if monitorEvent (cids, e) then begin
@@ -385,7 +385,7 @@ end) : TRACE = struct
         end
       end
 
-  let rec monitorTrace = function
+  let monitorTrace = function
     | None, g_, e -> false
     | Some cids, g_, e ->
         begin if monitorEvent (cids, e) then begin
@@ -411,7 +411,7 @@ end) : TRACE = struct
         end
       end
 
-  let rec watchFor e =
+  let watchFor e =
     begin match !watchForTag with
     | None -> false
     | Some t ->
@@ -425,7 +425,7 @@ end) : TRACE = struct
         end
     end
 
-  let rec skipping () =
+  let skipping () =
     begin match !watchForTag with None -> false | Some _ -> true
     end
 
@@ -453,7 +453,7 @@ end) : TRACE = struct
     end
   (* prints trace, continues *)
 
-  let rec showSpec = function
+  let showSpec = function
     | msg, None -> print (msg ^ " = None\n")
     | msg, Some names -> begin
         print (msg ^ " = Some [");
@@ -464,11 +464,11 @@ end) : TRACE = struct
       end
     | msg, All -> print (msg ^ " = All\n")
 
-  let rec tracing () =
+  let tracing () =
     begin match (!traceSpec, !breakSpec) with None, None -> false | _ -> true
     end
 
-  let rec show () =
+  let show () =
     begin
       showSpec ("trace", !traceSpec);
       begin
@@ -477,7 +477,7 @@ end) : TRACE = struct
       end
     end
 
-  let rec reset () =
+  let reset () =
     begin
       trace None;
       begin

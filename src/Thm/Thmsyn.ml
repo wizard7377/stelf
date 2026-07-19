@@ -38,7 +38,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
 
   exception Error = Error
 
-  let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
   type nonrec param = string option
   type order = Varg of string list | Lex of order list | Simul of order list
@@ -82,7 +82,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
     module I = IntSyn
     module M = ModeSyn
 
-    let rec theoremDecToConDec ((name, ThDecl (gBs_, g_, mg_, i)), r) =
+    let theoremDecToConDec ((name, ThDecl (gBs_, g_, mg_, i)), r) =
       let rec theoremToConDec' = function
         | I.Null, v_ -> v_
         | I.Decl (g_, d_), v_ ->
@@ -99,7 +99,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
           (name, None, i, I.Normal, theoremToConDec' (g_, I.Uni I.Type), I.Kind)
       )
 
-    let rec theoremDecToModeSpine ((name, ThDecl (gBs_, g_, mg_, i)), r) =
+    let theoremDecToModeSpine ((name, ThDecl (gBs_, g_, mg_, i)), r) =
       let rec theoremToModeSpine' = function
         | I.Null, I.Null, mS -> mS
         | I.Decl (g_, I.Dec (x, _)), I.Decl (mg_, m), mS ->

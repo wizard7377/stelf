@@ -64,7 +64,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
 
     type var = Ev of I.exp option ref * I.exp * MetaSyn.mode | Bv
 
-    let rec checkEmpty = function
+    let checkEmpty = function
       | [] -> ()
       | cnstr_ ->
           Debug.msg' ~src:Debug.Group.meta ~level:Debug.Level.Debug
@@ -76,10 +76,10 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           | _ -> raise (Error "Unresolved constraints")
           end
 
-    let rec typecheck (MetaSyn.Prefix (g_, m_, b_), v_) =
+    let typecheck (MetaSyn.Prefix (g_, m_, b_), v_) =
       TypeCheck.typeCheck (g_, (v_, I.Uni I.Type))
 
-    let rec modeEq = function
+    let modeEq = function
       | M.Marg (M.Plus, _), MetaSyn.Top -> true
       | M.Marg (M.Minus, _), MetaSyn.Bot -> true
       | _ -> false
@@ -104,7 +104,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           else I.comp (w', I.shift)
           end
 
-    let rec countPi v_ =
+    let countPi v_ =
       let rec countPi' = function
         | I.Root _, n -> n
         | I.Pi (_, v_), n -> countPi' (v_, n + 1)
@@ -210,7 +210,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     and collectDec (lG0, g_, (I.Dec (x, v_), s), mode, adepth_) =
       collectExp (lG0, g_, (v_, s), mode, adepth_)
 
-    let rec collectModeW = function
+    let collectModeW = function
       | lG0, g_, modeIn, modeRec, (I.Root (I.Const cid, s_), s), adepth_ ->
           let rec collectModeW' = function
             | ((I.Nil, _), M.Mnil), adepth_ -> adepth_
@@ -269,7 +269,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | lG0, g_, ((I.Root _, s) as vs_), adepth_ ->
           collectModeW (lG0, g_, MetaSyn.Bot, MetaSyn.Bot, vs_, adepth_)
 
-    let rec collect (MetaSyn.Prefix (g_, m_, b_), v_) =
+    let collect (MetaSyn.Prefix (g_, m_, b_), v_) =
       let lG0 = I.ctxLength g_ in
       let a_, k =
         collectDBot
@@ -277,7 +277,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       in
       a_
 
-    let rec lookupEV (a_, r) =
+    let lookupEV (a_, r) =
       let rec lookupEV' = function
         | I.Decl (a_, Ev (r, v_, _)), r', k ->
             begin if r == r' then (k, v_) else lookupEV' (a_, r', k + 1)
@@ -286,7 +286,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       in
       lookupEV' (a_, r, 1)
 
-    let rec lookupBV (a_, i) =
+    let lookupBV (a_, i) =
       let rec lookupBV' = function
         | I.Decl (a_, Ev (r, v_, _)), i, k -> lookupBV' (a_, i, k + 1)
         | I.Decl (a_, Bv), 1, k -> k
@@ -424,7 +424,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
                     end ) ),
             lG' )
 
-    let rec abstract
+    let abstract
         (MetaSyn.State (name, (MetaSyn.Prefix (g_, m_, b_) as gm_), v_) as s_) =
       let _ = Names.varReset I.Null in
       let a_ = collect (gm_, v_) in

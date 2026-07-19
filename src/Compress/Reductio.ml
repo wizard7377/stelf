@@ -78,7 +78,7 @@ module Reductio = struct
     let eq_and_strict =
       n = n' && (def = Sgn.Def_none || not (Sgn.abbreviation n))
     in
-    let rec redux t n sp =
+    let redux t n sp =
       reduce (SrTerm_ (t, typeOf (Sgn.classifier n)), sp)
     in
     begin match (eq_and_strict, def, def') with
@@ -96,7 +96,7 @@ module Reductio = struct
     let eq_and_strict =
       n = n' && (def = Sgn.Def_none || not (Sgn.abbreviation n))
     in
-    let rec redux a n sp = tp_reduce (a, kindOf (Sgn.classifier n), sp) in
+    let redux a n sp = tp_reduce (a, kindOf (Sgn.classifier n), sp) in
     begin match (eq_and_strict, def, def') with
     | true, _, _ -> sp_eq (sp, sp')
     | false, Sgn.Def_none, Sgn.Def_none -> false
@@ -114,7 +114,7 @@ module Reductio = struct
             TRoot since there is only one kind of TRoot (not both ARoot and NRoot in the case of terms)
             so we just build it back up from scratch *)
   (* is an equality constraint satisfied? *)
-  let rec eq_c_true = function
+  let eq_c_true = function
     | EltC (e, e') -> elt_eq (e, e')
     | SpineC (s, s') -> sp_eq (s, s')
     | TypeC (a, a') -> tp_eq (a, a')
@@ -129,24 +129,24 @@ module Reductio = struct
   type nonrec ppsubst = int list * int
 
   (* pp_shift pps m: compute pps o shift^m *)
-  let rec pp_shift (vs, shift) m =
+  let pp_shift (vs, shift) m =
     let len = length vs in
     begin if m < len then (List.drop (vs, m), shift) else ([], m - len + shift)
     end
 
   (* pp_nth: extract the result of applying a ppsubst to the nth variable *)
-  let rec pp_nth (vs, shift) n =
+  let pp_nth (vs, shift) n =
     let len = length vs in
     begin if n < len then List.nth (vs, n) else n - len + shift
     end
 
   (* pp_o: compose two ppsubsts *)
-  let rec pp_o (pps, (vs, shift)) =
+  let pp_o (pps, (vs, shift)) =
     let vs', shift' = pp_shift pps shift in
     (map (pp_nth pps) vs @ vs', shift')
 
   (* pp_comp: compose a list of ppsubsts *)
-  let rec pp_comp ppsl = foldr pp_o ([], 0) ppsl
+  let pp_comp ppsl = foldr pp_o ([], 0) ppsl
 
   (* pp_normalize s
            if a substitution s is equal to a 'prepattern'
@@ -189,8 +189,8 @@ module Reductio = struct
   let rec pp_ispat = function
     | [], shift -> true
     | n :: s, shift ->
-        let rec isn x = x = n in
-        let rec hasn s = List.exists isn s in
+        let isn x = x = n in
+        let hasn s = List.exists isn s in
         n < shift && (not (hasn s)) && pp_ispat (s, shift)
 
   (* take a list of int options and a shift value and
@@ -202,7 +202,7 @@ module Reductio = struct
     | v :: vs, shift -> VarOptDot (v, makesubst (vs, shift))
 
   (* take in a ppsubst and return a substitution (which may involve VarOptDots) that is its inverse. *)
-  let rec pp_invert (vs, shift) =
+  let pp_invert (vs, shift) =
     let inds = List.tabulate (shift, function x -> x) in
     let rec search arg__0 arg__1 arg__2 =
       begin match (arg__0, arg__1, arg__2) with
@@ -223,7 +223,7 @@ module Reductio = struct
 
            If sl is not pattern it raises NonPattern.
            If RHS is not in the range of sl, then MissingVar is raised by substitution *)
-  let rec flex_left = function
+  let flex_left = function
     | (({ contents = None } as r), a), (s : subst), rhs ->
         let pps = try prepattern s with Domain -> raise NonPattern in
         let _ =
@@ -293,7 +293,7 @@ module Reductio = struct
     let eq_and_strict =
       n = n' && (def = Sgn.Def_none || not (Sgn.abbreviation n))
     in
-    let rec redux t n sp =
+    let redux t n sp =
       reduce (SrTerm_ (t, typeOf (Sgn.classifier n)), sp)
     in
     let eq =
@@ -315,7 +315,7 @@ module Reductio = struct
     let eq_and_strict =
       n = n' && (def = Sgn.Def_none || not (Sgn.abbreviation n))
     in
-    let rec redux a n sp = tp_reduce (a, kindOf (Sgn.classifier n), sp) in
+    let redux a n sp = tp_reduce (a, kindOf (Sgn.classifier n), sp) in
     let eq =
       begin match (eq_and_strict, def, def') with
       | true, _, _ -> SpineC (s, s')
@@ -330,7 +330,7 @@ module Reductio = struct
 
   (* PERF: this second elt_eroot_elim on elt' seems like it ought to be unnecessary if
 	     I eliminate all eroots at synth time *)
-  let rec matching p =
+  let matching p =
     let rec matching' = function
       | c :: p, p' -> (
           try
@@ -342,7 +342,7 @@ module Reductio = struct
     matching' (p, [])
 
   (*	fun ctxcons (a, G) = map (shift_tp 0) (a::G) *)
-  let rec ctxcons (a, g_) = a :: g_
+  let ctxcons (a, g_) = a :: g_
 
   type cg_mode = Cg_synth | Cg_check of tp
 
@@ -550,8 +550,8 @@ module Reductio = struct
   (* similar to above but we just have a putative type and its kind, and return nothing but constraints *)
   (* returns true on success or raises Matching on failure *)
   (* check a type spine *)
-  let rec check_plusconst_type t = check_type Con_plus ([], t)
-  let rec check_minusconst_type t = check_type Con_minus ([], t)
+  let check_plusconst_type t = check_type Con_plus ([], t)
+  let check_minusconst_type t = check_type Con_minus ([], t)
 
   (* check_strictness_type : bool -> tp -> bool
 

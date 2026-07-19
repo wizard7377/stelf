@@ -81,10 +81,10 @@ end) : TOTAL = struct
     module N = Names
 
     let totalTable : unit Table.table = Table.new_ 0
-    let rec reset () = Table.clear totalTable
-    let rec install cid = Table.insert totalTable (cid, ())
-    let rec lookup cid = Table.lookup totalTable cid
-    let rec uninstall cid = Table.delete totalTable cid
+    let reset () = Table.clear totalTable
+    let install cid = Table.insert totalTable (cid, ())
+    let lookup cid = Table.lookup totalTable cid
+    let uninstall cid = Table.delete totalTable cid
   end
 
   (* totalTable (a) = SOME() iff a is total, otherwise NONE *)
@@ -101,7 +101,7 @@ end) : TOTAL = struct
           end
         end
 
-  let rec total cid =
+  let total cid =
     begin match lookup cid with None -> false | Some _ -> true
     end
   (* call only on constants *)
@@ -109,7 +109,7 @@ end) : TOTAL = struct
   exception Error' = Error'
 
   (* copied from terminates/Reduces.fun *)
-  let rec error (c, occ, msg) =
+  let error (c, occ, msg) =
     begin match Origins.originLookup c with
     | fileName, None -> raise (Error ((fileName ^ ":") ^ msg))
     | fileName, Some occDec ->
@@ -247,7 +247,7 @@ end) : TOTAL = struct
        Currently, there is no global output Coverage.
        Effect: raises Error (msg) otherwise, where msg has filename and location.
     *)
-  let rec checkFam a =
+  let checkFam a =
     let _ = Cover.checkNoDef a in
     let _ =
       try Subordinate.checkNoDef a

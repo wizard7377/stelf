@@ -54,7 +54,7 @@ end) : MTPPRINT.MTPRINT = struct
 
     let printFmt f = Fmt.string (PrintFmt.makestring_fmt f)
 
-    let rec nameState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
+    let nameState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
       let _ = Names.varReset I.Null in
       let g'_ = Names.ctxName g_ in
       S.State (n, (g'_, b_), (ih_, oh_), d, o_, h_, f_)
@@ -89,7 +89,7 @@ end) : MTPPRINT.MTPRINT = struct
           @ [ Fmt.string ","; Fmt.break_ ]
           @ formatOrders (g_, os_)
 
-    let rec formatTag = function
+    let formatTag = function
       | g_, S.Parameter l -> [ Fmt.string "<p>" ]
       | g_, S.Lemma (S.Splits k) ->
           [ Fmt.string "<i"; Fmt.string (Int.toString k); Fmt.string ">" ]
@@ -122,7 +122,7 @@ end) : MTPPRINT.MTPRINT = struct
             @ [ Fmt.break_; printFmt (Print.formatDec (g_, d_)) ]
           end
 
-    let rec formatState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
+    let formatState (S.State (n, (g_, b_), (ih_, oh_), d, o_, h_, f_)) =
       Fmt.vbox0 0 1
         [
           Fmt.hVbox0 1 0 1 (formatOrder (g_, o_));
@@ -138,7 +138,7 @@ end) : MTPPRINT.MTPRINT = struct
                (FunPrint.formatForBare (g_, f_)));
         ]
 
-    let rec stateToString s_ = Fmt.makestring_fmt (formatState s_)
+    let stateToString s_ = Fmt.makestring_fmt (formatState s_)
   end
 
   (* nameState S = S'

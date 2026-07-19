@@ -53,7 +53,7 @@ end) : SKOLEM = struct
     module I = IntSyn
     module M = Modes.Modesyn.ModeSyn
 
-    let rec installSkolem (name, imp, (v_, mS), l_) =
+    let installSkolem (name, imp, (v_, mS), l_) =
       let rec spine = function
         | 0 -> I.Nil
         | n -> I.App (I.Root (I.BVar n, I.Nil), spine (n - 1))

@@ -42,9 +42,9 @@ module Make_Thm
     module P = ThmPrint
     module O = Order
 
-    let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+    let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
-    let rec unique (((a, p_), r), a_) =
+    let unique (((a, p_), r), a_) =
       let rec unique' = function
         | I.Uni _, [], a_ -> a_
         | I.Pi (_, v_), None :: p_, a_ -> unique' (v_, p_, a_)
@@ -81,7 +81,7 @@ module Make_Thm
       in
       skip (I.constImp a, I.constType a, p_, a_)
 
-    let rec uniqueCallpats (l_, rs) =
+    let uniqueCallpats (l_, rs) =
       let rec uniqueCallpats' = function
         | ([], []), a_ -> ()
         | (aP :: l_, r :: rs), a_ ->
@@ -89,7 +89,7 @@ module Make_Thm
       in
       uniqueCallpats' ((l_, rs), [])
 
-    let rec wfCallpats (l0_, c0_, r) =
+    let wfCallpats (l0_, c0_, r) =
       let rec makestring = function
         | [] -> ""
         | s :: [] -> s
@@ -134,7 +134,7 @@ module Make_Thm
       in
       wfCallpats' (l0_, c0_)
 
-    let rec wf ((o_, L.Callpats c_), (r, rs)) =
+    let wf ((o_, L.Callpats c_), (r, rs)) =
       let rec wfOrder = function
         | L.Varg l_ -> wfCallpats (l_, c_, r)
         | L.Lex l_ -> wfOrders l_
@@ -210,27 +210,27 @@ module Make_Thm
           let s'_ = O.install (a, O.TDec (o'_, m'_)) in
           installOrder (o_, thmsLE, aP :: thmsLT)
 
-    let rec installDecl (o_, L.Callpats l_) =
+    let installDecl (o_, L.Callpats l_) =
       begin
         installOrder (o_, l_, []);
         map (function a, _ -> a) l_
       end
 
-    let rec installTerminates (L.TDecl (o_, cp_), rrs) =
+    let installTerminates (L.TDecl (o_, cp_), rrs) =
       begin
         wf ((o_, cp_), rrs);
         installDecl (o_, cp_)
       end
 
-    let rec uninstallTerminates cid = O.uninstall cid
+    let uninstallTerminates cid = O.uninstall cid
 
-    let rec installTotal (L.TDecl (o_, cp_), rrs) =
+    let installTotal (L.TDecl (o_, cp_), rrs) =
       begin
         wf ((o_, cp_), rrs);
         installDecl (o_, cp_)
       end
 
-    let rec uninstallTotal cid = O.uninstall cid
+    let uninstallTotal cid = O.uninstall cid
 
     let rec argROrder = function
       | L.Varg l_, p_, n -> O.Arg (locate (l_, p_, n))
@@ -241,7 +241,7 @@ module Make_Thm
       | [], p_, n -> []
       | o_ :: l_, p_, n -> argROrder (o_, p_, n) :: argROrderL (l_, p_, n)
 
-    let rec argPredicate = function
+    let argPredicate = function
       | L.Less, o_, o'_ -> O.Less (o_, o'_)
       | L.Leq, o_, o'_ -> O.Leq (o_, o'_)
       | L.Eq, o_, o'_ -> O.Eq (o_, o'_)
@@ -264,13 +264,13 @@ module Make_Thm
           let s''_ = O.installROrder (a, O.RDec (pr, m'_)) in
           installPredicate (L.RedOrder (pred_, o1_, o2_), thmsLE, aP :: thmsLT)
 
-    let rec installRDecl (r_, L.Callpats l_) =
+    let installRDecl (r_, L.Callpats l_) =
       begin
         installPredicate (r_, l_, []);
         map (function a, _ -> a) l_
       end
 
-    let rec wfRCallpats (l0_, c0_, r) =
+    let wfRCallpats (l0_, c0_, r) =
       let rec makestring = function
         | [] -> ""
         | s :: [] -> s
@@ -298,7 +298,7 @@ module Make_Thm
       in
       wfCallpats' (l0_, c0_)
 
-    let rec wfred ((L.RedOrder (pred_, o_, o'_), L.Callpats c_), (r, rs)) =
+    let wfred ((L.RedOrder (pred_, o_, o'_), L.Callpats c_), (r, rs)) =
       let rec wfOrder = function
         | L.Varg l_ -> begin
             wfRCallpats (l_, c_, r);
@@ -324,16 +324,16 @@ module Make_Thm
         end
       end
 
-    let rec installReduces (L.RDecl (r_, c_), rrs) =
+    let installReduces (L.RDecl (r_, c_), rrs) =
       begin
         wfred ((r_, c_), rrs);
         installRDecl (r_, c_)
       end
 
-    let rec uninstallReduces cid = O.uninstallROrder cid
-    let rec installTabled (L.TabledDecl cid) = TabledSyn.installTabled cid
+    let uninstallReduces cid = O.uninstallROrder cid
+    let installTabled (L.TabledDecl cid) = TabledSyn.installTabled cid
 
-    let rec installKeepTable (L.KeepTableDecl cid) =
+    let installKeepTable (L.KeepTableDecl cid) =
       TabledSyn.installKeepTable cid
   end
 

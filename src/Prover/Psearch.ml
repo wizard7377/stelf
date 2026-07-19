@@ -95,7 +95,7 @@ end) : SEARCH = struct
       | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
-    let rec exists p_ k_ =
+    let exists p_ k_ =
       let rec exists' = function
         | I.Null -> false
         | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
@@ -141,12 +141,12 @@ end) : SEARCH = struct
       | g_, 0 -> g_
       | I.Decl (g_, _), n -> pruneCtx (g_, n - 1)
 
-    let rec cidFromHead = function
+    let cidFromHead = function
       | I.Const a -> a
       | I.Def a -> a
       | I.Skonst a -> a
 
-    let rec eqHead = function
+    let eqHead = function
       | I.Const a, I.Const a' -> a = a'
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
@@ -367,7 +367,7 @@ end) : SEARCH = struct
                   with Unify.Unify _ -> ()) )
       end
 
-    let rec deepen depth f p_ =
+    let deepen depth f p_ =
       let rec deepen' level =
         begin if level > depth then ()
         else begin
@@ -415,7 +415,7 @@ end) : SEARCH = struct
         end
       end
 
-    let rec search (maxFill, ge_, sc) = searchEx (1, maxFill) (ge_, sc)
+    let search (maxFill, ge_, sc) = searchEx (1, maxFill) (ge_, sc)
   end
 
   (* isInstantiated (V) = SOME(cid) or NONE

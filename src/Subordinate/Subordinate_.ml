@@ -47,8 +47,8 @@ module MakeSubordinate
 
     let soGraph : IntSet.intset Table.table = Table.new_ 32
     let insert = Table.insert soGraph
-    let rec adjNodes a = valOf (Table.lookup soGraph a)
-    let rec insertNewFam a = Table.insert soGraph (a, IntSet.empty)
+    let adjNodes a = valOf (Table.lookup soGraph a)
+    let insertNewFam a = Table.insert soGraph (a, IntSet.empty)
     let updateFam = Table.insert soGraph
     let memoTable : (bool * int) MemoTable.table = MemoTable.new_ 2048
     let memoInsert = MemoTable.insert memoTable
@@ -56,7 +56,7 @@ module MakeSubordinate
     let memoClear () = MemoTable.clear memoTable
     let memoCounter = ref 0
 
-    let rec appReachable f b =
+    let appReachable f b =
       let rec rch (b, visited) =
         begin if IntSet.member (b, visited) then visited
         else begin
@@ -72,7 +72,7 @@ module MakeSubordinate
 
     exception Reachable
 
-    let rec reach (b, a, visited) =
+    let reach (b, a, visited) =
       let rec rch (b, visited) =
         begin if IntSet.member (b, visited) then visited
         else
@@ -84,9 +84,9 @@ module MakeSubordinate
       in
       rch (b, visited)
 
-    let rec reachable (b, a) = reach (b, a, IntSet.empty)
+    let reachable (b, a) = reach (b, a, IntSet.empty)
 
-    let rec addNewEdge (b, a) =
+    let addNewEdge (b, a) =
       begin
         memoCounter := !memoCounter + 1;
         begin
@@ -99,11 +99,11 @@ module MakeSubordinate
     let fLookup = Table.lookup fTable
     let fInsert = Table.insert fTable
 
-    let rec fGet a =
+    let fGet a =
       begin match fLookup a with Some frozen -> frozen | None -> false
       end
 
-    let rec fSet (a, frozen) =
+    let fSet (a, frozen) =
       let _ =
         Global.chPrint 5 (function () ->
             (begin if frozen then "Freezing " else "Thawing "
@@ -113,7 +113,7 @@ module MakeSubordinate
       in
       fInsert (a, frozen)
 
-    let rec checkFreeze (c, a) =
+    let checkFreeze (c, a) =
       begin if fGet a then
         raise
           (Error
@@ -124,7 +124,7 @@ module MakeSubordinate
       else ()
       end
 
-    let rec expandFamilyAbbrevs a =
+    let expandFamilyAbbrevs a =
       begin match I.constUni a with
       | I.Type ->
           raise
@@ -142,7 +142,7 @@ module MakeSubordinate
 
     let freezeList : IntSet.intset ref = ref IntSet.empty
 
-    let rec freeze l_ =
+    let freeze l_ =
       let _ = freezeList := IntSet.empty in
       let l'_ = map expandFamilyAbbrevs l_ in
       let _ =
@@ -161,11 +161,11 @@ module MakeSubordinate
       let cids = IntSet.foldl (fun (x, acc) -> x :: acc) [] !freezeList in
       cids
 
-    let rec frozen l_ =
+    let frozen l_ =
       let l'_ = map expandFamilyAbbrevs l_ in
       List.exists (function a -> fGet a) l'_
 
-    let rec computeBelow (a, b) =
+    let computeBelow (a, b) =
       try
         begin
           ignore (reachable (b, a));
@@ -180,7 +180,7 @@ module MakeSubordinate
           true
         end
 
-    let rec below (a, b) =
+    let below (a, b) =
       begin match memoLookup (b, a) with
       | None -> computeBelow (a, b)
       | Some (true, c) -> true
@@ -189,10 +189,10 @@ module MakeSubordinate
           end
       end
 
-    let rec belowEq (a, b) = a = b || below (a, b)
-    let rec equiv (a, b) = belowEq (a, b) && belowEq (b, a)
+    let belowEq (a, b) = a = b || below (a, b)
+    let equiv (a, b) = belowEq (a, b) && belowEq (b, a)
 
-    let rec addSubord (a, b) =
+    let addSubord (a, b) =
       begin if below (a, b) then ()
       else
         begin if fGet b then
@@ -207,14 +207,14 @@ module MakeSubordinate
 
     let aboveList : IntSyn.cid list ref = ref []
 
-    let rec addIfBelowEq a's = function
+    let addIfBelowEq a's = function
       | b ->
           begin if List.exists (function a -> belowEq (a, b)) a's then
             aboveList := b :: !aboveList
           else ()
           end
 
-    let rec thaw a's =
+    let thaw a's =
       let a's' = map expandFamilyAbbrevs a's in
       let _ = aboveList := [] in
       let _ = Table.app (function b, _ -> addIfBelowEq a's' b) soGraph in
@@ -223,24 +223,24 @@ module MakeSubordinate
 
     let defGraph : IntSet.intset Table.table = Table.new_ 32
 
-    let rec occursInDef a =
+    let occursInDef a =
       begin match Table.lookup defGraph a with None -> false | Some _ -> true
       end
 
-    let rec insertNewDef (b, a) =
+    let insertNewDef (b, a) =
       begin match Table.lookup defGraph a with
       | None -> Table.insert defGraph (a, IntSet.insert (b, IntSet.empty))
       | Some bs -> Table.insert defGraph (a, IntSet.insert (b, bs))
       end
 
-    let rec installConDec = function
+    let installConDec = function
       | b, I.ConDef (_, _, _, a_, k_, I.Kind, _) ->
           insertNewDef (b, I.targetFam a_)
       | _ -> ()
 
-    let rec installDef c = installConDec (c, I.sgnLookup c)
+    let installDef c = installConDec (c, I.sgnLookup c)
 
-    let rec checkNoDef a =
+    let checkNoDef a =
       begin if occursInDef a then
         raise
           (Error
@@ -303,7 +303,7 @@ module MakeSubordinate
           end
         end
 
-    let rec install c =
+    let install c =
       let v_ = I.constType c in
       begin match I.targetFamOpt v_ with
       | None -> begin
@@ -320,7 +320,7 @@ module MakeSubordinate
         end
       end
 
-    let rec installDec (I.Dec (_, v_)) = installTypeN v_
+    let installDec (I.Dec (_, v_)) = installTypeN v_
 
     let rec installSome = function
       | I.Null -> ()
@@ -329,14 +329,14 @@ module MakeSubordinate
           installDec d_
         end
 
-    let rec installBlock b =
+    let installBlock b =
       let (I.BlockDec (_, _, g_, ds_)) = I.sgnLookup b in
       begin
         installSome g_;
         List.app (function d_ -> installDec d_) ds_
       end
 
-    let rec checkBelow (a, b) =
+    let checkBelow (a, b) =
       begin if not (below (a, b)) then
         raise
           (Error
@@ -362,23 +362,23 @@ module MakeSubordinate
 
     and respectsTypeN v_ = respectsTypeN' (v_, I.targetFam v_)
 
-    let rec respects (g_, (v_, s)) = respectsTypeN (Whnf.normalize (v_, s))
-    let rec respectsN (g_, v_) = respectsTypeN v_
+    let respects (g_, (v_, s)) = respectsTypeN (Whnf.normalize (v_, s))
+    let respectsN (g_, v_) = respectsTypeN v_
 
-    let rec famsToString (bs, msg) =
+    let famsToString (bs, msg) =
       IntSet.foldl
         (function
           | a, msg -> (Names.qidToString (Names.constQid a) ^ " ") ^ msg)
         "\n" bs
 
-    let rec showFam (a, bs) =
+    let showFam (a, bs) =
       print
         ((Names.qidToString (Names.constQid a)
          ^ begin if fGet a then " #> " else " |> "
          end)
         ^ famsToString (bs, "\n"))
 
-    let rec show () = Table.app showFam soGraph
+    let show () = Table.app showFam soGraph
 
     let rec weaken = function
       | I.Null, a -> I.id
@@ -395,14 +395,14 @@ module MakeSubordinate
       let other = ref 0
       let heightArray = Array.array (32, 0)
       let maxHeight = ref 0
-      let rec inc r = r := !r + 1
+      let inc r = r := !r + 1
 
-      let rec incArray h =
+      let incArray h =
         Array.update (heightArray, h, Array.sub (heightArray, h) + 1)
 
-      let rec max h = maxHeight := Int.max (h, !maxHeight)
+      let max h = maxHeight := Int.max (h, !maxHeight)
 
-      let rec reset () =
+      let reset () =
         begin
           declared := 0;
           begin
@@ -421,14 +421,14 @@ module MakeSubordinate
         end
     end
 
-    let rec analyzeAnc = function
+    let analyzeAnc = function
       | I.Anc (None, _, _) -> incArray 0
       | I.Anc (_, h, _) -> begin
           incArray h;
           max h
         end
 
-    let rec analyze = function
+    let analyze = function
       | I.ConDec (_, _, _, _, _, l_) -> inc declared
       | I.ConDef (_, _, _, _, _, l_, ancestors) -> begin
           inc defined;
@@ -437,7 +437,7 @@ module MakeSubordinate
       | I.AbbrevDef (_, _, _, _, _, l_) -> inc abbrev
       | _ -> inc other
 
-    let rec showDef () =
+    let showDef () =
       let _ = reset () in
       let _ = I.sgnApp (function c -> analyze (I.sgnLookup c)) in
       let _ = print (("Declared: " ^ Int.toString !declared) ^ "\n") in

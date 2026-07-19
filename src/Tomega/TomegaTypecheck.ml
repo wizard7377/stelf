@@ -40,9 +40,9 @@ end) : TOMEGATYPECHECK = struct
     module S = Subordinate
     module TA = TomegaTypeCheck__0.TomegaAbstract
 
-    let rec chatter chlev f = Display.chatter_s chlev (f ())
+    let chatter chlev f = Display.chatter_s chlev (f ())
 
-    let rec normalizeHead = function
+    let normalizeHead = function
       | T.Const lemma, t -> T.Const lemma
       | T.Var k, t ->
           begin match T.varSub (k, t) with T.Idx k' -> T.Var k'
@@ -531,7 +531,7 @@ end) : TOMEGATYPECHECK = struct
           end
       | _ -> raise (Error "P isn't Value!")
 
-    let rec check (psi_, (p_, f_)) = checkPrg (psi_, (p_, (f_, T.id)))
+    let check (psi_, (p_, f_)) = checkPrg (psi_, (p_, (f_, T.id)))
   end
 
   (* no other cases can occur *)

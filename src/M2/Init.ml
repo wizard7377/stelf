@@ -33,7 +33,7 @@ end) : INIT with module MetaSyn = Init__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    let rec init' cid =
+    let init' cid =
       let v_, _ = M.createAtomConst (I.Null, I.Const cid) in
       MetaAbstract.abstract
         (M.State
@@ -41,7 +41,7 @@ end) : INIT with module MetaSyn = Init__0.MetaSyn' = struct
              M.Prefix (I.Null, I.Null, I.Null),
              v_ ))
 
-    let rec init cidList = map init' cidList
+    let init cidList = map init' cidList
   end
 
   (* init c = S'

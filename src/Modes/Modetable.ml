@@ -28,23 +28,23 @@ module MakeModeTable (Table : TABLE with type key = int) : MODETABLE = struct
     module M = ModeSyn
 
     let modeSignature : M.modeSpine list Table.table = Table.new_ 0
-    let rec reset () = Table.clear modeSignature
+    let reset () = Table.clear modeSignature
 
-    let rec modeLookup a =
+    let modeLookup a =
       begin match Table.lookup modeSignature a with
       | Some (mS :: _) -> Some mS
       | None -> None
       end
 
-    let rec mmodeLookup a =
+    let mmodeLookup a =
       begin match Table.lookup modeSignature a with
       | Some mSs -> mSs
       | None -> []
       end
 
-    let rec installMode (a, mS) = Table.insert modeSignature (a, [ mS ])
+    let installMode (a, mS) = Table.insert modeSignature (a, [ mS ])
 
-    let rec uninstallMode a =
+    let uninstallMode a =
       begin match modeLookup a with
       | None -> false
       | Some _ -> begin
@@ -53,7 +53,7 @@ module MakeModeTable (Table : TABLE with type key = int) : MODETABLE = struct
         end
       end
 
-    let rec installMmode (a, mS) =
+    let installMmode (a, mS) =
       let mSs = mmodeLookup a in
       Table.insert modeSignature (a, mS :: mSs)
   end

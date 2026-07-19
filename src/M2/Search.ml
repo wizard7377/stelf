@@ -74,12 +74,12 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       | I.Null, _ -> I.id
       | I.Decl (g_, d_), s -> I.dot1 (shiftSub (g_, s))
 
-    let rec cidFromHead = function
+    let cidFromHead = function
       | I.Const a -> a
       | I.Def a -> a
       | I.Skonst a -> a
 
-    let rec eqHead = function
+    let eqHead = function
       | I.Const a, I.Const a' -> a = a'
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
@@ -177,7 +177,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
           (C.DProg (g_, dPool) as dp),
           sc,
           (acc, k) ) =
-      let rec matchSig acc' =
+      let matchSig acc' =
         let rec matchSig' = function
           | [], acc'' -> acc''
           | hc_ :: sgn', acc'' ->
@@ -269,7 +269,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
               ([], max) )
       end
 
-    let rec deepen f p_ =
+    let deepen f p_ =
       let rec deepen' (level, acc) =
         begin if level > !MetaGlobal.maxFill then acc
         else begin
@@ -281,7 +281,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       in
       deepen' (1, [])
 
-    let rec searchEx (g_, ge_, vs_, sc) =
+    let searchEx (g_, ge_, vs_, sc) =
       begin
         begin if !Global.chatter > 5 then print "[Search: " else ()
         end;
@@ -314,7 +314,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
                 end),
               (acc, !MetaGlobal.maxFill) )
 
-    let rec searchAll (g_, ge_, vs_, sc) =
+    let searchAll (g_, ge_, vs_, sc) =
       searchAll' (selectEVar (ge_, vs_, []), [], sc)
   end
 

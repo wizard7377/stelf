@@ -30,9 +30,9 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
     type info = Correct | Incorrect of string list * string
     [@@deriving eq, ord, show]
 
-    let rec toggle = function Plus -> Minus | Minus -> Plus
+    let toggle = function Plus -> Minus | Minus -> Plus
 
-    let rec wrapMsg (c, occ, msg) err =
+    let wrapMsg (c, occ, msg) err =
       begin match Origins.originLookup c with
       | fileName, None -> (fileName ^ ":") ^ msg
       | fileName, Some occDec ->
@@ -53,7 +53,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
 
     let rec options = function n :: [] -> n | n :: l -> (n ^ ", ") ^ options l
 
-    let rec error c (prefNames, n, occ) err =
+    let error c (prefNames, n, occ) err =
       [
         wrapMsg
           ( c,
@@ -64,7 +64,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
           err;
       ]
 
-    let rec checkVariablename (n, prefNames) =
+    let checkVariablename (n, prefNames) =
       begin if
         List.exists
           (function n' -> denumber (explode n) = denumber (explode n'))
@@ -73,7 +73,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
       else Incorrect (prefNames, n)
       end
 
-    let rec checkVar = function
+    let checkVar = function
       | I.Dec (Some n, v_), pol ->
           begin match Names.getNamePref (I.targetFam v_) with
           | None -> Correct
@@ -85,7 +85,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
           end
       | I.Dec (None, v_), pol -> Correct
 
-    let rec implicitHead = function
+    let implicitHead = function
       | I.BVar k -> 0
       | I.Const c -> I.constImp c
       | I.Skonst k -> 0
@@ -206,7 +206,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
               l'_ @ checkDef c ((g'_, p'_), n - 1, u_, P.body occ) err)
       end
 
-    let rec checkConDec arg__22 arg__23 =
+    let checkConDec arg__22 arg__23 =
       begin match (arg__22, arg__23) with
       | c, I.ConDec (_, _, implicit, _, u_, _) -> begin
           begin if !Global.chatter > 3 then
@@ -244,7 +244,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
       else []
       end
 
-    let rec check () =
+    let check () =
       let n, _ = I.sgnSize () in
       begin
         ignore @@ map print (checkAll (0, n));

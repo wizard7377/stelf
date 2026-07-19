@@ -73,7 +73,7 @@ end) : SPLIT with module State = Split__0.State' = struct
           else I.comp (w', I.shift)
           end
 
-    let rec createEVar (g_, v_) =
+    let createEVar (g_, v_) =
       let w = weaken (g_, I.targetFam v_) in
       let iw = Whnf.invert w in
       let g'_ = Whnf.strengthen (iw, g_) in
@@ -96,9 +96,9 @@ end) : SPLIT with module State = Split__0.State' = struct
       let caseList : (T.dec I.ctx * T.sub) list ref = ref []
     end
 
-    let rec resetCases () = caseList := []
-    let rec addCase (psi_, t) = caseList := (psi_, t) :: !caseList
-    let rec getCases () = !caseList
+    let resetCases () = caseList := []
+    let addCase (psi_, t) = caseList := (psi_, t) :: !caseList
+    let getCases () = !caseList
 
     let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
 
@@ -109,7 +109,7 @@ end) : SPLIT with module State = Split__0.State' = struct
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
           (I.App (x_, s_), vs_)
 
-    let rec createAtomConst (g_, h_) =
+    let createAtomConst (g_, h_) =
       let cid =
         match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false
       in
@@ -117,12 +117,12 @@ end) : SPLIT with module State = Split__0.State' = struct
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (h_, s_), vs_)
 
-    let rec createAtomBVar (g_, k) =
+    let createAtomBVar (g_, k) =
       let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (I.BVar k, s_), vs_)
 
-    let rec createAtomProj (g_, h_, (v_, s)) =
+    let createAtomProj (g_, h_, (v_, s)) =
       let s_, vs'_ = createEVarSpine (g_, (v_, s)) in
       (I.Root (h_, s_), vs'_)
 
@@ -167,7 +167,7 @@ end) : SPLIT with module State = Split__0.State' = struct
           let x_ = I.newEVar (I.Null, v'_) in
           I.Dot (I.Exp x_, s)
 
-    let rec blockName cid = I.conDecName (I.sgnLookup cid)
+    let blockName cid = I.conDecName (I.sgnLookup cid)
 
     let rec blockCases (g_, vs_, cid, (gsome_, piDecs), sc) =
       let t = createEVarSub gsome_ in
@@ -204,7 +204,7 @@ end) : SPLIT with module State = Split__0.State' = struct
       let _ = worldCases (g_, vs_, w_, sc) in
       ()
 
-    let rec splitEVar ((I.EVar (_, gx_, v_, _) as x_), w_, sc) =
+    let splitEVar ((I.EVar (_, gx_, v_, _) as x_), w_, sc) =
       lowerSplit
         ( I.Null,
           (v_, I.id),
@@ -238,7 +238,7 @@ end) : SPLIT with module State = Split__0.State' = struct
           let x_ = T.newEVar (psi_, T.FClo (f_, t)) in
           (psi_, t, x_) :: mkCases (cs, f_)
 
-    let rec split (S.Focus (T.EVar (psi_, r, f_, None, None, _), w_)) =
+    let split (S.Focus (T.EVar (psi_, r, f_, None, None, _), w_)) =
       let rec splitXs arg__1 arg__2 =
         begin match (arg__1, arg__2) with
         | (g_, i), ([], _, _, _) -> []
@@ -269,17 +269,17 @@ end) : SPLIT with module State = Split__0.State' = struct
       in
       let t = createSub psi_ in
       let xs_ = State.collectLFSub t in
-      let rec init () = addCase (Abstract.abstractTomegaSub t) in
+      let init () = addCase (Abstract.abstractTomegaSub t) in
       let g_ = T.coerceCtx psi_ in
       let os_ = splitXs (g_, 1) (xs_, f_, w_, init) in
       os_
 
-    let rec expand (S.Focus (T.EVar (psi_, r, f_, None, None, _), w_) as s_) =
+    let expand (S.Focus (T.EVar (psi_, r, f_, None, None, _), w_) as s_) =
       begin if Abstract.closedCTX psi_ then split s_ else []
       end
 
-    let rec apply (Split (r, p_, s)) = r := Some p_
-    let rec menu (Split (_, _, s)) = "Split " ^ s
+    let apply (Split (r, p_, s)) = r := Some p_
+    let menu (Split (_, _, s)) = "Split " ^ s
   end
 
   (* weaken (G, a) = w'

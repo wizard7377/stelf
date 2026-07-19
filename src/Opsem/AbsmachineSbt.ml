@@ -60,7 +60,7 @@ end) : ABSMACHINESBT = struct
 
     let cidFromHead = function I.Const a -> a | I.Def a -> a
 
-    let rec eqHead = function
+    let eqHead = function
       | I.Const a, I.Const a' -> a = a'
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
@@ -355,7 +355,7 @@ end) : ABSMACHINESBT = struct
                there is a choice depending on how we compiled signature
              *)
   (* trail to undo EVar instantiations *)
-  let rec solve args =
+  let solve args =
     begin match !CompSyn.optimize with
     | CompSyn.No -> begin
         mSig := matchSig;

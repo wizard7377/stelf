@@ -74,7 +74,7 @@ module Whnf () : WHNF = struct
       | SClo (s_, s'), s, n -> etaContract' (s_, comp (s', s), n)
       | _ -> raise Eta
 
-    let rec dotEta = function
+    let dotEta = function
       | (Idx _ as ft_), s -> Dot (ft_, s)
       | (Exp u_ as ft_), s ->
           let ft'_ = try Idx (etaContract (u_, id, 0)) with Eta -> ft_ in
@@ -215,7 +215,7 @@ module Whnf () : WHNF = struct
           inferSpine
             ((s_, s1), whnfExpandDef (v2_, Dot (Exp (EClo (u_, s1)), s2)))
 
-    let rec inferCon = function
+    let inferCon = function
       | Const cid -> constType cid
       | Skonst cid -> constType cid
       | Def cid -> constType cid
@@ -229,7 +229,7 @@ module Whnf () : WHNF = struct
                 ( Redex (EClo (u_, shift), App (Root (BVar 1, Nil), Nil)),
                   whnfExpandDef (v_, dot1 s) ) )
 
-    let rec etaExpandRoot (Root (h_, s_) as u_) =
+    let etaExpandRoot (Root (h_, s_) as u_) =
       etaExpand' (u_, inferSpine ((s_, id), (inferCon h_, id)))
 
     let rec whnfEta (us_, vs_) = whnfEtaW (whnf us_, whnf vs_)
@@ -283,7 +283,7 @@ module Whnf () : WHNF = struct
       | Null -> Null
       | Decl (g_, d_) -> Decl (normalizeCtx g_, normalizeDec (d_, id))
 
-    let rec invert s =
+    let invert s =
       let rec lookup = function
         | n, Shift _, p -> None
         | n, Dot (Undef, s'), p -> lookup (n + 1, s', p)
@@ -318,9 +318,9 @@ module Whnf () : WHNF = struct
       | Dot (Idx n, s'), k' -> n = k' && isId' (s', k' + 1)
       | _ -> false
 
-    let rec isId s = isId' (s, 0)
-    let rec cloInv (u_, w) = EClo (u_, invert w)
-    let rec compInv (s, w) = comp (s, invert w)
+    let isId s = isId' (s, 0)
+    let cloInv (u_, w) = EClo (u_, invert w)
+    let compInv (s, w) = comp (s, invert w)
 
     let rec isPatSub = function
       | Shift k -> true
@@ -353,7 +353,7 @@ module Whnf () : WHNF = struct
           Dot (Idx k, mkPatSub s)
       | _ -> raise Eta
 
-    let rec makePatSub s = try Some (mkPatSub s) with Eta -> None
+    let makePatSub s = try Some (mkPatSub s) with Eta -> None
   end
 
   (* exception Undefined *)

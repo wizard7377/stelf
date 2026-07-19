@@ -51,7 +51,7 @@ struct
 
     exception MyIntsynRep of sum_
 
-    let rec extractSum = function
+    let extractSum = function
       | MyIntsynRep sum -> sum
       | fe -> raise (UnexpectedFgnExp fe)
 
@@ -59,30 +59,30 @@ struct
     let one = fromInt 1
     let myID = (ref (-1) : csid ref)
     let numberID = (ref (-1) : cid ref)
-    let rec number () = Root (Const !numberID, Nil)
+    let number () = Root (Const !numberID, Nil)
     let unaryMinusID = (ref (-1) : cid ref)
     let plusID = (ref (-1) : cid ref)
     let minusID = (ref (-1) : cid ref)
     let timesID = (ref (-1) : cid ref)
-    let rec unaryMinusExp u_ = Root (Const !unaryMinusID, App (u_, Nil))
-    let rec plusExp (u_, v_) = Root (Const !plusID, App (u_, App (v_, Nil)))
-    let rec minusExp (u_, v_) = Root (Const !minusID, App (u_, App (v_, Nil)))
-    let rec timesExp (u_, v_) = Root (Const !timesID, App (u_, App (v_, Nil)))
+    let unaryMinusExp u_ = Root (Const !unaryMinusID, App (u_, Nil))
+    let plusExp (u_, v_) = Root (Const !plusID, App (u_, App (v_, Nil)))
+    let minusExp (u_, v_) = Root (Const !minusID, App (u_, App (v_, Nil)))
+    let timesExp (u_, v_) = Root (Const !timesID, App (u_, App (v_, Nil)))
 
-    let rec numberConDec d =
+    let numberConDec d =
       ConDec (toString d, None, 0, Normal, number (), Type)
 
-    let rec numberExp d = Root (FgnConst (!myID, numberConDec d), Nil)
+    let numberExp d = Root (FgnConst (!myID, numberConDec d), Nil)
 
-    let rec parseNumber string =
+    let parseNumber string =
       begin match fromString string with
       | Some d -> Some (numberConDec d)
       | None -> None
       end
 
-    let rec solveNumber (g_, s_, k) = Some (numberExp (fromInt k))
+    let solveNumber (g_, s_, k) = Some (numberExp (fromInt k))
 
-    let rec findMSet eq (x, l_) =
+    let findMSet eq (x, l_) =
       let rec findMSet' = function
         | tried, [] -> None
         | tried, y :: l_ ->
@@ -92,7 +92,7 @@ struct
       in
       findMSet' ([], l_)
 
-    let rec equalMSet eq =
+    let equalMSet eq =
       let rec equalMSet' = function
         | [], [] -> true
         | x :: l1'_, l2_ ->
@@ -198,8 +198,8 @@ struct
           let (Sum (m', monL')) = timesSumMon (Sum (m, monL), mon) in
           Sum (m', Mon (n'', usL''_) :: monL')
 
-    let rec unaryMinusSum sum = timesSum (Sum (-one, []), sum)
-    let rec minusSum (sum1, sum2) = plusSum (sum1, unaryMinusSum sum2)
+    let unaryMinusSum sum = timesSum (Sum (-one, []), sum)
+    let minusSum (sum1, sum2) = plusSum (sum1, unaryMinusSum sum2)
 
     let rec fromExpW = function
       | (FgnExp (cs, fe), _) as us_ ->
@@ -244,7 +244,7 @@ struct
     and appMon (f, Mon (n, usL_)) =
       List.app (function u_, s_ -> f (EClo (u_, s_))) usL_
 
-    let rec solvableSum (Sum (m, monL)) =
+    let solvableSum (Sum (m, monL)) =
       let rec gcd_list = function
         | n1 :: [] -> n1
         | [ n1; n2 ] -> gcd (n1, n2)
@@ -254,7 +254,7 @@ struct
       let g = gcd_list coeffL in
       rem (m, gcd_list coeffL) = zero
 
-    let rec findMon f (g_, Sum (m, monL)) =
+    let findMon f (g_, Sum (m, monL)) =
       let rec findMon' = function
         | [], monL2 -> None
         | mon :: monL1, monL2 ->
@@ -265,13 +265,13 @@ struct
       in
       findMon' (monL, [])
 
-    let rec divideSum (Sum (m, monL), k) =
+    let divideSum (Sum (m, monL), k) =
       let exception Err in
-      let rec divide n =
+      let divide n =
         begin if rem (n, k) = zero then quot (n, k) else raise Err
         end
       in
-      let rec divideMon (Mon (n, usL_)) = Mon (divide n, usL_) in
+      let divideMon (Mon (n, usL_)) = Mon (divide n, usL_) in
       try Some (Sum (divide m, List.map divideMon monL)) with Err -> None
 
     let rec delaySum (g_, sum) =
@@ -288,7 +288,7 @@ struct
           else [ delaySum (g_, sum) ]
           end
       | g_, sum ->
-          let rec invertMon = function
+          let invertMon = function
             | g_, (Mon (n, (EVar (r, _, _, _), s) :: []) as mon), sum ->
                 begin if Whnf.isPatSub s then
                   let ss = Whnf.invert s in
@@ -347,7 +347,7 @@ struct
           end
 
     and unifySum (g_, sum1, sum2) =
-      let rec invertMon
+      let invertMon
           (g_, Mon (n, ((EVar (r, _, _, _) as lhs_), s) :: []), sum) =
         begin if Whnf.isPatSub s then
           let ss = Whnf.invert s in
@@ -372,25 +372,25 @@ struct
       | Sum (m, []) as sum -> toExp sum
       | Sum (m, monL) as sum -> FgnExp (!myID, MyIntsynRep sum)
 
-    let rec toInternal arg__1 arg__2 =
+    let toInternal arg__1 arg__2 =
       begin match (arg__1, arg__2) with
       | MyIntsynRep sum, () -> toExp (normalizeSum sum)
       | fe, () -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec map arg__3 arg__4 =
+    let map arg__3 arg__4 =
       begin match (arg__3, arg__4) with
       | MyIntsynRep sum, f -> toFgn (normalizeSum (mapSum (f, sum)))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec app arg__5 arg__6 =
+    let app arg__5 arg__6 =
       begin match (arg__5, arg__6) with
       | MyIntsynRep sum, f -> appSum (f, sum)
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec equalTo arg__7 arg__8 =
+    let equalTo arg__7 arg__8 =
       begin match (arg__7, arg__8) with
       | MyIntsynRep sum, u2_ ->
           begin match minusSum (normalizeSum sum, fromExp (u2_, id)) with
@@ -400,14 +400,14 @@ struct
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec unifyWith arg__9 arg__10 =
+    let unifyWith arg__9 arg__10 =
       begin match (arg__9, arg__10) with
       | MyIntsynRep sum, (g_, u2_) ->
           unifySum (g_, normalizeSum sum, fromExp (u2_, id))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
-    let rec installFgnExpOps () =
+    let installFgnExpOps () =
       let csid = !myID in
       let _ = FgnExpStd.ToInternal.install (csid, toInternal) in
       let _ = FgnExpStd.Map.install (csid, map) in
@@ -416,7 +416,7 @@ struct
       let _ = FgnExpStd.EqualTo.install (csid, equalTo) in
       ()
 
-    let rec makeFgn (arity, opExp) s_ =
+    let makeFgn (arity, opExp) s_ =
       let ( - ) = Stdlib.( - ) in
       let rec makeParams = function
         | 0 -> Nil
@@ -438,19 +438,19 @@ struct
       let s'_, arity' = expand ((s_, id), arity) in
       makeLam (toFgn (opExp s'_)) arity'
 
-    let rec makeFgnUnary opSum =
+    let makeFgnUnary opSum =
       makeFgn (1, function App (u_, Nil) -> opSum (fromExp (u_, id)))
 
-    let rec makeFgnBinary opSum =
+    let makeFgnBinary opSum =
       makeFgn
         ( 2,
           function
           | App (u1_, App (u2_, Nil)) ->
               opSum (fromExp (u1_, id), fromExp (u2_, id)) )
 
-    let rec arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
+    let arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
 
-    let rec init (cs, installF) =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin
@@ -741,15 +741,15 @@ struct
   let normalize = normalizeSum
   let compatibleMon = compatibleMon
   let number = number
-  let rec unaryMinus u_ = toFgn (unaryMinusSum (fromExp (u_, IntSyn.id)))
+  let unaryMinus u_ = toFgn (unaryMinusSum (fromExp (u_, IntSyn.id)))
 
-  let rec plus (u_, v_) =
+  let plus (u_, v_) =
     toFgn (plusSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
 
-  let rec minus (u_, v_) =
+  let minus (u_, v_) =
     toFgn (minusSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
 
-  let rec times (u_, v_) =
+  let times (u_, v_) =
     toFgn (timesSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
 
   let constant = numberExp

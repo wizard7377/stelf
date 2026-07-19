@@ -92,7 +92,7 @@ end) : MTPSEARCH.MTPSEARCH = struct
       | I.Null, v_ -> v_
       | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
 
-    let rec exists p_ k_ =
+    let exists p_ k_ =
       let rec exists' = function
         | I.Null -> false
         | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
@@ -142,12 +142,12 @@ end) : MTPSEARCH.MTPSEARCH = struct
       | g_, 0 -> g_
       | I.Decl (g_, _), n -> pruneCtx (g_, n - 1)
 
-    let rec cidFromHead = function
+    let cidFromHead = function
       | I.Const a -> a
       | I.Def a -> a
       | I.Skonst a -> a
 
-    let rec eqHead = function
+    let eqHead = function
       | I.Const a, I.Const a' -> a = a'
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
@@ -344,7 +344,7 @@ end) : MTPSEARCH.MTPSEARCH = struct
                   with Unify.Unify _ -> ()) )
       end
 
-    let rec deepen depth f p_ =
+    let deepen depth f p_ =
       let rec deepen' level =
         begin if level > depth then ()
         else begin
@@ -392,7 +392,7 @@ end) : MTPSEARCH.MTPSEARCH = struct
         end
       end
 
-    let rec search (maxFill, ge_, sc) = searchEx (1, maxFill) (ge_, sc)
+    let search (maxFill, ge_, sc) = searchEx (1, maxFill) (ge_, sc)
   end
 
   (* isInstantiated (V) = SOME(cid) or NONE
