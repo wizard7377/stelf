@@ -462,8 +462,8 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
             | None -> ()
             | Some name -> begin
                 begin if !Global.chatter > 3 then begin
-                  Msg.message "\n pskeleton \n";
-                  Msg.message (CompSyn.pskeletonToString m_ ^ "\n")
+                  Display.debug (Display.string "\n pskeleton \n");
+                  Display.debug (Display.string (CompSyn.pskeletonToString m_ ^ "\n"))
                 end
                 else ()
                 end;
@@ -600,7 +600,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
               begin match optName with
               | None -> ()
               | Some name -> begin
-                  Msg.message (CompSyn.pskeletonToString o_ ^ "\n");
+                  Display.debug (Display.string (CompSyn.pskeletonToString o_ ^ "\n"));
                   Timers.time Timers.ptrecon PtRecon.solve
                     ( o_,
                       (g, IntSyn.id),
@@ -662,9 +662,10 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
             ^ " finished =================== \n");
           begin
             begin if exceeds (Some !stages, try_) then begin
-              Msg.message
-                (("\n ================= " ^ " Number of tries exceeds stages ")
-                ^ " ======================= \n");
+              Display.debug
+                (Display.string
+                   (("\n ================= " ^ " Number of tries exceeds stages ")
+                   ^ " ======================= \n"));
               begin
                 status := false;
                 raise Done
@@ -717,7 +718,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
                 ()
             with TimeLimit.TimeOut ->
               begin
-                Msg.message "\n----------- TIME OUT ---------------\n";
+                Display.debug (Display.string "\n----------- TIME OUT ---------------\n");
                 raise Done
               end
           end
@@ -835,7 +836,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           begin
             Timers.time Timers.solving AbsMachine.solve
               ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit);
-            Msg.message "No more solutions\n";
+            Display.debug (Display.string "No more solutions\n");
             qLoop ()
           end
           (* scInit is timed into solving! *)
@@ -916,8 +917,8 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
               ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit);
             try loop ()
             with Completed ->
-              begin if !solExists then Msg.message "No more solutions\n"
-              else Msg.message "the query has no solution\n"
+              begin if !solExists then Display.debug (Display.string "No more solutions\n")
+              else Display.debug (Display.string "the query has no solution\n")
               end;
               qLoopT ()
           end

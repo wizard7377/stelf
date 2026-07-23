@@ -158,7 +158,7 @@ module NetServer : NETSERVER = struct
   let exec' arg__3 arg__4 =
     begin match (arg__3, arg__4) with
     | conn, ("quit", args) -> begin
-        Msg.message "goodbye.\n";
+        Display.debug (Display.string "goodbye.\n");
         raise Quit
       end
     | conn, ("set", args) -> begin
@@ -177,12 +177,12 @@ module NetServer : NETSERVER = struct
       try exec' conn (parseCmd str)
       with Error s ->
         begin
-          Msg.message (("Server Error: " ^ s) ^ "\n");
+          Display.debug (Display.string (("Server Error: " ^ s) ^ "\n"));
           Stelf.Abort
         end
     with
-    | Stelf.Ok -> Msg.message "%%% OK %%%\n"
-    | Stelf.Abort -> Msg.message "%%% ABORT %%%\n"
+    | Stelf.Ok -> Display.debug (Display.string "%%% OK %%%\n")
+    | Stelf.Abort -> Display.debug (Display.string "%%% ABORT %%%\n")
     end
 
   let stripcr s =

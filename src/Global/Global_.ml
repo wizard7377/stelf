@@ -29,14 +29,6 @@ module Global : GLOBAL = struct
   (* !!!reconsider later!!! Thu Mar 10 09:42:28 2005 *)
   let timeLimit = ref (None : Time.time option)
 
-  let chPrint n s =
-    begin if !chatter >= n then print (s ()) else ()
-    end
-
-  let chMessage n s f =
-    begin if !chatter >= n then f (s ()) else ()
-    end
-
   let arrow_reserved = ref false
   let arrow_infix = ref false
   let latin_uppercase = ref false

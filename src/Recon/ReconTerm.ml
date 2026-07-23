@@ -82,7 +82,7 @@ struct
     end
 
   let rec chatterOneNewline () =
-    begin if !Global.chatter = 1 && !errorCount = 1 then Msg.message "\n"
+    begin if !Global.chatter = 1 && !errorCount = 1 then Display.debug (Display.string "\n")
     else ()
     end
 
@@ -92,7 +92,7 @@ struct
       begin
         chatterOneNewline ();
         begin
-          Msg.message (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n");
+          Display.debug (Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           die r
         end
       end
@@ -104,7 +104,7 @@ struct
       begin
         chatterOneNewline ();
         begin
-          Msg.message (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n");
+          Display.debug (Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           Display.warning (Display.Form.string msg);
           begin if exceeds (!errorCount, !errorThreshold) then die r else ()
           end

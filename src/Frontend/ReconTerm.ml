@@ -118,7 +118,7 @@ end) : RECON_TERM = struct
      as ""[Loading file ..."", terribly confusing the Emacs error parsing code.
    *)
   let chatterOneNewline () =
-    begin if !Global.chatter = 1 && !errorCount = 1 then Msg.message "\n"
+    begin if !Global.chatter = 1 && !errorCount = 1 then Display.debug (Display.string "\n")
     else ()
     end
 
@@ -128,7 +128,7 @@ end) : RECON_TERM = struct
       begin
         chatterOneNewline ();
         begin
-          Msg.message (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n");
+          Display.debug (Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           die r
         end
       end
@@ -140,7 +140,7 @@ end) : RECON_TERM = struct
       begin
         chatterOneNewline ();
         begin
-          Msg.message (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n");
+          Display.debug (Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           begin if exceeds (!errorCount, !errorThreshold) then die r else ()
           end
         end
@@ -882,8 +882,8 @@ end) : RECON_TERM = struct
 
   let reportInst xnames =
     withConstPath false (fun () ->
-        try Msg.message (Print.evarInstToString xnames ^ "\n")
-        with unprintable_ -> Msg.message "%_unifier unprintable_%\n")
+        try Display.debug (Display.string (Print.evarInstToString xnames ^ "\n"))
+        with unprintable_ -> Display.debug (Display.string "%_unifier unprintable_%\n"))
 
   let delayMismatch (g_, v1_, v2_, r2, location_msg, problem_msg) =
     addDelayed (function () ->
@@ -988,13 +988,12 @@ end) : RECON_TERM = struct
               formatExp (g_, eClo vs2);
             ]
         in
-        ignore (Msg.message (F.makestring_fmt eqnsFmt ^ "\n"));
+        Display.debug (Display.string (F.makestring_fmt eqnsFmt ^ "\n"));
         ignore (reportConstraints xnames);
-        let _ =
-          Msg.message
-            ((("Failed: " ^ problem_msg) ^ "\n")
-            ^ "Continuing with subterm replaced by _\n")
-        in
+        Display.debug
+          (Display.string
+             ((("Failed: " ^ problem_msg) ^ "\n")
+             ^ "Continuing with subterm replaced by _\n"));
         ())
 
   let reportUnify' (g_, vs1, vs2) =
@@ -1016,14 +1015,15 @@ end) : RECON_TERM = struct
           formatExp (g_, eClo vs2);
         ]
     in
-    ignore (Msg.message (F.makestring_fmt eqnsFmt ^ "\n"));
+    Display.debug (Display.string (F.makestring_fmt eqnsFmt ^ "\n"));
     let _ =
       try unifyIdem (g_, vs1, vs2)
       with Unify.Unify msg as e ->
         begin
-          Msg.message
-            ((("Failed: " ^ msg) ^ "\n")
-            ^ "Continuing with subterm replaced by _\n");
+          Display.debug
+            (Display.string
+               ((("Failed: " ^ msg) ^ "\n")
+               ^ "Continuing with subterm replaced by _\n"));
           raise e
         end
     in
@@ -1070,7 +1070,7 @@ end) : RECON_TERM = struct
               formatExp (g_, v_);
             ]
         in
-        ignore (Msg.message (F.makestring_fmt omit ^ "\n"));
+        Display.debug (Display.string (F.makestring_fmt omit ^ "\n"));
         ignore (reportConstraints xnames);
         ()
     | g_, Mismatch_ (tm1, tm2, _, _), u_, v_ -> reportInfer' (g_, tm2, u_, v_)
@@ -1097,7 +1097,7 @@ end) : RECON_TERM = struct
               formatExp (g_, v_);
             ]
         in
-        ignore (Msg.message (F.makestring_fmt judg ^ "\n"));
+        Display.debug (Display.string (F.makestring_fmt judg ^ "\n"));
         ignore (reportConstraints xnames);
         ()
 

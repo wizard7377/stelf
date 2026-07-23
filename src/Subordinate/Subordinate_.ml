@@ -104,13 +104,10 @@ module MakeSubordinate
       end
 
     let fSet (a, frozen) =
-      let _ =
-        Global.chPrint 5 (function () ->
-            (begin if frozen then "Freezing " else "Thawing "
-             end
-            ^ Names.qidToString (Names.constQid a))
-            ^ "\n")
-      in
+      Display.chatter_s 5
+        ((if frozen then "Freezing " else "Thawing ")
+        ^ Names.qidToString (Names.constQid a)
+        ^ "\n");
       fInsert (a, frozen)
 
     let checkFreeze (c, a) =

@@ -230,7 +230,7 @@ end) : TWELF.STELF = struct
     module S = Parser.Stream
 
     let msg s = Msg.message s
-    let chmsg n s = Global.chMessage n s msg
+    let chmsg n s = if !Global.chatter >= n then msg (s ())
 
     let fileOpenMsg fileName =
       begin match !Global.chatter with

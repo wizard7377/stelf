@@ -15,8 +15,6 @@ module type GLOBAL = sig
   val doubleCheck : bool ref
   val unsafe : bool ref
   val autoFreeze : bool ref
-  val chPrint : int -> (unit -> string) -> unit
-  val chMessage : int -> (unit -> string) -> (string -> unit) -> unit
   val timeLimit : Time.time option ref
   val arrow_reserved : bool ref
   val arrow_infix : bool ref
