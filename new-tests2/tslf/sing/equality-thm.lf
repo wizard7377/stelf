@@ -514,11 +514,6 @@
 %term _ subtype-resp tp-eq/i tp-eq/i ([_] term-eq/i) D D %.
 %worlds (var bind ovar) (subtype-resp _ _ _ _ _) %.
 %total {} (subtype-resp _ _ _ _ _) %.
-%sort sum-resp {_ nat-eq N1 N1'} {_ nat-eq N2 N2'} {_ nat-eq N3 N3'} {_ sum N1 N2 N3} {_ sum N1' N2' N3'} %.
-%mode sum-resp %in %in %in %in %out %.
-%term _ sum-resp nat-eq/i nat-eq/i nat-eq/i D D %.
-%worlds () (sum-resp _ _ _ _ _) %.
-%total {} (sum-resp _ _ _ _ _) %.
 %sort tcanonize-resp {_ etp-eq A A'} {_ etp-eq B B'} {_ tcanonize A B} {_ tcanonize A' B'} %.
 %mode tcanonize-resp %in %in %in %out %.
 %term _ tcanonize-resp etp-eq/i etp-eq/i D D %.

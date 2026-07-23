@@ -80,7 +80,7 @@ module MakePrint
     let full_stop = F.string "%."
     let lvars : I.block option ref list ref = ref []
 
-    let rec lookuplvar l =
+    let lookuplvar l =
       let _ =
         begin if List.exists (function r -> r = l) !lvars then ()
         else lvars := !lvars @ [ l ]
@@ -93,12 +93,12 @@ module MakePrint
       Int.toString (find !lvars 0)
 
     let str_ = F.string
-    let rec str0 (s, n) = F.string0 n s
-    let rec sym s = str0 (Symbol.sym s)
+    let str0 (s, n) = F.string0 n s
+    let sym s = str0 (Symbol.sym s)
     let nameOf = function Some id -> id | None -> "_"
-    let rec fmtEVar (g_, x_) = str0 (Symbol.evar (Names.evarName (g_, x_)))
+    let fmtEVar (g_, x_) = str0 (Symbol.evar (Names.evarName (g_, x_)))
 
-    let rec fmtAVar (g_, x_) =
+    let fmtAVar (g_, x_) =
       str0 (Symbol.evar (Names.evarName (g_, x_) ^ "_"))
 
     let rec isNil = function
@@ -106,7 +106,7 @@ module MakePrint
       | I.App _ -> false
       | I.SClo (s_, _) -> isNil s_
 
-    let rec subToSpine (depth, s) =
+    let subToSpine (depth, s) =
       let rec sTS = function
         | I.Shift k, s_ ->
             begin if k < depth then
@@ -120,12 +120,12 @@ module MakePrint
 
     type argStatus = TooFew | Exact of I.spine | TooMany of I.spine * I.spine
 
-    let rec sclo' = function
+    let sclo' = function
       | TooFew, s -> TooFew
       | Exact s_, s -> Exact (I.SClo (s_, s))
       | TooMany (s_, s'_), s -> TooMany (I.SClo (s_, s), I.SClo (s'_, s))
 
-    let rec sclo'' = function
+    let sclo'' = function
       | TooFew, s -> TooFew
       | Exact s_, s -> Exact s_
       | TooMany (s_, s'_), s -> TooMany (s_, I.SClo (s'_, s))
@@ -145,7 +145,7 @@ module MakePrint
       | i, I.SClo (s_, s), n -> sclo' (dropImp (i, s_, n), s)
       | i, I.Nil, n -> TooFew
 
-    let rec exceeded = function
+    let exceeded = function
       | _, None -> false
       | (n : int), Some (m : int) -> n >= m
 
@@ -162,7 +162,7 @@ module MakePrint
     let arrowPrec = FX.dec FX.minPrec
     let juxPrec = FX.inc FX.maxPrec
 
-    let rec arrow (v1_, v2_) =
+    let arrow (v1_, v2_) =
       OpArgs
         ( FX.Infix (arrowPrec, FX.Right),
           [ F.break; sym "%->"; F.space ],
@@ -170,27 +170,27 @@ module MakePrint
 
     let appCtxt = Ctxt (FX.Nonfix, [], 0)
 
-    let rec fixityCon = function
+    let fixityCon = function
       | I.Const cid -> Names.getFixity cid
       | I.Skonst cid -> FX.Nonfix
       | I.Def cid -> Names.getFixity cid
       | I.NSDef cid -> Names.getFixity cid
       | _ -> FX.Nonfix
 
-    let rec impCon = function
+    let impCon = function
       | I.Const cid -> I.constImp cid
       | I.Skonst cid -> I.constImp cid
       | I.Def cid -> I.constImp cid
       | I.NSDef cid -> I.constImp cid
       | _ -> 0
 
-    let rec argNumber = function
+    let argNumber = function
       | FX.Nonfix -> 0
       | FX.Infix _ -> 2
       | FX.Prefix _ -> 1
       | FX.Postfix _ -> 1
 
-    let rec fmtConstPath (f, Names.Qid (ids, id)) =
+    let fmtConstPath (f, Names.Qid (ids, id)) =
       if !showConstPath then
         F.hVbox
           (foldr
@@ -203,26 +203,26 @@ module MakePrint
       | d_ :: l_, 1 -> d_
       | d_ :: l_, j -> parmDec (l_, j - 1)
 
-    let rec parmName (cid, i) =
+    let parmName (cid, i) =
       let gsome_, gblock_ = I.constBlock cid in
       begin match parmDec (gblock_, i) with
       | I.Dec (Some pname, _) -> pname
       | I.Dec (None, _) -> Int.toString i
       end
 
-    let rec projName = function
+    let projName = function
       | g_, I.Proj (I.Bidx k, i) ->
           let (I.BDec (Some bname, (cid, t))) = I.ctxLookup (g_, k) in
           (bname ^ "_") ^ parmName (cid, i)
       | g_, I.Proj (I.LVar (r, _, (cid, t)), i) -> "_" ^ parmName (cid, i)
       | g_, I.Proj (I.Inst iota, i) -> "*"
 
-    let rec constQid cid =
+    let constQid cid =
       begin if !noShadow then Names.conDecQid (I.sgnLookup cid)
       else Names.constQid cid
       end
 
-    let rec cidToFmt cid = F.string (Names.qidToString (Names.constQid cid))
+    let cidToFmt cid = F.string (Names.qidToString (Names.constQid cid))
 
     let rec formatCids = function
       | [] -> []
@@ -230,12 +230,12 @@ module MakePrint
       | cid :: cids ->
           cidToFmt cid :: F.break :: F.string "|" :: F.space :: formatCids cids
 
-    let rec formatWorlds (T.Worlds cids) =
+    let formatWorlds (T.Worlds cids) =
       F.hbox [ F.string "("; F.hVbox (formatCids cids); F.string ")" ]
 
-    let rec worldsToString w_ = F.makestring_fmt (formatWorlds w_)
+    let worldsToString w_ = F.makestring_fmt (formatWorlds w_)
 
-    let rec fmtCon = function
+    let fmtCon = function
       | g_, I.BVar n -> str0 (Symbol.bvar (Names.bvarName (g_, n)))
       | g_, I.Const cid -> fmtConstPath (Symbol.const, constQid cid)
       | g_, I.Skonst cid -> fmtConstPath (Symbol.skonst, constQid cid)
@@ -260,10 +260,10 @@ module MakePrint
           | _ -> str0 (Symbol.const name)
           end
 
-    let rec evarArgs (g_, d, x_, s) =
+    let evarArgs (g_, d, x_, s) =
       OpArgs (FX.Nonfix, [ fmtEVar (g_, x_) ], subToSpine (I.ctxLength g_, s))
 
-    let rec evarArgs' (g_, d, x_, s) =
+    let evarArgs' (g_, d, x_, s) =
       OpArgs (FX.Nonfix, [ fmtAVar (g_, x_) ], subToSpine (I.ctxLength g_, s))
 
     let rec fst = function
@@ -274,41 +274,65 @@ module MakePrint
       | I.App (u1_, s_), s -> fst (s_, s)
       | I.SClo (s_, s'), s -> snd (s_, I.comp (s', s))
 
-    let rec elide l =
+    let elide l =
       begin match !printLength with None -> false | Some l' -> l > l'
       end
 
     let ldots = sym "..."
 
-    let rec addots l =
+    let addots l =
       begin match !printLength with None -> false | Some l' -> l = l'
       end
 
-    let rec parens ((fixity', fixity), fmt) =
+    let parens ((fixity', fixity), fmt) =
       begin if FX.leq (FX.prec fixity, FX.prec fixity') then
         F.hbox [ sym "("; fmt; sym ")" ]
       else fmt
       end
 
-    let rec eqFix = function
+    let eqFix = function
       | FX.Infix (p, FX.Left), FX.Infix (p', FX.Left) -> p = p'
       | FX.Infix (p, FX.Right), FX.Infix (p', FX.Right) -> p = p'
       | FX.Prefix p, FX.Prefix p' -> p = p'
       | FX.Postfix p, FX.Postfix p' -> p = p'
       | _ -> false
 
-    let rec addAccum = function
+    let addAccum = function
       | fmt, _, [] -> fmt
       | fmt, FX.Infix (_, FX.Left), accum -> F.hVbox ([ fmt ] @ accum)
       | fmt, FX.Infix (_, FX.Right), accum -> F.hVbox (accum @ [ fmt ])
       | fmt, FX.Prefix _, accum -> F.hVbox (accum @ [ fmt ])
       | fmt, FX.Postfix _, accum -> F.hVbox ([ fmt ] @ accum)
 
-    let rec aa (Ctxt (fixity, accum, l), fmt) = addAccum (fmt, fixity, accum)
+    let aa (Ctxt (fixity, accum, l), fmt) = addAccum (fmt, fixity, accum)
     let fmtUni = function I.Type -> sym "type" | I.Kind -> sym "kind"
 
     let rec fmtExpW = function
       | g_, d, ctx, (I.Uni l_, s) -> aa (ctx, fmtUni l_)
+      | g_, d, ctx, (I.Pi (((I.Dec (name_opt, _) as d_), p_), v2_), s)
+        when !Global.printArrowSugar
+             &&
+             match (name_opt, p_) with
+             | None, I.No -> true
+             | _ -> false ->
+          let hops, gf, (uf, sf) =
+            arrowSugarHops (g_, (I.Pi ((d_, p_), v2_), s))
+          in
+          let domFmts =
+            List.map
+              (fun (gi_, (vi, si)) ->
+                fmtExp
+                  (gi_, d + 1, Ctxt (FX.Infix (arrowPrec, FX.Right), [], 0), (vi, si)))
+              hops
+          in
+          let codFmt =
+            fmtExp (gf, d + 1, Ctxt (FX.Infix (arrowPrec, FX.Right), [], 0), (uf, sf))
+          in
+          let whole =
+            F.hbox [ sym "%pi"; F.space; F.hVbox (joinArrowChain (domFmts @ [ codFmt ])) ]
+          in
+          let (Ctxt (fixity', accum, _l)) = ctx in
+          addAccum (parens ((fixity', FX.Prefix binderPrec), whole), fixity', accum)
       | g_, d, ctx, (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s) ->
           begin match p_ with
           | I.Maybe ->
@@ -569,6 +593,25 @@ module MakePrint
           [ sym "["; fmtDec (g_, d, (d_, s)); sym "]"; F.break ],
           IntSyn.App (u_, IntSyn.Nil) )
 
+    (* Collect a maximal run of anonymous, provably non-dependent Pi's
+       starting at [(u_, s)] into a flat list of domains (each paired with
+       the naming context and substitution it must be printed under) plus
+       the final codomain, for `%pi A %-> B %-> ...` arrow-sugar printing. *)
+    and arrowSugarHops (g_, (u_, s)) =
+      begin match Whnf.whnf (u_, s) with
+      | I.Pi (((I.Dec (None, v1_) as d_), I.No), v2_), s' ->
+          let hops, gf, final =
+            arrowSugarHops (I.Decl (g_, d_), (v2_, I.dot1 s'))
+          in
+          ((g_, (v1_, s')) :: hops, gf, final)
+      | other -> ([], g_, other)
+      end
+
+    and joinArrowChain = function
+      | [] -> []
+      | [ f ] -> [ f ]
+      | f :: rest -> f :: F.break :: sym "%->" :: F.space :: joinArrowChain rest
+
     and fmtDec = function
       | g_, d, (I.Dec (x, v_), s) ->
           F.hVbox
@@ -618,7 +661,7 @@ module MakePrint
           :: sym "}" :: F.break
           :: fmtDecList (I.Decl (g0_, d_), l_)
 
-    let rec fmtCtx (g0_, g_) = fmtDecList (g0_, ctxToDecList (g_, []))
+    let fmtCtx (g0_, g_) = fmtDecList (g0_, ctxToDecList (g_, []))
 
     let rec fmtKindBinders (g_, d, v_) =
       begin match v_ with
@@ -633,7 +676,7 @@ module MakePrint
       | _ -> [ fmtExp (g_, d, noCtxt, (v_, I.id)) ]
       end
 
-    let rec fmtBlock = function
+    let fmtBlock = function
       | I.Null, lblock_ ->
           [ sym "block"; F.break ] @ fmtDecList (I.Null, lblock_)
       | gsome_, lblock_ ->
@@ -644,10 +687,10 @@ module MakePrint
           ]
     (* Fix *)
 
-    let rec fmtConDec = function
+    let fmtConDec = function
       | hide, (I.ConDec (_, _, imp, _, v_, l_) as condec) ->
           let qid = Names.conDecQid condec in
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let g_, v_ =
             begin if hide then skipI (imp, I.Null, v_) else (I.Null, v_)
             end
@@ -673,7 +716,7 @@ module MakePrint
           end
       | hide, (I.SkoDec (_, _, imp, v_, l_) as condec) ->
           let qid = Names.conDecQid condec in
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let g_, v_ =
             begin if hide then skipI (imp, I.Null, v_) else (I.Null, v_)
             end
@@ -690,7 +733,7 @@ module MakePrint
             ]
       | hide, (I.BlockDec (_, _, gsome_, lblock_) as condec) ->
           let qid = Names.conDecQid condec in
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           F.hVbox
             ([
                sym "%block";
@@ -703,7 +746,7 @@ module MakePrint
             @ [ full_stop ])
       | hide, (I.BlockDef (_, _, w_) as condec) ->
           let qid = Names.conDecQid condec in
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           F.hVbox
             ([
                sym "%block";
@@ -715,7 +758,7 @@ module MakePrint
             @ [ formatWorlds (T.Worlds w_); full_stop ])
       | hide, (I.ConDef (_, _, imp, u_, v_, l_, _) as condec) ->
           let qid = Names.conDecQid condec in
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let g_, v_, u_ =
             begin if hide then skipI2 (imp, I.Null, v_, u_) else (I.Null, v_, u_)
             end
@@ -736,7 +779,7 @@ module MakePrint
             ]
       | hide, (I.AbbrevDef (_, _, imp, u_, v_, l_) as condec) ->
           let qid = Names.conDecQid condec in
-          let _ = Names.varReset IntSyn.Null in
+          ignore (Names.varReset IntSyn.Null);
           let g_, v_, u_ =
             begin if hide then skipI2 (imp, I.Null, v_, u_) else (I.Null, v_, u_)
             end
@@ -755,7 +798,7 @@ module MakePrint
               ufmt;
             ]
 
-    let rec fmtCnstr = function
+    let fmtCnstr = function
       | solved_ -> [ str_ "Solved Constraint" ]
       | I.Eqn (g_, u1_, u2_) ->
           let g'_ = Names.ctxLUName g_ in
@@ -794,7 +837,7 @@ module MakePrint
       | I.Null, u_ -> u_
       | I.Decl (g_, d_), u_ -> abstractLam (g_, I.Lam (d_, u_))
 
-    let rec fmtNamedEVar = function
+    let fmtNamedEVar = function
       | (I.EVar (_, g_, _, _) as u_), name ->
           let u'_ = abstractLam (g_, u_) in
           F.hVbox
@@ -826,7 +869,7 @@ module MakePrint
       | (u_, _) :: xnames, xs_ ->
           collectEVars (xnames, Abstract.collectEVars (I.Null, (u_, I.id), xs_))
 
-    let rec eqCnstr r1 r2 = r1 == r2
+    let eqCnstr r1 r2 = r1 == r2
 
     let rec mergeConstraints = function
       | [], cnstrs2 -> cnstrs2
@@ -1141,36 +1184,36 @@ module MakePrint
          actually applied in the scope (typically, using Names.decName)
      (b) types need not be well-formed, since they are not used
   *)
-  let rec formatDec (g_, d_) = fmtDec (g_, 0, (d_, I.id))
-  let rec formatDecList (g_, d_) = F.hVbox (fmtDecList (g_, d_))
-  let rec formatDecList' (g_, (d_, s)) = F.hVbox (fmtDecList' (g_, (d_, s)))
-  let rec formatExp (g_, u_) = fmtExp (g_, 0, noCtxt, (u_, I.id))
-  let rec formatSpine (g_, s_) = fmtSpine (g_, 0, 0, (s_, I.id))
-  let rec formatConDec condec_ = fmtConDec (false, condec_)
-  let rec formatConDecI condec_ = fmtConDec (true, condec_)
-  let rec formatCnstr cnstr_ = F.vbox0 0 1 (fmtCnstr cnstr_)
-  let rec formatCnstrs cnstrL = F.vbox0 0 1 (fmtCnstrL cnstrL)
-  let rec formatCtx (g0_, g_) = F.hVbox (fmtCtx (g0_, g_))
+  let formatDec (g_, d_) = fmtDec (g_, 0, (d_, I.id))
+  let formatDecList (g_, d_) = F.hVbox (fmtDecList (g_, d_))
+  let formatDecList' (g_, (d_, s)) = F.hVbox (fmtDecList' (g_, (d_, s)))
+  let formatExp (g_, u_) = fmtExp (g_, 0, noCtxt, (u_, I.id))
+  let formatSpine (g_, s_) = fmtSpine (g_, 0, 0, (s_, I.id))
+  let formatConDec condec_ = fmtConDec (false, condec_)
+  let formatConDecI condec_ = fmtConDec (true, condec_)
+  let formatCnstr cnstr_ = F.vbox0 0 1 (fmtCnstr cnstr_)
+  let formatCnstrs cnstrL = F.vbox0 0 1 (fmtCnstrL cnstrL)
+  let formatCtx (g0_, g_) = F.hVbox (fmtCtx (g0_, g_))
 
   (* assumes G0 and G are named *)
-  let rec decToString (g_, d_) = F.makestring_fmt (formatDec (g_, d_))
-  let rec expToString (g_, u_) = F.makestring_fmt (formatExp (g_, u_))
-  let rec conDecToString condec_ = F.makestring_fmt (formatConDec condec_)
-  let rec cnstrToString cnstr_ = F.makestring_fmt (formatCnstr cnstr_)
-  let rec cnstrsToString cnstrL = F.makestring_fmt (formatCnstrs cnstrL)
-  let rec ctxToString (g0_, g_) = F.makestring_fmt (formatCtx (g0_, g_))
+  let decToString (g_, d_) = F.makestring_fmt (formatDec (g_, d_))
+  let expToString (g_, u_) = F.makestring_fmt (formatExp (g_, u_))
+  let conDecToString condec_ = F.makestring_fmt (formatConDec condec_)
+  let cnstrToString cnstr_ = F.makestring_fmt (formatCnstr cnstr_)
+  let cnstrsToString cnstrL = F.makestring_fmt (formatCnstrs cnstrL)
+  let ctxToString (g0_, g_) = F.makestring_fmt (formatCtx (g0_, g_))
 
-  let rec evarInstToString xnames =
+  let evarInstToString xnames =
     F.makestring_fmt (F.hbox [ F.vbox0 0 1 (fmtEVarInst xnames); str_ "." ])
 
-  let rec evarCnstrsToStringOpt xnames =
+  let evarCnstrsToStringOpt xnames =
     let ys_ = collectEVars (xnames, []) in
     let cnstrL = collectConstraints ys_ in
     begin match cnstrL with [] -> None | _ -> Some (cnstrsToString cnstrL)
     end
   (* collect EVars in instantiations *)
 
-  let rec printSgn () =
+  let printSgn () =
     IntSyn.sgnApp (function cid ->
         begin
           print (F.makestring_fmt (formatConDecI (IntSyn.sgnLookup cid)));

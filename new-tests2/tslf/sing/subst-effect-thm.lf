@@ -14,7 +14,7 @@
 %sort simp-fun {_ simp A T} {_ simp A T'} {_ stp-eq T T'} %.
 %mode simp-fun %in %in %out %.
 %scope simp-fun %term t simp-fun simp/t simp/t stp-eq/i %.
-%term pi 
+%scope simp-fun %term pi 
 	%pi (simp-fun (simp/pi Dsimp2 Dsimp1) (simp/pi Dsimp2' Dsimp1') Deq)
 	%<- (simp-fun Dsimp1 Dsimp1' Deq1)
 	%<- ({x} simp-fun (Dsimp2 x) (Dsimp2' x) Deq2)
@@ -28,7 +28,7 @@
 	%<- (stp-resp-stp ([t] ssigma t T2) Deq1 Deq1')
 	%<- (stp-resp-stp ([t] ssigma T1' t) Deq2 Deq2')
 	%<- (stp-eq-trans Deq1' Deq2' Deq) %.
-%term sing simp-fun simp/sing simp/sing stp-eq/i %.
+%scope simp-fun %term sing simp-fun simp/sing simp/sing stp-eq/i %.
 %worlds (var) (simp-fun _ _ _) %.
 %total D (simp-fun D _ _) %.
 %sort employ-stp-leq {S} {T} {_ stp-leq S T} %.
@@ -76,15 +76,15 @@
 %sort can-simp {A} {_ simp A T} %.
 %mode can-simp %in %out %.
 %scope can-simp %term t can-simp t simp/t %.
-%term pi 
-	%pi (can-simp (pi A B) (simp/pi D2 D1))
+%scope can-simp %term pi 
+	%pi (can-simp ((%abs pi) A B) (simp/pi D2 D1))
 	%<- (can-simp A D1)
 	%<- ({x} can-simp (B x) (D2 x)) %.
 %scope can-simp %term sigma 
-	%pi (can-simp (sigma A B) (simp/sigma D2 D1))
+	%pi (can-simp ((%abs sigma) A B) (simp/sigma D2 D1))
 	%<- (can-simp A D1)
 	%<- ({x} can-simp (B x) (D2 x)) %.
-%term sing can-simp (sing R) simp/sing %.
+%scope can-simp %term sing can-simp (sing R) simp/sing %.
 %worlds (var) (can-simp _ _) %.
 %total A (can-simp A _) %.
 %%%%%  Simplifying Typings  %%%%%
@@ -224,9 +224,9 @@
 %sort aosub-headvar {_ aosub R _ _} {_ headvar R} %.
 %mode aosub-headvar %in %out %.
 %scope aosub-headvar %term var aosub-headvar aosub/var headvar/var %.
-%term app %pi (aosub-headvar (aosub/app _ _ D) (headvar/app D')) %<- (aosub-headvar D D') %.
+%scope aosub-headvar %term app %pi (aosub-headvar (aosub/app _ _ D) (headvar/app D')) %<- (aosub-headvar D D') %.
 %scope aosub-headvar %term pi1 %pi (aosub-headvar (aosub/pi1 D) (headvar/pi1 D')) %<- (aosub-headvar D D') %.
-%term pi2 %pi (aosub-headvar (aosub/pi2 D) (headvar/pi2 D')) %<- (aosub-headvar D D') %.
+%scope aosub-headvar %term pi2 %pi (aosub-headvar (aosub/pi2 D) (headvar/pi2 D')) %<- (aosub-headvar D D') %.
 %worlds (var) (aosub-headvar _ _) %.
 %total D (aosub-headvar D _) %.
 %sort headvar-closed {_ headvar ([x] R)} {_ false} %.
@@ -243,7 +243,7 @@
 	%pi (headvar-tp-size (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dapp) ([x] [d] aofe/var _ (%the (lookup (G x) x (A' x)) (Dlook x d))) (%the (simp A T) Dsimp) headvar/var Dsimp' stp-leq/eq)
 	%<- ({x} {d} lookup-binder-fun (Dapp x) (Dlook x d) (%the (tp-eq A (A' x)) (Deq x)))
 	%<- ({x} simp-resp (Deq x) stp-eq/i Dsimp (%the (simp (A' x) T) (Dsimp' x))) %.
-%term closed 
+%scope headvar-tp-size %term closed 
 	%pi (headvar-tp-size _ ([x] [d] aofe/closed (%the (ordered (G x)) (Dordered x d)) (%the (aof (R x) (B x)) (Daof x))) _ (%the (headvar R) Dheadvar) Dsimp stp-leq/eq)
 	%<- (aof-noassm Daof (%the ({x} atom-eq (R x) R') Deq) _)
 	%<- (headvar-resp Deq Dheadvar (%the (headvar ([x] R')) Dheadvar'))
@@ -254,9 +254,9 @@
 	%<- (headvar-tp-size Dapp Daof Dsimp Dheadvar ([x] simp/pi (%the ({y} simp (C x y) T2) (DsimpC x)) (%the (simp (B x) T1) (DsimpB x))) (%the (stp-leq (spi T1 T2) S) Dleq))
 	%<- ({x} tsub-preserves-simp (Dtsub x) (DsimpC x) (%the (simp (Cy x) T2) (DsimpCy x)))
 	%<- (stp-leq-trans (stp-leq/pi2 stp-leq/eq) Dleq (%the (stp-leq T2 S) Dleq')) %.
-%term appbad 
+%scope headvar-tp-size %term appbad 
 	%pi (headvar-tp-size _ ([x] [d isvar x I] aofe/var _ (Dlookup x d)) _ (headvar/app _) Dsimp Dleq)
-	%<- ({x} {d isvar x I} lookup-isvar (Dlookup x d) (%the (isvar (app _ _) J) (Disvar x)))
+	%<- ({x} {d isvar x I} lookup-isvar (Dlookup x d) (%the (isvar ((%abs app) _ _) J) (Disvar x)))
 	%<- ({x} isvar-app-contra (Disvar x) Dfalse)
 	%<- ({x} false-implies-simp Dfalse (%the (simp _ st) (Dsimp x)))
 	%<- (false-implies-stp-leq Dfalse Dleq) %.
@@ -264,19 +264,19 @@
 	%pi (headvar-tp-size (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dapp) ([x] [d] aofe/pi1 (%the (aofe (G x) (R x) (sigma (B x) ([y] C x y))) (Daof x d))) (%the (simp A S) Dsimp) (headvar/pi1 (%the (headvar R) Dheadvar)) DsimpB Dleq')
 	%<- (headvar-tp-size Dapp Daof Dsimp Dheadvar ([x] simp/sigma (%the ({y} simp (C x y) T2) (DsimpC x)) (%the (simp (B x) T1) (DsimpB x))) (%the (stp-leq (ssigma T1 T2) S) Dleq))
 	%<- (stp-leq-trans (stp-leq/sigma1 stp-leq/eq) Dleq (%the (stp-leq T1 S) Dleq')) %.
-%term pi1bad 
+%scope headvar-tp-size %term pi1bad 
 	%pi (headvar-tp-size _ ([x] [d isvar x I] aofe/var _ (Dlookup x d)) _ (headvar/pi1 _) Dsimp Dleq)
-	%<- ({x} {d isvar x I} lookup-isvar (Dlookup x d) (%the (isvar (pi1 _) J) (Disvar x)))
+	%<- ({x} {d isvar x I} lookup-isvar (Dlookup x d) (%the (isvar ((%abs pi1) _) J) (Disvar x)))
 	%<- ({x} isvar-pi1-contra (Disvar x) Dfalse)
 	%<- ({x} false-implies-simp Dfalse (%the (simp _ st) (Dsimp x)))
 	%<- (false-implies-stp-leq Dfalse Dleq) %.
 %scope headvar-tp-size %term pi2 
-	%pi (headvar-tp-size (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dapp) ([x] [d] aofe/pi2 (%the (aofe (G x) (R x) (sigma (B x) ([y] C x y))) (Daof x d))) (%the (simp A S) Dsimp) (headvar/pi2 (%the (headvar R) Dheadvar)) ([x] DsimpC x (pi1 (R x))) Dleq')
+	%pi (headvar-tp-size (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dapp) ([x] [d] aofe/pi2 (%the (aofe (G x) (R x) (sigma (B x) ([y] C x y))) (Daof x d))) (%the (simp A S) Dsimp) (headvar/pi2 (%the (headvar R) Dheadvar)) ([x] DsimpC x ((%abs pi1) (R x))) Dleq')
 	%<- (headvar-tp-size Dapp Daof Dsimp Dheadvar ([x] simp/sigma (%the ({y} simp (C x y) T2) (DsimpC x)) (%the (simp (B x) T1) (DsimpB x))) (%the (stp-leq (ssigma T1 T2) S) Dleq))
 	%<- (stp-leq-trans (stp-leq/sigma2 stp-leq/eq) Dleq (%the (stp-leq T2 S) Dleq')) %.
-%term pi2bad 
+%scope headvar-tp-size %term pi2bad 
 	%pi (headvar-tp-size _ ([x] [d isvar x I] aofe/var _ (Dlookup x d)) _ (headvar/pi2 _) Dsimp Dleq)
-	%<- ({x} {d isvar x I} lookup-isvar (Dlookup x d) (%the (isvar (pi2 _) J) (Disvar x)))
+	%<- ({x} {d isvar x I} lookup-isvar (Dlookup x d) (%the (isvar ((%abs pi2) _) J) (Disvar x)))
 	%<- ({x} isvar-pi2-contra (Disvar x) Dfalse)
 	%<- ({x} false-implies-simp Dfalse (%the (simp _ st) (Dsimp x)))
 	%<- (false-implies-stp-leq Dfalse Dleq) %.
@@ -304,7 +304,7 @@
 	%pi (headvar-stp-size _ ([x] [d] aofes/closed _ (Dsimp x) (Daof x)) Dheadvar D)
 	%<- (closed-headvar-contra Daof Dheadvar Dfalse)
 	%<- (false-implies-stp-leq Dfalse D) %.
-%term var 
+%scope headvar-stp-size %term var 
 	%pi (headvar-stp-size Dlookup ([x] [d] aofes/var (Dlookup' x d)) headvar/var D)
 	%<- ({x} {d} slookup-fun (Dlookup x d) (Dlookup' x d) Deq)
 	%<- (stp-leq-resp Deq stp-eq/i stp-leq/eq D) %.
@@ -312,7 +312,7 @@
 	%pi (headvar-stp-size Dlookup ([x] [d] aofes/app _ (Daof x d)) (headvar/app Dheadvar) Dleq')
 	%<- (headvar-stp-size Dlookup Daof Dheadvar Dleq)
 	%<- (stp-leq-trans (stp-leq/pi2 stp-leq/eq) Dleq Dleq') %.
-%term appbad 
+%scope headvar-stp-size %term appbad 
 	%pi (headvar-stp-size _ ([x] [d] aofes/var (Dlookup x d)) (headvar/app _) D)
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-app-contra (Disvar x d) Dfalse)
@@ -321,7 +321,7 @@
 	%pi (headvar-stp-size Dlookup ([x] [d] aofes/pi1 (Daof x d)) (headvar/pi1 Dheadvar) Dleq')
 	%<- (headvar-stp-size Dlookup Daof Dheadvar Dleq)
 	%<- (stp-leq-trans (stp-leq/sigma1 stp-leq/eq) Dleq Dleq') %.
-%term pi1bad 
+%scope headvar-stp-size %term pi1bad 
 	%pi (headvar-stp-size _ ([x] [d] aofes/var (Dlookup x d)) (headvar/pi1 _) D)
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-pi1-contra (Disvar x d) Dfalse)
@@ -330,7 +330,7 @@
 	%pi (headvar-stp-size Dlookup ([x] [d] aofes/pi2 (Daof x d)) (headvar/pi2 Dheadvar) Dleq')
 	%<- (headvar-stp-size Dlookup Daof Dheadvar Dleq)
 	%<- (stp-leq-trans (stp-leq/sigma2 stp-leq/eq) Dleq Dleq') %.
-%term pi2bad 
+%scope headvar-stp-size %term pi2bad 
 	%pi (headvar-stp-size _ ([x] [d] aofes/var (Dlookup x d)) (headvar/pi2 _) D)
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-pi2-contra (Disvar x d) Dfalse)
@@ -429,33 +429,33 @@
 	%<- (strengthen-sordered Dord' Dord'')
 	%<- ({x} aof-resp atom-eq/i (Deq x) (Daof x) (%the (aof R A') (Daof' x)))
 	%<- ({x} simp-resp (Deq x) stp-eq/i (Dsimp x) (%the (simp A' T) (Dsimp' x))) %.
-%term forall 
+%scope strengthen-wfes %term forall 
 	%pi (strengthen-aofes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] aofes/forall (%the (simp A T) (Dsimp x)) (%the (wfes (G x) A) (DwfA x d))) (aofes/forall (Dsimp aca) DwfA'))
 	%<- (strengthen-wfes Dappend Dappend' DwfA DwfA') %.
 %scope strengthen-wfes %term var 
 	%pi (strengthen-aofes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] aofes/var (%the (slookup (G x) Y T) (Dlookup x d))) (aofes/var Dlookup'))
 	%<- (slookup-drop Dappend Dappend' Dlookup Dlookup') %.
-%term app 
+%scope strengthen-wfes %term app 
 	%pi (strengthen-aofes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] aofes/app (%the (ofes (G x) M T) (DofM x d)) (%the (aofes (G x) R (spi T U)) (DofR x d))) (aofes/app DofM' DofR'))
 	%<- (strengthen-aofes Dappend Dappend' DofR DofR')
 	%<- (strengthen-ofes Dappend Dappend' DofM DofM') %.
 %scope strengthen-wfes %term pi1 
 	%pi (strengthen-aofes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] aofes/pi1 (%the (aofes (G x) R (ssigma T U)) (DofR x d))) (aofes/pi1 DofR'))
 	%<- (strengthen-aofes Dappend Dappend' DofR DofR') %.
-%term pi2 
+%scope strengthen-wfes %term pi2 
 	%pi (strengthen-aofes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] aofes/pi2 (%the (aofes (G x) R (ssigma T U)) (DofR x d))) (aofes/pi2 DofR'))
 	%<- (strengthen-aofes Dappend Dappend' DofR DofR') %.
 %scope strengthen-wfes %term at 
 	%pi (strengthen-ofes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] ofes/at (%the (aofes (G x) R st) (DofR x d))) (ofes/at DofR'))
 	%<- (strengthen-aofes Dappend Dappend' DofR DofR') %.
-%term lam 
+%scope strengthen-wfes %term lam 
 	%pi (strengthen-ofes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] ofes/lam (%the ({y} %pi (isvar y J) %-> (ofes (scons (G x) y T) (M y) U)) (DofM x d))) (ofes/lam DofM'))
 	%<- ({y} {e} strengthen-ofes ([x] sappend/cons (Dappend x)) (sappend/cons Dappend') ([x] [d] DofM x d y e) (DofM' y e)) %.
 %scope strengthen-wfes %term pair 
 	%pi (strengthen-ofes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] ofes/pair (%the (ofes (G x) N U) (DofN x d)) (%the (ofes (G x) M T) (DofM x d))) (ofes/pair DofN' DofM'))
 	%<- (strengthen-ofes Dappend Dappend' DofM DofM')
 	%<- (strengthen-ofes Dappend Dappend' DofN DofN') %.
-%term t 
+%scope strengthen-wfes %term t 
 	%pi (strengthen-wfes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] wfes/t (%the (sordered (G x)) (Dord x d))) (wfes/t Dord''))
 	%<- ({x} {d} sordered-drop (Dappend x) Dappend' (Dord x d) (Dord' x d))
 	%<- (strengthen-sordered Dord' Dord'') %.
@@ -463,7 +463,7 @@
 	%pi (strengthen-wfes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] wfes/pi (%the ({y} %pi (isvar y J) %-> (wfes (scons (G x) y T) (B y))) (DwfB x d)) (%the (simp A T) (Dsimp x)) (%the (wfes (G x) A) (DwfA x d))) (wfes/pi DwfB' (Dsimp aca) DwfA'))
 	%<- (strengthen-wfes Dappend Dappend' DwfA DwfA')
 	%<- ({y} {e} strengthen-wfes ([x] sappend/cons (Dappend x)) (sappend/cons Dappend') ([x] [d] DwfB x d y e) (DwfB' y e)) %.
-%term sigma 
+%scope strengthen-wfes %term sigma 
 	%pi (strengthen-wfes (%the ({x} sappend (scons G1 x S) G2 (G x)) Dappend) (%the (sappend G1 G2 G') Dappend') ([x] [d] wfes/sigma (%the ({y} %pi (isvar y J) %-> (wfes (scons (G x) y T) (B y))) (DwfB x d)) (%the (simp A T) (Dsimp x)) (%the (wfes (G x) A) (DwfA x d))) (wfes/sigma DwfB' (Dsimp aca) DwfA'))
 	%<- (strengthen-wfes Dappend Dappend' DwfA DwfA')
 	%<- ({y} {e} strengthen-wfes ([x] sappend/cons (Dappend x)) (sappend/cons Dappend') ([x] [d] DwfB x d y e) (DwfB' y e)) %.
@@ -481,7 +481,7 @@
 %sort tsubst-es {_ {x} %pi (isvar x I) %-> (slookup (G x) x S)} {_ {x} %pi (isvar x I) %-> (ofes (G x) M S)} {_ {x} %pi (isvar x I) %-> (wfes (G x) (A x))} {_ tsub A M A'} {_ {x} %pi (isvar x I) %-> (wfes (G x) A')} %.
 %mode tsubst-es %in %in %in %in %out %.
 %scope tsubst-es %term closed aasubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) (%the ({x} %pi (isvar x I) %-> (aofes (G x) R T)) DofR) aasub/closed DofR %.
-%term closed 
+%scope tsubst-es %term closed 
 	%pi (aasubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/closed (%the (sordered (G x)) (Dord x d)) (%the (simp (A x) T) (Dsimp x)) (%the (aof (R x) (A x)) (Daof x))) (%the (aasub R M Rx) Dsub) ([x] [d] aofes/closed (Dord x d) (Dsimp' aca) Daof''))
 	%<- (aof-noassm Daof (%the ({x} atom-eq (R x) R') DeqR) (%the ({x} tp-eq (A x) A') DeqA))
 	%<- (aasub-resp DeqR term-eq/i atom-eq/i Dsub (%the (aasub ([_] R') M Rx) Dsub'))
@@ -499,7 +499,7 @@
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-forall-contra (Disvar x d) Dfalse)
 	%<- ({x} {d} false-implies-aofes Dfalse (D x d)) %.
-%term app 
+%scope tsubst-es %term app 
 	%pi (aasubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/app (%the (ofes (G x) (N x) T) (DofN x d)) (%the (aofes (G x) (R x) (spi T U)) (DofR x d))) (aasub/app DsubN DsubR) ([x] [d] aofes/app (DofN' x d) (DofR' x d)))
 	%<- (aasubst-es Dlookup DofM DofR DsubR DofR')
 	%<- (subst-es Dlookup DofM DofN DsubN DofN') %.
@@ -508,7 +508,7 @@
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-app-contra (Disvar x d) Dfalse)
 	%<- ({x} {d} false-implies-aofes Dfalse (D x d)) %.
-%term pi1 
+%scope tsubst-es %term pi1 
 	%pi (aasubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/pi1 (%the (aofes (G x) (R x) (ssigma T U)) (DofR x d))) (aasub/pi1 DsubR) ([x] [d] aofes/pi1 (DofR' x d)))
 	%<- (aasubst-es Dlookup DofM DofR DsubR DofR') %.
 %term _ 
@@ -516,7 +516,7 @@
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-pi1-contra (Disvar x d) Dfalse)
 	%<- ({x} {d} false-implies-aofes Dfalse (D x d)) %.
-%term pi2 
+%scope tsubst-es %term pi2 
 	%pi (aasubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/pi2 (%the (aofes (G x) (R x) (ssigma T U)) (DofR x d))) (aasub/pi2 DsubR) ([x] [d] aofes/pi2 (DofR' x d)))
 	%<- (aasubst-es Dlookup DofM DofR DsubR DofR') %.
 %term _ 
@@ -525,17 +525,17 @@
 	%<- ({x} {d} isvar-pi2-contra (Disvar x d) Dfalse)
 	%<- ({x} {d} false-implies-aofes Dfalse (D x d)) %.
 %%%
-%term closed 
+%scope tsubst-es %term closed 
 	%pi (aosubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/closed (%the (sordered (G x)) (Dord x d)) (%the (simp (A x) T) (Dsimp x)) (%the (aof (R x) (A x)) (Daof x))) (%the (aosub R M LRx) Dsub) D)
 	%<- (aof-noassm Daof (%the ({x} atom-eq (R x) R') DeqR) (%the ({x} tp-eq (A x) A') DeqA))
 	%<- (aosub-resp DeqR term-eq/i term-eq/i Dsub (%the (aosub ([_] R') M LRx) Dsub'))
 	%<- (aosub-absent Dsub' Dfalse)
 	%<- ({x} {d} false-implies-ofes Dfalse (D x d)) %.
-%term var 
+%scope tsubst-es %term var 
 	%pi (aosubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/var (%the (slookup (G x) x T) (Dlookup' x d))) aosub/var DofM')
 	%<- ({x} {d} slookup-fun (Dlookup x d) (Dlookup' x d) (%the (stp-eq S T) Deq))
 	%<- ({x} {d} ofes-resp sctx-eq/i term-eq/i Deq (DofM x d) (%the (ofes (G x) M T) (DofM' x d))) %.
-%term app 
+%scope tsubst-es %term app 
 	%pi (aosubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/app (%the (ofes (G x) (N x) T) (DofN x d)) (%the (aofes (G x) (R x) (spi T U)) (DofR x d))) (aosub/app (%the (sub P Nx Py) DsubP) (%the (sub N M Nx) DsubN) (%the (aosub R M (lam P)) DsubR)) DofP'')
 	%<- (aosubst-es Dlookup DofM DofR DsubR ([x] [d] ofes/lam (%the ({y} %pi (isvar y J) %-> (ofes (scons (G x) y T) (P y) U)) (DofP x d))))
 	%<- (subst-es Dlookup DofM DofN DsubN (%the ({x} %pi (isvar x I) %-> (ofes (G x) Nx T)) DofN'))
@@ -548,7 +548,7 @@
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-app-contra (Disvar x d) Dfalse)
 	%<- ({x} {d} false-implies-ofes Dfalse (D x d)) %.
-%term pi1 
+%scope tsubst-es %term pi1 
 	%pi (aosubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/pi1 (%the (aofes (G x) (R x) (ssigma T U)) (DofR x d))) (aosub/pi1 (%the (aosub R M (pair P1 P2)) Dsub)) DofP1)
 	%<- (aosubst-es Dlookup DofM DofR Dsub ([x] [d] ofes/pair (%the (ofes (G x) P2 U) (DofP2 x d)) (%the (ofes (G x) P1 T) (DofP1 x d)))) %.
 %term _ 
@@ -556,7 +556,7 @@
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-pi1-contra (Disvar x d) Dfalse)
 	%<- ({x} {d} false-implies-ofes Dfalse (D x d)) %.
-%term pi2 
+%scope tsubst-es %term pi2 
 	%pi (aosubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] aofes/pi2 (%the (aofes (G x) (R x) (ssigma T U)) (DofR x d))) (aosub/pi2 (%the (aosub R M (pair P1 P2)) Dsub)) DofP2)
 	%<- (aosubst-es Dlookup DofM DofR Dsub ([x] [d] ofes/pair (%the (ofes (G x) P2 U) (DofP2 x d)) (%the (ofes (G x) P1 T) (DofP1 x d)))) %.
 %term _ 
@@ -565,41 +565,41 @@
 	%<- ({x} {d} isvar-pi2-contra (Disvar x d) Dfalse)
 	%<- ({x} {d} false-implies-ofes Dfalse (D x d)) %.
 %%%
-%term aa 
+%scope tsubst-es %term aa 
 	%pi (subst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] ofes/at (%the (aofes (G x) (R x) st) (DofR x d))) (sub/aa Dsub) ([x] [d] ofes/at (DofR' x d)))
 	%<- (aasubst-es Dlookup DofM DofR Dsub DofR') %.
-%term ao 
+%scope tsubst-es %term ao 
 	%pi (subst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] ofes/at (%the (aofes (G x) (R x) st) (DofR x d))) (sub/ao Dsub) D)
 	%<- (aosubst-es Dlookup DofM DofR Dsub D) %.
-%term lam 
+%scope tsubst-es %term lam 
 	%pi (subst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] ofes/lam (%the ({y} %pi (isvar y J) %-> (ofes (scons (G x) y T) (N x y) U)) (DofN x d))) (sub/lam (%the ({y} sub ([x] N x y) M (Nx y)) Dsub)) ([x] [d] ofes/lam (DofN' x d)))
 	%<- ({x} {d} {y} {e} ofes-context (DofN x d y e) (sordered/cons (%the (sbounded (G x) y) (Dbound x d y e))))
 	%<- ({x} {d} {y} {e} weaken-ofes (Dbound x d y e) (DofM x d) _ (%the (ofes (scons (G x) y T) M S) (DofM' x d y e)))
 	%<- ({y} {e} subst-es ([x] [d] slookup/miss (Dlookup x d) (Dbound x d y e)) ([x] [d] DofM' x d y e) ([x] [d] DofN x d y e) (Dsub y) ([x] [d] %the (ofes (scons (G x) y T) (Nx y) U) (DofN' x d y e))) %.
-%term pair 
+%scope tsubst-es %term pair 
 	%pi (subst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] ofes/pair (%the (ofes (G x) (O x) U) (DofO x d)) (%the (ofes (G x) (N x) T) (DofN x d))) (sub/pair (%the (sub O M Ox) DsubO) (%the (sub N M Nx) DsubN)) ([x] [d] ofes/pair (DofO' x d) (DofN' x d)))
 	%<- (subst-es Dlookup DofM DofN DsubN DofN')
 	%<- (subst-es Dlookup DofM DofO DsubO DofO') %.
 %%%
-%term t tsubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] wfes/t (Dord x d)) tsub/t ([x] [d] wfes/t (Dord x d)) %.
-%term pi 
+%scope tsubst-es %term t tsubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] wfes/t (Dord x d)) tsub/t ([x] [d] wfes/t (Dord x d)) %.
+%scope tsubst-es %term pi 
 	%pi (tsubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] wfes/pi (%the ({y} %pi (isvar y J) %-> (wfes (scons (G x) y T) (B x y))) (DwfB x d)) (%the (simp (A x) T) (Dsimp x)) (%the (wfes (G x) (A x)) (DwfA x d))) (tsub/pi (%the ({y} tsub ([x] B x y) M (Bx y)) DsubB) (%the (tsub A M Ax) DsubA)) ([x] [d] wfes/pi (DwfB' x d) Dsimp' (DwfA' x d)))
 	%<- (tsubst-es Dlookup DofM DwfA DsubA DwfA')
 	%<- ({x} {d} {y} {e} wfes-context (DwfB x d y e) (sordered/cons (%the (sbounded (G x) y) (Dbound x d y e))))
 	%<- ({x} {d} {y} {e} weaken-ofes (Dbound x d y e) (DofM x d) _ (%the (ofes (scons (G x) y T) M S) (DofM' x d y e)))
 	%<- ({y} {e} tsubst-es ([x] [d] slookup/miss (Dlookup x d) (Dbound x d y e)) ([x] [d] DofM' x d y e) ([x] [d] DwfB x d y e) (DsubB y) ([x] [d] %the (wfes (scons (G x) y T) (Bx y)) (DwfB' x d y e)))
 	%<- (tsub-preserves-simp DsubA Dsimp Dsimp') %.
-%term sigma 
+%scope tsubst-es %term sigma 
 	%pi (tsubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] wfes/sigma (%the ({y} %pi (isvar y J) %-> (wfes (scons (G x) y T) (B x y))) (DwfB x d)) (%the (simp (A x) T) (Dsimp x)) (%the (wfes (G x) (A x)) (DwfA x d))) (tsub/sigma (%the ({y} tsub ([x] B x y) M (Bx y)) DsubB) (%the (tsub A M Ax) DsubA)) ([x] [d] wfes/sigma (DwfB' x d) Dsimp' (DwfA' x d)))
 	%<- (tsubst-es Dlookup DofM DwfA DsubA DwfA')
 	%<- ({x} {d} {y} {e} wfes-context (DwfB x d y e) (sordered/cons (%the (sbounded (G x) y) (Dbound x d y e))))
 	%<- ({x} {d} {y} {e} weaken-ofes (Dbound x d y e) (DofM x d) _ (%the (ofes (scons (G x) y T) M S) (DofM' x d y e)))
 	%<- ({y} {e} tsubst-es ([x] [d] slookup/miss (Dlookup x d) (Dbound x d y e)) ([x] [d] DofM' x d y e) ([x] [d] DwfB x d y e) (DsubB y) ([x] [d] %the (wfes (scons (G x) y T) (Bx y)) (DwfB' x d y e)))
 	%<- (tsub-preserves-simp DsubA Dsimp Dsimp') %.
-%term singa 
+%scope tsubst-es %term singa 
 	%pi (tsubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] wfes/sing (%the (aofes (G x) (R x) st) (DofR x d))) (tsub/singa Dsub) ([x] [d] wfes/sing (DofR' x d)))
 	%<- (aasubst-es Dlookup DofM DofR Dsub DofR') %.
-%term singo 
+%scope tsubst-es %term singo 
 	%pi (tsubst-es (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) ([x] [d] wfes/sing (%the (aofes (G x) (R x) st) (DofR x d))) (tsub/singo Dsub) ([x] [d] wfes/sing (D x d)))
 	%<- (aosubst-es Dlookup DofM DofR Dsub ([x] [d] ofes/at (D x d))) %.
 %worlds (var ovar bind) (aasubst-es _ _ _ _ _) (aosubst-es _ _ _ _ _) (subst-es _ _ _ _ _) (tsubst-es _ _ _ _ _) %.
@@ -626,7 +626,7 @@
 %sort can-asub-pi1 {_ {x} %pi (isvar x I) %-> (slookup (G x) x S)} {_ {x} %pi (isvar x I) %-> (aofes (G x) (R x) (ssigma T U))} {_ {x} %pi (isvar x I) %-> (ofes (G x) M S)} {_ asub R M} {_ asub ([x] pi1 (R x)) M} %.
 %mode can-asub-pi1 %in %in %in %in %out %.
 %scope can-asub-pi1 %term aa can-asub-pi1 _ _ _ (asub/aasub Daasub) (asub/aasub (aasub/pi1 Daasub)) %.
-%term ao 
+%scope can-asub-pi1 %term ao 
 	%pi (can-asub-pi1 Dlookup DofR DofM (asub/aosub Daosub) (asub/aosub (aosub/pi1 Daosub')))
 	%<- (aosubst-es Dlookup DofM DofR Daosub (%the ({x} %pi (isvar x I) %-> (ofes (G x) LRx (ssigma T U))) DofLRx))
 	%<- (ofes-sigma-invert-underbind DofLRx (%the (term-eq LRx (pair P1 P2)) Deq) _ _)
@@ -636,7 +636,7 @@
 %sort can-asub-pi2 {_ {x} %pi (isvar x I) %-> (slookup (G x) x S)} {_ {x} %pi (isvar x I) %-> (aofes (G x) (R x) (ssigma T U))} {_ {x} %pi (isvar x I) %-> (ofes (G x) M S)} {_ asub R M} {_ asub ([x] pi2 (R x)) M} %.
 %mode can-asub-pi2 %in %in %in %in %out %.
 %scope can-asub-pi2 %term aa can-asub-pi2 _ _ _ (asub/aasub Daasub) (asub/aasub (aasub/pi2 Daasub)) %.
-%term ao 
+%scope can-asub-pi2 %term ao 
 	%pi (can-asub-pi2 Dlookup DofR DofM (asub/aosub Daosub) (asub/aosub (aosub/pi2 Daosub')))
 	%<- (aosubst-es Dlookup DofM DofR Daosub (%the ({x} %pi (isvar x I) %-> (ofes (G x) LRx (ssigma T U))) DofLRx))
 	%<- (ofes-sigma-invert-underbind DofLRx (%the (term-eq LRx (pair P1 P2)) Deq) _ _)
@@ -672,9 +672,9 @@
 	%<- (aof-noassm Daof (%the ({x} atom-eq (R x) R') Deq) _)
 	%<- ({x} atom-eq-symm (Deq x) (%the (atom-eq R' (R x)) (Deq' x)))
 	%<- (aasub-resp Deq' term-eq/i atom-eq/i aasub/closed (%the (aasub R M R') Daasub)) %.
-%term closed can-asub-esm _ _ _ _ (asub/aasub aasub/closed) %.
+%scope can-tsub-esm %term closed can-asub-esm _ _ _ _ (asub/aasub aasub/closed) %.
 %scope can-tsub-esm %term var can-asub-esm _ _ _ _ (asub/aosub aosub/var) %.
-%term forall 
+%scope can-tsub-esm %term forall 
 	%pi (can-asub-esm S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d] aofes/forall (%the (simp (A x) T) (Dsimp x)) (%the (wfes (G x) (A x)) (DofA x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) (asub/aasub (aasub/forall Dsub)))
 	%<- (can-tsub-esm S Dlookup DofA DofM (%the (tsub A M A') Dsub)) %.
 %scope can-tsub-esm %term allbad 
@@ -682,13 +682,13 @@
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-forall-contra (Disvar x d) Dfalse)
 	%<- (false-implies-aosub Dfalse (%the (aosub _ _ (at aca)) Daosub)) %.
-%term app 
+%scope can-tsub-esm %term app 
 	%pi (can-asub-esm S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d] aofes/app (%the (ofes (G x) (N x) T) (DofN x d)) (%the (aofes (G x) (R x) (spi T U)) (DofR x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) Dasub')
 	%<- (can-asub-esm S Dlookup DofR DofM Dasub)
 	%<- (can-sub-esm S Dlookup DofN DofM Dsub)
 	%<- (can-asub-app S Dlookup DofR DofN DofM Dasub Dsub Dasub') %.
 %scope can-tsub-esm %term ap-aa can-asub-app S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (aofes (G x) (R x) (spi T U))) DofR) (%the ({x} %pi (isvar x I) %-> (ofes (G x) (N x) T)) DofN) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) (asub/aasub (%the (aasub R M Rx) Daasub)) (%the (sub N M Nx) Dsub) (asub/aasub (aasub/app Dsub Daasub)) %.
-%term app-ao 
+%scope can-tsub-esm %term app-ao 
 	%pi (can-asub-app S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) (%the ({x} %pi (isvar x I) %-> (aofes (G x) (R x) (spi T U))) DofR) (%the ({x} %pi (isvar x I) %-> (ofes (G x) (N x) T)) DofN) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) (asub/aosub (%the (aosub R M LRx) Daosub)) (%the (sub N M Nx) DsubNx) (asub/aosub (aosub/app (DsubPy_x aca) DsubNx Daosub')))
 	%<- (aosub-headvar Daosub (%the (headvar R) Dheadvar))
 	%<- (headvar-stp-size Dlookup DofR Dheadvar (%the (stp-leq (spi T U) S) Dleq))
@@ -705,28 +705,28 @@
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-app-contra (Disvar x d) Dfalse)
 	%<- (false-implies-aosub Dfalse (%the (aosub _ _ (at aca)) Daosub)) %.
-%term pi1 
+%scope can-tsub-esm %term pi1 
 	%pi (can-asub-esm S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d] aofes/pi1 (%the (aofes (G x) (R x) (ssigma T U)) (DofR x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) Dasub')
 	%<- (can-asub-esm S Dlookup DofR DofM (%the (asub R M) Dasub))
-	%<- (can-asub-pi1 Dlookup DofR DofM Dasub (%the (asub ([x] pi1 (R x)) M) Dasub')) %.
+	%<- (can-asub-pi1 Dlookup DofR DofM Dasub (%the (asub ([x] (%abs pi1) (R x)) M) Dasub')) %.
 %scope can-tsub-esm %term pi1bad 
 	%pi (can-asub-esm _ _ ([x] [d] aofes/var (Dlookup x d)) _ (asub/aosub Daosub))
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-pi1-contra (Disvar x d) Dfalse)
 	%<- (false-implies-aosub Dfalse (%the (aosub _ _ (at aca)) Daosub)) %.
-%term pi2 
+%scope can-tsub-esm %term pi2 
 	%pi (can-asub-esm S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d] aofes/pi2 (%the (aofes (G x) (R x) (ssigma T U)) (DofR x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) Dasub')
 	%<- (can-asub-esm S Dlookup DofR DofM (%the (asub R M) Dasub))
-	%<- (can-asub-pi2 Dlookup DofR DofM Dasub (%the (asub ([x] pi2 (R x)) M) Dasub')) %.
+	%<- (can-asub-pi2 Dlookup DofR DofM Dasub (%the (asub ([x] (%abs pi2) (R x)) M) Dasub')) %.
 %scope can-tsub-esm %term pi2bad 
 	%pi (can-asub-esm _ _ ([x] [d] aofes/var (Dlookup x d)) _ (asub/aosub Daosub))
 	%<- ({x} {d} slookup-isvar (Dlookup x d) (%the (isvar _ I) (Disvar x d)))
 	%<- ({x} {d} isvar-pi2-contra (Disvar x d) Dfalse)
 	%<- (false-implies-aosub Dfalse (%the (aosub _ _ (at aca)) Daosub)) %.
-%term at 
+%scope can-tsub-esm %term at 
 	%pi (can-sub-esm S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d isvar x I] ofes/at (%the (aofes (G x) (R x) st) (DofR x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) Dsub)
 	%<- (can-asub-esm S Dlookup DofR DofM (%the (asub R M) Dasub))
-	%<- (asub-sub-at Dasub (%the (sub ([x] at (R x)) M _) Dsub)) %.
+	%<- (asub-sub-at Dasub (%the (sub ([x] (%abs at) (R x)) M _) Dsub)) %.
 %%%
 %scope can-tsub-esm %term lam 
 	%pi (can-sub-esm S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d isvar x I] ofes/lam (%the ({y} %pi (isvar y J) %-> (ofes (scons (G x) y T) (N x y) U)) (DofN x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) (sub/lam Dsub))
@@ -734,13 +734,13 @@
 	%<- ({x} {d} {y} {e} weaken-slookup (Dbound x d y e) (Dlookup x d) _ (%the (slookup (scons (G x) y T) x S) (Dlookup' x d y e)))
 	%<- ({x} {d} {y} {e} weaken-ofes (Dbound x d y e) (DofM x d) _ (%the (ofes (scons (G x) y T) M S) (DofM' x d y e)))
 	%<- ({y} {e} can-sub-esm S ([x] [d] Dlookup' x d y e) ([x] [d] DofN x d y e) ([x] [d] DofM' x d y e) (%the (sub ([x] N x y) M (Nx y)) (Dsub y))) %.
-%term pair 
+%scope can-tsub-esm %term pair 
 	%pi (can-sub-esm S (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d isvar x I] ofes/pair (%the (ofes (G x) (O x) U) (DofO x d)) (%the (ofes (G x) (N x) T) (DofN x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) (sub/pair DsubOx DsubNx))
 	%<- (can-sub-esm S Dlookup DofN DofM (%the (sub N M Nx) DsubNx))
 	%<- (can-sub-esm S Dlookup DofO DofM (%the (sub O M Ox) DsubOx)) %.
 %%%
 %scope can-tsub-esm %term t can-tsub-esm _ _ ([x] [d] wfes/t _) _ tsub/t %.
-%term pi 
+%scope can-tsub-esm %term pi 
 	%pi (can-tsub-esm _ (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d isvar x I] wfes/pi (%the ({y} %pi (isvar y J) %-> (wfes (scons (G x) y T) (B x y))) (DwfB x d)) (%the (simp (A x) T) (DsimpA x)) (%the (wfes (G x) (A x)) (DwfA x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) (tsub/pi DsubB DsubA))
 	%<- (can-tsub-esm _ Dlookup DwfA DofM (%the (tsub A M Ax) DsubA))
 	%<- ({x} {d} {y} {e} wfes-context (DwfB x d y e) (sordered/cons (%the (sbounded (G x) y) (Dbound x d y e))))
@@ -754,10 +754,10 @@
 	%<- ({x} {d} {y} {e} weaken-slookup (Dbound x d y e) (Dlookup x d) _ (%the (slookup (scons (G x) y T) x S) (Dlookup' x d y e)))
 	%<- ({x} {d} {y} {e} weaken-ofes (Dbound x d y e) (DofM x d) _ (%the (ofes (scons (G x) y T) M S) (DofM' x d y e)))
 	%<- ({y} {e} can-tsub-esm _ ([x] [d] Dlookup' x d y e) ([x] [d] DwfB x d y e) ([x] [d] DofM' x d y e) (%the (tsub ([x] B x y) M (Bx y)) (DsubB y))) %.
-%term sing 
+%scope can-tsub-esm %term sing 
 	%pi (can-tsub-esm _ (%the ({x} %pi (isvar x I) %-> (slookup (G x) x S)) Dlookup) ([x] [d isvar x I] wfes/sing (%the (aofes (G x) (R x) st) (DofR x d))) (%the ({x} %pi (isvar x I) %-> (ofes (G x) M S)) DofM) Dtsub)
 	%<- (can-asub-esm S Dlookup DofR DofM (%the (asub R M) Dasub))
-	%<- (asub-tsub-sing Dlookup DofR DofM Dasub (%the (tsub ([x] sing (R x)) M A) Dtsub)) %.
+	%<- (asub-tsub-sing Dlookup DofR DofM Dasub (%the (tsub ([x] (%abs sing) (R x)) M A) Dtsub)) %.
 %worlds (bind ovar var) (can-asub-esm _ _ _ _ _) (can-sub-esm _ _ _ _ _) (can-asub-app _ _ _ _ _ _ _ _) (can-tsub-esm _ _ _ _ _) %.
 %total {(S1 S2 S3 S4) (D1 D2 D3 D4)} (can-asub-esm S1 _ D1 _ _) (can-sub-esm S2 _ D2 _ _) (can-asub-app S3 _ D3 _ _ _ _ _) (can-tsub-esm S4 _ D4 _ _) %.
 %sort can-sub-es {_ {x} %pi (isvar x I) %-> (slookup (G x) x S)} {_ {x} %pi (isvar x I) %-> (ofes (G x) (N x) T)} {_ {x} %pi (isvar x I) %-> (ofes (G x) M S)} {_ sub N M N'} %.

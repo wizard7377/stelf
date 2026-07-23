@@ -15,12 +15,12 @@
 ss_imp  : s_sound (s_imp S1) (impi D1)
 	   <- {d:assume A} {u:pf A}
 	      h_sound d u -> s_sound (S1 d) (D1 u).
-}%
+%]
 %term ss_true s_sound s_true truei %.
 %. %[
 ss_forall : s_sound (s_forall S1) (foralli D1)
 	     <- {a:i} s_sound (S1 a) (D1 a).
-}%
+%]
 %term ss_atom %pi (s_sound (s_atom I2 H1) (D2 D1)) %<- (h_sound H1 D1) %<- (i_sound I2 D2) %.
 %term is_andl %pi (i_sound (i_andl I1) ([u pf (A1 and A2)] D1 (andel u))) %<- (i_sound I1 D1) %.
 %term is_andr %pi (i_sound (i_andr I2) ([u pf (A1 and A2)] D2 (ander u))) %<- (i_sound I2 D2) %.

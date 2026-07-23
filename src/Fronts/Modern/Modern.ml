@@ -56,9 +56,6 @@ module Make_Modern
 
   let mk_loc : int -> int -> Cst.loc = fun x y -> Cst.View.mk_loc x y
 
-  let whitespace' () : unit t =
-    whitespace <|> forget @@ (token "% " *> take_till (fun c -> c = '\n'))
-
   let ghost' = Cst.View.Loc.(review Ghost)
 
   let combine_fc (r1 : Paths.region) (r2 : Paths.region) : Paths.region =
@@ -76,7 +73,7 @@ module Make_Modern
     match view tm with
     | Lowercase (loc, _)
     | Uppercase (loc, _)
-    | Qualified (loc, _)
+    | Qualified (loc, _, _)
     | Text (loc, _)
     | ExistVar (loc, _)
     | FreeVar (loc, _)
@@ -173,7 +170,7 @@ module Make_Modern
     | _ -> Atom tm
 
   module P = struct
-    let rec reduce = function
+    let reduce = function
       | Atom tm2 :: Infix_ (_, con) :: Atom tm1 :: p' ->
           Atom (con (tm1, tm2)) :: p'
       | Atom tm :: Prefix_ (_, con) :: p' -> Atom (con tm) :: p'
@@ -197,7 +194,7 @@ module Make_Modern
       | Atom _ :: _ -> reduce (Atom tm :: jux_op :: p)
       | _ -> Atom tm :: p
 
-    let rec shift (opr, p) =
+    let shift (opr, p) =
       match (opr, p) with
       | (Atom _ as o), (Atom _ :: _ as p') -> reduce (o :: jux_op :: p')
       | Infix_ _, Infix_ _ :: _ ->
@@ -276,33 +273,43 @@ module Make_Modern
     | [] -> failwith "process_app: called with empty list"
     | _ -> go [] ts
 
+  let split_qid ns =
+    match List.rev ns with
+    | [] -> failwith "Expected qualified name"
+    | name :: rev_scopes -> (List.rev rev_scopes, name)
+
   let rec parse_arg () : string option t =
     token "_" *> return None
     <|> (let+ s = ident1 in
          Some s)
     <?> "argument"
 
+  and parse_qid_body (form : Cst.qid_form) : Cst.Term.t t =
+    inside "(" ")"
+      (let@ ns, s, e = many1 ident1 in
+       let loc = mk_loc s e in
+       return Cst.View.Term.(review @@ Qualified (loc, split_qid ns, form)))
+    <|> let@ name, s, e = ident1 in
+        let loc = mk_loc s e in
+        return Cst.View.Term.(review @@ Qualified (loc, ([], name), form))
+
   and parse_id () : Cst.Term.t t =
-    keyword' "val" *> commit
-    *> (inside "(" ")"
-          (let@ ns, s, e = many1 ident1 in
-           let loc = mk_loc s e in
-           let split = function
-             | [] -> failwith "Expected qualified name"
-             | name :: scopes -> (List.rev scopes, name)
-           in
-           return Cst.View.Term.(review @@ Qualified (loc, split ns)))
-       <|> let@ name, s, e = ident1 in
-           let loc = mk_loc s e in
-           return Cst.View.Term.(review @@ Qualified (loc, ([], name))))
+    keyword' "val" *> commit *> parse_qid_body Cst.Val
+    <|> (keyword' "abs" *> commit *> parse_qid_body Cst.Abs)
     <|> (string "%(" *> commit
-        *> let@ ns, s, e = many1 ident1 <* string ")" <* whitespace in
-           let loc = mk_loc s e in
-           let split = function
-             | [] -> failwith "Expected qualified name"
-             | name :: scopes -> (List.rev scopes, name)
+        *> let@ tm, s, e =
+             let* ns = many1 ident1 in
+             (let+ body = inside "(" ")" (parse_expr ()) <* string ")" <* whitespace in
+              `Local (ns, body))
+             <|> (let+ () = string ")" *> whitespace in
+                  `Qualified ns)
            in
-           return Cst.View.Term.(review @@ Qualified (loc, split ns)))
+           let loc = mk_loc s e in
+           return
+             (match tm with
+             | `Local (ns, body) -> Cst.View.Term.(review @@ Local (loc, ns, body))
+             | `Qualified ns ->
+                 Cst.View.Term.(review @@ Qualified (loc, split_qid ns, Cst.Val))))
     <|>
     let@ name, s, e = ident1 in
     let loc = mk_loc s e in
@@ -341,7 +348,7 @@ module Make_Modern
     (* %if A %-> B  %-> C  ==>  {_ A} {_ B} C  (last arg is the body) *)
     (* %if A %<- B  %<- C  ==>  {_ C} {_ B} A  (first arg is the body) *)
     (* commit fires only after the first separator is confirmed *)
-    (keywords [ "if"; "do"; "pi" ]
+    (keywords [ "if"; "do"; "pi"; "fn" ]
     *>
     let* first = return () >>= fun () -> parse_expr () in
     (keyword' "->" *> commit
@@ -444,27 +451,23 @@ module Make_Modern
 
   and parse_qualified () : Cst.symbol t =
     begin
-      let split = function
-        | [] -> failwith "Expected qualified name"
-        | name :: scopes -> (List.rev scopes, name)
-      in
       keyword' "val" *> commit
       *> ((let* ident in
            return ([], ident))
          <|> inside "(" ")"
                (let* ns = many1 ident in
-                return @@ split ns))
+                return @@ split_qid ns))
       <|> (keyword' "("
           *> let* ns = many1 ident <* string ")" in
-             return @@ split ns)
+             return @@ split_qid ns)
       <|> keyword "(" *> commit
           *> let* ns = many1 ident <* string ")" in
-             return @@ split ns
+             return @@ split_qid ns
     end
     <?> "qualified name"
 
   and parse_text () : string t =
-    string_lit () <* whitespace' () <?> "string literal"
+    string_lit () <* whitespace <?> "string literal"
 
   and parse_decl () : Cst.decl t =
     begin
@@ -524,10 +527,8 @@ module Make_Modern
       let+ bare_modes = many (parse_mode ()) in
       let rec head_sym tm =
         match Cst.View.Term.view tm with
-        | Cst.View.Term.Lowercase (_, s)
-        | Cst.View.Term.Uppercase (_, s)
-        | Cst.View.Term.Qualified (_, s) ->
-            s
+        | Cst.View.Term.Lowercase (_, s) | Cst.View.Term.Uppercase (_, s) -> s
+        | Cst.View.Term.Qualified (_, s, _) -> s
         | Cst.View.Term.App (_, f, _) -> head_sym f
         | _ ->
             raise (ParseError "mode declaration: expected identifier as head")
@@ -612,7 +613,7 @@ module Make_Modern
 
   and parse_fixity () : int t =
     begin
-      let+ s = take_while1 (fun c -> c >= '0' && c <= '9') <* whitespace' () in
+      let+ s = take_while1 (fun c -> c >= '0' && c <= '9') <* whitespace in
       int_of_string s
     end
     <?> "fixity level"
@@ -656,7 +657,7 @@ module Make_Modern
     begin
       token "_" *> return None
       <|> let+ s =
-            take_while1 (fun c -> c >= '0' && c <= '9') <* whitespace' ()
+            take_while1 (fun c -> c >= '0' && c <= '9') <* whitespace
           in
           Some (int_of_string s)
     end
@@ -766,7 +767,7 @@ module Make_Modern
   and run : 'a. 'a t -> N.namespace ref -> Cst.loc -> string -> 'a =
    fun p _ns _loc s ->
     try
-      let full_parser = whitespace' () *> p in
+      let full_parser = whitespace *> p in
       let state =
         Parser.Buffered.(
           (parse full_parser |> fun st -> feed st (`String s)) |> fun st ->

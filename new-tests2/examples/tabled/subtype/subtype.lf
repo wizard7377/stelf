@@ -33,7 +33,7 @@
 sub_* : sub T1 S1 
 	 -> sub T2 S2
 	 -> sub (T1 * T2) (S1 * S2).
-}%
+%]
 % worlds () (sub T S).
 %
 

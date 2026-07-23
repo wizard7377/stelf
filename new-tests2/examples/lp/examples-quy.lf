@@ -3,21 +3,21 @@
 %. %[
 sigma [G : {P:p} {Q:p} solve (atom P imp atom Q imp atom P)]
  {P:p} {Q:p} s_sound (G P Q) (D P Q).
-}%
+%]
 %query 1 _ _ {P p} {Q p} s_sound (s_imp ([H1 assume (atom P)] s_imp ([H2 assume (atom Q)] s_atom i_atom H1))) (D P Q) %.
 %query 1 _ _ {P} {Q} can _ (impi ([u pf (atom P)] impi ([u1 pf (atom Q)] u))) %.
 %. %[
 sigma [G : {P:p} {Q:p} solve (atom P imp atom Q imp atom P)]
 sigma [GS : {P:p} {Q:p} s_sound (G P Q) (D P Q)]
  {P:p} {Q:p} ss_can (GS P Q) (CN P Q).
-}%
+%]
 %query 1 _ _ {P p} {Q p} ss_can (ss_imp ([d assume (atom P)] [u pf (atom P)] [HS1 h_sound d u] ss_imp ([d1 assume (atom Q)] [u1 pf (atom Q)] [HS2 h_sound d1 u1] ss_atom is_atom HS1))) (CN P Q) %.
 %. %[
 sigma [G : solve ((atom q0 imp atom r0 imp atom s0) imp (atom q0 imp atom r0)
 	imp (atom q0 imp atom s0))]
 sigma [GS : s_sound G D]
  gs_can GS CN.
-}%
+%]
 %query 1 _ _ solve (atom q0 imp atom r0 imp atom s0 imp (atom q0 imp atom r0) imp (atom q0 imp atom s0)) %.
 %query 1 _ _ s_sound (s_imp ([H1 assume (atom q0 imp atom r0 imp atom s0)] s_imp ([H2 assume (atom q0 imp atom r0)] s_imp ([H3 assume (atom q0)] s_atom (i_imp (s_atom i_atom H3) (i_imp (s_atom (i_imp (s_atom i_atom H3) i_atom) H2) i_atom)) H1)))) D %.
 %query 1 _ _ ss_can (ss_imp ([d assume (atom q0 imp atom r0 imp atom s0)] [u pf (atom q0 imp atom r0 imp atom s0)] [HS1 h_sound d u] ss_imp ([d1 assume (atom q0 imp atom r0)] [u1 pf (atom q0 imp atom r0)] [HS2 h_sound d1 u1] ss_imp ([d2 assume (atom q0)] [u2 pf (atom q0)] [HS3 h_sound d2 u2] ss_atom (is_imp (ss_atom is_atom HS3) (is_imp (ss_atom (is_imp (ss_atom is_atom HS3) is_atom) HS2) is_atom)) HS1)))) CN %.
@@ -28,7 +28,7 @@ sigma [GS : s_sound G D]
 % next does not terminate.
 %. %[
 solve (atom q0 imp (atom q0 imp atom q0) imp atom q0).
-}%
+%]
 %query 1 _ _ solve (atom (plus (s (s 0)) (s (s (s 0))) Z)) %.
 %query 5 _ _ solve (atom (plus X Y (s (s (s (s 0)))))) %.
 % An ill-typed query.

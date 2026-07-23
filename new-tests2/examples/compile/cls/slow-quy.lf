@@ -57,7 +57,7 @@ cev_complete
               (fev_s (fev_s (fev_s fev_z)))
               (fev_app fev_lam (fev_s (fev_s fev_z)) (fev_1+ (fev_fix fev_lam))))))
 C.
-}%
+%]
 %. %[
 sigma [D:feval empty (s' z') W]
 cev_complete D C.
@@ -70,7 +70,7 @@ sigma [D:feval empty (app' (fix' (lam' (case' 1 z'
 			    (s' (s' (app' (1 ^ ^) 1))))))
 		           (s' z')) W]
 cev_complete D C.
-}%
+%]
 %. %[
 % This is VERY slow
 % Multiplication: 2 * 3 = 6.
@@ -88,4 +88,4 @@ sigma [D:feval empty
           (app' (app' 1 (s' (s' z'))) (s' (s' (s' z'))))))
 	   W]
 cev_complete D C.
-}%
+%]

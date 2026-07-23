@@ -64,7 +64,7 @@ prog_lam :
 
 %worlds () (prog D SV).
 %total D (prog D _).
-}%
+%]
 % Instead we need to factor the subcases for application into a single lemma
 %sort prog_@_lemma {_ step_or_val E1} {_ step_or_val E2} {_ step_or_val (E1 @ E2)} %.
 %mode prog_@_lemma %in %in %out %.

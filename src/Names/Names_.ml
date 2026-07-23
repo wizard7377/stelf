@@ -60,17 +60,17 @@ module MakeNames
     let maxPrec = Strength maxPrecInt
     let minPrecInt = 0
     let minPrec = Strength minPrecInt
-    let rec less (Strength p, Strength q) = p < q
-    let rec leq (Strength p, Strength q) = p <= q
+    let less (Strength p, Strength q) = p < q
+    let leq (Strength p, Strength q) = p <= q
 
-    let rec compare (Strength p, Strength q) =
+    let compare (Strength p, Strength q) =
       match Int.compare (p, q) with
       | Less -> Less
       | Equal -> Equal
       | Greater -> Greater
 
-    let rec inc (Strength p) = Strength (p + 1)
-    let rec dec (Strength p) = Strength (p - 1)
+    let inc (Strength p) = Strength (p + 1)
+    let dec (Strength p) = Strength (p - 1)
 
     (* Fixities ascribed to constants *)
     type fixity =
@@ -81,21 +81,21 @@ module MakeNames
     [@@deriving eq, ord, show]
 
     (* returns integer for precedence such that lower values correspond to higher precedence, useful for exports *)
-    let rec precToIntAsc = function
+    let precToIntAsc = function
       | Infix (Strength n, _) -> maxPrecInt + 1 - n
       | Prefix (Strength n) -> maxPrecInt + 1 - n
       | Postfix (Strength n) -> maxPrecInt + 1 - n
       | Nonfix -> minPrecInt
 
     (* prec (fix) = precedence of fix *)
-    let rec prec = function
+    let prec = function
       | Infix (p, _) -> p
       | Prefix p -> p
       | Postfix p -> p
       | Nonfix -> inc maxPrec
 
     (* toString (fix) = declaration corresponding to fix *)
-    let rec toString = function
+    let toString = function
       | Infix (Strength p, Left) -> "%infix left " ^ Int.toString p
       | Infix (Strength p, Right) -> "%infix right " ^ Int.toString p
       | Infix (Strength p, None) -> "%infix none " ^ Int.toString p
@@ -108,7 +108,7 @@ module MakeNames
   (* structure Fixity *)
   (* argNumber (fix) = minimum # of explicit arguments required *)
   (* for operator with fixity fix (0 if there are no requirements) *)
-  let rec argNumber = function
+  let argNumber = function
     | Fixity.Nonfix -> 0
     | Fixity.Infix _ -> 2
     | Fixity.Prefix _ -> 1
@@ -153,7 +153,7 @@ module MakeNames
      if constant c expects exactly n explicit arguments,
      raises Error (msg) otherwise
   *)
-  let rec checkArgNumber = function
+  let checkArgNumber = function
     | IntSyn.ConDec (name, _, i, _, v_, l_), n -> checkAtomic (name, v_, i + n)
     | IntSyn.SkoDec (name, _, i, v_, l_), n -> checkAtomic (name, v_, i + n)
     | IntSyn.ConDef (name, _, i, _, v_, l_, _), n ->
@@ -164,7 +164,7 @@ module MakeNames
   (** checkFixity (name, cidOpt, n) = () if n = 0 (no requirement on arguments)
       or name is declared and has n exactly explicit arguments, raises Error
       (msg) otherwise *)
-  let rec checkFixity = function
+  let checkFixity = function
     | name, _, 0 -> ()
     | name, cid, n ->
         begin if checkArgNumber (IntSyn.sgnLookup cid, n) then ()
@@ -201,17 +201,17 @@ module MakeNames
   *)
   type qid = Qid of string list * string [@@deriving eq, ord, show]
 
-  let rec qidToString (Qid (ids, name)) =
+  let qidToString (Qid (ids, name)) =
     List.foldr (function id, s -> (id ^ ".") ^ s) name ids
 
-  let rec validateQualName = function
+  let validateQualName = function
     | [] -> None
     | id :: ids as l ->
         begin if List.exists (function s -> s = "") l then None
         else Some (Qid (rev ids, id))
         end
 
-  let rec stringToQid name =
+  let stringToQid name =
     let name = Stdlib.String.trim name in
     validateQualName (rev (String.fields (function c -> c = '.') name))
 
@@ -220,9 +220,9 @@ module MakeNames
   type nonrec namespace =
     IntSyn.mid StringTree.table * IntSyn.cid StringTree.table
 
-  let rec newNamespace () = ((StringTree.new_ 0, StringTree.new_ 0) : namespace)
+  let newNamespace () = ((StringTree.new_ 0, StringTree.new_ 0) : namespace)
 
-  let rec insertConst ((structTable, constTable), cid) =
+  let insertConst ((structTable, constTable), cid) =
     let condec_ = IntSyn.sgnLookup cid in
     let id = IntSyn.conDecName condec_ in
     begin match StringTree.insertShadow constTable (id, cid) with
@@ -234,7 +234,12 @@ module MakeNames
              ^ "\nhas already been declared in this signature"))
     end
 
-  let rec insertStruct ((structTable, constTable), mid) =
+  let insertConstShadow ((structTable, constTable), cid) =
+    let condec_ = IntSyn.sgnLookup cid in
+    let id = IntSyn.conDecName condec_ in
+    ignore (StringTree.insertShadow constTable (id, cid))
+
+  let insertStruct ((structTable, constTable), mid) =
     let strdec = IntSyn.sgnStructLookup mid in
     let id = IntSyn.strDecName strdec in
     begin match StringTree.insertShadow structTable (id, mid) with
@@ -246,8 +251,8 @@ module MakeNames
              ^ "\nhas already been declared in this signature"))
     end
 
-  let rec appConsts f (structTable, constTable) = StringTree.app f constTable
-  let rec appStructs f (structTable, constTable) = StringTree.app f structTable
+  let appConsts f (structTable, constTable) = StringTree.app f constTable
+  let appStructs f (structTable, constTable) = StringTree.app f structTable
 
   open! struct
     let rec fromTo f (from, to_) =
@@ -263,50 +268,50 @@ module MakeNames
     let shadowArray : IntSyn.cid option Array.array =
       Array.array (maxCid + 1, None)
 
-    let rec shadowClear () = Array.modify (function _ -> None) shadowArray
+    let shadowClear () = Array.modify (function _ -> None) shadowArray
 
     let fixityArray : Fixity.fixity Array.array =
       Array.array (maxCid + 1, Fixity.Nonfix)
 
-    let rec fixityClear () =
+    let fixityClear () =
       Array.modify (function _ -> Fixity.Nonfix) fixityArray
 
     let namePrefArray : (string list * string list) option Array.array =
       Array.array (maxCid + 1, None)
 
-    let rec namePrefClear () = Array.modify (function _ -> None) namePrefArray
+    let namePrefClear () = Array.modify (function _ -> None) namePrefArray
     let topNamespace : IntSyn.cid HashTable.table = HashTable.new_ 4096
     let topInsert = HashTable.insertShadow topNamespace
     let topLookup = HashTable.lookup topNamespace
     let topDelete = HashTable.delete topNamespace
-    let rec topClear () = HashTable.clear topNamespace
+    let topClear () = HashTable.clear topNamespace
     let dummyNamespace = ((StringTree.new_ 0, StringTree.new_ 0) : namespace)
     let maxMid = Global.maxMid
 
     let structShadowArray : IntSyn.mid option Array.array =
       Array.array (maxMid + 1, None)
 
-    let rec structShadowClear () =
+    let structShadowClear () =
       Array.modify (function _ -> None) structShadowArray
 
     let componentsArray : namespace Array.array =
       Array.array (maxMid + 1, dummyNamespace)
 
-    let rec componentsClear () =
+    let componentsClear () =
       Array.modify (function _ -> dummyNamespace) componentsArray
 
     let topStructNamespace : IntSyn.mid HashTable.table = HashTable.new_ 4096
     let topStructInsert = HashTable.insertShadow topStructNamespace
     let topStructLookup = HashTable.lookup topStructNamespace
     let topStructDelete = HashTable.delete topStructNamespace
-    let rec topStructClear () = HashTable.clear topStructNamespace
+    let topStructClear () = HashTable.clear topStructNamespace
   end
 
   (* installName (name, cid) = ()
        Effect: update mapping from identifiers
                to constants, taking into account shadowing
     *)
-  let rec installConstName cid =
+  let installConstName cid =
     let condec_ = IntSyn.sgnLookup cid in
     let id = IntSyn.conDecName condec_ in
     begin match topInsert (id, cid) with
@@ -314,12 +319,12 @@ module MakeNames
     | Some (_, cid') -> Array.update (shadowArray, cid, Some cid')
     end
 
-  let rec installAlias (name, cid) = ignore (topInsert (name, cid))
+  let installAlias (name, cid) = ignore (topInsert (name, cid))
 
-  let rec insertConstAlias ((structTable, constTable), name, cid) =
+  let insertConstAlias ((structTable, constTable), name, cid) =
     ignore (StringTree.insertShadow constTable (name, cid))
 
-  let rec uninstallConst cid =
+  let uninstallConst cid =
     let condec_ = IntSyn.sgnLookup cid in
     let id = IntSyn.conDecName condec_ in
     begin
@@ -338,7 +343,7 @@ module MakeNames
       end
     end
 
-  let rec installStructName mid =
+  let installStructName mid =
     let strdec = IntSyn.sgnStructLookup mid in
     let id = IntSyn.strDecName strdec in
     begin match topStructInsert (id, mid) with
@@ -346,7 +351,7 @@ module MakeNames
     | Some (_, mid') -> Array.update (structShadowArray, mid, Some mid')
     end
 
-  let rec uninstallStruct mid =
+  let uninstallStruct mid =
     let strdec = IntSyn.sgnStructLookup mid in
     let id = IntSyn.strDecName strdec in
     begin
@@ -362,7 +367,7 @@ module MakeNames
       Array.update (componentsArray, mid, dummyNamespace)
     end
 
-  let rec resetFrom (mark, markStruct) =
+  let resetFrom (mark, markStruct) =
     let limit, limitStruct = IntSyn.sgnSize () in
     let rec ct f (i, j) =
       begin if j < i then ()
@@ -380,7 +385,7 @@ module MakeNames
   (* reset () = ()
        Effect: clear name tables related to constants
     *)
-  let rec reset () =
+  let reset () =
     begin
       topClear ();
       begin
@@ -401,8 +406,9 @@ module MakeNames
       end
     end
 
-  let rec structComps mid = (fun (r, _) -> r) (Array.sub (componentsArray, mid))
-  let rec constComps mid = (fun (_, r) -> r) (Array.sub (componentsArray, mid))
+  let structComps mid = (fun (r, _) -> r) (Array.sub (componentsArray, mid))
+
+  let constComps mid = (fun (_, r) -> r) (Array.sub (componentsArray, mid))
 
   let rec findStruct = function
     | structTable, id :: [] -> StringTree.lookup structTable id
@@ -412,7 +418,7 @@ module MakeNames
         | Some mid -> findStruct (structComps mid, ids)
         end
 
-  let rec findTopStruct = function
+  let findTopStruct = function
     | id :: [] -> HashTable.lookup topStructNamespace id
     | id :: ids ->
         begin match HashTable.lookup topStructNamespace id with
@@ -432,7 +438,7 @@ module MakeNames
         | Some mid -> findUndefStruct (structComps mid, ids, id :: ids')
         end
 
-  let rec findTopUndefStruct = function
+  let findTopUndefStruct = function
     | id :: [] ->
         begin match HashTable.lookup topStructNamespace id with
         | None -> Some (Qid ([], id))
@@ -444,7 +450,7 @@ module MakeNames
         | Some mid -> findUndefStruct (structComps mid, ids, [ id ])
         end
 
-  let rec constLookupIn = function
+  let constLookupIn = function
     | (structTable, constTable), Qid ([], id) -> StringTree.lookup constTable id
     | (structTable, constTable), Qid (ids, id) ->
         begin match findStruct (structTable, ids) with
@@ -452,7 +458,7 @@ module MakeNames
         | Some mid -> StringTree.lookup (constComps mid) id
         end
 
-  let rec structLookupIn = function
+  let structLookupIn = function
     | (structTable, constTable), Qid ([], id) ->
         StringTree.lookup structTable id
     | (structTable, constTable), Qid (ids, id) ->
@@ -461,7 +467,7 @@ module MakeNames
         | Some mid -> StringTree.lookup (structComps mid) id
         end
 
-  let rec constUndefIn = function
+  let constUndefIn = function
     | (structTable, constTable), Qid ([], id) ->
         begin match StringTree.lookup constTable id with
         | None -> Some (Qid ([], id))
@@ -481,7 +487,7 @@ module MakeNames
             end
         end
 
-  let rec structUndefIn = function
+  let structUndefIn = function
     | (structTable, constTable), Qid ([], id) ->
         begin match StringTree.lookup structTable id with
         | None -> Some (Qid ([], id))
@@ -504,7 +510,7 @@ module MakeNames
   (* nameLookup (qid) = SOME(cid),  if qid refers to cid in the current context,
                         = NONE,       if there is no such constant
     *)
-  let rec constLookup = function
+  let constLookup = function
     | Qid ([], id) -> HashTable.lookup topNamespace id
     | Qid (ids, id) ->
         begin match findTopStruct ids with
@@ -512,7 +518,7 @@ module MakeNames
         | Some mid -> StringTree.lookup (constComps mid) id
         end
 
-  let rec structLookup = function
+  let structLookup = function
     | Qid ([], id) -> HashTable.lookup topStructNamespace id
     | Qid (ids, id) ->
         begin match findTopStruct ids with
@@ -520,7 +526,41 @@ module MakeNames
         | Some mid -> StringTree.lookup (structComps mid) id
         end
 
-  let rec constUndef = function
+  (* The namespace of the %require group currently being loaded (or the
+     top-level namespace if none). [Pal.Impl]'s [current_group_ns] is an
+     alias for this ref: [ReconTerm]'s const-lookup chain only has access to
+     [Names], never to [Impl]'s internals, so this needs to live here for
+     [resolveQid] to see it. *)
+  let currentGroupNamespace : namespace ref = ref (newNamespace ())
+
+  (* [resolveQid ~shortest qid] is the shared entry point for %val/%abs name
+     resolution.
+
+     - [shortest:false] (%val, bare NAME, %( NAME )): identical to
+       [constLookup qid] -- shadow-aware lookup via the global bare-name
+       table, so an open [%scope]'s case-label binding wins over an
+       outer/toplevel declaration of the same name ("longest match").
+
+     - [shortest:true] on an unqualified qid ([Qid ([], name)]) (%abs NAME):
+       prefer the binding of [name] within [!currentGroupNamespace]'s own
+       table -- a genuine toplevel declaration of the currently-loading
+       %require group, bypassing whatever %scope shadow is currently open in
+       the global bare-name table -- falling back to the ordinary
+       shadow-aware [constLookup qid] if no such toplevel binding exists.
+
+     - [shortest:true] on a qualified qid ([Qid (ids, name)]) (%abs ( NAME
+       S )): identical to [constLookup qid] -- ordinary qualified
+       structure-member lookup is unaffected by shadowing either way. *)
+  let resolveQid ~shortest qid =
+    match (shortest, qid) with
+    | true, Qid ([], _) ->
+        begin match constLookupIn (!currentGroupNamespace, qid) with
+        | Some _ as found -> found
+        | None -> constLookup qid
+        end
+    | _ -> constLookup qid
+
+  let constUndef = function
     | Qid ([], id) ->
         begin match HashTable.lookup topNamespace id with
         | None -> Some (Qid ([], id))
@@ -538,7 +578,7 @@ module MakeNames
             end
         end
 
-  let rec structUndef = function
+  let structUndef = function
     | Qid ([], id) ->
         begin match HashTable.lookup topStructNamespace id with
         | None -> Some (Qid ([], id))
@@ -564,12 +604,12 @@ module MakeNames
     | Some mid' -> structPath (mid', ids')
     end
 
-  let rec maybeShadow = function
+  let maybeShadow = function
     | qid, false -> qid
     | Qid ([], id), true -> Qid ([], ("%" ^ id) ^ "%")
     | Qid (id :: ids, name), true -> Qid (("%" ^ id ^ "%") :: ids, name)
 
-  let rec conDecQid condec_ =
+  let conDecQid condec_ =
     let id = IntSyn.conDecName condec_ in
     begin match IntSyn.conDecParent condec_ with
     | None -> Qid ([], id)
@@ -579,12 +619,12 @@ module MakeNames
   (* constQid (cid) = qid,
        where `qid' is the print name of cid
     *)
-  let rec constQid cid =
+  let constQid cid =
     let condec_ = IntSyn.sgnLookup cid in
     let qid = conDecQid condec_ in
     maybeShadow (qid, constLookup qid <> Some cid)
 
-  let rec structQid mid =
+  let structQid mid =
     let strdec = IntSyn.sgnStructLookup mid in
     let id = IntSyn.strDecName strdec in
     let qid =
@@ -599,7 +639,7 @@ module MakeNames
        Effect: install fixity for constant cid,
                possibly print declaration depending on chatter level
     *)
-  let rec installFixity (cid, fixity) =
+  let installFixity (cid, fixity) =
     let name = qidToString (constQid cid) in
     begin
       checkFixity (name, cid, argNumber fixity);
@@ -609,13 +649,13 @@ module MakeNames
   (* getFixity (cid) = fixity
        fixity defaults to Fixity.Nonfix, if nothing has been declared
     *)
-  let rec getFixity cid = Array.sub (fixityArray, cid)
+  let getFixity cid = Array.sub (fixityArray, cid)
 
   (* fixityLookup qid = fixity
        where fixity is the fixity associated with constant named qid,
        defaults to Fixity.Nonfix if qid or fixity are undeclared
     *)
-  let rec fixityLookup qid =
+  let fixityLookup qid =
     begin match constLookup qid with
     | None -> Fixity.Nonfix
     | Some cid -> getFixity cid
@@ -625,7 +665,7 @@ module MakeNames
   (* ePref is the name preference for existential variables of given type *)
   (* uPref is the name preference for universal variables of given type *)
   (* installNamePref' (cid, (ePref, uPref)) see installNamePref *)
-  let rec installNamePref' (cid, (ePref, uPref)) =
+  let installNamePref' (cid, (ePref, uPref)) =
     let l_ = IntSyn.constUni cid in
     let _ =
       begin match l_ with
@@ -644,17 +684,17 @@ module MakeNames
        Effect: install name preference for type family cid
        raise Error if cid does not refer to a type family
     *)
-  let rec installNamePref = function
+  let installNamePref = function
     | cid, (ePref, []) ->
         installNamePref' (cid, (ePref, [ String.map Char.toLower (hd ePref) ]))
     | cid, (ePref, uPref) -> installNamePref' (cid, (ePref, uPref))
 
-  let rec getNamePref cid = Array.sub (namePrefArray, cid)
+  let getNamePref cid = Array.sub (namePrefArray, cid)
 
-  let rec installComponents (mid, namespace) =
+  let installComponents (mid, namespace) =
     Array.update (componentsArray, mid, namespace)
 
-  let rec getComponents mid = Array.sub (componentsArray, mid)
+  let getComponents mid = Array.sub (componentsArray, mid)
 
   (* local names are more easily re-used: they don't increment the
        counter associated with a name
@@ -664,13 +704,13 @@ module MakeNames
 
   let extent = function Exist -> Global | Univ ext -> ext
 
-  let rec namePrefOf'' = function
+  let namePrefOf'' = function
     | Exist, None -> "_?"
     | Univ _, None -> "_"
     | Exist, Some (ePref, uPref) -> hd ePref
     | Univ _, Some (ePref, uPref) -> hd uPref
 
-  let rec namePrefOf' = function
+  let namePrefOf' = function
     | Exist, None -> "_?"
     | Univ _, None -> "_"
     | role, Some (IntSyn.Const cid) ->
@@ -688,7 +728,7 @@ module MakeNames
 
        V should be a type, but the code is robust, returning the default ""X"" or ""x""
     *)
-  let rec namePrefOf (role, v_) = namePrefOf' (role, IntSyn.targetHeadOpt v_)
+  let namePrefOf (role, v_) = namePrefOf' (role, IntSyn.targetHeadOpt v_)
 
   (* local ... *)
   (******************)
@@ -736,12 +776,12 @@ module MakeNames
     let varTable : varEntry StringTree.table = StringTree.new_ 0
     let varInsert = StringTree.insert varTable
     let varLookup = StringTree.lookup varTable
-    let rec varClear () = StringTree.clear varTable
+    let varClear () = StringTree.clear varTable
     let varContext : IntSyn.dctx ref = ref IntSyn.Null
     let evarList : (IntSyn.exp * string) list ref = ref []
-    let rec evarReset () = evarList := []
+    let evarReset () = evarList := []
 
-    let rec evarLookup x_ =
+    let evarLookup x_ =
       let rec evlk = function
         | r, [] -> None
         | r, (IntSyn.EVar (r', _, _, _), name) :: l ->
@@ -756,8 +796,8 @@ module MakeNames
       | IntSyn.AVar r -> evlk (r, !evarList)
       end
 
-    let rec evarInsert entry = evarList := entry :: !evarList
-    let rec namedEVars () = !evarList
+    let evarInsert entry = evarList := entry :: !evarList
+    let namedEVars () = !evarList
 
     let rec evarCnstr' = function
       | [], acc -> acc
@@ -769,13 +809,13 @@ module MakeNames
           end
       | _ :: l, acc -> evarCnstr' (l, acc)
 
-    let rec evarCnstr () = evarCnstr' (!evarList, [])
+    let evarCnstr () = evarCnstr' (!evarList, [])
     let indexTable : int StringTree.table = StringTree.new_ 0
     let indexInsert = StringTree.insert indexTable
     let indexLookup = StringTree.lookup indexTable
-    let rec indexClear () = StringTree.clear indexTable
+    let indexClear () = StringTree.clear indexTable
 
-    let rec nextIndex' = function
+    let nextIndex' = function
       | name, None -> begin
           indexInsert (name, 1);
           1
@@ -785,7 +825,7 @@ module MakeNames
           i + 1
         end
 
-    let rec nextIndex name = nextIndex' (name, indexLookup name)
+    let nextIndex name = nextIndex' (name, indexLookup name)
   end
 
   (* X *)
@@ -816,7 +856,7 @@ module MakeNames
        Effect: clear variable tables
        This must be called for each declaration or query
     *)
-  let rec varReset g_ =
+  let varReset g_ =
     begin
       varClear ();
       begin
@@ -831,31 +871,31 @@ module MakeNames
   (* addEVar (X, name) = ()
        effect: adds (X, name) to varTable and evarList
        assumes name not already used *)
-  let rec addEVar (x_, name) =
+  let addEVar (x_, name) =
     begin
       evarInsert (x_, name);
       varInsert (name, Evar x_)
     end
 
-  let rec getEVarOpt name =
+  let getEVarOpt name =
     begin match varLookup name with None -> None | Some (Evar x_) -> Some x_
     end
 
   (* varDefined (name) = true iff `name' refers to a free variable, *)
   (* which could be an EVar for constant declarations or FVar for queries *)
-  let rec varDefined name =
+  let varDefined name =
     begin match varLookup name with None -> false | Some _ -> true
     end
 
   (* conDefined (name) = true iff `name' refers to a constant *)
-  let rec conDefined name =
+  let conDefined name =
     begin match constLookup (Qid ([], name)) with
     | None -> false
     | Some _ -> true
     end
 
   (* ctxDefined (G, name) = true iff `name' is declared in context G *)
-  let rec ctxDefined (g_, name) =
+  let ctxDefined (g_, name) =
     let rec cdfd = function
       | IntSyn.Null -> false
       | IntSyn.Decl (g'_, IntSyn.Dec (Some name', _)) ->
@@ -885,7 +925,7 @@ module MakeNames
     else name
     end
 
-  let rec findName = function
+  let findName = function
     | g_, base, Local -> findNameLocal (g_, base, 0)
     | g_, base, Global -> tryNextName (g_, base)
 
@@ -894,13 +934,13 @@ module MakeNames
   (* baseOf (name) = name',
        where name' is the prefix of name not containing a digit
     *)
-  let rec baseOf name = Substring.string (takeNonDigits (Substring.full name))
+  let baseOf name = Substring.string (takeNonDigits (Substring.full name))
 
   (* newEvarName (G, X) = name
        where name is the next unused name appropriate for X,
        based on the name preference declaration for A if X:A
     *)
-  let rec newEVarName = function
+  let newEVarName = function
     | g_, (IntSyn.EVar (r, _, v_, cnstr_) as x_) ->
         let name = tryNextName (g_, namePrefOf (Exist, v_)) in
         begin
@@ -921,7 +961,7 @@ module MakeNames
        If no name has been assigned yet, assign a new one.
        Effect: if a name is assigned, update varTable
     *)
-  let rec evarName (g_, x_) =
+  let evarName (g_, x_) =
     begin match evarLookup x_ with
     | None ->
         let name = newEVarName (g_, x_) in
@@ -939,7 +979,7 @@ module MakeNames
        If no name has been assigned, the context might be built the wrong
        way---check decName below instread of IntSyn.Dec
     *)
-  let rec bvarName (g_, k) =
+  let bvarName (g_, k) =
     begin match IntSyn.ctxLookup (g_, k) with
     | IntSyn.Dec (Some name, _) -> name
     | IntSyn.ADec (Some name, _) -> name
@@ -956,7 +996,7 @@ module MakeNames
        If D does not assign a name, this picks, based on the name
        preference declaration.
     *)
-  let rec decName' arg__1 arg__2 =
+  let decName' arg__1 arg__2 =
     begin match (arg__1, arg__2) with
     | role, (g_, IntSyn.Dec (None, v_)) ->
         let name = findName (g_, namePrefOf (role, v_), extent role) in
@@ -986,7 +1026,7 @@ module MakeNames
         end
     | role, (g_, (IntSyn.NDec None as d_)) ->
         let name = findName (g_, "@x", Local) in
-        let _ = print name in
+        ignore (print name);
         IntSyn.NDec (Some name)
     | role, (g_, (IntSyn.NDec (Some name) as d_)) ->
         begin if varDefined name || conDefined name || ctxDefined (g_, name)
@@ -1035,7 +1075,7 @@ module MakeNames
     | g_, _, v_ -> v_
 
   (* | pisEName' (G, i, V) = V *)
-  let rec pisEName (i, v_) = pisEName' (IntSyn.Null, i, v_)
+  let pisEName (i, v_) = pisEName' (IntSyn.Null, i, v_)
 
   (* defEName' (G, i, (U,V)) = (U',V')
        Invariant: G |- U : V  and G |- U' : V' since U == U' and V == V'.
@@ -1052,9 +1092,9 @@ module MakeNames
   (* i > 0 *)
 
   (* | defEName' (G, i, (U, V)) = (U, V) *)
-  let rec defEName (imp, uv) = defEName' (IntSyn.Null, imp, uv)
+  let defEName (imp, uv) = defEName' (IntSyn.Null, imp, uv)
 
-  let rec nameConDec' = function
+  let nameConDec' = function
     | IntSyn.ConDec (name, parent, imp, status, v_, l_) ->
         IntSyn.ConDec (name, parent, imp, status, pisEName (imp, v_), l_)
     | IntSyn.ConDef (name, parent, imp, u_, v_, l_, anc) ->
@@ -1068,14 +1108,14 @@ module MakeNames
   (* fix ??? *)
   (* Assigns names to variables in a constant declaration *)
   (* The varReset (); is necessary so that explicitly named variables keep their name *)
-  let rec nameConDec conDec =
+  let nameConDec conDec =
     begin
       varReset IntSyn.Null;
       nameConDec' conDec
     end
   (* declaration is always closed *)
 
-  let rec skonstName name = tryNextName (IntSyn.Null, name)
+  let skonstName name = tryNextName (IntSyn.Null, name)
   let namedEVars = namedEVars
   let evarCnstr = evarCnstr
 end

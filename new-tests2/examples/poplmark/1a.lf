@@ -24,7 +24,7 @@ is represented by
 This is the only way an assm judgement can arise, so we can identify
 variables as those types T such that a judgement assm T _ is available.
 
-}%
+%]
 %term sub_top sub _ top %.
 %term sub_refl %pi (sub X X) %<- (assm X _) %.
 %term sub_trans %pi (sub X T) %<- (assm X U) %<- (sub U T) %.
@@ -42,7 +42,7 @@ does become so entangled, because "assm X T" is dependent on T.  So we
 introduce a new judgement var, that mentions only the variable in
 question.
 
-}%
+%]
 %sort var {_ tp} %.
 %%%%  Blocks  %%%%%
 %. %[
@@ -53,7 +53,7 @@ to the context, we will also add a variable assumption (dv:var x).
 This will allow us to prove that whenever "assm X T" is present, so is
 "var X".  This lemma is called assm_var below.
 
-}%
+%]
 %sort assm_var {_ assm T _} {_ var T} %.
 %mode assm_var %in %out %.
 %. %[
@@ -64,7 +64,7 @@ context with them.  Thus, in addition to adding var assumptions, we
 will also add assm_var assumptions.  Hence, we have the following
 block from which to build contexts:
 
-}%
+%]
 %block bind [t tp] {x tp} {dv var x} {d assm x t} {thm assm_var d dv}%.
 %. %[
 
@@ -81,7 +81,7 @@ explained later) two other blocks that arise:
    assumption exists for the variable in question.  Since ablock adds
    an assm assumption, it must also add a case for assm_var.
 
-}%
+%]
 %block vblock {t tp} {d var t}%.
 %block ablock [x tp] [dv var x] [t tp] {d assm x t} {thm assm_var d dv}%.
 %. %[
@@ -89,7 +89,7 @@ explained later) two other blocks that arise:
 Assm_var is true in any context made up from bind, vblock, and ablock
 blocks.
 
-}%
+%]
 %worlds (bind vblock ablock) (assm_var _ _) %.
 %total {} (assm_var _ _) %.
 %%%%%  Reductio ad absurdio  %%%%%
@@ -110,7 +110,7 @@ top, arrow, or forall type.
 
 Put more pithily: top, arrow, and forall are not variables.
 
-}%
+%]
 %sort top_var_contra {_ var top} {_ false} %.
 %mode top_var_contra %in %out %.
 %worlds (bind vblock ablock) (top_var_contra _ _) %.
@@ -205,7 +205,7 @@ and states that subtyping assumptions are available only for
 variables, so a contradiction arises in each case where we suppose a
 subtyping assumption for a non-variable.
 
-}%
+%]
 %sort trans* {Q tp} {Ncase nat} {_ nat_eq Ncase z} {_ sub S Q} {_ sub Q T} {_ sub S T} %.
 %sort narrow* {Q tp} {Ncase nat} {_ nat_eq Ncase (s z)} {_ var X} {_ %pi (assm X Q) %-> (sub M N)} {_ sub P Q} {_ %pi (assm X P) %-> (sub M N)} %.
 %mode trans* %in %in %in %in %in %out %.
@@ -284,7 +284,7 @@ narrow are proven for worlds built from only bind.  We also can tidy
 away the extra stuff needed for the termination arguments for trans*
 and narrow*.
 
-}%
+%]
 %sort trans {_ sub S Q} {_ sub Q T} {_ sub S T} %.
 %mode trans %in %in %out %.
 %term _ %pi (trans D1 D2 D3) %<- (trans* _ _ nat_eq_ D1 D2 D3) %.
@@ -305,7 +305,7 @@ need to add its reflexivity case there, hence the reflx assumption in
 rblock and rbind.  Rblock exists for laziness purposes; since reflx
 never calls trans, we needn't bother to maintain trans's invariants.
 
-}%
+%]
 %sort reflx {T} {_ sub T T} %.
 %mode reflx %in %out %.
 %block rblock [t tp] {x tp} {d assm x t} {thm reflx x (sub_refl d)}%.

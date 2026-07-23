@@ -16,4 +16,4 @@ _ : of (lam [x] app x x) ((all [a] a) => (all [a] a))
 _ : of (lam [x] app x x) ((all [a] a => a) => (all [a] a => a))
   = tp_lam [x] [u:of x (all [a] a => a)]
      tp_app u (tp_alle (all [a] a => a) u).
-}%
+%]

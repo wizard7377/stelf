@@ -135,11 +135,6 @@
 %term _ ofkd-resp cn-eq/i kd-eq/i D D %.
 %worlds (ofkd+vdt-block ofkd-block) (ofkd-resp _ _ _ _) %.
 %total {} (ofkd-resp _ _ _ _) %.
-%sort cn-deq-resp {_ cn-eq C1 C1'} {_ cn-eq C2 C2'} {_ kd-eq K K'} {_ cn-deq C1 C2 K} {_ cn-deq C1' C2' K'} %.
-%mode cn-deq-resp %in %in %in %in %out %.
-%term _ cn-deq-resp cn-eq/i cn-eq/i kd-eq/i D D %.
-%worlds (ofkd+vdt-block ofkd-block) (cn-deq-resp _ _ _ _ _) %.
-%total {} (cn-deq-resp _ _ _ _ _) %.
 %%%%%  Unmap Functionality  %%%%%
 %sort can-unmap {M} {_ unmap M C} %.
 %mode can-unmap %in %out %.
@@ -235,17 +230,17 @@
 %sort invert-tmap {_ kd-wf K} {_ tmap K A} {_ tunmap A K'} {_ kd-deq K K'} %.
 %mode invert-tmap %in %in %out %out %.
 %block invert-bind [k kd] [d_wf kd-wf k] {a cn} {d ofkd a k} {dm mofkd d met/unit} {thm can-mofkd d dm} {thm vdt/ofkd d d_wf} {x eterm} {at map a x} {xt unmap x a} {thm invert-map d at xt (cn-deq/refl d)}%.
-%scope invert-tmap %term app 
+%scope invert-tmap %term app
 	%pi (invert-map (ofkd/cn/app Dof1 Dof2) (map/app D2 D1) (unmap/app D2' D1') (cn-deq/cn/app Dequiv1 Dequiv2))
 	%<- (invert-map Dof1 D1 D1' Dequiv1)
 	%<- (invert-map Dof2 D2 D2' Dequiv2) %.
-%term pi1 
+%scope invert-tmap %term pi1
 	%pi (invert-map (ofkd/cn/pj1 Dof) (map/pi1 D) (unmap/pi1 D') (cn-deq/cn/pj1 Dequiv))
 	%<- (invert-map Dof D D' Dequiv) %.
 %scope invert-tmap %term pi2 
 	%pi (invert-map (ofkd/cn/pj2 Dof) (map/pi2 D) (unmap/pi2 D') (cn-deq/cn/pj2 Dequiv))
 	%<- (invert-map Dof D D' Dequiv) %.
-%term lam 
+%scope invert-tmap %term lam
 	%pi (invert-map (ofkd/cn/lam Dof2 Dof1) (map/lam D2 D1) (unmap/lam D2' D1') (cn-deq/cn/lam Dequiv2 Dequiv1))
 	%<- (invert-tmap Dof1 D1 D1' Dequiv1)
 	%<- ({a} {d} {dm mofkd d met/unit} 
@@ -258,7 +253,7 @@
 	%pi (invert-map (ofkd/cn/pair Dof1 Dof2) (map/pair D2 D1) (unmap/pair D2' D1') (cn-deq/cn/pair Dequiv1 Dequiv2))
 	%<- (invert-map Dof1 D1 D1' Dequiv1)
 	%<- (invert-map Dof2 D2 D2' Dequiv2) %.
-%term sing 
+%scope invert-tmap %term sing
 	%pi (invert-map (ofkd/kd/sing Dof) D D' (cn-deq/kd/sing2 Dequiv Dof'))
 	%<- (invert-map Dof D D' Dequiv)
 	%<- (vdt/cn-deq Dequiv _ Dof' _) %.
@@ -275,7 +270,7 @@
 	%<- ({a} {x} {at map a x} {xt unmap x a} unmap-fun (D'' x a xt) D' (Deq a))
 	%<- ({a} cn-resp-cn ([b] cn/app b a) (Deq a) (Deq' a))
 	%<- ({a} {d} cn-deq-resp cn-eq/i (Deq' a) kd-eq/i (Dequiv2 a d) (Dequiv2' a d)) %.
-%term sigext 
+%scope invert-tmap %term sigext
 	%pi (invert-map (ofkd/sgm-ext Dof1 Dof2) D D' (cn-deq/sgm-ext Dequiv1 Dequiv2'))
 	%<- (invert-map Dof1 (map/pi1 D) (unmap/pi1 D') Dequiv1)
 	%<- (invert-map Dof2 (map/pi2 D) (unmap/pi2 D'') Dequiv2)
@@ -285,17 +280,17 @@
 %scope invert-tmap %term sub 
 	%pi (invert-map (ofkd/sub Dof Dsub) D D' (cn-deq/sub Dequiv Dsub))
 	%<- (invert-map Dof D D' Dequiv) %.
-%term deq 
+%scope invert-tmap %term deq
 	%pi (invert-map (ofkd/deq Dof Dtequiv) D D' (cn-deq/deq Dequiv Dtequiv))
 	%<- (invert-map Dof D D' Dequiv) %.
 %scope invert-tmap %term unit invert-map ofkd/tp/unit map/unit unmap/unit (cn-deq/refl ofkd/tp/unit) %.
-%term tagged invert-map ofkd/tp/tagged map/tagged unmap/tagged (cn-deq/refl ofkd/tp/tagged) %.
+%scope invert-tmap %term tagged invert-map ofkd/tp/tagged map/tagged unmap/tagged (cn-deq/refl ofkd/tp/tagged) %.
 %scope invert-tmap %term ref 
 	%pi (invert-map (ofkd/tp/ref Dof) (map/ref D) (unmap/app D' unmap/ref) (cn-deq/trans (cn-deq/tp/ref Dequiv) (cn-deq/sym Dequiv')))
 	%<- (invert-map Dof D D' Dequiv)
 	%<- (vdt/cn-deq Dequiv _ Dof' _)
 	%<- (cn-deq-beta ([a] [d] ofkd/tp/ref d) Dof' Dequiv') %.
-%term tag 
+%scope invert-tmap %term tag
 	%pi (invert-map (ofkd/tp/tag Dof) (map/tag D) (unmap/app D' unmap/tag) (cn-deq/trans (cn-deq/tp/tag Dequiv) (cn-deq/sym Dequiv')))
 	%<- (invert-map Dof D D' Dequiv)
 	%<- (vdt/cn-deq Dequiv _ Dof' _)
@@ -308,7 +303,7 @@
 	%<- (vdt/cn-deq Dequiv2 _ Dof2' _)
 	%<- (cn-deq-beta ([a] [d] ofkd/cn/lam ([b] [e] ofkd/tp/arrow d e) kd-wf/kd/type) Dof1' Dequiv)
 	%<- (cn-deq-beta ([b] [e] ofkd/tp/arrow Dof1' e) Dof2' Dequiv') %.
-%term cross 
+%scope invert-tmap %term cross
 	%pi (invert-map (ofkd/tp/cross Dof1 Dof2) (map/cross D2 D1) (unmap/app D2' (unmap/app D1' unmap/cross)) (cn-deq/trans (cn-deq/tp/cross Dequiv1 Dequiv2) (cn-deq/sym (cn-deq/trans (cn-deq/cn/app Dequiv (cn-deq/refl Dof2')) Dequiv'))))
 	%<- (invert-map Dof1 D1 D1' Dequiv1)
 	%<- (invert-map Dof2 D2 D2' Dequiv2)
@@ -324,7 +319,7 @@
 	%<- (vdt/cn-deq Dequiv2 _ Dof2' _)
 	%<- (cn-deq-beta ([a] [d] ofkd/cn/lam ([b] [e] ofkd/tp/sum d e) kd-wf/kd/type) Dof1' Dequiv)
 	%<- (cn-deq-beta ([b] [e] ofkd/tp/sum Dof1' e) Dof2' Dequiv') %.
-%term mu 
+%scope invert-tmap %term mu
 	%pi (invert-map (ofkd/cn/mu Dof _) (map/mu D) (unmap/app (unmap/lam D' tunmap/t) unmap/mu) (cn-deq/trans (cn-deq/cn/mu Dequiv kd-deq/kd/type) (cn-deq/sym (cn-deq/trans Dequiv' (cn-deq/cn/mu Dequiv'' kd-deq/kd/type)))))
 	%<- ({a} {d} {dm mofkd d met/unit} 
 	%pi (can-mofkd d dm)
@@ -362,11 +357,11 @@
 	%-> (vdt/ofkd d Dwf')
 	%-> (cn-deq-beta ([a] [d] Dof' a (ofkd/deq d Dequiv1')) d (Dequiv'' a d)))
 	%<- (kd-refl/deq Dwf' Dequiv''') %.
-%term t invert-tmap kd-wf/kd/type tmap/t tunmap/t kd-deq/kd/type %.
+%scope invert-tmap %term t invert-tmap kd-wf/kd/type tmap/t tunmap/t kd-deq/kd/type %.
 %scope invert-tmap %term sing 
 	%pi (invert-tmap (kd-wf/kd/sing Dof) (tmap/sing D) (tunmap/sing D') (kd-deq/kd/sing Dequiv))
 	%<- (invert-map Dof D D' Dequiv) %.
-%term pi 
+%scope invert-tmap %term pi
 	%pi (invert-tmap (kd-wf/kd/pi Dof1 Dof2) (tmap/pi D2 D1) (tunmap/pi D2' D1') (kd-deq/kd/pi Dequiv1' ([a] [d] Dequiv2 a (ofkd/deq d Dequiv1'))))
 	%<- (invert-tmap Dof1 D1 D1' (%the (kd-deq K1 K1') Dequiv1))
 	%<- (kd-sym Dequiv1 Dequiv1')

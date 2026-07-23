@@ -77,7 +77,7 @@ double_v' : {v:ctriv}
             doubleT (vvv XXi) (vvalMS_t (CV:vvalMS XXi Xi) VVT) 
                     (dsv Xi T) 
                     (v-part_t (VP:v-part CV XXi')) CV VP DST.
-}%
+%]
 %term double_t {t ctriv} {vvt {xi stack} vvalT xi t xi} {dst {xi stack} dstack_substT t xi t xi} doubleT (vvt XXi) VVMS (dst Xi) VP CV VP (dst Xi) %.
 %term double_cret 
 	%pi (doubleE (vval_cret VVC VVT) VVMS (dstack_subst_cret DSC DST) VP (dstack_subst_cret DSC' DST'))

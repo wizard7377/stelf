@@ -15,7 +15,7 @@
    where "---" are assumptions y:tm B W' for W' <> W
    and if J = (M : A) then J* = M* : tm A W
        if J = (E - A) then J* = E* : exp A W
-}%
+%]
 %sort tp %.
 %name tp %.
 %term => %pi tp %-> tp %-> tp %.
@@ -67,7 +67,7 @@ strboxe : str ([x][w] boxe (M1 x w) [u] M2 x w u) ([w] boxe (M1' w) [u] M2' w u)
 		 str ([x][w] u w) ([w] u w)
 		 -> str ([x][w] M2 x w u) (M2' w u)).
 ... more case missing ...
-}%
+%]
 % Examples
 %define _ (tm (box A => A) W) lam ([x] boxe x ([u] u W)) %.
 %define _ (tm (box A => box (box A)) W) lam ([x] boxe x ([u] boxi ([w] boxi ([w'] u w')))) %.
@@ -93,4 +93,4 @@ _ : tm (dia A => box (dia A)) W
      = lam [x] diae x [w][x'] t2e (boxi [v] diai (t2e x')).
 _ : tm (dia (box A) => box A) W
      = lam [x] boxi [w] diae x [w'][x'] boxe x' [u] u w.
-}%
+%]

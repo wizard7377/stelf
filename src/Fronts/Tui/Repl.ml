@@ -63,115 +63,37 @@ module Repl (M : REPL.S) : REPL.REPL = struct
     Lwt.return (Zed_string.to_utf8 s)
 
   exception Interrupted = Interrupted
-
   let stop code = exit code
 
-  (* Message rendering. Styling is expressed as [LTerm_style.t] values and
-     handed to LTerm via [LTerm_text.make_formatter]: semantic tags
-     ([@{<error>...@}], [@{<warning>...@}], etc.) inside a [Display.Info.t.msg]
-     thunk, and the tag wrapping the [kind] prefix ("error: ", "=> ", ...), are
-     resolved by [color_of_tag] into styles that LTerm encodes for the terminal.
-     When [M.use_color] is false we pass no [read_color], so tags are ignored and
-     the output is unstyled but textually correct. *)
-
-  let color_of_tag : string -> LTerm_style.t =
-    let open LTerm_style in
-    function
-    | "error" -> { none with bold = Some true; foreground = Some red }
-    | "warning" -> { none with bold = Some true; foreground = Some yellow }
-    | "response" ->
-        { none with bold = Some true; foreground = Some (rgb 255 165 0) }
-    (* LTerm_style has no faint/dim attribute; approximate dim with gray. *)
-    | "debug" | "dim" -> { none with foreground = Some lblack }
-    | "bold" -> { none with bold = Some true }
-    | _ -> none
-
-  type kind_style = { prefix : string; tag : string option }
-
-  let style_for : Display.Info.kind option -> kind_style =
-    let open Display.Info in
-    function
-    | Some Error -> { prefix = "error: "; tag = Some "error" }
-    | Some Warning -> { prefix = "warning: "; tag = Some "warning" }
-    | Some Response -> { prefix = "=> "; tag = Some "response" }
-    | Some Debug -> { prefix = "debug: "; tag = Some "debug" }
-    | Some Info | None -> { prefix = ""; tag = None }
-
-  (* Map the frontend-agnostic [Display.Info] styling vocabulary onto LTerm's. *)
-  let color_to_lterm : Display.Info.color -> LTerm_style.color =
-    let open LTerm_style in
-    function
-    | Black -> black
-    | Red -> red
-    | Green -> green
-    | Yellow -> yellow
-    | Blue -> blue
-    | Magenta -> magenta
-    | Cyan -> cyan
-    | White -> white
-    | Bright_black -> lblack
-    | Bright_red -> lred
-    | Bright_green -> lgreen
-    | Bright_yellow -> lyellow
-    | Bright_blue -> lblue
-    | Bright_magenta -> lmagenta
-    | Bright_cyan -> lcyan
-    | Bright_white -> lwhite
-    | Rgb (r, g, b) -> rgb r g b
-
-  let style_to_lterm (s : Display.Info.style) : LTerm_style.t =
-    {
-      LTerm_style.none with
-      bold = (if s.bold then Some true else None);
-      underline = (if s.underline then Some true else None);
-      foreground = Option.map color_to_lterm s.foreground;
-      background = Option.map color_to_lterm s.background;
-    }
-
-  (* Render a [kind] prefix ("error: ", "=> ", ...) as a styled fragment. *)
-  let render_prefix ~use_color (prefix : string) (tag : string option) :
-      LTerm_text.t =
-    if prefix = "" then [||]
-    else
-      let sty =
-        match tag with
-        | Some t when use_color -> color_of_tag t
-        | _ -> LTerm_style.none
-      in
-      LTerm_text.stylise prefix sty
-
-  (* A [Fmt] body: run the thunk through a styled formatter so any embedded
-     [@{<..>@}] semantic tags become styles. *)
-  let render_fmt ~use_color (form : Display.form) : LTerm_text.t =
-    let read_color = if use_color then Some color_of_tag else None in
-    let get_content, ppf = LTerm_text.make_formatter ?read_color () in
-    Format.fprintf ppf "@[<v>%t@]" form;
-    get_content () (* flushes the formatter *)
-
-  (* A [Rich] body: pre-styled spans map directly to LTerm styled text. *)
-  let render_rich ~use_color (spans : Display.Info.rich) : LTerm_text.t =
-    Array.concat
-      (List.map
-         (fun (sp : Display.Info.span) ->
-           let sty =
-             if use_color then style_to_lterm sp.style else LTerm_style.none
-           in
-           LTerm_text.stylise sp.text sty)
-         spans)
-
-  let render_msg (m : Display.Info.t) : unit Lwt.t =
-    let open Lwt.Syntax in
-    let { prefix; tag } = style_for m.kind in
-    let use_color = M.use_color in
-    let body =
-      match m.msg with
-      | Display.Info.Fmt form -> render_fmt ~use_color form
-      | Display.Info.Rich spans -> render_rich ~use_color spans
-    in
-    let styled = Array.append (render_prefix ~use_color prefix tag) body in
-    let* term' = term in
-    LTerm.fprintls !term' styled
-
+  let display_color_style (color : Display.color) : LTerm_style.color = match color with
+    | Display.Info.Black -> LTerm_style.black
+    | Display.Info.Red -> LTerm_style.red
+    | Display.Info.Green -> LTerm_style.green
+    | Display.Info.Yellow -> LTerm_style.yellow
+    | Display.Info.Blue -> LTerm_style.blue
+    | Display.Info.Magenta -> LTerm_style.magenta
+    | Display.Info.Cyan -> LTerm_style.cyan
+    | Display.Info.White -> LTerm_style.white
+    | Display.Info.Bright_black -> LTerm_style.black
+    | Display.Info.Bright_red -> LTerm_style.red
+    | Display.Info.Bright_green -> LTerm_style.green
+    | Display.Info.Bright_yellow -> LTerm_style.yellow
+    | Display.Info.Bright_blue -> LTerm_style.blue
+    | Display.Info.Bright_magenta -> LTerm_style.magenta
+    | Display.Info.Bright_cyan -> LTerm_style.cyan
+    | Display.Info.Bright_white -> LTerm_style.white
+    | Display.Info.Rgb (r, g, b) -> LTerm_style.rgb r g b
+  let stylize' (span : Display.span) : LTerm_style.t = 
+    { LTerm_style.none with bold = Some span.style.bold; underline = Some span.style.underline; foreground = Option.map display_color_style span.style.foreground ; background = Option.map display_color_style span.style.background   }
+  let span_to_ltext (span : Display.span) : LTerm_text.t =
+      LTerm_text.stylise  span.text (stylize' span)
+  let render_msg (m : Display.t) : unit Lwt.t = match m.msg with 
+  | Fmt fmt -> let flush, put = LTerm_text.make_formatter () in
+              fmt put;
+              let text = flush () in 
+              Lwt.bind term (fun term' -> LTerm.fprintls !term' text)
+  | Rich rich -> let text = (List.map span_to_ltext rich) in
+                 Lwt.bind term (fun term' -> Lwt_list.iter_s (LTerm.fprints !term') text)
   let flush () : unit Lwt.t =
     let open Lwt.Syntax in
     let* pending = flush_msgs () in

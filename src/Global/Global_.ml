@@ -35,5 +35,11 @@ module Global : GLOBAL = struct
   let bar_in_block = ref false
   let old_some = ref false
   let stop_reserved = ref false
+
+  (* When true, the printer rewrites a Pi type whose bound variable is
+     anonymous and provably unused in the body (dependency tag [IntSyn.No])
+     into the [%pi A %-> B] arrow-sugar form instead of the explicit
+     [{_ A} B] binder. *)
+  let printArrowSugar = ref false
 end
 (* structure Global *)

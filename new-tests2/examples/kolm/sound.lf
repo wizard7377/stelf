@@ -151,4 +151,4 @@
 %terminates NK (sound NK K NJ).
 %worlds (l1 | l3 | l4) (sound _ _ _).
 % %covers (sound +NK +K -NJ).    % it really doesn't seem to cover check! --cs
-}%
+%]

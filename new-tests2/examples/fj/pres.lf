@@ -1,7 +1,7 @@
 %. %[ This is part of a proof of the soundness of Featherweight Java (Atsushi Igarashi,
 Benjamin Pierce and Philip Wadler) in the Twelf logical Framework.
 It was developed by Stephanie Weirich <sweirich@cis.upenn.edu> and
-Geoffrey Washburn <geoffw@cis.upenn.edu>. }%
+Geoffrey Washburn <geoffw@cis.upenn.edu>. %]
 % Preservation Theorem
 %sort pres {_ class_table_typing CT} {_ typing CT E1 C1} {_ reduction CT E1 E2} {_ typing CT E2 C2} {_ subtyping CT C2 C1} %.
 %mode pres %in %in %in %out %out %.

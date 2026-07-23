@@ -94,7 +94,7 @@ cp_lam : cp (lam [x] E x) (lam [x] F x)
 %block cp_var : block {x:exp} {y:exp} {u:cp x y}.
 %worlds (cp_var) (cp E _).
 %total E (cp E _).
-}%
+%]
 % Following version cannot be checked
 % Output coverage on (F y) is violated.
 %. %[
@@ -110,6 +110,6 @@ cp_lam : cp (lam [x] E x) (lam [x] F x)
 %block cp_var : block {x:exp} {y:exp} {u:cp x y} {w:cp y y}.
 %worlds (cp_var) (cp E _).
 %total E (cp E _).
-}%
+%]
 %theorem cpt : forallG (pi {x exp} {y cp x x}) forall {E exp} exists {F exp} {C cp E F} true %.
 %prove 5 E (cpt E _ _) %.

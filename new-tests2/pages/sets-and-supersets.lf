@@ -36,7 +36,7 @@ every natural number n in S2, that natural number also exists in S1.
 This relation says nothing about the frequency of these entries, so
 (1,2,1) is a superset of (2,2,2) (a strict superset, though we do not define the
 notion of "strict")
-}%
+%]
 %sort superset {_ set} {_ set} %.
 %term superset/nil superset SET set/nil %.
 %term superset/cons %pi (superset SET1 (set/cons N SET2)) %<- (in-set N SET1) %<- (superset SET1 SET2) %.
@@ -65,7 +65,7 @@ We can then build a derivation of the result that we want like so:
  in-set N' (set/cons N SET1)              SUP':((set/cons N SET1) >= SET2)
 ------------------------------------------------------------------ superset/cons
       (set/cons N SET1) >= (set/cons N' SET2)
-}%
+%]
 %sort superset-wkn {N} {_ superset SET1 SET2} {_ superset (set/cons N SET1) SET2} %.
 %mode superset-wkn %in %in %out %.
 %term _ superset-wkn _ superset/nil superset/nil %.
@@ -93,7 +93,7 @@ and SET1 is a supertype of SET2, then N is in SET1.
 
 The proof is pretty straightforward induction - if the derivation of "in-set" 
 is the hit, you're done, if it's not, keep looking.
-}%
+%]
 %sort in-superset {_ in-set N SET2} {_ superset SET1 SET2} {_ in-set N SET1} %.
 %mode in-superset %in %in %out %.
 %term _ in-superset in-set/hit (superset/cons SUP IN) IN %.

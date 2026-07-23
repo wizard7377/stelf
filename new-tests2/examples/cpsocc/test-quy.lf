@@ -28,7 +28,7 @@ R' =
          (vlam [t01:ctriv] capp t01 y' (vlam [v:ctriv] cret k v)).
 ;
 no more solutions
-}%
+%]
 %. %[
 -------------------------------------------------------------------------------
 sigma[CR : {y:dtriv}{y':ctriv}{cy:cpsT y y'}
@@ -237,4 +237,4 @@ R' =
          (vlam [t01:ctriv] capp t01 y' (vlam [v:ctriv] cret k v)).
 ;
 no more solutions
-}%
+%]

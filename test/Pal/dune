@@ -7,4 +7,5 @@
  (libraries pal alcotest display grace grace.ansi_renderer)
  (deps
   (source_tree require)
-  (source_tree ../../new-tests)))
+  (source_tree ../../new-tests)
+  (source_tree ../../new-tests2)))

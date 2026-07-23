@@ -13,12 +13,12 @@
 ssc_imp  : ss_can (ss_imp SS1) (can_impi CN1)
 	    <- {d:assume A} {u:pf A} {hs:h_sound d u} {at:atm u}
 	       hs_atm hs at -> ss_can (SS1 d u hs) (CN1 u at).
-}%
+%]
 %term ssc_true ss_can ss_true can_truei %.
 %. %[
 ssc_forall : ss_can (ss_forall SS1) (can_foralli CN1)
 	      <- {a:i} ss_can (SS1 a) (CN1 a).
-}%
+%]
 %term ssc_atom 
 	%pi (ss_can (ss_atom IS2 HS1) (can_atm (AT2 _ AT1)))
 	%<- (hs_atm HS1 AT1)

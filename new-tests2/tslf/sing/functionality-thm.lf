@@ -474,7 +474,7 @@
 	%pi (functionality-e _ (%the ({x} %pi (evof x A) %-> (eofi (G x) (Y x) (B x))) Dof) (%the ({x} {d} meofi (Dof x d) meterm/var) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) Dequiv) (%the (eof M A) DofM) D)
 	%<- ({x} {d} eofi-var-invert (Dof x d) (Dmof x d) (%the (elookup? (G x) (Y x) (B x)) (Dlookup x d)) (%the (ewfi (G x) (B x)) (Dwf x d)))
 	%<- (functionality-e! Dlookup Dwf Dclean Dequiv DofM D) %.
-%term varsam 
+%scope functionality-e! %term varsam
 	%pi (functionality-e! ([x] [d] elookup?/not d) (%the ({x} %pi (evof x A) %-> (ewfi (G x) A)) Dwf) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) DequivMN) (%the (eof M A) DofM) Dequiv')
 	%<- (equiv-to-equivi _ DequivMN Dequiv') %.
 %scope functionality-e! %term varoth 
@@ -482,7 +482,7 @@
 	%<- (ewfi-subst Dwf DofM (%the (ewfi (G M) B) Dwf'))
 	%<- (eofi-evof Dvof Dwf' (%the (eofi (G M) X B) Dof))
 	%<- (equivi-reflex Dof (%the (equivi (G M) X X B) Dequiv)) %.
-%term varoth 
+%scope functionality-e! %term varoth
 	%pi (functionality-e! ([x] [d] elookup?/look (%the (elookup (G x) (Y x) (B x)) (Dlookup x))) (%the ({x} %pi (evof x A) %-> (ewfi (G x) (B x))) Dwf) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) DequivMN) (%the (eof M A) DofM) Dequiv'')
 	%<- (lookup-clean Dlookup Dclean (%the ({x} eterm-eq (Y x) Y') Deq))
 	%<- ({x} eterm-eq-symm (Deq x) (%the (eterm-eq Y' (Y x)) (Deq' x)))
@@ -500,7 +500,7 @@
 	%<- (eofi-const (Dkof M) Dwf' (%the (eofi (G M) (econst K) (B M)) Dof'))
 	%<- (equivi-reflex Dof' Dequiv)
 	%<- (equivi-resp ectx-eq/i (Deq M) (Deq N) etp-eq/i Dequiv Dequiv') %.
-%term forall 
+%scope functionality-e! %term forall
 	%pi (functionality-e _ (%the ({x} %pi (evof x A) %-> (eofi (G x) (O x) (B x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/forall Cm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv M N A) DequivMN) (%the (eof M A) DofM) Dequiv'')
 	%<- ({x} {d} eofi-forall-invert (Dof x d) (Dmof x d) (%the (eterm-eq (eforall (C x)) (O x)) (DeqO x)) (%the (etp-eq (epi (epi (C x) ([_] et)) ([_] et)) (B x)) (DeqB x)) (%the (ewfi (G x) (C x)) (DwfC x d)) (%the (mewfi (DwfC x d) Cm) (DmwfC x d)))
 	%<- (tfunctionality-e _ DwfC DmwfC Dclean DequivMN DofM (%the (tequivi (G M) (C M) (C N)) Dequiv))
@@ -513,7 +513,7 @@
 	%<- ({y} {e eisvar y} functionality-e _ ([x] [d] DofM x d y) ([x] [d] DmofM x d y) ([x] clean/cons e (Dclean x)) DequivP DofP (%the (equivi (econs (G P) y (C P)) (M P y) (M P' y) (D P y)) (DequivM y)))
 	%<- (equivi-lam DequivC DequivM (%the (equivi (G P) (elam (C P) (M P)) (elam (C P') (M P')) (epi (C P) (D P))) Dequiv))
 	%<- (equivi-resp ectx-eq/i (DeqO P) (DeqO P') (DeqB P) Dequiv (%the (equivi (G P) (O P) (O P') (B P)) Dequiv')) %.
-%term app 
+%scope functionality-e! %term app
 	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (O x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/app Nm Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
 	%<- ({x} {d} eofi-app-invert (Dof x d) (Dmof x d) (%the (eterm-eq (eapp (M x) (N x)) (O x)) (DeqO x)) (%the (etp-eq (B x (N x)) (C x)) (DeqC x)) (%the (eofi (G x) (M x) (epi (A x) (B x))) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)) (%the (eofi (G x) (N x) (A x)) (D2 x d)) (%the (meofi (D2 x d) Nm) (DM2 x d)))
 	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (epi (A P) (B P))) DequivM))
@@ -528,7 +528,7 @@
 	%<- ({y} ewfi-subst-gen ([d] D3 P d y) ([d eof P D] %the (ewfi (econs (G P) y (A P)) (B P y)) (D3' d y)))
 	%<- (equivi-pair DequivM DequivN ([x] D3' DofP x) (%the (equivi (G P) (epair (M P) (N P)) (epair (M P') (N P')) (esigma (A P) (B P))) Dequiv))
 	%<- (equivi-resp ectx-eq/i (DeqO P) (DeqO P') (DeqC P) Dequiv (%the (equivi (G P) (O P) (O P') (C P)) Dequiv')) %.
-%term pi1 
+%scope functionality-e! %term pi1
 	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (O x) (A x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/pi1 Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
 	%<- ({x} {d} eofi-pi1-invert (Dof x d) (Dmof x d) (%the (eterm-eq (epi1 (M x)) (O x)) (DeqO x)) (%the (eofi (G x) (M x) (esigma (A x) (B x))) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)))
 	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (esigma (A P) (B P))) DequivM))
@@ -540,7 +540,7 @@
 	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (esigma (A P) (B P))) DequivM))
 	%<- (equivi-pi2 DequivM (%the (equivi (G P) (epi2 (M P)) (epi2 (M P')) (B P (epi1 (M P)))) Dequiv))
 	%<- (equivi-resp ectx-eq/i (DeqO P) (DeqO P') (DeqC P) Dequiv (%the (equivi (G P) (O P) (O P') (C P)) Dequiv')) %.
-%term sing 
+%scope functionality-e! %term sing
 	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (M x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/sing Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
 	%<- ({x} {d} eofi-sing-invert (Dof x d) (Dmof x d) (%the (etp-eq (esing (M x)) (C x)) (DeqC x)) (%the (eofi (G x) (M x) et) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)))
 	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') et) DequivM))
@@ -553,7 +553,7 @@
 	%<- ({y} {e eisvar y} functionality-e _ ([x] [d] D2 x d y) ([x] [d] DM2 x d y) ([x] clean/cons e (Dclean x)) DequivP DofP (%the (equivi (econs (G P) y (A P)) (eapp (M P) y) (eapp (M P') y) (B P y)) (Dequiv2 y)))
 	%<- (equivi-extpiw Dequiv1 Dequiv2 (%the (equivi (G P) (M P) (M P') (epi (A P) (B P))) Dequiv))
 	%<- (equivi-resp ectx-eq/i eterm-eq/i eterm-eq/i (DeqC P) Dequiv (%the (equivi (G P) (M P) (M P') (C P)) Dequiv')) %.
-%term extsig 
+%scope functionality-e! %term extsig
 	%pi (functionality-e _ (%the ({x} %pi (evof x D) %-> (eofi (G x) (M x) (C x))) Dof) (%the ({x} {d} meofi (Dof x d) (meterm/extsigma Nm Mm)) Dmof) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
 	%<- ({x} {d} eofi-extsigma-invert (Dof x d) (Dmof x d) (%the (etp-eq (esigma (A x) (B x)) (C x)) (DeqC x)) (%the (eofi (G x) (epi1 (M x)) (A x)) (D1 x d)) (%the (meofi (D1 x d) Mm) (DM1 x d)) (%the (eofi (G x) (epi2 (M x)) (B x (epi1 (M x)))) (D2 x d)) (%the (meofi (D2 x d) Nm) (DM2 x d)) (%the ({y} ewfi (econs (G x) y (A x)) (B x y)) (Dwf x d)))
 	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (epi1 (M P)) (epi1 (M P')) (A P)) Dequiv1))
@@ -567,7 +567,7 @@
 	%<- (functionality-e _ D1 DM1 Dclean DequivP DofP (%the (equivi (G P) (M P) (M P') (B P)) Dequiv))
 	%<- (subtpi-subst Dsub DofP (%the (subtpi (G P) (B P) (A P)) Dsub'))
 	%<- (equivi-subsume Dequiv Dsub' (%the (equivi (G P) (M P) (M P') (A P)) Dequiv')) %.
-%term t 
+%scope functionality-e! %term t
 	%pi (tfunctionality-e _ (%the ({x} %pi (evof x D) %-> (ewfi (G x) (C x))) Dwf) (%the ({x} {d} mewfi (Dwf x d) metp/t) Dmwf) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
 	%<- ({x} {d} ewfi-t-invert (Dwf x d) (Dmwf x d) (%the (etp-eq et (C x)) (DeqC x)))
 	%<- (tequiv-to-tequivi (G P) (tequiv/reflex ewf/t) (%the (tequivi (G P) et et) Dequiv))
@@ -579,7 +579,7 @@
 	%<- ({y} {e eisvar y} tfunctionality-e _ ([x] [d] DwfB x d y) ([x] [d] DmwfB x d y) ([x] clean/cons e (Dclean x)) DequivP DofP (%the (tequivi (econs (G P) y (A P)) (B P y) (B P' y)) (DequivB y)))
 	%<- (tequivi-pi DequivA DequivB (%the (tequivi (G P) (epi (A P) (B P)) (epi (A P') (B P'))) Dequiv))
 	%<- (tequivi-resp ectx-eq/i (DeqC P) (DeqC P') Dequiv (%the (tequivi (G P) (C P) (C P')) Dequiv')) %.
-%term sigma 
+%scope functionality-e! %term sigma
 	%pi (tfunctionality-e _ (%the ({x} %pi (evof x D) %-> (ewfi (G x) (C x))) Dwf) (%the ({x} {d} mewfi (Dwf x d) (metp/sigma Bm Am)) Dmwf) (%the ({x} clean (G x)) Dclean) (%the (equiv P P' D) DequivP) (%the (eof P D) DofP) Dequiv')
 	%<- ({x} {d} ewfi-sigma-invert (Dwf x d) (Dmwf x d) (%the (etp-eq (esigma (A x) (B x)) (C x)) (DeqC x)) (%the (ewfi (G x) (A x)) (DwfA x d)) (%the (mewfi (DwfA x d) Am) (DmwfA x d)) (%the ({y} ewfi (econs (G x) y (A x)) (B x y)) (DwfB x d)) (%the ({y} mewfi (DwfB x d y) Bm) (DmwfB x d)))
 	%<- (tfunctionality-e _ DwfA DmwfA Dclean DequivP DofP (%the (tequivi (G P) (A P) (A P')) DequivA))

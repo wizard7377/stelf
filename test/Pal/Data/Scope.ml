@@ -18,7 +18,7 @@ let scope_qualified_test =
   %term sq_s {_ sq_nat} sq_nat
 %}
 %sort sq_pair sq_nat sq_nat %.
-%term sq_zz sq_pair %(sq_z sq_nat) %(sq_z sq_nat) %.
+%term sq_zz sq_pair %(sq_nat sq_z) %(sq_nat sq_z) %.
 |}
 
 let scope_open_inside_test =

@@ -76,20 +76,20 @@
 %sort esubsts-wf-gen {_ %pi (evof M A) %-> (ewfs B)} {_ %pi (eof M A) %-> (eofs M A) %-> (ewfs B)} %.
 %mode esubsts-wf-gen %in %out %.
 %scope esubsts-wf-gen %term varsam esubsts-of-gen ([d] eofs/var (D d) d) ([d] [d'] d') %.
-%term varoth 
+%scope esubsts-wf-gen %term varoth 
 	%pi (esubsts-of-gen ([d] eofs/var (D2 d) D) ([d] [d'] eofs/var (D2' d) D))
 	%<- (esubst-wf-gen D2 D2') %.
 %scope esubsts-wf-gen %term const 
 	%pi (esubsts-of-gen ([d] eofs/const (D2 d) D) ([d] [d'] eofs/const (D2' d) D))
 	%<- (esubst-wf-gen D2 D2') %.
-%term forall 
+%scope esubsts-wf-gen %term forall 
 	%pi (esubsts-of-gen ([d] eofs/forall (D d)) ([d] [d'] eofs/forall (D' d d')))
 	%<- (esubsts-wf-gen D D') %.
 %scope esubsts-wf-gen %term lam 
 	%pi (esubsts-of-gen ([d] eofs/lam (D2 d) (D1 d)) ([d] [d'] eofs/lam (D2' d d') (D1' d d')))
 	%<- (esubsts-wf-gen D1 D1')
 	%<- ({y} {e} esubsts-of-gen ([d] D2 d y e) ([d] [d'] D2' d d' y e)) %.
-%term app 
+%scope esubsts-wf-gen %term app 
 	%pi (esubsts-of-gen ([d] eofs/app (D2 d) (D1 d)) ([d] [d'] eofs/app (D2' d d') (D1' d d')))
 	%<- (esubsts-of-gen D1 D1')
 	%<- (esubsts-of-gen D2 D2') %.
@@ -98,25 +98,25 @@
 	%<- (esubsts-of-gen D1 D1')
 	%<- (esubsts-of-gen D2 D2')
 	%<- ({y} {e} esubst-wf-gen ([d] D3 d y e) ([d] D3' d y e)) %.
-%term pi1 
+%scope esubsts-wf-gen %term pi1 
 	%pi (esubsts-of-gen ([d] eofs/pi1 (D d)) ([d] [d'] eofs/pi1 (D' d d')))
 	%<- (esubsts-of-gen D D') %.
 %scope esubsts-wf-gen %term pi2 
 	%pi (esubsts-of-gen ([d] eofs/pi2 (D d)) ([d] [d'] eofs/pi2 (D' d d')))
 	%<- (esubsts-of-gen D D') %.
-%term sing 
+%scope esubsts-wf-gen %term sing 
 	%pi (esubsts-of-gen ([d] eofs/sing (D d)) ([d] [d'] eofs/sing (D' d d')))
 	%<- (esubsts-of-gen D D') %.
 %scope esubsts-wf-gen %term subsum 
 	%pi (esubsts-of-gen ([d] eofs/equiv (D2 d) (D1 d)) ([d] [d'] eofs/equiv (D2' d) (D1' d d')))
 	%<- (esubsts-of-gen D1 D1')
 	%<- (esubst-tequiv-gen D2 D2') %.
-%term t esubsts-wf-gen ([d] ewfs/t) ([d] [d'] ewfs/t) %.
+%scope esubsts-wf-gen %term t esubsts-wf-gen ([d] ewfs/t) ([d] [d'] ewfs/t) %.
 %scope esubsts-wf-gen %term pi 
 	%pi (esubsts-wf-gen ([d] ewfs/pi (D2 d) (D1 d)) ([d] [d'] ewfs/pi (D2' d d') (D1' d d')))
 	%<- (esubsts-wf-gen D1 D1')
 	%<- ({y} {e} esubsts-wf-gen ([d] D2 d y e) ([d] [d'] D2' d d' y e)) %.
-%term sigma 
+%scope esubsts-wf-gen %term sigma 
 	%pi (esubsts-wf-gen ([d] ewfs/sigma (D2 d) (D1 d)) ([d] [d'] ewfs/sigma (D2' d d') (D1' d d')))
 	%<- (esubsts-wf-gen D1 D1')
 	%<- ({y} {e} esubsts-wf-gen ([d] D2 d y e) ([d] [d'] D2' d d' y e)) %.
@@ -295,18 +295,18 @@
 %scope reduce-pi2-equiv %term sing 
 	%pi (reduce-equiv (eofs/sing (%the (eofs M et) Deof)) (%the (reduce M N) Dreduce) (eofs/equiv (tequiv/sing (equiv/symm Dequiv)) (eofs/sing Deof')) (equiv/sing Dequiv))
 	%<- (reduce-equiv Deof Dreduce (%the (eofs N et) Deof') (%the (equiv M N et) Dequiv)) %.
-%term equiv 
+%scope reduce-pi2-equiv %term equiv 
 	%pi (reduce-equiv (eofs/equiv (%the (tequiv A B) Dtequiv) (%the (eofs M A) Deof)) (%the (reduce M N) Dreduce) (eofs/equiv Dtequiv Deof') (equiv/equiv Dtequiv Dequiv))
-	%<- (reduce-equiv Deof Dreduce (%the (eofs N A) Deof') (%the (equiv M N A) Dequiv)) %.
+	%<- (reduce-equiv Deof Dreduce (%the (eofs N A) Deof') (%the ((%abs equiv) M N A) Dequiv)) %.
 %scope reduce-pi2-equiv %term const %pi (reduce-equiv D reduce/const D (equiv/reflex D')) %<- (eofs-to-eof D D') %.
-%term forall 
+%scope reduce-pi2-equiv %term forall 
 	%pi (reduce-equiv (eofs/forall Dwf) (reduce/forall Dreduce) (eofs/equiv (tequiv/pi ([_] [_] tequiv/t) (tequiv/pi ([_] [_] tequiv/t) (tequiv/symm Dequiv))) (eofs/forall Dwf')) (equiv/forall Dequiv))
 	%<- (treduce-equiv Dwf Dreduce Dwf' Dequiv) %.
 %scope reduce-pi2-equiv %term var %pi (reduce-equiv D (reduce/var _) D (equiv/reflex D')) %<- (eofs-to-eof D D') %.
-%term lam 
+%scope reduce-pi2-equiv %term lam 
 	%pi (reduce-equiv (eofs/lam (%the ({x} %pi (evof x A) %-> (eofs (M x) (B x))) Deofs) (%the (ewfs A) Dewfs)) (reduce/lam (%the ({x} %pi (variable x) %-> (reduce (M x) (M' x))) DreduceM) (%the (treduce A A') DreduceA)) (eofs/equiv (tequiv/pi ([x] [d] tequiv/reflex (DwfB' x d)) (tequiv/symm DequivA)) (eofs/lam Deofs'' Dewfs')) (equiv/lam DequivM DequivA))
 	%<- (treduce-equiv Dewfs DreduceA (%the (ewfs A') Dewfs') (%the (tequiv A A') DequivA))
-	%<- ({x} {d evof x A} {dv variable x} reduce-equiv (Deofs x d) (DreduceM x dv) (%the (eofs (M' x) (B x)) (Deofs' x d)) (%the (equiv (M x) (M' x) (B x)) (DequivM x d)))
+	%<- ({x} {d evof x A} {dv variable x} reduce-equiv (Deofs x d) (DreduceM x dv) (%the (eofs (M' x) (B x)) (Deofs' x d)) (%the ((%abs equiv) (M x) (M' x) (B x)) (DequivM x d)))
 	%<- (tequiv-reg DequivA _ (%the (ewf A') DwfA'))
 	%<- ({x} {d evof x A'} esubsts Deofs' (eofs/equiv (tequiv/symm DequivA) (eofs/var DwfA' d)) (%the (eofs (M' x) (B x)) (Deofs'' x d)))
 	%<- ({x} {d evof x A} eofs-to-eof (Deofs x d) (%the (eof (M x) (B x)) (Deof x d)))
@@ -314,30 +314,30 @@
 	%<- ({x} {d evof x A'} esubst-wf DwfB (eof/equiv (tequiv/symm DequivA) (eof/var DwfA' d)) (%the (ewf (B x)) (DwfB' x d))) %.
 %scope reduce-pi2-equiv %term app 
 	%pi (reduce-equiv (eofs/app (%the (eofs N A) DeofsN) (%the (eofs M (epi A B)) DeofsM)) (reduce/app (%the (reduce-app M' N' O) DreduceApp) (%the (reduce N N') DreduceN) (%the (reduce M M') DreduceM)) (eofs/equiv DequivBx DeofsO) (equiv/trans (equiv/equiv DequivBx Dequiv) (equiv/app DequivN DequivM)))
-	%<- (reduce-equiv DeofsM DreduceM (%the (eofs M' (epi A B)) DeofsM') (%the (equiv M M' (epi A B)) DequivM))
-	%<- (reduce-equiv DeofsN DreduceN (%the (eofs N' A) DeofsN') (%the (equiv N N' A) DequivN))
-	%<- (reduce-app-equiv DeofsM' DeofsN' DreduceApp (%the (eofs O (B N')) DeofsO) (%the (equiv (eapp M' N') O (B N')) Dequiv))
+	%<- (reduce-equiv DeofsM DreduceM (%the (eofs M' (epi A B)) DeofsM') (%the ((%abs equiv) M M' (epi A B)) DequivM))
+	%<- (reduce-equiv DeofsN DreduceN (%the (eofs N' A) DeofsN') (%the ((%abs equiv) N N' A) DequivN))
+	%<- (reduce-app-equiv DeofsM' DeofsN' DreduceApp (%the (eofs O (B N')) DeofsO) (%the ((%abs equiv) (eapp M' N') O (B N')) Dequiv))
 	%<- (eofs-to-eof DeofsM' (%the (eof M' (epi A B)) DeofM'))
 	%<- (eof-reg DeofM' (ewf/pi (%the ({x} %pi (evof x A) %-> (ewf (B x))) DwfB) (%the (ewf A) DwfA)))
 	%<- (tfunctionality DwfB (equiv/symm DequivN) (%the (tequiv (B N') (B N)) DequivBx)) %.
-%term pair 
+%scope reduce-pi2-equiv %term pair 
 	%pi (reduce-equiv (eofs/pair (%the ({x} %pi (evof x A) %-> (ewf (B x))) DwfB) (%the (eofs N (B M)) DeofsN) (%the (eofs M A) DeofsM)) (reduce/pair (%the (reduce N N') DreduceN) (%the (reduce M M') DreduceM)) (eofs/pair DwfB (eofs/equiv DequivBx DeofsN') DeofsM') (equiv/pair DwfB DequivN DequivM))
-	%<- (reduce-equiv DeofsM DreduceM (%the (eofs M' A) DeofsM') (%the (equiv M M' A) DequivM))
-	%<- (reduce-equiv DeofsN DreduceN (%the (eofs N' (B M)) DeofsN') (%the (equiv N N' (B M)) DequivN))
+	%<- (reduce-equiv DeofsM DreduceM (%the (eofs M' A) DeofsM') (%the ((%abs equiv) M M' A) DequivM))
+	%<- (reduce-equiv DeofsN DreduceN (%the (eofs N' (B M)) DeofsN') (%the ((%abs equiv) N N' (B M)) DequivN))
 	%<- (tfunctionality DwfB DequivM (%the (tequiv (B M) (B M')) DequivBx)) %.
 %scope reduce-pi2-equiv %term pi1 
 	%pi (reduce-equiv (eofs/pi1 (%the (eofs M (esigma A B)) Deofs)) (reduce/pi1 (%the (reduce-pi1 M' N) DreducePi) (%the (reduce M M') Dreduce)) DeofsN (equiv/trans Dequiv (equiv/pi1 DequivM)))
-	%<- (reduce-equiv Deofs Dreduce (%the (eofs M' (esigma A B)) Deofs') (%the (equiv M M' (esigma A B)) DequivM))
-	%<- (reduce-pi1-equiv Deofs' DreducePi (%the (eofs N A) DeofsN) (%the (equiv (epi1 M') N A) Dequiv)) %.
-%term pi2 
+	%<- (reduce-equiv Deofs Dreduce (%the (eofs M' (esigma A B)) Deofs') (%the ((%abs equiv) M M' (esigma A B)) DequivM))
+	%<- (reduce-pi1-equiv Deofs' DreducePi (%the (eofs N A) DeofsN) (%the ((%abs equiv) (epi1 M') N A) Dequiv)) %.
+%scope reduce-pi2-equiv %term pi2 
 	%pi (reduce-equiv (eofs/pi2 (%the (eofs M (esigma A B)) Deofs)) (reduce/pi2 (%the (reduce-pi2 M' N) DreducePi) (%the (reduce M M') Dreduce)) (eofs/equiv DequivBx DeofsN) (equiv/trans (equiv/equiv DequivBx Dequiv) (equiv/pi2 DequivM)))
-	%<- (reduce-equiv Deofs Dreduce (%the (eofs M' (esigma A B)) Deofs') (%the (equiv M M' (esigma A B)) DequivM))
-	%<- (reduce-pi2-equiv Deofs' DreducePi (%the (eofs N (B (epi1 M'))) DeofsN) (%the (equiv (epi2 M') N (B (epi1 M'))) Dequiv))
+	%<- (reduce-equiv Deofs Dreduce (%the (eofs M' (esigma A B)) Deofs') (%the ((%abs equiv) M M' (esigma A B)) DequivM))
+	%<- (reduce-pi2-equiv Deofs' DreducePi (%the (eofs N (B (epi1 M'))) DeofsN) (%the ((%abs equiv) (epi2 M') N (B (epi1 M'))) Dequiv))
 	%<- (eofs-to-eof Deofs (%the (eof M (esigma A B)) Deof))
 	%<- (eof-reg Deof (ewf/sigma (%the ({x} %pi (evof x A) %-> (ewf (B x))) DwfB) (%the (ewf A) DwfA)))
 	%<- (tfunctionality DwfB (equiv/symm (equiv/pi1 DequivM)) (%the (tequiv (B (epi1 M')) (B (epi1 M))) DequivBx)) %.
 %scope reduce-pi2-equiv %term t %pi (treduce-equiv D treduce/t D (tequiv/reflex D')) %<- (ewfs-to-ewf D D') %.
-%term pi 
+%scope reduce-pi2-equiv %term pi 
 	%pi (treduce-equiv (ewfs/pi (%the ({x} %pi (evof x A) %-> (ewfs (B x))) DwfsB) (%the (ewfs A) DwfsA)) (treduce/pi (%the ({x} %pi (variable x) %-> (treduce (B x) (B' x))) DreduceB) (%the (treduce A A') DreduceA)) (ewfs/pi DwfsB'' DwfsA') (tequiv/pi DequivB DequivA))
 	%<- (treduce-equiv DwfsA DreduceA (%the (ewfs A') DwfsA') (%the (tequiv A A') DequivA))
 	%<- ({x} {d evof x A} {dv variable x} treduce-equiv (DwfsB x d) (DreduceB x dv) (%the (ewfs (B' x)) (DwfsB' x d)) (%the (tequiv (B x) (B' x)) (DequivB x d)))
@@ -349,34 +349,34 @@
 	%<- ({x} {d evof x A} {dv variable x} treduce-equiv (DwfsB x d) (DreduceB x dv) (%the (ewfs (B' x)) (DwfsB' x d)) (%the (tequiv (B x) (B' x)) (DequivB x d)))
 	%<- (tequiv-reg DequivA _ DwfA')
 	%<- ({x} {d evof x A'} esubsts-wf DwfsB' (eofs/equiv (tequiv/symm DequivA) (eofs/var DwfA' d)) (%the (ewfs (B' x)) (DwfsB'' x d))) %.
-%term sing 
+%scope reduce-pi2-equiv %term sing 
 	%pi (treduce-equiv (ewfs/sing (%the (eofs M et) Deofs)) (treduce/sing (%the (reduce M M') Dreduce)) (ewfs/sing Deofs') (tequiv/sing Dequiv))
-	%<- (reduce-equiv Deofs Dreduce (%the (eofs M' et) Deofs') (%the (equiv M M' et) Dequiv)) %.
+	%<- (reduce-equiv Deofs Dreduce (%the (eofs M' et) Deofs') (%the ((%abs equiv) M M' et) Dequiv)) %.
 %scope reduce-pi2-equiv %term equiv 
 	%pi (reduce-app-equiv (eofs/equiv (%the (tequiv C (epi A B)) Dtequiv) (%the (eofs M C) DofsM)) (%the (eofs N A) DofsN) (%the (reduce-app M N O) Dreduce) (eofs/equiv DequivBx DofsO) (equiv/equiv DequivBx Dequiv))
 	%<- (tequiv-pi-invert Dtequiv (%the (etp-eq C (epi A' B')) Deq) (%the (tequiv A' A) DequivA) (%the ({x} %pi (evof x A') %-> (tequiv (B' x) (B x))) DequivB))
 	%<- (eofs-resp eterm-eq/i Deq DofsM (%the (eofs M (epi A' B')) DofsM'))
-	%<- (reduce-app-equiv DofsM' (eofs/equiv (tequiv/symm DequivA) DofsN) Dreduce (%the (eofs O (B' N)) DofsO) (%the (equiv (eapp M N) O (B' N)) Dequiv))
+	%<- (reduce-app-equiv DofsM' (eofs/equiv (tequiv/symm DequivA) DofsN) Dreduce (%the (eofs O (B' N)) DofsO) (%the ((%abs equiv) (eapp M N) O (B' N)) Dequiv))
 	%<- (eofs-to-eof DofsN (%the (eof N A) DofN))
 	%<- (esubst-tequiv DequivB (eof/equiv (tequiv/symm DequivA) DofN) (%the (tequiv (B' N) (B N)) DequivBx)) %.
-%term atom 
+%scope reduce-pi2-equiv %term atom 
 	%pi (reduce-app-equiv (%the (eofs M (epi A B)) DeofsM) (%the (eofs N A) DeofsN) (reduce-app/atom _) (eofs/app DeofsN DeofsM) (equiv/reflex D))
 	%<- (eofs-to-eof (eofs/app DeofsN DeofsM) D) %.
 %scope reduce-pi2-equiv %term beta 
 	%pi (reduce-app-equiv (eofs/lam (%the ({x} %pi (evof x A) %-> (eofs (M x) (B x))) DeofsM) (%the (ewfs A) DewfA)) (%the (eofs N A) DeofsN) (reduce-app/beta (%the (reduce (M N) O) Dreduce)) DeofsO (equiv/trans Dequiv (equiv/beta DeofN DeofM)))
 	%<- (esubsts DeofsM DeofsN (%the (eofs (M N) (B N)) DeofsMx))
-	%<- (reduce-equiv DeofsMx Dreduce (%the (eofs O (B N)) DeofsO) (%the (equiv (M N) O (B N)) Dequiv))
+	%<- (reduce-equiv DeofsMx Dreduce (%the (eofs O (B N)) DeofsO) (%the ((%abs equiv) (M N) O (B N)) Dequiv))
 	%<- ({x} {d} eofs-to-eof (DeofsM x d) (%the (eof (M x) (B x)) (DeofM x d)))
 	%<- (eofs-to-eof DeofsN (%the (eof N A) DeofN)) %.
-%term equiv 
+%scope reduce-pi2-equiv %term equiv 
 	%pi (reduce-pi1-equiv (eofs/equiv (%the (tequiv C (esigma A B)) Dtequiv) (%the (eofs M C) DofsM)) (%the (reduce-pi1 M N) Dreduce) (eofs/equiv DequivA DofsN) (equiv/equiv DequivA Dequiv))
 	%<- (tequiv-sigma-invert Dtequiv (%the (etp-eq C (esigma A' B')) Deq) (%the (tequiv A' A) DequivA) (%the ({x} %pi (evof x A') %-> (tequiv (B' x) (B x))) DequivB))
 	%<- (eofs-resp eterm-eq/i Deq DofsM (%the (eofs M (esigma A' B')) DofsM'))
-	%<- (reduce-pi1-equiv DofsM' Dreduce (%the (eofs N A') DofsN) (%the (equiv (epi1 M) N A') Dequiv)) %.
+	%<- (reduce-pi1-equiv DofsM' Dreduce (%the (eofs N A') DofsN) (%the ((%abs equiv) (epi1 M) N A') Dequiv)) %.
 %scope reduce-pi2-equiv %term atom 
 	%pi (reduce-pi1-equiv (%the (eofs M (esigma A B)) DofsM) (reduce-pi1/atom _) (eofs/pi1 DofsM) (equiv/reflex (eof/pi1 DofM)))
 	%<- (eofs-to-eof DofsM DofM) %.
-%term beta 
+%scope reduce-pi2-equiv %term beta 
 	%pi (reduce-pi1-equiv (eofs/pair (%the ({x} %pi (evof x A) %-> (ewf (B x))) DwfB) (%the (eofs N (B M)) DofsN) (%the (eofs M A) DofsM)) reduce-pi1/beta DofsM (equiv/beta1 DofN DofM))
 	%<- (eofs-to-eof DofsM DofM)
 	%<- (eofs-to-eof DofsN DofN) %.
@@ -384,10 +384,10 @@
 	%pi (reduce-pi2-equiv (eofs/equiv (%the (tequiv C (esigma A B)) Dtequiv) (%the (eofs M C) DofsM)) (%the (reduce-pi2 M N) Dreduce) (eofs/equiv DequivBx DofsN) (equiv/equiv DequivBx Dequiv))
 	%<- (tequiv-sigma-invert Dtequiv (%the (etp-eq C (esigma A' B')) Deq) (%the (tequiv A' A) DequivA) (%the ({x} %pi (evof x A') %-> (tequiv (B' x) (B x))) DequivB))
 	%<- (eofs-resp eterm-eq/i Deq DofsM (%the (eofs M (esigma A' B')) DofsM'))
-	%<- (reduce-pi2-equiv DofsM' Dreduce (%the (eofs N (B' (epi1 M))) DofsN) (%the (equiv (epi2 M) N (B' (epi1 M))) Dequiv))
+	%<- (reduce-pi2-equiv DofsM' Dreduce (%the (eofs N (B' (epi1 M))) DofsN) (%the ((%abs equiv) (epi2 M) N (B' (epi1 M))) Dequiv))
 	%<- (eofs-to-eof DofsM' (%the (eof M (esigma A' B')) DofM))
 	%<- (esubst-tequiv DequivB (eof/pi1 DofM) (%the (tequiv (B' (epi1 M)) (B (epi1 M))) DequivBx)) %.
-%term atom 
+%scope reduce-pi2-equiv %term atom 
 	%pi (reduce-pi2-equiv (%the (eofs M (esigma A B)) DofsM) (reduce-pi2/atom _) (eofs/pi2 DofsM) (equiv/reflex (eof/pi2 DofM)))
 	%<- (eofs-to-eof DofsM DofM) %.
 %scope reduce-pi2-equiv %term beta 
@@ -428,7 +428,7 @@
 %sort tconvert-reg-strong {_ tconvert A EA} {_ ewfs EA} %.
 %mode tconvert-reg-strong %in %out %.
 %scope tconvert-reg-strong %term t tconvert-reg-strong tconvert/t ewfs/t %.
-%term pi 
+%scope tconvert-reg-strong %term pi 
 	%pi (tconvert-reg-strong (tconvert/pi (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (ewfs/pi DwfB DwfA))
 	%<- (tconvert-reg-strong DconvertA (%the (ewfs EA) DwfA))
 	%<- ({x} {d vof x A} {ex} {xt vtrans ex x} {ed evof ex EA} {dv variable ex} 
@@ -442,15 +442,15 @@
 	%pi (vtrans-variable xt dv)
 	%-> (vsound d xt DconvertA ed)
 	%-> (tconvert-reg-strong (DconvertB x d ex xt) (%the (ewfs (EB ex)) (DwfB ex ed)))) %.
-%term sing 
-	%pi (tconvert-reg-strong (tconvert/sing (%the (aconvert R t EM) Dconvert)) (ewfs/sing Dof))
+%scope tconvert-reg-strong %term sing 
+	%pi (tconvert-reg-strong (tconvert/sing (%the (aconvert R (%abs t) EM) Dconvert)) (ewfs/sing Dof))
 	%<- (aconvert-reg-strong Dconvert tconvert/t _ (%the (eofs EM et) Dof)) %.
 %scope tconvert-reg-strong %term const 
 	%pi (aconvert-reg-strong (aconvert/const (%the (tconvert A EA) Dconvert) _ (%the (kof K A) Dkof)) Dconvert Dewfs (eofs/const Dewf Dekof))
 	%<- (convert-kof Dkof Dconvert (%the (ekof K EA) Dekof))
 	%<- (tconvert-reg-strong Dconvert (%the (ewfs EA) Dewfs))
 	%<- (ewfs-to-ewf Dewfs Dewf) %.
-%term forall 
+%scope tconvert-reg-strong %term forall 
 	%pi (aconvert-reg-strong (aconvert/forall (%the (tconvert A EA) Dconv)) (tconvert/pi ([_] [_] [_] [_] tconvert/t) (tconvert/pi ([_] [_] [_] [_] tconvert/t) Dconv)) (ewfs/pi ([_] [_] ewfs/t) (ewfs/pi ([_] [_] ewfs/t) Dwf)) (eofs/forall Dwf))
 	%<- (tconvert-reg-strong Dconv Dwf) %.
 %scope tconvert-reg-strong %term var 
@@ -462,30 +462,30 @@
 	%<- (tconvert-fun Dconvert' Dconvert (%the (etp-eq EA' EA) DeqA))
 	%<- (ewfs-resp DeqA Dewf' (%the (ewfs EA) Dewf))
 	%<- (ewfs-to-ewf Dewf (%the (ewf EA) Dewf'')) %.
-%term app 
-	%pi (aconvert-reg-strong (aconvert/app (%the (tsub B N Bx) DsubBx) (%the (convert N A EN) DconvertN) (%the (aconvert R (pi A B) EM) DconvertM)) DconvertBx DwfBx' (eofs/equiv Dequiv (eofs/app DeofN DeofM)))
+%scope tconvert-reg-strong %term app 
+	%pi (aconvert-reg-strong (aconvert/app (%the (tsub B N Bx) DsubBx) (%the (convert N A EN) DconvertN) (%the (aconvert R ((%abs pi) A B) EM) DconvertM)) DconvertBx DwfBx' (eofs/equiv Dequiv (eofs/app DeofN DeofM)))
 	%<- (aconvert-reg-strong DconvertM (tconvert/pi (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (ewfs/pi (%the ({ex} %pi (evof ex EA) %-> (ewfs (EB ex))) DwfB) (%the (ewfs EA) DwfA)) (%the (eofs EM (epi EA EB)) DeofM))
 	%<- (convert-reg-strong DconvertN DconvertA DwfA (%the (eofs EN EA) DeofN))
 	%<- (convert-tsub-reduce DconvertB DconvertN DsubBx (%the (tconvert Bx EBx) DconvertBx) (%the (treduce (EB EN) EBx) Dreduce))
 	%<- (esubsts-wf DwfB DeofN (%the (ewfs (EB EN)) DwfBx))
 	%<- (treduce-equiv DwfBx Dreduce (%the (ewfs EBx) DwfBx') (%the (tequiv (EB EN) EBx) Dequiv)) %.
 %scope tconvert-reg-strong %term pi1 
-	%pi (aconvert-reg-strong (aconvert/pi1 (%the (aconvert R (sigma A B) EM) DconvertM)) DconvertA DwfA (eofs/pi1 Dof))
+	%pi (aconvert-reg-strong (aconvert/pi1 (%the (aconvert R ((%abs sigma) A B) EM) DconvertM)) DconvertA DwfA (eofs/pi1 Dof))
 	%<- (aconvert-reg-strong DconvertM (tconvert/sigma (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (ewfs/sigma (%the ({ex} %pi (evof ex EA) %-> (ewfs (EB ex))) DwfB) (%the (ewfs EA) DwfA)) (%the (eofs EM (esigma EA EB)) Dof)) %.
-%term pi2 
-	%pi (aconvert-reg-strong (aconvert/pi2 (%the (aconvert R (sigma A B) EM) DconvertM)) DconvertBx DwfBx (eofs/pi2 Dof))
+%scope tconvert-reg-strong %term pi2 
+	%pi (aconvert-reg-strong (aconvert/pi2 (%the (aconvert R ((%abs sigma) A B) EM) DconvertM)) DconvertBx DwfBx (eofs/pi2 Dof))
 	%<- (aconvert-reg-strong DconvertM (tconvert/sigma (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (ewfs/sigma (%the ({ex} %pi (evof ex EA) %-> (ewfs (EB ex))) DwfB) (%the (ewfs EA) DwfA)) (%the (eofs EM (esigma EA EB)) Dof))
-	%<- (convert-stsub DconvertB (aconvert/pi1 DconvertM) (%the (tconvert (B (pi1 R)) (EB (epi1 EM))) DconvertBx))
+	%<- (convert-stsub DconvertB (aconvert/pi1 DconvertM) (%the (tconvert (B ((%abs pi1) R)) (EB (epi1 EM))) DconvertBx))
 	%<- (esubsts-wf DwfB (eofs/pi1 Dof) (%the (ewfs (EB (epi1 EM))) DwfBx)) %.
 %scope tconvert-reg-strong %term at 
-	%pi (convert-reg-strong (convert/at (%the (aconvert R t EM) DconvertM)) tconvert/t ewfs/t Dof)
+	%pi (convert-reg-strong (convert/at (%the (aconvert R (%abs t) EM) DconvertM)) tconvert/t ewfs/t Dof)
 	%<- (aconvert-reg-strong DconvertM tconvert/t _ (%the (eofs EM et) Dof)) %.
 %sort convert-reg-strong! {_ etp-eq EA' EA} {_ {ex} %pi (evof ex EA') %-> (ewfs (EB ex))} {_ {ex} %pi (evof ex EA) %-> (ewfs (EB ex))} %.
 %mode convert-reg-strong! %in %in %out %.
 %term _ convert-reg-strong! etp-eq/i D D %.
 %worlds (sbind) (convert-reg-strong! _ _ _) %.
 %total {} (convert-reg-strong! _ _ _) %.
-%term lam 
+%scope convert-reg-strong %term lam
 	%pi (convert-reg-strong (convert/lam (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))) DconvertM) (%the (tconvert A EA) DconvertA)) (tconvert/pi (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA') DconvertA')) (ewfs/pi (%the ({ex} %pi (evof ex EA') %-> (ewfs (EB ex))) DwfB) (%the (ewfs EA') DwfA')) Dof')
 	%<- (tconvert-fun DconvertA DconvertA' (%the (etp-eq EA EA') Deq))
 	%<- (etp-eq-symm Deq (%the (etp-eq EA' EA) Deq'))
@@ -497,7 +497,7 @@
 	%-> (vsound d xt DconvertA ed)
 	%-> (convert-reg-strong (DconvertM x d ex xt) (DconvertB x d ex xt) (DwfB' ex ed) (%the (eofs (EM ex) (EB ex)) (Dof ex ed))))
 	%<- (eofs-resp eterm-eq/i Deq'' (%the (eofs (elam EA EM) (epi EA EB)) (eofs/lam Dof DwfA)) (%the (eofs (elam EA EM) (epi EA' EB)) Dof')) %.
-%term pair 
+%scope convert-reg-strong %term pair
 	%pi (convert-reg-strong (convert/pair (%the ({x} %pi (vof x A) %-> (wf (B x))) Dwf) (%the (convert N Bx EN) DconvertN) (%the (tsub B M Bx) DsubBx) (%the (convert M A EM) DconvertM)) (tconvert/sigma (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (tconvert A EA) DconvertA)) (ewfs/sigma (%the ({ex} %pi (evof ex EA) %-> (ewfs (EB ex))) DwfB) (%the (ewfs EA) DwfA)) (eofs/pair DwfB' (eofs/equiv (tequiv/symm Dequiv) DeofN) DeofM))
 	%<- (convert-reg-strong DconvertM DconvertA DwfA (%the (eofs EM EA) DeofM))
 	%<- (esubsts-wf DwfB DeofM (%the (ewfs (EB EM)) DeofBM))
@@ -505,7 +505,7 @@
 	%<- (treduce-equiv DeofBM Dreduce (%the (ewfs EBx) DwfBx) (%the (tequiv (EB EM) EBx) Dequiv))
 	%<- (convert-reg-strong DconvertN DconvertBx DwfBx (%the (eofs EN EBx) DeofN))
 	%<- ({ex} {ed evof ex EA} ewfs-to-ewf (DwfB ex ed) (%the (ewf (EB ex)) (DwfB' ex ed))) %.
-%term at 
+%scope convert-reg-strong %term at
 	%pi (convert-reg-strong (convert/sing (%the (aconvert R t EM) DconvertM)) (tconvert/sing (%the (aconvert R t EM') DconvertM')) (ewfs/sing (%the (eofs EM' et) Dof)) Dof')
 	%<- (aconvert-fun DconvertM' DconvertM _ (%the (eterm-eq EM' EM) Deq))
 	%<- (eofs-resp Deq etp-eq/i (eofs/sing Dof) (%the (eofs EM (esing EM')) Dof')) %.

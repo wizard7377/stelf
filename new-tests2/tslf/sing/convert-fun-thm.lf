@@ -8,20 +8,20 @@
 %scope aconverte-fun %term const 
 	%pi (aconverte-fun (aconverte/const _ _ Dkof) (aconverte/const _ _ Dkof') Deq eterm-eq/i)
 	%<- (kof-fun Dkof Dkof' Deq) %.
-%term forall 
+%scope aconverte-fun %term forall 
 	%pi (aconverte-fun (aconverte/forall Dconv) (aconverte/forall Dconv') tp-eq/i Deq')
 	%<- (tconverte-fun Dconv Dconv' Deq)
 	%<- (eterm-resp-etp eforall Deq Deq') %.
 %scope aconverte-fun %term var 
 	%pi (aconverte-fun (aconverte/var Dvtrans _ Dlookup) (aconverte/var Dvtrans _ Dlookup') Deq eterm-eq/i)
 	%<- (lookup-fun Dlookup Dlookup' Deq) %.
-%term vari aconverte-fun (aconverte/vari Dvtrans _ _ Dvof) (aconverte/vari Dvtrans _ _ Dvof) tp-eq/i eterm-eq/i %.
+%scope aconverte-fun %term vari aconverte-fun (aconverte/vari Dvtrans _ _ Dvof) (aconverte/vari Dvtrans _ _ Dvof) tp-eq/i eterm-eq/i %.
 %scope aconverte-fun %term varbad 
 	%pi (aconverte-fun (aconverte/vari Dvtrans _ _ Dvof) (aconverte/var Dvtrans _ Dlookup) Deq eterm-eq/i)
 	%<- (lookup-isvar Dlookup Disvar)
 	%<- (vof-isvar-contra Dvof Disvar Dfalse)
 	%<- (false-implies-tp-eq Dfalse Deq) %.
-%term varbad 
+%scope aconverte-fun %term varbad 
 	%pi (aconverte-fun (aconverte/var Dvtrans _ Dlookup) (aconverte/vari Dvtrans _ _ Dvof) Deq eterm-eq/i)
 	%<- (lookup-isvar Dlookup Disvar)
 	%<- (vof-isvar-contra Dvof Disvar Dfalse)
@@ -35,17 +35,17 @@
 	%<- (eterm-resp-eterm2 eapp DeqM DeqN DeqMN)
 	%<- (tsub-resp DeqB term-eq/i tp-eq/i Dsub Dsub'')
 	%<- (tsub-fun Dsub'' Dsub' DeqBx) %.
-%term pi1 
+%scope aconverte-fun %term pi1 
 	%pi (aconverte-fun (aconverte/pi1 Dconv) (aconverte/pi1 Dconv') DeqA Deq)
 	%<- (aconverte-fun Dconv Dconv' DeqAB DeqM)
 	%<- (tp-eq-cdr-sigma DeqAB DeqA DeqB)
 	%<- (eterm-resp-eterm epi1 DeqM Deq) %.
 %scope aconverte-fun %term pi2 
-	%pi (aconverte-fun (aconverte/pi2 Dconv) (aconverte/pi2 Dconv') (DeqB (pi1 R)) Deq)
+	%pi (aconverte-fun (aconverte/pi2 Dconv) (aconverte/pi2 Dconv') (DeqB ((%abs pi1) R)) Deq)
 	%<- (aconverte-fun (%the (aconverte _ R _ _) Dconv) Dconv' DeqAB DeqM)
 	%<- (tp-eq-cdr-sigma DeqAB DeqA DeqB)
 	%<- (eterm-resp-eterm epi2 DeqM Deq) %.
-%term at 
+%scope aconverte-fun %term at 
 	%pi (converte-fun (converte/at Dconv) (converte/at Dconv') Deq)
 	%<- (aconverte-fun Dconv Dconv' _ Deq) %.
 %scope aconverte-fun %term lam 
@@ -55,7 +55,7 @@
 	%<- (bump-converte Dconv Dord Dconv'')
 	%<- ({x} {d} {ex} {xt} converte-fun (Dconv'' x d ex xt) (Dconv' x d ex xt) (Deq ex))
 	%<- (elam-resp DeqA Deq Deq') %.
-%term pair 
+%scope aconverte-fun %term pair 
 	%pi (converte-fun (converte/pair _ DconvN Dsub DconvM) (converte/pair _ DconvN' Dsub' DconvM') Deq)
 	%<- (converte-fun DconvM DconvM' DeqM)
 	%<- (tsub-fun Dsub Dsub' DeqBx)
@@ -65,7 +65,7 @@
 %scope aconverte-fun %term sing 
 	%pi (converte-fun (converte/sing Dconv) (converte/sing Dconv') Deq)
 	%<- (aconverte-fun Dconv Dconv' _ Deq) %.
-%term t tconverte-fun (tconverte/t _) (tconverte/t _) etp-eq/i %.
+%scope aconverte-fun %term t tconverte-fun (tconverte/t _) (tconverte/t _) etp-eq/i %.
 %scope aconverte-fun %term pi 
 	%pi (tconverte-fun (tconverte/pi Dconv DconvA) (tconverte/pi Dconv' DconvA') Deq')
 	%<- (tconverte-fun DconvA DconvA' DeqA)
@@ -73,7 +73,7 @@
 	%<- (bump-tconverte Dconv Dord Dconv'')
 	%<- ({x} {d} {ex} {xt} tconverte-fun (Dconv'' x d ex xt) (Dconv' x d ex xt) (Deq ex))
 	%<- (epi-resp DeqA Deq Deq') %.
-%term sigma 
+%scope aconverte-fun %term sigma 
 	%pi (tconverte-fun (tconverte/sigma Dconv DconvA) (tconverte/sigma Dconv' DconvA') Deq')
 	%<- (tconverte-fun DconvA DconvA' DeqA)
 	%<- ({x} {d} {ex} {xt} tconverte-context (Dconv' x d ex xt) (Dord x d))
@@ -114,17 +114,17 @@
 	%<- (aconverte-fun Dconve Dconve' Deq Deq') %.
 %worlds (fbind) (aconvert-fun _ _ _ _) %.
 %total {} (aconvert-fun _ _ _ _) %.
-%sort vconvert-fun {_ vtrans EX X} {_ vtrans EX' X} {_ eterm-eq EX EX'} %.
-%mode vconvert-fun %in %in %out %.
-%term _ vconvert-fun D D eterm-eq/i %.
-%worlds (fbind) (vconvert-fun _ _ _) %.
-%total {} (vconvert-fun _ _ _) %.
+%sort vtrans-fun {_ vtrans EX X} {_ vtrans EX' X} {_ eterm-eq EX EX'} %.
+%mode vtrans-fun %in %in %out %.
+%term _ vtrans-fun D D eterm-eq/i %.
+%worlds (fbind) (vtrans-fun _ _ _) %.
+%total {} (vtrans-fun _ _ _) %.
 %sort vsound' {_ vof X A} {_ vtrans EX X} {_ tconvert A EA} {_ evof EX EA} %.
 %mode vsound' %in %in %out %out %.
-%term _ 
+%term _
 	%pi (vsound' Dvof Dvtrans Dconv Devof')
 	%<- (vsound Dvof Dvtrans' Dconv Devof)
-	%<- (vconvert-fun Dvtrans' Dvtrans Deq)
+	%<- (vtrans-fun Dvtrans' Dvtrans Deq)
 	%<- (evof-resp Deq etp-eq/i Devof Devof') %.
 %worlds (sbind) (vsound' _ _ _ _) %.
 %total {} (vsound' _ _ _ _) %.
@@ -214,17 +214,17 @@
 %sort invert-aconvert {_ expand R A M} {_ self M A As} {_ aconvert R A ER} {_ trans ER As} %.
 %mode invert-aconvert %in %in %in %out %.
 %scope invert-aconvert %term const invert-aconvert (%the (expand (const K) A M) Dexpand) (%the (self M A As) Dself) (aconvert/const _ (%the (wf A) Dwf) (%the (kof K A) Dkof)) (trans/const Dself Dexpand Dwf Dkof) %.
-%term forall 
-	%pi (invert-aconvert (%the (expand (forall A) (qtp A) M) Dexpand) (%the (self M (qtp A) B) Dself) (aconvert/forall Dconv) (trans/forall Dself Dexpand Dtrans))
+%scope invert-aconvert %term forall 
+	%pi (invert-aconvert (%the (expand ((%abs forall) A) (qtp A) M) Dexpand) (%the (self M (qtp A) B) Dself) (aconvert/forall Dconv) (trans/forall Dself Dexpand Dtrans))
 	%<- (invert-tconvert Dconv Dtrans) %.
 %scope invert-aconvert %term var invert-aconvert (%the (expand X A M) Dexpand) (%the (self M A As) Dself) (aconvert/var (%the (vtrans EX X) Dvtrans) _ (%the (wf A) Dwf) (%the (vof X A) Dvof)) (trans/var Dself Dexpand Dwf Dvof Dvtrans) %.
-%term app 
-	%pi (invert-aconvert (%the (expand (app R N) Bx M) Dexpand) (%the (self M Bx Bsx) Dself) (aconvert/app (%the (tsub B N Bx) DsubBx) (%the (convert N A EN) DconvN) (%the (aconvert R (pi A B) ER) DconvR)) (trans/app DsubBsx Dsubtype DtransN DtransR))
+%scope invert-aconvert %term app 
+	%pi (invert-aconvert (%the (expand ((%abs app) R N) Bx M) Dexpand) (%the (self M Bx Bsx) Dself) (aconvert/app (%the (tsub B N Bx) DsubBx) (%the (convert N A EN) DconvN) (%the (aconvert R (pi A B) ER) DconvR)) (trans/app DsubBsx Dsubtype DtransN DtransR))
 	%<- (aconvert-reg-il DconvR (%the (aof R (pi A B)) DofR))
 	%<- (convert-reg-il DconvN (%the (of N A) DofN))
 	%<- (aof-reg DofR (wf/pi (%the ({x} %pi (vof x A) %-> (wf (B x))) DwfB) (%the (wf A) DwfA)))
 	%<- ({x} can-expand x A (X x) (%the (expand x A (X x)) (DexpandX x)))
-	%<- ({x} can-expand (app R (X x)) (B x) (O x) (%the (expand (app R (X x)) (B x) (O x)) (DexpandO x)))
+	%<- ({x} can-expand ((%abs app) R (X x)) (B x) (O x) (%the (expand ((%abs app) R (X x)) (B x) (O x)) (DexpandO x)))
 	%<- (expand-reg DofR (expand/pi DexpandO DexpandX) (of/lam (%the ({x} %pi (vof x A) %-> (of (O x) (B x))) DofO) _))
 	%<- ({x} {d} can-self (DofO x d) (%the (self (O x) (B x) (Bs x)) (DselfBs x)))
 	%<- (invert-aconvert (expand/pi DexpandO DexpandX) (self/pi DselfBs) DconvR (%the (trans ER (pi A Bs)) DtransR))
@@ -237,54 +237,54 @@
 	%<- (expand-aasub DofN ([x] [d] aof/app (DwfB x d) (DsubB x) (DofX x d) DofR) DexpandO (aasub/app DsubN aasub/closed) DsubBx Dexpand (%the (sub O N M) DsubOx))
 	%<- (self-sub' DofN DofO DselfBs DsubOx DsubBx Dself (%the (tsub Bs N Bsx) DsubBsx)) %.
 %scope invert-aconvert %term pi1 
-	%pi (invert-aconvert (%the (expand (pi1 R) A M1) Dexpand1) (%the (self M1 A As) Dself1) (aconvert/pi1 (%the (aconvert R (sigma A B) ER) Dconv)) (trans/pi1 Dtrans))
+	%pi (invert-aconvert (%the (expand ((%abs pi1) R) A M1) Dexpand1) (%the (self M1 A As) Dself1) (aconvert/pi1 (%the (aconvert R (sigma A B) ER) Dconv)) (trans/pi1 Dtrans))
 	%<- (aconvert-reg-il Dconv (%the (aof R (sigma A B)) DofR))
 	%<- (aof-reg DofR (wf/sigma (%the ({x} %pi (vof x A) %-> (wf (B x))) DwfB) _))
-	%<- (can-expand (pi2 R) (B (pi1 R)) _ (%the (expand (pi2 R) (B (pi1 R)) M2) Dexpand2))
+	%<- (can-expand (pi2 R) (B ((%abs pi1) R)) _ (%the (expand (pi2 R) (B ((%abs pi1) R)) M2) Dexpand2))
 	%<- (expand-reg (aof/pi1 DofR) Dexpand1 (%the (of M1 A) Dof1))
-	%<- (expand-reg (aof/pi2 DofR) Dexpand2 (%the (of M2 (B (pi1 R))) Dof2))
-	%<- (can-self Dof2 (%the (self M2 (B (pi1 R)) Bs) Dself2))
+	%<- (expand-reg (aof/pi2 DofR) Dexpand2 (%the (of M2 (B ((%abs pi1) R))) Dof2))
+	%<- (can-self Dof2 (%the (self M2 (B ((%abs pi1) R)) Bs) Dself2))
 	%<- (can-tsub DwfB Dof1 (%the (tsub B M1 Bx) DsubBx))
-	%<- (tsub-expand (aof/pi1 DofR) DwfB Dexpand1 DsubBx (%the (tp-eq Bx (B (pi1 R))) Deq))
-	%<- (tsub-resp ([_] tp-eq/i) term-eq/i Deq DsubBx (%the (tsub B M1 (B (pi1 R))) DsubBx'))
+	%<- (tsub-expand (aof/pi1 DofR) DwfB Dexpand1 DsubBx (%the (tp-eq Bx (B ((%abs pi1) R))) Deq))
+	%<- (tsub-resp ([_] tp-eq/i) term-eq/i Deq DsubBx (%the (tsub B M1 (B ((%abs pi1) R))) DsubBx'))
 	%<- (invert-aconvert (expand/sigma Dexpand2 Dexpand1) (self/sigma Dself2 DsubBx' Dself1) Dconv (%the (trans ER (sigma As ([_] Bs))) Dtrans)) %.
-%term pi2 
-	%pi (invert-aconvert (%the (expand (pi2 R) (B (pi1 R)) M2) Dexpand2) (%the (self M2 (B (pi1 R)) Bs) Dself2) (aconvert/pi2 (%the (aconvert R (sigma A B) ER) Dconv)) (trans/pi2 Dtrans))
+%scope invert-aconvert %term pi2 
+	%pi (invert-aconvert (%the (expand ((%abs pi2) R) (B ((%abs pi1) R)) M2) Dexpand2) (%the (self M2 (B ((%abs pi1) R)) Bs) Dself2) (aconvert/pi2 (%the (aconvert R (sigma A B) ER) Dconv)) (trans/pi2 Dtrans))
 	%<- (aconvert-reg-il Dconv (%the (aof R (sigma A B)) DofR))
 	%<- (aof-reg DofR (wf/sigma (%the ({x} %pi (vof x A) %-> (wf (B x))) DwfB) _))
-	%<- (can-expand (pi1 R) A _ (%the (expand (pi1 R) A M1) Dexpand1))
+	%<- (can-expand ((%abs pi1) R) A _ (%the (expand ((%abs pi1) R) A M1) Dexpand1))
 	%<- (expand-reg (aof/pi1 DofR) Dexpand1 (%the (of M1 A) Dof1))
-	%<- (expand-reg (aof/pi2 DofR) Dexpand2 (%the (of M2 (B (pi1 R))) Dof2))
+	%<- (expand-reg (aof/pi2 DofR) Dexpand2 (%the (of M2 (B ((%abs pi1) R))) Dof2))
 	%<- (can-self Dof1 (%the (self M1 A As) Dself1))
 	%<- (can-tsub DwfB Dof1 (%the (tsub B M1 Bx) DsubBx))
-	%<- (tsub-expand (aof/pi1 DofR) DwfB Dexpand1 DsubBx (%the (tp-eq Bx (B (pi1 R))) Deq))
-	%<- (tsub-resp ([_] tp-eq/i) term-eq/i Deq DsubBx (%the (tsub B M1 (B (pi1 R))) DsubBx'))
+	%<- (tsub-expand (aof/pi1 DofR) DwfB Dexpand1 DsubBx (%the (tp-eq Bx (B ((%abs pi1) R))) Deq))
+	%<- (tsub-resp ([_] tp-eq/i) term-eq/i Deq DsubBx (%the (tsub B M1 (B ((%abs pi1) R))) DsubBx'))
 	%<- (invert-aconvert (expand/sigma Dexpand2 Dexpand1) (self/sigma Dself2 DsubBx' Dself1) Dconv (%the (trans ER (sigma As ([_] Bs))) Dtrans)) %.
 %scope invert-aconvert %term at 
 	%pi (invert-convert self/t (convert/at Dconv) Dtrans)
 	%<- (invert-aconvert expand/t self/t Dconv Dtrans) %.
-%term sing 
+%scope invert-aconvert %term sing 
 	%pi (invert-convert self/sing (convert/sing Dconv) Dtrans)
 	%<- (invert-aconvert expand/t self/t Dconv Dtrans) %.
 %scope invert-aconvert %term lam 
 	%pi (invert-convert (self/pi Dself) (convert/lam DconvM DconvA) (trans/lam DtransM DtransA))
 	%<- (invert-tconvert DconvA DtransA)
 	%<- ({x} {d} {ex} {xt} invert-convert (Dself x) (DconvM x d ex xt) (DtransM x d ex xt)) %.
-%term pair 
+%scope invert-aconvert %term pair 
 	%pi (invert-convert (self/sigma Dself2 DsubBx Dself1) (convert/pair DwfB DconvN DsubBx' DconvM) (trans/pair DtransN DtransM))
 	%<- (invert-convert Dself1 DconvM DtransM)
 	%<- (tsub-fun DsubBx DsubBx' Deq)
 	%<- (self-resp term-eq/i Deq tp-eq/i Dself2 Dself2')
 	%<- (invert-convert Dself2' DconvN DtransN) %.
 %scope invert-aconvert %term t invert-tconvert tconvert/t ttrans/t %.
-%term sing 
+%scope invert-aconvert %term sing 
 	%pi (invert-tconvert (tconvert/sing Dconv) (ttrans/sing Dtrans))
 	%<- (invert-aconvert expand/t self/t Dconv Dtrans) %.
 %scope invert-aconvert %term pi 
 	%pi (invert-tconvert (tconvert/pi DconvB DconvA) (ttrans/pi DtransB DtransA))
 	%<- (invert-tconvert DconvA DtransA)
 	%<- ({x} {d} {ex} {xt} invert-tconvert (DconvB x d ex xt) (DtransB x d ex xt)) %.
-%term sigma 
+%scope invert-aconvert %term sigma 
 	%pi (invert-tconvert (tconvert/sigma DconvB DconvA) (ttrans/sigma DtransB DtransA))
 	%<- (invert-tconvert DconvA DtransA)
 	%<- ({x} {d} {ex} {xt} invert-tconvert (DconvB x d ex xt) (DtransB x d ex xt)) %.

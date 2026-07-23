@@ -9,8 +9,8 @@ eval (app (app mult (s (s (z)))) (s (s z))) V.
 %querytabled * *
 eval (app (app mult (s (s (z)))) (s (s z))) (s(s(s(s z)))).
 
-}%
+%]
 %. %[
 %querytabled * *
 (app (app mult (s (s (z)))) (s (s z))) ==>* V.
-}%
+%]

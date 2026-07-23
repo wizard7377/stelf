@@ -46,6 +46,9 @@ let cases () =
             test "Implicits" Term "_X";
             test "Qualified" Term "%val ( x y )";
             test "Nofix" Term "%val +";
+            test "Qualified (abs)" Term "%abs ( x y )";
+            test "Nofix (abs)" Term "%abs +";
+            test "Abs unqualified" Term "%abs x";
             test "Local" Term "%local nat (ap F X)";
           ] );
         ( "Explicit implicits",
@@ -171,6 +174,10 @@ let cases () =
             test "Same size or greater" Cmd1 "%reduces >= X Y add X Y zero";
             test "Same size or smaller" Cmd1 "%reduces <= X Y add X Y zero";
           ] );
+        ( "%prose",
+          [
+            test "Basic" Cmd1 "%prose highlightHint";
+          ] );
         ( "Parse errors",
           [
             (* %sort with no name: parser expects an identifier immediately after %sort *)
@@ -198,6 +205,20 @@ let cases () =
             test ~failure:true "Unclosed (single)" Term "%[hello";
             test ~failure:true "Unclosed (double)" Term "%[[hello%]";
             test ~failure:true "Bracket-only is unclosed" Term "%[]";
+          ] );
+        ( "Escapes and comments",
+          [
+            (* %%% is a literal % token; glued to `term` it is the identifier
+               `%term`, NOT the keyword — so it parses as a plain term atom *)
+            test "Escaped percent identifier" Term "%%%term";
+            (* %%X escapes X into a literal identifier character *)
+            test "Escaped char identifier" Term "%%!foo";
+            (* `%term` (single %) is a command keyword, not a term atom *)
+            test ~failure:true "Keyword is not a term atom" Term "%term";
+            (* line comment `% ...` is skipped mid-term (inner context) *)
+            test "Line comment between atoms" Term "succ % a comment\nzero";
+            (* `%[ ... %]` in term position is a string value, not a comment *)
+            test "String value in term" Term "%[hello%]";
           ] );
       ]
     end

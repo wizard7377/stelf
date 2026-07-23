@@ -11,7 +11,7 @@ bare_klam : bareR (klam E) A
             <- {k:ccont}
                {b:{t:ctriv}bareE (cret k t) t}
                bareE (E k) A.
-}%
+%]
 %term bare_klam 
 	%pi (bareR (klam E) A)
 	%<- ({k ccont} %pi ({T ctriv} bareE (cret k T) T) %-> (bareE (E k) A)) %.

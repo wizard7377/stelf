@@ -15,12 +15,12 @@
 %. %[
 s_imp  : solve (A2 imp A1)
 	  <- (assume A2 -> solve A1).
-}%
+%]
 %term s_true solve true %.
 %. %[
 s_forall : solve (forall A1)
 	    <- {a:i} solve (A1 a).
-}%
+%]
 %term s_atom %pi (solve (atom P)) %<- (assume A) %<- (A >> P) %.
 %term i_andl %pi (A1 and A2 >> P) %<- (A1 >> P) %.
 %term i_andr %pi (A1 and A2 >> P) %<- (A2 >> P) %.

@@ -31,7 +31,7 @@ ca
       ([h3:hyp (exists [x:i] B x)] orr1 (axiom h3))
       h))
 (F A B h1).
-}%
+%]
 % Example 5 (Classical Logic)
 %define _ %the ({A o} %pi (pos (A or not A)) %-> #) ([A o] [p pos (A or not A)] orr1' ([p1 pos A] orr2' ([p2 pos (not A)] notr' ([n1 neg A] axiom' n1 p1) p2) p) p) %.
 % Example 6 (Classical Logic)

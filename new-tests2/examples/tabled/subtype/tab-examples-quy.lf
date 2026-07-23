@@ -15,4 +15,4 @@
 %querytabled * 2 (of (lam [x] x) (zero => zero)).
 %querytabled * 2 (of (lam [x] x) T).
 
-}%
+%]

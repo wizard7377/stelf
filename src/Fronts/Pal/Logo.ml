@@ -1,5 +1,5 @@
 open Display
-
+ 
 let[@inline] colored (r : int) (g : int) (b : int) : form =
   if Stdlib.( < ) (r + g + b) 10 then string " "
   else Style.Fore.rgb r g b @@ string "█"

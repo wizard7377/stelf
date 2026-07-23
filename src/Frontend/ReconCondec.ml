@@ -59,7 +59,7 @@ end) : RECON_CONDEC = struct
   exception Error = Error
 
   (* error (r, msg) raises a syntax error within region r with text msg *)
-  let rec error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
   type nonrec name = string
 
@@ -70,10 +70,10 @@ end) : RECON_CONDEC = struct
     | Blockdef of string * (string list * string) list
     | Blockdec of name * ExtSyn.dec list * ExtSyn.dec list
 
-  let rec condec (name, tm) = Condec_ (name, tm)
-  let rec blockdec (name, ds1, ds2) = Blockdec (name, ds1, ds2)
-  let rec blockdef (name, worlds) = Blockdef (name, worlds)
-  let rec condef (nameOpt, tm1, tm2Opt) = Condef_ (nameOpt, tm1, tm2Opt)
+  let condec (name, tm) = Condec_ (name, tm)
+  let blockdec (name, ds1, ds2) = Blockdec (name, ds1, ds2)
+  let blockdef (name, worlds) = Blockdef (name, worlds)
+  let condef (nameOpt, tm1, tm2Opt) = Condef_ (nameOpt, tm1, tm2Opt)
 
   (* condecToConDec (condec, r) = (SOME(cd), SOME(ocd))
      if condec is a named constant declaration with occurrence tree ocd,
@@ -86,14 +86,14 @@ end) : RECON_CONDEC = struct
   *)
   (* should printing of result be moved to frontend? *)
   (* Wed May 20 08:08:50 1998 -fp *)
-  let rec condecToConDec = function
+  let condecToConDec = function
     | Condec_ (name, tm), Paths.Loc (fileName, r), abbFlag ->
-        let _ = Names.varReset IntSyn.Null in
-        let _ = ExtSyn.resetErrors fileName in
+        ignore (Names.varReset IntSyn.Null);
+        ignore (ExtSyn.resetErrors fileName);
         let (ExtSyn.JClass ((v_, oc), l_)) =
           Timers.time Timers.recon ExtSyn.recon (ExtSyn.jclass tm)
         in
-        let _ = ExtSyn.checkErrors r in
+        ignore (ExtSyn.checkErrors r);
         let i, v'_ =
           try Timers.time Timers.abstract Abstract.abstractDecImp v_
           with Abstract.Error msg ->
@@ -105,7 +105,7 @@ end) : RECON_CONDEC = struct
         in
         let ocd = Paths.dec (i, oc) in
         let _ =
-          Display.chatter_s 3
+          Display.chatter_s 3 ~kind:Display.Response
             (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
         in
         let _ =
@@ -121,8 +121,8 @@ end) : RECON_CONDEC = struct
         in
         (Some cd, Some ocd)
     | Condef_ (optName, tm1, tm2Opt), Paths.Loc (fileName, r), abbFlag ->
-        let _ = Names.varReset IntSyn.Null in
-        let _ = ExtSyn.resetErrors fileName in
+        ignore (Names.varReset IntSyn.Null);
+        ignore (ExtSyn.resetErrors fileName);
         let f =
           begin match tm2Opt with
           | None -> ExtSyn.jterm tm1
@@ -137,7 +137,7 @@ end) : RECON_CONDEC = struct
               ((u_, oc1), (v_, Some oc2), l_)
           end
         in
-        let _ = ExtSyn.checkErrors r in
+        ignore (ExtSyn.checkErrors r);
         let i, (u'', v'') =
           try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
           with Abstract.Error msg ->
@@ -162,7 +162,7 @@ end) : RECON_CONDEC = struct
           end
         in
         let _ =
-          Display.chatter_s 3
+          Display.chatter_s 3 ~kind:Display.Response
             (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
         in
         let _ =
@@ -202,8 +202,8 @@ end) : RECON_CONDEC = struct
           | g_, IntSyn.Null -> g_
           | g_, IntSyn.Decl (g'_, d_) -> IntSyn.Decl (ctxAppend (g_, g'_), d_)
         in
-        let rec ctxBlockToString (g0_, (g1_, g2_)) =
-          let _ = Names.varReset IntSyn.Null in
+        let ctxBlockToString (g0_, (g1_, g2_)) =
+          ignore (Names.varReset IntSyn.Null);
           let g0'_ = Names.ctxName g0_ in
           let g1'_ = Names.ctxLUName g1_ in
           let g2'_ = Names.ctxLUName g2_ in
@@ -215,10 +215,10 @@ end) : RECON_CONDEC = struct
           ^ "pi ")
           ^ Print.ctxToString (ctxAppend (g0'_, g1'_), g2'_)
         in
-        let rec checkFreevars = function
+        let checkFreevars = function
           | IntSyn.Null, (g1_, g2_), r -> ()
           | g0_, (g1_, g2_), r ->
-              let _ = Names.varReset IntSyn.Null in
+              ignore (Names.varReset IntSyn.Null);
               let g0'_ = Names.ctxName g0_ in
               let g1'_ = Names.ctxLUName g1_ in
               let g2'_ = Names.ctxLUName g2_ in
@@ -234,15 +234,15 @@ end) : RECON_CONDEC = struct
           | _, Some r2 -> r2
           end
         in
-        let _ = Names.varReset IntSyn.Null in
-        let _ = ExtSyn.resetErrors fileName in
+        ignore (Names.varReset IntSyn.Null);
+        ignore (ExtSyn.resetErrors fileName);
         let j =
           ExtSyn.jwithctx (gsome, ExtSyn.jwithctx (gblock, ExtSyn.jnothing))
         in
         let (ExtSyn.JWithCtx (gsome_, ExtSyn.JWithCtx (gblock_, _))) =
           Timers.time Timers.recon ExtSyn.recon j
         in
-        let _ = ExtSyn.checkErrors r in
+        ignore (ExtSyn.checkErrors r);
         let g0_, [ gsome'; gblock' ] =
           try Abstract.abstractCtxs [ gsome_; gblock_ ]
           with Constraints.Error c_ ->
@@ -255,12 +255,12 @@ end) : RECON_CONDEC = struct
                    ^ "\n")
                    ^ Print.cnstrsToString c_ ))
         in
-        let _ = checkFreevars (g0_, (gsome', gblock'), r') in
+        ignore (checkFreevars (g0_, (gsome', gblock'), r'));
         let bd =
           IntSyn.BlockDec (name, None, gsome', ctxToList (gblock', []))
         in
         let _ =
-          Display.chatter_s 3
+          Display.chatter_s 3 ~kind:Display.Response
             (Timers.time Timers.printing Print.conDecToString bd ^ "\n")
         in
         (Some bd, None)
@@ -284,13 +284,13 @@ end) : RECON_CONDEC = struct
         in
         let bd = IntSyn.BlockDef (name, None, w''_) in
         let _ =
-          Display.chatter_s 3
+          Display.chatter_s 3 ~kind:Display.Response
             (Timers.time Timers.printing Print.conDecToString bd ^ "\n")
         in
         (Some bd, None)
 
-  let rec internalInst _ = raise Match
-  let rec externalInst _ = raise Match
+  let internalInst _ = raise Match
+  let externalInst _ = raise Match
 end
 (* functor ReconConDec *)
 

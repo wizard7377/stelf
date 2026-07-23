@@ -35,7 +35,7 @@ b --> b, b.
 b --> [a].
 g --> g, [a].
 g --> [a].
-}%
+%]
 %sort recogS {_ tokens} {_ tokens} %.
 %sort recogB {_ tokens} {_ tokens} %.
 %sort recogG {_ tokens} {_ tokens} %.
@@ -60,7 +60,7 @@ Note: there are exponentially many parses
    it will take exponential time to produce them all,
    however, it do not want to take exponential time 
    to report failure.
-}%
+%]
 % Parser : referring to recognizer
 %sort pterm %.
 %term s %pi pterm %-> pterm %-> pterm %.

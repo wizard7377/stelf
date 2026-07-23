@@ -1,8 +1,8 @@
 %%! title: "POPL Tutorial/Properties of Typing and Reduction"
-%{! This problem (or problems) involves proving three properties of typing and reduction for the language L\{num str\}
+%[ This problem (or problems) involves proving three properties of typing and reduction for the language L\{num str\}
 from Bob Harper's book,  [http://www.cs.cmu.edu/~rwh/plbook/book.pdf Practical Foundations for Programming Languages].
 
-## The System L\{num str\} !}%
+## The System L\{num str\} %]
 % Natural numbers
 %sort nat %.
 %term 0 nat %.
@@ -64,7 +64,7 @@ from Bob Harper's book,  [http://www.cs.cmu.edu/~rwh/plbook/book.pdf Practical F
 %term red/len %pi (red E1 E1') %-> (red (len E1) (len E1')) %.
 %term red/let/val %pi (val E1) %-> (red (let E1 ([x] E2 x)) (E2 E1)) %.
 %term red/let %pi (red E1 E1') %-> (red (let E1 ([x] E2 x)) (let E1' ([x] E2 x))) %.
-%{! ## Problem 1: Unicity of Typing !}%
+%[ ## Problem 1: Unicity of Typing %]
 %%%%%%%%%%%%%%%% Lemma 9.1 (Unicity of typing) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
@@ -99,7 +99,7 @@ from Bob Harper's book,  [http://www.cs.cmu.edu/~rwh/plbook/book.pdf Practical F
 %block lemma_block [T typ] {x exp} {ofx of x T} {u lemma9-1 ofx ofx refl_t}%.
 %worlds (lemma_block) (lemma9-1 _ _ _) %.
 %total OjT2 (lemma9-1 _ OjT2 _) %.
-%{! ## Problem 2: Determinacy of Reduction !}%
+%[ ## Problem 2: Determinacy of Reduction %]
 %%%%%%%%%%%%%%%% Lemma 10.1 (Determinacy of Reduction) %%%%%%%%%%%%%%%%%%%%%%%
 %
 
@@ -249,9 +249,9 @@ from Bob Harper's book,  [http://www.cs.cmu.edu/~rwh/plbook/book.pdf Practical F
 	%<- (cong_let EE EE') %.
 %worlds () (lemma10-1 _ _ _) %.
 %total RjE (lemma10-1 RjE _ _) %.
-%{! ## Problem 3: Contextual Semantics
+%[ ## Problem 3: Contextual Semantics
 
-In this problem, we define the contextual semantics for L\{num str\} and proof that it is equivalent to (defines the same relation as) the given dynamic semantics (reduction). !}%
+In this problem, we define the contextual semantics for L\{num str\} and proof that it is equivalent to (defines the same relation as) the given dynamic semantics (reduction). %]
 %%%%%%%%%%%%%%%% L{num str}: Contextual Semantics %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Instructions:  E0 ~> E0'
 %sort instr %.
@@ -381,12 +381,12 @@ In this problem, we define the contextual semantics for L\{num str\} and proof t
 	%<- (lem10-2-2 FjC@E0 I FjC@E0' RjE) %.
 %worlds () (thm10-2-2 _ _) %.
 %total {} (thm10-2-2 _ _) %.
-%{! ## Twelf Output
+%[ ## Twelf Output
 
-The `` check="true">output`` for the above. !}%
-%{!
+The `` check="true">output`` for the above. %]
+%[
 -----
 This page was copied from the MediaWiki version of the Twelf Wiki.
 If anything looks wrong, you can refer to the
 [wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/POPL_Tutorial/Properties_of_Typing_and_Reduction).
-!}%
+%]

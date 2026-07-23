@@ -5,7 +5,7 @@
 		     exists {D: M => M}
 		     true.
 %assert (m-identity _ _).
-}%
+%]
 %theorem m-subst : forall* {M %pi term %-> term} {M' %pi term %-> term} {N term} {N' term} forall {D1 {x term} %pi (x => x) %-> (M x => M' x)} {D2 N => N'} exists {E M N => M' N'} true %.
 %assert (m-subst _ _ _) %.
 %theorem m-dia : forallG (pi {x term} {idx x => x}) forall* {M term} {M' term} {M'' term} forall {D1 M => M'} {D2 M => M''} exists {N term} {E1 M' => N} {E2 M'' => N} true %.
@@ -34,4 +34,4 @@
 		exists  {N:term} {S*:M =>* N} {S*':M' =>* N}
 		true.
 %prove 4 D (m-cr D _ _ _).
-}%
+%]

@@ -4,7 +4,7 @@
    are included here.
    
    Author: Brian E. Aydemir (baydemir [at] cis.upenn.edu).
-}%
+%]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Types.
 %sort tp %.
@@ -60,7 +60,7 @@
    Store typings are represented by length-indexed lists, starting from zero
    (z). Thus in the list "store_cons T1 (store_cons T2 store_nil)" index z
    corresponds to T1 and index (s z) corresponds to T2.
-}%
+%]
 %sort store %.
 %name store %.
 %term store_nil store %.
@@ -106,7 +106,7 @@
    use this auxiliary judgment since assumptions in the typing environment
    do not mention store typings, and hence we shouldn't confuse them with
    typing judgments.
-}%
+%]
 %sort of {_ store} {_ exp} {_ tp} %.
 %name of %.
 %mode of %in %in %star %.

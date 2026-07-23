@@ -9,9 +9,27 @@ module Parser : PARSER = struct
     let* end_pos = pos in
     return (res, start_pos, end_pos)
 
+  (* Raw whitespace: spaces, tabs, newlines only — no comment handling.
+     [blank] and the [%[ ... %]] string scanner build on this so they never
+     accidentally swallow a line comment that crosses a newline. *)
+  let ws0 = skip_while (function ' ' | '\t' | '\n' -> true | _ -> false)
+
+  (* [whitespace] also skips [% ...] line comments: a [%] immediately followed
+     by whitespace runs to end of line.  The probe fires only on [%]+whitespace,
+     so [%%] (escape), [%[] (string) and [%name] (keyword) fail it and — thanks
+     to Angstrom's default backtracking — are left intact for the token
+     parsers.  This gives line comments "anywhere whitespace is allowed" in the
+     inner (term) context. *)
   let whitespace =
-    skip_while (function ' ' | '\t' | '\n' -> true | _ -> false)
-  let blank = (skip (function ' ' | '\t' -> true | _ -> false) *> whitespace)
+    fix (fun self ->
+        ws0
+        *> option ()
+             ((string "%;" <|> string "%")
+             *> satisfy (function ' ' | '\t' | '\n' -> true | _ -> false)
+             *> skip_while (fun c -> c <> '\n')
+             *> self))
+
+  let blank = skip (function ' ' | '\t' -> true | _ -> false) *> ws0
   let token s = (string s <* whitespace) *> return ()
 
   (* Require that the character after the keyword body is either EOF
@@ -35,17 +53,22 @@ module Parser : PARSER = struct
 
   let keywords ss = choice (List.map keyword ss)
 
-  let ident =
-    take_till (function
-      | ' ' | '\t' | '\n' | '(' | ')' | '{' | '}' | '[' | ']' | '%' -> true
-      | _ -> false)
-    <* whitespace
+  (* [%%X] escapes the next character [X] to a literal, so it can appear inside
+     an identifier without being lexed specially.  A run of [%] decomposes by
+     greedily consuming [%%] pairs: [%%%] is a literal [%], [%%%term] is the
+     identifier [%term] (not the keyword), [%% ] is a literal space. *)
+  let esc_char = string "%%" *> any_char >>| String.make 1
 
-  let ident1 =
+  let ident_chunk =
     take_while1 (function
       | ' ' | '\t' | '\n' | '(' | ')' | '{' | '}' | '[' | ']' | '%' -> false
       | _ -> true) (* TODO Generalize to unicode ws *)
-    <* whitespace
+
+  let ident =
+    many (ident_chunk <|> esc_char) >>| String.concat "" <* whitespace
+
+  let ident1 =
+    many1 (ident_chunk <|> esc_char) >>| String.concat "" <* whitespace
 
   let ( let* ) = ( >>= )
 

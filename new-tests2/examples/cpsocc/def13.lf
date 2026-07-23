@@ -23,4 +23,4 @@
 %terminates [(Phi1 Phi2) (E C)]
  (cstack_substE E Phi1 _)
  (cstack_substC C Phi2 _).
-}%
+%]

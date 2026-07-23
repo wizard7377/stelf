@@ -1,7 +1,7 @@
 %. %[ This is part of a proof of the soundness of Featherweight Java (Atsushi Igarashi,
 Benjamin Pierce and Philip Wadler) in the Twelf logical Framework.
 It was developed by Stephanie Weirich <sweirich@cis.upenn.edu> and
-Geoffrey Washburn <geoffw@cis.upenn.edu>. }%
+Geoffrey Washburn <geoffw@cis.upenn.edu>. %]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   FJ Meta theory - Aux lemmas for the preservation proof
@@ -18,14 +18,14 @@ they don't influence judgments such as fields or mtype.
 
 An alternative would be to prove strengthening lemmas about fields and mtype.
 (See the proof of narrowing and the definitions of sub_strengthen below.)
-}%
+%]
 %block var {x exp}%.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %. %[ 
 We also have to reason about when things are equal, even though equality is not 
 built into twelf. Therefore, we need a judgment about equality for each different
 type.
-}%
+%]
 %% other equality relations --- not part of specification of FJ 
 %sort classDef_eq {_ classDef C} {_ classDef C} %.
 %mode classDef_eq %in %in %.
@@ -632,7 +632,7 @@ type.
 Coverage checker fails. Doesn't know that NI and LCM are exclusive. How to express
 this to twelf?
 
-}%
+%]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lemma about invoc
 %sort invoc_lemma {_ class_table_typing CT} {_ typing_list CT ES CS1} {_ typing_bexp CT BE C0 C1} {_ invoc (%the (bexp CS1) BE) ES (new C0 E1) E} {_ typing CT (new C0 E1) C0} {_ typing CT E C2} {_ subtyping CT C2 C1} %.

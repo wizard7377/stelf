@@ -28,10 +28,10 @@ module Make_ReconQuery
       | Cst.View.Query.Query (_, opt_name, tm) -> (opt_name, tm)
       | _ -> assert false
     in
-    let _ = Names.varReset IntSyn.Null in
-    let _ = RT.resetErrors filename in
+    ignore (Names.varReset IntSyn.Null);
+    ignore (RT.resetErrors filename);
     let (RT.JClass ((v_, _oc), l_)) = RT.reconQuery (RT.jclass tm) in
-    let _ = RT.checkErrors r in
+    ignore (RT.checkErrors r);
     let _ =
       match l_ with IntSyn.Type -> () | _ -> error (r, "Query was not a type")
     in
@@ -59,7 +59,10 @@ module Make_ReconQuery
         IntSyn.AbbrevDef (name, None, i, u'_, v'_, l_)
     in
     let cd = Names.nameConDec cd in
-    let _ = Display.chatter_s 3 (Print.conDecToString cd ^ "\n") in
+    let _ =
+      Display.chatter_s 3 ~kind:Display.Response
+        (Print.conDecToString cd ^ "\n")
+    in
     let _ =
       if !Global.doubleCheck then begin
         Typecheck.Typecheck_.TypeCheck.check (v'_, IntSyn.Uni l_);
@@ -84,7 +87,10 @@ module Make_ReconQuery
         IntSyn.AbbrevDef (name, None, i, u'_, v'_, IntSyn.Type)
     in
     let cd = Names.nameConDec cd in
-    let _ = Display.chatter_s 3 (Print.conDecToString cd ^ "\n") in
+    let _ =
+      Display.chatter_s 3 ~kind:Display.Response
+        (Print.conDecToString cd ^ "\n")
+    in
     let _ =
       if !Global.doubleCheck then begin
         Typecheck.Typecheck_.TypeCheck.check (v'_, IntSyn.Uni IntSyn.Type);
@@ -100,8 +106,8 @@ module Make_ReconQuery
       | Cst.View.Solve.Solve (_, nameOpt, solve_tm) -> (nameOpt, solve_tm)
       | _ -> assert false
     in
-    let _ = Names.varReset IntSyn.Null in
-    let _ = RT.resetErrors filename in
+    ignore (Names.varReset IntSyn.Null);
+    ignore (RT.resetErrors filename);
     (* Build job: AND of all define jobs, then the solve type *)
     let mkd d =
       let _, tm1, tm2_opt =
@@ -119,7 +125,7 @@ module Make_ReconQuery
     let (RT.JAnd (defines', RT.JClass ((v_, _), l_))) =
       RT.reconQuery combined_job
     in
-    let _ = RT.checkErrors r in
+    ignore (RT.checkErrors r);
     let _ =
       match l_ with IntSyn.Type -> () | _ -> error (r, "Query was not a type")
     in

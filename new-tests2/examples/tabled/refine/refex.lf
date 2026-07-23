@@ -45,7 +45,7 @@ n<=b : nat <= bit.
 <==> : B1 <= A1
 	-> A2 <= B2
 	-> A1 => A2 <= B1 => B2.
-}%
+%]
 % Ordinary Types
 %sort ord {_ tp} %.
 %mode ord %in %.
@@ -213,7 +213,7 @@ of_fix : of (fix M) A
 of_let : of (let M N) A
 	  <- of M B
 	  <- ({x:term} of x B -> of (N x) A).
-}%
+%]
 % Bi-Directional Type Checking
 %sort synth {_ term} {_ tp} %.
 %name synth %.

@@ -3,7 +3,7 @@
 %%! next: 
 %%!   label: Representing the syntax of the natural numbers
 %%!   link: /wiki/proving-metatheorems-representing-the-syntax-of-the-natural-numbers/
-%{! 
+%[ 
 
 The story of a typical [deductive system](/wiki/object-logic/) goes something like this: 
  - One day, a programming language designer has an idea for a new programming language.  
@@ -51,4 +51,4 @@ The third layer presents some more-interesting proofs and introduces one additio
  12. [Proving totality assertions in non-empty contexts](/wiki/proving-metatheorems-proving-totality-assertions-in-non-empty-contexts/)
  13. [Proving metatheorems in non-empty contexts](/wiki/proving-metatheorems-proving-metatheorems-in-non-empty-contexts/)
 
-!}%
+%]

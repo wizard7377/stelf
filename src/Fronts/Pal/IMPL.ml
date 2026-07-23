@@ -52,9 +52,18 @@ module type IMPL = sig
 
   module Install : sig
     val install1 :
-      ?path:Fpath.t option -> Names.namespace -> Cst.cmd -> Reply.t list
+      ?path:Fpath.t option ->
+      ?scope_installs:Intsyn.IntSyn.cid list ref option ->
+      Names.namespace ->
+      Cst.cmd ->
+      Reply.t list
     (** Install a single parsed command into the global signature, returning
-        what it produced. *)
+        what it produced. [scope_installs], when [Some acc], records every
+        cid that gets globally bare-name-installed while processing [cmd]
+        into [acc]; [%scope] bodies pass a fresh accumulator so they can
+        retract those bindings once the body finishes (see [Impl.ml]'s
+        [Cst.Scope_] handler), keeping scope-internal names from leaking
+        into the global namespace once the scope closes. *)
 
     val install :
       ?path:Fpath.t option -> Names.namespace -> Cst.cmd list -> Reply.t list

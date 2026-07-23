@@ -15,21 +15,21 @@
 	%<- (expand-fun Dexpand'' Dexpand' Deqm)
 	%<- (self-resp Deqm Deqt tp-eq/i Dself Dself'')
 	%<- (self-fun Dself'' Dself' Deq) %.
-%term var 
+%scope ttrans-fun %term var
 	%pi (trans-fun (trans/var (%the (self M A B) Dself) (%the (expand X A M) Dexpand) _ (%the (vof X A) Dvof) (%the (vtrans EM X) Dvtrans)) (trans/var (%the (self M' A B') Dself') (%the (expand X A M') Dexpand') _ (%the (vof X A) Dvof) (%the (vtrans EM X) Dvtrans)) DeqB)
 	%<- (expand-fun Dexpand Dexpand' (%the (term-eq M M') DeqM))
 	%<- (self-resp DeqM tp-eq/i tp-eq/i Dself (%the (self M' A B) Dself''))
 	%<- (self-fun Dself'' Dself' (%the (tp-eq B B') DeqB)) %.
 %scope ttrans-fun %term forall 
-	%pi (trans-fun (trans/forall (%the (self M (qtp A) B) Dself) (%the (expand (forall A) (qtp A) M) Dexpand) (%the (ttrans EA A) Dtrans)) (trans/forall (%the (self M' (qtp A') B') Dself') (%the (expand (forall A') (qtp A') M') Dexpand') (%the (ttrans EA A') Dtrans')) DeqB)
+	%pi (trans-fun (trans/forall (%the (self M (qtp A) B) Dself) (%the (expand ((%abs forall) A) (qtp A) M) Dexpand) (%the (ttrans EA A) Dtrans)) (trans/forall (%the (self M' (qtp A') B') Dself') (%the (expand ((%abs forall) A') (qtp A') M') Dexpand') (%the (ttrans EA A') Dtrans')) DeqB)
 	%<- (ttrans-fun Dtrans Dtrans' (%the (tp-eq A A') DeqA))
-	%<- (atom-resp-tp forall DeqA (%the (atom-eq (forall A) (forall A')) DeqF))
+	%<- (atom-resp-tp (%abs forall) DeqA (%the (atom-eq ((%abs forall) A) ((%abs forall) A')) DeqF))
 	%<- (tp-resp-tp qtp DeqA (%the (tp-eq (qtp A) (qtp A')) DeqQ))
 	%<- (expand-resp DeqF DeqQ term-eq/i Dexpand Dexpand'')
 	%<- (expand-fun Dexpand'' Dexpand' (%the (term-eq M M') DeqM))
 	%<- (self-resp DeqM DeqQ tp-eq/i Dself (%the (self M' (qtp A') B) Dself''))
 	%<- (self-fun Dself'' Dself' (%the (tp-eq B B') DeqB)) %.
-%term app 
+%scope ttrans-fun %term app
 	%pi (trans-fun (trans/app Dsub Dsubtype DtransN DtransM) (trans/app Dsub' Dsubtype' DtransN' DtransM') Deq)
 	%<- (trans-fun DtransM DtransM' DeqPi)
 	%<- (tp-eq-cdr-pi DeqPi DeqA DeqB)
@@ -42,7 +42,7 @@
 	%pi (trans-fun (trans/pi1 Dtrans) (trans/pi1 Dtrans') D)
 	%<- (trans-fun Dtrans Dtrans' DeqSig)
 	%<- (tp-eq-cdr-sigma DeqSig D _) %.
-%term pi2 
+%scope ttrans-fun %term pi2
 	%pi (trans-fun (trans/pi2 Dtrans) (trans/pi2 Dtrans') (D aca))
 	%<- (trans-fun Dtrans Dtrans' DeqSig)
 	%<- (tp-eq-cdr-sigma DeqSig _ D) %.
@@ -52,13 +52,13 @@
 	%<- (trans-resp-underbind Deqt Dtrans Dtrans'')
 	%<- ({x} {d} {ex} {xt} trans-fun (Dtrans'' x d ex xt) (Dtrans' x d ex xt) (Deqm x))
 	%<- (pi-resp Deqt Deqm Deq) %.
-%term pair 
+%scope ttrans-fun %term pair
 	%pi (trans-fun (trans/pair Dtrans2 Dtrans1) (trans/pair Dtrans2' Dtrans1') Deq)
 	%<- (trans-fun Dtrans1 Dtrans1' Deq1)
 	%<- (trans-fun Dtrans2 Dtrans2' Deq2)
 	%<- (sigma-resp Deq1 ([_] Deq2) Deq) %.
 %scope ttrans-fun %term t ttrans-fun ttrans/t ttrans/t tp-eq/i %.
-%term pi 
+%scope ttrans-fun %term pi
 	%pi (ttrans-fun (ttrans/pi Dtrans Dttrans) (ttrans/pi Dtrans' Dttrans') Deq)
 	%<- (ttrans-fun Dttrans Dttrans' Deqt)
 	%<- (ttrans-resp-underbind Deqt Dtrans Dtrans'')
@@ -70,7 +70,7 @@
 	%<- (ttrans-resp-underbind Deqt Dtrans Dtrans'')
 	%<- ({x} {d} {ex} {xt} ttrans-fun (Dtrans'' x d ex xt) (Dtrans' x d ex xt) (Deqm x))
 	%<- (sigma-resp Deqt Deqm Deq) %.
-%term sing 
+%scope ttrans-fun %term sing
 	%pi (ttrans-fun (ttrans/sing Dtrans) (ttrans/sing Dtrans') Deq)
 	%<- (trans-fun Dtrans Dtrans' Deq) %.
 %worlds (var bind tbind) (ttrans-fun _ _ _) (trans-fun _ _ _) %.

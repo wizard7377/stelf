@@ -4,7 +4,7 @@
    preservation theorems are included here (with associated lemmas).
    
    Author: Brian E. Aydemir (baydemir [at] cis.upenn.edu).
-}%
+%]
 %%% The one block of interest here.
 %block bind [t tp] {x exp} {d var x t}%.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

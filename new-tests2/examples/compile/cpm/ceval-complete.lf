@@ -12,7 +12,7 @@ sequences, which is possible, although somewhat tedious.
 
 Below we give a simpler implementation in which the partial computations
 are accumulated incrementally.
-}%
+%]
 %. %[ Main Lemma
    If   D :: eval E V
    and  C' :: K # (return V) =>* (answer W)
@@ -26,7 +26,7 @@ exactly the same as csd, the implementation of the soundness proof.
 There are only two changes: the order of arguments is switched
 (following the convention that induction arguments come first), the
 second is that the order of the subgoals is reversed.
-}%
+%]
 %sort ccp {_ eval E V} {_ K # (return V) =>* (answer W)} {_ K # (ev E) =>* (answer W)} %.
 %mode ccp %in %in %out %.
 %name ccp %.
@@ -76,6 +76,6 @@ second is that the order of the subgoals is reversed.
    then CE :: ceval E V.
 
 Proof: By Main Lemma.
-}%
+%]
 %sort ceval_complete {_ eval E V} {_ ceval E V} %.
 %term cevcp %pi (ceval_complete D (cev C)) %<- (ccp D (stop << st_init) C) %.

@@ -119,5 +119,5 @@ check (fix [plus] lam [n] lam [m]
    pos => nat => pos &
    pos => pos => pos).
 
-}%
+%]
 %query 20736 _ _ check plus' (nat => nat => nat & nat => pos => pos & pos => nat => pos & pos => pos => pos) %.

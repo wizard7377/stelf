@@ -90,9 +90,12 @@
 %require %[ progress-lemmas-mods %] %.
 %require %[ preservation-raises %] %.
 %require %[ preservation-fst %] %.
+%scope correspondence-with-sing %{
+%open sing
 %require %[ correspondence-thm %] %.
 %require %[ inequalities %] %.
 %require %[ inversions-deq %] %.
+%}
 %require %[ canonical-forms-terms %] %.
 %require %[ progress-lemmas-terms %] %.
 %require %[ progress %] %.

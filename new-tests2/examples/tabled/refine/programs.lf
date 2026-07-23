@@ -27,7 +27,7 @@
 %. %[
 % sub' produces a bit number,i.e. it might have leading zeros!
 % sub standardizes the result of sub', i.e. we get a nat (without leading zeros)
-}%
+%]
 % comment:
 % usually would compute with the twocomplement
 % and use addition? but this requires a fixed length

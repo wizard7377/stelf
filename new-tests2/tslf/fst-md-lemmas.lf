@@ -5,7 +5,11 @@
 		   -> seq/cn C C'
 		   -> type.
 
+<<<<<<< Updated upstream
 %mode fst-md-seq +D1 +D2 -D3. }% %]
+=======
+%mode fst-md-seq +D1 +D2 -D3. %]
+>>>>>>> Stashed changes
 %term _ fst-md-seq fst-md/unit fst-md/unit seq/cn/refl %.
 %term _ fst-md-seq fst-md/cn fst-md/cn seq/cn/refl %.
 %term _ fst-md-seq fst-md/tm fst-md/tm seq/cn/refl %.

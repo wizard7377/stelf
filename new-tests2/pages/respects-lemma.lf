@@ -27,7 +27,7 @@ For example, we can define the standard equality relation ``bin-eq`` for binary 
 %term and/11 %pi (and (1 M) (1 N) (1 P)) %<- (and M N P) %.
 %. %[
 The respects lemma: the and relation respects equality
-}%
+%]
 %sort and-resp {_ bin-eq M M'} {_ bin-eq N N'} {_ bin-eq O O'} {_ and M N O} {_ and M' N' O'} %.
 %mode and-resp %in %in %in %in %out %.
 %term _ and-resp bin-eq/ bin-eq/ bin-eq/ A A %.

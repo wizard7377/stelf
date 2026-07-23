@@ -32,7 +32,11 @@ cn-nke/tp/ref		: cn-nke (tp/ref _) kd/type.
 cn-nke/tp/tag		: cn-nke (tp/tag _) kd/type.
 
 cn-nke/cn/unit		: cn-nke cn/unit kd/unit.
+<<<<<<< Updated upstream
 }% %]
+=======
+%]
+>>>>>>> Stashed changes
 %term cn-nke/cn/pj1 %pi (cn-nke (cn/pj1 P1) K') %<- (cn-nke P1 (kd/sgm K' K'')) %.
 %term cn-nke/cn/pj2 %pi (cn-nke (cn/pj2 P1) (K'' (cn/pj1 P1))) %<- (cn-nke P1 (kd/sgm K' K'')) %.
 %%%%
@@ -79,7 +83,11 @@ cn-nke/cn/unit		: cn-nke cn/unit kd/unit.
 %. %[
 cn-peq/var		: cn-peq A A K
 			   <- ofkd A K.
+<<<<<<< Updated upstream
 }% %]
+=======
+%]
+>>>>>>> Stashed changes
 %term cn-peq/tp/unit cn-peq tp/unit tp/unit kd/type %.
 %term cn-peq/tp/tagged cn-peq tp/tagged tp/tagged kd/type %.
 %term cn-peq/tp/cross 

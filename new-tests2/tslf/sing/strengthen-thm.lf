@@ -7,9 +7,9 @@
 %sort sub-absent {N} {M} {_ sub ([_] N) M N} %.
 %mode sub-absent %in %in %out %.
 %scope sub-absent %term at sub-absent (at R) M (sub/aa aasub/closed) %.
-%term lam %pi (sub-absent (lam N) M (sub/lam D)) %<- ({y} sub-absent (N y) M (D y)) %.
+%scope sub-absent %term lam %pi (sub-absent (lam N) M (sub/lam D)) %<- ({y} sub-absent (N y) M (D y)) %.
 %scope sub-absent %term pair 
-	%pi (sub-absent (pair N1 N2) M (sub/pair D2 D1))
+	%pi (sub-absent ((%abs pair) N1 N2) M (sub/pair D2 D1))
 	%<- (sub-absent N1 M D1)
 	%<- (sub-absent N2 M D2) %.
 %worlds (var) (sub-absent _ _ _) %.
@@ -17,15 +17,15 @@
 %sort tsub-absent {A} {M} {_ tsub ([_] A) M A} %.
 %mode tsub-absent %in %in %out %.
 %scope tsub-absent %term t tsub-absent t M tsub/t %.
-%term pi 
-	%pi (tsub-absent (pi A1 A2) M (tsub/pi D2 D1))
+%scope tsub-absent %term pi 
+	%pi (tsub-absent ((%abs pi) A1 A2) M (tsub/pi D2 D1))
 	%<- (tsub-absent A1 M D1)
 	%<- ({y} tsub-absent (A2 y) M (D2 y)) %.
 %scope tsub-absent %term sigma 
-	%pi (tsub-absent (sigma A1 A2) M (tsub/sigma D2 D1))
+	%pi (tsub-absent ((%abs sigma) A1 A2) M (tsub/sigma D2 D1))
 	%<- (tsub-absent A1 M D1)
 	%<- ({y} tsub-absent (A2 y) M (D2 y)) %.
-%term sing tsub-absent (sing R) M (tsub/singa aasub/closed) %.
+%scope tsub-absent %term sing tsub-absent (sing R) M (tsub/singa aasub/closed) %.
 %worlds (var) (tsub-absent _ _ _) %.
 %total A (tsub-absent A _ _) %.
 %%%%%  Substitution Strengthening  %%%%%
@@ -38,24 +38,24 @@
 %sort tsub-closed {_ {x atom} tsub A M (B x)} {_ {x atom} tp-eq (B x) B'} %.
 %mode tsub-closed %in %out %.
 %scope tsub-closed %term closed aasub-closed ([_] aasub/closed) ([_] atom-eq/i) %.
-%term forall 
+%scope tsub-closed %term forall 
 	%pi (aasub-closed ([x] aasub/forall (D x)) Deq')
 	%<- (tsub-closed D Deq)
-	%<- ({x} atom-resp-tp forall (Deq x) (Deq' x)) %.
+	%<- ({x} atom-resp-tp (%abs forall) (Deq x) (Deq' x)) %.
 %scope tsub-closed %term app 
 	%pi (aasub-closed ([x] aasub/app (D2 x) (D1 x)) Deq)
 	%<- (aasub-closed D1 Deq1)
 	%<- (sub-closed D2 Deq2)
 	%<- ({x} app-resp (Deq1 x) (Deq2 x) (Deq x)) %.
-%term pi1 
+%scope tsub-closed %term pi1 
 	%pi (aasub-closed ([x] aasub/pi1 (D1 x)) Deq')
 	%<- (aasub-closed D1 Deq)
-	%<- ({x} atom-resp-atom pi1 (Deq x) (Deq' x)) %.
+	%<- ({x} atom-resp-atom (%abs pi1) (Deq x) (Deq' x)) %.
 %scope tsub-closed %term pi2 
 	%pi (aasub-closed ([x] aasub/pi2 (D1 x)) Deq')
 	%<- (aasub-closed D1 Deq)
-	%<- ({x} atom-resp-atom pi2 (Deq x) (Deq' x)) %.
-%term var aosub-closed ([_] aosub/var) ([_] term-eq/i) %.
+	%<- ({x} atom-resp-atom (%abs pi2) (Deq x) (Deq' x)) %.
+%scope tsub-closed %term var aosub-closed ([_] aosub/var) ([_] term-eq/i) %.
 %scope tsub-closed %term app 
 	%pi (aosub-closed ([x] aosub/app (D3 x) (D2 x) (D1 x)) Deq)
 	%<- (aosub-closed D1 Deq1)
@@ -63,7 +63,7 @@
 	%<- (sub-closed D2 Deq2)
 	%<- (sub-resp1 Deq1' Deq2 ([_] term-eq/i) D3 D3')
 	%<- (sub-closed D3' Deq) %.
-%term pi1 
+%scope tsub-closed %term pi1 
 	%pi (aosub-closed ([x] aosub/pi1 (D1 x)) Deq1)
 	%<- (aosub-closed D1 Deq)
 	%<- ({x} term-eq-cdr-pair (Deq x) (Deq1 x) (Deq2 x)) %.
@@ -71,12 +71,12 @@
 	%pi (aosub-closed ([x] aosub/pi2 (D1 x)) Deq2)
 	%<- (aosub-closed D1 Deq)
 	%<- ({x} term-eq-cdr-pair (Deq x) (Deq1 x) (Deq2 x)) %.
-%term aa 
+%scope tsub-closed %term aa 
 	%pi (sub-closed ([x] sub/aa (D1 x)) Deq')
 	%<- (aasub-closed D1 Deq)
 	%<- ({x} term-resp-atom at (Deq x) (Deq' x)) %.
 %scope tsub-closed %term ao %pi (sub-closed ([x] sub/ao (D1 x)) Deq) %<- (aosub-closed D1 Deq) %.
-%term lam 
+%scope tsub-closed %term lam 
 	%pi (sub-closed ([x] sub/lam (D1 x)) Deq')
 	%<- ({y} sub-closed ([x] D1 x y) ([x] Deq x y))
 	%<- ({x} lam-resp (Deq x) (Deq' x)) %.
@@ -85,13 +85,13 @@
 	%<- (sub-closed D1 Deq1)
 	%<- (sub-closed D2 Deq2)
 	%<- ({x} pair-resp (Deq1 x) (Deq2 x) (Deq x)) %.
-%term t tsub-closed ([_] tsub/t) ([_] tp-eq/i) %.
+%scope tsub-closed %term t tsub-closed ([_] tsub/t) ([_] tp-eq/i) %.
 %scope tsub-closed %term pi 
 	%pi (tsub-closed ([x] tsub/pi (D2 x) (D1 x)) Deq)
 	%<- (tsub-closed D1 Deq1)
 	%<- ({y} tsub-closed ([x] D2 x y) ([x] Deq2 x y))
 	%<- ({x} pi-resp (Deq1 x) (Deq2 x) (Deq x)) %.
-%term sigma 
+%scope tsub-closed %term sigma 
 	%pi (tsub-closed ([x] tsub/sigma (D2 x) (D1 x)) Deq)
 	%<- (tsub-closed D1 Deq1)
 	%<- ({y} tsub-closed ([x] D2 x y) ([x] Deq2 x y))
@@ -100,7 +100,7 @@
 	%pi (tsub-closed ([x] tsub/singa (D1 x)) Deq')
 	%<- (aasub-closed D1 Deq)
 	%<- ({x} tp-resp-atom sing (Deq x) (Deq' x)) %.
-%term singo 
+%scope tsub-closed %term singo 
 	%pi (tsub-closed ([x] tsub/singo (D1 x)) Deq'')
 	%<- (aosub-closed D1 Deq)
 	%<- ({x} term-eq-cdr-at (Deq x) (Deq' x))
@@ -165,13 +165,13 @@
 %scope wf-noassm %term const 
 	%pi (aof-noassm ([x] aof/const _ (Dkof x)) ([_] atom-eq/i) Deq)
 	%<- (kof-strengthen Dkof Deq) %.
-%term var aof-noassm ([x] aof/var (Dwf x) D) ([_] atom-eq/i) ([_] tp-eq/i) %.
+%scope wf-noassm %term var aof-noassm ([x] aof/var (Dwf x) D) ([_] atom-eq/i) ([_] tp-eq/i) %.
 %scope wf-noassm %term forall 
 	%pi (aof-noassm ([x] aof/forall (Dwf x)) Deqa Deqt)
 	%<- (wf-noassm Dwf Deq)
-	%<- ({x} atom-resp-tp forall (Deq x) (Deqa x))
+	%<- ({x} atom-resp-tp (%abs forall) (Deq x) (Deqa x))
 	%<- ({x} tp-resp-tp ([a] pi (pi a ([_] t)) ([_] t)) (Deq x) (Deqt x)) %.
-%term app 
+%scope wf-noassm %term app 
 	%pi (aof-noassm ([x] aof/app _ (D3 x) (D2 x) (D1 x)) Deqa Deqt)
 	%<- (aof-noassm D1 Deq1 DeqAB)
 	%<- (of-noassm D2 Deq2)
@@ -182,20 +182,20 @@
 %scope wf-noassm %term pi1 
 	%pi (aof-noassm ([x] aof/pi1 (D1 x)) Deqa' DeqA)
 	%<- (aof-noassm D1 Deqa DeqAB)
-	%<- ({x} atom-resp-atom pi1 (Deqa x) (Deqa' x))
+	%<- ({x} atom-resp-atom (%abs pi1) (Deqa x) (Deqa' x))
 	%<- ({x} tp-eq-cdr-sigma (DeqAB x) (DeqA x) _) %.
-%term pi2 
+%scope wf-noassm %term pi2 
 	%pi (aof-noassm ([x] aof/pi2 (D1 x)) Deqa' DeqB'')
 	%<- (aof-noassm D1 (%the ({x} atom-eq (R x) R') Deqa) DeqAB)
-	%<- ({x} atom-resp-atom pi2 (Deqa x) (Deqa' x))
+	%<- ({x} atom-resp-atom (%abs pi2) (Deqa x) (Deqa' x))
 	%<- ({x} tp-eq-cdr-sigma (DeqAB x) _ (%the ({y} tp-eq (B x y) (B' y)) (DeqB x)))
-	%<- ({x} tp-resp-atom ([r] B' (pi1 r)) (Deqa x) (DeqB' x))
-	%<- ({x} tp-eq-trans (DeqB x (pi1 (R x))) (DeqB' x) (DeqB'' x)) %.
+	%<- ({x} tp-resp-atom ([r] B' (%abs pi1 r)) (Deqa x) (DeqB' x))
+	%<- ({x} tp-eq-trans (DeqB x (%abs pi1 (R x))) (DeqB' x) (DeqB'' x)) %.
 %scope wf-noassm %term at 
 	%pi (of-noassm ([x] of/at (D1 x)) Deq')
 	%<- (aof-noassm D1 Deq _)
-	%<- ({x} term-resp-atom at (Deq x) (Deq' x)) %.
-%term lam 
+	%<- ({x} term-resp-atom (%abs at) (Deq x) (Deq' x)) %.
+%scope wf-noassm %term lam 
 	%pi (of-noassm ([x] of/lam (D2 x) (D1 x)) Deq')
 	%<- (wf-noassm D1 Deq1)
 	%<- (of-bind-resp1 Deq1 D2 D2')
@@ -206,12 +206,12 @@
 	%<- (of-noassm D1 Deq1)
 	%<- (of-noassm D2 Deq2)
 	%<- ({x} pair-resp (Deq1 x) (Deq2 x) (Deq x)) %.
-%term sing 
+%scope wf-noassm %term sing 
 	%pi (of-noassm ([x] of/sing (D1 x)) Deq')
 	%<- (aof-noassm D1 Deq _)
-	%<- ({x} term-resp-atom at (Deq x) (Deq' x)) %.
+	%<- ({x} term-resp-atom (%abs at) (Deq x) (Deq' x)) %.
 %scope wf-noassm %term t wf-noassm ([x] wf/t) ([_] tp-eq/i) %.
-%term pi 
+%scope wf-noassm %term pi 
 	%pi (wf-noassm ([x] wf/pi (D2 x) (D1 x)) Deq')
 	%<- (wf-noassm D1 Deq1)
 	%<- (wf-bind-resp1 Deq1 D2 D2')
@@ -223,10 +223,10 @@
 	%<- (wf-bind-resp1 Deq1 D2 D2')
 	%<- ({y} {e} wf-noassm ([x] D2' x y e) ([x] Deq2 x y))
 	%<- ({x} sigma-resp (Deq1 x) (Deq2 x) (Deq' x)) %.
-%term sing 
+%scope wf-noassm %term sing
 	%pi (wf-noassm ([x] wf/sing (D1 x)) Deq')
 	%<- (aof-noassm D1 Deq _)
-	%<- ({x} tp-resp-atom sing (Deq x) (Deq' x)) %.
+	%<- ({x} tp-resp-atom (%abs sing) (Deq x) (Deq' x)) %.
 %worlds (bind var) (aof-noassm _ _ _) (of-noassm _ _) (wf-noassm _ _) %.
 %total (D1 D2 D3) (aof-noassm D1 _ _) (of-noassm D2 _) (wf-noassm D3 _) %.
 %sort vof-noassm-var {_ {x} vof x (A x)} {_ false} %.

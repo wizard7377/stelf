@@ -67,7 +67,7 @@ Comments are at least as important a consideration when writing Twelf code inten
 % ******* The result is s(s(s nat-39)) ******* 
 %%%%% Metatheorems about nat
 %%%%%%
-%. %[ Type preservation }%
+%. %[ Type preservation %]
 %. %[[ Be conscious of the interaction of your comment style with the [Twelf Emacs mode](/wiki/twelf-with-emacs/) syntax highlighting – some comment styles which use percent signs at the end and the beginning of a line cause the syntax highlighting to behave unpredictably.
 
 * Comments are most useful as multi-line comments at the beginning of "groups" and "super-groups" as defined in the previous section. Listing the important metatheorems at the beginning of a long group of metatheorems is also helpful.
@@ -156,17 +156,17 @@ here than just the line or two that fits at the top of the
 page, then this would be about the right place to try
 and put that in.
 
-}%
+%]
 %%%%%%%%
-%. %[ Syntax }%
+%. %[ Syntax %]
 %sort exp %.
 %term exp/unit exp %.
 %%%%%%%%
-%. %[ Types }%
+%. %[ Types %]
 %sort tp %.
 %term tp/unit tp %.
 %%%%%%%%
-%. %[ Judgments }%
+%. %[ Judgments %]
 %sort typed {_ exp} {_ tp} %.
 %mode typed %in %out %.
 %term typed/unit %type d exp/unit tp/unit %.
@@ -174,7 +174,7 @@ and put that in.
 %mode isvalue %in %.
 %term isvalue/unit isvalue exp/unit %.
 %%%%%%%%
-%. %[ Metatheorems }%
+%. %[ Metatheorems %]
 %. %[
 
 We're only proving one, rather silly, methatheorem in this style example,
@@ -182,7 +182,7 @@ namely that if an expression is a value then it has a type. Of course,
 we're relying on the fact that everything in our toy language is a value
 and has a type.
 
-}%
+%]
 %sort isvalue-implies-typed {_ isvalue E} {_ %type d E T} %.
 %mode isvalue-implies-typed %in %out %.
 %term _ isvalue-implies-typed isvalue/unit %type d/unit %.

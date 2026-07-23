@@ -8,13 +8,13 @@
 %scope tconverte-reg-il %term const 
 	%pi (aconverte-reg-il (aconverte/const Dconv Dwf Dkof) (aofe/closed Dord (aof/const Dwf Dkof)))
 	%<- (tconverte-context Dconv Dord) %.
-%term forall 
+%scope tconverte-reg-il %term forall
 	%pi (aconverte-reg-il (aconverte/forall Dconv) (aofe/forall Dwf))
 	%<- (tconverte-reg-il Dconv Dwf) %.
 %scope tconverte-reg-il %term var 
 	%pi (aconverte-reg-il (aconverte/var _ Dconv Dlook) (aofe/var Dwf Dlook))
 	%<- (tconverte-reg-il Dconv Dwf) %.
-%term vari 
+%scope tconverte-reg-il %term vari
 	%pi (aconverte-reg-il (aconverte/vari _ Dconv Dwf Dvof) (aofe/closed Dord (aof/var Dwf Dvof)))
 	%<- (tconverte-context Dconv Dord) %.
 %scope tconverte-reg-il %term app 
@@ -23,32 +23,32 @@
 	%<- (converte-reg-il DconvM DofM)
 	%<- (aofe-reg DofR (wfe/pi DwfB _))
 	%<- (tsubst-e ([_] append/nil) csub/base DofM Dsub DwfB DwfBx) %.
-%term pi1 
+%scope tconverte-reg-il %term pi1
 	%pi (aconverte-reg-il (aconverte/pi1 Dconv) (aofe/pi1 Dof))
 	%<- (aconverte-reg-il Dconv Dof) %.
 %scope tconverte-reg-il %term pi2 
 	%pi (aconverte-reg-il (aconverte/pi2 Dconv) (aofe/pi2 Dof))
 	%<- (aconverte-reg-il Dconv Dof) %.
-%term at 
+%scope tconverte-reg-il %term at
 	%pi (converte-reg-il (converte/at Dconv) (ofe/at Dof))
 	%<- (aconverte-reg-il Dconv Dof) %.
 %scope tconverte-reg-il %term lam 
 	%pi (converte-reg-il (converte/lam Dconv2 Dconv1) (ofe/lam Dof Dwf))
 	%<- (tconverte-reg-il Dconv1 Dwf)
 	%<- ({x} {d} {ex} {xt} converte-reg-il (Dconv2 x d ex xt) (Dof x d)) %.
-%term pair 
+%scope tconverte-reg-il %term pair
 	%pi (converte-reg-il (converte/pair Dwf Dconv2 Dsub Dconv1) (ofe/pair Dwf Dof2 Dsub Dof1))
 	%<- (converte-reg-il Dconv1 Dof1)
 	%<- (converte-reg-il Dconv2 Dof2) %.
 %scope tconverte-reg-il %term sing 
 	%pi (converte-reg-il (converte/sing Dconv) (ofe/sing Dof))
 	%<- (aconverte-reg-il Dconv Dof) %.
-%term t tconverte-reg-il (tconverte/t Dord) (wfe/t Dord) %.
+%scope tconverte-reg-il %term t tconverte-reg-il (tconverte/t Dord) (wfe/t Dord) %.
 %scope tconverte-reg-il %term pi 
 	%pi (tconverte-reg-il (tconverte/pi Dconv2 Dconv1) (wfe/pi Dwf2 Dwf1))
 	%<- (tconverte-reg-il Dconv1 Dwf1)
 	%<- ({x} {d} {ex} {xt} tconverte-reg-il (Dconv2 x d ex xt) (Dwf2 x d)) %.
-%term sigma 
+%scope tconverte-reg-il %term sigma
 	%pi (tconverte-reg-il (tconverte/sigma Dconv2 Dconv1) (wfe/sigma Dwf2 Dwf1))
 	%<- (tconverte-reg-il Dconv1 Dwf1)
 	%<- ({x} {d} {ex} {xt} tconverte-reg-il (Dconv2 x d ex xt) (Dwf2 x d)) %.

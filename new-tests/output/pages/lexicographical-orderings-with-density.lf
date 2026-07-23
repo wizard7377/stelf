@@ -1,8 +1,8 @@
 %%! title: "Lexicographical orderings with density"
-%{! This is a fairly advanced example, but it illustrates a number of useful things. First, it adheres very closely to the [Twelf style guide](/wiki/twelf-style-guide/). Second, it has proofs of ``nat-less-trans`` and ``nat-less-immsucc`` which you usually need to get any mileage out of the natural numbers. Third, it is an example of how to prove ``uninhabited/void/false/absurd`` in order to user [reasoning from false](/wiki/reasoning-from-false/). 
+%[ This is a fairly advanced example, but it illustrates a number of useful things. First, it adheres very closely to the [Twelf style guide](/wiki/twelf-style-guide/). Second, it has proofs of ``nat-less-trans`` and ``nat-less-immsucc`` which you usually need to get any mileage out of the natural numbers. Third, it is an example of how to prove ``uninhabited/void/false/absurd`` in order to user [reasoning from false](/wiki/reasoning-from-false/). 
 
-This is a lexicographical ordering with the property that it has a less-than relation that is irreflexive and transitive, like the natural numbers. In addition, it has the additional property that the ordering is "dense" in that there exists an index between any two indices.  This ordering should be isomorphic to the non-negative rationals. Density is admissible in this ordering without having to deal with multiplication, as would be necessary in a more obvious encoding of the non-negative rationals. !}%
-%{! (options removed from twelftag: check="true") !}%
+This is a lexicographical ordering with the property that it has a less-than relation that is irreflexive and transitive, like the natural numbers. In addition, it has the additional property that the ordering is "dense" in that there exists an index between any two indices.  This ordering should be isomorphic to the non-negative rationals. Density is admissible in this ordering without having to deal with multiplication, as would be necessary in a more obvious encoding of the non-negative rationals. %]
+%[ (options removed from twelftag: check="true") %]
 % natural numbers
 %sort nat %.
 %term nat/z nat %.
@@ -86,12 +86,12 @@ This is a lexicographical ordering with the property that it has a less-than rel
 	%<- (nat-less-refl-uninhabited DL DU) %.
 %worlds () (lex-less-refl-uninhabited _ _) %.
 %total {DU} (lex-less-refl-uninhabited DU _) %.
-%{! [Category:Twelf code](/wiki/category-twelf-code/)
+%[ [Category:Twelf code](/wiki/category-twelf-code/)
 
-\{\{case study\}\} !}%
-%{!
+\{\{case study\}\} %]
+%[
 -----
 This page was copied from the MediaWiki version of the Twelf Wiki.
 If anything looks wrong, you can refer to the
 [wayback machine's version here](https://web.archive.org/web/20240303030303/http://twelf.org/wiki/Lexicographical_orderings_with_density).
-!}%
+%]

@@ -56,6 +56,8 @@ let () =
                   | Some Display.Error -> display_diag Error
                   | Some Display.Warning -> display_diag Warning
                   | Some Display.Response -> Format.printf "=> %t\n%!" body
+                  | Some Display.Debug -> display_diag Note
+                  | Some Display.Info -> display_diag Note
                   | _ -> display_diag Note
                 end;
 

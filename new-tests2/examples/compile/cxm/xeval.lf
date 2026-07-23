@@ -25,7 +25,7 @@
    Evaluation context C and expression E are given,
    C' and E' are constructed.
    Invariant: (C E) == (C' E')
-}%
+%]
 % Redices
 %term sp_redex %pi (split C E C E) %<- (redex E) %.
 % Natural Numbers

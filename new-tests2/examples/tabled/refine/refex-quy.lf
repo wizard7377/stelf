@@ -43,7 +43,7 @@
 %. %[
 % sub' produces a bit number,i.e. it might have leading zeros!
 % sub standardizes the result of sub', i.e. we get a nat (without leading zeros)
-}%
+%]
 %querytabled _ _ check sub' (zero => nat => zero) %.
 %querytabled _ _ check sub' (nat => zero => nat) %.
 %querytabled _ _ check sub' (nat => zero => nat & zero => nat => zero & bit => bit => bit) %.

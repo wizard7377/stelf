@@ -24,14 +24,14 @@ sigma [ap1:abse empty (llam [y] lapp (llam [x] x) y) M1]
 sigma [ap1:abse empty (llam [y] lapp (llam [x] x) y) M1]
   sigma [ap2:abse empty (llam [z] z) M2]
     ctoe (c_eta) ap1 ap2 EP.
-}%
+%]
 %% Preservation of CCC equality by <| |> - translation
 % app @ (pair ((cur fst) @ fst) snd) = fst
 %. %[
 sigma [cp1:conc (app @ (pair ((cur fst) @ fst) snd)) E1]
   sigma [cp2: conc fst E2]
     etoc exp_e cp1 cp2 EP.
-}%
+%]
 %query 1 _ _ etoc exp_e (ccomp capp (cpair (ccomp (ccur cfst) cfst) csnd)) cfst EP %.
 %% Translation lambda -> ccc -> lambda preserves equality
 % translate \x.\y.(x,y) to ccc and back
@@ -40,7 +40,7 @@ sigma [ap:abse empty (llam [x] llam [y] lpair x y) M]
   sigma [cp:conc M E]
     sigma [zp:exp empty Z] % a term-representaiton of the environment
       invca ap cp zp EP.
-}%
+%]
 %query 1 _ _ invca (alam ([x term _A1] alam ([x1 term _A2] apair (avar (av_y av_x)) (avar av_x)))) (ccur (ccur (cpair (ccomp csnd cfst) csnd))) exp_empty EP %.
 %% Translation ccc -> lamda -> ccc preserves equality
 % translate cur(app) @ fst to lambda-term and back
@@ -48,4 +48,4 @@ sigma [ap:abse empty (llam [x] llam [y] lpair x y) M]
 sigma [cp:conc ((cur app) @ fst) E]
   sigma [ap: zabs E F]
     invac cp ap EP.
-}%
+%]

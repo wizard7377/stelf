@@ -71,6 +71,11 @@ module type VIEW = sig
   type symbol = namespace * name
   (** Qualified symbol as [(namespace, name)]. *)
 
+  type qid_form = Val | Abs
+  (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
+      (toplevel-first lookup, falling back to shadow-aware). Only affects
+      unqualified [Qualified] terms; see [Names.resolveQid]. *)
+
   val mk_loc : int -> int -> loc
   (** Create a location from start and end lexer positions. *)
 
@@ -98,8 +103,10 @@ module type VIEW = sig
     type u =
       | Lowercase of Loc.t * symbol  (** A lowercase identifier in scope. *)
       | Uppercase of Loc.t * symbol  (** An uppercase identifier in scope. *)
-      | Qualified of Loc.t * symbol
-          (** An explicitly qualified identifier (eg, [%val (x y)]). *)
+      | Qualified of Loc.t * symbol * qid_form
+          (** An explicitly qualified identifier (eg, [%val (x y)] or
+              [%abs (x y)]); [qid_form] distinguishes the two for name
+              resolution -- see [Names.resolveQid]. *)
       | Text of Loc.t * string  (** A literal string (currently unused). *)
       | ExistVar of Loc.t * string
           (** An explicitly existential variable, you're probably looking for
@@ -552,6 +559,8 @@ module type VIEW = sig
           (** Termination declaration. *)
       | Covers of Loc.t * Mode.Dec.t  (** Coverage declaration. *)
       | Name of Loc.t * string  (** Name preference declaration. *)
+      | Prose of Loc.t * string
+          (** Prose/highlighting hint declaration; no-op at runtime. *)
       | Reduces of Loc.t * string * Term.t list
           (** Reduction ordering declaration. *)
       | Macro of Loc.t * int * string * t

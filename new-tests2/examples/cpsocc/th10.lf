@@ -11,7 +11,7 @@
 th10-1_t : {v:ctriv}{vvv:{xi:stack}vvalT (xi , v) v xi}
            th10-1 (vval_cret (vval_vlam VVE) (vvv Xi))
                   (VVE v vvv).
-}%
+%]
 % original from belmina
 %. %[
 th10-1_c : th10-1 (vval_cret (vval_vlam VVE) (VVT Xi))
@@ -21,7 +21,7 @@ th10-1_c : th10-1 (vval_cret (vval_vlam VVE) (VVT Xi))
                          VVT
                          app_init
                          VVE'.
-}%
+%]
 %term th10-1_c 
 	%pi (th10-1 (vval_cret (vval_vlam VVE) (vval_xlam VVR)) VVE')
 	%<- (lemma9-1b ([v ctriv] app_init) VVE ([xi stack] vval_xlam VVR) app_init VVE') %.

@@ -13,7 +13,7 @@ module Macro (C : CST.CST) : MACRO.MACRO with module C = C = struct
     match !>cmd with
     | Symbol _ | Freeze _ | Thaw _ | Union _ | Deterministic _ | Prec _ | Stop _
     | ReplQuit _ | ReplHelp _ | ReplGet _ | ReplSet _ | ReplVersion _ | Name _
-    | Require _ | Open _ ->
+    | Prose _ | Require _ | Open _ ->
         cmd
     | Unique (loc, tm) -> review (Unique (loc, go_term i args tm))
     | DeclCmd (loc, tm) -> review (DeclCmd (loc, go_term i args tm))

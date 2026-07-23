@@ -30,13 +30,9 @@
   "STELF (System for the Typed Edinburgh Logical Framework) is a port of Twelf to OCaml. It provides a framework for defining and reasoning about formal systems, such as programming languages and logics.")
  (depends
   (ocaml
-   (and
-    (>= 5.0.0)
-    (not (and 
-      (< 5.6.0)
-      (>= 5.4.0)
-    ))
-    ))
+   (>= 5.0.0))
+  (dune
+   (>= 3.24))
   lwt
   containers
   base
@@ -51,6 +47,10 @@
   (ocaml-lsp-server :dev)
   (user-setup :dev)
   (merlin :dev)
+  (js_of_ocaml :with-doc)
+  (js_of_ocaml-compiler :with-doc) 
+  (js_of_ocaml-ppx :with-doc) 
+  (js_of_ocaml-lwt :with-doc)
   sexplib
   ppx_deriving
   lambda-term

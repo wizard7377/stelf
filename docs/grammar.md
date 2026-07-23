@@ -87,8 +87,19 @@ Consequences worth knowing:
   lexer:
   - leading `_` or name mentioned in scope inside `{{A B...}}` → **uppercase** (used as a metavariable),
   - anything else → **lowercase** (a constant).
-- Comments are **not currently recognised** by the modern parser. See
-  §15 "Gaps".
+- **Comments and strings.** A `%` followed by whitespace (and not itself
+  the second `%` of an escape) begins a **line comment** to end of line;
+  these are recognised anywhere whitespace is allowed, in both the outer
+  (document) and inner (term) contexts. `%[ ... %]` (and `%[[ ... %]]`, with
+  *n* opening brackets closed by *n* closing brackets) is a **string**: the
+  lexer scans raw text to the matching close and yields a single token. It
+  lexes identically in either context — in the outer context a bare string
+  is ignorable prose (this replaces the old `%{ ... }%` block comment), in a
+  term it is a string value. There is **no** multi-line comment form: `%[ ...
+  %]` in a term is a value, not a discarded comment. `%%X` is an **escape**
+  that turns the next character `X` into a literal identifier character (so
+  `%%%` is a literal `%`, and `%%%term` is the identifier `%term`, not the
+  keyword) — it does *not* begin a comment.
 
 ---
 
@@ -159,8 +170,10 @@ expr1       ::= atom
 atom        ::= ident                         (* upper- or lower-case *)
               | qualified
 
-qualified   ::= "%val" ident                  (* unqualified rewrite  *)
-              | "%val" "(" ident+ ")"         (* dotted-path symbol   *)
+qualified   ::= "%val" ident                  (* unqualified, shadow-aware   *)
+              | "%val" "(" ident+ ")"         (* dotted-path, shadow-aware   *)
+              | "%abs" ident                  (* unqualified, toplevel-first *)
+              | "%abs" "(" ident+ ")"         (* dotted-path, identical to %val *)
 ```
 
 Notes:
@@ -172,6 +185,14 @@ Notes:
   are lowercase.
 - A parenthesised expression `( expr )` may contain anything, including
   another binder chain.
+- `%val NAME` and `%abs NAME` share this grammar but resolve differently
+  when NAME is unqualified and ambiguous (e.g. shadowed by an open
+  `%scope`): `%val` prefers the innermost/most-recently-shadowed binding,
+  `%abs` prefers the current `%require` group's own toplevel declaration,
+  falling back to `%val`'s behavior if there is none. Both forms resolve
+  identically once qualified with a namespace path — see
+  `hacking/grammar/stelf.md`'s "Qualified identifiers" section for the full
+  explanation and worked examples.
 
 ### 4.1 Test-suite examples (from `test/Parse/Cases.ml:31-72`)
 
@@ -188,6 +209,8 @@ Notes:
 | `_X` | uppercase atom |
 | `%val ( x y )` | qualified |
 | `%val +` | qualified (single, including symbolic ident) |
+| `%abs ( x y )` | qualified, identical resolution to `%val ( x y )` |
+| `%abs x` | qualified, toplevel-first resolution (differs from `%val x`) |
 | `f [x nat] [y nat] x` | nested lambdas with typed binders |
 | `f {p {_ nat} nat} z` | Pi with a nested-Pi binder type |
 
@@ -391,6 +414,7 @@ deterministic-cmd
                 ::= "%deterministic" id-list
 
 name-cmd        ::= "%name"   ident
+prose-cmd       ::= "%prose"  ident
 symbol-cmd      ::= "%symbol" ident ident
 covers-cmd      ::= "%covers" mode-dec
 
@@ -439,6 +463,7 @@ exists) a test-suite example.
 | `%name` | `ident` | 272 | `%name addition` |
 | `%open` | `ident id-list` | 184 | `%open M (succ zero)` |
 | `%prec` | `fixity-kw nat id-list` | 199 | `%prec %left 5 (+)` |
+| `%prose` | `ident` | 393 | `%prose highlightHint` |
 | `%query` | `bound bound bound expr` | 46 | `%query _ _ 1 add zero zero zero` |
 | `%querytabled` | `bound bound bound expr` | 39 | `%querytabled _ _ _ p` |
 | `%quit` | — | 216 | `%quit` |
@@ -504,11 +529,12 @@ currently parsed by `Cmd.ml` (gaps, listed in §15): `%abbrev`,
 Things the modern parser does **not** currently handle, deliberately
 omitted from the BNF above:
 
-- **Comments**. There is no comment syntax recognised by `Modern.ml`
-  or `Cmd.ml`. The legacy frontend recognises `%{ ... }%` block
-  comments and `%` / `%%` line comments. A future modern lexer is
-  expected to adopt the same conventions; tree-sitter implementers
-  should reserve those tokens.
+- **Comments**. The modern lexer recognises `%`-whitespace line
+  comments (both contexts) and `%[ ... %]` strings (ignorable prose in
+  the outer context, a value in a term); it has **no** multi-line
+  comment form. `%%X` is an escape, not a comment. The retired
+  `%{ ... }%` block comment is replaced by `%[ ... %]`; `%{`/`%}`
+  remain command-block delimiters (`%eval`, `%module`). See §2.
 - **String literals**. `Modern.parse_text` (`Modern.ml:297-301`)
   defines a `%"..."%` literal form, but no command currently calls
   it. The `Scon_` CST node it would build is unreachable from
@@ -634,16 +660,24 @@ tree-sitter:
 (`%module`, `%eval`) are delimited by `%{` and `%}`, not bare braces.
 Bare `{`/`}` are reserved for Pi binders inside terms.
 
-### 16.9 Comments — open question
+### 16.9 Comments and strings
 
-`Modern.ml` does not currently consume comments. Implementers should
-preserve forward compatibility by recognising at minimum:
+The modern lexer recognises:
 
-- `%{ ... %}` block comments (legacy convention, nestable in legacy).
-- `%` and `%%` line comments (legacy convention).
+- `%`-whitespace **line comments** (to end of line), in both the outer
+  and inner contexts. Model these as `extras` so they are absorbed
+  wherever whitespace is allowed.
+- `%[ ... %]` / `%[[ ... %]]` **strings** (*n* opening brackets close
+  with *n* closing brackets); a single token holding raw text. In the
+  outer context a bare string is ignorable prose; in a term it is a
+  value. There is no multi-line comment form.
+- `%%X` **escape**: the next character `X` becomes a literal identifier
+  character (`%%%` = literal `%`, `%%%term` = identifier `%term`). Not a
+  comment.
 
-These should be modelled as `extras` so they are absorbed wherever
-whitespace is allowed.
+`%{ ... %}` is **not** a comment — `%{`/`%}` are command-block
+delimiters (`%eval`, `%module`). The old `%{ ... }%` block comment is
+retired in favour of `%[ ... %]`.
 
 ### 16.10 Keyword inventory for tree-sitter
 
@@ -662,7 +696,7 @@ in-expression keywords (only valid inside `expr`/`mode-dec`/`sigexp`).
 
 **In-expression** (from `Modern.ml`):
 
-`%the` `%val` `%->` `%<-` `%in` `%out` `%out1` `%star` `%where`
+`%the` `%val` `%abs` `%->` `%<-` `%in` `%out` `%out1` `%star` `%where`
 `%left` `%right` `%prefix` `%postfix` `%middle` `%none`
 
 ### 16.11 Reduces operators

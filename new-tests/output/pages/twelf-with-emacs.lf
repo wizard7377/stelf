@@ -1,5 +1,5 @@
 %%! title: "Twelf with Emacs"
-%{! The preferred way to interact with Twelf is through its emacs mode, which is included in the Twelf distribution. The [Download](/download/) page has basic information for setting up Emacs mode with Twelf.
+%[ The preferred way to interact with Twelf is through its emacs mode, which is included in the Twelf distribution. The [Download](/download/) page has basic information for setting up Emacs mode with Twelf.
 
 ## Prerequisites
 
@@ -62,7 +62,7 @@ Save the file (by using CTRL-x CTRL-s in Emacs).
 
 ### Creating a .elf file
 
-Then create a file ``sometwelf.elf`` (by using CTRL-x CTRL-f in Emacs) and enter the following text: !}%
+Then create a file ``sometwelf.elf`` (by using CTRL-x CTRL-f in Emacs) and enter the following text: %]
 %sort nat %.
 %term z nat %.
 %term s %pi nat %-> nat %.
@@ -70,7 +70,7 @@ Then create a file ``sometwelf.elf`` (by using CTRL-x CTRL-f in Emacs) and enter
 %sort plus %.
 %term plus/z plus z N N %.
 %term plus/s %pi (plus N M P) %-> (plus (s N) M (s P)) %.
-%{! Save the file (by using CTRL-x CTRL-s in Emacs).
+%[ Save the file (by using CTRL-x CTRL-s in Emacs).
 
 ## Using the Twelf emacs mode
 
@@ -134,4 +134,4 @@ For more info on the emacs mode, see \{\{guide|chapter=13|section=74|title=Emacs
 If you use multiple frames with Emacs, ``twelf-mode`` annoyingly pops up the Twelf server buffer in the current frame, even if it is already shown in another frame. To avoid this, set ``display-buffer-reuse-frames`` to ``t``. Now, you will still have the problem that although the buffer is shown, it does not scroll to the bottom; to fix this you need to edit ``twelf.el`` and change ``(get-buffer-window twelf-server-buffer)`` to ``(get-buffer-window twelf-server-buffer t)``.
 
 ## See also
-<Guide chapter="13" section="74">Emacs Interface</Guide> !}%
+<Guide chapter="13" section="74">Emacs Interface</Guide> %]

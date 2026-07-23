@@ -1,1 +1,2 @@
-let help : string list -> Display.form = function [] -> assert false
+let help : string list -> Display.form = function 
+  [] -> assert false

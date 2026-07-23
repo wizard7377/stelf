@@ -28,7 +28,11 @@ cfl/md/cn	: val/md M
 
 %worlds () (cfl/md/cn _ _ _).
 %total (D) (cfl/md/cn _ D _).
+<<<<<<< Updated upstream
 }% %]
+=======
+%]
+>>>>>>> Stashed changes
 %sort cfl/md/pair {_ val/md M} {_ ofsg L T Y M (sg/sgm _ _)} {_ seq/md M (md/pair _ _)} %.
 %mode cfl/md/pair %in %in %out %.
 %term _ cfl/md/pair (val/md/pair _ _) (ofsg/md/pair _ _) seq/md/refl %.

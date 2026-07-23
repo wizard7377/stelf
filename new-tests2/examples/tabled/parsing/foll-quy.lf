@@ -18,6 +18,6 @@
 %querytabled * * 
 parse ('forall' ; 'x' ; 'forall' ; 'x' ; 'not' ; 'p' ; 'x' ; 'and' ; 'openB' ; 'forall' ; 'y' ; 'q' ; 'y' ; 'or' ; 'z' ; 'or' ; 'exist' ; 'y' ; 's' ; 'y' ; 'closeB' ; nil) P.
 
-}%
+%]
 %querytabled _ _ parse ('openB' ; 'forall' ; 'x' ; 'forall' ; 'y' ; 'not' ; 'p' ; 'x' ; 'and' ; 'openB' ; 'forall' ; 'y' ; 'q' ; 'y' ; 'or' ; 'z' ; 'closeB' ; 'closeB' ; 'imp' ; 'true' ; nil) P %.
 %querytabled _ _ parse ('openB' ; 'forall' ; 'x' ; 'forall' ; 'x' ; 'not' ; 'p' ; 'x' ; 'and' ; 'openB' ; 'forall' ; 'y' ; 'q' ; 'y' ; 'or' ; 'z' ; 'or' ; 'openB' ; 'exist' ; 'y' ; 's' ; 'y' ; 'closeB' ; 'closeB' ; 'closeB' ; 'imp' ; 'true' ; nil) P %.

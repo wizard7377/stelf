@@ -25,4 +25,4 @@ by non-unifiability (disequality) of Q and P.  top_solve could then
 choose to either accept only one solution or call the failure
 continuation, if there is one.  Unfortunately, non-unifiability
 is not part of the framework.
-}%
+%]

@@ -12,20 +12,20 @@
 %sort esubst-equiv-gen {_ %pi (evof M A) %-> (equiv N N' B)} {_ %pi (eof M A) %-> (equiv N N' B)} %.
 %mode esubst-equiv-gen %in %out %.
 %scope esubst-equiv-gen %term varsam esubst-of-gen ([d] eof/var (D d) d) ([d] d) %.
-%term varoth 
+%scope esubst-equiv-gen %term varoth 
 	%pi (esubst-of-gen ([d] eof/var (D2 d) D1) ([d] eof/var (D2' d) D1))
 	%<- (esubst-wf-gen D2 D2') %.
 %scope esubst-equiv-gen %term forall 
 	%pi (esubst-of-gen ([d] eof/forall (D d)) ([d] eof/forall (D' d)))
 	%<- (esubst-wf-gen D D') %.
-%term const 
+%scope esubst-equiv-gen %term const 
 	%pi (esubst-of-gen ([d] eof/const (D2 d) D) ([d] eof/const (D2' d) D))
 	%<- (esubst-wf-gen D2 D2') %.
 %scope esubst-equiv-gen %term lam 
 	%pi (esubst-of-gen ([d] eof/lam (D2 d) (D1 d)) ([d] eof/lam (D2' d) (D1' d)))
 	%<- (esubst-wf-gen D1 D1')
 	%<- ({y} {e} esubst-of-gen ([d] D2 d y e) ([d] D2' d y e)) %.
-%term app 
+%scope esubst-equiv-gen %term app 
 	%pi (esubst-of-gen ([d] eof/app (D2 d) (D1 d)) ([d] eof/app (D2' d) (D1' d)))
 	%<- (esubst-of-gen D1 D1')
 	%<- (esubst-of-gen D2 D2') %.
@@ -34,20 +34,20 @@
 	%<- (esubst-of-gen D1 D1')
 	%<- (esubst-of-gen D2 D2')
 	%<- ({y} {e} esubst-wf-gen ([d] D3 d y e) ([d] D3' d y e)) %.
-%term pi1 
+%scope esubst-equiv-gen %term pi1 
 	%pi (esubst-of-gen ([d] eof/pi1 (D d)) ([d] eof/pi1 (D' d)))
 	%<- (esubst-of-gen D D') %.
 %scope esubst-equiv-gen %term pi2 
 	%pi (esubst-of-gen ([d] eof/pi2 (D d)) ([d] eof/pi2 (D' d)))
 	%<- (esubst-of-gen D D') %.
-%term sing 
+%scope esubst-equiv-gen %term sing 
 	%pi (esubst-of-gen ([d] eof/sing (D d)) ([d] eof/sing (D' d)))
 	%<- (esubst-of-gen D D') %.
 %scope esubst-equiv-gen %term extpi 
 	%pi (esubst-of-gen ([d] eof/extpi (D2 d) (D1 d)) ([d] eof/extpi (D2' d) (D1' d)))
 	%<- (esubst-of-gen D1 D1')
 	%<- ({y} {e} esubst-of-gen ([d] D2 d y e) ([d] D2' d y e)) %.
-%term extsig 
+%scope esubst-equiv-gen %term extsig 
 	%pi (esubst-of-gen ([d] eof/extsigma (D3 d) (D2 d) (D1 d)) ([d] eof/extsigma (D3' d) (D2' d) (D1' d)))
 	%<- (esubst-of-gen D1 D1')
 	%<- (esubst-of-gen D2 D2')
@@ -56,26 +56,26 @@
 	%pi (esubst-of-gen ([d] eof/subsume (D2 d) (D1 d)) ([d] eof/subsume (D2' d) (D1' d)))
 	%<- (esubst-of-gen D1 D1')
 	%<- (esubst-subtp-gen D2 D2') %.
-%term t esubst-wf-gen ([d] ewf/t) ([d] ewf/t) %.
+%scope esubst-equiv-gen %term t esubst-wf-gen ([d] ewf/t) ([d] ewf/t) %.
 %scope esubst-equiv-gen %term pi 
 	%pi (esubst-wf-gen ([d] ewf/pi (D2 d) (D1 d)) ([d] ewf/pi (D2' d) (D1' d)))
 	%<- (esubst-wf-gen D1 D1')
 	%<- ({y} {e} esubst-wf-gen ([d] D2 d y e) ([d] D2' d y e)) %.
-%term sigma 
+%scope esubst-equiv-gen %term sigma 
 	%pi (esubst-wf-gen ([d] ewf/sigma (D2 d) (D1 d)) ([d] ewf/sigma (D2' d) (D1' d)))
 	%<- (esubst-wf-gen D1 D1')
 	%<- ({y} {e} esubst-wf-gen ([d] D2 d y e) ([d] D2' d y e)) %.
 %scope esubst-equiv-gen %term sing 
 	%pi (esubst-wf-gen ([d] ewf/sing (D d)) ([d] ewf/sing (D' d)))
 	%<- (esubst-of-gen D D') %.
-%term refl 
+%scope esubst-equiv-gen %term refl 
 	%pi (esubst-subtp-gen ([d] subtp/reflex (D d)) ([d] subtp/reflex (D' d)))
 	%<- (esubst-tequiv-gen D D') %.
 %scope esubst-equiv-gen %term trans 
 	%pi (esubst-subtp-gen ([d] subtp/trans (D2 d) (D1 d)) ([d] subtp/trans (D2' d) (D1' d)))
 	%<- (esubst-subtp-gen D1 D1')
 	%<- (esubst-subtp-gen D2 D2') %.
-%term sing_t 
+%scope esubst-equiv-gen %term sing_t 
 	%pi (esubst-subtp-gen ([d] subtp/sing_t (D d)) ([d] subtp/sing_t (D' d)))
 	%<- (esubst-of-gen D D') %.
 %scope esubst-equiv-gen %term pi 
@@ -83,7 +83,7 @@
 	%<- (esubst-subtp-gen D1 D1')
 	%<- ({y} {e} esubst-subtp-gen ([d] D2 d y e) ([d] D2' d y e))
 	%<- ({y} {e} esubst-wf-gen ([d] D3 d y e) ([d] D3' d y e)) %.
-%term sigma 
+%scope esubst-equiv-gen %term sigma 
 	%pi (esubst-subtp-gen ([d] subtp/sigma (D3 d) (D2 d) (D1 d)) ([d] subtp/sigma (D3' d) (D2' d) (D1' d)))
 	%<- (esubst-subtp-gen D1 D1')
 	%<- ({y} {e} esubst-subtp-gen ([d] D2 d y e) ([d] D2' d y e))
@@ -91,14 +91,14 @@
 %scope esubst-equiv-gen %term refl 
 	%pi (esubst-tequiv-gen ([d] tequiv/reflex (D d)) ([d] tequiv/reflex (D' d)))
 	%<- (esubst-wf-gen D D') %.
-%term symm 
+%scope esubst-equiv-gen %term symm 
 	%pi (esubst-tequiv-gen ([d] tequiv/symm (D d)) ([d] tequiv/symm (D' d)))
 	%<- (esubst-tequiv-gen D D') %.
 %scope esubst-equiv-gen %term trans 
 	%pi (esubst-tequiv-gen ([d] tequiv/trans (D2 d) (D1 d)) ([d] tequiv/trans (D2' d) (D1' d)))
 	%<- (esubst-tequiv-gen D1 D1')
 	%<- (esubst-tequiv-gen D2 D2') %.
-%term pi 
+%scope esubst-equiv-gen %term pi 
 	%pi (esubst-tequiv-gen ([d] tequiv/pi (D2 d) (D1 d)) ([d] tequiv/pi (D2' d) (D1' d)))
 	%<- (esubst-tequiv-gen D1 D1')
 	%<- ({y} {e} esubst-tequiv-gen ([d] D2 d y e) ([d] D2' d y e)) %.
@@ -106,27 +106,27 @@
 	%pi (esubst-tequiv-gen ([d] tequiv/sigma (D2 d) (D1 d)) ([d] tequiv/sigma (D2' d) (D1' d)))
 	%<- (esubst-tequiv-gen D1 D1')
 	%<- ({y} {e} esubst-tequiv-gen ([d] D2 d y e) ([d] D2' d y e)) %.
-%term sing 
+%scope esubst-equiv-gen %term sing 
 	%pi (esubst-tequiv-gen ([d] tequiv/sing (D d)) ([d] tequiv/sing (D' d)))
 	%<- (esubst-equiv-gen D D') %.
 %scope esubst-equiv-gen %term refl 
 	%pi (esubst-equiv-gen ([d] equiv/reflex (D d)) ([d] equiv/reflex (D' d)))
 	%<- (esubst-of-gen D D') %.
-%term symm 
+%scope esubst-equiv-gen %term symm 
 	%pi (esubst-equiv-gen ([d] equiv/symm (D d)) ([d] equiv/symm (D' d)))
 	%<- (esubst-equiv-gen D D') %.
 %scope esubst-equiv-gen %term trans 
 	%pi (esubst-equiv-gen ([d] equiv/trans (D2 d) (D1 d)) ([d] equiv/trans (D2' d) (D1' d)))
 	%<- (esubst-equiv-gen D1 D1')
 	%<- (esubst-equiv-gen D2 D2') %.
-%term forall 
+%scope esubst-equiv-gen %term forall 
 	%pi (esubst-equiv-gen ([d] equiv/forall (D d)) ([d] equiv/forall (D' d)))
 	%<- (esubst-tequiv-gen D D') %.
 %scope esubst-equiv-gen %term lam 
 	%pi (esubst-equiv-gen ([d] equiv/lam (D2 d) (D1 d)) ([d] equiv/lam (D2' d) (D1' d)))
 	%<- (esubst-tequiv-gen D1 D1')
 	%<- ({y} {e} esubst-equiv-gen ([d] D2 d y e) ([d] D2' d y e)) %.
-%term app 
+%scope esubst-equiv-gen %term app 
 	%pi (esubst-equiv-gen ([d] equiv/app (D2 d) (D1 d)) ([d] equiv/app (D2' d) (D1' d)))
 	%<- (esubst-equiv-gen D1 D1')
 	%<- (esubst-equiv-gen D2 D2') %.
@@ -135,19 +135,19 @@
 	%<- (esubst-equiv-gen D1 D1')
 	%<- (esubst-equiv-gen D2 D2')
 	%<- ({y} {e} esubst-wf-gen ([d] D3 d y e) ([d] D3' d y e)) %.
-%term pi1 
+%scope esubst-equiv-gen %term pi1 
 	%pi (esubst-equiv-gen ([d] equiv/pi1 (D d)) ([d] equiv/pi1 (D' d)))
 	%<- (esubst-equiv-gen D D') %.
 %scope esubst-equiv-gen %term pi2 
 	%pi (esubst-equiv-gen ([d] equiv/pi2 (D d)) ([d] equiv/pi2 (D' d)))
 	%<- (esubst-equiv-gen D D') %.
-%term sing 
+%scope esubst-equiv-gen %term sing 
 	%pi (esubst-equiv-gen ([d] equiv/sing (D d)) ([d] equiv/sing (D' d)))
 	%<- (esubst-equiv-gen D D') %.
 %scope esubst-equiv-gen %term singel 
 	%pi (esubst-equiv-gen ([d] equiv/singelim (D d)) ([d] equiv/singelim (D' d)))
 	%<- (esubst-of-gen D D') %.
-%term extpi 
+%scope esubst-equiv-gen %term extpi 
 	%pi (esubst-equiv-gen ([d] equiv/extpi (D3 d) (D2 d) (D1 d)) ([d] equiv/extpi (D3' d) (D2' d) (D1' d)))
 	%<- (esubst-of-gen D1 D1')
 	%<- (esubst-of-gen D2 D2')
@@ -156,7 +156,7 @@
 	%pi (esubst-equiv-gen ([d] equiv/extpiw (D2 d) (D1 d)) ([d] equiv/extpiw (D2' d) (D1' d)))
 	%<- (esubst-equiv-gen D1 D1')
 	%<- ({y} {e} esubst-equiv-gen ([d] D2 d y e) ([d] D2' d y e)) %.
-%term extsig 
+%scope esubst-equiv-gen %term extsig 
 	%pi (esubst-equiv-gen ([d] equiv/extsigma (D3 d) (D2 d) (D1 d)) ([d] equiv/extsigma (D3' d) (D2' d) (D1' d)))
 	%<- (esubst-equiv-gen D1 D1')
 	%<- (esubst-equiv-gen D2 D2')
@@ -165,7 +165,7 @@
 	%pi (esubst-equiv-gen ([d] equiv/subsume (D2 d) (D1 d)) ([d] equiv/subsume (D2' d) (D1' d)))
 	%<- (esubst-equiv-gen D1 D1')
 	%<- (esubst-subtp-gen D2 D2') %.
-%term beta 
+%scope esubst-equiv-gen %term beta 
 	%pi (esubst-equiv-gen ([d] equiv/beta (D2 d) (D1 d)) ([d] equiv/beta (D2' d) (D1' d)))
 	%<- ({y} {e} esubst-of-gen ([d] D1 d y e) ([d] D1' d y e))
 	%<- (esubst-of-gen D2 D2') %.
@@ -173,7 +173,7 @@
 	%pi (esubst-equiv-gen ([d] equiv/beta1 (D2 d) (D1 d)) ([d] equiv/beta1 (D2' d) (D1' d)))
 	%<- (esubst-of-gen D1 D1')
 	%<- (esubst-of-gen D2 D2') %.
-%term beta2 
+%scope esubst-equiv-gen %term beta2 
 	%pi (esubst-equiv-gen ([d] equiv/beta2 (D2 d) (D1 d)) ([d] equiv/beta2 (D2' d) (D1' d)))
 	%<- (esubst-of-gen D1 D1')
 	%<- (esubst-of-gen D2 D2') %.

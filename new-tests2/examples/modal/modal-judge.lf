@@ -28,7 +28,7 @@
 %. %[
 %theorem k_axiom1 : exists {D:{W:w}{A:o}{B:o} true ((□ (A ⇒ B)) ⇒  (□ A) ⇒ (□ B)) W} true.
 %establish 6 {} (k_axiom1 D).
-}%
+%]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sequent calculus version
 %sort hyp {_ o} {_ w} %.
@@ -69,11 +69,11 @@
 
 %theorem modaleq2 : exists {D:{W:w}{A:o} conc ((<> A) ⇒ (¬ (□ (¬ A)))) W} true.
 %prove 30 {} (modaleq2 D).
-}%
+%]
 %. %[
 %theorem dn_modaleq2 : exists {D:{W:w}{A:o} conc (¬ (¬ ((<> A) ⇒ (¬ (□ (¬ A)))) )) W} true.
 %prove 10 {} (dn_modaleq2 D).
 
 %theorem dn_modaleq1 : exists {D:{W:w}{A:o} conc (¬ (¬ ((□ A) ⇒ (¬ (<> (¬ A)))) )) W} true.
 %prove 10 {} (dn_modaleq1 D).
-}%
+%]

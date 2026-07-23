@@ -6,7 +6,7 @@
 %sort stsubst-gen {_ %pi (vof R A) %-> (wf B)} {_ %pi (aof R A) %-> (wf B)} %.
 %mode stsubst-gen %in %out %.
 %scope stsubst-gen %term at %pi (ssubst-gen ([d] of/at (D d)) ([d] of/at (D' d))) %<- (sasubst-gen D D') %.
-%term lam 
+%scope stsubst-gen %term lam 
 	%pi (ssubst-gen ([d] of/lam (D2 d) (D1 d)) ([d] of/lam (D2' d) (D1' d)))
 	%<- (stsubst-gen D1 D1')
 	%<- ({y} {e} ssubst-gen ([d] D2 d y e) ([d] D2' d y e)) %.
@@ -15,19 +15,19 @@
 	%<- (ssubst-gen D1 D1')
 	%<- (ssubst-gen D3 D3')
 	%<- ({y} {e} stsubst-gen ([d] D4 d y e) ([d] D4' d y e)) %.
-%term sing %pi (ssubst-gen ([d] of/sing (D d)) ([d] of/sing (D' d))) %<- (sasubst-gen D D') %.
+%scope stsubst-gen %term sing %pi (ssubst-gen ([d] of/sing (D d)) ([d] of/sing (D' d))) %<- (sasubst-gen D D') %.
 %scope stsubst-gen %term closed sasubst-gen ([d] D) ([d] D) %.
-%term const 
+%scope stsubst-gen %term const 
 	%pi (sasubst-gen ([d] aof/const (D2 d) D1) ([d] aof/const (D2' d) D1))
 	%<- (stsubst-gen D2 D2') %.
 %scope stsubst-gen %term forall 
 	%pi (sasubst-gen ([d] aof/forall (D1 d)) ([d] aof/forall (D1' d)))
 	%<- (stsubst-gen D1 D1') %.
-%term varsam sasubst-gen ([d] aof/var _ d) ([d] d) %.
+%scope stsubst-gen %term varsam sasubst-gen ([d] aof/var _ d) ([d] d) %.
 %scope stsubst-gen %term varoth 
 	%pi (sasubst-gen ([d] aof/var (D2 d) D1) ([d] aof/var (D2' d) D1))
 	%<- (stsubst-gen D2 D2') %.
-%term app 
+%scope stsubst-gen %term app 
 	%pi (sasubst-gen ([d] aof/app (D4 d) D3 (D2 d) (D1 d)) ([d] aof/app (D4' d) D3 (D2' d) (D1' d)))
 	%<- (sasubst-gen D1 D1')
 	%<- (ssubst-gen D2 D2')
@@ -35,11 +35,11 @@
 %scope stsubst-gen %term pi1 
 	%pi (sasubst-gen ([d] aof/pi1 (D1 d)) ([d] aof/pi1 (D1' d)))
 	%<- (sasubst-gen D1 D1') %.
-%term pi2 
+%scope stsubst-gen %term pi2 
 	%pi (sasubst-gen ([d] aof/pi2 (D1 d)) ([d] aof/pi2 (D1' d)))
 	%<- (sasubst-gen D1 D1') %.
 %scope stsubst-gen %term t stsubst-gen ([d] wf/t) ([d] wf/t) %.
-%term pi 
+%scope stsubst-gen %term pi 
 	%pi (stsubst-gen ([d] wf/pi (D2 d) (D1 d)) ([d] wf/pi (D2' d) (D1' d)))
 	%<- (stsubst-gen D1 D1')
 	%<- ({y} {e} stsubst-gen ([d] D2 d y e) ([d] D2' d y e)) %.
@@ -47,7 +47,7 @@
 	%pi (stsubst-gen ([d] wf/sigma (D2 d) (D1 d)) ([d] wf/sigma (D2' d) (D1' d)))
 	%<- (stsubst-gen D1 D1')
 	%<- ({y} {e} stsubst-gen ([d] D2 d y e) ([d] D2' d y e)) %.
-%term sing 
+%scope stsubst-gen %term sing 
 	%pi (stsubst-gen ([d] wf/sing (D1 d)) ([d] wf/sing (D1' d)))
 	%<- (sasubst-gen D1 D1') %.
 %worlds (var bind) (ssubst-gen _ _) (sasubst-gen _ _) (stsubst-gen _ _) %.
@@ -100,14 +100,14 @@
 %scope stsubst-e %term at 
 	%pi (ssubst-e Dappend Dappend' ([x] [d] ofe/at (D1 x d)) DofR (ofe/at D1'))
 	%<- (sasubst-e Dappend Dappend' D1 DofR D1') %.
-%term lam 
+%scope stsubst-e %term lam 
 	%pi (ssubst-e Dappend Dappend' ([x] [d] ofe/lam (D2 x d) (D1 x d)) DofR (ofe/lam D2' D1'))
 	%<- (stsubst-e Dappend Dappend' D1 DofR D1')
 	%<- ({y} {e} ssubst-e ([x] append/cons (Dappend x)) (append/cons Dappend') ([x] [d] D2 x d y e) DofR (D2' y e)) %.
 %scope stsubst-e %term sing 
 	%pi (ssubst-e Dappend Dappend' ([x] [d] ofe/sing (D1 x d)) DofR (ofe/sing D1'))
 	%<- (sasubst-e Dappend Dappend' D1 DofR D1') %.
-%term pair 
+%scope stsubst-e %term pair 
 	%pi (ssubst-e Dappend Dappend' ([x] [d] ofe/pair (D4 x d) (D3 x d) (D2 x) (D1 x d)) (%the (aofe _ R _) DofR) (ofe/pair D4' D3' (D2 R) D1'))
 	%<- (ssubst-e Dappend Dappend' D1 DofR D1')
 	%<- (ssubst-e Dappend Dappend' D3 DofR D3')
@@ -115,15 +115,15 @@
 %scope stsubst-e %term closed 
 	%pi (sasubst-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (append G1 (G2 R) G') Dappend') ([x] [d] aofe/closed (%the (ordered (G x)) (Dordered x d)) (%the (aof (Q x) (B x)) (Daof x))) (%the (aofe G1 R A) DofR) (aofe/closed Dordered' (Daof R)))
 	%<- (scsub-ordered Dappend Dappend' Dordered Dordered') %.
-%term forall 
+%scope stsubst-e %term forall 
 	%pi (sasubst-e Dappend Dappend' ([x] [d] aofe/forall (D1 x d)) DofR (aofe/forall D1'))
 	%<- (stsubst-e Dappend Dappend' D1 DofR D1') %.
 %scope stsubst-e %term forbad 
 	%pi (sasubst-e _ _ ([x] [d] aofe/var _ (D x d)) _ D'')
-	%<- ({x} {d} lookup-isvar (D x d) (%the (isvar (forall (B x)) I) (D' x d)))
+	%<- ({x} {d} lookup-isvar (D x d) (%the (isvar ((%abs forall) (B x)) I) (D' x d)))
 	%<- ({x} {d} isvar-forall-contra (D' x d) Dfalse)
 	%<- (false-implies-aofe Dfalse D'') %.
-%term varsam 
+%scope stsubst-e %term varsam 
 	%pi (sasubst-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (append G1 (G2 R) G') Dappend') ([x] [d] aofe/var (%the (wfe (G x) (B x)) (Dwf x d)) (%the (lookup (G x) x (B x)) (Dlookup x d))) (%the (aofe G1 R A) DofR) DofR'')
 	%<- ({x} {d} lookup-binder-fun (Dappend x) (Dlookup x d) (Deq x))
 	%<- (aofe-resp ctx-eq/i atom-eq/i (Deq R) DofR (%the (aofe G1 R (B R)) DofR'))
@@ -134,40 +134,40 @@
 	%pi (sasubst-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (append G1 (G2 R) G') Dappend') ([x] [d] aofe/var (%the (wfe (G x) (B x)) (Dwf x d)) (%the (lookup (G x) Y (B x)) (Dlookup x d))) (%the (aofe G1 R A) DofR) (aofe/var Dwf' Dlookup'))
 	%<- (scsub-lookup Dappend Dappend' Dlookup (%the (lookup G' Y (B R)) Dlookup'))
 	%<- (stsubst-e Dappend Dappend' Dwf DofR (%the (wfe G' (B R)) Dwf')) %.
-%term app 
+%scope stsubst-e %term app 
 	%pi (sasubst-e Dappend Dappend' ([x] [d] aofe/app (D4 x d) (D3 x) (D2 x d) (D1 x d)) (%the (aofe _ R _) DofR) (aofe/app D4' (D3 R) D2' D1'))
 	%<- (sasubst-e Dappend Dappend' D1 DofR D1')
 	%<- (ssubst-e Dappend Dappend' D2 DofR D2')
 	%<- (stsubst-e Dappend Dappend' D4 DofR D4') %.
 %scope stsubst-e %term appbad 
 	%pi (sasubst-e _ _ ([x] [d] aofe/var _ (D x d)) _ D'')
-	%<- ({x} {d} lookup-isvar (D x d) (%the (isvar (app (R x) (M x)) I) (D' x d)))
+	%<- ({x} {d} lookup-isvar (D x d) (%the (isvar ((%abs app) (R x) (M x)) I) (D' x d)))
 	%<- ({x} {d} isvar-app-contra (D' x d) Dfalse)
 	%<- (false-implies-aofe Dfalse D'') %.
-%term pi1 
+%scope stsubst-e %term pi1 
 	%pi (sasubst-e Dappend Dappend' ([x] [d] aofe/pi1 (D1 x d)) DofR (aofe/pi1 D1'))
 	%<- (sasubst-e Dappend Dappend' D1 DofR D1') %.
 %scope stsubst-e %term pi1bad 
 	%pi (sasubst-e _ _ ([x] [d] aofe/var _ (D x d)) _ D'')
-	%<- ({x} {d} lookup-isvar (D x d) (%the (isvar (pi1 (R x)) I) (D' x d)))
+	%<- ({x} {d} lookup-isvar (D x d) (%the (isvar ((%abs pi1) (R x)) I) (D' x d)))
 	%<- ({x} {d} isvar-pi1-contra (D' x d) Dfalse)
 	%<- (false-implies-aofe Dfalse D'') %.
-%term pi2 
+%scope stsubst-e %term pi2 
 	%pi (sasubst-e Dappend Dappend' ([x] [d] aofe/pi2 (D1 x d)) DofR (aofe/pi2 D1'))
 	%<- (sasubst-e Dappend Dappend' D1 DofR D1') %.
 %scope stsubst-e %term pi2bad 
 	%pi (sasubst-e _ _ ([x] [d] aofe/var _ (D x d)) _ D'')
-	%<- ({x} {d} lookup-isvar (D x d) (%the (isvar (pi2 (R x)) I) (D' x d)))
+	%<- ({x} {d} lookup-isvar (D x d) (%the (isvar ((%abs pi2) (R x)) I) (D' x d)))
 	%<- ({x} {d} isvar-pi2-contra (D' x d) Dfalse)
 	%<- (false-implies-aofe Dfalse D'') %.
-%term t 
+%scope stsubst-e %term t 
 	%pi (stsubst-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (append G1 (G2 R) G') Dappend') ([x] [d] wfe/t (%the (ordered (G x)) (Dordered x d))) (%the (aofe G1 R A) DofR) (wfe/t Dordered'))
 	%<- (scsub-ordered Dappend Dappend' Dordered Dordered') %.
 %scope stsubst-e %term pi 
 	%pi (stsubst-e Dappend Dappend' ([x] [d] wfe/pi (D2 x d) (D1 x d)) DofR (wfe/pi D2' D1'))
 	%<- (stsubst-e Dappend Dappend' D1 DofR D1')
 	%<- ({y} {e} stsubst-e ([x] append/cons (Dappend x)) (append/cons Dappend') ([x] [d] D2 x d y e) DofR (D2' y e)) %.
-%term sigma 
+%scope stsubst-e %term sigma 
 	%pi (stsubst-e Dappend Dappend' ([x] [d] wfe/sigma (D2 x d) (D1 x d)) DofR (wfe/sigma D2' D1'))
 	%<- (stsubst-e Dappend Dappend' D1 DofR D1')
 	%<- ({y} {e} stsubst-e ([x] append/cons (Dappend x)) (append/cons Dappend') ([x] [d] D2 x d y e) DofR (D2' y e)) %.
@@ -180,11 +180,11 @@
 %sort aof-reg {_ aof R A} {_ wf A} %.
 %mode aof-reg %in %out %.
 %scope aof-reg %term const aof-reg (aof/const D _) D %.
-%term forall aof-reg (aof/forall D) (wf/pi ([_] [_] wf/t) (wf/pi ([_] [_] wf/t) D)) %.
+%scope aof-reg %term forall aof-reg (aof/forall D) (wf/pi ([_] [_] wf/t) (wf/pi ([_] [_] wf/t) D)) %.
 %scope aof-reg %term var aof-reg (aof/var D _) D %.
-%term app aof-reg (aof/app D _ _ _) D %.
+%scope aof-reg %term app aof-reg (aof/app D _ _ _) D %.
 %scope aof-reg %term pi1 %pi (aof-reg (aof/pi1 Daof) D) %<- (aof-reg Daof (wf/sigma _ D)) %.
-%term pi2 
+%scope aof-reg %term pi2 
 	%pi (aof-reg (aof/pi2 Daof) D')
 	%<- (aof-reg Daof (wf/sigma D _))
 	%<- (stsubst D (aof/pi1 Daof) D') %.
@@ -193,11 +193,11 @@
 %sort of-reg {_ of M A} {_ wf A} %.
 %mode of-reg %in %out %.
 %scope of-reg %term at of-reg (of/at _) wf/t %.
-%term lam 
+%scope of-reg %term lam 
 	%pi (of-reg (of/lam Dof Dwf1) (wf/pi Dwf2 Dwf1))
 	%<- ({x} {d} of-reg (Dof x d) (Dwf2 x d)) %.
 %scope of-reg %term pair %pi (of-reg (of/pair Dwf2 _ _ Dof) (wf/sigma Dwf2 Dwf1)) %<- (of-reg Dof Dwf1) %.
-%term sing of-reg (of/sing Daof) (wf/sing Daof) %.
+%scope of-reg %term sing of-reg (of/sing Daof) (wf/sing Daof) %.
 %worlds (var ovar bind obind) (of-reg _ _) %.
 %total D (of-reg D _) %.
 %%%%%  Regularity (Explicit Context)  %%%%%
@@ -210,14 +210,14 @@
 	%<- (wf-to-wfe Dwf Dwfe)
 	%<- (append-all G (%the (append nil G G) Dappend))
 	%<- (weaken-wfe' Dappend Dordered Dwfe Dwfe') %.
-%term forall 
+%scope aofe-reg %term forall 
 	%pi (aofe-reg (aofe/forall D) (wfe/pi ([x] [d] wfe/t (ordered/cons (Dbound x d))) (wfe/pi ([x] [d] wfe/t (ordered/cons (Dbound x d))) D)))
 	%<- (wfe-context D Dord)
 	%<- (extend-context Dord Dbound) %.
 %scope aofe-reg %term var aofe-reg (aofe/var D _) D %.
-%term app aofe-reg (aofe/app D _ _ _) D %.
+%scope aofe-reg %term app aofe-reg (aofe/app D _ _ _) D %.
 %scope aofe-reg %term pi1 %pi (aofe-reg (aofe/pi1 D) D') %<- (aofe-reg D (wfe/sigma _ D')) %.
-%term pi2 
+%scope aofe-reg %term pi2 
 	%pi (aofe-reg (aofe/pi2 Daof) D)
 	%<- (aofe-reg Daof (wfe/sigma Dwf _))
 	%<- (stsubst-e ([_] append/nil) append/nil Dwf (aofe/pi1 Daof) D) %.

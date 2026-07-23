@@ -1,6 +1,5 @@
 (lang dune 3.21)
 
-(pkg enabled)
 (context default)
 
 (env

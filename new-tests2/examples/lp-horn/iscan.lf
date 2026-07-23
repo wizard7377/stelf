@@ -12,12 +12,12 @@
 isc_imp : iscan (tc_imp TC1) (can_impi CN1)
 	   <- {u:pf A} {ta:toatm u u} {at:atm u}
 	      isatm ta at -> iscan (TC1 u ta) (CN1 u at).
-}%
+%]
 %term isc_true iscan tc_true can_truei %.
 %. %[
 isc_forall : iscan (tc_forall TC1) (can_foralli CN1)
 	       <- {a:i} iscan (TC1 a) (CN1 a).
-}%
+%]
 %term isc_whr %pi (iscan (tc_whr TC1 WHR) CN1) %<- (iscan TC1 CN1) %.
 %term isc_atm %pi (iscan (tc_atm TA1) (can_atm AT1)) %<- (isatm TA1 AT1) %.
 %term isa_impe 

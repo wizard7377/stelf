@@ -12,7 +12,7 @@ Proof: By complete induction on the structure of C.
 Note that the fact that C' is a subderivation of C is not
 represented in the implementation below.  This could be added
 as a higher-level judgment on transformations.
-}%
+%]
 %sort csd {_ K # (ev E) =>* (answer W)} {_ eval E V} {_ K # (return V) =>* (answer W)} %.
 %name csd %.
 % Natural Numbers
@@ -61,6 +61,6 @@ as a higher-level judgment on transformations.
    then D :: eval E V.
 
 Proof: By inversion on CE and appeal to the Main Lemma.
-}%
+%]
 %sort ceval_sound {_ ceval E V} {_ eval E V} %.
 %term cevsd %pi (ceval_sound (cev C) D) %<- (csd C D (stop << st_init)) %.

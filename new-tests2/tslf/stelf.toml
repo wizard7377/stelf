@@ -2,4 +2,4 @@
 name = "sources"
 main = "sources.lf"
 src = ["."]
-dependencies = [{path = "sing/stelf.toml", name = "sources"}]
+deps = [{ type = "local", path = "sing/stelf.toml", name = "sources", alias = "sing" }]

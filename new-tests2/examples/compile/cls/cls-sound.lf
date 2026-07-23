@@ -14,7 +14,7 @@ Lemma: The postfix relation on computations is transitive:
   there exists an  R3 :: C1 < C3.
 
 Proof: By induction on the structure of R2.
-}%
+%]
 %sort trans* {_ C1 < C2} {_ C2 < C3} {_ C1 < C3} %.
 %mode trans* %in %in %out %.
 %term trans*_imm trans* R1 sub_imm (sub_med R1) %.
@@ -29,7 +29,7 @@ Splitting Lemma:
   such that C' < C.
 
 Proof: By complete induction on C.
-}%
+%]
 %sort spl {C st (KS ;; K) (ev F & P) S =>* (st emptys done (empty ; W'))} {_ feval K F W} {C' st KS P (S ; W) =>* (st emptys done (empty ; W'))} {_ C' < C} %.
 %mode spl %in %out %out %out %.
 % C = id  is impossible, since  (ev F & P)  is different from  (done).
@@ -98,7 +98,7 @@ there exists an evaluation
   D :: feval K F W
 
 Proof: By the splitting lemma for computations.
-}%
+%]
 %sort cls_sound {_ ceval K F W} {_ feval K F W} %.
 %mode cls_sound %in %out %.
 %term clss %pi (cls_sound (run C) D) %<- (spl C D id Id<C) %.

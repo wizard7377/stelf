@@ -22,4 +22,5 @@ module type GLOBAL = sig
   val bar_in_block : bool ref
   val old_some : bool ref
   val stop_reserved : bool ref
+  val printArrowSugar : bool ref
 end

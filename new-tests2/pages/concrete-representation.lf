@@ -365,16 +365,16 @@ relatively straightforward and are omitted (they are present in the full
 source code for this page). %]]
 %sort bind-uniq {_ {v} {iv isvar v} id-exp^ (Ea v iv) (Ea' v iv)} {_ bind Ea Eb} {_ bind Ea' Eb'} {_ id-exp^ Eb Eb'} %.
 %mode bind-uniq %in %in %in %out %.
-%. %[}%
+%. %[%]
 %sort unbind-uniq {_ id-exp^ Ea Ea'} {_ unbind Ea Eb} {_ unbind Ea' Eb'} {_ {v} {iv isvar v} id-exp^ (Eb v iv) (Eb' v iv)} %.
 %mode unbind-uniq %in %in %in %out %.
-%. %[}%
+%. %[%]
 %sort bind-unbind {_ bind ([v] E^ v) E^'} {_ unbind E^' ([v] E^ v)} %.
 %mode bind-unbind %in %out %.
-%. %[}%
+%. %[%]
 %sort unbind-bind {_ unbind E^ ([v] E^' v)} {_ bind ([v] E^' v) E^} %.
 %mode unbind-bind %in %out %.
-%. %[|hidden=true}%
+%. %[|hidden=true%]
 % Cases for bind-uniq
 %term _ bind-uniq ([v] [iv] id-exp^/refl) bind/fvar bind/fvar id-exp^/refl %.
 %term _ 
@@ -456,7 +456,7 @@ source code for this page). %]]
 %term _ %pi (unbind-bind (unbind/lam U) (bind/lam B)) %<- (unbind-bind U B) %.
 %worlds (blockvar) (unbind-bind _ _) %.
 %total T (unbind-bind T _) %.
-%. %[}%
+%. %[%]
 %. %[[ ## Relating HOAS and de Bruijn representations %]]
 %. %[[ This is the penultimate section. What we want to prove, ultimately, is
 a bijection between _closed_ HOAS terms and _closed_ de Bruijn terms;
@@ -488,7 +488,7 @@ but dependent on the effectiveness of ``bind``. %]]
 	%<- (exp->db E2 CASE2 Et2 E2') %.
 %worlds (blockcases) (exp->db _ _ _ _) %.
 %total T (exp->db T _ _ _) %.
-%. %[}%
+%. %[%]
 %sort uniq->db {_ exp->db E2 C Et E^} {_ exp->db E2 C Et' E^'} {_ id-etree Et Et'} {_ id-exp^ E^ E^'} %.
 %mode uniq->db %in %in %out %out %.
 %term _ uniq->db exp->db/var exp->db/var id-etree/refl id-exp^/refl %.
@@ -522,7 +522,7 @@ to provide a usable termination argument for ``db->exp``. %]]
 	%<- (db->exp ET2 E2^ E2 _) %.
 %worlds (blockcases) (db->exp _ _ _ _) %.
 %total T (db->exp T _ _ _) %.
-%. %[}%
+%. %[%]
 %sort uniq->exp {_ id-exp^ E^ E^'} {_ db->exp ET E^ E C} {_ db->exp ET' E^' E' C'} {_ id-exp E E'} %.
 %mode uniq->exp %in %in %in %out %.
 %term _ uniq->exp id-exp^/refl db->exp/fvar db->exp/fvar id-exp/refl %.
@@ -552,7 +552,7 @@ to provide a usable termination argument for ``db->exp``. %]]
 	%<- (inverseEDE T2 T2') %.
 %worlds (blockcases) (inverseEDE _ _) %.
 %total T (inverseEDE T _) %.
-%. %[}%
+%. %[%]
 %. %[[ ### Composition: de Bruijn -&gt; HOAS -&gt; de Bruijn %]]
 %. %[[ We need one last trick in order to make this proof go through in the
 opposite direction; we will need an effectiveness lemma on top of an
@@ -584,7 +584,7 @@ complete the proof that composition in the other direction is the identity. %]]
 	%<- (can-can-case _ C2) %.
 %worlds (blockcancases) (inverseDED _ _) %.
 %total T (inverseDED T _) %.
-%. %[}%
+%. %[%]
 %. %[[ ## Wrapping up %]]
 %. %[[ The one step that remains is to perform the above four steps for a
 simpler theorem statement in a closed world, since ultimately what we 
@@ -634,7 +634,7 @@ state what was done. %]]
 %mode exp-->db-->exp %in %out %.
 %worlds () (exp-->db-->exp _ _) %.
 %total {} (exp-->db-->exp _ _) %.
-%. %[}%
+%. %[%]
 %. %[[ ## Examples %]]
 %. %[[ It's also a good idea to run a [``%query``](/wiki/percent-query/) on some examples as
 a sanity check. First, we translate the Church numeral "4," <Math formula="\lambda f.\lambda x.f(f(f(f x)))"/> from a

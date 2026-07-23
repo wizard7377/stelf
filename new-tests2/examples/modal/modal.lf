@@ -37,11 +37,11 @@
 %. %[
 %theorem identity : exists {D:{W:w}{P:o} (P ⇒  P) @ W} true.
 %establish 5 {} (identity D).
-}%
+%]
 %. %[
 %theorem false : exists {D:{W:w} ⊥ @ W} true.
 %establish 5 {} (false D).
-}%
+%]
 %. %[
 %theorem box_taut0 : exists {D:{W:w}{A:o} □ (A ⇒ A) @ W} true.
 %establish 10 {} (box_taut0 D).
@@ -54,7 +54,7 @@
 
 %theorem k_axiom1 : exists {D:{W:w}{A:o}{B:o} ((□ (A ⇒ B)) ⇒  (□ A) ⇒ (□ B)) @ W} true.
 %establish 6 {} (k_axiom1 D).
-}%
+%]
 %. %[ Can't seem to be done with depth 6
 
 %theorem peirce : exists {D:{W:w}{A:o}{B:o} (¬ (¬ (((A ⇒ B) ⇒ A)⇒ A))) @ W} true.
@@ -62,14 +62,14 @@
 
 %theorem k_axiom2 : exists {D:{W:w}{A:o}{B:o} ((□ (A ⇒ B)) ⇒  (<> A) ⇒ (<> B)) @ W} true.
 %establish 6 {} (k_axiom2 D).
-}%
+%]
 %. %[ 
 %theorem modal_equiv1 : exists {D:{W:w}{A:o} ((□ A) ⇒ (¬ (<> (¬ A)))) @ W} true.
 %establish 5 {} (modal_equiv1 D).
 
 %theorem modal_equiv2 : exists {D:{W:w}{A:o} ((<> A) ⇒ (¬ (□ (¬ A)))) @ W} true.
 %establish 5 {} (modal_equiv2 D).
-}%
+%]
 %. %[
 % Can prove these if we add reflexivity
 refl : W R W.
@@ -79,7 +79,7 @@ refl : W R W.
 
 %theorem t_axiom2 : exists {D:{W:w}{A:o} (A ⇒  (<> A)) @ W} true.
 %establish 6 {} (t_axiom2 D).
-}%
+%]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sequent calculus version
 %sort hyp {_ o} {_ w} %.
@@ -117,15 +117,15 @@ refl : W R W.
 % K axiom 1
 %querytabled * * D : {W:w}{A:o}{B:o} conc ((□ (A ⇒ B)) ⇒  (□ A) ⇒ (□ B)) W.
 
-}%
+%]
 %. %[ Can't be proven -- correct
 %theorem false : exists {D:{W:w} conc ⊥  W} true.
 %establish 10 {} (false D).
-}%
+%]
 %. %[ Can't be proven -- correct
 %theorem peirce : exists {D:{W:w}{A:o}{B:o} conc (((A ⇒ B) ⇒ A)⇒ A) W} true.
 %establish 20 {} (peirce D).
-}%
+%]
 %theorem dn_peirce : exists {D {W w} {A o} {B o} conc (¬ (¬ (A ⇒ B ⇒ A ⇒ A))) W} true %.
 %prove 10 {} (dn_peirce D) %.
 %theorem k_axiom1 : exists {D {W w} {A o} {B o} conc (□ (A ⇒ B) ⇒ (□ A) ⇒ (□ B)) W} true %.

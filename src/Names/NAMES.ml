@@ -52,6 +52,13 @@ module type NAMES = sig
   val newNamespace : unit -> namespace
   val insertConst : namespace * IntSyn.cid -> unit
 
+  val insertConstShadow : namespace * IntSyn.cid -> unit
+  (** Like [insertConst], but silently replaces an existing same-named member
+      instead of raising [Error]. Used by [%scope] reopening, where a
+      judgment's later case clause is allowed to reuse an earlier clause's
+      label (the earlier constant keeps its own [cid] and stays in the
+      signature; it just stops being reachable by that name). *)
+
   val insertStruct : namespace * IntSyn.mid -> unit
   (** shadowing disallowed *)
 
@@ -66,10 +73,30 @@ module type NAMES = sig
   (** The following functions have to do with the mapping from names to
       cids/mids only. *)
 
+  val uninstallConst : IntSyn.cid -> unit
+  (** Undo a single [installConstName cid], restoring whatever it shadowed
+      (or removing it from the global table if it shadowed nothing). Used to
+      retract a %scope body's global bindings once the scope closes, without
+      touching signature/structure bookkeeping the way [resetFrom] does. *)
+
   val installStructName : IntSyn.mid -> unit
   val constLookup : qid -> IntSyn.cid option
   val structLookup : qid -> IntSyn.mid option
   val constUndef : qid -> qid option
+
+  val currentGroupNamespace : namespace ref
+  (** The namespace of the %require group currently being loaded (or the
+      top-level namespace if none). [Pal.Impl]'s [current_group_ns] is an
+      alias for this ref -- see [resolveQid] for why this needs to live here
+      rather than in [Impl.ml]. *)
+
+  val resolveQid : shortest:bool -> qid -> IntSyn.cid option
+  (** Shared entry point for %val/%abs name resolution. [shortest:false]
+      (%val) is shadow-aware lookup, identical to [constLookup].
+      [shortest:true] (%abs) on an unqualified [qid] prefers a toplevel
+      declaration within [!currentGroupNamespace], falling back to
+      shadow-aware lookup if none exists; on a qualified [qid] it is
+      identical to [constLookup]. *)
 
   val structUndef : qid -> qid option
   (** shortest undefined prefix of Qid *)

@@ -193,7 +193,7 @@
 %sort lt-implies-sum {_ lt N1 N3} {_ sum N1 (s N2) N3} %.
 %mode lt-implies-sum %in %out %.
 %scope lt-implies-sum %term z lt-implies-sum lt/z sum/z %.
-%term s %pi (lt-implies-sum (lt/s D) (sum/s D')) %<- (lt-implies-sum D D') %.
+%scope lt-implies-sum %term s %pi (lt-implies-sum (lt/s D) (sum/s D')) %<- (lt-implies-sum D D') %.
 %worlds () (lt-implies-sum _ _) %.
 %total D (lt-implies-sum D _) %.
 %sort sum-leq-lt {_ sum N1 N2 N3} {_ sum N1' N2' N3'} {_ leq N1 N1'} {_ lt N2 N2'} {_ lt N3 N3'} %.

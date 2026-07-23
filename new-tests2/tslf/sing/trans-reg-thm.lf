@@ -4,17 +4,17 @@
 %sort ttranse-context {_ ttranse G EA A} {_ ordered G} %.
 %mode ttranse-context %in %out %.
 %scope ttranse-context %term t ttranse-context (ttranse/t D) D %.
-%term pi %pi (ttranse-context (ttranse/pi _ D) D') %<- (ttranse-context D D') %.
+%scope ttranse-context %term pi %pi (ttranse-context (ttranse/pi _ D) D') %<- (ttranse-context D D') %.
 %scope ttranse-context %term sigma %pi (ttranse-context (ttranse/sigma _ D) D') %<- (ttranse-context D D') %.
-%term sing %pi (ttranse-context (ttranse/sing D) D') %<- (transe-context D D') %.
+%scope ttranse-context %term sing %pi (ttranse-context (ttranse/sing D) D') %<- (transe-context D D') %.
 %scope ttranse-context %term const transe-context (transe/const D _ _ _ _) D %.
-%term forall %pi (transe-context (transe/forall _ _ D) D') %<- (ttranse-context D D') %.
+%scope ttranse-context %term forall %pi (transe-context (transe/forall _ _ D) D') %<- (ttranse-context D D') %.
 %scope ttranse-context %term var %pi (transe-context (transe/var _ _ _ D _) D') %<- (lookup-context D D') %.
-%term vari transe-context (transe/vari D _ _ _ _ _) D %.
+%scope ttranse-context %term vari transe-context (transe/vari D _ _ _ _ _) D %.
 %scope ttranse-context %term app %pi (transe-context (transe/app _ _ _ D) D') %<- (transe-context D D') %.
-%term pi1 %pi (transe-context (transe/pi1 D) D') %<- (transe-context D D') %.
+%scope ttranse-context %term pi1 %pi (transe-context (transe/pi1 D) D') %<- (transe-context D D') %.
 %scope ttranse-context %term pi2 %pi (transe-context (transe/pi2 D) D') %<- (transe-context D D') %.
-%term lam %pi (transe-context (transe/lam _ D) D') %<- (ttranse-context D D') %.
+%scope ttranse-context %term lam %pi (transe-context (transe/lam _ D) D') %<- (ttranse-context D D') %.
 %scope ttranse-context %term pair %pi (transe-context (transe/pair _ D) D') %<- (transe-context D D') %.
 %worlds (var bind ovar obind tbind) (ttranse-context _ _) (transe-context _ _) %.
 %total (D1 D2) (ttranse-context D1 _) (transe-context D2 _) %.
@@ -36,7 +36,7 @@
 %scope cut-transe %term t 
 	%pi (cut-ttrans _ ([x] [d] [ex] [xt] ttrans/t) Dlook ([x] [d'] [ex] [xt] ttranse/t (Dord x d')))
 	%<- ({x} {d'} lookup-context (Dlook x d') (Dord x d')) %.
-%term pi 
+%scope cut-transe %term pi 
 	%pi (cut-ttrans _ ([x] [d] [ex] [xt] ttrans/pi (D2 x d ex xt) (D1 x d ex xt)) Dlook ([x] [d'] [ex] [xt] ttranse/pi (D2'' x d' ex xt) (D1' x d' ex xt)))
 	%<- (cut-ttrans _ D1 Dlook D1')
 	%<- ({x} {d'} lookup-context (Dlook x d') (Dord x d'))
@@ -50,7 +50,7 @@
 	%<- ({x} {d'} extend-context (Dord x d') (%the ({y} %pi (isvar y J) %-> (bounded (G x) y)) (Dbound x d')))
 	%<- ({x} {d} {d'} {ex} {xt} cut-ttrans _ ([y] [e] [ey] [yt] D2 x d ex xt y e ey yt) ([y] [e'] lookup/hit (Dbound x d' y e')) ([y] [e'] [ey] [yt] D2' x d d' ex xt y e' ey yt))
 	%<- ({y} {e'} {ey} {yt} cut-ttranse _ ([x] [d] [d'] [ex] [xt] D2' x d d' ex xt y e' ey yt) ([x] [d'] lookup/miss (Dlook x d') (Dbound x d' y e')) ([x] [d'] [ex] [xt] D2'' x d' ex xt y e' ey yt)) %.
-%term sing 
+%scope cut-transe %term sing 
 	%pi (cut-ttrans _ ([x] [d] [ex] [xt] ttrans/sing (D1 x d ex xt)) Dlook ([x] [d'] [ex] [xt] ttranse/sing (D1' x d' ex xt)))
 	%<- (cut-trans _ D1 Dlook D1') %.
 %%%
@@ -62,14 +62,14 @@
 	%<- (strengthen-wf Dwf' Dwf'')
 	%<- ({x} wf-resp (Deq' x) Dwf'' (Dwf''' x))
 	%<- ({x} {d'} lookup-context (Dlook x d') (Dord x d')) %.
-%term forall 
+%scope cut-transe %term forall 
 	%pi (cut-trans _ ([x] [d] [ex] [xt] trans/forall (D3 x) (D2 x) (D1 x d ex xt)) Dlook ([x] [d'] [ex] [xt] transe/forall (D3 x) (D2 x) (D1' x d' ex xt)))
 	%<- (cut-ttrans _ D1 Dlook D1') %.
 %scope cut-transe %term varsam 
 	%pi (cut-trans _ ([x] [d] [ex] [xt] trans/var (D5 x) (D4 x) (Dwf x d) d (D1 x ex xt)) Dlook ([x] [d'] [ex] [xt] transe/var (D5 x) (D4 x) (Dwfe x d') (Dlook x d') (D1 x ex xt)))
 	%<- ({x} {d} can-mwf (Dwf x d) (Dmwf x d))
 	%<- (cut-wf _ Dwf Dmwf Dlook Dwfe _) %.
-%term varoth 
+%scope cut-transe %term varoth 
 	%pi (cut-trans _ ([x] [d] [ex] [xt] trans/var (D5 x) (D4 x) (Dwf x d) D2 D1) Dlook ([x] [d'] [ex] [xt] transe/vari (Dord x d') (D5 x) (D4 x) Dwf' D2 D1))
 	%<- ({x} {d'} lookup-context (Dlook x d') (Dord x d'))
 	%<- ({x} {d} can-mwf (Dwf x d) (Dmwf x d))
@@ -81,21 +81,21 @@
 	%<- ({x} {d'} extend-context (Dord x d') (%the ({y} %pi (isvar y J) %-> (bounded (G x) y)) (Dbound x d')))
 	%<- ({x} {d} {d'} {ex} {xt} cut-trans _ ([y] [e] [ey] [yt] D2 x d ex xt y e ey yt) ([y] [e'] lookup/hit (Dbound x d' y e')) ([y] [e'] [ey] [yt] D2' x d d' ex xt y e' ey yt))
 	%<- ({y} {e'} {ey} {yt} cut-transe _ ([x] [d] [d'] [ex] [xt] D2' x d d' ex xt y e' ey yt) ([x] [d'] lookup/miss (Dlook x d') (Dbound x d' y e')) ([x] [d'] [ex] [xt] D2'' x d' ex xt y e' ey yt)) %.
-%term app 
+%scope cut-transe %term app 
 	%pi (cut-trans _ ([x] [d] [ex] [xt] trans/app (D4 x) (D3 x) (D2 x d ex xt) (D1 x d ex xt)) Dlook ([x] [d] [ex] [xt] transe/app (D4 x) (D3 x) (D2' x d ex xt) (D1' x d ex xt)))
 	%<- (cut-trans _ D1 Dlook D1')
 	%<- (cut-trans _ D2 Dlook D2') %.
 %scope cut-transe %term pi1 
 	%pi (cut-trans _ ([x] [d] [ex] [xt] trans/pi1 (D1 x d ex xt)) Dlook ([x] [d] [ex] [xt] transe/pi1 (D1' x d ex xt)))
 	%<- (cut-trans _ D1 Dlook D1') %.
-%term pi2 
+%scope cut-transe %term pi2 
 	%pi (cut-trans _ ([x] [d] [ex] [xt] trans/pi2 (D1 x d ex xt)) Dlook ([x] [d] [ex] [xt] transe/pi2 (D1' x d ex xt)))
 	%<- (cut-trans _ D1 Dlook D1') %.
 %scope cut-transe %term pair 
 	%pi (cut-trans _ ([x] [d] [ex] [xt] trans/pair (D2 x d ex xt) (D1 x d ex xt)) Dlook ([x] [d] [ex] [xt] transe/pair (D2' x d ex xt) (D1' x d ex xt)))
 	%<- (cut-trans _ D1 Dlook D1')
 	%<- (cut-trans _ D2 Dlook D2') %.
-%term t cut-ttranse _ ([x] [d] [d'] [ex] [xt] ttranse/t (Dord x d')) Dlook ([x] [d'] [ex] [xt] ttranse/t (Dord x d')) %.
+%scope cut-transe %term t cut-ttranse _ ([x] [d] [d'] [ex] [xt] ttranse/t (Dord x d')) Dlook ([x] [d'] [ex] [xt] ttranse/t (Dord x d')) %.
 %%%
 %scope cut-transe %term pi 
 	%pi (cut-ttranse _ ([x] [d] [d'] [ex] [xt] ttranse/pi (D2 x d d' ex xt) (D1 x d d' ex xt)) Dlook ([x] [d'] [ex] [xt] ttranse/pi (D2'' x d' ex xt) (D1' x d' ex xt)))
@@ -103,7 +103,7 @@
 	%<- ({x} {d} {d'} {ex} {xt} {y} {e'} {ey} {yt} ttranse-context (D2 x d d' ex xt y e' ey yt) (ordered/cons (Dbound x d' y e')))
 	%<- ({x} {d} {d'} {ex} {xt} cut-ttranse _ ([y] [e] [e'] [ey] [yt] D2 x d d' ex xt y e' ey yt) ([y] [e'] lookup/hit (Dbound x d' y e')) ([y] [e'] [ey] [yt] D2' x d d' ex xt y e' ey yt))
 	%<- ({y} {e'} {ey} {yt} cut-ttranse _ ([x] [d] [d'] [ex] [xt] D2' x d d' ex xt y e' ey yt) ([x] [d'] lookup/miss (Dlook x d') (Dbound x d' y e')) ([x] [d'] [ex] [xt] D2'' x d' ex xt y e' ey yt)) %.
-%term sigma 
+%scope cut-transe %term sigma 
 	%pi (cut-ttranse _ ([x] [d] [d'] [ex] [xt] ttranse/sigma (D2 x d d' ex xt) (D1 x d d' ex xt)) Dlook ([x] [d'] [ex] [xt] ttranse/sigma (D2'' x d' ex xt) (D1' x d' ex xt)))
 	%<- (cut-ttranse _ D1 Dlook D1')
 	%<- ({x} {d} {d'} {ex} {xt} {y} {e'} {ey} {yt} ttranse-context (D2 x d d' ex xt y e' ey yt) (ordered/cons (Dbound x d' y e')))
@@ -112,7 +112,7 @@
 %scope cut-transe %term sing 
 	%pi (cut-ttranse _ ([x] [d] [d'] [ex] [xt] ttranse/sing (D1 x d d' ex xt)) Dlook ([x] [d'] [ex] [xt] ttranse/sing (D1' x d' ex xt)))
 	%<- (cut-transe _ D1 Dlook D1') %.
-%term const 
+%scope cut-transe %term const 
 	%pi (cut-transe _ ([x] [d] [d'] [ex] [xt] transe/const (Dord x d') (D3 x) (D2 x) (Dwf x d) (D1 x)) Dlook ([x] [d'] [ex] [xt] transe/const (Dord x d') (D3 x) (D2 x) (Dwf''' x) (D1 x)))
 	%<- (kof-strengthen D1 Deq)
 	%<- ({x} tp-eq-symm (Deq x) (Deq' x))
@@ -124,14 +124,14 @@
 	%pi (cut-transe _ ([x] [d] [d'] [ex] [xt] transe/var (D5 x) (D4 x) (Dwfe x d d') (D2 x d') (D1 x ex xt)) Dlook ([x] [d'] [ex] [xt] transe/var (D5 x) (D4 x) (Dwfe' x d') (D2 x d') (D1 x ex xt)))
 	%<- ({x} {d} {d'} can-mwfe (Dwfe x d d') (Dmwfe x d d'))
 	%<- (cut-wfe _ Dwfe Dmwfe Dlook Dwfe' _) %.
-%term forall 
+%scope cut-transe %term forall 
 	%pi (cut-transe _ ([x] [d] [d'] [ex] [xt] transe/forall (D3 x) (D2 x) (D1 x d d' ex xt)) Dlook ([x] [d'] [ex] [xt] transe/forall (D3 x) (D2 x) (D1' x d' ex xt)))
 	%<- (cut-ttranse _ D1 Dlook D1') %.
 %scope cut-transe %term varsam 
 	%pi (cut-transe _ ([x] [d] [d'] [ex] [xt] transe/vari (D6 x d') (D5 x) (D4 x) (Dwf x d) d (D1 x ex xt)) Dlook ([x] [d'] [ex] [xt] transe/var (D5 x) (D4 x) (Dwfe x d') (Dlook x d') (D1 x ex xt)))
 	%<- ({x} {d} can-mwf (Dwf x d) (Dmwf x d))
 	%<- (cut-wf _ Dwf Dmwf Dlook Dwfe _) %.
-%term varoth 
+%scope cut-transe %term varoth 
 	%pi (cut-transe _ ([x] [d] [d'] [ex] [xt] transe/vari (D6 x d') (D5 x) (D4 x) (Dwf x d) D2 D1) Dlook ([x] [d'] [ex] [xt] transe/vari (D6 x d') (D5 x) (D4 x) Dwf' D2 D1))
 	%<- ({x} {d} can-mwf (Dwf x d) (Dmwf x d))
 	%<- (strengthen-for-cut-wf _ Dwf Dmwf Dwf' _) %.
@@ -141,14 +141,14 @@
 	%<- ({x} {d} {d'} {ex} {xt} {y} {e'} {ey} {yt} transe-context (D2 x d d' ex xt y e' ey yt) (ordered/cons (Dbound x d' y e')))
 	%<- ({x} {d} {d'} {ex} {xt} cut-transe _ ([y] [e] [e'] [ey] [yt] D2 x d d' ex xt y e' ey yt) ([y] [e'] lookup/hit (Dbound x d' y e')) ([y] [e'] [ey] [yt] D2' x d d' ex xt y e' ey yt))
 	%<- ({y} {e'} {ey} {yt} cut-transe _ ([x] [d] [d'] [ex] [xt] D2' x d d' ex xt y e' ey yt) ([x] [d'] lookup/miss (Dlook x d') (Dbound x d' y e')) ([x] [d'] [ex] [xt] D2'' x d' ex xt y e' ey yt)) %.
-%term app 
+%scope cut-transe %term app 
 	%pi (cut-transe _ ([x] [d] [d'] [ex] [xt] transe/app (D4 x) (D3 x) (D2 x d d' ex xt) (D1 x d d' ex xt)) Dlook ([x] [d'] [ex] [xt] transe/app (D4 x) (D3 x) (D2' x d' ex xt) (D1' x d' ex xt)))
 	%<- (cut-transe _ D1 Dlook D1')
 	%<- (cut-transe _ D2 Dlook D2') %.
 %scope cut-transe %term pi1 
 	%pi (cut-transe _ ([x] [d] [d'] [ex] [xt] transe/pi1 (D1 x d d' ex xt)) Dlook ([x] [d'] [ex] [xt] transe/pi1 (D1' x d' ex xt)))
 	%<- (cut-transe _ D1 Dlook D1') %.
-%term pi2 
+%scope cut-transe %term pi2 
 	%pi (cut-transe _ ([x] [d] [d'] [ex] [xt] transe/pi2 (D1 x d d' ex xt)) Dlook ([x] [d'] [ex] [xt] transe/pi2 (D1' x d' ex xt)))
 	%<- (cut-transe _ D1 Dlook D1') %.
 %scope cut-transe %term pair 
@@ -180,7 +180,7 @@
 %sort ttrans-to-ttranse {_ ttrans EA A} {_ ttranse nil EA A} %.
 %mode ttrans-to-ttranse %in %out %.
 %scope ttrans-to-ttranse %term t ttrans-to-ttranse ttrans/t (ttranse/t ordered/nil) %.
-%term pi 
+%scope ttrans-to-ttranse %term pi 
 	%pi (ttrans-to-ttranse (ttrans/pi D2 D1) (ttranse/pi D2' D1'))
 	%<- (ttrans-to-ttranse D1 D1')
 	%<- (ttrans1-to-ttranse 0 D2 D2') %.
@@ -188,25 +188,25 @@
 	%pi (ttrans-to-ttranse (ttrans/sigma D2 D1) (ttranse/sigma D2' D1'))
 	%<- (ttrans-to-ttranse D1 D1')
 	%<- (ttrans1-to-ttranse 0 D2 D2') %.
-%term sing 
+%scope ttrans-to-ttranse %term sing 
 	%pi (ttrans-to-ttranse (ttrans/sing D) (ttranse/sing D'))
 	%<- (trans-to-transe D D') %.
 %scope ttrans-to-ttranse %term const trans-to-transe (trans/const D4 D3 D2 D1) (transe/const ordered/nil D4 D3 D2 D1) %.
-%term forall 
+%scope ttrans-to-ttranse %term forall 
 	%pi (trans-to-transe (trans/forall D3 D2 D1) (transe/forall D3 D2 D1'))
 	%<- (ttrans-to-ttranse D1 D1') %.
 %scope ttrans-to-ttranse %term var trans-to-transe (trans/var D5 D4 D3 D2 D1) (transe/vari ordered/nil D5 D4 D3 D2 D1) %.
-%term app 
+%scope ttrans-to-ttranse %term app 
 	%pi (trans-to-transe (trans/app D4 D3 D2 D1) (transe/app D4 D3 D2' D1'))
 	%<- (trans-to-transe D1 D1')
 	%<- (trans-to-transe D2 D2') %.
 %scope ttrans-to-ttranse %term pi1 %pi (trans-to-transe (trans/pi1 D) (transe/pi1 D')) %<- (trans-to-transe D D') %.
-%term pi2 %pi (trans-to-transe (trans/pi2 D) (transe/pi2 D')) %<- (trans-to-transe D D') %.
+%scope ttrans-to-ttranse %term pi2 %pi (trans-to-transe (trans/pi2 D) (transe/pi2 D')) %<- (trans-to-transe D D') %.
 %scope ttrans-to-ttranse %term lam 
 	%pi (trans-to-transe (trans/lam D2 D1) (transe/lam D2' D1'))
 	%<- (ttrans-to-ttranse D1 D1')
 	%<- (trans1-to-transe 0 D2 D2') %.
-%term pair 
+%scope ttrans-to-ttranse %term pair 
 	%pi (trans-to-transe (trans/pair D2 D1) (transe/pair D2' D1'))
 	%<- (trans-to-transe D1 D1')
 	%<- (trans-to-transe D2 D2') %.
@@ -328,7 +328,7 @@
 %scope ttranse-to-ttransi %term const 
 	%pi (transe-to-transi (transe/const _ D4 D3 D2 D1) D)
 	%<- (trans-to-transi _ (trans/const D4 D3 D2 D1) D) %.
-%term forall 
+%scope ttranse-to-ttransi %term forall 
 	%pi (transe-to-transi (transe/forall D3 D2 D1) D)
 	%<- (ttranse-to-ttransi D1 D1')
 	%<- (transi-forall D1' D2 D3 D) %.
@@ -336,7 +336,7 @@
 	%pi (transe-to-transi (transe/var D5 D4 D3 D2 D1) D)
 	%<- (wfe-to-wfi D3 D3')
 	%<- (transi-var D1 D2 D3' D4 D5 D) %.
-%term vari 
+%scope ttranse-to-ttransi %term vari 
 	%pi (transe-to-transi (transe/vari _ D5 D4 D3 D2 D1) D)
 	%<- (trans-to-transi _ (trans/var D5 D4 D3 D2 D1) D) %.
 %scope ttranse-to-ttransi %term app 
@@ -344,7 +344,7 @@
 	%<- (transe-to-transi D1 D1')
 	%<- (transe-to-transi D2 D2')
 	%<- (transi-app D1' D2' D3 D4 D) %.
-%term pi1 
+%scope ttranse-to-ttransi %term pi1 
 	%pi (transe-to-transi (transe/pi1 D1) D)
 	%<- (transe-to-transi D1 D1')
 	%<- (transi-pi1 D1' D) %.
@@ -352,7 +352,7 @@
 	%pi (transe-to-transi (transe/pi2 D1) D)
 	%<- (transe-to-transi D1 D1')
 	%<- (transi-pi2 D1' D) %.
-%term lam 
+%scope ttranse-to-ttransi %term lam 
 	%pi (transe-to-transi (transe/lam D2 D1) D)
 	%<- (ttranse-to-ttransi D1 D1')
 	%<- ({x} {d} {ex} {xt} transe-to-transi (D2 x d ex xt) (D2' x ex xt))
@@ -362,13 +362,13 @@
 	%<- (transe-to-transi D1 D1')
 	%<- (transe-to-transi D2 D2')
 	%<- (transi-pair D1' D2' D) %.
-%term t %pi (ttranse-to-ttransi (ttranse/t _) D) %<- (ttransi-t _ D) %.
+%scope ttranse-to-ttransi %term t %pi (ttranse-to-ttransi (ttranse/t _) D) %<- (ttransi-t _ D) %.
 %scope ttranse-to-ttransi %term pi 
 	%pi (ttranse-to-ttransi (ttranse/pi D2 D1) D)
 	%<- (ttranse-to-ttransi D1 D1')
 	%<- ({x} {d} {ex} {xt} ttranse-to-ttransi (D2 x d ex xt) (D2' x ex xt))
 	%<- (ttransi-pi D1' D2' D) %.
-%term sigma 
+%scope ttranse-to-ttransi %term sigma 
 	%pi (ttranse-to-ttransi (ttranse/sigma D2 D1) D)
 	%<- (ttranse-to-ttransi D1 D1')
 	%<- ({x} {d} {ex} {xt} ttranse-to-ttransi (D2 x d ex xt) (D2' x ex xt))
@@ -395,25 +395,25 @@
 %sort bump-ttranse {EA} {_ {x} %pi (isvar x I) %-> ({ex} %pi (vtrans ex x) %-> (ttranse (G x) (EA ex) (A x)))} {_ {x} %pi (isvar x I') %-> (ordered (G x))} {_ {x} %pi (isvar x I') %-> ({ex} %pi (vtrans ex x) %-> (ttranse (G x) (EA ex) (A x)))} %.
 %mode bump-ttranse %in %in %in %out %.
 %scope bump-ttranse %term const bump-transe _ ([x] [d] [ex] [xt] transe/const (Dord' x d) (Dself x) (Dexpand x) (Dwf x) (Dkof x)) Dord ([x] [d] [ex] [xt] transe/const (Dord x d) (Dself x) (Dexpand x) (Dwf x) (Dkof x)) %.
-%term forall 
+%scope bump-ttranse %term forall 
 	%pi (bump-transe _ ([x] [d] [ex] [xt] transe/forall (D3 x) (D2 x) (D1 x d ex xt)) Dord ([x] [d] [ex] [xt] transe/forall (D3 x) (D2 x) (D1' x d ex xt)))
 	%<- (bump-ttranse _ D1 Dord D1') %.
 %scope bump-ttranse %term var 
 	%pi (bump-transe _ ([x] [d] [ex] [xt] transe/var (Dself x) (Dexpand x) (Dwf x d) (Dlookup x d) (Dvtrans x ex xt)) Dord ([x] [d] [ex] [xt] transe/var (Dself x) (Dexpand x) (Dwf' x d) (Dlookup' x d) (Dvtrans x ex xt)))
 	%<- (bump-wfe Dwf Dord Dwf')
 	%<- (bump-lookup Dlookup Dord Dlookup') %.
-%term vari bump-transe _ ([x] [d] [ex] [xt] transe/vari (Dord' x d) (Dself x) (Dexpand x) (Dwf x) (Dvof x) (Dvtrans x ex xt)) Dord ([x] [d] [ex] [xt] transe/vari (Dord x d) (Dself x) (Dexpand x) (Dwf x) (Dvof x) (Dvtrans x ex xt)) %.
+%scope bump-ttranse %term vari bump-transe _ ([x] [d] [ex] [xt] transe/vari (Dord' x d) (Dself x) (Dexpand x) (Dwf x) (Dvof x) (Dvtrans x ex xt)) Dord ([x] [d] [ex] [xt] transe/vari (Dord x d) (Dself x) (Dexpand x) (Dwf x) (Dvof x) (Dvtrans x ex xt)) %.
 %scope bump-ttranse %term app 
 	%pi (bump-transe _ ([x] [d] [ex] [xt] transe/app (Dsub x) (Dsubtype x) (DtransN x d ex xt) (DtransM x d ex xt)) Dord ([x] [d] [ex] [xt] transe/app (Dsub x) (Dsubtype x) (DtransN' x d ex xt) (DtransM' x d ex xt)))
 	%<- (bump-transe _ DtransM Dord DtransM')
 	%<- (bump-transe _ DtransN Dord DtransN') %.
-%term pi1 
+%scope bump-ttranse %term pi1 
 	%pi (bump-transe _ ([x] [d] [ex] [xt] transe/pi1 (Dtrans x d ex xt)) Dord ([x] [d] [ex] [xt] transe/pi1 (Dtrans' x d ex xt)))
 	%<- (bump-transe _ Dtrans Dord Dtrans') %.
 %scope bump-ttranse %term pi2 
 	%pi (bump-transe _ ([x] [d] [ex] [xt] transe/pi2 (Dtrans x d ex xt)) Dord ([x] [d] [ex] [xt] transe/pi2 (Dtrans' x d ex xt)))
 	%<- (bump-transe _ Dtrans Dord Dtrans') %.
-%term lam 
+%scope bump-ttranse %term lam 
 	%pi (bump-transe _ ([x] [d isvar x I] [ex] [xt] transe/lam (Dtrans x d ex xt) (Dttrans x d ex xt)) (%the ({x} %pi (isvar x I') %-> (ordered (G x))) Dord) ([x] [d] [ex] [xt] transe/lam (Dtrans'' x d ex xt) (Dttrans' x d ex xt)))
 	%<- (bump-ttranse _ Dttrans Dord Dttrans')
 	%<- ({x} {d isvar x I} {ex} {xt} {y} {e isvar y J1} {ey} {yt} transe-context (Dtrans x d ex xt y e ey yt) (ordered/cons (%the (bounded (G x) y) (Dbound1 x d y e))))
@@ -428,7 +428,7 @@
 	%pi (bump-transe _ ([x] [d] [ex] [xt] transe/pair (DtransN x d ex xt) (DtransM x d ex xt)) Dord ([x] [d] [ex] [xt] transe/pair (DtransN' x d ex xt) (DtransM' x d ex xt)))
 	%<- (bump-transe _ DtransM Dord DtransM')
 	%<- (bump-transe _ DtransN Dord DtransN') %.
-%term t bump-ttranse _ ([x] [d] [ex] [xt] ttranse/t (Dord' x d)) Dord ([x] [d] [ex] [xt] ttranse/t (Dord x d)) %.
+%scope bump-ttranse %term t bump-ttranse _ ([x] [d] [ex] [xt] ttranse/t (Dord' x d)) Dord ([x] [d] [ex] [xt] ttranse/t (Dord x d)) %.
 %scope bump-ttranse %term pi 
 	%pi (bump-ttranse _ ([x] [d isvar x I] [ex] [xt] ttranse/pi (Dtrans x d ex xt) (Dttrans x d ex xt)) (%the ({x} %pi (isvar x I') %-> (ordered (G x))) Dord) ([x] [d] [ex] [xt] ttranse/pi (Dtrans'' x d ex xt) (Dttrans' x d ex xt)))
 	%<- (bump-ttranse _ Dttrans Dord Dttrans')
@@ -440,7 +440,7 @@
 	%<- ({x} {d isvar x I'} bump-bounded Dleq2 ([y] [e isvar y J2] Dbound2 x d y e) ([y] [e isvar y J] %the (bounded (G x) y) (Dbound2' x d y e)))
 	%<- ({x} {d isvar x I} {ex} {xt} bump-ttranse _ ([y] [e] [ey] [yt] Dtrans x d ex xt y e ey yt) ([y] [e] ordered/cons (Dbound1' x d y e)) ([y] [e] [ey] [yt] Dtrans' x d ex xt y e ey yt))
 	%<- ({y} {e isvar y J} {ey} {yt} bump-ttranse _ ([x] [d] [ex] [xt] Dtrans' x d ex xt y e ey yt) ([x] [d] ordered/cons (Dbound2' x d y e)) ([x] [d] [ex] [xt] Dtrans'' x d ex xt y e ey yt)) %.
-%term sigma 
+%scope bump-ttranse %term sigma 
 	%pi (bump-ttranse _ ([x] [d isvar x I] [ex] [xt] ttranse/sigma (Dtrans x d ex xt) (Dttrans x d ex xt)) (%the ({x} %pi (isvar x I') %-> (ordered (G x))) Dord) ([x] [d] [ex] [xt] ttranse/sigma (Dtrans'' x d ex xt) (Dttrans' x d ex xt)))
 	%<- (bump-ttranse _ Dttrans Dord Dttrans')
 	%<- ({x} {d isvar x I} {ex} {xt} {y} {e isvar y J1} {ey} {yt} ttranse-context (Dtrans x d ex xt y e ey yt) (ordered/cons (%the (bounded (G x) y) (Dbound1 x d y e))))
@@ -461,25 +461,25 @@
 %sort weakeng-ttranse {EA} {_ append G1 G2 G} {_ append (cons G1 X B) G2 G'} {_ ordered G'} {_ ttranse G EA A} {_ ttranse G' EA A} %.
 %mode weakeng-ttranse %in %in %in %in %in %out %.
 %scope weakeng-ttranse %term const weakeng-transe _ _ _ Dord (transe/const _ Dself Dexpand Dwf Dkof) (transe/const Dord Dself Dexpand Dwf Dkof) %.
-%term forall 
+%scope weakeng-ttranse %term forall 
 	%pi (weakeng-transe _ Dappend Dappend' Dord (transe/forall Dself Dexpand D) (transe/forall Dself Dexpand D'))
 	%<- (weakeng-ttranse _ Dappend Dappend' Dord D D') %.
 %scope weakeng-ttranse %term var 
 	%pi (weakeng-transe _ Dappend Dappend' Dord (transe/var Dself Dexpand Dwf Dlookup Dvtrans) (transe/var Dself Dexpand Dwf' Dlookup' Dvtrans))
 	%<- (weakeng-lookup Dappend Dappend' Dord Dlookup Dlookup')
 	%<- (weakeng-wfe Dappend Dappend' Dord Dwf Dwf') %.
-%term vari weakeng-transe _ Dappend Dappend' Dord (transe/vari _ Dself Dexpand Dwf Dvof Dvtrans) (transe/vari Dord Dself Dexpand Dwf Dvof Dvtrans) %.
+%scope weakeng-ttranse %term vari weakeng-transe _ Dappend Dappend' Dord (transe/vari _ Dself Dexpand Dwf Dvof Dvtrans) (transe/vari Dord Dself Dexpand Dwf Dvof Dvtrans) %.
 %scope weakeng-ttranse %term app 
 	%pi (weakeng-transe _ Dappend Dappend' Dord (transe/app Dsub Dsubtype DtransN DtransM) (transe/app Dsub Dsubtype DtransN' DtransM'))
 	%<- (weakeng-transe _ Dappend Dappend' Dord DtransM DtransM')
 	%<- (weakeng-transe _ Dappend Dappend' Dord DtransN DtransN') %.
-%term pi1 
+%scope weakeng-ttranse %term pi1 
 	%pi (weakeng-transe _ Dappend Dappend' Dord (transe/pi1 Dtrans) (transe/pi1 Dtrans'))
 	%<- (weakeng-transe _ Dappend Dappend' Dord Dtrans Dtrans') %.
 %scope weakeng-ttranse %term pi2 
 	%pi (weakeng-transe _ Dappend Dappend' Dord (transe/pi2 Dtrans) (transe/pi2 Dtrans'))
 	%<- (weakeng-transe _ Dappend Dappend' Dord Dtrans Dtrans') %.
-%term lam 
+%scope weakeng-ttranse %term lam 
 	%pi (weakeng-transe _ Dappend Dappend' Dord (transe/lam Dtrans Dttrans) (transe/lam Dtrans'' Dttrans'))
 	%<- (weakeng-ttranse _ Dappend Dappend' Dord Dttrans Dttrans')
 	%<- (extend-context Dord Dbound)
@@ -490,7 +490,7 @@
 	%pi (weakeng-transe _ Dappend Dappend' Dord (transe/pair DtransN DtransM) (transe/pair DtransN' DtransM'))
 	%<- (weakeng-transe _ Dappend Dappend' Dord DtransM DtransM')
 	%<- (weakeng-transe _ Dappend Dappend' Dord DtransN DtransN') %.
-%term t weakeng-ttranse _ _ _ Dord (ttranse/t _) (ttranse/t Dord) %.
+%scope weakeng-ttranse %term t weakeng-ttranse _ _ _ Dord (ttranse/t _) (ttranse/t Dord) %.
 %scope weakeng-ttranse %term pi 
 	%pi (weakeng-ttranse _ Dappend Dappend' Dord (ttranse/pi Dtrans Dttrans) (ttranse/pi Dtrans'' Dttrans'))
 	%<- (weakeng-ttranse _ Dappend Dappend' Dord Dttrans Dttrans')
@@ -498,7 +498,7 @@
 	%<- ({x} {d} bounded-drop Dappend' Dappend (Dbound x d) (Dbound' x d))
 	%<- (bump-ttranse _ Dtrans ([x] [d] ordered/cons (Dbound' x d)) Dtrans')
 	%<- ({x} {d} {ex} {xt} weakeng-ttranse _ (append/cons Dappend) (append/cons Dappend') (ordered/cons (Dbound x d)) (Dtrans' x d ex xt) (Dtrans'' x d ex xt)) %.
-%term sigma 
+%scope weakeng-ttranse %term sigma 
 	%pi (weakeng-ttranse _ Dappend Dappend' Dord (ttranse/sigma Dtrans Dttrans) (ttranse/sigma Dtrans'' Dttrans'))
 	%<- (weakeng-ttranse _ Dappend Dappend' Dord Dttrans Dttrans')
 	%<- (extend-context Dord Dbound)
@@ -522,7 +522,7 @@
 %sort weaken-transe'' {_ append G1 G2 G} {_ bounded G Z} {_ transe G1 EM A} {_ transe G EM A} %.
 %mode weaken-transe'' %in %in %in %out %.
 %scope weaken-transe'' %term nil weaken-transe' append/nil _ D D %.
-%term cons 
+%scope weaken-transe'' %term cons 
 	%pi (weaken-transe' (append/cons Dapp) (ordered/cons Dbound) Dtrans Dtrans'')
 	%<- (weaken-transe'' Dapp Dbound Dtrans Dtrans')
 	%<- (weaken-transe Dbound Dtrans' _ Dtrans'') %.
@@ -542,7 +542,7 @@
 	%<- (expand-reg-e (aofe/closed Dord (aof/const Dwf' Dkof)) Dexpand Dof)
 	%<- (self-reg-e Dself Dof Dof' _)
 	%<- (ofe-reg Dof' Dwf) %.
-%term forall 
+%scope ttranse-reg %term forall 
 	%pi (transe-reg (transe/forall Dself Dexpand Dtrans) Dwf)
 	%<- (ttranse-reg Dtrans Dwf')
 	%<- (expand-reg-e (aofe/forall Dwf') Dexpand Dof)
@@ -553,7 +553,7 @@
 	%<- (expand-reg-e (aofe/var Dwf Dlookup) Dexpand Dof)
 	%<- (self-reg-e Dself Dof Dof' _)
 	%<- (ofe-reg Dof' Dwf') %.
-%term vari 
+%scope ttranse-reg %term vari 
 	%pi (transe-reg (transe/vari Dord Dself Dexpand Dwf Dvof _) Dwf')
 	%<- (expand-reg-e (aofe/closed Dord (aof/var Dwf Dvof)) Dexpand Dof)
 	%<- (self-reg-e Dself Dof Dof' _)
@@ -564,14 +564,14 @@
 	%<- (transe-reg DtransN DwfC)
 	%<- (subtype-reg-e' Dsubtype DwfC DwfA Dof)
 	%<- (tsubst-e ([_] append/nil) csub/base Dof Dsub DwfB DwfBx) %.
-%term pi1 
+%scope ttranse-reg %term pi1 
 	%pi (transe-reg (transe/pi1 Dtrans) DwfA)
 	%<- (transe-reg Dtrans (wfe/sigma DwfB DwfA)) %.
 %scope ttranse-reg %term pi2 
 	%pi (transe-reg (transe/pi2 Dtrans) DwfB')
 	%<- (transe-reg Dtrans (wfe/sigma DwfB DwfA))
 	%<- (tinhabitsub-e DwfA DwfB DwfB') %.
-%term lam 
+%scope ttranse-reg %term lam 
 	%pi (transe-reg (transe/lam DtransM DtransA) (wfe/pi DwfB DwfA))
 	%<- (ttranse-reg DtransA DwfA)
 	%<- ({x} {d} {ex} {xt} transe-reg (DtransM x d ex xt) (DwfB x d)) %.
@@ -582,12 +582,12 @@
 	%<- (wfe-context DwfA Dord)
 	%<- (extend-context Dord Dbound)
 	%<- ({x} {d} weaken-wfe (Dbound x d) DwfB _ (DwfB' x d)) %.
-%term t ttranse-reg (ttranse/t Dord) (wfe/t Dord) %.
+%scope ttranse-reg %term t ttranse-reg (ttranse/t Dord) (wfe/t Dord) %.
 %scope ttranse-reg %term pi 
 	%pi (ttranse-reg (ttranse/pi DtransB DtransA) (wfe/pi DwfB DwfA))
 	%<- (ttranse-reg DtransA DwfA)
 	%<- ({x} {d} {ex} {xt} ttranse-reg (DtransB x d ex xt) (DwfB x d)) %.
-%term sigma 
+%scope ttranse-reg %term sigma 
 	%pi (ttranse-reg (ttranse/sigma DtransB DtransA) (wfe/sigma DwfB DwfA))
 	%<- (ttranse-reg DtransA DwfA)
 	%<- ({x} {d} {ex} {xt} ttranse-reg (DtransB x d ex xt) (DwfB x d)) %.
@@ -618,22 +618,22 @@
 %scope transe-principal %term const 
 	%pi (transe-principal (transe/const _ Dself _ _ _) D)
 	%<- (self-principal Dself D) %.
-%term forall %pi (transe-principal (transe/forall Dself _ _) D) %<- (self-principal Dself D) %.
+%scope transe-principal %term forall %pi (transe-principal (transe/forall Dself _ _) D) %<- (self-principal Dself D) %.
 %scope transe-principal %term var %pi (transe-principal (transe/var Dself _ _ _ _) D) %<- (self-principal Dself D) %.
-%term vari 
+%scope transe-principal %term vari 
 	%pi (transe-principal (transe/vari _ Dself _ _ _ _) D)
 	%<- (self-principal Dself D) %.
 %scope transe-principal %term app 
 	%pi (transe-principal (transe/app Dsub _ _ Dtrans) D)
 	%<- (transe-principal Dtrans (principal/pi Dprin))
 	%<- (principal-sub Dprin Dsub D) %.
-%term pi1 
+%scope transe-principal %term pi1 
 	%pi (transe-principal (transe/pi1 Dtrans) D1)
 	%<- (transe-principal Dtrans (principal/sigma D2 D1)) %.
 %scope transe-principal %term pi2 
 	%pi (transe-principal (transe/pi2 Dtrans) D2)
 	%<- (transe-principal Dtrans (principal/sigma D2 D1)) %.
-%term lam 
+%scope transe-principal %term lam 
 	%pi (transe-principal (transe/lam Dtrans _) (principal/pi D))
 	%<- ({x} {d} {ex} {xt} transe-principal (Dtrans x d ex xt) (D x)) %.
 %scope transe-principal %term pair 

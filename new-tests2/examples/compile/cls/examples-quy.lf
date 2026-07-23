@@ -9,7 +9,7 @@
 trans empty F
     (let (fix [plus] lam [x] lam [y] case x y [x'] s (app (app plus x') y))
        [plus] app (app plus (s z)) (s (s z))).
-}%
+%]
 % Addition 1 + 2 = 3.
 %query 1 1 _ >ceval empty (letn' (fix' (lam' (lam' (case' (1 ^) 1 (s' (app' (app' (1 ^ ^ ^) 1) (1 ^))))))) (app' (app' 1 (s' z')) (s' (s' z')))) W %.
 %. %[
@@ -19,7 +19,7 @@ trans empty F
        (letn (fix [mult] lam [x] lam [y] case x z [x']
 	       app (app plus (app (app mult x') y)) y)
 	  [mult] app (app mult (s (s z))) (s (s (s z))))).
-}%
+%]
 % Multiplication: 2 * 3 = 6.
 %query 1 1 _ >ceval empty (letn' (fix' (lam' (lam' (case' (1 ^) 1 (s' (app' (app' (1 ^ ^ ^) 1) (1 ^))))))) (letn' (fix' (lam' (lam' (case' (1 ^) z' (app' (app' (1 ^ ^ ^ ^) (app' (app' (1 ^ ^ ^) 1) (1 ^))) (1 ^)))))) (app' (app' 1 (s' (s' z'))) (s' (s' (s' z')))))) W %.
 %%% Mapping from evaluations to computations.

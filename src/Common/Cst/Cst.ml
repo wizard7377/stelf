@@ -14,6 +14,15 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
   type namespace = string list [@@deriving show { with_path = false }, eq]
   type symbol = namespace * name [@@deriving show { with_path = false }, eq]
 
+  (* Distinguishes [%val NAME] (shadow-aware: an open %scope's case label
+     wins over an outer/toplevel declaration of the same name) from
+     [%abs NAME] (toplevel-first: prefers the current %require group's own
+     toplevel declaration, bypassing %scope shadowing, falling back to
+     shadow-aware lookup only if no toplevel binding exists). See
+     [Names.resolveQid]. Qualified forms ([%val ( NAME S )] /
+     [%abs ( NAME S )]) are unaffected by this distinction. *)
+  type qid_form = Val | Abs [@@deriving show { with_path = false }, eq]
+
   (* Location helpers *)
   let mk_loc (start_ : int) (end_ : int) : loc =
     { start_pos = start_; end_pos = end_ }
@@ -35,7 +44,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     | Omitted_ of loc
     | Lcid_ of string list * string * loc
     | Ucid_ of string list * string * loc
-    | Quid_ of string list * string * loc
+    | Quid_ of string list * string * qid_form * loc
     | Scon_ of string * loc
     | Evar_ of string * loc
     | Fvar_ of string * loc
@@ -54,8 +63,9 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     | Omitted_ l -> Format.fprintf fmt "_"
     | Lcid_ (ns, name, l) -> Format.fprintf fmt "%s" name
     | Ucid_ (ns, name, l) -> Format.fprintf fmt "$%s" name
-    | Quid_ (ns, name, l) ->
-        Format.fprintf fmt "%s.%s" (Stdlib.String.concat "." ns) name
+    | Quid_ (ns, name, form, l) ->
+        let prefix = match form with Val -> "%val" | Abs -> "%abs" in
+        Format.fprintf fmt "%s(%s.%s)" prefix (Stdlib.String.concat "." ns) name
     | Scon_ (str, l) -> Format.fprintf fmt "%%[%a%%]" Format.pp_print_string str
     | Evar_ (name, l) -> Format.fprintf fmt "_?%s" name
     | Fvar_ (name, l) -> Format.fprintf fmt "__%s" name
@@ -185,6 +195,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     | TerminatesCmd_ of order list * term list
     | CoversCmd_ of modeDec
     | NameCmd_ of string
+    | ProseCmd_ of string
     | ReducesCmd_ of string * term list
     | Macro_ of int * string * cmd
         (** Defines a macro, taking its location, number of params, name, and
@@ -209,8 +220,8 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     let uppercase ?fc:(loc_ = ghost) (namespace, name) =
       Ucid_ (namespace, name, loc_)
 
-    let qualified ?fc:(loc_ = ghost) (namespace, name) =
-      Quid_ (namespace, name, loc_)
+    let qualified ?fc:(loc_ = ghost) ?(form = Val) (namespace, name) =
+      Quid_ (namespace, name, form, loc_)
 
     let text ?fc:(loc_ = ghost) str = Scon_ (str, loc_)
     let exist_var ?fc:(loc_ = ghost) name = Evar_ (name, loc_)
@@ -307,7 +318,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         ModeSpineInternal_ ((m, name_opt) :: spine)
 
       let mode_root ?fc:(loc_ = ghost) (ns, name) (ModeSpineInternal_ _spine) =
-        ModeTermRoot_ (Quid_ (ns, name, loc_))
+        ModeTermRoot_ (Quid_ (ns, name, Val, loc_))
 
       let to_modeDec ?fc:(loc_ = ghost) mt = ModeDec_ mt
     end
@@ -491,6 +502,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
   module View :
     LENS.VIEW
       with type loc = loc
+       and type qid_form = qid_form
        and type Loc.t = loc
        and module Paths = Paths
        and type Term.t = term
@@ -527,6 +539,10 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     type symbol = namespace * name
     (** Qualified symbol as [(namespace, name)]. *)
 
+    type nonrec qid_form = qid_form = Val | Abs
+    (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
+        (toplevel-first lookup, falling back to shadow-aware). *)
+
     (** Create a Loc.tation from start and end lexer positions. *)
     let mk_loc = mk_loc
 
@@ -561,7 +577,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
       type u =
         | Lowercase of Loc.t * symbol
         | Uppercase of Loc.t * symbol
-        | Qualified of Loc.t * symbol
+        | Qualified of Loc.t * symbol * qid_form
         | Text of Loc.t * string
         | ExistVar of Loc.t * string
         | FreeVar of Loc.t * string
@@ -598,7 +614,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         match x with
         | Lcid_ (ns, name, loc) -> Lowercase (loc, (ns, name))
         | Ucid_ (ns, name, loc) -> Uppercase (loc, (ns, name))
-        | Quid_ (ns, name, loc) -> Qualified (loc, (ns, name))
+        | Quid_ (ns, name, form, loc) -> Qualified (loc, (ns, name), form)
         | Scon_ (str, loc) -> Text (loc, str)
         | Evar_ (name, loc) -> ExistVar (loc, name)
         | Fvar_ (name, loc) -> FreeVar (loc, name)
@@ -628,7 +644,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         match y with
         | Lowercase (loc, (ns, name)) -> Lcid_ (ns, name, loc)
         | Uppercase (loc, (ns, name)) -> Ucid_ (ns, name, loc)
-        | Qualified (loc, (ns, name)) -> Quid_ (ns, name, loc)
+        | Qualified (loc, (ns, name), form) -> Quid_ (ns, name, form, loc)
         | Text (loc, str) -> Scon_ (str, loc)
         | ExistVar (loc, name) -> Evar_ (name, loc)
         | FreeVar (loc, name) -> Fvar_ (name, loc)
@@ -783,7 +799,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
           match x with
           | ModeTermRoot_ tm ->
               let rec extract_head = function
-                | Quid_ (ns, n, _) -> (ns, n)
+                | Quid_ (ns, n, _, _) -> (ns, n)
                 | Lcid_ (ns, n, _) -> ([], n)
                 | App_ (_, f, _) -> extract_head f
                 | _ -> raise Lacking
@@ -794,7 +810,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         let review (y : u) : t =
           let g = { start_pos = 0; end_pos = 0 } in
           match y with
-          | ModeTerm (_, (ns, n), _) -> ModeTermRoot_ (Quid_ (ns, n, g))
+          | ModeTerm (_, (ns, n), _) -> ModeTermRoot_ (Quid_ (ns, n, Val, g))
           | ModePi (_, d, body, _) -> ModeTermPi_ (Plus_, d, body)
 
         let ( !> ) = view
@@ -1050,6 +1066,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Terminates of Loc.t * Thm.order list * Term.t list
         | Covers of Loc.t * Mode.Dec.t
         | Name of Loc.t * string
+        | Prose of Loc.t * string
         | Reduces of Loc.t * string * Term.t list
         | Macro of Loc.t * int * string * t
             (** Defines a macro, taking its location, number of params, name,
@@ -1096,6 +1113,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | TerminatesCmd_ (orders, terms) -> Terminates (ghost, orders, terms)
         | CoversCmd_ md -> Covers (ghost, md)
         | NameCmd_ id -> Name (ghost, id)
+        | ProseCmd_ id -> Prose (ghost, id)
         | ReducesCmd_ (pred, body) -> Reduces (ghost, pred, body)
         | Open_ ids -> Open (ghost, ids)
         | Scope_ (id, cmd) -> Scope (ghost, id, cmd)
@@ -1136,6 +1154,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Terminates (_, orders, terms) -> TerminatesCmd_ (orders, terms)
         | Covers (_, md) -> CoversCmd_ md
         | Name (_, id) -> NameCmd_ id
+        | Prose (_, id) -> ProseCmd_ id
         | Reduces (_, pred, body) -> ReducesCmd_ (pred, body)
         | Open (_, ids) -> Open_ ids
         | Scope (_, id, cmd) -> Scope_ (id, cmd)

@@ -10,7 +10,7 @@ there exists a computation
   C'' :: st Ks P S =>* st Ks'' P'' S''.
 
 Proof: By induction on the structure of C.
-}%
+%]
 %sort append {_ st Ks P S =>* st Ks' P' S'} {_ st Ks' P' S' =>* st Ks'' P'' S''} {_ st Ks P S =>* st Ks'' P'' S''} %.
 %mode append %in %in %out %.
 %term apd_id append id C' C' %.
@@ -22,7 +22,7 @@ environment stack Ks, program P, and stack S there exists a computation
   C :: st (Ks ;; K) (ev F & P) S =>* st Ks P (S ; W)
 
 Proof: By induction on the structure of D
-}%
+%]
 %sort subcomp {_ feval K F W} {_ st (Ks ;; K) (ev F & P) S =>* st Ks P (S ; W)} %.
 %mode {%in K} {%in F} {%in W} {%in D feval K F W} {%in Ks} {%in P} {%in S} {%out C st (Ks ;; K) (ev F & P) S =>* st Ks P (S ; W)} subcomp D C %.
 % Variables
@@ -86,7 +86,7 @@ there exists a complete computation
  E :: ceval K F W
 
 Proof: Immediately from the subcomputation lemma.
-}%
+%]
 %sort cev_complete {_ feval K F W} {_ ceval K F W} %.
 %mode cev_complete %in %out %.
 %term cevc %pi (cev_complete D (run C)) %<- (subcomp D C) %.

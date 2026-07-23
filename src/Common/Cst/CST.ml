@@ -92,6 +92,13 @@ module type CST = sig
   type symbol = namespace * name
   (** Qualified symbol as [(namespace, name)]. *)
 
+  type qid_form = Val | Abs
+  (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
+      (toplevel-first lookup, falling back to shadow-aware). *)
+
+  val pp_qid_form : Stdlib.Format.formatter -> qid_form -> unit
+  val show_qid_form : qid_form -> string
+
   val [@deprecated "Use View equivalent instead"] mk_loc : int -> int -> loc
   (** Create a location from start and end lexer positions. *)
 
@@ -115,7 +122,7 @@ module type CST = sig
     (** Uppercase identifier. *)
 
     val [@deprecated "Use View equivalent instead"] qualified :
-      ?fc:loc -> symbol -> term
+      ?fc:loc -> ?form:qid_form -> symbol -> term
     (** Qualified identifier. *)
 
     val [@deprecated "Use View equivalent instead"] text :
@@ -597,6 +604,7 @@ module type CST = sig
     include
       LENS.VIEW
         with type loc = loc
+         and type qid_form = qid_form
          and type Loc.t = loc
          and module Paths = Paths
          and type Term.t = term

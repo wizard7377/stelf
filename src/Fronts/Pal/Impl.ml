@@ -83,8 +83,11 @@ module Impl () = struct
   let status_to_exit = function Ok -> 0 | Abort -> 1
 
   (* Top-level namespace for the group currently being loaded.
-     %require deposits here, escaping any inner %scope. *)
-  let current_group_ns : Names.namespace ref = ref (Names.newNamespace ())
+     %require deposits here, escaping any inner %scope. Aliased (not
+     copied) to Names.currentGroupNamespace, since %abs's resolution
+     (Names.resolveQid) needs to see this namespace's live contents from
+     within Names/Recon, which cannot depend on Impl. *)
+  let current_group_ns : Names.namespace ref = Names.currentGroupNamespace
 
   (* Canonical paths already run via %require; skip on repeat (#once). *)
   let required_files : (string, unit) Hashtbl.t = Hashtbl.create 16
@@ -144,11 +147,26 @@ module Impl () = struct
   (* ConDec installation                                                   *)
   (* ------------------------------------------------------------------ *)
 
-  let install_condec ns (cd : Intsyn.IntSyn.conDec) : Intsyn.IntSyn.cid =
+  (* Declarations always become globally bare-visible when installed (needed
+     so sibling declarations within the same %scope session, e.g. a case
+     referring back to the judgment it's a case of, can see each other
+     unqualified). When [scope_installs] is given (i.e. we're inside a
+     %scope body), the cid is also recorded there so Cst.Scope_ can retract
+     just these bindings via [Names.uninstallConst] once the session closes,
+     instead of leaving them permanently global -- and struct-member
+     installation becomes shadow-tolerant rather than fatal, since a
+     judgment's later case clause is allowed to reuse an earlier clause's
+     label (see Cst.Scope_ below). *)
+  let install_condec ?(scope_installs : Intsyn.IntSyn.cid list ref option = None)
+      ns (cd : Intsyn.IntSyn.conDec) : Intsyn.IntSyn.cid =
     let open Intsyn.IntSyn in
     let cid = sgnAdd cd in
     Names.installConstName cid;
-    Names.insertConst (ns, cid);
+    (match scope_installs with
+    | Some acc ->
+        acc := cid :: !acc;
+        Names.insertConstShadow (ns, cid)
+    | None -> Names.insertConst (ns, cid));
     (match cd with
     | BlockDec _ -> Subordinate.Subordinate_.Subordinate.installBlock cid
     | BlockDef _ -> ()
@@ -194,6 +212,14 @@ module Impl () = struct
         | _ -> Cst.Term.pi [ decl ] rest)
 
   module Install = struct
+    (* The %scope session currently bare-visible, if any: a name and the
+       cids installed under it. A %scope NAME reopens this session when NAME
+       matches (accumulating into the same struct without re-raising on a
+       reused case label); a %scope with a *different* name closes it first.
+       See Cst.Scope_ below. *)
+    let open_scope : (string * Intsyn.IntSyn.cid list ref) option ref =
+      ref None
+
     let unfold_app tm =
       let rec go acc = function
         | Cst.App_ (_, f, arg) -> go (arg :: acc) f
@@ -303,11 +329,11 @@ module Impl () = struct
           l
       | Cst.Lcid_ (_, _, l)
       | Cst.Ucid_ (_, _, l)
-      | Cst.Quid_ (_, _, l)
       | Cst.Scon_ (_, l)
       | Cst.Evar_ (_, l)
       | Cst.Fvar_ (_, l) ->
           l
+      | Cst.Quid_ (_, _, _, l) -> l
 
     (* Returns the number of solutions found.  Solution terms themselves are
        still rendered here through the Display bus; extracting them as values
@@ -372,8 +398,8 @@ module Impl () = struct
             Names.constLookup (Names.Qid (ns, n))
         | Cst.View.Term.Uppercase (_, (ns, n)) ->
             Names.constLookup (Names.Qid (ns, n))
-        | Cst.View.Term.Qualified (_, (ns, n)) ->
-            Names.constLookup (Names.Qid (ns, n))
+        | Cst.View.Term.Qualified (_, (ns, n), form) ->
+            Names.resolveQid ~shortest:(form = Cst.Abs) (Names.Qid (ns, n))
         | _ -> None
       in
       let resolve_family tm =
@@ -390,10 +416,11 @@ module Impl () = struct
       List.app (fun a -> WorldSyn.install (a, w_)) families;
       List.app (fun a -> WorldSyn.worldcheck w_ a) families
 
-    let install_condec_cmd ?(inline = false) ns condec loc :
-        Intsyn.IntSyn.cid option =
+    let install_condec_cmd ?(inline = false)
+        ?(scope_installs : Intsyn.IntSyn.cid list ref option = None) ns condec
+        loc : Intsyn.IntSyn.cid option =
       match Recon.ReconConDec.condecToConDec (condec, loc, inline) with
-      | Some cd, _ -> Some (install_condec ns cd)
+      | Some cd, _ -> Some (install_condec ~scope_installs ns cd)
       | None, _ -> None
 
     let name_to_cid ns label id =
@@ -415,7 +442,9 @@ module Impl () = struct
 
     let installed = function [] -> [] | cids -> [ Reply.Installed cids ]
 
-    let rec install1 ?(path = None) ns (cmd : Cst.cmd) : Reply.t list =
+    let rec install1 ?(path = None)
+        ?(scope_installs : Intsyn.IntSyn.cid list ref option = None) ns
+        (cmd : Cst.cmd) : Reply.t list =
       let filename =
         Stdlib.Option.value
           (Option.map Fpath.to_string path)
@@ -423,6 +452,23 @@ module Impl () = struct
       in
       Debug.(
         msg' ~src:Group.pal ~level:Level.Debug Fmt.string "Installing command");
+      (* A %scope session (see Cst.Scope_ below) stays bare-visible across
+         multiple %scope NAME commands, but must not leak into whatever
+         top-level command comes next once the caller has moved on from NAME
+         -- otherwise a %scope-declared name (e.g. a case label that happens
+         to collide with an unrelated bare declaration's name elsewhere in
+         the file, like "s") stays shadowed forever. [scope_installs = None]
+         means we're not currently inside a %scope body's own recursive
+         install1 call, so this is exactly the top-level boundary where a
+         still-open session from an *earlier* command must be closed unless
+         the command about to run is a %scope reopening of the same name. *)
+      (match (scope_installs, !open_scope, cmd) with
+      | None, Some (cur_name, _), Cst.Scope_ (name, _) when cur_name = name ->
+          ()
+      | None, Some (_, cur_installs), _ ->
+          List.app Names.uninstallConst !cur_installs;
+          open_scope := None
+      | _ -> ());
       match cmd with
       | Cst.SortCmd_ (ids, decls) ->
           let sort_loc =
@@ -436,10 +482,11 @@ module Impl () = struct
                      Fmt.(const string "Installing sort" ++ sp ++ string)
                      id);
                  let kind = factor_sort decls in
+                 let name_opt = if id = "_" then None else Some id in
                  let condec =
-                   Cst.ConDec.constant_decl (Cst.Decl.decl1 [ Some id ] kind)
+                   Cst.ConDec.constant_decl (Cst.Decl.decl1 [ name_opt ] kind)
                  in
-                 install_condec_cmd ns condec (loc_of filename sort_loc))
+                 install_condec_cmd ~scope_installs ns condec (loc_of filename sort_loc))
                ids)
       | Cst.TermCmd_ decl ->
           Debug.(
@@ -457,16 +504,22 @@ module Impl () = struct
               string "Installing term command for"
               ++ each string names' ++ space ()
               ++ hvbox [ shown Cst.show_term ty ]);
-          let condec = Cst.ConstantDecl_ decl in
+          let term_loc = loc_of filename (decl_loc decl) in
           installed
-            (Stdlib.Option.to_list
-               (install_condec_cmd ns condec (loc_of filename (decl_loc decl))))
+            (Stdlib.List.filter_map
+               (fun name_opt ->
+                 let condec =
+                   Cst.ConDec.constant_decl (Cst.Decl.decl1 [ name_opt ] ty)
+                 in
+                 install_condec_cmd ~scope_installs ns condec term_loc)
+               names)
       | Cst.DefineCmd_ (Cst.Define_ (name_opt, tm, tp_opt)) ->
           let name = match name_opt with Some n -> n | None -> "_" in
           let condec = Cst.ConstantDef_ (name, tm, tp_opt) in
           installed
             (Stdlib.Option.to_list
-               (install_condec_cmd ns condec (loc_of filename (term_loc tm))))
+               (install_condec_cmd ~scope_installs ns condec
+                  (loc_of filename (term_loc tm))))
       | Cst.QueryCmd_ (_n, _b, _d, (Cst.Query_ (_, qtm) as q)) ->
           [ Reply.Solutions (run_query (loc_of filename (term_loc qtm)) q) ]
       | Cst.SolveCmd_ (Cst.Solve_ (_, stm) as sol) ->
@@ -494,7 +547,9 @@ module Impl () = struct
             | Some m_ -> m_
           in
           installed
-            (Stdlib.List.map (fun (cd, _) -> install_condec ns cd) (sc_fn m_))
+            (Stdlib.List.map
+               (fun (cd, _) -> install_condec ~scope_installs ns cd)
+               (sc_fn m_))
       | Cst.StopCmd_ -> []
       | Cst.QuitCmd_ -> [ Reply.Quit ]
       | Cst.HelpCmd_ topic ->
@@ -518,21 +573,24 @@ module Impl () = struct
           []
       | Cst.VersionCmd_ ->
           [ Reply.Response (Frontend.Version.Version.version_string ^ "\n") ]
-      | Cst.EvalCmd_ cmds -> run_until_quit (install1 ~path ns) cmds
+      | Cst.EvalCmd_ cmds -> run_until_quit (install1 ~path ~scope_installs ns) cmds
       | Cst.AdhocQueryCmd_ (Cst.Query_ (_, qtm) as q) ->
           [ Reply.Solutions (run_query (loc_of filename (term_loc qtm)) q) ]
       | Cst.DeclCmd_ tm ->
           let qid_opt =
             match Cst.View.Term.view tm with
-            | Cst.View.Term.Lowercase (_, (ns, n)) -> Some (Names.Qid (ns, n))
-            | Cst.View.Term.Uppercase (_, (ns, n)) -> Some (Names.Qid (ns, n))
-            | Cst.View.Term.Qualified (_, (ns, n)) -> Some (Names.Qid (ns, n))
+            | Cst.View.Term.Lowercase (_, (ns, n)) ->
+                Some (Names.Qid (ns, n), false)
+            | Cst.View.Term.Uppercase (_, (ns, n)) ->
+                Some (Names.Qid (ns, n), false)
+            | Cst.View.Term.Qualified (_, (ns, n), form) ->
+                Some (Names.Qid (ns, n), form = Cst.Abs)
             | _ -> None
           in
           begin match qid_opt with
           | None -> [ Reply.Response "decl: expected an identifier\n" ]
-          | Some qid ->
-              begin match Names.constLookup qid with
+          | Some (qid, shortest) ->
+              begin match Names.resolveQid ~shortest qid with
               | None ->
                   [
                     Reply.Response
@@ -543,12 +601,12 @@ module Impl () = struct
           end
       | Cst.FreezeCmd_ ids ->
           let cids = List.map (name_to_cid ns "freeze") ids in
-          let _ = Subordinate.Subordinate_.Subordinate.freeze cids in
+          ignore (Subordinate.Subordinate_.Subordinate.freeze cids);
           []
       | Cst.ThawCmd_ ids ->
           if not !unsafe then failwith' "%thaw not safe: Toggle `unsafe' flag";
           let cids = List.map (name_to_cid ns "thaw") ids in
-          let _ = Subordinate.Subordinate_.Subordinate.thaw cids in
+          ignore (Subordinate.Subordinate_.Subordinate.thaw cids);
           []
       | Cst.DeterministicCmd_ ids ->
           let cids = List.map (name_to_cid ns "deterministic") ids in
@@ -583,7 +641,7 @@ module Impl () = struct
           let condec = Cst.ConstantDef_ (name, tm, None) in
           installed
             (Stdlib.Option.to_list
-               (install_condec_cmd ~inline:true ns condec
+               (install_condec_cmd ~inline:true ~scope_installs ns condec
                   (loc_of filename (term_loc tm))))
       | Cst.BlockCmd_ (id, items) ->
           let pis =
@@ -602,7 +660,8 @@ module Impl () = struct
           let condec = Cst.BlockDecl_ (id, somes, pis) in
           installed
             (Stdlib.Option.to_list
-               (install_condec_cmd ns condec (loc_of filename block_loc)))
+               (install_condec_cmd ~scope_installs ns condec
+                  (loc_of filename block_loc)))
       | Cst.ModeCmd_ md ->
           let () =
             Display.(
@@ -637,6 +696,7 @@ module Impl () = struct
           Cover.checkCovers mdec;
           []
       | Cst.NameCmd_ _id -> []
+      | Cst.ProseCmd_ _id -> []
       | Cst.ReducesCmd_ (pred_str, body) ->
           let r_, rrs = build_thm_rdecl pred_str body in
           let la_ = ThmInst.installReduces (r_, rrs) in
@@ -664,7 +724,8 @@ module Impl () = struct
           let condec = Cst.BlockDef_ (id, syms) in
           installed
             (Stdlib.Option.to_list
-               (install_condec_cmd ns condec (loc_of filename Cst.ghost)))
+               (install_condec_cmd ~scope_installs ns condec
+                  (loc_of filename Cst.ghost)))
       | Cst.WorldsCmd_ (ids, tms) ->
           install_worlds_cmd ids tms;
           []
@@ -741,33 +802,97 @@ module Impl () = struct
                 )
           in
           let comps = Names.getComponents mid in
-          Names.appConsts (fun (_, cid) -> Names.insertConst (ns, cid)) comps;
+          (* %open promotes a structure's members to unqualified visibility,
+             matching the reference SML Twelf's %open
+             (twelf/src/modules/modsyn.fun): install their bare names
+             globally (not just into the qualified-lookup table [ns]), so a
+             plain %scope no longer does this by itself (see Cst.Scope_
+             below) -- %open is what actually makes it happen. If this %open
+             itself runs inside an enclosing %scope body, [scope_installs]
+             is Some, and the promotion is recorded so it gets retracted
+             along with the rest of that body's declarations when the
+             enclosing scope closes, same as a %open at the true top level
+             (scope_installs = None) staying permanent. *)
+          Names.appConsts
+            (fun (_, cid) ->
+              Names.installConstName cid;
+              (match scope_installs with
+              | Some acc -> acc := cid :: !acc
+              | None -> ());
+              Names.insertConst (ns, cid))
+            comps;
           Names.appStructs (fun (_, m) -> Names.insertStruct (ns, m)) comps;
           []
       | Cst.Scope_ (name, body_cmd) ->
-          let child_ns = Names.newNamespace () in
-          let mid =
-            Intsyn.IntSyn.sgnStructAdd (Intsyn.IntSyn.StrDec (name, None))
+          (* A `%scope NAME` naming NAME already in [ns] reopens that
+             structure (the corpus idiom is one `%scope NAME %term case ...`
+             per clause, expecting all clauses -- possibly separated by other,
+             unrelated commands -- to accumulate into the same structure)
+             rather than declaring a fresh, colliding one. *)
+          let mid, child_ns =
+            match Names.structLookupIn (ns, Names.Qid ([], name)) with
+            | Some mid -> (mid, Names.getComponents mid)
+            | None ->
+                let child_ns = Names.newNamespace () in
+                let mid =
+                  Intsyn.IntSyn.sgnStructAdd (Intsyn.IntSyn.StrDec (name, None))
+                in
+                Names.installStructName mid;
+                Names.insertStruct (ns, mid);
+                (mid, child_ns)
           in
-          Names.installStructName mid;
-          Names.insertStruct (ns, mid);
-          let rs = install1 ~path child_ns body_cmd in
+          (* A %scope session stays open (bare-visible) across multiple
+             %scope NAME commands as long as NAME keeps matching -- so a
+             judgment's clauses can be interleaved with unrelated commands
+             and still see each other/reuse case labels like "pi1" for both
+             an inductive and a "closed" sub-case. Closing on any other
+             command (a different-named %scope, or a return to bare
+             top-level declarations) is handled uniformly by the check at
+             the top of [install1], so by the time we reach here [open_scope]
+             is already either [None] or [Some (name, _)]. *)
+          let body_installs =
+            match !open_scope with
+            | Some (cur_name, cur_installs) when cur_name = name -> cur_installs
+            | _ ->
+                let installs = ref [] in
+                Names.appConsts
+                  (fun (_, cid) ->
+                    Names.installConstName cid;
+                    installs := cid :: !installs)
+                  child_ns;
+                open_scope := Some (name, installs);
+                installs
+          in
+          let rs =
+            install1 ~path ~scope_installs:(Some body_installs) child_ns
+              body_cmd
+          in
           Names.installComponents (mid, child_ns);
           rs
       | Cst.Use_ _ ->
           failwith'
             "%use: module instantiation not yet implemented in this frontend"
       | Cst.Macro_ _ -> failwith' "Macros not yet implemented in this frontend"
-      | Cst.Seq_ cmds -> run_until_quit (install1_item ~path ns) cmds
+      | Cst.Seq_ cmds ->
+          run_until_quit (install1_item ~path ~scope_installs ns) cmds
       | Cst.Require_ ids -> !handle_require_ref ids
 
-    and install1_item ?(path = None) ns (item : Cst.item) : Reply.t list =
-      match item with Cst.Outer _ -> [] | Cst.Cmd cmd -> install1 ~path ns cmd
+    and install1_item ?(path = None)
+        ?(scope_installs : Intsyn.IntSyn.cid list ref option = None) ns
+        (item : Cst.item) : Reply.t list =
+      match item with
+      | Cst.Outer _ -> []
+      | Cst.Cmd cmd -> install1 ~path ~scope_installs ns cmd
 
     let install ?(path = None) ns (cmds : Cst.cmd list) : Reply.t list =
       run_until_quit (install1 ~path ns) cmds
 
-    let reset () : unit = Frontend.Frontend_.Stelf.reset ()
+    let reset () : unit =
+      open_scope := None;
+      current_group_ns := Names.newNamespace ();
+      Hashtbl.reset required_files;
+      Hashtbl.reset Options.tbl;
+      Frontend.Frontend_.Stelf.reset ()
   end
 
   (* ------------------------------------------------------------------ *)
