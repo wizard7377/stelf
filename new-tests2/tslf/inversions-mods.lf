@@ -1,12 +1,14 @@
 %%%% inversion lemmas for modules
+%[
 %sort inv/ofsg/md/tm {_ ofsg L T Y (md/tm E) (sg/cn C)} {_ oftp L T E C} %.
 %mode inv/ofsg/md/tm %in %out %.
 %term _ inv/ofsg/md/tm (ofsg/md/tm D1) D1 %.
-%term _ 
+%term _
 	%pi (inv/ofsg/md/tm (ofsg/sub D1 (sg-sub/sg/cn DQ) _) (oftp/deq D1' DQ))
 	%<- (inv/ofsg/md/tm D1 D1') %.
 %worlds (ofsg+vdt-block oftp+vdt-block ofkd+vdt-block) (inv/ofsg/md/tm _ _) %.
 %total D1 (inv/ofsg/md/tm D1 _) %.
+%]
 %sort md/tm-not-sg/sgm {_ ofsg L T pty/p (md/tm _) (sg/sgm _ _)} {_ uninhabited} %.
 %mode md/tm-not-sg/sgm %in %out %.
 %term _ %pi (md/tm-not-sg/sgm (ofsg/sub D1 _ pty-sub/pp) DU) %<- (md/tm-not-sg/sgm D1 DU) %.
