@@ -16,25 +16,40 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
   let mk_loc = Cst.View.mk_loc
 
   (* Skip outer text (non-% characters) between commands.
-     Handles five special sequences starting with %:
-       %%%       — escape for a literal %
-       % ...    — line comment (skips to end of line)
-       %% ...   — line comment (Twelf treats % followed by whitespace OR
-                  another % as a line comment; banners like %%%%% reduce to
-                  a residual %% after the %%% escape consumes three)
-       %{! ... !}% — block comment (wiki pages; skips to matching !}%)
-       %{ ... }%  — classic Twelf delimited comment (nests)
-       %[ ... %] — block comment (skips to matching %]) (Can have mutiple `[` which mut be closed with the same number of `]`s *)
+     Handles the sequences that begin with % but are NOT commands:
+       %[ ... %] — block comment (skips to matching %]; nests by bracket count)
+       %% ...    — line comment: a run of two-or-more % (Twelf banners such as
+                   %%, %%%, %%%%, or "%%%% Header") comments to end of line
+       % ...     — line comment: a single % followed by a horizontal blank
+     A leading single % followed by a letter/[.] (e.g. [%sort], [%.]) is left
+     untouched for [parse1] to consume as a command. *)
   let skip_outer : unit t =
     fix (fun self ->
         skip_while (fun c -> c <> '%')
         *> option ()
-             (string "%%%" *> commit *> self
-             <|> string "%" *> blank *> commit
+             (* [%[]-block comment must be tried first, else its [[] would be
+                mistaken for the second [%] of a [%%] line comment. *)
+             (string_lit () *> self
+             (* A run of two-or-more [%] is a line comment to end of line.
+                Handling the whole run here (rather than a [%%%]-escape that
+                consumes exactly three) avoids leaving a stray [%] behind when
+                the run length is 1 mod 3 (e.g. a bare [%%%%]), which [parse1]
+                would then reject as an unrecognized command. *)
+             <|> string "%%" *> commit
                  *> skip_while (fun c -> c <> '\n')
                  *> self
-             <|> string "%%" *> self
-             <|> string_lit () *> self))
+             (* A single [%] followed by a horizontal blank is a line comment.
+                Consume ONLY the space/tab, not newline-crossing [blank]: an
+                empty comment (e.g. the banner [%%%% ], whose residual [% ] has
+                nothing after the space) must not swallow the newline and let
+                [skip_while (<> '\n')] devour the *following* declaration.
+                Leaving the newline for [self]'s leading [skip_while (<> '%')]
+                keeps the skip line-scoped. *)
+             <|> string "%"
+                 *> skip (function ' ' | '\t' -> true | _ -> false)
+                 *> commit
+                 *> skip_while (fun c -> c <> '\n')
+                 *> self))
 
   (* Defer a thunk-parser to prevent infinite recursion at construction time.
      Used for %module and %eval which recursively embed cmd lists. *)
