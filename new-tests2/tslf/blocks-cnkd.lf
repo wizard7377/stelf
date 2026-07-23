@@ -7,7 +7,5 @@
 				   block
 				   {a : cn} {da : ofkd a k}
 				   {_ : vdt/ofkd da kwf}.
-}%
+}% %]
 %block ofkd+vdt-block [k kd] [kwf kd-wf k] {a cn} {da ofkd a k} {dm mofkd da met/unit} {_ can-mofkd da dm} {_ vdt/ofkd da kwf}%.
-
-%]

@@ -11,8 +11,8 @@
 sing/kd/sgm     : sing/kd C (kd/sgm K1 K2) (kd/sgm K1' ([a] K2' (cn/pj1 C)))
 		   <- sing/kd (cn/pj1 C) K1 K1'
 		   <- {a} sing/kd (cn/pj2 C) (K2 a) (K2' a).
-}%
-%term sing/kd/sgm 
+}% %]
+%term sing/kd/sgm
 	%pi (sing/kd C (kd/sgm K1 K2) (kd/sgm K1' ([a] K2')))
 	%<- (sing/kd (cn/pj2 C) (K2 (cn/pj1 C)) K2')
 	%<- (sing/kd (cn/pj1 C) K1 K1') %.
