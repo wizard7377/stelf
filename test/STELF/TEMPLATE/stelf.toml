@@ -1,0 +1,7 @@
+#:schema ./stelf.schema.json
+
+[[group]]
+name = "NAME"
+main = "main.lf"
+src = ["src"]
+dependencies = []

@@ -81,13 +81,8 @@ struct
     begin if !errorCount > 0 then die r else ()
     end
 
-<<<<<<< Updated upstream
   let rec chatterOneNewline () =
     begin if !Global.chatter = 1 && !errorCount = 1 then Display.debug (Display.string "\n")
-=======
-  let chatterOneNewline () =
-    begin if !Global.chatter = 1 && !errorCount = 1 then Msg.message "\n"
->>>>>>> Stashed changes
     else ()
     end
 

@@ -56,8 +56,4 @@ esg-sub/sg/pi	: esg-sub G (sg/pi S1 S2) (sg/pi S3 S4)
 		   <- ({a:cn} isvar a I ->
 			 esg-deq (cxt/cons G a K3) (S2 a) (S4 a))
 		   <- esg-deq G S3 S1.
-<<<<<<< Updated upstream
 }% %]
-=======
-%]
->>>>>>> Stashed changes

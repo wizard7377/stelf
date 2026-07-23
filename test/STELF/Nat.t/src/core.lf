@@ -1,0 +1,17 @@
+
+
+  %sort ℕ %.
+`nat` is a easier way to type `ℕ`
+  %symbol nat ℕ %.
+## Basic Definitions
+  %scope nat %{
+
+`0` is a natural number
+        %term 0 nat %.
+`S` is a natural number
+        %term S %pi nat %-> nat %.
+`1` is a natural number
+        %inline 1 (S 0) %.
+`2` is a natural number
+        %inline 2 (S 1) %.
+  %}

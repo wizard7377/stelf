@@ -2,11 +2,7 @@
 			   {s:md}{a:cn}{da: ofkd a K1}{dm: fst-md s a}
 			   block 
 			   {ds: assm/md s S1}.
-<<<<<<< Updated upstream
 }% %]
-=======
-%]
->>>>>>> Stashed changes
 %sort subst/md-ofsg^ {_ %pi (assm/md M S) %-> (ofsg L T Y M' S')} {_ ofsg L T pty/p M S} {_ ofsg L T Y M' S'} %.
 %mode subst/md-ofsg^ %in %in %out %.
 %sort subst/md-oftp^ {_ %pi (assm/md M S) %-> (oftp L T E C')} {_ ofsg L T pty/p M S} {_ oftp L T E C'} %.

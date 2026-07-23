@@ -152,11 +152,7 @@ sappend-sordered : sappend G1 G2 G -> sordered G -> sordered G1 -> type.
 
 %worlds (var | bind | ovar) (sappend-sordered _ _ _).
 %total {} (sappend-sordered _ _ _).
-<<<<<<< Updated upstream
 }% %]
-=======
-%]
->>>>>>> Stashed changes
 %. %[
 append-lookup-bounded : append (cons G1 X A) G2 G -> lookup G _ _ -> bounded G1 X -> type.
 %mode append-lookup-bounded +X1 +X2 -X3.
@@ -168,11 +164,7 @@ append-lookup-bounded : append (cons G1 X A) G2 G -> lookup G _ _ -> bounded G1 
 
 %worlds (var | ovar) (append-lookup-bounded _ _ _).
 %total {} (append-lookup-bounded _ _ _).
-<<<<<<< Updated upstream
 }% %]
-=======
-%]
->>>>>>> Stashed changes
 %% this can be proved more elegantly using append-bounded
 %sort append-bounded-contra {_ append (cons G1 X A) G2 G} {_ bounded G X} {_ false} %.
 %mode append-bounded-contra %in %in %out %.

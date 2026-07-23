@@ -1,0 +1,32 @@
+%require %[ core %] %.
+## Addition and Multiplication
+`add X Y Z` is $X + Y = Z$
+%sort add nat nat nat %.
+
+%scope add %{
+$0 + X = X$
+	%term 0 {X nat} add %(nat 0) X X %.
+$X + Y = Z \implies S(X + Y) = S(Z)$
+    %term S {(X Y Z) nat}
+        %if add X Y Z
+        %-> add %(nat (S X)) Y %(nat (S Z)) %.
+
+    %scope zero-left %{
+$0 + Y = Y$
+		%sort goal {X nat} (add %(nat 0) X X) %.
+		%term case-0 goal %(nat 0) (0 %(nat 0)) %.
+		%term case-S {X nat} goal %(nat (S X)) (0 %(nat (S X))) %.
+		%mode goal %in %out %.
+		%worlds () (goal _ _) %.
+		%total X (goal X _) %.
+	%}
+%}
+%sort mul nat nat nat %.
+%scope mul %{
+	%term 0 {X nat} mul X %(nat 0) %(nat 0) %.
+	%term S {(X Y Z Z') nat}
+		%if mul X Y Z
+		%-> add Y Z Z'
+		%-> mul %(nat (S X)) Y Z'
+		%.
+%}

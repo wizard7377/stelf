@@ -15,16 +15,6 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
   let ghost' = Cst.View.Loc.(review Ghost)
   let mk_loc = Cst.View.mk_loc
 
-<<<<<<< Updated upstream
-  (* Skip outer text (non-% characters) between commands.
-     Handles the sequences that begin with % but are NOT commands:
-       %[ ... %] — block comment (skips to matching %]; nests by bracket count)
-       %% ...    — line comment: a run of two-or-more % (Twelf banners such as
-                   %%, %%%, %%%%, or "%%%% Header") comments to end of line
-       % ...     — line comment: a single % followed by a horizontal blank
-     A leading single % followed by a letter/[.] (e.g. [%sort], [%.]) is left
-     untouched for [parse1] to consume as a command. *)
-=======
   (* Skip outer text (non-% characters) between commands.  The "outer" context
      is document/command level: the only things that live here are [%keyword]
      commands, line comments, and [%[ ... %]] prose strings.  Sequences handled:
@@ -39,12 +29,10 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
      [%%] is tried before single [%] so a bare [%%\n] is a prose line, not a
      [%]-plus-empty-comment; keeping the whole run on one skip-to-newline also
      avoids the old [%%%]-eats-triples bug on odd-length banners. *)
->>>>>>> Stashed changes
   let skip_outer : unit t =
     fix (fun self ->
         skip_while (fun c -> c <> '%')
         *> option ()
-<<<<<<< Updated upstream
              (* [%[]-block comment must be tried first, else its [[] would be
                 mistaken for the second [%] of a [%%] line comment. *)
              (string_lit () *> self
@@ -68,13 +56,6 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
                  *> commit
                  *> skip_while (fun c -> c <> '\n')
                  *> self))
-=======
-             (string "%%" *> skip_while (fun c -> c <> '\n') *> self
-             <|> string "%" *> blank *> commit
-                 *> skip_while (fun c -> c <> '\n')
-                 *> self
-             <|> string_lit () *> self))
->>>>>>> Stashed changes
 
   (* Defer a thunk-parser to prevent infinite recursion at construction time.
      Used for %module and %eval which recursively embed cmd lists. *)
