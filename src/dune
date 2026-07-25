@@ -1,4 +1,6 @@
 (library
+ (instrumentation
+  (backend bisect_ppx))
  (name stelf)
  (public_name stelf)
  (libraries

@@ -1,6 +1,8 @@
 ; (include sources.dune)
 
 (library
+ (instrumentation
+  (backend bisect_ppx))
  (name intsyn)
  (public_name stelf.intsyn)
  (modules
@@ -17,18 +19,18 @@
   Match
   Abstract
   Approx
-  Intsyn_intf
+  INTSYN
   Lambda_
-  Abstract_intf
-  Approx_intf
-  Constraints_intf
-  Conv_intf
-  Fgnopn_intf
-  Match_intf
-  Order_intf
-  Tomega_intf
-  Unify_intf
-  Whnf_intf)
+  ABSTRACT
+  APPROX
+  CONSTRAINTS
+  CONV
+  FGNOPN
+  MATCH
+  ORDER
+  TOMEGA
+  UNIFY
+  WHNF)
  (libraries containers global trail table basis syntax debug)
  (flags
   (:standard

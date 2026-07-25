@@ -1,4 +1,0 @@
-(library
- (name smlofnj)
- (public_name stelf.smlofnj)
- (libraries display basis))

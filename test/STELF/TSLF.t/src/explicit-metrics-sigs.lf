@@ -1,0 +1,79 @@
+%%%% metrics on typing derivations for the explicit system
+%sort msg-wf {_ sg-wf K} {_ met} %.
+%mode msg-wf %star %star %.
+%sort msg-deq {_ sg-deq K1 K2} {_ met} %.
+%mode msg-deq %star %star %.
+%term msg-wf/sg/unit msg-wf sg-wf/sg/unit met/unit %.
+%term msg-wf/sg/cn %pi (msg-wf (sg-wf/sg/cn D1) (met/sing D1')) %<- (mofkd D1 D1') %.
+%term msg-wf/sg/kd %pi (msg-wf (sg-wf/sg/kd D1) (met/sing D1')) %<- (mkd-wf D1 D1') %.
+%term msg-wf/sg/sgm 
+	%pi (msg-wf (sg-wf/sg/sgm D1 D2 _) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} msg-wf (D2 a da) D2')
+	%<- (msg-wf D1 D1') %.
+%term msg-wf/sg/pi 
+	%pi (msg-wf (sg-wf/sg/pi D1 D2 _) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} msg-wf (D2 a da) D2')
+	%<- (msg-wf D1 D1') %.
+%term msg-deq/sg/unit msg-deq sg-deq/sg/unit met/unit %.
+%term msg-deq/sg/cn %pi (msg-deq (sg-deq/sg/cn D1) (met/sing D1')) %<- (mcn-deq D1 D1') %.
+%term msg-deq/sg/kd %pi (msg-deq (sg-deq/sg/kd D1) (met/sing D1')) %<- (mkd-deq D1 D1') %.
+%term msg-deq/sg/sgm 
+	%pi (msg-deq (sg-deq/sg/sgm D1 D2 _) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} msg-deq (D2 a da) D2')
+	%<- (msg-deq D1 D1') %.
+%term msg-deq/sg/pi 
+	%pi (msg-deq (sg-deq/sg/pi D1 D2 _) (met/pair D1' D2'))
+	%<- ({a} {da} {dm mofkd da met/unit} msg-deq (D2 a da) D2')
+	%<- (msg-deq D1 D1') %.
+%sort can-msg-wf {D sg-wf K} {_ msg-wf D Km} %.
+%mode can-msg-wf %in %out %.
+%sort can-msg-deq {D sg-deq K K'} {_ msg-deq D Km} %.
+%mode can-msg-deq %in %out %.
+%term _ can-msg-wf sg-wf/sg/unit msg-wf/sg/unit %.
+%term _ %pi (can-msg-wf (sg-wf/sg/cn D1) (msg-wf/sg/cn D1')) %<- (can-mofkd D1 D1') %.
+%term _ %pi (can-msg-wf (sg-wf/sg/kd D1) (msg-wf/sg/kd D1')) %<- (can-mkd-wf D1 D1') %.
+%term _ 
+	%pi (can-msg-wf (sg-wf/sg/sgm D1 D2 _) (msg-wf/sg/sgm D1' D2'))
+	%<- (can-msg-wf D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-msg-wf (D2 a da) (D2' a da dm)) %.
+%term _ 
+	%pi (can-msg-wf (sg-wf/sg/pi D1 D2 _) (msg-wf/sg/pi D1' D2'))
+	%<- (can-msg-wf D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-msg-wf (D2 a da) (D2' a da dm)) %.
+%term _ can-msg-deq sg-deq/sg/unit msg-deq/sg/unit %.
+%term _ %pi (can-msg-deq (sg-deq/sg/cn D1) (msg-deq/sg/cn D1')) %<- (can-mcn-deq D1 D1') %.
+%term _ %pi (can-msg-deq (sg-deq/sg/kd D1) (msg-deq/sg/kd D1')) %<- (can-mkd-deq D1 D1') %.
+%term _ 
+	%pi (can-msg-deq (sg-deq/sg/sgm D1 D2 _) (msg-deq/sg/sgm D1' D2'))
+	%<- (can-msg-deq D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-msg-deq (D2 a da) (D2' a da dm)) %.
+%term _ 
+	%pi (can-msg-deq (sg-deq/sg/pi D1 D2 _) (msg-deq/sg/pi D1' D2'))
+	%<- (can-msg-deq D1 D1')
+	%<- ({a} {da} {dm mofkd da _} {dcm can-mofkd da dm} can-msg-deq (D2 a da) (D2' a da dm)) %.
+%worlds (cn-block can-mofkd-block ovar-block) (can-msg-wf _ _) (can-msg-deq _ _) %.
+%total (D1 D2) (can-msg-wf D1 _) (can-msg-deq D2 _) %.
+%sort mesg-wf {_ esg-wf G K} {_ met} %.
+%sort mesg-deq {_ esg-deq G K1 K2} {_ met} %.
+%term mesg-wf/sg/unit mesg-wf (esg-wf/sg/unit _) met/unit %.
+%term mesg-wf/sg/cn %pi (mesg-wf (esg-wf/sg/cn D1) (met/sing D1')) %<- (meofkd D1 D1') %.
+%term mesg-wf/sg/kd %pi (mesg-wf (esg-wf/sg/kd D1) (met/sing D1')) %<- (mekd-wf D1 D1') %.
+%term mesg-wf/sg/sgm 
+	%pi (mesg-wf (esg-wf/sg/sgm D1 D2 _) (met/pair D1' D2'))
+	%<- ({a} {da} mesg-wf (D2 a da) D2')
+	%<- (mesg-wf D1 D1') %.
+%term mesg-wf/sg/pi 
+	%pi (mesg-wf (esg-wf/sg/pi D1 D2 _) (met/pair D1' D2'))
+	%<- ({a} {da} mesg-wf (D2 a da) D2')
+	%<- (mesg-wf D1 D1') %.
+%term mesg-deq/sg/unit mesg-deq (esg-deq/sg/unit _) met/unit %.
+%term mesg-deq/sg/cn %pi (mesg-deq (esg-deq/sg/cn D1) (met/sing D1')) %<- (mecn-deq D1 D1') %.
+%term mesg-deq/sg/kd %pi (mesg-deq (esg-deq/sg/kd D1) (met/sing D1')) %<- (mekd-deq D1 D1') %.
+%term mesg-deq/sg/sgm 
+	%pi (mesg-deq (esg-deq/sg/sgm D1 D2 _) (met/pair D1' D2'))
+	%<- ({a} {da} mesg-deq (D2 a da) D2')
+	%<- (mesg-deq D1 D1') %.
+%term mesg-deq/sg/pi 
+	%pi (mesg-deq (esg-deq/sg/pi D1 D2 _) (met/pair D1' D2'))
+	%<- ({a} {da} mesg-deq (D2 a da) D2')
+	%<- (mesg-deq D1 D1') %.

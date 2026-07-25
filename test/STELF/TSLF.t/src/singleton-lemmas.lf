@@ -1,0 +1,223 @@
+%sort sing/kd-complete {C cn} {K kd} {_ sing/kd C K K'} %.
+%mode sing/kd-complete %in %in %out %.
+%term _ sing/kd-complete _ kd/unit sing/kd/unit %.
+%term _ sing/kd-complete _ kd/type sing/kd/type %.
+%term _ sing/kd-complete _ (kd/sing _) sing/kd/sing %.
+%term _ 
+	%pi (sing/kd-complete C (kd/pi K1 K2) (sing/kd/pi DSK))
+	%<- ({a} sing/kd-complete (cn/app C a) (K2 a) (DSK a)) %.
+%term _ 
+	%pi (sing/kd-complete C (kd/sgm K1 K2) (sing/kd/sgm DSK1 (DSK2 (cn/pj1 C))))
+	%<- (sing/kd-complete (cn/pj1 C) K1 DSK1)
+	%<- ({a} sing/kd-complete (cn/pj2 C) (K2 a) (DSK2 a)) %.
+%worlds (cn-block) (sing/kd-complete _ _ _) %.
+%total K (sing/kd-complete _ K _) %.
+%sort stone-2/120 {_ cn-deq C1 C2 kd/type} {_ cn-deq C1 C2 (kd/sing C1)} %.
+%mode stone-2/120 %in %out %.
+%term _ 
+	%pi (stone-2/120 DQ (cn-deq/sym (cn-deq/kd/sing (ofkd/sub (ofkd/kd/sing DC2) (kd-sub/kd/sing-kd/sing (cn-deq/sym DQ))))))
+	%<- (vdt/cn-deq DQ _ DC2 _) %.
+%worlds (ofkd+vdt-block) (stone-2/120 _ _) %.
+%total {} (stone-2/120 _ _) %.
+%sort stone-2/119 {_ cn-deq C1 C2 kd/type} {_ ofkd C1 (kd/sing C2)} %.
+%mode stone-2/119 %in %out %.
+%term _ 
+	%pi (stone-2/119 DCQ (ofkd/sub (ofkd/kd/sing D1) (kd-sub/kd/sing-kd/sing DCQ)))
+	%<- (vdt/cn-deq DCQ D1 _ _) %.
+%worlds (ofkd+vdt-block) (stone-2/119 _ _) %.
+%total {} (stone-2/119 _ _) %.
+%sort stone-2/96 {_ cn-deq C1 C2 K} {_ sing/kd C2 K K'} {_ cn-deq C1 C2 K'} %.
+%mode stone-2/96 %in %in %out %.
+%term _ stone-2/96 DQ sing/kd/unit DQ %.
+%term _ %pi (stone-2/96 DQ sing/kd/type (cn-deq/kd/sing DC1)) %<- (stone-2/119 DQ DC1) %.
+%term _ 
+	%pi (stone-2/96 DQ sing/kd/sing (cn-deq/kd/sing DC1'))
+	%<- (vdt/cn-deq DQ DC1 DC2 (kd-wf/kd/sing DBT))
+	%<- (stone-2/119 (cn-deq/sub DQ (kd-sub/kd/sing-kd/type DBT)) DC1') %.
+%term _ 
+	%pi (stone-2/96 DQ (sing/kd/pi DSK) (cn-deq/pi-ext DC1 DC2 DQ'))
+	%<- (vdt/cn-deq DQ DC1 DC2 (kd-wf/kd/pi DKW _))
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {dw vdt/ofkd da DKW} stone-2/96 (cn-deq/cn/app DQ (cn-deq/refl da)) (DSK a) (DQ' a da)) %.
+%term _ 
+	%pi (stone-2/96 (%the (cn-deq C' C (kd/sgm K1 K2)) DQ) (sing/kd/sgm (%the (sing/kd (cn/pj1 C) K1 K1') DSK1) (%the (sing/kd (cn/pj2 C) (K2 (cn/pj1 C)) K2') DSK2)) (cn-deq/sgm-ext DQL DQR))
+	%<- (vdt/cn-deq DQ DC1 DC2 (kd-wf/kd/sgm _ DKWo))
+	%<- (stone-2/96 (cn-deq/cn/pj1 DQ) DSK1 (%the (cn-deq (cn/pj1 C') (cn/pj1 C) K1') DQL))
+	%<- (funct/kd-wf DKWo (cn-deq/cn/pj1 DQ) (ofkd/cn/pj1 DC1) (ofkd/cn/pj1 DC2) DKS)
+	%<- (stone-2/96 (cn-deq/deq (cn-deq/cn/pj2 DQ) DKS) DSK2 DQR) %.
+%worlds (ofkd+vdt-block) (stone-2/96 _ _ _) %.
+%total (D3) (stone-2/96 _ D3 _) %.
+%sort stone-2/92 {_ ofkd C1 K1} {_ sing/kd C1 K1 K2} {_ kd-wf K2} %.
+%mode stone-2/92 %in %in %out %.
+%term _ 
+	%pi (stone-2/92 DC DS DW)
+	%<- (stone-2/96 (cn-deq/refl DC) DS DQ)
+	%<- (vdt/cn-deq DQ _ _ DW) %.
+%worlds (ofkd+vdt-block) (stone-2/92 _ _ _) %.
+%total {} (stone-2/92 _ _ _) %.
+%sort stone-2/93 {_ ofkd C1 K1} {_ sing/kd C1 K1 K2} {_ ofkd C1 K2} %.
+%mode stone-2/93 %in %in %out %.
+%term _ 
+	%pi (stone-2/93 DC DS DC1)
+	%<- (stone-2/96 (cn-deq/refl DC) DS DQ)
+	%<- (vdt/cn-deq DQ DC1 _ DW) %.
+%worlds (ofkd+vdt-block) (stone-2/93 _ _ _) %.
+%total {} (stone-2/93 _ _ _) %.
+%sort stone-2/97 {_ ofkd C2 K1} {_ sing/kd C2 K1 K2} {_ ofkd C1 K2} {_ cn-deq C1 C2 K2} %.
+%mode stone-2/97 %in %in %in %out %.
+%term _ stone-2/97 D1 sing/kd/unit D2 (cn-deq/kd/unit D2 D1) %.
+%term _ stone-2/97 D1 sing/kd/type D2 (cn-deq/kd/sing D2) %.
+%term _ stone-2/97 D1 sing/kd/sing D2 (cn-deq/kd/sing D2) %.
+%term _ 
+	%pi (stone-2/97 D1 (sing/kd/pi DSK) D2 (cn-deq/pi-ext D2 D1 DQ))
+	%<- (vdt/ofkd D2 (kd-wf/kd/pi DWF _))
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {dw vdt/ofkd da DWF} stone-2/97 (ofkd/cn/app D1 da) (DSK a) (ofkd/cn/app D2 da) (DQ a da)) %.
+%term _ 
+	%pi (stone-2/97 D1 (%the (sing/kd C2 (kd/sgm K1 K2) (kd/sgm K1' ([a] K2'))) (sing/kd/sgm DSK1 DSK2)) D2 (cn-deq/sgm-ext DQL DQR))
+	%<- (stone-2/97 (ofkd/cn/pj1 D1) DSK1 (ofkd/cn/pj1 D2) DQL)
+	%<- (stone-2/97 (%the (ofkd (cn/pj2 C2) (K2 (cn/pj1 C2))) (ofkd/cn/pj2 D1)) DSK2 (%the (ofkd (cn/pj2 C1) K2') (ofkd/cn/pj2 D2)) DQR) %.
+%worlds (ofkd+vdt-block) (stone-2/97 _ _ _ _) %.
+%total D1 (stone-2/97 _ D1 _ _) %.
+%sort stone-2/94 {_ ofkd C1 K1} {_ sing/kd C1 K1 K2} {_ kd-sub K2 K1} %.
+%mode stone-2/94 %in %in %out %.
+%term _ stone-2/94 _ sing/kd/unit kd-sub/kd/unit %.
+%term _ stone-2/94 D1 sing/kd/type (kd-sub/kd/sing-kd/type D1) %.
+%term _ 
+	%pi (stone-2/94 D1 sing/kd/sing (kd-sub/kd/sing-kd/sing (cn-deq/sub (cn-deq/kd/sing D1) (kd-sub/kd/sing-kd/type DB))))
+	%<- (vdt/ofkd D1 (kd-wf/kd/sing DB)) %.
+%term _ 
+	%pi (stone-2/94 D1 (sing/kd/pi DSK) (kd-sub/kd/pi DS1 DS2 DW2))
+	%<- (vdt/ofkd D1 (kd-wf/kd/pi DW1 _))
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {dw vdt/ofkd da DW1} stone-2/94 (ofkd/cn/app D1 da) (DSK a) (DS2 a da))
+	%<- (kd-refl/sub DW1 DS1)
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {dw vdt/ofkd da DW1} vdt/kd-sub (DS2 a da) (DW2 a da) (DW2' a da)) %.
+%term _ 
+	%pi (stone-2/94 (%the (ofkd C (kd/sgm KA KB)) D1) (%the (sing/kd C (kd/sgm KA KB) (kd/sgm K0 ([a] K1))) (sing/kd/sgm DSK1 DSK2)) (%the (kd-sub (kd/sgm K0 ([a] K1)) (kd/sgm KA KB)) (kd-sub/kd/sgm DS1 DSr' DW2)))
+	%<- (stone-2/94 (ofkd/cn/pj1 D1) DSK1 DS1)
+	%<- (stone-2/94 (ofkd/cn/pj2 D1) DSK2 (%the (kd-sub K1 (KB (cn/pj1 C))) DS2))
+	%<- (vdt/ofkd D1 (kd-wf/kd/sgm (%the (kd-wf KA) DW1) (%the ({a} {da ofkd a KA} kd-wf (KB a)) DW2)))
+	%<- (kd-wkn/kd-wf DW2 DS1 (%the ({a} {da ofkd a K0} kd-wf (KB a)) DW2'))
+	%<- (vdt/kd-sub DS1 (%the (kd-wf K0) DWa) DWa')
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {dw vdt/ofkd da DWa} stone-2/97 (ofkd/cn/pj1 D1) DSK1 da (%the (cn-deq a (cn/pj1 C) K0) (DQ a da)))
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {dw vdt/ofkd da DWa} vdt/cn-deq (DQ a da) (Dlala a da) (DZ a da) (Dblah a da))
+	%<- ({b} {db ofkd b K0} {dm mofkd db met/unit} {_ can-mofkd db dm} funct/kd-wf ([a] [da ofkd a K0] DW2' a da) (%the (cn-deq b (cn/pj1 _) K0) (DQ b db)) db (DZ b db) (%the (kd-deq (KB b) (KB (cn/pj1 _))) (DQs b db)))
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {dw vdt/ofkd da DWa} vdt/kd-deq (DQs a da) (%the (kd-wf (KB a)) (Da1 a da)) (%the (kd-wf (KB (cn/pj1 _))) (Da2 a da)))
+	%<- ({a} {da} kd-anti (%the (kd-deq (KB a) (KB (cn/pj1 _))) (DQs a da)) (Da1 a da) (Da2 a da) (DSl a da) (%the (kd-sub (KB (cn/pj1 _)) (KB a)) (DSr a da)))
+	%<- ({a} {da ofkd a K0} {dm mofkd da met/unit} {_ can-mofkd da dm} {dw vdt/ofkd da DWa} kd-trans/sub DS2 (DSr a da) (%the (kd-sub K1 (KB a)) (DSr' a da))) %.
+%worlds (ofkd+vdt-block) (stone-2/94 _ _ _) %.
+%total D1 (stone-2/94 _ D1 _) %.
+%sort stone-2/108 {_ ofkd C1 K1} {_ ofkd C2 K2} {_ cn-deq (cn/pj1 (cn/pair C1 C2)) C1 K1} %.
+%mode stone-2/108 %in %in %out %.
+%term _ 
+	%pi (stone-2/108 D1 D2 (cn-deq/sub DQ DKS))
+	%<- (sing/kd-complete _ _ DS)
+	%<- (stone-2/92 D1 DS _)
+	%<- (stone-2/93 D1 DS D1')
+	%<- (stone-2/97 D1 DS (ofkd/cn/pj1 (ofkd/cn/pair D1' D2)) DQ)
+	%<- (stone-2/94 D1 DS DKS) %.
+%worlds (ofkd+vdt-block) (stone-2/108 _ _ _) %.
+%total {} (stone-2/108 _ _ _) %.
+%sort stone-2/109 {_ ofkd C1 K1} {_ ofkd C2 K2} {_ cn-deq (cn/pj2 (cn/pair C1 C2)) C2 K2} %.
+%mode stone-2/109 %in %in %out %.
+%term _ 
+	%pi (stone-2/109 D1 D2 (cn-deq/sub DQ DKS))
+	%<- (sing/kd-complete _ _ DS)
+	%<- (stone-2/92 D2 DS _)
+	%<- (stone-2/93 D2 DS D2')
+	%<- (stone-2/97 D2 DS (ofkd/cn/pj2 (ofkd/cn/pair D1 D2')) DQ)
+	%<- (stone-2/94 D2 DS DKS) %.
+%worlds (ofkd+vdt-block) (stone-2/109 _ _ _) %.
+%total {} (stone-2/109 _ _ _) %.
+%sort cn-deq-beta {_ {a} %pi (ofkd a K1) %-> (ofkd (C1 a) (K2 a))} {_ ofkd C2 K1} {_ cn-deq (cn/app (cn/lam K1 C1) C2) (C1 C2) (K2 C2)} %.
+%mode cn-deq-beta %in %in %out %.
+%term _ 
+	%pi (cn-deq-beta (%the ({a} %pi (ofkd a K1) %-> (ofkd (C1 a) (K2 a))) Dof1) (%the (ofkd C2 K1) Dof2) (cn-deq/sub Dequiv Dsub))
+	%<- (vdt/ofkd Dof2 (%the (kd-wf K1) DwfK1))
+	%<- ({a} sing/kd-complete _ _ (%the (sing/kd (C1 a) (K2 a) (K2s a)) (Dsing a)))
+	%<- ({a} {d ofkd a K1} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (vdt/ofkd d DwfK1)
+	%-> (stone-2/93 (Dof1 a d) (Dsing a) (%the (ofkd (C1 a) (K2s a)) (Dof1' a d))))
+	%<- (stone-2/97 (%the (ofkd (C1 C2) (K2 C2)) (Dof1 C2 Dof2)) (%the (sing/kd (C1 C2) (K2 C2) (K2s C2)) (Dsing C2)) (%the (ofkd (cn/app (cn/lam K1 C1) C2) (K2s C2)) (ofkd/cn/app (ofkd/cn/lam Dof1' DwfK1) Dof2)) (%the (cn-deq (cn/app (cn/lam K1 C1) C2) (C1 C2) (K2s C2)) Dequiv))
+	%<- (stone-2/94 (Dof1 C2 Dof2) (Dsing C2) (%the (kd-sub (K2s C2) (K2 C2)) Dsub)) %.
+%worlds (ofkd+vdt-block) (cn-deq-beta _ _ _) %.
+%total {} (cn-deq-beta _ _ _) %.
+%sort ofkd-sgm-intro {_ {a} %pi (ofkd a K1) %-> (kd-wf (K2 a))} {_ ofkd C1 K1} {_ ofkd C2 (K2 C1)} {_ ofkd (cn/pair C1 C2) (kd/sgm K1 K2)} %.
+%mode ofkd-sgm-intro %in %in %in %out %.
+%term _ 
+	%pi (ofkd-sgm-intro (%the ({a} %pi (ofkd a K1) %-> (kd-wf (K2 a))) Dwf2) (%the (ofkd C1 K1) Dof1) (%the (ofkd C2 (K2 C1)) Dof2) (ofkd/sub (ofkd/cn/pair Dof1' Dof2) (kd-sub/kd/sgm Dsub1 Dsub2 Dwf2)))
+	%<- (vdt/ofkd Dof1 (%the (kd-wf K1) Dwf1))
+	%<- (sing/kd-complete _ _ (%the (sing/kd C1 K1 K1s) Dsing))
+	%<- (stone-2/93 Dof1 Dsing (%the (ofkd C1 K1s) Dof1'))
+	%<- (stone-2/94 Dof1 Dsing (%the (kd-sub K1s K1) Dsub1))
+	%<- (stone-2/92 Dof1 Dsing (%the (kd-wf K1s) DwfK1s))
+	%<- ({a} {d ofkd a K1s} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (vdt/ofkd d DwfK1s)
+	%-> (stone-2/97 Dof1 Dsing d (%the (cn-deq a C1 K1s) (Dequiv a d))))
+	%<- ({a} {d ofkd a K1s} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (funct/kd-wf Dwf2 (cn-deq/sub (Dequiv a d) Dsub1) (ofkd/sub d Dsub1) Dof1 (%the (kd-deq (K2 a) (K2 C1)) (Dequiv' a d))))
+	%<- ({a} {d ofkd a K1s} kd-anti (Dequiv' a d) (Dwf2 _ (ofkd/sub d Dsub1)) (Dwf2 _ Dof1) (Dsub2' a d) (%the (kd-sub (K2 C1) (K2 a)) (Dsub2 a d))) %.
+%worlds (ofkd+vdt-block) (ofkd-sgm-intro _ _ _ _) %.
+%total {} (ofkd-sgm-intro _ _ _ _) %.
+%sort cn-deq-sgm-intro {_ {a} %pi (ofkd a K1) %-> (kd-wf (K2 a))} {_ cn-deq C1 C1' K1} {_ cn-deq C2 C2' (K2 C1)} {_ cn-deq (cn/pair C1 C2) (cn/pair C1' C2') (kd/sgm K1 K2)} %.
+%mode cn-deq-sgm-intro %in %in %in %out %.
+%term _ 
+	%pi (cn-deq-sgm-intro (%the ({a} %pi (ofkd a K1) %-> (kd-wf (K2 a))) Dwf2) (%the (cn-deq C1 C1' K1) Dequiv1) (%the (cn-deq C2 C2' (K2 C1)) Dequiv2) (cn-deq/sub (cn-deq/cn/pair (cn-deq/sym Dequiv1') Dequiv2) (kd-sub/kd/sgm Dsub1 Dsub2 Dwf2)))
+	%<- (vdt/cn-deq Dequiv1 (%the (ofkd C1 K1) Dof1) _ (%the (kd-wf K1) Dwf1))
+	%<- (vdt/cn-deq Dequiv2 (%the (ofkd C2 (K2 C1)) Dof2) _ _)
+	%<- (sing/kd-complete _ _ (%the (sing/kd C1 K1 K1s) Dsing))
+	%<- (stone-2/93 Dof1 Dsing (%the (ofkd C1 K1s) Dof1'))
+	%<- (stone-2/96 (cn-deq/sym Dequiv1) Dsing (%the (cn-deq C1' C1 K1s) Dequiv1'))
+	%<- (stone-2/94 Dof1 Dsing (%the (kd-sub K1s K1) Dsub1))
+	%<- (stone-2/92 Dof1 Dsing (%the (kd-wf K1s) DwfK1s))
+	%<- ({a} {d ofkd a K1s} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (vdt/ofkd d DwfK1s)
+	%-> (stone-2/97 Dof1 Dsing d (%the (cn-deq a C1 K1s) (Dequiv a d))))
+	%<- ({a} {d ofkd a K1s} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (funct/kd-wf Dwf2 (cn-deq/sub (Dequiv a d) Dsub1) (ofkd/sub d Dsub1) Dof1 (%the (kd-deq (K2 a) (K2 C1)) (Dequiv' a d))))
+	%<- ({a} {d ofkd a K1s} kd-anti (Dequiv' a d) (Dwf2 _ (ofkd/sub d Dsub1)) (Dwf2 _ Dof1) (Dsub2' a d) (%the (kd-sub (K2 C1) (K2 a)) (Dsub2 a d))) %.
+%worlds (ofkd+vdt-block) (cn-deq-sgm-intro _ _ _ _) %.
+%total {} (cn-deq-sgm-intro _ _ _ _) %.
+%sort ofkd-sgm-ext-intro {_ {a} %pi (ofkd a K1) %-> (kd-wf (K2 a))} {_ ofkd (cn/pj1 C) K1} {_ ofkd (cn/pj2 C) (K2 (cn/pj1 C))} {_ ofkd C (kd/sgm K1 K2)} %.
+%mode ofkd-sgm-ext-intro %in %in %in %out %.
+%term _ 
+	%pi (ofkd-sgm-ext-intro (%the ({a} %pi (ofkd a K1) %-> (kd-wf (K2 a))) Dwf2) (%the (ofkd (cn/pj1 C) K1) Dof1) (%the (ofkd (cn/pj2 C) (K2 (cn/pj1 C))) Dof2) (ofkd/sub (ofkd/sgm-ext Dof1' Dof2) (kd-sub/kd/sgm Dsub1 Dsub2 Dwf2)))
+	%<- (vdt/ofkd Dof1 (%the (kd-wf K1) Dwf1))
+	%<- (sing/kd-complete _ _ (%the (sing/kd (cn/pj1 C) K1 K1s) Dsing))
+	%<- (stone-2/93 Dof1 Dsing (%the (ofkd (cn/pj1 C) K1s) Dof1'))
+	%<- (stone-2/94 Dof1 Dsing (%the (kd-sub K1s K1) Dsub1))
+	%<- (stone-2/92 Dof1 Dsing (%the (kd-wf K1s) DwfK1s))
+	%<- ({a} {d ofkd a K1s} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (vdt/ofkd d DwfK1s)
+	%-> (stone-2/97 Dof1 Dsing d (%the (cn-deq a (cn/pj1 C) K1s) (Dequiv a d))))
+	%<- ({a} {d ofkd a K1s} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (funct/kd-wf Dwf2 (cn-deq/sub (Dequiv a d) Dsub1) (ofkd/sub d Dsub1) Dof1 (%the (kd-deq (K2 a) (K2 (cn/pj1 C))) (Dequiv' a d))))
+	%<- ({a} {d ofkd a K1s} kd-anti (Dequiv' a d) (Dwf2 _ (ofkd/sub d Dsub1)) (Dwf2 _ Dof1) (Dsub2' a d) (%the (kd-sub (K2 (cn/pj1 C)) (K2 a)) (Dsub2 a d))) %.
+%worlds (ofkd+vdt-block) (ofkd-sgm-ext-intro _ _ _ _) %.
+%total {} (ofkd-sgm-ext-intro _ _ _ _) %.
+%sort cn-deq-sgm-ext-intro {_ {a} %pi (ofkd a K1) %-> (kd-wf (K2 a))} {_ cn-deq (cn/pj1 C) (cn/pj1 C') K1} {_ cn-deq (cn/pj2 C) (cn/pj2 C') (K2 (cn/pj1 C))} {_ cn-deq C C' (kd/sgm K1 K2)} %.
+%mode cn-deq-sgm-ext-intro %in %in %in %out %.
+%term _ 
+	%pi (cn-deq-sgm-ext-intro (%the ({a} %pi (ofkd a K1) %-> (kd-wf (K2 a))) Dwf2) (%the (cn-deq (cn/pj1 C) (cn/pj1 C') K1) Dequiv1) (%the (cn-deq (cn/pj2 C) (cn/pj2 C') (K2 (cn/pj1 C))) Dequiv2) (cn-deq/sub (cn-deq/sgm-ext (cn-deq/sym Dequiv1') Dequiv2) (kd-sub/kd/sgm Dsub1 Dsub2 Dwf2)))
+	%<- (vdt/cn-deq Dequiv1 (%the (ofkd (cn/pj1 C) K1) Dof1) _ (%the (kd-wf K1) Dwf1))
+	%<- (vdt/cn-deq Dequiv2 (%the (ofkd (cn/pj2 C) (K2 (cn/pj1 C))) Dof2) _ _)
+	%<- (sing/kd-complete _ _ (%the (sing/kd (cn/pj1 C) K1 K1s) Dsing))
+	%<- (stone-2/93 Dof1 Dsing (%the (ofkd (cn/pj1 C) K1s) Dof1'))
+	%<- (stone-2/96 (cn-deq/sym Dequiv1) Dsing (%the (cn-deq (cn/pj1 C') (cn/pj1 C) K1s) Dequiv1'))
+	%<- (stone-2/94 Dof1 Dsing (%the (kd-sub K1s K1) Dsub1))
+	%<- (stone-2/92 Dof1 Dsing (%the (kd-wf K1s) DwfK1s))
+	%<- ({a} {d ofkd a K1s} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (vdt/ofkd d DwfK1s)
+	%-> (stone-2/97 Dof1 Dsing d (%the (cn-deq a (cn/pj1 C) K1s) (Dequiv a d))))
+	%<- ({a} {d ofkd a K1s} {dm mofkd d met/unit} 
+	%pi (can-mofkd d dm)
+	%-> (funct/kd-wf Dwf2 (cn-deq/sub (Dequiv a d) Dsub1) (ofkd/sub d Dsub1) Dof1 (%the (kd-deq (K2 a) (K2 (cn/pj1 C))) (Dequiv' a d))))
+	%<- ({a} {d ofkd a K1s} kd-anti (Dequiv' a d) (Dwf2 _ (ofkd/sub d Dsub1)) (Dwf2 _ Dof1) (Dsub2' a d) (%the (kd-sub (K2 (cn/pj1 C)) (K2 a)) (Dsub2 a d))) %.
+%worlds (ofkd+vdt-block) (cn-deq-sgm-ext-intro _ _ _ _) %.
+%total {} (cn-deq-sgm-ext-intro _ _ _ _) %.

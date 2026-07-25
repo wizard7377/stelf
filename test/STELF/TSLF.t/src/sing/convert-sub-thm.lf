@@ -1,0 +1,517 @@
+%%%%%  Conversion Commutes with Simple Substitution (Explicit Context)  %%%%%
+%sort strengthen-vtrans {_ {x} {ex} %pi (vtrans ex x) %-> (vtrans (EX ex) X)} {_ {ex} eterm-eq (EX ex) EX'} {_ vtrans EX' X} %.
+%mode strengthen-vtrans %in %out %out %.
+%term _ strengthen-vtrans ([x] [ex] [d] D) ([ex] eterm-eq/i) D %.
+%worlds (bind ovar tbind evar) (strengthen-vtrans _ _ _) %.
+%total {} (strengthen-vtrans _ _ _) %.
+%sort convert-ssub-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ append G1 (G2 R) G'} {_ {x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (converte (G x) (N x) (B x) (EN ex)))} {_ aconverte G1 R A EM} {_ converte G' (N R) (B R) (EN EM)} %.
+%mode convert-ssub-e %in %in %in %in %out %.
+%sort aconvert-ssub-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ append G1 (G2 R) G'} {_ {x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (aconverte (G x) (Q x) (B x) (EN ex)))} {_ aconverte G1 R A EM} {_ aconverte G' (Q R) (B R) (EN EM)} %.
+%mode aconvert-ssub-e %in %in %in %in %out %.
+%sort tconvert-ssub-e {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ append G1 (G2 R) G'} {_ {x} %pi (isvar x I) %-> ({ex} %pi (vtrans ex x) %-> (tconverte (G x) (B x) (EB ex)))} {_ aconverte G1 R A EM} {_ tconverte G' (B R) (EB EM)} %.
+%mode tconvert-ssub-e %in %in %in %in %out %.
+%scope tconvert-ssub-e %term const 
+	%pi (aconvert-ssub-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) Dappend' ([x] [d] [ex] [xt] aconverte/const (DconvB x d ex xt) (Dwf x) (%the (kof _ (A' x)) (Dkof x))) Dconv (aconverte/const DconvB' (Dwf _) (Dkof _)))
+	%<- (tconvert-ssub-e Dappend Dappend' DconvB Dconv DconvB') %.
+%scope tconvert-ssub-e %term forall 
+	%pi (aconvert-ssub-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) Dappend' ([x] [d] [ex] [xt] aconverte/forall (DconvB x d ex xt)) Dconv (aconverte/forall DconvB'))
+	%<- (tconvert-ssub-e Dappend Dappend' DconvB Dconv DconvB') %.
+%scope tconvert-ssub-e %term varsam 
+	%pi (aconvert-ssub-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) Dappend' ([x] [d] [ex] [xt] aconverte/var xt (%the (tconverte _ _ (B ex)) _) (Dlookup x d)) Dconv Dconv'')
+	%<- ({x} {d} lookup-binder-fun (Dappend x) (Dlookup x d) (%the (tp-eq _ (A' x)) (Deq x)))
+	%<- ({x} {d} lookup-context (Dlookup x d) (Dord x d))
+	%<- (scsub-ordered Dappend Dappend' Dord Dord')
+	%<- (weaken-aconverte' Dappend' Dord' Dconv Dconv')
+	%<- (aconverte-resp ctx-eq/i atom-eq/i (Deq _) eterm-eq/i Dconv' Dconv'') %.
+%scope tconvert-ssub-e %term varoth 
+	%pi (aconvert-ssub-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) Dappend' ([x] [d] [ex] [xt] aconverte/var Dvtrans (DconvB x d ex xt) (Dlookup x d)) Dconv (aconverte/var Dvtrans DconvB' Dlookup'))
+	%<- (tconvert-ssub-e Dappend Dappend' DconvB Dconv DconvB')
+	%<- (scsub-lookup Dappend Dappend' Dlookup Dlookup') %.
+%scope tconvert-ssub-e %term vari 
+	%pi (aconvert-ssub-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (append G1 (G2 R) G') Dappend') ([x] [d] [ex] [xt] aconverte/vari (%the (vtrans (EY ex) (Y x)) (Dvtrans x ex xt)) (%the (tconverte (G x) (B x) (EB ex)) (DconvB x d ex xt)) (%the (wf (B x)) (Dwf x)) (%the (vof (Y x) (B x)) (Dvof x))) (%the (aconverte G1 R _ EM) Dconv) (aconverte/vari (Dvtrans''' R EM) DconvB' (Dwf R) (Dvof R)))
+	%<- (tconvert-ssub-e Dappend Dappend' DconvB Dconv (%the (tconverte G' (B R) (EB EM)) DconvB'))
+	%<- (vof-noassm' Dvof (%the ({x} atom-eq (Y x) Y') DeqY) (%the ({x} tp-eq (B x) B') DeqB))
+	%<- ({x} atom-eq-symm (DeqY x) (%the (atom-eq Y' (Y x)) (DeqY' x)))
+	%<- ({x} {ex} {xt} vtrans-resp eterm-eq/i (DeqY x) (Dvtrans x ex xt) (%the (vtrans (EY ex) Y') (Dvtrans' x ex xt)))
+	%<- (strengthen-vtrans Dvtrans' (%the ({ex} eterm-eq (EY ex) EY') DeqEY) (%the (vtrans EY' Y') Dvtrans''))
+	%<- ({ex} eterm-eq-symm (DeqEY ex) (%the (eterm-eq EY' (EY ex)) (DeqEY' ex)))
+	%<- ({x} {ex} vtrans-resp (DeqEY' ex) (DeqY' x) Dvtrans'' (%the (vtrans (EY ex) (Y x)) (Dvtrans''' x ex))) %.
+%scope tconvert-ssub-e %term app 
+	%pi (aconvert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] aconverte/app (Dsub x) (DconvM x d ex xt) (DconvR x d ex xt)) (%the (aconverte _ R _ _) Dconv) (aconverte/app (Dsub R) DconvM' DconvR'))
+	%<- (aconvert-ssub-e Dappend Dappend' DconvR Dconv DconvR')
+	%<- (convert-ssub-e Dappend Dappend' DconvM Dconv DconvM') %.
+%scope tconvert-ssub-e %term pi1 
+	%pi (aconvert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] aconverte/pi1 (DconvR x d ex xt)) Dconv (aconverte/pi1 DconvR'))
+	%<- (aconvert-ssub-e Dappend Dappend' DconvR Dconv DconvR') %.
+%scope tconvert-ssub-e %term pi2 
+	%pi (aconvert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] aconverte/pi2 (DconvR x d ex xt)) Dconv (aconverte/pi2 DconvR'))
+	%<- (aconvert-ssub-e Dappend Dappend' DconvR Dconv DconvR') %.
+%scope tconvert-ssub-e %term at 
+	%pi (convert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] converte/at (D x d ex xt)) Dconv (converte/at D'))
+	%<- (aconvert-ssub-e Dappend Dappend' D Dconv D') %.
+%scope tconvert-ssub-e %term lam 
+	%pi (convert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] converte/lam (DconvM x d ex xt) (DconvA x d ex xt)) Dconv (converte/lam DconvM' DconvA'))
+	%<- (tconvert-ssub-e Dappend Dappend' DconvA Dconv DconvA')
+	%<- ({y} {e} {ey} {yt} convert-ssub-e ([x] append/cons (Dappend x)) (append/cons Dappend') ([x] [d] [ex] [xt] DconvM x d ex xt y e ey yt) Dconv (DconvM' y e ey yt)) %.
+%scope tconvert-ssub-e %term pair 
+	%pi (convert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] converte/pair (Dwf x d) (Dconv2 x d ex xt) (Dsub x) (Dconv1 x d ex xt)) (%the (aconverte _ R _ _) Dconv) (converte/pair Dwf' Dconv2' (Dsub R) Dconv1'))
+	%<- (convert-ssub-e Dappend Dappend' Dconv1 Dconv Dconv1')
+	%<- (convert-ssub-e Dappend Dappend' Dconv2 Dconv Dconv2')
+	%<- (aconverte-reg-il Dconv Daof)
+	%<- ({y} {e} stsubst-e ([x] append/cons (Dappend x)) (append/cons Dappend') ([x] [d] Dwf x d y e) Daof (Dwf' y e)) %.
+%scope tconvert-ssub-e %term sing 
+	%pi (convert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] converte/sing (D x d ex xt)) Dconv (converte/sing D'))
+	%<- (aconvert-ssub-e Dappend Dappend' D Dconv D') %.
+%scope tconvert-ssub-e %term t 
+	%pi (tconvert-ssub-e (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) Dappend' ([x] [d] [ex] [xt] tconverte/t (%the (ordered (G x)) (Dord x d))) (%the (aconverte _ R _ _) _) (tconverte/t Dord'))
+	%<- (scsub-ordered Dappend Dappend' Dord Dord') %.
+%scope tconvert-ssub-e %term pi 
+	%pi (tconvert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] tconverte/pi (DconvB x d ex xt) (DconvA x d ex xt)) Dconv (tconverte/pi DconvB' DconvA'))
+	%<- (tconvert-ssub-e Dappend Dappend' DconvA Dconv DconvA')
+	%<- ({y} {e} {ey} {yt} tconvert-ssub-e ([x] append/cons (Dappend x)) (append/cons Dappend') ([x] [d] [ex] [xt] DconvB x d ex xt y e ey yt) Dconv (DconvB' y e ey yt)) %.
+%scope tconvert-ssub-e %term sigma 
+	%pi (tconvert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] tconverte/sigma (DconvB x d ex xt) (DconvA x d ex xt)) Dconv (tconverte/sigma DconvB' DconvA'))
+	%<- (tconvert-ssub-e Dappend Dappend' DconvA Dconv DconvA')
+	%<- ({y} {e} {ey} {yt} tconvert-ssub-e ([x] append/cons (Dappend x)) (append/cons Dappend') ([x] [d] [ex] [xt] DconvB x d ex xt y e ey yt) Dconv (DconvB' y e ey yt)) %.
+%scope tconvert-ssub-e %term sing 
+	%pi (tconvert-ssub-e Dappend Dappend' ([x] [d] [ex] [xt] tconverte/sing (D x d ex xt)) Dconv (tconverte/sing D'))
+	%<- (aconvert-ssub-e Dappend Dappend' D Dconv D') %.
+%worlds (sbind ovar tbind) (convert-ssub-e _ _ _ _ _) (aconvert-ssub-e _ _ _ _ _) (tconvert-ssub-e _ _ _ _ _) %.
+%total (D1 D2 D3) (aconvert-ssub-e _ _ D1 _ _) (convert-ssub-e _ _ D2 _ _) (tconvert-ssub-e _ _ D3 _ _) %.
+%%%%%  Conversion Commutes with Substitution (Explicit Context)  %%%%%
+%sort convert-sub-em {T} {_ simp A T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ csub G N Gx} {_ {x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (converte (G x) (M x) (B x) (EM ex)))} {_ converte G1 N A EN} {_ sub M N Mx} {_ tsub B N Bx} {_ converte Gx Mx Bx EO} {_ reduce (EM EN) EO} %.
+%mode convert-sub-em %in %in %in %in %in %in %in %in %out %out %.
+%sort convert-aasub-em {T} {_ simp A T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ csub G N Gx} {_ {x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (aconverte (G x) (R x) (B x) (EM ex)))} {_ converte G1 N A EN} {_ aasub R N Rx} {_ tsub B N Bx} {_ aconverte Gx Rx Bx EO} {_ reduce (EM EN) EO} %.
+%mode convert-aasub-em %in %in %in %in %in %in %in %in %out %out %.
+%sort convert-aosub-em {T} {_ simp A T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ csub G N Gx} {_ {x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (aconverte (G x) (R x) (B x) (EM ex)))} {_ converte G1 N A EN} {_ aosub R N LRx} {_ tsub B N Bx} {_ converte Gx LRx Bx EO} {_ reduce (EM EN) EO} %.
+%mode convert-aosub-em %in %in %in %in %in %in %in %in %out %out %.
+%sort convert-tsub-em {T} {_ simp A T} {_ {x} append (cons G1 x A) (G2 x) (G x)} {_ csub G N Gx} {_ {x} %pi (isvar x I) %-> ({ex} %pi (vtrans ex x) %-> (tconverte (G x) (B x) (EB ex)))} {_ converte G1 N A EN} {_ tsub B N Bx} {_ tconverte Gx Bx EC} {_ treduce (EB EN) EC} %.
+%mode convert-tsub-em %in %in %in %in %in %in %in %out %out %.
+%scope convert-tsub-em %term var 
+	%pi (convert-aosub-em _ _ (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G N Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/var xt (%the (tconverte (G x) (A' x) (EA' ex)) (DconvertA x d ex xt)) (%the (lookup (G x) x (A' x)) (Dlookup x d))) (%the (converte G1 N A EN) Dconvert) aosub/var (%the (tsub A' N Ax) Dtsub) Dconvert'' Dreduce)
+	%<- (converte-normal Dconvert (%the (normal EN) Dnorm))
+	%<- (normal-reduce-refl Dnorm (%the (reduce EN EN) Dreduce))
+	%<- ({x} {d} lookup-binder-fun (Dappend x) (Dlookup x d) (%the (tp-eq A (A' x)) (DeqA x)))
+	%<- (tsub-absent A N (%the (tsub ([_] A) N A) Dtsub'))
+	%<- (tsub-resp DeqA term-eq/i tp-eq/i Dtsub' (%the (tsub A' N A) Dtsub''))
+	%<- (tsub-fun Dtsub'' Dtsub (%the (tp-eq A Ax) DeqAx))
+	%<- (csub-append Dcsub Dappend (%the (append G1 G2x Gx) Dappend'))
+	%<- ({x} {d} lookup-context (Dlookup x d) (%the (ordered (G x)) (Dordered x d)))
+	%<- (csub-ordered Dordered Dcsub (%the (ordered Gx) Dordered'))
+	%<- (weaken-converte' Dappend' Dordered' Dconvert (%the (converte Gx N A EN) Dconvert'))
+	%<- (converte-resp ctx-eq/i term-eq/i DeqAx eterm-eq/i Dconvert' (%the (converte Gx N Ax EN) Dconvert'')) %.
+%scope convert-tsub-em %term app 
+	%pi (convert-aosub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/app (%the (tsub ([y] C x y) (N x) (Cy x)) (DsubCy x)) (%the (converte (G x) (N x) (B x) (EN ex)) (DconvertN x d ex xt)) (%the (aconverte (G x) (R x) (pi (B x) ([y] C x y)) (EO ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (aosub/app (%the (sub P Nx Py) DsubPy) (%the (sub N M Nx) DsubNx) (%the (aosub R M (lam P)) DsubRx)) (%the (tsub Cy M Cyx) DsubCyx) DconvertPy' (reduce/app (reduce-app/beta DreducePy) DreduceBx DreduceP))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) (R x) (pi (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/pi (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- (can-tsub-e Dappend DwfB DofM (%the (tsub B M Bx) DsubBx))
+	%<- ({y} {e isvar y J} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- (convert-aosub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx (tsub/pi DsubCx DsubBx) (converte/lam (%the ({y} 
+	%pi (isvar y K)
+	%-> ({ey} %pi (vtrans ey y) %-> (converte (cons Gx y Bx) (P y) (Cx y) (EP ey)))) DconvertP) (%the (tconverte Gx Bx EBx) DconvertBx)) (%the (reduce (EO EM) (elam EBx EP)) DreduceP))
+	%<- (convert-sub-em _ Dsimp Dappend Dcsub DconvertN DconvertM DsubNx DsubBx (%the (converte Gx Nx Bx ENx) DconvertNx) (%the (reduce (EN EM) ENx) DreduceBx))
+	%<- ({y} {e isvar y J} tsubst-e ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) DofM (DsubCx y) ([x] [d] DwfC x d y e) (%the (wfe (cons Gx y Bx) (Cx y)) (DwfCx y e)))
+	%<- ({x} {d} {ex} {xt} converte-reg-il (DconvertN x d ex xt) (%the (ofe (G x) (N x) (B x)) (DofN x d)))
+	%<- (subst-e Dappend Dcsub DofM DsubNx DsubBx DofN (%the (ofe Gx Nx Bx) DofNx))
+	%<- (can-tsub-e ([_] append/nil) DwfCx DofNx (%the (tsub ([y] Cx y) Nx Cxy) DsubCxy))
+	%<- (aosub-headvar DsubRx (%the (headvar R) Dheadvar))
+	%<- (headvar-tp-size Dappend DofR Dsimp Dheadvar ([x] simp/pi (%the ({y} simp (C x y) U2) (DsimpC x)) (%the (simp (B x) U1) (DsimpB x))) (%the (stp-leq (spi U1 U2) T) Dleq))
+	%<- (tsub-preserves-simp DsubBx DsimpB (%the (simp Bx U1) DsimpBx))
+	%<- (employ-stp-leq _ _ Dleq)
+	%<- (convert-sub-em _ DsimpBx ([_] append/nil) csub/base DconvertP DconvertNx DsubPy DsubCxy (%the (converte Gx Py Cxy EPy) DconvertPy) (%the (reduce (EP ENx) EPy) DreducePy))
+	%<- (tsub-permute-e Dappend DofM DofN DwfC DsubCx DsubNx DsubCxy DsubCy DsubCyx (%the (tp-eq Cxy Cyx) Deq))
+	%<- (converte-resp ctx-eq/i term-eq/i Deq eterm-eq/i DconvertPy (%the (converte Gx Py Cyx EPy) DconvertPy')) %.
+%scope convert-tsub-em %term appbad 
+	%pi (convert-aosub-em _ _ _ _ ([x] [d] [ex] [xt] aconverte/var (Dvtrans x ex xt) (%the (tconverte _ _ (EA ex)) (Dconvert x d ex xt)) (Dlookup x d)) _ (aosub/app _ _ _) _ D1 (%the (reduce _ eaca) D2))
+	%<- ({x} {d} lookup-isvar (Dlookup x d) (%the (isvar ((%abs app) _ _) J) (Disvar x)))
+	%<- ({x} isvar-app-contra (Disvar x) Dfalse)
+	%<- (false-implies-converte Dfalse D1)
+	%<- (false-implies-reduce Dfalse D2) %.
+%scope convert-tsub-em %term pi1 
+	%pi (convert-aosub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/pi1 (%the (aconverte (G x) (R x) (sigma (B x) ([y] C x y)) (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (aosub/pi1 (%the (aosub R M (pair O P)) DsubRx)) (%the (tsub B M Bx) DsubBx) DconvertO (reduce/pi1 reduce-pi1/beta Dreduce))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) (R x) (sigma (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/sigma (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- ({y} {e isvar y J} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- (convert-aosub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx (tsub/sigma DsubCx DsubBx) (converte/pair _ (%the (converte Gx P Cxy EP) DconvertP) (%the (tsub Cx O Cxy) DsubCxy) (%the (converte Gx O Bx EO) DconvertO)) (%the (reduce (EN EM) (epair EO EP)) Dreduce)) %.
+%scope convert-tsub-em %term pi1bad 
+	%pi (convert-aosub-em _ _ _ _ ([x] [d] [ex] [xt] aconverte/var (Dvtrans x ex xt) (%the (tconverte _ _ (EA ex)) (Dconvert x d ex xt)) (Dlookup x d)) _ (aosub/pi1 _) _ D1 (%the (reduce _ eaca) D2))
+	%<- ({x} {d} lookup-isvar (Dlookup x d) (%the (isvar ((%abs pi1) _) J) (Disvar x)))
+	%<- ({x} isvar-pi1-contra (Disvar x) Dfalse)
+	%<- (false-implies-converte Dfalse D1)
+	%<- (false-implies-reduce Dfalse D2) %.
+%scope convert-tsub-em %term pi2 
+	%pi (convert-aosub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/pi2 (%the (aconverte (G x) (R x) (sigma (B x) ([y] C x y)) (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (aosub/pi2 (%the (aosub R M (pair O P)) DsubRx)) (%the (tsub ([x] C x ((%abs pi1) (R x))) M Cyx) DsubCyx) DconvertP' (reduce/pi2 reduce-pi2/beta Dreduce))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) (R x) (sigma (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/sigma (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- (can-tsub-e Dappend DwfB DofM (%the (tsub ([x] B x) M Bx) DsubBx))
+	%<- ({y} {e isvar y J} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- ({y} {e isvar y J} tsubst-e ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) DofM (DsubCx y) ([x] [d] DwfC x d y e) (%the (wfe (cons Gx y Bx) (Cx y)) (DwfCx y e)))
+	%<- (convert-aosub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx (tsub/sigma DsubCx DsubBx) (converte/pair _ (%the (converte Gx P Cxy EP) DconvertP) (%the (tsub Cx O Cxy) DsubCxy) (%the (converte Gx O Bx EO) DconvertO)) (%the (reduce (EN EM) (epair EO EP)) Dreduce))
+	%<- (stsub-ao-permute-e Dappend DofM ([x] [d] aofe/pi1 (DofR x d)) DwfC DsubCx (aosub/pi1 DsubRx) DsubCxy DsubCyx (%the (tp-eq Cxy Cyx) Deq))
+	%<- (converte-resp ctx-eq/i term-eq/i Deq eterm-eq/i DconvertP (%the (converte Gx P Cyx EP) DconvertP')) %.
+%scope convert-tsub-em %term pi2bad 
+	%pi (convert-aosub-em _ _ _ _ ([x] [d] [ex] [xt] aconverte/var (Dvtrans x ex xt) (%the (tconverte _ _ (EA ex)) (Dconvert x d ex xt)) (Dlookup x d)) _ (aosub/pi2 _) _ D1 (%the (reduce _ eaca) D2))
+	%<- ({x} {d} lookup-isvar (Dlookup x d) (%the (isvar ((%abs pi2) _) J) (Disvar x)))
+	%<- ({x} isvar-pi2-contra (Disvar x) Dfalse)
+	%<- (false-implies-converte Dfalse D1)
+	%<- (false-implies-reduce Dfalse D2) %.
+%scope convert-tsub-em %term const 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G N Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/const (%the (tconverte (G x) (B x) (EB ex)) (Dconv x d ex xt)) (%the (wf (B x)) (Dwf x)) (%the (kof C (B x)) (Dkof x))) (%the (converte G1 N A EN) DconvertN) aasub/closed (%the (tsub B N Bx) DsubBx) (aconverte/const DconvertBx Dwf'' Dkof') reduce/const)
+	%<- (subst-kof Dkof DsubBx (%the (kof C Bx) Dkof'))
+	%<- (wf-noassm Dwf (%the ({x} tp-eq (B x) B') Deq))
+	%<- (tsub-resp Deq term-eq/i tp-eq/i DsubBx (%the (tsub ([_] B') N Bx) DsubBx'))
+	%<- (tsub-absent-fun DsubBx' (%the (tp-eq Bx B') DeqBx))
+	%<- (tp-eq-symm DeqBx DeqBx')
+	%<- (wf-resp (Deq aca) (Dwf aca) Dwf')
+	%<- (wf-resp DeqBx' Dwf' Dwf'')
+	%<- (convert-tsub-em _ Dsimp Dappend Dcsub Dconv DconvertN DsubBx (%the (tconverte Gx Bx EBx) DconvertBx) _) %.
+%%%
+%scope convert-tsub-em %term forall 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G N Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/forall (%the (tconverte (G x) (B x) (EB ex)) (Dconv x d ex xt))) (%the (converte G1 N A EN) DconvertN) (aasub/forall (%the (tsub B N Bx) DsubBx)) (%the (tsub ([x] qtp (B x)) N Qx) DsubQx) Dconv' (reduce/forall Dreduce))
+	%<- (convert-tsub-em _ Dsimp Dappend Dcsub Dconv DconvertN DsubBx (%the (tconverte Gx Bx EBx) DconvBx) (%the (treduce (EB EN) EBx) Dreduce))
+	%<- (tsub-fun (tsub/pi ([_] tsub/t) (tsub/pi ([_] tsub/t) DsubBx)) DsubQx (%the (tp-eq (qtp Bx) Qx) Deq))
+	%<- (aconverte-resp ctx-eq/i atom-eq/i Deq eterm-eq/i (aconverte/forall DconvBx) (%the (aconverte Gx ((%abs forall) Bx) Qx (eforall EBx)) Dconv')) %.
+%scope convert-tsub-em %term allclo 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G N Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/forall (%the (tconverte (G x) B (EB ex)) (Dconv x d ex xt))) (%the (converte G1 N A EN) DconvertN) aasub/closed (%the (tsub ([x] qtp B) N Qx) DsubQx) Dconv' (reduce/forall Dreduce))
+	%<- (tsub-absent B N (%the (tsub ([_] B) N B) DsubBx))
+	%<- (convert-tsub-em _ Dsimp Dappend Dcsub Dconv DconvertN DsubBx (%the (tconverte Gx B EBx) DconvBx) (%the (treduce (EB EN) EBx) Dreduce))
+	%<- (tsub-fun (tsub/pi ([_] tsub/t) (tsub/pi ([_] tsub/t) DsubBx)) DsubQx (%the (tp-eq (qtp B) Qx) Deq))
+	%<- (aconverte-resp ctx-eq/i atom-eq/i Deq eterm-eq/i (aconverte/forall DconvBx) (%the (aconverte Gx ((%abs forall) B) Qx (eforall EBx)) Dconv')) %.
+%scope convert-tsub-em %term allbad 
+	%pi (convert-aasub-em _ _ _ _ ([x] [d] [ex] [xt] aconverte/var (Dvtrans x ex xt) (%the (tconverte _ _ (EA ex)) (Dconvert x d ex xt)) (Dlookup x d)) _ (aasub/forall _) _ D1 (%the (reduce _ eaca) D2))
+	%<- ({x} {d} lookup-isvar (Dlookup x d) (%the (isvar ((%abs forall) _) J) (Disvar x)))
+	%<- ({x} isvar-forall-contra (Disvar x) Dfalse)
+	%<- (false-implies-aconverte Dfalse D1)
+	%<- (false-implies-reduce Dfalse D2) %.
+%scope convert-tsub-em %term var 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G N Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/var (%the (vtrans (EX ex) X) (Dvtrans x ex xt)) (%the (tconverte (G x) (B x) (EB ex)) (DconvertB x d ex xt)) (%the (lookup (G x) X (B x)) (Dlookup x d))) (%the (converte G1 N A EN) DconvertN) aasub/closed (%the (tsub B N Bx) DsubBx) (aconverte/var Dvtrans' DconvertBx Dlookup') Dreduce)
+	%<- (csub-lookup Dcsub Dlookup DsubBx (%the (lookup Gx X Bx) Dlookup'))
+	%<- (strengthen-vtrans Dvtrans (%the ({ex} eterm-eq (EX ex) EX') Deq) (%the (vtrans EX' X) Dvtrans'))
+	%<- (convert-tsub-em _ Dsimp Dappend Dcsub DconvertB DconvertN DsubBx (%the (tconverte Gx Bx EBx) DconvertBx) _)
+	%<- ({ex} eterm-eq-symm (Deq ex) (%the (eterm-eq EX' (EX ex)) (Deq' ex)))
+	%<- (vtrans-variable Dvtrans' (%the (variable EX') Dvar))
+	%<- (reduce-resp (Deq' EN) eterm-eq/i (reduce/var Dvar) (%the (reduce (EX EN) EX') Dreduce)) %.
+%scope convert-tsub-em %term vari 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G N Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/vari (%the (vtrans (EX ex) X) (Dvtrans x ex xt)) (%the (tconverte (G x) (B x) (EB ex)) (DconvertB x d ex xt)) (%the (wf (B x)) (Dwf x)) (%the (vof X (B x)) (Dvof x))) (%the (converte G1 N A EN) DconvertN) aasub/closed (%the (tsub B N Bx) DsubBx) (aconverte/vari Dvtrans' DconvertBx Dwf'' Dvof'') Dreduce)
+	%<- (vof-noassm Dvof (%the ({x} tp-eq (B x) B') DeqB))
+	%<- ({x} vof-resp atom-eq/i (DeqB x) (Dvof x) (%the (vof X B') (Dvof' x)))
+	%<- (tsub-resp DeqB term-eq/i tp-eq/i DsubBx (%the (tsub ([_] B') N Bx) DsubBx'))
+	%<- (tsub-absent B' N (%the (tsub ([_] B') N B') DsubBabs))
+	%<- (tsub-fun DsubBx' DsubBabs (%the (tp-eq Bx B') DeqBx))
+	%<- (tp-eq-symm DeqBx (%the (tp-eq B' Bx) DeqBx'))
+	%<- (vof-resp atom-eq/i DeqBx' (Dvof' aca) (%the (vof X Bx) Dvof''))
+	%<- ({x} wf-resp (DeqB x) (Dwf x) (%the (wf B') (Dwf' x)))
+	%<- (wf-resp DeqBx' (Dwf' aca) (%the (wf Bx) Dwf''))
+	%<- (convert-tsub-em _ Dsimp Dappend Dcsub DconvertB DconvertN DsubBx (%the (tconverte Gx Bx EBx) DconvertBx) _)
+	%<- (strengthen-vtrans Dvtrans (%the ({ex} eterm-eq (EX ex) EX') DeqEX) (%the (vtrans EX' X) Dvtrans'))
+	%<- ({ex} eterm-eq-symm (DeqEX ex) (%the (eterm-eq EX' (EX ex)) (DeqEX' ex)))
+	%<- (vtrans-variable Dvtrans' (%the (variable EX') Dvar))
+	%<- (reduce-resp (DeqEX' EN) eterm-eq/i (reduce/var Dvar) (%the (reduce (EX EN) EX') Dreduce)) %.
+%scope convert-tsub-em %term app 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/app (%the (tsub ([y] C x y) (N x) (Cy x)) (DsubCy x)) (%the (converte (G x) (N x) (B x) (EN ex)) (DconvertN x d ex xt)) (%the (aconverte (G x) (R x) (pi (B x) ([y] C x y)) (EO ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (aasub/app (%the (sub N M Nx) DsubNx) (%the (aasub R M Rx) DsubRx)) (%the (tsub Cy M Cyx) DsubCyx) (aconverte/app DsubCxy' DconvertNx DconvertRx) (reduce/app (reduce-app/atom Doa) DreduceNx DreduceRx))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) (R x) (pi (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/pi (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- (can-tsub-e Dappend DwfB DofM (%the (tsub B M Bx) DsubBx))
+	%<- ({y} {e} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx (tsub/pi DsubCx DsubBx) (%the (aconverte Gx Rx (pi Bx Cx) ERx) DconvertRx) (%the (reduce (EO EM) ERx) DreduceRx))
+	%<- (convert-sub-em _ Dsimp Dappend Dcsub DconvertN DconvertM DsubNx DsubBx (%the (converte Gx Nx Bx ENx) DconvertNx) (%the (reduce (EN EM) ENx) DreduceNx))
+	%<- ({y} {e} tsubst-e ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) DofM (DsubCx y) ([x] [d] DwfC x d y e) (%the (wfe (cons Gx y Bx) (Cx y)) (DwfCx y e)))
+	%<- ({x} {d} {ex} {xt} converte-reg-il (DconvertN x d ex xt) (%the (ofe (G x) (N x) (B x)) (DofN x d)))
+	%<- (subst-e Dappend Dcsub DofM DsubNx DsubBx DofN (%the (ofe Gx Nx Bx) DofNx))
+	%<- (can-tsub-e ([_] append/nil) DwfCx DofNx (%the (tsub Cx Nx Cxy) DsubCxy))
+	%<- (tsub-permute-e Dappend DofM DofN DwfC DsubCx DsubNx DsubCxy DsubCy DsubCyx (%the (tp-eq Cxy Cyx) Deq))
+	%<- (tsub-resp ([_] tp-eq/i) term-eq/i Deq DsubCxy (%the (tsub Cx Nx Cyx) DsubCxy'))
+	%<- (aconverte-atomic DconvertRx (%the (atomic ERx) Datom))
+	%<- (atomic-implies-oa Datom (%the (oa ERx) Doa)) %.
+%scope convert-tsub-em %term appclo 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/app (%the (tsub ([y] C x y) N (Cy x)) (DsubCy x)) (%the (converte (G x) N (B x) (EN ex)) (DconvertN x d ex xt)) (%the (aconverte (G x) R (pi (B x) ([y] C x y)) (EO ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) aasub/closed (%the (tsub Cy M Cyx) DsubCyx) (aconverte/app DsubCxy' DconvertNx DconvertRx) (reduce/app (reduce-app/atom Doa) DreduceNx DreduceRx))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) R (pi (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/pi (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- (can-tsub-e Dappend DwfB DofM (%the (tsub B M Bx) DsubBx))
+	%<- ({y} {e} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM aasub/closed (tsub/pi DsubCx DsubBx) (%the (aconverte Gx R (pi Bx Cx) ERx) DconvertRx) (%the (reduce (EO EM) ERx) DreduceRx))
+	%<- (sub-absent N M (%the (sub ([_] N) M N) DsubNx))
+	%<- (convert-sub-em _ Dsimp Dappend Dcsub DconvertN DconvertM DsubNx DsubBx (%the (converte Gx N Bx ENx) DconvertNx) (%the (reduce (EN EM) ENx) DreduceNx))
+	%<- ({y} {e} tsubst-e ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) DofM (DsubCx y) ([x] [d] DwfC x d y e) (%the (wfe (cons Gx y Bx) (Cx y)) (DwfCx y e)))
+	%<- ({x} {d} {ex} {xt} converte-reg-il (DconvertN x d ex xt) (%the (ofe (G x) N (B x)) (DofN x d)))
+	%<- (subst-e Dappend Dcsub DofM DsubNx DsubBx DofN (%the (ofe Gx N Bx) DofNx))
+	%<- (can-tsub-e ([_] append/nil) DwfCx DofNx (%the (tsub Cx N Cxy) DsubCxy))
+	%<- (tsub-permute-e Dappend DofM DofN DwfC DsubCx DsubNx DsubCxy DsubCy DsubCyx (%the (tp-eq Cxy Cyx) Deq))
+	%<- (tsub-resp ([_] tp-eq/i) term-eq/i Deq DsubCxy (%the (tsub Cx N Cyx) DsubCxy'))
+	%<- (aconverte-atomic DconvertRx (%the (atomic ERx) Datom))
+	%<- (atomic-implies-oa Datom (%the (oa ERx) Doa)) %.
+%scope convert-tsub-em %term appbad 
+	%pi (convert-aasub-em _ _ _ _ ([x] [d] [ex] [xt] aconverte/var (Dvtrans x ex xt) (%the (tconverte _ _ (EA ex)) (Dconvert x d ex xt)) (Dlookup x d)) _ (aasub/app _ _) _ D1 (%the (reduce _ eaca) D2))
+	%<- ({x} {d} lookup-isvar (Dlookup x d) (%the (isvar ((%abs app) _ _) J) (Disvar x)))
+	%<- ({x} isvar-app-contra (Disvar x) Dfalse)
+	%<- (false-implies-aconverte Dfalse D1)
+	%<- (false-implies-reduce Dfalse D2) %.
+%scope convert-tsub-em %term pi1 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/pi1 (%the (aconverte (G x) (R x) (sigma (B x) ([y] C x y)) (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (aasub/pi1 (%the (aasub R M Rx) DsubRx)) (%the (tsub B M Bx) DsubBx) (aconverte/pi1 DconvertRx) (reduce/pi1 (reduce-pi1/atom Doa) Dreduce))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) (R x) (sigma (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/sigma (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- ({y} {e} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx (tsub/sigma DsubCx DsubBx) (%the (aconverte Gx Rx (sigma Bx Cx) ERx) DconvertRx) (%the (reduce (EN EM) ERx) Dreduce))
+	%<- (aconverte-atomic DconvertRx (%the (atomic ERx) Datom))
+	%<- (atomic-implies-oa Datom (%the (oa ERx) Doa)) %.
+%scope convert-tsub-em %term pi1clo 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/pi1 (%the (aconverte (G x) R (sigma (B x) ([y] C x y)) (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) aasub/closed (%the (tsub B M Bx) DsubBx) (aconverte/pi1 DconvertRx) (reduce/pi1 (reduce-pi1/atom Doa) Dreduce))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) R (sigma (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/sigma (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- ({y} {e} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM aasub/closed (tsub/sigma DsubCx DsubBx) (%the (aconverte Gx R (sigma Bx Cx) ERx) DconvertRx) (%the (reduce (EN EM) ERx) Dreduce))
+	%<- (aconverte-atomic DconvertRx (%the (atomic ERx) Datom))
+	%<- (atomic-implies-oa Datom (%the (oa ERx) Doa)) %.
+%scope convert-tsub-em %term pi1bad 
+	%pi (convert-aasub-em _ _ _ _ ([x] [d] [ex] [xt] aconverte/var (Dvtrans x ex xt) (%the (tconverte _ _ (EA ex)) (Dconvert x d ex xt)) (Dlookup x d)) _ (aasub/pi1 _) _ D1 (%the (reduce _ eaca) D2))
+	%<- ({x} {d} lookup-isvar (Dlookup x d) (%the (isvar ((%abs pi1) _) J) (Disvar x)))
+	%<- ({x} isvar-pi1-contra (Disvar x) Dfalse)
+	%<- (false-implies-aconverte Dfalse D1)
+	%<- (false-implies-reduce Dfalse D2) %.
+%scope convert-tsub-em %term pi2 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/pi2 (%the (aconverte (G x) (R x) (sigma (B x) ([y] C x y)) (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (aasub/pi2 (%the (aasub R M Rx) DsubRx)) (%the (tsub ([x] C x ((%abs pi1) (R x))) M Cyx) DsubCyx) Dconvert' (reduce/pi2 (reduce-pi2/atom Doa) Dreduce))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) (R x) (sigma (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/sigma (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- (can-tsub-e Dappend DwfB DofM (%the (tsub B M Bx) DsubBx))
+	%<- ({y} {e} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx (tsub/sigma DsubCx DsubBx) (%the (aconverte Gx Rx (sigma Bx Cx) ERx) DconvertRx) (%the (reduce (EN EM) ERx) Dreduce))
+	%<- (aconverte-reg-il DconvertRx (%the (aofe Gx Rx (sigma Bx Cx)) DofRx))
+	%<- (stsub-aa-permute-e Dappend DofM ([x] [d] aofe/pi1 (DofR x d)) DwfC DsubCx (aasub/pi1 DsubRx) DsubCyx (%the (tp-eq (Cx ((%abs pi1) Rx)) Cyx) Deq))
+	%<- (aconverte-resp ctx-eq/i atom-eq/i Deq eterm-eq/i (aconverte/pi2 DconvertRx) (%the (aconverte Gx ((%abs pi2) Rx) Cyx (epi2 ERx)) Dconvert'))
+	%<- (aconverte-atomic DconvertRx (%the (atomic ERx) Datom))
+	%<- (atomic-implies-oa Datom (%the (oa ERx) Doa)) %.
+%scope convert-tsub-em %term pi2clo 
+	%pi (convert-aasub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] aconverte/pi2 (%the (aconverte (G x) R (sigma (B x) ([y] C x y)) (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) aasub/closed (%the (tsub ([x] C x ((%abs pi1) R)) M Cyx) DsubCyx) Dconvert' (reduce/pi2 (reduce-pi2/atom Doa) Dreduce))
+	%<- ({x} {d} {ex} {xt} aconverte-reg-il (DconvertR x d ex xt) (%the (aofe (G x) R (sigma (B x) ([y] C x y))) (DofR x d)))
+	%<- ({x} {d} aofe-reg (DofR x d) (wfe/sigma (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (wfe (G x) (B x)) (DwfB x d))))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- (can-tsub-e Dappend DwfB DofM (%the (tsub B M Bx) DsubBx))
+	%<- ({y} {e} can-tsub-e ([x] append/cons (Dappend x)) ([x] [d] DwfC x d y e) DofM (%the (tsub ([x] C x y) M (Cx y)) (DsubCx y)))
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM aasub/closed (tsub/sigma DsubCx DsubBx) (%the (aconverte Gx R (sigma Bx Cx) ERx) DconvertRx) (%the (reduce (EN EM) ERx) Dreduce))
+	%<- (aconverte-reg-il DconvertRx (%the (aofe Gx R (sigma Bx Cx)) DofRx))
+	%<- (stsub-aa-permute-e Dappend DofM ([x] [d] aofe/pi1 (DofR x d)) DwfC DsubCx aasub/closed DsubCyx (%the (tp-eq (Cx ((%abs pi1) R)) Cyx) Deq))
+	%<- (aconverte-resp ctx-eq/i atom-eq/i Deq eterm-eq/i (aconverte/pi2 DconvertRx) (%the (aconverte Gx ((%abs pi2) R) Cyx (epi2 ERx)) Dconvert'))
+	%<- (aconverte-atomic DconvertRx (%the (atomic ERx) Datom))
+	%<- (atomic-implies-oa Datom (%the (oa ERx) Doa)) %.
+%scope convert-tsub-em %term pi2bad 
+	%pi (convert-aasub-em _ _ _ _ ([x] [d] [ex] [xt] aconverte/var (Dvtrans x ex xt) (%the (tconverte _ _ (EA ex)) (Dconvert x d ex xt)) (Dlookup x d)) _ (aasub/pi2 _) _ D1 (%the (reduce _ eaca) D2))
+	%<- ({x} {d} lookup-isvar (Dlookup x d) (%the (isvar ((%abs pi2) _) J) (Disvar x)))
+	%<- ({x} isvar-pi2-contra (Disvar x) Dfalse)
+	%<- (false-implies-aconverte Dfalse D1)
+	%<- (false-implies-reduce Dfalse D2) %.
+%%%
+%scope convert-tsub-em %term aa 
+	%pi (convert-sub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] converte/at (%the (aconverte (G x) (R x) t (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (sub/aa (%the (aasub R M Rx) DsubRx)) tsub/t (converte/at DconvertRx) Dreduce)
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx tsub/t (%the (aconverte Gx Rx t ENx) DconvertRx) (%the (reduce (EN EM) ENx) Dreduce)) %.
+%scope convert-tsub-em %term ao 
+	%pi (convert-sub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] converte/at (%the (aconverte (G x) (R x) t (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (sub/ao (%the (aosub R M O) DsubRx)) tsub/t DconvertO Dreduce)
+	%<- (convert-aosub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx tsub/t (%the (converte Gx O t EO) DconvertO) (%the (reduce (EN EM) EO) Dreduce)) %.
+%scope convert-tsub-em %term lam 
+	%pi (convert-sub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] converte/lam (%the ({y} {e isvar y J} {ey} {yt vtrans ey y} converte (cons (G x) y (B x)) (N x y) (C x y) (EN ex ey)) (DconvertN x d ex xt)) (%the (tconverte (G x) (B x) (EB ex)) (DconvertB x d ex xt))) (%the (converte G1 M A EM) DconvertM) (sub/lam (%the ({y} sub ([x] N x y) M (Nx y)) DsubNx)) (tsub/pi (%the ({y} tsub ([x] C x y) M (Cx y)) DsubCx) (%the (tsub B M Bx) DsubBx)) (converte/lam DconvertNx DconvertBx) (reduce/lam DreduceNx DreduceBx))
+	%<- (convert-tsub-em _ Dsimp Dappend Dcsub DconvertB DconvertM DsubBx (%the (tconverte Gx Bx EBx) DconvertBx) (%the (treduce (EB EM) EBx) DreduceBx))
+	%<- ({y} {e} {ey} {yt} {ev} 
+	%pi (vtrans-variable yt ev)
+	%-> (convert-sub-em _ Dsimp ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) ([x] [d] [ex] [xt] DconvertN x d ex xt y e ey yt) DconvertM (DsubNx y) (DsubCx y) (%the (converte (cons Gx y Bx) (Nx y) (Cx y) (ENx ey)) (DconvertNx y e ey yt)) (%the (reduce (EN EM ey) (ENx ey)) (DreduceNx ey ev)))) %.
+%scope convert-tsub-em %term pair 
+	%pi (convert-sub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] converte/pair (%the ({y} %pi (isvar y J) %-> (wfe (cons (G x) y (B x)) (C x y))) (DwfC x d)) (%the (converte (G x) (O x) (Cy x) (EO ex)) (DconvertO x d ex xt)) (%the (tsub ([y] C x y) (N x) (Cy x)) (DsubCy x)) (%the (converte (G x) (N x) (B x) (EN ex)) (DconvertN x d ex xt))) (%the (converte G1 M A EM) DconvertM) (sub/pair (%the (sub O M Ox) DsubOx) (%the (sub N M Nx) DsubNx)) (tsub/sigma (%the ({y} tsub ([x] C x y) M (Cx y)) DsubCx) (%the (tsub B M Bx) DsubBx)) (converte/pair DwfCx DconvertOx' DsubCxy DconvertNx) (reduce/pair DreduceOx DreduceNx))
+	%<- (convert-sub-em _ Dsimp Dappend Dcsub DconvertN DconvertM DsubNx DsubBx (%the (converte Gx Nx Bx ENx) DconvertNx) (%the (reduce (EN EM) ENx) DreduceNx))
+	%<- ({x} {d} {ex} {xt} converte-reg-il (DconvertN x d ex xt) (%the (ofe (G x) (N x) (B x)) (DofN x d)))
+	%<- ({x} {d} tsubst-e ([_] append/nil) csub/base (DofN x d) (DsubCy x) ([y] [e] DwfC x d y e) (%the (wfe (G x) (Cy x)) (DwfCy x d)))
+	%<- (converte-reg-il DconvertM (%the (ofe G1 M A) DofM))
+	%<- (can-tsub-e Dappend DwfCy DofM (%the (tsub Cy M Cyx) DsubCyx))
+	%<- (convert-sub-em _ Dsimp Dappend Dcsub DconvertO DconvertM DsubOx DsubCyx (%the (converte Gx Ox Cyx EOx) DconvertOx) (%the (reduce (EO EM) EOx) DreduceOx))
+	%<- (subst-e Dappend Dcsub DofM DsubNx DsubBx DofN (%the (ofe Gx Nx Bx) DofNx))
+	%<- ({y} {e} tsubst-e ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) DofM (DsubCx y) ([x] [d] DwfC x d y e) (%the (wfe (cons Gx y Bx) (Cx y)) (DwfCx y e)))
+	%<- (can-tsub-e ([_] append/nil) DwfCx DofNx (%the (tsub Cx Nx Cxy) DsubCxy))
+	%<- (tsub-permute-e Dappend DofM DofN DwfC DsubCx DsubNx DsubCxy DsubCy DsubCyx (%the (tp-eq Cxy Cyx) Deq))
+	%<- (tp-eq-symm Deq (%the (tp-eq Cyx Cxy) Deq'))
+	%<- (converte-resp ctx-eq/i term-eq/i Deq' eterm-eq/i DconvertOx (%the (converte Gx Ox Cxy EOx) DconvertOx')) %.
+%scope convert-tsub-em %term singa 
+	%pi (convert-sub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] converte/sing (%the (aconverte (G x) (R x) t (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (sub/aa (%the (aasub R M Rx) DsubRx)) (tsub/singa (%the (aasub R M Rx') DsubRx')) DconvertRx' Dreduce)
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx tsub/t (%the (aconverte Gx Rx t ENx) DconvertRx) (%the (reduce (EN EM) ENx) Dreduce))
+	%<- (aasub-fun DsubRx DsubRx' (%the (atom-eq Rx Rx') Deq))
+	%<- (tp-resp-atom sing Deq (%the (tp-eq (sing Rx) (sing Rx')) Deq'))
+	%<- (converte-resp ctx-eq/i term-eq/i Deq' eterm-eq/i (converte/sing DconvertRx) (%the (converte Gx (at Rx) (sing Rx') ENx) DconvertRx')) %.
+%scope convert-tsub-em %term singo 
+	%pi (convert-sub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] converte/sing (%the (aconverte (G x) (R x) t (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (sub/ao (%the (aosub R M O) DsubO)) (tsub/singo (%the (aosub R M (at Rx)) DsubRx)) DconvertO' Dreduce)
+	%<- (convert-aosub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubO tsub/t (%the (converte Gx O t EO) DconvertO) (%the (reduce (EN EM) EO) Dreduce))
+	%<- (aosub-fun DsubO DsubRx (%the (term-eq O (at Rx)) Deq))
+	%<- (term-eq-symm Deq (%the (term-eq (at Rx) O) Deq'))
+	%<- (converte-resp ctx-eq/i Deq tp-eq/i eterm-eq/i DconvertO (converte/at (%the (aconverte Gx Rx t EO) DconvertRx)))
+	%<- (converte-resp ctx-eq/i Deq' tp-eq/i eterm-eq/i (converte/sing DconvertRx) (%the (converte Gx O (sing Rx) EO) DconvertO')) %.
+%scope convert-tsub-em %term aaao 
+	%pi (convert-sub-em _ _ _ _ ([x] [d isvar x I] [ex] [xt] converte/sing _) _ (sub/aa (%the (aasub R M Rx) DsubRx)) (tsub/singo (%the (aosub R M (at Rx')) DsubRx')) D1 D2)
+	%<- (aasub-aosub-contra DsubRx DsubRx' Dfalse)
+	%<- (false-implies-converte Dfalse (%the (converte _ _ _ eaca) D1))
+	%<- (false-implies-reduce Dfalse D2) %.
+%scope convert-tsub-em %term aoaa 
+	%pi (convert-sub-em _ _ _ _ ([x] [d isvar x I] [ex] [xt] converte/sing _) _ (sub/ao (%the (aosub R M O) DsubRx)) (tsub/singa (%the (aasub R M Rx) DsubRx')) D1 D2)
+	%<- (aasub-aosub-contra DsubRx' DsubRx Dfalse)
+	%<- (false-implies-converte Dfalse (%the (converte _ _ _ eaca) D1))
+	%<- (false-implies-reduce Dfalse D2) %.
+%%%
+%scope convert-tsub-em %term t 
+	%pi (convert-tsub-em _ _ _ (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] tconverte/t (%the (ordered (G x)) (Dordered x d))) _ tsub/t (tconverte/t Dordered') treduce/t)
+	%<- (csub-ordered Dordered Dcsub Dordered') %.
+%scope convert-tsub-em %term pi 
+	%pi (convert-tsub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] tconverte/pi (%the ({y} {e isvar y J} {ey} {yt vtrans ey y} tconverte (cons (G x) y (B x)) (C x y) (EC ex ey)) (DconvertC x d ex xt)) (%the (tconverte (G x) (B x) (EB ex)) (DconvertB x d ex xt))) (%the (converte G1 M A EM) DconvertM) (tsub/pi (%the ({y} tsub ([x] C x y) M (Cx y)) DsubCx) (%the (tsub B M Bx) DsubBx)) (tconverte/pi DconvertCx DconvertBx) (treduce/pi DreduceCx DreduceBx))
+	%<- (convert-tsub-em _ Dsimp Dappend Dcsub DconvertB DconvertM DsubBx (%the (tconverte Gx Bx EBx) DconvertBx) (%the (treduce (EB EM) EBx) DreduceBx))
+	%<- ({y} {e} {ey} {yt} {ev} 
+	%pi (vtrans-variable yt ev)
+	%-> (convert-tsub-em _ Dsimp ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) ([x] [d] [ex] [xt] DconvertC x d ex xt y e ey yt) DconvertM (DsubCx y) (%the (tconverte (cons Gx y Bx) (Cx y) (ECx ey)) (DconvertCx y e ey yt)) (%the (treduce (EC EM ey) (ECx ey)) (DreduceCx ey ev)))) %.
+%scope convert-tsub-em %term sigma 
+	%pi (convert-tsub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] tconverte/sigma (%the ({y} {e isvar y J} {ey} {yt vtrans ey y} tconverte (cons (G x) y (B x)) (C x y) (EC ex ey)) (DconvertC x d ex xt)) (%the (tconverte (G x) (B x) (EB ex)) (DconvertB x d ex xt))) (%the (converte G1 M A EM) DconvertM) (tsub/sigma (%the ({y} tsub ([x] C x y) M (Cx y)) DsubCx) (%the (tsub B M Bx) DsubBx)) (tconverte/sigma DconvertCx DconvertBx) (treduce/sigma DreduceCx DreduceBx))
+	%<- (convert-tsub-em _ Dsimp Dappend Dcsub DconvertB DconvertM DsubBx (%the (tconverte Gx Bx EBx) DconvertBx) (%the (treduce (EB EM) EBx) DreduceBx))
+	%<- ({y} {e} {ey} {yt} {ev} 
+	%pi (vtrans-variable yt ev)
+	%-> (convert-tsub-em _ Dsimp ([x] append/cons (Dappend x)) (csub/cons DsubBx Dcsub) ([x] [d] [ex] [xt] DconvertC x d ex xt y e ey yt) DconvertM (DsubCx y) (%the (tconverte (cons Gx y Bx) (Cx y) (ECx ey)) (DconvertCx y e ey yt)) (%the (treduce (EC EM ey) (ECx ey)) (DreduceCx ey ev)))) %.
+%scope convert-tsub-em %term singa 
+	%pi (convert-tsub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] tconverte/sing (%the (aconverte (G x) (R x) (%abs t) (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (tsub/singa (%the (aasub R M Rx) DsubRx)) (tconverte/sing DconvertRx) (treduce/sing Dreduce))
+	%<- (convert-aasub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx tsub/t (%the (aconverte Gx Rx (%abs t) ENx) DconvertRx) (%the (reduce (EN EM) ENx) Dreduce)) %.
+%scope convert-tsub-em %term singo 
+	%pi (convert-tsub-em _ (%the (simp A T) Dsimp) (%the ({x} append (cons G1 x A) (G2 x) (G x)) Dappend) (%the (csub G M Gx) Dcsub) ([x] [d isvar x I] [ex] [xt] tconverte/sing (%the (aconverte (G x) (R x) (%abs t) (EN ex)) (DconvertR x d ex xt))) (%the (converte G1 M A EM) DconvertM) (tsub/singo (%the (aosub R M (at Rx)) DsubRx)) (tconverte/sing DconvertRx) (treduce/sing Dreduce))
+	%<- (convert-aosub-em _ Dsimp Dappend Dcsub DconvertR DconvertM DsubRx tsub/t (converte/at (%the (aconverte Gx Rx (%abs t) ENx) DconvertRx)) (%the (reduce (EN EM) ENx) Dreduce)) %.
+%worlds (sbind ovar tvbind evar) (convert-sub-em _ _ _ _ _ _ _ _ _ _) (convert-aasub-em _ _ _ _ _ _ _ _ _ _) (convert-aosub-em _ _ _ _ _ _ _ _ _ _) (convert-tsub-em _ _ _ _ _ _ _ _ _) %.
+%total {(T1 T2 T3 T4) (D1 D2 D3 D4)} (convert-aosub-em T1 _ _ _ D1 _ _ _ _ _) (convert-aasub-em T2 _ _ _ D2 _ _ _ _ _) (convert-sub-em T3 _ _ _ D3 _ _ _ _ _) (convert-tsub-em T4 _ _ _ D4 _ _ _ _) %.
+%%%%%  Conversion Commutes with Simple Substitution (Implicit Context)  %%%%%
+%sort convert-ssub {_ {x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))} {_ aconvert R A EN} {_ convert (M R) (B R) (EM EN)} %.
+%mode convert-ssub %in %in %out %.
+%term _ 
+	%pi (convert-ssub (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))) DconvM) (%the (aconvert R A EN) DconvR) DconvMR')
+	%<- (convert1-to-converte 0 DconvM (%the ({x} 
+	%pi (isvar x 0)
+	%-> ({ex} %pi (vtrans ex x) %-> (converte (cons nil x A) (M x) (B x) (EM ex)))) DconveM))
+	%<- (aconvert-to-aconverte DconvR (%the (aconverte nil R A EN) DconveR))
+	%<- (convert-ssub-e ([_] append/nil) append/nil DconveM DconveR (%the (converte nil (M R) (B R) (EM EN)) DconveMR))
+	%<- ({x} {d} {ex} {xt} convert-reg-il (DconvM x d ex xt) (%the (of (M x) (B x)) (DofM x d)))
+	%<- (aconvert-reg-il DconvR (%the (aof R A) DofR))
+	%<- (ssubst DofM DofR (%the (of (M R) (B R)) DofMR))
+	%<- (can-convert DofMR (%the (convert (M R) (B R) EM') DconvMR))
+	%<- (convert-to-converte DconvMR (%the (converte nil (M R) (B R) EM') DconveMR'))
+	%<- (converte-fun DconveMR' DconveMR (%the (eterm-eq EM' (EM EN)) Deq))
+	%<- (convert-resp term-eq/i tp-eq/i Deq DconvMR (%the (convert (M R) (B R) (EM EN)) DconvMR')) %.
+%sort _ {_ %pi (vsound _ _ _ _) %-> (convert-ssub _ _ _)} %.
+%worlds (sbind) (convert-ssub _ _ _) %.
+%total {} (convert-ssub _ _ _) %.
+%sort convert-stsub {_ {x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))} {_ aconvert R A EN} {_ tconvert (B R) (EB EN)} %.
+%mode convert-stsub %in %in %out %.
+%term _ 
+	%pi (convert-stsub (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvB) (%the (aconvert R A EN) DconvR) DconvBR')
+	%<- (tconvert1-to-tconverte 0 DconvB (%the ({x} 
+	%pi (isvar x 0)
+	%-> ({ex} %pi (vtrans ex x) %-> (tconverte (cons nil x A) (B x) (EB ex)))) DconveB))
+	%<- (aconvert-to-aconverte DconvR (%the (aconverte nil R A EN) DconveR))
+	%<- (tconvert-ssub-e ([_] append/nil) append/nil DconveB DconveR (%the (tconverte nil (B R) (EB EN)) DconveBR))
+	%<- ({x} {d} {ex} {xt} tconvert-reg-il (DconvB x d ex xt) (%the (wf (B x)) (DwfB x d)))
+	%<- (aconvert-reg-il DconvR (%the (aof R A) DofR))
+	%<- (stsubst DwfB DofR (%the (wf (B R)) DwfBR))
+	%<- (can-tconvert DwfBR (%the (tconvert (B R) EB') DconvBR))
+	%<- (tconvert-to-tconverte DconvBR (%the (tconverte nil (B R) EB') DconveBR'))
+	%<- (tconverte-fun DconveBR' DconveBR (%the (etp-eq EB' (EB EN)) Deq))
+	%<- (tconvert-resp tp-eq/i Deq DconvBR (%the (tconvert (B R) (EB EN)) DconvBR')) %.
+%sort _ {_ %pi (vsound _ _ _ _) %-> (convert-stsub _ _ _)} %.
+%worlds (sbind) (convert-stsub _ _ _) %.
+%total {} (convert-stsub _ _ _) %.
+%sort convert-ssub1 {_ {x} 
+	%pi (vof x A)
+	%-> ({ex} 
+	%pi (vtrans ex x)
+	%-> ({y} 
+	%pi (vof y (B x))
+	%-> ({ey} %pi (vtrans ey y) %-> (convert (M x y) (C x y) (EM ex ey)))))} {_ aconvert R A EN} {_ {x} %pi (vof x A) %-> (wf (B x))} {_ {y} 
+	%pi (vof y (B R))
+	%-> ({ey} %pi (vtrans ey y) %-> (convert (M R y) (C R y) (EM EN ey)))} %.
+%mode convert-ssub1 %in %in %in %out %.
+%term _ 
+	%pi (convert-ssub1 (%the ({x} 
+	%pi (vof x A)
+	%-> ({ex} 
+	%pi (vtrans ex x)
+	%-> ({y} 
+	%pi (vof y (B x))
+	%-> ({ey} %pi (vtrans ey y) %-> (convert (M x y) (C x y) (EM ex ey)))))) DconvM) (%the (aconvert R A EN) DconvR) (%the ({x} %pi (vof x A) %-> (wf (B x))) DwfB) DconvMR')
+	%<- (convert2-to-converte (%the (lt 0 (s 0)) lt/z) DconvM (%the ({x} 
+	%pi (isvar x 0)
+	%-> ({ex} 
+	%pi (vtrans ex x)
+	%-> ({y} 
+	%pi (isvar y (s 0))
+	%-> ({ey} 
+	%pi (vtrans ey y)
+	%-> (converte (cons (cons nil x A) y (B x)) (M x y) (C x y) (EM ex ey)))))) DconveM))
+	%<- (aconvert-to-aconverte DconvR (%the (aconverte nil R A EN) DconveR))
+	%<- ({y} {e} {ey} {yt} convert-ssub-e ([_] append/cons append/nil) (append/cons append/nil) ([x] [d] [ex] [xt] DconveM x d ex xt y e ey yt) DconveR (%the (converte (cons nil y (B R)) (M R y) (C R y) (EM EN ey)) (DconveMR y e ey yt)))
+	%<- ({x} {d} {ex} {xt} {y} {e} {ey} {yt} convert-reg-il (DconvM x d ex xt y e ey yt) (%the (of (M x y) (C x y)) (DofM x d y e)))
+	%<- (aconvert-reg-il DconvR (%the (aof R A) DofR))
+	%<- (ssubst1 DofM DofR (%the ({y} %pi (vof y (B R)) %-> (of (M R y) (C R y))) DofMR))
+	%<- (stsubst DwfB DofR (%the (wf (B R)) DwfBR))
+	%<- (can-tconvert DwfBR (%the (tconvert (B R) EB') DconvBR))
+	%<- ({y} {e} {ey} {yt vtrans ey y} {ee evof ey EB'} {ev variable ey} 
+	%pi (vtrans-variable yt ev)
+	%-> (vsound e yt DconvBR ee)
+	%-> (can-convert (DofMR y e) (%the (convert (M R y) (C R y) (EM' ey)) (DconvMR y e ey yt))))
+	%<- (convert1-to-converte (s 0) DconvMR (%the ({y} 
+	%pi (isvar y (s 0))
+	%-> ({ey} %pi (vtrans ey y) %-> (converte (cons nil y (B R)) (M R y) (C R y) (EM' ey)))) DconveMR'))
+	%<- ({y} {e} {ey} {yt} converte-fun (DconveMR' y e ey yt) (DconveMR y e ey yt) (%the (eterm-eq (EM' ey) (EM EN ey)) (Deq ey)))
+	%<- ({y} {e} {ey} {yt} convert-resp term-eq/i tp-eq/i (Deq ey) (DconvMR y e ey yt) (%the (convert (M R y) (C R y) (EM EN ey)) (DconvMR' y e ey yt))) %.
+%sort _ {_ %pi (vsound _ _ _ _) %-> (convert-ssub1 _ _ _ _)} %.
+%worlds (sbind) (convert-ssub1 _ _ _ _) %.
+%total {} (convert-ssub1 _ _ _ _) %.
+%%%%%  Conversion Commutes with Substitution (Implicit Context)  %%%%%
+%sort convert-tsub-reduce {_ {x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))} {_ convert N A EN} {_ tsub B N Bx} {_ tconvert Bx EC} {_ treduce (EB EN) EC} %.
+%mode convert-tsub-reduce %in %in %in %out %out %.
+%term _ 
+	%pi (convert-tsub-reduce (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) DconvertB) (%the (convert N A EN) DconvertN) (%the (tsub B N Bx) DsubBx) DconvertBx' Dreduce)
+	%<- ({x} {d} {ex} {xt} tconvert-reg-il (DconvertB x d ex xt) (%the (wf (B x)) (DwfB x d)))
+	%<- (convert-reg-il DconvertN (%the (of N A) DofN))
+	%<- (tsubst DsubBx DwfB DofN (%the (wf Bx) DwfBx))
+	%<- (can-tconvert DwfBx (%the (tconvert Bx EBx) DconvertBx))
+	%<- (tconvert1-to-tconverte 0 DconvertB (%the ({x} 
+	%pi (isvar x 0)
+	%-> ({ex} %pi (vtrans ex x) %-> (tconverte (cons nil x A) (B x) (EB ex)))) DconverteB))
+	%<- (convert-to-converte DconvertN (%the (converte nil N A EN) DconverteN))
+	%<- (tconvert-to-tconverte DconvertBx (%the (tconverte nil Bx EBx) DconverteBx))
+	%<- (can-simp A (%the (simp A T) Dsimp))
+	%<- (convert-tsub-em _ Dsimp ([_] append/nil) csub/base DconverteB DconverteN DsubBx (%the (tconverte nil Bx EC) DconverteBx') (%the (treduce (EB EN) EC) Dreduce))
+	%<- (tconverte-fun DconverteBx DconverteBx' (%the (etp-eq EBx EC) Deq))
+	%<- (tconvert-resp tp-eq/i Deq DconvertBx (%the (tconvert Bx EC) DconvertBx')) %.
+%worlds (sbind) (convert-tsub-reduce _ _ _ _ _) %.
+%total {} (convert-tsub-reduce _ _ _ _ _) %.
+%sort convert-sub-reduce {_ {x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))} {_ convert N A EN} {_ sub M N Mx} {_ tsub B N Bx} {_ convert Mx Bx EO} {_ reduce (EM EN) EO} %.
+%mode convert-sub-reduce %in %in %in %in %out %out %.
+%term _ 
+	%pi (convert-sub-reduce (%the ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))) DconvertM) (%the (convert N A EN) DconvertN) (%the (sub M N Mx) DsubMx) (%the (tsub B N Bx) DsubBx) DconvertMx' Dreduce)
+	%<- ({x} {d} {ex} {xt} convert-reg-il (DconvertM x d ex xt) (%the (of (M x) (B x)) (DofM x d)))
+	%<- (convert-reg-il DconvertN (%the (of N A) DofN))
+	%<- (subst DsubMx DsubBx DofM DofN (%the (of Mx Bx) DofMx))
+	%<- (can-convert DofMx (%the (convert Mx Bx EMx) DconvertMx))
+	%<- (convert1-to-converte 0 DconvertM (%the ({x} 
+	%pi (isvar x 0)
+	%-> ({ex} %pi (vtrans ex x) %-> (converte (cons nil x A) (M x) (B x) (EM ex)))) DconverteM))
+	%<- (convert-to-converte DconvertN (%the (converte nil N A EN) DconverteN))
+	%<- (convert-to-converte DconvertMx (%the (converte nil Mx Bx EMx) DconverteMx))
+	%<- (can-simp A (%the (simp A T) Dsimp))
+	%<- (convert-sub-em _ Dsimp ([_] append/nil) csub/base DconverteM DconverteN DsubMx DsubBx (%the (converte nil Mx Bx EO) DconverteMx') (%the (reduce (EM EN) EO) Dreduce))
+	%<- (converte-fun DconverteMx DconverteMx' (%the (eterm-eq EMx EO) Deq))
+	%<- (convert-resp term-eq/i tp-eq/i Deq DconvertMx (%the (convert Mx Bx EO) DconvertMx')) %.
+%worlds (sbind) (convert-sub-reduce _ _ _ _ _ _) %.
+%total {} (convert-sub-reduce _ _ _ _ _ _) %.

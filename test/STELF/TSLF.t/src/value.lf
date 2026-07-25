@@ -1,0 +1,20 @@
+%%%% Values
+%sort val/tm {_ tm} %.
+%mode val/tm %star %.
+%term val/tm/unit val/tm tm/unit %.
+%term val/tm/pair %pi (val/tm (tm/pair T1 T2)) %<- (val/tm T2) %<- (val/tm T1) %.
+%term val/tm/fun val/tm (tm/fun _ _ _) %.
+%term val/tm/cnabs val/tm (tm/cnabs _ _) %.
+%term val/tm/loc val/tm (tm/loc _) %.
+%term val/tm/inl %pi (val/tm (tm/inl (tp/sum C1 C2) E)) %<- (val/tm E) %.
+%term val/tm/inr %pi (val/tm (tm/inr (tp/sum C1 C2) E)) %<- (val/tm E) %.
+%term val/tm/tagloc val/tm (tm/tagloc _) %.
+%term val/tm/tag %pi (val/tm (tm/tag E1 E2)) %<- (val/tm E2) %<- (val/tm E1) %.
+%term val/tm/roll %pi (val/tm (tm/roll (cn/mu _ _) E)) %<- (val/tm E) %.
+%sort val/md {_ md} %.
+%mode val/md %star %.
+%term val/md/unit val/md md/unit %.
+%term val/md/pair %pi (val/md (md/pair M1 M2)) %<- (val/md M2) %<- (val/md M1) %.
+%term val/md/lam val/md (md/lam _ _ _) %.
+%term val/md/cn val/md (md/cn _) %.
+%term val/md/tm %pi (val/md (md/tm E)) %<- (val/tm E) %.

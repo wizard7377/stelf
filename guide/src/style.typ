@@ -1,6 +1,0 @@
-#let conf(docs) = {
-
-
-  docs
-}
-

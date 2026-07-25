@@ -1,0 +1,4 @@
+%scope nat %{
+  %require %[ core %] %.
+  %require %[ ops %] %.
+%}

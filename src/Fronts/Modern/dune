@@ -1,4 +1,6 @@
 (library
+ (instrumentation
+  (backend bisect_ppx))
  (name modern)
  (public_name stelf.modern)
- (libraries display parsing lexing paths names cst))
+ (libraries display parsing lexing paths names cst error))

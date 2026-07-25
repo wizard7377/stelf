@@ -1,0 +1,11 @@
+%%%% definition of not stuck
+%sort notstuck/tm {_ tm} {_ st} {_ lt} %.
+%mode notstuck/tm %star %star %star %.
+%term notstuck/tm/val %pi (notstuck/tm E ST TT) %<- (val/tm E) %.
+%term notstuck/tm/step %pi (notstuck/tm E ST TT) %<- (step/tm E ST TT E' ST' TT') %.
+%term notstuck/tm/raises %pi (notstuck/tm E ST TT) %<- (raises/tm E _) %.
+%sort notstuck/md {_ md} {_ st} {_ lt} %.
+%mode notstuck/md %star %star %star %.
+%term notstuck/md/val %pi (notstuck/md E ST TT) %<- (val/md E) %.
+%term notstuck/md/step %pi (notstuck/md E ST TT) %<- (step/md E ST TT E' ST' TT') %.
+%term notstuck/md/raises %pi (notstuck/md M ST TT) %<- (raises/md M _) %.

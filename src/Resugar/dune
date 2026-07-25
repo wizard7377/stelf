@@ -1,0 +1,6 @@
+(library
+ (instrumentation
+  (backend bisect_ppx))
+ (name resugar)
+ (public_name stelf.resugar)
+ (libraries syntax names paths cst))

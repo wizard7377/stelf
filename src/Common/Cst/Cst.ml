@@ -2,7 +2,7 @@ open Basis
 
 module type CST = CST.CST
 
-module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
+module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
   module Paths = Paths
 
   (* Location type for source tracking - use simple int-based representation *)
@@ -13,6 +13,15 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
   type name = string [@@deriving show { with_path = false }, eq]
   type namespace = string list [@@deriving show { with_path = false }, eq]
   type symbol = namespace * name [@@deriving show { with_path = false }, eq]
+
+  (* Distinguishes [%val NAME] (shadow-aware: an open %scope's case label
+     wins over an outer/toplevel declaration of the same name) from
+     [%abs NAME] (toplevel-first: prefers the current %require group's own
+     toplevel declaration, bypassing %scope shadowing, falling back to
+     shadow-aware lookup only if no toplevel binding exists). See
+     [Names.resolveQid]. Qualified forms ([%val ( NAME S )] /
+     [%abs ( NAME S )]) are unaffected by this distinction. *)
+  type qid_form = Val | Abs [@@deriving show { with_path = false }, eq]
 
   (* Location helpers *)
   let mk_loc (start_ : int) (end_ : int) : loc =
@@ -27,20 +36,65 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
   type decl = Dec_ of string option list * term * loc
 
   and term =
-    | Arrow_ of term * term
-    | Pi_ of decl * term
-    | Lam_ of decl * term
-    | App_ of term * term
-    | Hastype_ of term * term
+    | Arrow_ of loc * term * term
+    | Pi_ of loc * decl * term
+    | Lam_ of loc * decl * term
+    | App_ of loc * term * term
+    | Hastype_ of loc * term * term
     | Omitted_ of loc
     | Lcid_ of string list * string * loc
     | Ucid_ of string list * string * loc
-    | Quid_ of string list * string * loc
+    | Quid_ of string list * string * qid_form * loc
     | Scon_ of string * loc
     | Evar_ of string * loc
     | Fvar_ of string * loc
     | Typ_ of loc
-  [@@deriving show { with_path = false }, eq]
+    | MacroParam_ of loc * int option * int
+    | Local_ of loc * namespace * term
+  [@@deriving eq]
+
+  let rec pp_term (fmt : Format.formatter) (x : term) : unit =
+    match x with
+    | Arrow_ (l, t, u) -> Format.fprintf fmt "{%a} %a" pp_term t pp_term u
+    | Pi_ (l, t, u) -> Format.fprintf fmt "{%a} %a" pp_decl t pp_term u
+    | Lam_ (l, t, u) -> Format.fprintf fmt "[%a] %a" pp_decl t pp_term u
+    | App_ (l, t, u) -> Format.fprintf fmt "(%a %a)" pp_term t pp_term u
+    | Hastype_ (l, t, u) -> Format.fprintf fmt "%%the %a %a" pp_term t pp_term u
+    | Omitted_ l -> Format.fprintf fmt "_"
+    | Lcid_ (ns, name, l) -> Format.fprintf fmt "%s" name
+    | Ucid_ (ns, name, l) -> Format.fprintf fmt "$%s" name
+    | Quid_ (ns, name, form, l) ->
+        let prefix = match form with Val -> "%val" | Abs -> "%abs" in
+        Format.fprintf fmt "%s(%s.%s)" prefix (Stdlib.String.concat "." ns) name
+    | Scon_ (str, l) -> Format.fprintf fmt "%%[%a%%]" Format.pp_print_string str
+    | Evar_ (name, l) -> Format.fprintf fmt "_?%s" name
+    | Fvar_ (name, l) -> Format.fprintf fmt "__%s" name
+    | Typ_ l -> Format.fprintf fmt "%%type"
+    | MacroParam_ (l, opt, n) ->
+        Format.fprintf fmt "%%arg %d %d" (Stdlib.Option.value ~default:0 opt) n
+    | Local_ (l, ns, t) ->
+        Format.fprintf fmt "%%local %s %a"
+          (Stdlib.String.concat "." ns)
+          pp_term t
+
+  and pp_decl_name (fmt : Format.formatter) (n : name option) : unit =
+    match n with
+    | None -> Format.fprintf fmt "_"
+    | Some name -> Format.fprintf fmt "%s" name
+
+  and pp_decl (fmt : Format.formatter) (x : decl) : unit =
+    match x with
+    | Dec_ (names, t, l) -> (
+        match names with
+        | [] -> Format.fprintf fmt "%a" pp_term t
+        | [ name ] -> Format.fprintf fmt "%a %a" pp_decl_name name pp_term t
+        | names ->
+            Format.fprintf fmt "(%a) %a"
+              (Format.pp_print_list pp_decl_name)
+              names pp_term t)
+
+  and show_term (x : term) : string = Format.asprintf "%a" pp_term x
+  and show_decl (x : decl) : string = Format.asprintf "%a" pp_decl x
 
   (* Constant/block declarations *)
   type conDec =
@@ -103,6 +157,12 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
   type block_item = BlockSome_ of decl | BlockPi_ of decl
   [@@deriving show { with_path = false }, eq]
 
+  type order =
+    | Varg_ of loc * string list
+    | Lex_ of loc * order list
+    | Simul_ of loc * order list
+  [@@deriving show { with_path = false }, eq]
+
   (* Top-level commands *)
   type cmd =
     | QueryCmd_ of int option * int option * int option * query
@@ -116,15 +176,12 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
     | SymbolCmd_ of string * string
     | FreezeCmd_ of string list
     | ThawCmd_ of string list
-    | SortCmd_ of string * decl list
+    | SortCmd_ of string list * decl list
     | TermCmd_ of decl
     | BlockCmd_ of string * block_item list
     | UnionCmd_ of string * string list
-    | WorldsCmd_ of string list * term
+    | WorldsCmd_ of string list * term list
     | DeterministicCmd_ of string list
-    | ModuleCmd_ of string * string list * cmd list
-    | UseCmd_ of string * string * string list
-    | OpenCmd_ of string * string list
     | EvalCmd_ of cmd list
     | PrecCmd_ of fixity * int * string list
     | SolveCmd_ of solve
@@ -134,10 +191,23 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
     | GetCmd_ of string
     | SetCmd_ of string * string
     | VersionCmd_
-    | TotalCmd_ of string list list * term list
-    | TerminatesCmd_ of string list list * term list
+    | TotalCmd_ of order list * term list
+    | TerminatesCmd_ of order list * term list
     | CoversCmd_ of modeDec
     | NameCmd_ of string
+    | ProseCmd_ of string
+    | ReducesCmd_ of string * term list
+    | Macro_ of int * string * cmd
+        (** Defines a macro, taking its location, number of params, name, and
+            the body *)
+    | Seq_ of item list
+        (** A sequence of commands, for use withthe module system*)
+    | Require_ of string list  (** Ensure that the given path is loaded *)
+    | Open_ of string list  (** Open a scope into the scope *)
+    | Scope_ of string * cmd  (** Enter into a new scope *)
+    | Use_ of string list * term list  (** Apply a macro *)
+
+  and item = Outer of string | Cmd of cmd
   [@@deriving show { with_path = false }, eq]
 
   (* Term constructor module *)
@@ -150,29 +220,39 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
     let uppercase ?fc:(loc_ = ghost) (namespace, name) =
       Ucid_ (namespace, name, loc_)
 
-    let qualified ?fc:(loc_ = ghost) (namespace, name) =
-      Quid_ (namespace, name, loc_)
+    let qualified ?fc:(loc_ = ghost) ?(form = Val) (namespace, name) =
+      Quid_ (namespace, name, form, loc_)
 
     let text ?fc:(loc_ = ghost) str = Scon_ (str, loc_)
     let exist_var ?fc:(loc_ = ghost) name = Evar_ (name, loc_)
     let free_var ?fc:(loc_ = ghost) name = Fvar_ (name, loc_)
 
     module Sugar = struct
-      let arrow ?fc:(loc_ = ghost) tm1 tm2 = Arrow_ (tm1, tm2)
-      let backarrow ?fc:(loc_ = ghost) tm1 tm2 = Arrow_ (tm2, tm1)
+      let arrow ?fc:(loc_ = ghost) tm1 tm2 = Arrow_ (loc_, tm1, tm2)
+      let backarrow ?fc:(loc_ = ghost) tm1 tm2 = Arrow_ (loc_, tm2, tm1)
     end
 
     let pi ?fc:(loc_ = ghost) decls body =
       let rec fold_right f lst acc =
         match lst with [] -> acc | x :: xs -> f x (fold_right f xs acc)
       in
-      fold_right (fun d acc -> Pi_ (d, acc)) decls body
+      match decls with
+      | [] -> body
+      | first :: rest ->
+          let inner = fold_right (fun d acc -> Pi_ (ghost, d, acc)) rest body in
+          Pi_ (loc_, first, inner)
 
     let lam ?fc:(loc_ = ghost) decls body =
       let rec fold_right f lst acc =
         match lst with [] -> acc | x :: xs -> f x (fold_right f xs acc)
       in
-      fold_right (fun d acc -> Lam_ (d, acc)) decls body
+      match decls with
+      | [] -> body
+      | first :: rest ->
+          let inner =
+            fold_right (fun d acc -> Lam_ (ghost, d, acc)) rest body
+          in
+          Lam_ (loc_, first, inner)
 
     let app ?fc:(loc_ = ghost) head args =
       match args with
@@ -181,9 +261,15 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           let rec fold_left f acc lst =
             match lst with [] -> acc | x :: xs -> fold_left f (f acc x) xs
           in
-          fold_left (fun acc arg -> App_ (acc, arg)) head args
+          let rev = List.rev args in
+          let last = List.hd rev in
+          let init = List.rev (List.tl rev) in
+          let inner =
+            fold_left (fun acc arg -> App_ (ghost, acc, arg)) head init
+          in
+          App_ (loc_, inner, last)
 
-    let has_type ?fc:(loc_ = ghost) tm ty = Hastype_ (tm, ty)
+    let has_type ?fc:(loc_ = ghost) tm ty = Hastype_ (loc_, tm, ty)
     let[@warning "-16"] omitted ?fc:(loc_ = ghost) = Omitted_ loc_
     let typ ?fc:(loc_ = ghost) () = Typ_ loc_
   end
@@ -232,7 +318,7 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         ModeSpineInternal_ ((m, name_opt) :: spine)
 
       let mode_root ?fc:(loc_ = ghost) (ns, name) (ModeSpineInternal_ _spine) =
-        ModeTermRoot_ (Quid_ (ns, name, loc_))
+        ModeTermRoot_ (Quid_ (ns, name, Val, loc_))
 
       let to_modeDec ?fc:(loc_ = ghost) mt = ModeDec_ mt
     end
@@ -299,15 +385,12 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
     let symbol ?fc:(_ = ghost) id1 id2 = SymbolCmd_ (id1, id2)
     let freeze ?fc:(_ = ghost) ids = FreezeCmd_ ids
     let thaw ?fc:(_ = ghost) ids = ThawCmd_ ids
-    let sort ?fc:(_ = ghost) id decls = SortCmd_ (id, decls)
+    let sort ?fc:(_ = ghost) ids decls = SortCmd_ (ids, decls)
     let term ?fc:(_ = ghost) d = TermCmd_ d
     let block ?fc:(_ = ghost) id items = BlockCmd_ (id, items)
     let union ?fc:(_ = ghost) id ids = UnionCmd_ (id, ids)
-    let worlds ?fc:(_ = ghost) ids tm = WorldsCmd_ (ids, tm)
+    let worlds ?fc:(_ = ghost) ids tms = WorldsCmd_ (ids, tms)
     let deterministic ?fc:(_ = ghost) ids = DeterministicCmd_ ids
-    let module_cmd ?fc:(_ = ghost) id params cmds = ModuleCmd_ (id, params, cmds)
-    let use ?fc:(_ = ghost) id1 id2 ps = UseCmd_ (id1, id2, ps)
-    let open_cmd ?fc:(_ = ghost) id ids = OpenCmd_ (id, ids)
     let eval ?fc:(_ = ghost) cmds = EvalCmd_ cmds
     let prec ?fc:(_ = ghost) fix n ids = PrecCmd_ (fix, n, ids)
     let solve ?fc:(_ = ghost) s = SolveCmd_ s
@@ -325,6 +408,7 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
     let terminates ?fc:(_ = ghost) intros body = TerminatesCmd_ (intros, body)
     let covers ?fc:(_ = ghost) md = CoversCmd_ md
     let name ?fc:(_ = ghost) id = NameCmd_ id
+    let reduces ?fc:(_ = ghost) pred body = ReducesCmd_ (pred, body)
   end
 
   module Fixity = struct
@@ -342,7 +426,7 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
   end
 
   module Thm = struct
-    type order =
+    type nonrec order = order =
       | Varg_ of loc * string list
       | Lex_ of loc * order list
       | Simul_ of loc * order list
@@ -413,9 +497,15 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
     let wdecl wdecl_ = wdecl_
   end
 
+  open Lens
+
   module View :
     LENS.VIEW
-      with type Term.t = term
+      with type loc = loc
+       and type qid_form = qid_form
+       and type Loc.t = loc
+       and module Paths = Paths
+       and type Term.t = term
        and type Decl.t = decl
        and type ConDec.t = conDec
        and type Mode.t = mode
@@ -430,6 +520,7 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
        and type Solve.t = solve
        and type Define.t = define
        and type Fixity.t = fixity
+       and type BlockItem.t = block_item
        and type Cmd.t = cmd = struct
     module Paths = Paths
 
@@ -448,11 +539,17 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
     type symbol = namespace * name
     (** Qualified symbol as [(namespace, name)]. *)
 
+    type nonrec qid_form = qid_form =
+      | Val
+      | Abs
+          (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
+              (toplevel-first lookup, falling back to shadow-aware). *)
+
     (** Create a Loc.tation from start and end lexer positions. *)
-    let mk_loc : int -> int -> loc = fun x y -> assert false
+    let mk_loc = mk_loc
 
     (** Convert a source Loc.tation to a Paths region. *)
-    let loc_to_region : loc -> Paths.region = fun loc -> assert false
+    let loc_to_region = loc_to_region
 
     (** Synthetic Loc.tation used for generated nodes. *)
     let ghost : loc = ghost
@@ -469,44 +566,25 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         match y with
         | Loc (path_opt, start_pos, end_pos) -> { start_pos; end_pos }
         | Ghost -> ghost
+
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
-    (** {3 Term Syntax} *)
-    module rec Term : sig
-      type t = term
+    let ghost' : Loc.t = ghost
 
-      type u =
-        | Lowercase of loc * symbol
-        | Uppercase of loc * symbol
-        | Qualified of loc * symbol
-        | Text of loc * name
-        | ExistVar of loc * name
-        | FreeVar of loc * name
-        | Pi of loc * Decl.t list * t
-        | Lam of loc * Decl.t list * t
-        | App of loc * t * t list
-        | HasType of loc * t * t
-        | Omitted of loc
-        | Typ of loc
-        | Arrow of loc * t * t
-        | BackArrow of loc * t * t
-        | Foreign of loc * t
-        | Internal of int
-
-      val view : t -> u
-      val review : u -> t
-    end = struct
+    module Term = struct
       type t = term
 
       type u =
         | Lowercase of Loc.t * symbol
         | Uppercase of Loc.t * symbol
-        | Qualified of Loc.t * symbol
+        | Qualified of Loc.t * symbol * qid_form
         | Text of Loc.t * string
         | ExistVar of Loc.t * string
         | FreeVar of Loc.t * string
-        | Pi of Loc.t * Decl.t list * t
-        | Lam of Loc.t * Decl.t list * t
+        | Pi of Loc.t * decl list * t
+        | Lam of Loc.t * decl list * t
         | App of Loc.t * t * t list
         | HasType of Loc.t * t * t
         | Omitted of Loc.t
@@ -515,47 +593,49 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | BackArrow of Loc.t * t * t
         | Foreign of Loc.t * t
         | Internal of int
+        | MacroParam of Loc.t * int option * int
+        | Local of Loc.t * namespace * t
 
       let view (x : t) : u =
         let rec collect_pis = function
-          | Pi_ (d, body) ->
+          | Pi_ (_, d, body) ->
               let ds, b = collect_pis body in
               (d :: ds, b)
           | body -> ([], body)
         in
         let rec collect_lams = function
-          | Lam_ (d, body) ->
+          | Lam_ (_, d, body) ->
               let ds, b = collect_lams body in
               (d :: ds, b)
           | body -> ([], body)
         in
         let rec collect_apps acc = function
-          | App_ (f, arg) -> collect_apps (arg :: acc) f
+          | App_ (_, f, arg) -> collect_apps (arg :: acc) f
           | head -> (head, acc)
         in
         match x with
-        | Lcid_ (ns, name, _) -> Lowercase (ghost, (ns, name))
-        | Ucid_ (ns, name, _) -> Uppercase (ghost, (ns, name))
-        | Quid_ (ns, name, _) -> Qualified (ghost, (ns, name))
-        | Scon_ (str, _) -> Text (ghost, str)
-        | Evar_ (name, _) -> ExistVar (ghost, name)
-        | Fvar_ (name, _) -> FreeVar (ghost, name)
-        | Pi_ _ ->
+        | Lcid_ (ns, name, loc) -> Lowercase (loc, (ns, name))
+        | Ucid_ (ns, name, loc) -> Uppercase (loc, (ns, name))
+        | Quid_ (ns, name, form, loc) -> Qualified (loc, (ns, name), form)
+        | Scon_ (str, loc) -> Text (loc, str)
+        | Evar_ (name, loc) -> ExistVar (loc, name)
+        | Fvar_ (name, loc) -> FreeVar (loc, name)
+        | Pi_ (loc, _, _) ->
             let decls, body = collect_pis x in
-            Pi (ghost, decls, body)
-        | Lam_ _ ->
+            Pi (loc, decls, body)
+        | Lam_ (loc, _, _) ->
             let decls, body = collect_lams x in
-            Lam (ghost, decls, body)
-        | App_ _ ->
+            Lam (loc, decls, body)
+        | App_ (loc, _, _) ->
             let head, args = collect_apps [] x in
-            App (ghost, head, args)
-        | Hastype_ (tm, ty) -> HasType (ghost, tm, ty)
-        | Omitted_ _ -> Omitted ghost
-        | Typ_ _ -> Typ ghost
-        | Arrow_ (a, b) -> Arrow (ghost, a, b)
+            App (loc, head, args)
+        | Hastype_ (loc, tm, ty) -> HasType (loc, tm, ty)
+        | Omitted_ loc -> Omitted loc
+        | Typ_ loc -> Typ loc
+        | Arrow_ (loc, a, b) -> Arrow (loc, a, b)
+        | Local_ (loc, ns, tm) -> Local (loc, ns, tm)
 
       let review (y : u) : t =
-        let g = { start_pos = 0; end_pos = 0 } in
         let rec fold_right f lst acc =
           match lst with [] -> acc | x :: xs -> f x (fold_right f xs acc)
         in
@@ -564,53 +644,70 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           | x :: xs -> fold_left f (f acc x) xs
         in
         match y with
-        | Lowercase (_, (ns, name)) -> Lcid_ (ns, name, g)
-        | Uppercase (_, (ns, name)) -> Ucid_ (ns, name, g)
-        | Qualified (_, (ns, name)) -> Quid_ (ns, name, g)
-        | Text (_, str) -> Scon_ (str, g)
-        | ExistVar (_, name) -> Evar_ (name, g)
-        | FreeVar (_, name) -> Fvar_ (name, g)
-        | Pi (_, decls, body) ->
-            fold_right (fun d acc -> Pi_ (d, acc)) decls body
-        | Lam (_, decls, body) ->
-            fold_right (fun d acc -> Lam_ (d, acc)) decls body
-        | App (_, head, args) ->
-            fold_left (fun acc arg -> App_ (acc, arg)) head args
-        | HasType (_, tm, ty) -> Hastype_ (tm, ty)
-        | Omitted _ -> Omitted_ g
-        | Typ _ -> Typ_ g
-        | Arrow (_, a, b) -> Arrow_ (a, b)
-        | BackArrow (_, a, b) -> Arrow_ (b, a)
+        | Lowercase (loc, (ns, name)) -> Lcid_ (ns, name, loc)
+        | Uppercase (loc, (ns, name)) -> Ucid_ (ns, name, loc)
+        | Qualified (loc, (ns, name), form) -> Quid_ (ns, name, form, loc)
+        | Text (loc, str) -> Scon_ (str, loc)
+        | ExistVar (loc, name) -> Evar_ (name, loc)
+        | FreeVar (loc, name) -> Fvar_ (name, loc)
+        | Pi (loc, decls, body) -> (
+            match decls with
+            | [] -> body
+            | first :: rest ->
+                let inner =
+                  fold_right (fun d acc -> Pi_ (ghost, d, acc)) rest body
+                in
+                Pi_ (loc, first, inner))
+        | Lam (loc, decls, body) -> (
+            match decls with
+            | [] -> body
+            | first :: rest ->
+                let inner =
+                  fold_right (fun d acc -> Lam_ (ghost, d, acc)) rest body
+                in
+                Lam_ (loc, first, inner))
+        | App (loc, head, args) -> (
+            match List.rev args with
+            | [] -> head
+            | last :: rev_rest ->
+                let inner =
+                  fold_left
+                    (fun acc arg -> App_ (ghost, acc, arg))
+                    head (List.rev rev_rest)
+                in
+                App_ (loc, inner, last))
+        | HasType (loc, tm, ty) -> Hastype_ (loc, tm, ty)
+        | Omitted loc -> Omitted_ loc
+        | Typ loc -> Typ_ loc
+        | Arrow (loc, a, b) -> Arrow_ (loc, a, b)
+        | BackArrow (loc, a, b) -> Arrow_ (loc, b, a)
+        | Foreign (_, _) -> raise Lacking
+        | Internal _ -> raise Lacking
+        | Local (loc, ns, tm) -> Local_ (loc, ns, tm)
+
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
-    (** Binder declaration constructors. *)
-    and Decl : sig
+    module Decl = struct
       type t = decl
 
       type u =
-        | Decl1 of Loc.t * string option list * Term.t * Term.t
-        | Decl0 of Loc.t * string option list * Term.t
-
-      val view : t -> u
-      val review : u -> t
-    end = struct
-      type t = decl
-
-      type u =
-        | Decl1 of Loc.t * string option list * Term.t * Term.t
-        | Decl0 of Loc.t * string option list * Term.t
+        | Decl1 of Loc.t * string option list * term * term
+        | Decl0 of Loc.t * string option list * term
 
       let view (x : t) : u =
-        let g = { start_pos = 0; end_pos = 0 } in
         match x with
-        | Dec_ (names, Omitted_ _, _) -> Decl0 (ghost, names, Omitted_ g)
-        | Dec_ (names, typ, _) -> Decl1 (ghost, names, typ, Omitted_ g)
+        | Dec_ (names, Omitted_ loc, dloc) -> Decl0 (dloc, names, Omitted_ loc)
+        | Dec_ (names, typ, dloc) -> Decl1 (dloc, names, typ, Omitted_ ghost)
 
       let review (y : u) : t =
-        let g = { start_pos = 0; end_pos = 0 } in
         match y with
-        | Decl1 (_, names, typ, _) -> Dec_ (names, typ, g)
-        | Decl0 (_, names, typ) -> Dec_ (names, typ, g)
+        | Decl1 (loc, names, typ, _) -> Dec_ (names, typ, loc)
+        | Decl0 (loc, names, typ) -> Dec_ (names, typ, loc)
+
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
     (** Top-level declaration constructors. *)
@@ -636,6 +733,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | BlockDecl (_, n, ds1, ds2) -> BlockDecl_ (n, ds1, ds2)
         | BlockDef (_, n, syms) -> BlockDef_ (n, syms)
         | ConstantDef (_, n, tm, opt) -> ConstantDef_ (n, tm, opt)
+
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
     (** Mode syntax constructors. *)
@@ -662,6 +762,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | Minus _ -> Minus_
         | Minus1 _ -> Minus1_
 
+      let ( !> ) = view
+      let ( !< ) = review
+
       type t_mode = t
 
       module Spine = struct
@@ -682,6 +785,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           | ModeNil _ -> ModeSpineInternal_ []
           | ModeApp (_, entry, ModeSpineInternal_ xs) ->
               ModeSpineInternal_ (entry :: xs)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Term = struct
@@ -695,9 +801,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           match x with
           | ModeTermRoot_ tm ->
               let rec extract_head = function
-                | Quid_ (ns, n, _) -> (ns, n)
+                | Quid_ (ns, n, _, _) -> (ns, n)
                 | Lcid_ (ns, n, _) -> ([], n)
-                | App_ (f, _) -> extract_head f
+                | App_ (_, f, _) -> extract_head f
                 | _ -> raise Lacking
               in
               ModeTerm (ghost, extract_head tm, ModeSpineInternal_ [])
@@ -706,8 +812,11 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         let review (y : u) : t =
           let g = { start_pos = 0; end_pos = 0 } in
           match y with
-          | ModeTerm (_, (ns, n), _) -> ModeTermRoot_ (Quid_ (ns, n, g))
+          | ModeTerm (_, (ns, n), _) -> ModeTermRoot_ (Quid_ (ns, n, Val, g))
           | ModePi (_, d, body, _) -> ModeTermPi_ (Plus_, d, body)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Dec = struct
@@ -737,6 +846,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
                     ModeTermPi_ (m, Dec_ ([ n ], Omitted_ g, g), build rest)
               in
               ModeDec_ (build spine)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
     end
 
@@ -748,6 +860,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
 
         let view (x : t) : u = match x with StrExp_ sym -> StrExp (ghost, sym)
         let review (y : u) : t = match y with StrExp (_, sym) -> StrExp_ sym
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Inst = struct
@@ -767,6 +881,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           match y with
           | ConInst (_, sym, _, tm) -> ConInst_ (sym, g, tm)
           | StrInst (_, sym, _, se) -> StrInst_ (sym, g, se)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module SigExp = struct
@@ -788,6 +905,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           | Thesig _ -> TheSig_
           | SigId (_, str) -> SigId_ str
           | WhereSig (_, se, insts) -> WhereSig_ (se, insts)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module SigDef = struct
@@ -799,6 +919,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
 
         let review (y : u) : t =
           match y with SigDef (_, n, se) -> SigDef_ (n, se)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module StructDec = struct
@@ -817,6 +940,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           match y with
           | StructDecl (_, n, se) -> StructDecl_ (n, se)
           | StructDef (_, n, se) -> StructDef_ (n, se)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
     end
 
@@ -828,6 +954,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         match x with Query_ (n, tm) -> Query (ghost, n, tm)
 
       let review (y : u) : t = match y with Query (_, n, tm) -> Query_ (n, tm)
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
     module Define = struct
@@ -840,6 +968,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
 
       let review (y : u) : t =
         match y with Define (_, n, tm1, tm2_opt) -> Define_ (n, tm1, tm2_opt)
+
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
     module Solve = struct
@@ -850,6 +981,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         match x with Solve_ (n, tm) -> Solve (ghost, n, tm)
 
       let review (y : u) : t = match y with Solve (_, n, tm) -> Solve_ (n, tm)
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
     module Fixity = struct
@@ -880,6 +1013,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | Postfix _ -> Postfix_
         | Middle _ -> Middle_
         | None _ -> FNone_
+
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
     module BlockItem = struct
@@ -893,6 +1029,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
 
       let review (y : u) : t =
         match y with Any (_, d) -> BlockSome_ d | All (_, d) -> BlockPi_ d
+
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
     module Cmd = struct
@@ -914,11 +1053,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | Term of Loc.t * Decl.t
         | Block of Loc.t * string * BlockItem.t list
         | Union of Loc.t * string * string list
-        | Worlds of Loc.t * string list * Term.t
+        | Worlds of Loc.t * string list * Term.t list
         | Deterministic of Loc.t * string list
-        | ModuleCmd of Loc.t * string * string list * t list
-        | Use of Loc.t * string * string * string list
-        | OpenCmd of Loc.t * string * string list
         | Eval of Loc.t * t list
         | Prec of Loc.t * Fixity.t * int * string list
         | Solve of Loc.t * Solve.t
@@ -928,10 +1064,24 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | ReplGet of Loc.t * string
         | ReplSet of Loc.t * string * string
         | ReplVersion of Loc.t * unit
-        | Total of Loc.t * string list list * Term.t list
-        | Terminates of Loc.t * string list list * Term.t list
+        | Total of Loc.t * Thm.order list * Term.t list
+        | Terminates of Loc.t * Thm.order list * Term.t list
         | Covers of Loc.t * Mode.Dec.t
         | Name of Loc.t * string
+        | Prose of Loc.t * string
+        | Reduces of Loc.t * string * Term.t list
+        | Macro of Loc.t * int * string * t
+            (** Defines a macro, taking its location, number of params, name,
+                and the body *)
+        | Seq of Loc.t * item list
+            (** A sequence of commands, for use withthe module system*)
+        | Require of Loc.t * string list
+            (** Ensure that the given path is loaded *)
+        | Open of Loc.t * string list  (** Open a scope into the scope *)
+        | Scope of Loc.t * string * t  (** Enter into a new scope *)
+        | Use of Loc.t * string list * Term.t list  (** Apply a macro *)
+
+      and item = Outer of string | Cmd of t
 
       let view (x : t) : u =
         match x with
@@ -946,15 +1096,12 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | SymbolCmd_ (id1, id2) -> Symbol (ghost, id1, id2)
         | FreezeCmd_ ids -> Freeze (ghost, ids)
         | ThawCmd_ ids -> Thaw (ghost, ids)
-        | SortCmd_ (id, decls) -> Sort (ghost, [ id ], decls)
+        | SortCmd_ (ids, decls) -> Sort (ghost, ids, decls)
         | TermCmd_ d -> Term (ghost, d)
         | BlockCmd_ (id, items) -> Block (ghost, id, items)
         | UnionCmd_ (id, ids) -> Union (ghost, id, ids)
         | WorldsCmd_ (ids, tm) -> Worlds (ghost, ids, tm)
         | DeterministicCmd_ ids -> Deterministic (ghost, ids)
-        | ModuleCmd_ (id, params, cmds) -> ModuleCmd (ghost, id, params, cmds)
-        | UseCmd_ (id1, id2, ps) -> Use (ghost, id1, id2, ps)
-        | OpenCmd_ (id, ids) -> OpenCmd (ghost, id, ids)
         | EvalCmd_ cmds -> Eval (ghost, cmds)
         | PrecCmd_ (fix, n, ids) -> Prec (ghost, fix, n, ids)
         | SolveCmd_ s -> Solve (ghost, s)
@@ -964,6 +1111,18 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | GetCmd_ s -> ReplGet (ghost, s)
         | SetCmd_ (s, v) -> ReplSet (ghost, s, v)
         | VersionCmd_ -> ReplVersion (ghost, ())
+        | TotalCmd_ (orders, terms) -> Total (ghost, orders, terms)
+        | TerminatesCmd_ (orders, terms) -> Terminates (ghost, orders, terms)
+        | CoversCmd_ md -> Covers (ghost, md)
+        | NameCmd_ id -> Name (ghost, id)
+        | ProseCmd_ id -> Prose (ghost, id)
+        | ReducesCmd_ (pred, body) -> Reduces (ghost, pred, body)
+        | Open_ ids -> Open (ghost, ids)
+        | Scope_ (id, cmd) -> Scope (ghost, id, cmd)
+        | Use_ (ids, tms) -> Use (ghost, ids, tms)
+        | Macro_ (n, id, cmd) -> Macro (ghost, n, id, cmd)
+        | Seq_ _ -> failwith "Cmd.view: Seq_ is not representable in view"
+        | Require_ ids -> Require (ghost, ids)
 
       let review (y : u) : t =
         match y with
@@ -978,17 +1137,12 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | Symbol (loc, id1, id2) -> SymbolCmd_ (id1, id2)
         | Freeze (loc, ids) -> FreezeCmd_ ids
         | Thaw (loc, ids) -> ThawCmd_ ids
-        | Sort (loc, [ id ], decls) -> SortCmd_ (id, decls)
-        | Sort (loc, ids, decls) ->
-            assert false (* TODO Handle mutiple sort declerations *)
+        | Sort (_, ids, decls) -> SortCmd_ (ids, decls)
         | Term (loc, d) -> TermCmd_ d
         | Block (loc, id, items) -> BlockCmd_ (id, items)
         | Union (loc, id, ids) -> UnionCmd_ (id, ids)
         | Worlds (loc, ids, tm) -> WorldsCmd_ (ids, tm)
         | Deterministic (loc, ids) -> DeterministicCmd_ ids
-        | ModuleCmd (loc, id, params, cmds) -> ModuleCmd_ (id, params, cmds)
-        | Use (loc, id1, id2, ps) -> UseCmd_ (id1, id2, ps)
-        | OpenCmd (loc, id, ids) -> OpenCmd_ (id, ids)
         | Eval (loc, cmds) -> EvalCmd_ cmds
         | Prec (loc, fix, n, ids) -> PrecCmd_ (fix, n, ids)
         | Solve (loc, s) -> SolveCmd_ s
@@ -998,6 +1152,21 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
         | ReplGet (loc, s) -> GetCmd_ s
         | ReplSet (loc, s, v) -> SetCmd_ (s, v)
         | ReplVersion (loc, ()) -> VersionCmd_
+        | Total (_, orders, terms) -> TotalCmd_ (orders, terms)
+        | Terminates (_, orders, terms) -> TerminatesCmd_ (orders, terms)
+        | Covers (_, md) -> CoversCmd_ md
+        | Name (_, id) -> NameCmd_ id
+        | Prose (_, id) -> ProseCmd_ id
+        | Reduces (_, pred, body) -> ReducesCmd_ (pred, body)
+        | Open (_, ids) -> Open_ ids
+        | Scope (_, id, cmd) -> Scope_ (id, cmd)
+        | Use (_, ids, tms) -> Use_ (ids, tms)
+        | Macro (_, n, id, cmd) -> Macro_ (n, id, cmd)
+        | Seq _ -> failwith "Cmd.review: Seq is not representable in review"
+        | Require (_, ids) -> Require_ ids
+
+      let ( !> ) = view
+      let ( !< ) = review
     end
 
     module Thm = struct
@@ -1028,6 +1197,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           | Varg (l, names) -> Thm.Varg_ (l, names)
           | Lex (l, orders) -> Thm.Lex_ (l, orders)
           | Simul (l, orders) -> Thm.Simul_ (l, orders)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module CallPats = struct
@@ -1036,6 +1208,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
 
         let view (x : t) : u = CallPats x
         let review (y : u) : t = match y with CallPats cp -> cp
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module TDecl = struct
@@ -1047,6 +1221,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           TDecl (o, cp)
 
         let review (y : u) : t = match y with TDecl (o, cp) -> (o, cp)
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Predicate = struct
@@ -1058,6 +1234,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           Predicate (s, l)
 
         let review (y : u) : t = match y with Predicate (s, l) -> (s, l)
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module RDecl = struct
@@ -1070,6 +1248,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
 
         let review (y : u) : t =
           match y with RDecl (p, o1, o2, cp) -> (p, o1, o2, cp)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module TabledDecl = struct
@@ -1081,6 +1262,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           TabledDecl (s, l)
 
         let review (y : u) : t = match y with TabledDecl (s, l) -> (s, l)
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module KeepTableDecl = struct
@@ -1092,6 +1275,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           KeepTableDecl (s, l)
 
         let review (y : u) : t = match y with KeepTableDecl (s, l) -> (s, l)
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Prove = struct
@@ -1103,6 +1288,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           Prove (n, td)
 
         let review (y : u) : t = match y with Prove (n, td) -> (n, td)
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Establish = struct
@@ -1114,6 +1301,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           Establish (n, td)
 
         let review (y : u) : t = match y with Establish (n, td) -> (n, td)
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Assert = struct
@@ -1122,6 +1311,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
 
         let view (x : t) : u = Assert x
         let review (y : u) : t = match y with Assert cp -> cp
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Decs = struct
@@ -1137,6 +1328,9 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           match y with
           | DecsNil _ -> []
           | DecsList (rest, decls) -> rest @ decls
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module Thm = struct
@@ -1164,10 +1358,15 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           | Forall (_, ds, body) -> Thm.Forall_ (ds, body)
           | ForallStar (_, ds, body) -> Thm.ForallStar_ (ds, body)
           | ForallG (_, pairs, body) -> Thm.ForallG_ (pairs, body)
+
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       let view (x : t) : u = assert false
       let review (y : u) : t = assert false
+      let ( !> ) = view
+      let ( !< ) = review
 
       module ThmDec = struct
         type t = concrete_theoremdec
@@ -1178,6 +1377,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           ThmDec (name, thm)
 
         let review (y : u) : t = match y with ThmDec (name, thm) -> (name, thm)
+        let ( !> ) = view
+        let ( !< ) = review
       end
 
       module WDecl = struct
@@ -1189,6 +1390,8 @@ module Make_Cst (Paths : Paths.Paths_intf.PATHS) = struct
           WDecl (pairs, cp)
 
         let review (y : u) : t = match y with WDecl (pairs, cp) -> (pairs, cp)
+        let ( !> ) = view
+        let ( !< ) = review
       end
     end
   end

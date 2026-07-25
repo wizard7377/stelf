@@ -1,5 +1,7 @@
 module type RECON_MODULE = RECON_MODULE.RECON_MODULE
 
+exception Error of string
+
 module Make_ReconModule
     (M : S.S)
     (RT : RECON_TERM.RECON_TERM with module M = M) :
@@ -11,7 +13,7 @@ module Make_ReconModule
   module ModSyn = Modules.Modules_.ModSyn
   module IntTree = TableInstances.IntRedBlackTree
 
-  exception Error of string
+  exception Error = Error
 
   let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
@@ -67,8 +69,8 @@ module Make_ReconModule
             | inst :: rest -> (
                 let eqns = go rest in
                 match Cst.View.Struct.Inst.view inst with
-                | Cst.View.Struct.Inst.ConInst (_, (ids, id), _, tm) -> (
-                    let r = Cst.loc_to_region Cst.ghost in
+                | Cst.View.Struct.Inst.ConInst (loc, (ids, id), _, tm) -> (
+                    let r = Cst.loc_to_region loc in
                     let qid = ModSyn.Names.Qid (ids, id) in
                     match ModSyn.Names.constLookupIn (ns, qid) with
                     | None ->
@@ -78,8 +80,8 @@ module Make_ReconModule
                             ^ ModSyn.Names.qidToString
                                 (valOf (ModSyn.Names.constUndefIn (ns, qid))) )
                     | Some cid -> (cid, External tm, r) :: eqns)
-                | Cst.View.Struct.Inst.StrInst (_, (ids, id), _, strexp) ->
-                    let r1 = Cst.loc_to_region Cst.ghost in
+                | Cst.View.Struct.Inst.StrInst (loc, (ids, id), _, strexp) ->
+                    let r1 = Cst.loc_to_region loc in
                     let qid = ModSyn.Names.Qid (ids, id) in
                     let mid1 =
                       match ModSyn.Names.structLookupIn (ns, qid) with
@@ -161,7 +163,7 @@ module Make_ReconModule
       | None -> IntTree.insert table (cid, ref [ (inst_, r) ])
       | Some rl -> rl := (inst_, r) :: !rl
     in
-    let _ = List.app add eqns in
+    ignore (List.app add eqns);
     let doInst ((inst_, r), conDec_) =
       match inst_ with
       | Internal cid -> (
@@ -186,6 +188,6 @@ module Make_ReconModule
   let moduleWhere (module_, wherecl) =
     let mark, markStruct = IntSyn.sgnSize () in
     let module' = ModSyn.instantiateModule (module_, applyEqns wherecl) in
-    let _ = Names.resetFrom (mark, markStruct) in
+    ignore (Names.resetFrom (mark, markStruct));
     module'
 end

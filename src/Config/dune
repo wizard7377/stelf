@@ -1,0 +1,6 @@
+(library
+ (instrumentation
+  (backend bisect_ppx))
+ (name config)
+ (public_name stelf.config)
+ (libraries))

@@ -12,11 +12,12 @@ module type CID = sig
   val pp : Format.formatter -> t -> unit
   val show : t -> string
   val fresh : unit -> t
+  val reset : unit -> unit
 end
 
 module type COMMON = sig
   module Tag : TAG
   module Cid : CID
   module Mid : CID
-  module Global : Global.Global_intf.GLOBAL
+  module Global : Global.GLOBAL.GLOBAL
 end

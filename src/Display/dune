@@ -1,4 +1,6 @@
 (library
+ (instrumentation
+  (backend bisect_ppx))
  (name display)
  (public_name stelf.display)
- (libraries lwt fmt lambda-term))
+ (libraries lwt fmt))

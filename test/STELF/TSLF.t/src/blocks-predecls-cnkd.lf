@@ -1,0 +1,6 @@
+%sort vdt/ofkd {_ ofkd _C1 _K} {_ kd-wf _K} %.
+%mode vdt/ofkd %in %out %.
+%sort mofkd {_ ofkd _C K} {_ met} %.
+%mode mofkd %star %star %.
+%sort can-mofkd {D ofkd _C K} {_ mofkd D _Cm} %.
+%mode can-mofkd %in %out %.

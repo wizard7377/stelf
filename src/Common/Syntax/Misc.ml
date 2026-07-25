@@ -1,8 +1,8 @@
-include Misc_intf
+include MISC
 
 module Make_Misc
     (Common' : Common.COMMON)
-    (Ast' : Ast_intf.AST with module Common = Common') :
+    (Ast' : AST.AST with module Common = Common') :
   MISC with module Common = Common' and module Ast = Ast' = struct
   module Common = Common'
   module Ast = Ast'

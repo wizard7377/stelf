@@ -1,0 +1,1 @@
+(libraries lambda-term base cmdliner angstrom)

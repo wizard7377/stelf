@@ -12,12 +12,88 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
 
   open Parser
 
-  (* Skip outer text (non-% characters) between commands *)
-  let skip_outer : unit t = skip_while (fun c -> c <> '%')
+  let ghost' = Cst.View.Loc.(review Ghost)
+  let mk_loc = Cst.View.mk_loc
+
+  (* Skip outer text (non-% characters) between commands.  The "outer" context
+     is document/command level: the only things that live here are [%keyword]
+     commands, line comments, and [%[ ... %]] prose strings.  Sequences handled:
+       %% ...   — any run of two-or-more [%] starts a prose line (wiki
+                  [%%! title:] metadata, [%%%%%%] banners, [%%]-commented code);
+                  skipped to end of line
+       % ...    — line comment (skips to end of line)
+       %[ ... %] — string (multiple [[] close with the same number of []]);
+                  ignorable prose in the outer context, a value in a term
+     NB: the [%%X]-escapes-X-to-a-literal-token rule is an *inner* (term-lexing)
+     concept and lives in [ident]/[ident1]; out here [%%] runs are just prose.
+     [%%] is tried before single [%] so a bare [%%\n] is a prose line, not a
+     [%]-plus-empty-comment; keeping the whole run on one skip-to-newline also
+     avoids the old [%%%]-eats-triples bug on odd-length banners. *)
+  let skip_outer : unit t =
+    fix (fun self ->
+        skip_while (fun c -> c <> '%')
+        *> option ()
+             (* [%[]-block comment must be tried first, else its [[] would be
+                mistaken for the second [%] of a [%%] line comment. *)
+             (string_lit () *> self
+             (* A run of two-or-more [%] is a line comment to end of line.
+                Handling the whole run here (rather than a [%%%]-escape that
+                consumes exactly three) avoids leaving a stray [%] behind when
+                the run length is 1 mod 3 (e.g. a bare [%%%%]), which [parse1]
+                would then reject as an unrecognized command. *)
+             <|> string "%%" *> commit
+                 *> skip_while (fun c -> c <> '\n')
+                 *> self
+             (* A single [%] followed by a horizontal blank is a line comment.
+                Consume ONLY the space/tab, not newline-crossing [blank]: an
+                empty comment (e.g. the banner [%%%% ], whose residual [% ] has
+                nothing after the space) must not swallow the newline and let
+                [skip_while (<> '\n')] devour the *following* declaration.
+                Leaving the newline for [self]'s leading [skip_while (<> '%')]
+                keeps the skip line-scoped. *)
+             <|> string "%"
+                 *> skip (function ' ' | '\t' -> true | _ -> false)
+                 *> commit
+                 *> skip_while (fun c -> c <> '\n')
+                 *> self))
 
   (* Defer a thunk-parser to prevent infinite recursion at construction time.
      Used for %module and %eval which recursively embed cmd lists. *)
   let defer p = return () >>= fun () -> p ()
+
+  let parse_order () : Cst.View.Thm.Order.t t =
+    fix (fun self ->
+        begin
+          choice ~failure_msg:"order"
+            [
+              (let@ ids, s, e = Modern.parse_id_list () in
+               let loc = mk_loc s e in
+               return Cst.View.(Thm.Order.(review @@ Varg (loc, ids))));
+              (* [many], not [many1]: Twelf permits empty orders, e.g.
+                 `%total {} (f _ _)` for non-recursive totality proofs. *)
+              inside "[" "]"
+                (commit
+                *> let@ orders, s, e = many (self <* commit) in
+                   let loc = mk_loc s e in
+                   return Cst.View.(Thm.Order.(review @@ Simul (loc, orders))));
+              inside "{" "}"
+                (commit
+                *> let@ orders, s, e = many (self <* commit) in
+                   let loc = mk_loc s e in
+                   return Cst.View.(Thm.Order.(review @@ Lex (loc, orders))));
+            ]
+        end)
+
+  let order_list () : Cst.View.Thm.Order.t list t =
+    (* Try [parse_order] first: it reads a parenthesised list of bare variables
+       [(D1 D2 ... Dn)] as a single mutual [Varg [D1; ...; Dn]] (predicate i
+       decreases on Di), which is what a mutual [%total] needs.  Only fall back
+       to [( order order ... )] grouping (a list of per-predicate complex
+       orders) when [parse_order] can't take the whole parenthesised group,
+       e.g. [([D1] {D2})]. *)
+    (let+ x = parse_order () in
+     [ x ])
+    <|> inside "(" ")" (many (parse_order ()))
 
   let rec parse_cmd_list () : Cst.cmd list t =
     keyword "{" *> commit *> skip_outer *> many (defer parse1 <* skip_outer)
@@ -27,257 +103,331 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
     choice ~failure_msg:"command"
       [
         begin
-          whitespace *> (keyword "." *> commit *> return (Cst.Cmd.stop ()))
+          whitespace
+          *> let@ _, s, e = keyword "." *> commit *> skip_outer *> return () in
+             let loc = mk_loc s e in
+             return Cst.View.Cmd.(review @@ Stop (loc, ()))
           (* querytabled BEFORE query — "query" is a prefix of "querytabled" *)
         end;
         begin
-          (keyword "querytabled" *> commit
-          *>
-          let+ n, b, d, q = Modern.parse_query () in
-          Cst.Cmd.query_tabled ~n ~b ~d q)
+          (let@ (n, b, d, q), s, e =
+             keyword "querytabled" *> commit *> Modern.parse_query ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ QueryTabled (loc, n, b, d, q)))
           <?> "querytabled"
         end;
         begin
-          (keyword "query" *> commit
-          *>
-          let+ n, b, d, q = Modern.parse_query () in
-          Cst.Cmd.query ~n ~b ~d q)
+          (let@ (n, b, d, q), s, e =
+             keyword "query" *> commit *> Modern.parse_query ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Query (loc, n, b, d, q)))
           <?> "query"
         end;
         begin
-          (keyword "?" *> commit
-          *>
-          let+ tm = Modern.parse_expr () in
-          Cst.Cmd.adhoc_query (Cst.Query.query None tm))
+          (let@ tm, s, e = keyword "?" *> commit *> Modern.parse_expr () in
+           let loc = mk_loc s e in
+           return
+             Cst.View.Cmd.(
+               review
+               @@ AdhocQuery
+                    (loc, Cst.View.Query.(review @@ Query (ghost', None, tm)))))
           <?> "adhoc query"
         end;
         begin
-          (keyword "unique" *> commit
-          *>
-          let+ tm = Modern.parse_expr () in
-          Cst.Cmd.unique tm
-          (* module BEFORE mode — "mode" is a prefix of "module" *))
+          (let@ tm, s, e = keyword "unique" *> commit *> Modern.parse_expr () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Unique (loc, tm)))
+          (* module BEFORE mode — "mode" is a prefix of "module" *)
           <?> "unique"
         end;
         begin
-          (keyword "module" *> commit
-          *>
-          let* id = Modern.parse_var () in
-          let* params = Modern.parse_params () in
-          let+ cmds = parse_cmd_list () in
-          Cst.Cmd.module_cmd id params cmds)
-          <?> "module"
+          let@ (id, cmds), s, e =
+            keyword "scope" *> commit
+            *> let* id = Modern.parse_var () in
+               let+ cmds =
+                 parse_cmd_list ()
+                 <|> let+ cmd = parse1 () in
+                     [ cmd ]
+               in
+               (id, cmds)
+          in
+          let loc = mk_loc s e in
+          return
+            Cst.View.Cmd.(
+              review @@ Scope (loc, id, review @@ Eval (ghost', cmds)))
         end;
         begin
-          (keyword "mode" *> commit
-          *>
-          let+ md = Modern.parse_mode_dec () in
-          Cst.Cmd.mode md (* TODO Check this *))
+          (let@ md, s, e =
+             keyword "mode" *> commit *> Modern.parse_mode_dec ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Mode (loc, md)))
+          (* TODO Check this *)
           <?> "mode"
         end;
         begin
-          (keywords [ "define"; "def" ]
-          *> commit
-          *>
-          let+ d = Modern.parse_define () in
-          Cst.View.Cmd.(review @@ Define (Cst.View.Loc.(review Ghost), d)))
+          (let@ d, s, e =
+             keywords [ "define"; "def" ] *> commit *> Modern.parse_define ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Define (loc, d)))
           <?> "define"
         end;
         begin
-          (keyword "decl" *> commit
-          *>
-          let+ tm = Modern.parse_expr () in
-          Cst.Cmd.decl_cmd tm)
+          (let@ tm, s, e = keyword "decl" *> commit *> Modern.parse_expr () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ DeclCmd (loc, tm)))
           <?> "declaration"
         end;
         begin
-          (keyword "inline" *> commit
-          *>
-          let* id = Modern.parse_var () in
-          let+ tm = Modern.parse_expr () in
-          Cst.Cmd.inline id tm)
+          (let@ (id, tm), s, e =
+             keyword "inline" *> commit
+             *> let* id = Modern.parse_var () in
+                let+ tm = Modern.parse_expr () in
+                (id, tm)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Inline (loc, id, tm)))
           <?> "inline"
         end;
         begin
-          (keyword "symbol" *> commit
-          *>
-          let* id1 = Modern.parse_var () in
-          let+ id2 = Modern.parse_var () in
-          Cst.Cmd.symbol id1 id2)
+          (let@ (id1, id2), s, e =
+             keyword "symbol" *> commit
+             *> let* id1 = Modern.parse_var () in
+                let+ id2 = Modern.parse_var () in
+                (id1, id2)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Symbol (loc, id1, id2)))
           <?> "symbol"
         end;
         begin
-          (keyword "freeze" *> commit
-          *>
-          let+ ids = Modern.parse_id_list () in
-          Cst.Cmd.freeze ids)
+          (let@ ids, s, e =
+             keyword "freeze" *> commit *> Modern.parse_id_list ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Freeze (loc, ids)))
           <?> "freeze"
         end;
         begin
-          (keyword "thaw" *> commit
-          *>
-          let+ ids = Modern.parse_id_list () in
-          Cst.Cmd.thaw ids)
+          (let@ ids, s, e =
+             keyword "thaw" *> commit *> Modern.parse_id_list ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Thaw (loc, ids)))
           <?> "thaw"
         end;
         begin
-          (keyword "sort" *> commit
-          *>
-          let* ids = Modern.parse_id_list () in
-          let+ ds = many (inside "{" "}" (Modern.parse_decl ())) in
-          Cst.View.Cmd.(review @@ Sort (Cst.View.Loc.(review Ghost), ids, ds)))
+          (let@ (ids, ds), s, e =
+             keyword "sort" *> commit
+             *> let* ids = Modern.parse_id_list () in
+                let+ ds =
+                  many
+                    (inside "{" "}" (commit *> Modern.parse_decl ())
+                    <|> Modern.parse_decl_simple ())
+                in
+                (ids, ds)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Sort (loc, ids, ds)))
           <?> "sort"
         end;
         begin
-          (keyword "term" *> commit
-          *>
-          let+ d = Modern.parse_decl () in
-          Cst.Cmd.term d)
+          (let@ d, s, e = keyword "term" *> commit *> Modern.parse_decl () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Term (loc, d)))
           <?> "term"
         end;
         begin
-          (keyword "block" *> commit
-          *>
-          let* id = Modern.parse_var () in
-          let+ items = many (Modern.parse_block_item ()) in
-          Cst.Cmd.block id items)
+          (let@ (id, items), s, e =
+             keyword "block" *> commit
+             *> let* id = Modern.parse_var () in
+                let+ items = many (Modern.parse_block_item ()) in
+                (id, items)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Block (loc, id, items)))
           <?> "block"
         end;
         begin
-          (keyword "union" *> commit
-          *>
-          let* id = Modern.parse_var () in
-          let+ ids = inside "(" ")" (many (Modern.parse_var ())) in
-          Cst.Cmd.union id ids)
+          (let@ (id, ids), s, e =
+             keyword "union" *> commit
+             *> let* id = Modern.parse_var () in
+                let+ ids = inside "(" ")" (many (Modern.parse_var ())) in
+                (id, ids)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Union (loc, id, ids)))
           <?> "union"
         end;
         begin
-          (keyword "worlds" *> commit
-          *>
-          let* ids = inside "(" ")" (many (Modern.parse_var ())) in
-          let+ tm = Modern.parse_expr () in
-          Cst.Cmd.worlds ids tm)
+          (let@ (ids, tms), s, e =
+             keyword "worlds" *> commit
+             *> let* ids = inside "(" ")" (many (Modern.parse_var ())) in
+                let+ tms = many1 (Modern.parse_expr1 ()) in
+                (ids, tms)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Worlds (loc, ids, tms)))
           <?> "worlds"
         end;
         begin
-          (keyword "deterministic" *> commit
-          *>
-          let+ ids = Modern.parse_id_list () in
-          Cst.Cmd.deterministic ids)
+          (let@ ids, s, e =
+             keyword "deterministic" *> commit *> Modern.parse_id_list ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Deterministic (loc, ids)))
           <?> "deterministic"
         end;
         begin
-          (keyword "use" *> commit
-          *>
-          let* id1 = Modern.parse_var () in
-          let* id2 = Modern.parse_var () in
-          let+ iparams = inside "(" ")" (many (Modern.parse_var ())) in
-          Cst.Cmd.use id1 id2 iparams)
+          (let@ (id1, iparams), s, e =
+             keyword "use" *> commit
+             *> let* id1 = Modern.parse_id_list () in
+                let+ iparams = inside "(" ")" (many (Modern.parse_expr ())) in
+                (id1, iparams)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Use (loc, id1, iparams)))
           <?> "use"
         end;
         begin
-          (keyword "open" *> commit
-          *>
-          let* id = Modern.parse_var () in
-          let+ ids = Modern.parse_id_list () in
-          Cst.Cmd.open_cmd id ids)
+          (let@ id, s, e =
+             keyword "open" *> commit *> Modern.parse_id_list ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Open (loc, id)))
           <?> "open"
         end;
         begin
-          (keyword "eval" *> commit
-          *>
-          let+ cmds = parse_cmd_list () in
-          Cst.Cmd.eval cmds)
+          (let@ ids, s, e =
+             keyword "require" *> commit
+             *> ((let+ s = Modern.parse_text () in
+                  String.trim s |> String.split_on_char '/')
+                <|> Modern.parse_id_list ())
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Require (loc, ids)))
+          <?> "require"
+        end;
+        begin
+          (let@ cmds, s, e = keyword "eval" *> commit *> parse_cmd_list () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Eval (loc, cmds)))
           <?> "eval"
         end;
         begin
-          (keyword "prec" *> commit
-          *>
-          let* fix = Modern.parse_fixity_kw () in
-          let* n = Modern.parse_fixity () in
-          let+ ids = Modern.parse_id_list () in
-          Cst.Cmd.prec fix n ids)
+          (let@ (fix, n, ids), s, e =
+             keyword "prec" *> commit
+             *> let* fix = Modern.parse_fixity_kw () in
+                let* n = Modern.parse_fixity () in
+                let+ ids = Modern.parse_id_list () in
+                (fix, n, ids)
+           in
+           let loc = mk_loc s e in
+           let () = Modern.register_local_fixity fix n ids in
+           return Cst.View.Cmd.(review @@ Prec (loc, fix, n, ids)))
           <?> "prec"
         end;
         begin
-          (keyword "solve" *> commit
-          *>
-          let+ s = Modern.parse_solve () in
-          Cst.Cmd.solve s)
+          (let@ s_, s, e = keyword "solve" *> commit *> Modern.parse_solve () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Solve (loc, s_)))
           <?> "solve"
         end;
         begin
-          keyword "quit" *> commit *> return (Cst.Cmd.Repl.quit ()) <?> "quit"
+          (let@ _, s, e = keyword "quit" *> commit *> return () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ ReplQuit (loc, ())))
+          <?> "quit"
         end;
         begin
-          (keyword "help" *> commit
-          *>
-          let+ t =
-            option None
-              (let+ id = Modern.parse_var () in
-               Some id)
-          in
-          Cst.Cmd.Repl.help t)
+          (let@ t, s, e =
+             keyword "help" *> commit
+             *> option None
+                  (let+ id = Modern.parse_var () in
+                   Some id)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ ReplHelp (loc, t)))
           <?> "help"
         end;
         begin
-          (keyword "get" *> commit
-          *>
-          let+ id = Modern.parse_var () in
-          Cst.Cmd.Repl.get id)
+          (let@ id, s, e = keyword "get" *> commit *> Modern.parse_var () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ ReplGet (loc, id)))
           <?> "get"
         end;
         begin
-          (keyword "set" *> commit
-          *>
-          let* id = Modern.parse_var () in
-          let+ v = Modern.parse_var () in
-          Cst.Cmd.Repl.set id v)
+          (let@ (id, v), s, e =
+             keyword "set" *> commit
+             *> let* id = Modern.parse_var () in
+                let+ v = Modern.parse_var () in
+                (id, v)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ ReplSet (loc, id, v)))
           <?> "set"
         end;
         begin
-          keyword "version" *> commit *> return (Cst.Cmd.Repl.version ())
+          (let@ _, s, e = keyword "version" *> commit *> return () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ ReplVersion (loc, ())))
           <?> "version"
         end;
         begin
-          (keyword "total" *> commit
-          *>
-          let* intros =
-            inside "{" "}" @@ many (Modern.parse_id_list ())
-            <|> (let+ id = Modern.parse_var () in
-                 [ [ id ] ])
-            <|> return []
-          in
-          let+ body = many (Modern.parse_expr1 ()) in
-          Cst.Cmd.total intros body)
+          (let@ (order, body), s, e =
+             keyword "total" *> commit
+             *> let* order = order_list () in
+                let+ body = many1 (Modern.parse_expr1 ()) in
+                (order, body)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review (Total (loc, order, body))))
           <?> "total"
         end;
         begin
-          (keyword "terminates" *> commit
-          *>
-          let* intros =
-            inside "{" "}" @@ many (Modern.parse_id_list ())
-            <|> (let+ id = Modern.parse_var () in
-                 [ [ id ] ])
-            <|> return []
-          in
-          let+ body = many (Modern.parse_expr1 ()) in
-          Cst.Cmd.terminates intros body)
+          (let@ (order, body), s, e =
+             keyword "terminates" *> commit
+             *> let* order = order_list () in
+                let+ body = many1 (Modern.parse_expr1 ()) in
+                (order, body)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review (Terminates (loc, order, body))))
           <?> "terminates"
         end;
         begin
-          (keyword "covers" *> commit
-          *>
-          let+ md = Modern.parse_mode_dec () in
-          Cst.Cmd.covers md)
+          (let@ md, s, e =
+             keyword "covers" *> commit *> Modern.parse_mode_dec ()
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Covers (loc, md)))
           <?> "covers"
         end;
         begin
-          (keyword "name" *> commit
-          *>
-          let+ id = Modern.parse_var () in
-          Cst.Cmd.name id)
+          (let@ id, s, e = keyword "name" *> commit *> Modern.parse_var () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Name (loc, id)))
           <?> "name"
+        end;
+        begin
+          (let@ id, s, e = keyword "prose" *> commit *> Modern.parse_var () in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review @@ Prose (loc, id)))
+          <?> "prose"
+        end;
+        begin
+          (let@ (rel, body), s, e =
+             keyword "reduces" *> commit
+             *> let* rel = Modern.parse_reduces_rel () in
+                let+ body = many1 (Modern.parse_expr1 ()) in
+                (rel, body)
+           in
+           let loc = mk_loc s e in
+           return Cst.View.Cmd.(review (Reduces (loc, rel, body))))
+          <?> "reduces"
         end;
       ]
 

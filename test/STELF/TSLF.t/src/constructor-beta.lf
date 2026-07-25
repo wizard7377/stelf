@@ -1,0 +1,111 @@
+%sort psi-cn {_ %pi cn %-> cn} %.
+%term psi-cn/eps psi-cn ([a] a) %.
+%term psi-cn/pj1 %pi (psi-cn ([a] cn/pj1 (PS a))) %<- (psi-cn PS) %.
+%term psi-cn/pj2 %pi (psi-cn ([a] cn/pj2 (PS a))) %<- (psi-cn PS) %.
+%term psi-cn/app {C cn} %pi (psi-cn ([a] cn/app (PS a) C)) %<- (psi-cn PS) %.
+%%%% beta rules from SH
+%sort inv/ofkd/cn/pair {_ ofkd (cn/pair C1 C2) (kd/sgm KA KB)} {_ ofkd C1 K1} {_ ofkd C2 K2} {_ kd-sub (kd/sgm K1 ([a] K2)) (kd/sgm KA KB)} %.
+%mode inv/ofkd/cn/pair %in %out %out %out %.
+%sort cn-beta-pj1 {_ psi-cn P} {_ ofkd (P (cn/pj1 (cn/pair C1 C2))) K} {_ cn-deq (P (cn/pj1 (cn/pair C1 C2))) (P C1) K} %.
+%mode cn-beta-pj1 %in %in %out %.
+%sort cn-beta-pj2 {_ psi-cn P} {_ ofkd (P (cn/pj2 (cn/pair C1 C2))) K} {_ cn-deq (P (cn/pj2 (cn/pair C1 C2))) (P C2) K} %.
+%mode cn-beta-pj2 %in %in %out %.
+%term _ 
+	%pi (inv/ofkd/cn/pair (ofkd/cn/pair D1 D2) D1 D2 DKS)
+	%<- (vdt/ofkd (ofkd/cn/pair D1 D2) DK)
+	%<- (kd-refl/sub DK DKS) %.
+%term _ 
+	%pi (inv/ofkd/cn/pair (ofkd/sgm-ext D1 D2) D1' D2' DKS)
+	%<- (vdt/ofkd (ofkd/sgm-ext D1 D2) DK)
+	%<- (kd-refl/sub DK DKS)
+	%<- (cn-beta-pj1 psi-cn/eps D1 DQ1)
+	%<- (vdt/cn-deq DQ1 _ D1' _)
+	%<- (cn-beta-pj2 psi-cn/eps D2 DQ2)
+	%<- (vdt/cn-deq DQ2 _ D2' _) %.
+%term _ 
+	%pi (inv/ofkd/cn/pair (ofkd/sub DP DS) D1 D2 DSS)
+	%<- (inv/ofkd/cn/pair DP D1 D2 DKS)
+	%<- (kd-trans/sub DKS DS DSS) %.
+%term _ 
+	%pi (inv/ofkd/cn/pair (ofkd/deq DP DQ) D1 D2 DSS)
+	%<- (vdt/kd-deq DQ DQ1 DQ2)
+	%<- (kd-anti DQ DQ1 DQ2 DS _)
+	%<- (inv/ofkd/cn/pair DP D1 D2 DKS)
+	%<- (kd-trans/sub DKS DS DSS) %.
+%term _ 
+	%pi (cn-beta-pj1 psi-cn/eps (ofkd/cn/pj1 DP) (cn-deq/sub DCQ DS1))
+	%<- (inv/ofkd/cn/pair DP D1 D2 (kd-sub/kd/sgm DS1 DS2 _))
+	%<- (stone-2/108 D1 D2 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj1 (%the (psi-cn P) PS) (%the (ofkd (P (cn/pj1 (cn/pair C1 C2))) _) (ofkd/sgm-ext D1 D2)) (cn-deq/sgm-ext DCQ1 DCQ2))
+	%<- (cn-beta-pj1 (psi-cn/pj1 PS) D1 DCQ1)
+	%<- (cn-beta-pj1 (psi-cn/pj2 PS) D2 DCQ2) %.
+%term _ 
+	%pi (cn-beta-pj1 (%the (psi-cn P) PS) (ofkd/sub (%the (ofkd (P (cn/pj1 (cn/pair C1 C2))) _) D1) DS) (cn-deq/sub DCQ DS))
+	%<- (cn-beta-pj1 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj1 (psi-cn/pj1 (%the (psi-cn P) PS)) (ofkd/cn/pj1 D1) (cn-deq/cn/pj1 DCQ))
+	%<- (cn-beta-pj1 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj1 (psi-cn/pj2 (%the (psi-cn P) PS)) (ofkd/cn/pj2 D1) (cn-deq/cn/pj2 DCQ))
+	%<- (cn-beta-pj1 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj1 (psi-cn/app _ (%the (psi-cn P) PS)) (ofkd/cn/app D1 D2) (cn-deq/cn/app DCQ (cn-deq/refl D2)))
+	%<- (cn-beta-pj1 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj1 (%the (psi-cn P) PS) (%the (ofkd (P (cn/pj1 (cn/pair C1 C2))) _) (ofkd/pi-ext D1 D2)) (cn-deq/pi-ext DCA DCB DCQ2))
+	%<- (cn-beta-pj1 PS D1 DCQ1)
+	%<- (vdt/cn-deq DCQ1 DCA DCB (kd-wf/kd/pi DW _))
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {_ vdt/ofkd da DW} cn-beta-pj1 (psi-cn/app a PS) (D2 a da) (DCQ2 a da)) %.
+%term _ 
+	%pi (cn-beta-pj1 (%the (psi-cn P) PS) (%the (ofkd (P (cn/pj1 (cn/pair C1 C2))) _) (ofkd/kd/sing D1)) DCQ1')
+	%<- (cn-beta-pj1 PS D1 DCQ1)
+	%<- (stone-2/120 DCQ1 DCQ1') %.
+%term _ 
+	%pi (cn-beta-pj1 psi-cn/eps (ofkd/cn/pj1 DP) (cn-deq/sub DCQ DS1))
+	%<- (inv/ofkd/cn/pair DP D1 D2 (kd-sub/kd/sgm DS1 DS2 _))
+	%<- (stone-2/108 D1 D2 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj1 (%the (psi-cn P) PS) (%the (ofkd (P (cn/pj1 (cn/pair C1 C2))) _) (ofkd/sgm-ext D1 D2)) (cn-deq/sgm-ext DCQ1 DCQ2))
+	%<- (cn-beta-pj1 (psi-cn/pj1 PS) D1 DCQ1)
+	%<- (cn-beta-pj1 (psi-cn/pj2 PS) D2 DCQ2) %.
+%term _ 
+	%pi (cn-beta-pj1 (%the (psi-cn P) PS) (ofkd/sub (%the (ofkd (P (cn/pj1 (cn/pair C1 C2))) _) D1) DS) (cn-deq/sub DCQ DS))
+	%<- (cn-beta-pj1 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj1 (%the (psi-cn P) PS) (ofkd/deq (%the (ofkd (P (cn/pj1 (cn/pair C1 C2))) _) D1) DS) (cn-deq/deq DCQ DS))
+	%<- (cn-beta-pj1 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj2 (psi-cn/pj1 (%the (psi-cn P) PS)) (ofkd/cn/pj1 D1) (cn-deq/cn/pj1 DCQ))
+	%<- (cn-beta-pj2 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj2 (psi-cn/pj2 (%the (psi-cn P) PS)) (ofkd/cn/pj2 D1) (cn-deq/cn/pj2 DCQ))
+	%<- (cn-beta-pj2 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj2 (psi-cn/app _ (%the (psi-cn P) PS)) (ofkd/cn/app D1 D2) (cn-deq/cn/app DCQ (cn-deq/refl D2)))
+	%<- (cn-beta-pj2 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj2 (%the (psi-cn P) PS) (%the (ofkd (P (cn/pj2 (cn/pair C1 C2))) _) (ofkd/pi-ext D1 D2)) (cn-deq/pi-ext DCA DCB DCQ2))
+	%<- (cn-beta-pj2 PS D1 DCQ1)
+	%<- (vdt/cn-deq DCQ1 DCA DCB (kd-wf/kd/pi DW _))
+	%<- ({a} {da} {dm mofkd da met/unit} {_ can-mofkd da dm} {_ vdt/ofkd da DW} cn-beta-pj2 (psi-cn/app a PS) (D2 a da) (DCQ2 a da)) %.
+%term _ 
+	%pi (cn-beta-pj2 (%the (psi-cn P) PS) (%the (ofkd (P (cn/pj2 (cn/pair C1 C2))) _) (ofkd/kd/sing D1)) DCQ1')
+	%<- (cn-beta-pj2 PS D1 DCQ1)
+	%<- (stone-2/120 DCQ1 DCQ1') %.
+%term _ 
+	%pi (cn-beta-pj2 psi-cn/eps (ofkd/cn/pj2 DP) (cn-deq/sub DCQ (DS2 _ (ofkd/cn/pj1 (ofkd/cn/pair D1 D2)))))
+	%<- (inv/ofkd/cn/pair DP D1 D2 (kd-sub/kd/sgm DS1 DS2 _))
+	%<- (stone-2/109 D1 D2 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj2 (%the (psi-cn P) PS) (%the (ofkd (P (cn/pj2 (cn/pair C1 C2))) _) (ofkd/sgm-ext D1 D2)) (cn-deq/sgm-ext DCQ1 DCQ2))
+	%<- (cn-beta-pj2 (psi-cn/pj1 PS) D1 DCQ1)
+	%<- (cn-beta-pj2 (psi-cn/pj2 PS) D2 DCQ2) %.
+%term _ 
+	%pi (cn-beta-pj2 (%the (psi-cn P) PS) (ofkd/sub (%the (ofkd (P (cn/pj2 (cn/pair C1 C2))) _) D1) DS) (cn-deq/sub DCQ DS))
+	%<- (cn-beta-pj2 PS D1 DCQ) %.
+%term _ 
+	%pi (cn-beta-pj2 (%the (psi-cn P) PS) (ofkd/deq (%the (ofkd (P (cn/pj2 (cn/pair C1 C2))) _) D1) DS) (cn-deq/deq DCQ DS))
+	%<- (cn-beta-pj2 PS D1 DCQ) %.
+%worlds (ofkd+vdt-block) (cn-beta-pj2 _ _ _) (cn-beta-pj1 _ _ _) (inv/ofkd/cn/pair _ _ _ _) %.
+%total (D1 D2 D3) (inv/ofkd/cn/pair D1 _ _ _) (cn-beta-pj1 _ D3 _) (cn-beta-pj2 _ D2 _) %.

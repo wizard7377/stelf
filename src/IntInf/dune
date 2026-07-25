@@ -1,0 +1,12 @@
+; (include sources.dune)
+
+(library
+ (instrumentation
+  (backend bisect_ppx))
+ (name intInf)
+ (public_name stelf.intInf)
+ (modules IntInfSig IntInf_ INTINFSIG)
+ (libraries display basis)
+ (wrapped true)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

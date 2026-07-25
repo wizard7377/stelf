@@ -1,0 +1,58 @@
+%%%%% Static Semantics for sigs %%%%%%
+%sort sg-wf {_ sg} %.
+%mode sg-wf %star %.
+%sort fst-sg {_ sg} {_ kd} %.
+%mode fst-sg %star %star %.
+%sort sg-deq {_ sg} {_ sg} %.
+%mode sg-deq %star %star %.
+%sort sg-sub {_ sg} {_ sg} %.
+%mode sg-sub %star %star %.
+%term fst-sg/unit fst-sg sg/unit kd/unit %.
+%term fst-sg/kd fst-sg (sg/kd K) K %.
+%term fst-sg/cn fst-sg (sg/cn _) kd/unit %.
+%term fst-sg/sgm 
+	%pi (fst-sg (sg/sgm S1 S2) (kd/sgm K1 K2))
+	%<- ({a cn} fst-sg (S2 a) (K2 a))
+	%<- (fst-sg S1 K1) %.
+%term fst-sg/pi fst-sg (sg/pi _ _) kd/unit %.
+%term sg-wf/sg/unit sg-wf sg/unit %.
+%term sg-wf/sg/kd %pi (sg-wf (sg/kd K)) %<- (kd-wf K) %.
+%term sg-wf/sg/cn %pi (sg-wf (sg/cn C)) %<- (ofkd C kd/type) %.
+%term sg-wf/sg/sgm 
+	%pi (sg-wf (sg/sgm S1 S2))
+	%<- (fst-sg S1 K1)
+	%<- ({a cn} {da ofkd a K1} sg-wf (S2 a))
+	%<- (sg-wf S1) %.
+%term sg-wf/sg/pi 
+	%pi (sg-wf (sg/pi S1 S2))
+	%<- (fst-sg S1 K1)
+	%<- ({a cn} {da ofkd a K1} sg-wf (S2 a))
+	%<- (sg-wf S1) %.
+%term sg-deq/sg/unit sg-deq sg/unit sg/unit %.
+%term sg-deq/sg/kd %pi (sg-deq (sg/kd K1) (sg/kd K2)) %<- (kd-deq K1 K2) %.
+%term sg-deq/sg/cn %pi (sg-deq (sg/cn C1) (sg/cn C2)) %<- (cn-deq C1 C2 kd/type) %.
+%term sg-deq/sg/sgm 
+	%pi (sg-deq (sg/sgm S1 S2) (sg/sgm S3 S4))
+	%<- (fst-sg S1 K1)
+	%<- ({a cn} {da ofkd a K1} sg-deq (S2 a) (S4 a))
+	%<- (sg-deq S1 S3) %.
+%term sg-deq/sg/pi 
+	%pi (sg-deq (sg/pi S1 S2) (sg/pi S3 S4))
+	%<- (fst-sg S3 K3)
+	%<- ({a cn} {da ofkd a K3} sg-deq (S2 a) (S4 a))
+	%<- (sg-deq S3 S1) %.
+%term sg-sub/sg/unit sg-sub sg/unit sg/unit %.
+%term sg-sub/sg/kd %pi (sg-sub (sg/kd K1) (sg/kd K2)) %<- (kd-sub K1 K2) %.
+%term sg-sub/sg/cn %pi (sg-sub (sg/cn C1) (sg/cn C2)) %<- (cn-deq C1 C2 kd/type) %.
+%term sg-sub/sg/sgm 
+	%pi (sg-sub (sg/sgm S1 S2) (sg/sgm S3 S4))
+	%<- (fst-sg S3 K3)
+	%<- (fst-sg S1 K1)
+	%<- ({a cn} {da ofkd a K3} sg-wf (S4 a))
+	%<- ({a cn} {da ofkd a K1} sg-sub (S2 a) (S4 a))
+	%<- (sg-sub S1 S3) %.
+%term sg-sub/sg/pi 
+	%pi (sg-sub (sg/pi S1 S2) (sg/pi S3 S4))
+	%<- (fst-sg S3 K3)
+	%<- ({a cn} {da ofkd a K3} sg-deq (S2 a) (S4 a))
+	%<- (sg-deq S3 S1) %.

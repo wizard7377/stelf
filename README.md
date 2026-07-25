@@ -1,71 +1,83 @@
-# STELF (System for Totality in the Edinburgh Logical Framework)
+# STELF Project
 
-This is the STELF project, a port of the Twelf system to OCaml, and subsequents developments thereof.
+![STELF Logo](./logo.png)
 
-## Twelf Port 
+> "It is only prudent never to place confidence in that by which we have even once been deceived."
+>
+> René Descartes
 
-The Twelf port, which is completed, involved translating between SML to OCaml, and also the creation of a temporary basis library.
-If you are interested in looking at the process, see [shibboleth](https://github.com/standardocaml/shibboleth) 
+The STELF (System for Totality in the Edinburgh Logical Framework), is minimal system designed for creating understandable and completely trustworthy proofs.
+STELF is based off the [Twelf Theorem Prover](https://twelf.org).
 
-## From Twelf to STELF
+The best resource for learning about STELF is the [STELF website](https://standardocaml.github.io/).
 
-The STELF project, which is still in devolopment, involves a number of changes to the original Twelf codebase, designed to do the following:
+Some other quick links:
 
-- Imporove the syntax
-  - Remove unnecassary special syntax (Parsing done, printing not started)
-  - Simplify the language
-  - Make the codebase trivial to parse for editor integration
-  - Overhaul the parser (Nearly done)
-- Increase performance (WIP)
-- Make the codebase more flexible, particular in regards to custom frontends 
-  - Changed the design of the concrete syntax tree to not depend on the actual concrete syntax, but instead be view based (CST is done, but integration is not)
-  - Make the codebase more modular, and break up larger modules / libraries into smaller ones (WIP)
-  - Make documentation consistent (WIP)
-  - Testing
-- Create a cleaner frontend 
-  - Internally, the frontend is exposed at one point (Mostly done)
-  - Output should be given and then dealt with, not done internally (Not started)
-  - Create a nicer REPL (Done)
-  - Create a nicer CLI (Done)
+1. [STELF website](https://standardocaml.github.io/)
+2. [STELF GitHub](https://github.com/standardocaml)
+3. [Twelf website](https://twelf.org)
+4. [Twelf GitHub](https://github.com/standardml/twelf)
 
-Heavy inspiration was taken from the following sources:
+## Building
 
-- Rocq (interlopability) 
-- Z3 theorem prover (language design)
-- Metamath (minimalism)
+> [!WARNING] I have not as of yet tested that this is reproducible, please create an issue if you have a problem
 
-## Documentation
+The prerequisites for building STELF most easily is the [opam](https://opam.ocaml.org) package manager and `make`.
+Once you have opam installed, to build the project just do `make build`. This should automatically set up your environment, install dependencies and build the project
 
-Documentation is very incomplete, but the following resources are available:
-- The dev docs are not yet available, but running `source hacking.sh BROWSER` where `BROWSER` is your browser should (propably (on Linux (maybe ))) open the dev docs (hopefully). 
-  Dev docs are not done
-- [The wiki](https://github.com/standardocaml/stelf/wiki) contains some documentation, but is also incomplete.
-- The STELF book, which is intended to be both a manual and reference, is located in [the book directory](./guide/). It is also incomplete, and as a little experiment is written in Typst.
-- Some other useful links include:
-  - Original Twelf [repo](https://github.com/standardml/twelf) and [website](https://twelf.org/)
-  - The [Shibboleth transpiler](https://github.com/standardocaml/shibboleth)
-  - A certain [paper](https://www.cs.cmu.edu/~rwh/papers/mech/jfp07.pdf) describing canonical LF
-  - [Building](./hacking/BUILD.md), which is hopefully up to date 
+To install, just do `make install`.
 
-If you couldn't tell, this project is a tad large.
-If I miss something, please reach out. 
+> [!NOTE] You may notice that `dune` starts reporting that the build is getting larger and larger (up to a couple thousand targets (which for dune isn't that much)), or that it seems to be taking a long time on the first couple. This is expected.
 
-## Original README
+### Testing
+
+For end-user testing, just run `make test`.
+Developers should use `dune test`.
+
+### Editor Support
+
+Currently, the only editor supported is Zed (because of its interoperability with Tree-sitter) through the [stelf-zed](https://github.com/standardocaml/stelf-zed) extension.
+
+> [!NOTE] Help creating extensions for other editors is greatly appreciated
+
+## Improvements from Twelf
+
+Twelf itself is a powerful tool for reasoning about metatheorems, but it had several limitations and shortcomings
+
+### Ecosystem
+
+Twelf's is arguably one of its weakest points.
+Twelf, a Standard ML program, requires an SML compiler, which is a task in itself.
+In addition, the Twelf Emacs mode, while not a core part of the project, is not very modernized and is not on `MELPA`, which makes it another setup
+
+STELF is written in OCaml, a modern language in the ML family with a very large ecosystem (that is also the basis of the Rocq project).
+Its build is easy and user friendly.
+
+### Composability
+
+Twelf had a large *large* problem with composability.
+
+Firstly, Twelf's module system was never fully implemented (in Twelf, it serves as the basis for the scope system here).
+This means that if you wanted to make sure names didn't collide, you had to be sure that they were distinct.
+This means names had to either be at least one of (usually both)
+
+- Very, *very* long
+- Not descriptive
+
+In addition, Twelf did not have a clear way to import other files or to have libraries.
+The configuration system is a list of files to be loaded, in order.
+STELF uses a `stelf.toml` file (which is compliant TOML), which fixes all these problems.
+In addition, you get the much needed scope feature, allowing names like `%(nat zero)` to be written without aggressively adding dashes
+
+### Candy
+
+The original Twelf, compared to modern languages (including STELF) has a bit of a simple REPL
+
+1. Input and output can't be distinguished in the Twelf REPL (STELF has `=>`, `debug` etc. for output, and `λ∏>` or `>` for input)
+2. The Twelf REPL doesn't use color (STELF does))
+3. The Twelf REPL doesn't have a command history (STELF does)
+
+## Copyright
 
 Copyright (C) 1997-2011, Frank Pfenning and Carsten Schuermann
-
-Authors:
-
-    Frank Pfenning
-    Carsten Schuermann
-
-With contributions by:
-
-    Brigitte Pientka
-    Roberto Virga
-    Kevin Watkins
-    Jason Reed
-
-## STELF
-
-Copyright (C) 2026, Asher Frost
+Copyright (C) 2026-2026, Asher Frost (Ethan Moy)

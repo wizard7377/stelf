@@ -1,3 +1,3 @@
-open Whnf_intf
-include module type of Approx_intf
+open WHNF
+include module type of APPROX
 module MakeApprox (Whnf : WHNF) : APPROX

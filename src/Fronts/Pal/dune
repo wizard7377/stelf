@@ -1,19 +1,25 @@
 (library
+ (instrumentation
+  (backend bisect_ppx))
  (name pal)
  (public_name stelf.pal)
  (libraries
   display
   basis
   names
+  error
   cmdliner
   modern
   tui
+  project
+  fmt
   syntax
   paths
   cst
   recon
   intsyn
   global
+  typecheck
   timing
   print
   opsem
@@ -22,6 +28,8 @@
   subordinate
   index
   frontend
+  terminate
+  fmt.tty
   worldcheck
   modules
   lwt.unix))

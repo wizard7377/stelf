@@ -22,18 +22,16 @@ end) :
   type nonrec func = rep -> arg -> result
   type nonrec table = func array
 
-  let rec initializeTable tbl =
+  let initializeTable tbl =
     let exception CSfunNotInstalled of csid in
     let maxCSid = 50 in
-    let rec unimplemented csid = function
-      | _ -> raise (CSfunNotInstalled csid)
-    in
+    let unimplemented csid = function _ -> raise (CSfunNotInstalled csid) in
     Array.tabulate (maxCSid + 1, unimplemented)
   (*Global.maxCSid*)
 
   let table : table = initializeTable ()
-  let rec install (csid, f) = Array.update (table, csid, f)
-  let rec apply (csid, rep) = Array.sub (table, csid) rep
+  let install (csid, f) = Array.update (table, csid, f)
+  let apply (csid, rep) = Array.sub (table, csid) rep
 end
 
 (* # 1 "src/lambda/Fgnopntable.sml.ml" *)

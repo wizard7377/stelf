@@ -1,3 +1,11 @@
+(include_subdirs unqualified)
+
 (test
+ (instrumentation
+  (backend bisect_ppx))
  (name PalTest)
- (libraries pal alcotest display))
+ (libraries pal alcotest display grace grace.ansi_renderer)
+ (deps
+  (source_tree require)
+  (source_tree ../../new-tests)
+  (source_tree ../../new-tests2)))

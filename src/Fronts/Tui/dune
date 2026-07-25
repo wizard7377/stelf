@@ -1,4 +1,6 @@
 (library
+ (instrumentation
+  (backend bisect_ppx))
  (name tui)
  (public_name stelf.tui_fronts)
- (libraries frontend server fmt lambda-term lwt parsing display))
+ (libraries frontend server lambda-term lwt parsing display))

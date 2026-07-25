@@ -1,0 +1,22 @@
+%sort lt-look {_ lt} {_ loc} {_ cn} %.
+%mode lt-look %star %star %star %.
+%term lt-look/hit lt-look (lt/cons _ LC C) LC C %.
+%term lt-look/miss %pi (lt-look (lt/cons L _ _) LC C) %<- (lt-look L LC C) %.
+%worlds (cn-block) (lt-look _ _ _) %.
+%sort lt-extend {_ lt} {_ cn} {_ lt} {_ loc} %.
+%mode lt-extend %star %star %star %star %.
+%term lt-extend/nil lt-extend lt/nil C (lt/cons lt/nil loc/z C) loc/z %.
+%term lt-extend/cons lt-extend (lt/cons LT LC C') C (lt/cons (lt/cons LT LC C') (loc/s LC) C) (loc/s LC) %.
+%sort lt-wf {_ lt} %.
+%mode lt-wf %star %.
+%term lt-wf/nil lt-wf lt/nil %.
+%term lt-wf/cons 
+	%pi (lt-wf (lt/cons L1 LC C))
+	%<- (lt-extend L1 C (lt/cons L1 LC C) LC)
+	%<- (lt-wf L1) %.
+%sort lt-sub {_ lt} {_ lt} %.
+%term lt-sub/refl lt-sub L L %.
+%term lt-sub/trans 
+	%pi (lt-sub L (lt/cons L' LC C'))
+	%<- (lt-extend L' C' (lt/cons L' LC C') LC)
+	%<- (lt-sub L L') %.

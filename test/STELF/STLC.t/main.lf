@@ -1,0 +1,40 @@
+%prose markdown
+%scope STLC %{
+    %sort type
+    %sort term
+    %scope term %{
+        Lambda terms, which take a
+        %term λ {F %fn term %-> term} term %.
+        %term @ {F term} {X term} term %.
+        %prec %right 3 @ %.
+
+        %term (0 S ⊤) term
+    %}
+
+    %scope type %{
+        %term -> {A type} {B type} type %.
+        %prec %right 2 -> %.
+        %term unit type %.
+        %term ℕ type %.
+    %}
+
+    %sort : {X term} {A type} %.
+    %prec %middle 1 : %.
+    %scope of %{
+        %term 0 %(term 0) : ℕ
+        %term S %(term S) : ℕ -> ℕ
+        %term ⊤ %(term ⊤) : unit
+        %term λ {F %fn term %-> term} {(T U) type}
+            %if ({{X}}
+                %if X : T
+                %-> (F X) : U
+            ) %->
+            ((%(term λ) F) : (T -> U))
+
+        %term @ {(F X) term} {(T U) type}
+            %if (F : T -> U)
+            %-> (X : T)
+            %-> ((%(term @) F X) : U)
+
+    %}
+%}

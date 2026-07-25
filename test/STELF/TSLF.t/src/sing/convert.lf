@@ -1,0 +1,89 @@
+%sort tconvert {_ tp} {_ etp} %.
+%sort convert {_ term} {_ tp} {_ eterm} %.
+%sort aconvert {_ atom} {_ tp} {_ eterm} %.
+%term tconvert/t tconvert t et %.
+%term tconvert/pi 
+	%pi (tconvert (pi A B) (epi EA EB))
+	%<- (tconvert A EA)
+	%<- ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) %.
+%term tconvert/sigma 
+	%pi (tconvert (sigma A B) (esigma EA EB))
+	%<- (tconvert A EA)
+	%<- ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (tconvert (B x) (EB ex)))) %.
+%term tconvert/sing %pi (tconvert (sing R) (esing EM)) %<- (aconvert R t EM) %.
+%term convert/at %pi (convert (at R) t EM) %<- (aconvert R t EM) %.
+%term convert/lam 
+	%pi (convert (lam M) (pi A B) (elam EA EM))
+	%<- (tconvert A EA)
+	%<- ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (convert (M x) (B x) (EM ex)))) %.
+%term convert/pair 
+	%pi (convert (pair M N) (sigma A B) (epair EM EN))
+	%<- (convert M A EM)
+	%<- (tsub B M Bx)
+	%<- (convert N Bx EN)
+	%<- ({x} %pi (vof x A) %-> (wf (B x))) %.
+%term convert/sing %pi (convert (at R) (sing R) EM) %<- (aconvert R t EM) %.
+%term aconvert/const %pi (aconvert (const C) A (econst C)) %<- (kof C A) %<- (wf A) %<- (tconvert A _) %.
+%term aconvert/forall %pi (aconvert (forall A) (qtp A) (eforall EA)) %<- (tconvert A EA) %.
+%term aconvert/var %pi (aconvert X A EX) %<- (vof X A) %<- (wf A) %<- (tconvert A _) %<- (vtrans EX X) %.
+%term aconvert/app 
+	%pi (aconvert (app R N) Bx (eapp EM EN))
+	%<- (aconvert R (pi A B) EM)
+	%<- (convert N A EN)
+	%<- (tsub B N Bx) %.
+%term aconvert/pi1 %pi (aconvert (pi1 R) A (epi1 EM)) %<- (aconvert R (sigma A B) EM) %.
+%term aconvert/pi2 %pi (aconvert (pi2 R) (B (pi1 R)) (epi2 EM)) %<- (aconvert R (sigma A B) EM) %.
+%%%%%  Explicit Contexts  %%%%%
+%sort tconverte {_ ctx} {_ tp} {_ etp} %.
+%sort converte {_ ctx} {_ term} {_ tp} {_ eterm} %.
+%sort aconverte {_ ctx} {_ atom} {_ tp} {_ eterm} %.
+%term tconverte/t %pi (tconverte G t et) %<- (ordered G) %.
+%term tconverte/pi 
+	%pi (tconverte G (pi A B) (epi EA EB))
+	%<- (tconverte G A EA)
+	%<- ({x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (tconverte (cons G x A) (B x) (EB ex)))) %.
+%term tconverte/sigma 
+	%pi (tconverte G (sigma A B) (esigma EA EB))
+	%<- (tconverte G A EA)
+	%<- ({x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (tconverte (cons G x A) (B x) (EB ex)))) %.
+%term tconverte/sing %pi (tconverte G (sing R) (esing EM)) %<- (aconverte G R t EM) %.
+%term converte/at %pi (converte G (at R) t EM) %<- (aconverte G R t EM) %.
+%term converte/lam 
+	%pi (converte G (lam M) (pi A B) (elam EA EM))
+	%<- (tconverte G A EA)
+	%<- ({x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (converte (cons G x A) (M x) (B x) (EM ex)))) %.
+%term converte/pair 
+	%pi (converte G (pair M N) (sigma A B) (epair EM EN))
+	%<- (converte G M A EM)
+	%<- (tsub B M Bx)
+	%<- (converte G N Bx EN)
+	%<- ({x} %pi (isvar x I) %-> (wfe (cons G x A) (B x))) %.
+%term converte/sing %pi (converte G (at R) (sing R) EM) %<- (aconverte G R t EM) %.
+%term aconverte/const 
+	%pi (aconverte G (const C) A (econst C))
+	%<- (kof C A)
+	%<- (wf A)
+	%<- (tconverte G A _) %.
+%term aconverte/forall %pi (aconverte G (forall A) (qtp A) (eforall EA)) %<- (tconverte G A EA) %.
+%term aconverte/var %pi (aconverte G X A EX) %<- (lookup G X A) %<- (tconverte G A _) %<- (vtrans EX X) %.
+%term aconverte/vari 
+	%pi (aconverte G X A EX)
+	%<- (vof X A)
+	%<- (wf A)
+	%<- (tconverte G A _)
+	%<- (vtrans EX X) %.
+%term aconverte/app 
+	%pi (aconverte G (app R N) Bx (eapp EM EN))
+	%<- (aconverte G R (pi A B) EM)
+	%<- (converte G N A EN)
+	%<- (tsub B N Bx) %.
+%term aconverte/pi1 %pi (aconverte G (pi1 R) A (epi1 EM)) %<- (aconverte G R (sigma A B) EM) %.
+%term aconverte/pi2 
+	%pi (aconverte G (pi2 R) (B (pi1 R)) (epi2 EM))
+	%<- (aconverte G R (sigma A B) EM) %.

@@ -1,0 +1,29 @@
+; (include sources.dune)
+
+(library
+ (instrumentation
+  (backend bisect_ppx))
+ (name table)
+ (public_name stelf.table)
+ (modules
+  HashTable
+  StringHash
+  RedBlackTree
+  Ring
+  Queue
+  SparseArray
+  SparseArray2
+  RedBlackSet
+  Table_
+  TableInstances
+  QUEUE
+  REDBLACKSET
+  RING
+  SPARSEARRAY
+  SPARSEARRAY2
+  STRINGHASH
+  TABLE)
+ (libraries display basis)
+ (wrapped true)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

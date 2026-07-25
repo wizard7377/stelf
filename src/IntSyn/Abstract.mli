@@ -1,4 +1,4 @@
-include module type of Abstract_intf
+include module type of ABSTRACT
 
 module MakeAbstract
     (Whnf : Whnf.WHNF)

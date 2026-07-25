@@ -1,0 +1,127 @@
+%%%% simple inversion lemmas
+%sort inv/ofkd/tp/cross {_ ofkd (tp/cross C1 C2) K} {_ kd-sub K kd/type} {_ ofkd C1 kd/type} {_ ofkd C2 kd/type} %.
+%mode inv/ofkd/tp/cross %in %in %out %out %.
+%term _ inv/ofkd/tp/cross (ofkd/tp/cross D1 D2) _ D1 D2 %.
+%term _ 
+	%pi (inv/ofkd/tp/cross (ofkd/kd/sing DC) _ D1 D2)
+	%<- (inv/ofkd/tp/cross DC kd-sub/kd/type D1 D2) %.
+%term _ 
+	%pi (inv/ofkd/tp/cross (ofkd/sub DC DS) KS D1 D2)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/cross DC DS' D1 D2) %.
+%term _ 
+	%pi (inv/ofkd/tp/cross (ofkd/deq DC DQ) KS D1 D2)
+	%<- (vdt/kd-deq DQ DQ1 DQ2)
+	%<- (kd-anti DQ DQ1 DQ2 DS _)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/cross DC DS' D1 D2) %.
+%worlds (ofkd+vdt-block) (inv/ofkd/tp/cross _ _ _ _) %.
+%total D1 (inv/ofkd/tp/cross D1 _ _ _) %.
+%sort inv/ofkd/tp/arrow {_ ofkd (tp/arrow C1 C2) K} {_ kd-sub K kd/type} {_ ofkd C1 kd/type} {_ ofkd C2 kd/type} %.
+%mode inv/ofkd/tp/arrow %in %in %out %out %.
+%term _ inv/ofkd/tp/arrow (ofkd/tp/arrow D1 D2) _ D1 D2 %.
+%term _ 
+	%pi (inv/ofkd/tp/arrow (ofkd/kd/sing DC) _ D1 D2)
+	%<- (inv/ofkd/tp/arrow DC kd-sub/kd/type D1 D2) %.
+%term _ 
+	%pi (inv/ofkd/tp/arrow (ofkd/sub DC DS) KS D1 D2)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/arrow DC DS' D1 D2) %.
+%term _ 
+	%pi (inv/ofkd/tp/arrow (ofkd/deq DC DQ) KS D1 D2)
+	%<- (vdt/kd-deq DQ DQ1 DQ2)
+	%<- (kd-anti DQ DQ1 DQ2 DS _)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/arrow DC DS' D1 D2) %.
+%worlds (ofkd+vdt-block) (inv/ofkd/tp/arrow _ _ _ _) %.
+%total D1 (inv/ofkd/tp/arrow D1 _ _ _) %.
+%sort inv/ofkd/tp/sum {_ ofkd (tp/sum C1 C2) K} {_ kd-sub K kd/type} {_ ofkd C1 kd/type} {_ ofkd C2 kd/type} %.
+%mode inv/ofkd/tp/sum %in %in %out %out %.
+%term _ inv/ofkd/tp/sum (ofkd/tp/sum D1 D2) _ D1 D2 %.
+%term _ 
+	%pi (inv/ofkd/tp/sum (ofkd/kd/sing DC) _ D1 D2)
+	%<- (inv/ofkd/tp/sum DC kd-sub/kd/type D1 D2) %.
+%term _ 
+	%pi (inv/ofkd/tp/sum (ofkd/sub DC DS) KS D1 D2)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/sum DC DS' D1 D2) %.
+%term _ 
+	%pi (inv/ofkd/tp/sum (ofkd/deq DC DQ) KS D1 D2)
+	%<- (vdt/kd-deq DQ DQ1 DQ2)
+	%<- (kd-anti DQ DQ1 DQ2 DS _)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/sum DC DS' D1 D2) %.
+%worlds (ofkd+vdt-block) (inv/ofkd/tp/sum _ _ _ _) %.
+%total D1 (inv/ofkd/tp/sum D1 _ _ _) %.
+%sort inv/ofkd/tp/forall {_ ofkd (tp/forall K' C) K} {_ kd-sub K kd/type} {_ kd-wf K'} {_ {a} {da ofkd a K'} ofkd (C a) kd/type} %.
+%mode inv/ofkd/tp/forall %in %in %out %out %.
+%term _ inv/ofkd/tp/forall (ofkd/tp/forall D2 D1) _ D1 D2 %.
+%term _ 
+	%pi (inv/ofkd/tp/forall (ofkd/kd/sing DC) _ D1 D2)
+	%<- (inv/ofkd/tp/forall DC kd-sub/kd/type D1 D2) %.
+%term _ 
+	%pi (inv/ofkd/tp/forall (ofkd/sub DC DS) KS D1 D2)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/forall DC DS' D1 D2) %.
+%term _ 
+	%pi (inv/ofkd/tp/forall (ofkd/deq DC DQ) KS D1 D2)
+	%<- (vdt/kd-deq DQ DQ1 DQ2)
+	%<- (kd-anti DQ DQ1 DQ2 DS _)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/forall DC DS' D1 D2) %.
+%worlds (ofkd+vdt-block) (inv/ofkd/tp/forall _ _ _ _) %.
+%total D1 (inv/ofkd/tp/forall D1 _ _ _) %.
+%sort inv/ofkd/tp/ref {_ ofkd (tp/ref C1) K} {_ kd-sub K kd/type} {_ ofkd C1 kd/type} %.
+%mode inv/ofkd/tp/ref %in %in %out %.
+%term _ inv/ofkd/tp/ref (ofkd/tp/ref D1) _ D1 %.
+%term _ 
+	%pi (inv/ofkd/tp/ref (ofkd/kd/sing DC) _ D1)
+	%<- (inv/ofkd/tp/ref DC kd-sub/kd/type D1) %.
+%term _ 
+	%pi (inv/ofkd/tp/ref (ofkd/sub DC DS) KS D1)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/ref DC DS' D1) %.
+%term _ 
+	%pi (inv/ofkd/tp/ref (ofkd/deq DC DQ) KS D1)
+	%<- (vdt/kd-deq DQ DQ1 DQ2)
+	%<- (kd-anti DQ DQ1 DQ2 DS _)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/ref DC DS' D1) %.
+%worlds (ofkd+vdt-block) (inv/ofkd/tp/ref _ _ _) %.
+%total D1 (inv/ofkd/tp/ref D1 _ _) %.
+%sort inv/ofkd/tp/tag {_ ofkd (tp/tag C1) K} {_ kd-sub K kd/type} {_ ofkd C1 kd/type} %.
+%mode inv/ofkd/tp/tag %in %in %out %.
+%term _ inv/ofkd/tp/tag (ofkd/tp/tag D1) _ D1 %.
+%term _ 
+	%pi (inv/ofkd/tp/tag (ofkd/kd/sing DC) _ D1)
+	%<- (inv/ofkd/tp/tag DC kd-sub/kd/type D1) %.
+%term _ 
+	%pi (inv/ofkd/tp/tag (ofkd/sub DC DS) KS D1)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/tag DC DS' D1) %.
+%term _ 
+	%pi (inv/ofkd/tp/tag (ofkd/deq DC DQ) KS D1)
+	%<- (vdt/kd-deq DQ DQ1 DQ2)
+	%<- (kd-anti DQ DQ1 DQ2 DS _)
+	%<- (kd-trans/sub DS KS DS')
+	%<- (inv/ofkd/tp/tag DC DS' D1) %.
+%worlds (ofkd+vdt-block) (inv/ofkd/tp/tag _ _ _) %.
+%total D1 (inv/ofkd/tp/tag D1 _ _) %.
+%sort inv/ofkd/cn/mu {_ ofkd (cn/mu K1 C1) K} {_ kd-sub K kd/type} {_ {a} {da ofkd a kd/type} ofkd (C1 a) kd/type} %.
+%mode inv/ofkd/cn/mu %in %in %out %.
+%term _ %pi (inv/ofkd/cn/mu (ofkd/cn/mu D1 D2) DS D1') %<- (kd-wkn/ofkd D1 DS D1') %.
+%term _ 
+	%pi (inv/ofkd/cn/mu (ofkd/kd/sing DC) DS D1)
+	%<- (inv/ofkd/cn/mu DC kd-sub/kd/type D1) %.
+%term _ 
+	%pi (inv/ofkd/cn/mu (ofkd/sub DC DS) DS' D1)
+	%<- (kd-trans/sub DS DS' DS'')
+	%<- (inv/ofkd/cn/mu DC DS'' D1) %.
+%term _ 
+	%pi (inv/ofkd/cn/mu (ofkd/deq DC DQ) DS' D1)
+	%<- (vdt/kd-deq DQ DQ1 DQ2)
+	%<- (kd-anti DQ DQ1 DQ2 DS _)
+	%<- (kd-trans/sub DS DS' DS'')
+	%<- (inv/ofkd/cn/mu DC DS'' D1) %.
+%worlds (ofkd+vdt-block) (inv/ofkd/cn/mu _ _ _) %.
+%total D1 (inv/ofkd/cn/mu D1 _ _) %.

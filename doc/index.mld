@@ -3,59 +3,14 @@
 This is the internal docmentation for the STELF project. 
 
 {!modules:
-  Stelf
-  Cst 
-  Syntax 
-  Common
+  Common 
+  Cst
   Display
-  Error
+  Recon
+  Syntax
   Fronts
+  Pal 
+  Tui 
   IntSyn
   Lang
-  Recon
-  Compile
-  Compress
-  Cover
-  Debug
-  Domains
-  Flit
-  Formatter
-  Frontend
-  Global
-  Heuristic
-  Index
-  IntInf
-  Inverse
-  M2
-  Meta
-  Modes
-  Modules
-  Msg
-  Names
-  Netserver
-  Opsem
-  Order
-  Paths
-  Print
-  Prover
-  Server
-  Smlofnj
-  Solvers
-  Stream
-  Style
-  Subordinate
-  Table
-  Tabling
-  Terminate
-  Thm
-  Timing
-  Tomega
-  Trail
-  Typecheck
-  Unique
-  Worldcheck
-  Compile 
-  Compress
-  Cover
-  Display
 }

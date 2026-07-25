@@ -1,0 +1,14 @@
+[[group]]
+name = "al_base"
+main = "./al_base.lf"
+dirs = ["."]
+
+[[group]]
+name = "al_app"
+main = "./al_app.lf"
+dirs = ["."]
+
+[[group.deps]]
+type = "local"
+name = "al_base"
+alias = "al_b"

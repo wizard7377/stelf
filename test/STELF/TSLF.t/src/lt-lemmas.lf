@@ -1,0 +1,30 @@
+%%%% lemmas about location judgments
+%sort lt-wf-look-sane {_ lt-look (lt/cons L LC C) LC' _} {_ lt-wf (lt/cons L LC C)} {_ loc-less LC LC'} {_ uninhabited} %.
+%mode lt-wf-look-sane %in %in %in %out %.
+%term _ 
+	%pi (lt-wf-look-sane (lt-look/miss LL) (lt-wf/cons LCS _) LG DU)
+	%<- (loc-less-pred LG LG')
+	%<- (lt-wf-look-sane LL LCS LG' DU) %.
+%term _ 
+	%pi (lt-wf-look-sane lt-look/hit (lt-wf/cons _ _) DG DU)
+	%<- (loc-less-not-refl DG DU) %.
+%worlds () (lt-wf-look-sane _ _ _ _) %.
+%total D1 (lt-wf-look-sane _ D1 _ _) %.
+%sort lt-wf-look-unique {_ lt-look L LC C} {_ lt-look L LC C'} {_ lt-wf L} {_ seq/cn C C'} %.
+%mode lt-wf-look-unique %in %in %in %out %.
+%term _ lt-wf-look-unique lt-look/hit lt-look/hit _ seq/cn/refl %.
+%term _ 
+	%pi (lt-wf-look-unique (lt-look/miss LL1) (lt-look/miss LL2) (lt-wf/cons LW _) DQ)
+	%<- (lt-wf-look-unique LL1 LL2 LW DQ) %.
+%term _ 
+	%pi (lt-wf-look-unique lt-look/hit (lt-look/miss LL) (lt-wf/cons LW _) DQ)
+	%<- (loc-less-immsucc _ LG)
+	%<- (lt-wf-look-sane LL LW LG DU)
+	%<- (uninhabited-seq/cn _ _ DU DQ) %.
+%term _ 
+	%pi (lt-wf-look-unique (lt-look/miss LL) lt-look/hit (lt-wf/cons LW _) DQ)
+	%<- (loc-less-immsucc _ LG)
+	%<- (lt-wf-look-sane LL LW LG DU)
+	%<- (uninhabited-seq/cn _ _ DU DQ) %.
+%worlds () (lt-wf-look-unique _ _ _ _) %.
+%total D1 (lt-wf-look-unique _ _ D1 _) %.

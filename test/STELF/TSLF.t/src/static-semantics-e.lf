@@ -1,0 +1,164 @@
+%%%% Static Semantics with explicit contexts 
+%sort eofkd {_ cxt} {_ cn} {_ kd} %.
+%mode eofkd %star %star %star %.
+%sort ekd-wf {_ cxt} {_ kd} %.
+%mode ekd-wf %star %star %.
+%sort ekd-deq {_ cxt} {_ kd} {_ kd} %.
+%mode ekd-deq %star %star %star %.
+%sort ekd-sub {_ cxt} {_ kd} {_ kd} %.
+%mode ekd-sub %star %star %star %.
+%sort ecn-deq {_ cxt} {_ cn} {_ cn} {_ kd} %.
+%mode ecn-deq %star %star %star %star %.
+%term ekd-wf/kd/unit %pi (ekd-wf G kd/unit) %<- (cxt-ordered G) %.
+%term ekd-wf/kd/type %pi (ekd-wf G kd/type) %<- (cxt-ordered G) %.
+%term ekd-wf/kd/sing %pi (ekd-wf G (kd/sing C1)) %<- (eofkd G C1 kd/type) %.
+%term ekd-wf/kd/sgm 
+	%pi (ekd-wf G (kd/sgm K1 K2))
+	%<- ({a cn} %pi (isvar a I) %-> (ekd-wf (cxt/cons G a K1) (K2 a)))
+	%<- (ekd-wf G K1) %.
+%term ekd-wf/kd/pi 
+	%pi (ekd-wf G (kd/pi K1 K2))
+	%<- ({a cn} %pi (isvar a I) %-> (ekd-wf (cxt/cons G a K1) (K2 a)))
+	%<- (ekd-wf G K1) %.
+%term ekd-deq/kd/unit %pi (ekd-deq G kd/unit kd/unit) %<- (cxt-ordered G) %.
+%term ekd-deq/kd/type %pi (ekd-deq G kd/type kd/type) %<- (cxt-ordered G) %.
+%term ekd-deq/kd/sing %pi (ekd-deq G (kd/sing C1) (kd/sing C2)) %<- (ecn-deq G C1 C2 kd/type) %.
+%term ekd-deq/kd/sgm 
+	%pi (ekd-deq G (kd/sgm K1' K1'') (kd/sgm K2' K2''))
+	%<- ({a cn} %pi (isvar a I) %-> (ekd-deq (cxt/cons G a K1') (K1'' a) (K2'' a)))
+	%<- (ekd-deq G K1' K2') %.
+%term ekd-deq/kd/pi 
+	%pi (ekd-deq G (kd/pi K1' K1'') (kd/pi K2' K2''))
+	%<- ({a cn} %pi (isvar a I) %-> (ekd-deq (cxt/cons G a K2') (K1'' a) (K2'' a)))
+	%<- (ekd-deq G K2' K1') %.
+%term ekd-sub/kd/unit %pi (ekd-sub G kd/unit kd/unit) %<- (cxt-ordered G) %.
+%term ekd-sub/kd/type %pi (ekd-sub G kd/type kd/type) %<- (cxt-ordered G) %.
+%term ekd-sub/kd/sing-kd/sing %pi (ekd-sub G (kd/sing C1) (kd/sing C2)) %<- (ecn-deq G C1 C2 kd/type) %.
+%term ekd-sub/kd/sing-kd/type %pi (ekd-sub G (kd/sing C1) kd/type) %<- (eofkd G C1 kd/type) %.
+%term ekd-sub/kd/sgm 
+	%pi (ekd-sub G (kd/sgm K1' K1'') (kd/sgm K2' K2''))
+	%<- ({a cn} %pi (isvar a I) %-> (ekd-wf (cxt/cons G a K2') (K2'' a)))
+	%<- ({b cn} %pi (isvar b I) %-> (ekd-sub (cxt/cons G b K1') (K1'' b) (K2'' b)))
+	%<- (ekd-sub G K1' K2') %.
+%term ekd-sub/kd/pi 
+	%pi (ekd-sub G (kd/pi K1' K1'') (kd/pi K2' K2''))
+	%<- ({a cn} %pi (isvar a I) %-> (ekd-wf (cxt/cons G a K1') (K1'' a)))
+	%<- ({a cn} %pi (isvar a I) %-> (ekd-sub (cxt/cons G a K2') (K1'' a) (K2'' a)))
+	%<- (ekd-sub G K2' K1') %.
+%term eofkd/cn/unit %pi (eofkd G cn/unit kd/unit) %<- (cxt-ordered G) %.
+%term eofkd/tp/unit %pi (eofkd G tp/unit kd/type) %<- (cxt-ordered G) %.
+%term eofkd/tp/tagged %pi (eofkd G tp/tagged kd/type) %<- (cxt-ordered G) %.
+%term eofkd/tp/cross 
+	%pi (eofkd G (tp/cross T1 T2) kd/type)
+	%<- (eofkd G T2 kd/type)
+	%<- (eofkd G T1 kd/type) %.
+%term eofkd/tp/arrow 
+	%pi (eofkd G (tp/arrow T1 T2) kd/type)
+	%<- (eofkd G T2 kd/type)
+	%<- (eofkd G T1 kd/type) %.
+%term eofkd/tp/sum 
+	%pi (eofkd G (tp/sum T1 T2) kd/type)
+	%<- (eofkd G T2 kd/type)
+	%<- (eofkd G T1 kd/type) %.
+%term eofkd/tp/forall 
+	%pi (eofkd G (tp/forall K1 C1) kd/type)
+	%<- (ekd-wf G K1)
+	%<- ({a cn} %pi (isvar a I) %-> (eofkd (cxt/cons G a K1) (C1 a) kd/type)) %.
+%term eofkd/tp/tag %pi (eofkd G (tp/tag T1) kd/type) %<- (eofkd G T1 kd/type) %.
+%term eofkd/cn/mu 
+	%pi (eofkd G (cn/mu kd/type C) kd/type)
+	%<- (ekd-wf G kd/type)
+	%<- ({a cn} %pi (isvar a I) %-> (eofkd (cxt/cons G a kd/type) (C a) kd/type)) %.
+%term eofkd/cn/pair 
+	%pi (eofkd G (cn/pair C1 C2) (kd/sgm K1 ([a cn] K2)))
+	%<- (eofkd G C2 K2)
+	%<- (eofkd G C1 K1) %.
+%term eofkd/cn/pj1 %pi (eofkd G (cn/pj1 C1) K1) %<- (eofkd G C1 (kd/sgm K1 K2)) %.
+%term eofkd/cn/pj2 %pi (eofkd G (cn/pj2 C1) (K2 (cn/pj1 C1))) %<- (eofkd G C1 (kd/sgm K1 K2)) %.
+%term eofkd/cn/lam 
+	%pi (eofkd G (cn/lam K1 C) (kd/pi K1 K2))
+	%<- (ekd-wf G K1)
+	%<- ({a cn} %pi (isvar a I) %-> (eofkd (cxt/cons G a K1) (C a) (K2 a))) %.
+%term eofkd/cn/app 
+	%pi (eofkd G (cn/app C1 C2) (K2 C2))
+	%<- (eofkd G C2 K1)
+	%<- (eofkd G C1 (kd/pi K1 K2)) %.
+%term eofkd/kd/sing %pi (eofkd G C (kd/sing C)) %<- (eofkd G C kd/type) %.
+%term eofkd/sgm-ext 
+	%pi (eofkd G C (kd/sgm K1 ([a cn] K2)))
+	%<- (eofkd G (cn/pj2 C) K2)
+	%<- (eofkd G (cn/pj1 C) K1) %.
+%term eofkd/pi-ext 
+	%pi (eofkd G C (kd/pi K1 K2))
+	%<- ({a cn} %pi (isvar a I) %-> (eofkd (cxt/cons G a K1) (cn/app C a) (K2 a)))
+	%<- (eofkd G C (kd/pi K1 L)) %.
+%term eofkd/sub %pi (eofkd G C K) %<- (ekd-sub G K' K) %<- (eofkd G C K') %.
+%term eofkd/deq %pi (eofkd G C K) %<- (ekd-deq G K' K) %<- (eofkd G C K') %.
+%term eofkd/tp/ref %pi (eofkd G (tp/ref C) kd/type) %<- (eofkd G C kd/type) %.
+%term eofkd/var %pi (eofkd G A K) %<- (cxt-lookup G A K) %.
+%term eofkd/closed %pi (eofkd G A K) %<- (cxt-ordered G) %<- (ofkd A K) %.
+%term ecn-deq/refl %pi (ecn-deq G C C K) %<- (eofkd G C K) %.
+%term ecn-deq/sym %pi (ecn-deq G C1 C2 K) %<- (ecn-deq G C2 C1 K) %.
+%term ecn-deq/trans %pi (ecn-deq G C1 C3 K) %<- (ecn-deq G C2 C3 K) %<- (ecn-deq G C1 C2 K) %.
+%term ecn-deq/cn/unit %pi (ecn-deq G cn/unit cn/unit kd/unit) %<- (cxt-ordered G) %.
+%term ecn-deq/tp/unit %pi (ecn-deq G tp/unit tp/unit kd/type) %<- (cxt-ordered G) %.
+%term ecn-deq/tp/tagged %pi (ecn-deq G tp/tagged tp/tagged kd/type) %<- (cxt-ordered G) %.
+%term ecn-deq/tp/cross 
+	%pi (ecn-deq G (tp/cross C1' C1'') (tp/cross C2' C2'') kd/type)
+	%<- (ecn-deq G C1'' C2'' kd/type)
+	%<- (ecn-deq G C1' C2' kd/type) %.
+%term ecn-deq/tp/arrow 
+	%pi (ecn-deq G (tp/arrow C1' C1'') (tp/arrow C2' C2'') kd/type)
+	%<- (ecn-deq G C1'' C2'' kd/type)
+	%<- (ecn-deq G C1' C2' kd/type) %.
+%term ecn-deq/tp/sum 
+	%pi (ecn-deq G (tp/sum C1' C1'') (tp/sum C2' C2'') kd/type)
+	%<- (ecn-deq G C1'' C2'' kd/type)
+	%<- (ecn-deq G C1' C2' kd/type) %.
+%term ecn-deq/tp/forall 
+	%pi (ecn-deq G (tp/forall K1 C1) (tp/forall K2 C2) kd/type)
+	%<- (ekd-deq G K1 K2)
+	%<- ({a cn} %pi (isvar a I) %-> (ecn-deq (cxt/cons G a K1) (C1 a) (C2 a) kd/type)) %.
+%term ecn-deq/cn/pair 
+	%pi (ecn-deq G (cn/pair C1' C1'') (cn/pair C2' C2'') (kd/sgm K' ([a] K'')))
+	%<- (ecn-deq G C1'' C2'' K'')
+	%<- (ecn-deq G C1' C2' K') %.
+%term ecn-deq/cn/pj1 %pi (ecn-deq G (cn/pj1 C1) (cn/pj1 C2) K') %<- (ecn-deq G C1 C2 (kd/sgm K' _)) %.
+%term ecn-deq/cn/pj2 
+	%pi (ecn-deq G (cn/pj2 C1) (cn/pj2 C2) (K'' (cn/pj1 C1)))
+	%<- (ecn-deq G C1 C2 (kd/sgm _ K'')) %.
+%term ecn-deq/cn/lam 
+	%pi (ecn-deq G (cn/lam K1 C1) (cn/lam K2 C2) (kd/pi K1 K''))
+	%<- (ekd-deq G K1 K2)
+	%<- ({a cn} %pi (isvar a I) %-> (ecn-deq (cxt/cons G a K1) (C1 a) (C2 a) (K'' a))) %.
+%term ecn-deq/cn/mu 
+	%pi (ecn-deq G (cn/mu kd/type C1) (cn/mu kd/type C2) kd/type)
+	%<- (ekd-deq G kd/type kd/type)
+	%<- ({a cn} %pi (isvar a I) %-> (ecn-deq (cxt/cons G a kd/type) (C1 a) (C2 a) kd/type)) %.
+%term ecn-deq/cn/app 
+	%pi (ecn-deq G (cn/app C1 D1) (cn/app C2 D2) (K'' D1))
+	%<- (ecn-deq G D1 D2 K')
+	%<- (ecn-deq G C1 C2 (kd/pi K' K'')) %.
+%term ecn-deq/kd/unit %pi (ecn-deq G C1 C2 kd/unit) %<- (eofkd G C2 kd/unit) %<- (eofkd G C1 kd/unit) %.
+%term ecn-deq/kd/sing %pi (ecn-deq G C1 C (kd/sing C)) %<- (eofkd G C1 (kd/sing C)) %.
+%term ecn-deq/sgm-ext 
+	%pi (ecn-deq G C1 C2 (kd/sgm K' ([a] K'')))
+	%<- (ecn-deq G (cn/pj2 C1) (cn/pj2 C2) K'')
+	%<- (ecn-deq G (cn/pj1 C1) (cn/pj1 C2) K') %.
+%term ecn-deq/pi-ext 
+	%pi (ecn-deq G C1 C2 (kd/pi K' K''))
+	%<- ({a cn} 
+	%pi (isvar a I)
+	%-> (ecn-deq (cxt/cons G a K') (cn/app C1 a) (cn/app C2 a) (K'' a)))
+	%<- (eofkd G C2 (kd/pi K' _))
+	%<- (eofkd G C1 (kd/pi K' _)) %.
+%term ecn-deq/pi-ext-2 
+	%pi (ecn-deq G C1 C2 (kd/pi K' K''))
+	%<- ({a cn} 
+	%pi (isvar a I)
+	%-> (ecn-deq (cxt/cons G a K') (cn/app C1 a) (cn/app C2 a) (K'' a)))
+	%<- (ecn-deq G C1 C2 (kd/pi K' _)) %.
+%term ecn-deq/sub %pi (ecn-deq G C1 C2 K) %<- (ekd-sub G K' K) %<- (ecn-deq G C1 C2 K') %.
+%term ecn-deq/deq %pi (ecn-deq G C1 C2 K) %<- (ekd-deq G K' K) %<- (ecn-deq G C1 C2 K') %.
+%term ecn-deq/tp/ref %pi (ecn-deq G (tp/ref C1) (tp/ref C2) kd/type) %<- (ecn-deq G C1 C2 kd/type) %.
+%term ecn-deq/tp/tag %pi (ecn-deq G (tp/tag C1) (tp/tag C2) kd/type) %<- (ecn-deq G C1 C2 kd/type) %.

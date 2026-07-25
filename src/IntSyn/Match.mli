@@ -1,4 +1,4 @@
-open Whnf_intf
-open Unify_intf
-include module type of Match_intf
+open WHNF
+open UNIFY
+include module type of MATCH
 module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH

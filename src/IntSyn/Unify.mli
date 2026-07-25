@@ -1,3 +1,3 @@
-open Whnf_intf
-include module type of Unify_intf
+open WHNF
+include module type of UNIFY
 module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY

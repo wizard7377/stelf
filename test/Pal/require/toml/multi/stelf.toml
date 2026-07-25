@@ -1,0 +1,13 @@
+[[group]]
+name = "mn"
+main = "./mn.lf"
+dirs = ["."]
+
+[[group]]
+name = "ma"
+main = "./ma.lf"
+dirs = ["."]
+
+[[group.deps]]
+type = "local"
+name = "mn"

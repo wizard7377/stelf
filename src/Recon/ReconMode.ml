@@ -1,8 +1,21 @@
 module type RECON_MODE = RECON_MODE.RECON_MODE
 
+exception Error of string
+
 module ModeDec = Modes.Modedec.MakeModeDec ()
 
 let ghost_region = Paths.Paths_.Paths.Reg (0, 0)
+
+(* Substring search without relying on Basis's SML-flavored String shadowing
+   (this file has [-open Basis]) or pulling in a regex library for one check. *)
+let string_contains ~needle haystack =
+  let nlen = Stdlib.String.length needle in
+  let hlen = Stdlib.String.length haystack in
+  let rec go i =
+    i + nlen <= hlen
+    && (Stdlib.String.sub haystack i nlen = needle || go (i + 1))
+  in
+  go 0
 
 module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
   module M = M
@@ -12,7 +25,7 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
   module Paths = M.Paths
   module Modes = Modes.Modesyn.ModeSyn
 
-  exception Error of string
+  exception Error = Error
 
   let raise' m =
     Display.(
@@ -58,16 +71,23 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
                       Modes.Mapp
                         (Modes.Marg (convert_mode m, name_opt), build_spine rest)
                 in
-                let mS = build_spine spine in
-                ModeDec.checkFull (cid, mS, ghost_region);
-                ((cid, mS), Paths.Reg (0, 0))
+                let mS_user = build_spine spine in
+                (* Braced %mode {...} is ambiguous between short- and full-form
+                   at parse time (depends on the constant's arity), so try
+                   short-form first and only reinterpret as full-form spine on
+                   "too many modes specified". *)
+                try
+                  let mS = ModeDec.shortToFull (cid, mS_user, ghost_region) in
+                  ((cid, mS), Paths.Reg (0, 0))
+                with
+                | ModeDec.Error msg
+                when string_contains ~needle:"Too many modes specified" msg
+                ->
+                  ModeDec.checkFull (cid, mS_user, ghost_region);
+                  ((cid, mS_user), Paths.Reg (0, 0))
               end
           end
       | _ -> raise' "Invalid mode declaration"
       end
-    with Error m ->
-      Display.(
-        message ~kind:Warning ~level:Verbose
-          (string "Error processing mode declaration: " ++ string m));
-      raise' m
+    with Error m -> raise' m
 end

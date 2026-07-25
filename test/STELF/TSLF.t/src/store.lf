@@ -1,0 +1,19 @@
+%%%% stores for terms
+%sort st %.
+%name st %.
+%term st/nil st %.
+%term st/cons %pi st %-> loc %-> tm %-> st %.
+%sort st-look {_ st} {_ loc} {_ tm} %.
+%mode st-look %star %star %star %.
+%term st-look/hit st-look (st/cons _ LC V) LC V %.
+%term st-look/miss %pi (st-look (st/cons S _ _) LC V) %<- (st-look S LC V) %.
+%sort st-alloc {_ st} {_ tm} {_ st} {_ loc} %.
+%mode st-alloc %star %star %star %star %.
+%term st-alloc/nil st-alloc st/nil E (st/cons st/nil loc/z E) loc/z %.
+%term st-alloc/cons st-alloc (st/cons ST LC E') E (st/cons (st/cons ST LC E') (loc/s LC) E) (loc/s LC) %.
+%sort st-update {_ st} {_ loc} {_ tm} {_ st} %.
+%mode st-update %star %star %star %star %.
+%term st-update/hit st-update (st/cons S LC _) LC E (st/cons S LC E) %.
+%term st-update/miss 
+	%pi (st-update (st/cons S LC' E') LC E (st/cons S' LC' E'))
+	%<- (st-update S LC E S') %.

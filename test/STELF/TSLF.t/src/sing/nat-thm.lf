@@ -1,0 +1,290 @@
+%%%%%  Equality  %%%%%
+%sort lt-resp {_ nat-eq N1 N1'} {_ nat-eq N2 N2'} {_ lt N1 N2} {_ lt N1' N2'} %.
+%mode lt-resp %in %in %in %out %.
+%term _ lt-resp nat-eq/i nat-eq/i D D %.
+%worlds () (lt-resp _ _ _ _) %.
+%total {} (lt-resp _ _ _ _) %.
+%sort leq-resp {_ nat-eq N1 N1'} {_ nat-eq N2 N2'} {_ leq N1 N2} {_ leq N1' N2'} %.
+%mode leq-resp %in %in %in %out %.
+%term _ leq-resp nat-eq/i nat-eq/i D D %.
+%worlds () (leq-resp _ _ _ _) %.
+%total {} (leq-resp _ _ _ _) %.
+%sort sum-resp {_ nat-eq N1 N1'} {_ nat-eq N2 N2'} {_ nat-eq N3 N3'} {_ sum N1 N2 N3} {_ sum N1' N2' N3'} %.
+%mode sum-resp %in %in %in %in %out %.
+%term _ sum-resp nat-eq/i nat-eq/i nat-eq/i D D %.
+%worlds () (sum-resp _ _ _ _ _) %.
+%total {} (sum-resp _ _ _ _ _) %.
+%sort nat-resp {N %pi nat %-> nat} {_ nat-eq N1 N2} {_ nat-eq (N N1) (N N2)} %.
+%mode nat-resp %in %in %out %.
+%term _ nat-resp _ nat-eq/i nat-eq/i %.
+%worlds () (nat-resp _ _ _) %.
+%total {} (nat-resp _ _ _) %.
+%sort nat-eq-inc {_ nat-eq N1 N2} {_ nat-eq (s N1) (s N2)} %.
+%mode nat-eq-inc %in %out %.
+%term _ nat-eq-inc nat-eq/i nat-eq/i %.
+%worlds () (nat-eq-inc _ _) %.
+%total {} (nat-eq-inc _ _) %.
+%%%%%  Sum  %%%%%
+%sort sum-ident {N nat} {_ sum N 0 N} %.
+%mode sum-ident %in %out %.
+%term _ sum-ident 0 sum/z %.
+%term _ %pi (sum-ident (s N) (sum/s D)) %<- (sum-ident N D) %.
+%worlds () (sum-ident _ _) %.
+%total N (sum-ident N _) %.
+%sort sum-inc {_ sum N1 N2 N3} {_ sum N1 (s N2) (s N3)} %.
+%mode sum-inc %in %out %.
+%term _ sum-inc sum/z sum/z %.
+%term _ %pi (sum-inc (sum/s D) (sum/s D')) %<- (sum-inc D D') %.
+%worlds () (sum-inc _ _) %.
+%total D (sum-inc D _) %.
+%sort sum-commute {_ sum N1 N2 N3} {_ sum N2 N1 N3} %.
+%mode sum-commute %in %out %.
+%term _ %pi (sum-commute (%the (sum 0 N N) sum/z) D) %<- (sum-ident N D) %.
+%term _ 
+	%pi (sum-commute (%the (sum (s N1) N2 (s N3)) (sum/s D)) D'')
+	%<- (sum-commute D (%the (sum N2 N1 N3) D'))
+	%<- (sum-inc D' D'') %.
+%worlds () (sum-commute _ _) %.
+%total D (sum-commute D _) %.
+%sort sum-assoc {_ sum N1 N2 N12} {_ sum N12 N3 N} {_ sum N2 N3 N23} {_ sum N1 N23 N} %.
+%mode sum-assoc %in %in %out %out %.
+%term _ sum-assoc sum/z D D sum/z %.
+%term _ 
+	%pi (sum-assoc (sum/s D12) (sum/s D12_3) D23 (sum/s D1_23))
+	%<- (sum-assoc D12 D12_3 D23 D1_23) %.
+%worlds () (sum-assoc _ _ _ _) %.
+%total D (sum-assoc D _ _ _) %.
+%% same as above but different mode
+%sort sum-assoc' {_ sum N1 N2 N12} {_ sum N12 N3 N} {_ sum N2 N3 N23} {_ sum N1 N23 N} %.
+%mode sum-assoc' %out %out %in %in %.
+%term _ sum-assoc' sum/z D D sum/z %.
+%term _ 
+	%pi (sum-assoc' (sum/s D12) (sum/s D12-3) D23 (sum/s D1-23))
+	%<- (sum-assoc' D12 D12-3 D23 D1-23) %.
+%worlds () (sum-assoc' _ _ _ _) %.
+%total D (sum-assoc' _ _ _ D) %.
+%sort can-sum {N1 nat} {N2 nat} {N3 nat} {_ sum N1 N2 N3} %.
+%mode can-sum %in %in %out %out %.
+%term _ can-sum 0 N N sum/z %.
+%term _ %pi (can-sum (s N1) N2 (s N3) (sum/s D)) %<- (can-sum N1 N2 N3 D) %.
+%worlds () (can-sum _ _ _ _) %.
+%total N (can-sum N _ _ _) %.
+%sort sum-fun2 {_ sum N1 N2 N3} {_ sum N1 N2' N3} {_ nat-eq N2 N2'} %.
+%mode sum-fun2 %in %in %out %.
+%term _ sum-fun2 sum/z sum/z nat-eq/i %.
+%term _ %pi (sum-fun2 (sum/s D1) (sum/s D2) D3) %<- (sum-fun2 D1 D2 D3) %.
+%worlds () (sum-fun2 _ _ _) %.
+%total D (sum-fun2 D _ _) %.
+%sort sum-fun1 {_ sum N1 N2 N3} {_ sum N1' N2 N3} {_ nat-eq N1 N1'} %.
+%mode sum-fun1 %in %in %out %.
+%term _ 
+	%pi (sum-fun1 D1 D2 D)
+	%<- (sum-commute D1 D1')
+	%<- (sum-commute D2 D2')
+	%<- (sum-fun2 D1' D2' D) %.
+%worlds () (sum-fun1 _ _ _) %.
+%total D (sum-fun1 D _ _) %.
+%sort sum-fun3 {_ sum N1 N2 N3} {_ sum N1 N2 N3'} {_ nat-eq N3 N3'} %.
+%mode sum-fun3 %in %in %out %.
+%term _ sum-fun3 sum/z sum/z nat-eq/i %.
+%term _ 
+	%pi (sum-fun3 (sum/s D1) (sum/s D2) D')
+	%<- (sum-fun3 D1 D2 D)
+	%<- (nat-eq-inc D D') %.
+%worlds () (sum-fun3 _ _ _) %.
+%total D (sum-fun3 D _ _) %.
+%%%%%  Leq  %%%%%
+%sort leq-trans {_ leq N1 N2} {_ leq N2 N3} {_ leq N1 N3} %.
+%mode leq-trans %in %in %out %.
+%term _ leq-trans leq/z _ leq/z %.
+%term _ %pi (leq-trans (leq/s D1) (leq/s D2) (leq/s D3)) %<- (leq-trans D1 D2 D3) %.
+%worlds () (leq-trans _ _ _) %.
+%total D (leq-trans D _ _) %.
+%sort leq-reflex {N nat} {_ leq N N} %.
+%mode leq-reflex %in %out %.
+%term _ leq-reflex 0 leq/z %.
+%term _ %pi (leq-reflex (s N) (leq/s D)) %<- (leq-reflex N D) %.
+%worlds () (leq-reflex _ _) %.
+%total N (leq-reflex N _) %.
+%sort leq-reflex' {_ nat-eq N1 N2} {_ leq N1 N2} %.
+%mode leq-reflex' %in %out %.
+%term _ %pi (leq-reflex' nat-eq/i D) %<- (leq-reflex _ D) %.
+%worlds () (leq-reflex' _ _) %.
+%total {} (leq-reflex' _ _) %.
+%sort sum-implies-leq {_ sum N1 N2 N3} {_ leq N1 N3} %.
+%mode sum-implies-leq %in %out %.
+%term _ sum-implies-leq sum/z leq/z %.
+%term _ %pi (sum-implies-leq (sum/s D) (leq/s D')) %<- (sum-implies-leq D D') %.
+%worlds () (sum-implies-leq _ _) %.
+%total D (sum-implies-leq D _) %.
+%sort sum-implies-leq' {_ sum N1 N2 N3} {_ leq N2 N3} %.
+%mode sum-implies-leq' %in %out %.
+%term _ 
+	%pi (sum-implies-leq' Dsum Dleq)
+	%<- (sum-commute Dsum Dsum')
+	%<- (sum-implies-leq Dsum' Dleq) %.
+%worlds () (sum-implies-leq' _ _) %.
+%total {} (sum-implies-leq' _ _) %.
+%sort leq-implies-sum {_ leq N1 N3} {_ sum N1 N2 N3} %.
+%mode leq-implies-sum %in %out %.
+%term _ leq-implies-sum leq/z sum/z %.
+%term _ %pi (leq-implies-sum (leq/s D) (sum/s D')) %<- (leq-implies-sum D D') %.
+%worlds () (leq-implies-sum _ _) %.
+%total D (leq-implies-sum D _) %.
+%sort sum-leq {_ sum N1 N2 N3} {_ sum N1' N2' N3'} {_ leq N1 N1'} {_ leq N2 N2'} {_ leq N3 N3'} %.
+%mode sum-leq %in %in %in %in %out %.
+%term _ 
+	%pi (sum-leq Dsum Dsum' Dleq1 Dleq2 Dleq3)
+	%<- (leq-implies-sum Dleq1 (%the (sum N1 N1'' N1') Dsum1))
+	%<- (leq-implies-sum Dleq2 (%the (sum N2 N2'' N2') Dsum2))
+	%<- (sum-assoc Dsum1 Dsum' (%the (sum N1'' N2' N4) Dsum4) (%the (sum N1 N4 N3') Dsum5))
+	%<- (sum-commute Dsum4 (%the (sum N2' N1'' N4) Dsum6))
+	%<- (sum-assoc Dsum2 Dsum6 (%the (sum N2'' N1'' N5) Dsum7) (%the (sum N2 N5 N4) Dsum8))
+	%<- (sum-assoc' (%the (sum N1 N2 N6) Dsum9) (%the (sum N6 N5 N3') Dsum10) Dsum8 Dsum5)
+	%<- (sum-fun3 Dsum9 Dsum (%the (nat-eq N6 N3) Deq))
+	%<- (sum-resp Deq nat-eq/i nat-eq/i Dsum10 (%the (sum N3 N5 N3') Dsum3))
+	%<- (sum-implies-leq Dsum3 Dleq3) %.
+%worlds () (sum-leq _ _ _ _ _) %.
+%total {} (sum-leq _ _ _ _ _) %.
+%%%%%  Lt  %%%%%
+%sort leq-lt-trans {_ leq N1 N2} {_ lt N2 N3} {_ lt N1 N3} %.
+%mode leq-lt-trans %in %in %out %.
+%term _ leq-lt-trans leq/z lt/z lt/z %.
+%term _ leq-lt-trans leq/z (lt/s _) lt/z %.
+%term _ %pi (leq-lt-trans (leq/s D1) (lt/s D2) (lt/s D3)) %<- (leq-lt-trans D1 D2 D3) %.
+%worlds () (leq-lt-trans _ _ _) %.
+%total D (leq-lt-trans D _ _) %.
+%sort lt-leq-trans {_ lt N1 N2} {_ leq N2 N3} {_ lt N1 N3} %.
+%mode lt-leq-trans %in %in %out %.
+%term _ lt-leq-trans lt/z (leq/s _) lt/z %.
+%term _ %pi (lt-leq-trans (lt/s D1) (leq/s D2) (lt/s D3)) %<- (lt-leq-trans D1 D2 D3) %.
+%worlds () (lt-leq-trans _ _ _) %.
+%total D (lt-leq-trans D _ _) %.
+%sort lt-trans {_ lt N1 N2} {_ lt N2 N3} {_ lt N1 N3} %.
+%mode lt-trans %in %in %out %.
+%term _ lt-trans lt/z (lt/s _) lt/z %.
+%term _ %pi (lt-trans (lt/s D1) (lt/s D2) (lt/s D3)) %<- (lt-trans D1 D2 D3) %.
+%worlds () (lt-trans _ _ _) %.
+%total D (lt-trans D _ _) %.
+%sort lt-antisymm {_ lt N N} {_ false} %.
+%mode lt-antisymm %in %out %.
+%term _ %pi (lt-antisymm (lt/s D) D') %<- (lt-antisymm D D') %.
+%worlds () (lt-antisymm _ _) %.
+%total D (lt-antisymm D _) %.
+%sort sum-implies-lt {_ sum N1 N2 N3} {_ lt 0 N2} {_ lt N1 N3} %.
+%mode sum-implies-lt %in %in %out %.
+%term _ sum-implies-lt sum/z lt/z lt/z %.
+%term _ %pi (sum-implies-lt (sum/s D) Dlt (lt/s D')) %<- (sum-implies-lt D Dlt D') %.
+%worlds () (sum-implies-lt _ _ _) %.
+%total D (sum-implies-lt D _ _) %.
+%sort sum-implies-lt' {_ sum N1 N2 N3} {_ lt 0 N1} {_ lt N2 N3} %.
+%mode sum-implies-lt' %in %in %out %.
+%term _ 
+	%pi (sum-implies-lt' Dsum Dlt Dlt')
+	%<- (sum-commute Dsum Dsum')
+	%<- (sum-implies-lt Dsum' Dlt Dlt') %.
+%worlds () (sum-implies-lt' _ _ _) %.
+%total {} (sum-implies-lt' _ _ _) %.
+%sort lt-succ {N} {_ lt N (s N)} %.
+%mode lt-succ %in %out %.
+%term _ %pi (lt-succ N Dlt) %<- (sum-implies-lt' (sum/s sum/z) lt/z Dlt) %.
+%worlds () (lt-succ _ _) %.
+%total {} (lt-succ _ _) %.
+%sort lt-implies-sum {_ lt N1 N3} {_ sum N1 (s N2) N3} %.
+%mode lt-implies-sum %in %out %.
+%scope lt-implies-sum %term z lt-implies-sum lt/z sum/z %.
+%scope lt-implies-sum %term s %pi (lt-implies-sum (lt/s D) (sum/s D')) %<- (lt-implies-sum D D') %.
+%worlds () (lt-implies-sum _ _) %.
+%total D (lt-implies-sum D _) %.
+%sort sum-leq-lt {_ sum N1 N2 N3} {_ sum N1' N2' N3'} {_ leq N1 N1'} {_ lt N2 N2'} {_ lt N3 N3'} %.
+%mode sum-leq-lt %in %in %in %in %out %.
+%term _ 
+	%pi (sum-leq-lt (%the (sum N1 N2 N3) Dsum) (%the (sum N1' N2' N3') Dsum') (%the (leq N1 N1') Dleq) (%the (lt N2 N2') Dlt) D)
+	%<- (leq-implies-sum Dleq (%the (sum N1 N1'' N1') Dsum1))
+	%<- (lt-implies-sum Dlt (%the (sum N2 (s N2'') N2') Dsum2))
+	%<- (sum-assoc Dsum1 Dsum' (%the (sum N1'' N2' N4) Dsum4) (%the (sum N1 N4 N3') Dsum5))
+	%<- (sum-commute Dsum4 (%the (sum N2' N1'' N4) Dsum6))
+	%<- (sum-assoc Dsum2 Dsum6 (sum/s (%the (sum N2'' N1'' N5) Dsum7)) (%the (sum N2 (s N5) N4) Dsum8))
+	%<- (sum-assoc' (%the (sum N1 N2 N6) Dsum9) (%the (sum N6 (s N5) N3') Dsum10) Dsum8 Dsum5)
+	%<- (sum-fun3 Dsum9 Dsum (%the (nat-eq N6 N3) Deq))
+	%<- (sum-resp Deq nat-eq/i nat-eq/i Dsum10 (%the (sum N3 (s N5) N3') Dsum3))
+	%<- (sum-implies-lt Dsum3 lt/z D) %.
+%worlds () (sum-leq-lt _ _ _ _ _) %.
+%total {} (sum-leq-lt _ _ _ _ _) %.
+%sort sum-lt-leq {_ sum N1 N2 N3} {_ sum N1' N2' N3'} {_ lt N1 N1'} {_ leq N2 N2'} {_ lt N3 N3'} %.
+%mode sum-lt-leq %in %in %in %in %out %.
+%term _ 
+	%pi (sum-lt-leq DsumA DsumB Dlt Dleq D)
+	%<- (sum-commute DsumA DsumA')
+	%<- (sum-commute DsumB DsumB')
+	%<- (sum-leq-lt DsumA' DsumB' Dleq Dlt D) %.
+%worlds () (sum-lt-leq _ _ _ _ _) %.
+%total {} (sum-lt-leq _ _ _ _ _) %.
+%%%%%  Maximum  %%%%%
+%sort can-max {N1} {N2} {N3} {_ max N1 N2 N3} %.
+%mode can-max %in %in %out %out %.
+%term _ can-max 0 N N max/z* %.
+%term _ can-max N 0 N max/*z %.
+%term _ %pi (can-max (s N1) (s N2) (s N3) (max/s D)) %<- (can-max N1 N2 N3 D) %.
+%worlds () (can-max _ _ _ _) %.
+%total N (can-max N _ _ _) %.
+%sort max-lt {_ max N1 N2 N3} {_ lt N N1} {_ lt N N2} {_ lt N N3} %.
+%mode max-lt %in %in %in %out %.
+%term _ max-lt max/z* _ D D %.
+%term _ max-lt max/*z D _ D %.
+%term _ max-lt (max/s D) lt/z lt/z lt/z %.
+%term _ %pi (max-lt (max/s D) (lt/s D1) (lt/s D2) (lt/s D')) %<- (max-lt D D1 D2 D') %.
+%worlds () (max-lt _ _ _ _) %.
+%total D (max-lt D _ _ _) %.
+%sort max-leq {_ max N1 N2 N3} {_ leq N1 N3} {_ leq N2 N3} %.
+%mode max-leq %in %out %out %.
+%term _ %pi (max-leq max/z* leq/z D) %<- (leq-reflex _ D) %.
+%term _ %pi (max-leq max/*z D leq/z) %<- (leq-reflex _ D) %.
+%term _ %pi (max-leq (max/s D) (leq/s D1) (leq/s D2)) %<- (max-leq D D1 D2) %.
+%worlds () (max-leq _ _ _) %.
+%total D (max-leq D _ _) %.
+%%%%%  Subterm Ordering  %%%%%
+%sort sum-subterm2 {N1} {N2} {N3} {_ sum N1 N2 N3} %.
+%mode sum-subterm2 %in %in %in %in %.
+%term _ sum-subterm2 _ _ _ sum/z %.
+%term _ %pi (sum-subterm2 _ _ _ (sum/s D)) %<- (sum-subterm2 _ _ _ D) %.
+%worlds () (sum-subterm2 _ _ _ _) %.
+%total D (sum-subterm2 _ _ _ D) %.
+%reduces <= N2 N3 (sum-subterm2 _ N2 N3 _) %.
+%sort sum-subterm1 {N1} {N2} {N3} {_ sum N1 N2 N3} %.
+%mode sum-subterm1 %in %in %in %in %.
+%term _ %pi (sum-subterm1 _ _ _ D) %<- (sum-commute D D') %<- (sum-subterm2 _ _ _ D') %.
+%worlds () (sum-subterm1 _ _ _ _) %.
+%total D (sum-subterm1 _ _ _ D) %.
+%reduces <= N1 N3 (sum-subterm1 N1 _ N3 _) %.
+%sort sum-subterm2' {N1} {N2} {N3} {_ sum (s N1) N2 N3} %.
+%mode sum-subterm2' %in %in %in %in %.
+%term _ sum-subterm2' _ _ _ (sum/s sum/z) %.
+%term _ %pi (sum-subterm2' _ _ _ (sum/s D)) %<- (sum-subterm2' _ _ _ D) %.
+%worlds () (sum-subterm2' _ _ _ _) %.
+%total D (sum-subterm2' _ _ _ D) %.
+%reduces < N2 N3 (sum-subterm2' _ N2 N3 _) %.
+%sort sum-subterm1' {N1} {N2} {N3} {_ sum N1 (s N2) N3} %.
+%mode sum-subterm1' %in %in %in %in %.
+%term _ %pi (sum-subterm1' _ _ _ D) %<- (sum-commute D D') %<- (sum-subterm2' _ _ _ D') %.
+%worlds () (sum-subterm1' _ _ _ _) %.
+%total D (sum-subterm1' _ _ _ D) %.
+%reduces < N1 N3 (sum-subterm1' N1 _ N3 _) %.
+%sort leq-subterm {N1} {N2} {_ leq N1 N2} %.
+%mode leq-subterm %in %in %in %.
+%term _ 
+	%pi (leq-subterm _ _ Dleq)
+	%<- (leq-implies-sum Dleq Dsum)
+	%<- (sum-subterm1 _ _ _ Dsum) %.
+%worlds () (leq-subterm _ _ _) %.
+%total {} (leq-subterm _ _ _) %.
+%reduces <= N1 N2 (leq-subterm N1 N2 _) %.
+%sort lt-subterm {N1} {N2} {_ lt N1 N2} %.
+%mode lt-subterm %in %in %in %.
+%term _ 
+	%pi (lt-subterm _ _ Dlt)
+	%<- (lt-implies-sum Dlt Dsum)
+	%<- (sum-subterm1' _ _ _ Dsum) %.
+%worlds () (lt-subterm _ _ _) %.
+%total {} (lt-subterm _ _ _) %.
+%reduces < N1 N2 (lt-subterm N1 N2 _) %.

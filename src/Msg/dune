@@ -1,0 +1,12 @@
+; (include sources.dune)
+
+(library
+ (instrumentation
+  (backend bisect_ppx))
+ (name msg)
+ (public_name stelf.msg)
+ (modules Msg_ MSG)
+ (libraries display basis)
+ (wrapped true)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

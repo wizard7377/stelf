@@ -1,5 +1,7 @@
 module type RECON_TERM = RECON_TERM.RECON_TERM
 
+exception Error of string
+
 (* Logic copied from src/frontend/ReconTerm.ml.
    The functor takes a second parameter R for the modules that are not in S.S.
    See "Problems" comment at the bottom of this file. *)
@@ -14,7 +16,7 @@ module Make_ReconTerm
       module Print : PRINT
       module StringTree : TABLE with type key = string
       module Msg : MSG
-      module CsManager : Solvers.CsManager_intf.CS_MANAGER
+      module CsManager : Solvers.CSMANAGER.CS_MANAGER
     end) =
 struct
   module M = M
@@ -39,10 +41,10 @@ struct
 
   (* Error handling *)
   let delayedList : (unit -> unit) list ref = ref []
-  let rec clearDelayed () = delayedList := []
-  let rec addDelayed f = delayedList := f :: !delayedList
+  let clearDelayed () = delayedList := []
+  let addDelayed f = delayedList := f :: !delayedList
 
-  let rec runDelayed () =
+  let runDelayed () =
     let rec run' = function
       | [] -> ()
       | h :: t -> begin
@@ -52,20 +54,20 @@ struct
     in
     run' !delayedList
 
-  exception Error of string
+  exception Error = Error
 
   let errorCount = ref 0
   let errorFileName = ref "no file"
-  let errorThreshold = ref (Some 20)
+  let errorThreshold = ref (Some 200)
   let exceeds = function i, None -> false | i, Some j -> i > j
 
-  let rec resetErrors fileName =
+  let resetErrors fileName =
     begin
       errorCount := 0;
       errorFileName := fileName
     end
 
-  let rec die r =
+  let die r =
     raise
       (Error
          (Paths.wrap
@@ -75,34 +77,39 @@ struct
               end)
               ^ " found" )))
 
-  let rec checkErrors r =
+  let checkErrors r =
     begin if !errorCount > 0 then die r else ()
     end
 
   let rec chatterOneNewline () =
-    begin if !Global.chatter = 1 && !errorCount = 1 then Msg.message "\n"
+    begin if !Global.chatter = 1 && !errorCount = 1 then
+      Display.debug (Display.string "\n")
     else ()
     end
 
-  let rec fatalError (r, msg) =
+  let fatalError (r, msg) =
     begin
       errorCount := !errorCount + 1;
       begin
         chatterOneNewline ();
         begin
-          Msg.message (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n");
+          Display.debug
+            (Display.string
+               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           die r
         end
       end
     end
 
-  let rec error (r, msg) =
+  let error (r, msg) =
     begin
       errorCount := !errorCount + 1;
       begin
         chatterOneNewline ();
         begin
-          Msg.message (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n");
+          Display.debug
+            (Display.string
+               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           Display.warning (Display.Form.string msg);
           begin if exceeds (!errorCount, !errorThreshold) then die r else ()
           end
@@ -110,21 +117,9 @@ struct
       end
     end
 
-  let withConstPath show f =
-    let old = !Print.showConstPath in
-    Print.showConstPath := show;
-    try
-      let result = f () in
-      Print.showConstPath := old;
-      result
-    with exn ->
-      Print.showConstPath := old;
-      raise exn
-
-  let rec formatExp (g_, u_) =
-    withConstPath false (fun () ->
-        try Print.formatExp (g_, u_)
-        with unprintable_ -> F.string "%_unprintable_%")
+  let formatExp (g_, u_) =
+    try Print.formatExp (g_, u_)
+    with Names.Unprintable -> F.string "%_unprintable_%"
 
   (* this is a hack, i know *)
   let queryMode = ref false
@@ -134,19 +129,19 @@ struct
   end
 
   let decl_ = function g_, d_ -> IntSyn.Decl (g_, d_)
-  let eClo_ = function v_, s -> IntSyn.EClo (v_, s)
+  let eClo = function v_, s -> IntSyn.EClo (v_, s)
   let root_ = function h_, s_ -> IntSyn.Root (h_, s_)
-  let rec bVar_ n = IntSyn.BVar n
+  let bVar n = IntSyn.BVar n
   let redex_ = function u_, s_ -> IntSyn.Redex (u_, s_)
-  let fVar_ = function name, v_, s -> IntSyn.FVar (name, v_, s)
-  let rec exp_ u_ = IntSyn.Exp u_
+  let fVar = function name, v_, s -> IntSyn.FVar (name, v_, s)
+  let exp_ u_ = IntSyn.Exp u_
   let undefined_ = Apx.Undefined
-  let rec uni_ l_ = Apx.Uni (Apx.uniToApx l_)
+  let uni_ l_ = Apx.Uni (Apx.uniToApx l_)
   let kind_ = Apx.kind
   let hyperkind_ = Apx.hyperkind
-  let rec next_ l_ = Apx.Next l_
+  let next_ l_ = Apx.Next l_
 
-  let rec headConDec (h_ : IntSyn.head) =
+  let headConDec (h_ : IntSyn.head) =
     begin match h_ with
     | IntSyn.Const c -> IntSyn.sgnLookup c
     | IntSyn.Skonst c -> IntSyn.sgnLookup c
@@ -159,7 +154,7 @@ struct
     | g_, (IntSyn.Pi ((d_, _), v_), s) ->
         let d'_ = IntSyn.decSub (d_, s) in
         lowerType (decl_ (g_, d'_), (v_, IntSyn.dot1 s))
-    | g_, vs_ -> (g_, eClo_ vs_)
+    | g_, vs_ -> (g_, eClo vs_)
 
   and lowerType (g_, vs_) = lowerTypeW (g_, Whnf.whnfExpandDef vs_)
 
@@ -179,7 +174,7 @@ struct
 
   let fvarApxTable_ref_check () = fvarApxTable
 
-  let rec getEVarTypeApx name =
+  let getEVarTypeApx name =
     begin match StringTree.lookup evarApxTable name with
     | Some v_ -> v_
     | None ->
@@ -199,36 +194,41 @@ struct
         end
     end
 
-  let rec getFVarTypeApx name =
+  let getFVarTypeApx name =
     begin match StringTree.lookup fvarApxTable name with
     | Some v_ ->
-        Logs.debug (fun m -> m "getFVarTypeApx: found existing for %s" name);
+        msg ~src:Group.approx ~level:Level.Debug
+          (Fmt.shown_exact
+             (fun name -> "getFVarTypeApx: found existing for " ^ name)
+             name);
         v_
     | None ->
         let v_ = Apx.newCVar () in
-        Logs.debug (fun m ->
-            m "getFVarTypeApx: creating fresh CVar for %s" name);
+        msg ~src:Group.approx ~level:Level.Debug
+          (Fmt.shown_exact
+             (fun name -> "getFVarTypeApx: creating fresh CVar for " ^ name)
+             name);
         begin
           StringTree.insert fvarApxTable (name, v_);
           v_
         end
     end
 
-  let rec getEVar (name, allowed) =
+  let getEVar (name, allowed) =
     begin match Names.getEVarOpt name with
     | Some (IntSyn.EVar (_, g_, v_, _) as x_) -> (x_, raiseType (g_, v_))
     | None ->
         let v_ = Option.valOf (StringTree.lookup evarApxTable name) in
         let v'_ = Apx.apxToClass (IntSyn.Null, v_, Apx.(Level 1), allowed) in
-        let g''_, v''_ = lowerType (IntSyn.Null, (v'_, IntSyn.id)) in
-        let x_ = IntSyn.newEVar (g''_, v''_) in
+        let g''_, v'' = lowerType (IntSyn.Null, (v'_, IntSyn.id)) in
+        let x_ = IntSyn.newEVar (g''_, v'') in
         begin
           Names.addEVar (x_, name);
           (x_, v'_)
         end
     end
 
-  let rec getFVarType (name, allowed) =
+  let getFVarType (name, allowed) =
     begin match StringTree.lookup fvarTable name with
     | Some v_ -> v_
     | None ->
@@ -257,58 +257,115 @@ struct
     | Omitted_ of Paths.region
     | Lcid_ of string list * string * Paths.region
     | Ucid_ of string list * string * Paths.region
-    | Quid_ of string list * string * Paths.region
+    | Quid_ of string list * string * Cst.qid_form * Paths.region
     | Scon_ of string * Paths.region
-    | Omitapx_ of Apx.exp * Apx.exp * Apx.uni * Paths.region
-    | Omitexact_ of IntSyn.exp * IntSyn.exp * Paths.region
+    | Omitapx of Apx.exp * Apx.exp * Apx.uni * Paths.region
+    | Omitexact of IntSyn.exp * IntSyn.exp * Paths.region
   [@@deriving show { with_path = false }]
 
   and dec = Dec_ of string option * term * Paths.region
 
-  let rec lcid (ids, name, r) = Lcid_ (ids, name, r)
-  let rec ucid (ids, name, r) = Ucid_ (ids, name, r)
-  let rec quid (ids, name, r) = Quid_ (ids, name, r)
-  let rec scon (value, r) = Scon_ (value, r)
-  let rec evar (name, r) = Evar_ (name, r)
-  let rec fvar (name, r) = Fvar_ (name, r)
-  let rec typ r = Typ_ r
-  let rec arrow (tm1, tm2) = Arrow_ (tm1, tm2)
-  let rec pi (d, tm) = Pi_ (d, tm)
-  let rec lam (d, tm) = Lam_ (d, tm)
-  let rec app (tm1, tm2) = App_ (tm1, tm2)
-  let rec hastype (tm1, tm2) = Hastype_ (tm1, tm2)
-  let rec omitted r = Omitted_ r
-  let rec dec (nameOpt, tm, r) = Dec_ (nameOpt, tm, r)
-  let rec backarrow (tm1, tm2) = Arrow_ (tm2, tm1)
-  let rec dec0 (nameOpt, r) = Dec_ (nameOpt, Omitted_ r, r)
+  let lcid (ids, name, r) = Lcid_ (ids, name, r)
+  let ucid (ids, name, r) = Ucid_ (ids, name, r)
+  let quid (ids, name, form, r) = Quid_ (ids, name, form, r)
+  let scon (value, r) = Scon_ (value, r)
+  let evar (name, r) = Evar_ (name, r)
+  let fvar (name, r) = Fvar_ (name, r)
+  let typ r = Typ_ r
+  let arrow (tm1, tm2) = Arrow_ (tm1, tm2)
+  let pi (d, tm) = Pi_ (d, tm)
+  let lam (d, tm) = Lam_ (d, tm)
+  let app (tm1, tm2) = App_ (tm1, tm2)
+  let hastype (tm1, tm2) = Hastype_ (tm1, tm2)
+  let omitted r = Omitted_ r
+  let dec (nameOpt, tm, r) = Dec_ (nameOpt, tm, r)
+  let backarrow (tm1, tm2) = Arrow_ (tm2, tm1)
+  let dec0 (nameOpt, r) = Dec_ (nameOpt, Omitted_ r, r)
 
   (* Internal job type — uses the richer internal term/dec *)
   type job =
-    | Jnothing_
-    | Jand_ of job * job
-    | Jwithctx_ of dec IntSyn.ctx * job
-    | Jterm_ of term
-    | Jclass_ of term
-    | Jof_ of term * term
-    | Jof'_ of term * IntSyn.exp
+    | Jnothing
+    | Jand of job * job
+    | Jwithctx of dec IntSyn.ctx * job
+    | Jterm of term
+    | Jclass of term
+    | Jof of term * term
+    | Jof' of term * IntSyn.exp
 
-  let jnothing = Jnothing_
-  let rec jand (j1, j2) = Jand_ (j1, j2)
+  let jnothing = Jnothing
+  let jand (j1, j2) = Jand (j1, j2)
 
   (* Conversions from Cst types to internal types.
      Uses View observers because Cst.term/decl are abstract in the CST signature. *)
+
+  (* Walk a Cst.term and qualify unresolved lowercase/uppercase names that exist
+     in ns_comps under ns_path.  Used to implement %local NS EXPR desugaring:
+     names found in NS are prefixed with NS's path; everything else is unchanged. *)
+  let desugar_local (ns_path : string list) (ns_comps : Names.namespace)
+      (t : Cst.term) : Cst.term =
+    let module V = Cst.View in
+    let exists_in_ns name =
+      Names.constLookupIn (ns_comps, Names.Qid ([], name)) <> None
+    in
+    let qualify_lower loc ns name =
+      match ns with
+      | _ :: _ -> V.Term.(review @@ Lowercase (loc, (ns, name)))
+      | [] ->
+          let ns' = if exists_in_ns name then ns_path else [] in
+          V.Term.(review @@ Lowercase (loc, (ns', name)))
+    in
+    let qualify_upper loc ns name =
+      match ns with
+      | _ :: _ -> V.Term.(review @@ Uppercase (loc, (ns, name)))
+      | [] ->
+          let ns' = if exists_in_ns name then ns_path else [] in
+          V.Term.(review @@ Uppercase (loc, (ns', name)))
+    in
+    let rec go t =
+      match V.Term.view t with
+      | V.Term.Lowercase (loc, (ns, name)) -> qualify_lower loc ns name
+      | V.Term.Uppercase (loc, (ns, name)) -> qualify_upper loc ns name
+      | V.Term.Arrow (loc, a, b) -> V.Term.(review @@ Arrow (loc, go a, go b))
+      | V.Term.BackArrow (loc, b, a) ->
+          V.Term.(review @@ BackArrow (loc, go b, go a))
+      | V.Term.Pi (loc, decls, body) ->
+          V.Term.(review @@ Pi (loc, List.map go_decl decls, go body))
+      | V.Term.Lam (loc, decls, body) ->
+          V.Term.(review @@ Lam (loc, List.map go_decl decls, go body))
+      | V.Term.App (loc, head, args) ->
+          V.Term.(review @@ App (loc, go head, List.map go args))
+      | V.Term.HasType (loc, a, b) ->
+          V.Term.(review @@ HasType (loc, go a, go b))
+      | V.Term.Local (loc, ns2, inner) ->
+          V.Term.(review @@ Local (loc, ns2, go inner))
+      | other -> V.Term.review other
+    and go_decl d =
+      match V.Decl.view d with
+      | V.Decl.Decl1 (loc, names, ty, def) ->
+          V.Decl.(review @@ Decl1 (loc, names, go ty, def))
+      | V.Decl.Decl0 (loc, names, ty) ->
+          V.Decl.(review @@ Decl0 (loc, names, go ty))
+    in
+    go t
+
   let rec cst_term_to_term (t : Cst.term) : term =
     let module V = Cst.View in
     let ghost_r = loc_to_region Cst.ghost in
     let rec fold_pi decls body =
       match decls with
       | [] -> body
-      | d :: rest -> Pi_ (cst_decl_to_dec d, fold_pi rest body)
+      | d :: rest ->
+          Stdlib.List.fold_right
+            (fun dec acc -> Pi_ (dec, acc))
+            (cst_decl_to_decs d) (fold_pi rest body)
     in
     let rec fold_lam decls body =
       match decls with
       | [] -> body
-      | d :: rest -> Lam_ (cst_decl_to_dec d, fold_lam rest body)
+      | d :: rest ->
+          Stdlib.List.fold_right
+            (fun dec acc -> Lam_ (dec, acc))
+            (cst_decl_to_decs d) (fold_lam rest body)
     in
     let rec fold_app head args =
       match args with
@@ -324,37 +381,68 @@ struct
     | V.Term.App (_, head, args) -> fold_app (cst_term_to_term head) args
     | V.Term.HasType (_, a, b) ->
         Hastype_ (cst_term_to_term a, cst_term_to_term b)
-    | V.Term.Lowercase (_, (ns, n)) -> Lcid_ (ns, n, ghost_r)
-    | V.Term.Uppercase (_, (ns, n)) -> Ucid_ (ns, n, ghost_r)
-    | V.Term.Qualified (_, (ns, n)) -> Quid_ (ns, n, ghost_r)
-    | V.Term.Text (_, s) -> Scon_ (s, ghost_r)
-    | V.Term.ExistVar (_, s) -> Evar_ (s, ghost_r)
-    | V.Term.FreeVar (_, s) -> Fvar_ (s, ghost_r)
-    | V.Term.Typ _ -> Typ_ ghost_r
+    | V.Term.Lowercase (loc, (ns, n)) -> Lcid_ (ns, n, loc_to_region loc)
+    | V.Term.Uppercase (loc, (ns, n)) -> Ucid_ (ns, n, loc_to_region loc)
+    | V.Term.Qualified (loc, (ns, n), form) ->
+        Quid_ (ns, n, form, loc_to_region loc)
+    | V.Term.Text (loc, s) -> Scon_ (s, loc_to_region loc)
+    | V.Term.ExistVar (loc, s) -> Evar_ (s, loc_to_region loc)
+    | V.Term.FreeVar (loc, s) -> Fvar_ (s, loc_to_region loc)
+    | V.Term.Typ loc -> Typ_ (loc_to_region loc)
+    | V.Term.Local (_, ns_path, inner) ->
+        let qid =
+          match List.rev ns_path with
+          | [] -> failwith "%local: empty namespace path"
+          | last :: prefix -> Names.Qid (List.rev prefix, last)
+        in
+        let ns_comps =
+          match Names.structLookup qid with
+          | Some mid -> Names.getComponents mid
+          | None -> Names.newNamespace ()
+        in
+        cst_term_to_term (desugar_local ns_path ns_comps inner)
     | _ -> Omitted_ ghost_r
 
   and cst_decl_to_dec (d : Cst.decl) : dec =
-    let names, tm =
+    let names, tm, loc =
       match Cst.View.Decl.view d with
-      | Cst.View.Decl.Decl1 (_, names, tm, _) -> (names, tm)
-      | Cst.View.Decl.Decl0 (_, names, tm) -> (names, tm)
+      | Cst.View.Decl.Decl1 (loc, names, tm, _) -> (names, tm, loc)
+      | Cst.View.Decl.Decl0 (loc, names, tm) -> (names, tm, loc)
       | _ -> assert false
     in
-    (* Cst.decl allows a list of names; internal dec has one name option. *)
+    (* Cst.decl allows a list of names; internal dec has one name option.
+       Callers needing every name (e.g. Pi/Lam binders) use
+       [cst_decl_to_decs] instead. *)
     let name_opt = match names with [] -> None | n :: _ -> n in
-    Dec_ (name_opt, cst_term_to_term tm, loc_to_region Cst.ghost)
+    Dec_ (name_opt, cst_term_to_term tm, loc_to_region loc)
 
-  let rec jwithctx (g, j) =
+  and cst_decl_to_decs (d : Cst.decl) : dec list =
+    (* Expands a multi-name decl like [(X Y Z) T] into one [dec] per name,
+       all sharing [T] -- so {(X Y Z) T} body / [(X Y Z) T] body produce a
+       nested binder per name instead of just the first. *)
+    let names, tm, loc =
+      match Cst.View.Decl.view d with
+      | Cst.View.Decl.Decl1 (loc, names, tm, _) -> (names, tm, loc)
+      | Cst.View.Decl.Decl0 (loc, names, tm) -> (names, tm, loc)
+      | _ -> assert false
+    in
+    let tm' = cst_term_to_term tm in
+    let r = loc_to_region loc in
+    match names with
+    | [] -> [ Dec_ (None, tm', r) ]
+    | _ -> List.map (fun name_opt -> Dec_ (name_opt, tm', r)) names
+
+  let jwithctx (g, j) =
     let rec cvt = function
       | Ast.Null -> IntSyn.Null
       | Ast.Decl (g', d) -> IntSyn.Decl (cvt g', cst_decl_to_dec d)
     in
-    Jwithctx_ (cvt g, j)
+    Jwithctx (cvt g, j)
 
-  let rec jterm tm = Jterm_ (cst_term_to_term tm)
-  let rec jclass tm = Jclass_ (cst_term_to_term tm)
-  let rec jof (tm1, tm2) = Jof_ (cst_term_to_term tm1, cst_term_to_term tm2)
-  let rec jof' (tm, v_) = Jof'_ (cst_term_to_term tm, v_)
+  let jterm tm = Jterm (cst_term_to_term tm)
+  let jclass tm = Jclass (cst_term_to_term tm)
+  let jof (tm1, tm2) = Jof (cst_term_to_term tm1, cst_term_to_term tm2)
+  let jof' (tm, v_) = Jof' (cst_term_to_term tm, v_)
 
   (* Internal region functions operating on the internal term/dec types *)
   let rec termRegion_ = function
@@ -373,10 +461,10 @@ struct
     | Omitted_ r -> r
     | Lcid_ (_, _, r) -> r
     | Ucid_ (_, _, r) -> r
-    | Quid_ (_, _, r) -> r
+    | Quid_ (_, _, _, r) -> r
     | Scon_ (_, r) -> r
-    | Omitapx_ (u_, v_, l_, r) -> r
-    | Omitexact_ (u_, v_, r) -> r
+    | Omitapx (u_, v_, l_, r) -> r
+    | Omitexact (u_, v_, r) -> r
 
   and decRegion_ (Dec_ (name, tm, r)) = r
 
@@ -409,7 +497,7 @@ struct
 
   open Apx
 
-  let rec filterLevel (tm, l_, max, msg) =
+  let filterLevel (tm, l_, max, msg) =
     let notGround = Apx.makeGroundUni l_ in
     let (Apx.Level i) = Apx.whnfUni l_ in
     begin if i > max then fatalError (termRegion tm, "Level too high\n" ^ msg)
@@ -430,7 +518,7 @@ struct
       end
     end
 
-  let rec findOmitted (g_, qid, r) =
+  let findOmitted (g_, qid, r) =
     begin
       error
         ( r,
@@ -447,7 +535,7 @@ struct
         begin if name = name' then Some k else findBVar' (g_, name, k + 1)
         end
 
-  let rec findBVar fc (g_, qid, r) =
+  let findBVar fc (g_, qid, r) =
     begin match Names.unqualified qid with
     | None -> fc (g_, qid, r)
     | Some name ->
@@ -457,8 +545,8 @@ struct
         end
     end
 
-  let rec findConst fc (g_, qid, r) =
-    begin match Names.constLookup qid with
+  let findConst ?(shortest = false) fc (g_, qid, r) =
+    begin match Names.resolveQid ~shortest qid with
     | None -> fc (g_, qid, r)
     | Some cid ->
         begin match IntSyn.sgnLookup cid with
@@ -476,7 +564,7 @@ struct
         end
     end
 
-  let rec findCSConst fc (g_, qid, r) =
+  let findCSConst fc (g_, qid, r) =
     begin match Names.unqualified qid with
     | None -> fc (g_, qid, r)
     | Some name ->
@@ -486,20 +574,20 @@ struct
         end
     end
 
-  let rec findEFVar fc (g_, qid, r) =
+  let findEFVar fc (g_, qid, r) =
     begin match Names.unqualified qid with
     | None -> fc (g_, qid, r)
     | Some name ->
-        begin if !queryMode then Evar_ (name, r) else Fvar_ (name, r)
+        begin if !queryMode || String.isPrefix "__" name then Evar_ (name, r)
+        else Fvar_ (name, r)
         end
     end
 
-  let rec findLCID x = findBVar (findConst (findCSConst findOmitted)) x
+  let findLCID x = findBVar (findConst (findCSConst findOmitted)) x
+  let findUCID x = findBVar (findConst (findCSConst (findEFVar findOmitted))) x
 
-  let rec findUCID x =
-    findBVar (findConst (findCSConst (findEFVar findOmitted))) x
-
-  let rec findQUID x = findConst (findCSConst findOmitted) x
+  let findQUID form x =
+    findConst ~shortest:(form = Cst.Abs) (findCSConst findOmitted) x
 
   let rec inferApx = function
     | g_, (Internal_ (u_, v_, r) as tm) ->
@@ -511,9 +599,9 @@ struct
     | g_, (Ucid_ (ids, name, r) as tm) ->
         let qid = Names.Qid (ids, name) in
         inferApx (g_, findUCID (g_, qid, r))
-    | g_, (Quid_ (ids, name, r) as tm) ->
+    | g_, (Quid_ (ids, name, form, r) as tm) ->
         let qid = Names.Qid (ids, name) in
-        inferApx (g_, findQUID (g_, qid, r))
+        inferApx (g_, findQUID form (g_, qid, r))
     | g_, (Scon_ (name, r) as tm) ->
         begin match CsManager.parse name with
         | None -> begin
@@ -532,8 +620,8 @@ struct
           | v_, 0 -> v_
           | Apx.Arrow (_, v_), i -> dropImplicit (v_, i - 1)
         in
-        let v''_ = dropImplicit (v'_, IntSyn.conDecImp cd) in
-        (tm, u'_, v''_, l'_)
+        let v'' = dropImplicit (v'_, IntSyn.conDecImp cd) in
+        (tm, u'_, v'', l'_)
     | g_, (Bvar_ (k, r) as tm) ->
         let (Dec (_, v_)) = IntSyn.ctxLookup (g_, k) in
         (tm, undefined_, v_, Apx.(Level 1))
@@ -586,13 +674,13 @@ struct
                  ])
           (tm1, tm2);
         let l_ = Apx.newLVar () in
-        let va_ = Apx.newCVar () in
-        let vr_ = Apx.newCVar () in
+        let va = Apx.newCVar () in
+        let vr = Apx.newCVar () in
         let tm1', u1_ =
           checkApx
             ( g_,
               tm1,
-              Arrow (va_, vr_),
+              Arrow (va, vr),
               l_,
               "Non-function was applied to an argument" )
         in
@@ -600,11 +688,11 @@ struct
           checkApx
             ( g_,
               tm2,
-              va_,
+              va,
               Apx.(Level 1),
               "Argument type did not match function domain type" )
         in
-        (App_ (tm1', tm2'), u1_, vr_, l_)
+        (App_ (tm1', tm2'), u1_, vr, l_)
     | g_, (Hastype_ (tm1, tm2) as tm) ->
         let l_ = Apx.newLVar () in
         let tm2', v2_ =
@@ -632,7 +720,7 @@ struct
         let l_ = Apx.newLVar () in
         let v_ = Apx.newCVar () in
         let u_ = Apx.newCVar () in
-        (Omitapx_ (u_, v_, l_, r), u_, v_, l_)
+        (Omitapx (u_, v_, l_, r), u_, v_, l_)
 
   and checkApx (g_, tm, v_, l_, location_msg) =
     let tm', u'_, v'_, l'_ = inferApx (g_, tm) in
@@ -647,9 +735,9 @@ struct
     with Apx.Unify problem_msg ->
       begin
         let r = termRegion tm in
-        let tm'', u''_ = checkApx (g_, Omitted_ r, v_, l_, location_msg) in
-        let _ = addDelayed (fun () -> ignore (Apx.makeGroundUni l'_)) in
-        (Mismatch_ (tm', tm'', location_msg, problem_msg), u''_)
+        let tm'', u'' = checkApx (g_, Omitted_ r, v_, l_, location_msg) in
+        ignore (addDelayed (fun () -> ignore (Apx.makeGroundUni l'_)));
+        (Mismatch_ (tm', tm'', location_msg, problem_msg), u'')
       end
 
   and inferApxDec (g_, Dec_ (name, tm, r)) =
@@ -661,22 +749,22 @@ struct
     (Dec_ (name, tm', r), d_)
 
   let rec inferApxJob = function
-    | g_, Jnothing_ -> Jnothing_
-    | g_, Jand_ (j1, j2) -> Jand_ (inferApxJob (g_, j1), inferApxJob (g_, j2))
-    | g_, Jwithctx_ (g, j) ->
+    | g_, Jnothing -> Jnothing
+    | g_, Jand (j1, j2) -> Jand (inferApxJob (g_, j1), inferApxJob (g_, j2))
+    | g_, Jwithctx (g, j) ->
         let rec ia = function
           | IntSyn.Null -> (g_, IntSyn.Null)
           | Decl (g, tm) ->
               let g'_, g' = ia g in
-              let _ = clearDelayed () in
+              ignore (clearDelayed ());
               let tm', d_ = inferApxDec (g'_, tm) in
-              let _ = runDelayed () in
+              ignore (runDelayed ());
               (decl_ (g'_, d_), decl_ (g', tm'))
         in
         let g'_, g' = ia g in
-        Jwithctx_ (g', inferApxJob (g'_, j))
-    | g_, Jterm_ tm ->
-        let _ = clearDelayed () in
+        Jwithctx (g', inferApxJob (g'_, j))
+    | g_, Jterm tm ->
+        ignore (clearDelayed ());
         let tm', u_, v_, l_ = inferApx (g_, tm) in
         let _ =
           filterLevel
@@ -685,10 +773,10 @@ struct
               2,
               "The term in this position must be an object or a type family" )
         in
-        let _ = runDelayed () in
-        Jterm_ tm'
-    | g_, Jclass_ tm ->
-        let _ = clearDelayed () in
+        ignore (runDelayed ());
+        Jterm tm'
+    | g_, Jclass tm ->
+        ignore (clearDelayed ());
         let l_ = Apx.newLVar () in
         let tm', v_ =
           checkApx
@@ -705,10 +793,10 @@ struct
               3,
               "The term in this position must be a type or a kind" )
         in
-        let _ = runDelayed () in
-        Jclass_ tm'
-    | g_, Jof_ (tm1, tm2) ->
-        let _ = clearDelayed () in
+        ignore (runDelayed ());
+        Jclass tm'
+    | g_, Jof (tm1, tm2) ->
+        ignore (clearDelayed ());
         let l_ = Apx.newLVar () in
         let tm2', v2_ =
           checkApx
@@ -728,10 +816,10 @@ struct
               2,
               "The term in this position must be an object or a type family" )
         in
-        let _ = runDelayed () in
-        Jof_ (tm1', tm2')
-    | g_, Jof'_ (tm1, v_) ->
-        let _ = clearDelayed () in
+        ignore (runDelayed ());
+        Jof (tm1', tm2')
+    | g_, Jof' (tm1, v_) ->
+        ignore (clearDelayed ());
         let l_ = Apx.newLVar () in
         let v2_, _ = Apx.classToApx v_ in
         let tm1', u1_ =
@@ -744,8 +832,8 @@ struct
               2,
               "The term in this position must be an object or a type family" )
         in
-        let _ = runDelayed () in
-        Jof'_ (tm1', v_)
+        ignore (runDelayed ());
+        Jof' (tm1', v_)
 
   let rec ctxToApx = function
     | IntSyn.Null -> IntSyn.Null
@@ -754,7 +842,7 @@ struct
         let v'_, _ = Apx.classToApx v_ in
         IntSyn.Decl (ctxToApx g_, Dec (name, v'_))
 
-  let rec inferApxJob' (g_, t) = inferApxJob (ctxToApx g_, t)
+  let inferApxJob' (g_, t) = inferApxJob (ctxToApx g_, t)
 
   open! struct
     open IntSyn
@@ -774,24 +862,24 @@ struct
     | Elim of (IntSyn.sub * IntSyn.spine -> IntSyn.exp)
     | Intro of IntSyn.exp
 
-  let rec elimSub (e_, s) = function s', s_ -> e_ (IntSyn.comp (s, s'), s_)
+  let elimSub (e_, s) = function s', s_ -> e_ (IntSyn.comp (s, s'), s_)
 
-  let rec elimApp (e_, u_) = function
-    | s, s_ -> e_ (s, IntSyn.App (eClo_ (u_, s), s_))
+  let elimApp (e_, u_) = function
+    | s, s_ -> e_ (s, IntSyn.App (eClo (u_, s), s_))
 
-  let rec bvarElim n = function
+  let bvarElim n = function
     | s, s_ ->
         begin match IntSyn.bvarSub (n, s) with
-        | Idx n' -> root_ (bVar_ n', s_)
+        | Idx n' -> root_ (bVar n', s_)
         | Exp u_ -> redex_ (u_, s_)
         end
 
-  let rec fvarElim (name, v_, s) = function
-    | s', s_ -> root_ (fVar_ (name, v_, IntSyn.comp (s, s')), s_)
+  let fvarElim (name, v_, s) = function
+    | s', s_ -> root_ (fVar (name, v_, IntSyn.comp (s, s')), s_)
 
-  let rec redexElim u_ = function s, s_ -> redex_ (eClo_ (u_, s), s_)
+  let redexElim u_ = function s, s_ -> redex_ (eClo (u_, s), s_)
 
-  let rec headElim = function
+  let headElim = function
     | IntSyn.BVar n -> bvarElim n
     | IntSyn.FVar (name, v_, s) -> fvarElim (name, v_, s)
     | IntSyn.NSDef d -> redexElim (IntSyn.constDef d)
@@ -801,19 +889,17 @@ struct
         | _ -> fun (_, s_) -> Root (h_, s_)
         end
 
-  let rec evarElim (IntSyn.EVar _ as x_) = function
-    | s, s_ -> eClo_ (x_, Whnf.spineToSub (s_, s))
+  let evarElim (IntSyn.EVar _ as x_) = function
+    | s, s_ -> eClo (x_, Whnf.spineToSub (s_, s))
 
   let rec etaExpandW = function
-    | e_, (IntSyn.Pi (((IntSyn.Dec (_, va_) as d_), _), vr_), s) ->
-        let u1_ =
-          etaExpand (bvarElim 1, (va_, IntSyn.comp (s, IntSyn.shift)))
-        in
+    | e_, (IntSyn.Pi (((IntSyn.Dec (_, va) as d_), _), vr), s) ->
+        let u1_ = etaExpand (bvarElim 1, (va, IntSyn.comp (s, IntSyn.shift))) in
         let d'_ = IntSyn.decSub (d_, s) in
         IntSyn.Lam
           ( d'_,
             etaExpand
-              (elimApp (elimSub (e_, IntSyn.shift), u1_), (vr_, IntSyn.dot1 s))
+              (elimApp (elimSub (e_, IntSyn.shift), u1_), (vr, IntSyn.dot1 s))
           )
     | e_, _ -> e_ (IntSyn.id, IntSyn.Nil)
 
@@ -821,34 +907,40 @@ struct
 
   let toElim = function Elim e_ -> e_ | Intro u_ -> redexElim u_
 
-  let rec toIntro = function
+  let toIntro = function
     | Elim e_, vs_ -> etaExpand (e_, vs_)
     | Intro u_, vs_ -> u_
 
   let rec addImplicit1W
-      (g_, e_, (IntSyn.Pi ((IntSyn.Dec (_, va_), _), vr_), s), i (* >= 1 *)) =
-    let x_ = Whnf.newLoweredEVar (g_, (va_, s)) in
-    addImplicit (g_, elimApp (e_, x_), (vr_, Whnf.dotEta (exp_ x_, s)), i - 1)
+      (g_, e_, (IntSyn.Pi ((IntSyn.Dec (_, va), _), vr), s), i (* >= 1 *)) =
+    let x_ = Whnf.newLoweredEVar (g_, (va, s)) in
+    addImplicit (g_, elimApp (e_, x_), (vr, Whnf.dotEta (exp_ x_, s)), i - 1)
 
   and addImplicit = function
-    | g_, e_, vs_, 0 -> (e_, eClo_ vs_)
+    | g_, e_, vs_, 0 -> (e_, eClo vs_)
     | g_, e_, vs_, i -> addImplicit1W (g_, e_, Whnf.whnfExpandDef vs_, i)
 
-  let rec reportConstraints xnames_ =
-    withConstPath false (fun () ->
-        try
-          begin match Print.evarCnstrsToStringOpt xnames_ with
-          | None -> ()
-          | Some constr -> print (("Constraints:\n" ^ constr) ^ "\n")
-          end
-        with unprintable_ -> print "%_constraints unprintable_%\n")
+  let reportConstraints xnames =
+    try
+      begin match Print.evarCnstrsToStringOpt xnames with
+      | None -> ()
+      | Some constr ->
+          Display.debug ~level:Display.Level.verbose
+            (Display.Form.string (("Constraints:\n" ^ constr) ^ "\n"))
+      end
+    with Names.Unprintable ->
+      Display.debug ~level:Display.Level.verbose
+        (Display.Form.string "%_constraints unprintable_%\n")
 
-  let rec reportInst xnames_ =
-    withConstPath false (fun () ->
-        try Msg.message (Print.evarInstToString xnames_ ^ "\n")
-        with unprintable_ -> Msg.message "%_unifier unprintable_%\n")
+  let reportInst xnames =
+    try
+      Display.debug ~level:Display.Level.verbose
+        (Display.Form.string (Print.evarInstToString xnames ^ "\n"))
+    with Names.Unprintable ->
+      Display.debug ~level:Display.Level.verbose
+        (Display.Form.string "%_unifier unprintable_%\n")
 
-  let rec delayMismatch (g_, v1_, v2_, r2, location_msg, problem_msg) =
+  let delayMismatch (g_, v1_, v2_, r2, location_msg, problem_msg) =
     addDelayed (function () ->
         let xs_ =
           Abstract.collectEVars
@@ -856,25 +948,25 @@ struct
               (v2_, IntSyn.id),
               Abstract.collectEVars (g_, (v1_, IntSyn.id), []) )
         in
-        let xnames_ =
+        let xnames =
           List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
         in
-        let v1fmt_ = formatExp (g_, v1_) in
-        let v2fmt_ = formatExp (g_, v2_) in
+        let v1fmt = formatExp (g_, v1_) in
+        let v2fmt = formatExp (g_, v2_) in
         let diff =
           F.vbox0 0 1
             [
               F.string "Expected:";
               F.space;
-              v2fmt_;
+              v2fmt;
               F.break_;
               F.string "Inferred:";
               F.space;
-              v1fmt_;
+              v1fmt;
             ]
         in
         let diff =
-          begin match Print.evarCnstrsToStringOpt xnames_ with
+          begin match Print.evarCnstrsToStringOpt xnames with
           | None -> F.makestring_fmt diff
           | Some cnstrs -> (F.makestring_fmt diff ^ "\nConstraints:\n") ^ cnstrs
           end
@@ -884,19 +976,22 @@ struct
             (((("Type mismatch\n" ^ diff) ^ "\n") ^ problem_msg) ^ "\n")
             ^ location_msg ))
 
-  let rec delayAmbiguous (g_, u_, r, msg) =
+  let delayAmbiguous (g_, u_, r, msg) =
     addDelayed (function () ->
-        let ufmt_ = formatExp (g_, u_) in
+        let ufmt = formatExp (g_, u_) in
         let amb =
           F.hVbox [ F.string "Inferred:"; F.space; formatExp (g_, u_) ]
         in
-        error
-          ( r,
-            (("Ambiguous reconstruction\n" ^ F.makestring_fmt amb) ^ "\n") ^ msg
-          ))
+        let fstr = F.makestring_fmt amb in
+        Display.debug ~level:Display.Level.verbose
+          Display.Form.(
+            nl ()
+            ++ string "Ambiguous reconstruction of term: "
+            ++ string fstr ++ nl ());
+        error (r, (("Ambiguous reconstruction\n" ^ fstr) ^ "\n") ^ msg))
 
-  let rec unifyIdem x =
-    let _ = Unify.reset () in
+  let unifyIdem x =
+    ignore (Unify.reset ());
     let _ =
       try Unify.unify x
       with Unify.Unify _ as e ->
@@ -905,11 +1000,11 @@ struct
           raise e
         end
     in
-    let _ = Unify.reset () in
+    ignore (Unify.reset ());
     ()
 
-  let rec unifiableIdem x =
-    let _ = Unify.reset () in
+  let unifiableIdem x =
+    ignore (Unify.reset ());
     let ok = Unify.unifiable x in
     let _ =
       begin if ok then Unify.reset () else Unify.unwind ()
@@ -923,18 +1018,18 @@ struct
   let trace = ref false
   let traceMode = ref Omniscient
 
-  let rec report f =
+  let report f =
     begin match !traceMode with
     | Progressive -> f ()
     | Omniscient -> addDelayed f
     end
 
-  let rec reportMismatch (g_, vs1_, vs2_, problem_msg) =
+  let reportMismatch (g_, vs1, vs2, problem_msg) =
     report (function () ->
         let xs_ =
-          Abstract.collectEVars (g_, vs2_, Abstract.collectEVars (g_, vs1_, []))
+          Abstract.collectEVars (g_, vs2, Abstract.collectEVars (g_, vs1, []))
         in
-        let xnames_ =
+        let xnames =
           List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
         in
         let eqnsFmt =
@@ -942,27 +1037,31 @@ struct
             [
               F.string "|?";
               F.space;
-              formatExp (g_, eClo_ vs1_);
+              formatExp (g_, eClo vs1);
               F.break_;
               F.string "=";
               F.space;
-              formatExp (g_, eClo_ vs2_);
+              formatExp (g_, eClo vs2);
             ]
         in
-        let _ = Msg.message (F.makestring_fmt eqnsFmt ^ "\n") in
-        let _ = reportConstraints xnames_ in
         let _ =
-          Msg.message
-            ((("Failed: " ^ problem_msg) ^ "\n")
-            ^ "Continuing with subterm replaced by _\n")
+          Display.debug ~level:Display.Level.debug
+            (Display.Form.string (F.makestring_fmt eqnsFmt ^ "\n"))
+        in
+        ignore (reportConstraints xnames);
+        let _ =
+          Display.debug ~level:Display.Level.debug
+            (Display.Form.string
+               ((("Failed: " ^ problem_msg) ^ "\n")
+               ^ "Continuing with subterm replaced by _\n"))
         in
         ())
 
-  let rec reportUnify' (g_, vs1_, vs2_) =
+  let reportUnify' (g_, vs1, vs2) =
     let xs_ =
-      Abstract.collectEVars (g_, vs2_, Abstract.collectEVars (g_, vs1_, []))
+      Abstract.collectEVars (g_, vs2, Abstract.collectEVars (g_, vs1, []))
     in
-    let xnames_ =
+    let xnames =
       List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
     in
     let eqnsFmt =
@@ -970,49 +1069,53 @@ struct
         [
           F.string "|?";
           F.space;
-          formatExp (g_, eClo_ vs1_);
+          formatExp (g_, eClo vs1);
           F.break_;
           F.string "=";
           F.space;
-          formatExp (g_, eClo_ vs2_);
+          formatExp (g_, eClo vs2);
         ]
     in
-    let _ = Msg.message (F.makestring_fmt eqnsFmt ^ "\n") in
     let _ =
-      try unifyIdem (g_, vs1_, vs2_)
+      Display.debug ~level:Display.Level.debug
+        (Display.Form.string (F.makestring_fmt eqnsFmt ^ "\n"))
+    in
+    let _ =
+      try unifyIdem (g_, vs1, vs2)
       with Unify.Unify msg as e ->
         begin
-          Msg.message
-            ((("Failed: " ^ msg) ^ "\n")
-            ^ "Continuing with subterm replaced by _\n");
+          Display.debug ~level:Display.Level.debug
+            (Display.Form.string
+               ((("Failed: " ^ msg) ^ "\n")
+               ^ "Continuing with subterm replaced by _\n"));
           raise e
         end
     in
-    let _ = reportInst xnames_ in
-    let _ = reportConstraints xnames_ in
+    ignore (reportInst xnames);
+    ignore (reportConstraints xnames);
     ()
 
-  let rec reportUnify (g_, vs1_, vs2_) =
+  let reportUnify (g_, vs1, vs2) =
     begin match !traceMode with
-    | Progressive -> reportUnify' (g_, vs1_, vs2_)
+    | Progressive -> reportUnify' (g_, vs1, vs2)
     | Omniscient -> (
-        try unifyIdem (g_, vs1_, vs2_)
+        try unifyIdem (g_, vs1, vs2)
         with Unify.Unify msg as e ->
           begin
-            reportMismatch (g_, vs1_, vs2_, msg);
+            reportMismatch (g_, vs1, vs2, msg);
             raise e
           end)
     end
 
   let rec reportInfer' = function
-    | g_, Omitexact_ (_, _, r), u_, v_ ->
+    | g_, Omitexact (_, _, r), u_, v_ ->
         let xs_ =
           Abstract.collectEVars
             ( g_,
               (u_, IntSyn.id),
               Abstract.collectEVars (g_, (v_, IntSyn.id), []) )
         in
-        let xnames_ =
+        let xnames =
           List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
         in
         let omit =
@@ -1031,8 +1134,11 @@ struct
               formatExp (g_, v_);
             ]
         in
-        let _ = Msg.message (F.makestring_fmt omit ^ "\n") in
-        let _ = reportConstraints xnames_ in
+        let _ =
+          Display.debug ~level:Display.Level.verbose
+            (Display.Form.string (F.makestring_fmt omit ^ "\n"))
+        in
+        ignore (reportConstraints xnames);
         ()
     | g_, Mismatch_ (tm1, tm2, _, _), u_, v_ -> reportInfer' (g_, tm2, u_, v_)
     | g_, Hastype_ _, u_, v_ -> ()
@@ -1043,7 +1149,7 @@ struct
               (u_, IntSyn.id),
               Abstract.collectEVars (g_, (v_, IntSyn.id), []) )
         in
-        let xnames_ =
+        let xnames =
           List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
         in
         let judg =
@@ -1058,11 +1164,14 @@ struct
               formatExp (g_, v_);
             ]
         in
-        let _ = Msg.message (F.makestring_fmt judg ^ "\n") in
-        let _ = reportConstraints xnames_ in
+        let _ =
+          Display.debug ~level:Display.Level.verbose
+            (Display.Form.string (F.makestring_fmt judg ^ "\n"))
+        in
+        ignore (reportConstraints xnames);
         ()
 
-  let rec reportInfer x = report (function () -> reportInfer' x)
+  let reportInfer x = report (function () -> reportInfer' x)
 
   let rec inferExactN = function
     | g_, (Internal_ (u_, v_, r) as tm) -> (tm, Intro u_, v_)
@@ -1080,7 +1189,8 @@ struct
         let (Dec (_, v_)) = IntSyn.ctxDec (g_, k) in
         (tm, Elim (bvarElim k), v_)
     | g_, (Evar_ (name, r) as tm) ->
-        Logs.debug (fun m -> m "inferring EVar %s" name);
+        msg ~src:Group.approx ~level:Level.Debug
+          (Fmt.shown_exact (fun name -> "inferring EVar " ^ name) name);
         let x_, v_ =
           try getEVar (name, false)
           with Apx.Ambiguous ->
@@ -1091,15 +1201,25 @@ struct
             end
         in
         let s = IntSyn.Shift (IntSyn.ctxLength g_) in
-        (tm, Elim (elimSub (evarElim x_, s)), eClo_ (v_, s))
+        (tm, Elim (elimSub (evarElim x_, s)), eClo (v_, s))
     | g_, (Fvar_ (name, r) as tm) ->
-        Logs.debug (fun m -> m "inferring FVar %s" name);
+        Display.debug ~level:Display.Level.verbose
+          Display.Form.(
+            nl ()
+            ++ string "Inferring exact type of FVar"
+            ++ string name ++ nl ());
         let v_ =
           try getFVarType (name, false)
           with Apx.Ambiguous ->
             let v_ = getFVarType (name, true) in
             begin
-              Logs.debug (fun m -> m "ambiguous type for FVar %s" name);
+              Display.debug ~level:Display.Level.verbose
+                Display.Form.(
+                  string "Type of FVar" ++ string name
+                  ++ string
+                       " is ambiguous, but continuing with one of the \
+                        possibilities"
+                  ++ nl ());
               delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
               v_
             end
@@ -1115,7 +1235,7 @@ struct
         let tm2', b2_, l_ = inferExact (g_, tm2) in
         let v2_ = toIntro (b2_, (l_, IntSyn.id)) in
         ( Arrow_ (tm1', tm2'),
-          Intro (IntSyn.Pi ((d_, IntSyn.No), eClo_ (v2_, IntSyn.shift))),
+          Intro (IntSyn.Pi ((d_, IntSyn.No), eClo (v2_, IntSyn.shift))),
           l_ )
     | g_, Pi_ (tm1, tm2) ->
         let tm1', d_ = inferExactDec (g_, tm1) in
@@ -1132,32 +1252,35 @@ struct
     | g_, App_ (tm1, tm2) ->
         let tm1', b1_, v1_ = inferExact (g_, tm1) in
         let e1_ = toElim b1_ in
-        Debug.(
-          msg' ~src:Group.approx ~level:Level.Debug
-          @@ Fmt.concat
-               Fmt.
-                 [
-                   const string "Infering exact application of";
-                   using fst pp_term;
-                   const string "to";
-                   using snd pp_term;
-                 ])
-          (tm1, tm2);
-        let IntSyn.Pi ((IntSyn.Dec (_, va_), _), vr_), s =
-          Whnf.whnfExpandDef (v1_, IntSyn.id)
-        in
-        let tm2', b2_ =
-          checkExact
-            ( g_,
-              tm2,
-              (va_, s),
-              "Argument type did not match function domain type\n\
-               (Index object(s) did not match)" )
-        in
-        let u2_ = toIntro (b2_, (va_, s)) in
-        ( App_ (tm1', tm2'),
-          Elim (elimApp (e1_, u2_)),
-          eClo_ (vr_, Whnf.dotEta (exp_ u2_, s)) )
+        Display.(
+          debug ~level:Level.verbose
+            Form.(
+              nl ()
+              ++ string "Inferring exact application of"
+              ++ shown show_term tm1 ++ string "to" ++ shown show_term tm2
+              ++ nl ()));
+        let t, s = Whnf.whnfExpandDef (v1_, IntSyn.id) in
+        begin match t with
+        | IntSyn.Pi ((IntSyn.Dec (_, va), _), vr) -> begin
+            let tm2', b2_ =
+              checkExact
+                ( g_,
+                  tm2,
+                  (va, s),
+                  "Argument type did not match function domain type\n\
+                   (Index object(s) did not match)" )
+            in
+            let u2_ = toIntro (b2_, (va, s)) in
+            ( App_ (tm1', tm2'),
+              Elim (elimApp (e1_, u2_)),
+              eClo (vr, Whnf.dotEta (exp_ u2_, s)) )
+          end
+        | _ -> begin
+            failwith
+              "Expected a pi type after whnf in application, but got something \
+               else"
+          end
+        end
     | g_, Hastype_ (tm1, tm2) ->
         let tm2', b2_, l_ = inferExact (g_, tm2) in
         let v_ = toIntro (b2_, (l_, IntSyn.id)) in
@@ -1182,12 +1305,18 @@ struct
           delayMismatch (g_, v1_, v_, termRegion tm2', location_msg, problem_msg)
         in
         (Mismatch_ (tm1', tm2', location_msg, problem_msg), b_, v_)
-    | g_, Omitapx_ (u_, v_, l_, r) ->
+    | g_, Omitapx (u_, v_, l_, r) ->
         let v'_ =
           try Apx.apxToClass (g_, v_, l_, false)
           with Ambiguous ->
             let v'_ = Apx.apxToClass (g_, v_, l_, true) in
             begin
+              Display.debug ~level:Display.Level.verbose
+                Display.Form.(
+                  string
+                    "Classifier of omitted term is ambiguous, but continuing \
+                     with one of the possibilities"
+                  ++ nl ());
               delayAmbiguous
                 ( g_,
                   v'_,
@@ -1206,6 +1335,12 @@ struct
           with Ambiguous ->
             let u'_ = Apx.apxToExact (g_, u_, (v'_, IntSyn.id), true) in
             begin
+              Display.debug ~level:Display.Level.verbose
+                Display.Form.(
+                  string
+                    "Exact term of omitted term is ambiguous, but continuing \
+                     with one of the possibilities"
+                  ++ nl ());
               delayAmbiguous
                 ( g_,
                   u'_,
@@ -1219,7 +1354,7 @@ struct
               u'_
             end
         in
-        (Omitexact_ (u'_, v'_, r), Intro u'_, v'_)
+        (Omitexact (u'_, v'_, r), Intro u'_, v'_)
 
   and inferExact (g_, tm) =
     begin if not !trace then inferExactN (g_, tm)
@@ -1238,16 +1373,16 @@ struct
     (Dec_ (name, tm', r), d_)
 
   and checkExact1 = function
-    | g_, Lam_ (Dec_ (name, tm1, r), tm2), vhs_ ->
-        let Pi ((Dec (_, va_), _), vr_), s = Whnf.whnfExpandDef vhs_ in
+    | g_, Lam_ (Dec_ (name, tm1, r), tm2), vhs ->
+        let Pi ((Dec (_, va), _), vr), s = Whnf.whnfExpandDef vhs in
         let (tm1', b1_, _ (* Uni Type *)), ok1 =
-          unifyExact (g_, tm1, (va_, s))
+          unifyExact (g_, tm1, (va, s))
         in
         let v1_ = toIntro (b1_, (IntSyn.Uni Type, IntSyn.id)) in
         let d_ = IntSyn.Dec (name, v1_) in
         let (tm2', b2_, v2_), ok2 =
           begin if ok1 then
-            checkExact1 (decl_ (g_, d_), tm2, (vr_, IntSyn.dot1 s))
+            checkExact1 (decl_ (g_, d_), tm2, (vr, IntSyn.dot1 s))
           else (inferExact (decl_ (g_, d_), tm2), false)
           end
         in
@@ -1256,8 +1391,8 @@ struct
             Intro (IntSyn.Lam (d_, u2_)),
             IntSyn.Pi ((d_, IntSyn.Maybe), v2_) ),
           ok2 )
-    | g_, Hastype_ (tm1, tm2), vhs_ ->
-        let (tm2', b2_, l_), ok2 = unifyExact (g_, tm2, vhs_) in
+    | g_, Hastype_ (tm1, tm2), vhs ->
+        let (tm2', b2_, l_), ok2 = unifyExact (g_, tm2, vhs) in
         let v_ = toIntro (b2_, (l_, IntSyn.id)) in
         let tm1', b1_ =
           checkExact
@@ -1267,19 +1402,19 @@ struct
               "Ascription did not hold\n(Index object(s) did not match)" )
         in
         ((Hastype_ (tm1', tm2'), b1_, v_), ok2)
-    | g_, Mismatch_ (tm1, tm2, location_msg, problem_msg), vhs_ ->
+    | g_, Mismatch_ (tm1, tm2, location_msg, problem_msg), vhs ->
         let tm1', _, v1_ = inferExact (g_, tm1) in
-        let (tm2', b_, v_), ok2 = checkExact1 (g_, tm2, vhs_) in
+        let (tm2', b_, v_), ok2 = checkExact1 (g_, tm2, vhs) in
         let _ =
           delayMismatch (g_, v1_, v_, termRegion tm2', location_msg, problem_msg)
         in
         ((Mismatch_ (tm1', tm2', location_msg, problem_msg), b_, v_), ok2)
-    | g_, Omitapx_ (u_, v_, l_, r (* = Vhs *)), vhs_ ->
-        let v'_ = eClo_ vhs_ in
+    | g_, Omitapx (u_, v_, l_, r (* = Vhs *)), vhs ->
+        let v'_ = eClo vhs in
         let u'_ =
-          try Apx.apxToExact (g_, u_, vhs_, false)
+          try Apx.apxToExact (g_, u_, vhs, false)
           with Ambiguous ->
-            let u'_ = Apx.apxToExact (g_, u_, vhs_, true) in
+            let u'_ = Apx.apxToExact (g_, u_, vhs, true) in
             begin
               delayAmbiguous
                 ( g_,
@@ -1294,12 +1429,16 @@ struct
               u'_
             end
         in
-        ((Omitexact_ (u'_, v'_, r), Intro u'_, v'_), true)
-    | g_, tm, vhs_ ->
+        ((Omitexact (u'_, v'_, r), Intro u'_, v'_), true)
+    | g_, tm, vhs ->
         let tm', b'_, v'_ = inferExact (g_, tm) in
-        ((tm', b'_, v'_), unifiableIdem (g_, vhs_, (v'_, IntSyn.id)))
+        ((tm', b'_, v'_), unifiableIdem (g_, vhs, (v'_, IntSyn.id)))
 
   and checkExact (g_, tm, vs_, location_msg) =
+    Display.(
+      debug ~level:Level.verbose
+        Form.(
+          nl () ++ string "Checking exact term" ++ shown show_term tm ++ nl ()));
     begin if not !trace then
       let (tm', b'_, v'_), ok = checkExact1 (g_, tm, vs_) in
       begin if ok then (tm', b'_)
@@ -1312,14 +1451,14 @@ struct
         with Unify.Unify problem_msg ->
           let r = termRegion tm in
           let u'_ = toIntro (b'_, (v'_, IntSyn.id)) in
-          let uapx_, vapx_, lapx_ = Apx.exactToApx (u'_, v'_) in
-          let (tm'', b''_, _ (* Vs *)), _ (* true *) =
-            checkExact1 (g_, Omitapx_ (uapx_, vapx_, lapx_, r), vs_)
+          let uapx, vapx, lapx = Apx.exactToApx (u'_, v'_) in
+          let (tm'', b'', _ (* Vs *)), _ (* true *) =
+            checkExact1 (g_, Omitapx (uapx, vapx, lapx, r), vs_)
           in
           let _ =
-            delayMismatch (g_, v'_, eClo_ vs_, r, location_msg, problem_msg)
+            delayMismatch (g_, v'_, eClo vs_, r, location_msg, problem_msg)
           in
-          (Mismatch_ (tm', tm'', location_msg, problem_msg), b''_)
+          (Mismatch_ (tm', tm'', location_msg, problem_msg), b'')
       end
     else
       let tm', b'_, v'_ = inferExact (g_, tm) in
@@ -1331,42 +1470,41 @@ struct
       with Unify.Unify problem_msg ->
         let r = termRegion tm in
         let u'_ = toIntro (b'_, (v'_, IntSyn.id)) in
-        let uapx_, vapx_, lapx_ = Apx.exactToApx (u'_, v'_) in
-        let tm'', b''_ =
-          checkExact (g_, Omitapx_ (uapx_, vapx_, lapx_, r), vs_, location_msg)
+        let uapx, vapx, lapx = Apx.exactToApx (u'_, v'_) in
+        let tm'', b'' =
+          checkExact (g_, Omitapx (uapx, vapx, lapx, r), vs_, location_msg)
         in
         let _ =
-          delayMismatch (g_, v'_, eClo_ vs_, r, location_msg, problem_msg)
+          delayMismatch (g_, v'_, eClo vs_, r, location_msg, problem_msg)
         in
-        (Mismatch_ (tm', tm'', location_msg, problem_msg), b''_)
+        (Mismatch_ (tm', tm'', location_msg, problem_msg), b'')
     end
 
   and unifyExact = function
-    | g_, Arrow_ (tm1, tm2), vhs_ ->
-        let Pi ((Dec (_, va_), _), vr_), s = Whnf.whnfExpandDef vhs_ in
+    | g_, Arrow_ (tm1, tm2), vhs ->
+        let Pi ((Dec (_, va), _), vr), s = Whnf.whnfExpandDef vhs in
         let (tm1', b1_, _ (* Uni Type *)), ok1 =
-          unifyExact (g_, tm1, (va_, s))
+          unifyExact (g_, tm1, (va, s))
         in
         let v1_ = toIntro (b1_, (IntSyn.Uni Type, IntSyn.id)) in
         let d_ = IntSyn.Dec (None, v1_) in
         let tm2', b2_, l_ = inferExact (g_, tm2) in
         let v2_ = toIntro (b2_, (l_, IntSyn.id)) in
         ( ( Arrow_ (tm1', tm2'),
-            Intro (IntSyn.Pi ((d_, IntSyn.No), eClo_ (v2_, IntSyn.shift))),
+            Intro (IntSyn.Pi ((d_, IntSyn.No), eClo (v2_, IntSyn.shift))),
             l_ ),
           ok1
           && unifiableIdem
-               (decl_ (g_, d_), (vr_, IntSyn.dot1 s), (v2_, IntSyn.shift)) )
-    | g_, Pi_ (Dec_ (name, tm1, r), tm2), vhs_ ->
-        let Pi ((Dec (_, va_), _), vr_), s = Whnf.whnfExpandDef vhs_ in
+               (decl_ (g_, d_), (vr, IntSyn.dot1 s), (v2_, IntSyn.shift)) )
+    | g_, Pi_ (Dec_ (name, tm1, r), tm2), vhs ->
+        let Pi ((Dec (_, va), _), vr), s = Whnf.whnfExpandDef vhs in
         let (tm1', b1_, _ (* Uni Type *)), ok1 =
-          unifyExact (g_, tm1, (va_, s))
+          unifyExact (g_, tm1, (va, s))
         in
         let v1_ = toIntro (b1_, (IntSyn.Uni Type, IntSyn.id)) in
         let d_ = IntSyn.Dec (name, v1_) in
         let (tm2', b2_, l_), ok2 =
-          begin if ok1 then
-            unifyExact (decl_ (g_, d_), tm2, (vr_, IntSyn.dot1 s))
+          begin if ok1 then unifyExact (decl_ (g_, d_), tm2, (vr, IntSyn.dot1 s))
           else (inferExact (decl_ (g_, d_), tm2), false)
           end
         in
@@ -1375,25 +1513,25 @@ struct
             Intro (IntSyn.Pi ((d_, IntSyn.Maybe), v2_)),
             l_ ),
           ok2 )
-    | g_, Hastype_ (tm1, tm2), vhs_ ->
+    | g_, Hastype_ (tm1, tm2), vhs ->
         let tm2', _, _ = inferExact (g_, tm2) in
-        let (tm1', b_, l_), ok1 = unifyExact (g_, tm1, vhs_) in
+        let (tm1', b_, l_), ok1 = unifyExact (g_, tm1, vhs) in
         ((Hastype_ (tm1', tm2'), b_, l_), ok1)
-    | g_, Mismatch_ (tm1, tm2, location_msg, problem_msg), vhs_ ->
+    | g_, Mismatch_ (tm1, tm2, location_msg, problem_msg), vhs ->
         let tm1', _, l1_ = inferExact (g_, tm1) in
-        let (tm2', b_, l_), ok2 = unifyExact (g_, tm2, vhs_) in
+        let (tm2', b_, l_), ok2 = unifyExact (g_, tm2, vhs) in
         let _ =
           delayMismatch (g_, l1_, l_, termRegion tm2', location_msg, problem_msg)
         in
         ((Mismatch_ (tm1', tm2', location_msg, problem_msg), b_, l_), ok2)
-    | g_, Omitapx_ (v_, l_, nL, r), vhs_ ->
+    | g_, Omitapx (v_, l_, nL, r), vhs ->
         let l'_ = Apx.apxToClass (g_, l_, nL, false) in
-        let v'_ = eClo_ vhs_ in
-        ((Omitexact_ (v'_, l'_, r), Intro v'_, l'_), true)
-    | g_, tm, vhs_ ->
+        let v'_ = eClo vhs in
+        ((Omitexact (v'_, l'_, r), Intro v'_, l'_), true)
+    | g_, tm, vhs ->
         let tm', b'_, l'_ = inferExact (g_, tm) in
         let v'_ = toIntro (b'_, (l'_, IntSyn.id)) in
-        ((tm', b'_, l'_), unifiableIdem (g_, vhs_, (v'_, IntSyn.id)))
+        ((tm', b'_, l'_), unifiableIdem (g_, vhs, (v'_, IntSyn.id)))
 
   let rec occElim = function
     | Constant_ (h_, r), os, rs, i ->
@@ -1436,19 +1574,19 @@ struct
         (oc, r)
 
   let rec inferExactJob = function
-    | g_, Jnothing_ -> JNothing
-    | g_, Jand_ (j1, j2) -> JAnd (inferExactJob (g_, j1), inferExactJob (g_, j2))
-    | g_, Jwithctx_ (g, j) ->
+    | g_, Jnothing -> JNothing
+    | g_, Jand (j1, j2) -> JAnd (inferExactJob (g_, j1), inferExactJob (g_, j2))
+    | g_, Jwithctx (g, j) ->
         let rec ie = function
           | IntSyn.Null -> (g_, IntSyn.Null)
           | Decl (g, tm) ->
-              let g'_, gresult_ = ie g in
+              let g'_, gresult = ie g in
               let _, d_ = inferExactDec (g'_, tm) in
-              (decl_ (g'_, d_), decl_ (gresult_, d_))
+              (decl_ (g'_, d_), decl_ (gresult, d_))
         in
-        let g'_, gresult_ = ie g in
-        JWithCtx (gresult_, inferExactJob (g'_, j))
-    | g_, Jterm_ tm ->
+        let g'_, gresult = ie g in
+        JWithCtx (gresult, inferExactJob (g'_, j))
+    | g_, Jterm tm ->
         let tm', b_, v_ = inferExact (g_, tm) in
         let u_ = toIntro (b_, (v_, IntSyn.id)) in
         let oc, r = occIntro tm' in
@@ -1461,13 +1599,13 @@ struct
           | IntSyn.EClo (v_, _) -> iu v_
         in
         JTerm ((u_, oc), v_, iu v_)
-    | g_, Jclass_ tm ->
+    | g_, Jclass tm ->
         let tm', b_, l_ = inferExact (g_, tm) in
         let v_ = toIntro (b_, (l_, IntSyn.id)) in
         let oc, r = occIntro tm' in
         let IntSyn.Uni l_, _ = Whnf.whnf (l_, IntSyn.id) in
         JClass ((v_, oc), l_)
-    | g_, Jof_ (tm1, tm2) ->
+    | g_, Jof (tm1, tm2) ->
         let tm2', b2_, l2_ = inferExact (g_, tm2) in
         let v2_ = toIntro (b2_, (l2_, IntSyn.id)) in
         let tm1', b1_ =
@@ -1483,7 +1621,7 @@ struct
         let oc1, r1 = occIntro tm1' in
         let IntSyn.Uni l2_, _ = Whnf.whnf (l2_, IntSyn.id) in
         JOf ((u1_, oc1), (v2_, oc2), l2_)
-    | g_, Jof'_ (tm1, v2_) ->
+    | g_, Jof' (tm1, v2_) ->
         let tm1', b1_ =
           checkExact
             ( g_,
@@ -1496,52 +1634,52 @@ struct
         let oc1, r1 = occIntro tm1' in
         JOf ((u1_, oc1), (v2_, oc1), IntSyn.Type)
 
-  let rec recon' j =
-    let _ = Apx.varReset () in
+  let recon' j =
+    ignore (Apx.varReset ());
     StringTree.clear evarApxTable;
     StringTree.clear fvarApxTable;
     StringTree.clear fvarTable;
     let j' = inferApxJob (IntSyn.Null, j) in
-    let _ = clearDelayed () in
+    ignore (clearDelayed ());
     let j'' = inferExactJob (IntSyn.Null, j') in
-    let _ = runDelayed () in
+    ignore (runDelayed ());
     j''
 
-  let rec recon j =
+  let recon j =
     begin
       queryMode := false;
       recon' j
     end
 
-  let rec reconQuery j =
+  let reconQuery j =
     begin
       queryMode := true;
       recon' j
     end
 
-  let rec reconWithCtx' (g_, j) =
-    let _ = Apx.varReset () in
-    let _ = varReset () in
+  let reconWithCtx' (g_, j) =
+    ignore (Apx.varReset ());
+    ignore (varReset ());
     let j' = inferApxJob' (g_, j) in
-    let _ = clearDelayed () in
+    ignore (clearDelayed ());
     let j'' = inferExactJob (g_, j') in
-    let _ = runDelayed () in
+    ignore (runDelayed ());
     j''
 
-  let rec reconWithCtx (g_, j) =
+  let reconWithCtx (g_, j) =
     begin
       queryMode := false;
       reconWithCtx' (g_, j)
     end
 
-  let rec reconQueryWithCtx (g_, j) =
+  let reconQueryWithCtx (g_, j) =
     begin
       queryMode := true;
       reconWithCtx' (g_, j)
     end
 
-  let rec internalInst x = raise Match
-  let rec externalInst x = raise Match
+  let internalInst x = raise Match
+  let externalInst x = raise Match
 
   (* Re-expose public-facing termRegion/decRegion for the RECON_TERM interface *)
   let termRegion (t : Cst.term) : Paths.region =

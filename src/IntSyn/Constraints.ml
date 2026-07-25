@@ -8,7 +8,7 @@ open Intsyn_
 (* Manipulating Constraints *)
 (* Author: Jeff Polakow, Frank Pfenning *)
 (* Modified: Roberto Virga *)
-include Constraints_intf
+include CONSTRAINTS
 (* signature CONSTRAINTS *)
 
 (* # 1 "src/lambda/Constraints.fun.ml" *)
@@ -19,10 +19,17 @@ open Intsyn_
 (* Manipulating Constraints *)
 (* Author: Jeff Polakow, Frank Pfenning *)
 (* Modified: Roberto Virga *)
+exception Error of IntSyn.cnstr list
+
+let () =
+  Printexc.register_printer (function
+    | Error _ -> Some "Constraint error"
+    | _ -> None)
+
 module MakeConstraints (Conv : CONV) : CONSTRAINTS = struct
   (*! structure IntSyn = IntSyn' !*)
 
-  exception Error of IntSyn.cnstr list
+  exception Error = Error
 
   (*
      Constraints cnstr are of the form (X<I>[s] = U).
@@ -57,7 +64,7 @@ module MakeConstraints (Conv : CONV) : CONSTRAINTS = struct
     | name :: [] -> name ^ "."
     | name :: names -> (name ^ ", ") ^ names_to_string names
 
-  let rec warn_constraints = function
+  let warn_constraints = function
     | [] -> ()
     | names -> print (("Constraints remain on " ^ names_to_string names) ^ "\n")
 

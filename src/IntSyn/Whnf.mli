@@ -1,3 +1,3 @@
-module type WHNF = Whnf_intf.WHNF
+module type WHNF = WHNF.WHNF
 
 module Whnf () : WHNF

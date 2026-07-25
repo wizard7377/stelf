@@ -17,19 +17,36 @@ let test_value (f : form) (input : string) : exn option =
 let test ?(skip = false) ?(failure = false) (name : string) (f : form)
     (input : string) : unit Alcotest.test_case =
   let () = Printexc.record_backtrace true in
-  let () = Logs.set_reporter (Logs_fmt.reporter ()) in
-  let () = Logs.set_level (Some Logs.Debug) in
+  let () = Fmt_tty.setup_std_outputs () in
   let () =
     Display.register (fun m ->
-        Lwt.return @@ prerr_endline
-        @@ Fmt.to_to_string Display.Info.Form.fmt m.msg)
+        let _ = Display.fmt Fmt.stderr (Display.Info.body_to_form m.msg) in
+        Lwt.return ())
   in
   Alcotest.test_case name `Slow (fun () ->
+      let bad () =
+        Display.warning
+          Display.Form.(
+            concat
+              [
+                style Style.bold @@ style Style.Fore.red
+                @@ string "Test input>>";
+                nl ();
+                string input;
+                nl ();
+                style Style.bold @@ style Style.Fore.red
+                @@ string "<<Test input";
+                nl ();
+              ])
+      in
       if skip then Alcotest.skip ()
       else
         match test_value f input with
-        | None when failure -> Alcotest.fail "Expected failure, but test passed"
+        | None when failure ->
+            bad ();
+            Alcotest.fail "Expected failure, but test passed"
         | Some e when not failure ->
+            bad ();
             Alcotest.failf
               "Expected success, but test failed with exception: %s"
               (Printexc.to_string e)

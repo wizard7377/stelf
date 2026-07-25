@@ -1,0 +1,4 @@
+(data_only_dirs TEMPLATE)
+
+(cram
+ (deps %{bin:stelf}))

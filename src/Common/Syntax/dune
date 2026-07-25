@@ -1,4 +1,6 @@
 (library
+ (instrumentation
+  (backend bisect_ppx))
  (name syntax)
  (public_name stelf.syntax)
  (libraries display containers basis global))

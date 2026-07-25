@@ -1,0 +1,87 @@
+%%%%%  Conversion Regularity -- IL side (Explicit Context)  %%%%%
+%sort aconverte-reg-il {_ aconverte G R A _} {_ aofe G R A} %.
+%mode aconverte-reg-il %in %out %.
+%sort converte-reg-il {_ converte G M A _} {_ ofe G M A} %.
+%mode converte-reg-il %in %out %.
+%sort tconverte-reg-il {_ tconverte G A _} {_ wfe G A} %.
+%mode tconverte-reg-il %in %out %.
+%scope tconverte-reg-il %term const 
+	%pi (aconverte-reg-il (aconverte/const Dconv Dwf Dkof) (aofe/closed Dord (aof/const Dwf Dkof)))
+	%<- (tconverte-context Dconv Dord) %.
+%scope tconverte-reg-il %term forall
+	%pi (aconverte-reg-il (aconverte/forall Dconv) (aofe/forall Dwf))
+	%<- (tconverte-reg-il Dconv Dwf) %.
+%scope tconverte-reg-il %term var 
+	%pi (aconverte-reg-il (aconverte/var _ Dconv Dlook) (aofe/var Dwf Dlook))
+	%<- (tconverte-reg-il Dconv Dwf) %.
+%scope tconverte-reg-il %term vari
+	%pi (aconverte-reg-il (aconverte/vari _ Dconv Dwf Dvof) (aofe/closed Dord (aof/var Dwf Dvof)))
+	%<- (tconverte-context Dconv Dord) %.
+%scope tconverte-reg-il %term app 
+	%pi (aconverte-reg-il (aconverte/app Dsub DconvM DconvR) (aofe/app DwfBx Dsub DofM DofR))
+	%<- (aconverte-reg-il DconvR DofR)
+	%<- (converte-reg-il DconvM DofM)
+	%<- (aofe-reg DofR (wfe/pi DwfB _))
+	%<- (tsubst-e ([_] append/nil) csub/base DofM Dsub DwfB DwfBx) %.
+%scope tconverte-reg-il %term pi1
+	%pi (aconverte-reg-il (aconverte/pi1 Dconv) (aofe/pi1 Dof))
+	%<- (aconverte-reg-il Dconv Dof) %.
+%scope tconverte-reg-il %term pi2 
+	%pi (aconverte-reg-il (aconverte/pi2 Dconv) (aofe/pi2 Dof))
+	%<- (aconverte-reg-il Dconv Dof) %.
+%scope tconverte-reg-il %term at
+	%pi (converte-reg-il (converte/at Dconv) (ofe/at Dof))
+	%<- (aconverte-reg-il Dconv Dof) %.
+%scope tconverte-reg-il %term lam 
+	%pi (converte-reg-il (converte/lam Dconv2 Dconv1) (ofe/lam Dof Dwf))
+	%<- (tconverte-reg-il Dconv1 Dwf)
+	%<- ({x} {d} {ex} {xt} converte-reg-il (Dconv2 x d ex xt) (Dof x d)) %.
+%scope tconverte-reg-il %term pair
+	%pi (converte-reg-il (converte/pair Dwf Dconv2 Dsub Dconv1) (ofe/pair Dwf Dof2 Dsub Dof1))
+	%<- (converte-reg-il Dconv1 Dof1)
+	%<- (converte-reg-il Dconv2 Dof2) %.
+%scope tconverte-reg-il %term sing 
+	%pi (converte-reg-il (converte/sing Dconv) (ofe/sing Dof))
+	%<- (aconverte-reg-il Dconv Dof) %.
+%scope tconverte-reg-il %term t tconverte-reg-il (tconverte/t Dord) (wfe/t Dord) %.
+%scope tconverte-reg-il %term pi 
+	%pi (tconverte-reg-il (tconverte/pi Dconv2 Dconv1) (wfe/pi Dwf2 Dwf1))
+	%<- (tconverte-reg-il Dconv1 Dwf1)
+	%<- ({x} {d} {ex} {xt} tconverte-reg-il (Dconv2 x d ex xt) (Dwf2 x d)) %.
+%scope tconverte-reg-il %term sigma
+	%pi (tconverte-reg-il (tconverte/sigma Dconv2 Dconv1) (wfe/sigma Dwf2 Dwf1))
+	%<- (tconverte-reg-il Dconv1 Dwf1)
+	%<- ({x} {d} {ex} {xt} tconverte-reg-il (Dconv2 x d ex xt) (Dwf2 x d)) %.
+%scope tconverte-reg-il %term sing 
+	%pi (tconverte-reg-il (tconverte/sing Dconv) (wfe/sing Dof))
+	%<- (aconverte-reg-il Dconv Dof) %.
+%worlds (fbind fobind bind ovar tbind evar) (aconverte-reg-il _ _) (converte-reg-il _ _) (tconverte-reg-il _ _) %.
+%total (D1 D2 D3) (aconverte-reg-il D1 _) (converte-reg-il D2 _) (tconverte-reg-il D3 _) %.
+%%%%%  Conversion Regularity -- IL side  %%%%%
+%sort tconvert-reg-il {_ tconvert A _} {_ wf A} %.
+%mode tconvert-reg-il %in %out %.
+%term _ 
+	%pi (tconvert-reg-il Dconv Dwf)
+	%<- (tconvert-to-tconverte Dconv Dconve)
+	%<- (tconverte-reg-il Dconve Dwfe)
+	%<- (wfe-to-wf Dwfe Dwf) %.
+%worlds (fbind bind tbind) (tconvert-reg-il _ _) %.
+%total {} (tconvert-reg-il _ _) %.
+%sort convert-reg-il {_ convert M A _} {_ of M A} %.
+%mode convert-reg-il %in %out %.
+%term _ 
+	%pi (convert-reg-il Dconv Dof)
+	%<- (convert-to-converte Dconv Dconve)
+	%<- (converte-reg-il Dconve Dofe)
+	%<- (ofe-to-of Dofe Dof) %.
+%worlds (fbind bind tbind eofblock) (convert-reg-il _ _) %.
+%total {} (convert-reg-il _ _) %.
+%sort aconvert-reg-il {_ aconvert R A _} {_ aof R A} %.
+%mode aconvert-reg-il %in %out %.
+%term _ 
+	%pi (aconvert-reg-il Dconv Dof)
+	%<- (aconvert-to-aconverte Dconv Dconve)
+	%<- (aconverte-reg-il Dconve Dofe)
+	%<- (aofe-to-aof Dofe Dof) %.
+%worlds (fbind bind tbind) (aconvert-reg-il _ _) %.
+%total {} (aconvert-reg-il _ _) %.

@@ -1,0 +1,83 @@
+%%%%% Validity signatures%%%%%
+%sort vdt/sg-wf {_ sg-wf S1} {_ fst-sg S1 K1} {_ kd-wf K1} %.
+%mode vdt/sg-wf %in %in %out %.
+%term _ vdt/sg-wf sg-wf/sg/unit fst-sg/unit kd-wf/kd/unit %.
+%term _ vdt/sg-wf (sg-wf/sg/kd DK) fst-sg/kd DK %.
+%term _ vdt/sg-wf (sg-wf/sg/cn DC) fst-sg/cn kd-wf/kd/unit %.
+%term _ 
+	%pi (vdt/sg-wf (sg-wf/sg/sgm D1 D2 (%the (fst-sg S1 K3) DFS')) (fst-sg/sgm (%the (fst-sg S1 K1) DFS) (%the ({a} fst-sg (S2 a) (K2 a)) DFS2)) (kd-wf/kd/sgm DW DW2))
+	%<- (fst-sg-seq DFS' DFS (%the (seq/kd K3 K1) DQ))
+	%<- (vdt/sg-wf D1 DFS (%the (kd-wf K1) DW))
+	%<- (vdt/sg-wf D1 DFS' (%the (kd-wf K3) DW'))
+	%<- ({a cn} {da ofkd a K3} {dm mofkd da met/unit} {_ can-mofkd da dm} {va vdt/ofkd da DW'} vdt/sg-wf (D2 a da) (DFS2 a) (DW2' a da))
+	%<- (kd-wf/seq-a DQ DW2' DW2) %.
+%term _ vdt/sg-wf (sg-wf/sg/pi _ _ _) fst-sg/pi kd-wf/kd/unit %.
+%worlds (ofkd+vdt-block) (vdt/sg-wf _ _ _) %.
+%total D1 (vdt/sg-wf D1 _ _) %.
+%sort vdt/sg-deq {_ sg-deq S1 S2} {_ fst-sg S1 K1} {_ fst-sg S2 K2} {_ sg-wf S1} {_ sg-wf S2} {_ kd-deq K1 K2} %.
+%mode vdt/sg-deq %in %in %in %out %out %out %.
+%term _ vdt/sg-deq sg-deq/sg/unit fst-sg/unit fst-sg/unit sg-wf/sg/unit sg-wf/sg/unit kd-deq/kd/unit %.
+%term _ 
+	%pi (vdt/sg-deq (sg-deq/sg/cn D) fst-sg/cn fst-sg/cn (sg-wf/sg/cn D1) (sg-wf/sg/cn D2) kd-deq/kd/unit)
+	%<- (vdt/cn-deq D D1 D2 _) %.
+%term _ 
+	%pi (vdt/sg-deq (sg-deq/sg/kd D) fst-sg/kd fst-sg/kd (sg-wf/sg/kd D1) (sg-wf/sg/kd D2) D)
+	%<- (vdt/kd-deq D D1 D2) %.
+%term _ 
+	%pi (vdt/sg-deq (sg-deq/sg/sgm D1 D2 (%the (fst-sg S1 K) FSo)) (fst-sg/sgm (%the (fst-sg S1 K1) FS1) FS1') (fst-sg/sgm FS2 FS2') (sg-wf/sg/sgm DW1 DW1'o FS1) (sg-wf/sg/sgm DW2 DW2'' FS2) (kd-deq/kd/sgm DK1o DK2o))
+	%<- (vdt/sg-deq D1 FSo FS2 DW1 DW2 DK1)
+	%<- (vdt/kd-deq DK1 DKK1 DKK2)
+	%<- ({a cn} {da ofkd a K} {dm mofkd da met/unit} {_ can-mofkd da dm} {vd vdt/ofkd da DKK1} vdt/sg-deq (D2 a da) (FS1' a) (FS2' a) (DW1' a da) (DW2' a da) (DK2 a da))
+	%<- (kd-anti DK1 DKK1 DKK2 _ DK21)
+	%<- (kd-wkn/sg-wf DW2' DK21 DW2'')
+	%<- (fst-sg-seq FSo FS1 DQ)
+	%<- (sg-wf/seq-a DQ DW1' DW1'o)
+	%<- (kd-deq/seq-l DQ DK1 DK1o)
+	%<- (kd-deq/seq-a DQ DK2 DK2o) %.
+%term _ 
+	%pi (vdt/sg-deq (sg-deq/sg/pi (%the (sg-deq S2 S1) D1) D2 (%the (fst-sg S2 K2) FS2)) fst-sg/pi fst-sg/pi (sg-wf/sg/pi (%the (sg-wf S1) DW1) DW1'' FS1) (sg-wf/sg/pi (%the (sg-wf S2) DW2) DW2' FS2) kd-deq/kd/unit)
+	%<- (fst-sg-complete S1 (%the (fst-sg S1 K1) FS1))
+	%<- ({a cn} fst-sg-complete (S3 a) (FS1' a))
+	%<- ({a cn} fst-sg-complete (S4 a) (FS2' a))
+	%<- (vdt/sg-deq D1 FS2 FS1 DW2 DW1 DK1)
+	%<- (vdt/kd-deq DK1 DKK2 DKK1)
+	%<- ({a cn} {da ofkd a K2} {dm mofkd da met/unit} {_ can-mofkd da dm} {vd vdt/ofkd da DKK2} vdt/sg-deq (D2 a da) (FS1' a) (FS2' a) (DW1' a da) (DW2' a da) (DK2 a da))
+	%<- (kd-anti DK1 DKK2 DKK1 _ DK21)
+	%<- (kd-wkn/sg-wf DW1' DK21 DW1'') %.
+%worlds (ofkd+vdt-block) (vdt/sg-deq _ _ _ _ _ _) %.
+%total (D1) (vdt/sg-deq D1 _ _ _ _ _) %.
+%sort vdt/sg-sub {_ sg-sub S1 S2} {_ fst-sg S1 K1} {_ fst-sg S2 K2} {_ sg-wf S1} {_ sg-wf S2} {_ kd-sub K1 K2} %.
+%mode vdt/sg-sub %in %in %in %out %out %out %.
+%term _ vdt/sg-sub sg-sub/sg/unit fst-sg/unit fst-sg/unit sg-wf/sg/unit sg-wf/sg/unit kd-sub/kd/unit %.
+%term _ 
+	%pi (vdt/sg-sub (sg-sub/sg/cn D) fst-sg/cn fst-sg/cn (sg-wf/sg/cn D1) (sg-wf/sg/cn D2) kd-sub/kd/unit)
+	%<- (vdt/cn-deq D D1 D2 _) %.
+%term _ 
+	%pi (vdt/sg-sub (sg-sub/sg/kd D) fst-sg/kd fst-sg/kd (sg-wf/sg/kd D1) (sg-wf/sg/kd D2) D)
+	%<- (vdt/kd-sub D D1 D2) %.
+%term _ 
+	%pi (vdt/sg-sub (sg-sub/sg/sgm (%the (sg-sub S1 S2) D1) D2 DW'' (%the (fst-sg S1 K) FSo) (%the (fst-sg S2 K') FSt)) (fst-sg/sgm (%the (fst-sg S1 K1) FS1) FS1') (fst-sg/sgm (%the (fst-sg S2 K2) FS2) FS2') (sg-wf/sg/sgm DW1 DW1'o FS1) (sg-wf/sg/sgm DW2 DW''t FS2) (kd-sub/kd/sgm DK1ot DK2o DK2wt))
+	%<- (vdt/sg-sub D1 FSo FSt DW1 DW2 DK1)
+	%<- (vdt/kd-sub DK1 DKK1 DKK2)
+	%<- ({a cn} {da ofkd a K} {dm mofkd da met/unit} {_ can-mofkd da dm} {vd vdt/ofkd da DKK1} vdt/sg-sub (D2 a da) (FS1' a) (FS2' a) (DW1' a da) (DW2' a da) (DK2 a da))
+	%<- ({a cn} {da ofkd a K'} {dm mofkd da met/unit} {_ can-mofkd da dm} {vd vdt/ofkd da DKK2} vdt/sg-wf (DW'' a da) (FS2' a) (DK2w a da))
+	%<- (fst-sg-seq FSo FS1 DQ)
+	%<- (sg-wf/seq-a DQ DW1' DW1'o)
+	%<- (kd-sub/seq-l DQ DK1 DK1o)
+	%<- (kd-sub/seq-a DQ DK2 DK2o)
+	%<- (fst-sg-seq FSt FS2 DQ')
+	%<- (sg-wf/seq-a DQ' DW'' DW''t)
+	%<- (kd-sub/seq-r DQ' DK1o DK1ot)
+	%<- (kd-wf/seq-a DQ' DK2w DK2wt) %.
+%term _ 
+	%pi (vdt/sg-sub (sg-sub/sg/pi (%the (sg-deq S2 S1) D1) D2 (%the (fst-sg S2 K2) FS2)) fst-sg/pi fst-sg/pi (sg-wf/sg/pi (%the (sg-wf S1) DW1) DW1'' FS1) (sg-wf/sg/pi (%the (sg-wf S2) DW2) DW2' FS2) kd-sub/kd/unit)
+	%<- (fst-sg-complete S1 (%the (fst-sg S1 K1) FS1))
+	%<- ({a cn} fst-sg-complete (S3 a) (FS1' a))
+	%<- ({a cn} fst-sg-complete (S4 a) (FS2' a))
+	%<- (vdt/sg-deq D1 FS2 FS1 DW2 DW1 DK1)
+	%<- (vdt/kd-deq DK1 DKK2 DKK1)
+	%<- ({a cn} {da ofkd a K2} {dm mofkd da met/unit} {_ can-mofkd da dm} {vd vdt/ofkd da DKK2} vdt/sg-deq (D2 a da) (FS1' a) (FS2' a) (DW1' a da) (DW2' a da) (DK2 a da))
+	%<- (kd-anti DK1 DKK2 DKK1 _ DK21)
+	%<- (kd-wkn/sg-wf DW1' DK21 DW1'') %.
+%worlds (ofkd+vdt-block) (vdt/sg-sub _ _ _ _ _ _) %.
+%total (D3) (vdt/sg-sub D3 _ _ _ _ _) %.

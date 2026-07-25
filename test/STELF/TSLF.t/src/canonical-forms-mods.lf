@@ -1,0 +1,47 @@
+%%%% canonical forms for modules
+%%%% this happens to be much easier than canonical forms for terms
+%%%% in this language
+%sort cfl/md/unit {_ val/md M} {_ ofsg L T Y M sg/unit} {_ seq/md M md/unit} %.
+%mode cfl/md/unit %in %in %out %.
+%term _ cfl/md/unit val/md/unit ofsg/md/unit seq/md/refl %.
+%term _ %pi (cfl/md/unit V (ofsg/sub D1 Dsub _) DS) %<- (cfl/md/unit V D1 DS) %.
+%worlds () (cfl/md/unit _ _ _) %.
+%total (D) (cfl/md/unit _ D _) %.
+%sort cfl/sg/pi {_ val/md M} {_ ofsg L T Y M (sg/pi _ _)} {_ seq/md M (md/lam _ _ _)} %.
+%mode cfl/sg/pi %in %in %out %.
+%term _ cfl/sg/pi val/md/lam (ofsg/md/lam _ _ _) seq/md/refl %.
+%term _ %pi (cfl/sg/pi V (ofsg/sub D1 Dsub _) DS) %<- (cfl/sg/pi V D1 DS) %.
+%worlds () (cfl/sg/pi _ _ _) %.
+%total (D) (cfl/sg/pi _ D _) %.
+%. %[
+cfl/md/cn	: val/md M
+		   -> ofsg L T Y M (sg/kd _)
+		   -> seq/md M (md/cn _)
+		   -> type.
+
+%mode cfl/md/cn +D1 +D2 -D3.
+
+-	: cfl/md/cn val/md/cn (ofsg/md/cn _) seq/md/refl.
+
+-	: cfl/md/cn V (ofsg/sub D1 Dsub _) DS
+	   <- cfl/md/cn V D1 DS.
+
+%worlds () (cfl/md/cn _ _ _).
+%total (D) (cfl/md/cn _ D _).
+}% %]
+%sort cfl/md/pair {_ val/md M} {_ ofsg L T Y M (sg/sgm _ _)} {_ seq/md M (md/pair _ _)} %.
+%mode cfl/md/pair %in %in %out %.
+%term _ cfl/md/pair (val/md/pair _ _) (ofsg/md/pair _ _) seq/md/refl %.
+%term _ 
+	%pi (cfl/md/pair V (ofsg/sgm-ext D1 _) DS)
+	%<- (subder/md/pj1 D1 D2 _)
+	%<- (cfl/md/pair V D2 DS) %.
+%term _ %pi (cfl/md/pair V (ofsg/sub D1 Dsub _) DS) %<- (cfl/md/pair V D1 DS) %.
+%worlds () (cfl/md/pair _ _ _) %.
+%total (D) (cfl/md/pair _ D _) %.
+%sort cfl/md/tm {_ val/md M} {_ ofsg L T Y M (sg/cn _)} {_ seq/md M (md/tm _)} %.
+%mode cfl/md/tm %in %in %out %.
+%term _ cfl/md/tm (val/md/tm _) (ofsg/md/tm _) seq/md/refl %.
+%term _ %pi (cfl/md/tm V (ofsg/sub D1 Dsub _) DS) %<- (cfl/md/tm V D1 DS) %.
+%worlds () (cfl/md/tm _ _ _) %.
+%total (D) (cfl/md/tm _ D _) %.

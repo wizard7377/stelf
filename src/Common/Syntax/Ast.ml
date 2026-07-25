@@ -3,8 +3,27 @@ open Common
 
 (* Author: Frank Pfenning, Carsten Schuermann *)
 (* Modified: Roberto Virga *)
-module Make_Ast (Common : Common.COMMON) :
-  Ast_intf.AST with module Common = Common = struct
+exception Error of string
+
+let () =
+  Printexc.register_printer (function Error msg -> Some msg | _ -> None)
+
+exception UnexpectedFgnExp of exn
+
+let () =
+  Printexc.register_printer (function
+    | UnexpectedFgnExp _ -> Some "UnexpectedFgnExp"
+    | _ -> None)
+
+exception UnexpectedFgnCnstr of exn
+
+let () =
+  Printexc.register_printer (function
+    | UnexpectedFgnCnstr _ -> Some "UnexpectedFgnCnstr"
+    | _ -> None)
+
+module Make_Ast (Common : Common.COMMON) : AST.AST with module Common = Common =
+struct
   module Common = Common
   open Common
 
@@ -46,7 +65,7 @@ module Make_Ast (Common : Common.COMMON) :
     | Decl (g_, _) -> g_
     | Null -> invalid_arg "ctxPop: empty context"
 
-  exception Error of string
+  exception Error = Error
 
   (* raised if out of space     *)
   (* ctxLookup (G, k) = D, kth declaration in G from right to left
@@ -76,7 +95,7 @@ module Make_Ast (Common : Common.COMMON) :
   let show_fgnExp e = Printexc.to_string e
 
   (* foreign expression representation *)
-  exception UnexpectedFgnExp of fgnExp
+  exception UnexpectedFgnExp = UnexpectedFgnExp
 
   (* raised by a constraint solver
       if passed an incorrect arg *)
@@ -89,7 +108,7 @@ module Make_Ast (Common : Common.COMMON) :
   let pp_fgnCnstr fmt e = Format.pp_print_string fmt (Printexc.to_string e)
   let show_fgnCnstr e = Printexc.to_string e
 
-  exception UnexpectedFgnCnstr of fgnCnstr
+  exception UnexpectedFgnCnstr = UnexpectedFgnCnstr
 
   (* raised by a constraint solver
      if passed an incorrect arg *)

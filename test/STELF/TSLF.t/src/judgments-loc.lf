@@ -1,0 +1,12 @@
+%%%% 
+%sort loc-less {_ loc} {_ loc} %.
+%mode loc-less %star %star %.
+%term loc-less/z loc-less loc/z (loc/s L) %.
+%term loc-less/s %pi (loc-less (loc/s L) (loc/s L')) %<- (loc-less L L') %.
+%sort loc-neq {_ loc} {_ loc} %.
+%mode loc-neq %star %star %.
+%term loc-neq/l %pi (loc-neq L L') %<- (loc-less L L') %.
+%term loc-neq/r %pi (loc-neq L L') %<- (loc-less L' L) %.
+%sort loc-seq-or-neq {_ loc} {_ loc} %.
+%term loc-seq-or-neq/seq %pi (loc-seq-or-neq L1 L2) %<- (seq/loc L1 L2) %.
+%term loc-seq-or-neq/neq %pi (loc-seq-or-neq L1 L2) %<- (loc-neq L1 L2) %.

@@ -49,7 +49,7 @@ end
 
 module type S = sig
   module Common : Common.COMMON
-  module Ast : Ast_intf.AST with module Common = Common
+  module Ast : AST.AST with module Common = Common
 
   open Ast
   (** Raised when the global signature exceeds its maximum size. *)
@@ -107,7 +107,7 @@ end
 
 module FgnOpn
     (Common : Common.COMMON)
-    (Ast : Ast_intf.AST with module Common = Common) :
+    (Ast : AST.AST with module Common = Common) :
   S with module Common = Common and module Ast = Ast = struct
   open Ast
   module Ast = Ast

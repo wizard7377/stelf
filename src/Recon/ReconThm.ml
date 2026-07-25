@@ -1,5 +1,7 @@
 module type RECON_THM = RECON_THM.RECON_THM
 
+exception Error of string
+
 module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   RECON_THM with module M = M = struct
   module M = M
@@ -9,7 +11,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   module Syntax = M.Syntax
   module ThmSyn = Thm.Thm_.ThmSyn
 
-  exception Error of string
+  exception Error = Error
 
   let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
@@ -52,7 +54,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   let rec convertOrder ord =
     let module O = Cst.View.Thm.Order in
     match O.view ord with
-    | O.Varg (_, names) -> (ThmSyn.Varg names, Cst.loc_to_region Cst.ghost)
+    | O.Varg (loc, names) -> (ThmSyn.Varg names, Cst.loc_to_region loc)
     | O.Lex (_, ords) ->
         let rec go = function
           | [] -> ([], Cst.loc_to_region Cst.ghost)
@@ -245,7 +247,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   (* Context-block helpers (for forallG) *)
 
   let ctxBlockToString (g0_, (g1_, g2_)) =
-    let _ = Names.varReset IntSyn.Null in
+    ignore (Names.varReset IntSyn.Null);
     let g0' = Names.ctxName g0_ in
     let g1' = Names.ctxLUName g1_ in
     let g2' = Names.ctxLUName g2_ in
@@ -262,7 +264,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     match g0_ with
     | IntSyn.Null -> ()
     | _ ->
-        let _ = Names.varReset IntSyn.Null in
+        ignore (Names.varReset IntSyn.Null);
         let g0' = Names.ctxName g0_ in
         let g1' = Names.ctxLUName g1_ in
         let g2' = Names.ctxLUName g2_ in
@@ -292,7 +294,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
             ^ "\n" ^ Print.cnstrsToString c_ )
     in
     let g1'_, g2'_ = match ctxs with [ a; b ] -> (a, b) | _ -> assert false in
-    let _ = checkFreevars (g0_, (g1'_, g2'_), r) in
+    ignore (checkFreevars (g0_, (g1'_, g2'_), r));
     (g1'_, g2'_)
 
   (* ------------------------------------------------------------------ *)
@@ -326,10 +328,10 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
       | _ -> assert false
     in
     let gbs_cst, g_cst, m_ctx, k = go t ([], IntSyn.Null, IntSyn.Null, 0) in
-    let _ = Names.varReset IntSyn.Null in
-    let gBs_ = List.map abstractCtxPair gbs_cst in
+    ignore (Names.varReset IntSyn.Null);
+    let gBs = List.map abstractCtxPair gbs_cst in
     let (RT.JWithCtx (g_, _)) = RT.recon (RT.jwithctx (g_cst, RT.jnothing)) in
-    ThmSyn.ThDecl (gBs_, g_, m_ctx, k)
+    ThmSyn.ThDecl (gBs, g_, m_ctx, k)
 
   let theoremDecToTheoremDec td =
     let module ThmDec = Cst.View.Thm.ThmDec in

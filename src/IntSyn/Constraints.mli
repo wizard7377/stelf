@@ -1,3 +1,3 @@
-open Conv_intf
-include module type of Constraints_intf
+open CONV
+include module type of CONSTRAINTS
 module MakeConstraints (Conv : CONV) : CONSTRAINTS

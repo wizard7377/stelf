@@ -1,0 +1,108 @@
+%sort vtrans {_ eterm} {_ atom} %.
+%sort ttrans {_ etp} {_ tp} %.
+%sort trans {_ eterm} {_ tp} %.
+%term ttrans/t ttrans et t %.
+%term ttrans/pi 
+	%pi (ttrans (epi EA EB) (pi A B))
+	%<- (ttrans EA A)
+	%<- ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (ttrans (EB ex) (B x)))) %.
+%term ttrans/sigma 
+	%pi (ttrans (esigma EA EB) (sigma A B))
+	%<- (ttrans EA A)
+	%<- ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (ttrans (EB ex) (B x)))) %.
+%term ttrans/sing %pi (ttrans (esing EM) (sing R)) %<- (trans EM (sing R)) %.
+%term trans/const 
+	%pi (trans (econst C) A')
+	%<- (kof C A)
+	%<- (wf A)
+	%<- (expand (const C) A M)
+	%<- (self M A A') %.
+%term trans/forall 
+	%pi (trans (eforall EA) B)
+	%<- (ttrans EA A)
+	%<- (expand (forall A) (qtp A) M)
+	%<- (self M (qtp A) B) %.
+%term trans/var 
+	%pi (trans EM A')
+	%<- (vtrans EM X)
+	%<- (vof X A)
+	%<- (wf A)
+	%<- (expand X A M)
+	%<- (self M A A') %.
+%term trans/app 
+	%pi (trans (eapp EM EN) Bx)
+	%<- (trans EM (pi A B))
+	%<- (trans EN C)
+	%<- (subtype C A ([_] N))
+	%<- (tsub ([x] B x) N Bx) %.
+%term trans/pi1 %pi (trans (epi1 EM) A) %<- (trans EM (sigma A ([_] B))) %.
+%term trans/pi2 %pi (trans (epi2 EM) B) %<- (trans EM (sigma A ([_] B))) %.
+%term trans/lam 
+	%pi (trans (elam EA EM) (pi A B))
+	%<- (ttrans EA A)
+	%<- ({x} %pi (vof x A) %-> ({ex} %pi (vtrans ex x) %-> (trans (EM ex) (B x)))) %.
+%term trans/pair %pi (trans (epair EM EN) (sigma A ([_] B))) %<- (trans EM A) %<- (trans EN B) %.
+%block tbind [r atom] {ex eterm} {tr vtrans ex r}%.
+%sort _ {_ %pi (vtrans _ _) %-> (vtrans _ _)} %.
+%%%%%  Explicit Contexts  %%%%%
+%sort ttranse {_ ctx} {_ etp} {_ tp} %.
+%sort transe {_ ctx} {_ eterm} {_ tp} %.
+%term ttranse/t %pi (ttranse G et t) %<- (ordered G) %.
+%term ttranse/pi 
+	%pi (ttranse G (epi EA EB) (pi A B))
+	%<- (ttranse G EA A)
+	%<- ({x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (ttranse (cons G x A) (EB ex) (B x)))) %.
+%term ttranse/sigma 
+	%pi (ttranse G (esigma EA EB) (sigma A B))
+	%<- (ttranse G EA A)
+	%<- ({x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (ttranse (cons G x A) (EB ex) (B x)))) %.
+%term ttranse/sing %pi (ttranse G (esing EM) (sing R)) %<- (transe G EM (sing R)) %.
+%term transe/const 
+	%pi (transe G (econst C) A')
+	%<- (kof C A)
+	%<- (wf A)
+	%<- (expand (const C) A M)
+	%<- (self M A A')
+	%<- (ordered G) %.
+%term transe/forall 
+	%pi (transe G (eforall EA) B)
+	%<- (ttranse G EA A)
+	%<- (expand (forall A) (qtp A) M)
+	%<- (self M (qtp A) B) %.
+%term transe/var 
+	%pi (transe G EM A')
+	%<- (vtrans EM X)
+	%<- (lookup G X A)
+	%<- (wfe G A)
+	%<- (expand X A M)
+	%<- (self M A A') %.
+%term transe/vari 
+	%pi (transe G EM A')
+	%<- (vtrans EM X)
+	%<- (vof X A)
+	%<- (wf A)
+	%<- (expand X A M)
+	%<- (self M A A')
+	%<- (ordered G) %.
+%term transe/app 
+	%pi (transe G (eapp EM EN) Bx)
+	%<- (transe G EM (pi A B))
+	%<- (transe G EN C)
+	%<- (subtype C A ([_] N))
+	%<- (tsub ([x] B x) N Bx) %.
+%term transe/pi1 %pi (transe G (epi1 EM) A) %<- (transe G EM (sigma A ([_] B))) %.
+%term transe/pi2 %pi (transe G (epi2 EM) B) %<- (transe G EM (sigma A ([_] B))) %.
+%term transe/lam 
+	%pi (transe G (elam EA EM) (pi A B))
+	%<- (ttranse G EA A)
+	%<- ({x} 
+	%pi (isvar x I)
+	%-> ({ex} %pi (vtrans ex x) %-> (transe (cons G x A) (EM ex) (B x)))) %.
+%term transe/pair 
+	%pi (transe G (epair EM EN) (sigma A ([_] B)))
+	%<- (transe G EM A)
+	%<- (transe G EN B) %.

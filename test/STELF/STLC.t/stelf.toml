@@ -1,0 +1,10 @@
+#:schema ./stelf.schema.json
+
+[[group]]
+name = "NAME"
+main = "main.lf"
+src = ["."]
+
+[[group.dependencies]]
+name = "Nat"
+path = "../Nat.t/stelf.toml"

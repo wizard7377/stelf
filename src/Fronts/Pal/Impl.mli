@@ -1,1 +1,1 @@
-module Impl : IMPL.IMPL
+module Impl () : IMPL.IMPL

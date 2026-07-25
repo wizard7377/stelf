@@ -5,3 +5,6 @@
 [submodule "twelf"]
 	path = twelf
 	url = https://github.com/standardml/twelf
+[submodule "stelf-book"]
+	path = stelf-book
+	url = https://github.com/standardocaml/stelf-book.git

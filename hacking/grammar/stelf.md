@@ -35,14 +35,34 @@ An `arg` in a declaration is either a named variable or the anonymous wildcard `
 
 ### Qualified identifiers
 
-Inside an expression, the form `%val(a b c)` refers to a name while **stripping all fixity properties**, forcing it to be treated as a plain applied constant. The identifier list is split: the last element is the name, everything before it is the module namespace path.
+Inside an expression, the form `%val(a b c)` refers to a name while **stripping all fixity properties**, forcing it to be treated as a plain applied constant. The identifier list is split: the *last* element is the name; everything before it is the module namespace path, written **outermost namespace first**, matching the dotted `outer.inner.name` order used elsewhere.
 
 ```
-%val(plus)         → name "plus" with no fixity, empty namespace
-%val(Nat plus)     → name "plus" in namespace ["Nat"]
+%val(plus)             → name "plus" with no fixity, empty namespace
+%val(number nat add)   → name "add" in namespace "nat", itself inside namespace "number"
+                          i.e. number.nat.add, not nat.number.add
 ```
 
 This is useful when you want to pass an infix operator as a regular function argument without it being interpreted as an infix operator.
+
+### `%val` vs `%abs`
+
+`%abs` shares `%val`'s exact grammar (`%abs NAME`, `%abs ( NAME )`, `%abs ( PATH... NAME )` with the path outermost-first followed by the name) but resolves unqualified names differently. Both exist because a `%scope NAME cmd` session (see below) can install a case-label constant that shadows an outer/toplevel declaration sharing the same surface name — e.g. a case labeled `pi1` inside a `%scope`, shadowing a real `pi1` primitive declared earlier at the top level.
+
+- **`%val NAME`** (and bare `NAME`, and the `%(NAME)` shorthand) is **shadow-aware**: it resolves to whichever binding is currently "on top" — the innermost open `%scope`'s version if one shadows the name, else the toplevel one.
+- **`%abs NAME`** is **toplevel-first**: it prefers the current `%require` group's own toplevel declaration of NAME, bypassing any `%scope` shadow, falling back to `%val`'s shadow-aware behavior only if no toplevel binding exists.
+- **Qualified forms are identical for both**: `%val ( S NAME )` and `%abs ( S NAME )` both resolve to NAME as declared inside structure `S` — `%scope` sessions install genuine, permanent Twelf structures, so qualified lookup already ignores shadowing regardless of which keyword is used.
+
+```
+%sort pi1 atom %.
+%term pi1 %pi atom %-> atom %.        (* toplevel primitive *)
+...
+%scope wf-noassm %term pi1 ...        (* case label, shadows bare "pi1" for the rest of this %scope session *)
+...
+%abs pi1                              (* still the toplevel primitive *)
+%val pi1                              (* the %scope's case label, since its session is still open *)
+%abs ( wf-noassm pi1 )                (* the %scope's case label -- qualified, same as %val *)
+```
 
 ---
 
@@ -142,6 +162,8 @@ Higher numbers bind more tightly. The fixity keywords are:
 ```
 map (%val(+)) xs    (* pass + as a function, not as infix *)
 ```
+
+`%abs(op)` strips fixity the same way — this is a side effect of sharing `%val`'s grammar, not a separate feature; the two keywords only differ in how they resolve unqualified names (see "`%val` vs `%abs`" above).
 
 ---
 
@@ -263,7 +285,8 @@ This table maps grammar rules to their CST constructors in `src/Common/Cst/Cst.m
 |---|---|---|---|
 | `ident` (lowercase-initial) | `Lcid_ of string list * string * loc` | `Modern.parse_id` | Implemented |
 | `ident` (uppercase-initial) | `Ucid_ of string list * string * loc` | `Modern.parse_id` | Implemented |
-| `%val(...)` qualified id | `Quid_ of string list * string * loc` | `Modern.parse_qualified` | Implemented |
+| `%val(...)` qualified id | `Quid_ of string list * string * qid_form * loc` | `Modern.parse_id` | Implemented |
+| `%abs(...)` qualified id (toplevel-first) | `Quid_ of string list * string * qid_form * loc` | `Modern.parse_id` | Implemented |
 | `expr1` (parenthesised) | (delegates to inner `expr`) | `Modern.parse_expr1` | Implemented |
 | `expr_trail` lambda `[d] e` | `Lam_ of decl * term` / `Cst.Term.lam` | `Modern.parse_expr_trail` | Implemented |
 | `expr_trail` pi `{d} e` | `Pi_ of decl * term` / `Cst.Term.pi` | `Modern.parse_expr_trail` | Implemented |
@@ -294,7 +317,7 @@ The modern parser lives in `src/Fronts/Modern/Modern.ml` and uses Angstrom-based
 **Fully implemented:**
 - All expression parsing (`expr`, `expr1`, `expr_trail`, application)
 - Declaration parsing (single and multi-name)
-- Identifier parsing including `%val(...)` qualified forms
+- Identifier parsing including `%val(...)` and `%abs(...)` qualified forms
 
 **Stubbed (`assert false`):**
 - Mode syntax (`parse_mode`, `parse_mode_dec`)

@@ -1,0 +1,22 @@
+; (include sources.dune)
+
+(library
+ (instrumentation
+  (backend bisect_ppx))
+ (name domains)
+ (public_name stelf.domains)
+ (modules
+  Field
+  OrderedField
+  Integers
+  Rationals
+  IntegersMod
+  Domains_
+  FIELD
+  INTEGERS
+  ORDEREDFIELD
+  RATIONALS)
+ (libraries display intInf basis)
+ (wrapped true)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

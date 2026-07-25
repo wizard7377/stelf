@@ -1,0 +1,6 @@
+(library
+ (instrumentation
+  (backend bisect_ppx))
+ (name project)
+ (public_name stelf.project)
+ (libraries otoml fpath))

@@ -2,6 +2,7 @@ module type S = sig
   val use_color : bool
   val use_unicode : bool
   val verbosity : Display.Info.level
+  val mute : bool
 end
 
 module type REPL = sig

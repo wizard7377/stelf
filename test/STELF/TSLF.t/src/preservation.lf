@@ -1,0 +1,324 @@
+%%%% preservation for terms and modules
+%sort preserve/tm {_ oftp L T E C} {_ oflt ST L T} {_ step/tm E ST T E' ST' T'} {_ lt-sub L L'} {_ lt-sub T T'} {_ oftp L' T' E' C} {_ oflt ST' L' T'} %.
+%mode preserve/tm %in %in %in %out %out %out %out %.
+%sort preserve/md {_ ofsg L T Y M S} {_ oflt ST L T} {_ step/md M ST T M' ST' T'} {_ lt-sub L L'} {_ lt-sub T T'} {_ ofsg L' T' Y M' S} {_ oflt ST' L' T'} %.
+%mode preserve/md %in %in %in %out %out %out %out %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/pair-1 S) DS TS (oftp/deq (oftp/tm/pair D1' D2') DQ) DL')
+	%<- (inv/oftp/tm/pair DE DQ D1 D2)
+	%<- (preserve/tm D1 DL S DS TS D1' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D2 D2') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/pair-2 V S) DS TS (oftp/deq (oftp/tm/pair D1' D2') DQ) DL')
+	%<- (inv/oftp/tm/pair DE DQ D1 D2)
+	%<- (preserve/tm D2 DL S DS TS D2' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D1 D1') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/pj1 S) DS TS (oftp/tm/pj1 D1') DL')
+	%<- (inv/oftp/tm/pj1 DE D1)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL' (step/tm/pj1-beta _ _) lt-sub/refl lt-sub/refl (oftp/deq DL DQL) DL')
+	%<- (inv/oftp/tm/pj1 DE D1)
+	%<- (vdt/oftp D1 DC)
+	%<- (inv/oftp/tm/pair D1 DQ DL DR)
+	%<- (inv/cn-deq/tp/cross DQ DQL _) %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/pj2 S) DS TS (oftp/tm/pj2 D1') DL')
+	%<- (inv/oftp/tm/pj2 DE D1)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/pj2-beta _ _) lt-sub/refl lt-sub/refl (oftp/deq DR DQR) DL)
+	%<- (inv/oftp/tm/pj2 DE D1)
+	%<- (vdt/oftp D1 DC)
+	%<- (inv/oftp/tm/pair D1 DQ _ DR)
+	%<- (inv/cn-deq/tp/cross DQ _ DQR) %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/tmapp-1 S) DS TS (oftp/deq (oftp/tm/tmapp D1' D2') DQ) DL')
+	%<- (inv/oftp/tm/tmapp DE DQ D1 D2)
+	%<- (preserve/tm D1 DL S DS TS D1' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D2 D2') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/tmapp-2 V S) DS TS (oftp/deq (oftp/tm/tmapp D1' D2') DQ) DL')
+	%<- (inv/oftp/tm/tmapp DE DQ D1 D2)
+	%<- (preserve/tm D2 DL S DS TS D2' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D1 D1') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/tmapp-beta _ V) lt-sub/refl lt-sub/refl (oftp/deq D1''' (cn-deq/trans DQB2 DQ)) DL)
+	%<- (inv/oftp/tm/tmapp DE (%the (cn-deq C2 C kd/type) DQ) (%the (oftp L _ _ (tp/arrow C1 C2)) D1) D2)
+	%<- (inv/oftp/tm/fun D1 (%the (cn-deq (tp/arrow CA CB) (tp/arrow C1 C2) kd/type) DQ') D1' DC)
+	%<- (inv/cn-deq/tp/arrow DQ' DQA1 DQB2)
+	%<- ({x} {dx} subst/tm-oftp ([f] [df] D1' x dx f df) (oftp/deq D1 (cn-deq/sym DQ')) (D1'' x dx))
+	%<- (subst/tm-oftp D1'' (oftp/deq D2 (cn-deq/sym DQA1)) D1''') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/cnapp S) DS TS (oftp/deq (oftp/tm/cnapp D1' DC) DQ) DL')
+	%<- (inv/oftp/tm/cnapp DE DQ D1 DC)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/cnapp-beta V) lt-sub/refl lt-sub/refl (oftp/deq (D1' C' (ofkd/sub DC DKS12)) (cn-deq/trans (DQo C' (ofkd/sub DC DKS12)) DQ)) DL)
+	%<- (inv/oftp/tm/cnapp DE (%the (cn-deq (C1 C') C kd/type) DQ) D1 DC)
+	%<- (inv/oftp/tm/cnabs D1 (%the (cn-deq (tp/forall K2 C2) (tp/forall K1 C1) kd/type) DQ') D1' _)
+	%<- (inv/cn-deq/tp/forall DQ' (%the (kd-deq K2 K1) DQk) DQo)
+	%<- (vdt/kd-deq DQk DK2 DK1)
+	%<- (kd-anti DQk DK2 DK1 _ DKS12) %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/set-1 S) DS TS (oftp/deq (oftp/tm/set D1' D2') DQ) DL')
+	%<- (inv/oftp/tm/set DE DQ D1 D2)
+	%<- (preserve/tm D1 DL S DS TS D1' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D2 D2') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/set-2 V S) DS TS (oftp/deq (oftp/tm/set D1' D2') DQ) DL')
+	%<- (inv/oftp/tm/set DE DQ D1 D2)
+	%<- (preserve/tm D2 DL S DS TS D2' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D1 D1') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/get S) DS TS (oftp/tm/get D1') DL')
+	%<- (inv/oftp/tm/get DE D1)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/ref S) DS TS (oftp/deq (oftp/tm/ref D1') DQ) DL')
+	%<- (inv/oftp/tm/ref DE DQ D1)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/raise S) DS TS (oftp/tm/raise D1' DC) DL')
+	%<- (vdt/oftp DE DC)
+	%<- (inv/oftp/tm/raise DE D1)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/term S) DS TS (oftp/tm/term D1') DL')
+	%<- (inv/oftp/tm/term DE D1)
+	%<- (preserve/md D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/term-beta _ V) lt-sub/refl lt-sub/refl (oftp/deq D1' DQ) DL)
+	%<- (inv/oftp/tm/term DE D1)
+	%<- (inv/ofsg/md/tm D1 D1' (sg-sub/sg/cn DQ)) %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/inl S) DS TS (oftp/deq (oftp/tm/inl D1' DC) DQ) DL')
+	%<- (inv/oftp/tm/inl DE D1 DC DQ)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/inr S) DS TS (oftp/deq (oftp/tm/inr D1' DC) DQ) DL')
+	%<- (inv/oftp/tm/inr DE D1 DC DQ)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/case S) DS TS (oftp/tm/case D1' D2' D3') DL')
+	%<- (inv/oftp/tm/case DE D1 D2 D3)
+	%<- (preserve/tm D1 DL S DS TS D1' DL')
+	%<- ({x} {dx} lt-tt-wkn-sub/oftp DS TS (D2 x dx) (D2' x dx))
+	%<- ({x} {dx} lt-tt-wkn-sub/oftp DS TS (D3 x dx) (D3' x dx)) %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/case-beta-l V) lt-sub/refl lt-sub/refl D2' DL)
+	%<- (inv/oftp/tm/case DE D1 D2 D3)
+	%<- (inv/oftp/tm/inl D1 D1' _ DQ)
+	%<- (inv/cn-deq/tp/sum DQ DLe _)
+	%<- (subst/tm-oftp D2 (oftp/deq D1' DLe) D2') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/case-beta-r V) lt-sub/refl lt-sub/refl D3' DL)
+	%<- (inv/oftp/tm/case DE D1 D2 D3)
+	%<- (inv/oftp/tm/inr D1 D1' _ DQ)
+	%<- (inv/cn-deq/tp/sum DQ _ DR)
+	%<- (subst/tm-oftp D3 (oftp/deq D1' DR) D3') %.
+%term _ 
+	%pi (preserve/tm DE (oflt/c DCVR DWF) (step/tm/ref-beta V st-alloc/nil) (lt-sub/trans lt-sub/refl lt-extend/nil) lt-sub/refl (oftp/deq (oftp/tm/loc lt-look/hit DC) DQ) (oflt/c DCVR' DWF))
+	%<- (inv/oftp/tm/ref DE DQ D1)
+	%<- (vdt/oftp D1 DC)
+	%<- (preserve/st-alloc D1 st-alloc/nil DCVR lt-extend/nil DCVR') %.
+%term _ 
+	%pi (preserve/tm DE (oflt/c (st-wf/cons DCVR DT DG DSG) DWF) (step/tm/ref-beta V st-alloc/cons) (lt-sub/trans lt-sub/refl lt-extend/cons) lt-sub/refl (oftp/deq (oftp/tm/loc lt-look/hit DC) DQ) (oflt/c DCVR' DWF))
+	%<- (inv/oftp/tm/ref DE DQ D1)
+	%<- (vdt/oftp D1 DC)
+	%<- (preserve/st-alloc D1 st-alloc/cons (st-wf/cons DCVR DT DG DSG) lt-extend/cons DCVR') %.
+%term _ 
+	%pi (preserve/tm DE (oflt/c DL DWF) (step/tm/get-beta V SL) lt-sub/refl lt-sub/refl (oftp/deq DE' DQ) (oflt/c DL DWF))
+	%<- (inv/oftp/tm/get DE DLoc)
+	%<- (inv/oftp/tm/loc DLoc DQr LL _)
+	%<- (inv/cn-deq/tp/ref DQr DQ)
+	%<- (st-wf-can-look SL LL DL DE') %.
+%term _ 
+	%pi (preserve/tm DE (oflt/c DCVR DWF) (step/tm/set-beta V1 V2 SU) lt-sub/refl lt-sub/refl (oftp/deq oftp/tm/unit DQ) (oflt/c DCVR' DWF))
+	%<- (inv/oftp/tm/set DE (%the (cn-deq tp/unit Cu kd/type) DQ) DEL (%the (oftp _ _ _ C) DEA))
+	%<- (inv/oftp/tm/loc (%the (oftp _ _ _ (tp/ref C)) DEL) DQR (%the (lt-look L LC C') LL) (%the (ofkd C' kd/type) DC))
+	%<- (inv/cn-deq/tp/ref DQR DQQ)
+	%<- (preserve/st-update SU LL (oftp/deq DEA (cn-deq/sym DQQ)) DCVR DCVR') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/try S) LS TS (oftp/tm/try D1' D2') DL')
+	%<- (inv/oftp/tm/try DE D1 D2)
+	%<- (preserve/tm D1 DL S LS TS D1' DL')
+	%<- ({x} {dx} lt-tt-wkn-sub/oftp LS TS (D2 x dx) (D2' x dx)) %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/try-beta _) lt-sub/refl lt-sub/refl D1 DL)
+	%<- (inv/oftp/tm/try DE D1 D2) %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/try-handle R) lt-sub/refl lt-sub/refl D2' DL)
+	%<- (inv/oftp/tm/try DE D1 D2)
+	%<- (preserve-raises/tm D1 R D1')
+	%<- (subst/tm-oftp D2 D1' D2') %.
+%term _ 
+	%pi (preserve/tm DE (oflt/c DL DWF) (step/tm/new-tag-beta LX) lt-sub/refl (lt-sub/trans lt-sub/refl LX) (oftp/deq (oftp/tm/tagloc lt-look/hit DC) DQ) (oflt/c DL' (lt-wf/cons DWF LX)))
+	%<- (inv/oftp/tm/new-tag DE DQ DC)
+	%<- (tt-wkn/st-wf DL LX DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/tag-1 S) DS TS (oftp/deq (oftp/tm/tag D1' D2') DQ) DL')
+	%<- (inv/oftp/tm/tag DE DQ D1 D2)
+	%<- (preserve/tm D1 DL S DS TS D1' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D2 D2') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/tag-2 V S) DS TS (oftp/deq (oftp/tm/tag D1' D2') DQ) DL')
+	%<- (inv/oftp/tm/tag DE DQ D1 D2)
+	%<- (preserve/tm D2 DL S DS TS D2' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D1 D1') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/iftag-1 S) DS TS (oftp/tm/iftag D1' D2' D3' D4') DL')
+	%<- (inv/oftp/tm/iftag DE D1 D2 D3 D4)
+	%<- (preserve/tm D1 DL S DS TS D1' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D2 D2')
+	%<- ({x} {dx} lt-tt-wkn-sub/oftp DS TS (D3 x dx) (D3' x dx))
+	%<- (lt-tt-wkn-sub/oftp DS TS D4 D4') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/iftag-2 _ S) DS TS (oftp/tm/iftag D1' D2' D3' D4') DL')
+	%<- (inv/oftp/tm/iftag DE D1 D2 D3 D4)
+	%<- (preserve/tm D2 DL S DS TS D2' DL')
+	%<- (lt-tt-wkn-sub/oftp DS TS D1 D1')
+	%<- ({x} {dx} lt-tt-wkn-sub/oftp DS TS (D3 x dx) (D3' x dx))
+	%<- (lt-tt-wkn-sub/oftp DS TS D4 D4') %.
+%term _ 
+	%pi (preserve/tm DE (oflt/c DL DWF) (step/tm/iftag-beta-1 _) lt-sub/refl lt-sub/refl D3' (oflt/c DL DWF))
+	%<- (inv/oftp/tm/iftag DE D1 (%the (oftp _ _ _ (tp/tag C)) D2) D3 D4)
+	%<- (inv/oftp/tm/tag D1 DQ1 DA (%the (oftp _ _ _ CA) DB))
+	%<- (inv/oftp/tm/tagloc DA (%the (cn-deq (tp/tag CA') (tp/tag CA) kd/type) DCQA) (%the (lt-look _ _ CA') LLA) _)
+	%<- (inv/oftp/tm/tagloc D2 (%the (cn-deq (tp/tag C2') (tp/tag C) kd/type) DCQ2) (%the (lt-look _ _ C2') LL2) _)
+	%<- (lt-wf-look-unique LLA LL2 DWF DQ)
+	%<- (seq/cn/tag DQ DQ')
+	%<- (cn-deq/seq-l DQ' DCQA DCQA')
+	%<- (inv/cn-deq/tp/tag (cn-deq/trans (cn-deq/sym DCQA') DCQ2) DQQ)
+	%<- (subst/tm-oftp D3 (oftp/deq DB DQQ) D3') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/iftag-beta-2 _ _) lt-sub/refl lt-sub/refl D4 DL)
+	%<- (inv/oftp/tm/iftag DE D1 D2 D3 D4) %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/roll S) DS TS (oftp/deq (oftp/tm/roll D1' DC) DQ) DL')
+	%<- (inv/oftp/tm/roll DE DQ D1 DC)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm DE DL (step/tm/unroll S) DS TS (oftp/deq (oftp/tm/unroll D1') DQ) DL')
+	%<- (inv/oftp/tm/unroll DE DQ D1)
+	%<- (preserve/tm D1 DL S DS TS D1' DL') %.
+%term _ 
+	%pi (preserve/tm (%the (oftp _ _ (tm/unroll (tm/roll (cn/mu K1 C1) E)) _) DE) DL (step/tm/unroll-beta V) lt-sub/refl lt-sub/refl (%the (oftp _ _ _ CC) (oftp/deq D1'' (cn-deq/trans DQQ DQ))) DL)
+	%<- (inv/oftp/tm/unroll DE (%the (cn-deq (C2 (cn/mu K2 C2)) CC kd/type) DQ) (%the (oftp _ _ _ (cn/mu K2 C2)) D1'))
+	%<- (inv/oftp/tm/roll D1' (%the (cn-deq (cn/mu K1 C1) (cn/mu K2 C2) kd/type) DQ') (%the (oftp _ _ _ (C1 (cn/mu K1 C1))) D1'') _)
+	%<- (inv/cn-deq/cn/mu DQ' DQo)
+	%<- (functf/cn-deq DQ' DQo (%the (cn-deq (C1 (cn/mu K1 C1)) (C2 (cn/mu K2 C2)) kd/type) DQQ)) %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/pair-1 S) LS TS (ofsg/sub (ofsg/md/pair D1' D2') DS P) DL')
+	%<- (inv/ofsg/md/pair DE D1 D2 DS)
+	%<- (preserve/md D1 DL S LS TS D1' DL')
+	%<- (pty-sub-refl _ P)
+	%<- (lt-tt-wkn-sub/ofsg LS TS D2 D2') %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/pair-2 _ S) LS TS (ofsg/sub (ofsg/md/pair D1' D2') DS P) DL')
+	%<- (inv/ofsg/md/pair DE D1 D2 DS)
+	%<- (preserve/md D2 DL S LS TS D2' DL')
+	%<- (pty-sub-refl _ P)
+	%<- (lt-tt-wkn-sub/ofsg LS TS D1 D1') %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/pj1 S) LS TS (ofsg/sub (ofsg/md/pj1 D1') DS P) DL')
+	%<- (inv/ofsg/md/pj1 DE D1 DS)
+	%<- (preserve/md D1 DL S LS TS D1' DL')
+	%<- (pty-sub-refl _ P) %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/pj1-beta _ _) lt-sub/refl lt-sub/refl DE' DL)
+	%<- (module-beta/pj1 psi-md/eps DE DE') %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/app-1 S) LS TS (ofsg/sub (ofsg/md/app D1' D2' DM) DS pty-sub/ii) DL')
+	%<- (inv/ofsg/md/app DE D1 D2 DM DS)
+	%<- (preserve/md D1 DL S LS TS D1' DL')
+	%<- (lt-tt-wkn-sub/ofsg LS TS D2 D2') %.
+%term _ 
+	%pi (preserve/md DE DL _ lt-sub/refl DS D1' DL')
+	%<- (ofsg/md/app-pty/i DE DU)
+	%<- (uninhabited-ofsg L _ pty/p _ _ DU D1')
+	%<- (uninhabited-oflt _ L _ DU DL')
+	%<- (uninhabited-lt-sub _ _ DU DS) %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/tm S) LS TS (ofsg/sub (ofsg/md/tm D1') DS pty-sub/pp) DL')
+	%<- (inv/ofsg/md/tm DE D1 DS)
+	%<- (preserve/tm D1 DL S LS TS D1' DL') %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/tm S) LS TS (ofsg/sub (ofsg/md/tm D1') DS pty-sub/pi) DL')
+	%<- (inv/ofsg/md/tm DE D1 DS)
+	%<- (preserve/tm D1 DL S LS TS D1' DL') %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/seal-beta _) lt-sub/refl lt-sub/refl DE' DL)
+	%<- (inv/ofsg/md/seal DE DE') %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/let S) LS TS (ofsg/sub (ofsg/md/let D1' D2' DW DF) DS pty-sub/ii) DL')
+	%<- (inv/ofsg/md/let DE D1 D2 DW DF DS)
+	%<- (preserve/md D1 DL S LS TS D1' DL')
+	%<- ({s} {ds} {a} {da} {dm} lt-tt-wkn-sub/ofsg LS TS (D2 s ds a da dm) (D2' s ds a da dm)) %.
+%term _ 
+	%pi (preserve/md DE DL _ lt-sub/refl DS D1' DL')
+	%<- (ofsg/md/let-pty/i DE DU)
+	%<- (uninhabited-ofsg L _ pty/p _ _ DU D1')
+	%<- (uninhabited-oflt _ L _ DU DL')
+	%<- (uninhabited-lt-sub _ _ DU DS) %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/let-beta _ V DF) lt-sub/refl lt-sub/refl (ofsg/sub D2' DS P) DL)
+	%<- (inv/ofsg/md/let DE D1 D2 DW DFS DS)
+	%<- (val/md-pty/p V (%the (ofsg _ _ _ M' _) D1) (%the (ofsg _ _ _ M' _) D1p))
+	%<- (vdt/ofsg/p D1p _ DS' DF' DC')
+	%<- (subst/md-ofsg (%the ({s} {ds} {a} {da} {dm} ofsg _ _ _ (M s a) _) D2) (%the (ofsg _ _ _ M' _) D1p) DFS DF (%the (ofsg _ _ _ (M M' C') _) D2'))
+	%<- (pty-sub-pty/i-top _ P) %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/pj2-beta _ _) lt-sub/refl lt-sub/refl DE' DL)
+	%<- (module-beta/pj2 psi-md/eps DE DE') %.
+%term _ 
+	%pi (preserve/md DE DL (step/md/pj2 S) LS TS (ofsg/sub (ofsg/md/pj2 D1' DM') DSS DP) DL')
+	%<- (inv/ofsg/md/pj2 DE D1 DM DS DP)
+	%<- (preserve/md D1 DL S LS TS D1' DL')
+	%<- (preserve/fst-md D1 DM S DM' (fst-sg/sgm FSa' _) DQ)
+	%<- (vdt/cn-deq DQ DK1 DK2 _)
+	%<- (vdt/ofsg (%the (ofsg _ _ _ _ (sg/sgm _ S1)) D1') (sg-wf/sg/sgm _ DSo (%the (fst-sg _ Ka) FSa)))
+	%<- (fst-sg-seq FSa FSa' DQFS)
+	%<- (sg-wf/seq-a DQFS DSo DSo')
+	%<- (funct/sg-wf DSo' (cn-deq/cn/pj1 DQ) (ofkd/cn/pj1 DK1) DSQ)
+	%<- (fst-sg-complete (S1 (cn/pj1 CM)) FSM)
+	%<- (fst-sg-complete (S1 (cn/pj1 C')) FS')
+	%<- (sg-anti DSQ FSM FS' _ DS21 _ _)
+	%<- (sg-trans/sub DS21 DS DSS) %.
+%term _ 
+	%pi (preserve/md (%the (ofsg _ _ _ _ SG) DE) DL (step/md/app-2 _ S) LS TS (ofsg/sub (%the (ofsg _ _ _ _ (S1 C')) (ofsg/md/app (%the (ofsg _ _ _ _ (sg/pi _ S1)) D1') D2' DM')) (%the (sg-sub (S1 C') SG) DSS) pty-sub/ii) DL')
+	%<- (inv/ofsg/md/app (%the (ofsg _ _ _ _ SG) DE) (%the (ofsg _ _ _ _ (sg/pi SA S1)) D1) (%the (ofsg _ _ _ _ SA) D2) DM DS)
+	%<- (preserve/md (%the (ofsg _ _ _ _ SA) D2) DL S LS TS (%the (ofsg _ _ _ _ SA) D2') DL')
+	%<- (vdt/ofsg (%the (ofsg _ _ _ _ (sg/pi SA S1)) D1) (sg-wf/sg/pi (%the (sg-wf SA) _) (%the ({a} {da ofkd a K} sg-wf (S1 a)) DW) (%the (fst-sg SA K) DFS)))
+	%<- (preserve/fst-md (%the (ofsg _ _ _ _ SA) D2) DM S DM' (%the (fst-sg SA K') DFS') (%the (cn-deq CM C' K') DQ))
+	%<- (fst-sg-seq DFS DFS' DQFS)
+	%<- (sg-wf/seq-a DQFS (%the ({a} {da ofkd a K} sg-wf (S1 a)) DW) DW')
+	%<- (vdt/cn-deq DQ DK1 _ _)
+	%<- (funct/sg-wf DW' (%the (cn-deq CM C' K') DQ) DK1 (%the (sg-deq (S1 CM) (S1 C')) DSQ))
+	%<- (fst-sg-complete (S1 CM) FSM)
+	%<- (fst-sg-complete (S1 C') FS')
+	%<- (sg-anti DSQ FSM FS' (%the (sg-sub (S1 CM) (S1 C')) DS12) (%the (sg-sub (S1 C') (S1 CM)) DS21) _ _)
+	%<- (sg-trans/sub DS21 DS DSS)
+	%<- (lt-tt-wkn-sub/ofsg LS TS D1 D1') %.
+%term _ 
+	%pi (preserve/md (%the (ofsg _ _ _ _ SG) DE) DL (step/md/app-beta _ _ DM') lt-sub/refl lt-sub/refl (ofsg/sub Dc DSS P) DL)
+	%<- (inv/ofsg/md/app (%the (ofsg _ _ _ _ SG) DE) (%the (ofsg _ _ _ _ (sg/pi SA S1)) D1) (%the (ofsg _ _ _ _ SA) D2) (%the (fst-md _ C) DM) (%the (sg-sub (S1 C) SG) DS))
+	%<- (vdt/ofsg/p D2 _ FSAA' DMv DvC)
+	%<- (fst-md-seq DM' DM DMQ')
+	%<- (fst-md-seq DMv (%the (fst-md M' C') DM') DMQv)
+	%<- (inv/ofsg/md/lam D1 D1o _ DFFS (sg-sub/sg/pi (%the (sg-deq SA _) DS1) DS2 (%the (fst-sg _ KK) FSAA)))
+	%<- (fst-sg-complete _ Df2)
+	%<- (sg-anti DS1 FSAA Df2 DSA' _ DKA' _)
+	%<- (ofkd/seq-c DMQv DvC DCv)
+	%<- (fst-sg-seq FSAA' FSAA DQFSAA)
+	%<- (ofkd/seq-k DQFSAA DCv (%the (ofkd C' KK) DCv'))
+	%<- (subst/md-ofsg D1o (ofsg/sub D2 DSA' pty-sub/pp) DFFS DM' (%the (ofsg _ _ Y _ _) Dc))
+	%<- (fst-sg-complete _ DF1)
+	%<- (fst-sg-complete _ DF2)
+	%<- (sg-anti (DS2 _ DCv') DF1 DF2 DSla _ _ _)
+	%<- (seq/cn/sg-sub-o ([a] S1 a) DMQ' DSla DS')
+	%<- (sg-trans/sub DS' DS DSS)
+	%<- (pty-sub-pty/i-top Y (%the (pty-sub Y pty/i) P)) %.
+%worlds () (preserve/tm _ _ _ _ _ _ _) (preserve/md _ _ _ _ _ _ _) %.
+%total (D1 D2) (preserve/md _ _ D2 _ _ _ _) (preserve/tm _ _ D1 _ _ _ _) %.

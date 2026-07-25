@@ -1,5 +1,5 @@
-open Whnf_intf
-include module type of Conv_intf
+open WHNF
+include module type of CONV
 
 module Conv (Conv__0 : sig
   module Whnf : WHNF
