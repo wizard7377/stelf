@@ -1,0 +1,6 @@
+#:schema ./stelf.schema.json
+[[group]]
+name = "sources"
+main = "src/sources.lf"
+src = ["src"]
+deps = [{ type = "local", path = "src/sing/stelf.toml", name = "sources", alias = "sing" }]

@@ -1,3 +1,0 @@
-%require %[ nat %] %.
-%require %[ defs %] %.
-%require %[ theorems %] %.

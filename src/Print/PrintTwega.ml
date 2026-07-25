@@ -59,9 +59,7 @@ module MakePrintTwega
       | g_, I.Const cid -> sexp [ str_ "tw~const"; F.break; integer_ cid ]
       | g_, I.Def cid -> sexp [ str_ "tw~def"; F.break; integer_ cid ]
 
-    let fmtUni = function
-      | I.Type -> str_ "tw*type"
-      | I.Kind -> str_ "tw*kind"
+    let fmtUni = function I.Type -> str_ "tw*type" | I.Kind -> str_ "tw*kind"
 
     let rec fmtExpW = function
       | g_, (I.Uni l_, s) -> sexp [ str_ "tw~uni"; F.break; fmtUni l_ ]

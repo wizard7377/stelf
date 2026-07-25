@@ -92,9 +92,11 @@ module type CST = sig
   type symbol = namespace * name
   (** Qualified symbol as [(namespace, name)]. *)
 
-  type qid_form = Val | Abs
-  (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
-      (toplevel-first lookup, falling back to shadow-aware). *)
+  type qid_form =
+    | Val
+    | Abs
+        (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
+            (toplevel-first lookup, falling back to shadow-aware). *)
 
   val pp_qid_form : Stdlib.Format.formatter -> qid_form -> unit
   val show_qid_form : qid_form -> string

@@ -71,9 +71,7 @@ module MakePrintXML
           sexp [ str_ "<Def>"; F.break; integer_ cid; str_ "</Def>" ]
       | g_, I.FgnConst (csid, condec_) -> sexp [ str_ "FngConst" ]
 
-    let fmtUni = function
-      | I.Type -> str_ "<Type/>"
-      | I.Kind -> str_ "<Kind/>"
+    let fmtUni = function I.Type -> str_ "<Type/>" | I.Kind -> str_ "<Kind/>"
 
     let rec fmtExpW = function
       | g_, (I.Uni l_, s) ->

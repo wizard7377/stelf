@@ -287,8 +287,7 @@ end) : MEMOTABLE = struct
           I.Dot (I.Exp (I.EClo (x_, I.Shift (-d))), ctxToAVarSub (g'_, d_, s))
 
     let assign = function
-      | d, (I.Dec (n, v_) as dec1), (I.Root (I.BVar k, s1_) as e1_), u_, asub
-        ->
+      | d, (I.Dec (n, v_) as dec1), (I.Root (I.BVar k, s1_) as e1_), u_, asub ->
           let (I.EVar (r, _, _, cnstr) as e_) = I.newEVar (I.Null, v_) in
           let x_ =
             lowerEVar1 (e_, I.EVar (r, I.Null, v_, cnstr), Whnf.whnf (v_, I.id))
@@ -363,10 +362,8 @@ end) : MEMOTABLE = struct
               end
           | _ -> raise (Assignment "Head mismatch ")
           end
-      | ( fasub,
-          (ctxTotal, d),
-          (d1_, I.Lam (dec1, u1_)),
-          (d2_, I.Lam (dec2, u2_)) ) ->
+      | fasub, (ctxTotal, d), (d1_, I.Lam (dec1, u1_)), (d2_, I.Lam (dec2, u2_))
+        ->
           assignExp (fasub, (ctxTotal, d + 1), (d1_, u1_), (d2_, u2_))
       | ( fasub,
           (ctxTotal, d),
@@ -730,8 +727,7 @@ end) : MEMOTABLE = struct
           end
       | (d_1_, h1_), (d_2_, h2_) -> false
 
-    let compatible' ((d_t_, (dt, t_v)), (d_u_, (du, u_)), ds_, rho_t, rho_u)
-        =
+    let compatible' ((d_t_, (dt, t_v)), (d_u_, (du, u_)), ds_, rho_t, rho_u) =
       let genNVar ((rho_t, t_v), (rho_u, u_)) =
         begin
           S.insert rho_t (!nctr + 1, t_v);
@@ -931,8 +927,8 @@ end) : MEMOTABLE = struct
         | ( (Leaf ((d_, s), gRlistRef) as n_),
             (dq, sq),
             asubst,
-            ((((dEVars, dAVars) as dAEVars), g_r_, eqn, stage, status) as
-             gr') ) ->
+            ((((dEVars, dAVars) as dAEVars), g_r_, eqn, stage, status) as gr') )
+          ->
             let dsq, d_g_ = collectEVar (dq, sq) in
             begin match
               compatibleCtx (asubst, (d_g_, g_r_, eqn), !gRlistRef)
@@ -1186,8 +1182,7 @@ end) : MEMOTABLE = struct
                           end,
                           T.NewEntry answRef )
                   end
-              | (childRef, drho2, asub) :: [], _ ->
-                  insert (childRef, drho2, gr)
+              | (childRef, drho2, asub) :: [], _ -> insert (childRef, drho2, gr)
               | (childRef, drho2, asub) :: l_, sCands ->
                   begin match (insert (childRef, drho2, gr)) () with
                   | _, T.NewEntry answRef -> checkCandidates (l_, sCands)

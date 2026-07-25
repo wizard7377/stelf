@@ -161,8 +161,7 @@ module Make_ReconConDec
           else begin
             Typecheck.Typecheck_.Strict.check ((u'', v''), None);
             Names.nameConDec
-              (IntSyn.ConDef
-                 (name, None, i, u'', v'', l_, IntSyn.ancestor u''))
+              (IntSyn.ConDef (name, None, i, u'', v'', l_, IntSyn.ancestor u''))
           end
         in
         let _ =

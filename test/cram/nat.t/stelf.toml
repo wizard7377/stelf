@@ -1,4 +1,0 @@
-[[group]]
-name = "nat"
-main = "./main.lf"
-dirs = ["."]

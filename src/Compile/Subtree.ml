@@ -406,8 +406,7 @@ end) : SUBTREE = struct
     and normalizeNDec (I.Dec (n_, e_), nsub) =
       I.Dec (n_, normalizeNExp (e_, nsub))
 
-    let assign
-        (nvaronly, glocal_u1_, us1, u2_, nsub_goal, asub, csub, cnstr) =
+    let assign (nvaronly, glocal_u1_, us1, u2_, nsub_goal, asub, csub, cnstr) =
       let depth = I.ctxLength glocal_u1_ in
       let rec assignHead
           ( nvaronly,
@@ -514,8 +513,7 @@ end) : SUBTREE = struct
               | TypeLabel -> cnstr
               | Body -> begin
                   S.insert asub
-                    ( k2 - depth,
-                      Assign (glocal_u1_, I.EClo (fst us1, snd us1)) );
+                    (k2 - depth, Assign (glocal_u1_, I.EClo (fst us1, snd us1)));
                   cnstr
                 end
               end
@@ -526,8 +524,7 @@ end) : SUBTREE = struct
                   begin match us1 with
                   | I.EVar (r, _, v_, cnstrs), s ->
                       let u2' = normalizeNExp (u2_, csub) in
-                      Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2')
-                      :: cnstr
+                      Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2') :: cnstr
                   | I.EClo (u_, s'), s ->
                       assignExp
                         ( Body,
@@ -538,8 +535,7 @@ end) : SUBTREE = struct
                           cnstr )
                   | I.FgnExp (_, ops), _ ->
                       let u2' = normalizeNExp (u2_, csub) in
-                      Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2')
-                      :: cnstr
+                      Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2') :: cnstr
                   end
               end
             end
@@ -583,12 +579,8 @@ end) : SUBTREE = struct
             cnstr ) ->
             let u2' = normalizeNExp (u2_, csub) in
             Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2') :: cnstr
-        | ( nvaronly,
-            depth,
-            glocal_u1_,
-            ((I.EClo (u_, s'), s) as us1),
-            u2_,
-            cnstr ) ->
+        | nvaronly, depth, glocal_u1_, ((I.EClo (u_, s'), s) as us1), u2_, cnstr
+          ->
             assignExp
               (nvaronly, depth, glocal_u1_, (u_, I.comp (s', s)), u2_, cnstr)
         | ( nvaronly,
@@ -599,8 +591,7 @@ end) : SUBTREE = struct
             cnstr ) ->
             let u2' = normalizeNExp (u2_, csub) in
             Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2') :: cnstr
-        | nvaronly, depth, glocal_u1_, us1, (I.FgnExp (_, ops) as u2_), cnstr
-          ->
+        | nvaronly, depth, glocal_u1_, us1, (I.FgnExp (_, ops) as u2_), cnstr ->
             Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2_) :: cnstr
       and assignSpine = function
         | nvaronly, depth, glocal_u1_, (Nil, _), Nil, cnstr -> cnstr
@@ -686,8 +677,8 @@ end) : SUBTREE = struct
     let unifyW = function
       | g_, ((I.AVar ({ contents = None } as r) as x_), I.Shift 0), us2 ->
           r := Some (I.EClo (fst us2, snd us2))
-      | g_, ((I.AVar ({ contents = None } as r) as x_), s), ((u_, s2) as us2)
-        -> begin
+      | g_, ((I.AVar ({ contents = None } as r) as x_), s), ((u_, s2) as us2) ->
+        begin
           print "unifyW -- not s = Id\n";
           begin
             print
@@ -753,20 +744,17 @@ end) : SUBTREE = struct
           && solveCnstr (gquery, gclause, cnstr, s)
 
     let solveResiduals
-        (gquery, gclause, CGoals (auxG, cid, conjGoals, i), asub, cnstr', sc)
-        =
+        (gquery, gclause, CGoals (auxG, cid, conjGoals, i), asub, cnstr', sc) =
       let s = ctxToExplicitSub (1, gquery, gclause, asub) in
       let success =
-        solveAuxG (auxG, s, gquery)
-        && solveCnstr (gquery, gclause, cnstr', s)
+        solveAuxG (auxG, s, gquery) && solveCnstr (gquery, gclause, cnstr', s)
       in
       begin if success then sc ((conjGoals, s), cid) else ()
       end
 
     let ithChild (CGoals (_, _, _, i), n) = i = n
 
-    let retrieveChild
-        (num, child_, nsub_query, assignSub, cnstr, gquery, sc) =
+    let retrieveChild (num, child_, nsub_query, assignSub, cnstr, gquery, sc) =
       let rec retrieve = function
         | ( Leaf (nsub, gclause, residuals),
             nsub_query,
@@ -868,8 +856,7 @@ end) : SUBTREE = struct
       in
       retrieve (child_, nsub_query, assignSub, (nid (), cnstrSubId ()), cnstr)
 
-    let retrieveCandidates
-        (n, (Node (s, children_) as sTree), gquery, r, sc) =
+    let retrieveCandidates (n, (Node (s, children_) as sTree), gquery, r, sc) =
       let nsub_query, assignSub = (querySubId (), assignSubId ()) in
       let candSet = S.new_ () in
       let rec solveCandidate (i, candSet) =

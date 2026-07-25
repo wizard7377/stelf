@@ -332,9 +332,7 @@ module Make_Thm
 
     let uninstallReduces cid = O.uninstallROrder cid
     let installTabled (L.TabledDecl cid) = TabledSyn.installTabled cid
-
-    let installKeepTable (L.KeepTableDecl cid) =
-      TabledSyn.installKeepTable cid
+    let installKeepTable (L.KeepTableDecl cid) = TabledSyn.installKeepTable cid
   end
 
   (* L.ModeSyn *)

@@ -512,8 +512,7 @@ module MakeCompile
       | I.Decl (g_, I.Dec (_, a_)) ->
           let ha = I.targetHead a_ in
           I.Decl
-            ( compileCtx' g_,
-              CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha) )
+            (compileCtx' g_, CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha))
       | I.Decl (g_, I.BDec (_, (c, s))) ->
           let g_, l_ = I.constBlock c in
           let dpool = compileCtx' g_ in
@@ -546,8 +545,7 @@ module MakeCompile
       | I.Decl (g_, I.Dec (_, a_)) ->
           let ha = I.targetHead a_ in
           I.Decl
-            ( compileCtx' g_,
-              CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha) )
+            (compileCtx' g_, CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha))
       | I.Decl (g_, I.BDec (_, (c, s))) ->
           let g_, l_ = I.constBlock c in
           let dpool = compileCtx' g_ in

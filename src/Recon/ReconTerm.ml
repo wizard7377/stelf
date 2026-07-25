@@ -82,7 +82,8 @@ struct
     end
 
   let rec chatterOneNewline () =
-    begin if !Global.chatter = 1 && !errorCount = 1 then Display.debug (Display.string "\n")
+    begin if !Global.chatter = 1 && !errorCount = 1 then
+      Display.debug (Display.string "\n")
     else ()
     end
 
@@ -92,7 +93,9 @@ struct
       begin
         chatterOneNewline ();
         begin
-          Display.debug (Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
+          Display.debug
+            (Display.string
+               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           die r
         end
       end
@@ -104,7 +107,9 @@ struct
       begin
         chatterOneNewline ();
         begin
-          Display.debug (Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
+          Display.debug
+            (Display.string
+               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           Display.warning (Display.Form.string msg);
           begin if exceeds (!errorCount, !errorThreshold) then die r else ()
           end
@@ -378,7 +383,8 @@ struct
         Hastype_ (cst_term_to_term a, cst_term_to_term b)
     | V.Term.Lowercase (loc, (ns, n)) -> Lcid_ (ns, n, loc_to_region loc)
     | V.Term.Uppercase (loc, (ns, n)) -> Ucid_ (ns, n, loc_to_region loc)
-    | V.Term.Qualified (loc, (ns, n), form) -> Quid_ (ns, n, form, loc_to_region loc)
+    | V.Term.Qualified (loc, (ns, n), form) ->
+        Quid_ (ns, n, form, loc_to_region loc)
     | V.Term.Text (loc, s) -> Scon_ (s, loc_to_region loc)
     | V.Term.ExistVar (loc, s) -> Evar_ (s, loc_to_region loc)
     | V.Term.FreeVar (loc, s) -> Fvar_ (s, loc_to_region loc)
@@ -572,16 +578,13 @@ struct
     begin match Names.unqualified qid with
     | None -> fc (g_, qid, r)
     | Some name ->
-        begin
-          if !queryMode || String.isPrefix "__" name then Evar_ (name, r)
-          else Fvar_ (name, r)
+        begin if !queryMode || String.isPrefix "__" name then Evar_ (name, r)
+        else Fvar_ (name, r)
         end
     end
 
   let findLCID x = findBVar (findConst (findCSConst findOmitted)) x
-
-  let findUCID x =
-    findBVar (findConst (findCSConst (findEFVar findOmitted))) x
+  let findUCID x = findBVar (findConst (findCSConst (findEFVar findOmitted))) x
 
   let findQUID form x =
     findConst ~shortest:(form = Cst.Abs) (findCSConst findOmitted) x
@@ -891,9 +894,7 @@ struct
 
   let rec etaExpandW = function
     | e_, (IntSyn.Pi (((IntSyn.Dec (_, va) as d_), _), vr), s) ->
-        let u1_ =
-          etaExpand (bvarElim 1, (va, IntSyn.comp (s, IntSyn.shift)))
-        in
+        let u1_ = etaExpand (bvarElim 1, (va, IntSyn.comp (s, IntSyn.shift))) in
         let d'_ = IntSyn.decSub (d_, s) in
         IntSyn.Lam
           ( d'_,
@@ -1503,8 +1504,7 @@ struct
         let v1_ = toIntro (b1_, (IntSyn.Uni Type, IntSyn.id)) in
         let d_ = IntSyn.Dec (name, v1_) in
         let (tm2', b2_, l_), ok2 =
-          begin if ok1 then
-            unifyExact (decl_ (g_, d_), tm2, (vr, IntSyn.dot1 s))
+          begin if ok1 then unifyExact (decl_ (g_, d_), tm2, (vr, IntSyn.dot1 s))
           else (inferExact (decl_ (g_, d_), tm2), false)
           end
         in

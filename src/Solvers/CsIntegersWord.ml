@@ -402,8 +402,7 @@ end) : Cs.CS = struct
           end
       | g_, s_, n -> None
 
-    and toInternalQuot (g_, u1_, u2_, u3) () =
-      [ (g_, quotExp (u1_, u2_, u3)) ]
+    and toInternalQuot (g_, u1_, u2_, u3) () = [ (g_, quotExp (u1_, u2_, u3)) ]
 
     and awakeQuot (g_, proof, u1_, u2_, u3) () =
       begin match solveQuot (g_, App (u1_, App (u2_, App (u3, Nil))), 0) with
@@ -454,8 +453,7 @@ end) : Cs.CS = struct
       let us3 = trd (s_, id) in
       let us4 = fth (s_, id) in
       begin match
-        solvePlus
-          (g_, App (eclo_ us1, App (eclo_ us2, App (eclo_ us3, Nil))), k)
+        solvePlus (g_, App (eclo_ us1, App (eclo_ us2, App (eclo_ us3, Nil))), k)
       with
       | Some u_ ->
           begin if Unify.unifiable (g_, us4, (u_, id)) then
@@ -476,8 +474,7 @@ end) : Cs.CS = struct
       with
       | Some u_ ->
           begin if Unify.unifiable (g_, us4, (u_, id)) then
-            Some
-              (proofTimesExp (eclo_ us1, eclo_ us2, eclo_ us3, eclo_ us4))
+            Some (proofTimesExp (eclo_ us1, eclo_ us2, eclo_ us3, eclo_ us4))
           else None
           end
       | None -> None
@@ -489,8 +486,7 @@ end) : Cs.CS = struct
       let us3 = trd (s_, id) in
       let us4 = fth (s_, id) in
       begin match
-        solveQuot
-          (g_, App (eclo_ us1, App (eclo_ us2, App (eclo_ us3, Nil))), k)
+        solveQuot (g_, App (eclo_ us1, App (eclo_ us2, App (eclo_ us3, Nil))), k)
       with
       | Some u_ ->
           begin if Unify.unifiable (g_, us4, (u_, id)) then

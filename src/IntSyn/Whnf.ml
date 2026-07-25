@@ -255,8 +255,7 @@ module Whnf () : WHNF = struct
       | Lam (d_, u_), s -> Lam (normalizeDec (d_, s), normalizeExp (u_, dot1 s))
       | (EVar (_, _, _, _) as e_), s -> EClo (e_, s)
       | FgnExp (csid_, fge), s ->
-          FgnExpStd.Map.apply (csid_, fge) (function u_ ->
-              normalizeExp (u_, s))
+          FgnExpStd.Map.apply (csid_, fge) (function u_ -> normalizeExp (u_, s))
       | (AVar { contents = Some u_ }, s) as us_ -> normalizeExpW (u_, s)
       | (AVar _, s) as us_ -> begin
           print "Normalize  AVAR\n";

@@ -56,10 +56,7 @@ end) : ELIM with module State = Elim__0.State' = struct
     exception Success of int
 
     let stripTC tc = tc
-
-    let stripTCOpt = function
-      | None -> None
-      | Some tc -> Some (stripTC tc)
+    let stripTCOpt = function None -> None | Some tc -> Some (stripTC tc)
 
     let stripDec = function
       | T.UDec d_ -> T.UDec d_

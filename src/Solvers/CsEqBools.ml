@@ -67,10 +67,7 @@ end) : Cs.CS = struct
     let xorExp (u_, v_) = Root (Const !xorID, App (u_, App (v_, Nil)))
     let andExp (u_, v_) = Root (Const !andID, App (u_, App (v_, Nil)))
     let orExp (u_, v_) = Root (Const !orID, App (u_, App (v_, Nil)))
-
-    let impliesExp (u_, v_) =
-      Root (Const !impliesID, App (u_, App (v_, Nil)))
-
+    let impliesExp (u_, v_) = Root (Const !impliesID, App (u_, App (v_, Nil)))
     let iffExp (u_, v_) = Root (Const !iffID, App (u_, App (v_, Nil)))
     let member eq (x, l_) = List.exists (function y -> eq (x, y)) l_
 
@@ -163,13 +160,8 @@ end) : Cs.CS = struct
           xorSum (Sum (false, [ Mon usL ]), andSumMon (Sum (m1, monL1), mon2))
 
     let notSum (Sum (m, monL)) = Sum (not m, monL)
-
-    let orSum (sum1, sum2) =
-      xorSum (sum1, xorSum (sum2, andSum (sum1, sum2)))
-
-    let impliesSum (sum1, sum2) =
-      notSum (xorSum (sum1, andSum (sum1, sum2)))
-
+    let orSum (sum1, sum2) = xorSum (sum1, xorSum (sum2, andSum (sum1, sum2)))
+    let impliesSum (sum1, sum2) = notSum (xorSum (sum1, andSum (sum1, sum2)))
     let iffSum (sum1, sum2) = notSum (xorSum (sum1, sum2))
 
     let rec fromExpW = function

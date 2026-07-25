@@ -22,10 +22,7 @@ end) : CONV = struct
   module Whnf = Conv__0.Whnf
   open IntSyn
 
-  let eqUni = function
-    | Type, Type -> true
-    | Kind, Kind -> true
-    | _ -> false
+  let eqUni = function Type, Type -> true | Kind, Kind -> true | _ -> false
 
   let rec convExpW = function
     | (Uni l1_, _), (Uni l2_, _) -> eqUni (l1_, l2_)

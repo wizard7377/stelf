@@ -13,7 +13,7 @@ SWITCH_SENTINEL := _opam/.opam-switch/switch-config
 DUNE_SENTINEL   := _opam/lib/dune/META
 DEPS_SENTINEL   := .deps-installed
 
-.PHONY: all build test install docs clean check lock
+.PHONY: all build test install docs clean check lock js
 
 all: build
 
@@ -39,6 +39,8 @@ $(DEPS_SENTINEL): $(OPAM_FILE)
 	$(OPAM) install --switch $(SWITCH) . --deps-only --yes
 	@touch $@
 
+install: build 
+	$(OPAM_EXEC) $(DUNE) install 
 build: $(DEPS_SENTINEL)
 	$(OPAM_EXEC) $(DUNE) build
 	cp $(DUNE_BUILD_DIR)/bin/main.exe $(TARGET)

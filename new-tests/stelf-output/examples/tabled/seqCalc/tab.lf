@@ -1,4 +1,0 @@
-%require %[ formulas %] %.
-%require %[ int %] %.
-%require %[ tab-ex-all %] %.
-%require %[ tab-ex-np %] %.

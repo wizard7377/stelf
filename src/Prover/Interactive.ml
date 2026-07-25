@@ -275,8 +275,7 @@ end) : INTERACTIVE = struct
                 | T.EVar (psi, r, f_, tc, tCs, x_) -> begin
                     Names.varReset I.Null;
                     S.Focus
-                      ( T.EVar (TomegaPrint.nameCtx psi, r, f_, tc, tCs, x_),
-                        w_ )
+                      (T.EVar (TomegaPrint.nameCtx psi, r, f_, tc, tCs, x_), w_)
                   end)
               xs_
           in

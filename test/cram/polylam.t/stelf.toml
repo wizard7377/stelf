@@ -1,4 +1,0 @@
-[[group]]
-name = "polylam"
-main = "./main.lf"
-dirs = ["."]

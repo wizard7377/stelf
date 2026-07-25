@@ -105,8 +105,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
         | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select'
-              ( n - 1,
-                ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))) )
+              (n - 1, ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))))
       in
       let rec select = function
         | O.Arg n -> O.Arg (select' (n, ((s_, s), vid_)))
@@ -451,8 +450,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     let rec removeDuplicates = function
       | [] -> []
       | s'_ :: ops ->
-          let rec compExp (vs1, vs2) =
-            compExpW (Whnf.whnf vs1, Whnf.whnf vs2)
+          let rec compExp (vs1, vs2) = compExpW (Whnf.whnf vs1, Whnf.whnf vs2)
           and compExpW = function
             | vs1, (I.Root _, _) -> false
             | ((v1_, s1) as vs1), (I.Pi ((d2_, _), v2_), s2) ->
@@ -461,13 +459,10 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
           and compDec (vs1, (I.Dec (_, v2_), s2)) =
             inputConv (vs1, (v2_, s2))
           in
-          let rec check (M.State (name, gm, v_)) =
-            checkW (Whnf.whnf (v_, I.id))
+          let rec check (M.State (name, gm, v_)) = checkW (Whnf.whnf (v_, I.id))
           and checkW (I.Pi ((d_, _), v_), s) =
             checkDec ((d_, I.comp (s, I.shift)), (v_, I.dot1 s))
-          and checkDec ((I.Dec (_, v1_), s1), vs2) =
-            compExp ((v1_, s1), vs2)
-          in
+          and checkDec ((I.Dec (_, v1_), s1), vs2) = compExp ((v1_, s1), vs2) in
           begin if check s'_ then removeDuplicates ops
           else s'_ :: removeDuplicates ops
           end
@@ -475,10 +470,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     let rec fillOps = function
       | [] -> []
       | s'_ :: ops ->
-          let fillOps' = function
-            | [] -> []
-            | o_ :: _ -> Filling.apply o_
-          in
+          let fillOps' = function [] -> [] | o_ :: _ -> Filling.apply o_ in
           let fillop, _ = Filling.expand s'_ in
           fillOps' fillop @ fillOps ops
 
@@ -490,8 +482,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
          as s_) =
       "Recursion : " ^ Print.expToString (g'_, v_)
 
-    let handleExceptions f p_ =
-      try f p_ with Order.Error s -> raise (Error s)
+    let handleExceptions f p_ = try f p_ with Order.Error s -> raise (Error s)
   end
 
   (* Quantifier to mark parameters *)

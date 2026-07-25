@@ -155,8 +155,7 @@ module MakeOpsem
     | psi, (T.Lam ((T.UDec (I.BDec _) as d_), p_), t) ->
         let d'_ = T.decSub (d_, t) in
         T.Lam (d'_, evalPrg (I.Decl (psi, d'_), (p_, T.dot1 t)))
-    | psi, (T.Lam (d_, p_), t) ->
-        T.Lam (T.decSub (d_, t), T.PClo (p_, T.dot1 t))
+    | psi, (T.Lam (d_, p_), t) -> T.Lam (T.decSub (d_, t), T.PClo (p_, T.dot1 t))
     | psi, ((T.Rec (d_, p_) as p'_), t) ->
         evalPrg (psi, (p_, T.Dot (T.Prg (T.PClo (p'_, t)), t)))
     | psi, (T.PClo (p_, t'), t) -> evalPrg (psi, (p_, T.comp (t', t)))
@@ -288,8 +287,7 @@ module MakeOpsem
     | psi, T.Dot (T.Idx k1, t1), T.Dot (T.Idx k2, t2) ->
         begin if k1 = k2 then matchSub (psi, t1, t2) else raise NoMatch
         end
-    | psi, T.Dot (T.Idx k, t1), T.Dot (T.Block (I.LVar (r, s1, (c, s2))), t2)
-      ->
+    | psi, T.Dot (T.Idx k, t1), T.Dot (T.Block (I.LVar (r, s1, (c, s2))), t2) ->
         let s1' = Whnf.invert s1 in
         ignore (r := Some (I.blockSub (I.Bidx k, s1')));
         matchSub (psi, t1, t2)
@@ -415,9 +413,7 @@ module MakeOpsem
           ignore (matchSub (psi, t1, t'));
           let t'' = t in
           let _ =
-            printLF
-              (T.coerceCtx psi, T.coerceSub t'', T.coerceCtx psi')
-              (m - d)
+            printLF (T.coerceCtx psi, T.coerceSub t'', T.coerceCtx psi') (m - d)
           in
           topLevel (psi, m, (p_, t''))
           (* Psi |- t : Psi' *)

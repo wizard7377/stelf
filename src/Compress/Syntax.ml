@@ -209,8 +209,7 @@ module Syntax = struct
     | SrTerm (ATerm (ARoot (h, sp) as t), a), [] -> AElt t
     | SrTerm (ATerm (ERoot (({ contents = Some _ }, _), _) as t), a), [] ->
         reduce_plus (SrTerm (eroot_elim t, a), [])
-    | SrTerm (ATerm (ERoot (({ contents = None }, _), _) as t), a), [] ->
-        AElt t
+    | SrTerm (ATerm (ERoot (({ contents = None }, _), _) as t), a), [] -> AElt t
     | SrEVar ((x, a), sl), sp ->
         let a', subst = lower (substs_comp sl) (a, sp) in
         AElt (ERoot ((x, a'), subst))
@@ -382,10 +381,7 @@ module Syntax = struct
     | Elt (ATerm t) -> Elt (eroot_elim t)
     | x -> x
 
-  let ntm_eroot_elim = function
-    | Lam (ATerm t) -> Lam (eroot_elim t)
-    | x -> x
-
+  let ntm_eroot_elim = function Lam (ATerm t) -> Lam (eroot_elim t) | x -> x
   let ctxLookup (g_, n) = subst_tp (Shift (0, n + 1)) (List.nth (g_, n))
   let typeOf (Tclass a) = a
   let kindOf (Kclass k) = k

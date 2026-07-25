@@ -71,10 +71,12 @@ module type VIEW = sig
   type symbol = namespace * name
   (** Qualified symbol as [(namespace, name)]. *)
 
-  type qid_form = Val | Abs
-  (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
-      (toplevel-first lookup, falling back to shadow-aware). Only affects
-      unqualified [Qualified] terms; see [Names.resolveQid]. *)
+  type qid_form =
+    | Val
+    | Abs
+        (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
+            (toplevel-first lookup, falling back to shadow-aware). Only affects
+            unqualified [Qualified] terms; see [Names.resolveQid]. *)
 
   val mk_loc : int -> int -> loc
   (** Create a location from start and end lexer positions. *)

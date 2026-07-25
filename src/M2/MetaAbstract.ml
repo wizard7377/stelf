@@ -144,11 +144,8 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           end
       | lG0, g_, (I.Root (c_, s_), s), mode, adepth ->
           collectSpine (lG0, g_, (s_, s), mode, adepth)
-      | ( lG0,
-          g_,
-          (I.EVar (r, gx, v_, cnstrs), s),
-          mode,
-          ((a_, depth) as adepth) ) ->
+      | lG0, g_, (I.EVar (r, gx, v_, cnstrs), s), mode, ((a_, depth) as adepth)
+        ->
           begin match atxLookup (a_, r) with
           | None ->
               ignore (checkEmpty !cnstrs);
@@ -201,11 +198,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           collectSpine (lG0, g_, (s_, I.comp (s', s)), mode, adepth)
       | lG0, g_, (I.App (u_, s_), s), mode, adepth ->
           collectSpine
-            ( lG0,
-              g_,
-              (s_, s),
-              mode,
-              collectExp (lG0, g_, (u_, s), mode, adepth) )
+            (lG0, g_, (s_, s), mode, collectExp (lG0, g_, (u_, s), mode, adepth))
 
     and collectDec (lG0, g_, (I.Dec (x, v_), s), mode, adepth) =
       collectExp (lG0, g_, (v_, s), mode, adepth)
@@ -254,8 +247,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               g_,
               (v1_, s),
               collectDTop
-                (lG0, I.Decl (g_, I.decSub (d_, s)), (v2_, I.dot1 s), adepth)
-            )
+                (lG0, I.Decl (g_, I.decSub (d_, s)), (v2_, I.dot1 s), adepth) )
       | lG0, g_, ((I.Root _, s) as vs_), adepth ->
           collectModeW (lG0, g_, MetaSyn.Top, MetaSyn.Top, vs_, adepth)
 
@@ -346,8 +338,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | a_, g_, depth, ((I.Pi _, _) as xVt), I.Shift k, b, s_ ->
           abstractSub
             (a_, g_, depth, xVt, I.Dot (I.Idx (k + 1), I.Shift (k + 1)), b, s_)
-      | a_, g_, depth, ((I.Pi (_, xv'), t) as xVt), I.Dot (I.Idx k, s), b, s_
-        ->
+      | a_, g_, depth, ((I.Pi (_, xv'), t) as xVt), I.Dot (I.Idx k, s), b, s_ ->
           let (I.Dec (x, v_)) = I.ctxDec (g_, k) in
           begin if k > depth then
             let k' = lookupBV (a_, k - depth) in

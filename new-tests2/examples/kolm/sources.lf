@@ -1,6 +1,0 @@
-%require %[ fol %] %.
-%require %[ nk %] %.
-%require %[ nj %] %.
-%require %[ kolmtrans %] %.
-%require %[ sound %] %.
-%require %[ complete %] %.

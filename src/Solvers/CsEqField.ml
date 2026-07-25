@@ -65,10 +65,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
     let plusExp (u_, v_) = Root (Const !plusID, App (u_, App (v_, Nil)))
     let minusExp (u_, v_) = Root (Const !minusID, App (u_, App (v_, Nil)))
     let timesExp (u_, v_) = Root (Const !timesID, App (u_, App (v_, Nil)))
-
-    let numberConDec d =
-      ConDec (toString d, None, 0, Normal, number (), Type)
-
+    let numberConDec d = ConDec (toString d, None, 0, Normal, number (), Type)
     let numberExp d = Root (FgnConst (!myID, numberConDec d), Nil)
 
     let parseNumber string =
@@ -116,8 +113,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
           begin if n = one then toExpEClo us_
           else timesExp (toExpMon (Mon (n, [])), toExpEClo us_)
           end
-      | Mon (n, us_ :: usL) ->
-          timesExp (toExpMon (Mon (n, usL)), toExpEClo us_)
+      | Mon (n, us_ :: usL) -> timesExp (toExpMon (Mon (n, usL)), toExpEClo us_)
 
     and toExpEClo = function u_, Shift 0 -> u_ | u_, s_ -> EClo (u_, s_)
 
@@ -184,8 +180,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
     and timesSumMon = function
       | Sum (m, []), Mon (n, usL) ->
           let n' = m * n in
-          begin if n' = zero then Sum (n', [])
-          else Sum (zero, [ Mon (n', usL) ])
+          begin if n' = zero then Sum (n', []) else Sum (zero, [ Mon (n', usL) ])
           end
       | Sum (m, Mon (n', usL') :: monL), (Mon (n, usL) as mon) ->
           let n'' = n * n' in

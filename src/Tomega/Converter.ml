@@ -393,9 +393,7 @@ module MakeConverter
             else
               begin if occursInPsi (1, (psi2, l_)) then
                 let w1' = strengthenSub (w1, I.shift) in
-                let psi1', w', z' =
-                  strengthen' (psi1, ld :: psi2, l_, w1')
-                in
+                let psi1', w', z' = strengthen' (psi1, ld :: psi2, l_, w1') in
                 let v'_ = strengthenExp (v_, w') in
                 ( I.Decl (psi1', T.UDec (I.Dec (name, v'_))),
                   I.dot1 w',
@@ -409,18 +407,15 @@ module MakeConverter
                 (psi1'', I.comp (w', I.shift), z')
               end
             end
-        | I.Decl (psi1, (T.PDec (name, f_, None, None) as d_)), psi2, l_, w1
-          ->
+        | I.Decl (psi1, (T.PDec (name, f_, None, None) as d_)), psi2, l_, w1 ->
             let w1' = dot1inv w1 in
             let psi1', w', z' = strengthen' (psi1, d_ :: psi2, l_, w1') in
             let f'_ = strengthenFor (f_, w') in
             ( I.Decl (psi1', T.PDec (name, f'_, None, None)),
               I.dot1 w',
               I.dot1 z' )
-        | ( I.Decl (psi1, (T.UDec (I.BDec (name, (cid, s))) as ld)),
-            psi2,
-            l_,
-            w1 ) ->
+        | I.Decl (psi1, (T.UDec (I.BDec (name, (cid, s))) as ld)), psi2, l_, w1
+          ->
             let w1' = dot1inv w1 in
             let psi1', w', z' = strengthen' (psi1, ld :: psi2, l_, w1') in
             let s' = strengthenSub (s, w') in
@@ -580,8 +575,7 @@ module MakeConverter
         ) ->
           let psi1 = append (psi0, append (g_, T.embedCtx b_)) in
           let _ =
-            TomegaTypeCheck.checkCtx
-              (append (append (psi0, g_), T.embedCtx b_))
+            TomegaTypeCheck.checkCtx (append (append (psi0, g_), T.embedCtx b_))
           in
           let n = domain (psi1, w1) in
           let m = I.ctxLength psi0 in
@@ -871,9 +865,7 @@ module MakeConverter
               let (T.PDec (_, f'_, _, _)) = T.ctxDec (psi', k) in
               ( T.Case
                   (T.Cases
-                     [
-                       (psi', T.Dot (T.Prg pattern_, T.Shift depth'), T.Var k);
-                     ]),
+                     [ (psi', T.Dot (T.Prg pattern_, T.Shift depth'), T.Var k) ]),
                 f'_ ))
 
     let rec installProjection = function

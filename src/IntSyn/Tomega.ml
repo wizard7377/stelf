@@ -333,10 +333,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | Shift n, Shift m -> Shift (n + m)
       | Dot (ft_, t), t' -> Dot (frontSub (ft_, t'), comp (t, t'))
 
-    let dot1 = function
-      | Shift 0 as t -> t
-      | t -> Dot (Idx 1, comp (t, Shift 1))
-
+    let dot1 = function Shift 0 as t -> t | t -> Dot (Idx 1, comp (t, Shift 1))
     let id = Shift 0
     let shift = Shift 1
 
@@ -433,8 +430,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
     and convDec = function
       | (UDec d1_, t1), (UDec d2_, t2) ->
           Conv.convDec ((d1_, coerceSub t1), (d2_, coerceSub t2))
-      | (PDec (_, f1_, tc1, tc1'), t1), (PDec (_, f2_, tc2, tc2'), t2) ->
-        begin
+      | (PDec (_, f1_, tc1, tc1'), t1), (PDec (_, f2_, tc2, tc2'), t2) -> begin
           ignore (convFor ((f1_, t1), (f2_, t2)));
           begin
             ignore (convTCOpt (tc1, tc1'));
@@ -444,16 +440,10 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
 
     let newEVar (psi, f_) =
       EVar
-        ( psi,
-          ref None,
-          f_,
-          None,
-          None,
-          I.newEVar (coerceCtx psi, I.Uni I.Type) )
+        (psi, ref None, f_, None, None, I.newEVar (coerceCtx psi, I.Uni I.Type))
 
     let newEVarTC (psi, f_, tc, tc') =
-      EVar
-        (psi, ref None, f_, tc, tc', I.newEVar (coerceCtx psi, I.Uni I.Type))
+      EVar (psi, ref None, f_, tc, tc', I.newEVar (coerceCtx psi, I.Uni I.Type))
 
     let rec exists = function
       | x, [] -> false

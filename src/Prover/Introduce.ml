@@ -33,10 +33,7 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
     type nonrec operator = T.prg * T.prg
 
     let stripTC tc = tc
-
-    let stripTCOpt = function
-      | None -> None
-      | Some tc -> Some (stripTC tc)
+    let stripTCOpt = function None -> None | Some tc -> Some (stripTC tc)
 
     let stripDec = function
       | T.UDec d_ -> T.UDec d_
@@ -47,14 +44,14 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
       | I.Decl (psi, d_) -> I.Decl (strip psi, stripDec d_)
 
     let rec expand = function
-      | S.Focus
-          ((T.EVar (psi, r, T.All ((d_, _), f_), None, None, _) as r_), w_) ->
+      | S.Focus ((T.EVar (psi, r, T.All ((d_, _), f_), None, None, _) as r_), w_)
+        ->
           let d'_ = TomegaNames.decName (psi, d_) in
           Some (r_, T.Lam (d'_, T.newEVar (I.Decl (strip psi, d'_), f_)))
       | S.Focus
           ( (T.EVar
-               (psi, r, T.Ex (((I.Dec (_, v_) as d_), _), f_), None, None, _)
-             as r_),
+               (psi, r, T.Ex (((I.Dec (_, v_) as d_), _), f_), None, None, _) as
+             r_),
             w_ ) ->
           let x_ = I.newEVar (T.coerceCtx psi, v_) in
           let y_ = T.newEVar (psi, T.forSub (f_, T.Dot (T.Exp x_, T.id))) in
@@ -62,8 +59,7 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
       | S.Focus ((T.EVar (psi, r, True, None, None, _) as r_), w_) ->
           Some (r_, T.Unit)
       | S.Focus (T.EVar (psi, r, T.FClo (f_, s), tc1, tc2, x_), w_) ->
-          expand
-            (S.Focus (T.EVar (psi, r, T.forSub (f_, s), tc1, tc2, x_), w_))
+          expand (S.Focus (T.EVar (psi, r, T.forSub (f_, s), tc1, tc2, x_), w_))
       | S.Focus (T.EVar (psi, r, _, _, _, _), w_) -> None
 
     let apply (T.EVar (_, r, _, _, _, _), p_) = r := Some p_

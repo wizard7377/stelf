@@ -131,8 +131,7 @@ end) : ABSMACHINE = struct
               hcHa,
               function
               | s_ -> begin
-                  T.signal
-                    (g_, T.Subgoal (hcHa, function () -> subgoalNum s_));
+                  T.signal (g_, T.Subgoal (hcHa, function () -> subgoalNum s_));
                   solve' ((g, s), dp, function m_ -> sc (I.App (m_, s_)))
                 end )
       | ( ps',
@@ -186,9 +185,7 @@ end) : ABSMACHINE = struct
     and matchAtom
         (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
       let tag = T.tagGoal () in
-      let _ =
-        T.signal (g_, T.SolveGoal (tag, ha, I.EClo (fst ps', snd ps')))
-      in
+      let _ = T.signal (g_, T.SolveGoal (tag, ha, I.EClo (fst ps', snd ps'))) in
       let deterministic = C.detTableCheck (cidFromHead ha) in
       let exception SucceedOnce of I.spine in
       let rec matchSig = function
@@ -211,8 +208,7 @@ end) : ABSMACHINE = struct
                             T.signal
                               ( g_,
                                 T.SucceedGoal
-                                  (tag, (hc, ha), I.EClo (fst ps', snd ps'))
-                              );
+                                  (tag, (hc, ha), I.EClo (fst ps', snd ps')) );
                             sc (I.Root (hc, s_))
                           end ))
               then begin
@@ -252,9 +248,7 @@ end) : ABSMACHINE = struct
                             end ))
                 then begin
                   T.signal
-                    ( g_,
-                      T.RetryGoal (tag, (hc, ha), I.EClo (fst ps', snd ps'))
-                    );
+                    (g_, T.RetryGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
                   ()
                 end
                 else ()

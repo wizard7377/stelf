@@ -17,4 +17,6 @@ module type PAL = sig
   val make : M.source -> Reply.outcome
   val top : ?config:Fpath.t -> (module Tui.REPL.S) -> int Lwt.t
   val run : unit -> unit
+  val simulate : string -> bool Lwt.t
+  val render : ?config:Fpath.t -> (module Tui.REPL.S) -> string -> unit
 end

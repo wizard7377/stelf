@@ -99,8 +99,7 @@ end) : STATE = struct
       | (psi, Unit), k_ -> k_
       | (psi, T.Rec (d_, p_)), k_ -> findExp (psi, p_) k_
       | (psi, T.Case (T.Cases c_)), k_ -> findExpCases (psi, c_) k_
-      | (psi, T.PClo (p_, t)), k_ ->
-          findExpSub (psi, t) (findExp (psi, p_) k_)
+      | (psi, T.PClo (p_, t)), k_ -> findExpSub (psi, t) (findExp (psi, p_) k_)
       | (psi, T.Let (d_, p1_, p2_)), k_ ->
           findExp (I.Decl (psi, d_), p2_) (findExp (psi, p1_) k_)
       | (psi, T.LetPairExp (d1_, d2_, p1_, p2_)), k_ ->

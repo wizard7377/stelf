@@ -212,13 +212,8 @@ end) : ABSTRACTTABLED = struct
               dupVars,
               flag,
               d + 1 )
-      | ( gss,
-          gl_,
-          ((I.EVar (r, gx, v_, cnstrs) as x_), s),
-          k_,
-          dupVars,
-          flag,
-          d ) ->
+      | gss, gl_, ((I.EVar (r, gx, v_, cnstrs) as x_), s), k_, dupVars, flag, d
+        ->
           collectEVar (gss, gl_, (x_, s), k_, dupVars, flag, d)
       | gss, gl_, (I.FgnExp (csid_, csfe), s), k_, dupVars, flag, d ->
           I.FgnExpStd.fold (csid_, csfe)
@@ -343,13 +338,8 @@ end) : ABSTRACTTABLED = struct
       end
 
     and collectEVarFap
-        ( gss,
-          gl_,
-          ((I.EVar (r, gx, v_, cnstrs) as x_), s),
-          k_,
-          dupVars,
-          flag,
-          d ) =
+        (gss, gl_, ((I.EVar (r, gx, v_, cnstrs) as x_), s), k_, dupVars, flag, d)
+        =
       begin match member (eqEVar x_) k_ with
       | Some label ->
           begin if flag then
@@ -371,13 +361,8 @@ end) : ABSTRACTTABLED = struct
       end
 
     and collectEVarNFap
-        ( gss,
-          gl_,
-          ((I.EVar (r, gx, v_, cnstrs) as x_), s),
-          k_,
-          dupVars,
-          flag,
-          d ) =
+        (gss, gl_, ((I.EVar (r, gx, v_, cnstrs) as x_), s), k_, dupVars, flag, d)
+        =
       begin match member' (eqEVar x_) k_ with
       | Some label ->
           begin if flag then
@@ -410,13 +395,8 @@ end) : ABSTRACTTABLED = struct
       end
 
     and collectEVar
-        ( gss,
-          gl_,
-          ((I.EVar (r, gx, v_, cnstrs) as x_), s),
-          k_,
-          dupVars,
-          flag,
-          d ) =
+        (gss, gl_, ((I.EVar (r, gx, v_, cnstrs) as x_), s), k_, dupVars, flag, d)
+        =
       begin if !TableParam.strengthen then
         collectEVarStr (gss, gl_, (x_, s), k_, dupVars, flag, d)
       else
@@ -689,8 +669,8 @@ end) : ABSTRACTTABLED = struct
             ( posEA',
               vars',
               I.Root (bv, I.Nil),
-              TableParam.Unify
-                (gl_, I.Root (bv', s_), I.Root (bv1, I.Nil), eqn1) )
+              TableParam.Unify (gl_, I.Root (bv', s_), I.Root (bv1, I.Nil), eqn1)
+            )
           else
             let posEA', vars', s_, eqn1 =
               abstractSub
@@ -732,8 +712,8 @@ end) : ABSTRACTTABLED = struct
             ( posEA',
               vars',
               I.Root (bv, I.Nil),
-              TableParam.Unify
-                (gl_, I.Root (bv', s_), I.Root (bv1, I.Nil), eqn1) )
+              TableParam.Unify (gl_, I.Root (bv', s_), I.Root (bv1, I.Nil), eqn1)
+            )
           else
             let posEA', vars', s_, eqn1 =
               abstractSub
@@ -968,8 +948,7 @@ end) : ABSTRACTTABLED = struct
       let rec avarCtx = function
         | vars_, I.Null, k -> I.Null
         | ( vars_,
-            I.Decl
-              (k'_, Av ((I.EVar ({ contents = None }, gx, vx, _) as e_), d)),
+            I.Decl (k'_, Av ((I.EVar ({ contents = None }, gx, vx, _) as e_), d)),
             k ) ->
             I.Decl
               ( avarCtx (vars_, k'_, k + 1),
@@ -1015,9 +994,8 @@ end) : ABSTRACTTABLED = struct
       | I.Null, s -> s
       | ( I.Decl
             ( k'_,
-              ( _,
-                Ev (I.EVar (({ contents = None } as i_), gx, vx, cnstr) as e_)
-              ) ),
+              (_, Ev (I.EVar (({ contents = None } as i_), gx, vx, cnstr) as e_))
+            ),
           s ) ->
           let v'_ = raiseType (gx, vx) in
           let x_ =
@@ -1057,15 +1035,7 @@ end) : ABSTRACTTABLED = struct
       in
       let posEA'', vars'', u'_, eqn' =
         abstractExp
-          ( true,
-            (gs_, ss),
-            (epos', total),
-            vars',
-            I.Null,
-            total,
-            d,
-            (p, s),
-            eqn )
+          (true, (gs_, ss), (epos', total), vars', I.Null, total, d, (p, s), eqn)
       in
       let dAVars = makeAVarCtx (vars'', dupVars') in
       let dEVars = makeEVarCtx ((gs_, ss), vars'', I.Null, vars'', 0) in

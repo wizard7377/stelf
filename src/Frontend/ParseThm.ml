@@ -322,8 +322,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       let callpats, f4 = parseCallPats f3 in
       (E.rdecl (p, oOut, oIn, E.callpats callpats), f4)
 
-    let parseReduces' (LS.Cons ((L.Reduces, r), s')) =
-      parseRDecl (LS.expose s')
+    let parseReduces' (LS.Cons ((L.Reduces, r), s')) = parseRDecl (LS.expose s')
 
     let parseTabledDecl (LS.Cons ((L.Id (_, id), r), s') as f) =
       begin match LS.expose s' with
@@ -348,8 +347,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       let callpats, f2 = parseCallPats f1 in
       (E.wdecl (qids, E.callpats callpats), f2)
 
-    let parseWorlds' (LS.Cons ((L.Worlds, r), s')) =
-      parseWDecl (LS.expose s')
+    let parseWorlds' (LS.Cons ((L.Worlds, r), s')) = parseWDecl (LS.expose s')
   end
 
   (*--------------------------*)

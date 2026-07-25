@@ -117,8 +117,8 @@ end) : RECON_QUERY = struct
            couldn't optName ""occur"" in a constraint involving the type
            without being detected by this test?  -kw *)
 
-  let finishDefine
-      (Define_ (optName, tm, clsOpt), ((u_, oc1), (v_, oc2Opt), l_)) =
+  let finishDefine (Define_ (optName, tm, clsOpt), ((u_, oc1), (v_, oc2Opt), l_))
+      =
     let i, (u'_, v'_) =
       try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
       with Abstract.Error msg ->

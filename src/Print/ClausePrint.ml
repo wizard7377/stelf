@@ -140,9 +140,7 @@ module MakeClausePrint
           ignore (Names.varReset IntSyn.Null);
           let vfmt = fmtClauseI (i, I.Null, v_) in
           F.hVbox
-            [
-              str0 (Symbol.const id); F.space; sym ":"; F.break; vfmt; sym ".";
-            ]
+            [ str0 (Symbol.const id); F.space; sym ":"; F.break; vfmt; sym "." ]
       | condec_ -> Print.formatConDec condec_
   end
 

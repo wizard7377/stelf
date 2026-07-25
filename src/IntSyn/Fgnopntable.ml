@@ -25,9 +25,7 @@ end) :
   let initializeTable tbl =
     let exception CSfunNotInstalled of csid in
     let maxCSid = 50 in
-    let unimplemented csid = function
-      | _ -> raise (CSfunNotInstalled csid)
-    in
+    let unimplemented csid = function _ -> raise (CSfunNotInstalled csid) in
     Array.tabulate (maxCSid + 1, unimplemented)
   (*Global.maxCSid*)
 

@@ -62,10 +62,10 @@ module Parser : PARSER = struct
   let ident_chunk =
     take_while1 (function
       | ' ' | '\t' | '\n' | '(' | ')' | '{' | '}' | '[' | ']' | '%' -> false
-      | _ -> true) (* TODO Generalize to unicode ws *)
+      | _ -> true)
+  (* TODO Generalize to unicode ws *)
 
-  let ident =
-    many (ident_chunk <|> esc_char) >>| String.concat "" <* whitespace
+  let ident = many (ident_chunk <|> esc_char) >>| String.concat "" <* whitespace
 
   let ident1 =
     many1 (ident_chunk <|> esc_char) >>| String.concat "" <* whitespace

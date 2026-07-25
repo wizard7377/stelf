@@ -69,9 +69,7 @@ module MakeModePrint (Names : NAMES) (Formatter : FORMATTER) (Print : PRINT) :
           fmtModeDec (cid, mS) :: F.break :: fmtModeDecs mdecs
 
     let modeToString cM = F.makestring_fmt (fmtModeDec cM)
-
-    let modesToString mdecs =
-      F.makestring_fmt (F.vbox0 0 1 (fmtModeDecs mdecs))
+    let modesToString mdecs = F.makestring_fmt (F.vbox0 0 1 (fmtModeDecs mdecs))
   end
 
   let modeToString = modeToString

@@ -146,7 +146,11 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           let@ (id, cmds), s, e =
             keyword "scope" *> commit
             *> let* id = Modern.parse_var () in
-            let+ cmds = parse_cmd_list () <|> (let+ cmd = parse1 () in [cmd]) in
+               let+ cmds =
+                 parse_cmd_list ()
+                 <|> let+ cmd = parse1 () in
+                     [ cmd ]
+               in
                (id, cmds)
           in
           let loc = mk_loc s e in

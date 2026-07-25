@@ -1,13 +1,13 @@
-(** The parsing library, which is used in the modern frontend as a system for parsing. 
-@author Asher Frost *)
+(** The parsing library, which is used in the modern frontend as a system for
+    parsing.
+    @author Asher Frost *)
 
-(**
-  {2 The Parser Module}
+(** {2 The Parser Module}
 
-  The original Twelf used a very complex stack based parser.
-  Here, we use a more idiomatic (and, because of the simplicity of STELF not that theoretically slower) parser combinator library, which is based off Angstrom.
-  
-*)
+    The original Twelf used a very complex stack based parser. Here, we use a
+    more idiomatic (and, because of the simplicity of STELF not that
+    theoretically slower) parser combinator library, which is based off
+    Angstrom. *)
 
 module type PARSER = sig
   include module type of Angstrom
@@ -15,7 +15,8 @@ module type PARSER = sig
   val with_fc : 'a t -> ('a * int * int) t
   val inside : string -> string -> 'a t -> 'a t
   val whitespace : unit t
-  val blank : unit t 
+
+  val blank : unit t
   (** Parse some non ["\n"] whitespace, then [whitespace] *)
 
   val ident : string t

@@ -56,8 +56,7 @@ end) : ASSIGN = struct
               end
           | Def d1, Def d2 ->
               begin if d1 = d2 then assignSpine (g_, (s1_, s1), (s2_, s2), cnstr)
-              else
-                assignExp (g_, Whnf.expandDef us1, Whnf.expandDef us2, cnstr)
+              else assignExp (g_, Whnf.expandDef us1, Whnf.expandDef us2, cnstr)
               end
           | Def d1, _ -> assignExp (g_, Whnf.expandDef us1, us2, cnstr)
           | _, Def d2 -> assignExp (g_, us1, Whnf.expandDef us2, cnstr)
@@ -93,8 +92,7 @@ end) : ASSIGN = struct
           let cnstr' = assignExp (g_, (v1_, s1), (v2_, s2), cnstr) in
           assignExp
             (Decl (g_, decSub (d1_, s1)), (u1_, dot1 s1), (u2_, dot1 s2), cnstr')
-      | g_, ((u_, s1) as us1), ((EVar (r2, _, _, _), s2) as us2), cnstr ->
-        begin
+      | g_, ((u_, s1) as us1), ((EVar (r2, _, _, _), s2) as us2), cnstr -> begin
           r2 := Some (EClo (fst us1, snd us1));
           cnstr
         end
@@ -111,16 +109,13 @@ end) : ASSIGN = struct
       | g_, us1, ((EClo (u_, s'), s) as us2), cnstr ->
           assignExp (g_, us1, (u_, comp (s', s)), cnstr)
       | g_, ((EVar (r, _, v_, cnstr_), s) as us1), us2, cnstr ->
-          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2))
-          :: cnstr
+          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2)) :: cnstr
       | g_, ((EClo (u_, s'), s) as us1), us2, cnstr ->
           assignExp (g_, (u_, comp (s', s)), us2, cnstr)
       | g_, ((FgnExp (_, fe), _) as us1), us2, cnstr ->
-          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2))
-          :: cnstr
+          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2)) :: cnstr
       | g_, us1, ((FgnExp (_, fe), _) as us2), cnstr ->
-          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2))
-          :: cnstr
+          Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2)) :: cnstr
 
     and assignSpine = function
       | g_, (Nil, _), (Nil, _), cnstr -> cnstr

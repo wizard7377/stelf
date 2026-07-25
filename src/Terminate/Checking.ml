@@ -174,15 +174,8 @@ end) : CHECKING = struct
     let conv ((us_, vs_), (us', vs'_)) =
       Conv.conv (vs_, vs'_) && Conv.conv (us_, us')
 
-    let isUniversal = function
-      | All -> true
-      | Exist -> false
-      | exist' -> false
-
-    let isExistential = function
-      | All -> false
-      | Exist -> true
-      | exist' -> true
+    let isUniversal = function All -> true | Exist -> false | exist' -> false
+    let isExistential = function All -> false | Exist -> true | exist' -> true
 
     let rec isParameter (q_, x_) = isParameterW (q_, Whnf.whnf (x_, I.id))
 
@@ -254,8 +247,7 @@ end) : CHECKING = struct
               && sc ()
               && eqAtomicR (gq, d_ @ d'_, usVs, usVs1', sc, atomic))
           || transEq (gq, d_, Eq (usVs1, usVs1') :: d'_, usVs, usVs', sc)
-      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, d'_, usVs, usVs', sc
-        ->
+      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, d'_, usVs, usVs', sc ->
           transEq (gq, d_, d'_, usVs, usVs', sc)
 
     and ltAtomic = function
@@ -278,8 +270,7 @@ end) : CHECKING = struct
               && sc ()
               && ltAtomicR (gq, d_ @ d'_, usVs, usVs1', sc, atomic))
           || transLt (gq, d_, Eq (usVs1, usVs1') :: d'_, usVs, usVs', sc)
-      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, d'_, usVs, usVs', sc
-        ->
+      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, d'_, usVs, usVs', sc ->
           CsManager.trail (function () ->
               eq (g_, usVs1', usVs')
               && sc ()
@@ -501,8 +492,8 @@ end) : CHECKING = struct
             begin if !Global.chatter > 4 then
               print
                 (((((" Proved: "
-                    ^ atomicRCtxToString
-                        (g_, Eq ((us_, vs_), (us', vs'_)) :: d_))
+                    ^ atomicRCtxToString (g_, Eq ((us_, vs_), (us', vs'_)) :: d_)
+                    )
                    ^ atomicRCtxToString (g_, d'_))
                   ^ " ---> ")
                  ^ atomicPredToString (g_, p'_))
@@ -526,8 +517,8 @@ end) : CHECKING = struct
             begin if !Global.chatter > 4 then
               print
                 (((((" Proved: "
-                    ^ atomicRCtxToString
-                        (g_, Eq ((us_, vs_), (us', vs'_)) :: d_))
+                    ^ atomicRCtxToString (g_, Eq ((us_, vs_), (us', vs'_)) :: d_)
+                    )
                    ^ atomicRCtxToString (g_, d'_))
                   ^ " ---> ")
                  ^ atomicPredToString (g_, p'_))
@@ -611,8 +602,7 @@ end) : CHECKING = struct
       | ((g_, q_) as gq), d_, d'_, usVs, usVs', p'_, sc -> begin
           begin if !Global.chatter > 4 then
             print
-              (((((" Proved: "
-                  ^ atomicRCtxToString (g_, Eq (usVs, usVs') :: d_))
+              (((((" Proved: " ^ atomicRCtxToString (g_, Eq (usVs, usVs') :: d_))
                  ^ atomicRCtxToString (g_, d'_))
                 ^ " ---> ")
                ^ atomicPredToString (g_, p'_))
@@ -630,11 +620,9 @@ end) : CHECKING = struct
       | gq, d_, d'_, ((Nil, s), vs_), ((Nil, s'), vs'_), p'_, sc ->
           leftInstantiate (gq, d_, d'_, p'_, sc)
       | gq, d_, d'_, ((I.SClo (s_, s'), s''), vs_), ssVs', p'_, sc ->
-          eqSpineIL
-            (gq, d_, d'_, ((s_, I.comp (s', s'')), vs_), ssVs', p'_, sc)
+          eqSpineIL (gq, d_, d'_, ((s_, I.comp (s', s'')), vs_), ssVs', p'_, sc)
       | gq, d_, d'_, ssVs, ((I.SClo (s'_, s'), s''), vs'_), p'_, sc ->
-          eqSpineIL
-            (gq, d_, d'_, ssVs, ((s'_, I.comp (s', s'')), vs'_), p'_, sc)
+          eqSpineIL (gq, d_, d'_, ssVs, ((s'_, I.comp (s', s'')), vs'_), p'_, sc)
       | ( gq,
           d_,
           d'_,
@@ -799,12 +787,8 @@ end) : CHECKING = struct
             ltSpineR
               (gq, d_, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, k)
           end
-      | ( gq,
-          d_,
-          (us_, vs_),
-          (((I.Root (I.Def c, s'_), s') as us'), vs'_),
-          sc,
-          k ) ->
+      | gq, d_, (us_, vs_), (((I.Root (I.Def c, s'_), s') as us'), vs'_), sc, k
+        ->
           begin if isAtomic (gq, us') then
             k (gq, d_, [], Less ((us_, vs_), (us', vs'_)), sc)
           else
@@ -917,8 +901,7 @@ end) : CHECKING = struct
             end
           end
       | gq, d_, usVs, usVs', sc, k ->
-          ltR (gq, d_, usVs, usVs', sc, k)
-          || eqR (gq, d_, usVs, usVs', sc, k)
+          ltR (gq, d_, usVs, usVs', sc, k) || eqR (gq, d_, usVs, usVs', sc, k)
 
     and eqR (((g_, q_) as gq), d_, usVs, usVs', sc, k) =
       CsManager.trail (function () -> eq (g_, usVs, usVs') && sc ())
@@ -1109,8 +1092,7 @@ end) : CHECKING = struct
       ltAtomicLW (gq, d_, d'_, usVs, Whnf.whnfEta usVs', p_)
 
     and ltAtomicLW = function
-      | ((g_, q_) as gq), d_, d'_, usVs, (us', ((I.Root _, s') as vs'_)), p_
-        ->
+      | ((g_, q_) as gq), d_, d'_, usVs, (us', ((I.Root _, s') as vs'_)), p_ ->
           ltL (gq, d_, d'_, usVs, (us', vs'_), p_)
       | ( ((g_, q_) as gq),
           d_,
@@ -1120,9 +1102,7 @@ end) : CHECKING = struct
           p_ ) ->
           let d1_ = shiftRCtx d_ (function s -> I.comp (s, I.shift)) in
           let d1' = shiftACtx d'_ (function s -> I.comp (s, I.shift)) in
-          let usVs =
-            ((u_, I.comp (s1, I.shift)), (v_, I.comp (s2, I.shift)))
-          in
+          let usVs = ((u_, I.comp (s1, I.shift)), (v_, I.comp (s2, I.shift))) in
           let usVs' = ((u'_, I.dot1 s1'), (v'_, I.dot1 s2')) in
           let p'_ = shiftP p_ (function s -> I.comp (s, I.shift)) in
           ltAtomicL
@@ -1148,9 +1128,7 @@ end) : CHECKING = struct
           p_ ) ->
           let d1_ = shiftRCtx d_ (function s -> I.comp (s, I.shift)) in
           let d1' = shiftACtx d'_ (function s -> I.comp (s, I.shift)) in
-          let usVs =
-            ((u_, I.comp (s1, I.shift)), (v_, I.comp (s2, I.shift)))
-          in
+          let usVs = ((u_, I.comp (s1, I.shift)), (v_, I.comp (s2, I.shift))) in
           let usVs' = ((u'_, I.dot1 s1'), (v'_, I.dot1 s2')) in
           let p'_ = shiftP p_ (function s -> I.comp (s, I.shift)) in
           leAtomicL
@@ -1348,12 +1326,7 @@ end) : CHECKING = struct
           begin if n = n' then
             let (I.Dec (_, v'_)) = I.ctxDec (g_, n) in
             eqSpineL
-              ( gq,
-                d_,
-                d'_,
-                ((s_, s), (v'_, I.id)),
-                ((s'_, s'), (v'_, I.id)),
-                p_ )
+              (gq, d_, d'_, ((s_, s), (v'_, I.id)), ((s'_, s'), (v'_, I.id)), p_)
           else leftDecompose (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p_)
           end
       | gq, d_, d'_, usVs, usVs', p_ ->

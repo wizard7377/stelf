@@ -17,9 +17,7 @@ module Make_Weaken (Whnf : WHNF) : WEAKEN.WEAKEN = struct
     module I = IntSyn
 
     let strengthenExp (u_, s) = Whnf.normalize (Whnf.cloInv (u_, s), I.id)
-
-    let strengthenDec (I.Dec (name, v_), s) =
-      I.Dec (name, strengthenExp (v_, s))
+    let strengthenDec (I.Dec (name, v_), s) = I.Dec (name, strengthenExp (v_, s))
 
     let rec strengthenCtx = function
       | I.Null, s -> (I.Null, s)

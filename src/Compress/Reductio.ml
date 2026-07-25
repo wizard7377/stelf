@@ -78,9 +78,7 @@ module Reductio = struct
     let eq_and_strict =
       n = n' && (def = Sgn.Def_none || not (Sgn.abbreviation n))
     in
-    let redux t n sp =
-      reduce (SrTerm (t, typeOf (Sgn.classifier n)), sp)
-    in
+    let redux t n sp = reduce (SrTerm (t, typeOf (Sgn.classifier n)), sp) in
     begin match (eq_and_strict, def, def') with
     | true, _, _ -> sp_eq (sp, sp')
     | false, Sgn.Def_none, Sgn.Def_none -> false
@@ -293,9 +291,7 @@ module Reductio = struct
     let eq_and_strict =
       n = n' && (def = Sgn.Def_none || not (Sgn.abbreviation n))
     in
-    let redux t n sp =
-      reduce (SrTerm (t, typeOf (Sgn.classifier n)), sp)
-    in
+    let redux t n sp = reduce (SrTerm (t, typeOf (Sgn.classifier n)), sp) in
     let eq =
       begin match (eq_and_strict, def, def') with
       | true, _, _ -> SpineC (s, s')

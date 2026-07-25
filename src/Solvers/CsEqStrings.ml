@@ -62,8 +62,7 @@ end) : Cs.CS = struct
       | Concat (String str :: []) -> stringExp str
       | Concat (Exp (u_, Shift 0) :: []) -> u_
       | Concat (Exp (u_, s_) :: []) -> EClo (u_, s_)
-      | Concat (a_ :: al) ->
-          concatExp (toExp (Concat [ a_ ]), toExp (Concat al))
+      | Concat (a_ :: al) -> concatExp (toExp (Concat [ a_ ]), toExp (Concat al))
 
     let catConcat = function
       | Concat [], concat2 -> concat2
@@ -289,8 +288,7 @@ end) : Cs.CS = struct
                   end
                 else (MultDelay ([ EClo (u_, s) ], cnstr), [])
                 end
-            | Exp (u_, s_) :: al, _ ->
-                (MultDelay ([ EClo (u_, s_) ], cnstr), [])
+            | Exp (u_, s_) :: al, _ -> (MultDelay ([ EClo (u_, s_) ], cnstr), [])
             | String str :: [], candidates ->
                 let successors (Decomp (parse, parsedL)) =
                   List.mapPartial
@@ -328,8 +326,7 @@ end) : Cs.CS = struct
           | result, parsedL -> Failure
           end
 
-    let rec unifyConcat (g_, (Concat al1 as concat1), (Concat al2 as concat2))
-        =
+    let rec unifyConcat (g_, (Concat al1 as concat1), (Concat al2 as concat2)) =
       let u1_ = toFgn concat1 in
       let u2_ = toFgn concat2 in
       let cnstr = ref (Eqn (g_, u1_, u2_)) in

@@ -1,0 +1,29 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: STELF
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ethan
+    family-names: Moy
+    orcid: 'https://orcid.org/0009-0000-1043-4054'
+identifiers:
+  - type: url
+    value: 'https://standardocaml.github.io/'
+    description: STELF website
+repository-code: 'https://github.com/standardocaml/stelf'
+url: 'https://standardocaml.github.io/'
+abstract: >-
+  System for Totality in the Edinburgh Logical Framework is
+  a system for proving meta-theorems in a safe and simple
+  environment 
+keywords:
+  - stelf
+  - elf
+  - lf
+  - twelf
+license: BSD-2-Clause

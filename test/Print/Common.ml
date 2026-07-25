@@ -18,7 +18,9 @@ let condec_string ~arrow_sugar (cmds : string list) (scopes, name) : string =
 let contains ~needle haystack =
   let nlen = String.length needle in
   let hlen = String.length haystack in
-  let rec go i = i + nlen <= hlen && (String.sub haystack i nlen = needle || go (i + 1)) in
+  let rec go i =
+    i + nlen <= hlen && (String.sub haystack i nlen = needle || go (i + 1))
+  in
   go 0
 
 let check_contains printed needle =
@@ -31,6 +33,6 @@ let check_not_contains printed needle =
     (Printf.sprintf "does not contain %S" needle)
     false (contains ~needle printed)
 
-let test (name : string) (f : unit -> unit) : string * unit Alcotest.test_case list
-    =
+let test (name : string) (f : unit -> unit) :
+    string * unit Alcotest.test_case list =
   (name, [ Alcotest.test_case name `Quick f ])

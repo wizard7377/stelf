@@ -228,10 +228,8 @@ end) : RELFUN.RELFUN = struct
               let psi1'', w' = strengthen' (psi1, psi2', l'_, w1') in
               (psi1'', I.comp (w', I.shift))
             end
-        | ( I.Decl (psi1, (F.Block (F.CtxBlock (name, g_)) as ld)),
-            psi2,
-            l_,
-            w1 ) ->
+        | I.Decl (psi1, (F.Block (F.CtxBlock (name, g_)) as ld)), psi2, l_, w1
+          ->
             let bw, w1' = inBlock (g_, (false, w1)) in
             begin if bw || occursBlock (g_, (psi2, l_)) then
               let psi1', w' = strengthen' (psi1, ld :: psi2, l_, w1') in
@@ -377,9 +375,7 @@ end) : RELFUN.RELFUN = struct
             let w1' = peeln (g, w1) in
             let g1_, _ = Weaken.strengthenCtx (g0_, w1') in
             let g2_, _ = ctxSub (g1_, z1) in
-            let v1'', ur =
-              raiseType (g2_, I.EClo (v1_, z2), I.targetFam v1_)
-            in
+            let v1'', ur = raiseType (g2_, I.EClo (v1_, z2), I.targetFam v1_) in
             let w' =
               begin match dp_ with
               | maybe_ -> I.dot1 w
@@ -507,8 +503,7 @@ end) : RELFUN.RELFUN = struct
             begin if c = c' then
               let s'_ = Weaken.strengthenSpine (s_, v) in
               let psi', w' =
-                strengthen
-                  (psi, (c', s'_), I.Shift (F.lfctxLength psi), M.Plus)
+                strengthen (psi, (c', s'_), I.Shift (F.lfctxLength psi), M.Plus)
               in
               let w'', s'' = transformInit (psi', (c', s'_), w') in
               ( Some
@@ -585,8 +580,7 @@ end) : RELFUN.RELFUN = struct
               l_ )
         | c'', psi, g_, (v_, v), Some (w1, d, (p_, q_)), l_ ->
             let (I.Root (I.Const a', s_)) = Weaken.strengthenExp (v_, v) in
-            let (I.Decl (psi', F.Block (F.CtxBlock (name, g2_))) as dummy), w2
-                =
+            let (I.Decl (psi', F.Block (F.CtxBlock (name, g2_))) as dummy), w2 =
               strengthen
                 ( I.Decl (psi, F.Block (F.CtxBlock (None, g_))),
                   (a', s_),
@@ -631,12 +625,8 @@ end) : RELFUN.RELFUN = struct
                 (v2_, I.dot1 v),
                 None,
                 l_ )
-        | ( c'',
-            psi,
-            g_,
-            (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), v),
-            None,
-            l_ ) ->
+        | c'', psi, g_, (I.Pi (((I.Dec (_, v1_) as d_), no_), v2_), v), None, l_
+          ->
             begin match
               traversePos (c'', psi, g_, (v2_, I.comp (v, I.shift)), None, l_)
             with

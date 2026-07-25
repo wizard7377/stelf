@@ -1,6 +1,0 @@
-interactive = "lc1"
-
-[[group]]
-name = "lc1"
-main = "./main.lf"
-dirs = [".", "./src"]

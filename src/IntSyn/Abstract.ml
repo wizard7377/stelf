@@ -478,8 +478,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
 
     let rec abstractTC = function
       | k_, depth, T.Abs (d_, tc) ->
-          T.Abs
-            (abstractDec (k_, depth, (d_, I.id)), abstractTC (k_, depth, tc))
+          T.Abs (abstractDec (k_, depth, (d_, I.id)), abstractTC (k_, depth, tc))
       | k_, depth, T.Conj (tc1, tc2) ->
           T.Conj (abstractTC (k_, depth, tc1), abstractTC (k_, depth, tc2))
       | k_, depth, T.Base o_ -> T.Base (abstractOrder (k_, depth, o_))

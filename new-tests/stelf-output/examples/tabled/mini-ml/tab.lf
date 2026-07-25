@@ -1,5 +1,0 @@
-%require %[ mini-ml %] %.
-%require %[ value %] %.
-%require %[ reduce %] %.
-%require %[ programs %] %.
-%require %[ examples %] %.

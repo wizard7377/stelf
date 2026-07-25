@@ -143,6 +143,7 @@ module Impl () = struct
   let failwith' l =
     print_error "Fatal error" l;
     failwith l
+
   (* ------------------------------------------------------------------ *)
   (* ConDec installation                                                   *)
   (* ------------------------------------------------------------------ *)
@@ -157,8 +158,9 @@ module Impl () = struct
      installation becomes shadow-tolerant rather than fatal, since a
      judgment's later case clause is allowed to reuse an earlier clause's
      label (see Cst.Scope_ below). *)
-  let install_condec ?(scope_installs : Intsyn.IntSyn.cid list ref option = None)
-      ns (cd : Intsyn.IntSyn.conDec) : Intsyn.IntSyn.cid =
+  let install_condec
+      ?(scope_installs : Intsyn.IntSyn.cid list ref option = None) ns
+      (cd : Intsyn.IntSyn.conDec) : Intsyn.IntSyn.cid =
     let open Intsyn.IntSyn in
     let cid = sgnAdd cd in
     Names.installConstName cid;
@@ -217,8 +219,7 @@ module Impl () = struct
        matches (accumulating into the same struct without re-raising on a
        reused case label); a %scope with a *different* name closes it first.
        See Cst.Scope_ below. *)
-    let open_scope : (string * Intsyn.IntSyn.cid list ref) option ref =
-      ref None
+    let open_scope : (string * Intsyn.IntSyn.cid list ref) option ref = ref None
 
     let unfold_app tm =
       let rec go acc = function
@@ -486,7 +487,8 @@ module Impl () = struct
                  let condec =
                    Cst.ConDec.constant_decl (Cst.Decl.decl1 [ name_opt ] kind)
                  in
-                 install_condec_cmd ~scope_installs ns condec (loc_of filename sort_loc))
+                 install_condec_cmd ~scope_installs ns condec
+                   (loc_of filename sort_loc))
                ids)
       | Cst.TermCmd_ decl ->
           Debug.(
@@ -573,7 +575,8 @@ module Impl () = struct
           []
       | Cst.VersionCmd_ ->
           [ Reply.Response (Frontend.Version.Version.version_string ^ "\n") ]
-      | Cst.EvalCmd_ cmds -> run_until_quit (install1 ~path ~scope_installs ns) cmds
+      | Cst.EvalCmd_ cmds ->
+          run_until_quit (install1 ~path ~scope_installs ns) cmds
       | Cst.AdhocQueryCmd_ (Cst.Query_ (_, qtm) as q) ->
           [ Reply.Solutions (run_query (loc_of filename (term_loc qtm)) q) ]
       | Cst.DeclCmd_ tm ->

@@ -56,5 +56,13 @@ module Pal : PAL.PAL = struct
         if Reply.quit_requested replies then Lwt.return R.Stop
         else Lwt.return R.Continue)
 
+  let simulate (s : string) : bool Lwt.t =
+    let module Pal = Start () in
+    let replies = Pal.exec s in
+    Lwt.return @@ not @@ Reply.quit_requested replies
+
+  let render ?config (module N : Tui.REPL.S) (s : string) : unit =
+    assert false (* TODO *)
+
   let run () = ()
 end

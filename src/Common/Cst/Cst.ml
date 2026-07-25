@@ -539,9 +539,11 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     type symbol = namespace * name
     (** Qualified symbol as [(namespace, name)]. *)
 
-    type nonrec qid_form = qid_form = Val | Abs
-    (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
-        (toplevel-first lookup, falling back to shadow-aware). *)
+    type nonrec qid_form = qid_form =
+      | Val
+      | Abs
+          (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
+              (toplevel-first lookup, falling back to shadow-aware). *)
 
     (** Create a Loc.tation from start and end lexer positions. *)
     let mk_loc = mk_loc

@@ -74,10 +74,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       | I.Null, _ -> I.id
       | I.Decl (g_, d_), s -> I.dot1 (shiftSub (g_, s))
 
-    let cidFromHead = function
-      | I.Const a -> a
-      | I.Def a -> a
-      | I.Skonst a -> a
+    let cidFromHead = function I.Const a -> a | I.Def a -> a | I.Skonst a -> a
 
     let eqHead = function
       | I.Const a, I.Const a' -> a = a'
@@ -173,10 +170,8 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
           end
 
     and matchAtom
-        ( ((I.Root (ha, _), _) as ps'),
-          (C.DProg (g_, dPool) as dp),
-          sc,
-          (acc, k) ) =
+        (((I.Root (ha, _), _) as ps'), (C.DProg (g_, dPool) as dp), sc, (acc, k))
+        =
       let matchSig acc' =
         let rec matchSig' = function
           | [], acc'' -> acc''

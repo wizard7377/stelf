@@ -289,8 +289,7 @@ end) : WORLDIFY = struct
         end
       end
 
-    let subsumedWorld a (T.Worlds w1_) (T.Worlds w2_) =
-      subsumedBlocks a w1_ w2_
+    let subsumedWorld a (T.Worlds w1_) (T.Worlds w2_) = subsumedBlocks a w1_ w2_
 
     let rec eqCtx = function
       | I.Null, I.Null -> true

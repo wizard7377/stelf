@@ -1,4 +1,0 @@
-[[group]]
-name = "list"
-main = "./main.lf"
-dirs = ["."]

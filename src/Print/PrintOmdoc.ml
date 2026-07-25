@@ -182,9 +182,9 @@ module MakePrintOMDoc
           let l = spineLength s_ in
           let out = ref "" in
           let _ =
-            begin if l = 0 then out := !out ^ fmtCon (g_, h_)
-            else
-              ignore (out := (!out ^ "<om:OMA>") ^ nl_ind ());
+            begin
+              if l = 0 then out := !out ^ fmtCon (g_, h_)
+              else ignore (out := (!out ^ "<om:OMA>") ^ nl_ind ());
               let test, cid =
                 begin match h_ with
                 | I.Const c -> (true, c)

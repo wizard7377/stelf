@@ -358,8 +358,7 @@ end) : TWELF.STELF = struct
       ignore (Timers.time Timers.subordinate Subordinate.installDef cid);
       ()
 
-    let installConDec fromCS
-        (conDec, ((fileName, ocOpt) as fileNameocOpt), r) =
+    let installConDec fromCS (conDec, ((fileName, ocOpt) as fileNameocOpt), r) =
       let _ =
         Timers.time Timers.modes ModeCheck.checkD (conDec, fileName, ocOpt)
       in
@@ -388,8 +387,8 @@ end) : TWELF.STELF = struct
       in
       cid
 
-    let installBlockDec fromCS
-        (conDec, ((fileName, ocOpt) as fileNameocOpt), r) =
+    let installBlockDec fromCS (conDec, ((fileName, ocOpt) as fileNameocOpt), r)
+        =
       let cid = IntSyn.sgnAdd conDec in
       let _ =
         try
@@ -409,8 +408,8 @@ end) : TWELF.STELF = struct
       ignore (Origins.installLinesInfo (fileName, Paths.getLinesInfo ()));
       cid
 
-    let installBlockDef fromCS
-        (conDec, ((fileName, ocOpt) as fileNameocOpt), r) =
+    let installBlockDef fromCS (conDec, ((fileName, ocOpt) as fileNameocOpt), r)
+        =
       let cid = IntSyn.sgnAdd conDec in
       let _ =
         try

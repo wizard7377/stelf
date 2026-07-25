@@ -194,8 +194,8 @@ end) : ABSMACHINESBT = struct
                   sSolve
                     ((sgoals, s), dp, function skel2 -> sc (skel1 @ skel2)) )
 
-    and matchSig
-        (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
+    and matchSig (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc)
+        =
       let rec mSig = function
         | [] -> ()
         | (I.Const c as hc) :: sgn' ->
@@ -217,9 +217,8 @@ end) : ABSMACHINESBT = struct
           function
           | (conjGoals, s), clauseName ->
               sSolve
-                ( (conjGoals, s),
-                  dp,
-                  function s_ -> sc (C.Pc clauseName :: s_) ) )
+                ((conjGoals, s), dp, function s_ -> sc (C.Pc clauseName :: s_))
+        )
 
     and matchAtom
         (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =

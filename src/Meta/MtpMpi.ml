@@ -197,8 +197,7 @@ end) : MTPI = struct
             (fillingToMenu
                ( fillO,
                  recursionToMenu
-                   ( recO,
-                     inferenceToMenu (infO, splittingToMenu (splitO, [])) )
+                   (recO, inferenceToMenu (infO, splittingToMenu (splitO, [])))
                ))
       end
 

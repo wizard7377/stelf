@@ -55,7 +55,6 @@ module Make_Modern
         (x :: y, z)
 
   let mk_loc : int -> int -> Cst.loc = fun x y -> Cst.View.mk_loc x y
-
   let ghost' = Cst.View.Loc.(review Ghost)
 
   let combine_fc (r1 : Paths.region) (r2 : Paths.region) : Paths.region =
@@ -295,21 +294,25 @@ module Make_Modern
 
   and parse_id () : Cst.Term.t t =
     keyword' "val" *> commit *> parse_qid_body Cst.Val
-    <|> (keyword' "abs" *> commit *> parse_qid_body Cst.Abs)
+    <|> keyword' "abs" *> commit *> parse_qid_body Cst.Abs
     <|> (string "%(" *> commit
         *> let@ tm, s, e =
              let* ns = many1 ident1 in
-             (let+ body = inside "(" ")" (parse_expr ()) <* string ")" <* whitespace in
+             (let+ body =
+                inside "(" ")" (parse_expr ()) <* string ")" <* whitespace
+              in
               `Local (ns, body))
-             <|> (let+ () = string ")" *> whitespace in
-                  `Qualified ns)
+             <|> let+ () = string ")" *> whitespace in
+                 `Qualified ns
            in
            let loc = mk_loc s e in
            return
              (match tm with
-             | `Local (ns, body) -> Cst.View.Term.(review @@ Local (loc, ns, body))
+             | `Local (ns, body) ->
+                 Cst.View.Term.(review @@ Local (loc, ns, body))
              | `Qualified ns ->
-                 Cst.View.Term.(review @@ Qualified (loc, split_qid ns, Cst.Val))))
+                 Cst.View.Term.(
+                   review @@ Qualified (loc, split_qid ns, Cst.Val))))
     <|>
     let@ name, s, e = ident1 in
     let loc = mk_loc s e in
@@ -656,9 +659,7 @@ module Make_Modern
   and parse_bound () : int option t =
     begin
       token "_" *> return None
-      <|> let+ s =
-            take_while1 (fun c -> c >= '0' && c <= '9') <* whitespace
-          in
+      <|> let+ s = take_while1 (fun c -> c >= '0' && c <= '9') <* whitespace in
           Some (int_of_string s)
     end
     <?> "bound"

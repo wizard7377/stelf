@@ -122,8 +122,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
         MetaAbstract.abstract
           (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
       in
-      operators
-        (g'_, ge', (v_, s'), abstractAll, abstractEx, makeAddressInit s_)
+      operators (g'_, ge', (v_, s'), abstractAll, abstractEx, makeAddressInit s_)
 
     let apply (_, f) = f ()
 

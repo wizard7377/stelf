@@ -1,6 +1,0 @@
-%sort vdt/ofkd %.
-%mode vdt/ofkd %in %out %.
-%sort mofkd %.
-%mode mofkd %star %star %.
-%sort can-mofkd {D ofkd C K} %.
-%mode can-mofkd %in %out %.

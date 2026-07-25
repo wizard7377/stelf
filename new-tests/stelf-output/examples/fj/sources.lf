@@ -1,7 +1,0 @@
-%require %[ false %] %.
-%require %[ nat %] %.
-%require %[ fj %] %.
-%require %[ aux-lemma %] %.
-%require %[ pres %] %.
-%require %[ aux-lemma-prog %] %.
-%require %[ progress %] %.

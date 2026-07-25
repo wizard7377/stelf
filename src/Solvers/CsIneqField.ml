@@ -238,9 +238,7 @@ end) : Cs.CS = struct
       | Col j -> Array.update (tableau.clabels, j, new_)
       end
 
-    let ownerContext = function
-      | Var (g_, _mon) -> g_
-      | Exp (g_, _sum) -> g_
+    let ownerContext = function Var (g_, _mon) -> g_ | Exp (g_, _sum) -> g_
 
     let ownerSum = function
       | Var (_g_, mon) -> Sum (zero, [ mon ])

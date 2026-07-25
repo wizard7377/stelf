@@ -145,10 +145,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
       | g_, 0 -> g_
       | I.Decl (g_, _), n -> pruneCtx (g_, n - 1)
 
-    let cidFromHead = function
-      | I.Const a -> a
-      | I.Def a -> a
-      | I.Skonst a -> a
+    let cidFromHead = function I.Const a -> a | I.Def a -> a | I.Skonst a -> a
 
     let eqHead = function
       | I.Const a, I.Const a' -> a = a'

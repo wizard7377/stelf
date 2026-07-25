@@ -236,9 +236,7 @@ end) : TABLED = struct
     let (C.DProg (g_, dPool) as dProg), (p, s) =
       getHypGoal (C.DProg (I.Null, I.Null), (goal, I.id))
     in
-    let g'_, dAVars, dEVars, u'_, eqn', s' =
-      A.abstractEVarCtx (dProg, p, s)
-    in
+    let g'_, dAVars, dEVars, u'_, eqn', s' = A.abstractEVarCtx (dProg, p, s) in
     let _ =
       begin if solveEqn ((eqn', s'), g'_) then ()
       else print "\nresidual equation not solvable!\n"

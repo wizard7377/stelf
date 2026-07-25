@@ -136,8 +136,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               (v_, I.dot1 s'),
               function name, u_ -> abstract (name, I.Lam (d'_, u_)) )
 
-    let split (M.Prefix (g_, m_, b_), ((I.Dec (_, v_) as d_), s), abstract)
-        =
+    let split (M.Prefix (g_, m_, b_), ((I.Dec (_, v_) as d_), s), abstract) =
       lowerSplitDest
         ( I.Null,
           (v_, s),
@@ -319,8 +318,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           I.Pi ((I.Dec (_, v1'), I.No), v2'),
           bdd' ) ->
           inheritDBot (b_, k + 1, v2_, k' + 1, v2', bdd')
-      | b_, k, I.Root (I.Const cid, s_), k', I.Root (I.Const cid', s'_), bdd'
-        ->
+      | b_, k, I.Root (I.Const cid, s_), k', I.Root (I.Const cid', s'_), bdd' ->
           let mS = valOf (ModeTable.modeLookup cid) in
           inheritSpineMode (M.Bot, mS, b_, k, s_, k', s'_, bdd')
 
@@ -343,8 +341,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd') )
 
     and inheritSpineMode = function
-      | mode, Modes.Modesyn.ModeSyn.Mnil, b_, k, I.Nil, k', I.Nil, bdd' ->
-          bdd'
+      | mode, Modes.Modesyn.ModeSyn.Mnil, b_, k, I.Nil, k', I.Nil, bdd' -> bdd'
       | ( mode,
           Modes.Modesyn.ModeSyn.Mapp (m, mS),
           b_,
@@ -464,8 +461,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           | InActive -> raise (Error "Not applicable: leftover constraints"))
         sl_
 
-    let menu (((M.State (name, M.Prefix (g_, m_, b_), v_), i), sl_) as op_)
-        =
+    let menu (((M.State (name, M.Prefix (g_, m_, b_), v_), i), sl_) as op_) =
       let rec active = function
         | [], n -> n
         | InActive :: l_, n -> active (l_, n)

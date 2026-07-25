@@ -174,10 +174,7 @@ let cases () =
             test "Same size or greater" Cmd1 "%reduces >= X Y add X Y zero";
             test "Same size or smaller" Cmd1 "%reduces <= X Y add X Y zero";
           ] );
-        ( "%prose",
-          [
-            test "Basic" Cmd1 "%prose highlightHint";
-          ] );
+        ("%prose", [ test "Basic" Cmd1 "%prose highlightHint" ]);
         ( "Parse errors",
           [
             (* %sort with no name: parser expects an identifier immediately after %sort *)

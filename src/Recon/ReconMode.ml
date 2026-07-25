@@ -79,9 +79,10 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
                 try
                   let mS = ModeDec.shortToFull (cid, mS_user, ghost_region) in
                   ((cid, mS), Paths.Reg (0, 0))
-                with ModeDec.Error msg
-                     when string_contains ~needle:"Too many modes specified"
-                            msg ->
+                with
+                | ModeDec.Error msg
+                when string_contains ~needle:"Too many modes specified" msg
+                ->
                   ModeDec.checkFull (cid, mS_user, ghost_region);
                   ((cid, mS_user), Paths.Reg (0, 0))
               end

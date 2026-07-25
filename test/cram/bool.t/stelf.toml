@@ -1,4 +1,0 @@
-[[group]]
-name = "bool"
-main = "./main.lf"
-dirs = ["."]

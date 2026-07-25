@@ -172,8 +172,7 @@ end) : MTPRECURSION = struct
           end
 
     let rec recursion
-        ((nih, gall, fex, oex), (ncurrent, (g0_, b0), ll, ocurrent, h_, f_))
-        =
+        ((nih, gall, fex, oex), (ncurrent, (g0_, b0), ll, ocurrent, h_, f_)) =
       let (g'_, b'_), s', af = createCtx ((g0_, b0), ll, I.id) in
       let t' = createEVars (g'_, gall) in
       let af_ = af (A.Head (g'_, (fex, t'), I.ctxLength gall)) in
@@ -256,8 +255,7 @@ end) : MTPRECURSION = struct
       ltW (gb, k, (us_, vs_), Whnf.whnfEta (us', vs'_), sc, ac, ds_)
 
     and ltW = function
-      | gb, k, (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_), sc, ac, ds_
-        ->
+      | gb, k, (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_), sc, ac, ds_ ->
           ltSpine
             (gb, k, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, ac, ds_)
       | ( ((g_, b_) as gb),
@@ -455,8 +453,7 @@ end) : MTPRECURSION = struct
           then sc ds_
           else ds_
           end
-      | gb, S.Lex l_, S.Lex l'_, sc, ac, ds_ ->
-          ordeqs (gb, l_, l'_, sc, ac, ds_)
+      | gb, S.Lex l_, S.Lex l'_, sc, ac, ds_ -> ordeqs (gb, l_, l'_, sc, ac, ds_)
       | gb, S.Simul l_, S.Simul l'_, sc, ac, ds_ ->
           ordeqs (gb, l_, l'_, sc, ac, ds_)
 
@@ -585,11 +582,8 @@ end) : MTPRECURSION = struct
         s_
       end
 
-    let menu _ =
-      "Recursion (calculates ALL new assumptions & residual lemmas)"
-
-    let handleExceptions f p_ =
-      try f p_ with Order.Error s -> raise (Error s)
+    let menu _ = "Recursion (calculates ALL new assumptions & residual lemmas)"
+    let handleExceptions f p_ = try f p_ with Order.Error s -> raise (Error s)
   end
 
   (* Newly created *)

@@ -97,9 +97,7 @@ module MakePrint
     let sym s = str0 (Symbol.sym s)
     let nameOf = function Some id -> id | None -> "_"
     let fmtEVar (g_, x_) = str0 (Symbol.evar (Names.evarName (g_, x_)))
-
-    let fmtAVar (g_, x_) =
-      str0 (Symbol.evar (Names.evarName (g_, x_) ^ "_"))
+    let fmtAVar (g_, x_) = str0 (Symbol.evar (Names.evarName (g_, x_) ^ "_"))
 
     let rec isNil = function
       | I.Nil -> true
@@ -311,10 +309,7 @@ module MakePrint
       | g_, d, ctx, (I.Uni l_, s) -> aa (ctx, fmtUni l_)
       | g_, d, ctx, (I.Pi (((I.Dec (name_opt, _) as d_), p_), v2_), s)
         when !Global.printArrowSugar
-             &&
-             match (name_opt, p_) with
-             | None, I.No -> true
-             | _ -> false ->
+             && match (name_opt, p_) with None, I.No -> true | _ -> false ->
           let hops, gf, (uf, sf) =
             arrowSugarHops (g_, (I.Pi ((d_, p_), v2_), s))
           in
@@ -322,17 +317,27 @@ module MakePrint
             List.map
               (fun (gi_, (vi, si)) ->
                 fmtExp
-                  (gi_, d + 1, Ctxt (FX.Infix (arrowPrec, FX.Right), [], 0), (vi, si)))
+                  ( gi_,
+                    d + 1,
+                    Ctxt (FX.Infix (arrowPrec, FX.Right), [], 0),
+                    (vi, si) ))
               hops
           in
           let codFmt =
-            fmtExp (gf, d + 1, Ctxt (FX.Infix (arrowPrec, FX.Right), [], 0), (uf, sf))
+            fmtExp
+              (gf, d + 1, Ctxt (FX.Infix (arrowPrec, FX.Right), [], 0), (uf, sf))
           in
           let whole =
-            F.hbox [ sym "%pi"; F.space; F.hVbox (joinArrowChain (domFmts @ [ codFmt ])) ]
+            F.hbox
+              [
+                sym "%pi";
+                F.space;
+                F.hVbox (joinArrowChain (domFmts @ [ codFmt ]));
+              ]
           in
           let (Ctxt (fixity', accum, _l)) = ctx in
-          addAccum (parens ((fixity', FX.Prefix binderPrec), whole), fixity', accum)
+          addAccum
+            (parens ((fixity', FX.Prefix binderPrec), whole), fixity', accum)
       | g_, d, ctx, (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s) ->
           begin match p_ with
           | I.Maybe ->

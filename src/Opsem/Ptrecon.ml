@@ -210,10 +210,8 @@ end) : PTRECON = struct
         && aSolve ((eqns, s), dp, cnstr)
 
   and matchAtom
-      ( ho :: o_,
-        ((I.Root (ha, s_), s) as ps'),
-        (C.DProg (g_, dPool) as dp),
-        sc ) =
+      (ho :: o_, ((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc)
+      =
     let rec matchSig = function
       | [], k -> raise (Error " \noracle #Pc does not exist \n")
       | (I.Const c as hc) :: sgn', k ->

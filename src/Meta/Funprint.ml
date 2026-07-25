@@ -162,8 +162,7 @@ end) : FUNPRINT.FUNPRINT = struct
           begin match (arg__1, arg__2) with
           | (I.Shift n, (I.Decl _ as g_)), psi1 ->
               copyNames (I.Dot (I.Idx (n + 1), I.Shift (n + 1)), g_) psi1
-          | (I.Dot (I.Exp _, s), I.Decl (g_, _)), psi1 ->
-              copyNames (s, g_) psi1
+          | (I.Dot (I.Exp _, s), I.Decl (g_, _)), psi1 -> copyNames (s, g_) psi1
           | (I.Dot (I.Idx k, s), I.Decl (g_, I.Dec (None, _))), psi1 ->
               copyNames (s, g_) psi1
           | (I.Dot (I.Idx k, s), I.Decl (g_, I.Dec (Some name, _))), psi1 ->
@@ -334,8 +333,8 @@ end) : FUNPRINT.FUNPRINT = struct
             Fmt.hVbox
               (Fmt.string (nameLookup index)
               :: Fmt.break_
-              :: Print.formatSpine
-                   (F.makectx psi', argsToSpine (s, psi, I.Nil)));
+              :: Print.formatSpine (F.makectx psi', argsToSpine (s, psi, I.Nil))
+              );
           ]
       in
       let rec formatPro2 = function

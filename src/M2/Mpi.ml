@@ -92,10 +92,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       end
 
     let collectOpen () = Ring.foldr (fun (x, acc) -> x :: acc) [] !openRing
-
-    let collectSolved () =
-      Ring.foldr (fun (x, acc) -> x :: acc) [] !solvedRing
-
+    let collectSolved () = Ring.foldr (fun (x, acc) -> x :: acc) [] !solvedRing
     let nextOpen () = openRing := Ring.next !openRing
     let pushHistory () = history_ := (!openRing, !solvedRing) :: !history_
 
@@ -158,8 +155,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
             (fillingToMenu
                ( [ fillC ],
                  fillingToMenu
-                   ( fillO,
-                     recursionToMenu (recO, splittingToMenu (splitO, [])) )
+                   (fillO, recursionToMenu (recO, splittingToMenu (splitO, [])))
                ))
       end
 

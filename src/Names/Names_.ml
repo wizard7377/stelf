@@ -407,7 +407,6 @@ module MakeNames
     end
 
   let structComps mid = (fun (r, _) -> r) (Array.sub (componentsArray, mid))
-
   let constComps mid = (fun (_, r) -> r) (Array.sub (componentsArray, mid))
 
   let rec findStruct = function

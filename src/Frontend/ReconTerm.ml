@@ -118,7 +118,8 @@ end) : RECON_TERM = struct
      as ""[Loading file ..."", terribly confusing the Emacs error parsing code.
    *)
   let chatterOneNewline () =
-    begin if !Global.chatter = 1 && !errorCount = 1 then Display.debug (Display.string "\n")
+    begin if !Global.chatter = 1 && !errorCount = 1 then
+      Display.debug (Display.string "\n")
     else ()
     end
 
@@ -128,7 +129,9 @@ end) : RECON_TERM = struct
       begin
         chatterOneNewline ();
         begin
-          Display.debug (Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
+          Display.debug
+            (Display.string
+               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           die r
         end
       end
@@ -140,7 +143,9 @@ end) : RECON_TERM = struct
       begin
         chatterOneNewline ();
         begin
-          Display.debug (Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
+          Display.debug
+            (Display.string
+               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
           begin if exceeds (!errorCount, !errorThreshold) then die r else ()
           end
         end
@@ -515,10 +520,7 @@ end) : RECON_TERM = struct
     end
 
   let findLCID x = findBVar (findConst (findCSConst findOmitted)) x
-
-  let findUCID x =
-    findBVar (findConst (findCSConst (findEFVar findOmitted))) x
-
+  let findUCID x = findBVar (findConst (findCSConst (findEFVar findOmitted))) x
   let findQUID x = findConst (findCSConst findOmitted) x
 
   let rec inferApx = function
@@ -839,9 +841,7 @@ end) : RECON_TERM = struct
 
   let rec etaExpandW = function
     | e_, (IntSyn.Pi (((IntSyn.Dec (_, va) as d_), _), vr), s) ->
-        let u1_ =
-          etaExpand (bvarElim 1, (va, IntSyn.comp (s, IntSyn.shift)))
-        in
+        let u1_ = etaExpand (bvarElim 1, (va, IntSyn.comp (s, IntSyn.shift))) in
         let d'_ = IntSyn.decSub (d_, s) in
         IntSyn.Lam
           ( d'_,
@@ -882,8 +882,10 @@ end) : RECON_TERM = struct
 
   let reportInst xnames =
     withConstPath false (fun () ->
-        try Display.debug (Display.string (Print.evarInstToString xnames ^ "\n"))
-        with unprintable_ -> Display.debug (Display.string "%_unifier unprintable_%\n"))
+        try
+          Display.debug (Display.string (Print.evarInstToString xnames ^ "\n"))
+        with unprintable_ ->
+          Display.debug (Display.string "%_unifier unprintable_%\n"))
 
   let delayMismatch (g_, v1_, v2_, r2, location_msg, problem_msg) =
     addDelayed (function () ->
@@ -1427,8 +1429,7 @@ end) : RECON_TERM = struct
         let v1_ = toIntro (b1_, (IntSyn.Uni Type, IntSyn.id)) in
         let d_ = IntSyn.Dec (name, v1_) in
         let (tm2', b2_, l_), ok2 =
-          begin if ok1 then
-            unifyExact (decl_ (g_, d_), tm2, (vr, IntSyn.dot1 s))
+          begin if ok1 then unifyExact (decl_ (g_, d_), tm2, (vr, IntSyn.dot1 s))
           else (inferExact (decl_ (g_, d_), tm2), false)
           end
         in

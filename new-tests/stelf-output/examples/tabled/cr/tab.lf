@@ -1,4 +1,0 @@
-%require %[ lam %] %.
-%require %[ ord-red %] %.
-%require %[ par-red %] %.
-%require %[ tab-examples %] %.

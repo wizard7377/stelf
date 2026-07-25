@@ -139,8 +139,7 @@ end) : REDUCES = struct
         | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select''
-              ( n - 1,
-                ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))) )
+              (n - 1, ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))))
       in
       let rec select' = function
         | R.Arg n -> R.Arg (select'' (n, ((s_, s), vid_)))
@@ -170,8 +169,7 @@ end) : REDUCES = struct
         | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select''
-              ( n - 1,
-                ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))) )
+              (n - 1, ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))))
       in
       let rec select' = function
         | R.Arg n -> R.Arg (select'' (n, ((s_, s), vid_)))

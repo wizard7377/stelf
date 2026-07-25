@@ -28,7 +28,6 @@ module Global : GLOBAL = struct
 
   (* !!!reconsider later!!! Thu Mar 10 09:42:28 2005 *)
   let timeLimit = ref (None : Time.time option)
-
   let arrow_reserved = ref false
   let arrow_infix = ref false
   let latin_uppercase = ref false

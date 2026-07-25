@@ -156,9 +156,7 @@ end) : TOMEGAPRINT = struct
           ]
           @ formatFor' (psi, f_)
 
-    let formatFor (g_, f_) =
-      Fmt.hVbox (formatFor' (g_, T.forSub (f_, T.id)))
-
+    let formatFor (g_, f_) = Fmt.hVbox (formatFor' (g_, T.forSub (f_, T.id)))
     let forToString (psi, f_) = Fmt.makestring_fmt (formatFor (psi, f_))
 
     let decName = function
@@ -196,8 +194,8 @@ end) : TOMEGAPRINT = struct
         | (T.Dot (T.Exp _, s), I.Decl (g_, _)), psi1 -> copyNames (s, g_) psi1
         | (T.Dot (T.Idx k, s), I.Decl (g_, T.UDec (I.Dec (None, _)))), psi1 ->
             copyNames (s, g_) psi1
-        | ( (T.Dot (T.Idx k, s), I.Decl (g_, T.UDec (I.Dec (Some name, _)))),
-            psi1 ) ->
+        | (T.Dot (T.Idx k, s), I.Decl (g_, T.UDec (I.Dec (Some name, _)))), psi1
+          ->
             let psi1' = namePsi (psi1, k, name) in
             copyNames (s, g_) psi1'
         | (T.Dot (T.Prg k, s), I.Decl (g_, T.PDec (None, _, _, _))), psi1 ->
@@ -362,9 +360,8 @@ end) : TOMEGAPRINT = struct
               formatPrg3 callname (I.Decl (psi, d_), p_);
             ]
       | ( callname,
-          ( psi,
-            T.Rec ((T.PDec (Some name, f_, Some tc1, Some tc2) as d_), p_) ) )
-        ->
+          (psi, T.Rec ((T.PDec (Some name, f_, Some tc1, Some tc2) as d_), p_))
+        ) ->
           Fmt.hVbox
             [
               Fmt.string "fix";
@@ -451,9 +448,8 @@ end) : TOMEGAPRINT = struct
           in
           formatLet callname (psi1', p2_, fmts @ [ Fmt.break_; fmt ])
       | ( callname,
-          ( psi,
-            T.Let (d_, p1_, T.Case (T.Cases ((psi1, s1, p2_) :: []))),
-            fmts ) ) ->
+          (psi, T.Let (d_, p1_, T.Case (T.Cases ((psi1, s1, p2_) :: []))), fmts)
+        ) ->
           let psi1' = psiName (psi1, s1, psi, 1) in
           let f1_ = Fmt.hVbox [ formatPrg3 callname (psi, p1_) ] in
           let s_ = argsToSpine (s1, 1, T.Nil) in

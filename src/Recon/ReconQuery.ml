@@ -60,8 +60,7 @@ module Make_ReconQuery
     in
     let cd = Names.nameConDec cd in
     let _ =
-      Display.chatter_s 3 ~kind:Display.Response
-        (Print.conDecToString cd ^ "\n")
+      Display.chatter_s 3 ~kind:Display.Response (Print.conDecToString cd ^ "\n")
     in
     let _ =
       if !Global.doubleCheck then begin
@@ -88,8 +87,7 @@ module Make_ReconQuery
     in
     let cd = Names.nameConDec cd in
     let _ =
-      Display.chatter_s 3 ~kind:Display.Response
-        (Print.conDecToString cd ^ "\n")
+      Display.chatter_s 3 ~kind:Display.Response (Print.conDecToString cd ^ "\n")
     in
     let _ =
       if !Global.doubleCheck then begin

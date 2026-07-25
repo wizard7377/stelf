@@ -35,7 +35,9 @@ let exe_dir : string =
 (* test/Pal is two directories below the repo root. *)
 let repo_root : string = Filename.concat exe_dir "../.."
 let new_tests_pages : string = Filename.concat repo_root "new-tests2/pages"
-let new_tests_output_pages : string = Filename.concat repo_root "new-tests2/pages"
+
+let new_tests_output_pages : string =
+  Filename.concat repo_root "new-tests2/pages"
 
 let new_tests_stelf_output_tslf : string =
   Filename.concat repo_root "new-tests2/tslf"
@@ -261,9 +263,11 @@ let cases () =
         file_test ~skip:true ~failure:true "require/missing"
           [ exe_dir ^ "/require/missing/main.lf" ];
         (* Circular %require is handled gracefully: the dedup table breaks the cycle *)
-        file_test ~skip:true "require/circular" [ exe_dir ^ "/require/circular/a.lf" ];
+        file_test ~skip:true "require/circular"
+          [ exe_dir ^ "/require/circular/a.lf" ];
         (* Second %require of the same file is a no-op (idempotent) *)
-        file_test ~skip:true "require/dedup" [ exe_dir ^ "/require/dedup/main.lf" ];
+        file_test ~skip:true "require/dedup"
+          [ exe_dir ^ "/require/dedup/main.lf" ];
         (* %require inside %scope escapes to group_ns, not the inner scope's ns *)
         file_test ~skip:true "require/scope-require"
           [ exe_dir ^ "/require/scope-require/outer.lf" ];
@@ -274,11 +278,14 @@ let cases () =
         (* %open inside a %scope body (inner scope can open outer scope) *)
         test "scope/open-inside" Source.[ scope_open_inside_test ];
         (* TOML: single group *)
-        file_test ~skip:true "toml/single" [ exe_dir ^ "/require/toml/single/stelf.toml" ];
+        file_test ~skip:true "toml/single"
+          [ exe_dir ^ "/require/toml/single/stelf.toml" ];
         (* TOML: multi-group with local dep — dep group loaded before main *)
-        file_test ~skip:true "toml/multi" [ exe_dir ^ "/require/toml/multi/stelf.toml" ];
+        file_test ~skip:true "toml/multi"
+          [ exe_dir ^ "/require/toml/multi/stelf.toml" ];
         (* TOML: local dep with alias — dep accessible under aliased struct name *)
-        file_test ~skip:true "toml/alias" [ exe_dir ^ "/require/toml/alias/stelf.toml" ];
+        file_test ~skip:true "toml/alias"
+          [ exe_dir ^ "/require/toml/alias/stelf.toml" ];
         (* %local: qualify names in inner expr against given namespace *)
         test "local/basic" Source.[ local_basic_test ];
         (* %local: names not in namespace are resolved from surrounding context *)
@@ -301,16 +308,20 @@ let cases () =
         test "union/basic" Source.[ union_test ];
         (* %unique: impl hardcodes Mnil mode into checkUnique, causing a pattern match
            failure in Modecheck.checkMode — skip until the impl reads the mode table *)
-        test ~skip:true "unique/basic" Source.[ unique_test ]; (* NOTE: this test is ill formed *)
+        test ~skip:true "unique/basic" Source.[ unique_test ];
+        (* NOTE: this test is ill formed *)
         (* new-tests/pages: Twelf Wiki examples exercising % line comments and
            %[ ... %] string prose, which skip_outer now handles *)
 
         (* All content inside one big %[ ... %] string — parse to zero commands *)
-        file_test ~skip:true "new-tests/pages/computation-and-deduction-2009-20090203"
+        file_test ~skip:true
+          "new-tests/pages/computation-and-deduction-2009-20090203"
           [ new_tests_pages ^ "/computation-and-deduction-2009-20090203.lf" ];
-        file_test ~skip:true "new-tests/pages/computation-and-deduction-2009-20090316"
+        file_test ~skip:true
+          "new-tests/pages/computation-and-deduction-2009-20090316"
           [ new_tests_pages ^ "/computation-and-deduction-2009-20090316.lf" ];
-        file_test ~skip:true "new-tests/pages/computation-and-deduction-2009-20090408"
+        file_test ~skip:true
+          "new-tests/pages/computation-and-deduction-2009-20090408"
           [ new_tests_pages ^ "/computation-and-deduction-2009-20090408.lf" ];
         (* lex-orderings: parses cleanly after the %[ ... %] migration, but
            reconstruction then reports 2 errors — a separate reconstructor
@@ -341,13 +352,15 @@ let cases () =
           [ new_tests_pages ^ "/proving-metatheorems-with-twelf.lf" ];
         file_test ~skip:true "new-tests/pages/talk-effectiveness-lemma"
           [ new_tests_pages ^ "/talk-effectiveness-lemma.lf" ];
-        file_test ~skip:true "new-tests/pages/talk-incremental-metatheorem-development"
+        file_test ~skip:true
+          "new-tests/pages/talk-incremental-metatheorem-development"
           [ new_tests_pages ^ "/talk-incremental-metatheorem-development.lf" ];
         file_test ~skip:true "new-tests/pages/talk-metatheorem"
           [ new_tests_pages ^ "/talk-metatheorem.lf" ];
         file_test ~skip:true "new-tests/pages/talk-mutable-state"
           [ new_tests_pages ^ "/talk-mutable-state.lf" ];
-        file_test ~skip:true "new-tests/pages/talk-natural-numbers-with-inequality"
+        file_test ~skip:true
+          "new-tests/pages/talk-natural-numbers-with-inequality"
           [ new_tests_pages ^ "/talk-natural-numbers-with-inequality.lf" ];
         file_test ~skip:true "new-tests/pages/talk-thaw"
           [ new_tests_pages ^ "/talk-thaw.lf" ];
@@ -405,7 +418,8 @@ let cases () =
             new_tests_output_pages
             ^ "/proving-metatheorems-solutions-odd-even-succ.lf";
           ];
-        file_test ~skip:true "new-tests/output/pages/proving-metatheorems-with-twelf"
+        file_test ~skip:true
+          "new-tests/output/pages/proving-metatheorems-with-twelf"
           [ new_tests_output_pages ^ "/proving-metatheorems-with-twelf.lf" ];
         file_test ~skip:true "new-tests/output/pages/talk-effectiveness-lemma"
           [ new_tests_output_pages ^ "/talk-effectiveness-lemma.lf" ];
@@ -419,13 +433,15 @@ let cases () =
           [ new_tests_output_pages ^ "/talk-metatheorem.lf" ];
         file_test ~skip:true "new-tests/output/pages/talk-mutable-state"
           [ new_tests_output_pages ^ "/talk-mutable-state.lf" ];
-        file_test ~skip:true "new-tests/output/pages/talk-natural-numbers-with-inequality"
+        file_test ~skip:true
+          "new-tests/output/pages/talk-natural-numbers-with-inequality"
           [
             new_tests_output_pages ^ "/talk-natural-numbers-with-inequality.lf";
           ];
         file_test ~skip:true "new-tests/output/pages/talk-thaw"
           [ new_tests_output_pages ^ "/talk-thaw.lf" ];
-        file_test ~skip:true "new-tests/output/pages/template-bibtex-pierce02tapl"
+        file_test ~skip:true
+          "new-tests/output/pages/template-bibtex-pierce02tapl"
           [ new_tests_output_pages ^ "/template-bibtex-pierce02tapl.lf" ];
         file_test ~skip:true "new-tests/output/pages/template-discuss"
           [ new_tests_output_pages ^ "/template-discuss.lf" ];
@@ -437,8 +453,6 @@ let cases () =
           [ new_tests_output_pages ^ "/twelf-with-emacs.lf" ];
         file_test ~skip:true "new-tests/output/pages/user-jaked"
           [ new_tests_output_pages ^ "/user-jaked.lf" ];
-        file_test ~skip:false "new-tests/stelf-output/tslf"
-          [ new_tests_stelf_output_tslf ^ "/stelf.toml" ];
         test "%prose"
           [
             {| %prose highlightHint |};

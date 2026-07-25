@@ -277,8 +277,7 @@ module MakeCover
             end
         | I.Def d1, I.Def d2 ->
             begin if d1 = d2 then matchSpine (g_, d, (s1_, s1), (s2_, s2), cands)
-            else
-              matchExpW (g_, d, Whnf.expandDef us1, Whnf.expandDef us2, cands)
+            else matchExpW (g_, d, Whnf.expandDef us1, Whnf.expandDef us2, cands)
             end
         | I.Def d1, _ -> matchExpW (g_, d, Whnf.expandDef us1, us2, cands)
         | _, I.Def d2 -> matchExpW (g_, d, us1, Whnf.expandDef us2, cands)
@@ -729,8 +728,7 @@ module MakeCover
           begin if occursInMatchPos (1, v2_, ci) then Some x1_ else None
           end
         in
-        instEVarsSkip
-          ((v2_, I.Dot (I.Exp x1_, s)), p - 1, eVarOpt :: xsRev, ci)
+        instEVarsSkip ((v2_, I.Dot (I.Exp x1_, s)), p - 1, eVarOpt :: xsRev, ci)
     | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev, ci ->
         let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
         instEVarsSkip ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev, ci)
@@ -1031,9 +1029,7 @@ module MakeCover
   and createCoverGoalW = function
     | g_, (I.Pi ((d1_, p1_), v2_), s), 0, ms ->
         let d1' = I.decSub (d1_, s) in
-        let v2' =
-          createCoverGoal (I.Decl (g_, d1'), (v2_, I.dot1 s), 0, ms)
-        in
+        let v2' = createCoverGoal (I.Decl (g_, d1'), (v2_, I.dot1 s), 0, ms) in
         I.Pi ((d1', p1_), v2')
     | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s), p, ms ->
         let x_ = Whnf.newLoweredEVar (g_, (v1_, s)) in

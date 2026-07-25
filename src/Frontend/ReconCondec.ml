@@ -154,8 +154,7 @@ end) : RECON_CONDEC = struct
           else begin
             Strict.check ((u'', v''), Some ocd);
             Names.nameConDec
-              (IntSyn.ConDef
-                 (name, None, i, u'', v'', l_, IntSyn.ancestor u''))
+              (IntSyn.ConDef (name, None, i, u'', v'', l_, IntSyn.ancestor u''))
           end
             (* stricter checking of types according to Chris Richards Fri Jul  2 16:33:46 2004 -fp *)
             (* (case optName of NONE => () | _ => Strict.checkType ((i, V''), SOME(ocd))); *)
@@ -167,8 +166,7 @@ end) : RECON_CONDEC = struct
         in
         let _ =
           begin if !Global.doubleCheck then begin
-            (try
-               Timers.time Timers.checking TypeCheck.check (v'', IntSyn.Uni l_)
+            (try Timers.time Timers.checking TypeCheck.check (v'', IntSyn.Uni l_)
              with TypeCheck.Error msg ->
                let n = match optName with None -> "_" | Some n -> n in
                Printf.eprintf "DOUBLE-CHECK FAIL on ConDef %s (type): %s\n%!" n

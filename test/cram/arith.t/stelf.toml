@@ -1,4 +1,0 @@
-[[group]]
-name = "arith"
-main = "./main.lf"
-dirs = ["."]

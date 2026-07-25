@@ -447,15 +447,12 @@ end) : MEMOTABLE = struct
       | Node (_, children_), dsigma, drho1, gr, drho2 ->
           Node
             ( dsigma,
-              [
-                ref (Leaf (drho2, ref [ gr ])); ref (Node (drho1, children_));
-              ] )
+              [ ref (Leaf (drho2, ref [ gr ])); ref (Node (drho1, children_)) ]
+            )
       | Leaf (c, gRlist), dsigma, drho1, gr2, drho2 ->
           Node
             ( dsigma,
-              [
-                ref (Leaf (drho2, ref [ gr2 ])); ref (Leaf (drho1, gRlist));
-              ] )
+              [ ref (Leaf (drho2, ref [ gr2 ])); ref (Leaf (drho1, gRlist)) ] )
 
     let rec compatibleCtx = function
       | (g_, eqn), [] -> None
@@ -598,8 +595,7 @@ end) : MEMOTABLE = struct
                           end,
                           T.NewEntry answRef )
                   end
-              | (childRef, drho2, asub) :: [], _ ->
-                  insert (childRef, drho2, gr)
+              | (childRef, drho2, asub) :: [], _ -> insert (childRef, drho2, gr)
               | (childRef, drho2, asub) :: l_, sCands ->
                   begin match insert (childRef, drho2, gr) () with
                   | _, T.NewEntry answRef -> checkCandidates (l_, sCands)

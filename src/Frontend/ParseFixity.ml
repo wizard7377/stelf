@@ -130,9 +130,7 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
               "Expected identifer to assign name preference, found "
               ^ L.toString t )
 
-    let parseNamePref' (LS.Cons ((L.Name, r), s')) =
-      parseName1 (LS.expose s')
-
+    let parseNamePref' (LS.Cons ((L.Name, r), s')) = parseName1 (LS.expose s')
     let parseNamePref s = parseNamePref' (LS.expose s)
   end
 

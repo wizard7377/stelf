@@ -159,8 +159,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
 
     let rec deltaSub = function
       | I.Null, s -> I.Null
-      | I.Decl (delta, dd), s ->
-          I.Decl (deltaSub (delta, s), F.mdecSub (dd, s))
+      | I.Decl (delta, dd), s -> I.Decl (deltaSub (delta, s), F.mdecSub (dd, s))
 
     let shift delta = deltaSub (delta, I.shift)
 
@@ -178,8 +177,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
 
     let rec check = function
       | psi, delta, F.Unit, (F.True, _) -> ()
-      | psi, delta, F.Rec (dd, p_), f_ ->
-          check (psi, I.Decl (delta, dd), p_, f_)
+      | psi, delta, F.Rec (dd, p_), f_ -> check (psi, I.Decl (delta, dd), p_, f_)
       | ( psi,
           delta,
           F.Lam ((F.Prim (I.Dec (_, v_)) as ld), p_),
@@ -231,9 +229,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
               let psi', delta', s' =
                 assume (I.Decl (psi, ld), I.Decl (shift delta, dd), ds_)
               in
-              ( ld :: psi',
-                F.mdecSub (dd, s') :: delta',
-                I.comp (I.shift, s') )
+              (ld :: psi', F.mdecSub (dd, s') :: delta', I.comp (I.shift, s'))
           | _ -> raise (Error "Typecheck Error: Declaration")
           end
       | psi, delta, F.New (b_, ds_) ->
@@ -263,9 +259,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
                        ^ Print.expToString (F.makectx psi, I.EClo (v_, s))))
               in
               let dd = F.MDec (name, F.forSub (f_, I.Dot (I.Exp u_, s))) in
-              let psi', delta', s' =
-                assume (psi, I.Decl (delta, dd), ds_)
-              in
+              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
               (psi', F.mdecSub (dd, s') :: delta', s')
           | F.MDec (name, f_), s ->
               raise
@@ -278,9 +272,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           | F.MDec (name, F.All (F.Block (F.CtxBlock (l, g_)), f_)), s ->
               ignore (validBlock (psi, k, (l, g_)));
               let dd = F.MDec (name, F.forSub (f_, psub (k, g_, s))) in
-              let psi', delta', s' =
-                assume (psi, I.Decl (delta, dd), ds_)
-              in
+              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
               (psi', F.mdecSub (dd, s') :: delta', s')
           | _ -> raise (Error "Typecheck Error: Declaration PApp")
           end
@@ -288,9 +280,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           begin match infer (delta, kk) with
           | F.MDec (name, F.And (f1_, f2_)), s ->
               let dd = F.MDec (name, F.forSub (f1_, s)) in
-              let psi', delta', s' =
-                assume (psi, I.Decl (delta, dd), ds_)
-              in
+              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
               (psi', F.mdecSub (dd, s') :: delta', s')
           | _ -> raise (Error "Typecheck Error: Declaration Left")
           end
@@ -298,9 +288,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           begin match infer (delta, kk) with
           | F.MDec (name, F.And (f1_, f2_)), s ->
               let dd = F.MDec (name, F.forSub (f2_, s)) in
-              let psi', delta', s' =
-                assume (psi, I.Decl (delta, dd), ds_)
-              in
+              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
               (psi', F.mdecSub (dd, s') :: delta', s')
           | _ -> raise (Error "Typecheck Error: Declaration Left")
           end
