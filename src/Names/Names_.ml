@@ -280,6 +280,17 @@ module MakeNames
       Array.array (maxCid + 1, None)
 
     let namePrefClear () = Array.modify (function _ -> None) namePrefArray
+
+    (* The structure a constant was first installed as a component of, if
+       any.  [IntSyn.conDecParent] answers the same question from the
+       declaration itself, but only the module system ever fills that field
+       in: %scope records membership here, in the name tables, and leaves
+       the conDec's parent [None].  So this is the only record that a
+       %scope-declared constant belongs anywhere.  See [constPath]. *)
+    let parentArray : IntSyn.mid option Array.array =
+      Array.array (maxCid + 1, None)
+
+    let parentClear () = Array.modify (function _ -> None) parentArray
     let topNamespace : IntSyn.cid HashTable.table = HashTable.new_ 4096
     let topInsert = HashTable.insertShadow topNamespace
     let topLookup = HashTable.lookup topNamespace
@@ -398,7 +409,10 @@ module MakeNames
               fixityClear ();
               begin
                 namePrefClear ();
-                componentsClear ()
+                begin
+                  componentsClear ();
+                  parentClear ()
+                end
               end
             end
           end
@@ -623,6 +637,31 @@ module MakeNames
     let qid = conDecQid condec_ in
     maybeShadow (qid, constLookup qid <> Some cid)
 
+  (* constPath (cid) = SOME qid, where qid names cid through the structure it
+       was declared in and resolves back to it, or NONE if no such qid exists.
+
+       This is the answer [constQid]'s "%c%" marker cannot give.  The marker
+       says only that the bare name now means something else -- typically
+       because a %scope closed and its components stopped being bare-visible
+       -- while the constant itself is still perfectly reachable as
+       [Qid ([scope], c)], since structure-member lookup does not consult the
+       bare-name table at all.
+
+       The result is verified rather than trusted: [parentArray] is not
+       retracted by [uninstallConst] (bare-name retraction is not a change of
+       membership) or by [resetFrom], so a stale entry is possible and must
+       not turn into a name that resolves elsewhere.
+    *)
+  let constPath cid =
+    begin match Array.sub (parentArray, cid) with
+    | None -> None
+    | Some mid ->
+        let name = IntSyn.conDecName (IntSyn.sgnLookup cid) in
+        let qid = Qid (structPath (mid, []), name) in
+        begin if constLookup qid = Some cid then Some qid else None
+        end
+    end
+
   let structQid mid =
     let strdec = IntSyn.sgnStructLookup mid in
     let id = IntSyn.strDecName strdec in
@@ -691,7 +730,20 @@ module MakeNames
   let getNamePref cid = Array.sub (namePrefArray, cid)
 
   let installComponents (mid, namespace) =
-    Array.update (componentsArray, mid, namespace)
+    begin
+      (* First writer wins: a %scope reopening installs the same components
+         again, and %open copies a constant into an enclosing namespace that
+         may itself become a structure's.  The structure it was declared in
+         is the one that keeps naming it. *)
+      appConsts
+        (fun (_, cid) ->
+          begin match Array.sub (parentArray, cid) with
+          | None -> Array.update (parentArray, cid, Some mid)
+          | Some _ -> ()
+          end)
+        namespace;
+      Array.update (componentsArray, mid, namespace)
+    end
 
   let getComponents mid = Array.sub (componentsArray, mid)
 

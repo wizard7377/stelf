@@ -115,6 +115,13 @@ module type NAMES = sig
 
   val constQid : IntSyn.cid -> qid
 
+  val constPath : IntSyn.cid -> qid option
+  (** [constPath cid] is a qualified name that reaches [cid] through the
+      structure it was declared in, or [None] if there is none. Unlike
+      [constQid] it never returns a marker: either the qid resolves back to
+      [cid] or the answer is [None]. Use it to recover a printable name for a
+      constant [constQid] has marked as shadowed. *)
+
   val structQid : IntSyn.mid -> qid
   (** will mark if shadowed *)
 

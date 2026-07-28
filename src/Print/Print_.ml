@@ -1267,12 +1267,3 @@ module PrintTeX =
 module ClausePrintTeX =
   ClausePrintFunctor.MakeClausePrint (Whnf) (Names) (Formatter) (PrintTeX)
     (SymbolTeX)
-
-module PrintTwega =
-  PrintTwega.MakePrintTwega (Whnf) (Abstract) (Constraints) (Names) (Formatter)
-
-module PrintXML =
-  PrintXml.MakePrintXML (Whnf) (Abstract) (Constraints) (Names) (Formatter)
-
-module PrintOMDoc =
-  PrintOmdoc.MakePrintOMDoc (Whnf) (Abstract) (Constraints) (Names) (Formatter)

@@ -11,15 +11,15 @@
   
   => %sort add {nat0 ℕ} {nat1 ℕ} {nat2 ℕ}
   
-  => %term 0 {X ℕ} add %%%0%%% X X
+  => %term 0 {X ℕ} add %(nat 0) X X
   
-  => %term S {X ℕ} {Y ℕ} {Z ℕ} {_0 add X Y Z} add (%%%S%%% X) Y (%%%S%%% Z)
+  => %term S {X ℕ} {Y ℕ} {Z ℕ} {_0 add X Y Z} add (%(nat S) X) Y (%(nat S) Z)
   
-  => %sort goal {X ℕ} {_0 add %%%0%%% X X}
+  => %sort goal {X ℕ} {_0 add %(nat 0) X X}
   
-  => %term case-0 goal %%%0%%% (0 %%%0%%%)
+  => %term case-0 goal %(nat 0) (0 %(nat 0))
   
-  => %term case-S {X ℕ} goal (%%%S%%% X) (0 (%%%S%%% X))
+  => %term case-S {X ℕ} goal (%(nat S) X) (0 (%(nat S) X))
   
   note: checking mode of constant   case-0   ... 
   note: checking mode of constant   case-S   ... 
@@ -27,12 +27,12 @@
   note: checking mode of constant   case-S   ... 
   => %sort mul {nat0 ℕ} {nat1 ℕ} {nat2 ℕ}
   
-  => %term 0 {X ℕ} mul X %%%0%%% %%%0%%%
+  => %term 0 {X ℕ} mul X %(nat 0) %(nat 0)
   
   => %term
     S
       {X ℕ} {Y ℕ} {Z ℕ} {Z' ℕ} {_0 mul X Y Z} {_1 add Y Z Z'}
-        mul (%%%S%%% X) Y Z'
+        mul (%(nat S) X) Y Z'
   
 
   $ stelf repl stelf.toml
@@ -48,15 +48,15 @@
   
   => %sort add {nat0 ℕ} {nat1 ℕ} {nat2 ℕ}
   
-  => %term 0 {X ℕ} add %%%0%%% X X
+  => %term 0 {X ℕ} add %(nat 0) X X
   
-  => %term S {X ℕ} {Y ℕ} {Z ℕ} {_0 add X Y Z} add (%%%S%%% X) Y (%%%S%%% Z)
+  => %term S {X ℕ} {Y ℕ} {Z ℕ} {_0 add X Y Z} add (%(nat S) X) Y (%(nat S) Z)
   
-  => %sort goal {X ℕ} {_0 add %%%0%%% X X}
+  => %sort goal {X ℕ} {_0 add %(nat 0) X X}
   
-  => %term case-0 goal %%%0%%% (0 %%%0%%%)
+  => %term case-0 goal %(nat 0) (0 %(nat 0))
   
-  => %term case-S {X ℕ} goal (%%%S%%% X) (0 (%%%S%%% X))
+  => %term case-S {X ℕ} goal (%(nat S) X) (0 (%(nat S) X))
   
   debug: checking mode of constant   %case-0%   ... 
   
@@ -68,10 +68,10 @@
   
   => %sort mul {nat0 ℕ} {nat1 ℕ} {nat2 ℕ}
   
-  => %term 0 {X ℕ} mul X %%%0%%% %%%0%%%
+  => %term 0 {X ℕ} mul X %(nat 0) %(nat 0)
   
   => %term
     S
       {X ℕ} {Y ℕ} {Z ℕ} {Z' ℕ} {_0 mul X Y Z} {_1 add Y Z Z'}
-        mul (%%%S%%% X) Y Z'
+        mul (%(nat S) X) Y Z'
   

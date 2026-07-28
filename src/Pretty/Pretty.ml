@@ -64,19 +64,26 @@ module Make_Pretty (Cst : Cst.CST) :
 
   let esc = Lex.escape_ident
 
-  (* A qualified name is written [%val ( a b c )] -- always with the
-     parentheses, because the unparenthesised form takes a single identifier
-     and cannot carry a namespace. Dots are not separators in this grammar. *)
-  let pp_qualified fmt ((ns, name) : Cst.symbol) (form : Cst.qid_form) =
-    let kw = match form with Cst.Val -> "%val" | Cst.Abs -> "%abs" in
-    match ns with
-    | [] -> Format.fprintf fmt "%s %s" kw (esc name)
-    | _ ->
-        Format.fprintf fmt "@[<hov 2>%s (%a %s)@]" kw
-          (Format.pp_print_list
-             ~pp_sep:(fun fmt () -> Format.fprintf fmt "@ ")
-             (fun fmt c -> Format.pp_print_string fmt (esc c)))
-          ns (esc name)
+  let pp_path fmt ((ns, name) : Cst.symbol) =
+    Format.pp_print_list
+      ~pp_sep:(fun fmt () -> Format.fprintf fmt "@ ")
+      (fun fmt c -> Format.pp_print_string fmt (esc c))
+      fmt (ns @ [ name ])
+
+  (* A qualified name needs parentheses to carry a namespace -- dots are not
+     separators in this grammar, so the unparenthesised form takes a single
+     identifier and nothing more.
+
+     [%val ( a b c )] and [%( a b c )] are the same term: both resolve through
+     [Names.resolveQid ~shortest:false]. The shorter one is what gets printed,
+     since the keyword adds nothing a reader can act on. [%abs] has no such
+     abbreviation -- [%(...)] parses as [Val] -- so it keeps the long form. *)
+  let pp_qualified fmt ((ns, name) as sym : Cst.symbol) (form : Cst.qid_form) =
+    match (form, ns) with
+    | Cst.Val, [] -> Format.fprintf fmt "%%val %s" (esc name)
+    | Cst.Abs, [] -> Format.fprintf fmt "%%abs %s" (esc name)
+    | Cst.Val, _ -> Format.fprintf fmt "@[<hov 2>%%(%a)@]" pp_path sym
+    | Cst.Abs, _ -> Format.fprintf fmt "@[<hov 2>%%abs (%a)@]" pp_path sym
 
   (* [%val] is the universal escape hatch for a name that cannot be written
      bare: [Modern.classify] makes [Qualified] an atom unconditionally, so it
@@ -125,8 +132,12 @@ module Make_Pretty (Cst : Cst.CST) :
     | T.FreeVar (_, n) -> pp_ident env fmt ([], n) ~uppercase:false
     | T.Omitted _ -> Format.pp_print_string fmt "_"
     | T.Typ _ -> Format.pp_print_string fmt "%type"
-    (* [%(ns (M))] is an atom, unlike the [%local ns M] spelling, so it needs
-       no parentheses of its own in any slot. *)
+    (* [%(ns (M))] is an atom, so it needs no parentheses of its own in any
+       slot. The inner pair is not optional here even when [M] is one name:
+       dropping them turns the node into [%(ns M)], which is a qualified name
+       and demands that [ns] have a member [M], where [Local] only rewrites
+       the names [ns] happens to have and leaves the rest -- a bound variable
+       among them. Resugaring never builds this node; see [Resugar.Term]. *)
     | T.Local (_, ns, body) ->
         Format.fprintf fmt "@[<hov 2>%%(%a (%a))@]"
           (Format.pp_print_list

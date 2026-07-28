@@ -5,22 +5,7 @@
   (backend bisect_ppx))
  (name print)
  (public_name stelf.print)
- (modules
-  Symbol
-  ClausePrint
-  Print_
-  PrintCst
-  Traverse
-  PrintTwega
-  PrintXml
-  PrintOmdoc
-  CLAUSEPRINT
-  PRINT
-  PRINTOMDOC
-  PRINTTWEGA
-  PRINTXML
-  SYMBOL
-  TRAVERSE)
+ (modules Symbol ClausePrint Print_ PrintCst CLAUSEPRINT PRINT SYMBOL)
  (libraries
   display
   global

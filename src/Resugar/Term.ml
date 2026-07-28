@@ -103,9 +103,36 @@ module Make (Cst : Cst.CST) = struct
     | FX.Infix _ -> 2
     | FX.Prefix _ | FX.Postfix _ -> 1
 
+  (* The namespace path to fall back on when a constant's own name no longer
+     reaches it -- a %scope that has closed, so its components stopped being
+     bare-visible while remaining perfectly reachable as members of the
+     structure.
+
+     [None] means either that nothing is wrong (the canonical name resolves
+     here) or that nothing can be done (the constant was declared at top
+     level and shadowed, so there is no namespace to name it through). *)
+  let const_path (opts : Options.t) cid : N.qid option =
+    if opts.no_shadow then None
+    else
+      let qid = N.conDecQid (I.sgnLookup cid) in
+      if N.constLookup qid = Some cid then None else N.constPath cid
+
+  (* A namespaced symbol carries its own escape hatch: [Pretty] has to spell
+     it [%( ns c )], which resolves [c] as a member of [ns] and never consults
+     what the bare name means at the point of use. That is exactly the
+     question the [%c%] marker raises and cannot answer, so supplying the path
+     is the whole fix -- nothing here needs to know how it will be written. *)
   let const_sym (opts : Options.t) cid : Cst.symbol =
     let (N.Qid (ids, id)) =
-      if opts.no_shadow then N.conDecQid (I.sgnLookup cid) else N.constQid cid
+      match const_path opts cid with
+      | Some qid -> qid
+      | None ->
+          (* [constQid] decorates an unreachable name as [%c%]. That is a
+             note to the reader rather than syntax, but there is nowhere
+             better to put it: the constant was declared at top level and
+             shadowed, so no namespace names it. *)
+          if opts.no_shadow then N.conDecQid (I.sgnLookup cid)
+          else N.constQid cid
     in
     if opts.show_const_path then (ids, id) else ([], id)
 
