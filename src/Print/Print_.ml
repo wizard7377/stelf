@@ -1247,9 +1247,13 @@ structure WorldPrint = WorldPrint
    structure Formatter_param = Formatter
    structure Print = Print);
 *)
-module Print =
+(* Term output now goes through [Resugar] and [Pretty]; see [PrintCst].
+   [MakePrint] stays because [PrintTeX] and [ClausePrintTeX] below still use
+   it, and because reverting is this one line. *)
+module PrintForML =
   MakePrint (Whnf) (Abstract) (Constraints) (Names) (Formatter) (SymbolAscii)
 
+module Print = PrintCst.Print
 module ClausePrintFunctor = ClausePrint
 include Print
 

@@ -15,7 +15,7 @@
 
 (license BSD-2-Clause)
 
-(documentation https://github.com/standardocaml/stelf/wiki)
+(documentation https://standardocaml.github.io/)
 
 (pin
  (url "basis")
@@ -47,10 +47,7 @@
   (ocaml-lsp-server :dev)
   (user-setup :dev)
   (merlin :dev)
-  ; (js_of_ocaml :with-doc)
-  ; (js_of_ocaml-compiler :with-doc) 
-  ; (js_of_ocaml-ppx :with-doc) 
-  ; (js_of_ocaml-lwt :with-doc)
+
   sexplib
   ppx_deriving
   lambda-term

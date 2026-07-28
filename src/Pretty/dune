@@ -1,0 +1,7 @@
+(library
+ (instrumentation
+  (backend bisect_ppx))
+ (name pretty)
+ (public_name stelf.pretty)
+ (libraries cst)
+ (wrapped true))

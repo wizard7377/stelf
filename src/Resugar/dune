@@ -3,4 +3,5 @@
   (backend bisect_ppx))
  (name resugar)
  (public_name stelf.resugar)
- (libraries syntax names paths cst))
+ (libraries cst paths names intsyn)
+ (wrapped true))

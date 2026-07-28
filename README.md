@@ -18,27 +18,63 @@ Some other quick links:
 3. [Twelf website](https://twelf.org)
 4. [Twelf GitHub](https://github.com/standardml/twelf)
 
-## Building
+## Installation
 
-> [!WARNING] I have not as of yet tested that this is reproducible, please create an issue if you have a problem
+> [!WARNING] 
+> I have not as of yet tested that this is reproducible, please create an issue if you have a problem
 
-The prerequisites for building STELF most easily is the [opam](https://opam.ocaml.org) package manager and `make`.
-Once you have opam installed, to build the project just do `make build`. This should automatically set up your environment, install dependencies and build the project
+These are the quick installation instructions
 
-To install, just do `make install`.
+### Prerequisites
 
-> [!NOTE] You may notice that `dune` starts reporting that the build is getting larger and larger (up to a couple thousand targets (which for dune isn't that much)), or that it seems to be taking a long time on the first couple. This is expected.
+Most of STELF's prequisites are installed automatically.
+However, this setup process has two dependecies.
+Fortuanetly, they are quite easily available.
+1. `make`: GNU Make is fine, other versions are almost certainly also fine but this has only been tested with GNU Make (if it is called something like `make` it is probably fine)
+2. `opam`: The OCaml package manager, which is used to install OCaml and project dependencies.
+   See [opam's installation instructions](https://opam.ocaml.org/doc/Install.html) for your platform if you don't have `opam` installed.
+   Note that if you use the process outlined here you do **not** need to install `ocaml`, `dune`, or anything else, or setup a switch; the [Makefile](./Makefile) does this all automatically
 
-### Testing
+### Sources 
 
-For end-user testing, just run `make test`.
-Developers should use `dune test`.
+The source code for STELF can be obtained from this repository, if you want to install the stable version, the command would be:
+
+```sh
+git clone --recurse-submodules https://github.com/standardocaml/stelf.git
+cd stelf
+```
+
+If, on the other hand, you want the most up to date `dev` version, instead run
+
+```sh
+git clone --recurse-submodules --branch=dev https://github.com/standardocaml/stelf.git
+cd stelf
+```
+
+### Building 
+
+To install, build, document, test, or check the project, use the appropriate `make` target. 
+Those being:
+
+- `make install` to install the project
+- `make build` to build the project (create `./stelf`)
+- `make doc` to generate documentation (in `_build/default/doc`)
+- `make test` to run tests
+- `make check` to check that the project can compile
 
 ### Editor Support
 
 Currently, the only editor supported is Zed (because of its interoperability with Tree-sitter) through the [stelf-zed](https://github.com/standardocaml/stelf-zed) extension.
 
-> [!NOTE] Help creating extensions for other editors is greatly appreciated
+> [!NOTE] 
+> Help creating extensions for other editors is greatly appreciated
+
+## Building 
+
+### Testing
+
+For end-user testing, just run `make test`.
+Developers should use `dune test`.
 
 ## Improvements from Twelf
 

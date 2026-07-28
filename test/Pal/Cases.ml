@@ -24,6 +24,112 @@ let total_add_mul_test =
     {| %total N (add N _ _) |};
   ]
 
+(* ------------------------------------------------------------------ *)
+(* Derived forms.  Each of these must install exactly as the longhand    *)
+(* above does; the point of the shorthands is that they desugar to those *)
+(* same commands and nothing below the parser changes.                   *)
+(* ------------------------------------------------------------------ *)
+
+(* [%data] == %sort + %scope.  The constructors land inside the scope. *)
+let data_test =
+  [
+    {| %data d-nat %{ %term zero d-nat %. %term succ {_ d-nat} d-nat %} |};
+    {| %term d-one d-nat %. |};
+  ]
+
+(* Reopening the same name must behave like two explicit %scope blocks. *)
+let data_reopen_test =
+  [
+    {| %data r-nat %{ %term zero r-nat %} |};
+    {| %data r-bool %{ %term tt r-bool %} |};
+  ]
+
+(* [%prop] == %sort + %mode. *)
+let prop_test =
+  [
+    {| %sort p-nat |};
+    {| %term p-zero p-nat |};
+    {| %term p-succ {_ p-nat} p-nat |};
+    {| %prop p-add {%in X p-nat} {%in Y p-nat} {%out Z p-nat} |};
+    {| %term p-add/zero {y p-nat} p-add p-zero y y |};
+    {| %term p-add/succ {x p-nat} {y p-nat} {z p-nat} {_ p-add x y z} p-add (p-succ x) y (p-succ z) |};
+  ]
+
+(* [%proof] == %sort + %scope + %mode + %worlds + %total.  This is the
+   end-to-end case: if the derived %mode, %worlds and %total were malformed,
+   mode checking, world checking or the totality check would reject it. *)
+let proof_test =
+  [
+    {| %sort f-nat |};
+    {| %term f-zero f-nat |};
+    {| %term f-succ {_ f-nat} f-nat |};
+    {| %proof () f-add {%in X f-nat} {%in Y f-nat} {%out Z f-nat} %{
+         %term f-add/zero {y f-nat} f-add f-zero y y %.
+         %term f-add/succ {x f-nat} {y f-nat} {z f-nat} {_ f-add x y z} f-add (f-succ x) y (f-succ z) %.
+       %} |};
+  ]
+
+(* The realistic pairing: %data scopes its constructors, so referring to them
+   afterwards needs an %open.  This is inherited from %scope, not introduced by
+   %data -- the longhand %sort + %scope behaves identically -- but it is the
+   shape real code takes, so it is pinned here. *)
+let data_open_proof_test =
+  {|
+%data s_nat %{
+  %term s_z s_nat %.
+  %term s_s {_ s_nat} s_nat %.
+%}
+%open s_nat
+%proof () s_add {%in X s_nat} {%in Y s_nat} {%out Z s_nat} %{
+  %term s_add/z {y s_nat} s_add s_z y y %.
+  %term s_add/s {x s_nat} {y s_nat} {z s_nat} {_ s_add x y z} s_add (s_s x) y (s_s z) %.
+%}
+|}
+
+(* Without the %open, the constructors are not bare-visible and reconstruction
+   must reject the reference.  Guards the claim above. *)
+let data_without_open_test =
+  {|
+%data u_nat %{
+  %term u_z u_nat %.
+%}
+%sort u_p {X u_nat}
+%term u_p/z u_p u_z
+|}
+
+(* The positive %proof case above only shows the derived commands INSTALL.
+   These two show they are actually enforced: if the derived %mode or %total
+   were malformed or silently dropped, these would wrongly succeed.  Mirrors
+   wiki_failures/mode_error and wiki_failures/totality_error, which pin the
+   same violations in longhand. *)
+
+(* mv_bad's clause uses N2 -- its own OUTPUT -- in an input position of
+   mv_plus, so mode checking must reject it. *)
+let proof_mode_violation =
+  {|
+%sort mv_nat
+%term mv_z mv_nat
+%term mv_s {_ mv_nat} mv_nat
+%proof () mv_plus {%in N1 mv_nat} {%in N2 mv_nat} {%out N3 mv_nat} %{
+  %term mv_plus_z {N mv_nat} mv_plus mv_z N N %.
+  %term mv_plus_s {{N1 N2 N3}} {_ mv_plus N1 N2 N3} mv_plus (mv_s N1) N2 (mv_s N3) %.
+%}
+%proof () mv_bad {%in N1 mv_nat} {%out N2 mv_nat} %{
+  %term mv_bad_case {{N1 N2}} {_ mv_plus N1 N2 N1} mv_bad N1 N2 %.
+%}
+|}
+
+(* No clause covers tv_z, so the derived %total must reject it. *)
+let proof_totality_violation =
+  {|
+%sort tv_nat
+%term tv_z tv_nat
+%term tv_s {_ tv_nat} tv_nat
+%proof () tv_pred {%in N1 tv_nat} {%out N2 tv_nat} %{
+  %term tv_pred_s {N tv_nat} tv_pred (tv_s N) N %.
+%}
+|}
+
 (* Anchor on the exe's own location, not the process cwd: `dune exec` and
    `dune runtest` disagree on cwd but agree on argv0's directory. *)
 let exe_dir : string =
@@ -54,6 +160,15 @@ let cases () =
               String.concat "\n" mul_test;
               String.concat "\n" total_add_mul_test;
             ];
+        test "%data" data_test;
+        test "%data reopening" data_reopen_test;
+        test "%prop" prop_test;
+        test "%proof" proof_test;
+        test "%data + %open + %proof" [ data_open_proof_test ];
+        test ~failure:true "%data without %open" [ data_without_open_test ];
+        test ~failure:true "%proof mode violation" [ proof_mode_violation ];
+        test ~failure:true "%proof totality violation"
+          [ proof_totality_violation ];
         test "ZF" Source.[ zf_1; zf_2; zf_3; zf_4; zf_5; zf_6 ];
         test "FOL"
           Source.

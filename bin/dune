@@ -1,7 +1,7 @@
 (executable
  (name main)
  (public_name stelf)
- (modules main)
+ (modules main Setup)
  (libraries
   stelf
   server
@@ -9,7 +9,14 @@
   cmdliner
   fmt.tty
   display
+  fpath
   basis
   lwt.unix
+  bos
   grace
   grace.ansi_renderer))
+
+(install
+ (section bin)
+ (files main.exe)
+ (package stelf))

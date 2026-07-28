@@ -89,9 +89,24 @@ let () =
         $ const ())
     (* TODO Make this work *)
   in
+  let setup_cmd : int Cmd.t =
+    let name =
+      Arg.(required & pos 0 (some string) None & info [] ~docv:"NAME")
+    in
+    Cmd.v
+      (Cmd.info "setup" ~doc:"Create a new STELF project directory")
+      Term.(
+        const (fun name ->
+            match Setup.setup name with
+            | Ok () -> 0
+            | Error (`Msg m) ->
+                Format.eprintf "stelf setup: %s@." m;
+                1)
+        $ name)
+  in
   let main_cmd =
     Cmd.group
       (Cmd.info "stelf" ~version ~doc:"The STELF proof assistant")
-      [ repl_cmd; check_cmd; version_cmd; help_cmd ]
+      [ repl_cmd; check_cmd; version_cmd; help_cmd; setup_cmd ]
   in
   Basis.OS.Process.exit (Cmd.eval' main_cmd)

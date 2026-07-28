@@ -1,0 +1,6 @@
+(test
+ (instrumentation
+  (backend bisect_ppx))
+ (name Cases)
+ (modules Cases Common Direct Norm)
+ (libraries modern pretty names alcotest))

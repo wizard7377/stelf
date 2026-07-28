@@ -95,6 +95,121 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
      [ x ])
     <|> inside "(" ")" (many (parse_order ()))
 
+  (* The argument of [%require], shared with the [%open %require] shorthand so
+     that path-style and identifier-style arguments behave identically in both. *)
+  let parse_require_arg () : string list t =
+    (let+ s = Modern.parse_text () in
+     String.trim s |> String.split_on_char '/')
+    <|> Modern.parse_id_list ()
+
+  (* ------------------------------------------------------------------ *)
+  (* Derivation helpers for the %prop / %proof shorthands.                *)
+  (*                                                                      *)
+  (* All are pure functions of a FULL_MODE -- the (mode, decl) list that   *)
+  (* [parse_full_mode] produces -- plus the judgement's name:              *)
+  (*   DECLS       the {NAME TYPE} bindings with the modes erased          *)
+  (*   INPUTS      the names of the %in-moded entries, in order            *)
+  (*   HOLE_DECLS  one _ per entry                                         *)
+  (*   CALL_PAT    the entries' names, non-%in positions blanked to _      *)
+  (* ------------------------------------------------------------------ *)
+
+  type full_mode = (Cst.mode * Cst.decl) list
+
+  (* The braced, moded, named, typed prefix of a mode declaration --
+     [{%in X nat} {%out Y nat}] -- keeping the (mode, decl) PAIRS.
+
+     This deliberately mirrors the [many @@ inside "{" "}" ...] in
+     [Modern.parse_mode_dec], rather than calling it: that function projects the
+     names out of the decls and discards their TYPES, which is exactly what the
+     derived %sort needs.  Keep the two in step if %mode's braced syntax changes.
+
+     [many], not [many1]: a nullary judgement (%prop true) is legal and
+     degenerates to a %sort plus an empty mode spine. *)
+  let parse_full_mode () : full_mode t =
+    many
+      (inside "{" "}"
+         (let* m = Modern.parse_mode () and* d = Modern.parse_decl () in
+          return (m, d)))
+    <?> "mode arguments"
+
+  (* DECLS -- exactly what %sort wants. *)
+  let decls_of : full_mode -> Cst.decl list = List.map snd
+
+  (* The first name a declaration binds, or [None] when it is `_`. *)
+  let decl_name (d : Cst.decl) : string option =
+    match Cst.View.Decl.view d with
+    | Cst.View.Decl.Decl1 (_, ns, _, _) | Cst.View.Decl.Decl0 (_, ns, _) -> (
+        match ns with n :: _ -> n | [] -> None)
+
+  let is_input (m : Cst.mode) : bool =
+    match Cst.View.Mode.view m with Cst.View.Mode.Plus _ -> true | _ -> false
+
+  (* A metavariable occurrence.  [Uppercase] vs [Lowercase] is inert here --
+     [term_to_name] and [term_to_head] (Impl.ml:231-242) accept [Ucid_] and
+     [Lcid_] identically, as does [lookup_head] (Impl.ml:396) -- so this picks
+     the uppercase class to match the corpus idiom for mode arguments. *)
+  let var_term loc n = Cst.View.Term.(review @@ Uppercase (loc, ([], n)))
+  let hole loc = Cst.View.Term.(review @@ Omitted loc)
+
+  (* NAME applied to a spine.  A flat [App] is fine: [ReconTerm.fold_app]
+     left-folds it into the same nested [App_] the parser's own left-nested
+     juxtaposition produces. *)
+  let app_term loc name args =
+    Cst.View.Term.(
+      review @@ App (loc, review @@ Lowercase (loc, ([], name)), args))
+
+  (* The %mode declaration, built directly rather than by synthesizing a head
+     term and re-deriving its symbol: [Mode.Term.review] discards the spine of
+     its argument and [Mode.Dec.review] discards the decls' types, so the head
+     SYMBOL plus the (mode, name) spine is all the CST can carry.  This is also
+     why [parse_mode_dec] gets away with an always-empty [ModeNil]. *)
+  let mode_dec_of loc name (fm : full_mode) : Cst.modeDec =
+    let spine = List.map (fun (m, d) -> (m, decl_name d)) fm in
+    let root =
+      Cst.View.Mode.Term.(
+        review
+        @@ ModeTerm
+             (loc, ([], name), Cst.View.Mode.Spine.(review @@ ModeNil loc)))
+    in
+    Cst.View.Mode.Dec.(review @@ ModeDec (loc, spine, root))
+
+  (* HOLE_DECLS -- one _ per entry, for the %worlds call pattern. *)
+  let hole_args loc (fm : full_mode) = List.map (fun _ -> hole loc) fm
+
+  (* CALL_PAT -- a named %in keeps its name; %out, %out1, %star and unnamed
+     entries become holes. *)
+  let call_pat loc (fm : full_mode) =
+    List.map
+      (fun (m, d) ->
+        match (is_input m, decl_name d) with
+        | true, Some n -> var_term loc n
+        | _ -> hole loc)
+      fm
+
+  (* The lexicographic termination order over INPUTS.
+
+     An unnamed input ({%in _ nat}) simply drops out rather than being an error.
+     Degrading is both simpler and better-behaved than raising: [Modern.ParseError]
+     escapes angstrom entirely and its handler (Modern.ml:833) renders a caret at
+     character 0 of the whole file.  And the degraded form is meaningful on its
+     own -- [%total {}] with `_` call-pattern arguments is the established corpus
+     idiom for a non-recursive proof, and [parse_order] permits the empty order. *)
+  let lex_order loc (fm : full_mode) : Cst.View.Thm.Order.t list =
+    Cst.View.Thm.Order.
+      [
+        review
+        @@ Lex
+             ( loc,
+               List.filter_map
+                 (fun (m, d) ->
+                   if is_input m then
+                     Option.map
+                       (fun n -> review @@ Varg (loc, [ n ]))
+                       (decl_name d)
+                   else None)
+                 fm );
+      ]
+
   let rec parse_cmd_list () : Cst.cmd list t =
     keyword "{" *> commit *> skip_outer *> many (defer parse1 <* skip_outer)
     <* keyword "}" *> commit
@@ -235,6 +350,124 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           <?> "sort"
         end;
         begin
+          (* [%data NAME DECLS CMD]  ==>  %sort NAME DECLS %. %scope NAME CMD
+             A sort and the constructors inhabiting it are one unit; this writes
+             the name once instead of twice.
+
+             NAME is a single identifier rather than an id-list: [%sort] accepts
+             a list for mutual sorts but [%scope] takes exactly one name, so
+             mutual definitions still need the long form.
+
+             The [loc]s below are all the same outer span on purpose --
+             [Cst.View.Cmd.review] (Cst.ml:1128) discards the location of every
+             command constructor, so nothing downstream can observe a finer one. *)
+          (let@ (id, ds, cmds), s, e =
+             keyword "data" *> commit
+             *> let* id = Modern.parse_var () in
+                let* ds =
+                  many
+                    (inside "{" "}" (commit *> Modern.parse_decl ())
+                    <|> Modern.parse_decl_simple ())
+                in
+                let+ cmds =
+                  parse_cmd_list ()
+                  <|> let+ cmd = parse1 () in
+                      [ cmd ]
+                in
+                (id, ds, cmds)
+           in
+           let loc = mk_loc s e in
+           return
+             Cst.View.Cmd.(
+               review
+               @@ Eval
+                    ( loc,
+                      [
+                        review @@ Sort (loc, [ id ], ds);
+                        review @@ Scope (loc, id, review @@ Eval (ghost', cmds));
+                      ] )))
+          <?> "data"
+        end;
+        begin
+          (* [%prop NAME FULL_MODE]
+               ==>  %{ %sort NAME DECLS %. %mode FULL_MODE (NAME ARGS) %}
+             A judgement's sort and its mode are two views of the same
+             information; this writes the argument list once instead of three
+             times (in the %sort, in the %mode's braces, and in the %mode's
+             head term). *)
+          (let@ (id, fm), s, e =
+             keyword "prop" *> commit
+             *> let* id = Modern.parse_var () in
+                let+ fm = parse_full_mode () in
+                (id, fm)
+           in
+           let loc = mk_loc s e in
+           return
+             Cst.View.Cmd.(
+               review
+               @@ Eval
+                    ( loc,
+                      [
+                        review @@ Sort (loc, [ id ], decls_of fm);
+                        review @@ Mode (loc, mode_dec_of loc id fm);
+                      ] )))
+          <?> "prop"
+        end;
+        begin
+          (* [%proof (WORLD)? NAME FULL_MODE CMD]
+               ==>  %{ %sort   NAME DECLS                %.
+                       %scope  NAME CMD                  %.
+                       %mode   FULL_MODE (NAME ARGS)     %.
+                       %worlds (WORLD) (NAME HOLE_DECLS) %.
+                       %total  {INPUTS} (NAME CALL_PAT)  %}
+
+             WORLD is optional and must be parenthesised; that is what keeps it
+             unambiguous against NAME, which is a bare identifier.
+
+             %scope (the clauses) comes BEFORE %mode on purpose.  STELF mode
+             checks a whole family retroactively when the %mode is installed --
+             [ModeCheck.checkMode] runs [checkAll (Index.lookup a)]
+             (Modecheck.ml:867) and is reached from exactly one place,
+             Impl.ml:684 -- and there is no per-clause check at install time.  So
+             it is clauses declared AFTER a %mode that would escape checking, not
+             before.  %worlds must likewise precede %total, whose [checkFam]
+             needs both the mode and the world installed. *)
+          (let@ (world, id, fm, cmds), s, e =
+             keyword "proof" *> commit
+             *> let* world =
+                  option [] (inside "(" ")" (many (Modern.parse_var ())))
+                in
+                let* id = Modern.parse_var () in
+                let* fm = parse_full_mode () in
+                let+ cmds =
+                  parse_cmd_list ()
+                  <|> let+ cmd = parse1 () in
+                      [ cmd ]
+                in
+                (world, id, fm, cmds)
+           in
+           let loc = mk_loc s e in
+           return
+             Cst.View.Cmd.(
+               review
+               @@ Eval
+                    ( loc,
+                      [
+                        review @@ Sort (loc, [ id ], decls_of fm);
+                        review @@ Scope (loc, id, review @@ Eval (ghost', cmds));
+                        review @@ Mode (loc, mode_dec_of loc id fm);
+                        review
+                        @@ Worlds
+                             (loc, world, [ app_term loc id (hole_args loc fm) ]);
+                        review
+                        @@ Total
+                             ( loc,
+                               lex_order loc fm,
+                               [ app_term loc id (call_pat loc fm) ] );
+                      ] )))
+          <?> "proof"
+        end;
+        begin
           (let@ d, s, e = keyword "term" *> commit *> Modern.parse_decl () in
            let loc = mk_loc s e in
            return Cst.View.Cmd.(review @@ Term (loc, d)))
@@ -293,19 +526,44 @@ module Make_Cmd (Modern : MODERN.MODERN) = struct
           <?> "use"
         end;
         begin
-          (let@ id, s, e =
-             keyword "open" *> commit *> Modern.parse_id_list ()
+          (* [%open %require NAME] is a derived form for [%require NAME] followed
+             by [%open NAME].  The [%] sigil on [require] is what keeps this
+             unambiguous: a scope literally named [require] is still opened by
+             the bare [%open require].
+
+             Caveat: the two commands read their id-list differently.  [%require]
+             joins it with '/' into a FILE path (Loader.ml:32); [%open] splits it
+             into [Qid (prefix, last)], a STRUCTURE path (Impl.ml:793).  They
+             coincide only for a single-segment name, which is the intended use.
+             The full [%require] grammar is accepted anyway so that the two
+             commands cannot drift apart. *)
+          (let@ r, s, e =
+             keyword "open" *> commit
+             *> ((let+ ids =
+                    keyword "require" *> commit *> parse_require_arg ()
+                  in
+                  `Require ids)
+                <|> let+ ids = Modern.parse_id_list () in
+                    `Open ids)
            in
            let loc = mk_loc s e in
-           return Cst.View.Cmd.(review @@ Open (loc, id)))
+           return
+             Cst.View.Cmd.(
+               match r with
+               | `Open ids -> review @@ Open (loc, ids)
+               | `Require ids ->
+                   review
+                   @@ Eval
+                        ( loc,
+                          [
+                            review @@ Require (loc, ids);
+                            review @@ Open (loc, ids);
+                          ] )))
           <?> "open"
         end;
         begin
           (let@ ids, s, e =
-             keyword "require" *> commit
-             *> ((let+ s = Modern.parse_text () in
-                  String.trim s |> String.split_on_char '/')
-                <|> Modern.parse_id_list ())
+             keyword "require" *> commit *> parse_require_arg ()
            in
            let loc = mk_loc s e in
            return Cst.View.Cmd.(review @@ Require (loc, ids)))

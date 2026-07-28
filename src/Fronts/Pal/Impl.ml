@@ -326,7 +326,9 @@ module Impl () = struct
       | Cst.Omitted_ l
       | Cst.Typ_ l
       | Cst.MacroParam_ (l, _, _)
-      | Cst.Local_ (l, _, _) ->
+      | Cst.Local_ (l, _, _)
+      | Cst.Foreign_ (l, _)
+      | Cst.Internal_ (l, _, _) ->
           l
       | Cst.Lcid_ (_, _, l)
       | Cst.Ucid_ (_, _, l)

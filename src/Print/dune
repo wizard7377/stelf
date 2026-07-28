@@ -9,6 +9,7 @@
   Symbol
   ClausePrint
   Print_
+  PrintCst
   Traverse
   PrintTwega
   PrintXml
@@ -20,7 +21,17 @@
   PRINTXML
   SYMBOL
   TRAVERSE)
- (libraries display global intsyn names formatter basis)
+ (libraries
+  display
+  global
+  intsyn
+  names
+  formatter
+  basis
+  cst
+  paths
+  pretty
+  resugar)
  (flags
   (:standard
    -w

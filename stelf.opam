@@ -9,7 +9,7 @@ authors: ["Asher Frost <author@example.com>"]
 license: "BSD-2-Clause"
 tags: ["logic" "language" "stelf"]
 homepage: "https://github.com/standardocaml/stelf"
-doc: "https://github.com/standardocaml/stelf/wiki"
+doc: "https://standardocaml.github.io/"
 bug-reports: "https://github.com/standardocaml/stelf/issues"
 depends: [
   "ocaml" {>= "5.0.0"}
