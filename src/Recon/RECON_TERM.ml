@@ -27,7 +27,6 @@ module type RECON_TERM = sig
   val jterm : Cst.term -> job
   val jclass : Cst.term -> job
   val jof : Cst.term * Cst.term -> job
-  val jof' : Cst.term * Ast.exp -> job
 
   type job_ =
     | JNothing
@@ -39,8 +38,6 @@ module type RECON_TERM = sig
 
   val recon : job -> job_
   val reconQuery : job -> job_
-  val reconWithCtx : Ast.dctx * job -> job_
-  val reconQueryWithCtx : Ast.dctx * job -> job_
   val termRegion : Cst.term -> Paths.region
   val decRegion : Cst.decl -> Paths.region
   val ctxRegion : Cst.decl Ast.ctx -> Paths.region option

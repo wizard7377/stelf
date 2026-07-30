@@ -25,23 +25,6 @@ module Make_ReconModule
     | StructDec of string option * ModSyn.module_ * whereclause list
     | StructDef of string option * Ast.mid
 
-  (* OLD *)
-  (*
-  let strexpToStrexp se =
-    match Cst.View.struct_strexp_symbol se with
-    | None -> raise (Error "strexpToStrexp: unrecognised strexp")
-    | Some (ids, id) -> (
-        let qid = ModSyn.Names.Qid (ids, id) in
-        match ModSyn.Names.structLookup qid with
-        | None ->
-            raise
-              (Error
-                 ("Undeclared structure "
-                 ^ ModSyn.Names.qidToString
-                     (valOf (ModSyn.Names.structUndef qid))))
-        | Some mid -> mid)
-  *)
-  (* NEW *)
   let strexpToStrexp se =
     match Cst.View.Struct.StrExp.view se with
     | Cst.View.Struct.StrExp.StrExp (loc, (ids, id)) -> (

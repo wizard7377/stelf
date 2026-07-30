@@ -1,5 +1,3 @@
-module type RECON_TERM = RECON_TERM.RECON_TERM
-
 exception Error of string
 
 (* Logic copied from src/frontend/ReconTerm.ml.
@@ -131,10 +129,6 @@ struct
   (* this is a hack, i know *)
   let queryMode = ref false
 
-  open! struct
-    open IntSyn
-  end
-
   let decl_ = function g_, d_ -> IntSyn.Decl (g_, d_)
   let eClo = function v_, s -> IntSyn.EClo (v_, s)
   let root_ = function h_, s_ -> IntSyn.Root (h_, s_)
@@ -173,13 +167,6 @@ struct
   let evarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
   let fvarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
   let fvarTable : IntSyn.exp StringTree.table = StringTree.new_ 0
-
-  let varReset () =
-    StringTree.clear evarApxTable;
-    StringTree.clear fvarApxTable;
-    StringTree.clear fvarTable
-
-  let fvarApxTable_ref_check () = fvarApxTable
 
   let getEVarTypeApx name =
     begin match StringTree.lookup evarApxTable name with
@@ -297,7 +284,6 @@ struct
     | Jterm of term
     | Jclass of term
     | Jof of term * term
-    | Jof' of term * IntSyn.exp
 
   let jnothing = Jnothing
   let jand (j1, j2) = Jand (j1, j2)
@@ -449,7 +435,6 @@ struct
   let jterm tm = Jterm (cst_term_to_term tm)
   let jclass tm = Jclass (cst_term_to_term tm)
   let jof (tm1, tm2) = Jof (cst_term_to_term tm1, cst_term_to_term tm2)
-  let jof' (tm, v_) = Jof' (cst_term_to_term tm, v_)
 
   (* Internal region functions operating on the internal term/dec types *)
   let rec termRegion_ = function
@@ -483,12 +468,6 @@ struct
     | IntSyn.Null, r -> Some r
     | IntSyn.Decl (g, tm), r -> ctxRegion' (g, Paths.join (r, decRegion_ tm))
 
-  (* Public-facing versions for the RECON_TERM interface *)
-  let termRegion (t : Cst.term) : Paths.region =
-    termRegion_ (cst_term_to_term t)
-
-  let decRegion (d : Cst.decl) : Paths.region = decRegion_ (cst_decl_to_dec d)
-
   let ctxRegion (g : Cst.decl Ast.ctx) : Paths.region option =
     let rec cvt = function
       | Ast.Null -> IntSyn.Null
@@ -500,7 +479,6 @@ struct
   let termRegion = termRegion_
 
   type apx_dec = Dec of string option * Apx.exp | NDec of string option
-  type apx_ctx = apx_dec IntSyn.ctx
 
   open Apx
 
@@ -825,35 +803,6 @@ struct
         in
         ignore (runDelayed ());
         Jof (tm1', tm2')
-    | g_, Jof' (tm1, v_) ->
-        ignore (clearDelayed ());
-        let l_ = Apx.newLVar () in
-        let v2_, _ = Apx.classToApx v_ in
-        let tm1', u1_ =
-          checkApx (g_, tm1, v2_, l_, "Ascription in declaration did not hold")
-        in
-        let _ =
-          filterLevel
-            ( tm1',
-              l_,
-              2,
-              "The term in this position must be an object or a type family" )
-        in
-        ignore (runDelayed ());
-        Jof' (tm1', v_)
-
-  let rec ctxToApx = function
-    | IntSyn.Null -> IntSyn.Null
-    | IntSyn.Decl (g_, IntSyn.NDec x) -> IntSyn.Decl (ctxToApx g_, NDec x)
-    | IntSyn.Decl (g_, IntSyn.Dec (name, v_)) ->
-        let v'_, _ = Apx.classToApx v_ in
-        IntSyn.Decl (ctxToApx g_, Dec (name, v'_))
-
-  let inferApxJob' (g_, t) = inferApxJob (ctxToApx g_, t)
-
-  open! struct
-    open IntSyn
-  end
 
   (* Final reconstruction job result type *)
   type job_ =
@@ -1628,18 +1577,6 @@ struct
         let oc1, r1 = occIntro tm1' in
         let IntSyn.Uni l2_, _ = Whnf.whnf (l2_, IntSyn.id) in
         JOf ((u1_, oc1), (v2_, oc2), l2_)
-    | g_, Jof' (tm1, v2_) ->
-        let tm1', b1_ =
-          checkExact
-            ( g_,
-              tm1,
-              (v2_, IntSyn.id),
-              "Ascription in declaration did not hold\n"
-              ^ "(Index object(s) did not match)" )
-        in
-        let u1_ = toIntro (b1_, (v2_, IntSyn.id)) in
-        let oc1, r1 = occIntro tm1' in
-        JOf ((u1_, oc1), (v2_, oc1), IntSyn.Type)
 
   let recon' j =
     ignore (Apx.varReset ());
@@ -1662,27 +1599,6 @@ struct
     begin
       queryMode := true;
       recon' j
-    end
-
-  let reconWithCtx' (g_, j) =
-    ignore (Apx.varReset ());
-    ignore (varReset ());
-    let j' = inferApxJob' (g_, j) in
-    ignore (clearDelayed ());
-    let j'' = inferExactJob (g_, j') in
-    ignore (runDelayed ());
-    j''
-
-  let reconWithCtx (g_, j) =
-    begin
-      queryMode := false;
-      reconWithCtx' (g_, j)
-    end
-
-  let reconQueryWithCtx (g_, j) =
-    begin
-      queryMode := true;
-      reconWithCtx' (g_, j)
     end
 
   let internalInst x = raise Match
