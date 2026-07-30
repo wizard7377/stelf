@@ -202,13 +202,12 @@ module Make_ReconConDec
         let g0_, ctxs =
           try Abstract.abstractCtxs [ gsome_; gblock_ ]
           with Constraints.Error c_ ->
-            raise
-              (error
-                 ( r',
-                   "Constraints remain in context block after term \
-                    reconstruction:\n"
-                   ^ ctxBlockToString (IntSyn.Null, (gsome_, gblock_))
-                   ^ "\n" ^ Print.cnstrsToString c_ ))
+            error
+              ( r',
+                "Constraints remain in context block after term \
+                 reconstruction:\n"
+                ^ ctxBlockToString (IntSyn.Null, (gsome_, gblock_))
+                ^ "\n" ^ Print.cnstrsToString c_ )
         in
         let gsome', gblock' =
           match ctxs with [ a; b ] -> (a, b) | _ -> assert false
@@ -247,7 +246,4 @@ module Make_ReconConDec
         in
         (Some bd, None)
     | _ -> raise (Error "condecToConDec: unrecognised conDec variant")
-
-  let internalInst _ = raise Match
-  let externalInst _ = raise Match
 end

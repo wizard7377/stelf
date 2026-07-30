@@ -1,0 +1,5 @@
+[[group]]
+name = "{{name}}"
+main = "src/main.lf"
+src = ["src"]
+dependencies = []

@@ -2,6 +2,6 @@
 
 [[group]]
 name = "NAME"
-main = "main.lf"
+main = "src/main.lf"
 src = ["src"]
 dependencies = []

@@ -18,27 +18,84 @@ Some other quick links:
 3. [Twelf website](https://twelf.org)
 4. [Twelf GitHub](https://github.com/standardml/twelf)
 
+## Installation
+
+> [!WARNING]
+> I have not as of yet tested that this is reproducible, please create an issue if you have a problem
+
+These are the quick installation instructions
+
+### Prerequisites
+
+Most of STELF's requisites are installed automatically.
+However, this setup process has two dependencies.
+Fortunately, they are quite easily available.
+
+1. `make`: GNU Make is fine, other versions are almost certainly also fine but this has only been tested with GNU Make (if it is called something like `make` it is probably fine)
+2. `opam`: The OCaml package manager, which is used to install OCaml and project dependencies.
+   See [opam's installation instructions](https://opam.ocaml.org/doc/Install.html) for your platform if you don't have `opam` installed.
+   Note that if you use the process outlined here you do **not** need to install `ocaml`, `dune`, or anything else, or setup a switch; the [Makefile](./Makefile) does this all automatically
+
+### Sources
+
+The source code for STELF can be obtained from this repository, if you want to install the stable version, the command would be:
+
+```sh
+git clone --recurse-submodules https://github.com/standardocaml/stelf.git
+cd stelf
+```
+
+If, on the other hand, you want the most up to date `dev` version, instead run
+
+```sh
+git clone --recurse-submodules --branch=dev https://github.com/standardocaml/stelf.git
+cd stelf
+```
+
+### Building
+
+To install, build, document, test, or check the project, use the appropriate `make` target.
+Those being:
+
+- `make install` to install the project
+- `make build` to build the project (create `./stelf`)
+- `make doc` to generate documentation (in `_build/default/doc`)
+- `make test` to run tests
+- `make check` to check that the project can compile
+
+### Editor Support
+
+Currently, the officially supported editor extensions are for [Zed](https://github.com/standardocaml/stelf-zed) and [Neovim](https://github.com/standardocaml/stelf.nvim).
+We describe here how to install the Neovim extension, due to the simplicity thereof.
+
+1. Have [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
+2. Install the extension `standardocaml/stelf.nvim`, which *must not be lazy loaded*
+3. Run `:TSUpdate` and `:TSInstall stelf`, then reload
+4. Load up a `.lf`, `.elf`, `.stelf`, or `.slf` file and enjoy syntax highlighting!
+
+All together, if you use LazyVim you should have something like this
+
+```lua
+return {
+  {
+    'standardocaml/stelf.nvim', 
+    dependencies = 'nvim-treesitter/nvim-treesitter', 
+    lazy = false,
+    build = {':TSUpdate', ':TSInstall stelf'},
+  }
+}
+```
+
+> [!NOTE]
+> Other editor extensions are appreciated. Further, fixes and additions upon the existing extensions is greatly appreciated (currently, they just provide syntax highlighting using Tree-Sitter).
+> Also, a more general editor server protocol (perhaps LSP) would be quite useful.
+
 ## Building
-
-> [!WARNING] I have not as of yet tested that this is reproducible, please create an issue if you have a problem
-
-The prerequisites for building STELF most easily is the [opam](https://opam.ocaml.org) package manager and `make`.
-Once you have opam installed, to build the project just do `make build`. This should automatically set up your environment, install dependencies and build the project
-
-To install, just do `make install`.
-
-> [!NOTE] You may notice that `dune` starts reporting that the build is getting larger and larger (up to a couple thousand targets (which for dune isn't that much)), or that it seems to be taking a long time on the first couple. This is expected.
 
 ### Testing
 
 For end-user testing, just run `make test`.
 Developers should use `dune test`.
-
-### Editor Support
-
-Currently, the only editor supported is Zed (because of its interoperability with Tree-sitter) through the [stelf-zed](https://github.com/standardocaml/stelf-zed) extension.
-
-> [!NOTE] Help creating extensions for other editors is greatly appreciated
 
 ## Improvements from Twelf
 
@@ -80,4 +137,4 @@ The original Twelf, compared to modern languages (including STELF) has a bit of 
 ## Copyright
 
 Copyright (C) 1997-2011, Frank Pfenning and Carsten Schuermann
-Copyright (C) 2026-2026, Asher Frost (Ethan Moy)
+Copyright (C) 2026, Asher Frost (Ethan Moy)

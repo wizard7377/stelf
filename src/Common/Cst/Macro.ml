@@ -60,8 +60,11 @@ module Macro (C : CST.CST) : MACRO.MACRO with module C = C = struct
         List.nth args (n - 1)
     | MacroParam (_, Some _, _) -> term
     | Lowercase _ | Uppercase _ | Qualified _ | Text _ | ExistVar _ | FreeVar _
-    | Omitted _ | Typ _ | Internal _ ->
+    | Omitted _ | Typ _ ->
         term
+    | Internal (loc, tag, tms) ->
+        review (Internal (loc, tag, List.map (go_term i args) tms))
+    | Local (loc, ns, tm) -> review (Local (loc, ns, go_term i args tm))
     | Pi (loc, decls, body) ->
         review (Pi (loc, List.map (go_decl i args) decls, go_term i args body))
     | Lam (loc, decls, body) ->

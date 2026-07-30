@@ -5,7 +5,9 @@
   (backend bisect_ppx))
  (name PalTest)
  (libraries pal alcotest display grace grace.ansi_renderer)
+ ; new-tests/ and new-tests2/ were listed here but have never existed in the
+ ; tree. Because (deps ...) attaches to the runtest action rather than the link
+ ; step, PalTest.exe still built while `dune runtest` failed at rule evaluation.
+ ; Every case reading those paths in Cases.ml is ~skip:true, so nothing is lost.
  (deps
-  (source_tree require)
-  (source_tree ../../new-tests)
-  (source_tree ../../new-tests2)))
+  (source_tree require)))

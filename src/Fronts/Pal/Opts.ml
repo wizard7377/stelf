@@ -5,20 +5,27 @@ module Opts : OPTS = struct
 
   type 'a t = 'a Arg.t
 
+  (* These four are the options every command accepts, so they belong under
+     COMMON OPTIONS -- which is what each command's [~sdocs] points at -- rather
+     than in each command's own OPTIONS section. *)
+  let docs = Cmdliner.Manpage.s_common_options
+
   let verbosity : Display.Info.level t =
     begin
       let v_conv =
         Arg.vflag Display.Info.Level.normal
           [
             ( Display.Info.Level.quiet,
-              Arg.info ~doc:"Display less information" [ "q"; "quiet" ] );
+              Arg.info ~docs ~doc:"Display less information"
+                [ "q"; "quiet" ] );
             ( Display.Info.Level.terse,
-              Arg.info ~doc:"Display slightly less information" [ "t"; "terse" ]
-            );
+              Arg.info ~docs ~doc:"Display slightly less information"
+                [ "t"; "terse" ] );
             ( Display.Info.Level.verbose,
-              Arg.info ~doc:"Display more information" [ "v"; "verbose" ] );
+              Arg.info ~docs ~doc:"Display more information"
+                [ "v"; "verbose" ] );
             ( Display.Info.Level.debug,
-              Arg.info ~doc:"Display debug information" [ "debug" ] );
+              Arg.info ~docs ~doc:"Display debug information" [ "debug" ] );
           ]
       in
       v_conv
@@ -27,27 +34,39 @@ module Opts : OPTS = struct
   let mute : bool t =
     begin
       let doc : Arg.info =
-        Arg.info ~doc:"Suppress all output, including errors"
+        Arg.info ~docs ~doc:"Suppress all output, including errors"
           [ "s"; "silent"; "no-output" ]
       in
       Arg.flag doc
     end
 
-  let color : bool t =
+  type color_when = Auto | Always | Never
+
+  let color : color_when t =
     begin
-      let doc : Arg.info =
-        Arg.info ~doc:"Whether to use colors in output" [ "c"; "color" ]
-          ~docv:"COLOR"
+      (* Not named [conv]: the [Arg.(...)] below opens Arg, where [conv] is a
+         function, and the local binding would be shadowed. *)
+      let color_conv =
+        Arg.enum [ ("auto", Auto); ("always", Always); ("never", Never) ]
       in
-      Arg.(opt bool true doc)
-      (* TODO , make use Env variables *)
+      let doc : Arg.info =
+        Arg.info ~docs
+          ~doc:
+            "When to colour output. $(b,auto), the default, follows the \
+             terminal: styling is emitted only when standard error is a tty, \
+             and is suppressed when $(b,TERM) is $(b,dumb) or $(b,NO_COLOR) is \
+             set. $(b,always) forces styling even into a pipe or a file; \
+             $(b,never) disables it entirely."
+          [ "c"; "color"; "colour" ] ~docv:"WHEN"
+      in
+      Arg.(opt color_conv Auto doc)
     end
 
   let unicode : bool t =
     begin
       let doc : Arg.info =
-        Arg.info ~doc:"Whether to use unicode characters" [ "u"; "unicode" ]
-          ~docv:"UNICODE"
+        Arg.info ~docs ~doc:"Whether to use unicode characters"
+          [ "u"; "unicode" ] ~docv:"UNICODE"
       in
       Arg.(opt bool true doc)
       (* TODO , make use Env variables *)

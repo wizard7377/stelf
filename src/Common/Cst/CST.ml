@@ -101,6 +101,31 @@ module type CST = sig
   val pp_qid_form : Stdlib.Format.formatter -> qid_form -> unit
   val show_qid_form : qid_form -> string
 
+  (** Tags for printer-internal term nodes: the parts of the internal syntax
+      that have no STELF surface form, named so that resugaring can be total. A
+      term containing an [Internal] node is deliberately unparseable. *)
+  type internal_tag =
+    | Kind_tag  (** [IntSyn.Uni Kind]: no surface syntax exists. *)
+    | Subst_tag  (** Explicit substitution; children are its fronts. *)
+    | Shift_tag of int  (** The [^n] tail of a substitution. *)
+    | Undef_tag  (** An undefined substitution front. *)
+    | Proj_tag of string  (** Block projection label, pre-rendered. *)
+    | Cutoff_tag  (** [printDepth] was exceeded; prints [%%]. *)
+    | Elided_tag  (** [printLength] was exceeded; prints [...]. *)
+    | Opaque_tag of string  (** Verbatim token plus children; last resort. *)
+
+  val pp_internal_tag : Stdlib.Format.formatter -> internal_tag -> unit
+  val show_internal_tag : internal_tag -> string
+  val equal_internal_tag : internal_tag -> internal_tag -> bool
+
+  val equal_term : term -> term -> bool
+  (** Structural equality on terms, {e including} source locations. Callers
+      comparing terms from different sources normally want to erase locations
+      first. *)
+
+  val equal_decl : decl -> decl -> bool
+  (** Structural equality on declarations, including source locations. *)
+
   val [@deprecated "Use View equivalent instead"] mk_loc : int -> int -> loc
   (** Create a location from start and end lexer positions. *)
 
@@ -607,6 +632,7 @@ module type CST = sig
       LENS.VIEW
         with type loc = loc
          and type qid_form = qid_form
+         and type internal_tag = internal_tag
          and type Loc.t = loc
          and module Paths = Paths
          and type Term.t = term

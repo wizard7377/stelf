@@ -37,6 +37,11 @@ module Make_Modern
              (fun (sym, kw') -> if kw = kw' then Some (token sym) else None)
              !given_symbols)
 
+  (* Several spellings of the same keyword, e.g. [%in] and its quantifier
+     alias [%forall].  Each alternative still honours user-declared [%symbol]
+     aliases, since this goes through [keyword'] rather than [keyword]. *)
+  let keywords' kws = choice (List.map keyword' kws)
+
   let with_uppercase : string list -> (unit -> 'a t) -> 'a t =
    fun names p ->
     let old = !currently_uppercase in
@@ -86,9 +91,9 @@ module Make_Modern
     | BackArrow (loc, _, _)
     | Foreign (loc, _)
     | MacroParam (loc, _, _)
-    | Local (loc, _, _) ->
+    | Local (loc, _, _)
+    | Internal (loc, _, _) ->
         loc
-    | Internal _ -> ghost'
 
   module FX = Names.Fixity
 
@@ -278,9 +283,14 @@ module Make_Modern
     | name :: rev_scopes -> (List.rev rev_scopes, name)
 
   let rec parse_arg () : string option t =
-    token "_" *> return None
-    <|> (let+ s = ident1 in
-         Some s)
+    (* [_] alone is an anonymous binder, but the test has to be made on the
+       whole identifier: [token "_"] would match the leading underscore of
+       [_0] and leave [0] behind, silently turning [{_0 nat}] into an
+       anonymous binder of type [0 nat]. Names of that shape are exactly what
+       [Names.decLUName] hands to anonymous binders, so they arrive whenever
+       printed output is read back. *)
+    (let+ s = ident1 in
+     if s = "_" then None else Some s)
     <?> "argument"
 
   and parse_qid_body (form : Cst.qid_form) : Cst.Term.t t =
@@ -293,7 +303,16 @@ module Make_Modern
         return Cst.View.Term.(review @@ Qualified (loc, ([], name), form))
 
   and parse_id () : Cst.Term.t t =
-    keyword' "val" *> commit *> parse_qid_body Cst.Val
+    (* [%type] is the universe of types.  It is spelled with the [%] sigil so
+       that the bare identifier [type] stays available as an ordinary name.
+
+       No command currently accepts it in a type-correct position -- [%sort]
+       supplies the universe implicitly, so [%sort c %type] is a level clash,
+       not a longhand.  It exists so that the printer has a token for
+       [IntSyn.Uni Type] that parses back to the same term; see [Resugar]. *)
+    (let@ (), s, e = keyword' "type" in
+     return Cst.View.Term.(review @@ Typ (mk_loc s e)))
+    <|> keyword' "val" *> commit *> parse_qid_body Cst.Val
     <|> keyword' "abs" *> commit *> parse_qid_body Cst.Abs
     <|> (string "%(" *> commit
         *> let@ tm, s, e =
@@ -476,8 +495,11 @@ module Make_Modern
     begin
       (let@ names, s, e = inside "(" ")" (many1 (parse_arg ())) in
        let loc = mk_loc s e in
+       (* An omitted type is anchored on the binder it belongs to, so that
+          reconstruction's "Omitted term has ambiguous type" underlines the
+          binder rather than pointing nowhere. *)
        let+ typ =
-         option Cst.View.Term.(review @@ Omitted ghost') (parse_expr ())
+         option Cst.View.Term.(review @@ Omitted loc) (parse_expr ())
        in
        Cst.View.Decl.(
          review
@@ -485,7 +507,7 @@ module Make_Modern
       <|> let@ name, s, e = parse_arg () in
           let loc = mk_loc s e in
           let+ typ =
-            option Cst.View.Term.(review @@ Omitted ghost') (parse_expr ())
+            option Cst.View.Term.(review @@ Omitted loc) (parse_expr ())
           in
           Cst.View.Decl.(
             review
@@ -509,9 +531,13 @@ module Make_Modern
     begin
       (let@ (), s, e = keyword' "out1" *> commit *> return () in
        return Cst.View.Mode.(review @@ Minus1 (mk_loc s e)))
-      <|> (let@ (), s, e = keyword' "out" *> commit *> return () in
+      <|> (let@ (), s, e =
+             keywords' [ "out"; "exists" ] *> commit *> return ()
+           in
            return Cst.View.Mode.(review @@ Minus (mk_loc s e)))
-      <|> (let@ (), s, e = keyword' "in" *> commit *> return () in
+      <|> (let@ (), s, e =
+             keywords' [ "in"; "forall" ] *> commit *> return ()
+           in
            return Cst.View.Mode.(review @@ Plus (mk_loc s e)))
       <|> let@ (), s, e = keyword' "star" *> commit *> return () in
           return Cst.View.Mode.(review @@ Star (mk_loc s e))

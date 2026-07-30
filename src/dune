@@ -28,8 +28,10 @@
   opsem
   order
   paths
+  pretty
   print
   prover
+  resugar
   debug
   solvers
   stream

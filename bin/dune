@@ -1,15 +1,42 @@
+; The project skeleton written by `stelf setup`. Marked data-only so dune
+; neither interprets templates/dune as one of its own files nor tries to build
+; anything in there -- the tree is payload, not source.
+
+(data_only_dirs templates)
+
+(executable
+ (name Embed)
+ (modules Embed))
+
+(rule
+ (target Templates.ml)
+ (deps
+  (glob_files_rec templates/*))
+ (action
+  (with-stdout-to
+   Templates.ml
+   (run %{exe:Embed.exe} templates %{deps}))))
+
 (executable
  (name main)
  (public_name stelf)
- (modules main)
+ (modules main Setup Templates)
  (libraries
   stelf
   server
   pal
   cmdliner
+  dune-build-info
+  fmt
   fmt.tty
   display
+  fpath
   basis
   lwt.unix
+  bos
   grace
   grace.ansi_renderer))
+
+; No (install) stanza here: (public_name stelf) above already installs this
+; executable into the bin section as `stelf`. Adding one would ALSO install it
+; under its raw name, putting a bare `main.exe` on the user's PATH.

@@ -34,34 +34,9 @@ end)
 
 type nonrec spine = IntSyn.spine
 
-(* Now in Intsyn.fun *)
-(*
-structure IntSyn =
-  IntSyn (structure Global = Global);
-*)
-(* Now in Tomega.sml *)
-(*
-structure Whnf =
-  Whnf (! structure IntSyn' = IntSyn !);
-
-structure Conv =
-  Conv (! structure IntSyn' = IntSyn !
-	structure Whnf = Whnf);
-
-structure Tomega : TOMEGA =
-   Tomega (structure IntSyn' = IntSyn
-	   structure Whnf = Whnf
-	   structure Conv = Conv)
-*)
 module Constraints = Constraints.MakeConstraints (Conv)
 module UnifyNoTrail = Unify.MakeUnify (Whnf) (Notrail.NoTrail)
 module UnifyTrail = Unify.MakeUnify (Whnf) (Trail)
-
-(* structure Normalize : NORMALIZE =  
-  Normalize (! structure IntSyn' = IntSyn !
-             ! structure Tomega' = Tomega !
-             structure Whnf = Whnf)
- *)
 module Match = Match.MakeMatch (Whnf) (UnifyTrail) (Trail)
 module Abstract = Abstract.MakeAbstract (Whnf) (UnifyNoTrail) (Constraints)
 module Approx = Approx.MakeApprox (Whnf)

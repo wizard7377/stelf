@@ -196,9 +196,3 @@ include Order
 
 let () =
   Printexc.register_printer (function Error msg -> Some msg | _ -> None)
-(* -bp *)
-(*
-structure RedOrder = 
-    RedOrder (! structure IntSyn' = IntSyn !
-	      structure Table = IntRedBlackTree); 
-*)

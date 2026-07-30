@@ -40,6 +40,16 @@ module type IMPL = sig
   val time_limit : Time.time option ref
   (** Optional wall-clock limit in seconds for proof search. *)
 
+  val version : string ref
+  (** Human-readable version string, as reported by [%version].
+
+      An option rather than a constant because only an executable can know it:
+      the real value comes from [dune-build-info], whose artifact substitution
+      rewrites a placeholder in the linked binary. A library compiled once and
+      linked into several frontends cannot have it baked in. So [bin/] sets this
+      and nothing else does; the default is a placeholder for the LSP, the tests,
+      and any other consumer that never sets it. *)
+
   (* -------------------------------------------------------------------- *)
   (** {1 Result status} *)
 
@@ -281,9 +291,6 @@ module type IMPL = sig
     val eval : Cst.cmd -> Reply.t list
     (** Evaluate a single parsed command (used by REPL and LSP handlers). *)
   end
-
-  val version : string
-  (** Human-readable version string. *)
 
   val run : unit -> unit
   (** Complete top-level entry point: parse argv and dispatch to REPL / file

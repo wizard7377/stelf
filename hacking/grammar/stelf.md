@@ -1,337 +1,1094 @@
-# STELF Grammar
+# STELF Syntax Reference
 
-The STELF grammar changes a number of things from the Twelf grammar. This document explains those changes in prose and provides examples. For the formal grammar see [`stelf.ebnf`](stelf.ebnf).
+STELF is a redesign of the [Twelf](http://twelf.org/) surface syntax over the same
+LF logical framework. This document describes the language **as implemented**.
+
+> **The parser is the specification.** Every claim here cites the code that
+> enforces it. Where a doc comment elsewhere in the tree contradicts the parser,
+> the parser is right and the comment is a bug — §10.2 lists the ones known at the
+> time of writing. If you change `Modern.ml`, `Cmd.ml` or `Parser.ml`, change this
+> file.
+
+For machine-readable forms see [`stelf.ebnf`](stelf.ebnf) (productions) and
+[`tokens.md`](tokens.md) (token tables, for lexers and highlighters).
+
+## How to read this
+
+Every construct is tagged with its relationship to Twelf:
+
+| Tag | Meaning |
+|---|---|
+| `[new]` | No Twelf equivalent |
+| `[changed]` | Same concept, different spelling |
+| `[shared]` | Same as Twelf |
+| `[absent]` | Twelf has it, STELF does not |
+
+Jump to [§9 Migrating from Twelf](#9-migrating-from-twelf) for the summary tables.
+
+**Where the implementation lives:**
+
+| Layer | File |
+|---|---|
+| Tokens, escapes, text literals, comments | [`src/Lang/Parsing/Parser.ml`](../../src/Lang/Parsing/Parser.ml) |
+| Expressions, binders, fixity resolution | [`src/Fronts/Modern/Modern.ml`](../../src/Fronts/Modern/Modern.ml) |
+| Commands | [`src/Fronts/Modern/Cmd.ml`](../../src/Fronts/Modern/Cmd.ml) |
+| Printer — the inverse, must stay in sync | [`src/Pretty/Lex.ml`](../../src/Pretty/Lex.ml), [`src/Pretty/Pretty.ml`](../../src/Pretty/Pretty.ml) |
+| Scope / open / require semantics | [`src/Fronts/Pal/Impl.ml`](../../src/Fronts/Pal/Impl.ml), [`src/Fronts/Pal/Loader.ml`](../../src/Fronts/Pal/Loader.ml) |
+| Accepted-syntax corpus | [`test/Parse/Cases.ml`](../../test/Parse/Cases.ml), [`test/STELF/`](../../test/STELF/) |
 
 ---
 
-## Declarations
+## 1. Document structure
 
-The syntax of declarations (both for use in expressions and at the top level) is changed as follows:
+### 1.1 Files are literate by default `[new]`
 
-1. **The colon is always elided.** `X : T` becomes `X T`. This avoids overloading such a common symbol and makes the syntax more uniform.
-
-2. **Multiple declarations can be made at once**, if they share the same type, by surrounding the list of names in parentheses:
-
-   ```
-   [(X Y) T] Z    ≡    [X T] [Y T] Z
-   (A B C) nat    ≡    A nat, B nat, C nat
-   ```
-
-   The multi-name form `(X Y) T` desugars during parsing. The CST records both names in a single `Dec_` node: `Dec_(["X"; "Y"], T, loc)`.
-
-3. **The type is optional.** A bare name `x` (with no following type expression) produces a declaration with an omitted/inferred type. This is used in contexts like `%block` where the type may be derived from context.
-
-### Identifier conventions in declarations
-
-An `arg` in a declaration is either a named variable or the anonymous wildcard `_`:
-
-| Syntax | Meaning |
-|--------|---------|
-| `x`    | Named variable, lowercase-initial → concrete name |
-| `X`    | Named variable, uppercase-initial → metavariable / unification |
-| `_x`   | Implicit argument — automatically generalised by elaboration |
-| `?x`   | Meta-variable — used during interactive proof search |
-| `_`    | Wildcard — anonymous, not accessible in the body |
-
-### Qualified identifiers
-
-Inside an expression, the form `%val(a b c)` refers to a name while **stripping all fixity properties**, forcing it to be treated as a plain applied constant. The identifier list is split: the *last* element is the name; everything before it is the module namespace path, written **outermost namespace first**, matching the dotted `outer.inner.name` order used elsewhere.
+A source file is a sequence of commands separated by arbitrary prose. Everything
+that is not a command is discarded: `skip_outer` skips forward to the next `%`
+(`Cmd.ml:32-58`), and the file parser is just `outer { command outer }`
+(`Cmd.ml:692`). No comment marker is needed around narrative text.
 
 ```
-%val(plus)             → name "plus" with no fixity, empty namespace
-%val(number nat add)   → name "add" in namespace "nat", itself inside namespace "number"
-                          i.e. number.nat.add, not nat.number.add
+# Natural numbers
+
+We start with the type of naturals and its two constructors.
+
+%sort nat %.
+%term zero nat %.
+%term succ {_ nat} nat %.
 ```
 
-This is useful when you want to pass an infix operator as a regular function argument without it being interpreted as an infix operator.
+The Markdown above is not commented out — it is simply not a command, so nothing
+looks at it.
 
-### `%val` vs `%abs`
+### 1.2 `%.` is a separator, not a terminator `[changed]`
 
-`%abs` shares `%val`'s exact grammar (`%abs NAME`, `%abs ( NAME )`, `%abs ( PATH... NAME )` with the path outermost-first followed by the name) but resolves unqualified names differently. Both exist because a `%scope NAME cmd` session (see below) can install a case-label constant that shadows an outer/toplevel declaration sharing the same surface name — e.g. a case labeled `pi1` inside a `%scope`, shadowing a real `pi1` primitive declared earlier at the top level.
+Twelf terminates every declaration with `.`. STELF's `%.` (`Cmd.ml:220-226`) is a
+no-op at install time (`Impl.ml:557`) and is **optional between two commands**:
 
-- **`%val NAME`** (and bare `NAME`, and the `%(NAME)` shorthand) is **shadow-aware**: it resolves to whichever binding is currently "on top" — the innermost open `%scope`'s version if one shadows the name, else the toplevel one.
-- **`%abs NAME`** is **toplevel-first**: it prefers the current `%require` group's own toplevel declaration of NAME, bypassing any `%scope` shadow, falling back to `%val`'s shadow-aware behavior only if no toplevel binding exists.
-- **Qualified forms are identical for both**: `%val ( S NAME )` and `%abs ( S NAME )` both resolve to NAME as declared inside structure `S` — `%scope` sessions install genuine, permanent Twelf structures, so qualified lookup already ignores shadowing regardless of which keyword is used.
+```
+%sort nat
+%term zero nat        %; legal — the next % ends the previous command
+```
+
+A declaration ends at the next unescaped `%`, because identifiers cannot contain
+one (§2.1). But `%.` is **required before prose**, which does not start with `%`
+and would otherwise be swallowed as application arguments:
+
+```
+%sort nat %.
+Now the constructors.
+%term zero nat %.
+```
+
+Without that first `%.`, `Now the constructors.` parses as four more arguments to
+`%sort`, and the errors say so:
+
+```
+Undeclared identifier the
+Undeclared identifier constructors.
+Ambiguous reconstruction
+```
+
+Note that the second name is `constructors.` **with the full stop included** — a
+bare `.` is an ordinary identifier character (§2.1), and `%.` is the keyword.
+Corpus style is to write `%.` after every declaration; do that.
+
+### 1.3 Command blocks `%{ … %}` `[changed]`
+
+`%{ … %}` groups commands (`Cmd.ml:213-215`). **It is not a block comment** — this
+is the most dangerous false friend for a Twelf user, whose `%{ … %}` comments a
+region out. In STELF the region *runs*.
+
+```
+%scope nat %{
+  %term 0 nat %.
+  %term S {_ nat} nat %.
+%}
+```
+
+Only four commands take a block: `%scope`, `%eval`, `%data`, `%proof`. `%eval`
+*requires* one; the other three also accept a single bare command.
+
+```
+%data nat %term zero nat        %; equivalent to a one-command block
+```
+
+Blocks nest arbitrarily and may be empty (`%data nat %{ %}`).
+
+---
+
+## 2. Lexical structure
+
+There is no separate lexer. STELF is scannerless — the token rules are Angstrom
+combinators in `Parser.ml`, and `%` is disambiguated by context. See
+[`tokens.md`](tokens.md) for the complete tables.
+
+### 2.1 Identifiers and the delimiter set `[changed]`
+
+**Exactly ten bytes terminate an identifier** (`Parser.ml:62-65`):
+
+```
+space   tab   newline   (   )   {   }   [   ]   %
+```
+
+Everything else is an identifier character. This is the most consequential fact in
+the language:
+
+- `->` `<-` `+` `*` `:` `=` `,` `;` `?` `!` `#` `'` `"` `\` are ordinary names.
+- Digits are ordinary name characters, so `0`, `123` and `3x` are identifiers.
+- All bytes ≥ 0x80 pass through, so `ℕ`, `λ`, `⊢` are valid names.
+- **`.` is not a delimiter.** `ns.name` lexes as the single identifier `"ns.name"`.
+  There is no dotted-path syntax anywhere in STELF; namespaced references are
+  written `%(ns name)` (§3.5). A parser that splits on `.` will diverge from the
+  implementation.
+
+Identifier **class** is decided by the first character (`Modern.ml:338-341`):
+
+| First char | Class | Meaning |
+|---|---|---|
+| `A`–`Z` or `_` | uppercase | Metavariable — implicitly quantified, solved by unification |
+| anything else | lowercase | Constant reference or bound variable |
+
+So `X`, `Nat` and `_C1` are metavariables while `zero`, `λ`, `0` and `+` are not.
+The class can be overridden lexically by `{{…}}` (§3.9).
+
+The exact string `_` is in neither class: it is the omitted term (§3.3).
+
+### 2.2 Escaping delimiters: `%%X` `[new]`
+
+`%%` followed by **any single byte** contributes that byte literally to an
+identifier (`Parser.ml:56-60`). This is how you write a name containing a
+delimiter, or a name that would otherwise read as a keyword.
+
+| Written | Identifier |
+|---|---|
+| `%%%` | `%` |
+| `%%%term` | `%term` — the name, not the keyword |
+| `%%(` | `(` |
+| `%% ` | a single space |
+| `%%!foo` | `!foo` |
+
+A `%` run decomposes left to right by greedily pairing `%%`, so `%%%%` is `%`
+followed by a bare `%` that *ends* the identifier. There is no other escape form:
+no backslash escapes, no quoting, no `\n`.
+
+The printer emits `%%` before every delimiter byte (`Lex.ml:27-38`), and renders
+the empty name — which no source file can produce — as `%%_` (`Lex.ml:28`).
+
+### 2.3 Keywords and the boundary rule
+
+A keyword is `%` plus its body, and **must be followed by EOF or a delimiter**
+(`Parser.ml:40-52`). Without this check, `keyword "term"` would match the `%term`
+prefix of `%terminates` and the command dispatcher would commit to the wrong
+branch.
+
+A corollary: `%term.foo` is an *error*, not `%term` followed by `.foo`, because `.`
+is not in the boundary set.
+
+Keywords are recognised at parse time by string matching, not by a keyword table in
+a lexer. [`tokens.md`](tokens.md) has the complete list across all layers.
+
+### 2.4 Text literals: `%[ … %]` `[new]`
+
+A text literal opens with `%` + *n* `[` and closes with `%` + *n* `]`, for any
+*n* ≥ 1 (`Parser.ml:100-132`). The delimiters grow so that a payload containing the
+closer can still be written.
+
+```
+%[hello world%]                  →  hello world
+%[hello%world%]                  →  hello%world      (interior % is literal)
+%[[hello%]world%]]               →  hello%]world     (n = 2)
+%[[[a%]]]                        →  a                (n = 3)
+```
+
+Scanning rule: consume bytes until a `%`, then try to consume exactly *n* `]`. On
+success the literal **ends immediately** — the scanner does not look further, so a
+longer run of `]` closes at the *n*-th and leaves the rest in the stream. On
+failure the `%` and the brackets actually consumed are appended to the payload
+verbatim and scanning resumes.
+
+- **There are no escapes inside a literal.** The payload is raw bytes.
+- Reaching EOF first is an error: `%[hello` fails.
+- `%[]` fails, because *n* = 1 makes `]` payload and the literal is never closed.
+
+When *writing* a literal, choose the smallest *n* greater than the longest run of
+`]` that immediately follows a `%` in the payload — this is what the printer does
+(`Lex.ml:46-87`).
+
+Text literals appear as term atoms, as the `%require` payload (§7.2), and as
+ignorable prose between commands.
+
+### 2.5 Comments `[changed]`
+
+**There are no block comments.** A comment is `%` or `%;` followed immediately by
+whitespace, running to end of line.
+
+```
+succ % a comment
+zero
+```
+
+`%;` is an alternative introducer that reads better when a comment trails code on
+the same line.
+
+The rule differs slightly between the two contexts, deliberately:
+
+| Context | Introducers | `%` + newline? |
+|---|---|---|
+| Inner — inside a term, anywhere whitespace is legal (`Parser.ml:17-30`) | `% ` `%\t` `%\n` `%;` | yes, is a comment |
+| Outer — between commands (`Cmd.ml:32-58`) | `% ` `%\t`, or a run of **two or more** `%` | no, not a comment |
+
+At outer level a run of ≥2 `%` starts a comment line, which is what makes wiki
+metadata (`%%! title:`), banner rules (`%%%%%%`) and `%%`-commented-out code all
+work. The `%`+newline case is excluded there so an empty trailing comment cannot
+swallow the following declaration (`Cmd.ml:47-53`).
+
+Because the probe requires a whitespace byte immediately after, `%%` (escape), `%[`
+(text) and `%name` (keyword) are never mistaken for comments.
+
+### 2.6 What is *not* in the lexer
+
+- **No numeric literals.** Digit runs are matched ad hoc in exactly two places:
+  `%prec` levels (`Modern.ml:643-647`) and `%query` bounds (`Modern.ml:685-690`).
+  Neither does a boundary check, so `10x` reads as `10` then `x`.
+- **No layout sensitivity.** Newlines are ordinary whitespace; there is no offside
+  rule.
+- **Known gaps**, stated as gaps rather than design: `\r` is neither whitespace nor
+  a delimiter, so a CRLF file embeds `\r` in identifiers; and there is no UTF-8
+  awareness, so Unicode whitespace is an identifier character (`Parser.ml:66`).
+
+---
+
+## 3. Expressions
+
+The expression grammar has **three syntactic slots**, not a tower of precedence
+levels (`Pretty.ml:21-34`):
+
+| Slot | Parser | Contains |
+|---|---|---|
+| **Expr** | `parse_expr` (`Modern.ml:428-466`) | head forms, else `atom* trail?` |
+| **Atom** | `parse_expr1` (`Modern.ml:415-426`) | identifiers, `(…)`, text literals |
+| **Trail** | `parse_expr_trail` (`Modern.ml:354-407`) | binders and arrows — rightmost position only |
+
+Everything in the `atom*` run is disambiguated afterwards by an operator-precedence
+pass (§5).
+
+| Construct | Syntax | Slot | Tag |
+|---|---|---|---|
+| Application | juxtaposition | — | `[shared]` |
+| Identifier | `zero`, `X` | atom | `[shared]` |
+| Omitted term | `_` | atom | `[shared]` |
+| Universe | `%type` | atom | `[changed]` |
+| Qualified name | `%(ns c)`, `%val c`, `%abs c` | atom | `[changed]` |
+| Text literal | `%[ … %]` | atom | `[new]` |
+| Lambda | `[x A] M` | trail | `[changed]` |
+| Pi | `{x A} B` | trail | `[changed]` |
+| Implicit scoping | `{{X Y}} M` | trail | `[new]` |
+| Arrow | `%pi A %-> B`, `%pi B %<- A` | trail | `[changed]` |
+| Local scope | `%local ns M`, `%(ns (M))` | head / atom | `[new]` |
+| Ascription | `%the A M` | head | `[new]` |
+
+### 3.1 Application `[shared]`
+
+Juxtaposition, as in Twelf. There is no application operator.
+
+```
+succ zero
+succ (succ zero)
+```
+
+A trailing form is appended as the **last argument**, which is why this parses:
+
+```
+f y z [x nat] x y z
+```
+
+### 3.2 The universe `%type` `[changed]`
+
+Twelf's `type` is spelled `%type` so the bare identifier `type` stays available as
+an ordinary name (`Modern.ml:306-314`).
+
+```
+%type          %; the universe
+type           %; an ordinary lowercase identifier
+```
+
+`%type` exists mainly so the printer has a token for `IntSyn.Uni Type` that parses
+back to the same term. **No command accepts it in a type-correct position** —
+`%sort` supplies the universe implicitly, so `%sort c %type` is a level clash, not
+a longhand.
+
+### 3.3 The omitted term `_` `[shared]`
+
+A lone `_` is a fresh placeholder, solved by reconstruction independently at each
+occurrence.
+
+The test is made on the **whole identifier** (`Modern.ml:285-294, 343-349`), so
+`_0` and `_C1` are ordinary uppercase-class metavariables, not `_` followed by
+something else. This matters because `Names.decLUName` generates names of exactly
+that shape, so they arrive whenever printed output is read back in.
+
+### 3.4 `%val` and `%abs` `[new]`
+
+```
+%val NAME              %val ( P₁ … Pₙ NAME )
+%abs NAME              %abs ( P₁ … Pₙ NAME )
+```
+
+Both produce a *qualified reference*. In the parenthesised form the **last**
+element is the name and everything before it is the namespace path, outermost
+first (`Modern.ml:280-303`).
+
+They differ in how an **unqualified** name resolves (`Cst.ml:17-24`):
+
+- **`%val NAME`** is **shadow-aware**: it resolves to whichever binding is
+  currently on top — an open `%scope`'s label if one shadows the name, else the
+  toplevel one. Bare `NAME` and `%(NAME)` behave identically.
+- **`%abs NAME`** is **toplevel-first**: it bypasses `%scope` shadowing and prefers
+  the group's own toplevel declaration, falling back to `%val`'s behaviour only if
+  there is none.
+
+`%abs` exists because a `%scope` may install a case label that shadows a real
+toplevel constant of the same name (§7.1). Qualified forms are identical for both,
+since qualified lookup already ignores shadowing.
 
 ```
 %sort pi1 atom %.
-%term pi1 %pi atom %-> atom %.        (* toplevel primitive *)
-...
-%scope wf-noassm %term pi1 ...        (* case label, shadows bare "pi1" for the rest of this %scope session *)
-...
-%abs pi1                              (* still the toplevel primitive *)
-%val pi1                              (* the %scope's case label, since its session is still open *)
-%abs ( wf-noassm pi1 )                (* the %scope's case label -- qualified, same as %val *)
+%term pi1 %pi atom %-> atom %.     %; toplevel primitive
+
+%scope wf-noassm %term pi1 … %.    %; case label, shadows bare pi1 for this session
+
+%abs pi1                           %; still the toplevel primitive
+%val pi1                           %; the scope's case label
+%abs ( wf-noassm pi1 )             %; the scope's case label — qualified, same as %val
+```
+
+`%val` is also the **universal escape hatch for a name that cannot be written
+bare** (`Pretty.ml:88-94`): it opts a symbol out of operator status (§5), out of the
+uppercase/lowercase classification (§2.1), and is the only spelling that can carry
+a namespace.
+
+```
+%val +          %; the constant +, as a plain atom, even though + is infix
+```
+
+### 3.5 Qualified names `%(…)` `[changed]`
+
+`%( P₁ … Pₙ NAME )` is shorthand for `%val ( P₁ … Pₙ NAME )` (`Modern.ml:317-334`).
+
+```
+%(nat 0)        %; the constant 0 declared inside scope nat
+%(a b c)        %; c, in namespace a.b
+```
+
+Two details that bite:
+
+- **No space is allowed between `%` and `(`.** This is matched as the raw string
+  `"%("`, not through the keyword machinery. `%val (` *does* allow whitespace.
+- **A qualified name is unconditionally an atom** (`Modern.ml:155-161`). It never
+  consults the fixity table, so a namespaced operator can never be written — or
+  printed — infix. That is a deliberate trade-off: explicit qualification opts out
+  of operator status, and no spelling recovers it.
+
+### 3.6 Local scopes `%(ns (M))` and `%local` `[new]`
+
+Both open a scope for the extent of one expression, rewriting the names in `M` that
+`ns` happens to provide and leaving everything else — bound variables in particular
+— alone.
+
+```
+%(nat (S X))          %; S resolves in scope nat; X stays a metavariable
+%local nat (ap F X)
+```
+
+> **The inner parentheses in `%(ns (M))` are mandatory.** Dropping them turns the
+> node into `%(ns M)`, a *qualified name*, which demands that `ns` actually have a
+> member `M`. `Local` only rewrites what it can (`Pretty.ml:135-140`).
+
+`%local` is a head form: one namespace identifier, then a full expression, greedy to
+the end.
+
+### 3.7 Lambda and Pi `[changed]`
+
+```
+[decl] body            %; lambda   — Twelf [x:A] M
+{decl} body            %; Pi       — Twelf {x:A} B
+```
+
+The colon is gone (§4). Both are trailing forms and may appear only in the
+rightmost position of an expression, so an inner one needs parentheses.
+
+```
+f [x nat] x
+f {x nat} x
+f [p {_ nat} nat] z
+```
+
+### 3.8 Arrows `[changed]`
+
+```
+%pi A %-> B %-> C      ≡  A → (B → C)
+%pi C %<- B %<- A      ≡  A → (B → C)
+```
+
+`%if`, `%do`, `%pi` and `%fn` are **exact synonyms** for the leading keyword
+(`Modern.ml:373`); the printer always emits `%pi` (`Pretty.ml:196`). They read
+differently in different roles — `%if` for a clause premise, `%pi` for a type — but
+the parser does not distinguish them.
+
+- `%->` is right-associative; the **last** element is the body.
+- `%<-` reverses it: the **first** element is the body, matching Twelf's `A <- B`.
+- **A leading keyword is required.** Bare `A %-> B` does not parse.
+- **`%->` and `%<-` cannot be mixed in one chain.** The chain is built with a single
+  separator, so `%pi A %-> B %<- C` parses `%pi A %-> B` and then fails on the
+  leftover input.
+
+Every element of a chain is a full expression that stops only at the next
+separator, so an arrow in a non-final position would swallow the rest of the chain
+— parenthesise it (`Pretty.ml:200-203`):
+
+```
+%pi (%pi A %-> B) %-> C
+```
+
+Arrows elaborate to a dedicated non-dependent `Arrow` node rather than an
+anonymous-binder `Pi`, so the codomain is reconstructed without the domain in scope
+(`Modern.ml:385-388`). Routing through `Pi` would over-scope the head's omitted
+metavariables and derail coverage checking.
+
+### 3.9 Explicit implicits `{{X Y}}` `[new]`
+
+```
+{{X Y}} X Y
+{{X Y}} X {{Z}} Y Z
+```
+
+`{{…}}` scopes a list of names into the **uppercase class** for the body
+(`Modern.ml:365-368, 45-51`), so they are treated as implicitly quantified
+metavariables even when spelled lowercase. It produces no node of its own — it is
+purely a lexical-classification device — and it nests.
+
+> `{{` must be written glued. `{ {` lexes as a Pi binder whose declaration starts
+> with `{`, and fails.
+
+### 3.10 Type ascription `%the` `[new]`
+
+```
+%the TYPE TERM
+```
+
+**Type first.** `%the nat zero` ascribes `nat` to `zero`.
+
+The type slot is an **atom**, so a compound type needs parentheses
+(`Modern.ml:430-438`):
+
+```
+%the nat zero
+%the (a b) x
+%the a b c           %; = %the a (b c) — NOT (%the a b) c
+```
+
+The term slot is a full expression, greedy to the end. `%the` is a head form only:
+there is no trailing form, so anything narrower than a full expression position
+needs parentheses (`Pretty.ml:174-176`).
+
+### 3.11 Terms with no surface syntax
+
+The CST has constructors the parser never produces: `ExistVar`, `FreeVar`,
+`BackArrow`, `Foreign`, `Internal`, `MacroParam` (`LENS.ml:126-150`). They exist for
+the printer and for internal use, and `Internal` is deliberately unparseable. Do not
+look for syntax for them.
+
+---
+
+## 4. Declarations (binders)
+
+A declaration binds one or more names to a type. It appears in binders (`[…]`,
+`{…}`), in `%term`, in `%sort` arguments, in `%block` items and in `%mode`.
+
+```
+decl ::= "(" arg+ ")" expr?        -- several names sharing one type
+       | arg expr?                 -- one name
+arg  ::= identifier                -- "_" means anonymous
+```
+
+`[changed]` from Twelf on three counts (`Modern.ml:494-517`):
+
+**1. The colon is always elided.** `X : T` becomes `X T`.
+
+```
+{x nat} nat            %; Twelf: {x:nat} nat
+```
+
+**2. Several names may share a type**, by parenthesising them:
+
+```
+[(x y) nat] x          ≡  [x nat] [y nat] x
+%term (true false) bool
+```
+
+> **Trap.** The parentheses are not optional. `[x y z t]` is **one** binder `x` of
+> type `(y z t)` — not three binders. The bare-name branch takes exactly one
+> argument and parses everything after it as the type, so this misparses silently.
+
+**3. The type is optional**, yielding an inferred type:
+
+```
+[x] x
+{x} x
+(x y)
+```
+
+An omitted type is anchored on the binder's own source location, so
+reconstruction's "ambiguous type" error underlines the binder rather than pointing
+nowhere (`Modern.ml:498-502`).
+
+`_` as the argument makes the binder anonymous. Because the test is on the whole
+identifier, `{_0 nat}` binds the *name* `_0`; only a lone `_` is anonymous.
+
+---
+
+## 5. Fixity and precedence
+
+### 5.1 Declaring fixity: `%prec` `[changed]`
+
+Twelf's `%infix`, `%prefix` and `%postfix` are replaced by a single command:
+
+```
+%prec FIXITY LEVEL NAMES
+```
+
+```
+%prec %right 3 @ %.
+%prec %right 2 -> %.
+%prec %middle 1 : %.
+%prec %left 8 (++ --) %.
+```
+
+| Keyword | Fixity |
+|---|---|
+| `%left` | infix, left-associative |
+| `%right` | infix, right-associative |
+| `%middle` | infix, non-associative |
+| `%none` | infix, non-associative — **identical to `%middle`** (`Modern.ml:112-113`) |
+| `%prefix` | prefix |
+| `%postfix` | postfix |
+
+There is no `%nonfix`; an undeclared name is simply not an operator.
+
+`LEVEL` is a run of decimal digits (`Modern.ml:643-647`), and **higher levels bind
+more tightly**. The meaningful range is **0–9999**. Note the modern parser does
+**not** range-check, unlike the legacy Twelf front end (`ParseFixity.ml:35-42`) — a
+level above 9999 misbehaves rather than being rejected.
+
+`%prec` registers the fixity as a **parse-time side effect** (`Cmd.ml:587`), so an
+operator is usable in the same file immediately after its declaration.
+
+> Two sharp edges. The parse-time table is keyed on the **unqualified** name, so
+> `%prec %right 3 @` inside a `%scope` makes `@` infix everywhere, not just in that
+> scope. And because it fires during parsing, it also fires on speculative branches
+> that later backtrack.
+
+### 5.2 The precedence ladder
+
+| Level | Strength | Where |
+|---|---|---|
+| Atom | — | tightest |
+| **Juxtaposition** | **10000**, left-associative | `Modern.ml:125-130` |
+| `%prec` operators | 0–9999 | as declared |
+| Trailing forms — binders, arrows | — | loosest, greedy to the end |
+
+Application always binds tighter than any declarable operator, so `f x + g y` groups
+as `(f x) + (g y)`.
+
+### 5.3 Resolution
+
+The `atom*` run is collected flat and then resolved by a shift/reduce
+operator-precedence machine (`Modern.ml:176-278`) — the same design Twelf uses.
+Ambiguity is a **hard error**, not a silent choice:
+
+- infix following infix at equal precedence with mismatched associativity, which
+  includes any two `%middle`/`%none` operators of the same level in a row
+- infix following prefix at equal precedence
+- postfix following prefix or infix at equal precedence
+- consecutive infix operators, a leading infix, a leading postfix, or an incomplete
+  infix or prefix expression
+
+### 5.4 Bypassing fixity
+
+Wrap the name in `%val` (§3.4). Because a qualified reference is always an atom,
+this passes an operator as an ordinary argument:
+
+```
+%val +
+%(term @) F X          %; @ is infix, but qualification makes it an atom
 ```
 
 ---
 
-## Expressions
+## 6. Commands
 
-Expression syntax has been overhauled. Both lambda and pi/forall types now use the new declaration syntax, and the grammar is split into three tiers.
+Every command begins with a `%`-keyword. The parser tries 39 alternatives in a fixed
+order (`Cmd.ml:217-690`); the order matters where one keyword is a prefix of
+another. The separator `%.` is itself one of those 39 (`Cmd.ml`'s first arm,
+`Cst.Stop`) — which is why the count is 39 and not 38.
 
-### The three-tier structure
+> The one-line summaries the REPL prints for `%help` live in
+> [`src/Fronts/Pal/Help.ml`](../../src/Fronts/Pal/Help.ml), grouped by the same
+> categories as the subsections below. A command added to the parser must be added
+> to both; nothing checks that automatically, since `Cmd.ml` exposes no keyword
+> list to compare against.
 
-| Tier | Non-terminal | What it parses |
-|------|-------------|----------------|
-| Small | `expr1` | Identifiers and parenthesised expressions |
-| Trailing | `expr_trail` | Lambda and pi-type bindings |
-| Full | `expr` | Sequences of `expr1` optionally followed by one `expr_trail` |
+### 6.1 Declaring constants
 
-This split exists for two reasons:
+| Command | Syntax | Effect | Tag | Twelf |
+|---|---|---|---|---|
+| `%sort` | `%sort NAMES DECL*` | Declare a type family | `[changed]` | `a : type.` |
+| `%term` | `%term DECL` | Declare a term constant | `[changed]` | `c : A.` |
+| `%def` / `%define` | `%def NAME TYPE? BODY` | Definition | `[changed]` | `c : A = M.` |
+| `%inline` | `%inline NAME TERM` | Transparent definition | `[changed]` | `%abbrev c = M.` |
+| `%block` | `%block NAME ITEM*` | Context block | `[changed]` | `%block b : some […] block {…}.` |
+| `%union` | `%union NAME ( NAMES )` | Block union | `[changed]` | `%block b = b1 \| b2.` |
+| `%symbol` | `%symbol ALIAS EXISTING` | Name alias | `[new]` | — |
+| `%decl` | `%decl TERM` | Print a name's declaration | `[new]` | — |
 
-- **No left-recursion.** `expr` is right-to-left: it collects a flat list of atoms, then optionally attaches a trailing binder.
-- **Unambiguous trailing binders.** `[x T] body` can only appear at the "end" of an expression, avoiding the classic parsing ambiguity in grammars where lambdas and application fight for the same tokens.
-
-### Worked example
-
-Consider: `f a [x T] b x`
-
-1. `f`, `a` are parsed as `expr1` atoms.
-2. `[x T] b x` is an `expr_trail`: it is a lambda over `b x`, and `b x` is itself a full expression (application of `b` to `x`).
-3. The full expression is: atoms = `[f; a]`, trail = `Lam_(x:T, App_(b, x))`.
-4. Result: `App_(App_(f, a), Lam_(x:T, App_(b, x)))`.
-
-Another example: `[x T] y` — no atoms before the lambda, just a plain lambda term.
-
-### Type ascription
-
-```
-%the T e
-```
-
-Explicitly ascribes type `T` to expression `e`. The first argument after `%the` is the **type** (an `expr1`), and the second is the **expression** being ascribed.
-
-CST: `Hastype_(e, T)` — note that in the CST the expression comes first and the type second, which is the reverse of the surface syntax order.
-
-### Pi types and function types
+**`%sort`** takes a name list — parenthesised for mutual families — and a sequence
+of argument declarations. Each named argument `{x T}` becomes a dependent binder;
+each anonymous one (`{_ T}` or a bare `T`) becomes a non-dependent arrow; the
+universe terminating the kind is supplied implicitly.
 
 ```
-{x T} U        pi type:  x : T |- U    (dependent if x appears free in U)
-{T} U          function type:  T -> U   (non-dependent)
+%sort nat %.
+%sort prop {_ nat} {_ nat} %.
+%sort eq {t tp} {x term t} {y term t} %.
+%sort (even odd) %.                       %; mutual
 ```
 
-The `{decl} expr` form in `expr_trail` is both a pi type and a simple arrow type depending on whether the bound variable appears in the body. The parser does not distinguish them — that is determined during elaboration.
-
-An optional mode annotation (`%input`, `%output`, etc.) may prefix the `{`:
+**`%term`** takes a single declaration, so several constants of the same type share
+a line:
 
 ```
-%input  {x T} U    (x is an input argument)
-%output {y U} V    (y is an output argument)
+%term zero nat %.
+%term succ {_ nat} nat %.
+%term (true false) bool %.
 ```
 
-This is only meaningful inside `%mode` declarations.
+**`%def`** reads the name (`_` allowed), then an *atom* as the optional type, then
+the body:
+
+```
+%def not ({_ prop} prop) ([a] imp a false) %.
+```
+
+**`%inline`** is a definition installed transparently — always unfolded
+(`Impl.ml:645-650`).
+
+**`%block`** items use bare brackets, and the bracket shape carries the meaning
+Twelf spells with the `some`/`block` keywords (`Modern.ml:711-722`):
+
+| Item | Role |
+|---|---|
+| `[x T]` | *some* — a per-world variable, instantiated like a lambda binder |
+| `{x T}` | block body — a hypothesis, like a Pi binder |
+
+```
+%block test [x nat] { y bool } %.
+```
+
+> [`LENS.ml:356-359`](../../src/Common/Cst/LENS.ml) documents these two backwards.
+> The parser is authoritative.
+
+### 6.2 Derived commands `[new]`
+
+Three shorthands expand entirely in the parser; nothing downstream knows about them
+(`Cmd.ml:352-469`).
+
+**`%data NAME DECL* BODY`** → `%sort NAME DECL*` then `%scope NAME BODY`. A sort and
+the constructors inhabiting it are one unit, so this writes the name once instead of
+twice.
+
+```
+%data nat %{
+  %term zero nat %.
+  %term succ {_ nat} nat %.
+%}
+```
+
+`NAME` must be a single identifier — `%scope` takes exactly one name, so mutual
+sorts still need the long form.
+
+**`%prop NAME FULL_MODE`** → `%sort` + `%mode`. A judgement's sort and its mode are
+two views of the same information; this writes the argument list once instead of
+three times.
+
+```
+%prop add {%in X nat} {%in Y nat} {%out Z nat} %.
+%prop true %.                                    %; nullary is legal
+```
+
+Only the braced mode form is accepted here; the short positional form is not.
+
+**`%proof (WORLD)? NAME FULL_MODE BODY`** → `%sort` + `%scope` + `%mode` +
+`%worlds` + `%total`, in that order.
+
+```
+%proof (blk) total {%in X nat} {%out Z nat} %{ … %}
+```
+
+`WORLD` is optional and **must be parenthesised** — that is what keeps it
+unambiguous against `NAME`. The `%scope` deliberately precedes the `%mode`: mode
+checking runs retroactively over the whole family when the `%mode` is installed, so
+it is clauses declared *after* it that would escape checking, not before.
+
+### 6.3 Modes, worlds and totality `[shared]`
+
+| Command | Syntax |
+|---|---|
+| `%mode` | `%mode {%in x A} … NAME args` or `%mode NAME %in %in %out` |
+| `%worlds` | `%worlds ( NAMES ) ATOM+` |
+| `%total` | `%total ORDER ATOM+` |
+| `%terminates` | `%terminates ORDER ATOM+` |
+| `%covers` | `%covers MODE_DEC` |
+| `%reduces` | `%reduces REL ATOM+` |
+| `%freeze` | `%freeze NAMES` |
+| `%thaw` | `%thaw NAMES` `[new]` |
+| `%deterministic` | `%deterministic NAMES` |
+| `%unique` | `%unique NAME` `[new]` |
+
+**Mode keywords are `%`-sigil words, not `+`/`-`/`*` sigils** `[changed]`:
+
+| STELF | Alias | Twelf |
+|---|---|---|
+| `%in` | `%forall` | `+` |
+| `%out` | `%exists` | `-` |
+| `%out1` | — | `-1` |
+| `%star` | — | `*` |
+
+The braced and short forms may be mixed:
+
+```
+%mode {%in x nat} {%in y nat} {%out z nat} add x y z %.
+%mode add %in %in %out %.
+%mode {%in x nat} {%in y nat} add x y %out %.
+```
+
+**Termination orders** reuse the brackets a third way (`Cmd.ml:64-85`):
+
+| Form | Meaning |
+|---|---|
+| `N` or `( N₁ N₂ )` | argument position(s) |
+| `[ o … ]` | simultaneous |
+| `{ o … }` | lexicographic |
+
+Orders nest, and the empty order `{}` is legal — the corpus idiom for a
+non-recursive totality proof.
+
+```
+%total N (add N _ _) %.
+%total (N1 N2) (add N1 _ _) (mul N2 _ _) %.
+%terminates {A [B C] F} (max A (max B C)) %.
+```
+
+**`%reduces`** takes a bare relation token — `<`, `<=`, `>`, `>=` or `=` — which is
+*not* `%`-prefixed. `>` and `>=` are handled by swapping arguments; Twelf has only
+`<` and `<=`.
+
+```
+%reduces < X Y add X Y zero %.
+```
+
+**`%worlds`** requires the parenthesised block list, which may be empty. Twelf's `|`
+separator is gone.
+
+```
+%worlds () (add _ _ _) %.
+%worlds (blk) (add N _ _) %.
+```
+
+### 6.4 Queries `[changed]`
+
+| Command | Syntax |
+|---|---|
+| `%query` | `%query BOUND BOUND BOUND EXPR` |
+| `%querytabled` | same shape |
+| `%?` | `%? EXPR` `[new]` |
+| `%solve` | `%solve EXPR` |
+
+`%query` takes **three** bounds where Twelf takes two; `_` means unbounded. There is
+no `X : A` result binding, and `%solve` likewise takes no name.
+
+```
+%query _ _ 1 add zero zero zero %.
+%? add zero zero zero %.
+```
+
+`%?` is a STELF-only shorthand for an unbounded query, intended for the REPL.
+
+### 6.5 Modules and files
+
+Detailed in §7.
+
+| Command | Syntax | Effect |
+|---|---|---|
+| `%scope` | `%scope NAME %{ COMMAND* %}` or `%scope NAME COMMAND` | Group declarations under a name; reopens an existing structure of that name (§7.1) |
+| `%open` | `%open NAME`, `%open ( PREFIX NAME )`, `%open %require ARG` | Promote a structure's members to bare visibility (§7.3) |
+| `%require` | `%require %[ path %]`, `%require ( a b c )`, `%require name` | Load a file; idempotent, and circular requires terminate (§7.2) |
+| `%eval` | `%eval %{ COMMAND* %}` | Run a command list as one unit; the block is mandatory (§7.5) |
+| `%use` | `%use …` | Module instantiation — parses, then fails (§6.7) |
+
+### 6.6 REPL and meta commands
+
+| Command | Syntax | Effect |
+|---|---|---|
+| `%help` | `%help` or `%help TOPIC` | Categorised list of every command; with `TOPIC`, one command or one category |
+| `%version` | `%version` | Print the version |
+| `%get` | `%get KEY` | Read back a key stored by `%set` (§6.7) |
+| `%set` | `%set KEY VALUE` | Store a key; readable by `%get` only (§6.7) |
+| `%quit` | `%quit` | Leave the REPL (Ctrl-D also works) |
+
+Two things about `%help` follow from the grammar rather than from choice:
+
+- **It still needs the separator.** The REPL submits a line only when it ends in
+  `%.` (`Repl.ml:27-38`), so it is `%help %.`, not `%help`. Typing the latter just
+  gives you the continuation prompt.
+- **`TOPIC` is written bare.** The topic is parsed with `Modern.parse_var`
+  (`Cmd.ml:605-612`), i.e. `ident1`, whose character class excludes `%`. So it is
+  `%help sort %.`, not `%help %sort %.`. A topic may also name a category —
+  `constants`, `derived`, `modes`, `queries`, `files`, `fixity`, `annotations`,
+  `meta`, `separator`.
+
+`%version` reports whatever the executable set, so `%version`, `stelf version` and
+`stelf --version` always agree. The value comes from `dune-build-info`, which
+`bin/main.ml` reads and assigns to `Impl`'s `version` option — the only place it
+is set, and the only part of the tree depending on that library. Under a plain
+`dune build` this resolves to `dune-project`'s `(version …)`; if artifact
+substitution has not run, it falls back to `dev`.
+
+Two consequences worth knowing:
+
+- A library consumer of `pal` that never sets `M.version` sees `unknown`. That is
+  deliberate — a library cannot know the version, since substitution rewrites a
+  placeholder in the *linked executable*.
+- `src/Frontend/Version.ml`'s `Stelf 1.7.1` string is the *Twelf* revision this
+  port was taken from. It no longer reaches `%version`; it still serves the legacy
+  Twelf-compatible frontend, where the number means something.
+
+### 6.7 Commands that parse but do nothing
+
+Flagged so they are not mistaken for working features:
+
+| Command | Status |
+|---|---|
+| `%use` | Raises "module instantiation not yet implemented" (`Impl.ml:877-879`) |
+| `%name` | No-op (`Impl.ml:703`); takes one identifier, unlike Twelf's `%name a X y.` |
+| `%prose` | No-op (`Impl.ml:704`) — a highlighting hint |
+| `%thaw` | Gated on `Global.unsafe`, which **nothing in this frontend sets** — the only assignment in the tree is the legacy server's `set unsafe` (`Server_.ml:174`), so `%thaw` always fails here |
+| `%get` / `%set` | Read and write `Impl.Options`, a bare hashtable that nothing outside `%get` reads. A scratchpad, not a settings interface — no key changes any behaviour |
+| `%symbol` | Installs a *name* alias only. It cannot alias keywords: the keyword-alias table is read but never written (`Modern.ml:30`) |
+
+Each of these carries a matching `status` field on its entry in
+[`Help.ml`](../../src/Fronts/Pal/Help.ml), so `%help` flags them too rather than
+presenting them as working features.
+
+> `Impl.ml` also handles a `Cst.Macro_` command with "Macros not yet implemented
+> in this frontend", but the Modern parser has no `%macro` alternative, so that
+> arm is unreachable from source text. It is deliberately absent from `Help.ml`
+> for that reason — it is not an omission to fix.
 
 ---
 
-## Fixity Resolution
+## 7. Scopes, opening and files
 
-Fixity resolution comes *after* parsing, and is not encoded in the grammar. This means the parser does not need to know about operator precedence — it always produces a flat left-associative application spine, and fixity resolution rewrites it.
-
-### The two-pass model
-
-**Pass 1 — parsing:** All juxtaposition is treated as left-associative application. `a + b * c` is parsed as `App_(App_(App_(a, +), b), *) c`, i.e. a flat spine `a + b * c`.
-
-**Pass 2 — fixity resolution:** Each operator in the spine is looked up in the fixity table (populated by `%prec` declarations). The spine is restructured according to declared precedences and associativities.
-
-If there is a trailing expression (lambda or pi-type), fixity resolution first processes the atoms before it, then attaches the trail to the result.
-
-### Declaring fixity
+### 7.1 `%scope` `[new]`
 
 ```
-%prec %left  10 + -.
-%prec %right 20 -> *.
-%prec %prefix 30 ~.
+%scope NAME %{ COMMAND* %}
+%scope NAME COMMAND
 ```
 
-Higher numbers bind more tightly. The fixity keywords are:
+`%scope` groups declarations into a named structure. Semantically
+(`Impl.ml:831-876`):
 
-| Keyword | Meaning |
-|---------|---------|
-| `%left` | Left-associative infix: `a + b + c` → `(a + b) + c` |
-| `%right` | Right-associative infix: `a -> b -> c` → `a -> (b -> c)` |
-| `%prefix` | Prefix unary operator: `~ a` |
-| `%postfix` | Postfix unary operator: `a !` |
-| `%middle` | Non-associative infix: chaining is an error |
-| `%none` | Remove fixity from the operator |
-
-### Bypassing fixity
-
-`%val(op)` strips all fixity from `op`, making it behave as an ordinary applied constant. Use this when you want to pass an infix operator as a function argument:
+**Reopen-or-create.** If a structure of that name already exists in the current
+namespace it is *reopened* and further declarations accumulate into it. This is what
+lets you write one `%scope NAME` per clause:
 
 ```
-map (%val(+)) xs    (* pass + as a function, not as infix *)
+%scope add %{ %term z {X nat} add zero X X %} %.
+%scope add %{ %term s … %} %.
 ```
 
-`%abs(op)` strips fixity the same way — this is a side effect of sharing `%val`'s grammar, not a separate feature; the two keywords only differ in how they resolve unqualified names (see "`%val` vs `%abs`" above).
+**Sessions.** While a scope is open, its members are also visible **bare**, without
+qualification. The session closes as soon as the next top-level command is not a
+`%scope` of the same name (`Impl.ml:458-474`) — a scope-declared name must not stay
+shadowed forever. After that, members are reached by one of:
+
+```
+%(nat 0)               %; qualified reference          (§3.5)
+%local nat (S X)       %; open for one expression      (§3.6)
+%open nat              %; promote permanently          (§7.3)
+```
+
+**Shadow tolerance.** Inside a scope body an installation may reuse a label already
+bound outside (`Impl.ml:151-171`), so a case named `pi1` can coexist with a toplevel
+`pi1`. `%abs` (§3.4) is how you reach past such a shadow.
+
+### 7.2 `%require` `[new]`
+
+```
+%require %[ some/path %]
+%require ( a b c )
+%require name
+```
+
+All three spellings produce a path: the text form is trimmed and split on `/`, the
+identifier forms are joined with `/`. The `%[ … %]` spelling dominates the corpus
+because it reads as a path rather than a name.
+
+Resolution (`Loader.ml:31-78`):
+
+1. The path's last segment is the stem; the **extension is not written**, so
+   `%require %[ core %]` finds `core.lf`.
+2. Each directory on the current load path is searched for a file whose basename
+   without extension matches, excluding `.cfg` and `.toml`.
+3. Files are deduplicated by canonical path, so repeated requires are idempotent and
+   **circular requires terminate**.
+
+A `%require` inside a `%scope` still loads into the *group* namespace, not the
+scope's.
+
+### 7.3 `%open` and `%open %require`
+
+```
+%open NAME
+%open ( PREFIX NAME )
+%open %require ARG
+```
+
+`%open` promotes a structure's members to bare visibility. At the top level the
+effect is permanent; *inside* a `%scope` body the promoted names are retracted with
+the rest of the body (`Impl.ml:810-820`).
+
+`%open %require ARG` is the combined form. The two halves read the argument
+differently — `%require` joins it into a *file path*, `%open` splits it into a
+*structure path* — so they coincide only for a single-segment name, which is the
+intended use (`Cmd.ml:534-538`).
+
+The `%` sigil is what disambiguates: a scope literally named `require` is still
+opened by the bare `%open require`.
+
+### 7.4 There is no `%alias` command
+
+`alias` is a **`stelf.toml` dependency field**, not syntax. It renames the namespace
+a dependency is imported under (`Format.ml:5,59`; `Loader.ml:211-233`).
+
+### 7.5 `%eval`
+
+```
+%eval %{ COMMAND* %}
+```
+
+Runs a command list as a single unit. The block is mandatory here.
 
 ---
 
-## Document Syntax
+## 8. Project files
 
-A STELF source file alternates between free-text `outer` sections and keyword-driven `cmd`s. Each command is terminated by `%.`.
+A `stelf.toml` describes one or more groups:
 
-```
-outer ::= everything not starting with a bare `%`
-file  ::= outer { cmd outer }
-```
+```toml
+#:schema ./stelf.schema.json
 
-### `outer` text
-
-`outer` is any sequence of characters that does not contain a bare `%`. It serves as documentation, comments, blank lines, or any prose — the elaborator ignores it. The escape `%%` (followed by any character) may appear inside `outer` to embed a literal percent sign.
-
-```
-This is outer text describing natural numbers.
-%term nat : type.
-Another outer section between commands.
-%term z : nat.
+[[group]]
+name = "demo"
+main = "src/main.lf"
+src = ["src"]
+dependencies = []
 ```
 
-### Command terminator `%.`
+| Key | Required | Notes |
+|---|---|---|
+| `name` | yes | Group name; also the namespace it is sealed into |
+| `main` | yes | Entry-point file |
+| `src` | — | Also spelled `dirs`, `srcs`, `dir`. Search path for `%require` |
+| `dependencies` | — | Also spelled `deps` |
 
-Every command ends with `%.`. The period is mandatory and serves as an unambiguous end-of-command marker, even in the presence of multi-line expressions.
+**There is no glob-based source discovery.** `src` is only the search path; the
+actual file graph is `main` plus the `%require` edges reachable from it
+(`Loader.ml:198-298`). A file that nothing requires is never compiled.
 
-### Inline command blocks `%{ ... %}`
-
-Commands may be nested inside a `%{ ... %}` block (e.g. as the body of `%module` or `%eval`). Inside the block the same `outer { cmd outer }` structure applies:
-
-```
-%module MyMod (SigA) %{
-  %term foo : nat.
-  %term bar : nat -> nat.
-%}.
-```
+Dependencies are `local` (with an optional `alias`), `installed`, or `external`;
+only `local` is currently loaded.
 
 ---
 
-## Commands Reference
+## 9. Migrating from Twelf
 
-### Definition commands
+### Changed spellings
 
-| Syntax | Purpose |
-|--------|---------|
-| `%term decl` | Declare a constant with a type |
-| `%sort id { {decl} }` | Declare a type family (kind-level) |
-| `%decl expr` | Raw elaboration-level declaration |
-| `%define id expr` | Transparent definition (unfolds during type-checking) |
-| `%inline id expr` | Like `%define`, but always eagerly unfolded |
-| `%symbol id id` | Associate a symbolic name with an identifier |
-| `%freeze id_list` | Freeze identifiers (no new clauses allowed) |
-| `%thaw id_list` | Unfreeze previously frozen identifiers |
+| Twelf | STELF |
+|---|---|
+| `a : type.` | `%sort a %.` |
+| `c : A.` | `%term c A %.` |
+| `c : A = M.` | `%def c A M %.` |
+| `%abbrev c = M.` | `%inline c M %.` |
+| `{x:A} B` | `{x A} B` |
+| `[x:A] M` | `[x A] M` |
+| `A -> B` | `%pi A %-> B` |
+| `B <- A` | `%pi B %<- A` |
+| `type` | `%type` |
+| `+` / `-` / `-1` / `*` modes | `%in` / `%out` / `%out1` / `%star` |
+| `%infix left 9 f.` | `%prec %left 9 f %.` |
+| `%block b : some [x:T] block {y:U}.` | `%block b [x T] {y U} %.` |
+| `%block b = b1 \| b2.` | `%union b (b1 b2) %.` |
+| `%worlds (b1 \| b2) (f _ _).` | `%worlds (b1 b2) (f _ _) %.` |
+| `s.c` (module path) | `%(s c)` |
+| `.` terminator | `%.` |
+| `%{ … }%` block comment | `% …` line comment |
 
-`%freeze` and `%thaw` control whether new clauses may be added to a type family. Freezing is required before coverage or totality checking.
+### New in STELF
 
-### Mode and query commands
+`%the` · `%local` · `%(ns (M))` · `{{X Y}}` · `%[ … %]` · `%%X` escapes · `%scope` ·
+`%data` / `%prop` / `%proof` · `%?` · `%thaw` · `%unique` · `%symbol` · `%decl` ·
+literate-by-default files · optional binder types · multi-name binders
 
-| Syntax | Purpose |
-|--------|---------|
-| `%mode id hyps` | Declare input/output polarity for a type family |
-| `%? expr` | Ad-hoc REPL query: find a proof of `expr` |
-| `%query n b d expr` | Logic programming query (max solutions, bound, depth) |
-| `%querytabled n b d expr` | Like `%query` but with tabled (memoised) search |
-| `%unique expr` | Assert `expr` has at most one inhabitant |
+### Absent from STELF
 
-### World and coverage commands
+`%theorem` · `%prove` · `%establish` · `%assert` · `%clause` · `%tabled` ·
+`%trustme` · `%subord` · `%sig` / `%struct` / `%include` · `%{ … }%` block comments
 
-| Syntax | Purpose |
-|--------|---------|
-| `%block id block_item*` | Define a named context schema (block label) |
-| `%union id ( id* )` | Union of block labels |
-| `%worlds ( id* ) expr` | Assert `expr` lives in the named world |
-
-Coverage checking requires `%worlds` annotations. A world is built from block labels that describe what variable bindings are allowed in the context.
-
-### Module commands
-
-| Syntax | Purpose |
-|--------|---------|
-| `%module id params file` | Declare a parameterised module |
-| `%use id id iparams` | Instantiate a module with concrete arguments |
-| `%open id id_list` | Bring names from a module into scope |
-| `%eval cmd_list` | Evaluate a command block in the current context |
-
-### Logic commands
-
-| Syntax | Purpose |
-|--------|---------|
-| `%deterministic id_list` | Mark type families as deterministic (commit to first clause) |
-
-### Control and fixity
-
-| Syntax | Purpose |
-|--------|---------|
-| `%.` | End-of-command marker |
-| `%prec fixity n id_list` | Set operator fixity and precedence |
-| `%{ ... %}` | Inline command block |
-
-### REPL-only commands
-
-These commands are only valid at the interactive REPL, not in `.elf` source files.
-
-| Syntax | Purpose |
-|--------|---------|
-| `%help [topic]` | Print help |
-| `%get id` | Display the value of a REPL setting |
-| `%set id val` | Set a REPL configuration value |
-| `%quit` | Exit the REPL |
+Several of these have CST constructors but no parser entry, so they report an
+unrecognised command rather than a helpful "not supported" error.
 
 ---
 
-## Mapping to CST Types
+## 10. Notes for implementors
 
-This table maps grammar rules to their CST constructors in `src/Common/Cst/Cst.ml` and the current parser location in `src/Fronts/Modern/Modern.ml`.
+### 10.1 Surface order vs CST order
 
-| Grammar rule | CST constructor | Parser function | Status |
+Two constructs store their arguments in a different order than they are written.
+Both swaps **type-check when written backwards**, because the two slots have the
+same OCaml type — so they are worth checking against this table rather than
+against intuition.
+
+| Construct | Surface order | CST / view order | Built at |
 |---|---|---|---|
-| `ident` (lowercase-initial) | `Lcid_ of string list * string * loc` | `Modern.parse_id` | Implemented |
-| `ident` (uppercase-initial) | `Ucid_ of string list * string * loc` | `Modern.parse_id` | Implemented |
-| `%val(...)` qualified id | `Quid_ of string list * string * qid_form * loc` | `Modern.parse_id` | Implemented |
-| `%abs(...)` qualified id (toplevel-first) | `Quid_ of string list * string * qid_form * loc` | `Modern.parse_id` | Implemented |
-| `expr1` (parenthesised) | (delegates to inner `expr`) | `Modern.parse_expr1` | Implemented |
-| `expr_trail` lambda `[d] e` | `Lam_ of decl * term` / `Cst.Term.lam` | `Modern.parse_expr_trail` | Implemented |
-| `expr_trail` pi `{d} e` | `Pi_ of decl * term` / `Cst.Term.pi` | `Modern.parse_expr_trail` | Implemented |
-| `expr` application spine | `App_ of term * term` / `Cst.Term.app` | `Modern.parse_expr_app` | Implemented |
-| `%the T e` | `Hastype_ of term * term` / `Cst.Term.has_type` | `Modern.parse_expr` | Implemented |
-| `decl` single | `Dec_ of string option list * term * loc` | `Modern.parse_decl` | Implemented |
-| `decl` multi `(x y) T` | `Dec_ of string option list * term * loc` | `Modern.parse_decl` | Implemented |
-| `arg` wildcard `_` | `None` in the names list | `Modern.parse_arg` | Implemented |
-| `mode` annotation | `Cst.mode` = `Plus_ \| Star_ \| Minus_ \| Minus1_` | `Modern.parse_mode` | **Stubbed** |
-| `%mode` declaration | `Cst.modeDec` = `ModeDec_` | `Modern.parse_mode_dec` | **Stubbed** |
-| `sigexp` | `Cst.sigexp` = `TheSig_ \| SigId_ \| WhereSig_` | `Modern.parse_sigexp` | **Stubbed** |
-| `inst` | `Cst.inst` = `ConInst_ \| StrInst_` | `Modern.parse_inst` | **Stubbed** |
-| `%query` / `%?` | `Cst.query` = `Query_` | `Modern.parse_query` | **Stubbed** |
-| `%define` | `Cst.define` = `Define_` | `Modern.parse_define` | **Stubbed** |
-| `%prec fixity` | `int` (precedence level) | `Modern.parse_fixity` | **Stubbed** |
-| `%block` / `%worlds` | `Cst.ConDec.block_decl` / `block_def` | — | **Missing** |
-| theorem syntax (`%term`, `%sort`) | `Cst.Cmd.term` / `Cst.Cmd.sort` | — | **Missing** |
-| `%module` / `%use` / `%open` | `Cst.Struct.*` | `Modern.parse_struct_dec` | **Stubbed** |
+| `%the` | `%the TYPE TERM` | `HasType (loc, term, type)` | `Modern.ml:430-438` |
+| `%def` | `%def NAME TYPE BODY` | `Define (loc, name, body, type)` | `Modern.ml:660-676` |
 
-"Stubbed" means the function exists in `Modern.ml` but contains `assert false`. "Missing" means there is no parser entry point yet — these should be added to `Modern.ml`.
+Everything else stores its arguments in surface order.
 
----
+### 10.2 Known defects
 
-## Parser Implementation Status
+Documented here because they are traps, not because they are intended.
 
-The modern parser lives in `src/Fronts/Modern/Modern.ml` and uses Angstrom-based combinators from `src/Lang/Parsing/Parser.ml`.
-
-**Fully implemented:**
-- All expression parsing (`expr`, `expr1`, `expr_trail`, application)
-- Declaration parsing (single and multi-name)
-- Identifier parsing including `%val(...)` and `%abs(...)` qualified forms
-
-**Stubbed (`assert false`):**
-- Mode syntax (`parse_mode`, `parse_mode_dec`)
-- Module/signature syntax (`parse_sigexp`, `parse_inst`, `parse_sigdef`, `parse_struct_dec`)
-- Fixity declarations (`parse_fixity`)
-- Query/define/solve commands (`parse_query`, `parse_define`, `parse_solve`)
-- Helper grouping parsers (`parse_group`, `parse_parens`, `parse_braced`, `parse_bracketed`)
-- Top-level `run` function
-
-**Not yet started:**
-- World commands (`%block`, `%union`, `%worlds`)
-- Theorem commands (`%term`, `%sort`)
-- REPL command dispatch
-- `%prec` fixity declarations
-- `cmd_list` / `file` top-level structure
-
-The legacy frontend at `src/frontend/` is complete and handles all of the above; it can serve as a reference implementation for the missing modern parser rules.
+| Where | Problem |
+|---|---|
+| `LENS.ml:356-359` | `Any`/`All` block-item bracket shapes documented backwards |
+| `Cst.ml:83` | Debug printer emits `%the TERM TYPE`, reversing the surface order |
+| `Cmd.ml:257` | Comment refers to a `%mode`/`%module` collision; `%module` no longer exists |
+| `Modern.ml:30` | `given_symbols` is read but never written — `%symbol` cannot alias keywords |
+| `Modern.ml:409-413`, `Parser.ml:32` | `parse_expr_app` and `Parser.blank` are dead code |
+| `Parser.ml:66` | `\r` is neither whitespace nor a delimiter; no UTF-8 awareness |
+| `Modern.ml:643-647` | `%prec` accepts out-of-range levels the legacy parser rejects |
+| `stelf.schema.json` | Says `action` where the TOML reader expects `post` |

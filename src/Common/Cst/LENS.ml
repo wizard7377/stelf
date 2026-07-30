@@ -78,6 +78,19 @@ module type VIEW = sig
             (toplevel-first lookup, falling back to shadow-aware). Only affects
             unqualified [Qualified] terms; see [Names.resolveQid]. *)
 
+  (** Tags for printer-internal term nodes: the parts of the internal syntax
+      that have no STELF surface form, named so that resugaring can be total. A
+      term containing an [Internal] node is deliberately unparseable. *)
+  type internal_tag =
+    | Kind_tag  (** [IntSyn.Uni Kind]: no surface syntax exists. *)
+    | Subst_tag  (** Explicit substitution; children are its fronts. *)
+    | Shift_tag of int  (** The [^n] tail of a substitution. *)
+    | Undef_tag  (** An undefined substitution front. *)
+    | Proj_tag of string  (** Block projection label, pre-rendered. *)
+    | Cutoff_tag  (** [printDepth] was exceeded; prints [%%]. *)
+    | Elided_tag  (** [printLength] was exceeded; prints [...]. *)
+    | Opaque_tag of string  (** Verbatim token plus children; last resort. *)
+
   val mk_loc : int -> int -> loc
   (** Create a location from start and end lexer positions. *)
 
@@ -126,8 +139,12 @@ module type VIEW = sig
       | Typ of Loc.t  (** The universe [type]. *)
       | Arrow of Loc.t * t * t  (** Non-dependent function type [A -> B]. *)
       | BackArrow of Loc.t * t * t  (** Reverse-direction arrow [B <- A]. *)
-      | Foreign of Loc.t * t  (** Foreign/external term from an FFI. *)
-      | Internal of int  (** Internal de Bruijn reference (not user-facing). *)
+      | Foreign of Loc.t * t
+          (** Foreign/external term from an FFI. Transparent: prints as just its
+              child, so it round-trips. *)
+      | Internal of Loc.t * internal_tag * t list
+          (** A printer-internal node with no surface syntax; see
+              {!internal_tag}. Print-only and deliberately unparseable. *)
       | MacroParam of Loc.t * int option * int
           (** Macro parameter reference with optional binding level and index.
           *)

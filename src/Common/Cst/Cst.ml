@@ -32,6 +32,21 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
 
   let ghost : loc = { start_pos = 0; end_pos = 0 }
 
+  (* Tags for printer-internal term nodes. These name the parts of the
+     internal syntax that have no STELF surface form at all, so that
+     resugaring can be a total function. Terms containing an [Internal_]
+     node are deliberately unparseable -- they exist only to be printed. *)
+  type internal_tag =
+    | Kind_tag  (** [IntSyn.Uni Kind]: no surface syntax exists. *)
+    | Subst_tag  (** Explicit substitution; children are its fronts. *)
+    | Shift_tag of int  (** The [^n] tail of a substitution. *)
+    | Undef_tag  (** An undefined substitution front. *)
+    | Proj_tag of string  (** Block projection label, pre-rendered. *)
+    | Cutoff_tag  (** [printDepth] was exceeded; prints [%%]. *)
+    | Elided_tag  (** [printLength] was exceeded; prints [...]. *)
+    | Opaque_tag of string  (** Verbatim token plus children; last resort. *)
+  [@@deriving show { with_path = false }, eq]
+
   (* Mutual recursion: decl and term *)
   type decl = Dec_ of string option list * term * loc
 
@@ -51,6 +66,12 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     | Typ_ of loc
     | MacroParam_ of loc * int option * int
     | Local_ of loc * namespace * term
+    | Foreign_ of loc * term
+        (** A term coming from a foreign/FFI representation. Transparent: it
+            prints as just its child, so it round-trips through the parser. *)
+    | Internal_ of loc * internal_tag * term list
+        (** A printer-internal node with no surface syntax. See {!internal_tag}.
+        *)
   [@@deriving eq]
 
   let rec pp_term (fmt : Format.formatter) (x : term) : unit =
@@ -76,6 +97,12 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         Format.fprintf fmt "%%local %s %a"
           (Stdlib.String.concat "." ns)
           pp_term t
+    | Foreign_ (l, t) -> Format.fprintf fmt "%%foreign %a" pp_term t
+    | Internal_ (l, tag, ts) ->
+        Format.fprintf fmt "%%internal(%a%a)" pp_internal_tag tag
+          (fun fmt ->
+            Stdlib.List.iter (fun t -> Format.fprintf fmt " %a" pp_term t))
+          ts
 
   and pp_decl_name (fmt : Format.formatter) (n : name option) : unit =
     match n with
@@ -503,6 +530,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     LENS.VIEW
       with type loc = loc
        and type qid_form = qid_form
+       and type internal_tag = internal_tag
        and type Loc.t = loc
        and module Paths = Paths
        and type Term.t = term
@@ -544,6 +572,16 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
       | Abs
           (** Distinguishes [%val NAME] (shadow-aware lookup) from [%abs NAME]
               (toplevel-first lookup, falling back to shadow-aware). *)
+
+    type nonrec internal_tag = internal_tag =
+      | Kind_tag
+      | Subst_tag
+      | Shift_tag of int
+      | Undef_tag
+      | Proj_tag of string
+      | Cutoff_tag
+      | Elided_tag
+      | Opaque_tag of string
 
     (** Create a Loc.tation from start and end lexer positions. *)
     let mk_loc = mk_loc
@@ -592,7 +630,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Arrow of Loc.t * t * t
         | BackArrow of Loc.t * t * t
         | Foreign of Loc.t * t
-        | Internal of int
+        | Internal of Loc.t * internal_tag * t list
         | MacroParam of Loc.t * int option * int
         | Local of Loc.t * namespace * t
 
@@ -634,6 +672,9 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Typ_ loc -> Typ loc
         | Arrow_ (loc, a, b) -> Arrow (loc, a, b)
         | Local_ (loc, ns, tm) -> Local (loc, ns, tm)
+        | MacroParam_ (loc, lvl, n) -> MacroParam (loc, lvl, n)
+        | Foreign_ (loc, tm) -> Foreign (loc, tm)
+        | Internal_ (loc, tag, tms) -> Internal (loc, tag, tms)
 
       let review (y : u) : t =
         let rec fold_right f lst acc =
@@ -681,9 +722,10 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
         | Typ loc -> Typ_ loc
         | Arrow (loc, a, b) -> Arrow_ (loc, a, b)
         | BackArrow (loc, a, b) -> Arrow_ (loc, b, a)
-        | Foreign (_, _) -> raise Lacking
-        | Internal _ -> raise Lacking
+        | Foreign (loc, tm) -> Foreign_ (loc, tm)
+        | Internal (loc, tag, tms) -> Internal_ (loc, tag, tms)
         | Local (loc, ns, tm) -> Local_ (loc, ns, tm)
+        | MacroParam (loc, lvl, n) -> MacroParam_ (loc, lvl, n)
 
       let ( !> ) = view
       let ( !< ) = review

@@ -54,8 +54,8 @@ let flag_off_regression () =
   check_not_contains printed "%pi"
 
 let cases () =
-  Alcotest.run "Print"
-    [
+  Alcotest.run "Print" @@ Golden.cases () @ Shadow.cases ()
+  @ [
       test "Pi arrow-sugar: single non-dependent hop" positive_single_hop;
       test "Pi arrow-sugar: named binder stays explicit" negative_named_binder;
       test "Pi arrow-sugar: anonymous but dependent stays explicit"

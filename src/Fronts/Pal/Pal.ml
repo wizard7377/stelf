@@ -1,4 +1,7 @@
-let version = "0.1.0"
+(* No [version] here on purpose: it would be a second, hardcoded source of truth.
+   The version lives in [Pal.M.version], which the executable sets from
+   dune-build-info. *)
+
 let logo = Logo.logo
 
 module type PAL = PAL.PAL
@@ -7,6 +10,7 @@ module type PAL' = PAL.PAL'
 module Opts = Opts
 module Reply = Reply
 module Render = Render
+module Help = Help
 
 exception Error of exn
 
