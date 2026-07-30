@@ -2,7 +2,7 @@
 
 (name stelf)
 
-(version 1.0.0~alpha)
+(version 1.0.0~alpha2)
 
 (generate_opam_files true)
 
@@ -33,6 +33,8 @@
    (>= 5.0.0))
   (dune
    (>= 3.24))
+  ; Used only by bin/, to stamp the executable's version -- see bin/main.ml.
+  dune-build-info
   lwt
   containers
   base

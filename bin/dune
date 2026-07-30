@@ -1,12 +1,33 @@
+; The project skeleton written by `stelf setup`. Marked data-only so dune
+; neither interprets templates/dune as one of its own files nor tries to build
+; anything in there -- the tree is payload, not source.
+
+(data_only_dirs templates)
+
+(executable
+ (name Embed)
+ (modules Embed))
+
+(rule
+ (target Templates.ml)
+ (deps
+  (glob_files_rec templates/*))
+ (action
+  (with-stdout-to
+   Templates.ml
+   (run %{exe:Embed.exe} templates %{deps}))))
+
 (executable
  (name main)
  (public_name stelf)
- (modules main Setup)
+ (modules main Setup Templates)
  (libraries
   stelf
   server
   pal
   cmdliner
+  dune-build-info
+  fmt
   fmt.tty
   display
   fpath

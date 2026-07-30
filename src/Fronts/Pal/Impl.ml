@@ -74,6 +74,16 @@ module Impl () = struct
   let auto_freeze = Global.Global_.Global.autoFreeze
   let time_limit = Global.Global_.Global.timeLimit
 
+  (* Set by the executable -- see IMPL.ml.  [bin/main.ml] assigns it from
+     dune-build-info at startup; [Install.reset] deliberately leaves it alone, so
+     that one assignment covers every later [Pal.Start ()] session too.
+
+     This replaces a former [Frontend.Version.Version.version_string], which
+     reported the *Twelf* revision this port was taken from ("Stelf 1.7.1") --
+     inherited metadata, not STELF's version. That module still serves the legacy
+     Twelf-compatible frontend, where the number is meaningful. *)
+  let version : string ref = ref "unknown"
+
   (* ------------------------------------------------------------------ *)
   (* Status                                                               *)
   (* ------------------------------------------------------------------ *)
@@ -557,16 +567,12 @@ module Impl () = struct
       | Cst.StopCmd_ -> []
       | Cst.QuitCmd_ -> [ Reply.Quit ]
       | Cst.HelpCmd_ topic ->
-          begin match topic with
-          | None ->
-              [
-                Reply.Response
-                  "Commands: sort, term, query, define, solve, quit, help, \
-                   get, set, version\n";
-              ]
-          | Some t ->
-              [ Reply.Response (("No help available for '" ^ t) ^ "'\n") ]
-          end
+          [
+            Reply.Response
+              (match topic with
+              | None -> Help.overview
+              | Some t -> Help.topic (Stdlib.String.lowercase_ascii t));
+          ]
       | Cst.GetCmd_ key ->
           begin match Options.get key with
           | Some v -> [ Reply.Response ((key ^ " = ") ^ v ^ "\n") ]
@@ -576,7 +582,7 @@ module Impl () = struct
           Options.set key value;
           []
       | Cst.VersionCmd_ ->
-          [ Reply.Response (Frontend.Version.Version.version_string ^ "\n") ]
+          [ Reply.Response (!version ^ "\n") ]
       | Cst.EvalCmd_ cmds ->
           run_until_quit (install1 ~path ~scope_installs ns) cmds
       | Cst.AdhocQueryCmd_ (Cst.Query_ (_, qtm) as q) ->
@@ -1071,7 +1077,11 @@ module Impl () = struct
     let prog () = Print.Print_.ClausePrint.printSgn ()
     let subord () = Subordinate.Subordinate_.Subordinate.show ()
     let def () = Subordinate.Subordinate_.Subordinate.showDef ()
-    let domains () = msg (Frontend.Version.Version.version_string ^ "\n")
+    (* Suspicious, but preserved as-is: IMPL documents this as "print registered
+       constraint-solver domains", and printing a version string instead looks
+       like a mistranslation of the SML original. Only the source of the version
+       changed here; fixing what it prints is a separate question. *)
+    let domains () = msg (!version ^ "\n")
 
     module Tex = struct
       let sgn () =
@@ -1180,11 +1190,6 @@ module Impl () = struct
       Install.install1 (Names.newNamespace ()) cmd
   end
 
-  (* ------------------------------------------------------------------ *)
-  (* Version string                                                       *)
-  (* ------------------------------------------------------------------ *)
-
-  let version : string = Frontend.Version.Version.version_string
   let top _ = assert false
   let run _ = assert false
 end

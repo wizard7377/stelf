@@ -148,6 +148,38 @@ let new_tests_output_pages : string =
 let new_tests_stelf_output_tslf : string =
   Filename.concat repo_root "new-tests2/tslf"
 
+let contains ~(needle : string) (haystack : string) : bool =
+  let n = String.length needle and h = String.length haystack in
+  let rec go i =
+    i + n <= h && (String.equal (String.sub haystack i n) needle || go (i + 1))
+  in
+  n = 0 || go 0
+
+(* Help.ml must carry one entry per alternative in Modern/Cmd.ml's [choice]
+   table, and nothing keeps the two in step automatically -- the parser exposes
+   no keyword list to compare against. These two checks are what can be verified
+   cheaply from inside: that no entry was copied without being renamed, and that
+   every entry actually reaches the rendered overview (which a category defined
+   but left out of [categories] would break). *)
+let help_catalogue =
+  ( "help catalogue",
+    [
+      Alcotest.test_case "command names are unique" `Quick (fun () ->
+          let names =
+            List.map (fun (x : Pal.Help.entry) -> x.name) Pal.Help.entries
+          in
+          Alcotest.(check int)
+            "no duplicate names in Help.entries" (List.length names)
+            (List.length (List.sort_uniq String.compare names)));
+      Alcotest.test_case "every entry appears in the overview" `Quick (fun () ->
+          List.iter
+            (fun (x : Pal.Help.entry) ->
+              Alcotest.(check bool)
+                ("%" ^ x.name ^ " is listed") true
+                (contains ~needle:("%" ^ x.name) Pal.Help.overview))
+            Pal.Help.entries);
+    ] )
+
 let cases () =
   Alcotest.run "PAL"
     begin
@@ -604,5 +636,6 @@ let cases () =
                 |};
               ];
           ];
+        help_catalogue;
       ]
     end
