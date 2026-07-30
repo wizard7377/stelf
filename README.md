@@ -20,22 +20,23 @@ Some other quick links:
 
 ## Installation
 
-> [!WARNING] 
+> [!WARNING]
 > I have not as of yet tested that this is reproducible, please create an issue if you have a problem
 
 These are the quick installation instructions
 
 ### Prerequisites
 
-Most of STELF's prequisites are installed automatically.
-However, this setup process has two dependecies.
-Fortuanetly, they are quite easily available.
+Most of STELF's requisites are installed automatically.
+However, this setup process has two dependencies.
+Fortunately, they are quite easily available.
+
 1. `make`: GNU Make is fine, other versions are almost certainly also fine but this has only been tested with GNU Make (if it is called something like `make` it is probably fine)
 2. `opam`: The OCaml package manager, which is used to install OCaml and project dependencies.
    See [opam's installation instructions](https://opam.ocaml.org/doc/Install.html) for your platform if you don't have `opam` installed.
    Note that if you use the process outlined here you do **not** need to install `ocaml`, `dune`, or anything else, or setup a switch; the [Makefile](./Makefile) does this all automatically
 
-### Sources 
+### Sources
 
 The source code for STELF can be obtained from this repository, if you want to install the stable version, the command would be:
 
@@ -51,9 +52,9 @@ git clone --recurse-submodules --branch=dev https://github.com/standardocaml/ste
 cd stelf
 ```
 
-### Building 
+### Building
 
-To install, build, document, test, or check the project, use the appropriate `make` target. 
+To install, build, document, test, or check the project, use the appropriate `make` target.
 Those being:
 
 - `make install` to install the project
@@ -64,12 +65,32 @@ Those being:
 
 ### Editor Support
 
-Currently, the only editor supported is Zed (because of its interoperability with Tree-sitter) through the [stelf-zed](https://github.com/standardocaml/stelf-zed) extension.
+Currently, the officially supported editor extensions are for [Zed](https://github.com/standardocaml/stelf-zed) and [Neovim](https://github.com/standardocaml/stelf.nvim).
+We describe here how to install the Neovim extension, due to the simplicity thereof.
 
-> [!NOTE] 
-> Help creating extensions for other editors is greatly appreciated
+1. Have [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
+2. Install the extension `standardocaml/stelf.nvim`, which *must not be lazy loaded*
+3. Run `:TSUpdate` and `:TSInstall stelf`, then reload
+4. Load up a `.lf`, `.elf`, `.stelf`, or `.slf` file and enjoy syntax highlighting!
 
-## Building 
+All together, if you use LazyVim you should have something like this
+
+```lua
+return {
+  {
+    'standardocaml/stelf.nvim', 
+    dependencies = 'nvim-treesitter/nvim-treesitter', 
+    lazy = false,
+    build = {':TSUpdate', ':TSInstall stelf'},
+  }
+}
+```
+
+> [!NOTE]
+> Other editor extensions are appreciated. Further, fixes and additions upon the existing extensions is greatly appreciated (currently, they just provide syntax highlighting using Tree-Sitter).
+> Also, a more general editor server protocol (perhaps LSP) would be quite useful.
+
+## Building
 
 ### Testing
 
@@ -116,4 +137,4 @@ The original Twelf, compared to modern languages (including STELF) has a bit of 
 ## Copyright
 
 Copyright (C) 1997-2011, Frank Pfenning and Carsten Schuermann
-Copyright (C) 2026-2026, Asher Frost (Ethan Moy)
+Copyright (C) 2026, Asher Frost (Ethan Moy)
