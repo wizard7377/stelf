@@ -52,6 +52,48 @@ let setup_tty () =
   Fmt_tty.setup_std_outputs ();
   Display.set_color (Fmt.style_renderer Fmt.stdout = `Ansi_tty)
 
+(* Colour policy for the non-interactive paths.
+
+   [Fmt_tty.setup_std_outputs] resolves isatty, TERM and NO_COLOR for BOTH
+   Fmt.stdout and Fmt.stderr and records the verdict *on those formatters*.
+   Grace's ANSI renderer consults the formatter it is handed, so the fix for
+   escapes leaking into files is simply to hand it Fmt.stderr rather than the
+   untagged Format.std_formatter -- the latter has no style renderer set, so
+   Grace defaulted to styling unconditionally.
+
+   An explicit --color overrides the detection in both directions. *)
+let no_color_env =
+  match Sys.getenv_opt "NO_COLOR" with Some s when s <> "" -> true | _ -> false
+
+let apply_color_pref (pref : P.Opts.Opts.color_when) =
+  let set r =
+    Fmt.set_style_renderer Fmt.stdout r;
+    Fmt.set_style_renderer Fmt.stderr r
+  in
+  match pref with
+  (* Fmt_tty has already handled isatty and TERM=dumb. NO_COLOR is applied
+     here rather than left to Grace: Grace honours it by stripping colour but
+     deliberately KEEPING bold (Config.Style_sheet.not_color retains `Bold),
+     which is not what a user setting NO_COLOR is asking for. *)
+  | P.Opts.Opts.Auto -> if no_color_env then set `None
+  | P.Opts.Opts.Always -> set `Ansi_tty
+  | P.Opts.Opts.Never -> set `None
+
+(* Grace's Config.use_ansi is [None] by default, meaning "decide for yourself".
+   Pinning it to the verdict already recorded on Fmt.stderr is what makes the
+   renderer agree with every other styling decision in the binary, instead of
+   defaulting to styling-on and leaking escapes into files and pipes. *)
+let grace_config () =
+  {
+    Grace_ansi_renderer.Config.default with
+    (* Config.default's style sheet is NO_COLOR-stripped at module
+       initialisation, which is how `--color=always` under NO_COLOR ended up
+       emitting bold-but-not-colour. Take the full sheet and let use_ansi be
+       the single on/off switch, so the two never disagree. *)
+    styles = Grace_ansi_renderer.Config.Style_sheet.default;
+    use_ansi = Some (Fmt.style_renderer Fmt.stderr = `Ansi_tty);
+  }
+
 (* Display.fmt only queues. Format flushes std_formatter from an at_exit, which
    is late enough that the last logo row can be emitted after the shell has
    drawn its prompt; and the art carries no trailing break of its own, so the
@@ -103,7 +145,17 @@ let common_man =
 (* ------------------------------------------------------------------------- *)
 
 (* Diagnostic sink for the non-interactive paths: Display messages become Grace
-   diagnostics on stdout.
+   diagnostics.
+
+   Two streams, deliberately:
+
+   - Diagnostics (error / warning / note) go to *stderr*, via Fmt.stderr. This
+     is what lets `stelf check > out.lf` keep the transcript and still show the
+     user their errors, and what lets CI separate the two. Fmt.stderr rather
+     than Format.err_formatter because Fmt_tty has tagged it with the terminal
+     verdict -- see apply_color_pref.
+   - The `=> ` response echo stays on *stdout*: it is the command's output, not
+     a diagnostic.
 
    Deliberately NOT shared with src/Fronts/Tui/Repl.ml. That renderer targets
    LTerm styled text, and the only thing the two have in common is the
@@ -119,13 +171,17 @@ let register_cli_diagnostics ~(verbosity : Display.Info.level) ~(mute : bool) ()
   Display.register (fun (m : Display.Info.t) ->
       if (not mute) && m.level <= verbosity then begin
         let open Grace.Diagnostic.Severity in
-        let pp_diag fmt d = Grace_ansi_renderer.pp_diagnostic fmt d in
+        let config = grace_config () in
+        let pp_diag fmt d = Grace_ansi_renderer.pp_diagnostic ~config fmt d in
         let body = Display.Info.body_to_form m.msg in
         let display_diag sev =
           let diag =
             Grace.Diagnostic.create sev (fun ppf -> Display.fmt ppf body)
           in
-          Format.printf "%a%!" pp_diag diag
+          (* Trailing newline: Grace does not emit one, so without this the
+             next diagnostic -- or the shell prompt -- lands on the same
+             line. *)
+          Format.fprintf Fmt.stderr "%a@." pp_diag diag
         in
         match m.kind with
         | Some Display.Error -> display_diag Error
@@ -186,7 +242,13 @@ let repl_cmd : int Cmd.t =
      and+ unicode = Arg.value P.Opts.Opts.unicode
      and+ config = config_file in
      let module N = struct
-       let use_color = color
+       (* The REPL is interactive by definition, so [Auto] means colour; only
+          an explicit --color=never turns it off. *)
+       let use_color =
+         match color with
+         | P.Opts.Opts.Auto | P.Opts.Opts.Always -> true
+         | P.Opts.Opts.Never -> false
+
        let use_unicode = unicode
        let verbosity = verbosity
        let mute = mute
@@ -235,11 +297,14 @@ let check_cmd : int Cmd.t =
     (Cmd.info "check" ~doc ~docs:s_project ~sdocs ~exits ~man)
     (let+ verbosity = Arg.value P.Opts.Opts.verbosity
      and+ mute = Arg.value P.Opts.Opts.mute
+     and+ color = Arg.value P.Opts.Opts.color
      and+ f = file in
-     (* Grace's ANSI renderer needs this; the Display colour flag deliberately
-        stays off here, so this output remains byte-identical for the cram
-        tests. *)
+     (* Resolve the terminal verdict onto Fmt.stdout/Fmt.stderr, then let an
+        explicit --color override it. The Display colour flag deliberately
+        stays off: the `=> ` echo on stdout is plain text either way, which is
+        what keeps it byte-identical for the cram tests. *)
      Fmt_tty.setup_std_outputs ();
+     apply_color_pref color;
      Assistant.M.chatter := Display.Info.to_chatter verbosity;
      register_cli_diagnostics ~verbosity ~mute ();
      Assistant.status_to_exit @@ P.Render.report

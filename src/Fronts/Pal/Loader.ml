@@ -7,6 +7,27 @@ type status = Ok | Abort
 (** Input source for loading: a file path or an inline string. *)
 type source = File of Fpath.t | Input of string
 
+(** Outcome of trying to read a file as a project config.
+
+    This is deliberately three-valued. It used to be [Project.Format.file
+    option], where [None] meant both "not a config file" and "a config file that
+    failed to parse" — and callers took the only reasonable action for the
+    former, which is to fall back to loading the file as LF source. Because
+    STELF sources are literate by default, that fallback *succeeds* on a broken
+    [stelf.toml]: the file has no [%] commands, so it parses as an empty
+    signature and the whole check exits 0 having done nothing.
+
+    Keeping [Not_config] and [Bad_config] apart is what lets the fallback stay
+    where it belongs while a malformed config becomes a real error. *)
+type toml_result =
+  | Config of Project.Format.file
+      (** Parsed as a project config; load it as one. *)
+  | Not_config
+      (** Not a config file. Callers should fall back to loading it as source. *)
+  | Bad_config of string
+      (** It *is* a config file — [.toml] extension — but it is broken. Callers
+          must surface this as an error; falling back would hide it. *)
+
 (** Context injected by [Impl] to break the mutual dependency between the
     loading machinery and the command installer. *)
 module type CTX = sig
@@ -16,7 +37,7 @@ module type CTX = sig
   val current_group_ns : Names.namespace ref
   val required_files : (string, unit) Hashtbl.t
   val load_file_ref : (Names.namespace -> Fpath.t -> Reply.outcome) ref
-  val try_toml_ref : (Fpath.t -> string -> Project.Format.file option) ref
+  val try_toml_ref : (Fpath.t -> string -> toml_result) ref
   val dbg : string -> unit
   val print_error : string -> string -> unit
 end
@@ -140,40 +161,40 @@ module Make (C : CTX) = struct
         deps = List.map rebase_dep g.deps;
       }
 
-    let try_toml (path : Fpath.t) (str : string) : t option =
+    (* The [is_toml] test is what distinguishes the two failure modes: a file
+       named [*.toml] was *meant* to be a config, so a parse failure is an
+       error; anything else that merely fails to parse as TOML is just not a
+       config, and the caller should try it as LF source instead.
+
+       Failures are returned rather than printed. Reporting them here and
+       returning a "not a config" answer is precisely the bug this shape
+       exists to prevent -- see the [toml_result] doc comment. *)
+    let try_toml (path : Fpath.t) (str : string) : toml_result =
       let base_dir = Fpath.parent path in
       let is_toml = Fpath.has_ext "toml" path in
+      let reject msg = if is_toml then Bad_config msg else Not_config in
       match Otoml.Parser.from_string str with
       | exception Otoml.Parse_error (pos_opt, msg) ->
-          if is_toml then begin
-            let loc =
-              match pos_opt with
-              | Some (line, col) ->
-                  Printf.sprintf " at line %d, col %d" line col
-              | None -> ""
-            in
-            print_error "config"
-              (Printf.sprintf "TOML parse error in %s%s: %s"
-                 (Fpath.to_string path) loc msg)
-          end;
-          None
+          let loc =
+            match pos_opt with
+            | Some (line, col) -> Printf.sprintf " at line %d, col %d" line col
+            | None -> ""
+          in
+          reject
+            (Printf.sprintf "TOML parse error in %s%s: %s"
+               (Fpath.to_string path) loc msg)
       | exception exn ->
-          if is_toml then
-            print_error "config"
-              ("Error reading TOML config " ^ Fpath.to_string path ^ ": "
-             ^ Printexc.to_string exn);
-          None
+          reject
+            ("Error reading TOML config " ^ Fpath.to_string path ^ ": "
+           ^ Printexc.to_string exn)
       | toml -> (
           match Project.Format.from_toml toml with
-          | Error msg ->
-              if is_toml then
-                print_error "config" (Fpath.to_string path ^ ": " ^ msg);
-              None
+          | Error msg -> reject (Fpath.to_string path ^ ": " ^ msg)
           | Ok cfg ->
               let groups =
                 List.map (rebase_group base_dir) cfg.Project.Format.groups
               in
-              Some { cfg with Project.Format.groups })
+              Config { cfg with Project.Format.groups })
 
     let cfg_fail (msg : string) : Reply.outcome =
       Reply.fail
@@ -254,9 +275,10 @@ module Make (C : CTX) = struct
                 cfg_fail ("Failed to read dependency file: " ^ msg)
             | Ok str -> (
                 match !try_toml_ref p str with
-                | None ->
+                | Not_config ->
                     cfg_fail ("Not a valid TOML config: " ^ Fpath.to_string p)
-                | Some sub_file -> (
+                | Bad_config msg -> cfg_fail msg
+                | Config sub_file -> (
                     let groups = sub_file.Project.Format.groups in
                     match
                       Stdlib.List.find_opt

@@ -1098,6 +1098,7 @@
   => %sort tcanonize {_0 etp} {_2 etp}
   
   note: checking mode of constant   ekof/i   ... 
+  
   => %term
     canonize/const
       {K constant} {A etp} {M eterm} {As etp} {_0 selfify (econst K) A M As}
@@ -1546,12 +1547,14 @@
   => %term _3 {_?1 nat} {_?2 nat} {D lt _?1 _?2} lt-resp nat-eq/i nat-eq/i D D
   
   note: checking mode of constant   _3   ... 
+  
   => %sort leq-resp {N1 nat} {N1' nat} {N2 nat} {N2' nat} {_0 nat-eq N1 N1'}
     {_4 nat-eq N2 N2'} {_5 leq N1 N2} {_6 leq N1' N2'}
   
   => %term _4 {_?1 nat} {_?2 nat} {D leq _?1 _?2} leq-resp nat-eq/i nat-eq/i D D
   
   note: checking mode of constant   _4   ... 
+  
   => %sort sum-resp {N1 nat} {N1' nat} {N2 nat} {N2' nat} {N3 nat} {N3' nat}
     {_0 nat-eq N1 N1'} {_5 nat-eq N2 N2'} {_6 nat-eq N3 N3'} {_7 sum N1 N2 N3}
     {_8 sum N1' N2' N3'}
@@ -1562,6 +1565,7 @@
         sum-resp nat-eq/i nat-eq/i nat-eq/i D D
   
   note: checking mode of constant   _5   ... 
+  
   => %sort nat-resp {N1 nat} {N2 nat} {N {_0 nat} nat} {_0 nat-eq N1 N2}
     {_6 nat-eq (N N1) (N N2)}
   
@@ -1570,12 +1574,14 @@
       {_?1 nat} {_?2 {_0 nat} nat} nat-resp ([_0 nat] _?2 _0) nat-eq/i nat-eq/i
   
   note: checking mode of constant   _6   ... 
+  
   => %sort nat-eq-inc {N1 nat} {N2 nat} {_0 nat-eq N1 N2}
     {_7 nat-eq (s N1) (s N2)}
   
   => %term _7 {_?1 nat} nat-eq-inc nat-eq/i nat-eq/i
   
   note: checking mode of constant   _7   ... 
+  
   => %sort sum-ident {N nat} {_0 sum N 0 N}
   
   => %term _8 sum-ident 0 sum/z
@@ -1583,7 +1589,9 @@
   => %term _9 {N nat} {D sum N 0 N} {_0 sum-ident N D} sum-ident (s N) (sum/s D)
   
   note: checking mode of constant   _8   ... 
+  
   note: checking mode of constant   _9   ... 
+  
   => %sort sum-inc {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
     {_10 sum N1 (s N2) (s N3)}
   
@@ -1596,7 +1604,9 @@
         sum-inc (sum/s D) (sum/s D')
   
   note: checking mode of constant   _10   ... 
+  
   note: checking mode of constant   _11   ... 
+  
   => %sort sum-commute {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
     {_12 sum N2 N1 N3}
   
@@ -1609,7 +1619,9 @@
         sum-commute (sum/s D) D''
   
   note: checking mode of constant   _12   ... 
+  
   note: checking mode of constant   _13   ... 
+  
   => %sort sum-assoc {N1 nat} {N2 nat} {N12 nat} {N3 nat} {N nat} {N23 nat}
     {_0 sum N1 N2 N12} {_14 sum N12 N3 N} {_15 sum N2 N3 N23}
     {_16 sum N1 N23 N}
@@ -1627,7 +1639,9 @@
         sum-assoc (sum/s D12) (sum/s D12_3) D23 (sum/s D1_23)
   
   note: checking mode of constant   _14   ... 
+  
   note: checking mode of constant   _15   ... 
+  
   => %sort sum-assoc' {N1 nat} {N2 nat} {N12 nat} {N3 nat} {N nat} {N23 nat}
     {_0 sum N1 N2 N12} {_16 sum N12 N3 N} {_17 sum N2 N3 N23}
     {_18 sum N1 N23 N}
@@ -1645,7 +1659,9 @@
         sum-assoc' (sum/s D12) (sum/s D12-3) D23 (sum/s D1-23)
   
   note: checking mode of constant   _16   ... 
+  
   note: checking mode of constant   _17   ... 
+  
   => %sort can-sum {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
   
   => %term _18 {N nat} can-sum 0 N N sum/z
@@ -1656,7 +1672,9 @@
         can-sum (s N1) N2 (s N3) (sum/s D)
   
   note: checking mode of constant   _18   ... 
+  
   note: checking mode of constant   _19   ... 
+  
   => %sort sum-fun2 {N1 nat} {N2 nat} {N3 nat} {N2' nat} {_0 sum N1 N2 N3}
     {_20 sum N1 N2' N3} {_21 nat-eq N2 N2'}
   
@@ -1669,7 +1687,9 @@
         sum-fun2 (sum/s D1) (sum/s D2) D3
   
   note: checking mode of constant   _20   ... 
+  
   note: checking mode of constant   _21   ... 
+  
   => %sort sum-fun1 {N1 nat} {N2 nat} {N3 nat} {N1' nat} {_0 sum N1 N2 N3}
     {_22 sum N1' N2 N3} {_23 nat-eq N1 N1'}
   
@@ -1681,6 +1701,7 @@
         {_23 sum-commute D1 D1'} sum-fun1 D1 D2 D
   
   note: checking mode of constant   _22   ... 
+  
   => %sort sum-fun3 {N1 nat} {N2 nat} {N3 nat} {N3' nat} {_0 sum N1 N2 N3}
     {_23 sum N1 N2 N3'} {_24 nat-eq N3 N3'}
   
@@ -1694,7 +1715,9 @@
         sum-fun3 (sum/s D1) (sum/s D2) D'
   
   note: checking mode of constant   _23   ... 
+  
   note: checking mode of constant   _24   ... 
+  
   => %sort leq-trans {N1 nat} {N2 nat} {N3 nat} {_0 leq N1 N2} {_25 leq N2 N3}
     {_26 leq N1 N3}
   
@@ -1707,7 +1730,9 @@
         leq-trans (leq/s D1) (leq/s D2) (leq/s D3)
   
   note: checking mode of constant   _25   ... 
+  
   note: checking mode of constant   _26   ... 
+  
   => %sort leq-reflex {N nat} {_0 leq N N}
   
   => %term _27 leq-reflex 0 leq/z
@@ -1715,13 +1740,16 @@
   => %term _28 {N nat} {D leq N N} {_0 leq-reflex N D} leq-reflex (s N) (leq/s D)
   
   note: checking mode of constant   _27   ... 
+  
   note: checking mode of constant   _28   ... 
+  
   => %sort leq-reflex' {N1 nat} {N2 nat} {_0 nat-eq N1 N2} {_29 leq N1 N2}
   
   => %term
     _29 {_?1 nat} {D leq _?1 _?1} {_0 leq-reflex _?1 D} leq-reflex' nat-eq/i D
   
   note: checking mode of constant   _29   ... 
+  
   => %sort sum-implies-leq {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
     {_30 leq N1 N3}
   
@@ -1733,7 +1761,9 @@
         {_0 sum-implies-leq D D'} sum-implies-leq (sum/s D) (leq/s D')
   
   note: checking mode of constant   _30   ... 
+  
   note: checking mode of constant   _31   ... 
+  
   => %sort sum-implies-leq' {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
     {_32 leq N2 N3}
   
@@ -1744,6 +1774,7 @@
         {_32 sum-commute Dsum Dsum'} sum-implies-leq' Dsum Dleq
   
   note: checking mode of constant   _32   ... 
+  
   => %sort leq-implies-sum {N1 nat} {N3 nat} {N2 nat} {_0 leq N1 N3}
     {_33 sum N1 N2 N3}
   
@@ -1755,7 +1786,9 @@
         {_0 leq-implies-sum D D'} leq-implies-sum (leq/s D) (sum/s D')
   
   note: checking mode of constant   _33   ... 
+  
   note: checking mode of constant   _34   ... 
+  
   => %sort sum-leq {N1 nat} {N2 nat} {N3 nat} {N1' nat} {N2' nat} {N3' nat}
     {_0 sum N1 N2 N3} {_35 sum N1' N2' N3'} {_36 leq N1 N1'} {_37 leq N2 N2'}
     {_38 leq N3 N3'}
@@ -1778,6 +1811,7 @@
         sum-leq Dsum Dsum' Dleq1 Dleq2 Dleq3
   
   note: checking mode of constant   _35   ... 
+  
   => %sort leq-lt-trans {N1 nat} {N2 nat} {N3 nat} {_0 leq N1 N2} {_36 lt N2 N3}
     {_37 lt N1 N3}
   
@@ -1793,8 +1827,11 @@
         leq-lt-trans (leq/s D1) (lt/s D2) (lt/s D3)
   
   note: checking mode of constant   _36   ... 
+  
   note: checking mode of constant   _37   ... 
+  
   note: checking mode of constant   _38   ... 
+  
   => %sort lt-leq-trans {N1 nat} {N2 nat} {N3 nat} {_0 lt N1 N2} {_39 leq N2 N3}
     {_40 lt N1 N3}
   
@@ -1809,7 +1846,9 @@
         lt-leq-trans (lt/s D1) (leq/s D2) (lt/s D3)
   
   note: checking mode of constant   _39   ... 
+  
   note: checking mode of constant   _40   ... 
+  
   => %sort lt-trans {N1 nat} {N2 nat} {N3 nat} {_0 lt N1 N2} {_41 lt N2 N3}
     {_42 lt N1 N3}
   
@@ -1822,7 +1861,9 @@
         lt-trans (lt/s D1) (lt/s D2) (lt/s D3)
   
   note: checking mode of constant   _41   ... 
+  
   note: checking mode of constant   _42   ... 
+  
   => %sort lt-antisymm {N nat} {_0 lt N N} {_43 false}
   
   => %term
@@ -1831,6 +1872,7 @@
         lt-antisymm (lt/s D) D'
   
   note: checking mode of constant   _43   ... 
+  
   => %sort sum-implies-lt {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
     {_44 lt 0 N2} {_45 lt N1 N3}
   
@@ -1843,7 +1885,9 @@
         sum-implies-lt (sum/s D) Dlt (lt/s D')
   
   note: checking mode of constant   _44   ... 
+  
   note: checking mode of constant   _45   ... 
+  
   => %sort sum-implies-lt' {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
     {_46 lt 0 N1} {_47 lt N2 N3}
   
@@ -1855,6 +1899,7 @@
         sum-implies-lt' Dsum Dlt Dlt'
   
   note: checking mode of constant   _46   ... 
+  
   => %sort lt-succ {N nat} {_0 lt N (s N)}
   
   => %term
@@ -1863,6 +1908,7 @@
         lt-succ N Dlt
   
   note: checking mode of constant   _47   ... 
+  
   => %sort lt-implies-sum {N1 nat} {N3 nat} {N2 nat} {_0 lt N1 N3}
     {_48 sum N1 (s N2) N3}
   
@@ -1874,7 +1920,9 @@
         {_0 lt-implies-sum D D'} lt-implies-sum (lt/s D) (sum/s D')
   
   note: checking mode of constant   %z%   ... 
+  
   note: checking mode of constant   %s%   ... 
+  
   => %sort sum-leq-lt {N1 nat} {N2 nat} {N3 nat} {N1' nat} {N2' nat} {N3' nat}
     {_0 sum N1 N2 N3} {_48 sum N1' N2' N3'} {_49 leq N1 N1'} {_50 lt N2 N2'}
     {_51 lt N3 N3'}
@@ -1897,6 +1945,7 @@
         sum-leq-lt Dsum Dsum' Dleq Dlt D
   
   note: checking mode of constant   _48   ... 
+  
   => %sort sum-lt-leq {N1 nat} {N2 nat} {N3 nat} {N1' nat} {N2' nat} {N3' nat}
     {_0 sum N1 N2 N3} {_49 sum N1' N2' N3'} {_50 lt N1 N1'} {_51 leq N2 N2'}
     {_52 lt N3 N3'}
@@ -1911,6 +1960,7 @@
         sum-lt-leq DsumA DsumB Dlt Dleq D
   
   note: checking mode of constant   _49   ... 
+  
   => %sort can-max {N1 nat} {N2 nat} {N3 nat} {_0 max N1 N2 N3}
   
   => %term _50 {N nat} can-max 0 N N max/z*
@@ -1923,8 +1973,11 @@
         can-max (s N1) (s N2) (s N3) (max/s D)
   
   note: checking mode of constant   _50   ... 
+  
   note: checking mode of constant   _51   ... 
+  
   note: checking mode of constant   _52   ... 
+  
   => %sort max-lt {N1 nat} {N2 nat} {N3 nat} {N nat} {_0 max N1 N2 N3}
     {_53 lt N N1} {_54 lt N N2} {_55 lt N N3}
   
@@ -1946,9 +1999,13 @@
         max-lt (max/s D) (lt/s D1) (lt/s D2) (lt/s D')
   
   note: checking mode of constant   _53   ... 
+  
   note: checking mode of constant   _54   ... 
+  
   note: checking mode of constant   _55   ... 
+  
   note: checking mode of constant   _56   ... 
+  
   => %sort max-leq {N1 nat} {N2 nat} {N3 nat} {_0 max N1 N2 N3} {_57 leq N1 N3}
     {_58 leq N2 N3}
   
@@ -1965,8 +2022,11 @@
         max-leq (max/s D) (leq/s D1) (leq/s D2)
   
   note: checking mode of constant   _57   ... 
+  
   note: checking mode of constant   _58   ... 
+  
   note: checking mode of constant   _59   ... 
+  
   => %sort sum-subterm2 {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
   
   => %term _60 {_?1 nat} sum-subterm2 0 _?1 _?1 sum/z
@@ -1978,7 +2038,9 @@
         sum-subterm2 (s _?1) _?2 (s _?3) (sum/s D)
   
   note: checking mode of constant   _60   ... 
+  
   note: checking mode of constant   _61   ... 
+  
   => %sort sum-subterm1 {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 N2 N3}
   
   => %term
@@ -1988,6 +2050,7 @@
         sum-subterm1 _?2 _?1 _?3 D
   
   note: checking mode of constant   _62   ... 
+  
   => %sort sum-subterm2' {N1 nat} {N2 nat} {N3 nat} {_0 sum (s N1) N2 N3}
   
   => %term _63 {_?1 nat} sum-subterm2' 0 _?1 (s _?1) (sum/s sum/z)
@@ -1999,7 +2062,9 @@
         sum-subterm2' (s _?1) _?2 (s _?3) (sum/s D)
   
   note: checking mode of constant   _63   ... 
+  
   note: checking mode of constant   _64   ... 
+  
   => %sort sum-subterm1' {N1 nat} {N2 nat} {N3 nat} {_0 sum N1 (s N2) N3}
   
   => %term
@@ -2009,6 +2074,7 @@
         {_65 sum-commute D D'} sum-subterm1' _?2 _?1 _?3 D
   
   note: checking mode of constant   _65   ... 
+  
   => %sort leq-subterm {N1 nat} {N2 nat} {_0 leq N1 N2}
   
   => %term
@@ -2018,6 +2084,7 @@
         leq-subterm _?1 _?3 Dleq
   
   note: checking mode of constant   _66   ... 
+  
   => %sort lt-subterm {N1 nat} {N2 nat} {_0 lt N1 N2}
   
   => %term
@@ -2027,6 +2094,7 @@
         lt-subterm _?1 _?3 Dlt
   
   note: checking mode of constant   _67   ... 
+  
   => %sort atom-eq {_0 atom} {_68 atom}
   
   => %term atom-eq/i {R atom} atom-eq R R
@@ -2074,56 +2142,66 @@
   => %term _68 {_?1 atom} atom-eq-symm atom-eq/i atom-eq/i
   
   note: checking mode of constant   _68   ... 
+  
   => %sort eterm-eq-symm {M eterm} {N eterm} {_0 eterm-eq M N} {_69 eterm-eq N M}
   
   => %term _69 {_?1 eterm} eterm-eq-symm eterm-eq/i eterm-eq/i
   
   note: checking mode of constant   _69   ... 
+  
   => %sort etp-eq-symm {A etp} {B etp} {_0 etp-eq A B} {_70 etp-eq B A}
   
   => %term _70 {_?1 etp} etp-eq-symm etp-eq/i etp-eq/i
   
   note: checking mode of constant   _70   ... 
+  
   => %sort term-eq-symm {M term} {N term} {_0 term-eq M N} {_71 term-eq N M}
   
   => %term _71 {_?1 term} term-eq-symm term-eq/i term-eq/i
   
   note: checking mode of constant   _71   ... 
+  
   => %sort tp-eq-symm {A tp} {B tp} {_0 tp-eq A B} {_72 tp-eq B A}
   
   => %term _72 {_?1 tp} tp-eq-symm tp-eq/i tp-eq/i
   
   note: checking mode of constant   _72   ... 
+  
   => %sort atom-eq-trans {R1 atom} {R2 atom} {R3 atom} {_0 atom-eq R1 R2}
     {_73 atom-eq R2 R3} {_74 atom-eq R1 R3}
   
   => %term _73 {_?1 atom} atom-eq-trans atom-eq/i atom-eq/i atom-eq/i
   
   note: checking mode of constant   _73   ... 
+  
   => %sort stp-eq-trans {T1 stp} {T2 stp} {T3 stp} {_0 stp-eq T1 T2}
     {_74 stp-eq T2 T3} {_75 stp-eq T1 T3}
   
   => %term _74 {_?1 stp} stp-eq-trans stp-eq/i stp-eq/i stp-eq/i
   
   note: checking mode of constant   _74   ... 
+  
   => %sort term-eq-trans {M term} {N term} {O term} {_0 term-eq M N}
     {_75 term-eq N O} {_76 term-eq M O}
   
   => %term _75 {_?1 term} term-eq-trans term-eq/i term-eq/i term-eq/i
   
   note: checking mode of constant   _75   ... 
+  
   => %sort tp-eq-trans {A tp} {B tp} {C tp} {_0 tp-eq A B} {_76 tp-eq B C}
     {_77 tp-eq A C}
   
   => %term _76 {_?1 tp} tp-eq-trans tp-eq/i tp-eq/i tp-eq/i
   
   note: checking mode of constant   _76   ... 
+  
   => %sort app-resp {R atom} {R' atom} {M term} {M' term} {_0 atom-eq R R'}
     {_77 term-eq M M'} {_78 atom-eq (app R M) (app R' M')}
   
   => %term _77 {_?1 atom} {_?2 term} app-resp atom-eq/i term-eq/i atom-eq/i
   
   note: checking mode of constant   _77   ... 
+  
   => %sort atom-resp-atom {Q atom} {Q' atom} {R {_0 atom} atom} {_0 atom-eq Q Q'}
     {_78 atom-eq (R Q) (R Q')}
   
@@ -2133,6 +2211,7 @@
         atom-resp-atom ([_0 atom] _?2 _0) atom-eq/i atom-eq/i
   
   note: checking mode of constant   _78   ... 
+  
   => %sort atom-resp-term {M term} {M' term} {R {_0 term} atom} {_0 term-eq M M'}
     {_79 atom-eq (R M) (R M')}
   
@@ -2142,6 +2221,7 @@
         atom-resp-term ([_0 term] _?2 _0) term-eq/i atom-eq/i
   
   note: checking mode of constant   _79   ... 
+  
   => %sort atom-resp-tp {A tp} {A' tp} {R {_0 tp} atom} {_0 tp-eq A A'}
     {_80 atom-eq (R A) (R A')}
   
@@ -2151,6 +2231,7 @@
         atom-resp-tp ([_0 tp] _?2 _0) tp-eq/i atom-eq/i
   
   note: checking mode of constant   _80   ... 
+  
   => %sort cons-resp {G ctx} {G' ctx} {X atom} {X' atom} {A tp} {A' tp}
     {_0 ctx-eq G G'} {_81 atom-eq X X'} {_82 tp-eq A A'}
     {_83 ctx-eq (cons G X A) (cons G' X' A')}
@@ -2161,6 +2242,7 @@
         cons-resp ctx-eq/i atom-eq/i tp-eq/i ctx-eq/i
   
   note: checking mode of constant   _81   ... 
+  
   => %sort elam-resp {A etp} {A' etp} {M {_0 eterm} eterm} {M' {_0 eterm} eterm}
     {_0 etp-eq A A'} {_82 {x eterm} eterm-eq (M x) (M' x)}
     {_83 eterm-eq (elam A ([_83 eterm] M _83)) (elam A' [_83 eterm] M' _83)}
@@ -2171,12 +2253,14 @@
         elam-resp etp-eq/i ([_0 eterm] eterm-eq/i) eterm-eq/i
   
   note: checking mode of constant   _82   ... 
+  
   => %sort epair-resp {M eterm} {M' eterm} {N eterm} {N' eterm} {_0 eterm-eq M M'}
     {_83 eterm-eq N N'} {_84 eterm-eq (epair M N) (epair M' N')}
   
   => %term _83 {_?1 eterm} {_?2 eterm} epair-resp eterm-eq/i eterm-eq/i eterm-eq/i
   
   note: checking mode of constant   _83   ... 
+  
   => %sort epi-resp {A etp} {A' etp} {B {_0 eterm} etp} {B' {_0 eterm} etp}
     {_0 etp-eq A A'} {_84 {x eterm} etp-eq (B x) (B' x)}
     {_85 etp-eq (epi A ([_85 eterm] B _85)) (epi A' [_85 eterm] B' _85)}
@@ -2187,6 +2271,7 @@
         epi-resp etp-eq/i ([_0 eterm] etp-eq/i) etp-eq/i
   
   note: checking mode of constant   _84   ... 
+  
   => %sort equiv-resp {M eterm} {M' eterm} {N eterm} {N' eterm} {A etp} {A' etp}
     {_0 eterm-eq M M'} {_85 eterm-eq N N'} {_86 etp-eq A A'} {_87 equiv M N A}
     {_88 equiv M' N' A'}
@@ -2197,6 +2282,7 @@
         equiv-resp eterm-eq/i eterm-eq/i etp-eq/i D D
   
   note: checking mode of constant   _85   ... 
+  
   => %sort esigma-resp {A etp} {A' etp} {B {_0 eterm} etp} {B' {_0 eterm} etp}
     {_0 etp-eq A A'} {_86 {x eterm} etp-eq (B x) (B' x)}
     {_87 etp-eq (esigma A ([_87 eterm] B _87)) (esigma A' [_87 eterm] B' _87)}
@@ -2207,6 +2293,7 @@
         esigma-resp etp-eq/i ([_0 eterm] etp-eq/i) etp-eq/i
   
   note: checking mode of constant   _86   ... 
+  
   => %sort eterm-resp-bind {A etp} {A' etp} {N {_0 eterm} eterm}
     {N' {_0 eterm} eterm} {M {_0 etp} {_87 {_87 eterm} eterm} eterm}
     {_0 etp-eq A A'} {_87 {x eterm} eterm-eq (N x) (N' x)}
@@ -2220,6 +2307,7 @@
           ([_0 eterm] eterm-eq/i) eterm-eq/i
   
   note: checking mode of constant   _87   ... 
+  
   => %sort eterm-resp-eterm {N eterm} {N' eterm} {M {_0 eterm} eterm}
     {_0 eterm-eq N N'} {_88 eterm-eq (M N) (M N')}
   
@@ -2229,6 +2317,7 @@
         eterm-resp-eterm ([_0 eterm] _?2 _0) eterm-eq/i eterm-eq/i
   
   note: checking mode of constant   _88   ... 
+  
   => %sort eterm-resp-eterm2 {N eterm} {N' eterm} {O eterm} {O' eterm}
     {M {_0 eterm} {_89 eterm} eterm} {_0 eterm-eq N N'} {_89 eterm-eq O O'}
     {_90 eterm-eq (M N O) (M N' O')}
@@ -2240,6 +2329,7 @@
           eterm-eq/i eterm-eq/i
   
   note: checking mode of constant   _89   ... 
+  
   => %sort eterm-resp-eterm-fun {M {_0 eterm} eterm} {M' {_0 eterm} eterm}
     {N eterm} {N' eterm} {_0 {x eterm} eterm-eq (M x) (M' x)}
     {_90 eterm-eq N N'} {_91 eterm-eq (M N) (M' N')}
@@ -2250,6 +2340,7 @@
         eterm-resp-eterm-fun ([_0 eterm] eterm-eq/i) eterm-eq/i eterm-eq/i
   
   note: checking mode of constant   _90   ... 
+  
   => %sort eterm-resp-etp {A etp} {A' etp} {M {_0 etp} eterm} {_0 etp-eq A A'}
     {_91 eterm-eq (M A) (M A')}
   
@@ -2259,6 +2350,7 @@
         eterm-resp-etp ([_0 etp] _?2 _0) etp-eq/i eterm-eq/i
   
   note: checking mode of constant   _91   ... 
+  
   => %sort eterm-resp-halfbind {N {_0 eterm} eterm} {N' {_0 eterm} eterm}
     {M {_0 {_0 eterm} eterm} eterm} {_0 {x eterm} eterm-eq (N x) (N' x)}
     {_92 eterm-eq (M ([_92 eterm] N _92)) (M [_92 eterm] N' _92)}
@@ -2270,6 +2362,7 @@
           ([_0 eterm] eterm-eq/i) eterm-eq/i
   
   note: checking mode of constant   _92   ... 
+  
   => %sort etp-resp-bind {B etp} {B' etp} {M {_0 eterm} etp} {M' {_0 eterm} etp}
     {A {_0 etp} {_93 {_93 eterm} etp} etp} {_0 etp-eq B B'}
     {_93 {x eterm} etp-eq (M x) (M' x)}
@@ -2282,6 +2375,7 @@
           ([_0 eterm] etp-eq/i) etp-eq/i
   
   note: checking mode of constant   _93   ... 
+  
   => %sort etp-resp-eterm {M eterm} {M' eterm} {A {_0 eterm} etp}
     {_0 eterm-eq M M'} {_94 etp-eq (A M) (A M')}
   
@@ -2291,6 +2385,7 @@
         etp-resp-eterm ([_0 eterm] _?2 _0) eterm-eq/i etp-eq/i
   
   note: checking mode of constant   _94   ... 
+  
   => %sort etp-resp-eterm-fun {A {_0 eterm} etp} {A' {_0 eterm} etp} {M eterm}
     {M' eterm} {_0 {x eterm} etp-eq (A x) (A' x)} {_95 eterm-eq M M'}
     {_96 etp-eq (A M) (A' M')}
@@ -2301,6 +2396,7 @@
         etp-resp-eterm-fun ([_0 eterm] etp-eq/i) eterm-eq/i etp-eq/i
   
   note: checking mode of constant   _95   ... 
+  
   => %sort etp2-resp-eterm {M {_0 eterm} eterm} {M' {_0 eterm} eterm}
     {A {_0 {_0 eterm} eterm} etp} {_0 {x eterm} eterm-eq (M x) (M' x)}
     {_96 etp-eq (A ([_96 eterm] M _96)) (A [_96 eterm] M' _96)}
@@ -2312,6 +2408,7 @@
           etp-eq/i
   
   note: checking mode of constant   _96   ... 
+  
   => %sort etp-resp-etp {B etp} {B' etp} {A {_0 etp} etp} {_0 etp-eq B B'}
     {_97 etp-eq (A B) (A B')}
   
@@ -2321,6 +2418,7 @@
         etp-resp-etp ([_0 etp] _?2 _0) etp-eq/i etp-eq/i
   
   note: checking mode of constant   _97   ... 
+  
   => %sort lam-resp {M {_0 atom} term} {M' {_0 atom} term}
     {_0 {x atom} term-eq (M x) (M' x)}
     {_98 term-eq (lam ([_98 atom] M _98)) (lam [_98 atom] M' _98)}
@@ -2328,12 +2426,14 @@
   => %term _98 {_?1 {_0 atom} term} lam-resp ([_0 atom] term-eq/i) term-eq/i
   
   note: checking mode of constant   _98   ... 
+  
   => %sort pair-resp {M1 term} {M1' term} {M2 term} {M2' term} {_0 term-eq M1 M1'}
     {_99 term-eq M2 M2'} {_100 term-eq (pair M1 M2) (pair M1' M2')}
   
   => %term _99 {_?1 term} {_?2 term} pair-resp term-eq/i term-eq/i term-eq/i
   
   note: checking mode of constant   _99   ... 
+  
   => %sort pi-resp {A tp} {A' tp} {B {_0 atom} tp} {B' {_0 atom} tp}
     {_0 tp-eq A A'} {_100 {x atom} tp-eq (B x) (B' x)}
     {_101 tp-eq (pi A ([_101 atom] B _101)) (pi A' [_101 atom] B' _101)}
@@ -2343,6 +2443,7 @@
       {_?1 tp} {_?2 {_0 atom} tp} pi-resp tp-eq/i ([_0 atom] tp-eq/i) tp-eq/i
   
   note: checking mode of constant   _100   ... 
+  
   => %sort scons-resp {G sctx} {G' sctx} {R atom} {R' atom} {T stp} {T' stp}
     {_0 sctx-eq G G'} {_101 atom-eq R R'} {_102 stp-eq T T'}
     {_103 sctx-eq (scons G R T) (scons G' R' T')}
@@ -2353,6 +2454,7 @@
         scons-resp sctx-eq/i atom-eq/i stp-eq/i sctx-eq/i
   
   note: checking mode of constant   _101   ... 
+  
   => %sort sigma-resp {A tp} {A' tp} {B {_0 atom} tp} {B' {_0 atom} tp}
     {_0 tp-eq A A'} {_102 {x atom} tp-eq (B x) (B' x)}
     {_103 tp-eq (sigma A ([_103 atom] B _103)) (sigma A' [_103 atom] B' _103)}
@@ -2363,6 +2465,7 @@
         sigma-resp tp-eq/i ([_0 atom] tp-eq/i) tp-eq/i
   
   note: checking mode of constant   _102   ... 
+  
   => %sort stp-resp-stp {T1 stp} {T2 stp} {T {_0 stp} stp} {_0 stp-eq T1 T2}
     {_103 stp-eq (T T1) (T T2)}
   
@@ -2372,6 +2475,7 @@
         stp-resp-stp ([_0 stp] _?2 _0) stp-eq/i stp-eq/i
   
   note: checking mode of constant   _103   ... 
+  
   => %sort term-resp-atom {R atom} {R' atom} {M {_0 atom} term} {_0 atom-eq R R'}
     {_104 term-eq (M R) (M R')}
   
@@ -2381,6 +2485,7 @@
         term-resp-atom ([_0 atom] _?2 _0) atom-eq/i term-eq/i
   
   note: checking mode of constant   _104   ... 
+  
   => %sort term-resp-term {N term} {N' term} {M {_0 term} term} {_0 term-eq N N'}
     {_105 term-eq (M N) (M N')}
   
@@ -2390,6 +2495,7 @@
         term-resp-term ([_0 term] _?2 _0) term-eq/i term-eq/i
   
   note: checking mode of constant   _105   ... 
+  
   => %sort topen-resp {Ac ctp} {Ac' ctp} {A tp} {A' tp} {_0 ctp-eq Ac Ac'}
     {_106 tp-eq A A'} {_107 topen Ac A} {_108 topen Ac' A'}
   
@@ -2397,6 +2503,7 @@
     _106 {_?1 ctp} {_?2 tp} {D topen _?1 _?2} topen-resp ctp-eq/i tp-eq/i D D
   
   note: checking mode of constant   _106   ... 
+  
   => %sort tp-resp-atom {R atom} {R' atom} {A {_0 atom} tp} {_0 atom-eq R R'}
     {_107 tp-eq (A R) (A R')}
   
@@ -2406,6 +2513,7 @@
         tp-resp-atom ([_0 atom] _?2 _0) atom-eq/i tp-eq/i
   
   note: checking mode of constant   _107   ... 
+  
   => %sort tp-resp-term {M term} {M' term} {A {_0 term} tp} {_0 term-eq M M'}
     {_108 tp-eq (A M) (A M')}
   
@@ -2415,6 +2523,7 @@
         tp-resp-term ([_0 term] _?2 _0) term-eq/i tp-eq/i
   
   note: checking mode of constant   _108   ... 
+  
   => %sort tp-resp-tp {B tp} {B' tp} {A {_0 tp} tp} {_0 tp-eq B B'}
     {_109 tp-eq (A B) (A B')}
   
@@ -2422,6 +2531,7 @@
     _109 {_?1 tp} {_?2 {_0 tp} tp} tp-resp-tp ([_0 tp] _?2 _0) tp-eq/i tp-eq/i
   
   note: checking mode of constant   _109   ... 
+  
   => %sort tp-resp-atom-fun {A {_0 atom} tp} {A' {_0 atom} tp} {R atom} {R' atom}
     {_0 {x atom} tp-eq (A x) (A' x)} {_110 atom-eq R R'}
     {_111 tp-eq (A R) (A' R')}
@@ -2432,6 +2542,7 @@
         tp-resp-atom-fun ([_0 atom] tp-eq/i) atom-eq/i tp-eq/i
   
   note: checking mode of constant   _110   ... 
+  
   => %sort atom-eq-cdr-app {R atom} {M term} {R' atom} {M' term}
     {_0 atom-eq (app R M) (app R' M')} {_111 atom-eq R R'} {_112 term-eq M M'}
   
@@ -2439,18 +2550,21 @@
     _111 {_?1 atom} {_?2 term} atom-eq-cdr-app atom-eq/i atom-eq/i term-eq/i
   
   note: checking mode of constant   _111   ... 
+  
   => %sort atom-eq-cdr-const {C constant} {C' constant}
     {_0 atom-eq (const C) (const C')} {_112 constant-eq C C'}
   
   => %term _112 {_?1 constant} atom-eq-cdr-const atom-eq/i constant-eq/i
   
   note: checking mode of constant   _112   ... 
+  
   => %sort atom-eq-cdr-forall {A tp} {A' tp} {_0 atom-eq (forall A) (forall A')}
     {_113 tp-eq A A'}
   
   => %term _113 {_?1 tp} atom-eq-cdr-forall atom-eq/i tp-eq/i
   
   note: checking mode of constant   _113   ... 
+  
   => %sort etp-eq-cdr-epi {A etp} {B {_0 eterm} etp} {A' etp} {B' {_0 eterm} etp}
     {_0 etp-eq (epi A ([_0 eterm] B _0)) (epi A' [_0 eterm] B' _0)}
     {_114 etp-eq A A'} {_115 {x eterm} etp-eq (B x) (B' x)}
@@ -2461,6 +2575,7 @@
         etp-eq-cdr-epi etp-eq/i etp-eq/i [_0 eterm] etp-eq/i
   
   note: checking mode of constant   _114   ... 
+  
   => %sort etp-eq-cdr-esigma {A etp} {B {_0 eterm} etp} {A' etp}
     {B' {_0 eterm} etp}
     {_0 etp-eq (esigma A ([_0 eterm] B _0)) (esigma A' [_0 eterm] B' _0)}
@@ -2472,12 +2587,14 @@
         etp-eq-cdr-esigma etp-eq/i etp-eq/i [_0 eterm] etp-eq/i
   
   note: checking mode of constant   _115   ... 
+  
   => %sort term-eq-cdr-at {R atom} {R' atom} {_0 term-eq (at R) (at R')}
     {_116 atom-eq R R'}
   
   => %term _116 {_?1 atom} term-eq-cdr-at term-eq/i atom-eq/i
   
   note: checking mode of constant   _116   ... 
+  
   => %sort term-eq-cdr-lam {M {_0 atom} term} {N {_0 atom} term}
     {_0 term-eq (lam ([_0 atom] M _0)) (lam [_0 atom] N _0)}
     {_117 {x atom} term-eq (M x) (N x)}
@@ -2485,6 +2602,7 @@
   => %term _117 {_?1 {_0 atom} term} term-eq-cdr-lam term-eq/i [_0 atom] term-eq/i
   
   note: checking mode of constant   _117   ... 
+  
   => %sort term-eq-cdr-pair {M1 term} {M2 term} {N1 term} {N2 term}
     {_0 term-eq (pair M1 M2) (pair N1 N2)} {_118 term-eq M1 N1}
     {_119 term-eq M2 N2}
@@ -2493,6 +2611,7 @@
     _118 {_?1 term} {_?2 term} term-eq-cdr-pair term-eq/i term-eq/i term-eq/i
   
   note: checking mode of constant   _118   ... 
+  
   => %sort tp-eq-cdr-pi {A tp} {B {_0 atom} tp} {A' tp} {B' {_0 atom} tp}
     {_0 tp-eq (pi A ([_0 atom] B _0)) (pi A' [_0 atom] B' _0)}
     {_119 tp-eq A A'} {_120 {x atom} tp-eq (B x) (B' x)}
@@ -2503,6 +2622,7 @@
         tp-eq-cdr-pi tp-eq/i tp-eq/i [_0 atom] tp-eq/i
   
   note: checking mode of constant   _119   ... 
+  
   => %sort tp-eq-cdr-sigma {A tp} {B {_0 atom} tp} {A' tp} {B' {_0 atom} tp}
     {_0 tp-eq (sigma A ([_0 atom] B _0)) (sigma A' [_0 atom] B' _0)}
     {_120 tp-eq A A'} {_121 {x atom} tp-eq (B x) (B' x)}
@@ -2513,6 +2633,7 @@
         tp-eq-cdr-sigma tp-eq/i tp-eq/i [_0 atom] tp-eq/i
   
   note: checking mode of constant   _120   ... 
+  
   => %sort tp-eq-pi-strengthen {A {_0 atom} tp} {B {_0 atom} {_121 atom} tp}
     {C tp} {A' tp} {B' {_0 atom} tp}
     {_0 {x atom} tp-eq (pi (A x) ([y atom] B x y)) C}
@@ -2524,6 +2645,7 @@
         tp-eq-pi-strengthen ([x atom] tp-eq/i) tp-eq/i
   
   note: checking mode of constant   _121   ... 
+  
   => %sort tp-eq-sigma-strengthen {A {_0 atom} tp} {B {_0 atom} {_122 atom} tp}
     {C tp} {A' tp} {B' {_0 atom} tp}
     {_0 {x atom} tp-eq (sigma (A x) ([y atom] B x y)) C}
@@ -2535,6 +2657,7 @@
         tp-eq-sigma-strengthen ([x atom] tp-eq/i) tp-eq/i
   
   note: checking mode of constant   _122   ... 
+  
   => %sort aasub-resp {R {_0 atom} atom} {R' {_0 atom} atom} {M term} {M' term}
     {S atom} {S' atom} {_0 {x atom} atom-eq (R x) (R' x)} {_123 term-eq M M'}
     {_124 atom-eq S S'} {_125 aasub ([_125 atom] R _125) M S}
@@ -2547,6 +2670,7 @@
         aasub-resp ([_0 atom] atom-eq/i) term-eq/i atom-eq/i D D
   
   note: checking mode of constant   _123   ... 
+  
   => %sort aconvert-resp {R atom} {R' atom} {A tp} {A' tp} {EM eterm} {EM' eterm}
     {_0 atom-eq R R'} {_124 tp-eq A A'} {_125 eterm-eq EM EM'}
     {_126 aconvert R A EM} {_127 aconvert R' A' EM'}
@@ -2557,6 +2681,7 @@
         aconvert-resp atom-eq/i tp-eq/i eterm-eq/i D D
   
   note: checking mode of constant   _124   ... 
+  
   => %sort aconverte-resp {G ctx} {G' ctx} {R atom} {R' atom} {A tp} {A' tp}
     {EM eterm} {EM' eterm} {_0 ctx-eq G G'} {_125 atom-eq R R'}
     {_126 tp-eq A A'} {_127 eterm-eq EM EM'} {_128 aconverte G R A EM}
@@ -2568,12 +2693,14 @@
         aconverte-resp ctx-eq/i atom-eq/i tp-eq/i eterm-eq/i D D
   
   note: checking mode of constant   _125   ... 
+  
   => %sort aof-resp {R atom} {R' atom} {A tp} {A' tp} {_0 atom-eq R R'}
     {_126 tp-eq A A'} {_127 aof R A} {_128 aof R' A'}
   
   => %term _126 {_?1 atom} {_?2 tp} {D aof _?1 _?2} aof-resp atom-eq/i tp-eq/i D D
   
   note: checking mode of constant   _126   ... 
+  
   => %sort aofe-resp {G ctx} {G' ctx} {R atom} {R' atom} {A tp} {A' tp}
     {_0 ctx-eq G G'} {_127 atom-eq R R'} {_128 tp-eq A A'} {_129 aofe G R A}
     {_130 aofe G' R' A'}
@@ -2584,6 +2711,7 @@
         aofe-resp ctx-eq/i atom-eq/i tp-eq/i D D
   
   note: checking mode of constant   _127   ... 
+  
   => %sort aofes-resp {G sctx} {G' sctx} {R atom} {R' atom} {A stp} {A' stp}
     {_0 sctx-eq G G'} {_128 atom-eq R R'} {_129 stp-eq A A'} {_130 aofes G R A}
     {_131 aofes G' R' A'}
@@ -2594,6 +2722,7 @@
         aofes-resp sctx-eq/i atom-eq/i stp-eq/i D D
   
   note: checking mode of constant   _128   ... 
+  
   => %sort aosub-resp {R {_0 atom} atom} {R' {_0 atom} atom} {M term} {M' term}
     {N term} {N' term} {_0 {x atom} atom-eq (R x) (R' x)} {_129 term-eq M M'}
     {_130 term-eq N N'} {_131 aosub ([_131 atom] R _131) M N}
@@ -2606,6 +2735,7 @@
         aosub-resp ([_0 atom] atom-eq/i) term-eq/i term-eq/i D D
   
   note: checking mode of constant   _129   ... 
+  
   => %sort canonize-resp {M eterm} {M' eterm} {A etp} {A' etp} {_0 eterm-eq M M'}
     {_130 etp-eq A A'} {_131 canonize M A} {_132 canonize M' A'}
   
@@ -2615,6 +2745,7 @@
         canonize-resp eterm-eq/i etp-eq/i D D
   
   note: checking mode of constant   _130   ... 
+  
   => %sort canonize-resp-underbind {A etp} {A' etp} {M {_0 eterm} eterm}
     {B {_0 eterm} etp} {_0 etp-eq A A'}
     {_131 {x eterm} {_131 evof x A} {_132 variable x} canonize (M x) (B x)}
@@ -2631,6 +2762,7 @@
           [x eterm] [_0 evof x _?1] [_131 variable x] D x _0 _131
   
   note: checking mode of constant   _131   ... 
+  
   => %sort coerce-resp {A etp} {A' etp} {B etp} {B' etp} {M {_0 eterm} eterm}
     {M' {_0 eterm} eterm} {_0 etp-eq A A'} {_132 etp-eq B B'}
     {_133 {x eterm} eterm-eq (M x) (M' x)}
@@ -2644,6 +2776,7 @@
         coerce-resp etp-eq/i etp-eq/i ([_0 eterm] eterm-eq/i) D D
   
   note: checking mode of constant   _132   ... 
+  
   => %sort convert-resp {M term} {M' term} {A tp} {A' tp} {EM eterm} {EM' eterm}
     {_0 term-eq M M'} {_133 tp-eq A A'} {_134 eterm-eq EM EM'}
     {_135 convert M A EM} {_136 convert M' A' EM'}
@@ -2654,6 +2787,7 @@
         convert-resp term-eq/i tp-eq/i eterm-eq/i D D
   
   note: checking mode of constant   _133   ... 
+  
   => %sort convert-resp-underbind {A tp} {A' tp} {M {_0 atom} term}
     {B {_0 atom} tp} {EM {_0 eterm} eterm} {_0 tp-eq A A'}
     {_134
@@ -2674,6 +2808,7 @@
           [x atom] [_0 vof x _?1] [ex eterm] [_134 vtrans ex x] D x _0 ex _134
   
   note: checking mode of constant   _134   ... 
+  
   => %sort converte-resp {G ctx} {G' ctx} {M term} {M' term} {A tp} {A' tp}
     {EM eterm} {EM' eterm} {_0 ctx-eq G G'} {_135 term-eq M M'}
     {_136 tp-eq A A'} {_137 eterm-eq EM EM'} {_138 converte G M A EM}
@@ -2685,12 +2820,14 @@
         converte-resp ctx-eq/i term-eq/i tp-eq/i eterm-eq/i D D
   
   note: checking mode of constant   _135   ... 
+  
   => %sort ekof-resp {A etp} {A' etp} {C constant} {_0 etp-eq A A'}
     {_136 ekof C A} {_137 ekof C A'}
   
   => %term _136 {_?1 etp} {_?2 constant} {D ekof _?2 _?1} ekof-resp etp-eq/i D D
   
   note: checking mode of constant   _136   ... 
+  
   => %sort eof-resp {EM eterm} {EM' eterm} {EA etp} {EA' etp} {_0 eterm-eq EM EM'}
     {_137 etp-eq EA EA'} {_138 eof EM EA} {_139 eof EM' EA'}
   
@@ -2698,6 +2835,7 @@
     _137 {_?1 eterm} {_?2 etp} {D eof _?1 _?2} eof-resp eterm-eq/i etp-eq/i D D
   
   note: checking mode of constant   _137   ... 
+  
   => %sort etopen-resp {Ac ctp} {Ac' ctp} {A etp} {A' etp} {_0 ctp-eq Ac Ac'}
     {_138 etp-eq A A'} {_139 etopen Ac A} {_140 etopen Ac' A'}
   
@@ -2706,6 +2844,7 @@
       {_?1 ctp} {_?2 etp} {D etopen _?1 _?2} etopen-resp ctp-eq/i etp-eq/i D D
   
   note: checking mode of constant   _138   ... 
+  
   => %sort evof-resp {EM eterm} {EM' eterm} {EA etp} {EA' etp}
     {_0 eterm-eq EM EM'} {_139 etp-eq EA EA'} {_140 evof EM EA}
     {_141 evof EM' EA'}
@@ -2715,11 +2854,13 @@
       {_?1 eterm} {_?2 etp} {D evof _?1 _?2} evof-resp eterm-eq/i etp-eq/i D D
   
   note: checking mode of constant   _139   ... 
+  
   => %sort ewf-resp {A etp} {A' etp} {_0 etp-eq A A'} {_140 ewf A} {_141 ewf A'}
   
   => %term _140 {_?1 etp} {D ewf _?1} ewf-resp etp-eq/i D D
   
   note: checking mode of constant   _140   ... 
+  
   => %sort expand-resp {R atom} {R' atom} {A tp} {A' tp} {M term} {M' term}
     {_0 atom-eq R R'} {_141 tp-eq A A'} {_142 term-eq M M'} {_143 expand R A M}
     {_144 expand R' A' M'}
@@ -2730,12 +2871,14 @@
         expand-resp atom-eq/i tp-eq/i term-eq/i D D
   
   note: checking mode of constant   _141   ... 
+  
   => %sort kof-resp {A tp} {A' tp} {C constant} {_0 tp-eq A A'} {_142 kof C A}
     {_143 kof C A'}
   
   => %term _142 {_?1 tp} {_?2 constant} {D kof _?2 _?1} kof-resp tp-eq/i D D
   
   note: checking mode of constant   _142   ... 
+  
   => %sort lookup-resp {G ctx} {G' ctx} {X atom} {X' atom} {A tp} {A' tp}
     {_0 ctx-eq G G'} {_143 atom-eq X X'} {_144 tp-eq A A'} {_145 lookup G X A}
     {_146 lookup G' X' A'}
@@ -2746,12 +2889,14 @@
         lookup-resp ctx-eq/i atom-eq/i tp-eq/i D D
   
   note: checking mode of constant   _143   ... 
+  
   => %sort of-resp {M term} {M' term} {A tp} {A' tp} {_0 term-eq M M'}
     {_144 tp-eq A A'} {_145 of M A} {_146 of M' A'}
   
   => %term _144 {_?1 term} {_?2 tp} {D of _?1 _?2} of-resp term-eq/i tp-eq/i D D
   
   note: checking mode of constant   _144   ... 
+  
   => %sort of-bind-resp {A tp} {A' tp} {M {_0 atom} term} {B {_0 atom} tp}
     {_0 tp-eq A A'} {_145 {x atom} {_145 vof x A} of (M x) (B x)}
     {_146 {x atom} {_146 vof x A'} of (M x) (B x)}
@@ -2764,6 +2909,7 @@
           [x atom] [_0 vof x _?1] D x _0
   
   note: checking mode of constant   _145   ... 
+  
   => %sort of-bind-resp1 {A {_0 atom} tp} {A' {_0 atom} tp}
     {M {_0 atom} {_146 atom} term} {B {_0 atom} {_146 atom} tp}
     {_0 {y atom} tp-eq (A y) (A' y)}
@@ -2782,6 +2928,7 @@
           [y atom] [x atom] [_0 vof x (_?1 y)] D y x _0
   
   note: checking mode of constant   _146   ... 
+  
   => %sort ofe-resp {G ctx} {G' ctx} {M term} {M' term} {A tp} {A' tp}
     {_0 ctx-eq G G'} {_147 term-eq M M'} {_148 tp-eq A A'} {_149 ofe G M A}
     {_150 ofe G' M' A'}
@@ -2792,6 +2939,7 @@
         ofe-resp ctx-eq/i term-eq/i tp-eq/i D D
   
   note: checking mode of constant   _147   ... 
+  
   => %sort ofes-resp {G sctx} {G' sctx} {M term} {M' term} {T stp} {T' stp}
     {_0 sctx-eq G G'} {_148 term-eq M M'} {_149 stp-eq T T'} {_150 ofes G M T}
     {_151 ofes G' M' T'}
@@ -2802,12 +2950,14 @@
         ofes-resp sctx-eq/i term-eq/i stp-eq/i D D
   
   note: checking mode of constant   _148   ... 
+  
   => %sort principal-resp {A tp} {A' tp} {_0 tp-eq A A'} {_149 principal A}
     {_150 principal A'}
   
   => %term _149 {_?1 tp} {D principal _?1} principal-resp tp-eq/i D D
   
   note: checking mode of constant   _149   ... 
+  
   => %sort reduce-resp {M eterm} {M' eterm} {N eterm} {N' eterm}
     {_0 eterm-eq M M'} {_150 eterm-eq N N'} {_151 reduce M N}
     {_152 reduce M' N'}
@@ -2818,6 +2968,7 @@
         reduce-resp eterm-eq/i eterm-eq/i D D
   
   note: checking mode of constant   _150   ... 
+  
   => %sort reduce-app-resp {M eterm} {M' eterm} {N eterm} {N' eterm} {O eterm}
     {O' eterm} {_0 eterm-eq M M'} {_151 eterm-eq N N'} {_152 eterm-eq O O'}
     {_153 reduce-app M N O} {_154 reduce-app M' N' O'}
@@ -2828,6 +2979,7 @@
         reduce-app-resp eterm-eq/i eterm-eq/i eterm-eq/i D D
   
   note: checking mode of constant   _151   ... 
+  
   => %sort reduce-pi1-resp {M eterm} {M' eterm} {N eterm} {N' eterm}
     {_0 eterm-eq M M'} {_152 eterm-eq N N'} {_153 reduce-pi1 M N}
     {_154 reduce-pi1 M' N'}
@@ -2838,6 +2990,7 @@
         reduce-pi1-resp eterm-eq/i eterm-eq/i D D
   
   note: checking mode of constant   _152   ... 
+  
   => %sort reduce-pi2-resp {M eterm} {M' eterm} {N eterm} {N' eterm}
     {_0 eterm-eq M M'} {_153 eterm-eq N N'} {_154 reduce-pi2 M N}
     {_155 reduce-pi2 M' N'}
@@ -2848,6 +3001,7 @@
         reduce-pi2-resp eterm-eq/i eterm-eq/i D D
   
   note: checking mode of constant   _153   ... 
+  
   => %sort self-resp {M term} {M' term} {A tp} {A' tp} {B tp} {B' tp}
     {_0 term-eq M M'} {_154 tp-eq A A'} {_155 tp-eq B B'} {_156 self M A B}
     {_157 self M' A' B'}
@@ -2858,6 +3012,7 @@
         self-resp term-eq/i tp-eq/i tp-eq/i D D
   
   note: checking mode of constant   _154   ... 
+  
   => %sort selfify-resp {M eterm} {M' eterm} {A etp} {A' etp} {N eterm} {N' eterm}
     {B etp} {B' etp} {_0 eterm-eq M M'} {_155 etp-eq A A'} {_156 eterm-eq N N'}
     {_157 etp-eq B B'} {_158 selfify M A N B} {_159 selfify M' A' N' B'}
@@ -2868,12 +3023,14 @@
         selfify-resp eterm-eq/i etp-eq/i eterm-eq/i etp-eq/i D D
   
   note: checking mode of constant   _155   ... 
+  
   => %sort simp-resp {A tp} {A' tp} {T stp} {T' stp} {_0 tp-eq A A'}
     {_156 stp-eq T T'} {_157 simp A T} {_158 simp A' T'}
   
   => %term _156 {_?1 tp} {_?2 stp} {D simp _?1 _?2} simp-resp tp-eq/i stp-eq/i D D
   
   note: checking mode of constant   _156   ... 
+  
   => %sort slookup-resp {G sctx} {G' sctx} {X atom} {X' atom} {T stp} {T' stp}
     {_0 sctx-eq G G'} {_157 atom-eq X X'} {_158 stp-eq T T'}
     {_159 slookup G X T} {_160 slookup G' X' T'}
@@ -2884,6 +3041,7 @@
         slookup-resp sctx-eq/i atom-eq/i stp-eq/i D D
   
   note: checking mode of constant   _157   ... 
+  
   => %sort stp-leq-resp {S stp} {S' stp} {T stp} {T' stp} {_0 stp-eq S S'}
     {_158 stp-eq T T'} {_159 stp-leq S T} {_160 stp-leq S' T'}
   
@@ -2893,6 +3051,7 @@
         stp-leq-resp stp-eq/i stp-eq/i D D
   
   note: checking mode of constant   _158   ... 
+  
   => %sort sub-resp {O {_0 atom} term} {O' {_0 atom} term} {M term} {M' term}
     {N term} {N' term} {_0 {x atom} term-eq (O x) (O' x)} {_159 term-eq M M'}
     {_160 term-eq N N'} {_161 sub ([_161 atom] O _161) M N}
@@ -2905,6 +3064,7 @@
         sub-resp ([_0 atom] term-eq/i) term-eq/i term-eq/i D D
   
   note: checking mode of constant   _159   ... 
+  
   => %sort sub-resp1 {O {_0 atom} {_160 atom} term}
     {O' {_0 atom} {_160 atom} term} {M {_0 atom} term} {M' {_0 atom} term}
     {N {_0 atom} term} {N' {_0 atom} term}
@@ -2922,6 +3082,7 @@
           ([_0 atom] term-eq/i) ([x atom] D x) [x atom] D x
   
   note: checking mode of constant   _160   ... 
+  
   => %sort sub-resp-strengthen {O {_0 atom} {_161 atom} term} {O' {_0 atom} term}
     {M {_0 atom} term} {M' term} {N {_0 atom} term} {N' term}
     {_0 {y atom} {x atom} term-eq (O x y) (O' x)}
@@ -2938,6 +3099,7 @@
           (Dsub aca)
   
   note: checking mode of constant   _161   ... 
+  
   => %sort subtp-resp {A etp} {A' etp} {B etp} {B' etp} {_0 etp-eq A A'}
     {_162 etp-eq B B'} {_163 subtp A B} {_164 subtp A' B'}
   
@@ -2945,6 +3107,7 @@
     _162 {_?1 etp} {_?2 etp} {D subtp _?1 _?2} subtp-resp etp-eq/i etp-eq/i D D
   
   note: checking mode of constant   _162   ... 
+  
   => %sort subtype-resp {A tp} {A' tp} {B tp} {B' tp} {M {_0 atom} term}
     {M' {_0 atom} term} {_0 tp-eq A A'} {_163 tp-eq B B'}
     {_164 {x atom} term-eq (M x) (M' x)} {_165 subtype A B [_165 atom] M _165}
@@ -2957,6 +3120,7 @@
         subtype-resp tp-eq/i tp-eq/i ([_0 atom] term-eq/i) D D
   
   note: checking mode of constant   _163   ... 
+  
   => %sort tcanonize-resp {A etp} {A' etp} {B etp} {B' etp} {_0 etp-eq A A'}
     {_164 etp-eq B B'} {_165 tcanonize A B} {_166 tcanonize A' B'}
   
@@ -2966,6 +3130,7 @@
         tcanonize-resp etp-eq/i etp-eq/i D D
   
   note: checking mode of constant   _164   ... 
+  
   => %sort tcanonize-resp-underbind {A etp} {A' etp} {C {_0 eterm} etp}
     {B {_0 eterm} etp} {_0 etp-eq A A'}
     {_165 {x eterm} {_165 evof x A} {_166 variable x} tcanonize (C x) (B x)}
@@ -2982,6 +3147,7 @@
           [x eterm] [_0 evof x _?1] [_165 variable x] D x _0 _165
   
   note: checking mode of constant   _165   ... 
+  
   => %sort tconvert-resp {A tp} {A' tp} {EA etp} {EA' etp} {_0 tp-eq A A'}
     {_166 etp-eq EA EA'} {_167 tconvert A EA} {_168 tconvert A' EA'}
   
@@ -2991,6 +3157,7 @@
         tconvert-resp tp-eq/i etp-eq/i D D
   
   note: checking mode of constant   _166   ... 
+  
   => %sort tconvert-resp-underbind {A tp} {A' tp} {B {_0 atom} tp}
     {EM {_0 eterm} etp} {_0 tp-eq A A'}
     {_167
@@ -3011,6 +3178,7 @@
           [x atom] [_0 vof x _?1] [ex eterm] [_167 vtrans ex x] D x _0 ex _167
   
   note: checking mode of constant   _167   ... 
+  
   => %sort tequiv-resp {EA etp} {EA' etp} {EB etp} {EB' etp} {_0 etp-eq EA EA'}
     {_168 etp-eq EB EB'} {_169 tequiv EA EB} {_170 tequiv EA' EB'}
   
@@ -3019,6 +3187,7 @@
       {_?1 etp} {_?2 etp} {D tequiv _?1 _?2} tequiv-resp etp-eq/i etp-eq/i D D
   
   note: checking mode of constant   _168   ... 
+  
   => %sort trans-resp {EM eterm} {EM' eterm} {A tp} {A' tp} {_0 eterm-eq EM EM'}
     {_169 tp-eq A A'} {_170 trans EM A} {_171 trans EM' A'}
   
@@ -3027,6 +3196,7 @@
       {_?1 eterm} {_?2 tp} {D trans _?1 _?2} trans-resp eterm-eq/i tp-eq/i D D
   
   note: checking mode of constant   _169   ... 
+  
   => %sort trans-resp-underbind {A tp} {A' tp} {EM {_0 eterm} eterm}
     {B {_0 atom} tp} {_0 tp-eq A A'}
     {_170
@@ -3047,6 +3217,7 @@
           [x atom] [_0 vof x _?1] [ex eterm] [_170 vtrans ex x] D x _0 ex _170
   
   note: checking mode of constant   _170   ... 
+  
   => %sort transe-resp {G ctx} {G' ctx} {EM eterm} {EM' eterm} {A tp} {A' tp}
     {_0 ctx-eq G G'} {_171 eterm-eq EM EM'} {_172 tp-eq A A'}
     {_173 transe G EM A} {_174 transe G' EM' A'}
@@ -3057,6 +3228,7 @@
         transe-resp ctx-eq/i eterm-eq/i tp-eq/i D D
   
   note: checking mode of constant   _171   ... 
+  
   => %sort treduce-resp {A etp} {A' etp} {B etp} {B' etp} {_0 etp-eq A A'}
     {_172 etp-eq B B'} {_173 treduce A B} {_174 treduce A' B'}
   
@@ -3066,6 +3238,7 @@
         treduce-resp etp-eq/i etp-eq/i D D
   
   note: checking mode of constant   _172   ... 
+  
   => %sort tsub-resp {A {_0 atom} tp} {A' {_0 atom} tp} {M term} {M' term} {
     B tp} {B' tp} {_0 {x atom} tp-eq (A x) (A' x)} {_173 term-eq M M'}
     {_174 tp-eq B B'} {_175 tsub ([_175 atom] A _175) M B}
@@ -3078,6 +3251,7 @@
         tsub-resp ([_0 atom] tp-eq/i) term-eq/i tp-eq/i D D
   
   note: checking mode of constant   _173   ... 
+  
   => %sort ttrans-resp {EA etp} {EA' etp} {A tp} {A' tp} {_0 etp-eq EA EA'}
     {_174 tp-eq A A'} {_175 ttrans EA A} {_176 ttrans EA' A'}
   
@@ -3085,6 +3259,7 @@
     _174 {_?1 etp} {_?2 tp} {D ttrans _?1 _?2} ttrans-resp etp-eq/i tp-eq/i D D
   
   note: checking mode of constant   _174   ... 
+  
   => %sort ttrans-resp-underbind {A tp} {A' tp} {EB {_0 eterm} etp}
     {B {_0 atom} tp} {_0 tp-eq A A'}
     {_175
@@ -3105,12 +3280,14 @@
           [x atom] [_0 vof x _?1] [ex eterm] [_175 vtrans ex x] D x _0 ex _175
   
   note: checking mode of constant   _175   ... 
+  
   => %sort vof-resp {X atom} {X' atom} {A tp} {A' tp} {_0 atom-eq X X'}
     {_176 tp-eq A A'} {_177 vof X A} {_178 vof X' A'}
   
   => %term _176 {_?1 atom} {_?2 tp} {D vof _?1 _?2} vof-resp atom-eq/i tp-eq/i D D
   
   note: checking mode of constant   _176   ... 
+  
   => %sort vtrans-resp {EX eterm} {EX' eterm} {X atom} {X' atom}
     {_0 eterm-eq EX EX'} {_177 atom-eq X X'} {_178 vtrans EX X}
     {_179 vtrans EX' X'}
@@ -3121,6 +3298,7 @@
         vtrans-resp eterm-eq/i atom-eq/i D D
   
   note: checking mode of constant   _177   ... 
+  
   => %sort wf-bind-resp1 {A {_0 atom} tp} {A' {_0 atom} tp}
     {B {_0 atom} {_178 atom} tp} {_0 {y atom} tp-eq (A y) (A' y)}
     {_178 {y atom} {x atom} {_178 vof x (A y)} wf (B x y)}
@@ -3135,17 +3313,20 @@
           [y atom] [x atom] [_0 vof x (_?1 y)] D y x _0
   
   note: checking mode of constant   _178   ... 
+  
   => %sort wf-resp {A tp} {A' tp} {_0 tp-eq A A'} {_179 wf A} {_180 wf A'}
   
   => %term _179 {_?1 tp} {D wf _?1} wf-resp tp-eq/i D D
   
   note: checking mode of constant   _179   ... 
+  
   => %sort wfe-resp {G ctx} {G' ctx} {A tp} {A' tp} {_0 ctx-eq G G'}
     {_180 tp-eq A A'} {_181 wfe G A} {_182 wfe G' A'}
   
   => %term _180 {_?1 ctx} {_?2 tp} {D wfe _?1 _?2} wfe-resp ctx-eq/i tp-eq/i D D
   
   note: checking mode of constant   _180   ... 
+  
   => %sort wfes-resp {G sctx} {G' sctx} {A tp} {A' tp} {_0 sctx-eq G G'}
     {_181 tp-eq A A'} {_182 wfes G A} {_183 wfes G' A'}
   
@@ -3153,6 +3334,7 @@
     _181 {_?1 sctx} {_?2 tp} {D wfes _?1 _?2} wfes-resp sctx-eq/i tp-eq/i D D
   
   note: checking mode of constant   _181   ... 
+  
   => %sort false-implies-aconverte {G ctx} {R atom} {A tp} {EM eterm} {_0 false}
     {_182 aconverte G R A EM}
   
@@ -3274,11 +3456,17 @@
         aasub-aosub-contra aasub/closed (aosub/pi2 D2) D
   
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   appcl   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   => %sort aosub-absent {R atom} {M term} {N term} {_0 aosub ([_0 atom] R) M N}
     {_182 false}
   
@@ -3289,6 +3477,7 @@
         aosub-absent Daosub D
   
   note: checking mode of constant   _182   ... 
+  
   => %sort aasub-absent-fun {R atom} {M term} {R' atom}
     {_0 aasub ([_0 atom] R) M R'} {_183 atom-eq R' R}
   
@@ -3409,19 +3598,33 @@
         tsub-absent-fun (tsub/singo D) Deq
   
   note: checking mode of constant   _183   ... 
+  
   note: checking mode of constant   _184   ... 
+  
   note: checking mode of constant   _185   ... 
+  
   note: checking mode of constant   _186   ... 
+  
   note: checking mode of constant   _187   ... 
+  
   note: checking mode of constant   _188   ... 
+  
   note: checking mode of constant   _189   ... 
+  
   note: checking mode of constant   _190   ... 
+  
   note: checking mode of constant   _191   ... 
+  
   note: checking mode of constant   _192   ... 
+  
   note: checking mode of constant   _193   ... 
+  
   note: checking mode of constant   _194   ... 
+  
   note: checking mode of constant   _195   ... 
+  
   note: checking mode of constant   _196   ... 
+  
   => %sort aasub-fun {R {_0 atom} atom} {M term} {R1 atom} {R2 atom}
     {_0 aasub ([_0 atom] R _0) M R1} {_197 aasub ([_197 atom] R _197) M R2}
     {_198 atom-eq R1 R2}
@@ -3658,33 +3861,57 @@
         tsub-fun (tsub/singo D2) (tsub/singa D1) Deq
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   note: checking mode of constant   %aaao%   ... 
+  
   note: checking mode of constant   %aoaa%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   note: checking mode of constant   %singao%   ... 
+  
   note: checking mode of constant   %singoa%   ... 
+  
   => %sort aasub-absent {R atom} {M term} {_0 aasub ([_0 atom] R) M R}
   
   => %term _197 {R atom} {M term} aasub-absent R M aasub/closed
   
   note: checking mode of constant   _197   ... 
+  
   => %sort sub-absent {N term} {M term} {_0 sub ([_0 atom] N) M N}
   
   => %term at {R atom} {M term} sub-absent (at R) M (sub/aa aasub/closed)
@@ -3702,8 +3929,11 @@
         {_198 sub-absent N1 M D1} sub-absent (pair N1 N2) M (sub/pair D2 D1)
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   => %sort tsub-absent {A tp} {M term} {_0 tsub ([_0 atom] A) M A}
   
   => %term t {M term} tsub-absent t M tsub/t
@@ -3729,9 +3959,13 @@
   => %term sing {R atom} {M term} tsub-absent (sing R) M (tsub/singa aasub/closed)
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort aasub-closed {R {_0 atom} atom} {M term} {Q {_0 atom} atom} {Q' atom}
     {_0 {x atom} aasub ([_0 atom] R _0) M (Q x)}
     {_198 {x atom} atom-eq (Q x) Q'}
@@ -3957,23 +4191,41 @@
         tsub-closed ([x atom] tsub/singo (D1 x)) [x atom] Deq'' x
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   => %sort sub-closed' {N {_0 atom} term} {M term} {O {_0 atom} term} {O' term}
     {_0 {x atom} sub ([_0 atom] N _0) M (O x)}
     {_198 sub ([_198 atom] N _198) M O'}
@@ -3991,6 +4243,7 @@
         sub-closed' ([x atom] Dsub x) (Dsub' aca)
   
   note: checking mode of constant   _198   ... 
+  
   => %sort topen-fun {A ctp} {B tp} {B' tp} {_0 topen A B} {_199 topen A B'}
     {_200 tp-eq B B'}
   
@@ -4007,7 +4260,9 @@
         topen-fun (topen/pi D2 D1) (topen/pi D2' D1') Deq
   
   note: checking mode of constant   _199   ... 
+  
   note: checking mode of constant   _200   ... 
+  
   => %sort kof-strengthen {C constant} {A {_0 atom} tp} {A' tp}
     {_0 {x atom} kof C (A x)} {_201 {x atom} tp-eq (A x) A'}
   
@@ -4019,6 +4274,7 @@
         kof-strengthen ([x atom] kof/i (Dopen x) Dckof) [x atom] Deq x
   
   note: checking mode of constant   _201   ... 
+  
   => %sort subst-kof {C constant} {A {_0 atom} tp} {M term} {Ax tp}
     {_0 {x atom} kof C (A x)} {_202 tsub ([_202 atom] A _202) M Ax}
     {_203 kof C Ax}
@@ -4038,6 +4294,7 @@
         subst-kof ([x atom] Dkof x) Dsub Dkof''
   
   note: checking mode of constant   _202   ... 
+  
   => %sort vof-noassm {Y atom} {A {_0 atom} tp} {A' tp} {_0 {x atom} vof Y (A x)}
     {_203 {x atom} tp-eq (A x) A'}
   
@@ -4047,6 +4304,7 @@
         vof-noassm ([_0 atom] D) [_0 atom] tp-eq/i
   
   note: checking mode of constant   _203   ... 
+  
   => %sort vof-noassm' {Y {_0 atom} atom} {A {_0 atom} tp} {Y' atom} {A' tp}
     {_0 {x atom} vof (Y x) (A x)} {_204 {x atom} atom-eq (Y x) Y'}
     {_205 {x atom} tp-eq (A x) A'}
@@ -4057,6 +4315,7 @@
         vof-noassm' ([_0 atom] D) ([_0 atom] atom-eq/i) [_0 atom] tp-eq/i
   
   note: checking mode of constant   _204   ... 
+  
   => %sort aof-noassm {R {_0 atom} atom} {A {_0 atom} tp} {R' atom} {A' tp}
     {_0 {x atom} aof (R x) (A x)} {_205 {x atom} atom-eq (R x) R'}
     {_206 {x atom} tp-eq (A x) A'}
@@ -4302,19 +4561,33 @@
         wf-noassm ([x atom] wf/sing (D1 x)) [x atom] Deq' x
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort vof-noassm-var {A {_0 atom} tp} {_0 {x atom} vof x (A x)} {_205 false}
   
   => %sort aof-noassm-var {A {_0 atom} tp} {_0 {x atom} aof x (A x)} {_205 false}
@@ -4326,6 +4599,7 @@
         aof-noassm-var ([x atom] aof/var (_?2 x) (Dvof x)) Dfalse
   
   note: checking mode of constant   _205   ... 
+  
   => %sort vof-noassm-tsub {Y atom} {A {_0 atom} tp} {M term} {Ax tp}
     {_0 {x atom} vof Y (A x)} {_206 tsub ([_206 atom] A _206) M Ax}
     {_207 vof Y Ax}
@@ -4345,12 +4619,14 @@
         vof-noassm-tsub ([x atom] Dvof x) Dsub Dvof''
   
   note: checking mode of constant   _206   ... 
+  
   => %sort isvar-fun {X atom} {I nat} {J nat} {_0 isvar X I} {_207 isvar X J}
     {_208 nat-eq I J}
   
   => %term _207 {_?1 atom} {_?2 nat} {D isvar _?1 _?2} isvar-fun D D nat-eq/i
   
   note: checking mode of constant   _207   ... 
+  
   => %sort precedes-trans {X atom} {Y atom} {Z atom} {_0 precedes X Y}
     {_208 precedes Y Z} {_209 precedes X Z}
   
@@ -4367,6 +4643,7 @@
           (precedes/i DltIK DisvarZ DisvarX)
   
   note: checking mode of constant   _208   ... 
+  
   => %sort precedes-trans-abs {I nat} {J nat} {K nat}
     {_0 {x atom} {_0 isvar x I} {y atom} {_209 isvar y J} precedes x y}
     {_209 {y atom} {_209 isvar y J} {z atom} {_210 isvar z K} precedes y z}
@@ -4385,6 +4662,7 @@
             precedes/i DltIK f d
   
   note: checking mode of constant   _209   ... 
+  
   => %sort precedes-antisymm {X atom} {_0 precedes X X} {_210 false}
   
   => %term
@@ -4396,6 +4674,7 @@
         precedes-antisymm (precedes/i Dlt Disvar' Disvar) Dfalse
   
   note: checking mode of constant   _210   ... 
+  
   => %sort bounded-isvar {G ctx} {X atom} {I nat} {_0 bounded G X}
     {_211 isvar X I}
   
@@ -4409,7 +4688,9 @@
         bounded-isvar (bounded/cons _?6 (precedes/i _?8 D _?9)) D
   
   note: checking mode of constant   _211   ... 
+  
   note: checking mode of constant   _212   ... 
+  
   => %sort sbounded-isvar {G sctx} {X atom} {I nat} {_0 sbounded G X}
     {_213 isvar X I}
   
@@ -4425,7 +4706,9 @@
         sbounded-isvar (sbounded/cons _?6 (precedes/i _?8 D _?9)) D
   
   note: checking mode of constant   _213   ... 
+  
   note: checking mode of constant   _214   ... 
+  
   => %sort lookup-isvar {G ctx} {X atom} {A tp} {I nat} {_0 lookup G X A}
     {_215 isvar X I}
   
@@ -4441,7 +4724,9 @@
         {_0 lookup-isvar D D'} lookup-isvar (lookup/miss D _?7) D'
   
   note: checking mode of constant   _215   ... 
+  
   note: checking mode of constant   _216   ... 
+  
   => %sort slookup-isvar {G sctx} {X atom} {T stp} {I nat} {_0 slookup G X T}
     {_217 isvar X I}
   
@@ -4457,7 +4742,9 @@
         {_0 slookup-isvar D D'} slookup-isvar (slookup/miss D _?7) D'
   
   note: checking mode of constant   _217   ... 
+  
   note: checking mode of constant   _218   ... 
+  
   => %sort isvar-app-contra {R atom} {M term} {_?1 nat} {_0 isvar (app R M) _?1}
     {_219 false}
   
@@ -4482,7 +4769,9 @@
         can-append _?1 (cons _?2 _?4 _?5) (cons _?3 _?4 _?5) (append/cons D)
   
   note: checking mode of constant   _219   ... 
+  
   note: checking mode of constant   _220   ... 
+  
   => %sort bounded-is-ordered {G ctx} {X atom} {_0 bounded G X} {_221 ordered G}
   
   => %term
@@ -4497,7 +4786,9 @@
         bounded-is-ordered (bounded/cons D _?5) (ordered/cons D)
   
   note: checking mode of constant   _221   ... 
+  
   note: checking mode of constant   _222   ... 
+  
   => %sort sbounded-is-sordered {G sctx} {X atom} {_0 sbounded G X}
     {_223 sordered G}
   
@@ -4513,7 +4804,9 @@
         sbounded-is-sordered (sbounded/cons D _?5) (sordered/cons D)
   
   note: checking mode of constant   _223   ... 
+  
   note: checking mode of constant   _224   ... 
+  
   => %sort bounded-increase-bound {G ctx} {X atom} {Y atom} {_0 bounded G X}
     {_225 precedes X Y} {_226 bounded G Y}
   
@@ -4534,7 +4827,9 @@
           (bounded/cons Dbounded Dprecedes'')
   
   note: checking mode of constant   _225   ... 
+  
   note: checking mode of constant   _226   ... 
+  
   => %sort sbounded-increase-bound {G sctx} {X atom} {Y atom} {_0 sbounded G X}
     {_227 precedes X Y} {_228 sbounded G Y}
   
@@ -4555,7 +4850,9 @@
           (sbounded/cons Dbounded Dprecedes'')
   
   note: checking mode of constant   _227   ... 
+  
   note: checking mode of constant   _228   ... 
+  
   => %sort append-bounded {G1 ctx} {G2 ctx} {G ctx} {X atom} {_0 append G1 G2 G}
     {_229 bounded G X} {_230 bounded G1 X}
   
@@ -4573,7 +4870,9 @@
     _230 {_?1 ctx} {_?2 atom} {D bounded _?1 _?2} append-bounded append/nil D D
   
   note: checking mode of constant   _229   ... 
+  
   note: checking mode of constant   _230   ... 
+  
   => %sort append-ordered {G1 ctx} {G2 ctx} {G ctx} {_0 append G1 G2 G}
     {_231 ordered G} {_232 ordered G1}
   
@@ -4588,7 +4887,9 @@
   => %term _232 {_?1 ctx} {D ordered _?1} append-ordered append/nil D D
   
   note: checking mode of constant   _231   ... 
+  
   note: checking mode of constant   _232   ... 
+  
   => %sort append-bounded-contra {G1 ctx} {X atom} {A tp} {G2 ctx} {G ctx}
     {_0 append (cons G1 X A) G2 G} {_233 bounded G X} {_234 false}
   
@@ -4610,7 +4911,9 @@
           (bounded/cons Dbounded Dprecedes) Dfalse
   
   note: checking mode of constant   _233   ... 
+  
   note: checking mode of constant   _234   ... 
+  
   => %sort strengthen-bounded {I nat} {G ctx} {Y atom}
     {_0 {x atom} {_0 isvar x I} bounded G Y} {_235 bounded G Y}
   
@@ -4631,7 +4934,9 @@
           (bounded/cons Dbound' Dprec)
   
   note: checking mode of constant   _235   ... 
+  
   note: checking mode of constant   _236   ... 
+  
   => %sort strengthen-ordered {I nat} {G ctx}
     {_0 {x atom} {_0 isvar x I} ordered G} {_237 ordered G}
   
@@ -4650,7 +4955,9 @@
           (ordered/cons Dbound')
   
   note: checking mode of constant   _237   ... 
+  
   note: checking mode of constant   _238   ... 
+  
   => %sort bounded-is-ordered-strengthen {I nat} {G ctx}
     {_0 {x atom} {_0 isvar x I} bounded G x} {_239 ordered G}
   
@@ -4671,7 +4978,9 @@
              bounded/cons (D x d) (precedes/i Dlt d Disvar)) (ordered/cons D')
   
   note: checking mode of constant   _239   ... 
+  
   note: checking mode of constant   _240   ... 
+  
   => %sort strengthen-sbounded {I nat} {G sctx} {Y atom}
     {_0 {x atom} {_0 isvar x I} sbounded G Y} {_241 sbounded G Y}
   
@@ -4693,7 +5002,9 @@
           (sbounded/cons Dbound' Dprec)
   
   note: checking mode of constant   _241   ... 
+  
   note: checking mode of constant   _242   ... 
+  
   => %sort strengthen-sordered {I nat} {G sctx}
     {_0 {x atom} {_0 isvar x I} sordered G} {_243 sordered G}
   
@@ -4714,7 +5025,9 @@
           (sordered/cons Dbound')
   
   note: checking mode of constant   _243   ... 
+  
   note: checking mode of constant   _244   ... 
+  
   => %sort sbounded-is-sordered-strengthen {I nat} {G sctx}
     {_0 {x atom} {_0 isvar x I} sbounded G x} {_245 sordered G}
   
@@ -4737,7 +5050,9 @@
           (sordered/cons D')
   
   note: checking mode of constant   _245   ... 
+  
   note: checking mode of constant   _246   ... 
+  
   => %sort strengthen-lookup {I nat} {G ctx} {Y atom} {A {_0 atom} tp} {A' tp}
     {_0 {x atom} {_0 isvar x I} lookup G Y (A x)} {_247 lookup G Y A'}
     {_248 {x atom} tp-eq (A x) A'}
@@ -4772,7 +5087,9 @@
           (lookup/miss Dlookup' Dbounded') [x atom] Deq x
   
   note: checking mode of constant   _247   ... 
+  
   note: checking mode of constant   _248   ... 
+  
   => %sort strengthen-slookup {I nat} {G sctx} {Y atom} {T stp}
     {_0 {x atom} {_0 isvar x I} slookup G Y T} {_249 slookup G Y T}
   
@@ -4806,7 +5123,9 @@
           (slookup/miss Dlookup' Dbounded')
   
   note: checking mode of constant   _249   ... 
+  
   note: checking mode of constant   _250   ... 
+  
   => %sort bounded-increase-bound-abs {I nat} {J nat} {G ctx}
     {_0 {x atom} {_0 isvar x I} {y atom} {_251 isvar y J} precedes x y}
     {_251 {x atom} {_251 isvar x I} bounded G x}
@@ -4834,6 +5153,7 @@
           [y atom] [_252 isvar y J] D'' y _252
   
   note: checking mode of constant   _251   ... 
+  
   => %sort strengthen-precedes {I nat} {Y atom} {Z atom}
     {_0 {x atom} {_0 isvar x I} precedes Y Z} {_252 precedes Y Z}
   
@@ -4845,6 +5165,7 @@
           (precedes/i Dlt D1 D2)
   
   note: checking mode of constant   _252   ... 
+  
   => %sort csub-bounded {I nat} {G {_0 atom} ctx} {Y atom} {M term} {G' ctx}
     {_0 {x atom} {_0 isvar x I} bounded (G x) Y}
     {_253 csub ([_253 atom] G _253) M G'} {_254 bounded G' Y}
@@ -4878,7 +5199,9 @@
           (csub/cons Dsub Dcsub) (bounded/cons Dbound' Dprec)
   
   note: checking mode of constant   _253   ... 
+  
   note: checking mode of constant   _254   ... 
+  
   => %sort csub-ordered {I nat} {G {_0 atom} ctx} {M term} {G' ctx}
     {_0 {x atom} {_0 isvar x I} ordered (G x)}
     {_255 csub ([_255 atom] G _255) M G'} {_256 ordered G'}
@@ -4904,7 +5227,9 @@
           (csub/cons Dsub Dcsub) (ordered/cons Dbound')
   
   note: checking mode of constant   _255   ... 
+  
   note: checking mode of constant   _256   ... 
+  
   => %sort scsub-bounded {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {R atom} {G' ctx} {I nat} {Y atom}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)} {_257 append G1 (G2 R) G'}
@@ -4962,8 +5287,11 @@
           ([x atom] [d isvar x _?5] bounded/cons (Dbounded x d) (_?9 x d)) D
   
   note: checking mode of constant   _257   ... 
+  
   note: checking mode of constant   _258   ... 
+  
   note: checking mode of constant   _259   ... 
+  
   => %sort scsub-ordered {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {R atom} {G' ctx} {I nat} {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
     {_260 append G1 (G2 R) G'} {_261 {x atom} {_261 isvar x I} ordered (G x)}
@@ -5087,12 +5415,19 @@
           ([x atom] [d isvar x _?2] ordered/cons (Dbounded x d)) D
   
   note: checking mode of constant   _260   ... 
+  
   note: checking mode of constant   _261   ... 
+  
   note: checking mode of constant   _262   ... 
+  
   note: checking mode of constant   _263   ... 
+  
   note: checking mode of constant   _264   ... 
+  
   note: checking mode of constant   _265   ... 
+  
   note: checking mode of constant   _266   ... 
+  
   => %sort bounded-lookup {G ctx} {X atom} {Y atom} {_?1 tp} {_0 bounded G X}
     {_267 lookup G Y _?1} {_268 precedes Y X}
   
@@ -5114,7 +5449,9 @@
           (lookup/miss Dlookup _?7) Dprecedes''
   
   note: checking mode of constant   _267   ... 
+  
   note: checking mode of constant   _268   ... 
+  
   => %sort sbounded-slookup {G sctx} {X atom} {Y atom} {_?1 stp} {_0 sbounded G X}
     {_269 slookup G Y _?1} {_270 precedes Y X}
   
@@ -5137,7 +5474,9 @@
           (slookup/miss Dlookup _?7) Dprecedes''
   
   note: checking mode of constant   _269   ... 
+  
   note: checking mode of constant   _270   ... 
+  
   => %sort lookup-binder-fun {G1 ctx} {X atom} {A tp} {G2 ctx} {G ctx} {B tp}
     {_0 append (cons G1 X A) G2 G} {_271 lookup G X B} {_272 tp-eq A B}
   
@@ -5172,9 +5511,13 @@
         lookup-binder-fun append/nil (lookup/miss Dlookup Dbounded) Deq
   
   note: checking mode of constant   _271   ... 
+  
   note: checking mode of constant   _272   ... 
+  
   note: checking mode of constant   _273   ... 
+  
   note: checking mode of constant   _274   ... 
+  
   => %sort append-all {G ctx} {_0 append nil G G}
   
   => %term _275 append-all nil append/nil
@@ -5185,7 +5528,9 @@
         {_0 append-all _?1 D} append-all (cons _?1 _?2 _?3) (append/cons D)
   
   note: checking mode of constant   _275   ... 
+  
   note: checking mode of constant   _276   ... 
+  
   => %sort sappend-all {G sctx} {_0 sappend snil G G}
   
   => %term _277 sappend-all snil sappend/nil
@@ -5196,7 +5541,9 @@
         {_0 sappend-all _?1 D} sappend-all (scons _?1 _?2 _?3) (sappend/cons D)
   
   note: checking mode of constant   _277   ... 
+  
   note: checking mode of constant   _278   ... 
+  
   => %sort csub-append {G {_0 atom} ctx} {M term} {G' ctx} {G1 ctx} {A tp}
     {G2 {_0 atom} ctx} {G2' ctx} {_0 csub ([_0 atom] G _0) M G'}
     {_279 {x atom} append (cons G1 x A) (G2 x) (G x)} {_280 append G1 G2' G'}
@@ -5233,7 +5580,9 @@
         csub-append! (append/cons D) (append/cons D')
   
   note: checking mode of constant   _281   ... 
+  
   note: checking mode of constant   _282   ... 
+  
   => %term
     _283
       {_?1 ctx} {_?2 tp} {_?3 {_0 atom} ctx} {_?4 ctx} {_?5 ctx}
@@ -5243,8 +5592,11 @@
         csub-append csub/base ([x atom] append/cons (Dappend x)) D
   
   note: checking mode of constant   _279   ... 
+  
   note: checking mode of constant   _280   ... 
+  
   note: checking mode of constant   _283   ... 
+  
   => %sort csub-lookup {G {_0 atom} ctx} {M term} {G' ctx} {I nat} {Y atom}
     {A {_0 atom} tp} {A' tp} {_0 csub ([_0 atom] G _0) M G'}
     {_284 {x atom} {_284 isvar x I} lookup (G x) Y (A x)}
@@ -5306,8 +5658,11 @@
           Dtsub Dlookup''
   
   note: checking mode of constant   _284   ... 
+  
   note: checking mode of constant   _285   ... 
+  
   note: checking mode of constant   _286   ... 
+  
   => %sort scsub-lookup {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {R atom} {G' ctx} {I nat} {Y atom} {B {_0 atom} tp}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)} {_287 append G1 (G2 R) G'}
@@ -5470,13 +5825,21 @@
           ([x atom] [d isvar x _?5] lookup/miss (_?14 x d) (Dbounded x d)) D
   
   note: checking mode of constant   _287   ... 
+  
   note: checking mode of constant   _288   ... 
+  
   note: checking mode of constant   _289   ... 
+  
   note: checking mode of constant   _290   ... 
+  
   note: checking mode of constant   _291   ... 
+  
   note: checking mode of constant   _292   ... 
+  
   note: checking mode of constant   _293   ... 
+  
   note: checking mode of constant   _294   ... 
+  
   => %sort lookup-bounded-contra {G ctx} {X atom} {T tp} {_0 lookup G X T}
     {_295 bounded G X} {_296 false}
   
@@ -5498,7 +5861,9 @@
           (bounded/cons Dbound Dprec) Dfalse
   
   note: checking mode of constant   _295   ... 
+  
   note: checking mode of constant   _296   ... 
+  
   => %sort lookup-fun {G ctx} {X atom} {T tp} {T' tp} {_0 lookup G X T}
     {_297 lookup G X T'} {_298 tp-eq T T'}
   
@@ -5532,9 +5897,13 @@
         lookup-fun (lookup/hit _?5) (lookup/miss Dlook Dbound) D
   
   note: checking mode of constant   _297   ... 
+  
   note: checking mode of constant   _298   ... 
+  
   note: checking mode of constant   _299   ... 
+  
   note: checking mode of constant   _300   ... 
+  
   => %sort slookup-sbounded-contra {G sctx} {X atom} {T stp} {_0 slookup G X T}
     {_301 sbounded G X} {_302 false}
   
@@ -5558,7 +5927,9 @@
           (sbounded/cons Dbound Dprec) Dfalse
   
   note: checking mode of constant   _301   ... 
+  
   note: checking mode of constant   _302   ... 
+  
   => %sort slookup-fun {G sctx} {X atom} {T stp} {T' stp} {_0 slookup G X T}
     {_303 slookup G X T'} {_304 stp-eq T T'}
   
@@ -5593,9 +5964,13 @@
         slookup-fun (slookup/hit _?5) (slookup/miss Dlook Dbound) D
   
   note: checking mode of constant   _303   ... 
+  
   note: checking mode of constant   _304   ... 
+  
   note: checking mode of constant   _305   ... 
+  
   note: checking mode of constant   _306   ... 
+  
   => %sort bounded-drop {G1 ctx} {X atom} {T tp} {G2 ctx} {G ctx} {G' ctx}
     {Y atom} {_0 append (cons G1 X T) G2 G} {_307 append G1 G2 G'}
     {_308 bounded G Y} {_309 bounded G' Y}
@@ -5617,7 +5992,9 @@
           (bounded/cons Dbound Dprec) (bounded/cons Dbound' Dprec)
   
   note: checking mode of constant   _307   ... 
+  
   note: checking mode of constant   _308   ... 
+  
   => %sort ordered-drop {G1 ctx} {X atom} {T tp} {G2 ctx} {G ctx} {G' ctx}
     {_0 append (cons G1 X T) G2 G} {_309 append G1 G2 G'} {_310 ordered G}
     {_311 ordered G'}
@@ -5638,7 +6015,9 @@
           (ordered/cons Dbound) (ordered/cons Dbound')
   
   note: checking mode of constant   _309   ... 
+  
   note: checking mode of constant   _310   ... 
+  
   => %sort sbounded-drop {G1 sctx} {X atom} {T stp} {G2 sctx} {G sctx} {G' sctx}
     {Y atom} {_0 sappend (scons G1 X T) G2 G} {_311 sappend G1 G2 G'}
     {_312 sbounded G Y} {_313 sbounded G' Y}
@@ -5662,7 +6041,9 @@
           (sbounded/cons Dbound Dprec) (sbounded/cons Dbound' Dprec)
   
   note: checking mode of constant   _311   ... 
+  
   note: checking mode of constant   _312   ... 
+  
   => %sort sordered-drop {G1 sctx} {X atom} {T stp} {G2 sctx} {G sctx} {G' sctx}
     {_0 sappend (scons G1 X T) G2 G} {_313 sappend G1 G2 G'} {_314 sordered G}
     {_315 sordered G'}
@@ -5684,7 +6065,9 @@
           (sordered/cons Dbound) (sordered/cons Dbound')
   
   note: checking mode of constant   _313   ... 
+  
   note: checking mode of constant   _314   ... 
+  
   => %sort slookup-drop {G1 sctx} {S stp} {G2 sctx} {G {_0 atom} sctx} {G' sctx}
     {I nat} {Y atom} {T stp} {_0 {x atom} sappend (scons G1 x S) G2 (G x)}
     {_315 sappend G1 G2 G'} {_316 {x atom} {_316 isvar x I} slookup (G x) Y T}
@@ -5748,8 +6131,11 @@
           (slookup/miss Dlook' Dbound'')
   
   note: checking mode of constant   _315   ... 
+  
   note: checking mode of constant   _316   ... 
+  
   note: checking mode of constant   _317   ... 
+  
   => %sort lookup-context {G ctx} {X atom} {A tp} {_0 lookup G X A}
     {_318 ordered G}
   
@@ -5765,7 +6151,9 @@
         lookup-context (lookup/miss _?6 D) (ordered/cons D)
   
   note: checking mode of constant   _318   ... 
+  
   note: checking mode of constant   _319   ... 
+  
   => %sort aofe-context {G ctx} {M atom} {T tp} {_0 aofe G M T} {_320 ordered G}
   
   => %sort ofe-context {G ctx} {M term} {T tp} {_0 ofe G M T} {_320 ordered G}
@@ -5858,19 +6246,33 @@
         {_0 aofe-context D D'} wfe-context (wfe/sing D) D'
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort ofe-context-precedes {G ctx} {X atom} {A tp} {Y atom} {B tp} {M term}
     {C tp} {_0 ofe (cons (cons G X A) Y B) M C} {_320 precedes X Y}
   
@@ -5883,6 +6285,7 @@
         ofe-context-precedes D D'
   
   note: checking mode of constant   _320   ... 
+  
   => %sort slookup-context {G sctx} {X atom} {A stp} {_0 slookup G X A}
     {_321 sordered G}
   
@@ -5898,7 +6301,9 @@
         slookup-context (slookup/miss _?6 D) (sordered/cons D)
   
   note: checking mode of constant   _321   ... 
+  
   note: checking mode of constant   _322   ... 
+  
   => %sort aofes-context {G sctx} {R atom} {T stp} {_0 aofes G R T}
     {_323 sordered G}
   
@@ -5992,18 +6397,31 @@
         {_0 aofes-context D D'} wfes-context (wfes/sing D) D'
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort bound-isvar {G ctx} {X atom} {I nat} {_0 bounded G X} {_323 isvar X I}
   
   => %term
@@ -6016,7 +6434,9 @@
         bound-isvar (bounded/cons _?6 (precedes/i _?8 D _?9)) D
   
   note: checking mode of constant   _323   ... 
+  
   note: checking mode of constant   _324   ... 
+  
   => %sort following-var {X atom} {I nat} {J nat} {_0 isvar X I}
     {_325 {y atom} {_325 isvar y J} precedes X y}
   
@@ -6026,6 +6446,7 @@
         following-var D [y atom] [e isvar y (s I)] precedes/i Dlt e D
   
   note: checking mode of constant   _325   ... 
+  
   => %sort extend-context {G ctx} {I nat} {_0 ordered G}
     {_326 {x atom} {_326 isvar x I} bounded G x}
   
@@ -6042,7 +6463,9 @@
           [x atom] [d isvar x J] bounded/cons Dbounded (Dprecedes x d)
   
   note: checking mode of constant   _326   ... 
+  
   note: checking mode of constant   _327   ... 
+  
   => %sort sbound-isvar {G sctx} {X atom} {I nat} {_0 sbounded G X}
     {_328 isvar X I}
   
@@ -6057,7 +6480,9 @@
         sbound-isvar (sbounded/cons _?6 (precedes/i _?8 D _?9)) D
   
   note: checking mode of constant   _328   ... 
+  
   note: checking mode of constant   _329   ... 
+  
   => %sort extend-scontext {G sctx} {I nat} {_0 sordered G}
     {_330 {x atom} {_330 isvar x I} sbounded G x}
   
@@ -6073,7 +6498,9 @@
             sbounded/cons Dbounded (precedes/i Dlt d Disvar)
   
   note: checking mode of constant   _330   ... 
+  
   note: checking mode of constant   _331   ... 
+  
   => %sort mtp
   
   => %sort matom
@@ -6416,19 +6843,33 @@
         can-mwf (wf/sing D) (mwf/sing D')
   
   note: checking mode of constant   _332   ... 
+  
   note: checking mode of constant   _333   ... 
+  
   note: checking mode of constant   _334   ... 
+  
   note: checking mode of constant   _335   ... 
+  
   note: checking mode of constant   _336   ... 
+  
   note: checking mode of constant   _337   ... 
+  
   note: checking mode of constant   _338   ... 
+  
   note: checking mode of constant   _339   ... 
+  
   note: checking mode of constant   _340   ... 
+  
   note: checking mode of constant   _341   ... 
+  
   note: checking mode of constant   _342   ... 
+  
   note: checking mode of constant   _343   ... 
+  
   note: checking mode of constant   _344   ... 
+  
   note: checking mode of constant   _345   ... 
+  
   => %sort can-maofe {G ctx} {R atom} {A tp} {Rm matom} {D aofe G R A}
     {_0 maofe D Rm}
   
@@ -6543,19 +6984,33 @@
         {_0 can-maofe D D'} can-mwfe (wfe/sing D) (mwfe/sing D')
   
   note: checking mode of constant   _346   ... 
+  
   note: checking mode of constant   _347   ... 
+  
   note: checking mode of constant   _348   ... 
+  
   note: checking mode of constant   _349   ... 
+  
   note: checking mode of constant   _350   ... 
+  
   note: checking mode of constant   _351   ... 
+  
   note: checking mode of constant   _352   ... 
+  
   note: checking mode of constant   _353   ... 
+  
   note: checking mode of constant   _354   ... 
+  
   note: checking mode of constant   _355   ... 
+  
   note: checking mode of constant   _356   ... 
+  
   note: checking mode of constant   _357   ... 
+  
   note: checking mode of constant   _358   ... 
+  
   note: checking mode of constant   _359   ... 
+  
   => %sort maof-resp {R atom} {R' atom} {A tp} {A' tp} {Rm matom}
     {_0 atom-eq R R'} {_360 tp-eq A A'} {D aof R A} {_361 maof D Rm}
     {D' aof R' A'} {_362 maof D' Rm}
@@ -6566,6 +7021,7 @@
         maof-resp atom-eq/i tp-eq/i D Dm D Dm
   
   note: checking mode of constant   _360   ... 
+  
   => %sort mof-resp {M term} {M' term} {A tp} {A' tp} {Mm mterm} {_0 term-eq M M'}
     {_361 tp-eq A A'} {D of M A} {_362 mof D Mm} {D' of M' A'} {_363 mof D' Mm}
   
@@ -6575,6 +7031,7 @@
         mof-resp term-eq/i tp-eq/i D Dm D Dm
   
   note: checking mode of constant   _361   ... 
+  
   => %sort mwf-resp {A tp} {A' tp} {Am mtp} {_0 tp-eq A A'} {D wf A}
     {_362 mwf D Am} {D' wf A'} {_363 mwf D' Am}
   
@@ -6583,6 +7040,7 @@
       {_?1 tp} {_?2 mtp} {D wf _?1} {Dm mwf D _?2} mwf-resp tp-eq/i D Dm D Dm
   
   note: checking mode of constant   _362   ... 
+  
   => %sort bump-precedes {I nat} {I' nat} {Y atom} {_0 leq I I'}
     {_363 {x atom} {_363 isvar x I} precedes Y x}
     {_364 {x atom} {_364 isvar x I'} precedes Y x}
@@ -6596,6 +7054,7 @@
           [x atom] [d isvar x _?3] precedes/i Dlt' d Disvar
   
   note: checking mode of constant   _363   ... 
+  
   => %sort bump-bounded {I nat} {I' nat} {G ctx} {_0 leq I I'}
     {_364 {x atom} {_364 isvar x I} bounded G x}
     {_365 {x atom} {_365 isvar x I'} bounded G x}
@@ -6621,7 +7080,9 @@
             bounded/cons Dbound' (precedes/i Dlt' d Disvar)
   
   note: checking mode of constant   _364   ... 
+  
   note: checking mode of constant   _365   ... 
+  
   => %sort bump-lookup {I nat} {G {_0 atom} ctx} {Y {_0 atom} atom}
     {A {_0 atom} tp} {I' nat}
     {_0 {x atom} {_0 isvar x I} lookup (G x) (Y x) (A x)}
@@ -6660,7 +7121,9 @@
           [x atom] [d isvar x _?5] lookup/miss (Dlook' x d) (Dbound x d)
   
   note: checking mode of constant   %hit%   ... 
+  
   note: checking mode of constant   %miss%   ... 
+  
   => %sort bump-aofe-m {I nat} {G {_0 atom} ctx} {R {_0 atom} atom}
     {A {_0 atom} tp} {I' nat} {Rm matom}
     {D {x atom} {_0 isvar x I} aofe (G x) (R x) (A x)}
@@ -7284,19 +7747,33 @@
           [x atom] [d isvar x _?4] mwfe/sing (Dmaof' x d)
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort bump-aofe {I nat} {G {_0 atom} ctx} {M {_0 atom} atom} {A {_0 atom} tp}
     {I' nat} {_0 {x atom} {_0 isvar x I} aofe (G x) (M x) (A x)}
     {_366 {x atom} {_366 isvar x I'} ordered (G x)}
@@ -7323,6 +7800,7 @@
           [x atom] [_367 isvar x _?4] Daof' x _367
   
   note: checking mode of constant   _366   ... 
+  
   => %sort bump-ofe {I nat} {G {_0 atom} ctx} {M {_0 atom} term} {A {_0 atom} tp}
     {I' nat} {_0 {x atom} {_0 isvar x I} ofe (G x) (M x) (A x)}
     {_367 {x atom} {_367 isvar x I'} ordered (G x)}
@@ -7349,6 +7827,7 @@
           [x atom] [_368 isvar x _?4] Dof' x _368
   
   note: checking mode of constant   _367   ... 
+  
   => %sort bump-wfe {I nat} {G {_0 atom} ctx} {A {_0 atom} tp} {I' nat}
     {_0 {x atom} {_0 isvar x I} wfe (G x) (A x)}
     {_368 {x atom} {_368 isvar x I'} ordered (G x)}
@@ -7374,6 +7853,7 @@
           [x atom] [_369 isvar x _?3] Dwf' x _369
   
   note: checking mode of constant   _368   ... 
+  
   => %sort bump2-ofe {I nat} {J nat} {G {_0 atom} {_369 atom} ctx}
     {M {_0 atom} {_369 atom} term} {A {_0 atom} {_369 atom} tp} {J' nat}
     {I' nat}
@@ -7426,6 +7906,7 @@
             Dof3 x _370 y _371
   
   note: checking mode of constant   _369   ... 
+  
   => %sort bump2-wfe {I nat} {J nat} {G {_0 atom} {_370 atom} ctx}
     {A {_0 atom} {_370 atom} tp} {J' nat} {I' nat}
     {_0 {x atom} {_0 isvar x I} {y atom} {_370 isvar y J} wfe (G x y) (A x y)}
@@ -7475,6 +7956,7 @@
             Dof3 x _371 y _372
   
   note: checking mode of constant   _370   ... 
+  
   => %sort bump-ofe-under {I nat} {J nat} {G {_0 atom} ctx} {A {_0 atom} tp}
     {M {_0 atom} {_371 atom} term} {B {_0 atom} {_371 atom} tp} {I' nat}
     {J' nat}
@@ -7546,6 +8028,7 @@
             Dof' x _377 y _378
   
   note: checking mode of constant   _371   ... 
+  
   => %sort bump-wfe-under {I nat} {J nat} {G {_0 atom} ctx} {A {_0 atom} tp}
     {B {_0 atom} {_372 atom} tp} {I' nat} {J' nat}
     {_0
@@ -7615,6 +8098,7 @@
             Dof' x _378 y _379
   
   note: checking mode of constant   _372   ... 
+  
   => %sort bump-sbounded {I nat} {I' nat} {G sctx} {_0 leq I I'}
     {_373 {x atom} {_373 isvar x I} sbounded G x}
     {_374 {x atom} {_374 isvar x I'} sbounded G x}
@@ -7640,7 +8124,9 @@
             sbounded/cons Dbound' (precedes/i Dlt' d Disvar)
   
   note: checking mode of constant   _373   ... 
+  
   note: checking mode of constant   _374   ... 
+  
   => %sort bump-slookup {I nat} {G {_0 atom} sctx} {Y {_0 atom} atom} {T stp}
     {I' nat} {_0 {x atom} {_0 isvar x I} slookup (G x) (Y x) T}
     {_375 {x atom} {_375 isvar x I'} sordered (G x)}
@@ -7677,7 +8163,9 @@
           [x atom] [d isvar x _?5] slookup/miss (Dlook' x d) (Dbound x d)
   
   note: checking mode of constant   %hit%   ... 
+  
   note: checking mode of constant   %miss%   ... 
+  
   => %sort bump-aofes {I nat} {G {_0 atom} sctx} {T stp} {I' nat}
     {R {_0 atom} atom} {_0 {x atom} {_0 isvar x I} aofes (G x) (R x) T}
     {_375 {x atom} {_375 isvar x I'} sordered (G x)}
@@ -8060,18 +8548,31 @@
           [x atom] [d isvar x _?3] wfes/sing (D' x d)
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort weakeng-lookup {G1 ctx} {G2 ctx} {G ctx} {X atom} {B tp} {G' ctx}
     {Y atom} {A tp} {_0 append G1 G2 G} {_375 append (cons G1 X B) G2 G'}
     {_376 ordered G'} {_377 lookup G Y A} {_378 lookup G' Y A}
@@ -8106,8 +8607,11 @@
           (lookup/miss Dlook Dbound)
   
   note: checking mode of constant   %hit%   ... 
+  
   note: checking mode of constant   %miss%   ... 
+  
   note: checking mode of constant   %nil%   ... 
+  
   => %sort weakeng-aofe-m {G1 ctx} {G2 ctx} {G ctx} {X atom} {B tp} {G' ctx}
     {R atom} {A tp} {Rm matom} {_0 append G1 G2 G}
     {_375 append (cons G1 X B) G2 G'} {_376 ordered G'} {D aofe G R A}
@@ -8431,19 +8935,33 @@
           (mwfe/sing Dmaof) (wfe/sing Daof') (mwfe/sing Dmaof')
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort weakeng-aofe {G1 ctx} {G2 ctx} {G ctx} {X atom} {B tp} {G' ctx}
     {R atom} {A tp} {_0 append G1 G2 G} {_375 append (cons G1 X B) G2 G'}
     {_376 ordered G'} {_377 aofe G R A} {_378 aofe G' R A}
@@ -8459,6 +8977,7 @@
         {_375 can-maofe Daof Dmaof} weakeng-aofe Dapp Dapp' Dordered Daof Daof'
   
   note: checking mode of constant   _375   ... 
+  
   => %sort weakeng-ofe {G1 ctx} {G2 ctx} {G ctx} {X atom} {B tp} {G' ctx} {
     M term} {A tp} {_0 append G1 G2 G} {_376 append (cons G1 X B) G2 G'}
     {_377 ordered G'} {_378 ofe G M A} {_379 ofe G' M A}
@@ -8474,6 +8993,7 @@
         {_376 can-mofe Dof Dmof} weakeng-ofe Dapp Dapp' Dordered Dof Dof'
   
   note: checking mode of constant   _376   ... 
+  
   => %sort weakeng-wfe {G1 ctx} {G2 ctx} {G ctx} {X atom} {B tp} {G' ctx} {
     A tp} {_0 append G1 G2 G} {_377 append (cons G1 X B) G2 G'}
     {_378 ordered G'} {_379 wfe G A} {_380 wfe G' A}
@@ -8489,6 +9009,7 @@
         {_377 can-mwfe Dwf Dmwf} weakeng-wfe Dapp Dapp' Dordered Dwf Dwf'
   
   note: checking mode of constant   _377   ... 
+  
   => %sort weaken-lookup {G ctx} {X atom} {Y atom} {A tp} {_0 bounded G X}
     {_378 lookup G Y A} {B tp} {_379 lookup (cons G X B) Y A}
   
@@ -8499,6 +9020,7 @@
         weaken-lookup Dbounded Dlook _?5 (lookup/miss Dlook Dbounded)
   
   note: checking mode of constant   _378   ... 
+  
   => %sort weaken-ofe {G ctx} {X atom} {M term} {A tp} {_0 bounded G X}
     {_379 ofe G M A} {B tp} {_380 ofe (cons G X B) M A}
   
@@ -8511,6 +9033,7 @@
         weaken-ofe Dbound Dofe _?3 Dofe'
   
   note: checking mode of constant   _379   ... 
+  
   => %sort weaken-aofe {G ctx} {X atom} {R atom} {A tp} {_0 bounded G X}
     {_380 aofe G R A} {B tp} {_381 aofe (cons G X B) R A}
   
@@ -8524,6 +9047,7 @@
              Daofe'} weaken-aofe Dbound Daofe _?3 Daofe'
   
   note: checking mode of constant   _380   ... 
+  
   => %sort weaken-wfe {G ctx} {X atom} {A tp} {_0 bounded G X} {_381 wfe G A}
     {B tp} {_382 wfe (cons G X B) A}
   
@@ -8535,6 +9059,7 @@
         weaken-wfe Dbound Dwfe _?3 Dwfe'
   
   note: checking mode of constant   _381   ... 
+  
   => %sort weaken-ofe' {G1 ctx} {G2 ctx} {G ctx} {M term} {A tp}
     {_0 append G1 G2 G} {_382 ordered G} {_383 ofe G1 M A} {_384 ofe G M A}
   
@@ -8566,8 +9091,11 @@
         weaken-ofe'' Dapp Dbound Dofe Dofe'
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   _382   ... 
+  
   => %sort weaken-aofe' {G1 ctx} {G2 ctx} {G ctx} {R atom} {A tp}
     {_0 append G1 G2 G} {_383 ordered G} {_384 aofe G1 R A} {_385 aofe G R A}
   
@@ -8599,8 +9127,11 @@
         weaken-aofe'' Dapp Dbound Dofe Dofe'
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   _383   ... 
+  
   => %sort weaken-wfe' {G1 ctx} {G2 ctx} {G ctx} {A tp} {_0 append G1 G2 G}
     {_384 ordered G} {_385 wfe G1 A} {_386 wfe G A}
   
@@ -8630,8 +9161,11 @@
         weaken-wfe'' Dapp Dbound Dwfe Dwfe'
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   _384   ... 
+  
   => %sort weaken-ofe-csub {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {I nat} {M term} {G' ctx} {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
     {_385 {x atom} {_385 isvar x I} ordered (G x)}
@@ -8681,8 +9215,11 @@
           ([x atom] [d isvar x I] ordered/cons (Dbound x d)) csub/base _?7 D
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   %bad%   ... 
+  
   => %sort weaken-aofe-insert1 {J nat} {G ctx} {B tp} {R {_0 atom} atom}
     {C {_0 atom} tp} {I nat} {J' nat}
     {_0 {y atom} {_0 isvar y J} aofe (cons G y B) (R y) (C y)}
@@ -8739,6 +9276,7 @@
             Daof'' x _392 y _393
   
   note: checking mode of constant   _385   ... 
+  
   => %sort weaken-ofe-insert1 {J nat} {G ctx} {B tp} {M {_0 atom} term}
     {C {_0 atom} tp} {I nat} {J' nat}
     {_0 {y atom} {_0 isvar y J} ofe (cons G y B) (M y) (C y)}
@@ -8795,6 +9333,7 @@
             Dof'' x _393 y _394
   
   note: checking mode of constant   _386   ... 
+  
   => %sort weaken-ofe-insert2 {J nat} {K nat} {G ctx} {B tp} {C {_0 atom} tp}
     {M {_0 atom} {_387 atom} term} {D {_0 atom} {_387 atom} tp} {I nat}
     {J' nat} {K' nat}
@@ -8906,6 +9445,7 @@
             [_400 isvar z K'] Dof'' x _398 y _399 z _400
   
   note: checking mode of constant   _387   ... 
+  
   => %sort weaken-wfe-insert1 {J nat} {G ctx} {B tp} {C {_0 atom} tp} {I nat}
     {J' nat} {_0 {y atom} {_0 isvar y J} wfe (cons G y B) (C y)}
     {_388 {x atom} {_388 isvar x I} bounded G x} {A tp}
@@ -8961,6 +9501,7 @@
             Dwf'' x _395 y _396
   
   note: checking mode of constant   _388   ... 
+  
   => %sort weaken-ofe-insert1-bump {J nat} {G ctx} {B tp} {M {_0 atom} term}
     {C {_0 atom} tp} {I nat} {J' nat}
     {_0 {y atom} {_0 isvar y J} ofe (cons G y B) (M y) (C y)}
@@ -9008,6 +9549,7 @@
             Dof'' x _390 y _391
   
   note: checking mode of constant   _389   ... 
+  
   => %sort weaken-wfe-insert1-bump {J nat} {G ctx} {B tp} {C {_0 atom} tp} {
     I nat} {J' nat} {_0 {y atom} {_0 isvar y J} wfe (cons G y B) (C y)}
     {_390 {x atom} {_390 isvar x I} bounded G x}
@@ -9051,6 +9593,7 @@
             Dwf'' x _391 y _392
   
   note: checking mode of constant   _390   ... 
+  
   => %sort weakeng-slookup {G1 sctx} {G2 sctx} {G sctx} {X atom} {B stp} {
     G' sctx} {Y atom} {A stp} {_0 sappend G1 G2 G}
     {_391 sappend (scons G1 X B) G2 G'} {_392 sordered G'} {_393 slookup G Y A}
@@ -9086,8 +9629,11 @@
           (slookup/miss Dlook Dbound)
   
   note: checking mode of constant   %hit%   ... 
+  
   note: checking mode of constant   %miss%   ... 
+  
   note: checking mode of constant   %snil%   ... 
+  
   => %sort weakeng-aofes {G1 sctx} {G2 sctx} {G sctx} {X atom} {S stp} {G' sctx}
     {T stp} {R atom} {_0 sappend G1 G2 G} {_391 sappend (scons G1 X S) G2 G'}
     {_392 sordered G'} {_393 aofes G R T} {_394 aofes G' R T}
@@ -9318,18 +9864,31 @@
           (wfes/sing D1')
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort weaken-slookup {G sctx} {X atom} {Y atom} {T stp} {_0 sbounded G X}
     {_391 slookup G Y T} {S stp} {_392 slookup (scons G X S) Y T}
   
@@ -9340,6 +9899,7 @@
         weaken-slookup Dbounded Dlook _?5 (slookup/miss Dlook Dbounded)
   
   note: checking mode of constant   _391   ... 
+  
   => %sort weaken-aofes {G sctx} {X atom} {R atom} {T stp} {_0 sbounded G X}
     {_392 aofes G R T} {S stp} {_393 aofes (scons G X S) R T}
   
@@ -9353,6 +9913,7 @@
              D'} weaken-aofes Dbound D _?3 D'
   
   note: checking mode of constant   _392   ... 
+  
   => %sort weaken-ofes {G sctx} {X atom} {M term} {T stp} {_0 sbounded G X}
     {_393 ofes G M T} {S stp} {_394 ofes (scons G X S) M T}
   
@@ -9366,6 +9927,7 @@
         weaken-ofes Dbound D _?3 D'
   
   note: checking mode of constant   _393   ... 
+  
   => %sort weaken-wfes {G sctx} {X atom} {A tp} {_0 sbounded G X} {_394 wfes G A}
     {S stp} {_395 wfes (scons G X S) A}
   
@@ -9378,6 +9940,7 @@
         weaken-wfes Dbound D _?3 D'
   
   note: checking mode of constant   _394   ... 
+  
   => %sort weaken-ofes' {G1 sctx} {G2 sctx} {G sctx} {M term} {A stp}
     {_0 sappend G1 G2 G} {_395 sordered G} {_396 ofes G1 M A} {_397 ofes G M A}
   
@@ -9410,8 +9973,11 @@
         weaken-ofes'' Dapp Dbound Dofes Dofes'
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   _395   ... 
+  
   => %sort weaken-wfes' {G1 sctx} {G2 sctx} {G sctx} {A tp} {_0 sappend G1 G2 G}
     {_396 sordered G} {_397 wfes G1 A} {_398 wfes G A}
   
@@ -9442,8 +10008,11 @@
         weaken-wfes'' Dapp Dbound Dwfes Dwfes'
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   _396   ... 
+  
   => %sort wfi {_0 ctx} {_397 tp}
   
   => %term wfi/nil {A tp} {_0 wf A} wfi nil A
@@ -9482,7 +10051,9 @@
         aof-to-aofi (cons G X A) D (aofi/cons [_398 vof X A] D')
   
   note: checking mode of constant   _397   ... 
+  
   note: checking mode of constant   _398   ... 
+  
   => %sort aofi-var {A tp} {R atom} {G ctx} {_0 {_0 wf A} aof R A} {_399 wfi G A}
     {_400 aofi G R A}
   
@@ -9500,7 +10071,9 @@
           (aofi/cons [_400 vof Y B] Daofi _400)
   
   note: checking mode of constant   _399   ... 
+  
   note: checking mode of constant   _400   ... 
+  
   => %sort aofi-lookup {G ctx} {X atom} {A tp} {_0 lookup G X A} {_401 wfi G A}
     {_402 aofi G X A}
   
@@ -9522,7 +10095,9 @@
           (aofi/cons [_402 vof Y B] D _402)
   
   note: checking mode of constant   _401   ... 
+  
   note: checking mode of constant   _402   ... 
+  
   => %sort aofi-forall {G ctx} {A tp} {_0 wfi G A}
     {_403 aofi G (forall A) (pi (pi A ([_403 atom] t)) [_403 atom] t)}
   
@@ -9540,7 +10115,9 @@
           (aofi/cons [_404 vof _?1 _?2] D' _404)
   
   note: checking mode of constant   _403   ... 
+  
   note: checking mode of constant   _404   ... 
+  
   => %sort aofi-app {G ctx} {R atom} {A tp} {B {_0 atom} tp} {M term} {B' tp}
     {_0 aofi G R (pi A [_0 atom] B _0)} {_405 ofi G M A}
     {_406 tsub ([_406 atom] B _406) M B'} {_407 wfi G B'}
@@ -9569,7 +10146,9 @@
           (aofi/cons [_406 vof _?1 _?2] D _406)
   
   note: checking mode of constant   _405   ... 
+  
   note: checking mode of constant   _406   ... 
+  
   => %sort aofi-pi1 {G ctx} {R atom} {A tp} {B {_0 atom} tp}
     {_0 aofi G R (sigma A [_0 atom] B _0)} {_407 aofi G (pi1 R) A}
   
@@ -9589,7 +10168,9 @@
           (aofi/cons [_408 vof _?1 _?2] D' _408)
   
   note: checking mode of constant   _407   ... 
+  
   note: checking mode of constant   _408   ... 
+  
   => %sort aofi-pi2 {G ctx} {R atom} {A tp} {B {_0 atom} tp}
     {_0 aofi G R (sigma A [_0 atom] B _0)} {_409 aofi G (pi2 R) (B (pi1 R))}
   
@@ -9609,7 +10190,9 @@
           (aofi/cons [_410 vof _?1 _?2] D' _410)
   
   note: checking mode of constant   _409   ... 
+  
   note: checking mode of constant   _410   ... 
+  
   => %sort ofi-at {G ctx} {R atom} {_0 aofi G R t} {_411 ofi G (at R) t}
   
   => %term _411 {_?1 atom} {D aof _?1 t} ofi-at (aofi/nil D) (ofi/nil (of/at D))
@@ -9624,7 +10207,9 @@
           (ofi/cons [_412 vof _?1 _?2] D' _412)
   
   note: checking mode of constant   _411   ... 
+  
   note: checking mode of constant   _412   ... 
+  
   => %sort ofi-lam {G ctx} {A tp} {M {_0 atom} term} {B {_0 atom} tp} {_0 wfi G A}
     {_413 {x atom} ofi (cons G x A) (M x) (B x)}
     {_414 ofi G (lam ([_414 atom] M _414)) (pi A [_414 atom] B _414)}
@@ -9654,7 +10239,9 @@
           (ofi/cons [_414 vof _?1 _?2] D _414)
   
   note: checking mode of constant   _413   ... 
+  
   note: checking mode of constant   _414   ... 
+  
   => %sort ofi-pair {G ctx} {M term} {A tp} {B {_0 atom} tp} {B' tp} {N term}
     {_0 ofi G M A} {_415 tsub ([_415 atom] B _415) M B'} {_416 ofi G N B'}
     {_417 {x atom} wfi (cons G x A) (B x)}
@@ -9689,7 +10276,9 @@
           (ofi/cons [_416 vof _?1 _?2] D _416)
   
   note: checking mode of constant   _415   ... 
+  
   note: checking mode of constant   _416   ... 
+  
   => %sort ofi-sing {G ctx} {R atom} {_0 aofi G R t} {_417 ofi G (at R) (sing R)}
   
   => %term
@@ -9705,7 +10294,9 @@
           (ofi/cons [_418 vof _?1 _?2] D' _418)
   
   note: checking mode of constant   _417   ... 
+  
   note: checking mode of constant   _418   ... 
+  
   => %sort wfi-t {G ctx} {_0 wfi G t}
   
   => %term _419 wfi-t nil (wfi/nil wf/t)
@@ -9717,7 +10308,9 @@
         wfi-t (cons G X A) (wfi/cons [_420 vof X A] D _420)
   
   note: checking mode of constant   _419   ... 
+  
   note: checking mode of constant   _420   ... 
+  
   => %sort wfi-pi {G ctx} {A tp} {B {_0 atom} tp} {_0 wfi G A}
     {_421 {x atom} wfi (cons G x A) (B x)}
     {_422 wfi G (pi A [_422 atom] B _422)}
@@ -9743,7 +10336,9 @@
           (wfi/cons [_422 vof _?1 _?2] D _422)
   
   note: checking mode of constant   _421   ... 
+  
   note: checking mode of constant   _422   ... 
+  
   => %sort wfi-sigma {G ctx} {A tp} {B {_0 atom} tp} {_0 wfi G A}
     {_423 {x atom} wfi (cons G x A) (B x)}
     {_424 wfi G (sigma A [_424 atom] B _424)}
@@ -9770,7 +10365,9 @@
           (wfi/cons [_424 vof _?1 _?2] D _424)
   
   note: checking mode of constant   _423   ... 
+  
   note: checking mode of constant   _424   ... 
+  
   => %sort wfi-sing {G ctx} {R atom} {_0 aofi G R t} {_425 wfi G (sing R)}
   
   => %term
@@ -9786,7 +10383,9 @@
           (wfi/cons [_426 vof _?1 _?2] D' _426)
   
   note: checking mode of constant   _425   ... 
+  
   note: checking mode of constant   _426   ... 
+  
   => %sort aofe-to-aofi {G ctx} {R atom} {A tp} {_0 aofe G R A} {_427 aofi G R A}
   
   => %sort ofe-to-ofi {G ctx} {M term} {A tp} {_0 ofe G M A} {_427 ofi G M A}
@@ -9916,19 +10515,33 @@
         wfe-to-wfi (wfe/sing Daofe) D
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort ofe-to-of {M term} {A tp} {_0 ofe nil M A} {_427 of M A}
   
   => %term
@@ -9937,6 +10550,7 @@
         {_0 ofe-to-ofi D (ofi/nil D')} ofe-to-of D D'
   
   note: checking mode of constant   _427   ... 
+  
   => %sort aofe-to-aof {M atom} {A tp} {_0 aofe nil M A} {_428 aof M A}
   
   => %term
@@ -9945,6 +10559,7 @@
         {_0 aofe-to-aofi D (aofi/nil D')} aofe-to-aof D D'
   
   note: checking mode of constant   _428   ... 
+  
   => %sort wfe-to-wf {A tp} {_0 wfe nil A} {_429 wf A}
   
   => %term
@@ -9953,6 +10568,7 @@
         wfe-to-wf D D'
   
   note: checking mode of constant   _429   ... 
+  
   => %sort ofe-to-of1 {I nat} {A tp} {M {_0 atom} term} {B {_0 atom} tp}
     {_0 {x atom} {_0 isvar x I} ofe (cons nil x A) (M x) (B x)}
     {_430 {x atom} {_430 vof x A} of (M x) (B x)}
@@ -9970,6 +10586,7 @@
           [x atom] [_430 vof x _?1] Dof x _430
   
   note: checking mode of constant   _430   ... 
+  
   => %sort wfe-to-wf1 {I nat} {A tp} {B {_0 atom} tp}
     {_0 {x atom} {_0 isvar x I} wfe (cons nil x A) (B x)}
     {_431 {x atom} {_431 vof x A} wf (B x)}
@@ -9986,6 +10603,7 @@
           [x atom] [_431 vof x _?1] Dof x _431
   
   note: checking mode of constant   _431   ... 
+  
   => %sort ofe-reg {G ctx} {M term} {A tp} {_0 ofe G M A} {_432 wfe G A}
   
   => %term
@@ -10023,9 +10641,13 @@
         ofe-reg (ofe/sing Daof) (wfe/sing Daof)
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort strengthen-for-cut-aof {A tp} {R atom} {B {_0 atom} tp} {B' tp}
     {Rm matom} {D {x atom} {_0 vof x A} aof R (B x)}
     {_0 {x atom} {d vof x A} maof (D x d) Rm} {_432 {x atom} tp-eq (B x) B'}
@@ -10414,19 +11036,33 @@
           (mwf/sing Dmaof'')
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort strengthen-wf {A tp} {B tp} {_0 {x atom} {_0 vof x A} wf B} {_432 wf B}
   
   => %term
@@ -10441,6 +11077,7 @@
         strengthen-wf ([x atom] [_433 vof x _?1] Dwf x _433) D
   
   note: checking mode of constant   _432   ... 
+  
   => %sort cut-aof {A tp} {R {_0 atom} atom} {B {_0 atom} tp} {I nat}
     {G {_0 atom} ctx} {Rm matom} {D {x atom} {_0 vof x A} aof (R x) (B x)}
     {_0 {x atom} {d vof x A} maof (D x d) Rm}
@@ -11628,34 +12265,63 @@
           [x atom] [d' isvar x I] mwfe/sing (Dmaofe' x d')
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort of1-to-ofe {A tp} {M {_0 atom} term} {B {_0 atom} tp} {I nat}
     {_0 {x atom} {_0 vof x A} of (M x) (B x)}
     {_433 {x atom} {_433 isvar x I} ofe (cons nil x A) (M x) (B x)}
@@ -11678,6 +12344,7 @@
           [x atom] [_434 isvar x I] Dofe x _434
   
   note: checking mode of constant   _433   ... 
+  
   => %sort aof1-to-aofe {A tp} {M {_0 atom} atom} {B {_0 atom} tp} {I nat}
     {_0 {x atom} {_0 vof x A} aof (M x) (B x)}
     {_434 {x atom} {_434 isvar x I} aofe (cons nil x A) (M x) (B x)}
@@ -11700,6 +12367,7 @@
           [x atom] [_435 isvar x I] Daofe x _435
   
   note: checking mode of constant   _434   ... 
+  
   => %sort wf1-to-wfe {A tp} {B {_0 atom} tp} {I nat}
     {_0 {x atom} {_0 vof x A} wf (B x)}
     {_435 {x atom} {_435 isvar x I} wfe (cons nil x A) (B x)}
@@ -11722,6 +12390,7 @@
           [x atom] [_436 isvar x I] Dwfe x _436
   
   note: checking mode of constant   _435   ... 
+  
   => %sort aof-to-aofe {R atom} {A tp} {_0 aof R A} {_436 aofe nil R A}
   
   => %term
@@ -11730,6 +12399,7 @@
         aof-to-aofe Daof (aofe/closed ordered/nil Daof)
   
   note: checking mode of constant   _436   ... 
+  
   => %sort wf-to-wfe {A tp} {_0 wf A} {_437 wfe nil A}
   
   => %term t wf-to-wfe wf/t (wfe/t ordered/nil)
@@ -11762,9 +12432,13 @@
         {_0 aof-to-aofe D D'} wf-to-wfe (wf/sing D) (wfe/sing D')
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort of-to-ofe {M term} {A tp} {_0 of M A} {_437 ofe nil M A}
   
   => %term
@@ -11807,9 +12481,13 @@
         of-to-ofe (of/sing Daof) (ofe/sing (aofe/closed ordered/nil Daof))
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort of2-to-ofe {I nat} {J nat} {A tp} {B {_0 atom} tp}
     {M {_0 atom} {_437 atom} term} {C {_0 atom} {_437 atom} tp} {_0 lt I J}
     {_437
@@ -11870,6 +12548,7 @@
             Dofe' x _439 y _440
   
   note: checking mode of constant   _437   ... 
+  
   => %sort aof2-to-aofe {I nat} {J nat} {A tp} {B {_0 atom} tp}
     {R {_0 atom} {_438 atom} atom} {C {_0 atom} {_438 atom} tp} {_0 lt I J}
     {_438
@@ -11931,6 +12610,7 @@
             Daofe' x _440 y _441
   
   note: checking mode of constant   _438   ... 
+  
   => %sort wf2-to-wfe {I nat} {J nat} {A tp} {B {_0 atom} tp}
     {C {_0 atom} {_439 atom} tp} {_0 lt I J}
     {_439 {x atom} {_439 vof x A} {y atom} {_440 vof y (B x)} wf (C x y)}
@@ -11990,6 +12670,7 @@
             Dwfe' x _441 y _442
   
   note: checking mode of constant   _439   ... 
+  
   => %sort ssubst-gen {R atom} {A tp} {M term} {B tp} {_0 {_0 vof R A} of M B}
     {_440 {_440 aof R A} of M B}
   
@@ -12173,21 +12854,37 @@
           [d aof _?1 _?2] wf/sing (D1' d)
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort ssubst {A tp} {M {_0 atom} term} {B {_0 atom} tp} {R atom}
     {_0 {x atom} {_0 vof x A} of (M x) (B x)} {_440 aof R A}
     {_441 of (M R) (B R)}
@@ -12201,6 +12898,7 @@
         ssubst ([x atom] [_440 vof x _?2] D1 x _440) D2 (D1' D2)
   
   note: checking mode of constant   _440   ... 
+  
   => %sort ssubst1 {A tp} {B {_0 atom} tp} {M {_0 atom} {_441 atom} term}
     {C {_0 atom} {_441 atom} tp} {R atom}
     {_0 {x atom} {_0 vof x A} {y atom} {_441 vof y (B x)} of (M x y) (C x y)}
@@ -12225,6 +12923,7 @@
           [y atom] [_441 vof y (_?1 R)] Dof' Daof y _441
   
   note: checking mode of constant   _441   ... 
+  
   => %sort sasubst {A tp} {Q {_0 atom} atom} {B {_0 atom} tp} {R atom}
     {_0 {x atom} {_0 vof x A} aof (Q x) (B x)} {_442 aof R A}
     {_443 aof (Q R) (B R)}
@@ -12238,6 +12937,7 @@
         sasubst ([x atom] [_442 vof x _?2] D1 x _442) D2 (D1' D2)
   
   note: checking mode of constant   _442   ... 
+  
   => %sort stsubst {A tp} {B {_0 atom} tp} {R atom}
     {_0 {x atom} {_0 vof x A} wf (B x)} {_443 aof R A} {_444 wf (B R)}
   
@@ -12250,6 +12950,7 @@
         stsubst ([x atom] [_443 vof x _?2] D1 x _443) D2 (D1' D2)
   
   note: checking mode of constant   _443   ... 
+  
   => %sort stsubst2 {A tp} {B {_0 atom} tp} {C {_0 atom} {_444 atom} tp}
     {D {_0 atom} {_444 atom} {_445 atom} tp} {R atom}
     {_0
@@ -12280,6 +12981,7 @@
             Dwf' Daof y _444 z _445
   
   note: checking mode of constant   _444   ... 
+  
   => %sort stsubst1 {A tp} {B {_0 atom} tp} {C {_0 atom} {_445 atom} tp} {
     R atom} {_0 {x atom} {_0 vof x A} {y atom} {_445 vof y (B x)} wf (C x y)}
     {_445 aof R A} {_446 {y atom} {_446 vof y (B R)} wf (C R y)}
@@ -12302,6 +13004,7 @@
           [y atom] [_445 vof y (_?1 R)] Dwf' Daof y _445
   
   note: checking mode of constant   _445   ... 
+  
   => %sort ssubst-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx} {
     R atom} {G' ctx} {I nat} {M {_0 atom} term} {B {_0 atom} tp}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)} {_446 append G1 (G2 R) G'}
@@ -12717,24 +13420,43 @@
           ([x atom] [d isvar x _?7] wfe/sing (D1 x d)) DofR (wfe/sing D1')
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %forbad%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %appbad%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1bad%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2bad%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   => %sort aof-reg {R atom} {A tp} {_0 aof R A} {_446 wf A}
   
   => %term
@@ -12780,11 +13502,17 @@
         aof-reg (aof/pi2 Daof) D'
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   => %sort of-reg {M term} {A tp} {_0 of M A} {_446 wf A}
   
   => %term at {_?1 atom} {_?2 aof _?1 t} of-reg (of/at _?2) wf/t
@@ -12810,9 +13538,13 @@
   => %term sing {_?1 atom} {Daof aof _?1 t} of-reg (of/sing Daof) (wf/sing Daof)
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort aofe-reg {G ctx} {R atom} {A tp} {_0 aofe G R A} {_446 wfe G A}
   
   => %term
@@ -12871,11 +13603,17 @@
         aofe-reg (aofe/pi2 Daof) D
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   => %sort headvar {_0 {_0 atom} atom}
   
   => %term headvar/var headvar [x atom] x
@@ -12903,6 +13641,7 @@
         headvar-resp ([_0 atom] atom-eq/i) D D
   
   note: checking mode of constant   _446   ... 
+  
   => %sort simp-fun {A tp} {T stp} {T' stp} {_0 simp A T} {_447 simp A T'}
     {_448 stp-eq T T'}
   
@@ -12945,9 +13684,13 @@
   => %term sing {_?1 atom} simp-fun simp/sing simp/sing stp-eq/i
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort employ-stp-leq {S stp} {T stp} {_0 stp-leq S T}
   
   => %term _447 {_?1 stp} employ-stp-leq _?1 _?1 stp-leq/eq
@@ -12977,10 +13720,15 @@
         employ-stp-leq _?1 (ssigma _?3 _?2) (stp-leq/sigma2 D)
   
   note: checking mode of constant   _447   ... 
+  
   note: checking mode of constant   _448   ... 
+  
   note: checking mode of constant   _449   ... 
+  
   note: checking mode of constant   _450   ... 
+  
   note: checking mode of constant   _451   ... 
+  
   => %sort stp-leq-trans {T1 stp} {T2 stp} {T3 stp} {_0 stp-leq T1 T2}
     {_452 stp-leq T2 T3} {_453 stp-leq T1 T3}
   
@@ -13012,10 +13760,15 @@
         stp-leq-trans D (stp-leq/sigma2 D') (stp-leq/sigma2 D'')
   
   note: checking mode of constant   _452   ... 
+  
   note: checking mode of constant   _453   ... 
+  
   note: checking mode of constant   _454   ... 
+  
   note: checking mode of constant   _455   ... 
+  
   note: checking mode of constant   _456   ... 
+  
   => %sort tsub-preserves-simp {A {_0 atom} tp} {_?1 term} {B tp} {T stp}
     {_0 tsub ([_0 atom] A _0) _?1 B} {_457 {x atom} simp (A x) T}
     {_458 simp B T}
@@ -13067,10 +13820,15 @@
         tsub-preserves-simp (tsub/singo _?4) ([_0 atom] simp/sing) simp/sing
   
   note: checking mode of constant   _457   ... 
+  
   note: checking mode of constant   _458   ... 
+  
   note: checking mode of constant   _459   ... 
+  
   note: checking mode of constant   _460   ... 
+  
   note: checking mode of constant   _461   ... 
+  
   => %sort can-simp {T stp} {A tp} {_0 simp A T}
   
   => %term t can-simp t simp/t
@@ -13092,9 +13850,13 @@
   => %term sing {R atom} can-simp (sing R) simp/sing
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort simpctx {_0 ctx} {_462 sctx}
   
   => %term simpctx/nil simpctx nil snil
@@ -13115,7 +13877,9 @@
         can-simpctx (cons G X A) (simpctx/cons D2 D1)
   
   note: checking mode of constant   _462   ... 
+  
   note: checking mode of constant   _463   ... 
+  
   => %sort bounded-simpctx {G ctx} {G' sctx} {X atom} {_0 simpctx G G'}
     {_464 bounded G X} {_465 sbounded G' X}
   
@@ -13134,7 +13898,9 @@
           (sbounded/cons Dbound' Dprec)
   
   note: checking mode of constant   _464   ... 
+  
   note: checking mode of constant   _465   ... 
+  
   => %sort ordered-simpctx {G ctx} {G' sctx} {_0 simpctx G G'} {_466 ordered G}
     {_467 sordered G'}
   
@@ -13149,7 +13915,9 @@
           (sordered/cons Dbound')
   
   note: checking mode of constant   _466   ... 
+  
   note: checking mode of constant   _467   ... 
+  
   => %sort lookup-simp {G ctx} {G' sctx} {A tp} {T stp} {X atom} {_0 simpctx G G'}
     {_468 simp A T} {_469 lookup G X A} {_470 slookup G' X T}
   
@@ -13176,7 +13944,9 @@
           (lookup/miss Dlookup Dbound) (slookup/miss Dlookup' Dbound')
   
   note: checking mode of constant   _468   ... 
+  
   note: checking mode of constant   _469   ... 
+  
   => %sort aofe-simp {G ctx} {G' sctx} {A tp} {T stp} {R atom} {_0 simpctx G G'}
     {_470 simp A T} {_471 aofe G R A} {_472 aofes G' R T}
   
@@ -13351,19 +14121,33 @@
         wfe-simp Dsimpctx (wfe/sing D) (wfes/sing D')
   
   note: checking mode of constant   _470   ... 
+  
   note: checking mode of constant   _471   ... 
+  
   note: checking mode of constant   _472   ... 
+  
   note: checking mode of constant   _473   ... 
+  
   note: checking mode of constant   _474   ... 
+  
   note: checking mode of constant   _475   ... 
+  
   note: checking mode of constant   _476   ... 
+  
   note: checking mode of constant   _477   ... 
+  
   note: checking mode of constant   _478   ... 
+  
   note: checking mode of constant   _479   ... 
+  
   note: checking mode of constant   _480   ... 
+  
   note: checking mode of constant   _481   ... 
+  
   note: checking mode of constant   _482   ... 
+  
   note: checking mode of constant   _483   ... 
+  
   => %sort context-append-simp-lookup {G1 ctx} {A tp} {G2 {_0 atom} ctx}
     {G {_0 atom} ctx} {I nat} {Y {_0 atom} atom} {T stp} {G' {_0 atom} sctx}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -13416,7 +14200,9 @@
           [x atom] [d isvar x _?5] slookup/miss (Dlookup x d) (Dsbounded x d)
   
   note: checking mode of constant   _484   ... 
+  
   note: checking mode of constant   _485   ... 
+  
   => %sort context-append-simp-lookup' {G1 ctx} {A tp} {G2 {_0 atom} ctx}
     {G {_0 atom} ctx} {I nat} {T stp} {G' {_0 atom} sctx}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -13461,7 +14247,9 @@
           [x atom] [d isvar x _?5] slookup/miss (Dlookup x d) (Dsbounded x d)
   
   note: checking mode of constant   _486   ... 
+  
   note: checking mode of constant   _487   ... 
+  
   => %sort aosub-headvar {R {_0 atom} atom} {_?1 term} {_?2 term}
     {_0 aosub ([_0 atom] R _0) _?1 _?2} {_488 headvar [_488 atom] R _488}
   
@@ -13491,9 +14279,13 @@
         aosub-headvar (aosub/pi2 D) (headvar/pi2 D')
   
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   => %sort headvar-closed {R atom} {_0 headvar [x atom] R} {_488 false}
   
   => %term
@@ -13512,8 +14304,11 @@
         headvar-closed (headvar/pi2 D) D'
   
   note: checking mode of constant   _488   ... 
+  
   note: checking mode of constant   _489   ... 
+  
   note: checking mode of constant   _490   ... 
+  
   => %sort headvar-tp-size {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {I nat} {R {_0 atom} atom} {B {_0 atom} tp} {S stp} {T stp}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -13692,13 +14487,21 @@
           (headvar/pi2 _?11) ([x atom] Dsimp x) Dleq
   
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %appbad%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1bad%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2bad%   ... 
+  
   => %sort closed-headvar-contra {R {_0 atom} atom} {A {_0 atom} tp}
     {_0 {x atom} aof (R x) (A x)} {_491 headvar [_491 atom] R _491}
     {_492 false}
@@ -13740,9 +14543,13 @@
           Dfalse
   
   note: checking mode of constant   _491   ... 
+  
   note: checking mode of constant   _492   ... 
+  
   note: checking mode of constant   _493   ... 
+  
   note: checking mode of constant   _494   ... 
+  
   => %sort headvar-stp-size {I nat} {G {_0 atom} sctx} {S stp} {R {_0 atom} atom}
     {T stp} {_0 {x atom} {_0 isvar x I} slookup (G x) x S}
     {_495 {x atom} {_495 isvar x I} aofes (G x) (R x) T}
@@ -13882,13 +14689,21 @@
           D
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %appbad%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1bad%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2bad%   ... 
+  
   => %sort sasubst-es {I nat} {G {_0 atom} sctx} {S stp} {R atom}
     {Q {_0 atom} atom} {T stp} {_0 {x atom} {_0 isvar x I} slookup (G x) x S}
     {_495 {x atom} {_495 isvar x I} aofes (G x) R S}
@@ -14336,23 +15151,41 @@
           [x atom] [d isvar x _?1] wfes/sing (D' x d)
   
   note: checking mode of constant   _495   ... 
+  
   note: checking mode of constant   _496   ... 
+  
   note: checking mode of constant   _497   ... 
+  
   note: checking mode of constant   _498   ... 
+  
   note: checking mode of constant   _499   ... 
+  
   note: checking mode of constant   _500   ... 
+  
   note: checking mode of constant   _501   ... 
+  
   note: checking mode of constant   _502   ... 
+  
   note: checking mode of constant   _503   ... 
+  
   note: checking mode of constant   _504   ... 
+  
   note: checking mode of constant   _505   ... 
+  
   note: checking mode of constant   _506   ... 
+  
   note: checking mode of constant   _507   ... 
+  
   note: checking mode of constant   _508   ... 
+  
   note: checking mode of constant   _509   ... 
+  
   note: checking mode of constant   _510   ... 
+  
   note: checking mode of constant   _511   ... 
+  
   note: checking mode of constant   _512   ... 
+  
   => %sort strengthen-aofes {G1 sctx} {S stp} {G2 sctx} {G {_0 atom} sctx}
     {G' sctx} {I nat} {R atom} {T stp}
     {_0 {x atom} sappend (scons G1 x S) G2 (G x)} {_513 sappend G1 G2 G'}
@@ -14600,18 +15433,31 @@
           ([x atom] [d isvar x _?1] wfes/sing (DofR x d)) (wfes/sing DofR')
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort aasubst-es {I nat} {G {_0 atom} sctx} {S stp} {M term}
     {R {_0 atom} atom} {T stp} {R' atom}
     {_0 {x atom} {_0 isvar x I} slookup (G x) x S}
@@ -15297,32 +16143,59 @@
           [x atom] [d isvar x I] wfes/sing (D x d)
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   _513   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   _514   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   _515   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   _516   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   _517   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   _518   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   _519   ... 
+  
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   => %sort ofes-pi-invert-underbind {I nat} {G {_0 atom} sctx} {M term} {S stp}
     {T stp} {P {_0 atom} term} {J nat}
     {_0 {x atom} {_0 isvar x I} ofes (G x) M (spi S T)}
@@ -15344,6 +16217,7 @@
           [x atom] [_0 isvar x _?1] [y atom] [_520 isvar y _?6] D x _0 y _520
   
   note: checking mode of constant   _520   ... 
+  
   => %sort ofes-sigma-invert-underbind {I nat} {G {_0 atom} sctx} {M term} {
     S stp} {T stp} {P1 term} {P2 term}
     {_0 {x atom} {_0 isvar x I} ofes (G x) M (ssigma S T)}
@@ -15361,6 +16235,7 @@
           ([x atom] [_0 isvar x _?1] D1 x _0) [x atom] [_0 isvar x _?1] D2 x _0
   
   note: checking mode of constant   _521   ... 
+  
   => %sort ofes-t-invert-underbind {I nat} {G {_0 atom} sctx} {M term} {R atom}
     {_0 {x atom} {_0 isvar x I} ofes (G x) M st} {_522 term-eq M (at R)}
   
@@ -15372,6 +16247,7 @@
           term-eq/i
   
   note: checking mode of constant   _522   ... 
+  
   => %sort asub {_0 {_0 atom} atom} {_523 term}
   
   => %term
@@ -15432,7 +16308,9 @@
           (asub/aosub (aosub/pi1 Daosub'))
   
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   => %sort can-asub-pi2 {I nat} {G {_0 atom} sctx} {S stp} {R {_0 atom} atom}
     {T stp} {U stp} {M term} {_0 {x atom} {_0 isvar x I} slookup (G x) x S}
     {_523 {x atom} {_523 isvar x I} aofes (G x) (R x) (ssigma T U)}
@@ -15481,7 +16359,9 @@
           (asub/aosub (aosub/pi2 Daosub'))
   
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   => %sort asub-sub-at {R {_0 atom} atom} {M term} {N term}
     {_0 asub ([_0 atom] R _0) M} {_523 sub ([x atom] at (R x)) M N}
   
@@ -15498,7 +16378,9 @@
         asub-sub-at (asub/aosub D) (sub/ao D)
   
   note: checking mode of constant   _523   ... 
+  
   note: checking mode of constant   _524   ... 
+  
   => %sort asub-tsub-sing {I nat} {G {_0 atom} sctx} {S stp} {R {_0 atom} atom}
     {M term} {A tp} {_0 {x atom} {_0 isvar x I} slookup (G x) x S}
     {_525 {x atom} {_525 isvar x I} aofes (G x) (R x) st}
@@ -15540,7 +16422,9 @@
           (tsub/singo Daosub')
   
   note: checking mode of constant   _525   ... 
+  
   note: checking mode of constant   _526   ... 
+  
   => %sort can-asub-esm {I nat} {G {_0 atom} sctx} {R {_0 atom} atom} {T stp}
     {M term} {S stp} {_0 {x atom} {_0 isvar x I} slookup (G x) x S}
     {_527 {x atom} {_527 isvar x I} aofes (G x) (R x) T}
@@ -16045,25 +16929,45 @@
           ([x atom] [_528 isvar x I] DofM x _528) Dtsub
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %allbad%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %appbad%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1bad%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2bad%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %ap-aa%   ... 
+  
   note: checking mode of constant   %app-ao%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort can-sub-es {I nat} {G {_0 atom} sctx} {S stp} {N {_0 atom} term}
     {T stp} {M term} {N' term} {_0 {x atom} {_0 isvar x I} slookup (G x) x S}
     {_527 {x atom} {_527 isvar x I} ofes (G x) (N x) T}
@@ -16087,6 +16991,7 @@
           ([x atom] [_527 isvar x _?1] DofM x _527) Dsub
   
   note: checking mode of constant   _527   ... 
+  
   => %sort can-tsub-es {I nat} {G {_0 atom} sctx} {S stp} {A {_0 atom} tp}
     {M term} {A' tp} {_0 {x atom} {_0 isvar x I} slookup (G x) x S}
     {_528 {x atom} {_528 isvar x I} wfes (G x) (A x)}
@@ -16110,6 +17015,7 @@
           ([x atom] [_528 isvar x _?1] Dof x _528) Dsub
   
   note: checking mode of constant   _528   ... 
+  
   => %sort can-sub-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx} {
     I nat} {N {_0 atom} term} {B {_0 atom} tp} {M term} {N' term}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -16161,6 +17067,7 @@
           DofM Dsub
   
   note: checking mode of constant   _529   ... 
+  
   => %sort can-tsub-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx} {
     I nat} {B {_0 atom} tp} {M term} {B' tp}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -16211,6 +17118,7 @@
           DofM Dsub
   
   note: checking mode of constant   _530   ... 
+  
   => %sort can-sub {A tp} {N {_0 atom} term} {B {_0 atom} tp} {M term} {N' term}
     {_0 {x atom} {_0 vof x A} of (N x) (B x)} {_531 of M A}
     {_532 sub ([x atom] N x) M N'}
@@ -16233,6 +17141,7 @@
         can-sub ([x atom] [_533 vof x _?1] DofN x _533) DofM Dsub
   
   note: checking mode of constant   _531   ... 
+  
   => %sort can-tsub {A tp} {B {_0 atom} tp} {M term} {B' tp}
     {_0 {x atom} {_0 vof x A} wf (B x)} {_532 of M A}
     {_533 tsub ([x atom] B x) M B'}
@@ -16253,6 +17162,7 @@
         can-tsub ([x atom] [_534 vof x _?1] DwfB x _534) DofM Dsub
   
   note: checking mode of constant   _532   ... 
+  
   => %sort can-sub-context-e {I nat} {G ctx} {A tp} {M {_0 atom} term} {B tp}
     {J nat} {N {_0 atom} term} {C {_0 atom} tp} {Ny {_0 atom} term}
     {_0 {x atom} {_0 isvar x I} ofe (cons G x A) (M x) B}
@@ -16307,6 +17217,7 @@
           ([y atom] [_538 isvar y J] DofN y _538) [x atom] Dsub x
   
   note: checking mode of constant   _533   ... 
+  
   => %sort can-tsub-context-e {I nat} {G ctx} {A tp} {M {_0 atom} term} {B tp}
     {J nat} {C {_0 atom} tp} {Cy {_0 atom} tp}
     {_0 {x atom} {_0 isvar x I} ofe (cons G x A) (M x) B}
@@ -16361,6 +17272,7 @@
           ([y atom] [_539 isvar y J] Dwf y _539) [x atom] Dtsub x
   
   note: checking mode of constant   _534   ... 
+  
   => %sort can-tsub1 {B {_0 atom} tp} {M term} {Bx tp} {A tp}
     {C {_0 atom} {_535 atom} tp} {Cx {_0 atom} tp}
     {_0 tsub ([x atom] B x) M Bx}
@@ -16395,6 +17307,7 @@
              DwfC x _537 y _538) DofM [y atom] DsubCx y
   
   note: checking mode of constant   _535   ... 
+  
   => %sort aofes-invert-app {G sctx} {R atom} {M term} {T stp} {S stp}
     {_0 aofes G (app R M) T} {_536 aofes G R (spi S T)} {_537 ofes G M S}
   
@@ -16444,8 +17357,11 @@
     {_0 {_0 isvar-fun _?4 _?5 _?6} aofes-invert-app _?12 _?13 _?14}
   
   note: checking mode of constant   _536   ... 
+  
   note: checking mode of constant   _537   ... 
+  
   note: checking mode of constant   _538   ... 
+  
   => %sort aofes-invert-pi1 {G sctx} {R atom} {T stp} {S stp}
     {_0 aofes G (pi1 R) T} {_540 aofes G R (ssigma T S)}
   
@@ -16479,8 +17395,11 @@
     {_0 {_0 isvar-fun _?4 _?5 _?6} aofes-invert-pi1 _?11 _?12}
   
   note: checking mode of constant   _540   ... 
+  
   note: checking mode of constant   _541   ... 
+  
   note: checking mode of constant   _542   ... 
+  
   => %sort aofes-invert-pi2 {G sctx} {R atom} {T stp} {S stp}
     {_0 aofes G (pi2 R) T} {_544 aofes G R (ssigma S T)}
   
@@ -16518,8 +17437,11 @@
     {_0 {_0 isvar-fun _?4 _?5 _?6} aofes-invert-pi2 _?11 _?12}
   
   note: checking mode of constant   _544   ... 
+  
   note: checking mode of constant   _545   ... 
+  
   note: checking mode of constant   _546   ... 
+  
   => %sort aofes-invert-forall {G sctx} {A tp} {T stp} {_0 aofes G (forall A) T}
     {_548 wfes G A}
   
@@ -16553,8 +17475,11 @@
     {_0 {_0 isvar-fun _?4 _?5 _?6} aofes-invert-forall _?10 _?11}
   
   note: checking mode of constant   _548   ... 
+  
   note: checking mode of constant   _549   ... 
+  
   note: checking mode of constant   _550   ... 
+  
   => %sort ofes-invert-st {G sctx} {M term} {R atom} {_0 ofes G M st}
     {_552 term-eq M (at R)}
   
@@ -16569,6 +17494,7 @@
     {_0 {_0 isvar-fun _?4 _?5 _?6} ofes-invert-st _?10 _?11}
   
   note: checking mode of constant   _552   ... 
+  
   => %sort aofe-invert-var {I nat} {G {_0 atom} ctx} {A {_0 atom} tp}
     {_0 {x atom} {_0 isvar x I} aofe (G x) x (A x)}
     {_554 {x atom} {_554 isvar x I} lookup (G x) x (A x)}
@@ -16595,7 +17521,9 @@
           [x atom] [_556 isvar x _?3] Dlookup x
   
   note: checking mode of constant   _554   ... 
+  
   note: checking mode of constant   _555   ... 
+  
   => %sort aofe-invert-forall {G ctx} {A tp} {B tp} {_0 aofe G (forall A) B}
     {_556 wfe G A} {_557 tp-eq B (pi (pi A ([_557 atom] t)) [_557 atom] t)}
   
@@ -16624,8 +17552,11 @@
         aofe-invert-forall (aofe/var _?5 Dlookup) Dwf Deq
   
   note: checking mode of constant   _556   ... 
+  
   note: checking mode of constant   _557   ... 
+  
   note: checking mode of constant   _558   ... 
+  
   => %sort aofe-invert-app {G ctx} {R atom} {M term} {C tp} {A tp}
     {B {_0 atom} tp} {_0 aofe G (app R M) C}
     {_559 aofe G R (pi A [_559 atom] B _559)} {_560 ofe G M A}
@@ -16671,8 +17602,11 @@
     {_0 {_0 isvar-fun _?4 _?5 _?6} aofe-invert-app _?13 _?14 _?15 _?16}
   
   note: checking mode of constant   _559   ... 
+  
   note: checking mode of constant   _560   ... 
+  
   note: checking mode of constant   _561   ... 
+  
   => %sort aofe-invert-pi1 {G ctx} {R atom} {A tp} {B {_0 atom} tp}
     {_0 aofe G (pi1 R) A} {_563 aofe G R (sigma A [_563 atom] B _563)}
   
@@ -16700,8 +17634,11 @@
         aofe-invert-pi1 (aofe/var _?5 Dlookup) Daofe
   
   note: checking mode of constant   _563   ... 
+  
   note: checking mode of constant   _564   ... 
+  
   note: checking mode of constant   _565   ... 
+  
   => %sort aofe-invert-pi2 {G ctx} {R atom} {C tp} {A tp} {B {_0 atom} tp}
     {_0 aofe G (pi2 R) C} {_566 aofe G R (sigma A [_566 atom] B _566)}
     {_567 tp-eq C (B (pi1 R))}
@@ -16738,8 +17675,11 @@
     {_0 {_0 isvar-fun _?4 _?5 _?6} aofe-invert-pi2 _?12 _?13 _?14}
   
   note: checking mode of constant   _566   ... 
+  
   note: checking mode of constant   _567   ... 
+  
   note: checking mode of constant   _568   ... 
+  
   => %sort ofe-invert-at {G ctx} {R atom} {A tp} {_0 ofe G (at R) A}
     {_570 aofe G R t}
   
@@ -16754,7 +17694,9 @@
     {_0 {_0 isvar-fun _?4 _?5 _?6} ofe-invert-at _?10 _?11}
   
   note: checking mode of constant   _570   ... 
+  
   note: checking mode of constant   _571   ... 
+  
   => %sort ofe-invert-sing {G ctx} {M term} {R atom} {_0 ofe G M (sing R)}
     {_573 term-eq M (at R)}
   
@@ -16764,6 +17706,7 @@
         ofe-invert-sing (ofe/sing _?3) term-eq/i
   
   note: checking mode of constant   _573   ... 
+  
   => %sort ofe-at-pi-contra {G ctx} {R atom} {A tp} {B {_0 atom} tp}
     {_0 ofe G (at R) (pi A [_0 atom] B _0)} {_574 false}
   
@@ -16793,7 +17736,9 @@
         tsub-sing-sub-at (tsub/singo D) (sub/ao D)
   
   note: checking mode of constant   %a%   ... 
+  
   note: checking mode of constant   o   ... 
+  
   => %sort stp-size {_0 stp} {_574 nat}
   
   => %term stp-size/t stp-size st (s 0)
@@ -16842,8 +17787,11 @@
           (stp-size/sigma Dsum' DsizeT' DsizeS') Deq
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   => %sort can-stp-size {N nat} {T stp} {_0 stp-size T N}
   
   => %term _574 can-stp-size st stp-size/t
@@ -16865,8 +17813,11 @@
         can-stp-size (ssigma S T) (stp-size/sigma Dsum DsizeT DsizeS)
   
   note: checking mode of constant   _574   ... 
+  
   note: checking mode of constant   _575   ... 
+  
   note: checking mode of constant   _576   ... 
+  
   => %sort stp-size-leq {S stp} {Ssz nat} {T stp} {Tsz nat} {_0 stp-size S Ssz}
     {_577 stp-size T Tsz} {_578 stp-leq S T} {_579 leq Ssz Tsz}
   
@@ -16921,10 +17872,15 @@
           (stp-leq/sigma2 Dleqt) Dleq''
   
   note: checking mode of constant   %eq%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %sigma1%   ... 
+  
   note: checking mode of constant   %sigma2%   ... 
+  
   => %sort stp-size-pos {T stp} {N nat} {_0 stp-size T N} {_577 lt 0 N}
   
   => %term _577 stp-size-pos stp-size/t lt/z
@@ -16950,8 +17906,11 @@
         stp-size-pos (stp-size/sigma Dsum _?6 Dsize) Dlt''
   
   note: checking mode of constant   _577   ... 
+  
   note: checking mode of constant   _578   ... 
+  
   note: checking mode of constant   _579   ... 
+  
   => %sort sub-at-tsub {R {_0 atom} atom} {M term} {Rx atom}
     {_0 sub ([x atom] at (R x)) M (at Rx)}
     {_580 tsub ([x atom] sing (R x)) M (sing Rx)}
@@ -16969,7 +17928,9 @@
         sub-at-tsub (sub/ao Dsub) (tsub/singo Dsub)
   
   note: checking mode of constant   _580   ... 
+  
   note: checking mode of constant   _581   ... 
+  
   => %sort aosub-permute-esm {S stp} {SizeS nat} {T stp} {SizeT nat} {I nat}
     {J nat} {G {_0 atom} {_582 atom} sctx} {M term} {N {_0 atom} term}
     {R {_0 atom} {_582 atom} atom} {U stp} {Oy {_0 atom} term} {Oyx term}
@@ -17546,6 +18507,7 @@
              ofes/lam [z atom] [f isvar z K] D x d y e z f) [y atom] term-eq/i
   
   note: checking mode of constant   _582   ... 
+  
   => %term
     app
       {Qz {_0 atom} term} {Nx term} {Qzy term} {Pz term}
@@ -17846,6 +18808,7 @@
              ofes/pair (D2 x d y e) (D1 x d y e)) [y atom] term-eq/i
   
   note: checking mode of constant   _583   ... 
+  
   => %term
     pi1
       {R {_0 atom} {_584 atom} atom} {M term} {Qp {_0 atom} term}
@@ -19481,34 +20444,63 @@
           (tsub/singo DsubRxy)
   
   note: checking mode of constant   %at-o%   ... 
+  
   note: checking mode of constant   %at-ao%   ... 
+  
   note: checking mode of constant   %at-a%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %all-c%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %app-c%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1-c%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2-c%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singaa%   ... 
+  
   note: checking mode of constant   %singao%   ... 
+  
   note: checking mode of constant   %singoa%   ... 
+  
   note: checking mode of constant   %singoo%   ... 
+  
   => %sort sub-permute-es {I nat} {J nat} {G {_0 atom} {_584 atom} sctx} {
     S stp} {T stp} {M term} {N {_0 atom} term} {O {_0 atom} {_584 atom} term}
     {U stp} {Oy {_0 atom} term} {Oyx term} {Ox {_0 atom} term} {Nx term}
@@ -19584,6 +20576,7 @@
           ([y atom] DsubOx y) DsubNx DsubOxy
   
   note: checking mode of constant   _584   ... 
+  
   => %sort aasub-aosub-permute-es {I nat} {J nat} {G {_0 atom} {_585 atom} sctx}
     {S stp} {T stp} {M term} {N {_0 atom} term} {R {_0 atom} {_585 atom} atom}
     {U stp} {Ry {_0 atom} atom} {LRyx term} {LRx {_0 atom} term} {Nx term}
@@ -19658,6 +20651,7 @@
           ([y atom] DsubRx y) DsubNx DsubRxy
   
   note: checking mode of constant   _585   ... 
+  
   => %sort aasub-permute-es {I nat} {J nat} {G {_0 atom} {_586 atom} sctx} {
     S stp} {T stp} {M term} {N {_0 atom} term} {R {_0 atom} {_586 atom} atom}
     {U stp} {Ry {_0 atom} atom} {Ryx atom} {Rx {_0 atom} atom} {Nx term}
@@ -19732,6 +20726,7 @@
           ([y atom] DsubRx y) DsubNx DsubRxy
   
   note: checking mode of constant   _586   ... 
+  
   => %sort aosub-permute-es {I nat} {J nat} {G {_0 atom} {_587 atom} sctx} {
     S stp} {T stp} {M term} {N {_0 atom} term} {R {_0 atom} {_587 atom} atom}
     {U stp} {LRy {_0 atom} term} {LRyx term} {Rx {_0 atom} atom} {Nx term}
@@ -19806,6 +20801,7 @@
           ([y atom] DsubRx y) DsubNx DsubRxy
   
   note: checking mode of constant   _587   ... 
+  
   => %sort tsub-permute-es {I nat} {J nat} {G {_0 atom} {_588 atom} sctx} {
     S stp} {T stp} {M term} {N {_0 atom} term} {A {_0 atom} {_588 atom} tp}
     {Ay {_0 atom} tp} {Ayx tp} {Ax {_0 atom} tp} {Nx term}
@@ -19878,6 +20874,7 @@
           ([y atom] DsubAx y) DsubNx DsubAxy
   
   note: checking mode of constant   _588   ... 
+  
   => %sort sub-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {N {_0 atom} term} {B {_0 atom} tp} {J nat}
     {O {_0 atom} {_589 atom} term} {C {_0 atom} {_589 atom} tp}
@@ -20019,6 +21016,7 @@
           ([x atom] DsubOy x) DsubOyx Deq
   
   note: checking mode of constant   _589   ... 
+  
   => %sort aasub-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {N {_0 atom} term} {B {_0 atom} tp} {J nat}
     {R {_0 atom} {_590 atom} atom} {C {_0 atom} {_590 atom} tp}
@@ -20160,6 +21158,7 @@
           ([x atom] DsubRy x) DsubRyx Deq
   
   note: checking mode of constant   _590   ... 
+  
   => %sort aasub-aosub-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx}
     {G {_0 atom} ctx} {M term} {I nat} {N {_0 atom} term} {B {_0 atom} tp}
     {J nat} {R {_0 atom} {_591 atom} atom} {C {_0 atom} {_591 atom} tp}
@@ -20301,6 +21300,7 @@
           ([x atom] DsubRy x) DsubRyx Deq
   
   note: checking mode of constant   _591   ... 
+  
   => %sort aosub-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {N {_0 atom} term} {B {_0 atom} tp} {J nat}
     {R {_0 atom} {_592 atom} atom} {C {_0 atom} {_592 atom} tp}
@@ -20442,6 +21442,7 @@
           ([x atom] DsubRy x) DsubRyx Deq
   
   note: checking mode of constant   _592   ... 
+  
   => %sort tsub-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {N {_0 atom} term} {B {_0 atom} tp} {J nat}
     {C {_0 atom} {_593 atom} tp} {Cx {_0 atom} tp} {Nx term} {Cxy tp}
@@ -20578,6 +21579,7 @@
           ([x atom] DsubCy x) DsubCyx Deq
   
   note: checking mode of constant   _593   ... 
+  
   => %sort aasub-into-term {R {_0 atom} atom} {M term} {Rx atom}
     {N {_0 atom} term} {_0 aasub ([x atom] R x) M Rx}
     {_594 sub ([x atom] N (R x)) M (N Rx)}
@@ -20701,18 +21703,31 @@
         aasub-into-tp ([y atom] sing (Q y)) DsubRx (tsub/singa DsubQyx)
   
   note: checking mode of constant   _594   ... 
+  
   note: checking mode of constant   _595   ... 
+  
   note: checking mode of constant   _596   ... 
+  
   note: checking mode of constant   _597   ... 
+  
   note: checking mode of constant   _598   ... 
+  
   note: checking mode of constant   _599   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort aosub-into-aasub {R {_0 atom} atom} {M term} {LRx term}
     {Q {_0 atom} atom} {Qy atom} {_0 aosub ([x atom] R x) M LRx}
     {_600 aasub ([y atom] Q y) LRx Qy} {_601 aasub ([x atom] Q (R x)) M Qy}
@@ -20906,23 +21921,41 @@
         aosub-into-tsub DsubRx (tsub/singo DsubQy) (tsub/singo DsubQyx)
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   => %sort ssub-z-permute-es {I nat} {J nat} {G {_0 atom} {_600 atom} sctx}
     {S stp} {T stp} {M term} {R {_0 atom} atom} {O {_0 atom} {_600 atom} term}
     {U stp} {Ox {_0 atom} term} {Rx atom}
@@ -24050,52 +25083,99 @@
           (tsub/singo DsubQxy) (tsub/singo DsubQyx)
   
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %aa-aa%   ... 
+  
   note: checking mode of constant   %aa-ao%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %allcl%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %app-cl%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1-cl%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2-cl%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singaa%   ... 
+  
   note: checking mode of constant   %singao%   ... 
+  
   note: checking mode of constant   %singoa%   ... 
+  
   note: checking mode of constant   %singoo%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   => %sort ssub-aa-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {R {_0 atom} atom} {B {_0 atom} tp} {J nat}
     {N {_0 atom} {_600 atom} term} {C {_0 atom} {_600 atom} tp}
@@ -24224,6 +25304,7 @@
              DofN x _614 y _615) ([y atom] DsubNx y) DsubRx DsubNyx Deq
   
   note: checking mode of constant   _600   ... 
+  
   => %sort ssub-ao-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {R {_0 atom} atom} {B {_0 atom} tp} {J nat}
     {N {_0 atom} {_601 atom} term} {C {_0 atom} {_601 atom} tp}
@@ -24354,6 +25435,7 @@
              DofN x _615 y _616) ([y atom] DsubNx y) DsubRx DsubNxy DsubNyx Deq
   
   note: checking mode of constant   _601   ... 
+  
   => %sort ssub-ao-permute2-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {R {_0 atom} atom} {B {_0 atom} tp} {J nat} {Z atom}
     {D {_0 atom} {_602 atom} tp} {N {_0 atom} {_602 atom} term}
@@ -24517,6 +25599,7 @@
              DofN x _619 y _620) ([y atom] DsubNx y) DsubRx DsubNxy DsubNyx Deq
   
   note: checking mode of constant   _602   ... 
+  
   => %sort stsub-aa-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {R {_0 atom} atom} {B {_0 atom} tp} {J nat}
     {C {_0 atom} {_603 atom} tp} {Cx {_0 atom} tp} {Rx atom} {Cyx tp}
@@ -24641,6 +25724,7 @@
              DwfC x _616 y _617) ([y atom] DsubCx y) DsubRx DsubCyx Deq
   
   note: checking mode of constant   _603   ... 
+  
   => %sort stsub-ao-permute-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {R {_0 atom} atom} {B {_0 atom} tp} {J nat}
     {C {_0 atom} {_604 atom} tp} {Cx {_0 atom} tp} {LRx term} {Cxy tp} {
@@ -24767,6 +25851,7 @@
              DwfC x _617 y _618) ([y atom] DsubCx y) DsubRx DsubCxy DsubCyx Deq
   
   note: checking mode of constant   _604   ... 
+  
   => %sort aasubst-em {A tp} {G1 ctx} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {G' ctx} {R {_0 atom} atom} {R' atom} {B {_0 atom} tp} {B' tp}
     {I nat} {T stp} {_0 simp A T}
@@ -25849,40 +26934,75 @@
           ([x atom] [d isvar x _?1] wfe/sing (Daof x d)) (wfe/sing Daof')
   
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %allcl%   ... 
+  
   note: checking mode of constant   %allbad%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %appclo%   ... 
+  
   note: checking mode of constant   %appbad%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1clo%   ... 
+  
   note: checking mode of constant   %pi1bad%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2clo%   ... 
+  
   note: checking mode of constant   %pi2bad%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %appbad%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1bad%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2bad%   ... 
+  
   note: checking mode of constant   %at-a%   ... 
+  
   note: checking mode of constant   %at-o%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing-a%   ... 
+  
   note: checking mode of constant   %sing-o%   ... 
+  
   note: checking mode of constant   %sing-x%   ... 
+  
   note: checking mode of constant   %sing-x%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   => %sort aasubst-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx} {
     M term} {G' ctx} {R {_0 atom} atom} {R' atom} {B {_0 atom} tp} {B' tp}
     {I nat} {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -25911,6 +27031,7 @@
           ([x atom] [_606 isvar x _?11] Daof x _606) D
   
   note: checking mode of constant   _605   ... 
+  
   => %sort aosubst-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx} {
     M term} {G' ctx} {R {_0 atom} atom} {N term} {B {_0 atom} tp} {B' tp}
     {I nat} {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -25937,6 +27058,7 @@
           ([x atom] [_607 isvar x _?11] Daof x _607) D
   
   note: checking mode of constant   _606   ... 
+  
   => %sort subst-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx} {M term}
     {G' ctx} {N {_0 atom} term} {N' term} {B {_0 atom} tp} {B' tp} {I nat}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -25963,6 +27085,7 @@
           ([x atom] [_608 isvar x _?11] Dof' x _608) D
   
   note: checking mode of constant   _607   ... 
+  
   => %sort tsubst-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx} {
     M term} {G' ctx} {B {_0 atom} tp} {B' tp} {I nat}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -25987,6 +27110,7 @@
           ([x atom] [_609 isvar x _?9] Dwf x _609) D
   
   note: checking mode of constant   _608   ... 
+  
   => %sort subst {M {_0 atom} term} {N term} {Mx term} {B {_0 atom} tp} {Bx tp}
     {A tp} {_0 sub ([x atom] M x) N Mx} {_609 tsub ([x atom] B x) N Bx}
     {_610 {x atom} {_610 vof x A} of (M x) (B x)} {_611 of N A} {_612 of Mx Bx}
@@ -26009,6 +27133,7 @@
         subst Dsub Dtsub ([x atom] [_612 vof x A] DofM x _612) DofN Dof
   
   note: checking mode of constant   _609   ... 
+  
   => %sort subst' {M {_0 atom} term} {N term} {Mx term} {A tp} {B tp}
     {_0 sub ([x atom] M x) N Mx} {_610 {x atom} {_610 vof x A} of (M x) B}
     {_611 of N A} {_612 of Mx B}
@@ -26024,6 +27149,7 @@
         subst' Dsub ([x atom] [_611 vof x _?3] DofM x _611) DofN DofMx
   
   note: checking mode of constant   _610   ... 
+  
   => %sort aosubst {R {_0 atom} atom} {N term} {LRx term} {B {_0 atom} tp} {
     Bx tp} {A tp} {_0 aosub ([x atom] R x) N LRx}
     {_611 tsub ([x atom] B x) N Bx}
@@ -26048,6 +27174,7 @@
         aosubst Dsub Dtsub ([x atom] [_614 vof x A] DofR x _614) DofN Dof
   
   note: checking mode of constant   _611   ... 
+  
   => %sort aasubst {R {_0 atom} atom} {N term} {Rx atom} {B {_0 atom} tp} {
     Bx tp} {A tp} {_0 aasub ([x atom] R x) N Rx}
     {_612 tsub ([x atom] B x) N Bx}
@@ -26072,6 +27199,7 @@
         aasubst Dsub Dtsub ([x atom] [_615 vof x A] DofR x _615) DofN Daof
   
   note: checking mode of constant   _612   ... 
+  
   => %sort tsubst {B {_0 atom} tp} {N term} {Bx tp} {A tp}
     {_0 tsub ([x atom] B x) N Bx} {_613 {x atom} {_613 vof x A} wf (B x)}
     {_614 of N A} {_615 wf Bx}
@@ -26093,6 +27221,7 @@
         tsubst Dsub ([x atom] [_616 vof x A] DwfB x _616) DofN Dwf
   
   note: checking mode of constant   _613   ... 
+  
   => %sort sub-permute {M term} {A tp} {N {_0 atom} term} {B {_0 atom} tp}
     {O {_0 atom} {_614 atom} term} {C {_0 atom} {_614 atom} tp}
     {Ox {_0 atom} term} {Nx term} {Oxy term} {Oy {_0 atom} term} {Oyx term}
@@ -26145,6 +27274,7 @@
           ([x atom] DsubOy x) DsubOyx Deq
   
   note: checking mode of constant   _614   ... 
+  
   => %sort aasub-permute {M term} {A tp} {N {_0 atom} term} {B {_0 atom} tp}
     {R {_0 atom} {_615 atom} atom} {C {_0 atom} {_615 atom} tp}
     {Rx {_0 atom} atom} {Nx term} {Rxy atom} {Ry {_0 atom} atom} {Ryx atom}
@@ -26197,6 +27327,7 @@
           ([x atom] DsubRy x) DsubRyx Deq
   
   note: checking mode of constant   _615   ... 
+  
   => %sort aasub-aosub-permute {M term} {A tp} {N {_0 atom} term} {B {_0 atom} tp}
     {R {_0 atom} {_616 atom} atom} {C {_0 atom} {_616 atom} tp}
     {LRx {_0 atom} term} {Nx term} {LRxy term} {Ry {_0 atom} atom} {LRyx term}
@@ -26249,6 +27380,7 @@
           ([x atom] DsubRy x) DsubRyx Deq
   
   note: checking mode of constant   _616   ... 
+  
   => %sort aosub-permute {M term} {A tp} {N {_0 atom} term} {B {_0 atom} tp}
     {R {_0 atom} {_617 atom} atom} {C {_0 atom} {_617 atom} tp}
     {Rx {_0 atom} atom} {Nx term} {LRxy term} {LRy {_0 atom} term} {LRyx term}
@@ -26301,6 +27433,7 @@
           ([x atom] DsubRy x) DsubRyx Deq
   
   note: checking mode of constant   _617   ... 
+  
   => %sort tsub-permute {M term} {A tp} {N {_0 atom} term} {B {_0 atom} tp}
     {C {_0 atom} {_618 atom} tp} {Cx {_0 atom} tp} {Nx term} {Cxy tp}
     {Cy {_0 atom} tp} {Cyx tp} {_0 of M A}
@@ -26351,6 +27484,7 @@
           ([x atom] DsubOy x) DsubOyx Deq
   
   note: checking mode of constant   _618   ... 
+  
   => %sort ssub-ao-permute {M term} {A tp} {R {_0 atom} atom} {B {_0 atom} tp}
     {N {_0 atom} {_619 atom} term} {C {_0 atom} {_619 atom} tp}
     {Nx {_0 atom} term} {LRx term} {Nxy term} {Nyx term} {_0 of M A}
@@ -26404,6 +27538,7 @@
              DofN x _622 y _623) ([y atom] DsubNx y) DsubRx DsubNxy DsubNyx Deq
   
   note: checking mode of constant   _619   ... 
+  
   => %sort inhabitation-e {G ctx} {A tp} {M term} {_0 wfe G A} {_620 ofe G M A}
   
   => %term
@@ -26455,9 +27590,13 @@
         inhabitation-e (wfe/sing Daof) (ofe/sing Daof)
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort inhabitation {A tp} {M term} {_0 wf A} {_620 of M A}
   
   => %term
@@ -26468,6 +27607,7 @@
         inhabitation Dwf Dof
   
   note: checking mode of constant   _620   ... 
+  
   => %sort inhabitsub-e {G ctx} {A tp} {I nat} {M term} {B tp} {_0 wfe G A}
     {_621 {x atom} {_621 isvar x I} ofe (cons G x A) M B} {_622 ofe G M B}
   
@@ -26485,6 +27625,7 @@
         inhabitsub-e DwfA ([x atom] [_624 isvar x _?2] DofM x _624) DofM'
   
   note: checking mode of constant   _621   ... 
+  
   => %sort tinhabitsub-e {G ctx} {A tp} {I nat} {B tp} {_0 wfe G A}
     {_622 {x atom} {_622 isvar x I} wfe (cons G x A) B} {_623 wfe G B}
   
@@ -26501,6 +27642,7 @@
         tinhabitsub-e DwfA ([x atom] [_624 isvar x _?2] DwfB x _624) DwfB'
   
   note: checking mode of constant   _622   ... 
+  
   => %sort tinhabitsub {A tp} {B tp} {_0 wf A} {_623 {x atom} {_623 vof x A} wf B}
     {_624 wf B}
   
@@ -26514,6 +27656,7 @@
         tinhabitsub DwfA ([x atom] [_625 vof x _?1] DwfB x _625) D
   
   note: checking mode of constant   _623   ... 
+  
   => %sort compose-sub {MA term} {A tp} {OAB {_0 atom} term} {B tp}
     {OBC {_0 atom} term} {C tp} {MB term} {MC term} {OAC {_0 atom} term}
     {_0 of MA A} {_624 {x atom} {_624 vof x A} of (OAB x) B}
@@ -26554,6 +27697,7 @@
           ([x atom] DsubOAC x) DsubAC'
   
   note: checking mode of constant   _624   ... 
+  
   => %sort subst1 {N {_0 atom} {_625 atom} term} {M term} {Nx {_0 atom} term}
     {C {_0 atom} {_625 atom} tp} {Cx {_0 atom} tp} {B {_0 atom} tp} {Bx tp}
     {A tp} {_0 {y atom} sub ([x atom] N x y) M (Nx y)}
@@ -26601,6 +27745,7 @@
              DofN x _628 y _629) DofM [y atom] [_628 vof y Bx] DofNx y _628
   
   note: checking mode of constant   _625   ... 
+  
   => %sort tsubst1 {C {_0 atom} {_626 atom} tp} {M term} {Cx {_0 atom} tp}
     {B {_0 atom} tp} {Bx tp} {A tp}
     {_0 {y atom} tsub ([x atom] C x y) M (Cx y)}
@@ -26642,6 +27787,7 @@
              DwfC x _629 y _630) DofM [y atom] [_629 vof y Bx] DwfCx y _629
   
   note: checking mode of constant   _626   ... 
+  
   => %sort subst-context-e {I nat} {G ctx} {A tp} {M {_0 atom} term} {B tp}
     {J nat} {N {_0 atom} term} {C {_0 atom} tp} {Ny {_0 atom} term}
     {Cy {_0 atom} tp} {_0 {x atom} {_0 isvar x I} ofe (cons G x A) (M x) B}
@@ -26702,6 +27848,7 @@
           ([x atom] DsubCy x) [x atom] [_632 isvar x I] DofN''' x _632
   
   note: checking mode of constant   _627   ... 
+  
   => %sort tsubst-context-e {I nat} {G ctx} {A tp} {M {_0 atom} term} {B tp}
     {J nat} {C {_0 atom} tp} {Cy {_0 atom} tp}
     {_0 {x atom} {_0 isvar x I} ofe (cons G x A) (M x) B}
@@ -26759,6 +27906,7 @@
           [x atom] [_633 isvar x I] Dwf''' x _633
   
   note: checking mode of constant   _628   ... 
+  
   => %sort ssubst-context-e {I nat} {G ctx} {A tp} {R {_0 atom} atom} {B tp}
     {J nat} {N {_0 atom} term} {C {_0 atom} tp}
     {_0 {x atom} {_0 isvar x I} aofe (cons G x A) (R x) B}
@@ -26798,6 +27946,7 @@
           [x atom] [_631 isvar x _?1] D x _631
   
   note: checking mode of constant   _629   ... 
+  
   => %sort ssubst-context2-e {I nat} {G ctx} {A tp} {Q {_0 atom} atom} {B tp}
     {R {_0 atom} atom} {C {_0 atom} tp} {J nat} {K nat}
     {N {_0 atom} {_630 atom} term} {D {_0 atom} {_630 atom} tp}
@@ -26866,6 +28015,7 @@
              Dof y _633 z _634) [x atom] [_633 isvar x _?1] Dof''' x _633
   
   note: checking mode of constant   _630   ... 
+  
   => %sort subst-simult-pair-e {I nat} {J nat} {G ctx} {A tp} {B tp}
     {O {_0 atom} {_631 atom} term} {C {_0 atom} {_631 atom} tp} {M term}
     {N term} {P term} {Ox {_0 atom} term}
@@ -27099,6 +28249,7 @@
              DofO x _665 y _666) DofM DofN Dsub ([y atom] DsubOx y) DsubOxy'
   
   note: checking mode of constant   _631   ... 
+  
   => %sort tsubst-context-permute-e {I nat} {G ctx} {A tp} {M {_0 atom} term}
     {B tp} {J nat} {N {_0 atom} term} {C tp} {K nat} {D {_0 atom} tp}
     {NM {_0 atom} term} {Db {_0 atom} tp} {Dc {_0 atom} tp}
@@ -27192,6 +28343,7 @@
           ([x atom] DsubDb x) ([x atom] DsubDc x) [x atom] DsubDc'' x
   
   note: checking mode of constant   _632   ... 
+  
   => %sort aasub-into-sub-e {G ctx} {M term} {A tp} {I nat} {R {_0 atom} atom}
     {B {_0 atom} tp} {I' nat} {J nat} {O {_0 atom} {_633 atom} term}
     {C {_0 atom} {_633 atom} tp} {Ox {_0 atom} term} {Rx atom} {_0 ofe G M A}
@@ -27256,6 +28408,7 @@
              DofO x _639 y _640) ([y atom] DsubOx y) DsubRx DsubOyx'
   
   note: checking mode of constant   _633   ... 
+  
   => %sort aosub-into-ssub-e {G ctx} {M term} {A tp} {I nat} {R {_0 atom} atom}
     {B tp} {J nat} {N {_0 atom} term} {C {_0 atom} tp} {LRx term} {Ny term}
     {_0 ofe G M A} {_634 {x atom} {_634 isvar x I} aofe (cons G x A) (R x) B}
@@ -27310,6 +28463,7 @@
           ([y atom] [_641 isvar y _?11] DofN y _641) DsubRx DsubNxy DsubNyx'
   
   note: checking mode of constant   _634   ... 
+  
   => %sort aosub-into-ssub-e' {K nat} {G ctx} {D tp} {M {_0 atom} term} {A tp}
     {I nat} {R {_0 atom} atom} {B tp} {J nat} {N {_0 atom} term}
     {C {_0 atom} tp} {LRx {_0 atom} term} {Ny {_0 atom} term}
@@ -27367,6 +28521,7 @@
           ([z atom] DsubNxy z) [z atom] DsubNyx z
   
   note: checking mode of constant   _635   ... 
+  
   => %sort aosub-into-ssub-e'' {G ctx} {M term} {A tp} {I nat} {Q {_0 atom} atom}
     {B tp} {J nat} {R {_0 atom} atom} {C {_0 atom} tp} {K nat} {K' nat}
     {N {_0 atom} {_636 atom} term} {D {_0 atom} {_636 atom} tp} {LQx term}
@@ -27477,6 +28632,7 @@
           DsubNyzx'
   
   note: checking mode of constant   _636   ... 
+  
   => %sort aosub-into-ssub-e''' {L nat} {G ctx} {E tp} {M {_0 atom} term} {
     A tp} {I nat} {Q {_0 atom} atom} {B tp} {J nat} {R {_0 atom} atom}
     {C {_0 atom} tp} {K nat} {K' nat} {N {_0 atom} {_637 atom} term}
@@ -27572,6 +28728,7 @@
           [z atom] DsubNyx z
   
   note: checking mode of constant   _637   ... 
+  
   => %sort can-expand* {T stp} {R atom} {A tp} {_0 simp A T} {M term}
     {_638 expand R A M}
   
@@ -27608,9 +28765,13 @@
         can-expand* st R (sing R') simp/sing (at R') expand/sing
   
   note: checking mode of constant   _638   ... 
+  
   note: checking mode of constant   _639   ... 
+  
   note: checking mode of constant   _640   ... 
+  
   note: checking mode of constant   _641   ... 
+  
   => %sort can-expand {R atom} {A tp} {M term} {_0 expand R A M}
   
   => %term
@@ -27620,6 +28781,7 @@
         can-expand R A M D
   
   note: checking mode of constant   _642   ... 
+  
   => %sort expand-fun {R atom} {A tp} {M term} {M' term} {_0 expand R A M}
     {_643 expand R A M'} {_644 term-eq M M'}
   
@@ -27667,15 +28829,20 @@
   => %term _646 {_?1 atom} {_?2 atom} expand-fun expand/sing expand/sing term-eq/i
   
   note: checking mode of constant   _643   ... 
+  
   note: checking mode of constant   _644   ... 
+  
   note: checking mode of constant   _645   ... 
+  
   note: checking mode of constant   _646   ... 
+  
   => %sort expand-t-invert {R atom} {M term} {_0 expand R t M}
     {_647 term-eq M (at R)}
   
   => %term _647 {_?1 atom} expand-t-invert expand/t term-eq/i
   
   note: checking mode of constant   _647   ... 
+  
   => %sort expand-pi-invert {R atom} {A tp} {B {_0 atom} tp} {M {_0 atom} term}
     {X {_0 atom} term}
     {_0 expand R (pi A ([_0 atom] B _0)) (lam [_0 atom] M _0)}
@@ -27692,6 +28859,7 @@
           ([x atom] D1 x) [x atom] D2 x
   
   note: checking mode of constant   _648   ... 
+  
   => %sort expand-sigma-invert {R atom} {A tp} {B {_0 atom} tp} {M term} {
     N term} {_0 expand R (sigma A ([_0 atom] B _0)) (pair M N)}
     {_649 expand (pi1 R) A M} {_650 expand (pi2 R) (B (pi1 R)) N}
@@ -27703,6 +28871,7 @@
         expand-sigma-invert (expand/sigma D2 D1) D1 D2
   
   note: checking mode of constant   _649   ... 
+  
   => %sort expand-reg-em {A tp} {G ctx} {R atom} {M term} {Ncase nat} {T stp}
     {_0 nat-eq Ncase 0} {_650 simp A T} {_651 aofe G R A} {_652 expand R A M}
     {_653 ofe G M A}
@@ -29123,42 +30292,79 @@
           [x atom] Dsub' x
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %pibad%   ... 
+  
   note: checking mode of constant   %pibad%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sigmab%   ... 
+  
   note: checking mode of constant   %sigmab%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %closed%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   note: checking mode of constant   _650   ... 
+  
   note: checking mode of constant   _651   ... 
+  
   => %sort expand-reg-e {G ctx} {R atom} {A tp} {M term} {_0 aofe G R A}
     {_652 expand R A M} {_653 ofe G M A}
   
@@ -29171,6 +30377,7 @@
         {_652 can-simp _?1 Dsimp} expand-reg-e Daof Dexpand Dof
   
   note: checking mode of constant   _652   ... 
+  
   => %sort expand-aasub-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {I nat} {R {_0 atom} atom} {B {_0 atom} tp} {N {_0 atom} term}
     {Rx atom} {Ax tp} {N' term} {_0 {x atom} append (cons G1 x A) (G2 x) (G x)}
@@ -29201,6 +30408,7 @@
           ([x atom] [_654 isvar x _?7] D3 x _654) ([x atom] D4 x) D5 D6 D7 D8
   
   note: checking mode of constant   _653   ... 
+  
   => %sort expand-aosub-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {Gx ctx} {I nat} {R {_0 atom} atom} {B {_0 atom} tp}
     {N {_0 atom} term} {LRx term}
@@ -29230,6 +30438,7 @@
           ([x atom] [_655 isvar x _?8] D4 x _655) ([x atom] D5 x) D6 D7
   
   note: checking mode of constant   _654   ... 
+  
   => %sort aasub-expand-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {R atom} {I nat} {Q {_0 atom} atom} {B {_0 atom} tp} {XR term} {Q' atom}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)} {_655 aofe G1 R A}
@@ -29255,6 +30464,7 @@
           ([x atom] [_656 isvar x _?6] D3 x _656) D4 D5 D6
   
   note: checking mode of constant   _655   ... 
+  
   => %sort aosub-expand-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {R atom} {I nat} {Q {_0 atom} atom} {B {_0 atom} tp} {XR term} {LQx term}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)} {_656 aofe G1 R A}
@@ -29280,6 +30490,7 @@
           ([x atom] [_657 isvar x _?6] D3 x _657) D4 D5 D6
   
   note: checking mode of constant   _656   ... 
+  
   => %sort sub-expand-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {R atom} {I nat} {M {_0 atom} term} {B {_0 atom} tp} {XR term} {M' term}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)} {_657 aofe G1 R A}
@@ -29304,6 +30515,7 @@
           D4 D5 D6
   
   note: checking mode of constant   _657   ... 
+  
   => %sort tsub-expand-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {R atom} {I nat} {B {_0 atom} tp} {XR term} {B' tp}
     {_0 {x atom} append (cons G1 x A) (G2 x) (G x)} {_658 aofe G1 R A}
@@ -29328,6 +30540,7 @@
           ([x atom] [_659 isvar x _?6] D3 x _659) D4 D5 D6
   
   note: checking mode of constant   _658   ... 
+  
   => %sort tsub-expand-var-e1 {G ctx} {A tp} {I nat} {B {_0 atom} tp}
     {X {_0 atom} term} {_0 wfe G A}
     {_659 {x atom} {_659 isvar x I} wfe (cons G x A) (B x)}
@@ -29349,6 +30562,7 @@
           ([x atom] D3 x) [x atom] D4 x
   
   note: checking mode of constant   _659   ... 
+  
   => %sort sub-expand-var-e {G ctx} {A tp} {I nat} {M {_0 atom} term}
     {B {_0 atom} tp} {X {_0 atom} term} {_0 wfe G A}
     {_660 {x atom} {_660 isvar x I} ofe (cons G x A) (M x) (B x)}
@@ -29372,6 +30586,7 @@
           ([x atom] D3 x) [x atom] D4 x
   
   note: checking mode of constant   _660   ... 
+  
   => %sort expand-reg {R atom} {A tp} {M term} {_0 aof R A} {_661 expand R A M}
     {_662 of M A}
   
@@ -29384,6 +30599,7 @@
         expand-reg Daof Dexpand Dof
   
   note: checking mode of constant   _661   ... 
+  
   => %sort expand-aasub {N term} {A tp} {R {_0 atom} atom} {B {_0 atom} tp}
     {M {_0 atom} term} {Rx atom} {Bx tp} {M' term} {_0 of N A}
     {_662 {x atom} {_662 vof x A} aof (R x) (B x)}
@@ -29416,6 +30632,7 @@
           ([x atom] DexpandR x) Daasub Dtsub DexpandRx Dsub
   
   note: checking mode of constant   _662   ... 
+  
   => %sort expand-aasub1 {N term} {A tp} {B {_0 atom} tp}
     {R {_0 atom} {_663 atom} atom} {C {_0 atom} {_663 atom} tp}
     {M {_0 atom} {_663 atom} term} {Rx {_0 atom} atom} {Cx {_0 atom} tp}
@@ -29466,6 +30683,7 @@
           [y atom] Dsub y
   
   note: checking mode of constant   _663   ... 
+  
   => %sort expand-aosub {N term} {A tp} {R {_0 atom} atom} {B {_0 atom} tp}
     {M {_0 atom} term} {LRx term} {_0 of N A}
     {_664 {x atom} {_664 vof x A} aof (R x) (B x)}
@@ -29495,6 +30713,7 @@
           ([x atom] Dexpand x) Daosub Dsub
   
   note: checking mode of constant   _664   ... 
+  
   => %sort expand-aosub1 {N term} {A tp} {B {_0 atom} tp}
     {R {_0 atom} {_665 atom} atom} {C {_0 atom} {_665 atom} tp}
     {M {_0 atom} {_665 atom} term} {LRx {_0 atom} term} {_0 of N A}
@@ -29543,6 +30762,7 @@
           ([y atom] Daosub y) [y atom] Dsub y
   
   note: checking mode of constant   _665   ... 
+  
   => %sort aasub-expand {R atom} {A tp} {Q {_0 atom} atom} {B {_0 atom} tp}
     {XR term} {Q' atom} {_0 aof R A}
     {_666 {x atom} {_666 vof x A} aof (Q x) (B x)} {_667 expand R A XR}
@@ -29569,6 +30789,7 @@
           Daasub Deq
   
   note: checking mode of constant   _666   ... 
+  
   => %sort aosub-expand {R atom} {A tp} {Q {_0 atom} atom} {B {_0 atom} tp}
     {XR term} {Qx term} {_0 aof R A}
     {_667 {x atom} {_667 vof x A} aof (Q x) (B x)} {_668 expand R A XR}
@@ -29595,6 +30816,7 @@
           Daosub Dexpand'
   
   note: checking mode of constant   _667   ... 
+  
   => %sort sub-expand {R atom} {A tp} {M {_0 atom} term} {B {_0 atom} tp}
     {XR term} {M' term} {_0 aof R A}
     {_668 {x atom} {_668 vof x A} of (M x) (B x)} {_669 expand R A XR}
@@ -29621,6 +30843,7 @@
           Deq
   
   note: checking mode of constant   _668   ... 
+  
   => %sort tsub-expand {R atom} {A tp} {B {_0 atom} tp} {XR term} {B' tp}
     {_0 aof R A} {_669 {x atom} {_669 vof x A} wf (B x)} {_670 expand R A XR}
     {_671 tsub ([_671 atom] B _671) XR B'} {_672 tp-eq B' (B R)}
@@ -29644,6 +30867,7 @@
           Daasub Deq
   
   note: checking mode of constant   _669   ... 
+  
   => %sort sub-expand-var {A tp} {M {_0 atom} term} {B {_0 atom} tp}
     {X {_0 atom} term} {_0 wf A} {_670 {x atom} {_670 vof x A} of (M x) (B x)}
     {_671 {x atom} expand x A (X x)}
@@ -29679,6 +30903,7 @@
           ([x atom] Dexpand x) [x atom] Dsub' x
   
   note: checking mode of constant   _670   ... 
+  
   => %sort tsub-expand-var-e {G ctx} {A tp} {I nat} {B {_0 atom} tp}
     {X {_0 atom} term} {_0 wfe G A}
     {_671 {x atom} {_671 isvar x I} wfe (cons G x A) (B x)}
@@ -29732,6 +30957,7 @@
           ([x atom] Dexpand x) [x atom] Dtsub' x
   
   note: checking mode of constant   _671   ... 
+  
   => %sort tsub-expand-var {A tp} {B {_0 atom} tp} {X {_0 atom} term} {_0 wf A}
     {_672 {x atom} {_672 vof x A} wf (B x)} {_673 {x atom} expand x A (X x)}
     {_674 {x atom} tsub ([y atom] B y) (X x) (B x)}
@@ -29765,6 +30991,7 @@
           ([x atom] Dexpand x) [x atom] Dtsub' x
   
   note: checking mode of constant   _672   ... 
+  
   => %sort sub-into-expand-var {A tp} {X {_0 atom} term} {M term}
     {_0 {x atom} expand x A (X x)} {_673 of M A}
     {_674 sub ([_674 atom] X _674) M M}
@@ -29780,6 +31007,7 @@
         sub-into-expand-var ([x atom] Dexpand x) DofM Dsub
   
   note: checking mode of constant   _673   ... 
+  
   => %sort strengthen-expand {R atom} {A tp} {M {_0 atom} term} {M' term}
     {_0 {x atom} expand R A (M x)} {_674 {x atom} term-eq (M x) M'}
   
@@ -29793,6 +31021,7 @@
         strengthen-expand ([x atom] Dexpand x) [x atom] Deq x
   
   note: checking mode of constant   _674   ... 
+  
   => %sort subtype-fun {A tp} {B tp} {M {_0 atom} term} {M' {_0 atom} term}
     {_0 subtype A B [_0 atom] M _0} {_675 subtype A B [_675 atom] M' _675}
     {_676 {x atom} term-eq (M x) (M' x)}
@@ -29900,10 +31129,15 @@
       {_?1 atom} subtype-fun subtype/sing_t subtype/sing_t [_0 atom] term-eq/i
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %sing_t%   ... 
+  
   => %sort subtype-reg-e {A tp} {B tp} {M {_0 atom} term} {G ctx} {I nat}
     {_0 subtype A B [_0 atom] M _0} {_675 wfe G A} {_676 wfe G B}
     {_677 {x atom} {_677 isvar x I} ofe (cons G x A) (M x) B}
@@ -30300,10 +31534,15 @@
           [x atom] [d isvar x I] ofe/sing (Daof' x d)
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singt%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort subtype-reg-e-bump {A tp} {B tp} {M {_0 atom} term} {G ctx} {I nat}
     {_0 subtype A B [_0 atom] M _0} {_675 wfe G A} {_676 wfe G B}
     {_677 {x atom} {_677 isvar x I} bounded G x}
@@ -30329,6 +31568,7 @@
           [x atom] [_676 isvar x _?6] Dof' x _676
   
   note: checking mode of constant   _675   ... 
+  
   => %sort subtype-reg-e' {A tp} {B tp} {M term} {G ctx}
     {_0 subtype A B [_0 atom] M} {_676 wfe G A} {_677 wfe G B} {_678 ofe G M B}
   
@@ -30350,6 +31590,7 @@
         subtype-reg-e' Dsubtype DwfA DwfB DofM'
   
   note: checking mode of constant   _676   ... 
+  
   => %sort subtype-reg {A tp} {B tp} {M {_0 atom} term}
     {_0 subtype A B [_0 atom] M _0} {_677 wf A} {_678 wf B}
     {_679 {x atom} {_679 vof x A} of (M x) B}
@@ -30477,10 +31718,15 @@
           [x atom] [d vof x (sing R)] of/sing Daof
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singt%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort subtype-reg' {A tp} {B tp} {M term} {_0 subtype A B [_0 atom] M}
     {_677 wf A} {_678 wf B} {_679 of M B}
   
@@ -30498,6 +31744,7 @@
         subtype-reg' Dsubtype DwfA DwfB DofM'
   
   note: checking mode of constant   _677   ... 
+  
   => %sort subtype-sub-e {G1 ctx} {C tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {Gx ctx} {I nat} {A {_0 atom} tp} {B {_0 atom} tp}
     {O {_0 atom} {_678 atom} term} {Ax tp} {Bx tp} {Ox {_0 atom} term}
@@ -31063,14 +32310,23 @@
           Dsubtype
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singta%   ... 
+  
   note: checking mode of constant   %singto%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   note: checking mode of constant   %singao%   ... 
+  
   note: checking mode of constant   %singoa%   ... 
+  
   => %sort subtype-sub {A {_0 atom} tp} {B {_0 atom} tp}
     {O {_0 atom} {_678 atom} term} {C tp} {M term} {Ax tp} {Bx tp}
     {Ox {_0 atom} term} {_0 {x atom} subtype (A x) (B x) [y atom] O x y}
@@ -31111,6 +32367,7 @@
           ([y atom] DsubOx y) Dsubtype'
   
   note: checking mode of constant   _678   ... 
+  
   => %sort subtype-sub' {A {_0 atom} tp} {B {_0 atom} tp}
     {O {_0 atom} {_679 atom} term} {C tp} {M term} {Ax tp} {Bx tp}
     {Ox {_0 atom} term} {_0 {x atom} subtype (A x) (B x) [y atom] O x y}
@@ -31150,6 +32407,7 @@
           ([y atom] DsubOx y) DsubtypeAxBx'
   
   note: checking mode of constant   _679   ... 
+  
   => %sort subtype-refl-e {G ctx} {A tp} {M {_0 atom} term} {_0 wfe G A}
     {_680 subtype A A [_680 atom] M _680} {_681 {x atom} expand x A (M x)}
   
@@ -31206,9 +32464,13 @@
         subtype-refl-e _?3 subtype/sing [_0 atom] expand/sing
   
   note: checking mode of constant   _680   ... 
+  
   note: checking mode of constant   _681   ... 
+  
   note: checking mode of constant   _682   ... 
+  
   note: checking mode of constant   _683   ... 
+  
   => %sort subtype-refl {A tp} {M {_0 atom} term} {_0 wf A}
     {_684 subtype A A [_684 atom] M _684} {_685 {x atom} expand x A (M x)}
   
@@ -31221,6 +32483,7 @@
         {_684 wf-to-wfe Dwf Dwfe} subtype-refl Dwf Dsubtype [x atom] Dexpand x
   
   note: checking mode of constant   _684   ... 
+  
   => %sort subtype-trans-em {B tp} {G ctx} {A tp} {C tp} {M {_0 atom} term}
     {N {_0 atom} term} {NM {_0 atom} term} {T stp} {_0 simp B T} {_685 wfe G A}
     {_686 wfe G B} {_687 wfe G C} {_688 subtype A B [_688 atom] M _688}
@@ -31947,11 +33210,17 @@
              DsubtypeA13)
   
   note: checking mode of constant   %ttt%   ... 
+  
   note: checking mode of constant   %stt%   ... 
+  
   note: checking mode of constant   %sst%   ... 
+  
   note: checking mode of constant   %sss%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   => %sort subtype-trans-e {G ctx} {A tp} {B tp} {C tp} {M {_0 atom} term}
     {N {_0 atom} term} {NM {_0 atom} term} {_0 wfe G A} {_685 wfe G B}
     {_686 wfe G C} {_687 subtype A B [_687 atom] M _687}
@@ -31982,6 +33251,7 @@
           DsubtypeAC'
   
   note: checking mode of constant   _685   ... 
+  
   => %sort subtype-trans {A tp} {B tp} {C tp} {M {_0 atom} term}
     {N {_0 atom} term} {NM {_0 atom} term} {_0 wf A} {_686 wf B} {_687 wf C}
     {_688 subtype A B [_688 atom] M _688} {_689 subtype B C [_689 atom] N _689}
@@ -32005,6 +33275,7 @@
           DsubtypeAC
   
   note: checking mode of constant   _686   ... 
+  
   => %sort subtype-trans-e' {G ctx} {A tp} {B tp} {C tp} {M {_0 atom} term}
     {N {_0 atom} term} {NM {_0 atom} term} {_0 wfe G A} {_687 wfe G B}
     {_688 wfe G C} {_689 subtype A B [_689 atom] M _689}
@@ -32028,6 +33299,7 @@
           DsubtypeAC
   
   note: checking mode of constant   _687   ... 
+  
   => %sort subtype-trans' {A tp} {B tp} {C tp} {M {_0 atom} term}
     {N {_0 atom} term} {NM {_0 atom} term} {_0 wf A} {_688 wf B} {_689 wf C}
     {_690 subtype A B [_690 atom] M _690} {_691 subtype B C [_691 atom] N _691}
@@ -32060,6 +33332,7 @@
           DsubtypeAC
   
   note: checking mode of constant   _688   ... 
+  
   => %sort subtype-sing-invert {A tp} {R atom} {M {_0 atom} term}
     {_0 subtype A (sing R) [_0 atom] M _0} {_689 tp-eq A (sing R)}
     {_690 {x atom} term-eq (M x) (at R)}
@@ -32068,6 +33341,7 @@
     _689 {_?1 atom} subtype-sing-invert subtype/sing tp-eq/i [x atom] term-eq/i
   
   note: checking mode of constant   _689   ... 
+  
   => %sort subtype-pi-invert {A1 tp} {A2 {_0 atom} tp} {B1 tp} {B2 {_0 atom} tp}
     {M {_0 atom} term} {M1 {_0 atom} term} {A2' {_0 atom} tp}
     {M2 {_0 atom} {_690 atom} term}
@@ -32090,6 +33364,7 @@
           ([x atom] D2 x) ([x atom] D3 x) [_0 atom] term-eq/i
   
   note: checking mode of constant   _690   ... 
+  
   => %sort subtype-sigma-invert {A1 tp} {A2 {_0 atom} tp} {B1 tp}
     {B2 {_0 atom} tp} {M {_0 atom} term} {M1 {_0 atom} term} {B2' {_0 atom} tp}
     {M2 {_0 atom} {_691 atom} term}
@@ -32112,6 +33387,7 @@
           D1 ([x atom] D2 x) ([x atom] D3 x) [_0 atom] term-eq/i
   
   note: checking mode of constant   _691   ... 
+  
   => %sort subtype-closed {A tp} {B tp} {M {_0 atom} {_692 atom} term}
     {M' {_0 atom} term} {_0 {x atom} subtype A B [y atom] M x y}
     {_692 {x atom} {y atom} term-eq (M x y) (M' y)}
@@ -32138,6 +33414,7 @@
           [x atom] [y atom] D x y
   
   note: checking mode of constant   _692   ... 
+  
   => %term
     pi
       {M2 {_0 atom} {_693 atom} {_694 atom} term}
@@ -32267,10 +33544,15 @@
         subtype-closed ([x atom] subtype/sing) [x atom] [y atom] term-eq/i
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   sing_t   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort self-reg-e {M term} {A tp} {A' tp} {G ctx} {_0 self M A A'}
     {_693 ofe G M A} {_694 ofe G M A'} {_695 subtype A' A [_695 atom] M}
   
@@ -32343,9 +33625,13 @@
         self-reg-e self/sing (ofe/sing Daof) (ofe/sing Daof) subtype/sing
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort self-reg-e' {M term} {A tp} {As tp} {G ctx} {_0 self M A As}
     {_693 ofe G M A} {_694 wfe G As}
   
@@ -32357,6 +33643,7 @@
         {_693 self-reg-e Dself Dof Dof' _?5} self-reg-e' Dself Dof Dwf
   
   note: checking mode of constant   _693   ... 
+  
   => %sort self-reg {M term} {A tp} {A' tp} {_0 self M A A'} {_694 of M A}
     {_695 of M A'} {_696 subtype A' A [_696 atom] M}
   
@@ -32416,9 +33703,13 @@
         self-reg self/sing (of/sing Daof) (of/sing Daof) subtype/sing
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort self-reg' {M term} {A tp} {A' tp} {_0 self M A A'} {_694 of M A}
     {_695 wf A'}
   
@@ -32430,6 +33721,7 @@
         {_694 self-reg Dself Dof Dof' _?4} self-reg' Dself Dof Dwf
   
   note: checking mode of constant   _694   ... 
+  
   => %sort can-self-e {G ctx} {M term} {A tp} {A' tp} {_0 ofe G M A}
     {_695 self M A A'}
   
@@ -32465,9 +33757,13 @@
         can-self-e (ofe/sing _?3) self/sing
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort can-self {M term} {A tp} {A' tp} {_0 of M A} {_695 self M A A'}
   
   => %term
@@ -32477,6 +33773,7 @@
         {_695 of-to-ofe Dof Dofe} can-self Dof Dself
   
   note: checking mode of constant   _695   ... 
+  
   => %sort self-fun {M term} {A tp} {B tp} {B' tp} {_0 self M A B}
     {_696 self M A B'} {_697 tp-eq B B'}
   
@@ -32516,9 +33813,13 @@
   => %term sing {_?1 atom} self-fun self/sing self/sing tp-eq/i
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort self-sub-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {M term} {Gx ctx} {I nat} {N {_0 atom} term} {B {_0 atom} tp}
     {B' {_0 atom} tp} {Nx term} {Bx tp} {Bx' tp}
@@ -32856,17 +34157,29 @@
           _?16 (tsub/singa Daasub) (tsub/singo Daosub) D
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort self-sub {M term} {A tp} {N {_0 atom} term} {B {_0 atom} tp}
     {Bs {_0 atom} tp} {Nx term} {Bx tp} {Bsx tp} {_0 of M A}
     {_696 {x atom} {_696 vof x A} of (N x) (B x)}
@@ -32898,6 +34211,7 @@
           ([x atom] Dself x) DsubNx DsubBx DsubBsx Dself'
   
   note: checking mode of constant   _696   ... 
+  
   => %sort self-sub' {M term} {A tp} {N {_0 atom} term} {B {_0 atom} tp}
     {Bs {_0 atom} tp} {Nx term} {Bx tp} {Bsx tp} {_0 of M A}
     {_697 {x atom} {_697 vof x A} of (N x) (B x)}
@@ -32929,6 +34243,7 @@
           ([x atom] DselfB x) DsubNx DsubBx DselfBs DsubBsx'
   
   note: checking mode of constant   _697   ... 
+  
   => %sort self-principal {M term} {A tp} {A' tp} {_0 self M A A'}
     {_698 principal A'}
   
@@ -32956,9 +34271,13 @@
   => %term sing {_?1 atom} self-principal self/sing principal/sing
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort principal-sub {A {_0 atom} tp} {M term} {A' tp}
     {_0 {x atom} principal (A x)} {_698 tsub ([_698 atom] A _698) M A'}
     {_699 principal A'}
@@ -33011,9 +34330,13 @@
         principal-sub ([x atom] principal/sing) (tsub/singo _?4) principal/sing
   
   note: checking mode of constant   _698   ... 
+  
   note: checking mode of constant   _699   ... 
+  
   note: checking mode of constant   _700   ... 
+  
   note: checking mode of constant   _701   ... 
+  
   => %sort principal-self-e {A tp} {G ctx} {M term} {_0 principal A}
     {_702 ofe G M A} {_703 self M A A}
   
@@ -33051,8 +34374,11 @@
         principal-self-e principal/sing (ofe/sing _?3) self/sing
   
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort self-singleton-e {M term} {A tp} {A' tp} {G ctx} {N term}
     {_0 self M A A'} {_702 ofe G N A'} {_703 term-eq M N}
   
@@ -33107,9 +34433,13 @@
         self-singleton-e self/sing (ofe/sing _?3) term-eq/i
   
   note: checking mode of constant   _702   ... 
+  
   note: checking mode of constant   _703   ... 
+  
   note: checking mode of constant   _704   ... 
+  
   note: checking mode of constant   _705   ... 
+  
   => %sort principal-singleton-e {A tp} {G ctx} {M term} {N term} {_0 principal A}
     {_706 ofe G M A} {_707 ofe G N A} {_708 term-eq M N}
   
@@ -33123,6 +34453,7 @@
         principal-singleton-e Dprincipal DofeM DofeN Deq
   
   note: checking mode of constant   _706   ... 
+  
   => %sort subtype-refl-principal-e {A tp} {G ctx} {M term} {_0 principal A}
     {_707 ofe G M A} {_708 subtype A A [_708 atom] M}
   
@@ -33156,6 +34487,7 @@
         subtype-refl-principal-e Dprincipal DofM Dsubtype'
   
   note: checking mode of constant   _707   ... 
+  
   => %sort subtype-refl-principal {A tp} {M term} {_0 principal A} {_708 of M A}
     {_709 subtype A A [_709 atom] M}
   
@@ -33167,6 +34499,7 @@
         {_708 of-to-ofe Dof Dofe} subtype-refl-principal Dprincipal Dof Dsub
   
   note: checking mode of constant   _708   ... 
+  
   => %sort principal-subtype-t-invert {A tp} {M {_0 atom} term} {R atom}
     {_0 principal A} {_709 subtype A t [_709 atom] M _709}
     {_710 tp-eq A (sing R)} {_711 {x atom} term-eq (M x) (at R)}
@@ -33178,6 +34511,7 @@
           [_0 atom] term-eq/i
   
   note: checking mode of constant   _709   ... 
+  
   => %sort principal-subtype-t-invert' {A tp} {M {_0 atom} term} {R atom}
     {_0 principal A} {_710 subtype A t [_710 atom] M _710}
     {_711 {x atom} term-eq (M x) (at R)} {_712 tp-eq A (sing R)}
@@ -33189,6 +34523,7 @@
           ([_0 atom] term-eq/i) tp-eq/i
   
   note: checking mode of constant   _710   ... 
+  
   => %sort principal-subtype-sigma-invert {A tp} {B tp} {C {_0 atom} tp}
     {_?1 {_0 atom} term} {D tp} {E tp} {_0 principal A}
     {_711 subtype A (sigma B ([_711 atom] C _711)) [_711 atom] _?1 _711}
@@ -33206,6 +34541,7 @@
           (subtype/sigma ([x atom] _?10 x) ([x atom] _?11 x) _?12) tp-eq/i
   
   note: checking mode of constant   _711   ... 
+  
   => %sort principal-sigma-invert {A tp} {B {_0 atom} tp} {B' tp}
     {_0 principal (sigma A [_0 atom] B _0)} {_712 {x atom} tp-eq (B x) B'}
   
@@ -33215,6 +34551,7 @@
         principal-sigma-invert (principal/sigma _?3 _?4) [_0 atom] tp-eq/i
   
   note: checking mode of constant   _712   ... 
+  
   => %sort principal-subtype {A tp} {B tp} {M {_0 atom} term} {M' term}
     {_0 principal A} {_713 subtype A B [_713 atom] M _713}
     {_714 {y atom} term-eq (M y) M'}
@@ -33256,6 +34593,7 @@
           ([_0 atom] [_713 atom] term-eq/i) [_0 atom] [_713 atom] term-eq/i
   
   note: checking mode of constant   _713   ... 
+  
   => %term
     sigma
       {L1 {_0 atom} term} {L1' term} {L2 {_0 atom} {_714 atom} term} {L2' term}
@@ -33309,9 +34647,13 @@
         principal-subtype principal/sing subtype/sing [_0 atom] term-eq/i
   
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing_t%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort subtype-self-e' {A tp} {B tp} {O {_0 atom} term} {G ctx} {M term}
     {N term} {B' tp} {_0 subtype A B [_0 atom] O _0} {_714 ofe G M A}
     {_715 wfe G B} {_716 sub ([_716 atom] O _716) M N} {_717 principal A}
@@ -33647,9 +34989,13 @@
           self/sing subtype/sing
   
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing_t%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort subtype-self-e {A tp} {B tp} {M term} {G ctx} {B' tp}
     {_0 subtype A B [_0 atom] M} {_714 wfe G A} {_715 wfe G B}
     {_716 principal A} {_717 self M B B'} {_718 subtype A B' [_718 atom] M}
@@ -33669,6 +35015,7 @@
         subtype-self-e Dsubtype DwfA DwfB DprincipalA Dself Dsubtype'
   
   note: checking mode of constant   _714   ... 
+  
   => %sort kof-fun {C constant} {A tp} {A' tp} {_0 kof C A} {_715 kof C A'}
     {_716 tp-eq A A'}
   
@@ -33679,6 +35026,7 @@
         {_0 topen-fun D D' Deq} kof-fun (kof/i D Dckof) (kof/i D' Dckof) Deq
   
   note: checking mode of constant   _715   ... 
+  
   => %sort trans-fun {EM eterm} {A tp} {A' tp} {_0 trans EM A} {_716 trans EM A'}
     {_717 tp-eq A A'}
   
@@ -33904,17 +35252,29 @@
         ttrans-fun (ttrans/sing Dtrans) (ttrans/sing Dtrans') Deq
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort transe-context {G ctx} {EA eterm} {A tp} {_0 transe G EA A}
     {_716 ordered G}
   
@@ -34024,18 +35384,31 @@
         transe-context (transe/pair _?6 D) D'
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   => %sort cut-ttrans {A tp} {B {_0 atom} tp} {I nat} {G {_0 atom} ctx}
     {EB {_0 eterm} etp}
     {_0
@@ -35076,32 +36449,59 @@
             transe/pair (D2' x d' ex xt) (D1' x d' ex xt)
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort trans1-to-transe {A tp} {EM {_0 eterm} eterm} {B {_0 atom} tp} {
     I nat}
     {_0 {x atom} {_0 vof x A} {ex eterm} {_716 vtrans ex x} trans (EM ex) (B x)}
@@ -35132,6 +36532,7 @@
             Dtranse x _716 ex _717
   
   note: checking mode of constant   _716   ... 
+  
   => %sort ttrans1-to-ttranse {A tp} {EB {_0 eterm} etp} {B {_0 atom} tp} {
     I nat}
     {_0
@@ -35163,6 +36564,7 @@
             Dtranse x _717 ex _718
   
   note: checking mode of constant   _717   ... 
+  
   => %sort trans-to-transe {EM eterm} {A tp} {_0 trans EM A}
     {_718 transe nil EM A}
   
@@ -35304,17 +36706,29 @@
         trans-to-transe (trans/pair D2 D1) (transe/pair D2' D1')
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort transi {_0 ctx} {_718 eterm} {_719 tp}
   
   => %term transi/nil {EM eterm} {B tp} {_0 trans EM B} transi nil EM B
@@ -35344,7 +36758,9 @@
         ttransi-t (cons G X A) (ttransi/cons [_719 vof X A] D _719)
   
   note: checking mode of constant   _718   ... 
+  
   note: checking mode of constant   _719   ... 
+  
   => %sort ttransi-pi {G ctx} {EA etp} {A tp} {EB {_0 eterm} etp} {B {_0 atom} tp}
     {_0 ttransi G EA A}
     {_720
@@ -35390,7 +36806,9 @@
           (ttransi/cons [_721 vof _?1 _?2] D _721)
   
   note: checking mode of constant   _720   ... 
+  
   note: checking mode of constant   _721   ... 
+  
   => %sort ttransi-sigma {G ctx} {EA etp} {A tp} {EB {_0 eterm} etp}
     {B {_0 atom} tp} {_0 ttransi G EA A}
     {_722
@@ -35438,7 +36856,9 @@
           (ttransi/cons [_723 vof _?1 _?2] D _723)
   
   note: checking mode of constant   _722   ... 
+  
   note: checking mode of constant   _723   ... 
+  
   => %sort ttransi-sing {G ctx} {EM eterm} {R atom} {_0 transi G EM (sing R)}
     {_724 ttransi G (esing EM) (sing R)}
   
@@ -35457,7 +36877,9 @@
           (ttransi/cons [_725 vof _?1 _?2] D' _725)
   
   note: checking mode of constant   _724   ... 
+  
   note: checking mode of constant   _725   ... 
+  
   => %sort transi-forall {G ctx} {EA etp} {A tp} {M term} {B tp}
     {_0 ttransi G EA A} {_726 expand (forall A) (qtp A) M}
     {_727 self M (qtp A) B} {_728 transi G (eforall EA) B}
@@ -35480,7 +36902,9 @@
           (transi/cons [_727 vof _?1 _?2] D _727)
   
   note: checking mode of constant   _726   ... 
+  
   note: checking mode of constant   _727   ... 
+  
   => %sort transi-app {G ctx} {EM eterm} {A tp} {B {_0 atom} tp} {EN eterm} {
     C tp} {N term} {Bx tp} {_0 transi G EM (pi A [_0 atom] B _0)}
     {_728 transi G EN C} {_729 subtype C A [_729 atom] N}
@@ -35509,7 +36933,9 @@
           (transi/cons [_729 vof _?1 _?2] D _729)
   
   note: checking mode of constant   _728   ... 
+  
   note: checking mode of constant   _729   ... 
+  
   => %sort transi-pi1 {G ctx} {EM eterm} {A tp} {B tp}
     {_0 transi G EM (sigma A [_0 atom] B)} {_730 transi G (epi1 EM) A}
   
@@ -35528,7 +36954,9 @@
           (transi/cons [_731 vof _?1 _?2] D' _731)
   
   note: checking mode of constant   _730   ... 
+  
   note: checking mode of constant   _731   ... 
+  
   => %sort transi-pi2 {G ctx} {EM eterm} {A tp} {B tp}
     {_0 transi G EM (sigma A [_0 atom] B)} {_732 transi G (epi2 EM) B}
   
@@ -35547,7 +36975,9 @@
           (transi/cons [_733 vof _?1 _?2] D' _733)
   
   note: checking mode of constant   _732   ... 
+  
   note: checking mode of constant   _733   ... 
+  
   => %sort transi-lam {G ctx} {EA etp} {A tp} {EM {_0 eterm} eterm}
     {B {_0 atom} tp} {_0 ttransi G EA A}
     {_734
@@ -35592,7 +37022,9 @@
           (transi/cons [_735 vof _?1 _?2] D _735)
   
   note: checking mode of constant   _734   ... 
+  
   note: checking mode of constant   _735   ... 
+  
   => %sort transi-pair {G ctx} {EM eterm} {A tp} {EN eterm} {B tp}
     {_0 transi G EM A} {_736 transi G EN B}
     {_737 transi G (epair EM EN) (sigma A [_737 atom] B)}
@@ -35618,7 +37050,9 @@
           (transi/cons [_737 vof _?1 _?2] D _737)
   
   note: checking mode of constant   _736   ... 
+  
   note: checking mode of constant   _737   ... 
+  
   => %sort transi-var* {A tp} {EM eterm} {A' tp} {G ctx}
     {_0 {_0 wf A} trans EM A'} {_738 wfi G A} {_739 transi G EM A'}
   
@@ -35638,7 +37072,9 @@
           (transi/cons [_739 vof _?1 _?2] D'' _739)
   
   note: checking mode of constant   _738   ... 
+  
   note: checking mode of constant   _739   ... 
+  
   => %sort transi-var {EM eterm} {X atom} {G ctx} {A tp} {M term} {A' tp}
     {_0 vtrans EM X} {_740 lookup G X A} {_741 wfi G A} {_742 expand X A M}
     {_743 self M A A'} {_744 transi G EM A'}
@@ -35670,7 +37106,9 @@
           (transi/cons [_741 vof _?1 _?2] D _741)
   
   note: checking mode of constant   _740   ... 
+  
   note: checking mode of constant   _741   ... 
+  
   => %sort trans-to-transi {EM eterm} {A tp} {G ctx} {_0 trans EM A}
     {_742 transi G EM A}
   
@@ -35686,7 +37124,9 @@
         trans-to-transi (cons _?3 _?4 _?5) D (transi/cons [d vof _?4 _?5] D')
   
   note: checking mode of constant   _742   ... 
+  
   note: checking mode of constant   _743   ... 
+  
   => %sort transe-to-transi {G ctx} {EM eterm} {A tp} {_0 transe G EM A}
     {_744 transi G EM A}
   
@@ -35847,18 +37287,31 @@
         ttranse-to-ttransi (ttranse/sing D1) D
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort ttranse-to-ttrans {EA etp} {A tp} {_0 ttranse nil EA A}
     {_744 ttrans EA A}
   
@@ -35868,6 +37321,7 @@
         {_0 ttranse-to-ttransi D (ttransi/nil D')} ttranse-to-ttrans D D'
   
   note: checking mode of constant   _744   ... 
+  
   => %sort transe-to-trans {EM eterm} {A tp} {_0 transe nil EM A}
     {_745 trans EM A}
   
@@ -35877,6 +37331,7 @@
         {_0 transe-to-transi D (transi/nil D')} transe-to-trans D D'
   
   note: checking mode of constant   _745   ... 
+  
   => %sort bump-transe {I nat} {G {_0 atom} ctx} {A {_0 atom} tp} {I' nat}
     {EM {_0 eterm} eterm}
     {_0
@@ -36435,18 +37890,31 @@
             ttranse/sing (Dtrans' x d ex xt)
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort weakeng-transe {G1 ctx} {G2 ctx} {G ctx} {X atom} {B tp} {G' ctx}
     {A tp} {EM eterm} {_0 append G1 G2 G} {_746 append (cons G1 X B) G2 G'}
     {_747 ordered G'} {_748 transe G EM A} {_749 transe G' EM A}
@@ -36711,18 +38179,31 @@
           (ttranse/sing Dtrans')
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort weaken-transe {G ctx} {X atom} {EM eterm} {A tp} {_0 bounded G X}
     {_746 transe G EM A} {B tp} {_747 transe (cons G X B) EM A}
   
@@ -36736,6 +38217,7 @@
              Dtrans Dtrans'} weaken-transe Dbound Dtrans _?3 Dtrans'
   
   note: checking mode of constant   _746   ... 
+  
   => %sort weaken-transe' {G1 ctx} {G2 ctx} {G ctx} {EM eterm} {A tp}
     {_0 append G1 G2 G} {_747 ordered G} {_748 transe G1 EM A}
     {_749 transe G EM A}
@@ -36769,8 +38251,11 @@
         weaken-transe'' Dapp Dbound Dtrans Dtrans'
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   _747   ... 
+  
   => %sort transe-reg {G ctx} {EM eterm} {A tp} {_0 transe G EM A} {_748 wfe G A}
   
   => %sort ttranse-reg {G ctx} {EA etp} {A tp} {_0 ttranse G EA A} {_748 wfe G A}
@@ -36946,18 +38431,31 @@
         ttranse-reg (ttranse/sing Dtrans) Dwf
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort ttrans-reg {EA etp} {A tp} {_0 ttrans EA A} {_748 wf A}
   
   => %term
@@ -36968,6 +38466,7 @@
         {_749 ttrans-to-ttranse Dtrans Dtranse} ttrans-reg Dtrans Dwf
   
   note: checking mode of constant   _748   ... 
+  
   => %sort trans-reg {EM eterm} {A tp} {_0 trans EM A} {_749 wf A}
   
   => %term
@@ -36978,6 +38477,7 @@
         {_750 trans-to-transe Dtrans Dtranse} trans-reg Dtrans Dwf
   
   note: checking mode of constant   _749   ... 
+  
   => %sort transe-principal {G ctx} {EM eterm} {A tp} {_0 transe G EM A}
     {_750 principal A}
   
@@ -37062,14 +38562,23 @@
         transe-principal (transe/pair Dtrans2 Dtrans1) (principal/sigma D2 D1)
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   => %sort trans-principal {EM eterm} {A tp} {_0 trans EM A} {_750 principal A}
   
   => %term
@@ -37079,6 +38588,7 @@
         {_750 trans-to-transe Dtrans Dtranse} trans-principal Dtrans D
   
   note: checking mode of constant   _750   ... 
+  
   => %sort trans-subtype {EM eterm} {A tp} {B tp} {M' {_0 atom} term} {M term}
     {_0 trans EM A} {_751 subtype A B [_751 atom] M' _751}
     {_752 subtype A B [_752 atom] M} {_753 {x atom} term-eq (M' x) M}
@@ -37096,6 +38606,7 @@
         trans-subtype Dtrans Dsubtype Dsubtype' [x atom] Deq x
   
   note: checking mode of constant   _751   ... 
+  
   => %sort trans-sub-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {I nat} {EN {_0 eterm} eterm} {B {_0 atom} tp} {EM eterm} {C tp} {M term}
     {Bx tp} {Gx ctx} {D tp} {_?1 {_0 atom} term}
@@ -38045,19 +39556,33 @@
           Dcsub (ttranse/sing DtransRx)
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   => %sort ttrans-sub {A tp} {EB {_0 eterm} etp} {B {_0 atom} tp} {EM eterm}
     {C tp} {M term} {Bx tp}
     {_0
@@ -38098,6 +39623,7 @@
              DtransB x _756 ex _757) DtransM DwfA Dsubtype Dtsub DtransB'
   
   note: checking mode of constant   _752   ... 
+  
   => %sort trans-sub {A tp} {EN {_0 eterm} eterm} {B {_0 atom} tp} {EM eterm}
     {C tp} {M term} {Bx tp} {D tp} {_?1 {_0 atom} term}
     {_0 {x atom} {_0 vof x A} {ex eterm} {_753 vtrans ex x} trans (EN ex) (B x)}
@@ -38140,6 +39666,7 @@
           Dsubtype'
   
   note: checking mode of constant   _753   ... 
+  
   => %sort trans-var-coerce {EA etp} {A tp} {EB etp} {B tp} {M {_0 atom} term}
     {EC {_0 eterm} etp} {C {_0 atom} tp} {D {_0 atom} tp} {_0 ttrans EA A}
     {_754 ttrans EB B} {_755 subtype A B [_755 atom] M _755}
@@ -38238,6 +39765,7 @@
              DtransD x _770 ex _771) [x atom] DsubC x
   
   note: checking mode of constant   _754   ... 
+  
   => %block nbind [a tp] [ea etp] {x atom} {d vof x a} {ex eterm} {xt vtrans ex x}
     {ed evof ex ea}
   
@@ -38966,51 +40494,97 @@
           [d eof _?1 _?2] equiv/beta2 (D2' d) (D1' d)
   
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %extpi%   ... 
+  
   note: checking mode of constant   %extsig%   ... 
+  
   note: checking mode of constant   %subsum%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %refl%   ... 
+  
   note: checking mode of constant   %trans%   ... 
+  
   note: checking mode of constant   %sing_t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %refl%   ... 
+  
   note: checking mode of constant   %symm%   ... 
+  
   note: checking mode of constant   %trans%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %refl%   ... 
+  
   note: checking mode of constant   %symm%   ... 
+  
   note: checking mode of constant   %trans%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %singel%   ... 
+  
   note: checking mode of constant   %extpi%   ... 
+  
   note: checking mode of constant   %extpiw%   ... 
+  
   note: checking mode of constant   %extsig%   ... 
+  
   note: checking mode of constant   %subsum%   ... 
+  
   note: checking mode of constant   %beta%   ... 
+  
   note: checking mode of constant   %beta1%   ... 
+  
   note: checking mode of constant   %beta2%   ... 
+  
   => %sort esubst {A etp} {M {_0 eterm} eterm} {B {_0 eterm} etp} {N eterm}
     {_0 {x eterm} {_0 evof x A} eof (M x) (B x)} {_755 eof N A}
     {_756 eof (M N) (B N)}
@@ -39024,6 +40598,7 @@
         esubst ([x eterm] [_755 evof x _?2] D1 x _755) D2 (D1' D2)
   
   note: checking mode of constant   _755   ... 
+  
   => %sort esubst-subtp {A etp} {B {_0 eterm} etp} {EC {_0 eterm} etp} {N eterm}
     {_0 {x eterm} {_0 evof x A} subtp (B x) (EC x)} {_756 eof N A}
     {_757 subtp (B N) (EC N)}
@@ -39039,6 +40614,7 @@
         esubst-subtp ([x eterm] [_756 evof x _?2] D1 x _756) D2 (D1' D2)
   
   note: checking mode of constant   _756   ... 
+  
   => %sort esubst-wf {A etp} {B {_0 eterm} etp} {N eterm}
     {_0 {x eterm} {_0 evof x A} ewf (B x)} {_757 eof N A} {_758 ewf (B N)}
   
@@ -39051,6 +40627,7 @@
         esubst-wf ([x eterm] [_757 evof x _?2] D1 x _757) D2 (D1' D2)
   
   note: checking mode of constant   _757   ... 
+  
   => %sort esubst-equiv {A etp} {M {_0 eterm} eterm} {M' {_0 eterm} eterm}
     {B {_0 eterm} etp} {N eterm}
     {_0 {x eterm} {_0 evof x A} equiv (M x) (M' x) (B x)} {_758 eof N A}
@@ -39069,6 +40646,7 @@
         esubst-equiv ([x eterm] [_758 evof x _?2] D1 x _758) D2 (D1' D2)
   
   note: checking mode of constant   _758   ... 
+  
   => %sort esubst-tequiv {A etp} {B {_0 eterm} etp} {B' {_0 eterm} etp} {N eterm}
     {_0 {x eterm} {_0 evof x A} tequiv (B x) (B' x)} {_759 eof N A}
     {_760 tequiv (B N) (B' N)}
@@ -39084,6 +40662,7 @@
         esubst-tequiv ([x eterm] [_759 evof x _?2] D1 x _759) D2 (D1' D2)
   
   note: checking mode of constant   _759   ... 
+  
   => %sort eisvar {_0 eterm}
   
   => %block eovar [n nat] {x eterm} {d eisvar x}
@@ -39121,6 +40700,7 @@
         eisvar-closed ([_0 eterm] D) [_0 eterm] eterm-eq/i
   
   note: checking mode of constant   _760   ... 
+  
   => %sort lookup-clean {G {_0 eterm} ectx} {X {_0 eterm} eterm}
     {A {_0 eterm} etp} {X' eterm} {_0 {x eterm} elookup (G x) (X x) (A x)}
     {_761 {x eterm} clean (G x)} {_762 {x eterm} eterm-eq (X x) X'}
@@ -39148,7 +40728,9 @@
           ([x eterm] clean/cons (_?7 x) (Dclean x)) [x eterm] Deq x
   
   note: checking mode of constant   _761   ... 
+  
   note: checking mode of constant   _762   ... 
+  
   => %sort ewfi {_0 ectx} {_763 etp}
   
   => %sort eofi {_0 ectx} {_763 eterm} {_764 etp}
@@ -39209,6 +40791,7 @@
         eofi-resp ectx-eq/i eterm-eq/i etp-eq/i D D
   
   note: checking mode of constant   _763   ... 
+  
   => %sort equivi-resp {G ectx} {G' ectx} {M eterm} {M' eterm} {N eterm}
     {N' eterm} {A etp} {A' etp} {_0 ectx-eq G G'} {_764 eterm-eq M M'}
     {_765 eterm-eq N N'} {_766 etp-eq A A'} {_767 equivi G M N A}
@@ -39220,6 +40803,7 @@
         equivi-resp ectx-eq/i eterm-eq/i eterm-eq/i etp-eq/i D D
   
   note: checking mode of constant   _764   ... 
+  
   => %sort tequivi-resp {G ectx} {G' ectx} {A etp} {A' etp} {B etp} {B' etp}
     {_0 ectx-eq G G'} {_765 etp-eq A A'} {_766 etp-eq B B'}
     {_767 tequivi G A B} {_768 tequivi G' A' B'}
@@ -39230,6 +40814,7 @@
         tequivi-resp ectx-eq/i etp-eq/i etp-eq/i D D
   
   note: checking mode of constant   _765   ... 
+  
   => %sort metp
   
   => %sort meterm
@@ -39427,7 +41012,9 @@
           [d eof _?3 _?4] eofi/cons [_767 evof _?1 _?2] D' d _767
   
   note: checking mode of constant   _766   ... 
+  
   note: checking mode of constant   _767   ... 
+  
   => %sort ewfi-subst-gen {M eterm} {A etp} {G ectx} {B etp}
     {_0 {_0 evof M A} ewfi G B} {_768 {_768 eof M A} ewfi G B}
   
@@ -39452,7 +41039,9 @@
           [d eof _?3 _?4] ewfi/cons [_769 evof _?1 _?2] D' d _769
   
   note: checking mode of constant   _768   ... 
+  
   note: checking mode of constant   _769   ... 
+  
   => %sort subtpi-subst-gen {M eterm} {A etp} {G ectx} {B etp} {C etp}
     {_0 {_0 evof M A} subtpi G B C} {_770 {_770 eof M A} subtpi G B C}
   
@@ -39477,7 +41066,9 @@
           [d eof _?3 _?4] subtpi/cons [_771 evof _?1 _?2] D' d _771
   
   note: checking mode of constant   _770   ... 
+  
   note: checking mode of constant   _771   ... 
+  
   => %sort eofi-subst {A etp} {G {_0 eterm} ectx} {N {_0 eterm} eterm}
     {B {_0 eterm} etp} {M eterm}
     {_0 {x eterm} {_0 evof x A} eofi (G x) (N x) (B x)} {_772 eof M A}
@@ -39495,6 +41086,7 @@
         eofi-subst ([x eterm] [_772 evof x _?2] D1 x _772) D2 (D1' D2)
   
   note: checking mode of constant   _772   ... 
+  
   => %sort ewfi-subst {A etp} {G {_0 eterm} ectx} {B {_0 eterm} etp} {M eterm}
     {_0 {x eterm} {_0 evof x A} ewfi (G x) (B x)} {_773 eof M A}
     {_774 ewfi (G M) (B M)}
@@ -39509,6 +41101,7 @@
         ewfi-subst ([x eterm] [_773 evof x _?2] D1 x _773) D2 (D1' D2)
   
   note: checking mode of constant   _773   ... 
+  
   => %sort subtpi-subst {A etp} {G {_0 eterm} ectx} {B {_0 eterm} etp}
     {C {_0 eterm} etp} {M eterm}
     {_0 {x eterm} {_0 evof x A} subtpi (G x) (B x) (C x)} {_774 eof M A}
@@ -39527,6 +41120,7 @@
         subtpi-subst ([x eterm] [_774 evof x _?2] D1 x _774) D2 (D1' D2)
   
   note: checking mode of constant   _774   ... 
+  
   => %sort elookup? {_0 ectx} {_775 eterm} {_776 etp}
   
   => %term
@@ -39556,8 +41150,11 @@
           (elookup?/look elookup/hit)
   
   note: checking mode of constant   _775   ... 
+  
   note: checking mode of constant   _776   ... 
+  
   note: checking mode of constant   _777   ... 
+  
   => %sort eofi-var-invert {G ectx} {M eterm} {A etp} {D eofi G M A}
     {_0 meofi D meterm/var} {_778 elookup? G M A} {_779 ewfi G A}
   
@@ -39584,7 +41181,9 @@
           (ewfi/cons [_780 evof _?1 _?2] Dewfi _780)
   
   note: checking mode of constant   _778   ... 
+  
   note: checking mode of constant   _779   ... 
+  
   => %sort eofi-const-invert {G ectx} {M eterm} {A etp} {C constant}
     {D eofi G M A} {_0 meofi D meterm/const} {_780 eterm-eq (econst C) M}
     {_781 ekof C A} {_782 ewfi G A}
@@ -39609,7 +41208,9 @@
           (ewfi/cons [_781 evof _?1 _?2] Dwf _781)
   
   note: checking mode of constant   _780   ... 
+  
   note: checking mode of constant   _781   ... 
+  
   => %sort eofi-forall-invert {G ectx} {M eterm} {C etp} {Am metp} {A etp}
     {D eofi G M C} {_0 meofi D (meterm/forall Am)}
     {_782 eterm-eq (eforall A) M}
@@ -39641,7 +41242,9 @@
           (mewfi/cons [d evof _?1 _?2] DM1 d)
   
   note: checking mode of constant   _782   ... 
+  
   note: checking mode of constant   _783   ... 
+  
   => %sort eofi-lam-invert {G ectx} {O eterm} {C etp} {Mm meterm} {Am metp}
     {A etp} {M {_0 eterm} eterm} {B {_0 eterm} etp} {D eofi G O C}
     {_0 meofi D (meterm/lam Mm Am)}
@@ -39694,7 +41297,9 @@
             meofi/cons [e evof y _?8] meofi/cons [d evof _?1 _?2] DM2 d y e
   
   note: checking mode of constant   _784   ... 
+  
   note: checking mode of constant   _785   ... 
+  
   => %sort eofi-app-invert {G ectx} {O eterm} {C etp} {Nm meterm} {Mm meterm}
     {M eterm} {N eterm} {B {_0 eterm} etp} {A etp} {D eofi G O C}
     {_0 meofi D (meterm/app Nm Mm)} {_786 eterm-eq (eapp M N) O}
@@ -39733,7 +41338,9 @@
           (meofi/cons [d evof _?1 _?2] DM2 d)
   
   note: checking mode of constant   _786   ... 
+  
   note: checking mode of constant   _787   ... 
+  
   => %sort eofi-pair-invert {G ectx} {O eterm} {C etp} {Nm meterm} {Mm meterm}
     {M eterm} {N eterm} {A etp} {B {_0 eterm} etp} {D eofi G O C}
     {_0 meofi D (meterm/pair Nm Mm)} {_788 eterm-eq (epair M N) O}
@@ -39782,7 +41389,9 @@
             ewfi/cons [e evof y _?10] ewfi/cons [d evof _?1 _?2] D3 d y e
   
   note: checking mode of constant   _788   ... 
+  
   note: checking mode of constant   _789   ... 
+  
   => %sort eofi-pi1-invert {G ectx} {O eterm} {A etp} {Mm meterm} {M eterm}
     {B {_0 eterm} etp} {D eofi G O A} {_0 meofi D (meterm/pi1 Mm)}
     {_790 eterm-eq (epi1 M) O} {D1 eofi G M (esigma A [_791 eterm] B _791)}
@@ -39810,7 +41419,9 @@
           (meofi/cons [d evof _?1 _?2] DM1 d)
   
   note: checking mode of constant   _790   ... 
+  
   note: checking mode of constant   _791   ... 
+  
   => %sort eofi-pi2-invert {G ectx} {O eterm} {C etp} {Mm meterm} {M eterm}
     {B {_0 eterm} etp} {A etp} {D eofi G O C} {_0 meofi D (meterm/pi2 Mm)}
     {_792 eterm-eq (epi2 M) O} {_793 etp-eq (B (epi1 M)) C}
@@ -39841,7 +41452,9 @@
           (meofi/cons [d evof _?1 _?2] DM1 d)
   
   note: checking mode of constant   _792   ... 
+  
   note: checking mode of constant   _793   ... 
+  
   => %sort eofi-sing-invert {G ectx} {M eterm} {C etp} {Mm meterm} {D eofi G M C}
     {_0 meofi D (meterm/sing Mm)} {_794 etp-eq (esing M) C} {D1 eofi G M et}
     {_795 meofi D1 Mm}
@@ -39866,7 +41479,9 @@
           (meofi/cons [d evof _?1 _?2] DM1 d)
   
   note: checking mode of constant   _794   ... 
+  
   note: checking mode of constant   _795   ... 
+  
   => %sort eofi-extpi-invert {G ectx} {M eterm} {C etp} {Nm meterm} {Mm meterm}
     {A etp} {B {_0 eterm} etp} {B' {_0 eterm} etp} {D eofi G M C}
     {_0 meofi D (meterm/extpi Nm Mm)}
@@ -39920,7 +41535,9 @@
             meofi/cons [e evof y _?8] meofi/cons [d evof _?1 _?2] DM2 d y e
   
   note: checking mode of constant   _796   ... 
+  
   note: checking mode of constant   _797   ... 
+  
   => %sort eofi-extsigma-invert {G ectx} {M eterm} {C etp} {Nm meterm} {Mm meterm}
     {A etp} {B {_0 eterm} etp} {D eofi G M C}
     {_0 meofi D (meterm/extsigma Nm Mm)}
@@ -39968,7 +41585,9 @@
             ewfi/cons [e evof y _?8] ewfi/cons [d evof _?1 _?2] D3 d y e
   
   note: checking mode of constant   _798   ... 
+  
   note: checking mode of constant   _799   ... 
+  
   => %sort eofi-subsume-invert {G ectx} {M eterm} {A etp} {Mm meterm} {B etp}
     {D eofi G M A} {_0 meofi D (meterm/subsume Mm)} {D1 eofi G M B}
     {_800 meofi D1 Mm} {_801 subtpi G B A}
@@ -39999,7 +41618,9 @@
           (subtpi/cons [_801 evof _?1 _?2] D2 _801)
   
   note: checking mode of constant   _800   ... 
+  
   note: checking mode of constant   _801   ... 
+  
   => %sort ewfi-t-invert {G ectx} {C etp} {D ewfi G C} {_0 mewfi D metp/t}
     {_802 etp-eq et C}
   
@@ -40018,7 +41639,9 @@
           (mewfi/cons ([d evof _?1 _?2] DM d)) Deq
   
   note: checking mode of constant   _802   ... 
+  
   note: checking mode of constant   _803   ... 
+  
   => %sort ewfi-pi-invert {G ectx} {C etp} {Bm metp} {Am metp} {A etp}
     {B {_0 eterm} etp} {D ewfi G C} {_0 mewfi D (metp/pi Bm Am)}
     {_804 etp-eq (epi A ([_804 eterm] B _804)) C} {D1 ewfi G A}
@@ -40067,7 +41690,9 @@
             mewfi/cons [e evof y _?7] mewfi/cons [d evof _?1 _?2] DM2 d y e
   
   note: checking mode of constant   _804   ... 
+  
   note: checking mode of constant   _805   ... 
+  
   => %sort ewfi-sigma-invert {G ectx} {C etp} {Bm metp} {Am metp} {A etp}
     {B {_0 eterm} etp} {D ewfi G C} {_0 mewfi D (metp/sigma Bm Am)}
     {_806 etp-eq (esigma A ([_806 eterm] B _806)) C} {D1 ewfi G A}
@@ -40116,7 +41741,9 @@
             mewfi/cons [e evof y _?7] mewfi/cons [d evof _?1 _?2] DM2 d y e
   
   note: checking mode of constant   _806   ... 
+  
   note: checking mode of constant   _807   ... 
+  
   => %sort ewfi-sing-invert {G ectx} {C etp} {Mm meterm} {M eterm} {D ewfi G C}
     {_0 mewfi D (metp/sing Mm)} {_808 etp-eq (esing M) C} {D1 eofi G M et}
     {_809 meofi D1 Mm}
@@ -40141,7 +41768,9 @@
           (meofi/cons [d evof _?1 _?2] DM1 d)
   
   note: checking mode of constant   _808   ... 
+  
   note: checking mode of constant   _809   ... 
+  
   => %sort equiv-to-equivi {M eterm} {N eterm} {A etp} {G ectx} {_0 equiv M N A}
     {_810 equivi G M N A}
   
@@ -40158,7 +41787,9 @@
         equiv-to-equivi (econs G X A) D (equivi/cons [_811 evof X A] D' _811)
   
   note: checking mode of constant   _810   ... 
+  
   note: checking mode of constant   _811   ... 
+  
   => %sort tequiv-to-tequivi {A etp} {B etp} {G ectx} {_0 tequiv A B}
     {_812 tequivi G A B}
   
@@ -40176,7 +41807,9 @@
           (tequivi/cons [_813 evof X A] D' _813)
   
   note: checking mode of constant   _812   ... 
+  
   note: checking mode of constant   _813   ... 
+  
   => %sort eofi-evof {X eterm} {A etp} {G ectx} {_0 evof X A} {_814 ewfi G A}
     {_815 eofi G X A}
   
@@ -40195,7 +41828,9 @@
           (eofi/cons [_815 evof _?1 _?2] Dof _815)
   
   note: checking mode of constant   _814   ... 
+  
   note: checking mode of constant   _815   ... 
+  
   => %sort eofi-lookup {G ectx} {X eterm} {A etp} {_0 elookup G X A}
     {_816 ewfi G A} {_817 eofi G X A}
   
@@ -40218,7 +41853,9 @@
           (eofi/cons [_817 evof _?1 _?2] Dof _817)
   
   note: checking mode of constant   _816   ... 
+  
   note: checking mode of constant   _817   ... 
+  
   => %sort eofi-const {K constant} {A etp} {G ectx} {_0 ekof K A} {_818 ewfi G A}
     {_819 eofi G (econst K) A}
   
@@ -40237,7 +41874,9 @@
           (eofi/cons [_819 evof _?1 _?2] Dof _819)
   
   note: checking mode of constant   _818   ... 
+  
   note: checking mode of constant   _819   ... 
+  
   => %sort equivi-reflex {G ectx} {M eterm} {A etp} {_0 eofi G M A}
     {_820 equivi G M M A}
   
@@ -40256,7 +41895,9 @@
           (equivi/cons [_821 evof _?1 _?2] D' _821)
   
   note: checking mode of constant   _820   ... 
+  
   note: checking mode of constant   _821   ... 
+  
   => %sort equivi-forall {G ectx} {A etp} {A' etp} {_0 tequivi G A A'}
     {_822
        equivi G (eforall A) (eforall A')
@@ -40280,7 +41921,9 @@
           (equivi/cons [_823 evof _?1 _?2] D' _823)
   
   note: checking mode of constant   _822   ... 
+  
   note: checking mode of constant   _823   ... 
+  
   => %sort equivi-lam {G ectx} {A etp} {A' etp} {M {_0 eterm} eterm}
     {M' {_0 eterm} eterm} {B {_0 eterm} etp} {_0 tequivi G A A'}
     {_824 {x eterm} equivi (econs G x A) (M x) (M' x) (B x)}
@@ -40320,7 +41963,9 @@
           (equivi/cons [_825 evof _?1 _?2] D _825)
   
   note: checking mode of constant   _824   ... 
+  
   note: checking mode of constant   _825   ... 
+  
   => %sort equivi-app {G ectx} {M eterm} {M' eterm} {A etp} {B {_0 eterm} etp}
     {N eterm} {N' eterm} {_0 equivi G M M' (epi A [_0 eterm] B _0)}
     {_826 equivi G N N' A} {_827 equivi G (eapp M N) (eapp M' N') (B N)}
@@ -40347,7 +41992,9 @@
           (equivi/cons [_827 evof _?1 _?2] D _827)
   
   note: checking mode of constant   _826   ... 
+  
   note: checking mode of constant   _827   ... 
+  
   => %sort equivi-pair {G ectx} {M eterm} {M' eterm} {A etp} {N eterm} {N' eterm}
     {B {_0 eterm} etp} {_0 equivi G M M' A} {_828 equivi G N N' (B M)}
     {_829 {x eterm} ewfi (econs G x A) (B x)}
@@ -40385,7 +42032,9 @@
           (equivi/cons [_829 evof _?1 _?2] D _829)
   
   note: checking mode of constant   _828   ... 
+  
   note: checking mode of constant   _829   ... 
+  
   => %sort equivi-pi1 {G ectx} {M eterm} {M' eterm} {A etp} {B {_0 eterm} etp}
     {_0 equivi G M M' (esigma A [_0 eterm] B _0)}
     {_830 equivi G (epi1 M) (epi1 M') A}
@@ -40409,7 +42058,9 @@
           (equivi/cons [_831 evof _?1 _?2] D _831)
   
   note: checking mode of constant   _830   ... 
+  
   note: checking mode of constant   _831   ... 
+  
   => %sort equivi-pi2 {G ectx} {M eterm} {M' eterm} {A etp} {B {_0 eterm} etp}
     {_0 equivi G M M' (esigma A [_0 eterm] B _0)}
     {_832 equivi G (epi2 M) (epi2 M') (B (epi1 M))}
@@ -40433,7 +42084,9 @@
           (equivi/cons [_833 evof _?1 _?2] D _833)
   
   note: checking mode of constant   _832   ... 
+  
   note: checking mode of constant   _833   ... 
+  
   => %sort equivi-sing {G ectx} {M eterm} {M' eterm} {_0 equivi G M M' et}
     {_834 equivi G M M' (esing M)}
   
@@ -40452,7 +42105,9 @@
           (equivi/cons [_835 evof _?1 _?2] D _835)
   
   note: checking mode of constant   _834   ... 
+  
   note: checking mode of constant   _835   ... 
+  
   => %sort equivi-extpiw {G ectx} {M eterm} {N eterm} {A etp} {B' {_0 eterm} etp}
     {B {_0 eterm} etp} {_0 equivi G M N (epi A [_0 eterm] B' _0)}
     {_836 {x eterm} equivi (econs G x A) (eapp M x) (eapp N x) (B x)}
@@ -40489,7 +42144,9 @@
           (equivi/cons [_837 evof _?1 _?2] D _837)
   
   note: checking mode of constant   _836   ... 
+  
   note: checking mode of constant   _837   ... 
+  
   => %sort equivi-extsigma {G ectx} {M eterm} {N eterm} {A etp} {B {_0 eterm} etp}
     {_0 equivi G (epi1 M) (epi1 N) A}
     {_838 equivi G (epi2 M) (epi2 N) (B (epi1 M))}
@@ -40528,7 +42185,9 @@
           (equivi/cons [_839 evof _?1 _?2] D _839)
   
   note: checking mode of constant   _838   ... 
+  
   note: checking mode of constant   _839   ... 
+  
   => %sort equivi-subsume {G ectx} {M eterm} {N eterm} {A etp} {B etp}
     {_0 equivi G M N A} {_840 subtpi G A B} {_841 equivi G M N B}
   
@@ -40551,7 +42210,9 @@
           (equivi/cons [_841 evof _?1 _?2] D _841)
   
   note: checking mode of constant   _840   ... 
+  
   note: checking mode of constant   _841   ... 
+  
   => %sort tequivi-pi {G ectx} {A etp} {A' etp} {B {_0 eterm} etp}
     {B' {_0 eterm} etp} {_0 tequivi G A A'}
     {_842 {x eterm} tequivi (econs G x A) (B x) (B' x)}
@@ -40587,7 +42248,9 @@
           (tequivi/cons [_843 evof _?1 _?2] D _843)
   
   note: checking mode of constant   _842   ... 
+  
   note: checking mode of constant   _843   ... 
+  
   => %sort tequivi-sigma {G ectx} {A etp} {A' etp} {B {_0 eterm} etp}
     {B' {_0 eterm} etp} {_0 tequivi G A A'}
     {_844 {x eterm} tequivi (econs G x A) (B x) (B' x)}
@@ -40625,7 +42288,9 @@
           (tequivi/cons [_845 evof _?1 _?2] D _845)
   
   note: checking mode of constant   _844   ... 
+  
   note: checking mode of constant   _845   ... 
+  
   => %sort tequivi-sing {G ectx} {M eterm} {N eterm} {_0 equivi G M N et}
     {_846 tequivi G (esing M) (esing N)}
   
@@ -40644,7 +42309,9 @@
           (tequivi/cons [_847 evof _?1 _?2] D _847)
   
   note: checking mode of constant   _846   ... 
+  
   note: checking mode of constant   _847   ... 
+  
   => %sort tfunctionality-e {A etp} {G {_0 eterm} ectx} {B {_0 eterm} etp}
     {M eterm} {N eterm} {Am metp} {D {x eterm} {_0 evof x A} ewfi (G x) (B x)}
     {_0 {x eterm} {d evof x A} mewfi (D x d) Am} {_848 {x eterm} clean (G x)}
@@ -40735,8 +42402,11 @@
           DofM Dequiv''
   
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   => %term
     const
       {G {_0 eterm} ectx} {M eterm} {K constant} {O {_0 eterm} eterm} {
@@ -41269,21 +42939,37 @@
           Dequiv'
   
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %extpi%   ... 
+  
   note: checking mode of constant   %extsig%   ... 
+  
   note: checking mode of constant   %subsum%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort can-meof {M eterm} {A etp} {Mm meterm} {D eof M A} {_0 meof D Mm}
   
   => %sort can-mewf {A etp} {Am metp} {D ewf A} {_0 mewf D Am}
@@ -41407,21 +43093,37 @@
         {_0 can-meof D D'} can-mewf (ewf/sing D) (mewf/sing D')
   
   note: checking mode of constant   _848   ... 
+  
   note: checking mode of constant   _849   ... 
+  
   note: checking mode of constant   _850   ... 
+  
   note: checking mode of constant   _851   ... 
+  
   note: checking mode of constant   _852   ... 
+  
   note: checking mode of constant   _853   ... 
+  
   note: checking mode of constant   _854   ... 
+  
   note: checking mode of constant   _855   ... 
+  
   note: checking mode of constant   _856   ... 
+  
   note: checking mode of constant   _857   ... 
+  
   note: checking mode of constant   _858   ... 
+  
   note: checking mode of constant   _859   ... 
+  
   note: checking mode of constant   _860   ... 
+  
   note: checking mode of constant   _861   ... 
+  
   note: checking mode of constant   _862   ... 
+  
   note: checking mode of constant   _863   ... 
+  
   => %sort tequivi-nil-invert {A etp} {B etp} {_0 tequivi enil A B}
     {_864 tequiv A B}
   
@@ -41431,6 +43133,7 @@
         tequivi-nil-invert (tequivi/nil D) D
   
   note: checking mode of constant   _864   ... 
+  
   => %sort tfunctionality* {A etp} {B {_0 eterm} etp} {M eterm} {N eterm}
     {_0 {x eterm} {_0 evof x A} ewf (B x)} {_865 equiv M N A} {_866 eof M A}
     {_867 tequiv (B M) (B N)}
@@ -41453,6 +43156,7 @@
           Dtequiv
   
   note: checking mode of constant   _865   ... 
+  
   => %sort tequivi-cons1-invert {A etp} {B {_0 eterm} etp} {C {_0 eterm} etp}
     {_0 {x eterm} tequivi (econs enil x A) (B x) (C x)}
     {_866 {x eterm} {_866 evof x A} tequiv (B x) (C x)}
@@ -41466,6 +43170,7 @@
           [x eterm] [_0 evof x _?1] D x _0
   
   note: checking mode of constant   _866   ... 
+  
   => %sort tfunctionality1* {A etp} {B {_0 eterm} etp}
     {C {_0 eterm} {_867 eterm} etp} {M eterm} {N eterm}
     {_0 {x eterm} {_0 evof x A} {y eterm} {_867 evof y (B x)} ewf (C x y)}
@@ -41508,6 +43213,7 @@
           [y eterm] [_869 evof y (_?1 _?2)] Dtequiv y _869
   
   note: checking mode of constant   _867   ... 
+  
   => %sort tequivi-cons2-invert {A etp} {B {_0 eterm} etp}
     {C {_0 eterm} {_868 eterm} etp} {D {_0 eterm} {_868 eterm} etp}
     {_0
@@ -41533,6 +43239,7 @@
             D x _0 y _868
   
   note: checking mode of constant   _868   ... 
+  
   => %sort tfunctionality2* {A etp} {B {_0 eterm} etp}
     {C {_0 eterm} {_869 eterm} etp}
     {D {_0 eterm} {_869 eterm} {_870 eterm} etp} {M eterm} {N eterm}
@@ -41592,6 +43299,7 @@
             Dtequiv y _871 z _872
   
   note: checking mode of constant   _869   ... 
+  
   => %sort eof-reg {M eterm} {A etp} {_0 eof M A} {_870 ewf A}
   
   => %sort subtp-reg {A etp} {B etp} {_0 subtp A B} {_870 ewf A} {_871 ewf B}
@@ -42079,46 +43787,87 @@
           DofN DwfB
   
   note: checking mode of constant   _870   ... 
+  
   note: checking mode of constant   _871   ... 
+  
   note: checking mode of constant   _872   ... 
+  
   note: checking mode of constant   _873   ... 
+  
   note: checking mode of constant   _874   ... 
+  
   note: checking mode of constant   _875   ... 
+  
   note: checking mode of constant   _876   ... 
+  
   note: checking mode of constant   _877   ... 
+  
   note: checking mode of constant   _878   ... 
+  
   note: checking mode of constant   _879   ... 
+  
   note: checking mode of constant   _880   ... 
+  
   note: checking mode of constant   _881   ... 
+  
   note: checking mode of constant   _882   ... 
+  
   note: checking mode of constant   _883   ... 
+  
   note: checking mode of constant   _884   ... 
+  
   note: checking mode of constant   _885   ... 
+  
   note: checking mode of constant   _886   ... 
+  
   note: checking mode of constant   _887   ... 
+  
   note: checking mode of constant   _888   ... 
+  
   note: checking mode of constant   _889   ... 
+  
   note: checking mode of constant   _890   ... 
+  
   note: checking mode of constant   _891   ... 
+  
   note: checking mode of constant   _892   ... 
+  
   note: checking mode of constant   _893   ... 
+  
   note: checking mode of constant   _894   ... 
+  
   note: checking mode of constant   _895   ... 
+  
   note: checking mode of constant   _896   ... 
+  
   note: checking mode of constant   _897   ... 
+  
   note: checking mode of constant   _898   ... 
+  
   note: checking mode of constant   _899   ... 
+  
   note: checking mode of constant   _900   ... 
+  
   note: checking mode of constant   _901   ... 
+  
   note: checking mode of constant   _902   ... 
+  
   note: checking mode of constant   _903   ... 
+  
   note: checking mode of constant   _904   ... 
+  
   note: checking mode of constant   _905   ... 
+  
   note: checking mode of constant   _906   ... 
+  
   note: checking mode of constant   _907   ... 
+  
   note: checking mode of constant   _908   ... 
+  
   note: checking mode of constant   _909   ... 
+  
   note: checking mode of constant   _910   ... 
+  
   => %sort tfunctionality {A etp} {B {_0 eterm} etp} {M eterm} {N eterm}
     {_0 {x eterm} {_0 evof x A} ewf (B x)} {_911 equiv M N A}
     {_912 tequiv (B M) (B N)}
@@ -42135,6 +43884,7 @@
         tfunctionality ([x eterm] [_912 evof x _?1] Dwf x _912) Dequiv Dtequiv
   
   note: checking mode of constant   _911   ... 
+  
   => %sort tequiv-functionality {A etp} {B {_0 eterm} etp} {C {_0 eterm} etp}
     {M eterm} {N eterm} {_0 {x eterm} {_0 evof x A} tequiv (B x) (C x)}
     {_912 equiv M N A} {_913 tequiv (B M) (C N)}
@@ -42163,6 +43913,7 @@
           DequivMN (tequiv/trans DequivCMCN DequivBMCM)
   
   note: checking mode of constant   _912   ... 
+  
   => %sort tfunctionality1 {A etp} {B {_0 eterm} etp}
     {C {_0 eterm} {_913 eterm} etp} {M eterm} {N eterm}
     {_0 {x eterm} {_0 evof x A} {y eterm} {_913 evof y (B x)} ewf (C x y)}
@@ -42191,6 +43942,7 @@
           [y eterm] [_914 evof y (_?2 _?4)] Dtequiv y _914
   
   note: checking mode of constant   _913   ... 
+  
   => %sort tfunctionality2 {A etp} {B {_0 eterm} etp}
     {C {_0 eterm} {_914 eterm} etp}
     {D {_0 eterm} {_914 eterm} {_915 eterm} etp} {M eterm} {N eterm}
@@ -42229,6 +43981,7 @@
             Dtequiv y _915 z _916
   
   note: checking mode of constant   _914   ... 
+  
   => %def eaca eterm econst unit
   
   => %sort vof-const-contra {_?1 constant} {_?2 tp} {_0 vof (const _?1) _?2}
@@ -42260,6 +44013,7 @@
         {_917 vof-const-contra Dvof Dfalse} vsound Dvof D1 D2 D3
   
   note: checking mode of constant   _915   ... 
+  
   => %sort can-tconvert {A tp} {EA etp} {_0 wf A} {_916 tconvert A EA}
   
   => %sort can-convert {M term} {A tp} {EM eterm} {_0 of M A}
@@ -42409,19 +44163,33 @@
     {_0 {_0 vsound _?5 _?6 _?7 _?8} can-convert _?12 _?13}
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %block fbind [a tp] {x atom} {d vof x a} {ex eterm} {xt vtrans ex x}
   
   => %block fobind [n nat] {x atom} {d isvar x n} {ex eterm} {xt vtrans ex x}
@@ -42557,20 +44325,35 @@
         tconverte-context (tconverte/sing Dconv) D
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort mconvert {M term} {A tp} {_?1 eterm} {_0 convert M A _?1} {_917 mterm}
   
   => %sort maconvert {R atom} {A tp} {_?1 eterm} {_0 aconvert R A _?1}
@@ -42968,19 +44751,33 @@
         can-mtconvert (tconvert/sing D) (mtconvert/sing D')
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort can-mconverte {_?1 ctx} {_?2 term} {_?3 tp} {_?4 eterm} {Mm mterm}
     {D converte _?1 _?2 _?3 _?4} {_0 mconverte D Mm}
   
@@ -43147,20 +44944,35 @@
         can-mtconverte (tconverte/sing D) (mtconverte/sing D')
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort cut-convert {A tp} {M {_0 atom} term} {B {_0 atom} tp}
     {EM {_0 eterm} eterm} {I nat} {G {_0 atom} ctx} {Mm mterm}
     {D
@@ -45035,36 +46847,67 @@
             mtconverte/sing (X1' x d' ex xt)
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort convert1-to-converte {A tp} {M {_0 atom} term} {B {_0 atom} tp}
     {EM {_0 eterm} eterm} {I nat}
     {_0
@@ -45110,6 +46953,7 @@
             Dconverte x _918 ex _919
   
   note: checking mode of constant   _917   ... 
+  
   => %sort aconvert1-to-aconverte {A tp} {R {_0 atom} atom} {B {_0 atom} tp}
     {EM {_0 eterm} eterm} {I nat}
     {_0
@@ -45155,6 +46999,7 @@
             Dconverte x _919 ex _920
   
   note: checking mode of constant   _918   ... 
+  
   => %sort tconvert1-to-tconverte {A tp} {B {_0 atom} tp} {EB {_0 eterm} etp}
     {I nat}
     {_0
@@ -45199,6 +47044,7 @@
             Dconverte x _920 ex _921
   
   note: checking mode of constant   _919   ... 
+  
   => %sort convert2-to-converte {I nat} {J nat} {A tp} {B {_0 atom} tp}
     {M {_0 atom} {_920 atom} term} {C {_0 atom} {_920 atom} tp}
     {EM {_0 eterm} {_920 eterm} eterm} {_0 lt I J}
@@ -45290,6 +47136,7 @@
             Dconvert'' x _922 ex _923 y _924 ey _925
   
   note: checking mode of constant   _920   ... 
+  
   => %sort convert-to-converte {M term} {A tp} {EM eterm} {_0 convert M A EM}
     {_921 converte nil M A EM}
   
@@ -45457,19 +47304,33 @@
         aconvert-to-aconverte (aconvert/pi2 D1) (aconverte/pi2 D1')
   
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort bump-converte-m {I nat} {G {_0 atom} ctx} {M {_0 atom} term}
     {A {_0 atom} tp} {EM {_0 eterm} eterm} {I' nat} {Mm mterm}
     {D
@@ -46436,20 +48297,35 @@
             mtconverte/sing (DM' x d ex xt)
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort bump-converte {I nat} {G {_0 atom} ctx} {M {_0 atom} term}
     {A {_0 atom} tp} {EM {_0 eterm} eterm} {I' nat}
     {_0
@@ -46496,6 +48372,7 @@
             Dconv' x _922 ex _923
   
   note: checking mode of constant   _921   ... 
+  
   => %sort bump-tconverte {I nat} {G {_0 atom} ctx} {A {_0 atom} tp}
     {EA {_0 eterm} etp} {I' nat}
     {_0
@@ -46542,6 +48419,7 @@
             Dconv' x _923 ex _924
   
   note: checking mode of constant   _922   ... 
+  
   => %sort weakeng-aconverte {G1 ctx} {G2 ctx} {G ctx} {X atom} {B tp} {G' ctx}
     {R atom} {A tp} {EM eterm} {Rm matom} {_0 append G1 G2 G}
     {_923 append (cons G1 X B) G2 G'} {_924 ordered G'} {D aconverte G R A EM}
@@ -46926,20 +48804,35 @@
           (tconverte/sing Dconv) (mtconverte/sing DM) (tconverte/sing Dconv')
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort weaken-converte {G ctx} {X atom} {M term} {A tp} {EM eterm}
     {_0 bounded G X} {_923 converte G M A EM} {B tp}
     {_924 converte (cons G X B) M A EM}
@@ -46956,6 +48849,7 @@
         weaken-converte Dbound Dconv _?3 Dconv'
   
   note: checking mode of constant   _923   ... 
+  
   => %sort weaken-aconverte {G ctx} {X atom} {M atom} {A tp} {EM eterm}
     {_0 bounded G X} {_924 aconverte G M A EM} {B tp}
     {_925 aconverte (cons G X B) M A EM}
@@ -46972,6 +48866,7 @@
         weaken-aconverte Dbound Daconv _?3 Daconv'
   
   note: checking mode of constant   _924   ... 
+  
   => %sort weaken-converte' {G1 ctx} {G2 ctx} {G ctx} {M term} {A tp} {EM eterm}
     {_0 append G1 G2 G} {_925 ordered G} {_926 converte G1 M A EM}
     {_927 converte G M A EM}
@@ -47006,8 +48901,11 @@
         weaken-converte'' Dapp Dbound Dconv Dconv'
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   _925   ... 
+  
   => %sort weaken-aconverte' {G1 ctx} {G2 ctx} {G ctx} {M atom} {A tp} {EM eterm}
     {_0 append G1 G2 G} {_926 ordered G} {_927 aconverte G1 M A EM}
     {_928 aconverte G M A EM}
@@ -47043,8 +48941,11 @@
         weaken-aconverte'' Dapp Dbound Daconv Daconv'
   
   note: checking mode of constant   %nil%   ... 
+  
   note: checking mode of constant   %cons%   ... 
+  
   note: checking mode of constant   _926   ... 
+  
   => %sort aconverte-reg-il {G ctx} {R atom} {A tp} {_?1 eterm}
     {_0 aconverte G R A _?1} {_927 aofe G R A}
   
@@ -47212,20 +49113,35 @@
         tconverte-reg-il (tconverte/sing Dconv) (wfe/sing Dof)
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort tconvert-reg-il {A tp} {_?1 etp} {_0 tconvert A _?1} {_927 wf A}
   
   => %term
@@ -47236,6 +49152,7 @@
         {_928 tconvert-to-tconverte Dconv Dconve} tconvert-reg-il Dconv Dwf
   
   note: checking mode of constant   _927   ... 
+  
   => %sort convert-reg-il {M term} {A tp} {_?1 eterm} {_0 convert M A _?1}
     {_928 of M A}
   
@@ -47247,6 +49164,7 @@
         {_929 convert-to-converte Dconv Dconve} convert-reg-il Dconv Dof
   
   note: checking mode of constant   _928   ... 
+  
   => %sort aconvert-reg-il {R atom} {A tp} {_?1 eterm} {_0 aconvert R A _?1}
     {_929 aof R A}
   
@@ -47258,6 +49176,7 @@
         {_930 aconvert-to-aconverte Dconv Dconve} aconvert-reg-il Dconv Dof
   
   note: checking mode of constant   _929   ... 
+  
   => %sort tconverte-fun {G ctx} {A tp} {EA etp} {EA' etp} {_0 tconverte G A EA}
     {_930 tconverte G A EA'} {_931 etp-eq EA EA'}
   
@@ -47568,22 +49487,39 @@
         tconverte-fun (tconverte/sing Dconv) (tconverte/sing Dconv') Deq'
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %varbad%   ... 
+  
   note: checking mode of constant   %varbad%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort tconvert-fun {A tp} {EA etp} {EA' etp} {_0 tconvert A EA}
     {_930 tconvert A EA'} {_931 etp-eq EA EA'}
   
@@ -47597,6 +49533,7 @@
         {_931 tconvert-to-tconverte Dconv Dconve} tconvert-fun Dconv Dconv' Deq
   
   note: checking mode of constant   _930   ... 
+  
   => %sort convert-fun {M term} {A tp} {EM eterm} {EM' eterm} {_0 convert M A EM}
     {_931 convert M A EM'} {_932 eterm-eq EM EM'}
   
@@ -47610,6 +49547,7 @@
         {_932 convert-to-converte Dconv Dconve} convert-fun Dconv Dconv' Deq
   
   note: checking mode of constant   _931   ... 
+  
   => %sort aconvert-fun {R atom} {A tp} {EM eterm} {A' tp} {EM' eterm}
     {_0 aconvert R A EM} {_932 aconvert R A' EM'} {_933 tp-eq A A'}
     {_934 eterm-eq EM EM'}
@@ -47626,6 +49564,7 @@
         aconvert-fun Dconv Dconv' Deq Deq'
   
   note: checking mode of constant   _932   ... 
+  
   => %sort vtrans-fun {EX eterm} {X atom} {EX' eterm} {_0 vtrans EX X}
     {_933 vtrans EX' X} {_934 eterm-eq EX EX'}
   
@@ -47633,6 +49572,7 @@
     _933 {_?1 eterm} {_?2 atom} {D vtrans _?1 _?2} vtrans-fun D D eterm-eq/i
   
   note: checking mode of constant   _933   ... 
+  
   => %sort vsound' {X atom} {A tp} {EX eterm} {EA etp} {_0 vof X A}
     {_934 vtrans EX X} {_935 tconvert A EA} {_936 evof EX EA}
   
@@ -47648,6 +49588,7 @@
         vsound' Dvof Dvtrans Dconv Devof'
   
   note: checking mode of constant   _934   ... 
+  
   => %sort aconvert-fun2 {R atom} {A tp} {EM eterm} {R' atom} {A' tp}
     {_0 aconvert R A EM} {_935 aconvert R' A' EM} {_936 atom-eq R R'}
     {_937 tp-eq A A'}
@@ -47893,19 +49834,33 @@
         tconvert-fun2 (tconvert/sing D) (tconvert/sing D') Deq'
   
   note: checking mode of constant   _935   ... 
+  
   note: checking mode of constant   _936   ... 
+  
   note: checking mode of constant   _937   ... 
+  
   note: checking mode of constant   _938   ... 
+  
   note: checking mode of constant   _939   ... 
+  
   note: checking mode of constant   _940   ... 
+  
   note: checking mode of constant   _941   ... 
+  
   note: checking mode of constant   _942   ... 
+  
   note: checking mode of constant   _943   ... 
+  
   note: checking mode of constant   _944   ... 
+  
   note: checking mode of constant   _945   ... 
+  
   note: checking mode of constant   _946   ... 
+  
   note: checking mode of constant   _947   ... 
+  
   note: checking mode of constant   _948   ... 
+  
   => %sort invert-tconvert {A tp} {EA etp} {_0 tconvert A EA} {_949 ttrans EA A}
   
   => %sort invert-convert {M term} {A tp} {As tp} {EM eterm} {_0 self M A As}
@@ -48158,19 +50113,33 @@
                 DtransB x _950 ex _951) DtransA)
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   => %sort atomic {_0 eterm}
   
   => %sort normal {_0 eterm}
@@ -48370,20 +50339,35 @@
         tconverte-normal (tconverte/sing Dconv) (tnormal/sing Datom)
   
   note: checking mode of constant   _949   ... 
+  
   note: checking mode of constant   _950   ... 
+  
   note: checking mode of constant   _951   ... 
+  
   note: checking mode of constant   _952   ... 
+  
   note: checking mode of constant   _953   ... 
+  
   note: checking mode of constant   _954   ... 
+  
   note: checking mode of constant   _955   ... 
+  
   note: checking mode of constant   _956   ... 
+  
   note: checking mode of constant   _957   ... 
+  
   note: checking mode of constant   _958   ... 
+  
   note: checking mode of constant   _959   ... 
+  
   note: checking mode of constant   _960   ... 
+  
   note: checking mode of constant   _961   ... 
+  
   note: checking mode of constant   _962   ... 
+  
   note: checking mode of constant   _963   ... 
+  
   => %sort atomic-implies-oa {M eterm} {_0 atomic M} {_964 oa M}
   
   => %term _964 {_?1 constant} atomic-implies-oa atomic/const oa/const
@@ -48409,11 +50393,17 @@
     _969 {_?1 eterm} {_?2 atomic _?1} atomic-implies-oa (atomic/pi2 _?2) oa/pi2
   
   note: checking mode of constant   _964   ... 
+  
   note: checking mode of constant   _965   ... 
+  
   note: checking mode of constant   _966   ... 
+  
   note: checking mode of constant   _967   ... 
+  
   note: checking mode of constant   _968   ... 
+  
   note: checking mode of constant   _969   ... 
+  
   => %sort atomic-reduce-refl {M eterm} {_0 atomic M} {_970 reduce M M}
   
   => %sort normal-reduce-refl {M eterm} {_0 normal M} {_970 reduce M M}
@@ -48519,18 +50509,31 @@
         tnormal-reduce-refl (tnormal/sing Dnorm) (treduce/sing D)
   
   note: checking mode of constant   _970   ... 
+  
   note: checking mode of constant   _971   ... 
+  
   note: checking mode of constant   _972   ... 
+  
   note: checking mode of constant   _973   ... 
+  
   note: checking mode of constant   _974   ... 
+  
   note: checking mode of constant   _975   ... 
+  
   note: checking mode of constant   _976   ... 
+  
   note: checking mode of constant   _977   ... 
+  
   note: checking mode of constant   _978   ... 
+  
   note: checking mode of constant   _979   ... 
+  
   note: checking mode of constant   _980   ... 
+  
   note: checking mode of constant   _981   ... 
+  
   note: checking mode of constant   _982   ... 
+  
   => %sort strengthen-vtrans {EX {_0 eterm} eterm} {X atom} {EX' eterm}
     {_0 {x atom} {ex eterm} {_0 vtrans ex x} vtrans (EX ex) X}
     {_983 {ex eterm} eterm-eq (EX ex) EX'} {_984 vtrans EX' X}
@@ -48542,6 +50545,7 @@
           ([ex eterm] eterm-eq/i) D
   
   note: checking mode of constant   _983   ... 
+  
   => %sort convert-ssub-e {G1 ctx} {A tp} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {R atom} {G' ctx} {I nat} {N {_0 atom} term} {B {_0 atom} tp}
     {EN {_0 eterm} eterm} {EM eterm}
@@ -49032,21 +51036,37 @@
              tconverte/sing (D x d ex xt)) Dconv (tconverte/sing D')
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort convert-sub-em {A tp} {G1 ctx} {G2 {_0 atom} ctx} {G {_0 atom} ctx}
     {N term} {Gx ctx} {I nat} {M {_0 atom} term} {B {_0 atom} tp}
     {EM {_0 eterm} eterm} {EN eterm} {Mx term} {Bx tp} {EO eterm} {T stp}
@@ -50646,40 +52666,75 @@
           (treduce/sing Dreduce)
   
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %appbad%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1bad%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2bad%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %allclo%   ... 
+  
   note: checking mode of constant   %allbad%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %vari%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %appclo%   ... 
+  
   note: checking mode of constant   %appbad%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi1clo%   ... 
+  
   note: checking mode of constant   %pi1bad%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %pi2clo%   ... 
+  
   note: checking mode of constant   %pi2bad%   ... 
+  
   note: checking mode of constant   %aa%   ... 
+  
   note: checking mode of constant   %ao%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   note: checking mode of constant   %aaao%   ... 
+  
   note: checking mode of constant   %aoaa%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %singa%   ... 
+  
   note: checking mode of constant   %singo%   ... 
+  
   => %sort convert-ssub {A tp} {M {_0 atom} term} {B {_0 atom} tp}
     {EM {_0 eterm} eterm} {R atom} {EN eterm}
     {_0
@@ -50743,6 +52798,7 @@
               _?15 x _985 ex _986) _?16 _?17}
   
   note: checking mode of constant   _984   ... 
+  
   => %sort convert-stsub {A tp} {B {_0 atom} tp} {EB {_0 eterm} etp} {R atom}
     {EN eterm}
     {_0
@@ -50803,6 +52859,7 @@
               _?14 x _987 ex _988) _?15 _?16}
   
   note: checking mode of constant   _986   ... 
+  
   => %sort convert-ssub1 {A tp} {B {_0 atom} tp} {M {_0 atom} {_988 atom} term}
     {C {_0 atom} {_988 atom} tp} {EM {_0 eterm} {_988 eterm} eterm} {R atom}
     {EN eterm}
@@ -50928,6 +52985,7 @@
              _?19 y _989 ey _990}
   
   note: checking mode of constant   _988   ... 
+  
   => %sort convert-tsub-reduce {A tp} {B {_0 atom} tp} {EB {_0 eterm} etp}
     {N term} {EN eterm} {Bx tp} {EC etp}
     {_0
@@ -50977,6 +53035,7 @@
              DconvertB x _1000 ex _1001) DconvertN DsubBx DconvertBx' Dreduce
   
   note: checking mode of constant   _990   ... 
+  
   => %sort convert-sub-reduce {A tp} {M {_0 atom} term} {B {_0 atom} tp}
     {EM {_0 eterm} eterm} {N term} {EN eterm} {Mx term} {Bx tp} {EO eterm}
     {_0
@@ -51030,6 +53089,7 @@
           Dreduce
   
   note: checking mode of constant   _991   ... 
+  
   => %sort ewfs {_0 etp}
   
   => %sort eofs {_0 eterm} {_992 etp}
@@ -51097,12 +53157,14 @@
       {_?1 eterm} {_?2 etp} {D eofs _?1 _?2} eofs-resp eterm-eq/i etp-eq/i D D
   
   note: checking mode of constant   _992   ... 
+  
   => %sort ewfs-resp {A etp} {A' etp} {_0 etp-eq A A'} {_993 ewfs A}
     {_994 ewfs A'}
   
   => %term _993 {_?1 etp} {D ewfs _?1} ewfs-resp etp-eq/i D D
   
   note: checking mode of constant   _993   ... 
+  
   => %sort eofs-to-eof {M eterm} {A etp} {_0 eofs M A} {_994 eof M A}
   
   => %sort ewfs-to-ewf {A etp} {_0 ewfs A} {_994 ewf A}
@@ -51205,19 +53267,33 @@
         ewfs-to-ewf (ewfs/sing D) (ewf/sing D')
   
   note: checking mode of constant   _994   ... 
+  
   note: checking mode of constant   _995   ... 
+  
   note: checking mode of constant   _996   ... 
+  
   note: checking mode of constant   _997   ... 
+  
   note: checking mode of constant   _998   ... 
+  
   note: checking mode of constant   _999   ... 
+  
   note: checking mode of constant   _1000   ... 
+  
   note: checking mode of constant   _1001   ... 
+  
   note: checking mode of constant   _1002   ... 
+  
   note: checking mode of constant   _1003   ... 
+  
   note: checking mode of constant   _1004   ... 
+  
   note: checking mode of constant   _1005   ... 
+  
   note: checking mode of constant   _1006   ... 
+  
   note: checking mode of constant   _1007   ... 
+  
   => %sort esubsts-of-gen {M eterm} {A etp} {N eterm} {B etp}
     {_0 {_0 evof M A} eofs N B}
     {_1008 {_1008 eof M A} {_1009 eofs M A} eofs N B}
@@ -51443,20 +53519,35 @@
           [d eof _?1 _?2] [d' eofs _?1 _?2] ewfs/sing (D' d d')
   
   note: checking mode of constant   %varsam%   ... 
+  
   note: checking mode of constant   %varoth%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %subsum%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort esubsts {A etp} {M {_0 eterm} eterm} {B {_0 eterm} etp} {N eterm}
     {_0 {x eterm} {_0 evof x A} eofs (M x) (B x)} {_1008 eofs N A}
     {_1009 eofs (M N) (B N)}
@@ -51474,6 +53565,7 @@
         esubsts ([x eterm] [_1009 evof x _?2] D1 x _1009) D2 (D1' D2' D2)
   
   note: checking mode of constant   _1008   ... 
+  
   => %sort esubsts-wf {A etp} {B {_0 eterm} etp} {N eterm}
     {_0 {x eterm} {_0 evof x A} ewfs (B x)} {_1009 eofs N A} {_1010 ewfs (B N)}
   
@@ -51489,6 +53581,7 @@
         esubsts-wf ([x eterm] [_1010 evof x _?2] D1 x _1010) D2 (D1' D2' D2)
   
   note: checking mode of constant   _1009   ... 
+  
   => %sort tequiv-t-invert {C etp} {_0 tequiv C et} {_1010 etp-eq C et}
   
   => %sort tequiv-t-invert' {C etp} {_0 tequiv et C} {_1010 etp-eq C et}
@@ -51528,13 +53621,21 @@
   => %term _1017 tequiv-t-invert' tequiv/t etp-eq/i
   
   note: checking mode of constant   _1010   ... 
+  
   note: checking mode of constant   _1011   ... 
+  
   note: checking mode of constant   _1012   ... 
+  
   note: checking mode of constant   _1013   ... 
+  
   note: checking mode of constant   _1014   ... 
+  
   note: checking mode of constant   _1015   ... 
+  
   note: checking mode of constant   _1016   ... 
+  
   note: checking mode of constant   _1017   ... 
+  
   => %sort tequiv-sing-invert {C etp} {M eterm} {M' eterm} {_0 tequiv C (esing M)}
     {_1018 etp-eq C (esing M')} {_1019 equiv M' M et}
   
@@ -51602,13 +53703,21 @@
         tequiv-sing-invert' (tequiv/sing D) etp-eq/i (equiv/symm D)
   
   note: checking mode of constant   _1018   ... 
+  
   note: checking mode of constant   _1019   ... 
+  
   note: checking mode of constant   _1020   ... 
+  
   note: checking mode of constant   _1021   ... 
+  
   note: checking mode of constant   _1022   ... 
+  
   note: checking mode of constant   _1023   ... 
+  
   note: checking mode of constant   _1024   ... 
+  
   note: checking mode of constant   _1025   ... 
+  
   => %sort tequiv-pi-invert {C etp} {A etp} {B {_0 eterm} etp} {A' etp}
     {B' {_0 eterm} etp} {_0 tequiv C (epi A [_0 eterm] B _0)}
     {_1026 etp-eq C (epi A' [_1026 eterm] B' _1026)} {_1027 tequiv A' A}
@@ -51740,13 +53849,21 @@
           (tequiv/symm D1) [x eterm] [d evof x A] tequiv/symm (D2' x d)
   
   note: checking mode of constant   _1026   ... 
+  
   note: checking mode of constant   _1027   ... 
+  
   note: checking mode of constant   _1028   ... 
+  
   note: checking mode of constant   _1029   ... 
+  
   note: checking mode of constant   _1030   ... 
+  
   note: checking mode of constant   _1031   ... 
+  
   note: checking mode of constant   _1032   ... 
+  
   note: checking mode of constant   _1033   ... 
+  
   => %sort tequiv-sigma-invert {C etp} {A etp} {B {_0 eterm} etp} {A' etp}
     {B' {_0 eterm} etp} {_0 tequiv C (esigma A [_0 eterm] B _0)}
     {_1034 etp-eq C (esigma A' [_1034 eterm] B' _1034)} {_1035 tequiv A' A}
@@ -51880,13 +53997,21 @@
           (tequiv/symm D1) [x eterm] [d evof x A] tequiv/symm (D2' x d)
   
   note: checking mode of constant   _1034   ... 
+  
   note: checking mode of constant   _1035   ... 
+  
   note: checking mode of constant   _1036   ... 
+  
   note: checking mode of constant   _1037   ... 
+  
   note: checking mode of constant   _1038   ... 
+  
   note: checking mode of constant   _1039   ... 
+  
   note: checking mode of constant   _1040   ... 
+  
   note: checking mode of constant   _1041   ... 
+  
   => %sort eofs-lam-invert {C etp} {M {_0 eterm} eterm} {A etp} {B {_0 eterm} etp}
     {_0 eofs (elam C ([_0 eterm] M _0)) (epi A [_0 eterm] B _0)}
     {_1042 tequiv A C} {_1043 {x eterm} {_1043 evof x A} eofs (M x) (B x)}
@@ -51936,7 +54061,9 @@
           [x eterm] [d evof x A] eofs/equiv (DequivB' x d) (DeofM' x d)
   
   note: checking mode of constant   _1042   ... 
+  
   note: checking mode of constant   _1043   ... 
+  
   => %sort eofs-pair-invert {M eterm} {N eterm} {A etp} {B {_0 eterm} etp}
     {_0 eofs (epair M N) (esigma A [_0 eterm] B _0)} {_1044 eofs M A}
     {_1045 eofs N (B M)} {_1046 {x eterm} {_1046 evof x A} ewf (B x)}
@@ -51984,7 +54111,9 @@
           (eofs/equiv DequivBx DeofN) [x eterm] [_1052 evof x A] DwfB' x _1052
   
   note: checking mode of constant   _1044   ... 
+  
   note: checking mode of constant   _1045   ... 
+  
   => %sort reduce-equiv {M eterm} {A etp} {N eterm} {_0 eofs M A}
     {_1046 reduce M N} {_1047 eofs N A} {_1048 equiv M N A}
   
@@ -52368,28 +54497,51 @@
           (equiv/equiv (tequiv/symm Dtequiv) (equiv/beta2 DofN DofM))
   
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %equiv%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %equiv%   ... 
+  
   note: checking mode of constant   %atom%   ... 
+  
   note: checking mode of constant   %beta%   ... 
+  
   note: checking mode of constant   %equiv%   ... 
+  
   note: checking mode of constant   %atom%   ... 
+  
   note: checking mode of constant   %beta%   ... 
+  
   note: checking mode of constant   %equiv%   ... 
+  
   note: checking mode of constant   %atom%   ... 
+  
   note: checking mode of constant   %beta%   ... 
+  
   => %sort convert-topen {Ac ctp} {A tp} {EA etp} {_0 topen Ac A}
     {_1046 tconvert A EA} {_1047 etopen Ac EA}
   
@@ -52409,7 +54561,9 @@
           (etopen/pi Detopen2 Detopen1)
   
   note: checking mode of constant   _1046   ... 
+  
   note: checking mode of constant   _1047   ... 
+  
   => %sort convert-kof {K constant} {A tp} {EA etp} {_0 kof K A}
     {_1048 tconvert A EA} {_1049 ekof K EA}
   
@@ -52424,6 +54578,7 @@
         convert-kof (kof/i Dopen Dckof) Dconvert (ekof/i Deopen' Dckof)
   
   note: checking mode of constant   _1048   ... 
+  
   => %sort vconvert-fun {EX eterm} {X atom} {EX' eterm} {_0 vtrans EX X}
     {_1049 vtrans EX' X} {_1050 eterm-eq EX EX'}
   
@@ -52431,6 +54586,7 @@
     _1049 {_?1 eterm} {_?2 atom} {D vtrans _?1 _?2} vconvert-fun D D eterm-eq/i
   
   note: checking mode of constant   _1049   ... 
+  
   => %sort convert-reg-strong {M term} {A tp} {EM eterm} {EA etp}
     {_0 convert M A EM} {_1050 tconvert A EA} {_1051 ewfs EA}
     {_1052 eofs EM EA}
@@ -52624,6 +54780,7 @@
           [ex eterm] [_0 evof ex _?1] D ex _0
   
   note: checking mode of constant   _1050   ... 
+  
   => %term
     lam
       {EA etp} {EM {_0 eterm} eterm} {EB {_0 eterm} etp} {EA' etp}
@@ -52712,19 +54869,33 @@
           (ewfs/sing Dof) Dof'
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %at%   ... 
+  
   => %sort tconvert-reg {A tp} {EA etp} {_0 tconvert A EA} {_1051 ewf EA}
   
   => %term
@@ -52734,6 +54905,7 @@
         {_1051 tconvert-reg-strong Dconvert Dwfs} tconvert-reg Dconvert Dwf
   
   note: checking mode of constant   _1051   ... 
+  
   => %sort convert-reg {M term} {A tp} {EM eterm} {EA etp} {_0 convert M A EM}
     {_1052 tconvert A EA} {_1053 eof EM EA}
   
@@ -52747,6 +54919,7 @@
         convert-reg Dconvert Dtconvert Dof
   
   note: checking mode of constant   _1052   ... 
+  
   => %sort aconvert-reg {R atom} {A tp} {EM eterm} {EA etp} {_0 aconvert R A EM}
     {_1053 tconvert A EA} {_1054 eof EM EA}
   
@@ -52759,6 +54932,7 @@
         aconvert-reg Dconvert Dtconvert Dof
   
   note: checking mode of constant   _1053   ... 
+  
   => %sort aconvert-reg' {R atom} {A tp} {EM eterm} {EA etp} {_0 aconvert R A EM}
     {_1054 tconvert A EA} {_1055 eof EM EA}
   
@@ -52773,6 +54947,7 @@
         aconvert-reg' Dconvert Dtconvert Dof
   
   note: checking mode of constant   _1054   ... 
+  
   => %sort convert-tsub {A tp} {B {_0 atom} tp} {EB {_0 eterm} etp} {N term}
     {EN eterm} {Bx tp} {EC etp}
     {_0
@@ -52816,6 +54991,7 @@
              DconvertB x _1063 ex _1064) DconvertN Dsub DconvertBx Dequiv
   
   note: checking mode of constant   _1055   ... 
+  
   => %sort convert-sub {A tp} {M {_0 atom} term} {B {_0 atom} tp}
     {EM {_0 eterm} eterm} {N term} {EN eterm} {Mx term} {Bx tp} {EO eterm}
     {EC etp}
@@ -52889,6 +55065,7 @@
           DconvertBx (equiv/equiv Dtequiv Dequiv)
   
   note: checking mode of constant   _1056   ... 
+  
   => %sort convert-subtype {A tp} {B tp} {M {_0 atom} term} {EA etp} {EB etp}
     {EM {_0 eterm} eterm} {_0 subtype A B [_0 atom] M _0} {_1057 tconvert A EA}
     {_1058 tconvert B EB} {_1059 subtp EA EB}
@@ -53457,10 +55634,15 @@
           [ex eterm] [_1061 evof ex (esing EM)] Dequiv ex _1061
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing_t%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort convert-subtype' {A tp} {B tp} {_?1 {_0 atom} term} {EA etp} {EB etp}
     {_0 subtype A B [_0 atom] _?1 _0} {_1057 tconvert A EA}
     {_1058 tconvert B EB} {_1059 subtp EA EB}
@@ -53481,6 +55663,7 @@
         convert-subtype' D1 D2 D3 D
   
   note: checking mode of constant   _1057   ... 
+  
   => %sort convert-subtype-equiv {A tp} {B tp} {N term} {EA etp} {EB etp}
     {EN eterm} {EM eterm} {_0 subtype A B [_0 atom] N} {_1058 tconvert A EA}
     {_1059 tconvert B EB} {_1060 convert N B EN} {_1061 eof EM EA}
@@ -53516,6 +55699,7 @@
           DequivM
   
   note: checking mode of constant   _1058   ... 
+  
   => %sort expand-convert {R atom} {A tp} {N term} {EM eterm} {EN eterm} {
     EA etp} {_0 expand R A N} {_1059 aconvert R A EM} {_1060 convert N A EN}
     {_1061 tconvert A EA} {_1062 equiv EM EN EA}
@@ -53712,9 +55896,13 @@
           (equiv/symm (equiv/sing (equiv/symm (equiv/singelim Deof))))
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort self-convert {M term} {A tp} {B tp} {EM eterm} {EA etp} {EN eterm}
     {EB etp} {_0 self M A B} {_1059 convert M A EM} {_1060 tconvert A EA}
     {_1061 eof EN EA} {_1062 equiv EN EM EA} {_1063 tconvert B EB}
@@ -53866,9 +56054,13 @@
           (tconvert/sing Dconvert') Deof Dequiv (tconvert/sing Dconvert) Deof'
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort sound-trans {EM eterm} {A tp} {EA etp} {_0 trans EM A}
     {_1059 tconvert A EA} {_1060 eof EM EA}
   
@@ -54226,17 +56418,29 @@
           (tconvert/sing Dconvert) (tequiv/sing (equiv/singelim DeofM))
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort sound-trans' {EM eterm} {A tp} {EA etp} {_0 trans EM A}
     {_1059 tconvert A EA} {_1060 eof EM EA}
   
@@ -54250,6 +56454,7 @@
         {_1060 sound-trans Dtrans Dconv' Dof'} sound-trans' Dtrans Dconv Dof
   
   note: checking mode of constant   _1059   ... 
+  
   => %sort sound-ttrans' {EA etp} {A tp} {EA' etp} {_0 ttrans EA A}
     {_1060 tconvert A EA'} {_1061 tequiv EA EA'}
   
@@ -54265,6 +56470,7 @@
         sound-ttrans' Dtrans Dconv Dequiv
   
   note: checking mode of constant   _1060   ... 
+  
   => %sort il-soundness {EM eterm} {A tp} {EN eterm} {B tp} {EC etp} {C tp}
     {O {_0 atom} term} {_0 trans EM A} {_1061 trans EN B} {_1062 ttrans EC C}
     {_1063 subtype A C [_1063 atom] O _1063}
@@ -54303,6 +56509,7 @@
              (equiv/trans (equiv/symm DequivN) DequivM))
   
   note: checking mode of constant   _1061   ... 
+  
   => %sort il-soundness-tp {EA etp} {A tp} {EA' etp} {_0 ttrans EA A}
     {_1062 ttrans EA' A} {_1063 tequiv EA EA'}
   
@@ -54321,6 +56528,7 @@
           (tequiv/trans (tequiv/symm DequivA') DequivA'')
   
   note: checking mode of constant   _1062   ... 
+  
   => %sort etopen-fun {Ac ctp} {A etp} {A' etp} {_0 etopen Ac A}
     {_1063 etopen Ac A'} {_1064 etp-eq A A'}
   
@@ -54338,7 +56546,9 @@
         etopen-fun (etopen/pi D2 D1) (etopen/pi D2' D1') Deq
   
   note: checking mode of constant   _1063   ... 
+  
   note: checking mode of constant   _1064   ... 
+  
   => %sort trans-topen {Ac ctp} {EA etp} {A tp} {_0 etopen Ac EA}
     {_1065 ttrans EA A} {_1066 topen Ac A}
   
@@ -54358,7 +56568,9 @@
           (topen/pi Dopen2' Dopen1')
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   => %sort kof-comp {C constant} {EA etp} {A tp} {_0 ekof C EA}
     {_1065 ttrans EA A} {_1066 kof C A}
   
@@ -54373,6 +56585,7 @@
         kof-comp (ekof/i Deopen Dckof) Dtrans (kof/i Dopen' Dckof)
   
   note: checking mode of constant   _1065   ... 
+  
   => %sort vof-comp {EM eterm} {EA etp} {A tp} {X atom} {_0 evof EM EA}
     {_1066 ttrans EA A} {_1067 vtrans EM X} {_1068 vof X A}
   
@@ -56858,50 +59071,95 @@
           DsubtypeDB
   
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %extpi%   ... 
+  
   note: checking mode of constant   %extsig%   ... 
+  
   note: checking mode of constant   %sub%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %reflex%   ... 
+  
   note: checking mode of constant   %trans%   ... 
+  
   note: checking mode of constant   %sing_t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %refl%   ... 
+  
   note: checking mode of constant   %symm%   ... 
+  
   note: checking mode of constant   %trans%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %refl%   ... 
+  
   note: checking mode of constant   %symm%   ... 
+  
   note: checking mode of constant   %trans%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %singel%   ... 
+  
   note: checking mode of constant   %extpi%   ... 
+  
   note: checking mode of constant   %extpiw%   ... 
+  
   note: checking mode of constant   %extsig%   ... 
+  
   note: checking mode of constant   %subsum%   ... 
+  
   note: checking mode of constant   %beta%   ... 
+  
   note: checking mode of constant   %beta1%   ... 
+  
   note: checking mode of constant   %beta2%   ... 
+  
   => %sort of-comp' {EM eterm} {EA etp} {A tp} {B tp} {M term} {_0 eof EM EA}
     {_1066 ttrans EA A} {_1067 trans EM B} {_1068 subtype B A [_1068 atom] M}
   
@@ -56917,6 +59175,7 @@
         of-comp' Dof DtransA DtransM Dsubtype'
   
   note: checking mode of constant   _1066   ... 
+  
   => %sort equiv-comp' {EM eterm} {EN eterm} {EA etp} {A tp} {B tp} {C tp}
     {M term} {_0 equiv EM EN EA} {_1067 ttrans EA A} {_1068 trans EM B}
     {_1069 trans EN C} {_1070 subtype B A [_1070 atom] M}
@@ -56939,6 +59198,7 @@
         equiv-comp' Dequiv DtransA DtransM DtransN DsubtypeBA' DsubtypeCA'
   
   note: checking mode of constant   _1067   ... 
+  
   => %sort reduce-fun {M eterm} {N eterm} {N' eterm} {_0 reduce M N}
     {_1068 reduce M N'} {_1069 eterm-eq N N'}
   
@@ -57108,23 +59368,41 @@
         reduce-pi2-fun reduce-pi2/beta reduce-pi2/beta eterm-eq/i
   
   note: checking mode of constant   _1068   ... 
+  
   note: checking mode of constant   _1069   ... 
+  
   note: checking mode of constant   _1070   ... 
+  
   note: checking mode of constant   _1071   ... 
+  
   note: checking mode of constant   _1072   ... 
+  
   note: checking mode of constant   _1073   ... 
+  
   note: checking mode of constant   _1074   ... 
+  
   note: checking mode of constant   _1075   ... 
+  
   note: checking mode of constant   _1076   ... 
+  
   note: checking mode of constant   _1077   ... 
+  
   note: checking mode of constant   _1078   ... 
+  
   note: checking mode of constant   _1079   ... 
+  
   note: checking mode of constant   _1080   ... 
+  
   note: checking mode of constant   _1081   ... 
+  
   note: checking mode of constant   _1082   ... 
+  
   note: checking mode of constant   _1083   ... 
+  
   note: checking mode of constant   _1084   ... 
+  
   note: checking mode of constant   _1085   ... 
+  
   => %sort can-selfify {R atom} {A tp} {M term} {As tp} {EA etp} {ER eterm}
     {EM eterm} {EAs etp} {_0 expand R A M} {_1086 self M A As}
     {_1087 tconvert A EA} {_1088 aconvert R A ER} {_1089 convert M A EM}
@@ -57265,9 +59543,13 @@
           (selfify/sigma Dselfify2 Dselfify1)
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   => %sort selfify-fun {M eterm} {A etp} {N eterm} {B etp} {N' eterm} {B' etp}
     {_0 selfify M A N B} {_1086 selfify M A N' B'} {_1087 eterm-eq N N'}
     {_1088 etp-eq B B'}
@@ -57335,9 +59617,13 @@
         selfify-fun selfify/sing selfify/sing eterm-eq/i etp-eq/i
   
   note: checking mode of constant   _1086   ... 
+  
   note: checking mode of constant   _1087   ... 
+  
   note: checking mode of constant   _1088   ... 
+  
   note: checking mode of constant   _1089   ... 
+  
   => %sort can-coerce {A tp} {EA etp} {B tp} {EB etp} {M {_0 atom} term}
     {EM {_0 eterm} eterm} {_0 tconvert A EA} {_1090 tconvert B EB}
     {_1091 subtype A B [_1091 atom] M _1091}
@@ -57635,10 +59921,15 @@
              [_1095 vtrans _1094 _1092] convert/sing DconvR) Dcoerce
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing_t%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort can-coerce' {A tp} {EA etp} {B tp} {EB etp} {M {_0 atom} term}
     {EM {_0 eterm} eterm} {_0 tconvert A EA} {_1090 tconvert B EB}
     {_1091 subtype A B [_1091 atom] M _1091}
@@ -57673,6 +59964,7 @@
              DconvM x _1092 ex _1093) Dcoerce'
   
   note: checking mode of constant   _1090   ... 
+  
   => %sort coerce-fun {A etp} {B etp} {M {_0 eterm} eterm} {M' {_0 eterm} eterm}
     {_0 coerce A B [_0 eterm] M _0} {_1091 coerce A B [_1091 eterm] M' _1091}
     {_1092 {x eterm} eterm-eq (M x) (M' x)}
@@ -57806,10 +60098,15 @@
     _1095 {_?1 eterm} coerce-fun coerce/sing coerce/sing [_0 eterm] eterm-eq/i
   
   note: checking mode of constant   _1091   ... 
+  
   note: checking mode of constant   _1092   ... 
+  
   note: checking mode of constant   _1093   ... 
+  
   note: checking mode of constant   _1094   ... 
+  
   note: checking mode of constant   _1095   ... 
+  
   => %sort coerce-convert {A tp} {EA etp} {B tp} {EB etp} {EM {_0 eterm} eterm}
     {M {_0 atom} term} {_0 tconvert A EA} {_1096 tconvert B EB}
     {_1097 coerce EA EB [_1097 eterm] EM _1097}
@@ -58028,10 +60325,15 @@
           D
   
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing_t%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort coerce-convert' {A tp} {EA etp} {B tp} {EB etp} {EM {_0 eterm} eterm}
     {M {_0 atom} term} {_0 tconvert A EA} {_1096 tconvert B EB}
     {_1097 coerce EA EB [_1097 eterm] EM _1097}
@@ -58068,6 +60370,7 @@
             DconvM' x _1099 ex _1100
   
   note: checking mode of constant   _1096   ... 
+  
   => %sort canonize-comp {EM eterm} {A tp} {EA etp} {_0 trans EM A}
     {_1097 tconvert A EA} {_1098 canonize EM EA}
   
@@ -58341,17 +60644,29 @@
           (tcanonize/sing Dcanon)
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   => %sort canonize-comp' {EM eterm} {A tp} {EA etp} {_0 trans EM A}
     {_1097 tconvert A EA} {_1098 canonize EM EA}
   
@@ -58366,6 +60681,7 @@
         canonize-comp' Dtrans Dconv Dcanon'
   
   note: checking mode of constant   _1097   ... 
+  
   => %sort tcanonize-comp' {EA etp} {A tp} {EA' etp} {_0 ttrans EA A}
     {_1098 tconvert A EA'} {_1099 tcanonize EA EA'}
   
@@ -58380,6 +60696,7 @@
         tcanonize-comp' Dtrans Dconv Dcanon'
   
   note: checking mode of constant   _1098   ... 
+  
   => %sort ekof-fun {C constant} {A etp} {A' etp} {_0 ekof C A} {_1099 ekof C A'}
     {_1100 etp-eq A A'}
   
@@ -58391,6 +60708,7 @@
         ekof-fun (ekof/i Detopen Dckof) (ekof/i Detopen' Dckof) Deq
   
   note: checking mode of constant   _1099   ... 
+  
   => %sort canonize-fun {M eterm} {A etp} {A' etp} {_0 canonize M A}
     {_1100 canonize M A'} {_1101 etp-eq A A'}
   
@@ -58601,17 +60919,29 @@
         tcanonize-fun (tcanonize/sing D) (tcanonize/sing D') Deq
   
   note: checking mode of constant   _1100   ... 
+  
   note: checking mode of constant   _1101   ... 
+  
   note: checking mode of constant   _1102   ... 
+  
   note: checking mode of constant   _1103   ... 
+  
   note: checking mode of constant   _1104   ... 
+  
   note: checking mode of constant   _1105   ... 
+  
   note: checking mode of constant   _1106   ... 
+  
   note: checking mode of constant   _1107   ... 
+  
   note: checking mode of constant   _1108   ... 
+  
   note: checking mode of constant   _1109   ... 
+  
   note: checking mode of constant   _1110   ... 
+  
   note: checking mode of constant   _1111   ... 
+  
   => %sort etopen-reg {Ac ctp} {A etp} {_0 etopen Ac A} {_1112 ewf A}
   
   => %term _1112 etopen-reg etopen/t ewf/t
@@ -58625,7 +60955,9 @@
           (ewf/pi ([_1114 eterm] [_1115 evof _1114 _?4] D2') D1')
   
   note: checking mode of constant   _1112   ... 
+  
   note: checking mode of constant   _1113   ... 
+  
   => %sort ekof-reg {K constant} {A etp} {_0 ekof K A} {_1114 ewf A}
   
   => %term
@@ -58635,6 +60967,7 @@
         ekof-reg (ekof/i Dopen _?4) Dwf
   
   note: checking mode of constant   _1114   ... 
+  
   => %sort canonize-trans {EM eterm} {EA etp} {A tp} {_0 canonize EM EA}
     {_1115 trans EM A}
   
@@ -58890,19 +61223,33 @@
         tcanonize-trans' Dcanon Dtrans Dconv'
   
   note: checking mode of constant   %const%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %var%   ... 
+  
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   _1115   ... 
+  
   note: checking mode of constant   _1116   ... 
+  
   => %sort canonize-sound {EM eterm} {EA etp} {_0 canonize EM EA}
     {_1117 eof EM EA}
   
@@ -58914,6 +61261,7 @@
         {_1117 canonize-trans' Dcanon Dtrans Dconv} canonize-sound Dcanon Dof
   
   note: checking mode of constant   _1117   ... 
+  
   => %sort tcanonize-sound {EA etp} {EB etp} {_0 tcanonize EA EB}
     {_1118 tequiv EA EB}
   
@@ -58926,6 +61274,7 @@
         tcanonize-sound Dcanon Dequiv
   
   note: checking mode of constant   _1118   ... 
+  
   => %sort canonize-idem {EM eterm} {EA etp} {_0 canonize EM EA}
     {_1119 tcanonize EA EA}
   
@@ -58938,6 +61287,7 @@
         {_1120 canonize-trans' Dcanon _?1 Dconv} canonize-idem Dcanon Dcanon'
   
   note: checking mode of constant   _1119   ... 
+  
   => %sort tcanonize-idem {EA etp} {EB etp} {_0 tcanonize EA EB}
     {_1120 tcanonize EB EB}
   
@@ -58950,6 +61300,7 @@
         {_1121 tcanonize-trans' Dcanon _?4 Dconv} tcanonize-idem Dcanon Dcanon'
   
   note: checking mode of constant   _1120   ... 
+  
   => %sort check-eof-comp {EM eterm} {EA etp} {_0 eof EM EA}
     {_1121 check-eof EM EA}
   
@@ -58974,6 +61325,7 @@
         check-eof-comp Deof (check-eof/i Dcoerce DcanonA DcanonM)
   
   note: checking mode of constant   _1121   ... 
+  
   => %sort check-eof-sound {EM eterm} {EA etp} {_0 check-eof EM EA}
     {_1122 eof EM EA}
   
@@ -59003,6 +61355,7 @@
           (eof/equiv (tequiv/symm Dequiv) (eof/subsume Dsubtp Deof))
   
   note: checking mode of constant   _1122   ... 
+  
   => %sort check-equiv-comp {EM eterm} {EN eterm} {EA etp} {_0 equiv EM EN EA}
     {_1123 check-equiv EM EN EA}
   
@@ -59043,6 +61396,7 @@
           (check-equiv/i DcoerceCA DcoerceBA DcanonA DcanonN DcanonM)
   
   note: checking mode of constant   _1123   ... 
+  
   => %sort canonize-coerce-equiv {EM eterm} {EA etp} {EB etp} {EC etp} {EN eterm}
     {_0 eof EM EA} {_1124 tcanonize EA EB} {_1125 canonize EM EC}
     {_1126 coerce EC EB [_1126 eterm] EN} {_1127 equiv EM EN EA}
@@ -59084,6 +61438,7 @@
           (equiv/equiv (tequiv/symm Dtequiv) Dequiv)
   
   note: checking mode of constant   _1124   ... 
+  
   => %sort check-equiv-sound {EM eterm} {EN eterm} {EA etp}
     {_0 check-equiv EM EN EA} {_1125 equiv EM EN EA}
   
@@ -59103,6 +61458,7 @@
           (equiv/trans (equiv/symm Dequiv') Dequiv)
   
   note: checking mode of constant   _1125   ... 
+  
   => %sort check-ewf-comp {EA etp} {_0 ewf EA} {_1126 check-ewf EA}
   
   => %term
@@ -59113,6 +61469,7 @@
         check-ewf-comp Dewf (check-ewf/i Dcanon)
   
   note: checking mode of constant   _1126   ... 
+  
   => %sort check-ewf-sound {EA etp} {_0 check-ewf EA} {_1127 ewf EA}
   
   => %term
@@ -59124,6 +61481,7 @@
         check-ewf-sound (check-ewf/i Dcanon) Dwf
   
   note: checking mode of constant   _1127   ... 
+  
   => %sort check-subtp-comp {A etp} {B etp} {_0 subtp A B} {_1128 check-subtp A B}
   
   => %term
@@ -59147,6 +61505,7 @@
         check-subtp-comp Dsubtp (check-subtp/i Dcoerce DcanonB DcanonA)
   
   note: checking mode of constant   _1128   ... 
+  
   => %sort check-subtp-sound {A etp} {B etp} {_0 check-subtp A B}
     {_1129 subtp A B}
   
@@ -59187,6 +61546,7 @@
              (subtp/reflex DequivA'))
   
   note: checking mode of constant   _1129   ... 
+  
   => %sort check-tequiv-comp {A etp} {B etp} {_0 tequiv A B}
     {_1130 check-tequiv A B}
   
@@ -59204,6 +61564,7 @@
         check-tequiv-comp Dequiv (check-tequiv/i DcanonB' DcanonA)
   
   note: checking mode of constant   _1130   ... 
+  
   => %sort check-tequiv-sound {A etp} {B etp} {_0 check-tequiv A B}
     {_1131 tequiv A B}
   
@@ -59228,6 +61589,7 @@
           (tequiv/trans (tequiv/symm DequivB') DequivA')
   
   note: checking mode of constant   _1131   ... 
+  
   => %sort epair-invert {M eterm} {N eterm} {A etp} {B {_0 eterm} etp}
     {_0 eof (epair M N) (esigma A [_0 eterm] B _0)} {_1132 eof M A}
     {_1133 eof N (B M)}
@@ -59316,6 +61678,7 @@
                 DsubtpDB) DeofN)
   
   note: checking mode of constant   _1132   ... 
+  
   => %sort elam-equiv-invert {A1 etp} {M1 {_0 eterm} eterm} {A2 etp}
     {M2 {_0 eterm} eterm} {A etp} {B {_0 eterm} etp}
     {_0
@@ -59620,6 +61983,7 @@
           [x eterm] [_1179 evof x EA] Dequiv' x _1179
   
   note: checking mode of constant   _1133   ... 
+  
   => %sort nullary-trans {K constant} {B tp} {N term} {_0 kof K t}
     {_1134 trans (econst K) B} {_1135 subtype B t [_1135 atom] N}
     {_1136 term-eq N (at (const K))}
@@ -59638,6 +62002,7 @@
         nullary-trans Dkof DtransK DsubtypeB (Deq aca)
   
   note: checking mode of constant   _1134   ... 
+  
   => %sort trans-kof-invert {K constant} {_?1 tp} {A tp} {_0 trans (econst K) _?1}
     {_1135 kof K A} {_1136 wf A}
   
@@ -59650,6 +62015,7 @@
         trans-kof-invert (trans/const _?6 _?7 Dwf Dkof) Dkof' Dwf'
   
   note: checking mode of constant   _1135   ... 
+  
   => %sort unary-trans {K constant} {A tp} {EM eterm} {B tp} {N term} {C tp}
     {M term} {_0 kof K (pi A [_0 atom] t)} {_1136 trans (eapp (econst K) EM) B}
     {_1137 subtype B t [_1137 atom] N} {_1138 trans EM C}
@@ -59704,6 +62070,7 @@
           DsubtypeBx DtransM DsubtypeCA (Deq aca)
   
   note: checking mode of constant   _1136   ... 
+  
   => %sort trans-forall-invert {EA etp} {_?1 tp} {_?2 tp}
     {_0 trans (eforall EA) _?1} {_1137 ttrans EA _?2}
   
@@ -59714,6 +62081,7 @@
         trans-forall-invert (trans/forall _?5 _?6 Dtrans) Dtrans
   
   note: checking mode of constant   _1137   ... 
+  
   => %sort forall-trans {EA etp} {EM eterm} {B tp} {N term} {A tp} {C tp} {
     M term} {_0 trans (eapp (eforall EA) EM) B}
     {_1138 subtype B t [_1138 atom] N} {_1139 ttrans EA A} {_1140 trans EM C}
@@ -59767,6 +62135,7 @@
           DtransA DtransM DsubtypeDB' (DeqN aca)
   
   note: checking mode of constant   _1138   ... 
+  
   => %sort binary-trans {K constant} {A tp} {B {_0 atom} tp} {EM eterm} {EN eterm}
     {C tp} {O term} {D tp} {M term} {Bx tp} {E tp} {N term}
     {_0 kof K (pi A [x atom] pi (B x) [_0 atom] t)}
@@ -59892,6 +62261,7 @@
           DtransM DsubtypeDA DsubBx DtransN DsubtypeEB (Deq aca)
   
   note: checking mode of constant   _1139   ... 
+  
   => %sort eof-const-invert {K constant} {A etp} {_?1 etp} {_0 ekof K A}
     {_1140 eof (econst K) _?1} {_1141 ewf A}
   
@@ -59909,6 +62279,7 @@
         eof-const-invert Dkof Dof Dwf'
   
   note: checking mode of constant   _1140   ... 
+  
   => %sort eof-app-subterms {M eterm} {N eterm} {_?1 etp} {_?2 etp} {_?3 etp}
     {_0 eof (eapp M N) _?1} {_1141 eof M _?2} {_1142 eof N _?3}
   
@@ -59929,6 +62300,7 @@
         eof-app-subterms Dof DofM DofN
   
   note: checking mode of constant   _1141   ... 
+  
   => %sort unary-equiv-inversion {C constant} {A etp} {M1 eterm} {M2 eterm}
     {_0 ekof C (epi A [_0 eterm] et)}
     {_1142 equiv (eapp (econst C) M1) (eapp (econst C) M2) et}
@@ -59984,6 +62356,7 @@
         unary-equiv-inversion Dekof DequivApp DequivM
   
   note: checking mode of constant   _1142   ... 
+  
   => %sort binary-equiv-inversion {C constant} {A etp} {B {_0 eterm} etp}
     {M1 eterm} {N1 eterm} {M2 eterm} {N2 eterm}
     {_0 ekof C (epi A [x eterm] epi (B x) [_0 eterm] et)}
@@ -60091,6 +62464,7 @@
         binary-equiv-inversion Dekof DequivApp DequivM DequivN
   
   note: checking mode of constant   _1143   ... 
+  
   => %sort eof-forall-invert {A etp} {_?1 etp} {_0 eof (eforall A) _?1}
     {_1144 ewf A}
   
@@ -60108,6 +62482,7 @@
         eof-forall-invert Dof Dwf
   
   note: checking mode of constant   _1144   ... 
+  
   => %sort forall-equiv-inversion {A1 etp} {M1 eterm} {A2 etp} {M2 eterm}
     {_0 equiv (eapp (eforall A1) M1) (eapp (eforall A2) M2) et}
     {_1145 tequiv A1 A2} {_1146 equiv M1 M2 (epi A1 [_1146 eterm] et)}
@@ -60168,6 +62543,7 @@
         forall-equiv-inversion DequivApp DequivA DequivM
   
   note: checking mode of constant   _1145   ... 
+  
   => %sort nullary-equiv-head {C constant} {C' constant} {_0 ekof C et}
     {_1146 ekof C' et} {_1147 equiv (econst C) (econst C') et}
     {_1148 constant-eq C C'}
@@ -60195,6 +62571,7 @@
              DsubtypeB2} nullary-equiv-head Dekof1 Dekof2 DequivApp DeqK
   
   note: checking mode of constant   _1146   ... 
+  
   => %sort unary-equiv-head {C constant} {A etp} {C' constant} {A' etp} {M eterm}
     {M' eterm} {_0 ekof C (epi A [_0 eterm] et)}
     {_1147 ekof C' (epi A' [_1147 eterm] et)}
@@ -60261,6 +62638,7 @@
         unary-equiv-head Dekof1 Dekof2 DequivApp DeqK
   
   note: checking mode of constant   _1147   ... 
+  
   => %sort binary-equiv-head {C constant} {A etp} {B {_0 eterm} etp} {C' constant}
     {A' etp} {B' {_0 eterm} etp} {M eterm} {N eterm} {M' eterm} {N' eterm}
     {_0 ekof C (epi A [x eterm] epi (B x) [_0 eterm] et)}
@@ -60381,6 +62759,7 @@
         binary-equiv-head Dekof1 Dekof2 DequivApp DeqK
   
   note: checking mode of constant   _1148   ... 
+  
   => %sort eq-const-app-contra {_?1 constant} {_?2 atom} {_?3 term}
     {_0 atom-eq (const _?1) (app _?2 _?3)} {_1149 false}
   
@@ -60431,6 +62810,7 @@
         nullary-unary-equiv Dekof1 Dekof2 DequivApp D
   
   note: checking mode of constant   _1149   ... 
+  
   => %sort nullary-binary-equiv {C constant} {C' constant} {A' etp}
     {B' {_0 eterm} etp} {M' eterm} {N' eterm} {_0 ekof C et}
     {_1150 ekof C' (epi A' [x eterm] epi (B' x) [_1150 eterm] et)}
@@ -60502,6 +62882,7 @@
         nullary-binary-equiv Dekof1 Dekof2 DequivApp D
   
   note: checking mode of constant   _1150   ... 
+  
   => %sort unary-binary-equiv {C constant} {A etp} {C' constant} {A' etp}
     {B' {_0 eterm} etp} {M eterm} {M' eterm} {N' eterm}
     {_0 ekof C (epi A [_0 eterm] et)}
@@ -60597,6 +62978,7 @@
         unary-binary-equiv Dekof1 Dekof2 DequivApp D
   
   note: checking mode of constant   _1151   ... 
+  
   => %sort nullary-forall-equiv {C constant} {A etp} {M' eterm} {_0 ekof C et}
     {_1152 equiv (econst C) (eapp (eforall A) M') et} {_1153 false}
   
@@ -60631,6 +63013,7 @@
         nullary-forall-equiv Dekof1 DequivApp D
   
   note: checking mode of constant   _1152   ... 
+  
   => %sort eq-const-forall-contra {_?1 constant} {_?2 tp}
     {_0 atom-eq (const _?1) (forall _?2)} {_1153 false}
   
@@ -60683,6 +63066,7 @@
         unary-forall-equiv Dekof1 DequivApp Dfalse
   
   note: checking mode of constant   _1153   ... 
+  
   => %sort eq-app-forall-contra {_?1 atom} {_?2 term} {_?3 tp}
     {_0 atom-eq (app _?1 _?2) (forall _?3)} {_1154 false}
   
@@ -60768,6 +63152,7 @@
         binary-forall-equiv Dekof1 DequivApp Dfalse
   
   note: checking mode of constant   _1154   ... 
+  
   => %sort uninhabited
   
   => %sort met
@@ -61218,7 +63603,9 @@
         loc-less-pred (loc-less/s LL) (loc-less/s LL')
   
   note: checking mode of constant   _1155   ... 
+  
   note: checking mode of constant   _1156   ... 
+  
   => %sort loc-less-immsucc {L loc} {_0 loc-less L (loc/s L)}
   
   => %term _1157 loc-less-immsucc loc/z loc-less/z
@@ -61229,7 +63616,9 @@
         loc-less-immsucc (loc/s L) (loc-less/s LL')
   
   note: checking mode of constant   _1157   ... 
+  
   note: checking mode of constant   _1158   ... 
+  
   => %sort loc-seq-or-neq-s {L1 loc} {L2 loc} {_0 loc-seq-or-neq L1 L2}
     {_1159 loc-seq-or-neq (loc/s L1) (loc/s L2)}
   
@@ -61252,8 +63641,11 @@
           (loc-seq-or-neq/neq (loc-neq/r (loc-less/s LS)))
   
   note: checking mode of constant   _1159   ... 
+  
   note: checking mode of constant   _1160   ... 
+  
   note: checking mode of constant   _1161   ... 
+  
   => %sort loc-seq-or-neq-total {L1 loc} {L2 loc} {_0 loc-seq-or-neq L1 L2}
   
   => %term
@@ -61280,9 +63672,13 @@
         loc-seq-or-neq-total (loc/s LC1) (loc/s LC2) LCS'
   
   note: checking mode of constant   _1162   ... 
+  
   note: checking mode of constant   _1163   ... 
+  
   note: checking mode of constant   _1164   ... 
+  
   note: checking mode of constant   _1165   ... 
+  
   => %sort loc-less-not-refl {LC loc} {_0 loc-less LC LC} {_1166 uninhabited}
   
   => %term
@@ -61291,6 +63687,7 @@
         {_0 loc-less-not-refl LG DU} loc-less-not-refl (loc-less/s LG) DU
   
   note: checking mode of constant   _1166   ... 
+  
   => %sort loc-less-trans {X loc} {Y loc} {Z loc} {_0 loc-less X Y}
     {_1167 loc-less Y Z} {_1168 loc-less X Z}
   
@@ -61306,7 +63703,9 @@
         loc-less-trans (loc-less/s L1) (loc-less/s L2) (loc-less/s L3)
   
   note: checking mode of constant   _1167   ... 
+  
   note: checking mode of constant   _1168   ... 
+  
   => %sort loc-less-bound {K loc} {I loc} {J loc} {_0 loc-less I K}
     {_1169 loc-less J K}
   
@@ -61331,9 +63730,13 @@
         loc-less-bound (loc/s L1) (loc/s L2) (loc-less/s DL1) (loc-less/s DL2)
   
   note: checking mode of constant   _1169   ... 
+  
   note: checking mode of constant   _1170   ... 
+  
   note: checking mode of constant   _1171   ... 
+  
   note: checking mode of constant   _1172   ... 
+  
   => %sort cxt
   
   => %term cxt/nil cxt
@@ -61415,7 +63818,9 @@
           (cxt-append/cons D)
   
   note: checking mode of constant   _1173   ... 
+  
   note: checking mode of constant   _1174   ... 
+  
   => %sort cxt-precedes-trans {X cn} {Y cn} {Z cn} {_0 cxt-precedes X Y}
     {_1175 cxt-precedes Y Z} {_1176 cxt-precedes X Z}
   
@@ -61429,6 +63834,7 @@
           (cxt-precedes/i _?8 DZ DL2) (cxt-precedes/i DX DZ DL3)
   
   note: checking mode of constant   _1175   ... 
+  
   => %sort cxt-lookup-ordered {G cxt} {_?1 cn} {_?2 kd} {_0 cxt-lookup G _?1 _?2}
     {_1176 cxt-ordered G}
   
@@ -61445,7 +63851,9 @@
         cxt-lookup-ordered (cxt-lookup/miss DL DP DB) (cxt-ordered/cons DB)
   
   note: checking mode of constant   _1176   ... 
+  
   note: checking mode of constant   _1177   ... 
+  
   => %sort cxt-bounded-isvar {G cxt} {X cn} {I loc} {_0 cxt-bounded G X}
     {_1178 isvar X I}
   
@@ -61461,7 +63869,9 @@
         cxt-bounded-isvar (cxt-bounded/cons _?6 (cxt-precedes/i _?8 D _?9)) D
   
   note: checking mode of constant   _1178   ... 
+  
   note: checking mode of constant   _1179   ... 
+  
   => %sort cxt-extend-ordered {G cxt} {I loc} {_0 cxt-ordered G}
     {_1180 {x cn} {_1180 isvar x I} cxt-bounded G x}
   
@@ -61480,7 +63890,9 @@
             cxt-bounded/cons DB (cxt-precedes/i Disvar d Dlt)
   
   note: checking mode of constant   _1180   ... 
+  
   note: checking mode of constant   _1181   ... 
+  
   => %sort cxt-bounded-lookup {G cxt} {X cn} {Y cn} {_?1 kd} {_0 cxt-bounded G X}
     {_1182 cxt-lookup G Y _?1} {_1183 cxt-precedes Y X}
   
@@ -61502,7 +63914,9 @@
           (cxt-lookup/miss DL _?7 _?8) DP''
   
   note: checking mode of constant   _1182   ... 
+  
   note: checking mode of constant   _1183   ... 
+  
   => %sort cxt-weaken-lookup {G cxt} {X cn} {Y cn} {T kd} {_0 cxt-bounded G X}
     {_1184 cxt-lookup G Y T} {S kd} {_1185 cxt-lookup (cxt/cons G X S) Y T}
   
@@ -61514,6 +63928,7 @@
         cxt-weaken-lookup DB DL _?5 (cxt-lookup/miss DL DP DB)
   
   note: checking mode of constant   _1184   ... 
+  
   => %sort id-or-cl {_0 {_0 cn} cn} {_1185 {_1185 cn} kd}
   
   => %term id-or-cl/id {K kd} id-or-cl ([x cn] x) [x cn] K
@@ -61544,7 +63959,9 @@
              cxt-lookup/miss (DL x di) (_?7 x di) (_?8 x di)) IOC
   
   note: checking mode of constant   _1185   ... 
+  
   note: checking mode of constant   _1186   ... 
+  
   => %sort cxt-append-precedes {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt}
     {I loc} {X {_0 cn} cn}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -61582,7 +63999,9 @@
           [x cn] [_1189 isvar x I] DP'' x _1189
   
   note: checking mode of constant   _1187   ... 
+  
   note: checking mode of constant   _1188   ... 
+  
   => %sort cxt-precedes-not-refl {I loc}
     {_0 {x cn} {_0 isvar x I} cxt-precedes x x} {_1189 uninhabited}
   
@@ -61594,6 +64013,7 @@
           ([x cn] [di isvar x _?1] cxt-precedes/i di di D11) DU
   
   note: checking mode of constant   _1189   ... 
+  
   => %sort isvar-fun {X cn} {I loc} {J loc} {_0 isvar X I} {_1190 isvar X J}
     {_1191 seq/loc I J}
   
@@ -61609,6 +64029,7 @@
         seq/loc/less-r DL seq/loc/refl DL
   
   note: checking mode of constant   _1190   ... 
+  
   => %sort cxt-bounded-strengthen {I loc} {G cxt}
     {_0 {x cn} {di isvar x I} cxt-bounded G x} {_1191 cxt-ordered G}
   
@@ -61649,8 +64070,11 @@
           (cxt-ordered/cons (cxt-bounded/cons DB' (cxt-precedes/i D1 D2 DL12)))
   
   note: checking mode of constant   _1191   ... 
+  
   note: checking mode of constant   _1192   ... 
+  
   note: checking mode of constant   _1193   ... 
+  
   => %sort cxt-bounded-strengthen-c {I loc} {G cxt} {X cn}
     {_0 {x cn} {di isvar x I} cxt-bounded G X} {_1194 cxt-bounded G X}
   
@@ -61671,7 +64095,9 @@
           (cxt-bounded/cons DB' DP)
   
   note: checking mode of constant   _1194   ... 
+  
   note: checking mode of constant   _1195   ... 
+  
   => %sort cxt-lookup-strengthen {I loc} {G cxt} {C cn} {K {_0 cn} kd} {C' cn}
     {_0 {x cn} {di isvar x I} cxt-lookup G C (K x)}
     {_1196 cxt-lookup G C (K C')}
@@ -61700,7 +64126,9 @@
           (cxt-lookup/miss DL' DP DB')
   
   note: checking mode of constant   _1196   ... 
+  
   note: checking mode of constant   _1197   ... 
+  
   => %sort uninhabited-seq/kd {S1 kd} {S2 kd} {_0 uninhabited}
     {_1198 seq/kd S1 S2}
   
@@ -61758,9 +64186,13 @@
           ([x cn] [di isvar x I] cxt-lookup/hit (DB x di)) DQ
   
   note: checking mode of constant   _1198   ... 
+  
   note: checking mode of constant   _1199   ... 
+  
   note: checking mode of constant   _1200   ... 
+  
   note: checking mode of constant   _1201   ... 
+  
   => %sort cxt-inc {G cxt} {J loc} {K kd} {_0 cxt-ordered G}
     {_1202 {y cn} {_1202 isvar y J} cxt-ordered (cxt/cons G y K)}
   
@@ -61772,6 +64204,7 @@
         cxt-inc _?3 DO [x cn] [di isvar x _?2] cxt-ordered/cons (DB x di)
   
   note: checking mode of constant   _1202   ... 
+  
   => %sort cxt-inc-duece {G cxt} {J loc} {K kd} {K' kd} {_0 cxt-ordered G}
     {_1203 {y cn} {_1203 isvar y J} cxt-ordered (cxt/cons G y K)}
     {_1204 {y cn} {_1204 isvar y J} cxt-ordered (cxt/cons G y K')}
@@ -61815,8 +64248,11 @@
                  (cxt-precedes/i D2 dx DL))
   
   note: checking mode of constant   _1203   ... 
+  
   note: checking mode of constant   _1204   ... 
+  
   note: checking mode of constant   _1205   ... 
+  
   => %sort cxt-inc-precedes {I loc} {C {_0 cn} cn} {C' {_0 cn} cn} {J loc} {
     L loc} {_0 {x cn} {_0 isvar x I} cxt-precedes (C x) (C' x)}
     {_1206 {x cn} {_1206 isvar x J} cxt-precedes (C x) (C' x)}
@@ -61882,9 +64318,13 @@
             cxt-precedes/i (DJ x) dy DL2
   
   note: checking mode of constant   _1206   ... 
+  
   note: checking mode of constant   _1207   ... 
+  
   note: checking mode of constant   _1208   ... 
+  
   note: checking mode of constant   _1209   ... 
+  
   => %sort cxt-inc-2-b {I loc} {G {_0 cn} cxt} {C {_0 cn} cn} {J loc} {L loc}
     {K {_0 cn} kd} {_0 {x cn} {_0 isvar x I} cxt-bounded (G x) (C x)}
     {_1210 {x cn} {_1210 isvar x J} cxt-bounded (G x) (C x)}
@@ -61956,8 +64396,11 @@
               (DP2' x di y dy)
   
   note: checking mode of constant   _1210   ... 
+  
   note: checking mode of constant   _1211   ... 
+  
   note: checking mode of constant   _1212   ... 
+  
   => %sort cxt-inc-2 {I loc} {G {_0 cn} cxt} {J loc} {K loc}
     {_0 {x cn} {_0 isvar x I} cxt-ordered (G x)}
     {_1213 {x cn} {_1213 isvar x J} cxt-ordered (G x)}
@@ -62001,7 +64444,9 @@
             DB2' x _1214 y _1215
   
   note: checking mode of constant   _1213   ... 
+  
   note: checking mode of constant   _1214   ... 
+  
   => %sort cxt-lookup-precedes {G cxt} {C cn} {K kd} {C' cn} {_0 cxt-lookup G C K}
     {_1215 cxt-bounded G C'} {_1216 cxt-precedes C C'}
   
@@ -62022,7 +64467,9 @@
           (cxt-bounded/cons _?9 DP') DP''
   
   note: checking mode of constant   _1215   ... 
+  
   note: checking mode of constant   _1216   ... 
+  
   => %sort eofkd {_0 cxt} {_1217 cn} {_1218 kd}
   
   => %sort ekd-wf {_0 cxt} {_1217 kd}
@@ -62382,6 +64829,7 @@
   => %term _1217 {_?1 cn} {_?2 seq/cn _?1 _?1} seq/cn/sym _?2 seq/cn/refl
   
   note: checking mode of constant   _1217   ... 
+  
   => %sort seq/cn/pair {C1 cn} {C2 cn} {C3 cn} {C4 cn} {_0 seq/cn C1 C2}
     {_1218 seq/cn C3 C4} {_1219 seq/cn (cn/pair C1 C3) (cn/pair C2 C4)}
   
@@ -62391,30 +64839,35 @@
         seq/cn/pair _?3 _?4 seq/cn/refl
   
   note: checking mode of constant   _1218   ... 
+  
   => %sort seq/cn/pj1 {C1 cn} {C2 cn} {_0 seq/cn C1 C2}
     {_1219 seq/cn (cn/pj1 C1) (cn/pj1 C2)}
   
   => %term _1219 {_?1 cn} {_?2 seq/cn _?1 _?1} seq/cn/pj1 _?2 seq/cn/refl
   
   note: checking mode of constant   _1219   ... 
+  
   => %sort seq/cn/pj2 {C1 cn} {C2 cn} {_0 seq/cn C1 C2}
     {_1220 seq/cn (cn/pj2 C1) (cn/pj2 C2)}
   
   => %term _1220 {_?1 cn} {_?2 seq/cn _?1 _?1} seq/cn/pj2 _?2 seq/cn/refl
   
   note: checking mode of constant   _1220   ... 
+  
   => %sort seq/cn/tag {C1 cn} {C2 cn} {_0 seq/cn C1 C2}
     {_1221 seq/cn (tp/tag C1) (tp/tag C2)}
   
   => %term _1221 {_?1 cn} {_?2 seq/cn _?1 _?1} seq/cn/tag _?2 seq/cn/refl
   
   note: checking mode of constant   _1221   ... 
+  
   => %sort ofkd/seq-k {K1 kd} {K2 kd} {C cn} {_0 seq/kd K1 K2} {_1222 ofkd C K1}
     {_1223 ofkd C K2}
   
   => %term _1222 {_?1 kd} {_?2 cn} {D1 ofkd _?2 _?1} ofkd/seq-k seq/kd/refl D1 D1
   
   note: checking mode of constant   _1222   ... 
+  
   => %sort ofkd/seq-k-pi-l {K1 kd} {K2 kd} {C cn} {L {_0 cn} kd} {_0 seq/kd K1 K2}
     {_1223 ofkd C (kd/pi K1 [_1223 cn] L _1223)}
     {_1224 ofkd C (kd/pi K2 [_1224 cn] L _1224)}
@@ -62426,18 +64879,21 @@
         ofkd/seq-k-pi-l seq/kd/refl D1 D1
   
   note: checking mode of constant   _1223   ... 
+  
   => %sort ofkd/seq-c {C1 cn} {C2 cn} {K kd} {_0 seq/cn C1 C2} {_1224 ofkd C1 K}
     {_1225 ofkd C2 K}
   
   => %term _1224 {_?1 cn} {_?2 kd} {D1 ofkd _?1 _?2} ofkd/seq-c seq/cn/refl D1 D1
   
   note: checking mode of constant   _1224   ... 
+  
   => %sort kd-wf/seq {K1 kd} {K2 kd} {_0 seq/kd K1 K2} {_1225 kd-wf K1}
     {_1226 kd-wf K2}
   
   => %term _1225 {_?1 kd} {D1 kd-wf _?1} kd-wf/seq seq/kd/refl D1 D1
   
   note: checking mode of constant   _1225   ... 
+  
   => %sort seq/kd/sgm {K1 kd} {K2 kd} {K3 {_0 cn} kd} {K4 {_0 cn} kd}
     {_0 seq/kd K1 K2} {_1226 {a cn} seq/kd (K3 a) (K4 a)}
     {_1227
@@ -62450,6 +64906,7 @@
         seq/kd/sgm _?3 ([a cn] _?4 a) seq/kd/refl
   
   note: checking mode of constant   _1226   ... 
+  
   => %sort kd-wf/seq-a {K1 kd} {K2 kd} {K3 {_0 cn} kd} {_0 seq/kd K1 K2}
     {_1227 {a cn} {da ofkd a K1} kd-wf (K3 a)}
     {_1228 {a cn} {da ofkd a K2} kd-wf (K3 a)}
@@ -62461,6 +64918,7 @@
           [a cn] [da ofkd a _?1] D1 a da
   
   note: checking mode of constant   _1227   ... 
+  
   => %sort kd-sub/seq-l {K1 kd} {K2 kd} {K4 kd} {_0 seq/kd K1 K2}
     {_1228 kd-sub K1 K4} {_1229 kd-sub K2 K4}
   
@@ -62468,6 +64926,7 @@
     _1228 {_?1 kd} {_?2 kd} {D1 kd-sub _?1 _?2} kd-sub/seq-l seq/kd/refl D1 D1
   
   note: checking mode of constant   _1228   ... 
+  
   => %sort kd-sub/seq-r {K1 kd} {K2 kd} {K3 kd} {_0 seq/kd K1 K2}
     {_1229 kd-sub K3 K1} {_1230 kd-sub K3 K2}
   
@@ -62475,6 +64934,7 @@
     _1229 {_?1 kd} {_?2 kd} {D1 kd-sub _?2 _?1} kd-sub/seq-r seq/kd/refl D1 D1
   
   note: checking mode of constant   _1229   ... 
+  
   => %sort kd-sub/seq-a {K1 kd} {K2 kd} {K3 {_0 cn} kd} {K4 {_0 cn} kd}
     {_0 seq/kd K1 K2} {_1230 {a cn} {da ofkd a K1} kd-sub (K3 a) (K4 a)}
     {_1231 {a cn} {da ofkd a K2} kd-sub (K3 a) (K4 a)}
@@ -62487,6 +64947,7 @@
           [a cn] [da ofkd a _?1] D1 a da
   
   note: checking mode of constant   _1230   ... 
+  
   => %sort kd-deq/seq-l {K1 kd} {K2 kd} {K4 kd} {_0 seq/kd K1 K2}
     {_1231 kd-deq K1 K4} {_1232 kd-deq K2 K4}
   
@@ -62494,6 +64955,7 @@
     _1231 {_?1 kd} {_?2 kd} {D1 kd-deq _?1 _?2} kd-deq/seq-l seq/kd/refl D1 D1
   
   note: checking mode of constant   _1231   ... 
+  
   => %sort kd-deq/seq-r {K1 kd} {K2 kd} {K4 kd} {_0 seq/kd K1 K2}
     {_1232 kd-deq K4 K1} {_1233 kd-deq K4 K2}
   
@@ -62501,6 +64963,7 @@
     _1232 {_?1 kd} {_?2 kd} {D1 kd-deq _?2 _?1} kd-deq/seq-r seq/kd/refl D1 D1
   
   note: checking mode of constant   _1232   ... 
+  
   => %sort kd-deq/seq-a {K1 kd} {K2 kd} {K3 {_0 cn} kd} {K4 {_0 cn} kd}
     {_0 seq/kd K1 K2} {_1233 {a cn} {da ofkd a K1} kd-deq (K3 a) (K4 a)}
     {_1234 {a cn} {da ofkd a K2} kd-deq (K3 a) (K4 a)}
@@ -62513,6 +64976,7 @@
           [a cn] [da ofkd a _?1] D1 a da
   
   note: checking mode of constant   _1233   ... 
+  
   => %sort seq/cn/beta-pj1 {C1 cn} {C2 cn} {C3 cn} {C4 cn} {K kd}
     {_0 seq/cn C1 C2} {_1234 seq/cn C3 C4}
     {_1235 cn-deq (cn/pj1 (cn/pair C1 C3)) C1 K}
@@ -62524,6 +64988,7 @@
         seq/cn/beta-pj1 seq/cn/refl seq/cn/refl D1 D1
   
   note: checking mode of constant   _1234   ... 
+  
   => %sort seq/cn/beta-pj2 {C1 cn} {C2 cn} {C3 cn} {C4 cn} {K kd}
     {_0 seq/cn C1 C2} {_1235 seq/cn C3 C4}
     {_1236 cn-deq (cn/pj2 (cn/pair C3 C1)) C1 K}
@@ -62535,6 +65000,7 @@
         seq/cn/beta-pj2 seq/cn/refl seq/cn/refl D1 D1
   
   note: checking mode of constant   _1235   ... 
+  
   => %sort cn-deq/seq-l {K1 cn} {K2 cn} {K4 cn} {K kd} {_0 seq/cn K1 K2}
     {_1236 cn-deq K1 K4 K} {_1237 cn-deq K2 K4 K}
   
@@ -62544,6 +65010,7 @@
         cn-deq/seq-l seq/cn/refl D1 D1
   
   note: checking mode of constant   _1236   ... 
+  
   => %sort cn-deq/seq-r {K1 cn} {K2 cn} {K4 cn} {K kd} {_0 seq/cn K1 K2}
     {_1237 cn-deq K4 K1 K} {_1238 cn-deq K4 K2 K}
   
@@ -62553,6 +65020,7 @@
         cn-deq/seq-r seq/cn/refl D1 D1
   
   note: checking mode of constant   _1237   ... 
+  
   => %sort cn-deq/seq-k {K1 kd} {K2 kd} {K cn} {K4 cn} {_0 seq/kd K1 K2}
     {_1238 cn-deq K K4 K1} {_1239 cn-deq K K4 K2}
   
@@ -62562,6 +65030,7 @@
         cn-deq/seq-k seq/kd/refl D1 D1
   
   note: checking mode of constant   _1238   ... 
+  
   => %sort kd-refl/deq {K kd} {_0 kd-wf K} {_1239 kd-deq K K}
   
   => %term _1239 kd-refl/deq kd-wf/kd/unit kd-deq/kd/unit
@@ -62594,10 +65063,15 @@
           (kd-deq/kd/pi D3 [a cn] [da ofkd a _?1] D4 a da)
   
   note: checking mode of constant   _1239   ... 
+  
   note: checking mode of constant   _1240   ... 
+  
   note: checking mode of constant   _1241   ... 
+  
   note: checking mode of constant   _1242   ... 
+  
   note: checking mode of constant   _1243   ... 
+  
   => %sort kd-refl/sub {K kd} {_0 kd-wf K} {_1244 kd-sub K K}
   
   => %term _1244 kd-refl/sub kd-wf/kd/unit kd-sub/kd/unit
@@ -62633,10 +65107,15 @@
              [a cn] [da ofkd a _?1] D2 a da)
   
   note: checking mode of constant   _1244   ... 
+  
   note: checking mode of constant   _1245   ... 
+  
   note: checking mode of constant   _1246   ... 
+  
   note: checking mode of constant   _1247   ... 
+  
   note: checking mode of constant   _1248   ... 
+  
   => %sort kd-wkn/ofkd {K2 kd} {B {_0 cn} cn} {K {_0 cn} kd} {K1 kd}
     {_0 {a cn} {_0 ofkd a K2} ofkd (B a) (K a)} {_1249 kd-sub K1 K2}
     {_1250 {a cn} {_1250 ofkd a K1} ofkd (B a) (K a)}
@@ -62650,6 +65129,7 @@
           [a cn] [da ofkd a _?4] DI a (ofkd/sub da DS)
   
   note: checking mode of constant   _1249   ... 
+  
   => %sort kd-wkn/kd-wf {K2 kd} {K {_0 cn} kd} {K1 kd}
     {_0 {a cn} {da ofkd a K2} kd-wf (K a)} {_1250 kd-sub K1 K2}
     {_1251 {a cn} {da ofkd a K1} kd-wf (K a)}
@@ -62662,6 +65142,7 @@
           [a cn] [da ofkd a _?3] DI a (ofkd/sub da DS)
   
   note: checking mode of constant   _1250   ... 
+  
   => %sort kd-wkn/kd-deq {K2 kd} {K' {_0 cn} kd} {K'' {_0 cn} kd} {K1 kd}
     {_0 {a cn} {da ofkd a K2} kd-deq (K' a) (K'' a)} {_1251 kd-sub K1 K2}
     {_1252 {a cn} {da ofkd a K1} kd-deq (K' a) (K'' a)}
@@ -62675,6 +65156,7 @@
           [a cn] [da ofkd a _?4] DI a (ofkd/sub da DS)
   
   note: checking mode of constant   _1251   ... 
+  
   => %sort kd-wkn/kd-sub {K2 kd} {K' {_0 cn} kd} {K'' {_0 cn} kd} {K1 kd}
     {_0 {a cn} {da ofkd a K2} kd-sub (K' a) (K'' a)} {_1252 kd-sub K1 K2}
     {_1253 {a cn} {da ofkd a K1} kd-sub (K' a) (K'' a)}
@@ -62688,6 +65170,7 @@
           [a cn] [da ofkd a _?4] DI a (ofkd/sub da DS)
   
   note: checking mode of constant   _1252   ... 
+  
   => %sort kd-wkn/cn-deq {K2 kd} {C1 {_0 cn} cn} {C2 {_0 cn} cn} {K {_0 cn} kd}
     {K1 kd} {_0 {a cn} {da ofkd a K2} cn-deq (C1 a) (C2 a) (K a)}
     {_1253 kd-sub K1 K2}
@@ -62702,6 +65185,7 @@
           [a cn] [da ofkd a _?5] DI a (ofkd/sub da DS)
   
   note: checking mode of constant   _1253   ... 
+  
   => %sort kd-wkn-deq/ofkd {K2 kd} {B {_0 cn} cn} {K {_0 cn} kd} {K1 kd}
     {_0 {a cn} {_0 ofkd a K2} ofkd (B a) (K a)} {_1254 kd-deq K1 K2}
     {_1255 {a cn} {_1255 ofkd a K1} ofkd (B a) (K a)}
@@ -62715,6 +65199,7 @@
           [a cn] [da ofkd a _?4] DI a (ofkd/deq da DS)
   
   note: checking mode of constant   _1254   ... 
+  
   => %sort kd-wkn-deq/kd-wf {K2 kd} {K {_0 cn} kd} {K1 kd}
     {_0 {a cn} {da ofkd a K2} kd-wf (K a)} {_1255 kd-deq K1 K2}
     {_1256 {a cn} {da ofkd a K1} kd-wf (K a)}
@@ -62727,6 +65212,7 @@
           [a cn] [da ofkd a _?3] DI a (ofkd/deq da DS)
   
   note: checking mode of constant   _1255   ... 
+  
   => %sort kd-wkn-deq/kd-deq {K2 kd} {K' {_0 cn} kd} {K'' {_0 cn} kd} {K1 kd}
     {_0 {a cn} {da ofkd a K2} kd-deq (K' a) (K'' a)} {_1256 kd-deq K1 K2}
     {_1257 {a cn} {da ofkd a K1} kd-deq (K' a) (K'' a)}
@@ -62740,6 +65226,7 @@
           [a cn] [da ofkd a _?4] DI a (ofkd/deq da DS)
   
   note: checking mode of constant   _1256   ... 
+  
   => %sort kd-wkn-deq/kd-sub {K2 kd} {K' {_0 cn} kd} {K'' {_0 cn} kd} {K1 kd}
     {_0 {a cn} {da ofkd a K2} kd-sub (K' a) (K'' a)} {_1257 kd-deq K1 K2}
     {_1258 {a cn} {da ofkd a K1} kd-sub (K' a) (K'' a)}
@@ -62753,6 +65240,7 @@
           [a cn] [da ofkd a _?4] DI a (ofkd/deq da DS)
   
   note: checking mode of constant   _1257   ... 
+  
   => %sort kd-wkn-deq/cn-deq {K2 kd} {C1 {_0 cn} cn} {C2 {_0 cn} cn}
     {K {_0 cn} kd} {K1 kd}
     {_0 {a cn} {da ofkd a K2} cn-deq (C1 a) (C2 a) (K a)} {_1258 kd-deq K1 K2}
@@ -62767,6 +65255,7 @@
           [a cn] [da ofkd a _?5] DI a (ofkd/deq da DS)
   
   note: checking mode of constant   _1258   ... 
+  
   => %sort kd-anti {K1 kd} {K2 kd} {_0 kd-deq K1 K2} {_1259 kd-wf K1}
     {_1260 kd-wf K2} {_1261 kd-sub K1 K2} {_1262 kd-sub K2 K1}
   
@@ -62846,10 +65335,15 @@
              [a cn] [da ofkd a K2] DK a da)
   
   note: checking mode of constant   _1259   ... 
+  
   note: checking mode of constant   _1260   ... 
+  
   note: checking mode of constant   _1261   ... 
+  
   note: checking mode of constant   _1262   ... 
+  
   note: checking mode of constant   _1263   ... 
+  
   => %sort closed-cn {_0 {_0 cn} cn} {_1264 cn}
   
   => %term closed-cn/i {C cn} closed-cn ([x cn] C) C
@@ -62865,6 +65359,7 @@
   => %term _1264 {_?1 cn} closed-cn-seq/cn closed-cn/i closed-cn/i seq/cn/refl
   
   note: checking mode of constant   _1264   ... 
+  
   => %sort closed-kd-seq/kd {C {_0 cn} kd} {C1 kd} {C2 kd}
     {_0 closed-kd ([_0 cn] C _0) C1} {_1265 closed-kd ([_1265 cn] C _1265) C2}
     {_1266 seq/kd C1 C2}
@@ -62872,6 +65367,7 @@
   => %term _1265 {_?1 kd} closed-kd-seq/kd closed-kd/i closed-kd/i seq/kd/refl
   
   note: checking mode of constant   _1265   ... 
+  
   => %sort closed-cn-cn/pj1 {C1 {_0 cn} cn} {C cn}
     {_0 closed-cn ([_0 cn] C1 _0) C}
     {_1266 closed-cn ([x cn] cn/pj1 (C1 x)) (cn/pj1 C)}
@@ -62879,6 +65375,7 @@
   => %term _1266 {_?1 cn} closed-cn-cn/pj1 closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1266   ... 
+  
   => %sort closed-cn-cn/pj1-e {C1 {_0 cn} cn} {C cn}
     {_0 closed-cn ([x cn] cn/pj1 (C1 x)) (cn/pj1 C)}
     {_1267 closed-cn ([_1267 cn] C1 _1267) C}
@@ -62886,6 +65383,7 @@
   => %term _1267 {_?1 cn} closed-cn-cn/pj1-e closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1267   ... 
+  
   => %sort closed-cn-cn/pj2-e {C1 {_0 cn} cn} {Cpj2 cn} {C cn}
     {_0 closed-cn ([x cn] cn/pj2 (C1 x)) Cpj2}
     {_1268 closed-cn ([_1268 cn] C1 _1268) C} {_1269 seq/cn Cpj2 (cn/pj2 C)}
@@ -62893,6 +65391,7 @@
   => %term _1268 {_?1 cn} closed-cn-cn/pj2-e closed-cn/i closed-cn/i seq/cn/refl
   
   note: checking mode of constant   _1268   ... 
+  
   => %sort closed-cn-cn/pj2 {C1 {_0 cn} cn} {C cn}
     {_0 closed-cn ([_0 cn] C1 _0) C}
     {_1269 closed-cn ([x cn] cn/pj2 (C1 x)) (cn/pj2 C)}
@@ -62900,6 +65399,7 @@
   => %term _1269 {_?1 cn} closed-cn-cn/pj2 closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1269   ... 
+  
   => %sort closed-cn-tp/ref {C1 {_0 cn} cn} {C cn}
     {_0 closed-cn ([_0 cn] C1 _0) C}
     {_1270 closed-cn ([x cn] tp/ref (C1 x)) (tp/ref C)}
@@ -62907,6 +65407,7 @@
   => %term _1270 {_?1 cn} closed-cn-tp/ref closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1270   ... 
+  
   => %sort closed-cn-tp/tag {C1 {_0 cn} cn} {C cn}
     {_0 closed-cn ([_0 cn] C1 _0) C}
     {_1271 closed-cn ([x cn] tp/tag (C1 x)) (tp/tag C)}
@@ -62914,6 +65415,7 @@
   => %term _1271 {_?1 cn} closed-cn-tp/tag closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1271   ... 
+  
   => %sort closed-cn-cn/pair {C1 {_0 cn} cn} {C cn} {C2 {_0 cn} cn} {C' cn}
     {_0 closed-cn ([_0 cn] C1 _0) C} {_1272 closed-cn ([_1272 cn] C2 _1272) C'}
     {_1273 closed-cn ([x cn] cn/pair (C1 x) (C2 x)) (cn/pair C C')}
@@ -62923,6 +65425,7 @@
       {_?1 cn} {_?2 cn} closed-cn-cn/pair closed-cn/i closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1272   ... 
+  
   => %sort closed-cn-cn/app {C1 {_0 cn} cn} {C cn} {C2 {_0 cn} cn} {C' cn}
     {_0 closed-cn ([_0 cn] C1 _0) C} {_1273 closed-cn ([_1273 cn] C2 _1273) C'}
     {_1274 closed-cn ([x cn] cn/app (C1 x) (C2 x)) (cn/app C C')}
@@ -62932,6 +65435,7 @@
       {_?1 cn} {_?2 cn} closed-cn-cn/app closed-cn/i closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1273   ... 
+  
   => %sort closed-cn-tp/cross {C1 {_0 cn} cn} {C cn} {C2 {_0 cn} cn} {C' cn}
     {_0 closed-cn ([_0 cn] C1 _0) C} {_1274 closed-cn ([_1274 cn] C2 _1274) C'}
     {_1275 closed-cn ([x cn] tp/cross (C1 x) (C2 x)) (tp/cross C C')}
@@ -62941,6 +65445,7 @@
       {_?1 cn} {_?2 cn} closed-cn-tp/cross closed-cn/i closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1274   ... 
+  
   => %sort closed-cn-tp/arrow {C1 {_0 cn} cn} {C cn} {C2 {_0 cn} cn} {C' cn}
     {_0 closed-cn ([_0 cn] C1 _0) C} {_1275 closed-cn ([_1275 cn] C2 _1275) C'}
     {_1276 closed-cn ([x cn] tp/arrow (C1 x) (C2 x)) (tp/arrow C C')}
@@ -62950,6 +65455,7 @@
       {_?1 cn} {_?2 cn} closed-cn-tp/arrow closed-cn/i closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1275   ... 
+  
   => %sort closed-cn-tp/sum {C1 {_0 cn} cn} {C cn} {C2 {_0 cn} cn} {C' cn}
     {_0 closed-cn ([_0 cn] C1 _0) C} {_1276 closed-cn ([_1276 cn] C2 _1276) C'}
     {_1277 closed-cn ([x cn] tp/sum (C1 x) (C2 x)) (tp/sum C C')}
@@ -62959,6 +65465,7 @@
       {_?1 cn} {_?2 cn} closed-cn-tp/sum closed-cn/i closed-cn/i closed-cn/i
   
   note: checking mode of constant   _1276   ... 
+  
   => %sort closed-cn-cn/lam {K1 {_0 cn} kd} {K kd} {C2 {_0 cn} {_1277 cn} cn}
     {C {_0 cn} cn} {_0 closed-kd ([x cn] K1 x) K}
     {_1277 {y cn} closed-cn ([x cn] C2 x y) (C y)}
@@ -62972,6 +65479,7 @@
         closed-cn-cn/lam closed-kd/i ([y cn] closed-cn/i) closed-cn/i
   
   note: checking mode of constant   _1277   ... 
+  
   => %sort closed-cn-cn/mu {K1 {_0 cn} kd} {K kd} {C2 {_0 cn} {_1278 cn} cn}
     {C {_0 cn} cn} {_0 closed-kd ([_0 cn] K1 _0) K}
     {_1278 {y cn} closed-cn ([x cn] C2 x y) (C y)}
@@ -62985,6 +65493,7 @@
         closed-cn-cn/mu closed-kd/i ([y cn] closed-cn/i) closed-cn/i
   
   note: checking mode of constant   _1278   ... 
+  
   => %sort closed-cn-tp/forall {K1 {_0 cn} kd} {K kd} {C2 {_0 cn} {_1279 cn} cn}
     {C {_0 cn} cn} {_0 closed-kd ([_0 cn] K1 _0) K}
     {_1279 {y cn} closed-cn ([x cn] C2 x y) (C y)}
@@ -62998,6 +65507,7 @@
         closed-cn-tp/forall closed-kd/i ([y cn] closed-cn/i) closed-cn/i
   
   note: checking mode of constant   _1279   ... 
+  
   => %sort closed-kd-kd/sing {C {_0 cn} cn} {C' cn}
     {_0 closed-cn ([_0 cn] C _0) C'}
     {_1280 closed-kd ([x cn] kd/sing (C x)) (kd/sing C')}
@@ -63005,6 +65515,7 @@
   => %term _1280 {_?1 cn} closed-kd-kd/sing closed-cn/i closed-kd/i
   
   note: checking mode of constant   _1280   ... 
+  
   => %sort closed-cn-kd/sing-e {C {_0 cn} cn} {C' cn}
     {_0 closed-kd ([x cn] kd/sing (C x)) (kd/sing C')}
     {_1281 closed-cn ([_1281 cn] C _1281) C'}
@@ -63012,6 +65523,7 @@
   => %term _1281 {_?1 cn} closed-cn-kd/sing-e closed-kd/i closed-cn/i
   
   note: checking mode of constant   _1281   ... 
+  
   => %sort closed-kd-kd/sgm {K1 {_0 cn} kd} {K kd} {K2 {_0 cn} {_1282 cn} kd}
     {K' {_0 cn} kd} {_0 closed-kd ([_0 cn] K1 _0) K}
     {_1282 {y cn} closed-kd ([x cn] K2 x y) (K' y)}
@@ -63025,6 +65537,7 @@
         closed-kd-kd/sgm closed-kd/i ([y cn] closed-kd/i) closed-kd/i
   
   note: checking mode of constant   _1282   ... 
+  
   => %sort closed-kd-kd/pi {K1 {_0 cn} kd} {K kd} {K2 {_0 cn} {_1283 cn} kd}
     {K' {_0 cn} kd} {_0 closed-kd ([_0 cn] K1 _0) K}
     {_1283 {y cn} closed-kd ([x cn] K2 x y) (K' y)}
@@ -63038,6 +65551,7 @@
         closed-kd-kd/pi closed-kd/i ([y cn] closed-kd/i) closed-kd/i
   
   note: checking mode of constant   _1283   ... 
+  
   => %sort closed-kd-kd/sgm-el {K1 {_0 cn} kd} {K2 {_0 cn} {_1284 cn} kd} {
     K kd} {K' {_0 cn} kd}
     {_0
@@ -63048,6 +65562,7 @@
     _1284 {_?1 kd} {_?2 {_0 cn} kd} closed-kd-kd/sgm-el closed-kd/i closed-kd/i
   
   note: checking mode of constant   _1284   ... 
+  
   => %sort closed-kd-kd/pi-el {K1 {_0 cn} kd} {K2 {_0 cn} {_1285 cn} kd} {
     K kd} {K' {_0 cn} kd}
     {_0 closed-kd ([x cn] kd/pi (K1 x) [_0 cn] K2 x _0) (kd/pi K [_0 cn] K' _0)}
@@ -63057,6 +65572,7 @@
     _1285 {_?1 kd} {_?2 {_0 cn} kd} closed-kd-kd/pi-el closed-kd/i closed-kd/i
   
   note: checking mode of constant   _1285   ... 
+  
   => %sort closed-kd-kd/sgm-er {C {_0 cn} cn} {C' cn} {K1 {_0 cn} kd}
     {K2 {_0 cn} {_1286 cn} kd} {K kd} {K' {_0 cn} kd}
     {_0 closed-cn ([_0 cn] C _0) C'}
@@ -63071,6 +65587,7 @@
         closed-kd-kd/sgm-er closed-cn/i closed-kd/i closed-kd/i
   
   note: checking mode of constant   _1286   ... 
+  
   => %sort closed-kd-kd/pi-er {C {_0 cn} cn} {C' cn} {K1 {_0 cn} kd}
     {K2 {_0 cn} {_1287 cn} kd} {K kd} {K' {_0 cn} kd}
     {_0 closed-cn ([_0 cn] C _0) C'}
@@ -63085,6 +65602,7 @@
         closed-kd-kd/pi-er closed-cn/i closed-kd/i closed-kd/i
   
   note: checking mode of constant   _1287   ... 
+  
   => %sort strengthen-ofkd {C {_0 cn} cn} {K {_0 cn} kd} {C' cn} {K' kd}
     {_0 {x cn} ofkd (C x) (K x)} {_1288 closed-cn ([_1288 cn] C _1288) C'}
     {_1289 closed-kd ([_1289 cn] K _1289) K'} {_1290 ofkd C' K'}
@@ -64391,64 +66909,123 @@
           (cn-deq/sgm-ext D1''' D2''')
   
   note: checking mode of constant   _1293   ... 
+  
   note: checking mode of constant   _1294   ... 
+  
   note: checking mode of constant   _1295   ... 
+  
   note: checking mode of constant   _1296   ... 
+  
   note: checking mode of constant   _1297   ... 
+  
   note: checking mode of constant   _1298   ... 
+  
   note: checking mode of constant   _1299   ... 
+  
   note: checking mode of constant   _1300   ... 
+  
   note: checking mode of constant   _1301   ... 
+  
   note: checking mode of constant   _1302   ... 
+  
   note: checking mode of constant   _1303   ... 
+  
   note: checking mode of constant   _1304   ... 
+  
   note: checking mode of constant   _1305   ... 
+  
   note: checking mode of constant   _1306   ... 
+  
   note: checking mode of constant   _1307   ... 
+  
   note: checking mode of constant   _1308   ... 
+  
   note: checking mode of constant   _1309   ... 
+  
   note: checking mode of constant   _1310   ... 
+  
   note: checking mode of constant   _1288   ... 
+  
   note: checking mode of constant   _1311   ... 
+  
   note: checking mode of constant   _1312   ... 
+  
   note: checking mode of constant   _1313   ... 
+  
   note: checking mode of constant   _1314   ... 
+  
   note: checking mode of constant   _1289   ... 
+  
   note: checking mode of constant   _1315   ... 
+  
   note: checking mode of constant   _1316   ... 
+  
   note: checking mode of constant   _1317   ... 
+  
   note: checking mode of constant   _1318   ... 
+  
   note: checking mode of constant   _1290   ... 
+  
   note: checking mode of constant   _1319   ... 
+  
   note: checking mode of constant   _1320   ... 
+  
   note: checking mode of constant   _1321   ... 
+  
   note: checking mode of constant   _1322   ... 
+  
   note: checking mode of constant   _1323   ... 
+  
   note: checking mode of constant   _1291   ... 
+  
   note: checking mode of constant   _1324   ... 
+  
   note: checking mode of constant   _1325   ... 
+  
   note: checking mode of constant   _1326   ... 
+  
   note: checking mode of constant   _1327   ... 
+  
   note: checking mode of constant   _1328   ... 
+  
   note: checking mode of constant   _1329   ... 
+  
   note: checking mode of constant   _1330   ... 
+  
   note: checking mode of constant   _1331   ... 
+  
   note: checking mode of constant   _1332   ... 
+  
   note: checking mode of constant   _1333   ... 
+  
   note: checking mode of constant   _1334   ... 
+  
   note: checking mode of constant   _1335   ... 
+  
   note: checking mode of constant   _1336   ... 
+  
   note: checking mode of constant   _1337   ... 
+  
   note: checking mode of constant   _1338   ... 
+  
   note: checking mode of constant   _1339   ... 
+  
   note: checking mode of constant   _1340   ... 
+  
   note: checking mode of constant   _1341   ... 
+  
   note: checking mode of constant   _1342   ... 
+  
   note: checking mode of constant   _1343   ... 
+  
   note: checking mode of constant   _1344   ... 
+  
   note: checking mode of constant   _1345   ... 
+  
   note: checking mode of constant   _1346   ... 
+  
   note: checking mode of constant   _1292   ... 
+  
   => %sort mkd-wf {K kd} {_0 kd-wf K} {_1347 met}
   
   => %sort mkd-sub {K1 kd} {K2 kd} {_0 kd-sub K1 K2} {_1347 met}
@@ -65368,66 +67945,127 @@
         can-mcn-deq (cn-deq/deq D1 DS) (mcn-deq/deq D1' DS')
   
   note: checking mode of constant   _1347   ... 
+  
   note: checking mode of constant   _1348   ... 
+  
   note: checking mode of constant   _1349   ... 
+  
   note: checking mode of constant   _1350   ... 
+  
   note: checking mode of constant   _1351   ... 
+  
   note: checking mode of constant   _1352   ... 
+  
   note: checking mode of constant   _1353   ... 
+  
   note: checking mode of constant   _1354   ... 
+  
   note: checking mode of constant   _1355   ... 
+  
   note: checking mode of constant   _1356   ... 
+  
   note: checking mode of constant   _1357   ... 
+  
   note: checking mode of constant   _1358   ... 
+  
   note: checking mode of constant   _1359   ... 
+  
   note: checking mode of constant   _1360   ... 
+  
   note: checking mode of constant   _1361   ... 
+  
   note: checking mode of constant   _1362   ... 
+  
   note: checking mode of constant   _1363   ... 
+  
   note: checking mode of constant   _1364   ... 
+  
   note: checking mode of constant   _1365   ... 
+  
   note: checking mode of constant   _1366   ... 
+  
   note: checking mode of constant   _1367   ... 
+  
   note: checking mode of constant   _1368   ... 
+  
   note: checking mode of constant   _1369   ... 
+  
   note: checking mode of constant   _1370   ... 
+  
   note: checking mode of constant   _1371   ... 
+  
   note: checking mode of constant   _1372   ... 
+  
   note: checking mode of constant   _1373   ... 
+  
   note: checking mode of constant   _1374   ... 
+  
   note: checking mode of constant   _1375   ... 
+  
   note: checking mode of constant   _1376   ... 
+  
   note: checking mode of constant   _1377   ... 
+  
   note: checking mode of constant   _1378   ... 
+  
   note: checking mode of constant   _1379   ... 
+  
   note: checking mode of constant   _1380   ... 
+  
   note: checking mode of constant   _1381   ... 
+  
   note: checking mode of constant   _1382   ... 
+  
   note: checking mode of constant   _1383   ... 
+  
   note: checking mode of constant   _1384   ... 
+  
   note: checking mode of constant   _1385   ... 
+  
   note: checking mode of constant   _1386   ... 
+  
   note: checking mode of constant   _1387   ... 
+  
   note: checking mode of constant   _1388   ... 
+  
   note: checking mode of constant   _1389   ... 
+  
   note: checking mode of constant   _1390   ... 
+  
   note: checking mode of constant   _1391   ... 
+  
   note: checking mode of constant   _1392   ... 
+  
   note: checking mode of constant   _1393   ... 
+  
   note: checking mode of constant   _1394   ... 
+  
   note: checking mode of constant   _1395   ... 
+  
   note: checking mode of constant   _1396   ... 
+  
   note: checking mode of constant   _1397   ... 
+  
   note: checking mode of constant   _1398   ... 
+  
   note: checking mode of constant   _1399   ... 
+  
   note: checking mode of constant   _1400   ... 
+  
   note: checking mode of constant   _1401   ... 
+  
   note: checking mode of constant   _1402   ... 
+  
   note: checking mode of constant   _1403   ... 
+  
   note: checking mode of constant   _1404   ... 
+  
   note: checking mode of constant   _1405   ... 
+  
   note: checking mode of constant   _1406   ... 
+  
   note: checking mode of constant   _1407   ... 
+  
   => %sort meofkd {G cxt} {C cn} {K kd} {_0 eofkd G C K} {_1408 met}
   
   => %sort mekd-wf {G cxt} {K kd} {_0 ekd-wf G K} {_1408 met}
@@ -66440,68 +69078,131 @@
         can-mecn-deq (ecn-deq/deq D1 DS) (mecn-deq/deq D1' DS')
   
   note: checking mode of constant   _1408   ... 
+  
   note: checking mode of constant   _1409   ... 
+  
   note: checking mode of constant   _1410   ... 
+  
   note: checking mode of constant   _1411   ... 
+  
   note: checking mode of constant   _1412   ... 
+  
   note: checking mode of constant   _1413   ... 
+  
   note: checking mode of constant   _1414   ... 
+  
   note: checking mode of constant   _1415   ... 
+  
   note: checking mode of constant   _1416   ... 
+  
   note: checking mode of constant   _1417   ... 
+  
   note: checking mode of constant   _1418   ... 
+  
   note: checking mode of constant   _1419   ... 
+  
   note: checking mode of constant   _1420   ... 
+  
   note: checking mode of constant   _1421   ... 
+  
   note: checking mode of constant   _1422   ... 
+  
   note: checking mode of constant   _1423   ... 
+  
   note: checking mode of constant   _1424   ... 
+  
   note: checking mode of constant   _1425   ... 
+  
   note: checking mode of constant   _1426   ... 
+  
   note: checking mode of constant   _1427   ... 
+  
   note: checking mode of constant   _1428   ... 
+  
   note: checking mode of constant   _1429   ... 
+  
   note: checking mode of constant   _1430   ... 
+  
   note: checking mode of constant   _1431   ... 
+  
   note: checking mode of constant   _1432   ... 
+  
   note: checking mode of constant   _1433   ... 
+  
   note: checking mode of constant   _1434   ... 
+  
   note: checking mode of constant   _1435   ... 
+  
   note: checking mode of constant   _1436   ... 
+  
   note: checking mode of constant   _1437   ... 
+  
   note: checking mode of constant   _1438   ... 
+  
   note: checking mode of constant   _1439   ... 
+  
   note: checking mode of constant   _1440   ... 
+  
   note: checking mode of constant   _1441   ... 
+  
   note: checking mode of constant   _1442   ... 
+  
   note: checking mode of constant   _1443   ... 
+  
   note: checking mode of constant   _1444   ... 
+  
   note: checking mode of constant   _1445   ... 
+  
   note: checking mode of constant   _1446   ... 
+  
   note: checking mode of constant   _1447   ... 
+  
   note: checking mode of constant   _1448   ... 
+  
   note: checking mode of constant   _1449   ... 
+  
   note: checking mode of constant   _1450   ... 
+  
   note: checking mode of constant   _1451   ... 
+  
   note: checking mode of constant   _1452   ... 
+  
   note: checking mode of constant   _1453   ... 
+  
   note: checking mode of constant   _1454   ... 
+  
   note: checking mode of constant   _1455   ... 
+  
   note: checking mode of constant   _1456   ... 
+  
   note: checking mode of constant   _1457   ... 
+  
   note: checking mode of constant   _1458   ... 
+  
   note: checking mode of constant   _1459   ... 
+  
   note: checking mode of constant   _1460   ... 
+  
   note: checking mode of constant   _1461   ... 
+  
   note: checking mode of constant   _1462   ... 
+  
   note: checking mode of constant   _1463   ... 
+  
   note: checking mode of constant   _1464   ... 
+  
   note: checking mode of constant   _1465   ... 
+  
   note: checking mode of constant   _1466   ... 
+  
   note: checking mode of constant   _1467   ... 
+  
   note: checking mode of constant   _1468   ... 
+  
   note: checking mode of constant   _1469   ... 
+  
   note: checking mode of constant   _1470   ... 
+  
   => %block bind-block [c cn] [k kd] {da ofkd c k} {dm mofkd da met/unit}
   
   => %block wbind-block [c cn] [k kd] {da ofkd c k}
@@ -66678,32 +69379,59 @@
         eofkd-ordered (eofkd/closed _?4 DO) DO
   
   note: checking mode of constant   _1471   ... 
+  
   note: checking mode of constant   _1472   ... 
+  
   note: checking mode of constant   _1473   ... 
+  
   note: checking mode of constant   _1474   ... 
+  
   note: checking mode of constant   _1475   ... 
+  
   note: checking mode of constant   _1476   ... 
+  
   note: checking mode of constant   _1477   ... 
+  
   note: checking mode of constant   _1478   ... 
+  
   note: checking mode of constant   _1479   ... 
+  
   note: checking mode of constant   _1480   ... 
+  
   note: checking mode of constant   _1481   ... 
+  
   note: checking mode of constant   _1482   ... 
+  
   note: checking mode of constant   _1483   ... 
+  
   note: checking mode of constant   _1484   ... 
+  
   note: checking mode of constant   _1485   ... 
+  
   note: checking mode of constant   _1486   ... 
+  
   note: checking mode of constant   _1487   ... 
+  
   note: checking mode of constant   _1488   ... 
+  
   note: checking mode of constant   _1489   ... 
+  
   note: checking mode of constant   _1490   ... 
+  
   note: checking mode of constant   _1491   ... 
+  
   note: checking mode of constant   _1492   ... 
+  
   note: checking mode of constant   _1493   ... 
+  
   note: checking mode of constant   _1494   ... 
+  
   note: checking mode of constant   _1495   ... 
+  
   note: checking mode of constant   _1496   ... 
+  
   note: checking mode of constant   _1497   ... 
+  
   => %sort ekd-deq-ordered {G cxt} {K kd} {K' kd} {_0 ekd-deq G K K'}
     {_1498 cxt-ordered G}
   
@@ -66924,35 +69652,65 @@
           (ecn-deq/cn/mu ([a cn] [_1527 isvar a _?4] _?5 a _1527) D1) DO
   
   note: checking mode of constant   _1498   ... 
+  
   note: checking mode of constant   _1499   ... 
+  
   note: checking mode of constant   _1500   ... 
+  
   note: checking mode of constant   _1501   ... 
+  
   note: checking mode of constant   _1502   ... 
+  
   note: checking mode of constant   _1503   ... 
+  
   note: checking mode of constant   _1504   ... 
+  
   note: checking mode of constant   _1505   ... 
+  
   note: checking mode of constant   _1506   ... 
+  
   note: checking mode of constant   _1507   ... 
+  
   note: checking mode of constant   _1508   ... 
+  
   note: checking mode of constant   _1509   ... 
+  
   note: checking mode of constant   _1510   ... 
+  
   note: checking mode of constant   _1511   ... 
+  
   note: checking mode of constant   _1512   ... 
+  
   note: checking mode of constant   _1513   ... 
+  
   note: checking mode of constant   _1514   ... 
+  
   note: checking mode of constant   _1515   ... 
+  
   note: checking mode of constant   _1516   ... 
+  
   note: checking mode of constant   _1517   ... 
+  
   note: checking mode of constant   _1518   ... 
+  
   note: checking mode of constant   _1519   ... 
+  
   note: checking mode of constant   _1520   ... 
+  
   note: checking mode of constant   _1521   ... 
+  
   note: checking mode of constant   _1522   ... 
+  
   note: checking mode of constant   _1523   ... 
+  
   note: checking mode of constant   _1524   ... 
+  
   note: checking mode of constant   _1525   ... 
+  
   note: checking mode of constant   _1526   ... 
+  
   note: checking mode of constant   _1527   ... 
+  
   => %sort ekd-sub-ordered {G cxt} {K kd} {K' kd} {_0 ekd-sub G K K'}
     {_1528 cxt-ordered G}
   
@@ -67001,11 +69759,17 @@
              ([a cn] [_1533 isvar a _?6] _?8 a _1533)) DO
   
   note: checking mode of constant   _1528   ... 
+  
   note: checking mode of constant   _1529   ... 
+  
   note: checking mode of constant   _1530   ... 
+  
   note: checking mode of constant   _1531   ... 
+  
   note: checking mode of constant   _1532   ... 
+  
   note: checking mode of constant   _1533   ... 
+  
   => %sort cut-ofkd {C cn} {K kd} {C' cn} {K' kd} {G cxt} {Cm met}
     {D {_0 ofkd C K} ofkd C' K'}
     {_0 {d ofkd C K} {_0 mofkd d met/unit} mofkd (D d) Cm}
@@ -70068,131 +72832,257 @@
           (mecn-deq/pi-ext-2 D3' [a cn] [da isvar a J] D6' a da)
   
   note: checking mode of constant   _1534   ... 
+  
   note: checking mode of constant   _1535   ... 
+  
   note: checking mode of constant   _1536   ... 
+  
   note: checking mode of constant   _1537   ... 
+  
   note: checking mode of constant   _1538   ... 
+  
   note: checking mode of constant   _1539   ... 
+  
   note: checking mode of constant   _1540   ... 
+  
   note: checking mode of constant   _1541   ... 
+  
   note: checking mode of constant   _1542   ... 
+  
   note: checking mode of constant   _1543   ... 
+  
   note: checking mode of constant   _1544   ... 
+  
   note: checking mode of constant   _1545   ... 
+  
   note: checking mode of constant   _1546   ... 
+  
   note: checking mode of constant   _1547   ... 
+  
   note: checking mode of constant   _1548   ... 
+  
   note: checking mode of constant   _1549   ... 
+  
   note: checking mode of constant   _1550   ... 
+  
   note: checking mode of constant   _1551   ... 
+  
   note: checking mode of constant   _1552   ... 
+  
   note: checking mode of constant   _1553   ... 
+  
   note: checking mode of constant   _1554   ... 
+  
   note: checking mode of constant   _1555   ... 
+  
   note: checking mode of constant   _1556   ... 
+  
   note: checking mode of constant   _1557   ... 
+  
   note: checking mode of constant   _1558   ... 
+  
   note: checking mode of constant   _1559   ... 
+  
   note: checking mode of constant   _1560   ... 
+  
   note: checking mode of constant   _1566   ... 
+  
   note: checking mode of constant   _1567   ... 
+  
   note: checking mode of constant   _1568   ... 
+  
   note: checking mode of constant   _1569   ... 
+  
   note: checking mode of constant   _1570   ... 
+  
   note: checking mode of constant   _1571   ... 
+  
   note: checking mode of constant   _1561   ... 
+  
   note: checking mode of constant   _1562   ... 
+  
   note: checking mode of constant   _1563   ... 
+  
   note: checking mode of constant   _1564   ... 
+  
   note: checking mode of constant   _1565   ... 
+  
   note: checking mode of constant   _1572   ... 
+  
   note: checking mode of constant   _1573   ... 
+  
   note: checking mode of constant   _1574   ... 
+  
   note: checking mode of constant   _1575   ... 
+  
   note: checking mode of constant   _1576   ... 
+  
   note: checking mode of constant   _1577   ... 
+  
   note: checking mode of constant   _1578   ... 
+  
   note: checking mode of constant   _1579   ... 
+  
   note: checking mode of constant   _1580   ... 
+  
   note: checking mode of constant   _1581   ... 
+  
   note: checking mode of constant   _1582   ... 
+  
   note: checking mode of constant   _1583   ... 
+  
   note: checking mode of constant   _1584   ... 
+  
   note: checking mode of constant   _1585   ... 
+  
   note: checking mode of constant   _1586   ... 
+  
   note: checking mode of constant   _1587   ... 
+  
   note: checking mode of constant   _1588   ... 
+  
   note: checking mode of constant   _1589   ... 
+  
   note: checking mode of constant   _1590   ... 
+  
   note: checking mode of constant   _1591   ... 
+  
   note: checking mode of constant   _1592   ... 
+  
   note: checking mode of constant   _1593   ... 
+  
   note: checking mode of constant   _1594   ... 
+  
   note: checking mode of constant   _1595   ... 
+  
   note: checking mode of constant   _1596   ... 
+  
   note: checking mode of constant   _1597   ... 
+  
   note: checking mode of constant   _1598   ... 
+  
   note: checking mode of constant   _1599   ... 
+  
   note: checking mode of constant   _1600   ... 
+  
   note: checking mode of constant   _1601   ... 
+  
   note: checking mode of constant   _1602   ... 
+  
   note: checking mode of constant   _1603   ... 
+  
   note: checking mode of constant   _1604   ... 
+  
   note: checking mode of constant   _1605   ... 
+  
   note: checking mode of constant   _1606   ... 
+  
   note: checking mode of constant   _1607   ... 
+  
   note: checking mode of constant   _1608   ... 
+  
   note: checking mode of constant   _1609   ... 
+  
   note: checking mode of constant   _1610   ... 
+  
   note: checking mode of constant   _1611   ... 
+  
   note: checking mode of constant   _1612   ... 
+  
   note: checking mode of constant   _1613   ... 
+  
   note: checking mode of constant   _1614   ... 
+  
   note: checking mode of constant   _1615   ... 
+  
   note: checking mode of constant   _1616   ... 
+  
   note: checking mode of constant   _1617   ... 
+  
   note: checking mode of constant   _1618   ... 
+  
   note: checking mode of constant   _1619   ... 
+  
   note: checking mode of constant   _1620   ... 
+  
   note: checking mode of constant   _1621   ... 
+  
   note: checking mode of constant   _1622   ... 
+  
   note: checking mode of constant   _1623   ... 
+  
   note: checking mode of constant   _1624   ... 
+  
   note: checking mode of constant   _1625   ... 
+  
   note: checking mode of constant   _1626   ... 
+  
   note: checking mode of constant   _1627   ... 
+  
   note: checking mode of constant   _1628   ... 
+  
   note: checking mode of constant   _1629   ... 
+  
   note: checking mode of constant   _1630   ... 
+  
   note: checking mode of constant   _1631   ... 
+  
   note: checking mode of constant   _1632   ... 
+  
   note: checking mode of constant   _1633   ... 
+  
   note: checking mode of constant   _1634   ... 
+  
   note: checking mode of constant   _1635   ... 
+  
   note: checking mode of constant   _1636   ... 
+  
   note: checking mode of constant   _1637   ... 
+  
   note: checking mode of constant   _1638   ... 
+  
   note: checking mode of constant   _1639   ... 
+  
   note: checking mode of constant   _1640   ... 
+  
   note: checking mode of constant   _1641   ... 
+  
   note: checking mode of constant   _1642   ... 
+  
   note: checking mode of constant   _1643   ... 
+  
   note: checking mode of constant   _1644   ... 
+  
   note: checking mode of constant   _1645   ... 
+  
   note: checking mode of constant   _1646   ... 
+  
   note: checking mode of constant   _1647   ... 
+  
   note: checking mode of constant   _1648   ... 
+  
   note: checking mode of constant   _1649   ... 
+  
   note: checking mode of constant   _1650   ... 
+  
   note: checking mode of constant   _1651   ... 
+  
   note: checking mode of constant   _1652   ... 
+  
   note: checking mode of constant   _1653   ... 
+  
   note: checking mode of constant   _1654   ... 
+  
   note: checking mode of constant   _1655   ... 
+  
   note: checking mode of constant   _1656   ... 
+  
   note: checking mode of constant   _1657   ... 
+  
   note: checking mode of constant   _1658   ... 
+  
   note: checking mode of constant   _1659   ... 
+  
   => %sort explicate-open-ofkd {A kd} {M {_0 cn} cn} {B {_0 cn} kd} {I loc}
     {_0 {x cn} {_0 ofkd x A} ofkd (M x) (B x)}
     {_1660 {x cn} {_1660 isvar x I} eofkd (cxt/cons cxt/nil x A) (M x) (B x)}
@@ -70220,6 +73110,7 @@
           [x cn] [_1661 isvar x I] Dofe x _1661
   
   note: checking mode of constant   _1660   ... 
+  
   => %sort explicate-open-kd-wf {A kd} {B {_0 cn} kd} {I loc}
     {_0 {x cn} {_0 ofkd x A} kd-wf (B x)}
     {_1661 {x cn} {_1661 isvar x I} ekd-wf (cxt/cons cxt/nil x A) (B x)}
@@ -70246,6 +73137,7 @@
           [x cn] [_1662 isvar x I] Dofe x _1662
   
   note: checking mode of constant   _1661   ... 
+  
   => %sort explicate-open-kd-deq {A kd} {B {_0 cn} kd} {C {_0 cn} kd} {I loc}
     {_0 {x cn} {_0 ofkd x A} kd-deq (B x) (C x)}
     {_1662 {x cn} {_1662 isvar x I} ekd-deq (cxt/cons cxt/nil x A) (B x) (C x)}
@@ -70273,6 +73165,7 @@
           [x cn] [_1663 isvar x I] Dofe x _1663
   
   note: checking mode of constant   _1662   ... 
+  
   => %sort explicate-open-kd-sub {A kd} {B {_0 cn} kd} {C {_0 cn} kd} {I loc}
     {_0 {x cn} {_0 ofkd x A} kd-sub (B x) (C x)}
     {_1663 {x cn} {_1663 isvar x I} ekd-sub (cxt/cons cxt/nil x A) (B x) (C x)}
@@ -70300,6 +73193,7 @@
           [x cn] [_1664 isvar x I] Dofe x _1664
   
   note: checking mode of constant   _1663   ... 
+  
   => %sort explicate-open-cn-deq {A kd} {B {_0 cn} cn} {C {_0 cn} cn}
     {D {_0 cn} kd} {I loc} {_0 {x cn} {_0 ofkd x A} cn-deq (B x) (C x) (D x)}
     {_1664
@@ -70329,6 +73223,7 @@
           [x cn] [_1665 isvar x I] Dofe x _1665
   
   note: checking mode of constant   _1664   ... 
+  
   => %sort explicate-closed-ofkd {C cn} {K kd} {_0 ofkd C K}
     {_1665 eofkd cxt/nil C K}
   
@@ -70338,6 +73233,7 @@
         explicate-closed-ofkd D1 (eofkd/closed D1 cxt-ordered/nil)
   
   note: checking mode of constant   _1665   ... 
+  
   => %sort explicate-closed-kd-wf {K kd} {_0 kd-wf K} {_1666 ekd-wf cxt/nil K}
   
   => %term
@@ -70383,10 +73279,15 @@
           (ekd-wf/kd/pi D1' [a cn] [_1671 isvar a loc/z] D2' a _1671)
   
   note: checking mode of constant   _1666   ... 
+  
   note: checking mode of constant   _1667   ... 
+  
   note: checking mode of constant   _1668   ... 
+  
   note: checking mode of constant   _1669   ... 
+  
   note: checking mode of constant   _1670   ... 
+  
   => %sort explicate-closed-kd-sub {K kd} {K' kd} {_0 kd-sub K K'}
     {_1671 ekd-sub cxt/nil K K'}
   
@@ -70762,41 +73663,77 @@
           (ecn-deq/pi-ext-2 D1' [a cn] [_1707 isvar a loc/z] D3' a _1707)
   
   note: checking mode of constant   _1671   ... 
+  
   note: checking mode of constant   _1672   ... 
+  
   note: checking mode of constant   _1673   ... 
+  
   note: checking mode of constant   _1674   ... 
+  
   note: checking mode of constant   _1675   ... 
+  
   note: checking mode of constant   _1676   ... 
+  
   note: checking mode of constant   _1677   ... 
+  
   note: checking mode of constant   _1678   ... 
+  
   note: checking mode of constant   _1679   ... 
+  
   note: checking mode of constant   _1680   ... 
+  
   note: checking mode of constant   _1681   ... 
+  
   note: checking mode of constant   _1682   ... 
+  
   note: checking mode of constant   _1683   ... 
+  
   note: checking mode of constant   _1684   ... 
+  
   note: checking mode of constant   _1685   ... 
+  
   note: checking mode of constant   _1686   ... 
+  
   note: checking mode of constant   _1687   ... 
+  
   note: checking mode of constant   _1688   ... 
+  
   note: checking mode of constant   _1689   ... 
+  
   note: checking mode of constant   _1690   ... 
+  
   note: checking mode of constant   _1691   ... 
+  
   note: checking mode of constant   _1692   ... 
+  
   note: checking mode of constant   _1693   ... 
+  
   note: checking mode of constant   _1694   ... 
+  
   note: checking mode of constant   _1695   ... 
+  
   note: checking mode of constant   _1696   ... 
+  
   note: checking mode of constant   _1697   ... 
+  
   note: checking mode of constant   _1698   ... 
+  
   note: checking mode of constant   _1699   ... 
+  
   note: checking mode of constant   _1700   ... 
+  
   note: checking mode of constant   _1701   ... 
+  
   note: checking mode of constant   _1702   ... 
+  
   note: checking mode of constant   _1703   ... 
+  
   note: checking mode of constant   _1704   ... 
+  
   note: checking mode of constant   _1705   ... 
+  
   note: checking mode of constant   _1706   ... 
+  
   => %sort renum-cxt-lookup {I loc} {G {_0 cn} cxt} {J loc} {C {_0 cn} cn}
     {K {_0 cn} kd} {_0 {x cn} {_0 isvar x I} cxt-ordered (G x)}
     {_1707 {x cn} {_1707 isvar x J} cxt-lookup (G x) (C x) (K x)}
@@ -70848,7 +73785,9 @@
               (cxt-bounded/cons (DB x di) (DP x di))
   
   note: checking mode of constant   _1707   ... 
+  
   note: checking mode of constant   _1708   ... 
+  
   => %sort renum-ekd-wf {I loc} {G {_0 cn} cxt} {J loc} {K' {_0 cn} kd} {Mm met}
     {_0 {x cn} {_0 isvar x I} cxt-ordered (G x)}
     {D {x cn} {_1709 isvar x J} ekd-wf (G x) (K' x)}
@@ -73370,68 +76309,131 @@
               [a cn] [da isvar a _?1] D2m'' x dx a da
   
   note: checking mode of constant   _1709   ... 
+  
   note: checking mode of constant   _1710   ... 
+  
   note: checking mode of constant   _1711   ... 
+  
   note: checking mode of constant   _1712   ... 
+  
   note: checking mode of constant   _1713   ... 
+  
   note: checking mode of constant   _1714   ... 
+  
   note: checking mode of constant   _1715   ... 
+  
   note: checking mode of constant   _1716   ... 
+  
   note: checking mode of constant   _1717   ... 
+  
   note: checking mode of constant   _1718   ... 
+  
   note: checking mode of constant   _1719   ... 
+  
   note: checking mode of constant   _1720   ... 
+  
   note: checking mode of constant   _1721   ... 
+  
   note: checking mode of constant   _1722   ... 
+  
   note: checking mode of constant   _1723   ... 
+  
   note: checking mode of constant   _1724   ... 
+  
   note: checking mode of constant   _1725   ... 
+  
   note: checking mode of constant   _1726   ... 
+  
   note: checking mode of constant   _1727   ... 
+  
   note: checking mode of constant   _1728   ... 
+  
   note: checking mode of constant   _1729   ... 
+  
   note: checking mode of constant   _1730   ... 
+  
   note: checking mode of constant   _1731   ... 
+  
   note: checking mode of constant   _1732   ... 
+  
   note: checking mode of constant   _1733   ... 
+  
   note: checking mode of constant   _1734   ... 
+  
   note: checking mode of constant   _1735   ... 
+  
   note: checking mode of constant   _1736   ... 
+  
   note: checking mode of constant   _1737   ... 
+  
   note: checking mode of constant   _1738   ... 
+  
   note: checking mode of constant   _1739   ... 
+  
   note: checking mode of constant   _1740   ... 
+  
   note: checking mode of constant   _1741   ... 
+  
   note: checking mode of constant   _1742   ... 
+  
   note: checking mode of constant   _1743   ... 
+  
   note: checking mode of constant   _1744   ... 
+  
   note: checking mode of constant   _1745   ... 
+  
   note: checking mode of constant   _1746   ... 
+  
   note: checking mode of constant   _1747   ... 
+  
   note: checking mode of constant   _1748   ... 
+  
   note: checking mode of constant   _1749   ... 
+  
   note: checking mode of constant   _1750   ... 
+  
   note: checking mode of constant   _1751   ... 
+  
   note: checking mode of constant   _1752   ... 
+  
   note: checking mode of constant   _1753   ... 
+  
   note: checking mode of constant   _1754   ... 
+  
   note: checking mode of constant   _1755   ... 
+  
   note: checking mode of constant   _1756   ... 
+  
   note: checking mode of constant   _1757   ... 
+  
   note: checking mode of constant   _1758   ... 
+  
   note: checking mode of constant   _1759   ... 
+  
   note: checking mode of constant   _1760   ... 
+  
   note: checking mode of constant   _1761   ... 
+  
   note: checking mode of constant   _1762   ... 
+  
   note: checking mode of constant   _1763   ... 
+  
   note: checking mode of constant   _1764   ... 
+  
   note: checking mode of constant   _1765   ... 
+  
   note: checking mode of constant   _1766   ... 
+  
   note: checking mode of constant   _1767   ... 
+  
   note: checking mode of constant   _1768   ... 
+  
   note: checking mode of constant   _1769   ... 
+  
   note: checking mode of constant   _1770   ... 
+  
   note: checking mode of constant   _1771   ... 
+  
   => %sort wkn-cxt-bounded {G1 cxt} {G2 cxt} {G3 cxt} {C cn} {K kd} {G3' cxt}
     {C' cn} {_0 cxt-append G1 G2 G3}
     {_1772 cxt-append (cxt/cons G1 C K) G2 G3'} {_1773 cxt-bounded G3' C'}
@@ -73469,8 +76471,11 @@
           (cxt-bounded/cons DB' DP')
   
   note: checking mode of constant   _1772   ... 
+  
   note: checking mode of constant   _1773   ... 
+  
   note: checking mode of constant   _1774   ... 
+  
   => %sort wkn-cxt-ordered {G1 cxt} {G2 cxt} {G3 cxt} {C cn} {K kd} {G3' cxt}
     {_0 cxt-append G1 G2 G3} {_1775 cxt-append (cxt/cons G1 C K) G2 G3'}
     {_1776 cxt-ordered G3'} {_1777 cxt-ordered G3}
@@ -73499,8 +76504,11 @@
           (cxt-ordered/cons DB) (cxt-ordered/cons DB')
   
   note: checking mode of constant   _1775   ... 
+  
   note: checking mode of constant   _1776   ... 
+  
   note: checking mode of constant   _1777   ... 
+  
   => %sort wkn-cxt-lookup {G1 cxt} {G2 cxt} {G3 cxt} {C cn} {K kd} {G3' cxt}
     {C' cn} {K' kd} {_0 cxt-append G1 G2 G3}
     {_1778 cxt-append (cxt/cons G1 C K) G2 G3'} {_1779 cxt-ordered G3'}
@@ -73539,8 +76547,11 @@
           (cxt-ordered/cons DB') (cxt-lookup/hit DB) (cxt-lookup/hit DB')
   
   note: checking mode of constant   _1778   ... 
+  
   note: checking mode of constant   _1779   ... 
+  
   note: checking mode of constant   _1780   ... 
+  
   => %sort wkn-ekd-wf {G1 cxt} {G2 cxt} {G3 cxt} {C cn} {K kd} {G3' cxt} {
     K' kd} {Mm met} {_0 cxt-append G1 G2 G3}
     {_1781 cxt-append (cxt/cons G1 C K) G2 G3'} {_1782 cxt-ordered G3'}
@@ -74868,68 +77879,131 @@
           (mecn-deq/pi-ext-2 D1m' [a cn] [da isvar a _?1] D2m'' a da)
   
   note: checking mode of constant   _1781   ... 
+  
   note: checking mode of constant   _1782   ... 
+  
   note: checking mode of constant   _1783   ... 
+  
   note: checking mode of constant   _1784   ... 
+  
   note: checking mode of constant   _1785   ... 
+  
   note: checking mode of constant   _1786   ... 
+  
   note: checking mode of constant   _1787   ... 
+  
   note: checking mode of constant   _1788   ... 
+  
   note: checking mode of constant   _1789   ... 
+  
   note: checking mode of constant   _1790   ... 
+  
   note: checking mode of constant   _1791   ... 
+  
   note: checking mode of constant   _1792   ... 
+  
   note: checking mode of constant   _1793   ... 
+  
   note: checking mode of constant   _1794   ... 
+  
   note: checking mode of constant   _1795   ... 
+  
   note: checking mode of constant   _1796   ... 
+  
   note: checking mode of constant   _1797   ... 
+  
   note: checking mode of constant   _1798   ... 
+  
   note: checking mode of constant   _1799   ... 
+  
   note: checking mode of constant   _1800   ... 
+  
   note: checking mode of constant   _1801   ... 
+  
   note: checking mode of constant   _1802   ... 
+  
   note: checking mode of constant   _1803   ... 
+  
   note: checking mode of constant   _1804   ... 
+  
   note: checking mode of constant   _1805   ... 
+  
   note: checking mode of constant   _1806   ... 
+  
   note: checking mode of constant   _1807   ... 
+  
   note: checking mode of constant   _1808   ... 
+  
   note: checking mode of constant   _1809   ... 
+  
   note: checking mode of constant   _1810   ... 
+  
   note: checking mode of constant   _1811   ... 
+  
   note: checking mode of constant   _1812   ... 
+  
   note: checking mode of constant   _1813   ... 
+  
   note: checking mode of constant   _1814   ... 
+  
   note: checking mode of constant   _1815   ... 
+  
   note: checking mode of constant   _1816   ... 
+  
   note: checking mode of constant   _1817   ... 
+  
   note: checking mode of constant   _1818   ... 
+  
   note: checking mode of constant   _1819   ... 
+  
   note: checking mode of constant   _1820   ... 
+  
   note: checking mode of constant   _1821   ... 
+  
   note: checking mode of constant   _1822   ... 
+  
   note: checking mode of constant   _1823   ... 
+  
   note: checking mode of constant   _1824   ... 
+  
   note: checking mode of constant   _1825   ... 
+  
   note: checking mode of constant   _1826   ... 
+  
   note: checking mode of constant   _1827   ... 
+  
   note: checking mode of constant   _1828   ... 
+  
   note: checking mode of constant   _1829   ... 
+  
   note: checking mode of constant   _1830   ... 
+  
   note: checking mode of constant   _1831   ... 
+  
   note: checking mode of constant   _1832   ... 
+  
   note: checking mode of constant   _1833   ... 
+  
   note: checking mode of constant   _1834   ... 
+  
   note: checking mode of constant   _1835   ... 
+  
   note: checking mode of constant   _1836   ... 
+  
   note: checking mode of constant   _1837   ... 
+  
   note: checking mode of constant   _1838   ... 
+  
   note: checking mode of constant   _1839   ... 
+  
   note: checking mode of constant   _1840   ... 
+  
   note: checking mode of constant   _1841   ... 
+  
   note: checking mode of constant   _1842   ... 
+  
   note: checking mode of constant   _1843   ... 
+  
   => %sort cxt-ordered-pred {G cxt} {_?1 cn} {_?2 kd}
     {_0 cxt-ordered (cxt/cons G _?1 _?2)} {_1844 cxt-ordered G}
   
@@ -74947,7 +78021,9 @@
           (cxt-ordered/cons DB)
   
   note: checking mode of constant   _1844   ... 
+  
   note: checking mode of constant   _1845   ... 
+  
   => %sort wkn-eofkd-append {G1 cxt} {C cn} {K kd} {_?1 {_0 cn} cxt} {_?2 cn}
     {G' cxt} {_0 eofkd G1 C K}
     {_1846 cxt-append-sub G1 ([_1846 cn] _?1 _1846) _?2 G'}
@@ -74972,7 +78048,9 @@
         wkn-eofkd-append D1 (cxt-append-sub/cons DA) DO D1''
   
   note: checking mode of constant   _1846   ... 
+  
   note: checking mode of constant   _1847   ... 
+  
   => %sort wkn-ecn-deq-append {G1 cxt} {C cn} {CC cn} {K kd} {_?1 {_0 cn} cxt}
     {_?2 cn} {G' cxt} {_0 ecn-deq G1 C CC K}
     {_1848 cxt-append-sub G1 ([_1848 cn] _?1 _1848) _?2 G'}
@@ -75000,7 +78078,9 @@
         wkn-ecn-deq-append D1 (cxt-append-sub/cons DA) DO D1''
   
   note: checking mode of constant   _1848   ... 
+  
   note: checking mode of constant   _1849   ... 
+  
   => %sort wkn-ekd-deq-append {G1 cxt} {K kd} {K' kd} {_?1 {_0 cn} cxt} {_?2 cn}
     {G' cxt} {_0 ekd-deq G1 K K'}
     {_1850 cxt-append-sub G1 ([_1850 cn] _?1 _1850) _?2 G'}
@@ -75026,7 +78106,9 @@
         wkn-ekd-deq-append D1 (cxt-append-sub/cons DA) DO D1''
   
   note: checking mode of constant   _1850   ... 
+  
   note: checking mode of constant   _1851   ... 
+  
   => %sort wkn-deq-cxt-bounded {G cxt} {C cn} {K1 kd} {G2 cxt} {G3 cxt} {K2 kd}
     {G3' cxt} {X cn} {_0 cxt-append (cxt/cons G C K1) G2 G3}
     {_1852 cxt-append (cxt/cons G C K2) G2 G3'} {_1853 cxt-bounded G3 X}
@@ -75051,7 +78133,9 @@
           (cxt-bounded/cons DB DP) (cxt-bounded/cons DB' DP)
   
   note: checking mode of constant   _1852   ... 
+  
   note: checking mode of constant   _1853   ... 
+  
   => %sort wkn-deq-cxt-ordered {G cxt} {C cn} {K1 kd} {G2 cxt} {G3 cxt} {K2 kd}
     {G3' cxt} {_0 cxt-append (cxt/cons G C K1) G2 G3}
     {_1854 cxt-append (cxt/cons G C K2) G2 G3'} {_1855 cxt-ordered G3}
@@ -75076,7 +78160,9 @@
           (cxt-ordered/cons DB) (cxt-ordered/cons DB')
   
   note: checking mode of constant   _1854   ... 
+  
   note: checking mode of constant   _1855   ... 
+  
   => %sort wkn-deq-cxt-lookup {G cxt} {C cn} {K1 kd} {G2 cxt} {G3 cxt} {K2 kd}
     {G3' cxt} {C' cn} {K' kd} {_0 cxt-append (cxt/cons G C K1) G2 G3}
     {_1856 cxt-append (cxt/cons G C K2) G2 G3'} {_1857 ekd-deq G K2 K1}
@@ -75129,9 +78215,13 @@
           (cxt-lookup/miss DL _?8 DB) DC'
   
   note: checking mode of constant   _1856   ... 
+  
   note: checking mode of constant   _1857   ... 
+  
   note: checking mode of constant   _1858   ... 
+  
   note: checking mode of constant   _1859   ... 
+  
   => %sort wkn-deq-ekd-wf {G cxt} {K1 kd} {G2 {_0 cn} cxt} {G3 {_0 cn} cxt}
     {K2 kd} {G3' {_0 cn} cxt} {I loc} {K' {_0 cn} kd}
     {_0 {x cn} cxt-append (cxt/cons G x K1) (G2 x) (G3 x)}
@@ -76781,68 +79871,131 @@
               [a cn] [_1923 isvar a _?1] D2' x di a _1923
   
   note: checking mode of constant   _1860   ... 
+  
   note: checking mode of constant   _1861   ... 
+  
   note: checking mode of constant   _1862   ... 
+  
   note: checking mode of constant   _1863   ... 
+  
   note: checking mode of constant   _1864   ... 
+  
   note: checking mode of constant   _1865   ... 
+  
   note: checking mode of constant   _1866   ... 
+  
   note: checking mode of constant   _1867   ... 
+  
   note: checking mode of constant   _1868   ... 
+  
   note: checking mode of constant   _1869   ... 
+  
   note: checking mode of constant   _1870   ... 
+  
   note: checking mode of constant   _1871   ... 
+  
   note: checking mode of constant   _1872   ... 
+  
   note: checking mode of constant   _1873   ... 
+  
   note: checking mode of constant   _1874   ... 
+  
   note: checking mode of constant   _1875   ... 
+  
   note: checking mode of constant   _1876   ... 
+  
   note: checking mode of constant   _1877   ... 
+  
   note: checking mode of constant   _1878   ... 
+  
   note: checking mode of constant   _1879   ... 
+  
   note: checking mode of constant   _1880   ... 
+  
   note: checking mode of constant   _1881   ... 
+  
   note: checking mode of constant   _1882   ... 
+  
   note: checking mode of constant   _1883   ... 
+  
   note: checking mode of constant   _1884   ... 
+  
   note: checking mode of constant   _1885   ... 
+  
   note: checking mode of constant   _1886   ... 
+  
   note: checking mode of constant   _1887   ... 
+  
   note: checking mode of constant   _1888   ... 
+  
   note: checking mode of constant   _1889   ... 
+  
   note: checking mode of constant   _1890   ... 
+  
   note: checking mode of constant   _1891   ... 
+  
   note: checking mode of constant   _1892   ... 
+  
   note: checking mode of constant   _1893   ... 
+  
   note: checking mode of constant   _1894   ... 
+  
   note: checking mode of constant   _1895   ... 
+  
   note: checking mode of constant   _1896   ... 
+  
   note: checking mode of constant   _1897   ... 
+  
   note: checking mode of constant   _1898   ... 
+  
   note: checking mode of constant   _1899   ... 
+  
   note: checking mode of constant   _1900   ... 
+  
   note: checking mode of constant   _1901   ... 
+  
   note: checking mode of constant   _1902   ... 
+  
   note: checking mode of constant   _1903   ... 
+  
   note: checking mode of constant   _1904   ... 
+  
   note: checking mode of constant   _1905   ... 
+  
   note: checking mode of constant   _1906   ... 
+  
   note: checking mode of constant   _1907   ... 
+  
   note: checking mode of constant   _1908   ... 
+  
   note: checking mode of constant   _1909   ... 
+  
   note: checking mode of constant   _1910   ... 
+  
   note: checking mode of constant   _1911   ... 
+  
   note: checking mode of constant   _1912   ... 
+  
   note: checking mode of constant   _1913   ... 
+  
   note: checking mode of constant   _1914   ... 
+  
   note: checking mode of constant   _1915   ... 
+  
   note: checking mode of constant   _1916   ... 
+  
   note: checking mode of constant   _1917   ... 
+  
   note: checking mode of constant   _1918   ... 
+  
   note: checking mode of constant   _1919   ... 
+  
   note: checking mode of constant   _1920   ... 
+  
   note: checking mode of constant   _1921   ... 
+  
   note: checking mode of constant   _1922   ... 
+  
   => %sort subst-cxt-bounded {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt}
     {C cn} {G' cxt} {I loc} {X cn}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -76910,8 +80063,11 @@
           (cxt-bounded/cons DB' (cxt-precedes/i D1 D2 DL))
   
   note: checking mode of constant   _1923   ... 
+  
   note: checking mode of constant   _1924   ... 
+  
   note: checking mode of constant   _1925   ... 
+  
   => %sort subst-cxt-ordered {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt}
     {C cn} {G' cxt} {I loc}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -76946,7 +80102,9 @@
           (cxt-ordered/cons DB')
   
   note: checking mode of constant   _1926   ... 
+  
   note: checking mode of constant   _1927   ... 
+  
   => %sort subst-cxt-lookup-c {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt}
     {C cn} {G' cxt} {I loc} {C' cn} {K' {_0 cn} kd}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -77033,9 +80191,13 @@
           DL'
   
   note: checking mode of constant   _1928   ... 
+  
   note: checking mode of constant   _1929   ... 
+  
   note: checking mode of constant   _1930   ... 
+  
   note: checking mode of constant   _1931   ... 
+  
   => %sort cxt-lookup-ioc {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt} {
     C cn} {G' cxt} {I loc} {C' {_0 cn} cn} {K' {_0 cn} kd}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -77101,9 +80263,13 @@
              cxt-lookup/miss (DL x di) (_?12 x di) (_?13 x di)) IOC
   
   note: checking mode of constant   _1932   ... 
+  
   note: checking mode of constant   _1933   ... 
+  
   note: checking mode of constant   _1934   ... 
+  
   note: checking mode of constant   _1935   ... 
+  
   => %sort eofkd/seq/kd {K1 kd} {K2 kd} {G cxt} {C cn} {_0 seq/kd K1 K2}
     {_1936 eofkd G C K1} {_1937 eofkd G C K2}
   
@@ -77113,6 +80279,7 @@
         eofkd/seq/kd seq/kd/refl D1 D1
   
   note: checking mode of constant   _1936   ... 
+  
   => %sort subst-cxt-lookup {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt}
     {C cn} {G' cxt} {I loc} {C' {_0 cn} cn} {K' {_0 cn} kd}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -77157,7 +80324,9 @@
           ([x cn] [_1942 isvar x I] DL x _1942) id-or-cl/id DC''
   
   note: checking mode of constant   _1937   ... 
+  
   note: checking mode of constant   _1938   ... 
+  
   => %sort subst-f-cxt-lookup {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt}
     {C cn} {G' cxt} {Cz cn} {I loc} {C' {_0 cn} cn} {K' {_0 cn} kd}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -77202,7 +80371,9 @@
           ([x cn] [_1944 isvar x I] DL x _1944) id-or-cl/id DC''
   
   note: checking mode of constant   _1939   ... 
+  
   note: checking mode of constant   _1940   ... 
+  
   => %sort subst-eofkd {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt} {C cn}
     {G' cxt} {I loc} {C' {_0 cn} cn} {K' {_0 cn} kd}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -78659,69 +81830,133 @@
           (ecn-deq/pi-ext-2 D1' [a cn] [_2005 isvar a YI] D2' a _2005)
   
   note: checking mode of constant   _1941   ... 
+  
   note: checking mode of constant   _1942   ... 
+  
   note: checking mode of constant   _1943   ... 
+  
   note: checking mode of constant   _1944   ... 
+  
   note: checking mode of constant   _1945   ... 
+  
   note: checking mode of constant   _1946   ... 
+  
   note: checking mode of constant   _1947   ... 
+  
   note: checking mode of constant   _1948   ... 
+  
   note: checking mode of constant   _1949   ... 
+  
   note: checking mode of constant   _1950   ... 
+  
   note: checking mode of constant   _1951   ... 
+  
   note: checking mode of constant   _1952   ... 
+  
   note: checking mode of constant   _1953   ... 
+  
   note: checking mode of constant   _1954   ... 
+  
   note: checking mode of constant   _1955   ... 
+  
   note: checking mode of constant   _1956   ... 
+  
   note: checking mode of constant   _1957   ... 
+  
   note: checking mode of constant   _1958   ... 
+  
   note: checking mode of constant   _1959   ... 
+  
   note: checking mode of constant   _1960   ... 
+  
   note: checking mode of constant   _1961   ... 
+  
   note: checking mode of constant   _1962   ... 
+  
   note: checking mode of constant   _1963   ... 
+  
   note: checking mode of constant   _1964   ... 
+  
   note: checking mode of constant   _1965   ... 
+  
   note: checking mode of constant   _1966   ... 
+  
   note: checking mode of constant   _1967   ... 
+  
   note: checking mode of constant   _1968   ... 
+  
   note: checking mode of constant   _1969   ... 
+  
   note: checking mode of constant   _1970   ... 
+  
   note: checking mode of constant   _1971   ... 
+  
   note: checking mode of constant   _1972   ... 
+  
   note: checking mode of constant   _1973   ... 
+  
   note: checking mode of constant   _1974   ... 
+  
   note: checking mode of constant   _1975   ... 
+  
   note: checking mode of constant   _1976   ... 
+  
   note: checking mode of constant   _1977   ... 
+  
   note: checking mode of constant   _1978   ... 
+  
   note: checking mode of constant   _1979   ... 
+  
   note: checking mode of constant   _1980   ... 
+  
   note: checking mode of constant   _1981   ... 
+  
   note: checking mode of constant   _1982   ... 
+  
   note: checking mode of constant   _1983   ... 
+  
   note: checking mode of constant   _1984   ... 
+  
   note: checking mode of constant   _1985   ... 
+  
   note: checking mode of constant   _1986   ... 
+  
   note: checking mode of constant   _1987   ... 
+  
   note: checking mode of constant   _1988   ... 
+  
   note: checking mode of constant   _1989   ... 
+  
   note: checking mode of constant   _1990   ... 
+  
   note: checking mode of constant   _1991   ... 
+  
   note: checking mode of constant   _1992   ... 
+  
   note: checking mode of constant   _1993   ... 
+  
   note: checking mode of constant   _1994   ... 
+  
   note: checking mode of constant   _1995   ... 
+  
   note: checking mode of constant   _1996   ... 
+  
   note: checking mode of constant   _1997   ... 
+  
   note: checking mode of constant   _1998   ... 
+  
   note: checking mode of constant   _1999   ... 
+  
   note: checking mode of constant   _2000   ... 
+  
   note: checking mode of constant   _2001   ... 
+  
   note: checking mode of constant   _2002   ... 
+  
   note: checking mode of constant   _2003   ... 
+  
   note: checking mode of constant   _2004   ... 
+  
   => %sort ecn-deq/seq/kd {K1 kd} {K2 kd} {G cxt} {C cn} {CC cn} {_0 seq/kd K1 K2}
     {_2005 ecn-deq G C CC K1} {_2006 ecn-deq G C CC K2}
   
@@ -78731,6 +81966,7 @@
         ecn-deq/seq/kd seq/kd/refl D1 D1
   
   note: checking mode of constant   _2005   ... 
+  
   => %sort funct-cxt-lookup {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt}
     {C cn} {G' cxt} {CC cn} {I loc} {C' {_0 cn} cn} {K' {_0 cn} kd}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -78779,7 +82015,9 @@
           ([x cn] [_2011 isvar x I] DL x _2011) id-or-cl/id DC''
   
   note: checking mode of constant   _2006   ... 
+  
   note: checking mode of constant   _2007   ... 
+  
   => %sort funct-closed-ofkd^ {C' cn} {K' kd} {C {_0 cn} cn} {K {_0 cn} kd}
     {G cxt} {C1 cn} {C2 cn} {_0 ofkd C' K'}
     {_2008 closed-cn ([_2008 cn] C _2008) C'}
@@ -78794,6 +82032,7 @@
           (ecn-deq/refl (eofkd/closed D1 DO))
   
   note: checking mode of constant   _2008   ... 
+  
   => %sort funct-closed-ofkd {C {_0 cn} cn} {K {_0 cn} kd} {G cxt} {C1 cn} {
     C2 cn} {_0 {x cn} ofkd (C x) (K x)} {_2009 cxt-ordered G}
     {_2010 ecn-deq G (C C1) (C C2) (K C1)}
@@ -78810,6 +82049,7 @@
         funct-closed-ofkd C1 C2 ([x cn] D1 x) DO DQ
   
   note: checking mode of constant   _2009   ... 
+  
   => %sort funct-eofkd {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt} {C cn}
     {G' cxt} {CC cn} {I loc} {C' {_0 cn} cn} {K' {_0 cn} kd}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -79472,32 +82712,59 @@
           ([x cn] [di isvar x _?8] eofkd/closed (DC x) (DO x di)) DQ
   
   note: checking mode of constant   _2010   ... 
+  
   note: checking mode of constant   _2011   ... 
+  
   note: checking mode of constant   _2012   ... 
+  
   note: checking mode of constant   _2013   ... 
+  
   note: checking mode of constant   _2014   ... 
+  
   note: checking mode of constant   _2015   ... 
+  
   note: checking mode of constant   _2016   ... 
+  
   note: checking mode of constant   _2017   ... 
+  
   note: checking mode of constant   _2018   ... 
+  
   note: checking mode of constant   _2019   ... 
+  
   note: checking mode of constant   _2020   ... 
+  
   note: checking mode of constant   _2021   ... 
+  
   note: checking mode of constant   _2022   ... 
+  
   note: checking mode of constant   _2023   ... 
+  
   note: checking mode of constant   _2024   ... 
+  
   note: checking mode of constant   _2025   ... 
+  
   note: checking mode of constant   _2026   ... 
+  
   note: checking mode of constant   _2027   ... 
+  
   note: checking mode of constant   _2028   ... 
+  
   note: checking mode of constant   _2029   ... 
+  
   note: checking mode of constant   _2030   ... 
+  
   note: checking mode of constant   _2031   ... 
+  
   note: checking mode of constant   _2032   ... 
+  
   note: checking mode of constant   _2033   ... 
+  
   note: checking mode of constant   _2034   ... 
+  
   note: checking mode of constant   _2035   ... 
+  
   note: checking mode of constant   _2036   ... 
+  
   => %sort ikd-wf {_0 cxt} {_2037 kd}
   
   => %term ikd-wf/nil {K kd} {_0 kd-wf K} ikd-wf cxt/nil K
@@ -79558,7 +82825,9 @@
         kd-wf-to-ikd-wf (cxt/cons G C K) D (ikd-wf/cons [d ofkd C K] D')
   
   note: checking mode of constant   _2037   ... 
+  
   note: checking mode of constant   _2038   ... 
+  
   => %sort ofkd-to-iofkd {C cn} {K kd} {G cxt} {_0 ofkd C K} {_2039 iofkd G C K}
   
   => %term
@@ -79572,7 +82841,9 @@
         ofkd-to-iofkd (cxt/cons G C K) D (iofkd/cons [d ofkd C K] D')
   
   note: checking mode of constant   _2039   ... 
+  
   note: checking mode of constant   _2040   ... 
+  
   => %sort kd-sub-to-ikd-sub {K kd} {K' kd} {G cxt} {_0 kd-sub K K'}
     {_2041 ikd-sub G K K'}
   
@@ -79588,7 +82859,9 @@
         kd-sub-to-ikd-sub (cxt/cons G C K) D (ikd-sub/cons [d ofkd C K] D')
   
   note: checking mode of constant   _2041   ... 
+  
   note: checking mode of constant   _2042   ... 
+  
   => %sort kd-deq-to-ikd-deq {K kd} {K' kd} {G cxt} {_0 kd-deq K K'}
     {_2043 ikd-deq G K K'}
   
@@ -79604,7 +82877,9 @@
         kd-deq-to-ikd-deq (cxt/cons G C K) D (ikd-deq/cons [d ofkd C K] D')
   
   note: checking mode of constant   _2043   ... 
+  
   note: checking mode of constant   _2044   ... 
+  
   => %sort cn-deq-to-icn-deq {C1 cn} {C2 cn} {K kd} {G cxt} {_0 cn-deq C1 C2 K}
     {_2045 icn-deq G C1 C2 K}
   
@@ -79620,7 +82895,9 @@
         cn-deq-to-icn-deq (cxt/cons G C K) D (icn-deq/cons [d ofkd C K] D')
   
   note: checking mode of constant   _2045   ... 
+  
   note: checking mode of constant   _2046   ... 
+  
   => %sort implicate-cxt-lookup {G cxt} {C cn} {K kd} {_0 cxt-lookup G C K}
     {_2047 iofkd G C K}
   
@@ -79640,7 +82917,9 @@
           (iofkd/cons [d ofkd _?4 _?5] D')
   
   note: checking mode of constant   _2047   ... 
+  
   note: checking mode of constant   _2048   ... 
+  
   => %sort ikd-wf/kd/unit {G cxt} {_0 ikd-wf G kd/unit}
   
   => %sort ikd-wf/kd/sing {G cxt} {C1 cn} {_0 iofkd G C1 kd/type}
@@ -79660,7 +82939,9 @@
           (ikd-wf/cons [_2050 ofkd C K] D' _2050)
   
   note: checking mode of constant   _2049   ... 
+  
   note: checking mode of constant   _2050   ... 
+  
   => %sort ikd-wf/kd/sgm {G cxt} {K1 kd} {K2 {_0 cn} kd} {_0 ikd-wf G K1}
     {_2051 {c cn} {_2051 ofkd c K1} ikd-wf G (K2 c)}
     {_2052 ikd-wf G (kd/sgm K1 [_2052 cn] K2 _2052)}
@@ -79687,7 +82968,9 @@
           (ikd-wf/cons [_2052 ofkd C K] D' _2052)
   
   note: checking mode of constant   _2051   ... 
+  
   note: checking mode of constant   _2052   ... 
+  
   => %sort ikd-wf/kd/pi {G cxt} {K1 kd} {K2 {_0 cn} kd} {_0 ikd-wf G K1}
     {_2053 {c cn} {_2053 ofkd c K1} ikd-wf G (K2 c)}
     {_2054 ikd-wf G (kd/pi K1 [_2054 cn] K2 _2054)}
@@ -79713,7 +82996,9 @@
           (ikd-wf/cons [_2054 ofkd C K] D' _2054)
   
   note: checking mode of constant   _2053   ... 
+  
   note: checking mode of constant   _2054   ... 
+  
   => %sort ikd-deq/kd/sing {G cxt} {C1 cn} {C2 cn} {_0 icn-deq G C1 C2 kd/type}
     {_2055 ikd-deq G (kd/sing C1) (kd/sing C2)}
   
@@ -79732,7 +83017,9 @@
           (ikd-deq/cons [_2056 ofkd C K] D' _2056)
   
   note: checking mode of constant   _2055   ... 
+  
   note: checking mode of constant   _2056   ... 
+  
   => %sort ikd-deq/kd/sgm {G cxt} {K1 kd} {K2 kd} {K3 {_0 cn} kd} {K4 {_0 cn} kd}
     {_0 ikd-deq G K1 K2}
     {_2057 {c cn} {_2057 ofkd c K1} ikd-deq G (K3 c) (K4 c)}
@@ -79767,7 +83054,9 @@
           (ikd-deq/cons [_2058 ofkd C K] D' _2058)
   
   note: checking mode of constant   _2057   ... 
+  
   note: checking mode of constant   _2058   ... 
+  
   => %sort ikd-deq/kd/pi {G cxt} {K2 kd} {K1 kd} {K3 {_0 cn} kd} {K4 {_0 cn} kd}
     {_0 ikd-deq G K2 K1}
     {_2059 {c cn} {_2059 ofkd c K2} ikd-deq G (K3 c) (K4 c)}
@@ -79802,7 +83091,9 @@
           (ikd-deq/cons [_2060 ofkd C K] D' _2060)
   
   note: checking mode of constant   _2059   ... 
+  
   note: checking mode of constant   _2060   ... 
+  
   => %sort ikd-sub/kd/sing-kd/sing {G cxt} {C1 cn} {C2 cn}
     {_0 icn-deq G C1 C2 kd/type} {_2061 ikd-sub G (kd/sing C1) (kd/sing C2)}
   
@@ -79822,7 +83113,9 @@
           (ikd-sub/cons [_2062 ofkd C K] D' _2062)
   
   note: checking mode of constant   _2061   ... 
+  
   note: checking mode of constant   _2062   ... 
+  
   => %sort ikd-sub/kd/sing-kd/type {G cxt} {C1 cn} {_0 iofkd G C1 kd/type}
     {_2063 ikd-sub G (kd/sing C1) kd/type}
   
@@ -79841,7 +83134,9 @@
           (ikd-sub/cons [_2064 ofkd C K] D' _2064)
   
   note: checking mode of constant   _2063   ... 
+  
   note: checking mode of constant   _2064   ... 
+  
   => %sort ikd-sub/kd/sgm {G cxt} {K1 kd} {K2 kd} {K3 {_0 cn} kd} {K4 {_0 cn} kd}
     {_0 ikd-sub G K1 K2}
     {_2065 {c cn} {_2065 ofkd c K1} ikd-sub G (K3 c) (K4 c)}
@@ -79884,7 +83179,9 @@
           (ikd-sub/cons [_2066 ofkd C K] D' _2066)
   
   note: checking mode of constant   _2065   ... 
+  
   note: checking mode of constant   _2066   ... 
+  
   => %sort ikd-sub/kd/pi {G cxt} {K2 kd} {K1 kd} {K3 {_0 cn} kd} {K4 {_0 cn} kd}
     {_0 ikd-sub G K2 K1}
     {_2067 {c cn} {_2067 ofkd c K2} ikd-sub G (K3 c) (K4 c)}
@@ -79927,7 +83224,9 @@
           (ikd-sub/cons [_2068 ofkd C K] D' _2068)
   
   note: checking mode of constant   _2067   ... 
+  
   note: checking mode of constant   _2068   ... 
+  
   => %sort iofkd/tp/cross {G cxt} {C1 cn} {C2 cn} {_0 iofkd G C1 kd/type}
     {_2069 iofkd G C2 kd/type} {_2070 iofkd G (tp/cross C1 C2) kd/type}
   
@@ -79949,7 +83248,9 @@
           (iofkd/cons [_2070 ofkd C K] D' _2070)
   
   note: checking mode of constant   _2069   ... 
+  
   note: checking mode of constant   _2070   ... 
+  
   => %sort iofkd/tp/arrow {G cxt} {C1 cn} {C2 cn} {_0 iofkd G C1 kd/type}
     {_2071 iofkd G C2 kd/type} {_2072 iofkd G (tp/arrow C1 C2) kd/type}
   
@@ -79971,7 +83272,9 @@
           (iofkd/cons [_2072 ofkd C K] D' _2072)
   
   note: checking mode of constant   _2071   ... 
+  
   note: checking mode of constant   _2072   ... 
+  
   => %sort iofkd/tp/sum {G cxt} {C1 cn} {C2 cn} {_0 iofkd G C1 kd/type}
     {_2073 iofkd G C2 kd/type} {_2074 iofkd G (tp/sum C1 C2) kd/type}
   
@@ -79993,7 +83296,9 @@
           (iofkd/cons [_2074 ofkd C K] D' _2074)
   
   note: checking mode of constant   _2073   ... 
+  
   note: checking mode of constant   _2074   ... 
+  
   => %sort iofkd/cn/pair {G cxt} {C1 cn} {K1 kd} {C2 cn} {K2 kd}
     {_0 iofkd G C1 K1} {_2075 iofkd G C2 K2}
     {_2076 iofkd G (cn/pair C1 C2) (kd/sgm K1 [c cn] K2)}
@@ -80016,7 +83321,9 @@
           (iofkd/cons [_2076 ofkd C K] D' _2076)
   
   note: checking mode of constant   _2075   ... 
+  
   note: checking mode of constant   _2076   ... 
+  
   => %sort iofkd/cn/app {G cxt} {C1 cn} {K1 kd} {K2 {_0 cn} kd} {C2 cn}
     {_0 iofkd G C1 (kd/pi K1 [_0 cn] K2 _0)} {_2077 iofkd G C2 K1}
     {_2078 iofkd G (cn/app C1 C2) (K2 C2)}
@@ -80040,7 +83347,9 @@
           (iofkd/cons [_2078 ofkd C K] D' _2078)
   
   note: checking mode of constant   _2077   ... 
+  
   note: checking mode of constant   _2078   ... 
+  
   => %sort iofkd/sgm-ext {G cxt} {C cn} {K1 kd} {K2 kd} {_0 iofkd G (cn/pj1 C) K1}
     {_2079 iofkd G (cn/pj2 C) K2} {_2080 iofkd G C (kd/sgm K1 [c cn] K2)}
   
@@ -80063,7 +83372,9 @@
           (iofkd/cons [_2080 ofkd C K] D' _2080)
   
   note: checking mode of constant   _2079   ... 
+  
   note: checking mode of constant   _2080   ... 
+  
   => %sort iofkd/sub {G cxt} {C cn} {K1 kd} {K2 kd} {_0 iofkd G C K1}
     {_2081 ikd-sub G K1 K2} {_2082 iofkd G C K2}
   
@@ -80084,7 +83395,9 @@
           (iofkd/cons [_2082 ofkd C K] D' _2082)
   
   note: checking mode of constant   _2081   ... 
+  
   note: checking mode of constant   _2082   ... 
+  
   => %sort iofkd/deq {G cxt} {C cn} {K1 kd} {K2 kd} {_0 iofkd G C K1}
     {_2083 ikd-deq G K1 K2} {_2084 iofkd G C K2}
   
@@ -80105,7 +83418,9 @@
           (iofkd/cons [_2084 ofkd C K] D' _2084)
   
   note: checking mode of constant   _2083   ... 
+  
   note: checking mode of constant   _2084   ... 
+  
   => %sort iofkd/tp/ref {G cxt} {C1 cn} {_0 iofkd G C1 kd/type}
     {_2085 iofkd G (tp/ref C1) kd/type}
   
@@ -80123,7 +83438,9 @@
           (iofkd/cons [_2086 ofkd C K] D' _2086)
   
   note: checking mode of constant   _2085   ... 
+  
   note: checking mode of constant   _2086   ... 
+  
   => %sort iofkd/tp/tag {G cxt} {C1 cn} {_0 iofkd G C1 kd/type}
     {_2087 iofkd G (tp/tag C1) kd/type}
   
@@ -80141,7 +83458,9 @@
           (iofkd/cons [_2088 ofkd C K] D' _2088)
   
   note: checking mode of constant   _2087   ... 
+  
   note: checking mode of constant   _2088   ... 
+  
   => %sort iofkd/cn/pj1 {G cxt} {C1 cn} {K1 kd} {_?1 {_0 cn} kd}
     {_0 iofkd G C1 (kd/sgm K1 [_0 cn] _?1 _0)} {_2089 iofkd G (cn/pj1 C1) K1}
   
@@ -80161,7 +83480,9 @@
           (iofkd/cons [_2090 ofkd C K] D' _2090)
   
   note: checking mode of constant   _2089   ... 
+  
   note: checking mode of constant   _2090   ... 
+  
   => %sort iofkd/cn/pj2 {G cxt} {C1 cn} {K1 kd} {K2 {_0 cn} kd}
     {_0 iofkd G C1 (kd/sgm K1 [_0 cn] K2 _0)}
     {_2091 iofkd G (cn/pj2 C1) (K2 (cn/pj1 C1))}
@@ -80182,7 +83503,9 @@
           (iofkd/cons [_2092 ofkd C K] D' _2092)
   
   note: checking mode of constant   _2091   ... 
+  
   note: checking mode of constant   _2092   ... 
+  
   => %sort iofkd/kd/sing {G cxt} {C1 cn} {_0 iofkd G C1 kd/type}
     {_2093 iofkd G C1 (kd/sing C1)}
   
@@ -80200,7 +83523,9 @@
           (iofkd/cons [_2094 ofkd C K] D' _2094)
   
   note: checking mode of constant   _2093   ... 
+  
   note: checking mode of constant   _2094   ... 
+  
   => %sort iofkd/tp/forall {K1 kd} {G cxt} {C {_0 cn} cn}
     {_0 {c cn} {_0 ofkd c K1} iofkd G (C c) kd/type} {_2095 ikd-wf G K1}
     {_2096 iofkd G (tp/forall K1 ([_2096 cn] C _2096)) kd/type}
@@ -80231,7 +83556,9 @@
           (iofkd/cons [_2096 ofkd C K] D' _2096)
   
   note: checking mode of constant   _2095   ... 
+  
   note: checking mode of constant   _2096   ... 
+  
   => %sort iofkd/cn/lam {K1 kd} {G cxt} {C {_0 cn} cn} {K2 {_0 cn} kd}
     {_0 {c cn} {_0 ofkd c K1} iofkd G (C c) (K2 c)} {_2097 ikd-wf G K1}
     {_2098
@@ -80262,7 +83589,9 @@
           (iofkd/cons [_2098 ofkd C K] D' _2098)
   
   note: checking mode of constant   _2097   ... 
+  
   note: checking mode of constant   _2098   ... 
+  
   => %sort iofkd/cn/mu {G cxt} {C {_0 cn} cn}
     {_0 {c cn} {_0 ofkd c kd/type} iofkd G (C c) kd/type}
     {_2099 ikd-wf G kd/type}
@@ -80295,7 +83624,9 @@
           (iofkd/cons [_2100 ofkd C K] D' _2100)
   
   note: checking mode of constant   _2099   ... 
+  
   note: checking mode of constant   _2100   ... 
+  
   => %sort iofkd/pi-ext {G cxt} {C cn} {K1 kd} {L {_0 cn} kd} {K2 {_0 cn} kd}
     {_0 iofkd G C (kd/pi K1 [_0 cn] L _0)}
     {_2101 {c cn} {_2101 ofkd c K1} iofkd G (cn/app C c) (K2 c)}
@@ -80326,7 +83657,9 @@
           (iofkd/cons [_2102 ofkd C K] D' _2102)
   
   note: checking mode of constant   _2101   ... 
+  
   note: checking mode of constant   _2102   ... 
+  
   => %sort icn-deq/tp/cross {G cxt} {C1 cn} {C3 cn} {C2 cn} {C4 cn}
     {_0 icn-deq G C1 C3 kd/type} {_2103 icn-deq G C2 C4 kd/type}
     {_2104 icn-deq G (tp/cross C1 C2) (tp/cross C3 C4) kd/type}
@@ -80352,7 +83685,9 @@
           (icn-deq/cons [_2104 ofkd C K] D' _2104)
   
   note: checking mode of constant   _2103   ... 
+  
   note: checking mode of constant   _2104   ... 
+  
   => %sort icn-deq/tp/arrow {G cxt} {C1 cn} {C3 cn} {C2 cn} {C4 cn}
     {_0 icn-deq G C1 C3 kd/type} {_2105 icn-deq G C2 C4 kd/type}
     {_2106 icn-deq G (tp/arrow C1 C2) (tp/arrow C3 C4) kd/type}
@@ -80378,7 +83713,9 @@
           (icn-deq/cons [_2106 ofkd C K] D' _2106)
   
   note: checking mode of constant   _2105   ... 
+  
   note: checking mode of constant   _2106   ... 
+  
   => %sort icn-deq/tp/sum {G cxt} {C1 cn} {C3 cn} {C2 cn} {C4 cn}
     {_0 icn-deq G C1 C3 kd/type} {_2107 icn-deq G C2 C4 kd/type}
     {_2108 icn-deq G (tp/sum C1 C2) (tp/sum C3 C4) kd/type}
@@ -80402,7 +83739,9 @@
           (icn-deq/cons [_2108 ofkd C K] D' _2108)
   
   note: checking mode of constant   _2107   ... 
+  
   note: checking mode of constant   _2108   ... 
+  
   => %sort icn-deq/cn/pair {G cxt} {C1 cn} {C3 cn} {K1 kd} {C2 cn} {C4 cn} {
     K2 kd} {_0 icn-deq G C1 C3 K1} {_2109 icn-deq G C2 C4 K2}
     {_2110 icn-deq G (cn/pair C1 C2) (cn/pair C3 C4) (kd/sgm K1 [c cn] K2)}
@@ -80429,7 +83768,9 @@
           (icn-deq/cons [_2110 ofkd C K] D' _2110)
   
   note: checking mode of constant   _2109   ... 
+  
   note: checking mode of constant   _2110   ... 
+  
   => %sort icn-deq/cn/app {G cxt} {C1 cn} {C3 cn} {K1 kd} {K2 {_0 cn} kd} {
     C2 cn} {C4 cn} {_0 icn-deq G C1 C3 (kd/pi K1 [_0 cn] K2 _0)}
     {_2111 icn-deq G C2 C4 K1}
@@ -80457,7 +83798,9 @@
           (icn-deq/cons [_2112 ofkd C K] D' _2112)
   
   note: checking mode of constant   _2111   ... 
+  
   note: checking mode of constant   _2112   ... 
+  
   => %sort icn-deq/sgm-ext {G cxt} {C cn} {C' cn} {K1 kd} {K2 kd}
     {_0 icn-deq G (cn/pj1 C) (cn/pj1 C') K1}
     {_2113 icn-deq G (cn/pj2 C) (cn/pj2 C') K2}
@@ -80483,7 +83826,9 @@
           (icn-deq/cons [_2114 ofkd C K] D' _2114)
   
   note: checking mode of constant   _2113   ... 
+  
   note: checking mode of constant   _2114   ... 
+  
   => %sort icn-deq/trans {G cxt} {C1 cn} {C2 cn} {K1 kd} {C3 cn}
     {_0 icn-deq G C1 C2 K1} {_2115 icn-deq G C2 C3 K1}
     {_2116 icn-deq G C1 C3 K1}
@@ -80507,7 +83852,9 @@
           (icn-deq/cons [_2116 ofkd C K] D' _2116)
   
   note: checking mode of constant   _2115   ... 
+  
   note: checking mode of constant   _2116   ... 
+  
   => %sort icn-deq/sub {G cxt} {C cn} {C' cn} {K1 kd} {K2 kd}
     {_0 icn-deq G C C' K1} {_2117 ikd-sub G K1 K2} {_2118 icn-deq G C C' K2}
   
@@ -80530,7 +83877,9 @@
           (icn-deq/cons [_2118 ofkd C K] D' _2118)
   
   note: checking mode of constant   _2117   ... 
+  
   note: checking mode of constant   _2118   ... 
+  
   => %sort icn-deq/deq {G cxt} {C cn} {C' cn} {K1 kd} {K2 kd}
     {_0 icn-deq G C C' K1} {_2119 ikd-deq G K1 K2} {_2120 icn-deq G C C' K2}
   
@@ -80553,7 +83902,9 @@
           (icn-deq/cons [_2120 ofkd C K] D' _2120)
   
   note: checking mode of constant   _2119   ... 
+  
   note: checking mode of constant   _2120   ... 
+  
   => %sort icn-deq/tp/ref {G cxt} {C1 cn} {C2 cn} {_0 icn-deq G C1 C2 kd/type}
     {_2121 icn-deq G (tp/ref C1) (tp/ref C2) kd/type}
   
@@ -80572,7 +83923,9 @@
           (icn-deq/cons [_2122 ofkd C K] D' _2122)
   
   note: checking mode of constant   _2121   ... 
+  
   note: checking mode of constant   _2122   ... 
+  
   => %sort icn-deq/tp/tag {G cxt} {C1 cn} {C2 cn} {_0 icn-deq G C1 C2 kd/type}
     {_2123 icn-deq G (tp/tag C1) (tp/tag C2) kd/type}
   
@@ -80591,7 +83944,9 @@
           (icn-deq/cons [_2124 ofkd C K] D' _2124)
   
   note: checking mode of constant   _2123   ... 
+  
   note: checking mode of constant   _2124   ... 
+  
   => %sort icn-deq/cn/pj1 {G cxt} {C1 cn} {C2 cn} {K1 kd} {_?1 {_0 cn} kd}
     {_0 icn-deq G C1 C2 (kd/sgm K1 [_0 cn] _?1 _0)}
     {_2125 icn-deq G (cn/pj1 C1) (cn/pj1 C2) K1}
@@ -80612,7 +83967,9 @@
           (icn-deq/cons [_2126 ofkd C K] D' _2126)
   
   note: checking mode of constant   _2125   ... 
+  
   note: checking mode of constant   _2126   ... 
+  
   => %sort icn-deq/cn/pj2 {G cxt} {C1 cn} {C2 cn} {K1 kd} {K2 {_0 cn} kd}
     {_0 icn-deq G C1 C2 (kd/sgm K1 [_0 cn] K2 _0)}
     {_2127 icn-deq G (cn/pj2 C1) (cn/pj2 C2) (K2 (cn/pj1 C1))}
@@ -80635,7 +83992,9 @@
           (icn-deq/cons [_2128 ofkd C K] D' _2128)
   
   note: checking mode of constant   _2127   ... 
+  
   note: checking mode of constant   _2128   ... 
+  
   => %sort icn-deq/kd/sing {G cxt} {C1 cn} {C cn} {_0 iofkd G C1 (kd/sing C)}
     {_2129 icn-deq G C1 C (kd/sing C)}
   
@@ -80654,7 +84013,9 @@
           (icn-deq/cons [_2130 ofkd C K] D' _2130)
   
   note: checking mode of constant   _2129   ... 
+  
   note: checking mode of constant   _2130   ... 
+  
   => %sort icn-deq/kd/unit {G cxt} {C1 cn} {C2 cn} {_0 iofkd G C1 kd/unit}
     {_2131 iofkd G C2 kd/unit} {_2132 icn-deq G C1 C2 kd/unit}
   
@@ -80676,7 +84037,9 @@
           (icn-deq/cons [_2132 ofkd C K] D' _2132)
   
   note: checking mode of constant   _2131   ... 
+  
   note: checking mode of constant   _2132   ... 
+  
   => %sort icn-deq/refl {G cxt} {C1 cn} {K kd} {_0 iofkd G C1 K}
     {_2133 icn-deq G C1 C1 K}
   
@@ -80695,7 +84058,9 @@
           (icn-deq/cons [_2134 ofkd C K] D' _2134)
   
   note: checking mode of constant   _2133   ... 
+  
   note: checking mode of constant   _2134   ... 
+  
   => %sort icn-deq/sym {G cxt} {C1 cn} {C2 cn} {K kd} {_0 icn-deq G C1 C2 K}
     {_2135 icn-deq G C2 C1 K}
   
@@ -80714,7 +84079,9 @@
           (icn-deq/cons [_2136 ofkd C K] D' _2136)
   
   note: checking mode of constant   _2135   ... 
+  
   note: checking mode of constant   _2136   ... 
+  
   => %sort icn-deq/tp/forall {K1 kd} {G cxt} {C {_0 cn} cn} {C' {_0 cn} cn}
     {K2 kd} {_0 {c cn} {_0 ofkd c K1} icn-deq G (C c) (C' c) kd/type}
     {_2137 ikd-deq G K1 K2}
@@ -80752,7 +84119,9 @@
           (icn-deq/cons [_2138 ofkd C K] D' _2138)
   
   note: checking mode of constant   _2137   ... 
+  
   note: checking mode of constant   _2138   ... 
+  
   => %sort icn-deq/cn/lam {K1 kd} {G cxt} {C {_0 cn} cn} {C' {_0 cn} cn}
     {K2 {_0 cn} kd} {K3 kd}
     {_0 {c cn} {_0 ofkd c K1} icn-deq G (C c) (C' c) (K2 c)}
@@ -80792,7 +84161,9 @@
           (icn-deq/cons [_2140 ofkd C K] D' _2140)
   
   note: checking mode of constant   _2139   ... 
+  
   note: checking mode of constant   _2140   ... 
+  
   => %sort icn-deq/cn/mu {G cxt} {C {_0 cn} cn} {C' {_0 cn} cn}
     {_0 {c cn} {_0 ofkd c kd/type} icn-deq G (C c) (C' c) kd/type}
     {_2141 ikd-deq G kd/type kd/type}
@@ -80829,7 +84200,9 @@
           (icn-deq/cons [_2142 ofkd C K] D' _2142)
   
   note: checking mode of constant   _2141   ... 
+  
   note: checking mode of constant   _2142   ... 
+  
   => %sort icn-deq/pi-ext {G cxt} {C cn} {K1 kd} {L {_0 cn} kd} {C' cn}
     {L' {_0 cn} kd} {K2 {_0 cn} kd} {_0 iofkd G C (kd/pi K1 [_0 cn] L _0)}
     {_2143 iofkd G C' (kd/pi K1 [_2143 cn] L' _2143)}
@@ -80868,7 +84241,9 @@
           (icn-deq/cons [_2144 ofkd C K] D' _2144)
   
   note: checking mode of constant   _2143   ... 
+  
   note: checking mode of constant   _2144   ... 
+  
   => %sort icn-deq/pi-ext-2 {G cxt} {C cn} {C' cn} {K1 kd} {L {_0 cn} kd}
     {K2 {_0 cn} kd} {_0 icn-deq G C C' (kd/pi K1 [_0 cn] L _0)}
     {_2145 {c cn} {_2145 ofkd c K1} icn-deq G (cn/app C c) (cn/app C' c) (K2 c)}
@@ -80902,7 +84277,9 @@
           (icn-deq/cons [_2146 ofkd C K] D' _2146)
   
   note: checking mode of constant   _2145   ... 
+  
   note: checking mode of constant   _2146   ... 
+  
   => %sort implicate/kd-wf {G cxt} {K kd} {_0 ekd-wf G K} {_2147 ikd-wf G K}
   
   => %sort implicate/kd-deq {G cxt} {K1 kd} {K2 kd} {_0 ekd-deq G K1 K2}
@@ -81611,68 +84988,131 @@
         implicate/cn-deq (ecn-deq/deq D1 D2) D'
   
   note: checking mode of constant   _2147   ... 
+  
   note: checking mode of constant   _2148   ... 
+  
   note: checking mode of constant   _2149   ... 
+  
   note: checking mode of constant   _2150   ... 
+  
   note: checking mode of constant   _2151   ... 
+  
   note: checking mode of constant   _2152   ... 
+  
   note: checking mode of constant   _2153   ... 
+  
   note: checking mode of constant   _2154   ... 
+  
   note: checking mode of constant   _2155   ... 
+  
   note: checking mode of constant   _2156   ... 
+  
   note: checking mode of constant   _2157   ... 
+  
   note: checking mode of constant   _2158   ... 
+  
   note: checking mode of constant   _2159   ... 
+  
   note: checking mode of constant   _2160   ... 
+  
   note: checking mode of constant   _2161   ... 
+  
   note: checking mode of constant   _2162   ... 
+  
   note: checking mode of constant   _2163   ... 
+  
   note: checking mode of constant   _2164   ... 
+  
   note: checking mode of constant   _2165   ... 
+  
   note: checking mode of constant   _2166   ... 
+  
   note: checking mode of constant   _2167   ... 
+  
   note: checking mode of constant   _2168   ... 
+  
   note: checking mode of constant   _2169   ... 
+  
   note: checking mode of constant   _2170   ... 
+  
   note: checking mode of constant   _2171   ... 
+  
   note: checking mode of constant   _2172   ... 
+  
   note: checking mode of constant   _2173   ... 
+  
   note: checking mode of constant   _2174   ... 
+  
   note: checking mode of constant   _2175   ... 
+  
   note: checking mode of constant   _2176   ... 
+  
   note: checking mode of constant   _2177   ... 
+  
   note: checking mode of constant   _2178   ... 
+  
   note: checking mode of constant   _2179   ... 
+  
   note: checking mode of constant   _2180   ... 
+  
   note: checking mode of constant   _2181   ... 
+  
   note: checking mode of constant   _2182   ... 
+  
   note: checking mode of constant   _2183   ... 
+  
   note: checking mode of constant   _2184   ... 
+  
   note: checking mode of constant   _2185   ... 
+  
   note: checking mode of constant   _2186   ... 
+  
   note: checking mode of constant   _2187   ... 
+  
   note: checking mode of constant   _2188   ... 
+  
   note: checking mode of constant   _2189   ... 
+  
   note: checking mode of constant   _2190   ... 
+  
   note: checking mode of constant   _2191   ... 
+  
   note: checking mode of constant   _2192   ... 
+  
   note: checking mode of constant   _2193   ... 
+  
   note: checking mode of constant   _2194   ... 
+  
   note: checking mode of constant   _2195   ... 
+  
   note: checking mode of constant   _2196   ... 
+  
   note: checking mode of constant   _2197   ... 
+  
   note: checking mode of constant   _2198   ... 
+  
   note: checking mode of constant   _2199   ... 
+  
   note: checking mode of constant   _2200   ... 
+  
   note: checking mode of constant   _2201   ... 
+  
   note: checking mode of constant   _2202   ... 
+  
   note: checking mode of constant   _2203   ... 
+  
   note: checking mode of constant   _2204   ... 
+  
   note: checking mode of constant   _2205   ... 
+  
   note: checking mode of constant   _2206   ... 
+  
   note: checking mode of constant   _2207   ... 
+  
   note: checking mode of constant   _2208   ... 
+  
   note: checking mode of constant   _2209   ... 
+  
   => %sort implicate-closed/kd-wf {K kd} {_0 ekd-wf cxt/nil K} {_2210 kd-wf K}
   
   => %term
@@ -81681,6 +85121,7 @@
         {_0 implicate/kd-wf D (ikd-wf/nil D')} implicate-closed/kd-wf D D'
   
   note: checking mode of constant   _2210   ... 
+  
   => %sort implicate-closed/kd-deq {K1 kd} {K2 kd} {_0 ekd-deq cxt/nil K1 K2}
     {_2211 kd-deq K1 K2}
   
@@ -81690,6 +85131,7 @@
         {_0 implicate/kd-deq D (ikd-deq/nil D')} implicate-closed/kd-deq D D'
   
   note: checking mode of constant   _2211   ... 
+  
   => %sort implicate-closed/kd-sub {K1 kd} {K2 kd} {_0 ekd-sub cxt/nil K1 K2}
     {_2212 kd-sub K1 K2}
   
@@ -81699,6 +85141,7 @@
         {_0 implicate/kd-sub D (ikd-sub/nil D')} implicate-closed/kd-sub D D'
   
   note: checking mode of constant   _2212   ... 
+  
   => %sort implicate-closed/ofkd {C cn} {K kd} {_0 eofkd cxt/nil C K}
     {_2213 ofkd C K}
   
@@ -81708,6 +85151,7 @@
         {_0 implicate/ofkd D (iofkd/nil D')} implicate-closed/ofkd D D'
   
   note: checking mode of constant   _2213   ... 
+  
   => %sort implicate-closed/cn-deq {C1 cn} {C2 cn} {K kd}
     {_0 ecn-deq cxt/nil C1 C2 K} {_2214 cn-deq C1 C2 K}
   
@@ -81718,6 +85162,7 @@
         implicate-closed/cn-deq D D'
   
   note: checking mode of constant   _2214   ... 
+  
   => %sort funct/kd-wf {K kd} {K' {_0 cn} kd} {C1 cn} {C2 cn}
     {_0 {a cn} {da ofkd a K} kd-wf (K' a)} {_2215 cn-deq C1 C2 K}
     {_2216 ofkd C1 K} {_2217 ofkd C2 K} {_2218 kd-deq (K' C1) (K' C2)}
@@ -81775,7 +85220,9 @@
         funct/ofkd ([a cn] [da ofkd a _?5] DO a da) DQ D1 D2 DQI
   
   note: checking mode of constant   _2215   ... 
+  
   note: checking mode of constant   _2216   ... 
+  
   => %sort vdt/kd-sub {K1 kd} {K2 kd} {_0 kd-sub K1 K2} {_2217 kd-wf K1}
     {_2218 kd-wf K2}
   
@@ -82277,54 +85724,103 @@
           DK'
   
   note: checking mode of constant   _2235   ... 
+  
   note: checking mode of constant   _2236   ... 
+  
   note: checking mode of constant   _2237   ... 
+  
   note: checking mode of constant   _2238   ... 
+  
   note: checking mode of constant   _2239   ... 
+  
   note: checking mode of constant   _2240   ... 
+  
   note: checking mode of constant   _2241   ... 
+  
   note: checking mode of constant   _2242   ... 
+  
   note: checking mode of constant   _2243   ... 
+  
   note: checking mode of constant   _2244   ... 
+  
   note: checking mode of constant   _2245   ... 
+  
   note: checking mode of constant   _2246   ... 
+  
   note: checking mode of constant   _2247   ... 
+  
   note: checking mode of constant   _2248   ... 
+  
   note: checking mode of constant   _2249   ... 
+  
   note: checking mode of constant   _2250   ... 
+  
   note: checking mode of constant   _2251   ... 
+  
   note: checking mode of constant   _2252   ... 
+  
   note: checking mode of constant   _2253   ... 
+  
   note: checking mode of constant   _2254   ... 
+  
   note: checking mode of constant   _2255   ... 
+  
   note: checking mode of constant   _2256   ... 
+  
   note: checking mode of constant   _2257   ... 
+  
   note: checking mode of constant   _2258   ... 
+  
   note: checking mode of constant   _2259   ... 
+  
   note: checking mode of constant   _2260   ... 
+  
   note: checking mode of constant   _2261   ... 
+  
   note: checking mode of constant   _2262   ... 
+  
   note: checking mode of constant   _2263   ... 
+  
   note: checking mode of constant   _2264   ... 
+  
   note: checking mode of constant   _2265   ... 
+  
   note: checking mode of constant   _2230   ... 
+  
   note: checking mode of constant   _2231   ... 
+  
   note: checking mode of constant   _2232   ... 
+  
   note: checking mode of constant   _2233   ... 
+  
   note: checking mode of constant   _2234   ... 
+  
   note: checking mode of constant   _2217   ... 
+  
   note: checking mode of constant   _2218   ... 
+  
   note: checking mode of constant   _2219   ... 
+  
   note: checking mode of constant   _2220   ... 
+  
   note: checking mode of constant   _2221   ... 
+  
   note: checking mode of constant   _2222   ... 
+  
   note: checking mode of constant   _2223   ... 
+  
   note: checking mode of constant   _2224   ... 
+  
   note: checking mode of constant   _2225   ... 
+  
   note: checking mode of constant   _2226   ... 
+  
   note: checking mode of constant   _2227   ... 
+  
   note: checking mode of constant   _2228   ... 
+  
   note: checking mode of constant   _2229   ... 
+  
   => %sort kd-sym {K1 kd} {K2 kd} {_0 kd-deq K1 K2} {_2266 kd-deq K2 K1}
   
   => %term _2266 kd-sym kd-deq/kd/unit kd-deq/kd/unit
@@ -82377,10 +85873,15 @@
           (kd-deq/kd/pi D3 [a cn] [da ofkd a _?3] D4' a da)
   
   note: checking mode of constant   _2266   ... 
+  
   note: checking mode of constant   _2267   ... 
+  
   note: checking mode of constant   _2268   ... 
+  
   note: checking mode of constant   _2269   ... 
+  
   note: checking mode of constant   _2270   ... 
+  
   => %sort kd-trans/deq* {K1 kd} {K3 kd} {K2 kd} {_0 kd-deq K1 K2}
     {_2271 kd-deq K2 K3} {_2272 kd-deq K1 K3}
   
@@ -82442,10 +85943,15 @@
           (kd-deq/kd/pi D3 [a cn] [da ofkd a K3] D3' a da)
   
   note: checking mode of constant   _2271   ... 
+  
   note: checking mode of constant   _2272   ... 
+  
   note: checking mode of constant   _2273   ... 
+  
   note: checking mode of constant   _2274   ... 
+  
   note: checking mode of constant   _2275   ... 
+  
   => %sort kd-trans/deq {K1 kd} {K2 kd} {K3 kd} {_0 kd-deq K1 K2}
     {_2276 kd-deq K2 K3} {_2277 kd-deq K1 K3}
   
@@ -82456,6 +85962,7 @@
         kd-trans/deq D1 D2 D3
   
   note: checking mode of constant   _2276   ... 
+  
   => %sort kd-trans/sub* {K1 kd} {K3 kd} {K2 kd} {_0 kd-sub K1 K2}
     {_2277 kd-sub K2 K3} {_2278 kd-sub K1 K3}
   
@@ -82540,12 +86047,19 @@
              [a cn] [da ofkd a _?3] DK1 a da)
   
   note: checking mode of constant   _2277   ... 
+  
   note: checking mode of constant   _2278   ... 
+  
   note: checking mode of constant   _2279   ... 
+  
   note: checking mode of constant   _2280   ... 
+  
   note: checking mode of constant   _2281   ... 
+  
   note: checking mode of constant   _2282   ... 
+  
   note: checking mode of constant   _2283   ... 
+  
   => %sort kd-trans/sub {K1 kd} {K2 kd} {K3 kd} {_0 kd-sub K1 K2}
     {_2284 kd-sub K2 K3} {_2285 kd-sub K1 K3}
   
@@ -82556,6 +86070,7 @@
         kd-trans/sub D1 D2 D3
   
   note: checking mode of constant   _2284   ... 
+  
   => %sort functf/cn-deq {C1 cn} {C2 cn} {K kd} {Ca {_0 cn} cn} {Cb {_0 cn} cn}
     {K' {_0 cn} kd} {_0 cn-deq C1 C2 K}
     {_2285 {a cn} {da ofkd a K} cn-deq (Ca a) (Cb a) (K' a)}
@@ -82580,6 +86095,7 @@
           (cn-deq/trans (Deq' C1 D1) Deq2)
   
   note: checking mode of constant   _2285   ... 
+  
   => %sort inv/ofkd/tp/cross {C1 cn} {C2 cn} {K kd} {_0 ofkd (tp/cross C1 C2) K}
     {_2286 kd-sub K kd/type} {_2287 ofkd C1 kd/type} {_2288 ofkd C2 kd/type}
   
@@ -82617,9 +86133,13 @@
         inv/ofkd/tp/cross (ofkd/deq DC DQ) KS D1 D2
   
   note: checking mode of constant   _2286   ... 
+  
   note: checking mode of constant   _2287   ... 
+  
   note: checking mode of constant   _2288   ... 
+  
   note: checking mode of constant   _2289   ... 
+  
   => %sort inv/ofkd/tp/arrow {C1 cn} {C2 cn} {K kd} {_0 ofkd (tp/arrow C1 C2) K}
     {_2290 kd-sub K kd/type} {_2291 ofkd C1 kd/type} {_2292 ofkd C2 kd/type}
   
@@ -82657,9 +86177,13 @@
         inv/ofkd/tp/arrow (ofkd/deq DC DQ) KS D1 D2
   
   note: checking mode of constant   _2290   ... 
+  
   note: checking mode of constant   _2291   ... 
+  
   note: checking mode of constant   _2292   ... 
+  
   note: checking mode of constant   _2293   ... 
+  
   => %sort inv/ofkd/tp/sum {C1 cn} {C2 cn} {K kd} {_0 ofkd (tp/sum C1 C2) K}
     {_2294 kd-sub K kd/type} {_2295 ofkd C1 kd/type} {_2296 ofkd C2 kd/type}
   
@@ -82696,9 +86220,13 @@
         {_2299 vdt/kd-deq DQ DQ1 DQ2} inv/ofkd/tp/sum (ofkd/deq DC DQ) KS D1 D2
   
   note: checking mode of constant   _2294   ... 
+  
   note: checking mode of constant   _2295   ... 
+  
   note: checking mode of constant   _2296   ... 
+  
   note: checking mode of constant   _2297   ... 
+  
   => %sort inv/ofkd/tp/forall {K' kd} {C {_0 cn} cn} {K kd}
     {_0 ofkd (tp/forall K' ([_0 cn] C _0)) K} {_2298 kd-sub K kd/type}
     {_2299 kd-wf K'} {_2300 {a cn} {da ofkd a K'} ofkd (C a) kd/type}
@@ -82749,9 +86277,13 @@
           [a cn] [da ofkd a _?1] D2 a da
   
   note: checking mode of constant   _2298   ... 
+  
   note: checking mode of constant   _2299   ... 
+  
   note: checking mode of constant   _2300   ... 
+  
   note: checking mode of constant   _2301   ... 
+  
   => %sort inv/ofkd/tp/ref {C1 cn} {K kd} {_0 ofkd (tp/ref C1) K}
     {_2302 kd-sub K kd/type} {_2303 ofkd C1 kd/type}
   
@@ -82784,9 +86316,13 @@
         {_2307 vdt/kd-deq DQ DQ1 DQ2} inv/ofkd/tp/ref (ofkd/deq DC DQ) KS D1
   
   note: checking mode of constant   _2302   ... 
+  
   note: checking mode of constant   _2303   ... 
+  
   note: checking mode of constant   _2304   ... 
+  
   note: checking mode of constant   _2305   ... 
+  
   => %sort inv/ofkd/tp/tag {C1 cn} {K kd} {_0 ofkd (tp/tag C1) K}
     {_2306 kd-sub K kd/type} {_2307 ofkd C1 kd/type}
   
@@ -82819,9 +86355,13 @@
         {_2311 vdt/kd-deq DQ DQ1 DQ2} inv/ofkd/tp/tag (ofkd/deq DC DQ) KS D1
   
   note: checking mode of constant   _2306   ... 
+  
   note: checking mode of constant   _2307   ... 
+  
   note: checking mode of constant   _2308   ... 
+  
   note: checking mode of constant   _2309   ... 
+  
   => %sort inv/ofkd/cn/mu {K1 kd} {C1 {_0 cn} cn} {K kd}
     {_0 ofkd (cn/mu K1 ([_0 cn] C1 _0)) K} {_2310 kd-sub K kd/type}
     {_2311 {a cn} {da ofkd a kd/type} ofkd (C1 a) kd/type}
@@ -82870,9 +86410,13 @@
         inv/ofkd/cn/mu (ofkd/deq DC DQ) DS' [a cn] [da ofkd a kd/type] D1 a da
   
   note: checking mode of constant   _2310   ... 
+  
   note: checking mode of constant   _2311   ... 
+  
   note: checking mode of constant   _2312   ... 
+  
   note: checking mode of constant   _2313   ... 
+  
   => %sort sing/kd {_0 cn} {_2314 kd} {_2315 kd}
   
   => %term sing/kd/unit {_?1 cn} sing/kd _?1 kd/unit kd/unit
@@ -82922,10 +86466,15 @@
           (sing/kd/sgm DSK1 (DSK2 (cn/pj1 C)))
   
   note: checking mode of constant   _2314   ... 
+  
   note: checking mode of constant   _2315   ... 
+  
   note: checking mode of constant   _2316   ... 
+  
   note: checking mode of constant   _2317   ... 
+  
   note: checking mode of constant   _2318   ... 
+  
   => %sort stone-2/120 {C1 cn} {C2 cn} {_0 cn-deq C1 C2 kd/type}
     {_2319 cn-deq C1 C2 (kd/sing C1)}
   
@@ -82941,6 +86490,7 @@
                    (kd-sub/kd/sing-kd/sing (cn-deq/sym DQ)))))
   
   note: checking mode of constant   _2319   ... 
+  
   => %sort stone-2/119 {C1 cn} {C2 cn} {_0 cn-deq C1 C2 kd/type}
     {_2320 ofkd C1 (kd/sing C2)}
   
@@ -82953,6 +86503,7 @@
           (ofkd/sub (ofkd/kd/sing D1) (kd-sub/kd/sing-kd/sing DCQ))
   
   note: checking mode of constant   _2320   ... 
+  
   => %sort stone-2/96 {C1 cn} {C2 cn} {K kd} {K' kd} {_0 cn-deq C1 C2 K}
     {_2321 sing/kd C2 K K'} {_2322 cn-deq C1 C2 K'}
   
@@ -83020,10 +86571,15 @@
         stone-2/96 DQ (sing/kd/sgm DSK1 DSK2) (cn-deq/sgm-ext DQL DQR)
   
   note: checking mode of constant   _2321   ... 
+  
   note: checking mode of constant   _2322   ... 
+  
   note: checking mode of constant   _2323   ... 
+  
   note: checking mode of constant   _2324   ... 
+  
   note: checking mode of constant   _2325   ... 
+  
   => %sort stone-2/92 {C1 cn} {K1 kd} {K2 kd} {_0 ofkd C1 K1}
     {_2326 sing/kd C1 K1 K2} {_2327 kd-wf K2}
   
@@ -83035,6 +86591,7 @@
         {_2326 stone-2/96 (cn-deq/refl DC) DS DQ} stone-2/92 DC DS DW
   
   note: checking mode of constant   _2326   ... 
+  
   => %sort stone-2/93 {C1 cn} {K1 kd} {K2 kd} {_0 ofkd C1 K1}
     {_2327 sing/kd C1 K1 K2} {_2328 ofkd C1 K2}
   
@@ -83046,6 +86603,7 @@
         {_2327 stone-2/96 (cn-deq/refl DC) DS DQ} stone-2/93 DC DS DC1
   
   note: checking mode of constant   _2327   ... 
+  
   => %sort stone-2/97 {C2 cn} {K1 kd} {K2 kd} {C1 cn} {_0 ofkd C2 K1}
     {_2328 sing/kd C2 K1 K2} {_2329 ofkd C1 K2} {_2330 cn-deq C1 C2 K2}
   
@@ -83098,10 +86656,15 @@
         stone-2/97 D1 (sing/kd/sgm DSK1 DSK2) D2 (cn-deq/sgm-ext DQL DQR)
   
   note: checking mode of constant   _2328   ... 
+  
   note: checking mode of constant   _2329   ... 
+  
   note: checking mode of constant   _2330   ... 
+  
   note: checking mode of constant   _2331   ... 
+  
   note: checking mode of constant   _2332   ... 
+  
   => %sort stone-2/94 {C1 cn} {K1 kd} {K2 kd} {_0 ofkd C1 K1}
     {_2333 sing/kd C1 K1 K2} {_2334 kd-sub K2 K1}
   
@@ -83196,10 +86759,15 @@
              [a cn] [da ofkd a KA] DW2 a da)
   
   note: checking mode of constant   _2333   ... 
+  
   note: checking mode of constant   _2334   ... 
+  
   note: checking mode of constant   _2335   ... 
+  
   note: checking mode of constant   _2336   ... 
+  
   note: checking mode of constant   _2337   ... 
+  
   => %sort stone-2/108 {C1 cn} {K1 kd} {C2 cn} {K2 kd} {_0 ofkd C1 K1}
     {_2338 ofkd C2 K2} {_2339 cn-deq (cn/pj1 (cn/pair C1 C2)) C1 K1}
   
@@ -83215,6 +86783,7 @@
         stone-2/108 D1 D2 (cn-deq/sub DQ DKS)
   
   note: checking mode of constant   _2338   ... 
+  
   => %sort stone-2/109 {C1 cn} {K1 kd} {C2 cn} {K2 kd} {_0 ofkd C1 K1}
     {_2339 ofkd C2 K2} {_2340 cn-deq (cn/pj2 (cn/pair C1 C2)) C2 K2}
   
@@ -83230,6 +86799,7 @@
         stone-2/109 D1 D2 (cn-deq/sub DQ DKS)
   
   note: checking mode of constant   _2339   ... 
+  
   => %sort cn-deq-beta {K1 kd} {C1 {_0 cn} cn} {K2 {_0 cn} kd} {C2 cn}
     {_0 {a cn} {_0 ofkd a K1} ofkd (C1 a) (K2 a)} {_2340 ofkd C2 K1}
     {_2341 cn-deq (cn/app (cn/lam K1 ([_2341 cn] C1 _2341)) C2) (C1 C2) (K2 C2)}
@@ -83259,6 +86829,7 @@
           (cn-deq/sub Dequiv Dsub)
   
   note: checking mode of constant   _2340   ... 
+  
   => %sort ofkd-sgm-intro {K1 kd} {K2 {_0 cn} kd} {C1 cn} {C2 cn}
     {_0 {a cn} {_0 ofkd a K1} kd-wf (K2 a)} {_2341 ofkd C1 K1}
     {_2342 ofkd C2 (K2 C1)}
@@ -83296,6 +86867,7 @@
                 [a cn] [da ofkd a K1] Dwf2 a da))
   
   note: checking mode of constant   _2341   ... 
+  
   => %sort cn-deq-sgm-intro {K1 kd} {K2 {_0 cn} kd} {C1 cn} {C1' cn} {C2 cn}
     {C2' cn} {_0 {a cn} {_0 ofkd a K1} kd-wf (K2 a)} {_2342 cn-deq C1 C1' K1}
     {_2343 cn-deq C2 C2' (K2 C1)}
@@ -83342,6 +86914,7 @@
                 [a cn] [da ofkd a K1] Dwf2 a da))
   
   note: checking mode of constant   _2342   ... 
+  
   => %sort ofkd-sgm-ext-intro {K1 kd} {K2 {_0 cn} kd} {C cn}
     {_0 {a cn} {_0 ofkd a K1} kd-wf (K2 a)} {_2343 ofkd (cn/pj1 C) K1}
     {_2344 ofkd (cn/pj2 C) (K2 (cn/pj1 C))}
@@ -83380,6 +86953,7 @@
                 [a cn] [da ofkd a K1] Dwf2 a da))
   
   note: checking mode of constant   _2343   ... 
+  
   => %sort cn-deq-sgm-ext-intro {K1 kd} {K2 {_0 cn} kd} {C cn} {C' cn}
     {_0 {a cn} {_0 ofkd a K1} kd-wf (K2 a)}
     {_2344 cn-deq (cn/pj1 C) (cn/pj1 C') K1}
@@ -83429,6 +87003,7 @@
                 [a cn] [da ofkd a K1] Dwf2 a da))
   
   note: checking mode of constant   _2344   ... 
+  
   => %sort psi-cn {_0 {_0 cn} cn}
   
   => %term psi-cn/eps psi-cn [a cn] a
@@ -83778,30 +87353,55 @@
         cn-beta-pj2 PS (ofkd/deq D1 DS) (cn-deq/deq DCQ DS)
   
   note: checking mode of constant   _2345   ... 
+  
   note: checking mode of constant   _2346   ... 
+  
   note: checking mode of constant   _2347   ... 
+  
   note: checking mode of constant   _2348   ... 
+  
   note: checking mode of constant   _2349   ... 
+  
   note: checking mode of constant   _2350   ... 
+  
   note: checking mode of constant   _2351   ... 
+  
   note: checking mode of constant   _2352   ... 
+  
   note: checking mode of constant   _2353   ... 
+  
   note: checking mode of constant   _2354   ... 
+  
   note: checking mode of constant   _2355   ... 
+  
   note: checking mode of constant   _2356   ... 
+  
   note: checking mode of constant   _2357   ... 
+  
   note: checking mode of constant   _2358   ... 
+  
   note: checking mode of constant   _2359   ... 
+  
   note: checking mode of constant   _2360   ... 
+  
   note: checking mode of constant   _2361   ... 
+  
   note: checking mode of constant   _2362   ... 
+  
   note: checking mode of constant   _2363   ... 
+  
   note: checking mode of constant   _2364   ... 
+  
   note: checking mode of constant   _2365   ... 
+  
   note: checking mode of constant   _2366   ... 
+  
   note: checking mode of constant   _2367   ... 
+  
   note: checking mode of constant   _2368   ... 
+  
   note: checking mode of constant   _2369   ... 
+  
   => %sort sg
   
   => %term sg/unit sg
@@ -83919,6 +87519,7 @@
         sg-wf/seq seq/cn/refl D1 D1
   
   note: checking mode of constant   _2370   ... 
+  
   => %sort fst-sg/seq {C1 cn} {C2 cn} {S sg} {K {_0 cn} kd} {_0 seq/cn C1 C2}
     {_2371 fst-sg S (K C1)} {_2372 fst-sg S (K C2)}
   
@@ -83928,6 +87529,7 @@
         fst-sg/seq seq/cn/refl D1 D1
   
   note: checking mode of constant   _2371   ... 
+  
   => %sort sg-sub/seq-a {K1 kd} {K2 kd} {K3 {_0 cn} sg} {K4 {_0 cn} sg}
     {_0 seq/kd K1 K2} {_2372 {a cn} {da ofkd a K1} sg-sub (K3 a) (K4 a)}
     {_2373 {a cn} {da ofkd a K2} sg-sub (K3 a) (K4 a)}
@@ -83940,6 +87542,7 @@
           [a cn] [da ofkd a _?1] D1 a da
   
   note: checking mode of constant   _2372   ... 
+  
   => %sort sg-wf/seq-a {K1 kd} {K2 kd} {K3 {_0 cn} sg} {_0 seq/kd K1 K2}
     {_2373 {a cn} {da ofkd a K1} sg-wf (K3 a)}
     {_2374 {a cn} {da ofkd a K2} sg-wf (K3 a)}
@@ -83951,6 +87554,7 @@
           [a cn] [da ofkd a _?1] D1 a da
   
   note: checking mode of constant   _2373   ... 
+  
   => %sort seq/cn/sg-sub-o {C1 cn} {C2 cn} {S' sg} {S1 {_0 cn} sg}
     {_0 seq/cn C1 C2} {_2374 sg-sub S' (S1 C1)} {_2375 sg-sub S' (S1 C2)}
   
@@ -83960,6 +87564,7 @@
         seq/cn/sg-sub-o ([_0 cn] _?3 _0) seq/cn/refl D1 D1
   
   note: checking mode of constant   _2374   ... 
+  
   => %sort seq/cn/sg-sub-ol {C1 cn} {C2 cn} {S' sg} {S1 {_0 cn} sg}
     {_0 seq/cn C1 C2} {_2375 sg-sub (S1 C1) S'} {_2376 sg-sub (S1 C2) S'}
   
@@ -83969,6 +87574,7 @@
         seq/cn/sg-sub-ol ([_0 cn] _?3 _0) seq/cn/refl D1 D1
   
   note: checking mode of constant   _2375   ... 
+  
   => %sort fst-sg-complete {K kd} {S sg} {_0 fst-sg S K}
   
   => %term _2376 fst-sg-complete sg/unit fst-sg/unit
@@ -83991,10 +87597,15 @@
         fst-sg-complete (sg/pi _?1 ([_0 cn] _?2 _0)) fst-sg/pi
   
   note: checking mode of constant   _2376   ... 
+  
   note: checking mode of constant   _2377   ... 
+  
   note: checking mode of constant   _2378   ... 
+  
   note: checking mode of constant   _2379   ... 
+  
   note: checking mode of constant   _2380   ... 
+  
   => %sort fst-sg-seq {S sg} {K kd} {K' kd} {_0 fst-sg S K} {_2381 fst-sg S K'}
     {_2382 seq/kd K K'}
   
@@ -84021,10 +87632,15 @@
     _2385 {_?1 sg} {_?2 {_0 cn} sg} fst-sg-seq fst-sg/pi fst-sg/pi seq/kd/refl
   
   note: checking mode of constant   _2381   ... 
+  
   note: checking mode of constant   _2382   ... 
+  
   note: checking mode of constant   _2383   ... 
+  
   note: checking mode of constant   _2384   ... 
+  
   note: checking mode of constant   _2385   ... 
+  
   => %sort kd-wkn/sg-wf {K2 kd} {S {_0 cn} sg} {K1 kd}
     {_0 {a cn} {da ofkd a K2} sg-wf (S a)} {_2386 kd-sub K1 K2}
     {_2387 {a cn} {da ofkd a K1} sg-wf (S a)}
@@ -84037,6 +87653,7 @@
           [a cn] [da ofkd a _?3] DI a (ofkd/sub da DS)
   
   note: checking mode of constant   _2386   ... 
+  
   => %sort kd-wkn/sg-sub {K2 kd} {S' {_0 cn} sg} {S'' {_0 cn} sg} {K1 kd}
     {_0 {a cn} {da ofkd a K2} sg-sub (S' a) (S'' a)} {_2387 kd-sub K1 K2}
     {_2388 {a cn} {da ofkd a K1} sg-sub (S' a) (S'' a)}
@@ -84050,6 +87667,7 @@
           [a cn] [da ofkd a _?4] DI a (ofkd/sub da DS)
   
   note: checking mode of constant   _2387   ... 
+  
   => %sort kd-wkn/sg-deq {K2 kd} {S' {_0 cn} sg} {S'' {_0 cn} sg} {K1 kd}
     {_0 {a cn} {da ofkd a K2} sg-deq (S' a) (S'' a)} {_2388 kd-sub K1 K2}
     {_2389 {a cn} {da ofkd a K1} sg-deq (S' a) (S'' a)}
@@ -84063,6 +87681,7 @@
           [a cn] [da ofkd a _?4] DI a (ofkd/sub da DS)
   
   note: checking mode of constant   _2388   ... 
+  
   => %sort sg-refl/deq {S sg} {_0 sg-wf S} {_2389 sg-deq S S}
   
   => %term _2389 sg-refl/deq sg-wf/sg/unit sg-deq/sg/unit
@@ -84098,10 +87717,15 @@
           (sg-deq/sg/pi D3 ([a cn] [da ofkd a _?1] D4 a da) DFS)
   
   note: checking mode of constant   _2389   ... 
+  
   note: checking mode of constant   _2390   ... 
+  
   note: checking mode of constant   _2391   ... 
+  
   note: checking mode of constant   _2392   ... 
+  
   note: checking mode of constant   _2393   ... 
+  
   => %sort sg-refl/sub {S sg} {_0 sg-wf S} {_2394 sg-sub S S}
   
   => %term _2394 sg-refl/sub sg-wf/sg/unit sg-sub/sg/unit
@@ -84138,10 +87762,15 @@
           (sg-sub/sg/pi D3 ([a cn] [da ofkd a _?1] D4 a da) DFS)
   
   note: checking mode of constant   _2394   ... 
+  
   note: checking mode of constant   _2395   ... 
+  
   note: checking mode of constant   _2396   ... 
+  
   note: checking mode of constant   _2397   ... 
+  
   note: checking mode of constant   _2398   ... 
+  
   => %sort vdt/sg-wf {S1 sg} {K1 kd} {_0 sg-wf S1} {_2399 fst-sg S1 K1}
     {_2400 kd-wf K1}
   
@@ -84182,10 +87811,15 @@
           fst-sg/pi kd-wf/kd/unit
   
   note: checking mode of constant   _2399   ... 
+  
   note: checking mode of constant   _2400   ... 
+  
   note: checking mode of constant   _2401   ... 
+  
   note: checking mode of constant   _2402   ... 
+  
   note: checking mode of constant   _2403   ... 
+  
   => %sort vdt/sg-deq {S1 sg} {S2 sg} {K1 kd} {K2 kd} {_0 sg-deq S1 S2}
     {_2404 fst-sg S1 K1} {_2405 fst-sg S2 K2} {_2406 sg-wf S1} {_2407 sg-wf S2}
     {_2408 kd-deq K1 K2}
@@ -84281,10 +87915,15 @@
           kd-deq/kd/unit
   
   note: checking mode of constant   _2404   ... 
+  
   note: checking mode of constant   _2405   ... 
+  
   note: checking mode of constant   _2406   ... 
+  
   note: checking mode of constant   _2407   ... 
+  
   note: checking mode of constant   _2408   ... 
+  
   => %sort vdt/sg-sub {S1 sg} {S2 sg} {K1 kd} {K2 kd} {_0 sg-sub S1 S2}
     {_2409 fst-sg S1 K1} {_2410 fst-sg S2 K2} {_2411 sg-wf S1} {_2412 sg-wf S2}
     {_2413 kd-sub K1 K2}
@@ -84394,10 +88033,15 @@
           kd-sub/kd/unit
   
   note: checking mode of constant   _2409   ... 
+  
   note: checking mode of constant   _2410   ... 
+  
   note: checking mode of constant   _2411   ... 
+  
   note: checking mode of constant   _2412   ... 
+  
   note: checking mode of constant   _2413   ... 
+  
   => %sort sg-sym {S1 sg} {S2 sg} {_0 sg-deq S1 S2} {_2414 sg-deq S2 S1}
   
   => %term _2414 sg-sym sg-deq/sg/unit sg-deq/sg/unit
@@ -84461,10 +88105,15 @@
           (sg-deq/sg/pi D1' ([a cn] [da ofkd a _?3] D2'' a da) FS2)
   
   note: checking mode of constant   _2414   ... 
+  
   note: checking mode of constant   _2415   ... 
+  
   note: checking mode of constant   _2416   ... 
+  
   note: checking mode of constant   _2417   ... 
+  
   note: checking mode of constant   _2418   ... 
+  
   => %sort sg-anti {S1 sg} {S2 sg} {K1 kd} {K2 kd} {_0 sg-deq S1 S2}
     {_2419 fst-sg S1 K1} {_2420 fst-sg S2 K2} {_2421 sg-sub S1 S2}
     {_2422 sg-sub S2 S1} {_2423 kd-sub K1 K2} {_2424 kd-sub K2 K1}
@@ -84593,10 +88242,15 @@
           kd-sub/kd/unit kd-sub/kd/unit
   
   note: checking mode of constant   _2419   ... 
+  
   note: checking mode of constant   _2420   ... 
+  
   note: checking mode of constant   _2421   ... 
+  
   note: checking mode of constant   _2422   ... 
+  
   note: checking mode of constant   _2423   ... 
+  
   => %sort sg-trans/deq* {S1 sg} {S3 sg} {S2 sg} {_0 sg-deq S1 S2}
     {_2424 sg-deq S2 S3} {_2425 sg-deq S1 S3}
   
@@ -84676,10 +88330,15 @@
           (sg-deq/sg/pi DS3' ([a cn] [da ofkd a _?1] DS3'' a da) DF2)
   
   note: checking mode of constant   _2424   ... 
+  
   note: checking mode of constant   _2425   ... 
+  
   note: checking mode of constant   _2426   ... 
+  
   note: checking mode of constant   _2427   ... 
+  
   note: checking mode of constant   _2428   ... 
+  
   => %sort sg-trans/sub* {S1 sg} {S3 sg} {S2 sg} {_0 sg-sub S1 S2}
     {_2429 sg-sub S2 S3} {_2430 sg-sub S1 S3}
   
@@ -84763,10 +88422,15 @@
           (sg-sub/sg/pi DS3' ([a cn] [da ofkd a _?1] DS3'' a da) DF2)
   
   note: checking mode of constant   _2429   ... 
+  
   note: checking mode of constant   _2430   ... 
+  
   note: checking mode of constant   _2431   ... 
+  
   note: checking mode of constant   _2432   ... 
+  
   note: checking mode of constant   _2433   ... 
+  
   => %sort sg-trans/sub {S1 sg} {S2 sg} {S3 sg} {_0 sg-sub S1 S2}
     {_2434 sg-sub S2 S3} {_2435 sg-sub S1 S3}
   
@@ -84777,6 +88441,7 @@
         sg-trans/sub DS1 DS2 DS3
   
   note: checking mode of constant   _2434   ... 
+  
   => %sort esg-wf {_0 cxt} {_2435 sg}
   
   => %sort esg-deq {_0 cxt} {_2435 sg} {_2436 sg}
@@ -84992,15 +88657,25 @@
              [a cn] [da ofkd a _?1] [dm mofkd da met/unit] D2' a da dm)
   
   note: checking mode of constant   _2435   ... 
+  
   note: checking mode of constant   _2436   ... 
+  
   note: checking mode of constant   _2437   ... 
+  
   note: checking mode of constant   _2438   ... 
+  
   note: checking mode of constant   _2439   ... 
+  
   note: checking mode of constant   _2440   ... 
+  
   note: checking mode of constant   _2441   ... 
+  
   note: checking mode of constant   _2442   ... 
+  
   note: checking mode of constant   _2443   ... 
+  
   note: checking mode of constant   _2444   ... 
+  
   => %sort mesg-wf {G cxt} {K sg} {_0 esg-wf G K} {_2445 met}
   
   => %sort mesg-deq {G cxt} {K1 sg} {K2 sg} {_0 esg-deq G K1 K2} {_2445 met}
@@ -85112,10 +88787,15 @@
           (esg-wf/sg/pi D1 ([a cn] [_2449 isvar a _?4] _?6 a _2449) _?7) DO
   
   note: checking mode of constant   _2445   ... 
+  
   note: checking mode of constant   _2446   ... 
+  
   note: checking mode of constant   _2447   ... 
+  
   note: checking mode of constant   _2448   ... 
+  
   note: checking mode of constant   _2449   ... 
+  
   => %sort esg-deq-ordered {G cxt} {K sg} {K' sg} {_0 esg-deq G K K'}
     {_2450 cxt-ordered G}
   
@@ -85155,10 +88835,15 @@
           (esg-deq/sg/pi D1 ([a cn] [_2454 isvar a _?6] _?8 a _2454) _?9) DO
   
   note: checking mode of constant   _2450   ... 
+  
   note: checking mode of constant   _2451   ... 
+  
   note: checking mode of constant   _2452   ... 
+  
   note: checking mode of constant   _2453   ... 
+  
   note: checking mode of constant   _2454   ... 
+  
   => %sort cut-sg-wf {C cn} {K kd} {K' sg} {G cxt} {Cm met}
     {D {_0 ofkd C K} sg-wf K'}
     {_0 {d ofkd C K} {_0 mofkd d met/unit} msg-wf (D d) Cm}
@@ -85683,25 +89368,45 @@
           (mesg-deq/sg/pi D3' [a cn] [da isvar a J] D4' a da)
   
   note: checking mode of constant   _2455   ... 
+  
   note: checking mode of constant   _2456   ... 
+  
   note: checking mode of constant   _2457   ... 
+  
   note: checking mode of constant   _2458   ... 
+  
   note: checking mode of constant   _2459   ... 
+  
   note: checking mode of constant   _2460   ... 
+  
   note: checking mode of constant   _2461   ... 
+  
   note: checking mode of constant   _2462   ... 
+  
   note: checking mode of constant   _2463   ... 
+  
   note: checking mode of constant   _2464   ... 
+  
   note: checking mode of constant   _2465   ... 
+  
   note: checking mode of constant   _2466   ... 
+  
   note: checking mode of constant   _2467   ... 
+  
   note: checking mode of constant   _2468   ... 
+  
   note: checking mode of constant   _2469   ... 
+  
   note: checking mode of constant   _2470   ... 
+  
   note: checking mode of constant   _2471   ... 
+  
   note: checking mode of constant   _2472   ... 
+  
   note: checking mode of constant   _2473   ... 
+  
   note: checking mode of constant   _2474   ... 
+  
   => %sort explicate-open-sg-wf {A kd} {B {_0 cn} sg} {I loc}
     {_0 {x cn} {_0 ofkd x A} sg-wf (B x)}
     {_2475 {x cn} {_2475 isvar x I} esg-wf (cxt/cons cxt/nil x A) (B x)}
@@ -85728,6 +89433,7 @@
           [x cn] [_2476 isvar x I] Dofe x _2476
   
   note: checking mode of constant   _2475   ... 
+  
   => %sort explicate-open-sg-deq {A kd} {B {_0 cn} sg} {C {_0 cn} sg} {I loc}
     {_0 {x cn} {_0 ofkd x A} sg-deq (B x) (C x)}
     {_2476 {x cn} {_2476 isvar x I} esg-deq (cxt/cons cxt/nil x A) (B x) (C x)}
@@ -85755,6 +89461,7 @@
           [x cn] [_2477 isvar x I] Dofe x _2477
   
   note: checking mode of constant   _2476   ... 
+  
   => %sort explicate-closed-sg-wf {K sg} {_0 sg-wf K} {_2477 esg-wf cxt/nil K}
   
   => %term
@@ -85803,10 +89510,15 @@
           (esg-wf/sg/pi D1' ([a cn] [_2482 isvar a loc/z] D2' a _2482) DFS)
   
   note: checking mode of constant   _2477   ... 
+  
   note: checking mode of constant   _2478   ... 
+  
   note: checking mode of constant   _2479   ... 
+  
   note: checking mode of constant   _2480   ... 
+  
   note: checking mode of constant   _2481   ... 
+  
   => %sort explicate-closed-sg-deq {K sg} {K' sg} {_0 sg-deq K K'}
     {_2482 esg-deq cxt/nil K K'}
   
@@ -85862,10 +89574,15 @@
           (esg-deq/sg/pi D1' ([a cn] [_2487 isvar a loc/z] D2' a _2487) DFS)
   
   note: checking mode of constant   _2482   ... 
+  
   note: checking mode of constant   _2483   ... 
+  
   note: checking mode of constant   _2484   ... 
+  
   note: checking mode of constant   _2485   ... 
+  
   note: checking mode of constant   _2486   ... 
+  
   => %sort ekd-wf/seq-a {K1 kd} {K2 kd} {I loc} {G cxt} {K3 {_0 cn} kd}
     {_0 seq/kd K1 K2}
     {_2487 {a cn} {_2487 isvar a I} ekd-wf (cxt/cons G a K1) (K3 a)}
@@ -85879,6 +89596,7 @@
           [a cn] [_0 isvar a _?2] D1 a _0
   
   note: checking mode of constant   _2487   ... 
+  
   => %sort vdt/esg-wf {G cxt} {S1 sg} {K1 kd} {_0 esg-wf G S1}
     {_2488 fst-sg S1 K1} {_2489 ekd-wf G K1}
   
@@ -85931,10 +89649,15 @@
           fst-sg/pi (ekd-wf/kd/unit DO)
   
   note: checking mode of constant   _2488   ... 
+  
   note: checking mode of constant   _2489   ... 
+  
   note: checking mode of constant   _2490   ... 
+  
   note: checking mode of constant   _2491   ... 
+  
   note: checking mode of constant   _2492   ... 
+  
   => %sort wkn-deq-esg-deq {G cxt} {K1 kd} {G2 {_0 cn} cxt} {G3 {_0 cn} cxt}
     {K2 kd} {G3' {_0 cn} cxt} {I loc} {K' {_0 cn} sg} {K'' {_0 cn} sg}
     {_0 {x cn} cxt-append (cxt/cons G x K1) (G2 x) (G3 x)}
@@ -86070,10 +89793,15 @@
               ([a cn] [_2498 isvar a _?1] D2' x di a _2498) (DFS x)
   
   note: checking mode of constant   _2493   ... 
+  
   note: checking mode of constant   _2494   ... 
+  
   note: checking mode of constant   _2495   ... 
+  
   note: checking mode of constant   _2496   ... 
+  
   note: checking mode of constant   _2497   ... 
+  
   => %sort funct-esg-wf {G1 cxt} {K kd} {G2 {_0 cn} cxt} {G {_0 cn} cxt} {
     C cn} {G' cxt} {CC cn} {I loc} {K' {_0 cn} sg}
     {_0 {x cn} cxt-append (cxt/cons G1 x K) (G2 x) (G x)}
@@ -86234,10 +89962,15 @@
           (esg-deq/sg/pi D1' ([a cn] [_2506 isvar a _?3] D2'' a _2506) (DFS C1))
   
   note: checking mode of constant   _2498   ... 
+  
   note: checking mode of constant   _2499   ... 
+  
   note: checking mode of constant   _2500   ... 
+  
   note: checking mode of constant   _2501   ... 
+  
   note: checking mode of constant   _2502   ... 
+  
   => %sort isg-wf {_0 cxt} {_2503 sg}
   
   => %term isg-wf/nil {K sg} {_0 sg-wf K} isg-wf cxt/nil K
@@ -86267,7 +90000,9 @@
         sg-wf-to-isg-wf (cxt/cons G C K) D (isg-wf/cons [d ofkd C K] D')
   
   note: checking mode of constant   _2503   ... 
+  
   note: checking mode of constant   _2504   ... 
+  
   => %sort sg-deq-to-isg-deq {K sg} {K' sg} {G cxt} {_0 sg-deq K K'}
     {_2505 isg-deq G K K'}
   
@@ -86283,7 +90018,9 @@
         sg-deq-to-isg-deq (cxt/cons G C K) D (isg-deq/cons [d ofkd C K] D')
   
   note: checking mode of constant   _2505   ... 
+  
   note: checking mode of constant   _2506   ... 
+  
   => %sort isg-wf/sg/cn {G cxt} {C1 cn} {_0 iofkd G C1 kd/type}
     {_2507 isg-wf G (sg/cn C1)}
   
@@ -86301,7 +90038,9 @@
           (isg-wf/cons [_2508 ofkd C K] D' _2508)
   
   note: checking mode of constant   _2507   ... 
+  
   note: checking mode of constant   _2508   ... 
+  
   => %sort isg-wf/sg/kd {G cxt} {C1 kd} {_0 ikd-wf G C1}
     {_2509 isg-wf G (sg/kd C1)}
   
@@ -86319,7 +90058,9 @@
           (isg-wf/cons [_2510 ofkd C K] D' _2510)
   
   note: checking mode of constant   _2509   ... 
+  
   note: checking mode of constant   _2510   ... 
+  
   => %sort isg-wf/sg/sgm {G cxt} {S1 sg} {K1 kd} {K2 {_0 cn} sg} {_0 isg-wf G S1}
     {_2511 fst-sg S1 K1} {_2512 {c cn} {_2512 ofkd c K1} isg-wf G (K2 c)}
     {_2513 isg-wf G (sg/sgm S1 [_2513 cn] K2 _2513)}
@@ -86346,7 +90087,9 @@
           (isg-wf/cons [_2512 ofkd C K] D' _2512)
   
   note: checking mode of constant   _2511   ... 
+  
   note: checking mode of constant   _2512   ... 
+  
   => %sort isg-wf/sg/pi {G cxt} {S1 sg} {K1 kd} {K2 {_0 cn} sg} {_0 isg-wf G S1}
     {_2513 fst-sg S1 K1} {_2514 {c cn} {_2514 ofkd c K1} isg-wf G (K2 c)}
     {_2515 isg-wf G (sg/pi S1 [_2515 cn] K2 _2515)}
@@ -86373,7 +90116,9 @@
           (isg-wf/cons [_2514 ofkd C K] D' _2514)
   
   note: checking mode of constant   _2513   ... 
+  
   note: checking mode of constant   _2514   ... 
+  
   => %sort isg-deq/sg/cn {G cxt} {C1 cn} {C2 cn} {_0 icn-deq G C1 C2 kd/type}
     {_2515 isg-deq G (sg/cn C1) (sg/cn C2)}
   
@@ -86392,7 +90137,9 @@
           (isg-deq/cons [_2516 ofkd C K] D' _2516)
   
   note: checking mode of constant   _2515   ... 
+  
   note: checking mode of constant   _2516   ... 
+  
   => %sort isg-deq/sg/kd {G cxt} {C1 kd} {C2 kd} {_0 ikd-deq G C1 C2}
     {_2517 isg-deq G (sg/kd C1) (sg/kd C2)}
   
@@ -86411,7 +90158,9 @@
           (isg-deq/cons [_2518 ofkd C K] D' _2518)
   
   note: checking mode of constant   _2517   ... 
+  
   note: checking mode of constant   _2518   ... 
+  
   => %sort isg-deq/sg/sgm {G cxt} {S1 sg} {K2 sg} {K1 kd} {K3 {_0 cn} sg}
     {K4 {_0 cn} sg} {_0 isg-deq G S1 K2} {_2519 fst-sg S1 K1}
     {_2520 {c cn} {_2520 ofkd c K1} isg-deq G (K3 c) (K4 c)}
@@ -86449,7 +90198,9 @@
           (isg-deq/cons [_2520 ofkd C K] D' _2520)
   
   note: checking mode of constant   _2519   ... 
+  
   note: checking mode of constant   _2520   ... 
+  
   => %sort isg-deq/sg/pi {G cxt} {S2 sg} {K1 sg} {K2 kd} {K3 {_0 cn} sg}
     {K4 {_0 cn} sg} {_0 isg-deq G S2 K1} {_2521 fst-sg S2 K2}
     {_2522 {c cn} {_2522 ofkd c K2} isg-deq G (K3 c) (K4 c)}
@@ -86486,7 +90237,9 @@
           (isg-deq/cons [_2522 ofkd C K] D' _2522)
   
   note: checking mode of constant   _2521   ... 
+  
   note: checking mode of constant   _2522   ... 
+  
   => %sort implicate/sg-wf {G cxt} {K sg} {_0 esg-wf G K} {_2523 isg-wf G K}
   
   => %sort implicate/sg-deq {G cxt} {K1 sg} {K2 sg} {_0 esg-deq G K1 K2}
@@ -86608,15 +90361,25 @@
           (esg-deq/sg/pi D1 ([a cn] [_2534 isvar a I] D2 a _2534) DFS) D''
   
   note: checking mode of constant   _2523   ... 
+  
   note: checking mode of constant   _2524   ... 
+  
   note: checking mode of constant   _2525   ... 
+  
   note: checking mode of constant   _2526   ... 
+  
   note: checking mode of constant   _2527   ... 
+  
   note: checking mode of constant   _2528   ... 
+  
   note: checking mode of constant   _2529   ... 
+  
   note: checking mode of constant   _2530   ... 
+  
   note: checking mode of constant   _2531   ... 
+  
   note: checking mode of constant   _2532   ... 
+  
   => %sort implicate-closed/sg-wf {K sg} {_0 esg-wf cxt/nil K} {_2533 sg-wf K}
   
   => %term
@@ -86625,6 +90388,7 @@
         {_0 implicate/sg-wf D (isg-wf/nil D')} implicate-closed/sg-wf D D'
   
   note: checking mode of constant   _2533   ... 
+  
   => %sort implicate-closed/sg-deq {K1 sg} {K2 sg} {_0 esg-deq cxt/nil K1 K2}
     {_2534 sg-deq K1 K2}
   
@@ -86634,6 +90398,7 @@
         {_0 implicate/sg-deq D (isg-deq/nil D')} implicate-closed/sg-deq D D'
   
   note: checking mode of constant   _2534   ... 
+  
   => %sort funct/sg-wf {K kd} {S {_0 cn} sg} {C1 cn} {C2 cn}
     {_0 {a cn} {da ofkd a K} sg-wf (S a)} {_2535 cn-deq C1 C2 K}
     {_2536 ofkd C1 K} {_2537 sg-deq (S C1) (S C2)}
@@ -86664,6 +90429,7 @@
         funct/sg-wf ([a cn] [da ofkd a _?4] DO a da) DQ D1 DQI
   
   note: checking mode of constant   _2535   ... 
+  
   => %sort lt
   
   => %term lt/nil lt
@@ -86732,7 +90498,9 @@
         lt-wf-look-sane lt-look/hit (lt-wf/cons _?4 _?5) DG DU
   
   note: checking mode of constant   _2536   ... 
+  
   note: checking mode of constant   _2537   ... 
+  
   => %sort lt-wf-look-unique {L lt} {LC loc} {C cn} {C' cn} {_0 lt-look L LC C}
     {_2538 lt-look L LC C'} {_2539 lt-wf L} {_2540 seq/cn C C'}
   
@@ -86775,9 +90543,13 @@
         lt-wf-look-unique (lt-look/miss LL) lt-look/hit (lt-wf/cons LW _?6) DQ
   
   note: checking mode of constant   _2538   ... 
+  
   note: checking mode of constant   _2539   ... 
+  
   note: checking mode of constant   _2540   ... 
+  
   note: checking mode of constant   _2541   ... 
+  
   => %sort pty
   
   => %term pty/p pty
@@ -86799,7 +90571,9 @@
   => %term _2543 pty-sub-refl pty/i pty-sub/ii
   
   note: checking mode of constant   _2542   ... 
+  
   note: checking mode of constant   _2543   ... 
+  
   => %sort pty-sub-trans {P pty} {P' pty} {P'' pty} {_0 pty-sub P P'}
     {_2544 pty-sub P' P''} {_2545 pty-sub P P''}
   
@@ -86812,9 +90586,13 @@
   => %term _2547 pty-sub-trans pty-sub/ii pty-sub/ii pty-sub/ii
   
   note: checking mode of constant   _2544   ... 
+  
   note: checking mode of constant   _2545   ... 
+  
   note: checking mode of constant   _2546   ... 
+  
   note: checking mode of constant   _2547   ... 
+  
   => %sort pty-sub-pty/i-top {P pty} {_0 pty-sub P pty/i}
   
   => %term _2548 pty-sub-pty/i-top pty/p pty-sub/pi
@@ -86822,7 +90600,9 @@
   => %term _2549 pty-sub-pty/i-top pty/i pty-sub/ii
   
   note: checking mode of constant   _2548   ... 
+  
   note: checking mode of constant   _2549   ... 
+  
   => %sort tm
   
   => %sort md
@@ -87210,12 +90990,14 @@
   => %term _2550 {_?1 tm} {_?2 seq/tm _?1 _?1} seq/tm/pj1 _?2 seq/tm/refl
   
   note: checking mode of constant   _2550   ... 
+  
   => %sort seq/tm/pj2 {E1 tm} {E2 tm} {_0 seq/tm E1 E2}
     {_2551 seq/tm (tm/pj2 E1) (tm/pj2 E2)}
   
   => %term _2551 {_?1 tm} {_?2 seq/tm _?1 _?1} seq/tm/pj2 _?2 seq/tm/refl
   
   note: checking mode of constant   _2551   ... 
+  
   => %sort seq/tm/tmapp {E1 tm} {E2 tm} {E3 tm} {_0 seq/tm E1 E2}
     {_2552 seq/tm (tm/tmapp E1 E3) (tm/tmapp E2 E3)}
   
@@ -87224,6 +91006,7 @@
       {_?1 tm} {_?2 tm} {_?3 seq/tm _?1 _?1} seq/tm/tmapp _?2 _?3 seq/tm/refl
   
   note: checking mode of constant   _2552   ... 
+  
   => %sort seq/tm/tag {E1 tm} {E2 tm} {E3 tm} {_0 seq/tm E1 E2}
     {_2553 seq/tm (tm/tag E1 E3) (tm/tag E2 E3)}
   
@@ -87231,6 +91014,7 @@
     _2553 {_?1 tm} {_?2 tm} {_?3 seq/tm _?1 _?1} seq/tm/tag _?2 _?3 seq/tm/refl
   
   note: checking mode of constant   _2553   ... 
+  
   => %sort seq/tm/cnapp {E1 tm} {E2 tm} {E3 cn} {_0 seq/tm E1 E2}
     {_2554 seq/tm (tm/cnapp E1 E3) (tm/cnapp E2 E3)}
   
@@ -87239,29 +91023,34 @@
       {_?1 tm} {_?2 cn} {_?3 seq/tm _?1 _?1} seq/tm/cnapp _?2 _?3 seq/tm/refl
   
   note: checking mode of constant   _2554   ... 
+  
   => %sort seq/tm/term {M1 md} {M2 md} {_0 seq/md M1 M2}
     {_2555 seq/tm (tm/term M1) (tm/term M2)}
   
   => %term _2555 {_?1 md} {_?2 seq/md _?1 _?1} seq/tm/term _?2 seq/tm/refl
   
   note: checking mode of constant   _2555   ... 
+  
   => %sort seq/tm/unroll {E1 tm} {E2 tm} {_0 seq/tm E1 E2}
     {_2556 seq/tm (tm/unroll E1) (tm/unroll E2)}
   
   => %term _2556 {_?1 tm} {_?2 seq/tm _?1 _?1} seq/tm/unroll _?2 seq/tm/refl
   
   note: checking mode of constant   _2556   ... 
+  
   => %sort seq/tm/sym {E1 tm} {E2 tm} {_0 seq/tm E1 E2} {_2557 seq/tm E2 E1}
   
   => %term _2557 {_?1 tm} {_?2 seq/tm _?1 _?1} seq/tm/sym _?2 seq/tm/refl
   
   note: checking mode of constant   _2557   ... 
+  
   => %sort seq/tm/term-a {E1 tm} {E2 tm} {_0 seq/tm E1 E2}
     {_2558 seq/md (md/tm E1) (md/tm E2)}
   
   => %term _2558 {_?1 tm} {_?2 seq/tm _?1 _?1} seq/tm/term-a _?2 seq/md/refl
   
   note: checking mode of constant   _2558   ... 
+  
   => %sort seq/md/app {M1 md} {M2 md} {M3 md} {_0 seq/md M1 M2}
     {_2559 seq/md (md/app M1 M3) (md/app M2 M3)}
   
@@ -87269,6 +91058,7 @@
     _2559 {_?1 md} {_?2 md} {_?3 seq/md _?1 _?1} seq/md/app _?2 _?3 seq/md/refl
   
   note: checking mode of constant   _2559   ... 
+  
   => %sort fst-md/seq-m {M1 md} {M2 md} {C cn} {_0 seq/md M1 M2}
     {_2560 fst-md M1 C} {_2561 fst-md M2 C}
   
@@ -87276,18 +91066,21 @@
     _2560 {_?1 md} {_?2 cn} {D1 fst-md _?1 _?2} fst-md/seq-m seq/md/refl D1 D1
   
   note: checking mode of constant   _2560   ... 
+  
   => %sort seq/md/pj1 {E1 md} {E2 md} {_0 seq/md E1 E2}
     {_2561 seq/md (md/pj1 E1) (md/pj1 E2)}
   
   => %term _2561 {_?1 md} {_?2 seq/md _?1 _?1} seq/md/pj1 _?2 seq/md/refl
   
   note: checking mode of constant   _2561   ... 
+  
   => %sort seq/md/pj2 {E1 md} {E2 md} {_0 seq/md E1 E2}
     {_2562 seq/md (md/pj2 E1) (md/pj2 E2)}
   
   => %term _2562 {_?1 md} {_?2 seq/md _?1 _?1} seq/md/pj2 _?2 seq/md/refl
   
   note: checking mode of constant   _2562   ... 
+  
   => %sort oftp/seq-t {E1 tm} {E2 tm} {L lt} {T lt} {C cn} {_0 seq/tm E1 E2}
     {_2563 oftp L T E1 C} {_2564 oftp L T E2 C}
   
@@ -87297,12 +91090,14 @@
         oftp/seq-t seq/tm/refl D1 D1
   
   note: checking mode of constant   _2563   ... 
+  
   => %sort seq/tm/get {E1 tm} {E2 tm} {_0 seq/tm E1 E2}
     {_2564 seq/tm (tm/get E1) (tm/get E2)}
   
   => %term _2564 {_?1 tm} {_?2 seq/tm _?1 _?1} seq/tm/get _?2 seq/tm/refl
   
   note: checking mode of constant   _2564   ... 
+  
   => %sort seq/tm/set {E1 tm} {E2 tm} {E3 tm} {_0 seq/tm E1 E2}
     {_2565 seq/tm (tm/set E1 E3) (tm/set E2 E3)}
   
@@ -87310,6 +91105,7 @@
     _2565 {_?1 tm} {_?2 tm} {_?3 seq/tm _?1 _?1} seq/tm/set _?2 _?3 seq/tm/refl
   
   note: checking mode of constant   _2565   ... 
+  
   => %term _2566 fst-md-seq fst-md/unit fst-md/unit seq/cn/refl
   
   => %term _2567 {_?1 cn} fst-md-seq fst-md/cn fst-md/cn seq/cn/refl
@@ -87345,12 +91141,19 @@
         fst-md-seq fst-md/lam fst-md/lam seq/cn/refl
   
   note: checking mode of constant   _2566   ... 
+  
   note: checking mode of constant   _2567   ... 
+  
   note: checking mode of constant   _2568   ... 
+  
   note: checking mode of constant   _2569   ... 
+  
   note: checking mode of constant   _2570   ... 
+  
   note: checking mode of constant   _2571   ... 
+  
   note: checking mode of constant   _2572   ... 
+  
   => %sort lt-wkn/oftp {L lt} {C cn} {L' lt} {LC loc} {T lt} {E tm} {C' cn}
     {_0 lt-extend L C L' LC} {_2573 oftp L T E C'} {_2574 oftp L' T E C'}
   
@@ -87756,45 +91559,85 @@
                 [dm1 fst-md s1 a] D1' s1 dm a da dm1) DW DF)
   
   note: checking mode of constant   _2573   ... 
+  
   note: checking mode of constant   _2574   ... 
+  
   note: checking mode of constant   _2575   ... 
+  
   note: checking mode of constant   _2576   ... 
+  
   note: checking mode of constant   _2577   ... 
+  
   note: checking mode of constant   _2578   ... 
+  
   note: checking mode of constant   _2579   ... 
+  
   note: checking mode of constant   _2580   ... 
+  
   note: checking mode of constant   _2581   ... 
+  
   note: checking mode of constant   _2582   ... 
+  
   note: checking mode of constant   _2583   ... 
+  
   note: checking mode of constant   _2584   ... 
+  
   note: checking mode of constant   _2585   ... 
+  
   note: checking mode of constant   _2586   ... 
+  
   note: checking mode of constant   _2587   ... 
+  
   note: checking mode of constant   _2588   ... 
+  
   note: checking mode of constant   _2589   ... 
+  
   note: checking mode of constant   _2590   ... 
+  
   note: checking mode of constant   _2591   ... 
+  
   note: checking mode of constant   _2592   ... 
+  
   note: checking mode of constant   _2593   ... 
+  
   note: checking mode of constant   _2594   ... 
+  
   note: checking mode of constant   _2595   ... 
+  
   note: checking mode of constant   _2596   ... 
+  
   note: checking mode of constant   _2597   ... 
+  
   note: checking mode of constant   _2598   ... 
+  
   note: checking mode of constant   _2599   ... 
+  
   note: checking mode of constant   _2600   ... 
+  
   note: checking mode of constant   _2601   ... 
+  
   note: checking mode of constant   _2602   ... 
+  
   note: checking mode of constant   _2603   ... 
+  
   note: checking mode of constant   _2604   ... 
+  
   note: checking mode of constant   _2605   ... 
+  
   note: checking mode of constant   _2606   ... 
+  
   note: checking mode of constant   _2607   ... 
+  
   note: checking mode of constant   _2608   ... 
+  
   note: checking mode of constant   _2609   ... 
+  
   note: checking mode of constant   _2610   ... 
+  
   note: checking mode of constant   _2611   ... 
+  
   note: checking mode of constant   _2612   ... 
+  
   => %sort tt-wkn/oftp {T lt} {C cn} {T' lt} {LC loc} {L lt} {E tm} {C' cn}
     {_0 lt-extend T C T' LC} {_2613 oftp L T E C'} {_2614 oftp L T' E C'}
   
@@ -88201,45 +92044,85 @@
                 [dm1 fst-md s1 a] D1' s1 dm a da dm1) DW DF)
   
   note: checking mode of constant   _2613   ... 
+  
   note: checking mode of constant   _2614   ... 
+  
   note: checking mode of constant   _2615   ... 
+  
   note: checking mode of constant   _2616   ... 
+  
   note: checking mode of constant   _2617   ... 
+  
   note: checking mode of constant   _2618   ... 
+  
   note: checking mode of constant   _2619   ... 
+  
   note: checking mode of constant   _2620   ... 
+  
   note: checking mode of constant   _2621   ... 
+  
   note: checking mode of constant   _2622   ... 
+  
   note: checking mode of constant   _2623   ... 
+  
   note: checking mode of constant   _2624   ... 
+  
   note: checking mode of constant   _2625   ... 
+  
   note: checking mode of constant   _2626   ... 
+  
   note: checking mode of constant   _2627   ... 
+  
   note: checking mode of constant   _2628   ... 
+  
   note: checking mode of constant   _2629   ... 
+  
   note: checking mode of constant   _2630   ... 
+  
   note: checking mode of constant   _2631   ... 
+  
   note: checking mode of constant   _2632   ... 
+  
   note: checking mode of constant   _2633   ... 
+  
   note: checking mode of constant   _2634   ... 
+  
   note: checking mode of constant   _2635   ... 
+  
   note: checking mode of constant   _2636   ... 
+  
   note: checking mode of constant   _2637   ... 
+  
   note: checking mode of constant   _2638   ... 
+  
   note: checking mode of constant   _2639   ... 
+  
   note: checking mode of constant   _2640   ... 
+  
   note: checking mode of constant   _2641   ... 
+  
   note: checking mode of constant   _2642   ... 
+  
   note: checking mode of constant   _2643   ... 
+  
   note: checking mode of constant   _2644   ... 
+  
   note: checking mode of constant   _2645   ... 
+  
   note: checking mode of constant   _2646   ... 
+  
   note: checking mode of constant   _2647   ... 
+  
   note: checking mode of constant   _2648   ... 
+  
   note: checking mode of constant   _2649   ... 
+  
   note: checking mode of constant   _2650   ... 
+  
   note: checking mode of constant   _2651   ... 
+  
   note: checking mode of constant   _2652   ... 
+  
   => %sort lt-wkn-sub/oftp {L lt} {L' lt} {T lt} {E tm} {C' cn} {_0 lt-sub L L'}
     {_2653 oftp L T E C'} {_2654 oftp L' T E C'}
   
@@ -88259,7 +92142,9 @@
         lt-wkn-sub/oftp (lt-sub/trans LL LX) D1 D1''
   
   note: checking mode of constant   _2653   ... 
+  
   note: checking mode of constant   _2654   ... 
+  
   => %sort lt-wkn-sub/ofsg {L lt} {L' lt} {T lt} {Y pty} {M md} {S sg}
     {_0 lt-sub L L'} {_2655 ofsg L T Y M S} {_2656 ofsg L' T Y M S}
   
@@ -88279,7 +92164,9 @@
         lt-wkn-sub/ofsg (lt-sub/trans LL LX) D1 D1''
   
   note: checking mode of constant   _2655   ... 
+  
   note: checking mode of constant   _2656   ... 
+  
   => %sort tt-wkn-sub/oftp {T lt} {T' lt} {L lt} {E tm} {C' cn} {_0 lt-sub T T'}
     {_2657 oftp L T E C'} {_2658 oftp L T' E C'}
   
@@ -88299,7 +92186,9 @@
         tt-wkn-sub/oftp (lt-sub/trans LL LX) D1 D1''
   
   note: checking mode of constant   _2657   ... 
+  
   note: checking mode of constant   _2658   ... 
+  
   => %sort tt-wkn-sub/ofsg {T lt} {T' lt} {L lt} {Y pty} {M md} {S sg}
     {_0 lt-sub T T'} {_2659 ofsg L T Y M S} {_2660 ofsg L T' Y M S}
   
@@ -88319,7 +92208,9 @@
         tt-wkn-sub/ofsg (lt-sub/trans LL LX) D1 D1''
   
   note: checking mode of constant   _2659   ... 
+  
   note: checking mode of constant   _2660   ... 
+  
   => %sort lt-tt-wkn-sub/oftp {L lt} {L' lt} {T lt} {T' lt} {E tm} {C' cn}
     {_0 lt-sub L L'} {_2661 lt-sub T T'} {_2662 oftp L T E C'}
     {_2663 oftp L' T' E C'}
@@ -88333,6 +92224,7 @@
         lt-tt-wkn-sub/oftp LS TS D1 D1''
   
   note: checking mode of constant   _2661   ... 
+  
   => %sort lt-tt-wkn-sub/ofsg {L lt} {L' lt} {T lt} {T' lt} {Y pty} {E md} {
     C' sg} {_0 lt-sub L L'} {_2662 lt-sub T T'} {_2663 ofsg L T Y E C'}
     {_2664 ofsg L' T' Y E C'}
@@ -88346,6 +92238,7 @@
         {_2662 lt-wkn-sub/ofsg LS D1 D1'} lt-tt-wkn-sub/ofsg LS TS D1 D1''
   
   note: checking mode of constant   _2662   ... 
+  
   => %sort subst/tm-oftp {C1 cn} {L lt} {T lt} {E2 {_0 tm} tm} {C2 cn} {E1 tm}
     {_0 {x tm} {dx assm/tm x C1} oftp L T (E2 x) C2} {_2663 oftp L T E1 C1}
     {_2664 oftp L T (E2 E1) C2}
@@ -88861,40 +92754,75 @@
           (ofsg/sub D1' DS DP)
   
   note: checking mode of constant   _2663   ... 
+  
   note: checking mode of constant   _2664   ... 
+  
   note: checking mode of constant   _2665   ... 
+  
   note: checking mode of constant   _2666   ... 
+  
   note: checking mode of constant   _2667   ... 
+  
   note: checking mode of constant   _2668   ... 
+  
   note: checking mode of constant   _2669   ... 
+  
   note: checking mode of constant   _2670   ... 
+  
   note: checking mode of constant   _2671   ... 
+  
   note: checking mode of constant   _2672   ... 
+  
   note: checking mode of constant   _2673   ... 
+  
   note: checking mode of constant   _2674   ... 
+  
   note: checking mode of constant   _2675   ... 
+  
   note: checking mode of constant   _2676   ... 
+  
   note: checking mode of constant   _2677   ... 
+  
   note: checking mode of constant   _2678   ... 
+  
   note: checking mode of constant   _2679   ... 
+  
   note: checking mode of constant   _2680   ... 
+  
   note: checking mode of constant   _2681   ... 
+  
   note: checking mode of constant   _2682   ... 
+  
   note: checking mode of constant   _2683   ... 
+  
   note: checking mode of constant   _2684   ... 
+  
   note: checking mode of constant   _2685   ... 
+  
   note: checking mode of constant   _2686   ... 
+  
   note: checking mode of constant   _2687   ... 
+  
   note: checking mode of constant   _2688   ... 
+  
   note: checking mode of constant   _2689   ... 
+  
   note: checking mode of constant   _2690   ... 
+  
   note: checking mode of constant   _2691   ... 
+  
   note: checking mode of constant   _2692   ... 
+  
   note: checking mode of constant   _2693   ... 
+  
   note: checking mode of constant   _2694   ... 
+  
   note: checking mode of constant   _2695   ... 
+  
   note: checking mode of constant   _2696   ... 
+  
   note: checking mode of constant   _2697   ... 
+  
   => %sort vdt/ofsg/i {L lt} {T lt} {M md} {S sg} {_0 ofsg L T pty/i M S}
     {_2698 sg-wf S}
   
@@ -89364,52 +93292,99 @@
         vdt/ofsg/i (ofsg/sub D1 DS _?9) DSS
   
   note: checking mode of constant   _2698   ... 
+  
   note: checking mode of constant   _2699   ... 
+  
   note: checking mode of constant   _2700   ... 
+  
   note: checking mode of constant   _2701   ... 
+  
   note: checking mode of constant   _2702   ... 
+  
   note: checking mode of constant   _2703   ... 
+  
   note: checking mode of constant   _2704   ... 
+  
   note: checking mode of constant   _2705   ... 
+  
   note: checking mode of constant   _2706   ... 
+  
   note: checking mode of constant   _2707   ... 
+  
   note: checking mode of constant   _2708   ... 
+  
   note: checking mode of constant   _2709   ... 
+  
   note: checking mode of constant   _2710   ... 
+  
   note: checking mode of constant   _2711   ... 
+  
   note: checking mode of constant   _2712   ... 
+  
   note: checking mode of constant   _2713   ... 
+  
   note: checking mode of constant   _2714   ... 
+  
   note: checking mode of constant   _2715   ... 
+  
   note: checking mode of constant   _2716   ... 
+  
   note: checking mode of constant   _2717   ... 
+  
   note: checking mode of constant   _2718   ... 
+  
   note: checking mode of constant   _2719   ... 
+  
   note: checking mode of constant   _2720   ... 
+  
   note: checking mode of constant   _2721   ... 
+  
   note: checking mode of constant   _2722   ... 
+  
   note: checking mode of constant   _2723   ... 
+  
   note: checking mode of constant   _2724   ... 
+  
   note: checking mode of constant   _2737   ... 
+  
   note: checking mode of constant   _2738   ... 
+  
   note: checking mode of constant   _2739   ... 
+  
   note: checking mode of constant   _2740   ... 
+  
   note: checking mode of constant   _2741   ... 
+  
   note: checking mode of constant   _2742   ... 
+  
   note: checking mode of constant   _2743   ... 
+  
   note: checking mode of constant   _2744   ... 
+  
   note: checking mode of constant   _2725   ... 
+  
   note: checking mode of constant   _2726   ... 
+  
   note: checking mode of constant   _2727   ... 
+  
   note: checking mode of constant   _2728   ... 
+  
   note: checking mode of constant   _2729   ... 
+  
   note: checking mode of constant   _2730   ... 
+  
   note: checking mode of constant   _2731   ... 
+  
   note: checking mode of constant   _2732   ... 
+  
   note: checking mode of constant   _2733   ... 
+  
   note: checking mode of constant   _2734   ... 
+  
   note: checking mode of constant   _2735   ... 
+  
   note: checking mode of constant   _2736   ... 
+  
   => %sort vdt/ofsg {L lt} {T lt} {Y pty} {M md} {S sg} {_0 ofsg L T Y M S}
     {_2745 sg-wf S}
   
@@ -89426,7 +93401,9 @@
         {_0 vdt/ofsg/p D1 DS _?7 _?8 _?9} vdt/ofsg D1 DS
   
   note: checking mode of constant   _2745   ... 
+  
   note: checking mode of constant   _2746   ... 
+  
   => %sort subst/md-ofsg^ {M md} {S sg} {L lt} {T lt} {Y pty} {M' md} {S' sg}
     {_0 {_0 assm/md M S} ofsg L T Y M' S'} {_2747 ofsg L T pty/p M S}
     {_2748 ofsg L T Y M' S'}
@@ -89903,40 +93880,75 @@
           (oftp/tm/unroll D1')
   
   note: checking mode of constant   _2747   ... 
+  
   note: checking mode of constant   _2748   ... 
+  
   note: checking mode of constant   _2749   ... 
+  
   note: checking mode of constant   _2750   ... 
+  
   note: checking mode of constant   _2751   ... 
+  
   note: checking mode of constant   _2752   ... 
+  
   note: checking mode of constant   _2753   ... 
+  
   note: checking mode of constant   _2754   ... 
+  
   note: checking mode of constant   _2755   ... 
+  
   note: checking mode of constant   _2756   ... 
+  
   note: checking mode of constant   _2757   ... 
+  
   note: checking mode of constant   _2758   ... 
+  
   note: checking mode of constant   _2759   ... 
+  
   note: checking mode of constant   _2760   ... 
+  
   note: checking mode of constant   _2761   ... 
+  
   note: checking mode of constant   _2762   ... 
+  
   note: checking mode of constant   _2763   ... 
+  
   note: checking mode of constant   _2764   ... 
+  
   note: checking mode of constant   _2765   ... 
+  
   note: checking mode of constant   _2766   ... 
+  
   note: checking mode of constant   _2767   ... 
+  
   note: checking mode of constant   _2768   ... 
+  
   note: checking mode of constant   _2769   ... 
+  
   note: checking mode of constant   _2770   ... 
+  
   note: checking mode of constant   _2771   ... 
+  
   note: checking mode of constant   _2772   ... 
+  
   note: checking mode of constant   _2773   ... 
+  
   note: checking mode of constant   _2774   ... 
+  
   note: checking mode of constant   _2775   ... 
+  
   note: checking mode of constant   _2776   ... 
+  
   note: checking mode of constant   _2777   ... 
+  
   note: checking mode of constant   _2778   ... 
+  
   note: checking mode of constant   _2779   ... 
+  
   note: checking mode of constant   _2780   ... 
+  
   note: checking mode of constant   _2781   ... 
+  
   => %sort subst/md-ofsg {S' sg} {K' kd} {L lt} {T lt} {Y pty}
     {M {_0 md} {_2782 cn} md} {S {_0 cn} sg} {M' md} {C' cn}
     {_0
@@ -89968,6 +93980,7 @@
              D1 s1 ds a da dm) D2 DS DM D'
   
   note: checking mode of constant   _2782   ... 
+  
   => %sort inv/oftp/tm/pj1 {L lt} {T lt} {E tm} {C1 cn} {C2 cn}
     {_0 oftp L T (tm/pj1 E) C1} {_2783 oftp L T E (tp/cross C1 C2)}
   
@@ -89989,7 +94002,9 @@
           (oftp/deq DE' (cn-deq/tp/cross DC (cn-deq/refl DC2)))
   
   note: checking mode of constant   _2783   ... 
+  
   note: checking mode of constant   _2784   ... 
+  
   => %sort inv/oftp/tm/pj2 {L lt} {T lt} {E tm} {C2 cn} {C1 cn}
     {_0 oftp L T (tm/pj2 E) C2} {_2785 oftp L T E (tp/cross C1 C2)}
   
@@ -90011,7 +94026,9 @@
           (oftp/deq DE' (cn-deq/tp/cross (cn-deq/refl DC1') DC))
   
   note: checking mode of constant   _2785   ... 
+  
   note: checking mode of constant   _2786   ... 
+  
   => %sort inv/oftp/tm/pair {L lt} {T lt} {E1 tm} {E2 tm} {C cn} {C1 cn} {
     C2 cn} {_0 oftp L T (tm/pair E1 E2) C}
     {_2787 cn-deq (tp/cross C1 C2) C kd/type} {_2788 oftp L T E1 C1}
@@ -90035,7 +94052,9 @@
         inv/oftp/tm/pair (oftp/deq DE DC) (cn-deq/trans DC' DC) DE1 DE2
   
   note: checking mode of constant   _2787   ... 
+  
   note: checking mode of constant   _2788   ... 
+  
   => %sort inv/oftp/tm/tmapp {L lt} {T lt} {E1 tm} {E2 tm} {C cn} {C'' cn} {
     C' cn} {_0 oftp L T (tm/tmapp E1 E2) C} {_2789 cn-deq C'' C kd/type}
     {_2790 oftp L T E1 (tp/arrow C' C'')} {_2791 oftp L T E2 C'}
@@ -90059,7 +94078,9 @@
         inv/oftp/tm/tmapp (oftp/deq DE DC) (cn-deq/trans DC' DC) DE1 DE2
   
   note: checking mode of constant   _2789   ... 
+  
   note: checking mode of constant   _2790   ... 
+  
   => %sort inv/oftp/tm/cnapp {L lt} {T lt} {E1 tm} {C2 cn} {C cn} {C1 {_0 cn} cn}
     {K kd} {_0 oftp L T (tm/cnapp E1 C2) C} {_2791 cn-deq (C1 C2) C kd/type}
     {_2792 oftp L T E1 (tp/forall K [_2792 cn] C1 _2792)} {_2793 ofkd C2 K}
@@ -90087,7 +94108,9 @@
         inv/oftp/tm/cnapp (oftp/deq DE DC) (cn-deq/trans DC' DC) DE1 DE2
   
   note: checking mode of constant   _2791   ... 
+  
   note: checking mode of constant   _2792   ... 
+  
   => %sort inv/oftp/tm/fun {L lt} {T lt} {C1 cn} {C2 cn} {E {_0 tm} {_2793 tm} tm}
     {C cn} {_0 oftp L T (tm/fun C1 C2 ([_0 tm] [_2793 tm] E _0 _2793)) C}
     {_2793 cn-deq (tp/arrow C1 C2) C kd/type}
@@ -90132,7 +94155,9 @@
              D1 x dx f df) DC
   
   note: checking mode of constant   _2793   ... 
+  
   note: checking mode of constant   _2794   ... 
+  
   => %sort inv/oftp/tm/cnabs {L lt} {T lt} {K kd} {E {_0 cn} tm} {C cn}
     {C' {_0 cn} cn} {_0 oftp L T (tm/cnabs K ([_0 cn] E _0)) C}
     {_2795 cn-deq (tp/forall K ([_2795 cn] C' _2795)) C kd/type}
@@ -90159,7 +94184,9 @@
           ([a cn] [da ofkd a _?3] D1 a da) DW
   
   note: checking mode of constant   _2795   ... 
+  
   note: checking mode of constant   _2796   ... 
+  
   => %sort inv/oftp/tm/set {L lt} {T lt} {E1 tm} {E2 tm} {C cn} {C1 cn}
     {_0 oftp L T (tm/set E1 E2) C} {_2797 cn-deq tp/unit C kd/type}
     {_2798 oftp L T E1 (tp/ref C1)} {_2799 oftp L T E2 C1}
@@ -90179,7 +94206,9 @@
         inv/oftp/tm/set (oftp/deq DE DC) (cn-deq/trans DC' DC) DE1 DE2
   
   note: checking mode of constant   _2797   ... 
+  
   note: checking mode of constant   _2798   ... 
+  
   => %sort inv/oftp/tm/get {L lt} {T lt} {E1 tm} {C1 cn}
     {_0 oftp L T (tm/get E1) C1} {_2799 oftp L T E1 (tp/ref C1)}
   
@@ -90196,7 +94225,9 @@
         inv/oftp/tm/get (oftp/deq DE DC) (oftp/deq D1 (cn-deq/tp/ref DC))
   
   note: checking mode of constant   _2799   ... 
+  
   note: checking mode of constant   _2800   ... 
+  
   => %sort inv/oftp/tm/ref {L lt} {T lt} {E1 tm} {C1 cn} {C cn}
     {_0 oftp L T (tm/ref E1) C1} {_2801 cn-deq (tp/ref C) C1 kd/type}
     {_2802 oftp L T E1 C}
@@ -90216,7 +94247,9 @@
         inv/oftp/tm/ref (oftp/deq DE DC) (cn-deq/trans DC' DC) D1
   
   note: checking mode of constant   _2801   ... 
+  
   note: checking mode of constant   _2802   ... 
+  
   => %sort inv/oftp/tm/term {L lt} {T lt} {M md} {C1 cn} {Y pty}
     {_0 oftp L T (tm/term M) C1} {_2803 ofsg L T Y M (sg/cn C1)}
   
@@ -90236,7 +94269,9 @@
         inv/oftp/tm/term (oftp/deq DE DC) (ofsg/sub DM (sg-sub/sg/cn DC) P)
   
   note: checking mode of constant   _2803   ... 
+  
   note: checking mode of constant   _2804   ... 
+  
   => %sort inv/oftp/tm/loc {L lt} {T lt} {LC loc} {C cn} {C' cn}
     {_0 oftp L T (tm/loc LC) C} {_2805 cn-deq (tp/ref C') C kd/type}
     {_2806 lt-look L LC C'} {_2807 ofkd C' kd/type}
@@ -90258,7 +94293,9 @@
         inv/oftp/tm/loc (oftp/deq D1 DQ) (cn-deq/trans DQ' DQ) LL DC
   
   note: checking mode of constant   _2805   ... 
+  
   note: checking mode of constant   _2806   ... 
+  
   => %sort inv/oftp/tm/inl {L lt} {T lt} {C1 cn} {C2 cn} {E tm} {C' cn}
     {_0 oftp L T (tm/inl (tp/sum C1 C2) E) C'} {_2807 oftp L T E C1}
     {_2808 ofkd C2 kd/type} {_2809 cn-deq (tp/sum C1 C2) C' kd/type}
@@ -90281,7 +94318,9 @@
         inv/oftp/tm/inl (oftp/deq DE DQ) D1 DC (cn-deq/trans DQ' DQ)
   
   note: checking mode of constant   _2807   ... 
+  
   note: checking mode of constant   _2808   ... 
+  
   => %sort inv/oftp/tm/inr {L lt} {T lt} {C1 cn} {C2 cn} {E tm} {C' cn}
     {_0 oftp L T (tm/inr (tp/sum C1 C2) E) C'} {_2809 oftp L T E C2}
     {_2810 ofkd C1 kd/type} {_2811 cn-deq (tp/sum C1 C2) C' kd/type}
@@ -90304,7 +94343,9 @@
         inv/oftp/tm/inr (oftp/deq DE DQ) D1 DC (cn-deq/trans DQ' DQ)
   
   note: checking mode of constant   _2809   ... 
+  
   note: checking mode of constant   _2810   ... 
+  
   => %sort inv/oftp/tm/case {L lt} {T lt} {E1 tm} {E2 {_0 tm} tm} {E3 {_0 tm} tm}
     {C' cn} {C1 cn} {C2 cn}
     {_0 oftp L T (tm/case E1 ([_0 tm] E2 _0) ([_0 tm] E3 _0)) C'}
@@ -90340,7 +94381,9 @@
           [x tm] [dx assm/tm x _?8] oftp/deq (D3 x dx) DQ
   
   note: checking mode of constant   _2811   ... 
+  
   note: checking mode of constant   _2812   ... 
+  
   => %sort inv/oftp/tm/try {L lt} {T lt} {E1 tm} {E2 {_0 tm} tm} {C cn}
     {_0 oftp L T (tm/try E1 ([_0 tm] E2 _0)) C} {_2813 oftp L T E1 C}
     {_2814 {x tm} {dx assm/tm x tp/tagged} oftp L T (E2 x) C}
@@ -90366,7 +94409,9 @@
           [x tm] [dx assm/tm x tp/tagged] oftp/deq (D2 x dx) DQ
   
   note: checking mode of constant   _2813   ... 
+  
   note: checking mode of constant   _2814   ... 
+  
   => %sort inv/oftp/tm/new-tag {L lt} {T lt} {C cn} {C1 cn}
     {_0 oftp L T (tm/new-tag C) C1} {_2815 cn-deq (tp/tag C) C1 kd/type}
     {_2816 ofkd C kd/type}
@@ -90386,7 +94431,9 @@
         inv/oftp/tm/new-tag (oftp/deq DE DC) (cn-deq/trans DC' DC) D1
   
   note: checking mode of constant   _2815   ... 
+  
   note: checking mode of constant   _2816   ... 
+  
   => %sort inv/oftp/tm/tag {L lt} {T lt} {E1 tm} {E2 tm} {C cn} {C1 cn}
     {_0 oftp L T (tm/tag E1 E2) C} {_2817 cn-deq tp/tagged C kd/type}
     {_2818 oftp L T E1 (tp/tag C1)} {_2819 oftp L T E2 C1}
@@ -90407,7 +94454,9 @@
         inv/oftp/tm/tag (oftp/deq DE DC) (cn-deq/trans DC' DC) DE1 DE2
   
   note: checking mode of constant   _2817   ... 
+  
   note: checking mode of constant   _2818   ... 
+  
   => %sort inv/oftp/tm/raise {L lt} {T lt} {E1 tm} {C1 cn}
     {_0 oftp L T (tm/raise E1) C1} {_2819 oftp L T E1 tp/tagged}
   
@@ -90423,7 +94472,9 @@
         {_0 inv/oftp/tm/raise DE D1} inv/oftp/tm/raise (oftp/deq DE DC) D1
   
   note: checking mode of constant   _2819   ... 
+  
   note: checking mode of constant   _2820   ... 
+  
   => %sort inv/oftp/tm/iftag {L lt} {T lt} {E1 tm} {E2 tm} {E3 {_0 tm} tm} {
     E4 tm} {C' cn} {C1 cn} {_0 oftp L T (tm/iftag E1 E2 ([_0 tm] E3 _0) E4) C'}
     {_2821 oftp L T E1 tp/tagged} {_2822 oftp L T E2 (tp/tag C1)}
@@ -90452,7 +94503,9 @@
           ([x tm] [dx assm/tm x _?8] oftp/deq (D3 x dx) DQ) (oftp/deq D4 DQ)
   
   note: checking mode of constant   _2821   ... 
+  
   note: checking mode of constant   _2822   ... 
+  
   => %sort inv/oftp/tm/tagloc {L lt} {T lt} {LC loc} {C cn} {C' cn}
     {_0 oftp L T (tm/tagloc LC) C} {_2823 cn-deq (tp/tag C') C kd/type}
     {_2824 lt-look T LC C'} {_2825 ofkd C' kd/type}
@@ -90474,7 +94527,9 @@
         inv/oftp/tm/tagloc (oftp/deq D1 DQ) (cn-deq/trans DQ' DQ) LL DC
   
   note: checking mode of constant   _2823   ... 
+  
   note: checking mode of constant   _2824   ... 
+  
   => %sort inv/oftp/tm/roll {L lt} {T lt} {K kd} {C {_0 cn} cn} {E1 tm} {C1 cn}
     {_0 oftp L T (tm/roll (cn/mu K ([_0 cn] C _0)) E1) C1}
     {_2825 cn-deq (cn/mu K ([_2825 cn] C _2825)) C1 kd/type}
@@ -90501,7 +94556,9 @@
         inv/oftp/tm/roll (oftp/deq DE DC) (cn-deq/trans DC' DC) D1 DCC
   
   note: checking mode of constant   _2825   ... 
+  
   note: checking mode of constant   _2826   ... 
+  
   => %sort inv/oftp/tm/unroll {L lt} {T lt} {E1 tm} {C1 cn} {C {_0 cn} cn} {
     K kd} {_0 oftp L T (tm/unroll E1) C1}
     {_2827 cn-deq (C (cn/mu K ([_2827 cn] C _2827))) C1 kd/type}
@@ -90525,7 +94582,9 @@
         inv/oftp/tm/unroll (oftp/deq DE DC) (cn-deq/trans DC' DC) D1
   
   note: checking mode of constant   _2827   ... 
+  
   note: checking mode of constant   _2828   ... 
+  
   => %sort subder/md/pj1 {L lt} {T lt} {Y pty} {M md} {_?1 sg} {Y' pty} {_?2 sg}
     {_?3 {_0 cn} sg} {_0 ofsg L T Y (md/pj1 M) _?1}
     {_2829 ofsg L T Y' M (sg/sgm _?2 [_2829 cn] _?3 _2829)}
@@ -90569,9 +94628,13 @@
         subder/md/pj1 (ofsg/sub D1 _?8 PS') D2 PS''
   
   note: checking mode of constant   _2829   ... 
+  
   note: checking mode of constant   _2830   ... 
+  
   note: checking mode of constant   _2831   ... 
+  
   note: checking mode of constant   _2832   ... 
+  
   => %sort subder/md/pj2 {L lt} {T lt} {Y pty} {M md} {_?1 sg} {Y' pty} {_?2 sg}
     {_?3 {_0 cn} sg} {_0 ofsg L T Y (md/pj2 M) _?1}
     {_2833 ofsg L T Y' M (sg/sgm _?2 [_2833 cn] _?3 _2833)}
@@ -90615,9 +94678,13 @@
         subder/md/pj2 (ofsg/sub D1 _?8 PS') D2 PS''
   
   note: checking mode of constant   _2833   ... 
+  
   note: checking mode of constant   _2834   ... 
+  
   note: checking mode of constant   _2835   ... 
+  
   note: checking mode of constant   _2836   ... 
+  
   => %sort md/tm-not-sg/sgm {L lt} {T lt} {_?1 tm} {_?2 sg} {_?3 {_0 cn} sg}
     {_0 ofsg L T pty/p (md/tm _?1) (sg/sgm _?2 [_0 cn] _?3 _0)}
     {_2837 uninhabited}
@@ -90642,7 +94709,9 @@
         md/tm-not-sg/sgm (ofsg/sgm-ext D1 _?8) DU
   
   note: checking mode of constant   _2837   ... 
+  
   note: checking mode of constant   _2838   ... 
+  
   => %sort md/tm-not-sg/kd {L lt} {T lt} {_?1 tm} {_?2 kd}
     {_0 ofsg L T pty/p (md/tm _?1) (sg/kd _?2)} {_2839 uninhabited}
   
@@ -90662,7 +94731,9 @@
         {_0 md/tm-not-sg/kd D1 DU} md/tm-not-sg/kd (ofsg/kd-ext D1 _?7 _?8) DU
   
   note: checking mode of constant   _2839   ... 
+  
   note: checking mode of constant   _2840   ... 
+  
   => %sort inv/ofsg/md/tm {L lt} {T lt} {Y pty} {E tm} {S sg} {C cn}
     {_0 ofsg L T Y (md/tm E) S} {_2841 oftp L T E C} {_2842 sg-sub (sg/cn C) S}
   
@@ -90706,9 +94777,13 @@
         inv/ofsg/md/tm (ofsg/kd-ext D1 _?7 _?8) DE DS
   
   note: checking mode of constant   _2841   ... 
+  
   note: checking mode of constant   _2842   ... 
+  
   note: checking mode of constant   _2843   ... 
+  
   note: checking mode of constant   _2844   ... 
+  
   => %sort inv/ofsg/md/pj1 {L lt} {T lt} {Y pty} {M md} {S sg} {S' sg}
     {S'' {_0 cn} sg} {_0 ofsg L T Y (md/pj1 M) S}
     {_2845 ofsg L T Y M (sg/sgm S' [_2845 cn] S'' _2845)} {_2846 sg-sub S' S}
@@ -90768,9 +94843,13 @@
              (ofsg/md/pj2 D1' DM)) DS
   
   note: checking mode of constant   _2845   ... 
+  
   note: checking mode of constant   _2846   ... 
+  
   note: checking mode of constant   _2847   ... 
+  
   note: checking mode of constant   _2848   ... 
+  
   => %sort inv/ofsg/md/pj2 {L lt} {T lt} {Y pty} {M md} {S sg} {S' sg}
     {S'' {_0 cn} sg} {C cn} {_0 ofsg L T Y (md/pj2 M) S}
     {_2849 ofsg L T pty/p M (sg/sgm S' [_2849 cn] S'' _2849)}
@@ -90840,9 +94919,13 @@
           DM DS pty-sub/pp
   
   note: checking mode of constant   _2849   ... 
+  
   note: checking mode of constant   _2850   ... 
+  
   note: checking mode of constant   _2851   ... 
+  
   note: checking mode of constant   _2852   ... 
+  
   => %sort md/lam-not-sg/sgm {L lt} {T lt} {_?1 sg} {_?2 {_0 cn} sg}
     {_?3 {_0 md} {_2853 cn} md} {_?4 sg} {_?5 {_0 cn} sg}
     {_0
@@ -90885,7 +94968,9 @@
         md/lam-not-sg/sgm (ofsg/sgm-ext D1 _?10) DU
   
   note: checking mode of constant   _2853   ... 
+  
   note: checking mode of constant   _2854   ... 
+  
   => %sort md/lam-not-sg/kd {L lt} {T lt} {_?1 sg} {_?2 {_0 cn} sg}
     {_?3 {_0 md} {_2855 cn} md} {_?4 kd}
     {_0
@@ -90919,7 +95004,9 @@
         md/lam-not-sg/kd (ofsg/kd-ext D1 _?9 _?10) DU
   
   note: checking mode of constant   _2855   ... 
+  
   note: checking mode of constant   _2856   ... 
+  
   => %sort inv/ofsg/md/lam {L lt} {T lt} {Y pty} {S1 sg} {S2 {_0 cn} sg}
     {M {_0 md} {_2857 cn} md} {S sg} {K1 kd} {Y' pty}
     {_0
@@ -91034,9 +95121,13 @@
              D2'' s2 dm a da dm1) DW DF DSS
   
   note: checking mode of constant   _2857   ... 
+  
   note: checking mode of constant   _2858   ... 
+  
   note: checking mode of constant   _2859   ... 
+  
   note: checking mode of constant   _2860   ... 
+  
   => %sort ofsg/md/seal-pty/i {L lt} {T lt} {M md} {S sg} {S' sg}
     {_0 ofsg L T pty/p (md/seal M S) S'} {_2861 uninhabited}
   
@@ -91058,7 +95149,9 @@
         ofsg/md/seal-pty/i (ofsg/sgm-ext D1 _?9) DU
   
   note: checking mode of constant   _2861   ... 
+  
   note: checking mode of constant   _2862   ... 
+  
   => %sort inv/ofsg/md/seal {L lt} {T lt} {Y pty} {M md} {S' sg} {S sg}
     {_0 ofsg L T Y (md/seal M S') S} {_2863 ofsg L T Y M S}
   
@@ -91103,10 +95196,15 @@
         inv/ofsg/md/seal (ofsg/sgm-ext D1 D2) D1''
   
   note: checking mode of constant   _2863   ... 
+  
   note: checking mode of constant   _2864   ... 
+  
   note: checking mode of constant   _2865   ... 
+  
   note: checking mode of constant   _2866   ... 
+  
   note: checking mode of constant   _2867   ... 
+  
   => %sort ofsg/md/let-pty/i {L lt} {T lt} {M md} {M' {_0 md} {_2868 cn} md}
     {S sg} {S' sg}
     {_0 ofsg L T pty/p (md/let M ([_0 md] [_2868 cn] M' _0 _2868) S) S'}
@@ -91142,7 +95240,9 @@
         ofsg/md/let-pty/i (ofsg/sgm-ext D1 _?10) DU
   
   note: checking mode of constant   _2868   ... 
+  
   note: checking mode of constant   _2869   ... 
+  
   => %sort inv/ofsg/md/let {L lt} {T lt} {Y pty} {M md} {M' {_0 md} {_2870 cn} md}
     {S sg} {S' sg} {Y'' pty} {S'' sg} {K1 kd} {Y' pty}
     {_0 ofsg L T Y (md/let M ([_0 md] [_2870 cn] M' _0 _2870) S) S'}
@@ -91218,8 +95318,11 @@
              [dm1 fst-md s2 a] D2'' s2 dm a da dm1) DW fst-sg/unit DSS
   
   note: checking mode of constant   _2870   ... 
+  
   note: checking mode of constant   _2871   ... 
+  
   note: checking mode of constant   _2872   ... 
+  
   => %sort ofsg/md/app-pty/i {L lt} {T lt} {M md} {M' md} {S' sg}
     {_0 ofsg L T pty/p (md/app M M') S'} {_2873 uninhabited}
   
@@ -91241,7 +95344,9 @@
         ofsg/md/app-pty/i (ofsg/sgm-ext D1 _?9) DU
   
   note: checking mode of constant   _2873   ... 
+  
   note: checking mode of constant   _2874   ... 
+  
   => %sort inv/ofsg/md/app {L lt} {T lt} {Y pty} {M1 md} {M2 md} {S sg} {Y' pty}
     {S1 sg} {S2 {_0 cn} sg} {C2 cn} {_0 ofsg L T Y (md/app M1 M2) S}
     {_2875 ofsg L T Y' M1 (sg/pi S1 [_2875 cn] S2 _2875)}
@@ -91286,8 +95391,11 @@
         inv/ofsg/md/app (ofsg/sgm-ext D1 D2) D1'' D2'' DM DSS
   
   note: checking mode of constant   _2875   ... 
+  
   note: checking mode of constant   _2876   ... 
+  
   note: checking mode of constant   _2877   ... 
+  
   => %sort md/pair-not-sg/kd {L lt} {T lt} {_?1 md} {_?2 md} {_?3 kd}
     {_0 ofsg L T pty/p (md/pair _?1 _?2) (sg/kd _?3)} {_2878 uninhabited}
   
@@ -91308,7 +95416,9 @@
         md/pair-not-sg/kd (ofsg/kd-ext D1 _?8 _?9) DU
   
   note: checking mode of constant   _2878   ... 
+  
   note: checking mode of constant   _2879   ... 
+  
   => %sort psi-md {_0 {_0 md} md}
   
   => %term psi-md/eps psi-md [a md] a
@@ -91356,8 +95466,11 @@
         psi-md-subder (psi-md/pj2 PC) D1 D1'' P''
   
   note: checking mode of constant   _2880   ... 
+  
   note: checking mode of constant   _2881   ... 
+  
   note: checking mode of constant   _2882   ... 
+  
   => %sort psi-pj1-fst-beta {_?1 lt} {_?2 lt} {M1 md} {_?3 sg} {_?4 lt} {_?5 lt}
     {M2 md} {_?6 sg} {P {_0 md} md} {PC {_0 cn} cn} {C1 cn} {C2 cn}
     {_0 ofsg _?1 _?2 pty/p M1 _?3} {_2883 ofsg _?4 _?5 pty/p M2 _?6}
@@ -91406,8 +95519,11 @@
           (fst-md/pj2 DM2)
   
   note: checking mode of constant   _2883   ... 
+  
   note: checking mode of constant   _2884   ... 
+  
   note: checking mode of constant   _2885   ... 
+  
   => %sort psi-pj2-fst-beta {_?1 lt} {_?2 lt} {M1 md} {_?3 sg} {_?4 lt} {_?5 lt}
     {M2 md} {_?6 sg} {P {_0 md} md} {PC {_0 cn} cn} {C1 cn} {C2 cn}
     {_0 ofsg _?1 _?2 pty/p M1 _?3} {_2886 ofsg _?4 _?5 pty/p M2 _?6}
@@ -91456,8 +95572,11 @@
           (fst-md/pj2 DM2)
   
   note: checking mode of constant   _2886   ... 
+  
   note: checking mode of constant   _2887   ... 
+  
   note: checking mode of constant   _2888   ... 
+  
   => %sort inv/ofsg/md/pair {L lt} {T lt} {Y pty} {M1 md} {M2 md} {S sg} {
     S1 sg} {S2 sg} {_0 ofsg L T Y (md/pair M1 M2) S} {_2889 ofsg L T Y M1 S1}
     {_2890 ofsg L T Y M2 S2} {_2891 sg-sub (sg/sgm S1 ([x cn] S2)) S}
@@ -91822,21 +95941,37 @@
         module-beta/pj2 PS (ofsg/kd-ext D1 DM DC) (ofsg/kd-ext D1' DM2 DC2)
   
   note: checking mode of constant   _2889   ... 
+  
   note: checking mode of constant   _2890   ... 
+  
   note: checking mode of constant   _2891   ... 
+  
   note: checking mode of constant   _2892   ... 
+  
   note: checking mode of constant   _2893   ... 
+  
   note: checking mode of constant   _2894   ... 
+  
   note: checking mode of constant   _2895   ... 
+  
   note: checking mode of constant   _2896   ... 
+  
   note: checking mode of constant   _2897   ... 
+  
   note: checking mode of constant   _2898   ... 
+  
   note: checking mode of constant   _2899   ... 
+  
   note: checking mode of constant   _2900   ... 
+  
   note: checking mode of constant   _2901   ... 
+  
   note: checking mode of constant   _2902   ... 
+  
   note: checking mode of constant   _2903   ... 
+  
   note: checking mode of constant   _2904   ... 
+  
   => %sort st
   
   => %term st/nil st
@@ -91930,7 +96065,9 @@
         lt-look-wf lt-look/hit (st-wf/cons _?8 _?9 _?10 _?11) DG DU
   
   note: checking mode of constant   _2905   ... 
+  
   note: checking mode of constant   _2906   ... 
+  
   => %sort st-look-wf {S st} {LC loc} {E tm} {LC' loc} {_?1 tm} {_?2 lt} {
     _?3 lt} {_?4 lt} {_0 st-look (st/cons S LC E) LC' _?1}
     {_2907 st-wf _?2 (st/cons S LC E) _?3 _?4} {_2908 loc-less LC LC'}
@@ -91961,7 +96098,9 @@
         st-look-wf st-look/hit (st-wf/cons _?8 _?9 _?10 _?11) DG DU
   
   note: checking mode of constant   _2907   ... 
+  
   note: checking mode of constant   _2908   ... 
+  
   => %sort st-update-wf {S st} {LC loc} {E tm} {LC' loc} {_?1 tm} {S' st}
     {_?2 loc} {_?3 tm} {_?4 lt} {_?5 lt} {_?6 lt}
     {_0 st-update (st/cons S LC E) LC' _?1 (st/cons S' _?2 _?3)}
@@ -91994,7 +96133,9 @@
         st-update-wf st-update/hit (st-wf/cons _?9 _?10 _?11 _?12) DG DU
   
   note: checking mode of constant   _2909   ... 
+  
   note: checking mode of constant   _2910   ... 
+  
   => %sort st-wf-can-look {ST st} {LC loc} {E tm} {L lt} {C cn} {L' lt} {T lt}
     {SL st-look ST LC E} {LL lt-look L LC C} {_0 st-wf L ST L' T}
     {_2911 oftp L' T E C}
@@ -92052,9 +96193,13 @@
           (st-wf/cons LCS _?10 _?11 _?12) DC
   
   note: checking mode of constant   _2911   ... 
+  
   note: checking mode of constant   _2912   ... 
+  
   note: checking mode of constant   _2913   ... 
+  
   note: checking mode of constant   _2914   ... 
+  
   => %sort lt-wkn/st-wf {L1 lt} {ST st} {L lt} {T lt} {C cn} {L' lt} {LC loc}
     {_0 st-wf L1 ST L T} {_2915 lt-extend L C L' LC} {_2916 st-wf L1 ST L' T}
   
@@ -92075,7 +96220,9 @@
         lt-wkn/st-wf (st-wf/cons DV DE DG DSG) DX (st-wf/cons DV' DE' DG DSG)
   
   note: checking mode of constant   _2915   ... 
+  
   note: checking mode of constant   _2916   ... 
+  
   => %sort tt-wkn/st-wf {L1 lt} {ST st} {L lt} {T lt} {C cn} {T' lt} {LC loc}
     {_0 st-wf L1 ST L T} {_2917 lt-extend T C T' LC} {_2918 st-wf L1 ST L T'}
   
@@ -92096,7 +96243,9 @@
         tt-wkn/st-wf (st-wf/cons DV DE DG DSG) DX (st-wf/cons DV' DE' DG DSG)
   
   note: checking mode of constant   _2917   ... 
+  
   note: checking mode of constant   _2918   ... 
+  
   => %sort preserve/st-alloc {L lt} {T lt} {E tm} {C cn} {ST st} {ST' st} {
     LC loc} {L' lt} {_0 oftp L T E C} {_2919 st-alloc ST E ST' LC}
     {_2920 st-wf L ST L T} {_2921 lt-extend L C L' LC}
@@ -92137,7 +96286,9 @@
           (st-wf/cons DCVR' DE' lt-extend/cons st-alloc/cons)
   
   note: checking mode of constant   _2919   ... 
+  
   note: checking mode of constant   _2920   ... 
+  
   => %sort preserve/st-update {ST st} {LC loc} {E tm} {ST' st} {L lt} {C cn}
     {L' lt} {T lt} {_0 st-update ST LC E ST'} {_2921 lt-look L LC C}
     {_2922 oftp L' T E C} {_2923 st-wf L ST L' T} {_2924 st-wf L ST' L' T}
@@ -92245,11 +96396,17 @@
           (st-wf/cons LCS' DE' DG st-alloc/cons)
   
   note: checking mode of constant   _2921   ... 
+  
   note: checking mode of constant   _2922   ... 
+  
   note: checking mode of constant   _2923   ... 
+  
   note: checking mode of constant   _2924   ... 
+  
   note: checking mode of constant   _2925   ... 
+  
   note: checking mode of constant   _2926   ... 
+  
   => %sort val/tm {_0 tm}
   
   => %term val/tm/unit val/tm tm/unit
@@ -92795,12 +96952,14 @@
   => %term _2927 {_?1 tm} {D1 val/tm _?1} seq/val/tm seq/tm/refl D1 D1
   
   note: checking mode of constant   _2927   ... 
+  
   => %sort seq/val/md {M1 md} {M2 md} {_0 seq/md M1 M2} {_2928 val/md M1}
     {_2929 val/md M2}
   
   => %term _2928 {_?1 md} {D1 val/md _?1} seq/val/md seq/md/refl D1 D1
   
   note: checking mode of constant   _2928   ... 
+  
   => %sort step/tm/seq {T2 tm} {T1 tm} {S1 st} {TT1 lt} {T3 tm} {S2 st} {TT2 lt}
     {_0 seq/tm T2 T1} {_2929 step/tm T1 S1 TT1 T3 S2 TT2}
     {_2930 step/tm T2 S1 TT1 T3 S2 TT2}
@@ -92811,6 +96970,7 @@
         {S1 step/tm _?1 _?2 _?3 _?4 _?5 _?6} step/tm/seq seq/tm/refl S1 S1
   
   note: checking mode of constant   _2929   ... 
+  
   => %sort step/md/seq {M2 md} {M1 md} {S1 st} {T1 lt} {M3 md} {S2 st} {T2 lt}
     {_0 seq/md M2 M1} {_2930 step/md M1 S1 T1 M3 S2 T2}
     {_2931 step/md M2 S1 T1 M3 S2 T2}
@@ -92821,6 +96981,7 @@
         {S1 step/md _?1 _?2 _?3 _?4 _?5 _?6} step/md/seq seq/md/refl S1 S1
   
   note: checking mode of constant   _2930   ... 
+  
   => %sort val/md-pty/p {M md} {L lt} {T lt} {_?1 pty} {S sg} {_0 val/md M}
     {_2931 ofsg L T _?1 M S} {_2932 ofsg L T pty/p M S}
   
@@ -92848,8 +97009,11 @@
         val/md-pty/p V (ofsg/sub D1 DS _?8) (ofsg/sub D1' DS pty-sub/pp)
   
   note: checking mode of constant   _2931   ... 
+  
   note: checking mode of constant   _2932   ... 
+  
   note: checking mode of constant   _2933   ... 
+  
   => %sort cfl/md/unit {M md} {L lt} {T lt} {Y pty} {_0 val/md M}
     {_2934 ofsg L T Y M sg/unit} {_2935 seq/md M md/unit}
   
@@ -92864,7 +97028,9 @@
         {_0 cfl/md/unit V D1 DS} cfl/md/unit V (ofsg/sub D1 Dsub _?6) DS
   
   note: checking mode of constant   _2934   ... 
+  
   note: checking mode of constant   _2935   ... 
+  
   => %sort cfl/sg/pi {M md} {L lt} {T lt} {Y pty} {_?1 sg} {_?2 {_0 cn} sg}
     {_?3 sg} {_?4 {_0 cn} sg} {_?5 {_0 md} {_2936 cn} md} {_0 val/md M}
     {_2936 ofsg L T Y M (sg/pi _?1 [_2936 cn] _?2 _2936)}
@@ -92900,7 +97066,9 @@
         cfl/sg/pi V (ofsg/sub D1 Dsub _?13) DS
   
   note: checking mode of constant   _2936   ... 
+  
   note: checking mode of constant   _2937   ... 
+  
   => %sort cfl/md/pair {M md} {L lt} {T lt} {Y pty} {_?1 sg} {_?2 {_0 cn} sg}
     {_?3 md} {_?4 md} {_0 val/md M}
     {_2938 ofsg L T Y M (sg/sgm _?1 [_2938 cn] _?2 _2938)}
@@ -92936,8 +97104,11 @@
         cfl/md/pair V (ofsg/sub D1 Dsub _?12) DS
   
   note: checking mode of constant   _2938   ... 
+  
   note: checking mode of constant   _2939   ... 
+  
   note: checking mode of constant   _2940   ... 
+  
   => %sort cfl/md/tm {M md} {L lt} {T lt} {Y pty} {_?1 cn} {_?2 tm} {_0 val/md M}
     {_2941 ofsg L T Y M (sg/cn _?1)} {_2942 seq/md M (md/tm _?2)}
   
@@ -92956,7 +97127,9 @@
         cfl/md/tm V (ofsg/sub D1 Dsub _?9) DS
   
   note: checking mode of constant   _2941   ... 
+  
   note: checking mode of constant   _2942   ... 
+  
   => %sort progress/md/pair {M1 md} {ST st} {T lt} {M2 md}
     {_0 notstuck/md M1 ST T} {_2943 notstuck/md M2 ST T}
     {_2944 notstuck/md (md/pair M1 M2) ST T}
@@ -92996,10 +97169,15 @@
           (notstuck/md/val (val/md/pair V1 V2))
   
   note: checking mode of constant   _2943   ... 
+  
   note: checking mode of constant   _2944   ... 
+  
   note: checking mode of constant   _2945   ... 
+  
   note: checking mode of constant   _2946   ... 
+  
   note: checking mode of constant   _2947   ... 
+  
   => %sort progress/md/pj1 {M md} {ST st} {T lt} {L lt} {_?1 pty} {_?2 sg}
     {_?3 {_0 cn} sg} {_0 notstuck/md M ST T}
     {_2948 ofsg L T _?1 M (sg/sgm _?2 [_2948 cn] _?3 _2948)}
@@ -93036,8 +97214,11 @@
         progress/md/pj1 (notstuck/md/val V) D (notstuck/md/step S)
   
   note: checking mode of constant   _2948   ... 
+  
   note: checking mode of constant   _2949   ... 
+  
   note: checking mode of constant   _2950   ... 
+  
   => %sort progress/md/pj2 {M md} {ST st} {T lt} {L lt} {_?1 sg} {_?2 {_0 cn} sg}
     {_0 notstuck/md M ST T}
     {_2951 ofsg L T pty/p M (sg/sgm _?1 [_2951 cn] _?2 _2951)}
@@ -93073,8 +97254,11 @@
         progress/md/pj2 (notstuck/md/val V) D (notstuck/md/step S)
   
   note: checking mode of constant   _2951   ... 
+  
   note: checking mode of constant   _2952   ... 
+  
   note: checking mode of constant   _2953   ... 
+  
   => %sort progress/md/app {M1 md} {ST st} {T lt} {M2 md} {L lt} {_?1 pty} {
     S sg} {S' {_0 cn} sg} {C cn} {_0 notstuck/md M1 ST T}
     {_2954 notstuck/md M2 ST T}
@@ -93146,10 +97330,15 @@
           (notstuck/md/step S)
   
   note: checking mode of constant   _2954   ... 
+  
   note: checking mode of constant   _2955   ... 
+  
   note: checking mode of constant   _2956   ... 
+  
   note: checking mode of constant   _2957   ... 
+  
   note: checking mode of constant   _2958   ... 
+  
   => %sort progress/md/let {M1 md} {ST st} {T lt} {L lt} {Y pty} {S' sg}
     {M2 {_0 md} {_2959 cn} md} {S sg} {_0 notstuck/md M1 ST T}
     {_2959 ofsg L T Y M1 S'}
@@ -93184,8 +97373,11 @@
           (notstuck/md/val V) DM1 (notstuck/md/step (step/md/let-beta ST V DC))
   
   note: checking mode of constant   _2959   ... 
+  
   note: checking mode of constant   _2960   ... 
+  
   note: checking mode of constant   _2961   ... 
+  
   => %sort progress/md/tm {E1 tm} {ST st} {T lt} {_0 notstuck/tm E1 ST T}
     {_2962 notstuck/md (md/tm E1) ST T}
   
@@ -93207,8 +97399,11 @@
           (notstuck/md/raises (raises/md/tm S))
   
   note: checking mode of constant   _2962   ... 
+  
   note: checking mode of constant   _2963   ... 
+  
   note: checking mode of constant   _2964   ... 
+  
   => %sort preserve-raises/tm {L lt} {T lt} {E tm} {C cn} {V tm} {_0 oftp L T E C}
     {_2965 raises/tm E V} {_2966 oftp L T V tp/tagged}
   
@@ -93543,37 +97738,69 @@
         preserve-raises/md DE (raises/md/let S) D1'
   
   note: checking mode of constant   _2965   ... 
+  
   note: checking mode of constant   _2966   ... 
+  
   note: checking mode of constant   _2967   ... 
+  
   note: checking mode of constant   _2968   ... 
+  
   note: checking mode of constant   _2969   ... 
+  
   note: checking mode of constant   _2970   ... 
+  
   note: checking mode of constant   _2971   ... 
+  
   note: checking mode of constant   _2972   ... 
+  
   note: checking mode of constant   _2973   ... 
+  
   note: checking mode of constant   _2974   ... 
+  
   note: checking mode of constant   _2975   ... 
+  
   note: checking mode of constant   _2976   ... 
+  
   note: checking mode of constant   _2977   ... 
+  
   note: checking mode of constant   _2978   ... 
+  
   note: checking mode of constant   _2979   ... 
+  
   note: checking mode of constant   _2980   ... 
+  
   note: checking mode of constant   _2981   ... 
+  
   note: checking mode of constant   _2982   ... 
+  
   note: checking mode of constant   _2983   ... 
+  
   note: checking mode of constant   _2984   ... 
+  
   note: checking mode of constant   _2985   ... 
+  
   note: checking mode of constant   _2986   ... 
+  
   note: checking mode of constant   _2987   ... 
+  
   note: checking mode of constant   _2988   ... 
+  
   note: checking mode of constant   _2989   ... 
+  
   note: checking mode of constant   _2990   ... 
+  
   note: checking mode of constant   _2991   ... 
+  
   note: checking mode of constant   _2992   ... 
+  
   note: checking mode of constant   _2993   ... 
+  
   note: checking mode of constant   _2994   ... 
+  
   note: checking mode of constant   _2995   ... 
+  
   note: checking mode of constant   _2996   ... 
+  
   => %sort preserve/fst-md {L lt} {T lt} {M md} {S sg} {C cn} {ST st} {M' md}
     {ST' st} {T' lt} {C' cn} {K kd} {_0 ofsg L T pty/p M S} {_2997 fst-md M C}
     {_2998 step/md M ST T M' ST' T'} {_2999 fst-md M' C'} {_3000 fst-sg S K}
@@ -93724,12 +97951,19 @@
           (step/md/pj2-beta _?12 _?13) DM2 DFS DCQ'
   
   note: checking mode of constant   _2997   ... 
+  
   note: checking mode of constant   _2998   ... 
+  
   note: checking mode of constant   _2999   ... 
+  
   note: checking mode of constant   _3000   ... 
+  
   note: checking mode of constant   _3001   ... 
+  
   note: checking mode of constant   _3002   ... 
+  
   note: checking mode of constant   _3003   ... 
+  
   => %sort map {_0 cn} {_3004 eterm}
   
   => %sort tmap {_0 kd} {_3004 etp}
@@ -93913,6 +98147,7 @@
           ([_0 cn] cn-eq/i) cn-eq/i
   
   note: checking mode of constant   _3004   ... 
+  
   => %sort cn-resp-cn {C1 cn} {C2 cn} {C {_0 cn} cn} {_0 cn-eq C1 C2}
     {_3005 cn-eq (C C1) (C C2)}
   
@@ -93920,6 +98155,7 @@
     _3005 {_?1 cn} {_?2 {_0 cn} cn} cn-resp-cn ([_0 cn] _?2 _0) cn-eq/i cn-eq/i
   
   note: checking mode of constant   _3005   ... 
+  
   => %sort cn-resp-cn2 {C1 cn} {C2 cn} {D1 cn} {D2 cn} {C {_0 cn} {_3006 cn} cn}
     {_0 cn-eq C1 C2} {_3006 cn-eq D1 D2} {_3007 cn-eq (C C1 D1) (C C2 D2)}
   
@@ -93929,6 +98165,7 @@
         cn-resp-cn2 ([_0 cn] [_3006 cn] _?3 _0 _3006) cn-eq/i cn-eq/i cn-eq/i
   
   note: checking mode of constant   _3006   ... 
+  
   => %sort cn-resp-kd {K kd} {K' kd} {C {_0 kd} cn} {_0 kd-eq K K'}
     {_3007 cn-eq (C K) (C K')}
   
@@ -93936,6 +98173,7 @@
     _3007 {_?1 kd} {_?2 {_0 kd} cn} cn-resp-kd ([_0 kd] _?2 _0) kd-eq/i cn-eq/i
   
   note: checking mode of constant   _3007   ... 
+  
   => %sort kd-resp-bind {K1 kd} {K1' kd} {K2 {_0 cn} kd} {K2' {_0 cn} kd}
     {K {_0 kd} {_3008 {_3008 cn} kd} kd} {_0 kd-eq K1 K1'}
     {_3008 {a cn} kd-eq (K2 a) (K2' a)}
@@ -93948,6 +98186,7 @@
           ([_0 cn] kd-eq/i) kd-eq/i
   
   note: checking mode of constant   _3008   ... 
+  
   => %sort kd-resp-cn {C cn} {C' cn} {K {_0 cn} kd} {_0 cn-eq C C'}
     {_3009 kd-eq (K C) (K C')}
   
@@ -93955,6 +98194,7 @@
     _3009 {_?1 cn} {_?2 {_0 cn} kd} kd-resp-cn ([_0 cn] _?2 _0) cn-eq/i kd-eq/i
   
   note: checking mode of constant   _3009   ... 
+  
   => %sort cn-deq-resp {C1 cn} {C1' cn} {C2 cn} {C2' cn} {K kd} {K' kd}
     {_0 cn-eq C1 C1'} {_3010 cn-eq C2 C2'} {_3011 kd-eq K K'}
     {_3012 cn-deq C1 C2 K} {_3013 cn-deq C1' C2' K'}
@@ -93965,6 +98205,7 @@
         cn-deq-resp cn-eq/i cn-eq/i kd-eq/i D D
   
   note: checking mode of constant   _3010   ... 
+  
   => %sort kd-deq-resp {K1 kd} {K1' kd} {K2 kd} {K2' kd} {_0 kd-eq K1 K1'}
     {_3011 kd-eq K2 K2'} {_3012 kd-deq K1 K2} {_3013 kd-deq K1' K2'}
   
@@ -93972,18 +98213,21 @@
     _3011 {_?1 kd} {_?2 kd} {D kd-deq _?1 _?2} kd-deq-resp kd-eq/i kd-eq/i D D
   
   note: checking mode of constant   _3011   ... 
+  
   => %sort kd-wf-resp {K kd} {K' kd} {_0 kd-eq K K'} {_3012 kd-wf K}
     {_3013 kd-wf K'}
   
   => %term _3012 {_?1 kd} {D kd-wf _?1} kd-wf-resp kd-eq/i D D
   
   note: checking mode of constant   _3012   ... 
+  
   => %sort ofkd-resp {C cn} {C' cn} {K kd} {K' kd} {_0 cn-eq C C'}
     {_3013 kd-eq K K'} {_3014 ofkd C K} {_3015 ofkd C' K'}
   
   => %term _3013 {_?1 cn} {_?2 kd} {D ofkd _?1 _?2} ofkd-resp cn-eq/i kd-eq/i D D
   
   note: checking mode of constant   _3013   ... 
+  
   => %sort can-unmap {C cn} {M eterm} {_0 unmap M C}
   
   => %sort can-tunmap {K kd} {A etp} {_0 tunmap A K}
@@ -94082,23 +98326,41 @@
           (tunmap/sigma ([x eterm] [a cn] [_3032 unmap x a] D2 x a _3032) D1)
   
   note: checking mode of constant   _3014   ... 
+  
   note: checking mode of constant   _3015   ... 
+  
   note: checking mode of constant   _3016   ... 
+  
   note: checking mode of constant   _3017   ... 
+  
   note: checking mode of constant   _3018   ... 
+  
   note: checking mode of constant   _3019   ... 
+  
   note: checking mode of constant   _3020   ... 
+  
   note: checking mode of constant   _3021   ... 
+  
   note: checking mode of constant   _3022   ... 
+  
   note: checking mode of constant   _3023   ... 
+  
   note: checking mode of constant   _3024   ... 
+  
   note: checking mode of constant   _3025   ... 
+  
   note: checking mode of constant   _3026   ... 
+  
   note: checking mode of constant   _3027   ... 
+  
   note: checking mode of constant   _3028   ... 
+  
   note: checking mode of constant   _3029   ... 
+  
   note: checking mode of constant   _3030   ... 
+  
   note: checking mode of constant   _3031   ... 
+  
   => %sort unmap-fun {M eterm} {C cn} {C' cn} {_0 unmap M C} {_3032 unmap M C'}
     {_3033 cn-eq C C'}
   
@@ -94259,16 +98521,27 @@
     {_0 {_0 map _?1 _?2} unmap-fun _?6 _?7 _?8}
   
   note: checking mode of constant   _3032   ... 
+  
   note: checking mode of constant   _3033   ... 
+  
   note: checking mode of constant   _3034   ... 
+  
   note: checking mode of constant   _3035   ... 
+  
   note: checking mode of constant   _3036   ... 
+  
   note: checking mode of constant   _3037   ... 
+  
   note: checking mode of constant   _3038   ... 
+  
   note: checking mode of constant   _3039   ... 
+  
   note: checking mode of constant   _3040   ... 
+  
   note: checking mode of constant   _3041   ... 
+  
   note: checking mode of constant   _3042   ... 
+  
   => %sort invert-map {C cn} {K kd} {M eterm} {C' cn} {_0 ofkd C K}
     {_3044 map C M} {_3045 unmap M C'} {_3046 cn-deq C C' K}
   
@@ -94751,28 +99024,51 @@
           (kd-deq/kd/sgm Dequiv1 [a cn] [da ofkd a K1] Dequiv2 a da)
   
   note: checking mode of constant   %app%   ... 
+  
   note: checking mode of constant   %pi1%   ... 
+  
   note: checking mode of constant   %pi2%   ... 
+  
   note: checking mode of constant   %lam%   ... 
+  
   note: checking mode of constant   %pair%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %piext%   ... 
+  
   note: checking mode of constant   %sigext%   ... 
+  
   note: checking mode of constant   %sub%   ... 
+  
   note: checking mode of constant   %deq%   ... 
+  
   note: checking mode of constant   %unit%   ... 
+  
   note: checking mode of constant   %tagged%   ... 
+  
   note: checking mode of constant   %ref%   ... 
+  
   note: checking mode of constant   %tag%   ... 
+  
   note: checking mode of constant   %arrow%   ... 
+  
   note: checking mode of constant   %cross%   ... 
+  
   note: checking mode of constant   %sum%   ... 
+  
   note: checking mode of constant   %mu%   ... 
+  
   note: checking mode of constant   %forall%   ... 
+  
   note: checking mode of constant   %t%   ... 
+  
   note: checking mode of constant   %sing%   ... 
+  
   note: checking mode of constant   %pi%   ... 
+  
   note: checking mode of constant   %sigma%   ... 
+  
   => %sort unmap-vof {X eterm} {A etp} {C cn} {K kd} {_0 evof X A}
     {_3044 unmap X C} {_3045 tunmap A K} {_3046 ofkd C K}
   
@@ -95793,60 +100089,115 @@
         unmap-equiv' Dmap1 Dmap2 Dequiv DmapA Dequiv''
   
   note: checking mode of constant   _3044   ... 
+  
   note: checking mode of constant   _3045   ... 
+  
   note: checking mode of constant   _3046   ... 
+  
   note: checking mode of constant   _3047   ... 
+  
   note: checking mode of constant   _3048   ... 
+  
   note: checking mode of constant   _3049   ... 
+  
   note: checking mode of constant   _3050   ... 
+  
   note: checking mode of constant   _3051   ... 
+  
   note: checking mode of constant   _3052   ... 
+  
   note: checking mode of constant   _3053   ... 
+  
   note: checking mode of constant   _3054   ... 
+  
   note: checking mode of constant   _3055   ... 
+  
   note: checking mode of constant   _3056   ... 
+  
   note: checking mode of constant   _3057   ... 
+  
   note: checking mode of constant   _3058   ... 
+  
   note: checking mode of constant   _3059   ... 
+  
   note: checking mode of constant   _3060   ... 
+  
   note: checking mode of constant   _3061   ... 
+  
   note: checking mode of constant   _3062   ... 
+  
   note: checking mode of constant   _3063   ... 
+  
   note: checking mode of constant   _3064   ... 
+  
   note: checking mode of constant   _3065   ... 
+  
   note: checking mode of constant   _3066   ... 
+  
   note: checking mode of constant   _3067   ... 
+  
   note: checking mode of constant   _3068   ... 
+  
   note: checking mode of constant   _3069   ... 
+  
   note: checking mode of constant   _3070   ... 
+  
   note: checking mode of constant   _3071   ... 
+  
   note: checking mode of constant   _3072   ... 
+  
   note: checking mode of constant   _3073   ... 
+  
   note: checking mode of constant   _3074   ... 
+  
   note: checking mode of constant   _3075   ... 
+  
   note: checking mode of constant   _3076   ... 
+  
   note: checking mode of constant   _3077   ... 
+  
   note: checking mode of constant   _3078   ... 
+  
   note: checking mode of constant   _3079   ... 
+  
   note: checking mode of constant   _3080   ... 
+  
   note: checking mode of constant   _3081   ... 
+  
   note: checking mode of constant   _3082   ... 
+  
   note: checking mode of constant   _3083   ... 
+  
   note: checking mode of constant   _3084   ... 
+  
   note: checking mode of constant   _3085   ... 
+  
   note: checking mode of constant   _3086   ... 
+  
   note: checking mode of constant   _3087   ... 
+  
   note: checking mode of constant   _3088   ... 
+  
   note: checking mode of constant   _3089   ... 
+  
   note: checking mode of constant   _3090   ... 
+  
   note: checking mode of constant   _3091   ... 
+  
   note: checking mode of constant   _3092   ... 
+  
   note: checking mode of constant   _3093   ... 
+  
   note: checking mode of constant   _3094   ... 
+  
   note: checking mode of constant   _3095   ... 
+  
   note: checking mode of constant   _3096   ... 
+  
   note: checking mode of constant   _3097   ... 
+  
   note: checking mode of constant   _3098   ... 
+  
   => %sort invert-map-equiv {C1 cn} {M1 eterm} {C2 cn} {M2 eterm} {K kd} {
     A etp} {_0 map C1 M1} {_3099 map C2 M2} {_3100 tmap K A} {_3101 ofkd C1 K}
     {_3102 ofkd C2 K} {_3103 equiv M1 M2 A} {_3104 cn-deq C1 C2 K}
@@ -95870,6 +100221,7 @@
              (cn-deq/trans (cn-deq/deq Dequiv' Dtequiv'') (cn-deq/sym Dequiv2')))
   
   note: checking mode of constant   _3099   ... 
+  
   => %sort invert-map-equiv1 {K' kd} {A' etp} {C1 {_0 cn} cn}
     {M1 {_0 eterm} eterm} {C2 {_0 cn} cn} {M2 {_0 eterm} eterm} {K {_0 cn} kd}
     {A {_0 eterm} etp} {_0 tmap K' A'}
@@ -95960,6 +100312,7 @@
                  (cn-deq/sym (Dequiv2' a d)))
   
   note: checking mode of constant   _3100   ... 
+  
   => %sort invert-map-tequiv {K1 kd} {A1 etp} {K2 kd} {A2 etp} {_0 tmap K1 A1}
     {_3101 tmap K2 A2} {_3102 kd-wf K1} {_3103 kd-wf K2} {_3104 tequiv A1 A2}
     {_3105 kd-deq K1 K2}
@@ -95981,6 +100334,7 @@
         invert-map-tequiv Dmap1 Dmap2 Dwf1 Dwf2 Dequiv Dequiv''
   
   note: checking mode of constant   _3101   ... 
+  
   => %sort false-implies-uninhabited {_0 false} {_3102 uninhabited}
   
   => %sort can-map {M eterm} {C cn} {_0 map C M}
@@ -96111,23 +100465,41 @@
           (tmap/sigma ([a cn] [x eterm] [_3120 map a x] D2 a x _3120) D1)
   
   note: checking mode of constant   _3102   ... 
+  
   note: checking mode of constant   _3103   ... 
+  
   note: checking mode of constant   _3104   ... 
+  
   note: checking mode of constant   _3105   ... 
+  
   note: checking mode of constant   _3106   ... 
+  
   note: checking mode of constant   _3107   ... 
+  
   note: checking mode of constant   _3108   ... 
+  
   note: checking mode of constant   _3109   ... 
+  
   note: checking mode of constant   _3110   ... 
+  
   note: checking mode of constant   _3111   ... 
+  
   note: checking mode of constant   _3112   ... 
+  
   note: checking mode of constant   _3113   ... 
+  
   note: checking mode of constant   _3114   ... 
+  
   note: checking mode of constant   _3115   ... 
+  
   note: checking mode of constant   _3116   ... 
+  
   note: checking mode of constant   _3117   ... 
+  
   note: checking mode of constant   _3118   ... 
+  
   note: checking mode of constant   _3119   ... 
+  
   => %sort map-fun {C cn} {M eterm} {M' eterm} {_0 map C M} {_3120 map C M'}
     {_3121 eterm-eq M M'}
   
@@ -96354,22 +100726,39 @@
           (tmap/sigma ([a cn] [x eterm] [_3138 map a x] D2' a x _3138) D1') Deq
   
   note: checking mode of constant   _3120   ... 
+  
   note: checking mode of constant   _3121   ... 
+  
   note: checking mode of constant   _3122   ... 
+  
   note: checking mode of constant   _3123   ... 
+  
   note: checking mode of constant   _3124   ... 
+  
   note: checking mode of constant   _3125   ... 
+  
   note: checking mode of constant   _3126   ... 
+  
   note: checking mode of constant   _3127   ... 
+  
   note: checking mode of constant   _3128   ... 
+  
   note: checking mode of constant   _3129   ... 
+  
   note: checking mode of constant   _3130   ... 
+  
   note: checking mode of constant   _3131   ... 
+  
   note: checking mode of constant   _3132   ... 
+  
   note: checking mode of constant   _3133   ... 
+  
   note: checking mode of constant   _3134   ... 
+  
   note: checking mode of constant   _3135   ... 
+  
   note: checking mode of constant   _3136   ... 
+  
   => %sort map-of {C cn} {K kd} {M eterm} {A etp} {_0 ofkd C K} {_3137 map C M}
     {_3138 tmap K A} {_3139 eof M A}
   
@@ -97314,63 +101703,121 @@
         map-equiv'' Dmap Dmap' Dequiv DmapA Dequiv''
   
   note: checking mode of constant   _3137   ... 
+  
   note: checking mode of constant   _3138   ... 
+  
   note: checking mode of constant   _3139   ... 
+  
   note: checking mode of constant   _3140   ... 
+  
   note: checking mode of constant   _3141   ... 
+  
   note: checking mode of constant   _3142   ... 
+  
   note: checking mode of constant   _3143   ... 
+  
   note: checking mode of constant   _3144   ... 
+  
   note: checking mode of constant   _3145   ... 
+  
   note: checking mode of constant   _3146   ... 
+  
   note: checking mode of constant   _3147   ... 
+  
   note: checking mode of constant   _3148   ... 
+  
   note: checking mode of constant   _3149   ... 
+  
   note: checking mode of constant   _3150   ... 
+  
   note: checking mode of constant   _3151   ... 
+  
   note: checking mode of constant   _3152   ... 
+  
   note: checking mode of constant   _3153   ... 
+  
   note: checking mode of constant   _3154   ... 
+  
   note: checking mode of constant   _3155   ... 
+  
   note: checking mode of constant   _3156   ... 
+  
   note: checking mode of constant   _3157   ... 
+  
   note: checking mode of constant   _3158   ... 
+  
   note: checking mode of constant   _3159   ... 
+  
   note: checking mode of constant   _3160   ... 
+  
   note: checking mode of constant   _3161   ... 
+  
   note: checking mode of constant   _3162   ... 
+  
   note: checking mode of constant   _3163   ... 
+  
   note: checking mode of constant   _3164   ... 
+  
   note: checking mode of constant   _3165   ... 
+  
   note: checking mode of constant   _3166   ... 
+  
   note: checking mode of constant   _3167   ... 
+  
   note: checking mode of constant   _3168   ... 
+  
   note: checking mode of constant   _3169   ... 
+  
   note: checking mode of constant   _3170   ... 
+  
   note: checking mode of constant   _3171   ... 
+  
   note: checking mode of constant   _3172   ... 
+  
   note: checking mode of constant   _3173   ... 
+  
   note: checking mode of constant   _3174   ... 
+  
   note: checking mode of constant   _3175   ... 
+  
   note: checking mode of constant   _3176   ... 
+  
   note: checking mode of constant   _3177   ... 
+  
   note: checking mode of constant   _3178   ... 
+  
   note: checking mode of constant   _3179   ... 
+  
   note: checking mode of constant   _3180   ... 
+  
   note: checking mode of constant   _3181   ... 
+  
   note: checking mode of constant   _3182   ... 
+  
   note: checking mode of constant   _3183   ... 
+  
   note: checking mode of constant   _3184   ... 
+  
   note: checking mode of constant   _3185   ... 
+  
   note: checking mode of constant   _3186   ... 
+  
   note: checking mode of constant   _3187   ... 
+  
   note: checking mode of constant   _3188   ... 
+  
   note: checking mode of constant   _3189   ... 
+  
   note: checking mode of constant   _3190   ... 
+  
   note: checking mode of constant   _3191   ... 
+  
   note: checking mode of constant   _3192   ... 
+  
   note: checking mode of constant   _3193   ... 
+  
   note: checking mode of constant   _3194   ... 
+  
   => %sort map-equiv {C1 cn} {C2 cn} {K kd} {M1 eterm} {M2 eterm} {A etp}
     {_0 cn-deq C1 C2 K} {_3195 map C1 M1} {_3196 map C2 M2} {_3197 tmap K A}
     {_3198 equiv M1 M2 A}
@@ -97385,6 +101832,7 @@
         map-equiv Dequiv Dmap1 Dmap2 DmapA Dequiv'
   
   note: checking mode of constant   _3195   ... 
+  
   => %sort neq/deq/arrow-unit {T1 cn} {T2 cn}
     {_0 cn-deq (tp/arrow T1 T2) tp/unit kd/type} {_3196 uninhabited}
   
@@ -97403,6 +101851,7 @@
         neq/deq/arrow-unit Deq Dun
   
   note: checking mode of constant   _3196   ... 
+  
   => %sort neq/deq/cross-unit {T1 cn} {T2 cn}
     {_0 cn-deq (tp/cross T1 T2) tp/unit kd/type} {_3197 uninhabited}
   
@@ -97421,6 +101870,7 @@
         neq/deq/cross-unit Deq Dun
   
   note: checking mode of constant   _3197   ... 
+  
   => %sort neq/deq/forall-unit {T1 kd} {T2 {_0 cn} cn}
     {_0 cn-deq (tp/forall T1 ([_0 cn] T2 _0)) tp/unit kd/type}
     {_3198 uninhabited}
@@ -97442,6 +101892,7 @@
              map/unit tmap/t Deq'} neq/deq/forall-unit Deq Dun
   
   note: checking mode of constant   _3198   ... 
+  
   => %sort neq/deq/ref-unit {T1 cn} {_0 cn-deq (tp/ref T1) tp/unit kd/type}
     {_3199 uninhabited}
   
@@ -97458,6 +101909,7 @@
         neq/deq/ref-unit Deq Dun
   
   note: checking mode of constant   _3199   ... 
+  
   => %sort neq/deq/tag-unit {T1 cn} {_0 cn-deq (tp/tag T1) tp/unit kd/type}
     {_3200 uninhabited}
   
@@ -97474,6 +101926,7 @@
         neq/deq/tag-unit Deq Dun
   
   note: checking mode of constant   _3200   ... 
+  
   => %sort neq/deq/sum-unit {T1 cn} {T2 cn}
     {_0 cn-deq (tp/sum T1 T2) tp/unit kd/type} {_3201 uninhabited}
   
@@ -97492,6 +101945,7 @@
         neq/deq/sum-unit Deq Dun
   
   note: checking mode of constant   _3201   ... 
+  
   => %sort neq/deq/tagged-unit {_0 cn-deq tp/tagged tp/unit kd/type}
     {_3202 uninhabited}
   
@@ -97509,6 +101963,7 @@
         neq/deq/tagged-unit Deq Dun
   
   note: checking mode of constant   _3202   ... 
+  
   => %sort neq/deq/mu-unit {T1 kd} {T2 {_0 cn} cn}
     {_0 cn-deq (cn/mu T1 ([_0 cn] T2 _0)) tp/unit kd/type} {_3203 uninhabited}
   
@@ -97531,6 +101986,7 @@
              tmap/t Deq'} neq/deq/mu-unit Deq Dun
   
   note: checking mode of constant   _3203   ... 
+  
   => %sort neq/deq/unit-arrow {_?1 cn} {_?2 cn}
     {_0 cn-deq tp/unit (tp/arrow _?1 _?2) kd/type} {_3204 uninhabited}
   
@@ -97541,6 +101997,7 @@
         neq/deq/unit-arrow Deq Dun
   
   note: checking mode of constant   _3204   ... 
+  
   => %sort neq/deq/tagged-arrow {_?1 cn} {_?2 cn}
     {_0 cn-deq tp/tagged (tp/arrow _?1 _?2) kd/type} {_3205 uninhabited}
   
@@ -97559,6 +102016,7 @@
         neq/deq/tagged-arrow Deq Dun
   
   note: checking mode of constant   _3205   ... 
+  
   => %sort neq/deq/cross-arrow {_?1 cn} {_?2 cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/cross _?1 _?2) (tp/arrow _?3 _?4) kd/type}
     {_3206 uninhabited}
@@ -97587,6 +102045,7 @@
         neq/deq/cross-arrow Deq Dun
   
   note: checking mode of constant   _3206   ... 
+  
   => %sort neq/deq/forall-arrow {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/forall _?1 ([_0 cn] _?2 _0)) (tp/arrow _?3 _?4) kd/type}
     {_3207 uninhabited}
@@ -97613,6 +102072,7 @@
              (map/arrow _?11 _?12) tmap/t Deq'} neq/deq/forall-arrow Deq Dun
   
   note: checking mode of constant   _3207   ... 
+  
   => %sort neq/deq/ref-arrow {T1 cn} {_?1 cn} {_?2 cn}
     {_0 cn-deq (tp/ref T1) (tp/arrow _?1 _?2) kd/type} {_3208 uninhabited}
   
@@ -97633,6 +102093,7 @@
         neq/deq/ref-arrow Deq Dun
   
   note: checking mode of constant   _3208   ... 
+  
   => %sort neq/deq/tag-arrow {T1 cn} {_?1 cn} {_?2 cn}
     {_0 cn-deq (tp/tag T1) (tp/arrow _?1 _?2) kd/type} {_3209 uninhabited}
   
@@ -97653,6 +102114,7 @@
         neq/deq/tag-arrow Deq Dun
   
   note: checking mode of constant   _3209   ... 
+  
   => %sort neq/deq/sum-arrow {_?1 cn} {_?2 cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/sum _?1 _?2) (tp/arrow _?3 _?4) kd/type} {_3210 uninhabited}
   
@@ -97680,6 +102142,7 @@
         neq/deq/sum-arrow Deq Dun
   
   note: checking mode of constant   _3210   ... 
+  
   => %sort neq/deq/mu-arrow {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (cn/mu _?1 ([_0 cn] _?2 _0)) (tp/arrow _?3 _?4) kd/type}
     {_3211 uninhabited}
@@ -97707,6 +102170,7 @@
              (map/arrow _?9 _?10) tmap/t Deq'} neq/deq/mu-arrow Deq Dun
   
   note: checking mode of constant   _3211   ... 
+  
   => %sort neq/deq/unit-cross {_?1 cn} {_?2 cn}
     {_0 cn-deq tp/unit (tp/cross _?1 _?2) kd/type} {_3212 uninhabited}
   
@@ -97717,6 +102181,7 @@
         neq/deq/unit-cross Deq Dun
   
   note: checking mode of constant   _3212   ... 
+  
   => %sort neq/deq/tagged-cross {_?1 cn} {_?2 cn}
     {_0 cn-deq tp/tagged (tp/cross _?1 _?2) kd/type} {_3213 uninhabited}
   
@@ -97735,6 +102200,7 @@
         neq/deq/tagged-cross Deq Dun
   
   note: checking mode of constant   _3213   ... 
+  
   => %sort neq/deq/arrow-cross {_?1 cn} {_?2 cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/arrow _?1 _?2) (tp/cross _?3 _?4) kd/type}
     {_3214 uninhabited}
@@ -97747,6 +102213,7 @@
         neq/deq/arrow-cross Deq Dun
   
   note: checking mode of constant   _3214   ... 
+  
   => %sort neq/deq/forall-cross {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/forall _?1 ([_0 cn] _?2 _0)) (tp/cross _?3 _?4) kd/type}
     {_3215 uninhabited}
@@ -97773,6 +102240,7 @@
              (map/cross _?11 _?12) tmap/t Deq'} neq/deq/forall-cross Deq Dun
   
   note: checking mode of constant   _3215   ... 
+  
   => %sort neq/deq/ref-cross {T1 cn} {_?1 cn} {_?2 cn}
     {_0 cn-deq (tp/ref T1) (tp/cross _?1 _?2) kd/type} {_3216 uninhabited}
   
@@ -97793,6 +102261,7 @@
         neq/deq/ref-cross Deq Dun
   
   note: checking mode of constant   _3216   ... 
+  
   => %sort neq/deq/tag-cross {T1 cn} {_?1 cn} {_?2 cn}
     {_0 cn-deq (tp/tag T1) (tp/cross _?1 _?2) kd/type} {_3217 uninhabited}
   
@@ -97813,6 +102282,7 @@
         neq/deq/tag-cross Deq Dun
   
   note: checking mode of constant   _3217   ... 
+  
   => %sort neq/deq/sum-cross {_?1 cn} {_?2 cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/sum _?1 _?2) (tp/cross _?3 _?4) kd/type} {_3218 uninhabited}
   
@@ -97840,6 +102310,7 @@
         neq/deq/sum-cross Deq Dun
   
   note: checking mode of constant   _3218   ... 
+  
   => %sort neq/deq/mu-cross {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (cn/mu _?1 ([_0 cn] _?2 _0)) (tp/cross _?3 _?4) kd/type}
     {_3219 uninhabited}
@@ -97867,6 +102338,7 @@
              (map/cross _?9 _?10) tmap/t Deq'} neq/deq/mu-cross Deq Dun
   
   note: checking mode of constant   _3219   ... 
+  
   => %sort neq/deq/unit-forall {_?1 kd} {_?2 {_0 cn} cn}
     {_0 cn-deq tp/unit (tp/forall _?1 ([_0 cn] _?2 _0)) kd/type}
     {_3220 uninhabited}
@@ -97888,6 +102360,7 @@
              tmap/t Deq'} neq/deq/unit-forall Deq Dun
   
   note: checking mode of constant   _3220   ... 
+  
   => %sort neq/deq/tagged-forall {_?1 kd} {_?2 {_0 cn} cn}
     {_0 cn-deq tp/tagged (tp/forall _?1 ([_0 cn] _?2 _0)) kd/type}
     {_3221 uninhabited}
@@ -97909,6 +102382,7 @@
              tmap/t Deq'} neq/deq/tagged-forall Deq Dun
   
   note: checking mode of constant   _3221   ... 
+  
   => %sort neq/deq/arrow-forall {_?1 cn} {_?2 cn} {_?3 kd} {_?4 {_0 cn} cn}
     {_0 cn-deq (tp/arrow _?1 _?2) (tp/forall _?3 ([_0 cn] _?4 _0)) kd/type}
     {_3222 uninhabited}
@@ -97935,6 +102409,7 @@
              tmap/t Deq'} neq/deq/arrow-forall Deq Dun
   
   note: checking mode of constant   _3222   ... 
+  
   => %sort neq/deq/cross-forall {_?1 cn} {_?2 cn} {_?3 kd} {_?4 {_0 cn} cn}
     {_0 cn-deq (tp/cross _?1 _?2) (tp/forall _?3 ([_0 cn] _?4 _0)) kd/type}
     {_3223 uninhabited}
@@ -97961,6 +102436,7 @@
              tmap/t Deq'} neq/deq/cross-forall Deq Dun
   
   note: checking mode of constant   _3223   ... 
+  
   => %sort neq/deq/ref-forall {T1 cn} {_?1 kd} {_?2 {_0 cn} cn}
     {_0 cn-deq (tp/ref T1) (tp/forall _?1 ([_0 cn] _?2 _0)) kd/type}
     {_3224 uninhabited}
@@ -97985,6 +102461,7 @@
              tmap/t Deq'} neq/deq/ref-forall Deq Dun
   
   note: checking mode of constant   _3224   ... 
+  
   => %sort neq/deq/tag-forall {T1 cn} {_?1 kd} {_?2 {_0 cn} cn}
     {_0 cn-deq (tp/tag T1) (tp/forall _?1 ([_0 cn] _?2 _0)) kd/type}
     {_3225 uninhabited}
@@ -98009,6 +102486,7 @@
              tmap/t Deq'} neq/deq/tag-forall Deq Dun
   
   note: checking mode of constant   _3225   ... 
+  
   => %sort neq/deq/sum-forall {_?1 cn} {_?2 cn} {_?3 kd} {_?4 {_0 cn} cn}
     {_0 cn-deq (tp/sum _?1 _?2) (tp/forall _?3 ([_0 cn] _?4 _0)) kd/type}
     {_3226 uninhabited}
@@ -98035,6 +102513,7 @@
              tmap/t Deq'} neq/deq/sum-forall Deq Dun
   
   note: checking mode of constant   _3226   ... 
+  
   => %sort neq/deq/mu-forall {_?1 kd} {_?2 {_0 cn} cn} {_?3 kd} {_?4 {_0 cn} cn}
     {_0
        cn-deq (cn/mu _?1 ([_0 cn] _?2 _0)) (tp/forall _?3 ([_0 cn] _?4 _0))
@@ -98064,6 +102543,7 @@
              tmap/t Deq'} neq/deq/mu-forall Deq Dun
   
   note: checking mode of constant   _3227   ... 
+  
   => %sort neq/deq/unit-ref {_?1 cn} {_0 cn-deq tp/unit (tp/ref _?1) kd/type}
     {_3228 uninhabited}
   
@@ -98073,6 +102553,7 @@
         {_0 neq/deq/ref-unit (cn-deq/sym Deq) Dun} neq/deq/unit-ref Deq Dun
   
   note: checking mode of constant   _3228   ... 
+  
   => %sort neq/deq/tagged-ref {_?1 cn} {_0 cn-deq tp/tagged (tp/ref _?1) kd/type}
     {_3229 uninhabited}
   
@@ -98089,6 +102570,7 @@
         neq/deq/tagged-ref Deq Dun
   
   note: checking mode of constant   _3229   ... 
+  
   => %sort neq/deq/arrow-ref {_?1 cn} {_?2 cn} {_?3 cn}
     {_0 cn-deq (tp/arrow _?1 _?2) (tp/ref _?3) kd/type} {_3230 uninhabited}
   
@@ -98109,6 +102591,7 @@
         neq/deq/arrow-ref Deq Dun
   
   note: checking mode of constant   _3230   ... 
+  
   => %sort neq/deq/cross-ref {_?1 cn} {_?2 cn} {_?3 cn}
     {_0 cn-deq (tp/cross _?1 _?2) (tp/ref _?3) kd/type} {_3231 uninhabited}
   
@@ -98129,6 +102612,7 @@
         neq/deq/cross-ref Deq Dun
   
   note: checking mode of constant   _3231   ... 
+  
   => %sort neq/deq/forall-ref {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn}
     {_0 cn-deq (tp/forall _?1 ([_0 cn] _?2 _0)) (tp/ref _?3) kd/type}
     {_3232 uninhabited}
@@ -98141,6 +102625,7 @@
         neq/deq/forall-ref Deq Dun
   
   note: checking mode of constant   _3232   ... 
+  
   => %sort neq/deq/sum-ref {_?1 cn} {_?2 cn} {_?3 cn}
     {_0 cn-deq (tp/sum _?1 _?2) (tp/ref _?3) kd/type} {_3233 uninhabited}
   
@@ -98161,6 +102646,7 @@
         neq/deq/sum-ref Deq Dun
   
   note: checking mode of constant   _3233   ... 
+  
   => %sort neq/deq/mu-ref {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn}
     {_0 cn-deq (cn/mu _?1 ([_0 cn] _?2 _0)) (tp/ref _?3) kd/type}
     {_3234 uninhabited}
@@ -98187,6 +102673,7 @@
              (map/ref _?7) tmap/t Deq'} neq/deq/mu-ref Deq Dun
   
   note: checking mode of constant   _3234   ... 
+  
   => %sort neq/deq/tag-ref {_?1 cn} {_?2 cn}
     {_0 cn-deq (tp/tag _?1) (tp/ref _?2) kd/type} {_3235 uninhabited}
   
@@ -98205,6 +102692,7 @@
         neq/deq/tag-ref Deq Dun
   
   note: checking mode of constant   _3235   ... 
+  
   => %sort neq/deq/unit-tag {_?1 cn} {_0 cn-deq tp/unit (tp/tag _?1) kd/type}
     {_3236 uninhabited}
   
@@ -98214,6 +102702,7 @@
         {_0 neq/deq/tag-unit (cn-deq/sym Deq) Dun} neq/deq/unit-tag Deq Dun
   
   note: checking mode of constant   _3236   ... 
+  
   => %sort neq/deq/tagged-tag {_?1 cn} {_0 cn-deq tp/tagged (tp/tag _?1) kd/type}
     {_3237 uninhabited}
   
@@ -98230,6 +102719,7 @@
         neq/deq/tagged-tag Deq Dun
   
   note: checking mode of constant   _3237   ... 
+  
   => %sort neq/deq/arrow-tag {_?1 cn} {_?2 cn} {_?3 cn}
     {_0 cn-deq (tp/arrow _?1 _?2) (tp/tag _?3) kd/type} {_3238 uninhabited}
   
@@ -98250,6 +102740,7 @@
         neq/deq/arrow-tag Deq Dun
   
   note: checking mode of constant   _3238   ... 
+  
   => %sort neq/deq/cross-tag {_?1 cn} {_?2 cn} {_?3 cn}
     {_0 cn-deq (tp/cross _?1 _?2) (tp/tag _?3) kd/type} {_3239 uninhabited}
   
@@ -98270,6 +102761,7 @@
         neq/deq/cross-tag Deq Dun
   
   note: checking mode of constant   _3239   ... 
+  
   => %sort neq/deq/forall-tag {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn}
     {_0 cn-deq (tp/forall _?1 ([_0 cn] _?2 _0)) (tp/tag _?3) kd/type}
     {_3240 uninhabited}
@@ -98282,6 +102774,7 @@
         neq/deq/forall-tag Deq Dun
   
   note: checking mode of constant   _3240   ... 
+  
   => %sort neq/deq/sum-tag {_?1 cn} {_?2 cn} {_?3 cn}
     {_0 cn-deq (tp/sum _?1 _?2) (tp/tag _?3) kd/type} {_3241 uninhabited}
   
@@ -98302,6 +102795,7 @@
         neq/deq/sum-tag Deq Dun
   
   note: checking mode of constant   _3241   ... 
+  
   => %sort neq/deq/mu-tag {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn}
     {_0 cn-deq (cn/mu _?1 ([_0 cn] _?2 _0)) (tp/tag _?3) kd/type}
     {_3242 uninhabited}
@@ -98328,6 +102822,7 @@
              (map/tag _?7) tmap/t Deq'} neq/deq/mu-tag Deq Dun
   
   note: checking mode of constant   _3242   ... 
+  
   => %sort neq/deq/ref-tag {_?1 cn} {_?2 cn}
     {_0 cn-deq (tp/ref _?1) (tp/tag _?2) kd/type} {_3243 uninhabited}
   
@@ -98338,6 +102833,7 @@
         neq/deq/ref-tag Deq Dun
   
   note: checking mode of constant   _3243   ... 
+  
   => %sort neq/deq/unit-sum {_?1 cn} {_?2 cn}
     {_0 cn-deq tp/unit (tp/sum _?1 _?2) kd/type} {_3244 uninhabited}
   
@@ -98348,6 +102844,7 @@
         neq/deq/unit-sum Deq Dun
   
   note: checking mode of constant   _3244   ... 
+  
   => %sort neq/deq/tagged-sum {_?1 cn} {_?2 cn}
     {_0 cn-deq tp/tagged (tp/sum _?1 _?2) kd/type} {_3245 uninhabited}
   
@@ -98366,6 +102863,7 @@
         neq/deq/tagged-sum Deq Dun
   
   note: checking mode of constant   _3245   ... 
+  
   => %sort neq/deq/cross-sum {_?1 cn} {_?2 cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/cross _?1 _?2) (tp/sum _?3 _?4) kd/type} {_3246 uninhabited}
   
@@ -98393,6 +102891,7 @@
         neq/deq/cross-sum Deq Dun
   
   note: checking mode of constant   _3246   ... 
+  
   => %sort neq/deq/forall-sum {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/forall _?1 ([_0 cn] _?2 _0)) (tp/sum _?3 _?4) kd/type}
     {_3247 uninhabited}
@@ -98419,6 +102918,7 @@
              (map/sum _?11 _?12) tmap/t Deq'} neq/deq/forall-sum Deq Dun
   
   note: checking mode of constant   _3247   ... 
+  
   => %sort neq/deq/ref-sum {T1 cn} {_?1 cn} {_?2 cn}
     {_0 cn-deq (tp/ref T1) (tp/sum _?1 _?2) kd/type} {_3248 uninhabited}
   
@@ -98439,6 +102939,7 @@
         neq/deq/ref-sum Deq Dun
   
   note: checking mode of constant   _3248   ... 
+  
   => %sort neq/deq/tag-sum {T1 cn} {_?1 cn} {_?2 cn}
     {_0 cn-deq (tp/tag T1) (tp/sum _?1 _?2) kd/type} {_3249 uninhabited}
   
@@ -98459,6 +102960,7 @@
         neq/deq/tag-sum Deq Dun
   
   note: checking mode of constant   _3249   ... 
+  
   => %sort neq/deq/arrow-sum {_?1 cn} {_?2 cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (tp/arrow _?1 _?2) (tp/sum _?3 _?4) kd/type} {_3250 uninhabited}
   
@@ -98470,6 +102972,7 @@
         neq/deq/arrow-sum Deq Dun
   
   note: checking mode of constant   _3250   ... 
+  
   => %sort neq/deq/mu-sum {_?1 kd} {_?2 {_0 cn} cn} {_?3 cn} {_?4 cn}
     {_0 cn-deq (cn/mu _?1 ([_0 cn] _?2 _0)) (tp/sum _?3 _?4) kd/type}
     {_3251 uninhabited}
@@ -98497,6 +103000,7 @@
              (map/sum _?9 _?10) tmap/t Deq'} neq/deq/mu-sum Deq Dun
   
   note: checking mode of constant   _3251   ... 
+  
   => %sort neq/deq/arrow-tagged {T1 cn} {T2 cn}
     {_0 cn-deq (tp/arrow T1 T2) tp/tagged kd/type} {_3252 uninhabited}
   
@@ -98515,6 +103019,7 @@
         neq/deq/arrow-tagged Deq Dun
   
   note: checking mode of constant   _3252   ... 
+  
   => %sort neq/deq/cross-tagged {T1 cn} {T2 cn}
     {_0 cn-deq (tp/cross T1 T2) tp/tagged kd/type} {_3253 uninhabited}
   
@@ -98533,6 +103038,7 @@
         neq/deq/cross-tagged Deq Dun
   
   note: checking mode of constant   _3253   ... 
+  
   => %sort neq/deq/forall-tagged {T1 kd} {T2 {_0 cn} cn}
     {_0 cn-deq (tp/forall T1 ([_0 cn] T2 _0)) tp/tagged kd/type}
     {_3254 uninhabited}
@@ -98555,6 +103061,7 @@
              map/tagged tmap/t Deq'} neq/deq/forall-tagged Deq Dun
   
   note: checking mode of constant   _3254   ... 
+  
   => %sort neq/deq/ref-tagged {T1 cn} {_0 cn-deq (tp/ref T1) tp/tagged kd/type}
     {_3255 uninhabited}
   
@@ -98571,6 +103078,7 @@
         neq/deq/ref-tagged Deq Dun
   
   note: checking mode of constant   _3255   ... 
+  
   => %sort neq/deq/tag-tagged {T1 cn} {_0 cn-deq (tp/tag T1) tp/tagged kd/type}
     {_3256 uninhabited}
   
@@ -98587,6 +103095,7 @@
         neq/deq/tag-tagged Deq Dun
   
   note: checking mode of constant   _3256   ... 
+  
   => %sort neq/deq/sum-tagged {T1 cn} {T2 cn}
     {_0 cn-deq (tp/sum T1 T2) tp/tagged kd/type} {_3257 uninhabited}
   
@@ -98605,6 +103114,7 @@
         neq/deq/sum-tagged Deq Dun
   
   note: checking mode of constant   _3257   ... 
+  
   => %sort neq/deq/unit-tagged {_0 cn-deq tp/unit tp/tagged kd/type}
     {_3258 uninhabited}
   
@@ -98615,6 +103125,7 @@
         neq/deq/unit-tagged Deq Dun
   
   note: checking mode of constant   _3258   ... 
+  
   => %sort neq/deq/mu-tagged {T1 kd} {T2 {_0 cn} cn}
     {_0 cn-deq (cn/mu T1 ([_0 cn] T2 _0)) tp/tagged kd/type}
     {_3259 uninhabited}
@@ -98638,6 +103149,7 @@
              map/tagged tmap/t Deq'} neq/deq/mu-tagged Deq Dun
   
   note: checking mode of constant   _3259   ... 
+  
   => %sort neq/deq/unit-mu {_?1 kd} {_?2 {_0 cn} cn}
     {_0 cn-deq tp/unit (cn/mu _?1 ([_0 cn] _?2 _0)) kd/type}
     {_3260 uninhabited}
@@ -98650,6 +103162,7 @@
         neq/deq/unit-mu Deq Dun
   
   note: checking mode of constant   _3260   ... 
+  
   => %sort neq/deq/tagged-mu {_?1 kd} {_?2 {_0 cn} cn}
     {_0 cn-deq tp/tagged (cn/mu _?1 ([_0 cn] _?2 _0)) kd/type}
     {_3261 uninhabited}
@@ -98662,6 +103175,7 @@
         neq/deq/tagged-mu Deq Dun
   
   note: checking mode of constant   _3261   ... 
+  
   => %sort neq/deq/arrow-mu {_?1 cn} {_?2 cn} {_?3 kd} {_?4 {_0 cn} cn}
     {_0 cn-deq (tp/arrow _?1 _?2) (cn/mu _?3 ([_0 cn] _?4 _0)) kd/type}
     {_3262 uninhabited}
@@ -98674,6 +103188,7 @@
         neq/deq/arrow-mu Deq Dun
   
   note: checking mode of constant   _3262   ... 
+  
   => %sort neq/deq/cross-mu {_?1 cn} {_?2 cn} {_?3 kd} {_?4 {_0 cn} cn}
     {_0 cn-deq (tp/cross _?1 _?2) (cn/mu _?3 ([_0 cn] _?4 _0)) kd/type}
     {_3263 uninhabited}
@@ -98686,6 +103201,7 @@
         neq/deq/cross-mu Deq Dun
   
   note: checking mode of constant   _3263   ... 
+  
   => %sort neq/deq/ref-mu {T1 cn} {_?1 kd} {_?2 {_0 cn} cn}
     {_0 cn-deq (tp/ref T1) (cn/mu _?1 ([_0 cn] _?2 _0)) kd/type}
     {_3264 uninhabited}
@@ -98698,6 +103214,7 @@
         neq/deq/ref-mu Deq Dun
   
   note: checking mode of constant   _3264   ... 
+  
   => %sort neq/deq/tag-mu {T1 cn} {_?1 kd} {_?2 {_0 cn} cn}
     {_0 cn-deq (tp/tag T1) (cn/mu _?1 ([_0 cn] _?2 _0)) kd/type}
     {_3265 uninhabited}
@@ -98710,6 +103227,7 @@
         neq/deq/tag-mu Deq Dun
   
   note: checking mode of constant   _3265   ... 
+  
   => %sort neq/deq/sum-mu {_?1 cn} {_?2 cn} {_?3 kd} {_?4 {_0 cn} cn}
     {_0 cn-deq (tp/sum _?1 _?2) (cn/mu _?3 ([_0 cn] _?4 _0)) kd/type}
     {_3266 uninhabited}
@@ -98722,6 +103240,7 @@
         neq/deq/sum-mu Deq Dun
   
   note: checking mode of constant   _3266   ... 
+  
   => %sort neq/deq/forall-mu {_?1 kd} {_?2 {_0 cn} cn} {_?3 kd} {_?4 {_0 cn} cn}
     {_0
        cn-deq (tp/forall _?1 ([_0 cn] _?2 _0)) (cn/mu _?3 ([_0 cn] _?4 _0))
@@ -98736,6 +103255,7 @@
         {_0 neq/deq/mu-forall (cn-deq/sym Deq) Dun} neq/deq/forall-mu Deq Dun
   
   note: checking mode of constant   _3267   ... 
+  
   => %sort inv/cn-deq/tp/cross {C1 cn} {C2 cn} {C3 cn} {C4 cn}
     {_0 cn-deq (tp/cross C1 C2) (tp/cross C3 C4) kd/type}
     {_3268 cn-deq C1 C3 kd/type} {_3269 cn-deq C2 C4 kd/type}
@@ -98769,6 +103289,7 @@
              Deq} inv/cn-deq/tp/cross D D1 D2
   
   note: checking mode of constant   _3268   ... 
+  
   => %sort inv/cn-deq/tp/ref {C1 cn} {C3 cn}
     {_0 cn-deq (tp/ref C1) (tp/ref C3) kd/type} {_3269 cn-deq C1 C3 kd/type}
   
@@ -98791,6 +103312,7 @@
         inv/cn-deq/tp/ref D D1
   
   note: checking mode of constant   _3269   ... 
+  
   => %sort inv/cn-deq/tp/forall {K1 kd} {C1 {_0 cn} cn} {K2 kd} {C2 {_0 cn} cn}
     {_0
        cn-deq (tp/forall K1 ([_0 cn] C1 _0)) (tp/forall K2 ([_0 cn] C2 _0))
@@ -98853,6 +103375,7 @@
         inv/cn-deq/tp/forall D D1 [a cn] [da ofkd a _?1] D2 a da
   
   note: checking mode of constant   _3270   ... 
+  
   => %sort inv/cn-deq/tp/arrow {C1 cn} {C2 cn} {C3 cn} {C4 cn}
     {_0 cn-deq (tp/arrow C1 C2) (tp/arrow C3 C4) kd/type}
     {_3271 cn-deq C1 C3 kd/type} {_3272 cn-deq C2 C4 kd/type}
@@ -98886,6 +103409,7 @@
              Deq} inv/cn-deq/tp/arrow D D1 D2
   
   note: checking mode of constant   _3271   ... 
+  
   => %sort inv/cn-deq/tp/sum {C1 cn} {C2 cn} {C3 cn} {C4 cn}
     {_0 cn-deq (tp/sum C1 C2) (tp/sum C3 C4) kd/type}
     {_3272 cn-deq C1 C3 kd/type} {_3273 cn-deq C2 C4 kd/type}
@@ -98919,6 +103443,7 @@
         inv/cn-deq/tp/sum D D1 D2
   
   note: checking mode of constant   _3272   ... 
+  
   => %sort inv/cn-deq/cn/mu {K1 kd} {C1 {_0 cn} cn} {K2 kd} {C2 {_0 cn} cn}
     {_0 cn-deq (cn/mu K1 ([_0 cn] C1 _0)) (cn/mu K2 ([_0 cn] C2 _0)) kd/type}
     {_3273 {a cn} {da ofkd a kd/type} cn-deq (C1 a) (C2 a) kd/type}
@@ -98976,6 +103501,7 @@
              tmap/t Deq} inv/cn-deq/cn/mu D [a cn] [da ofkd a kd/type] D2 a da
   
   note: checking mode of constant   _3273   ... 
+  
   => %sort inv/cn-deq/tp/tag {C1 cn} {C3 cn}
     {_0 cn-deq (tp/tag C1) (tp/tag C3) kd/type} {_3274 cn-deq C1 C3 kd/type}
   
@@ -98998,6 +103524,7 @@
         inv/cn-deq/tp/tag D D1
   
   note: checking mode of constant   _3274   ... 
+  
   => %sort cfl/tp/unit {E tm} {L lt} {T lt} {C cn} {_0 val/tm E}
     {_3275 oftp L T E C} {_3276 cn-deq C tp/unit kd/type}
     {_3277 seq/tm E tm/unit}
@@ -99120,16 +103647,27 @@
         cfl/tp/unit _?6 (oftp/tm/roll _?7 _?8) Deq Dseq
   
   note: checking mode of constant   _3275   ... 
+  
   note: checking mode of constant   _3276   ... 
+  
   note: checking mode of constant   _3277   ... 
+  
   note: checking mode of constant   _3278   ... 
+  
   note: checking mode of constant   _3279   ... 
+  
   note: checking mode of constant   _3280   ... 
+  
   note: checking mode of constant   _3281   ... 
+  
   note: checking mode of constant   _3282   ... 
+  
   note: checking mode of constant   _3283   ... 
+  
   note: checking mode of constant   _3284   ... 
+  
   note: checking mode of constant   _3285   ... 
+  
   => %sort cfl/tp/arrow {E tm} {L lt} {T lt} {C cn} {C1 cn} {C2 cn} {_?1 cn}
     {_?2 cn} {_?3 {_0 tm} {_3286 tm} tm} {_0 val/tm E} {_3286 oftp L T E C}
     {_3287 cn-deq C (tp/arrow C1 C2) kd/type}
@@ -99292,16 +103830,27 @@
         cfl/tp/arrow _?8 (oftp/tm/roll _?9 _?10) Deq Dseq
   
   note: checking mode of constant   _3286   ... 
+  
   note: checking mode of constant   _3287   ... 
+  
   note: checking mode of constant   _3288   ... 
+  
   note: checking mode of constant   _3289   ... 
+  
   note: checking mode of constant   _3290   ... 
+  
   note: checking mode of constant   _3291   ... 
+  
   note: checking mode of constant   _3292   ... 
+  
   note: checking mode of constant   _3293   ... 
+  
   note: checking mode of constant   _3294   ... 
+  
   note: checking mode of constant   _3295   ... 
+  
   note: checking mode of constant   _3296   ... 
+  
   => %sort cfl/tp/cross {E tm} {L lt} {T lt} {C cn} {C1 cn} {C2 cn} {_?1 tm}
     {_?2 tm} {_0 val/tm E} {_3297 oftp L T E C}
     {_3298 cn-deq C (tp/cross C1 C2) kd/type}
@@ -99452,16 +104001,27 @@
         cfl/tp/cross _?8 (oftp/tm/roll _?9 _?10) Deq Dseq
   
   note: checking mode of constant   _3297   ... 
+  
   note: checking mode of constant   _3298   ... 
+  
   note: checking mode of constant   _3299   ... 
+  
   note: checking mode of constant   _3300   ... 
+  
   note: checking mode of constant   _3301   ... 
+  
   note: checking mode of constant   _3302   ... 
+  
   note: checking mode of constant   _3303   ... 
+  
   note: checking mode of constant   _3304   ... 
+  
   note: checking mode of constant   _3305   ... 
+  
   note: checking mode of constant   _3306   ... 
+  
   note: checking mode of constant   _3307   ... 
+  
   => %sort cfl/tp/forall {E tm} {L lt} {T lt} {C cn} {C1 kd} {C2 {_0 cn} cn}
     {_?1 kd} {_?2 {_0 cn} tm} {_0 val/tm E} {_3308 oftp L T E C}
     {_3309 cn-deq C (tp/forall C1 ([_3309 cn] C2 _3309)) kd/type}
@@ -99627,16 +104187,27 @@
         cfl/tp/forall _?8 (oftp/tm/roll _?9 _?10) Deq Dseq
   
   note: checking mode of constant   _3308   ... 
+  
   note: checking mode of constant   _3309   ... 
+  
   note: checking mode of constant   _3310   ... 
+  
   note: checking mode of constant   _3311   ... 
+  
   note: checking mode of constant   _3312   ... 
+  
   note: checking mode of constant   _3313   ... 
+  
   note: checking mode of constant   _3314   ... 
+  
   note: checking mode of constant   _3315   ... 
+  
   note: checking mode of constant   _3316   ... 
+  
   note: checking mode of constant   _3317   ... 
+  
   note: checking mode of constant   _3318   ... 
+  
   => %sort cfl/tp/ref {E tm} {L lt} {T lt} {C cn} {C1 cn} {_?1 loc} {_0 val/tm E}
     {_3319 oftp L T E C} {_3320 cn-deq C (tp/ref C1) kd/type}
     {_3321 seq/tm E (tm/loc _?1)}
@@ -99770,16 +104341,27 @@
         cfl/tp/ref _?7 (oftp/tm/roll _?8 _?9) Deq Dseq
   
   note: checking mode of constant   _3319   ... 
+  
   note: checking mode of constant   _3320   ... 
+  
   note: checking mode of constant   _3321   ... 
+  
   note: checking mode of constant   _3322   ... 
+  
   note: checking mode of constant   _3323   ... 
+  
   note: checking mode of constant   _3324   ... 
+  
   note: checking mode of constant   _3325   ... 
+  
   note: checking mode of constant   _3326   ... 
+  
   note: checking mode of constant   _3327   ... 
+  
   note: checking mode of constant   _3328   ... 
+  
   note: checking mode of constant   _3329   ... 
+  
   => %sort seq-in {E' tm} {E tm} {_0 seq/tm E E'}
   
   => %term seq-inl {C cn} {E tm} seq-in (tm/inl C E) seq/tm/refl
@@ -99929,16 +104511,27 @@
         cfl/tp/sum _?10 (oftp/tm/roll _?11 _?12) Deq Dseq
   
   note: checking mode of constant   _3330   ... 
+  
   note: checking mode of constant   _3331   ... 
+  
   note: checking mode of constant   _3332   ... 
+  
   note: checking mode of constant   _3333   ... 
+  
   note: checking mode of constant   _3334   ... 
+  
   note: checking mode of constant   _3335   ... 
+  
   note: checking mode of constant   _3336   ... 
+  
   note: checking mode of constant   _3337   ... 
+  
   note: checking mode of constant   _3338   ... 
+  
   note: checking mode of constant   _3339   ... 
+  
   note: checking mode of constant   _3340   ... 
+  
   => %sort cfl/tp/tag {E tm} {L lt} {T lt} {C cn} {C1 cn} {_?1 loc} {_0 val/tm E}
     {_3341 oftp L T E C} {_3342 cn-deq C (tp/tag C1) kd/type}
     {_3343 seq/tm E (tm/tagloc _?1)}
@@ -100074,16 +104667,27 @@
         cfl/tp/tag _?7 (oftp/tm/roll _?8 _?9) Deq Dseq
   
   note: checking mode of constant   _3341   ... 
+  
   note: checking mode of constant   _3342   ... 
+  
   note: checking mode of constant   _3343   ... 
+  
   note: checking mode of constant   _3344   ... 
+  
   note: checking mode of constant   _3345   ... 
+  
   note: checking mode of constant   _3346   ... 
+  
   note: checking mode of constant   _3347   ... 
+  
   note: checking mode of constant   _3348   ... 
+  
   note: checking mode of constant   _3349   ... 
+  
   note: checking mode of constant   _3350   ... 
+  
   note: checking mode of constant   _3351   ... 
+  
   => %sort cfl/tp/tagged {E tm} {L lt} {T lt} {C cn} {_?1 loc} {_?2 tm}
     {_0 val/tm E} {_3352 oftp L T E C} {_3353 cn-deq C tp/tagged kd/type}
     {_3354 seq/tm E (tm/tag (tm/tagloc _?1) _?2)}
@@ -100242,16 +104846,27 @@
         cfl/tp/tagged _?6 (oftp/tm/roll _?7 _?8) Deq Dseq
   
   note: checking mode of constant   _3352   ... 
+  
   note: checking mode of constant   _3353   ... 
+  
   note: checking mode of constant   _3354   ... 
+  
   note: checking mode of constant   _3355   ... 
+  
   note: checking mode of constant   _3356   ... 
+  
   note: checking mode of constant   _3357   ... 
+  
   note: checking mode of constant   _3358   ... 
+  
   note: checking mode of constant   _3359   ... 
+  
   note: checking mode of constant   _3360   ... 
+  
   note: checking mode of constant   _3361   ... 
+  
   note: checking mode of constant   _3362   ... 
+  
   => %sort cfl/cn/mu {E tm} {L lt} {T lt} {C cn} {C1 kd} {C2 {_0 cn} cn} {
     _?1 cn} {_?2 tm} {_0 val/tm E} {_3363 oftp L T E C}
     {_3364 cn-deq C (cn/mu C1 ([_3364 cn] C2 _3364)) kd/type}
@@ -100405,16 +105020,27 @@
           Deq Dseq
   
   note: checking mode of constant   _3363   ... 
+  
   note: checking mode of constant   _3364   ... 
+  
   note: checking mode of constant   _3365   ... 
+  
   note: checking mode of constant   _3366   ... 
+  
   note: checking mode of constant   _3367   ... 
+  
   note: checking mode of constant   _3368   ... 
+  
   note: checking mode of constant   _3369   ... 
+  
   note: checking mode of constant   _3370   ... 
+  
   note: checking mode of constant   _3371   ... 
+  
   note: checking mode of constant   _3372   ... 
+  
   note: checking mode of constant   _3373   ... 
+  
   => %sort progress/tm/pair {E1 tm} {S1 st} {T lt} {E2 tm}
     {_0 notstuck/tm E1 S1 T} {_3374 notstuck/tm E2 S1 T}
     {_3375 notstuck/tm (tm/pair E1 E2) S1 T}
@@ -100454,10 +105080,15 @@
           (notstuck/tm/val (val/tm/pair V1 V2))
   
   note: checking mode of constant   _3374   ... 
+  
   note: checking mode of constant   _3375   ... 
+  
   note: checking mode of constant   _3376   ... 
+  
   note: checking mode of constant   _3377   ... 
+  
   note: checking mode of constant   _3378   ... 
+  
   => %sort progress/tm/tag {E1 tm} {S1 st} {T lt} {E2 tm} {_0 notstuck/tm E1 S1 T}
     {_3379 notstuck/tm E2 S1 T} {_3380 notstuck/tm (tm/tag E1 E2) S1 T}
   
@@ -100496,10 +105127,15 @@
           (notstuck/tm/val (val/tm/tag V1 V2))
   
   note: checking mode of constant   _3379   ... 
+  
   note: checking mode of constant   _3380   ... 
+  
   note: checking mode of constant   _3381   ... 
+  
   note: checking mode of constant   _3382   ... 
+  
   note: checking mode of constant   _3383   ... 
+  
   => %sort progress/tm/pj1 {E tm} {ST st} {T lt} {L lt} {C cn} {C2 cn}
     {_0 notstuck/tm E ST T} {_3384 oftp L T E (tp/cross C C2)}
     {_3385 notstuck/tm (tm/pj1 E) ST T}
@@ -100534,8 +105170,11 @@
         progress/tm/pj1 (notstuck/tm/val V) D (notstuck/tm/step S)
   
   note: checking mode of constant   _3384   ... 
+  
   note: checking mode of constant   _3385   ... 
+  
   note: checking mode of constant   _3386   ... 
+  
   => %sort progress/tm/pj2 {E tm} {ST st} {T lt} {L lt} {C1 cn} {C cn}
     {_0 notstuck/tm E ST T} {_3387 oftp L T E (tp/cross C1 C)}
     {_3388 notstuck/tm (tm/pj2 E) ST T}
@@ -100570,8 +105209,11 @@
         progress/tm/pj2 (notstuck/tm/val V) D (notstuck/tm/step S)
   
   note: checking mode of constant   _3387   ... 
+  
   note: checking mode of constant   _3388   ... 
+  
   note: checking mode of constant   _3389   ... 
+  
   => %sort progress/tm/tmapp {E1 tm} {ST st} {T lt} {E2 tm} {L lt} {C1 cn} {
     C2 cn} {_0 notstuck/tm E1 ST T} {_3390 notstuck/tm E2 ST T}
     {_3391 oftp L T E1 (tp/arrow C1 C2)}
@@ -100635,10 +105277,15 @@
           (notstuck/tm/step S)
   
   note: checking mode of constant   _3390   ... 
+  
   note: checking mode of constant   _3391   ... 
+  
   note: checking mode of constant   _3392   ... 
+  
   note: checking mode of constant   _3393   ... 
+  
   note: checking mode of constant   _3394   ... 
+  
   => %sort progress/tm/cnapp {E1 tm} {ST st} {T lt} {L lt} {K kd} {C {_0 cn} cn}
     {C' cn} {_0 notstuck/tm E1 ST T}
     {_3395 oftp L T E1 (tp/forall K [_3395 cn] C _3395)}
@@ -100677,8 +105324,11 @@
         progress/tm/cnapp _?2 (notstuck/tm/val V1) D1 (notstuck/tm/step S)
   
   note: checking mode of constant   _3395   ... 
+  
   note: checking mode of constant   _3396   ... 
+  
   note: checking mode of constant   _3397   ... 
+  
   => %sort progress/tm/term {M md} {ST st} {T lt} {L lt} {_?1 pty} {C cn}
     {_0 notstuck/md M ST T} {_3398 ofsg L T _?1 M (sg/cn C)}
     {_3399 notstuck/tm (tm/term M) ST T}
@@ -100711,8 +105361,11 @@
         progress/tm/term (notstuck/md/val Vt) D (notstuck/tm/step S)
   
   note: checking mode of constant   _3398   ... 
+  
   note: checking mode of constant   _3399   ... 
+  
   note: checking mode of constant   _3400   ... 
+  
   => %sort progress/st {ST' st} {LC loc} {ST st} {E tm} {_0 st-alloc ST E ST' LC}
   
   => %term _3401 {E tm} progress/st st/nil E st-alloc/nil
@@ -100723,7 +105376,9 @@
         progress/st (st/cons _?1 _?2 _?3) E st-alloc/cons
   
   note: checking mode of constant   _3401   ... 
+  
   note: checking mode of constant   _3402   ... 
+  
   => %sort progress/tm/ref {E1 tm} {ST st} {T lt} {L lt} {C cn}
     {_0 notstuck/tm E1 ST T} {_3403 oftp L T E1 C}
     {_3404 notstuck/tm (tm/ref E1) ST T}
@@ -100751,8 +105406,11 @@
           (notstuck/tm/step (step/tm/ref-beta V SA))
   
   note: checking mode of constant   _3403   ... 
+  
   note: checking mode of constant   _3404   ... 
+  
   note: checking mode of constant   _3405   ... 
+  
   => %sort progress/st-look {L lt} {LC loc} {C cn} {ST st} {L' lt} {T lt} {
     E tm} {_0 lt-look L LC C} {_3406 st-wf L ST L' T} {_3407 st-look ST LC E}
   
@@ -100777,7 +105435,9 @@
           (st-look/miss LS)
   
   note: checking mode of constant   _3406   ... 
+  
   note: checking mode of constant   _3407   ... 
+  
   => %sort progress/tm/get {E tm} {ST st} {T lt} {L lt} {C cn}
     {_0 notstuck/tm E ST T} {_3408 oftp L T E (tp/ref C)} {_3409 oflt ST L T}
     {_3410 notstuck/tm (tm/get E) ST T}
@@ -100816,8 +105476,11 @@
           (notstuck/tm/step S)
   
   note: checking mode of constant   _3408   ... 
+  
   note: checking mode of constant   _3409   ... 
+  
   note: checking mode of constant   _3410   ... 
+  
   => %sort progress/st-update {L lt} {LC loc} {C cn} {ST st} {L' lt} {T lt}
     {ST' st} {E tm} {_0 lt-look L LC C} {_3411 st-wf L ST L' T}
     {_3412 st-update ST LC E ST'}
@@ -100844,7 +105507,9 @@
           (st-update/miss LS)
   
   note: checking mode of constant   _3411   ... 
+  
   note: checking mode of constant   _3412   ... 
+  
   => %sort progress/tm/set {E1 tm} {S st} {T lt} {E2 tm} {L lt} {C cn}
     {_0 notstuck/tm E1 S T} {_3413 notstuck/tm E2 S T}
     {_3414 oftp L T E1 (tp/ref C)} {_3415 oftp L T E2 C} {_3416 oflt S L T}
@@ -100906,10 +105571,15 @@
           (oflt/c LCS _?10) (notstuck/tm/step S)
   
   note: checking mode of constant   _3413   ... 
+  
   note: checking mode of constant   _3414   ... 
+  
   note: checking mode of constant   _3415   ... 
+  
   note: checking mode of constant   _3416   ... 
+  
   note: checking mode of constant   _3417   ... 
+  
   => %sort progress/tm/inl {E1 tm} {S1 st} {T lt} {C1 cn} {C2 cn}
     {_0 notstuck/tm E1 S1 T}
     {_3418 notstuck/tm (tm/inl (tp/sum C1 C2) E1) S1 T}
@@ -100935,8 +105605,11 @@
           (notstuck/tm/val (val/tm/inl V1))
   
   note: checking mode of constant   _3418   ... 
+  
   note: checking mode of constant   _3419   ... 
+  
   note: checking mode of constant   _3420   ... 
+  
   => %sort progress/tm/inr {E1 tm} {S1 st} {T lt} {C1 cn} {C2 cn}
     {_0 notstuck/tm E1 S1 T}
     {_3421 notstuck/tm (tm/inr (tp/sum C1 C2) E1) S1 T}
@@ -100962,8 +105635,11 @@
           (notstuck/tm/val (val/tm/inr V1))
   
   note: checking mode of constant   _3421   ... 
+  
   note: checking mode of constant   _3422   ... 
+  
   note: checking mode of constant   _3423   ... 
+  
   => %sort progress/tm/case-beta {E' tm} {E'' tm} {E1 tm} {E2 {_0 tm} tm}
     {E3 {_0 tm} tm} {ST st} {T lt} {SQ seq/tm E1 E'} {_0 val/tm E1}
     {_3424 seq-in E1 SQ}
@@ -100988,7 +105664,9 @@
           (step/tm/case-beta-r V)
   
   note: checking mode of constant   _3424   ... 
+  
   note: checking mode of constant   _3425   ... 
+  
   => %sort progress/tm/case {E1 tm} {S1 st} {T lt} {L lt} {C1 cn} {C2 cn}
     {E2 {_0 tm} tm} {E3 {_0 tm} tm} {_0 notstuck/tm E1 S1 T}
     {_3426 oftp L T E1 (tp/sum C1 C2)}
@@ -101030,8 +105708,11 @@
           (notstuck/tm/val V) D (notstuck/tm/step S)
   
   note: checking mode of constant   _3426   ... 
+  
   note: checking mode of constant   _3427   ... 
+  
   note: checking mode of constant   _3428   ... 
+  
   => %sort progress/tm/try {E1 tm} {S1 st} {T lt} {L lt} {C cn} {E2 {_0 tm} tm}
     {_0 notstuck/tm E1 S1 T}
     {_3429 oftp L T (tm/try E1 ([_3429 tm] E2 _3429)) C}
@@ -101061,8 +105742,11 @@
           (notstuck/tm/step (step/tm/try-handle R))
   
   note: checking mode of constant   _3429   ... 
+  
   note: checking mode of constant   _3430   ... 
+  
   note: checking mode of constant   _3431   ... 
+  
   => %sort progress/tm/raise {E1 tm} {ST st} {T lt} {L lt} {C cn}
     {_0 notstuck/tm E1 ST T} {_3432 oftp L T E1 C}
     {_3433 notstuck/tm (tm/raise E1) ST T}
@@ -101089,8 +105773,11 @@
           (notstuck/tm/raises (raises/tm/raise-1 V))
   
   note: checking mode of constant   _3432   ... 
+  
   note: checking mode of constant   _3433   ... 
+  
   note: checking mode of constant   _3434   ... 
+  
   => %sort progress/tm/iftag-beta {EA tm} {L loc} {E1 tm} {EB tm} {L' loc}
     {E'' tm} {E3 {_0 tm} tm} {E4 tm} {ST st} {T lt} {_0 val/tm EA}
     {_3435 seq/tm EA (tm/tag (tm/tagloc L) E1)}
@@ -101113,7 +105800,9 @@
           seq/tm/refl (loc-seq-or-neq/neq N) (step/tm/iftag-beta-2 V N)
   
   note: checking mode of constant   _3435   ... 
+  
   note: checking mode of constant   _3436   ... 
+  
   => %sort progress/tm/iftag {E1 tm} {S1 st} {T lt} {E2 tm} {L lt} {C cn}
     {E3 {_0 tm} tm} {E4 tm} {_0 notstuck/tm E1 S1 T}
     {_3437 notstuck/tm E2 S1 T} {_3438 oftp L T E1 tp/tagged}
@@ -101177,10 +105866,15 @@
           (notstuck/tm/val V2) D1 D2 (notstuck/tm/step S)
   
   note: checking mode of constant   _3437   ... 
+  
   note: checking mode of constant   _3438   ... 
+  
   note: checking mode of constant   _3439   ... 
+  
   note: checking mode of constant   _3440   ... 
+  
   note: checking mode of constant   _3441   ... 
+  
   => %sort progress/tm/roll {E1 tm} {ST st} {T lt} {K kd} {C' {_0 cn} cn}
     {_0 notstuck/tm E1 ST T}
     {_3442 notstuck/tm (tm/roll (cn/mu K ([_3442 cn] C' _3442)) E1) ST T}
@@ -101206,8 +105900,11 @@
           (notstuck/tm/val (val/tm/roll V))
   
   note: checking mode of constant   _3442   ... 
+  
   note: checking mode of constant   _3443   ... 
+  
   note: checking mode of constant   _3444   ... 
+  
   => %sort progress/tm/unroll {E1 tm} {ST st} {T lt} {L lt} {_?1 kd}
     {_?2 {_0 cn} cn} {_0 notstuck/tm E1 ST T}
     {_3445 oftp L T E1 (cn/mu _?1 [_3445 cn] _?2 _3445)}
@@ -101243,8 +105940,11 @@
         progress/tm/unroll (notstuck/tm/val V) D1 (notstuck/tm/step S)
   
   note: checking mode of constant   _3445   ... 
+  
   note: checking mode of constant   _3446   ... 
+  
   note: checking mode of constant   _3447   ... 
+  
   => %sort progress/tm {L lt} {T lt} {E tm} {C cn} {ST st} {_0 oftp L T E C}
     {_3448 oflt ST L T} {_3449 notstuck/tm E ST T}
   
@@ -101613,44 +106313,83 @@
         progress/md (ofsg/sub D1 _?9 _?10) DS NS
   
   note: checking mode of constant   _3448   ... 
+  
   note: checking mode of constant   _3449   ... 
+  
   note: checking mode of constant   _3450   ... 
+  
   note: checking mode of constant   _3451   ... 
+  
   note: checking mode of constant   _3452   ... 
+  
   note: checking mode of constant   _3453   ... 
+  
   note: checking mode of constant   _3454   ... 
+  
   note: checking mode of constant   _3455   ... 
+  
   note: checking mode of constant   _3456   ... 
+  
   note: checking mode of constant   _3457   ... 
+  
   note: checking mode of constant   _3458   ... 
+  
   note: checking mode of constant   _3459   ... 
+  
   note: checking mode of constant   _3460   ... 
+  
   note: checking mode of constant   _3461   ... 
+  
   note: checking mode of constant   _3462   ... 
+  
   note: checking mode of constant   _3463   ... 
+  
   note: checking mode of constant   _3464   ... 
+  
   note: checking mode of constant   _3465   ... 
+  
   note: checking mode of constant   _3466   ... 
+  
   note: checking mode of constant   _3467   ... 
+  
   note: checking mode of constant   _3468   ... 
+  
   note: checking mode of constant   _3469   ... 
+  
   note: checking mode of constant   _3470   ... 
+  
   note: checking mode of constant   _3471   ... 
+  
   note: checking mode of constant   _3472   ... 
+  
   note: checking mode of constant   _3473   ... 
+  
   note: checking mode of constant   _3474   ... 
+  
   note: checking mode of constant   _3475   ... 
+  
   note: checking mode of constant   _3476   ... 
+  
   note: checking mode of constant   _3477   ... 
+  
   note: checking mode of constant   _3478   ... 
+  
   note: checking mode of constant   _3479   ... 
+  
   note: checking mode of constant   _3480   ... 
+  
   note: checking mode of constant   _3481   ... 
+  
   note: checking mode of constant   _3482   ... 
+  
   note: checking mode of constant   _3483   ... 
+  
   note: checking mode of constant   _3484   ... 
+  
   note: checking mode of constant   _3485   ... 
+  
   note: checking mode of constant   _3486   ... 
+  
   => %sort preserve/tm {L lt} {T lt} {E tm} {C cn} {ST st} {E' tm} {ST' st}
     {T' lt} {L' lt} {_0 oftp L T E C} {_3487 oflt ST L T}
     {_3488 step/tm E ST T E' ST' T'} {_3489 lt-sub L L'} {_3490 lt-sub T T'}
@@ -102717,61 +107456,117 @@
           lt-sub/refl (ofsg/sub Dc DSS P) DL
   
   note: checking mode of constant   _3527   ... 
+  
   note: checking mode of constant   _3528   ... 
+  
   note: checking mode of constant   _3529   ... 
+  
   note: checking mode of constant   _3530   ... 
+  
   note: checking mode of constant   _3531   ... 
+  
   note: checking mode of constant   _3532   ... 
+  
   note: checking mode of constant   _3533   ... 
+  
   note: checking mode of constant   _3534   ... 
+  
   note: checking mode of constant   _3535   ... 
+  
   note: checking mode of constant   _3536   ... 
+  
   note: checking mode of constant   _3537   ... 
+  
   note: checking mode of constant   _3538   ... 
+  
   note: checking mode of constant   _3539   ... 
+  
   note: checking mode of constant   _3540   ... 
+  
   note: checking mode of constant   _3541   ... 
+  
   note: checking mode of constant   _3542   ... 
+  
   note: checking mode of constant   _3487   ... 
+  
   note: checking mode of constant   _3488   ... 
+  
   note: checking mode of constant   _3489   ... 
+  
   note: checking mode of constant   _3490   ... 
+  
   note: checking mode of constant   _3491   ... 
+  
   note: checking mode of constant   _3492   ... 
+  
   note: checking mode of constant   _3493   ... 
+  
   note: checking mode of constant   _3494   ... 
+  
   note: checking mode of constant   _3495   ... 
+  
   note: checking mode of constant   _3496   ... 
+  
   note: checking mode of constant   _3497   ... 
+  
   note: checking mode of constant   _3498   ... 
+  
   note: checking mode of constant   _3499   ... 
+  
   note: checking mode of constant   _3500   ... 
+  
   note: checking mode of constant   _3501   ... 
+  
   note: checking mode of constant   _3502   ... 
+  
   note: checking mode of constant   _3503   ... 
+  
   note: checking mode of constant   _3504   ... 
+  
   note: checking mode of constant   _3505   ... 
+  
   note: checking mode of constant   _3506   ... 
+  
   note: checking mode of constant   _3507   ... 
+  
   note: checking mode of constant   _3508   ... 
+  
   note: checking mode of constant   _3509   ... 
+  
   note: checking mode of constant   _3510   ... 
+  
   note: checking mode of constant   _3511   ... 
+  
   note: checking mode of constant   _3512   ... 
+  
   note: checking mode of constant   _3513   ... 
+  
   note: checking mode of constant   _3514   ... 
+  
   note: checking mode of constant   _3515   ... 
+  
   note: checking mode of constant   _3516   ... 
+  
   note: checking mode of constant   _3517   ... 
+  
   note: checking mode of constant   _3518   ... 
+  
   note: checking mode of constant   _3519   ... 
+  
   note: checking mode of constant   _3520   ... 
+  
   note: checking mode of constant   _3521   ... 
+  
   note: checking mode of constant   _3522   ... 
+  
   note: checking mode of constant   _3523   ... 
+  
   note: checking mode of constant   _3524   ... 
+  
   note: checking mode of constant   _3525   ... 
+  
   note: checking mode of constant   _3526   ... 
+  
 
   $ stelf repl stelf.toml
   => %sort constant

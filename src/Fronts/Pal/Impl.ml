@@ -111,8 +111,8 @@ module Impl () = struct
   (* Forward reference for TOML config detection, set after Config is defined.
      load calls this to check if a file is a valid TOML project before
      treating it as source. *)
-  let try_toml_ref : (Fpath.t -> string -> Project.Format.file option) ref =
-    ref (fun _path _str -> None)
+  let try_toml_ref : (Fpath.t -> string -> Loader.toml_result) ref =
+    ref (fun _path _str -> Loader.Not_config)
 
   let load_toml_ref : (Project.Format.file -> Reply.outcome) ref =
     ref (fun _cfg -> Reply.ok [])
@@ -988,10 +988,22 @@ module Impl () = struct
         | Ok str -> (
             try
               match !try_toml_ref path str with
-              | Some cfg ->
+              | Loader.Config cfg ->
                   dbg ("load: detected TOML config in " ^ Fpath.to_string path);
                   !load_toml_ref cfg
-              | None ->
+              | Loader.Bad_config msg ->
+                  (* A broken *.toml must NOT fall through to load_string.
+                     STELF sources are literate by default, so TOML text
+                     contains no commands and would parse as an empty
+                     signature -- reporting success for a project that never
+                     loaded. *)
+                  dbg ("load: malformed TOML config in " ^ Fpath.to_string path);
+                  Reply.fail
+                    {
+                      Reply.stage = Error.Error.Other "config";
+                      message = Display.Form.string msg;
+                    }
+              | Loader.Not_config ->
                   let saved_load_path = !current_load_path in
                   let parent = Fpath.parent path in
                   current_load_path := parent :: !current_load_path;

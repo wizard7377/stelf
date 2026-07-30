@@ -40,14 +40,26 @@ module Opts : OPTS = struct
       Arg.flag doc
     end
 
-  let color : bool t =
+  type color_when = Auto | Always | Never
+
+  let color : color_when t =
     begin
-      let doc : Arg.info =
-        Arg.info ~docs ~doc:"Whether to use colors in output"
-          [ "c"; "color" ] ~docv:"COLOR"
+      (* Not named [conv]: the [Arg.(...)] below opens Arg, where [conv] is a
+         function, and the local binding would be shadowed. *)
+      let color_conv =
+        Arg.enum [ ("auto", Auto); ("always", Always); ("never", Never) ]
       in
-      Arg.(opt bool true doc)
-      (* TODO , make use Env variables *)
+      let doc : Arg.info =
+        Arg.info ~docs
+          ~doc:
+            "When to colour output. $(b,auto), the default, follows the \
+             terminal: styling is emitted only when standard error is a tty, \
+             and is suppressed when $(b,TERM) is $(b,dumb) or $(b,NO_COLOR) is \
+             set. $(b,always) forces styling even into a pipe or a file; \
+             $(b,never) disables it entirely."
+          [ "c"; "color"; "colour" ] ~docv:"WHEN"
+      in
+      Arg.(opt color_conv Auto doc)
     end
 
   let unicode : bool t =

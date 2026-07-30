@@ -37,7 +37,6 @@
   grace
   grace.ansi_renderer))
 
-(install
- (section bin)
- (files main.exe)
- (package stelf))
+; No (install) stanza here: (public_name stelf) above already installs this
+; executable into the bin section as `stelf`. Adding one would ALSO install it
+; under its raw name, putting a bare `main.exe` on the user's PATH.

@@ -87,15 +87,25 @@ struct
     else ()
     end
 
+  (* Both of these report a *type error*, so both emit exactly one message, at
+     kind Error.
+
+     They used to use Display.debug for the located text -- which the CLI maps
+     to a green "note:" -- and [error] additionally emitted the bare message a
+     second time via Display.warning. The result was every type error printed
+     twice, once as a note carrying the location and once as a warning without
+     it, and never once as an error. The located form is the one worth keeping:
+     it is the only one that says where the problem is. *)
+  let located (r, msg) =
+    Display.string (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n")
+
   let fatalError (r, msg) =
     begin
       errorCount := !errorCount + 1;
       begin
         chatterOneNewline ();
         begin
-          Display.debug
-            (Display.string
-               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
+          Display.error (located (r, msg));
           die r
         end
       end
@@ -107,10 +117,7 @@ struct
       begin
         chatterOneNewline ();
         begin
-          Display.debug
-            (Display.string
-               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
-          Display.warning (Display.Form.string msg);
+          Display.error (located (r, msg));
           begin if exceeds (!errorCount, !errorThreshold) then die r else ()
           end
         end

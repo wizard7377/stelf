@@ -22,9 +22,13 @@
   => %term case-S {X ℕ} goal (%(nat S) X) (0 (%(nat S) X))
   
   note: checking mode of constant   case-0   ... 
+  
   note: checking mode of constant   case-S   ... 
+  
   note: checking mode of constant   case-0   ... 
+  
   note: checking mode of constant   case-S   ... 
+  
   => %sort mul {nat0 ℕ} {nat1 ℕ} {nat2 ℕ}
   
   => %term 0 {X ℕ} mul X %(nat 0) %(nat 0)

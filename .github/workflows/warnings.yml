@@ -5,11 +5,16 @@ on:
     branches: [master, dev]
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   warnings:
     name: All warnings as errors / ${{ matrix.os }} / OCaml ${{ matrix.ocaml-compiler }}
     runs-on: ${{ matrix.os }}
+    # ubuntu only: the warning-enumeration step below uses `grep -oP` (PCRE),
+    # which is GNU-specific and fails on macOS's BSD grep, so that leg could
+    # never have passed. Porting the script is the prerequisite for widening
+    # this matrix again.
     strategy:
       fail-fast: false
       matrix:
@@ -18,12 +23,13 @@ jobs:
             ocaml-compiler: "5.4.x"
           - os: ubuntu-latest
             ocaml-compiler: "5.2.x"
-          - os: macos-latest
-            ocaml-compiler: "5.4.x"
 
     steps:
+      # See build.yml: `basis` is an in-tree submodule, not an opam dependency.
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v3
