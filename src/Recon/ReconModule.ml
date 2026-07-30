@@ -17,8 +17,8 @@ module Make_ReconModule
 
   let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
 
-  type inst_ = External of Cst.term | Internal of IntSyn.cid
-  type eqn = IntSyn.cid * inst_ * Paths.region
+  type inst = External of Cst.term | Internal of IntSyn.cid
+  type eqn = IntSyn.cid * inst * Paths.region
   type whereclause = ModSyn.Names.namespace -> eqn list
 
   type structDec =
@@ -136,19 +136,19 @@ module Make_ReconModule
         StructDef (name_opt, mid)
     | _ -> raise (Error "structdecToStructDec: unrecognised structDec")
 
-  type eqnTable = (inst_ * Paths.region) list ref IntTree.table
+  type eqnTable = (inst * Paths.region) list ref IntTree.table
 
   let applyEqns wherecl namespace =
     let eqns = wherecl namespace in
     let table : eqnTable = IntTree.new_ 0 in
-    let add (cid, inst_, r) =
+    let add (cid, inst, r) =
       match IntTree.lookup table cid with
-      | None -> IntTree.insert table (cid, ref [ (inst_, r) ])
-      | Some rl -> rl := (inst_, r) :: !rl
+      | None -> IntTree.insert table (cid, ref [ (inst, r) ])
+      | Some rl -> rl := (inst, r) :: !rl
     in
     ignore (List.app add eqns);
-    let doInst ((inst_, r), conDec_) =
-      match inst_ with
+    let doInst ((inst, r), conDec_) =
+      match inst with
       | Internal cid -> (
           try
             ModSyn.strictify

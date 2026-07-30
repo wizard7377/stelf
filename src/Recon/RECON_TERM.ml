@@ -19,25 +19,25 @@ module type RECON_TERM = sig
   val traceMode : traceMode ref
 
   (* Reconstruction jobs *)
-  type job
+  type t
 
-  val jnothing : job
-  val jand : job * job -> job
-  val jwithctx : Cst.decl Ast.ctx * job -> job
-  val jterm : Cst.term -> job
-  val jclass : Cst.term -> job
-  val jof : Cst.term * Cst.term -> job
+  val jnothing : t
+  val jand : t * t -> t
+  val jwithctx : Cst.decl Ast.ctx * t -> t
+  val jterm : Cst.term -> t
+  val jclass : Cst.term -> t
+  val jof : Cst.term * Cst.term -> t
 
-  type job_ =
+  type result =
     | JNothing
-    | JAnd of job_ * job_
-    | JWithCtx of Ast.dec Ast.ctx * job_
+    | JAnd of result * result
+    | JWithCtx of Ast.dec Ast.ctx * result
     | JTerm of (Ast.exp * Paths.occExp) * Ast.exp * Ast.uni
     | JClass of (Ast.exp * Paths.occExp) * Ast.uni
     | JOf of (Ast.exp * Paths.occExp) * (Ast.exp * Paths.occExp) * Ast.uni
 
-  val recon : job -> job_
-  val reconQuery : job -> job_
+  val recon : t -> result
+  val reconQuery : t -> result
   val termRegion : Cst.term -> Paths.region
   val decRegion : Cst.decl -> Paths.region
   val ctxRegion : Cst.decl Ast.ctx -> Paths.region option
