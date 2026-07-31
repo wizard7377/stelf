@@ -1,3 +1,11 @@
+open! Basis
+open! Intsyn
+open! Intsyn.Lambda_
+open! Table
+open! Table.Table_
+open! Global
+open! Global.Global_
+
 (* # 1 "src/index/IndexSkolem.sig.ml" *)
 
 (* # 1 "src/index/IndexSkolem.fun.ml" *)

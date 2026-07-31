@@ -1,3 +1,18 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Table
+open! Table.Table_
+open! Msg
+open! Msg.Msg_
+open! Print
+open! Print.Print_
+open! Debug
+
 (** Term reconstruction: elaborating external syntax into internal LF.
 
     Reconstruction is the bridge between what the user writes and what the rest
@@ -31,9 +46,9 @@
     a counter and prints one located message, aborting early only if the count
     passes an internal threshold (200). Callers therefore use a pair of calls
     around each declaration: {!resetErrors} before, {!checkErrors} after — the
-    latter being the barrier that finally raises {!Error} if anything went wrong.
-    Reconstructing without calling {!checkErrors} will silently yield a term
-    built from erroneous input. *)
+    latter being the barrier that finally raises {!Error} if anything went
+    wrong. Reconstructing without calling {!checkErrors} will silently yield a
+    term built from erroneous input. *)
 
 module type RECON_TERM = sig
   module M : S.S
@@ -47,9 +62,9 @@ module type RECON_TERM = sig
       directly on a fatal error. The payload is already location-wrapped. *)
 
   val resetErrors : string -> unit
-  (** [resetErrors filename] zeroes the error counter and sets the filename
-      used to prefix subsequent messages. Call once per declaration, before
-      building and reconstructing its job.
+  (** [resetErrors filename] zeroes the error counter and sets the filename used
+      to prefix subsequent messages. Call once per declaration, before building
+      and reconstructing its job.
 
       Note this does {i not} clear the pending trace list; see {!traceMode}. *)
 
@@ -94,8 +109,8 @@ module type RECON_TERM = sig
   (** The empty job. Unit for {!jand}. *)
 
   val jand : t * t -> t
-  (** [jand (j1, j2)] reconstructs [j1] and [j2] together, sharing
-      metavariables between them. *)
+  (** [jand (j1, j2)] reconstructs [j1] and [j2] together, sharing metavariables
+      between them. *)
 
   val jwithctx : Cst.decl Ast.ctx * t -> t
   (** [jwithctx (g, j)] reconstructs [j] under the additional hypotheses [g],
@@ -122,7 +137,8 @@ module type RECON_TERM = sig
     | JAnd of result * result
     | JWithCtx of Ast.dec Ast.ctx * result
     | JTerm of (Ast.exp * Paths.occExp) * Ast.exp * Ast.uni
-        (** [JTerm ((u, occ), v, l)] — object [u] of type [v] in universe [l]. *)
+        (** [JTerm ((u, occ), v, l)] — object [u] of type [v] in universe [l].
+        *)
     | JClass of (Ast.exp * Paths.occExp) * Ast.uni
         (** [JClass ((v, occ), l)] — classifier [v] inhabiting universe [l]. *)
     | JOf of (Ast.exp * Paths.occExp) * (Ast.exp * Paths.occExp) * Ast.uni
@@ -132,10 +148,10 @@ module type RECON_TERM = sig
   val recon : t -> result
   (** Reconstruct a job appearing in a {i declaration}.
 
-      An uppercase identifier that resolves to nothing becomes a {b free
-      variable}, to be abstracted into an implicit argument of the declaration
-      being elaborated. This is what makes [nat : type. z : nat.] work with
-      implicit quantification. *)
+      An uppercase identifier that resolves to nothing becomes a
+      {b free variable}, to be abstracted into an implicit argument of the
+      declaration being elaborated. This is what makes [nat : type. z : nat.]
+      work with implicit quantification. *)
 
   val reconQuery : t -> result
   (** Reconstruct a job appearing in a {i query}.

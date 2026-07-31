@@ -1,3 +1,18 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Table
+open! Table.Table_
+open! Msg
+open! Msg.Msg_
+open! Print
+open! Print.Print_
+open! Debug
+
 module type RECON_CONDEC = RECON_CONDEC.RECON_CONDEC
 
 exception Error of string
@@ -204,8 +219,7 @@ module Make_ReconConDec
           with Constraints.Error c_ ->
             error
               ( r',
-                "Constraints remain in context block after term \
-                 reconstruction:\n"
+                "Constraints remain in context block after term reconstruction:\n"
                 ^ ctxBlockToString (IntSyn.Null, (gsome_, gblock_))
                 ^ "\n" ^ Print.cnstrsToString c_ )
         in

@@ -1,3 +1,12 @@
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Print
+open! Print.Print_
+
 (** Exact rendering of a small signature, and re-installation of it.
 
     The arrow-sugar cases next door check one feature at a time; these check

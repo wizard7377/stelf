@@ -1,3 +1,11 @@
+open! Basis
+open! Table
+open! Table.Table_
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+
 (* # 1 "src/names/Names_.sig.ml" *)
 open! Basis
 
@@ -12,7 +20,6 @@ include NAMES
 
 (* # 1 "src/names/Names_.fun.ml" *)
 open! Basis
-
 (* Names of Constants and Variables *)
 (* Author: Frank Pfenning *)
 (* Modified: Jeff Polakow *)
@@ -1171,6 +1178,14 @@ module MakeNames
   let evarCnstr = evarCnstr
 end
 
+module Wrap (M : NAMES.FIXITY) : NAMES.WRAP = struct 
+  module Fixity = M
+  module type S = NAMES with module Fixity = M
+  type t = (module S)
+
+  let wrap (m : (module S)) : t = m
+  let unwrap (t : t) : (module S) = t
+end  
 (* local varTable ... *)
 (* functor Names *)
 

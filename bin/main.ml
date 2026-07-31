@@ -63,7 +63,9 @@ let setup_tty () =
 
    An explicit --color overrides the detection in both directions. *)
 let no_color_env =
-  match Sys.getenv_opt "NO_COLOR" with Some s when s <> "" -> true | _ -> false
+  match Sys.getenv_opt "NO_COLOR" with
+  | Some s when s <> "" -> true
+  | _ -> false
 
 let apply_color_pref (pref : P.Opts.Opts.color_when) =
   let set r =
@@ -218,8 +220,8 @@ let repl_cmd : int Cmd.t =
       `P
         "A command is submitted only when it ends with the separator $(b,%.), \
          so input may span as many lines as you like; the continuation prompt \
-         is $(b,>). Type $(b,%help %.) for the list of commands, and \
-         $(b,%quit %.) or Ctrl-D to leave.";
+         is $(b,>). Type $(b,%help %.) for the list of commands, and $(b,%quit \
+         %.) or Ctrl-D to leave.";
       `P
         "If $(i,CONFIG) is given it is loaded first, exactly as $(mname) \
          $(b,check) would load it.";
@@ -253,8 +255,7 @@ let repl_cmd : int Cmd.t =
        let verbosity = verbosity
        let mute = mute
      end in
-     Lwt_main.run
-       (Assistant.top ?config:(Option.map Fpath.v config) (module N)))
+     Lwt_main.run (Assistant.top ?config:(Option.map Fpath.v config) (module N)))
 
 (* ------------------------------------------------------------------------- *)
 (* stelf check                                                               *)
@@ -355,8 +356,7 @@ let setup_cmd : int Cmd.t =
   in
   Cmd.v
     (Cmd.info "setup" ~doc ~docs:s_project ~sdocs ~exits ~man)
-    (let+ name = name
-     and+ path = path in
+    (let+ name = name and+ path = path in
      match Setup.setup ?dir:(Option.map Fpath.v path) name with
      | Ok () -> 0
      | Error (`Msg m) ->
@@ -374,9 +374,11 @@ let version_cmd : int Cmd.t =
       `S Manpage.s_description;
       `P
         "Prints $(mname)'s version followed by the STELF banner. The banner is \
-         coloured when standard output is a terminal and plain otherwise, so it \
-         is safe in a pipe.";
-      `P "$(mname) $(b,--version) prints the bare version string, with no banner.";
+         coloured when standard output is a terminal and plain otherwise, so \
+         it is safe in a pipe.";
+      `P
+        "$(mname) $(b,--version) prints the bare version string, with no \
+         banner.";
       `S Manpage.s_examples;
       `Pre "  \\$ $(mname) version";
       `Blocks common_man;

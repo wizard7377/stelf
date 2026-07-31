@@ -67,7 +67,7 @@ $(DEPS_SENTINEL): $(OPAM_FILE)
 install: build
 	@$(OPAM_EXEC) $(DUNE) build @install
 	@mkdir -p "$(DESTDIR)$(PREFIX)"
-	@cp -RL $(INSTALL_TREE)/. "$(DESTDIR)$(PREFIX)/"
+	@sudo cp -RL $(INSTALL_TREE)/. "$(DESTDIR)$(PREFIX)/"
 	@echo "Installed $(TARGET) to $(DESTDIR)$(PREFIX)/bin/$(TARGET)"
 
 # Removes exactly what `install` places. Kept in sync by hand: the sections

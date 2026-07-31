@@ -175,7 +175,8 @@ let help_catalogue =
           List.iter
             (fun (x : Pal.Help.entry) ->
               Alcotest.(check bool)
-                ("%" ^ x.name ^ " is listed") true
+                ("%" ^ x.name ^ " is listed")
+                true
                 (contains ~needle:("%" ^ x.name) Pal.Help.overview))
             Pal.Help.entries);
     ] )

@@ -4,22 +4,4 @@
  (name PrintTest)
  (libraries pal intsyn names global print alcotest)
  (flags
-  (:standard
-   -w
-   -A
-   -open
-   Global
-   -open
-   Global.Global_
-   -open
-   Intsyn
-   -open
-   Intsyn.Lambda_
-   -open
-   Names
-   -open
-   Names.Names_
-   -open
-   Print
-   -open
-   Print.Print_)))
+  (:standard -w -A)))

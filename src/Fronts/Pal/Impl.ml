@@ -581,8 +581,7 @@ module Impl () = struct
       | Cst.SetCmd_ (key, value) ->
           Options.set key value;
           []
-      | Cst.VersionCmd_ ->
-          [ Reply.Response (!version ^ "\n") ]
+      | Cst.VersionCmd_ -> [ Reply.Response (!version ^ "\n") ]
       | Cst.EvalCmd_ cmds ->
           run_until_quit (install1 ~path ~scope_installs ns) cmds
       | Cst.AdhocQueryCmd_ (Cst.Query_ (_, qtm) as q) ->
@@ -1089,6 +1088,7 @@ module Impl () = struct
     let prog () = Print.Print_.ClausePrint.printSgn ()
     let subord () = Subordinate.Subordinate_.Subordinate.show ()
     let def () = Subordinate.Subordinate_.Subordinate.showDef ()
+
     (* Suspicious, but preserved as-is: IMPL documents this as "print registered
        constraint-solver domains", and printing a version string instead looks
        like a mistranslation of the SML original. Only the source of the version

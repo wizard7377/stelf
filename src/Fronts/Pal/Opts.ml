@@ -16,14 +16,13 @@ module Opts : OPTS = struct
         Arg.vflag Display.Info.Level.normal
           [
             ( Display.Info.Level.quiet,
-              Arg.info ~docs ~doc:"Display less information"
-                [ "q"; "quiet" ] );
+              Arg.info ~docs ~doc:"Display less information" [ "q"; "quiet" ] );
             ( Display.Info.Level.terse,
               Arg.info ~docs ~doc:"Display slightly less information"
                 [ "t"; "terse" ] );
             ( Display.Info.Level.verbose,
-              Arg.info ~docs ~doc:"Display more information"
-                [ "v"; "verbose" ] );
+              Arg.info ~docs ~doc:"Display more information" [ "v"; "verbose" ]
+            );
             ( Display.Info.Level.debug,
               Arg.info ~docs ~doc:"Display debug information" [ "debug" ] );
           ]

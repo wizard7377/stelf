@@ -1,3 +1,28 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Timing
+open! Timing.Timing_
+open! Table
+open! Table.Table_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Paths
+open! Paths.Paths_
+open! Formatter
+open! Formatter__Formatter_
+open! Print
+open! Print.Print_
+open! Index
+open! Index.Index_
+open! Subordinate
+open! Subordinate
+open! Meta
+open! Meta.Meta_
+open! Solvers
+open! Solvers.Solvers_
 include module type of WORLDSYN
 
 module WorldSyn (WorldSyn__0 : sig

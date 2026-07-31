@@ -1,3 +1,11 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Trail
+open! Trail.Trail_
+open! Table
+open! Table.Table_
+
 (* # 1 "src/lambda/Lambda_.sig.ml" *)
 
 (** Top-level wiring for the core lambda subsystem Modules. *)

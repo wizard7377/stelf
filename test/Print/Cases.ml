@@ -1,3 +1,11 @@
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Print
+open! Print.Print_
 open Common
 
 let positive_single_hop () =

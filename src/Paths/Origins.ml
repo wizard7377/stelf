@@ -1,3 +1,11 @@
+open! Basis
+open! Intsyn
+open! Intsyn.Lambda_
+open! Global
+open! Global.Global_
+open! Table
+open! Table.Table_
+
 (* # 1 "src/paths/Origins.sig.ml" *)
 open! Basis
 open Paths_

@@ -1,3 +1,11 @@
+open! Basis
+open! Table
+open! Table.Table_
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+
 (* # 1 "src/names/Names_.sig.ml" *)
 open! Basis
 
@@ -192,4 +200,12 @@ module type NAMES = sig
 
   val evarCnstr : unit -> (IntSyn.exp * string) list
   (** Uninstantiated named EVars with constraints *)
+end
+
+module type WRAP = sig 
+    module Fixity : FIXITY
+    module type S = NAMES with module Fixity = Fixity
+    type t
+    val wrap : (module S) -> t
+    val unwrap : t -> (module S)
 end

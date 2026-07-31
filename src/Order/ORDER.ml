@@ -1,3 +1,9 @@
+open! Basis
+open! Table
+open! Table.Table_
+open! Intsyn
+open! Intsyn.Lambda_
+
 (* # 1 "src/order/Order.sig.ml" *)
 open! Basis
 

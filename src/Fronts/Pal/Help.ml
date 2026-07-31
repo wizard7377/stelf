@@ -77,9 +77,7 @@ let categories =
       ];
     (* §5.1 *)
     cat "Fixity" "fixity"
-      [
-        e "prec" "declare fixity and precedence: %prec FIXITY LEVEL NAMES";
-      ];
+      [ e "prec" "declare fixity and precedence: %prec FIXITY LEVEL NAMES" ];
     (* §6.7 *)
     cat "Annotations" "annotations"
       [
@@ -182,8 +180,7 @@ let category_lines =
     List.rev (wrap_items ~width:66 (List.map (fun c -> c.slug) categories))
   with
   | [] -> []
-  | last :: rest ->
-      List.rev ((last ^ ".") :: List.map (fun l -> l ^ ",") rest)
+  | last :: rest -> List.rev ((last ^ ".") :: List.map (fun l -> l ^ ",") rest)
 
 let topic (t : string) : string =
   (* A leading % is what a user will type despite the help text saying otherwise.
@@ -200,7 +197,8 @@ let topic (t : string) : string =
       Buffer.add_string b
         ("%" ^ x.name ^ " — " ^ x.summary ^ status_note x.status ^ "\n");
       buf_line b
-        "There is no per-command manual; see hacking/grammar/stelf.md \xc2\xa76.";
+        "There is no per-command manual; see hacking/grammar/stelf.md \
+         \xc2\xa76.";
       buf_line b "%help %. lists every command.";
       Buffer.contents b
   | None -> (

@@ -1,3 +1,13 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Formatter
+open! Formatter__Formatter_
+
 (** [PRINT], implemented as resugaring followed by pretty-printing.
 
     This is a shim, not a printer. All of the work happens in two libraries that

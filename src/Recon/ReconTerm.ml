@@ -1,3 +1,18 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Table
+open! Table.Table_
+open! Msg
+open! Msg.Msg_
+open! Print
+open! Print.Print_
+open! Debug
+
 exception Error of string
 
 (* Logic copied from src/frontend/ReconTerm.ml.
@@ -128,7 +143,6 @@ struct
 
   (* this is a hack, i know *)
   let queryMode = ref false
-
   let decl = function g_, d_ -> IntSyn.Decl (g_, d_)
   let eClo = function v_, s -> IntSyn.EClo (v_, s)
   let root = function h_, s_ -> IntSyn.Root (h_, s_)
@@ -242,10 +256,10 @@ struct
     | Evar of string * Paths.region
     | Fvar of string * Paths.region
     | Typ of Paths.region
-    | Arrow_ of term * term
-    | Pi_ of dec * term
-    | Lam_ of dec * term
-    | App_ of term * term
+    | Arrow of term * term
+    | Pi of dec * term
+    | Lam of dec * term
+    | App of term * term
     | Hastype of term * term
     | Mismatch of term * term * string * string
     | Omitted of Paths.region
@@ -257,7 +271,7 @@ struct
     | Omitexact of IntSyn.exp * IntSyn.exp * Paths.region
   [@@deriving show { with_path = false }]
 
-  and dec = Dec_ of string option * term * Paths.region
+  and dec = Dec of string option * term * Paths.region
 
   let lcid (ids, name, r) = Lcid (ids, name, r)
   let ucid (ids, name, r) = Ucid (ids, name, r)
@@ -266,15 +280,15 @@ struct
   let evar (name, r) = Evar (name, r)
   let fvar (name, r) = Fvar (name, r)
   let typ r = Typ r
-  let arrow (tm1, tm2) = Arrow_ (tm1, tm2)
-  let pi (d, tm) = Pi_ (d, tm)
-  let lam (d, tm) = Lam_ (d, tm)
-  let app (tm1, tm2) = App_ (tm1, tm2)
+  let arrow (tm1, tm2) = Arrow (tm1, tm2)
+  let pi (d, tm) = Pi (d, tm)
+  let lam (d, tm) = Lam (d, tm)
+  let app (tm1, tm2) = App (tm1, tm2)
   let hastype (tm1, tm2) = Hastype (tm1, tm2)
   let omitted r = Omitted r
-  let dec (nameOpt, tm, r) = Dec_ (nameOpt, tm, r)
-  let backarrow (tm1, tm2) = Arrow_ (tm2, tm1)
-  let dec0 (nameOpt, r) = Dec_ (nameOpt, Omitted r, r)
+  let dec (nameOpt, tm, r) = Dec (nameOpt, tm, r)
+  let backarrow (tm1, tm2) = Arrow (tm2, tm1)
+  let dec0 (nameOpt, r) = Dec (nameOpt, Omitted r, r)
 
   (* Unreconstructed job — uses the richer internal term/dec *)
   type t =
@@ -349,7 +363,7 @@ struct
       | [] -> body
       | d :: rest ->
           Stdlib.List.fold_right
-            (fun dec acc -> Pi_ (dec, acc))
+            (fun dec acc -> Pi (dec, acc))
             (cst_decl_to_decs d) (fold_pi rest body)
     in
     let rec fold_lam decls body =
@@ -357,18 +371,18 @@ struct
       | [] -> body
       | d :: rest ->
           Stdlib.List.fold_right
-            (fun dec acc -> Lam_ (dec, acc))
+            (fun dec acc -> Lam (dec, acc))
             (cst_decl_to_decs d) (fold_lam rest body)
     in
     let rec fold_app head args =
       match args with
       | [] -> head
-      | a :: rest -> fold_app (App_ (head, cst_term_to_term a)) rest
+      | a :: rest -> fold_app (App (head, cst_term_to_term a)) rest
     in
     match V.Term.view t with
-    | V.Term.Arrow (_, a, b) -> Arrow_ (cst_term_to_term a, cst_term_to_term b)
+    | V.Term.Arrow (_, a, b) -> Arrow (cst_term_to_term a, cst_term_to_term b)
     | V.Term.BackArrow (_, b, a) ->
-        Arrow_ (cst_term_to_term a, cst_term_to_term b)
+        Arrow (cst_term_to_term a, cst_term_to_term b)
     | V.Term.Pi (_, decls, body) -> fold_pi decls (cst_term_to_term body)
     | V.Term.Lam (_, decls, body) -> fold_lam decls (cst_term_to_term body)
     | V.Term.App (_, head, args) -> fold_app (cst_term_to_term head) args
@@ -407,7 +421,7 @@ struct
        Callers needing every name (e.g. Pi/Lam binders) use
        [cst_decl_to_decs] instead. *)
     let name_opt = match names with [] -> None | n :: _ -> n in
-    Dec_ (name_opt, cst_term_to_term tm, loc_to_region loc)
+    Dec (name_opt, cst_term_to_term tm, loc_to_region loc)
 
   and cst_decl_to_decs (d : Cst.decl) : dec list =
     (* Expands a multi-name decl like [(X Y Z) T] into one [dec] per name,
@@ -422,8 +436,8 @@ struct
     let tm' = cst_term_to_term tm in
     let r = loc_to_region loc in
     match names with
-    | [] -> [ Dec_ (None, tm', r) ]
-    | _ -> List.map (fun name_opt -> Dec_ (name_opt, tm', r)) names
+    | [] -> [ Dec (None, tm', r) ]
+    | _ -> List.map (fun name_opt -> Dec (name_opt, tm', r)) names
 
   let jwithctx (g, j) =
     let rec cvt = function
@@ -444,10 +458,10 @@ struct
     | Evar (name, r) -> r
     | Fvar (name, r) -> r
     | Typ r -> r
-    | Arrow_ (tm1, tm2) -> Paths.join (termRegion_ tm1, termRegion_ tm2)
-    | Pi_ (tm1, tm2) -> Paths.join (decRegion_ tm1, termRegion_ tm2)
-    | Lam_ (tm1, tm2) -> Paths.join (decRegion_ tm1, termRegion_ tm2)
-    | App_ (tm1, tm2) -> Paths.join (termRegion_ tm1, termRegion_ tm2)
+    | Arrow (tm1, tm2) -> Paths.join (termRegion_ tm1, termRegion_ tm2)
+    | Pi (tm1, tm2) -> Paths.join (decRegion_ tm1, termRegion_ tm2)
+    | Lam (tm1, tm2) -> Paths.join (decRegion_ tm1, termRegion_ tm2)
+    | App (tm1, tm2) -> Paths.join (termRegion_ tm1, termRegion_ tm2)
     | Hastype (tm1, tm2) -> Paths.join (termRegion_ tm1, termRegion_ tm2)
     | Mismatch (tm1, tm2, _, _) -> termRegion_ tm2
     | Omitted r -> r
@@ -458,7 +472,7 @@ struct
     | Omitapx (u_, v_, l_, r) -> r
     | Omitexact (u_, v_, r) -> r
 
-  and decRegion_ (Dec_ (name, tm, r)) = r
+  and decRegion_ (Dec (name, tm, r)) = r
 
   let rec ctxRegion_internal = function
     | IntSyn.Null -> None
@@ -615,7 +629,7 @@ struct
     | g_, (Fvar (name, r) as tm) ->
         (tm, undefined, getFVarTypeApx name, Apx.(Level 1))
     | g_, (Typ r as tm) -> (tm, uni Type, Apx.Uni kind, hyperkind)
-    | g_, Arrow_ (tm1, tm2) ->
+    | g_, Arrow (tm1, tm2) ->
         let l_ = Apx.newLVar () in
         let tm1', v1_ =
           checkApx
@@ -629,8 +643,8 @@ struct
               next l_,
               "Right-hand side of arrow must be a type or a kind" )
         in
-        (Arrow_ (tm1', tm2'), Arrow (v1_, v2_), Apx.Uni l_, next l_)
-    | g_, Pi_ (tm1, tm2) ->
+        (Arrow (tm1', tm2'), Arrow (v1_, v2_), Apx.Uni l_, next l_)
+    | g_, Pi (tm1, tm2) ->
         let tm1', (Dec (_, v1_) as d_) = inferApxDec (g_, tm1) in
         let l_ = Apx.newLVar () in
         let tm2', v2_ =
@@ -641,12 +655,12 @@ struct
               next l_,
               "Body of pi must be a type or a kind" )
         in
-        (Pi_ (tm1', tm2'), Arrow (v1_, v2_), Apx.Uni l_, next l_)
-    | g_, (Lam_ (tm1, tm2) as tm) ->
+        (Pi (tm1', tm2'), Arrow (v1_, v2_), Apx.Uni l_, next l_)
+    | g_, (Lam (tm1, tm2) as tm) ->
         let tm1', (Dec (_, v1_) as d_) = inferApxDec (g_, tm1) in
         let tm2', u2_, v2_, l2_ = inferApx (decl (g_, d_), tm2) in
-        (Lam_ (tm1', tm2'), u2_, Arrow (v1_, v2_), l2_)
-    | g_, (App_ (tm1, tm2) as tm) ->
+        (Lam (tm1', tm2'), u2_, Arrow (v1_, v2_), l2_)
+    | g_, (App (tm1, tm2) as tm) ->
         Debug.(
           msg' ~src:Group.approx ~level:Level.Debug
           @@ Fmt.concat
@@ -677,7 +691,7 @@ struct
               Apx.(Level 1),
               "Argument type did not match function domain type" )
         in
-        (App_ (tm1', tm2'), u1_, vr, l_)
+        (App (tm1', tm2'), u1_, vr, l_)
     | g_, (Hastype (tm1, tm2) as tm) ->
         let l_ = Apx.newLVar () in
         let tm2', v2_ =
@@ -725,13 +739,13 @@ struct
         (Mismatch (tm', tm'', location_msg, problem_msg), u'')
       end
 
-  and inferApxDec (g_, Dec_ (name, tm, r)) =
+  and inferApxDec (g_, Dec (name, tm, r)) =
     let tm', v1_ =
       checkApx
         (g_, tm, uni Type, kind, "Classifier in declaration must be a type")
     in
     let d_ = Dec (name, v1_) in
-    (Dec_ (name, tm', r), d_)
+    (Dec (name, tm', r), d_)
 
   let rec inferApxJob = function
     | g_, Jnothing -> Jnothing
@@ -1183,29 +1197,29 @@ struct
         let s = IntSyn.Shift (IntSyn.ctxLength g_) in
         (tm, Elim (fvarElim (name, v_, s)), EClo (v_, s))
     | g_, (Typ r as tm) -> (tm, Intro (IntSyn.Uni Type), IntSyn.Uni Kind)
-    | g_, Arrow_ (tm1, tm2) ->
+    | g_, Arrow (tm1, tm2) ->
         let tm1', b1_, _ (* Uni Type *) = inferExact (g_, tm1) in
         let d_ =
           IntSyn.Dec (None, toIntro (b1_, (IntSyn.Uni Type, IntSyn.id)))
         in
         let tm2', b2_, l_ = inferExact (g_, tm2) in
         let v2_ = toIntro (b2_, (l_, IntSyn.id)) in
-        ( Arrow_ (tm1', tm2'),
+        ( Arrow (tm1', tm2'),
           Intro (IntSyn.Pi ((d_, IntSyn.No), eClo (v2_, IntSyn.shift))),
           l_ )
-    | g_, Pi_ (tm1, tm2) ->
+    | g_, Pi (tm1, tm2) ->
         let tm1', d_ = inferExactDec (g_, tm1) in
         let tm2', b2_, l_ = inferExact (decl (g_, d_), tm2) in
         let v2_ = toIntro (b2_, (l_, IntSyn.id)) in
-        (Pi_ (tm1', tm2'), Intro (IntSyn.Pi ((d_, IntSyn.Maybe), v2_)), l_)
-    | g_, Lam_ (tm1, tm2) ->
+        (Pi (tm1', tm2'), Intro (IntSyn.Pi ((d_, IntSyn.Maybe), v2_)), l_)
+    | g_, Lam (tm1, tm2) ->
         let tm1', d_ = inferExactDec (g_, tm1) in
         let tm2', b2_, v2_ = inferExact (decl (g_, d_), tm2) in
         let u2_ = toIntro (b2_, (v2_, IntSyn.id)) in
-        ( Lam_ (tm1', tm2'),
+        ( Lam (tm1', tm2'),
           Intro (IntSyn.Lam (d_, u2_)),
           IntSyn.Pi ((d_, IntSyn.Maybe), v2_) )
-    | g_, App_ (tm1, tm2) ->
+    | g_, App (tm1, tm2) ->
         let tm1', b1_, v1_ = inferExact (g_, tm1) in
         let e1_ = toElim b1_ in
         Display.(
@@ -1227,7 +1241,7 @@ struct
                    (Index object(s) did not match)" )
             in
             let u2_ = toIntro (b2_, (va, s)) in
-            ( App_ (tm1', tm2'),
+            ( App (tm1', tm2'),
               Elim (elimApp (e1_, u2_)),
               eClo (vr, Whnf.dotEta (exp u2_, s)) )
           end
@@ -1322,14 +1336,14 @@ struct
       end
     end
 
-  and inferExactDec (g_, Dec_ (name, tm, r)) =
+  and inferExactDec (g_, Dec (name, tm, r)) =
     let tm', b1_, _ (* Uni Type *) = inferExact (g_, tm) in
     let v1_ = toIntro (b1_, (IntSyn.Uni Type, IntSyn.id)) in
     let d_ = IntSyn.Dec (name, v1_) in
-    (Dec_ (name, tm', r), d_)
+    (Dec (name, tm', r), d_)
 
   and checkExact1 = function
-    | g_, Lam_ (Dec_ (name, tm1, r), tm2), vhs ->
+    | g_, Lam (Dec (name, tm1, r), tm2), vhs ->
         let Pi ((Dec (_, va), _), vr), s = Whnf.whnfExpandDef vhs in
         let (tm1', b1_, _ (* Uni Type *)), ok1 =
           unifyExact (g_, tm1, (va, s))
@@ -1337,13 +1351,12 @@ struct
         let v1_ = toIntro (b1_, (IntSyn.Uni Type, IntSyn.id)) in
         let d_ = IntSyn.Dec (name, v1_) in
         let (tm2', b2_, v2_), ok2 =
-          begin if ok1 then
-            checkExact1 (decl (g_, d_), tm2, (vr, IntSyn.dot1 s))
+          begin if ok1 then checkExact1 (decl (g_, d_), tm2, (vr, IntSyn.dot1 s))
           else (inferExact (decl (g_, d_), tm2), false)
           end
         in
         let u2_ = toIntro (b2_, (v2_, IntSyn.id)) in
-        ( ( Lam_ (Dec_ (name, tm1', r), tm2'),
+        ( ( Lam (Dec (name, tm1', r), tm2'),
             Intro (IntSyn.Lam (d_, u2_)),
             IntSyn.Pi ((d_, IntSyn.Maybe), v2_) ),
           ok2 )
@@ -1437,7 +1450,7 @@ struct
     end
 
   and unifyExact = function
-    | g_, Arrow_ (tm1, tm2), vhs ->
+    | g_, Arrow (tm1, tm2), vhs ->
         let Pi ((Dec (_, va), _), vr), s = Whnf.whnfExpandDef vhs in
         let (tm1', b1_, _ (* Uni Type *)), ok1 =
           unifyExact (g_, tm1, (va, s))
@@ -1446,13 +1459,13 @@ struct
         let d_ = IntSyn.Dec (None, v1_) in
         let tm2', b2_, l_ = inferExact (g_, tm2) in
         let v2_ = toIntro (b2_, (l_, IntSyn.id)) in
-        ( ( Arrow_ (tm1', tm2'),
+        ( ( Arrow (tm1', tm2'),
             Intro (IntSyn.Pi ((d_, IntSyn.No), eClo (v2_, IntSyn.shift))),
             l_ ),
           ok1
           && unifiableIdem
                (decl (g_, d_), (vr, IntSyn.dot1 s), (v2_, IntSyn.shift)) )
-    | g_, Pi_ (Dec_ (name, tm1, r), tm2), vhs ->
+    | g_, Pi (Dec (name, tm1, r), tm2), vhs ->
         let Pi ((Dec (_, va), _), vr), s = Whnf.whnfExpandDef vhs in
         let (tm1', b1_, _ (* Uni Type *)), ok1 =
           unifyExact (g_, tm1, (va, s))
@@ -1465,7 +1478,7 @@ struct
           end
         in
         let v2_ = toIntro (b2_, (l_, IntSyn.id)) in
-        ( ( Pi_ (Dec_ (name, tm1', r), tm2'),
+        ( ( Pi (Dec (name, tm1', r), tm2'),
             Intro (IntSyn.Pi ((d_, IntSyn.Maybe), v2_)),
             l_ ),
           ok2 )
@@ -1500,7 +1513,7 @@ struct
     | Fvar (name, r), os, rs, i ->
         let r' = List.foldr Paths.join r rs in
         (Paths.root (r', Paths.leaf r, 0, i, os), r')
-    | App_ (tm1, tm2), os, rs, i ->
+    | App (tm1, tm2), os, rs, i ->
         let oc2, r2 = occIntro tm2 in
         occElim (tm1, Paths.app (oc2, os), r2 :: rs, i + 1)
     | Hastype (tm1, tm2), os, rs, i -> occElim (tm1, os, rs, i)
@@ -1509,17 +1522,17 @@ struct
         (Paths.leaf r', r')
 
   and occIntro = function
-    | Arrow_ (tm1, tm2) ->
+    | Arrow (tm1, tm2) ->
         let oc1, r1 = occIntro tm1 in
         let oc2, r2 = occIntro tm2 in
         let r' = Paths.join (r1, r2) in
         (Paths.bind (r', Some oc1, oc2), r')
-    | Pi_ (Dec_ (name, tm1, r), tm2) ->
+    | Pi (Dec (name, tm1, r), tm2) ->
         let oc1, r1 = occIntro tm1 in
         let oc2, r2 = occIntro tm2 in
         let r' = Paths.join (r, r2) in
         (Paths.bind (r', Some oc1, oc2), r')
-    | Lam_ (Dec_ (name, tm1, r), tm2) ->
+    | Lam (Dec (name, tm1, r), tm2) ->
         let oc1, r1 = occIntro tm1 in
         let oc2, r2 = occIntro tm2 in
         let r' = Paths.join (r, r2) in

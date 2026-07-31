@@ -1,3 +1,9 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+
 (* # 1 "src/compress/Syntax.sig.ml" *)
 
 (* # 1 "src/compress/Syntax.fun.ml" *)

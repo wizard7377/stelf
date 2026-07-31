@@ -1,3 +1,12 @@
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Print
+open! Print.Print_
+
 (** Constants that are no longer reachable under their own name.
 
     A [%scope]'s components stop being bare-visible once the scope closes, so a

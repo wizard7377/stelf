@@ -1,3 +1,10 @@
+open! Basis
+open! Timing
+open! Timing.Timing_
+open! Frontend
+open! Frontend.Frontend_
+open! Smlofnj
+
 (* # 1 "src/server/SigintSmlnj.sig.ml" *)
 
 (* # 1 "src/server/SigintSmlnj.fun.ml" *)

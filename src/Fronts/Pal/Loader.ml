@@ -9,13 +9,14 @@ type source = File of Fpath.t | Input of string
 
 (** Outcome of trying to read a file as a project config.
 
-    This is deliberately three-valued. It used to be [Project.Format.file
-    option], where [None] meant both "not a config file" and "a config file that
-    failed to parse" — and callers took the only reasonable action for the
-    former, which is to fall back to loading the file as LF source. Because
-    STELF sources are literate by default, that fallback *succeeds* on a broken
-    [stelf.toml]: the file has no [%] commands, so it parses as an empty
-    signature and the whole check exits 0 having done nothing.
+    This is deliberately three-valued. It used to be
+    [Project.Format.file option], where [None] meant both "not a config file"
+    and "a config file that failed to parse" — and callers took the only
+    reasonable action for the former, which is to fall back to loading the file
+    as LF source. Because STELF sources are literate by default, that fallback
+    *succeeds* on a broken [stelf.toml]: the file has no [%] commands, so it
+    parses as an empty signature and the whole check exits 0 having done
+    nothing.
 
     Keeping [Not_config] and [Bad_config] apart is what lets the fallback stay
     where it belongs while a malformed config becomes a real error. *)
@@ -23,7 +24,8 @@ type toml_result =
   | Config of Project.Format.file
       (** Parsed as a project config; load it as one. *)
   | Not_config
-      (** Not a config file. Callers should fall back to loading it as source. *)
+      (** Not a config file. Callers should fall back to loading it as source.
+      *)
   | Bad_config of string
       (** It *is* a config file — [.toml] extension — but it is broken. Callers
           must surface this as an error; falling back would hide it. *)

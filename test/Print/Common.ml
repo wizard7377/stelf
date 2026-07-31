@@ -1,3 +1,12 @@
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Print
+open! Print.Print_
+
 (* Installs [cmds] through the real Pal pipeline, then renders the
    declaration named [name] (in the given qualifying scopes, outermost
    first) back to a string via [conDecToString], with [Global.printArrowSugar]

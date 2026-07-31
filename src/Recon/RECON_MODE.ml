@@ -1,3 +1,18 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Table
+open! Table.Table_
+open! Msg
+open! Msg.Msg_
+open! Print
+open! Print.Print_
+open! Debug
+
 module type RECON_MODE = sig
   module M : S.S
   module Cst = M.Cst

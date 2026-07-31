@@ -1,3 +1,16 @@
+open! Basis
+open! Global
+open! Global.Global_
+open! Table
+open! Table.Table_
+open! Intsyn
+open! Intsyn.Lambda_
+open! Names
+open! Names.Names_
+open! Paths
+open! Paths.Paths_
+open! Typecheck
+open! Typecheck.Typecheck_
 include module type of MODSYN
 
 module ModSyn (ModSyn__0 : sig
