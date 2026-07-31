@@ -43,13 +43,13 @@ module type CS_EQ_FIELD = sig
   val fromExp : IntSyn.eclo -> sum_
   val toExp : sum_ -> IntSyn.exp
   val normalize : sum_ -> sum_
-  val compatibleMon : mon_ * mon_ -> bool
+  val compatibleMon : mon_ -> mon_ -> bool
 
   (* Internal expressions constructors *)
   val number : unit -> IntSyn.exp
   val unaryMinus : IntSyn.exp -> IntSyn.exp
-  val plus : IntSyn.exp * IntSyn.exp -> IntSyn.exp
-  val minus : IntSyn.exp * IntSyn.exp -> IntSyn.exp
-  val times : IntSyn.exp * IntSyn.exp -> IntSyn.exp
+  val plus : IntSyn.exp -> IntSyn.exp -> IntSyn.exp
+  val minus : IntSyn.exp -> IntSyn.exp -> IntSyn.exp
+  val times : IntSyn.exp -> IntSyn.exp -> IntSyn.exp
   val constant : Field.number -> IntSyn.exp
 end

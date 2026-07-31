@@ -364,7 +364,7 @@ end) : Cs.CS = struct
       let find (i, (l : label)) =
         begin match l.owner with
         | Var (_g_, mon') ->
-            begin if compatibleMon (mon, mon') then raise (Found i) else ()
+            begin if compatibleMon mon mon' then raise (Found i) else ()
             end
         | _ -> ()
         end
@@ -1073,7 +1073,7 @@ end) : Cs.CS = struct
           try
             begin if isZeroExp u2_ then Some (solveGt0 u1_)
             else
-              let w_ = minus (u1_, u2_) in
+              let w_ = minus u1_ u2_ in
               let proof = solveGt0 w_ in
               Some (gtAdd (w_, constant zero, u2_, proof))
             end
@@ -1106,7 +1106,7 @@ end) : Cs.CS = struct
           try
             begin if isZeroExp u2_ then Some (solveGeq0 u1_)
             else
-              let w_ = minus (u1_, u2_) in
+              let w_ = minus u1_ u2_ in
               let proof = solveGeq0 w_ in
               Some (geqAdd (w_, constant zero, u2_, proof))
             end
@@ -1199,11 +1199,11 @@ end) : Cs.CS = struct
                                             Root (BVar 2, Nil) ),
                                         gt
                                           ( plus
-                                              ( Root (BVar 4, Nil),
-                                                Root (BVar 2, Nil) ),
+                                              (Root (BVar 4, Nil))
+                                              (Root (BVar 2, Nil)),
                                             plus
-                                              ( Root (BVar 3, Nil),
-                                                Root (BVar 2, Nil) ) ) ) ) ) ),
+                                              (Root (BVar 3, Nil))
+                                              (Root (BVar 2, Nil)) ) ) ) ) ),
                         Type ),
                     None,
                     [] );
@@ -1230,11 +1230,11 @@ end) : Cs.CS = struct
                                               Root (BVar 2, Nil) ),
                                           geq
                                             ( plus
-                                                ( Root (BVar 4, Nil),
-                                                  Root (BVar 2, Nil) ),
+                                                (Root (BVar 4, Nil))
+                                                (Root (BVar 2, Nil)),
                                               plus
-                                                ( Root (BVar 3, Nil),
-                                                  Root (BVar 2, Nil) ) ) ) ) )
+                                                (Root (BVar 3, Nil))
+                                                (Root (BVar 2, Nil)) ) ) ) )
                             ),
                           Type ),
                       None,

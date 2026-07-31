@@ -657,17 +657,17 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
   let fromExp = fromExp
   let toExp = toExp
   let normalize = normalizeSum
-  let compatibleMon = compatibleMon
+  let compatibleMon a b = compatibleMon (a, b)
   let number = number
   let unaryMinus u_ = toFgn (unaryMinusSum (fromExp (u_, IntSyn.id)))
 
-  let plus (u_, v_) =
+  let plus u_ v_ =
     toFgn (plusSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
 
-  let minus (u_, v_) =
+  let minus u_ v_ =
     toFgn (minusSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
 
-  let times (u_, v_) =
+  let times u_ v_ =
     toFgn (timesSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
 
   let constant = numberExp
