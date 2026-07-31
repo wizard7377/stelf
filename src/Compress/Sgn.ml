@@ -67,7 +67,7 @@ module Sgn = struct
       abbreviation = false;
     }
 
-  let tycondec (s, k, ok) =
+  let tycondec s k ok =
     {
       name = s;
       classifier = Kclass k;
@@ -118,13 +118,16 @@ module Sgn = struct
     }
 
   let typeOfSigent (e : sigent) = Syntax.typeOf ((fun r -> r.classifier) e)
-  let setter table (n, x) = Array.update (table, n, Some x)
+  let setter table n x = Array.update (table, n, Some x)
   let getter table id = Array.sub (table, id)
   let set_modes = setter all_modes
   let get_modes = getter all_modes
   let set_p = setter all_ps
   let get_p = getter all_ps
-  let update = setter sigma
+
+  (* `update` is still tupled in SGN: the name carries two different arities
+     across signatures, so it is out of scope for the mechanical pass. *)
+  let update (n, x) = setter sigma n x
   let sub = getter sigma
 
   let classifier id =

@@ -319,7 +319,7 @@ struct
     | cid, IntSyn.ConDec (name, None, _, normal_, k, IntSyn.Kind) ->
         let x = xlate_kind k in
         let modes = Sgn.get_modes cid in
-        Sgn.tycondec (name, compress_kind [] (modes, x), x)
+        Sgn.tycondec name (compress_kind [] (modes, x)) x
     | cid, IntSyn.ConDef (name, None, _, m, a, I.Type, _) ->
         let m = xlate_term m in
         let a = xlate_type a in
@@ -406,7 +406,7 @@ struct
     in
     let total_args = count_args ak in
     let can_omit ms =
-      ignore (Sgn.set_modes (cid, ms));
+      ignore (Sgn.set_modes cid ms);
       let s = compress (cid, I.sgnLookup cid) in
       let t = Sgn.typeOfSigent s in
       let isValid = Reductio.check_plusconst_strictness t in
@@ -473,7 +473,7 @@ struct
     else begin
       setModesUpTo (x - 1) f;
       begin
-        Sgn.set_modes (x, f x);
+        Sgn.set_modes x (f x);
         ()
       end
     end
@@ -483,7 +483,7 @@ struct
     try
       let modes = f n in
       begin
-        Sgn.set_modes (n, modes);
+        Sgn.set_modes n modes;
         Sgn.update (n, compress (n, IntSyn.sgnLookup n))
       end
     with NoModes -> ()
@@ -498,7 +498,7 @@ struct
             try
               let modes = f n0 in
               begin
-                Sgn.set_modes (n0, modes);
+                Sgn.set_modes n0 modes;
                 begin
                   Sgn.update (n0, compress (n0, IntSyn.sgnLookup n0));
                   begin if n0 mod 100 = 0 then print (Int.toString n0 ^ "\n")

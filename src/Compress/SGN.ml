@@ -17,7 +17,7 @@ module type SGN = sig
   type def = Def_none | Def_term of Syntax.term | Def_type of Syntax.tp
 
   val condec : string * Syntax.tp * Syntax.tp -> sigent
-  val tycondec : string * Syntax.knd * Syntax.knd -> sigent
+  val tycondec : string -> Syntax.knd -> Syntax.knd -> sigent
 
   val defn :
     string * Syntax.tp * Syntax.tp * Syntax.term * Syntax.term -> sigent
@@ -40,8 +40,8 @@ module type SGN = sig
   val sub : int -> sigent option
   val clear : unit -> unit
   val get_modes : int -> Syntax.mode list option
-  val set_modes : int * Syntax.mode list -> unit
+  val set_modes : int -> Syntax.mode list -> unit
   val get_p : int -> bool option
-  val set_p : int * bool -> unit
+  val set_p : int -> bool -> unit
   val abbreviation : int -> bool
 end

@@ -20,5 +20,5 @@ module type COMPRESS = sig
 
   val sgnCompressUpTo : int -> unit
   val check : Syntax.tp list * Syntax.term * Syntax.tp -> bool
-  val set_modes : int * Syntax.mode list -> unit
+  val set_modes : int -> Syntax.mode list -> unit
 end
