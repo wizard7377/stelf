@@ -1,0 +1,7 @@
+; Refactoring tool: converts SML-style tuple-argument functions to curried form.
+; Depends on nothing in src/, so the compiler-libs vs. project module-name
+; collisions noted in CLAUDE.md (Lambda / Lexer / Parser) do not arise here.
+
+(executable
+ (name curry)
+ (libraries compiler-libs.common))
