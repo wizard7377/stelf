@@ -313,7 +313,24 @@ let analyse file src ast =
         in
         if ok arg.ptyp_loc && List.for_all (fun p -> ok p.ptyp_loc) parts then begin
           let s, e = expand_parens src arg.ptyp_loc.loc_start.pos_cnum arg.ptyp_loc.loc_end.pos_cnum in
-          let repl = String.concat " -> " (List.map (fun p -> sub src p.ptyp_loc) parts) in
+          (* An arrow component MUST keep its parentheses. Parens are not AST
+             nodes, so a parenthesised type's ptyp_loc excludes them and
+             `sub src p.ptyp_loc` hands back the bare arrow -- joining with
+             " -> " then reassociates it into extra arguments:
+
+               val suspend : 'a trail * ('a -> 'b) -> 'b trail
+                          -> 'a trail -> 'a -> 'b -> 'b trail     (wrong)
+
+             `*` binds tighter than `->`, so a tuple component is never itself a
+             tuple; the arrow is the only case that needs re-wrapping. Note the
+             result can be a well-formed but *different* type
+             (`(int -> int) * int -> int` -> `int -> int -> int -> int`), caught
+             only when the definition fails to match its signature. *)
+          let paren_ty (p : core_type) =
+            let t = sub src p.ptyp_loc in
+            match p.ptyp_desc with Ptyp_arrow _ -> "(" ^ t ^ ")" | _ -> t
+          in
+          let repl = String.concat " -> " (List.map paren_ty parts) in
           add { file; s; e; repl; kind = "SIG"; line = line arg.ptyp_loc; note = vd.pval_name.txt }
         end
     | _ -> ()
