@@ -353,7 +353,7 @@ module MakeConverter
         | I.Nil, M.Mnil -> []
         | I.App (u_, s'_), M.Mapp (M.Marg (m', _), mS) ->
             let l_ = args (s'_, mS) in
-            if M.modeEqual (m, m') then u_ :: l_ else l_
+            if M.modeEqual m m' then u_ :: l_ else l_
       in
       let rec strengthenArgs = function
         | [], s -> []

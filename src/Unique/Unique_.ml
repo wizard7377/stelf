@@ -469,7 +469,7 @@ module MakeUnique
           ("Checking uniqueness modes for family " ^ cName a) ^ "\n")
     in
     let _ =
-      try UniqueCheck.checkMode (a, ms)
+      try UniqueCheck.checkMode a ms
       with UniqueCheck.Error msg ->
         raise (Error ((("Uniqueness mode checking " ^ cName a) ^ ":\n") ^ msg))
     in

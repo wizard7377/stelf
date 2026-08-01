@@ -34,6 +34,6 @@ module type MODESYN = sig
   type modeSpine = Mnil | Mapp of marg * modeSpine
   and marg = Marg of mode * string option [@@deriving eq, ord, show]
 
-  val modeEqual : mode * mode -> bool
+  val modeEqual : mode -> mode -> bool
   val modeToString : mode -> string
 end

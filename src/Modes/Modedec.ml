@@ -152,7 +152,7 @@ module MakeModeDec () : MODEDEC = struct
       in
       abstractMode' (ms, mS, 1)
 
-    let shortToFull (a, mS, r) =
+    let shortToFull a mS r =
       let calcImplicit' = function
         | I.ConDec (_, _, k, _, v_, _) ->
             abstractMode (inferMode (empty (k, I.Null, v_), mS), mS)
@@ -166,7 +166,7 @@ module MakeModeDec () : MODEDEC = struct
         end
       with Error msg -> error (r, msg)
 
-    let checkFull (a, mS, r) =
+    let checkFull a mS r =
       try
         begin
           checkName mS;
@@ -183,14 +183,14 @@ module MakeModeDec () : MODEDEC = struct
         end
       with Error msg -> error (r, msg)
 
-    let rec checkPure = function
+    let rec checkPure a1 b1 = match a1, b1 with
       | (a, M.Mnil), r -> ()
       | (a, M.Mapp (M.Marg (M.Minus1, _), mS)), r ->
           error
             ( r,
               "Uniqueness modes (-1) not permitted in `%mode' declarations \
                (use `%unique')" )
-      | (a, M.Mapp (_, mS)), r -> checkPure ((a, mS), r)
+      | (a, M.Mapp (_, mS)), r -> checkPure (a, mS) r
   end
 
   (* Representation invariant:

@@ -68,7 +68,7 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
                    ^ " in mode declaration"))
           | Some cid ->
               if spine = [] then begin
-                let mS = ModeDec.shortToFull (cid, Modes.Mnil, ghost_region) in
+                let mS = ModeDec.shortToFull cid Modes.Mnil ghost_region in
                 ((cid, mS), Paths.Reg (0, 0))
               end
               else begin
@@ -92,13 +92,13 @@ module Make_ReconMode (M : S.S) : RECON_MODE with module M = M = struct
                    short-form first and only reinterpret as full-form spine on
                    "too many modes specified". *)
                 try
-                  let mS = ModeDec.shortToFull (cid, mS_user, ghost_region) in
+                  let mS = ModeDec.shortToFull cid mS_user ghost_region in
                   ((cid, mS), Paths.Reg (0, 0))
                 with
                 | ModeDec.Error msg
                 when string_contains ~needle:"Too many modes specified" msg
                 ->
-                  ModeDec.checkFull (cid, mS_user, ghost_region);
+                  ModeDec.checkFull cid mS_user ghost_region;
                   ((cid, mS_user), Paths.Reg (0, 0))
               end
           end

@@ -680,15 +680,15 @@ module Impl () = struct
                 ++ shown Cst.show_modeDec md))
           in
           let mdec, _r = Recon.ReconMode.modeToMode md in
-          let cid, _ = mdec in
+          let cid, mS = mdec in
           (match ModeTable.modeLookup cid with
           | Some _ when Subordinate.Subordinate_.Subordinate.frozen [ cid ] ->
               failwith'
                 ("Cannot redeclare mode for frozen constant "
                 ^ Names.qidToString (Names.constQid cid))
           | _ -> ());
-          ModeTable.installMode mdec;
-          ModeCheck.checkMode mdec;
+          ModeTable.installMode cid mS;
+          ModeCheck.checkMode cid mS;
           []
       | Cst.TotalCmd_ (intros, body) ->
           let t_, rrs = build_thm_tdecl "%total" intros body in
@@ -724,8 +724,8 @@ module Impl () = struct
           in
           begin match mdec_opt with
           | None -> [ Reply.Response "unique: expected a type family name\n" ]
-          | Some ((cid, _) as mdec) ->
-              UniqueTable.installMode mdec;
+          | Some ((cid, mS) as mdec) ->
+              UniqueTable.installMode cid mS;
               Unique.checkUnique mdec;
               []
           end

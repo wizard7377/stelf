@@ -166,7 +166,7 @@ end) : RECON_MODE = struct
         in
         let a, mS = convertExp (Whnf.normalize (v_, I.id)) in
         begin
-          ModeDec.checkFull (a, mS, r);
+          ModeDec.checkFull a mS r;
           ((a, mS), r)
         end
 
@@ -187,7 +187,7 @@ end) : RECON_MODE = struct
                   ("Undeclared identifier "
                   ^ Names.qidToString (valOf (Names.constUndef qid)))
                   ^ " in mode declaration" )
-          | Some cid -> ((cid, ModeDec.shortToFull (cid, mS, r)), r)
+          | Some cid -> ((cid, ModeDec.shortToFull cid mS r), r)
           end
       | _ -> error (Paths.Reg (0, 0), "Internal mode declaration state")
   end

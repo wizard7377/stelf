@@ -319,7 +319,7 @@ end) : TOTAL = struct
         (("Output coverage checking family " ^ N.qidToString (N.constQid a))
         ^ "\n")
     in
-    ignore (ModeCheck.checkFreeOut (a, ms));
+    ignore (ModeCheck.checkFreeOut a ms);
     let cs = Index.lookup a in
     let _ =
       try

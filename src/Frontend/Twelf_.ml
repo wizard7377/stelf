@@ -418,7 +418,9 @@ end) : TWELF.STELF = struct
 
     let installConDec fromCS (conDec, ((fileName, ocOpt) as fileNameocOpt), r) =
       let _ =
-        Timers.time Timers.modes ModeCheck.checkD (conDec, fileName, ocOpt)
+        Timers.time Timers.modes
+          (fun () -> ModeCheck.checkD conDec fileName ocOpt)
+          ()
       in
       let cid = IntSyn.sgnAdd conDec in
       let _ =
@@ -808,7 +810,7 @@ end) : TWELF.STELF = struct
             | [] -> ()
             | a :: la_ ->
                 let (Some ms) = ModeTable.modeLookup a in
-                ignore (ModeCheck.checkFreeOut (a, ms));
+                ignore (ModeCheck.checkFreeOut a ms);
                 checkFreeOut la_
           in
           ignore (checkFreeOut cids);
@@ -893,10 +895,10 @@ end) : TWELF.STELF = struct
           let _ =
             List.app
               (function
-                | ((a, _) as mdec), r -> (
+                | (a, mS), r -> (
                     try
                       begin match IntSyn.conDecStatus (IntSyn.sgnLookup a) with
-                      | normal_ -> ModeTable.installMode mdec
+                      | normal_ -> ModeTable.installMode a mS
                       | _ ->
                           raise
                             (ModeTable.Error
@@ -906,12 +908,12 @@ end) : TWELF.STELF = struct
                       raise (ModeTable.Error (Paths.wrap (r, msg)))))
               mdecs
           in
-          ignore (List.app (function mdec -> ModeDec.checkPure mdec) mdecs);
+          ignore (List.app (function mdec, r -> ModeDec.checkPure mdec r) mdecs);
           let _ =
             List.app
               (function
-                | mdec, r -> (
-                    try ModeCheck.checkMode mdec
+                | (a, mS), r -> (
+                    try ModeCheck.checkMode a mS
                     with ModeCheck.Error msg -> raise (ModeCheck.Error msg)))
               mdecs
           in
@@ -929,10 +931,10 @@ end) : TWELF.STELF = struct
           let _ =
             List.app
               (function
-                | ((a, _) as mdec), r -> (
+                | (a, mS), r -> (
                     try
                       begin match IntSyn.conDecStatus (IntSyn.sgnLookup a) with
-                      | normal_ -> UniqueTable.installMode mdec
+                      | normal_ -> UniqueTable.installMode a mS
                       | _ ->
                           raise
                             (UniqueTable.Error
@@ -962,7 +964,7 @@ end) : TWELF.STELF = struct
       | fileName, (Parser.CoversDec mterms, r) ->
           let mdecs = List.map ReconMode.modeToMode mterms in
           ignore (ReconTerm.checkErrors r);
-          ignore (List.app (function mdec -> ModeDec.checkPure mdec) mdecs);
+          ignore (List.app (function mdec, r -> ModeDec.checkPure mdec r) mdecs);
           let _ =
             List.app
               (function
@@ -1085,7 +1087,7 @@ end) : TWELF.STELF = struct
                   ( Modes.Modesyn.ModeSyn.Marg (convert_mode m, name),
                     convert_mode_spine tail )
           in
-          ignore (ModeTable.installMode (cid, convert_mode_spine ms_));
+          ignore (ModeTable.installMode cid (convert_mode_spine ms_));
           let _ =
             Display.chatter_s 3 (("%theorem " ^ Print.conDecToString e_) ^ "\n")
           in
@@ -1108,7 +1110,7 @@ end) : TWELF.STELF = struct
                       Display.chatter_s 3
                         (("%mode "
                          ^ ModePrint.modeToString
-                             (a, valOf (ModeTable.modeLookup a)))
+                             a (valOf (ModeTable.modeLookup a)))
                         ^ ".\n"))
                 la_
             else [ () ]
@@ -1147,7 +1149,7 @@ end) : TWELF.STELF = struct
                       Display.chatter_s 3
                         (("%mode "
                          ^ ModePrint.modeToString
-                             (a, valOf (ModeTable.modeLookup a)))
+                             a (valOf (ModeTable.modeLookup a)))
                         ^ ".\n"))
                 la_
             else [ () ]
@@ -1180,7 +1182,7 @@ end) : TWELF.STELF = struct
                       Display.chatter_s 3
                         (("%mode "
                          ^ ModePrint.modeToString
-                             (a, valOf (ModeTable.modeLookup a)))
+                             a (valOf (ModeTable.modeLookup a)))
                         ^ ".\n"))
                 la_
             else [ () ]
@@ -1505,7 +1507,7 @@ end) : TWELF.STELF = struct
         | CsManager.Fixity.Prefix p -> Names.Fixity.Prefix (convert_prec p)
         | CsManager.Fixity.Postfix p -> Names.Fixity.Postfix (convert_prec p)
       in
-      ignore (ModeCheck.checkD (conDec, "%use", None));
+      ignore (ModeCheck.checkD conDec ("%use") None);
       let cid =
         installConDec IntSyn.FromCS (conDec, ("", None), Paths.Reg (0, 0))
       in
@@ -1534,7 +1536,7 @@ end) : TWELF.STELF = struct
       let _ =
         List.app
           (function
-            | mdec -> ModeTable.installMmode (cid, convert_mode_spine mdec))
+            | mdec -> ModeTable.installMmode cid (convert_mode_spine mdec))
           mdecL
       in
       cid

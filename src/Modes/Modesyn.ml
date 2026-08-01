@@ -43,7 +43,7 @@ module ModeSyn : MODESYN = struct
   and marg = Marg of mode * string option [@@deriving eq, ord, show]
 
   (* modeEqual (M1, M2) = true iff M1 = M2 *)
-  let modeEqual = function
+  let modeEqual a1 b1 = match a1, b1 with
     | Plus, Plus -> true
     | Star, Star -> true
     | Minus, Minus -> true

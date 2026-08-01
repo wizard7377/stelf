@@ -829,7 +829,7 @@ module MakeModeCheck
 
        (occOpt is used in error messages)
     *)
-    let checkD (conDec, fileName, occOpt) =
+    let checkD conDec fileName occOpt =
       ignore (checkFree := false);
       let rec checkable = function
         | I.Root (ha, _) ->
@@ -873,7 +873,7 @@ module MakeModeCheck
           checkAll clist
         end
 
-    let checkMode (a, ms) =
+    let checkMode a ms =
       let _ =
         begin if !Global.chatter > 3 then
           print'
@@ -891,7 +891,7 @@ module MakeModeCheck
       in
       ()
 
-    let checkFreeOut (a, ms) =
+    let checkFreeOut a ms =
       let _ =
         begin if !Global.chatter > 3 then
           print'
