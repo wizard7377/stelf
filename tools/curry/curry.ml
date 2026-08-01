@@ -505,8 +505,11 @@ let non_overlapping eds =
   (List.rev kept, List.rev dropped)
 
 let () =
-  let cmd = if Array.length Sys.argv > 1 then Sys.argv.(1) else "locate" in
-  let scope = if Array.length Sys.argv > 2 then Some Sys.argv.(2) else None in
+  let args = List.tl (Array.to_list Sys.argv) in
+  let with_escalate = List.mem "--with-escalate" args in
+  let args = List.filter (fun a -> not (String.length a > 1 && a.[0] = '-')) args in
+  let cmd = match args with c :: _ -> c | [] -> "locate" in
+  let scope = match args with _ :: s :: _ -> Some s | _ -> None in
   let files = all_files scan_roots in
   collect_targets files;
   (match scope with
@@ -534,10 +537,20 @@ let () =
           | src, ast -> analyse f src ast)
         files;
       let all = !edits in
-      (* ESCALATE, VALUEUSE and DECLINE are report-only: never applied by
-         `patch`. Whitelisting the four auto kinds -- rather than blacklisting --
-         is what makes adding a report-only kind safe. *)
-      let auto = List.filter (fun e -> List.mem e.kind [ "SIG"; "DEF"; "DEFFUN"; "CALL" ]) all in
+      (* VALUEUSE and DECLINE are report-only: never applied by `patch`.
+         Whitelisting the applied kinds -- rather than blacklisting -- is what
+         makes adding a report-only kind safe.
+
+         ESCALATE joins them under --with-escalate. Leaving it out is not the
+         safe default it looks like: every escalated site's name also receives a
+         SIG edit (126 of 126, checked), so skipping the call sites while
+         currying their signature yields 126 guaranteed type errors rather than
+         126 preserved call sites. The kind is kept separate so `locate` still
+         reports them and the review record survives. *)
+      let kinds =
+        [ "SIG"; "DEF"; "DEFFUN"; "CALL" ] @ if with_escalate then [ "ESCALATE" ] else []
+      in
+      let auto = List.filter (fun e -> List.mem e.kind kinds) all in
       let kept, deferred = non_overlapping auto in
       (all, auto, kept, deferred)
     in
@@ -626,5 +639,6 @@ let () =
       rounds 1 max_int;
       Printf.eprintf "patched %d edits across %d file-writes total\n" !total_e !total_f
     end
-    else (Printf.eprintf "usage: curry [targets|locate|patch]\n"; exit 1)
+    else
+      (Printf.eprintf "usage: curry [targets|locate|patch] [scope] [--with-escalate]\n"; exit 1)
   end
