@@ -17,7 +17,7 @@ module Integers (Integer : INTEGER) : INTEGERS = struct
   let zero = fromInt 0
   let one = fromInt 1
 
-  let solve_gcd (m, n) =
+  let solve_gcd m n =
     let rec solve' (m, n) =
       let q = quot (m, n) in
       let r = rem (m, n) in
@@ -36,11 +36,11 @@ module Integers (Integer : INTEGER) : INTEGERS = struct
     else (function x, y -> (sm * y, sn * x)) (solve' (an, am))
     end
 
-  let gcd (m, n) =
-    let x, y = solve_gcd (m, n) in
+  let gcd m n =
+    let x, y = solve_gcd m n in
     (m * x) + (n * y)
 
-  let lcm (m, n) = quot (m * n, gcd (m, n))
+  let lcm m n = quot (m * n, gcd m n)
 
   let fromString str =
     let check = function

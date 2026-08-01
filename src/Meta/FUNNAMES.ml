@@ -47,7 +47,7 @@ module type FUNNAMES = sig
 
   (* Constant names and fixities *)
   val reset : unit -> unit
-  val installName : string * FunSyn.lemma -> unit
+  val installName : string -> FunSyn.lemma -> unit
   val nameLookup : string -> FunSyn.lemma option
   val constName : FunSyn.lemma -> string
 end

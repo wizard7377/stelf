@@ -11,7 +11,7 @@ module type SPARSE_ARRAY = sig
   val array : 'a -> 'a array
   val sub : 'a array * int -> 'a
   val update : 'a array * int * 'a -> unit
-  val extract : 'a array * int * int -> 'a Vector.vector
+  val extract : 'a array -> int -> int -> 'a Vector.vector
 
   type 'a __0 = {
     src : 'a Vector.vector;

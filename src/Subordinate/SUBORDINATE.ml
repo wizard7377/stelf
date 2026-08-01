@@ -36,27 +36,27 @@ module type SUBORDINATE = sig
   val frozen : IntSyn.cid list -> bool
   (** reverse transitive thaw, returns thawed cids *)
 
-  val addSubord : IntSyn.cid * IntSyn.cid -> unit
+  val addSubord : IntSyn.cid -> IntSyn.cid -> unit
   (** any cid in list frozen? *)
 
-  val below : IntSyn.cid * IntSyn.cid -> bool
+  val below : IntSyn.cid -> IntSyn.cid -> bool
 
-  val belowEq : IntSyn.cid * IntSyn.cid -> bool
+  val belowEq : IntSyn.cid -> IntSyn.cid -> bool
   (** transitive closure *)
 
-  val equiv : IntSyn.cid * IntSyn.cid -> bool
+  val equiv : IntSyn.cid -> IntSyn.cid -> bool
   (** refl. transitive closure *)
 
-  val respects : IntSyn.dctx * IntSyn.eclo -> unit
+  val respects : IntSyn.dctx -> IntSyn.eclo -> unit
   (** mutual dependency *)
 
-  val respectsN : IntSyn.dctx * IntSyn.exp -> unit
+  val respectsN : IntSyn.dctx -> IntSyn.exp -> unit
   (** respects current subordination? *)
 
   val checkNoDef : IntSyn.cid -> unit
   (** respectsN(G, V), V in nf *)
 
-  val weaken : IntSyn.dctx * IntSyn.cid -> IntSyn.sub
+  val weaken : IntSyn.dctx -> IntSyn.cid -> IntSyn.sub
   (** not involved in type-level definition? *)
 
   val show : unit -> unit

@@ -510,7 +510,7 @@ module Reductio = struct
     | _ -> false
 
   and synth = function
-    | g_, ARoot (Var n, s) -> synth' (g_, ctxLookup (g_, n), s)
+    | g_, ARoot (Var n, s) -> synth' (g_, ctxLookup g_ n, s)
     | g_, ARoot (Const n, s) ->
         let b =
           begin match Sgn.classifier n with

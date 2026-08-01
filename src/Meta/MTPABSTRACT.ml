@@ -57,8 +57,8 @@ module type MTPABSTRACT = sig
   (* Approximat formula *)
   (* AF ::= F [s] *)
   (*  | (t, G2), AF *)
-  val weaken : IntSyn.dctx * IntSyn.cid -> IntSyn.sub
-  val raiseType : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
+  val weaken : IntSyn.dctx -> IntSyn.cid -> IntSyn.sub
+  val raiseType : IntSyn.dctx -> IntSyn.exp -> IntSyn.exp
 
   val abstractSub :
     IntSyn.sub
@@ -69,9 +69,7 @@ module type MTPABSTRACT = sig
     (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
 
   val abstractSub' :
-    (IntSyn.dctx * StateSyn.tag IntSyn.ctx)
-    * IntSyn.sub
-    * StateSyn.tag IntSyn.ctx ->
+    IntSyn.dctx * StateSyn.tag IntSyn.ctx -> IntSyn.sub -> StateSyn.tag IntSyn.ctx ->
     (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
 
   val abstractApproxFor : approxFor -> FunSyn.for_

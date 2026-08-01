@@ -164,20 +164,20 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           let psi', g'_ = aux' (g_, b_, n - 1) in
           (psi', I.Decl (g'_, d_))
 
-    let conv (gs_, gs') =
+    let conv gs_ gs' =
       let exception Conv in
-      let rec conv = function
+      let rec conv a1 b1 = match a1, b1 with
         | (I.Null, s), (I.Null, s') -> (s, s')
         | (I.Decl (g_, I.Dec (_, v_)), s), (I.Decl (g'_, I.Dec (_, v'_)), s') ->
-            let s1, s1' = conv ((g_, s), (g'_, s')) in
+            let s1, s1' = conv (g_, s) (g'_, s') in
             let ((s2, s2') as ps) = (I.dot1 s1, I.dot1 s1') in
-            begin if Conv.conv ((v_, s1), (v'_, s1')) then ps else raise Conv
+            begin if Conv.conv (v_, s1) (v'_, s1') then ps else raise Conv
             end
         | _ -> raise Conv
       in
       try
         begin
-          ignore (conv (gs_, gs'));
+          ignore (conv gs_ gs');
           true
         end
       with Conv -> false
@@ -188,11 +188,11 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       | g_, ((I.Uni I.Type, s) as vs_) -> (I.Nil, vs_)
       | g_, ((I.Root _, s) as vs_) -> (I.Nil, vs_)
       | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
-          let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
           (I.App (x_, s_), vs_)
 
-    let createAtomConst (g_, h_) =
+    let createAtomConst g_ h_ =
       let cid =
         begin match h_ with
         | I.Const cid -> cid
@@ -205,15 +205,15 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (h_, s_), vs_)
 
-    let createAtomBVar (g_, k) =
-      let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
+    let createAtomBVar g_ k =
+      let (I.Dec (_, v_)) = I.ctxDec g_ k in
       let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
       (I.Root (I.BVar k, s_), vs_)
 
     let rec someEVars = function
       | g_, [], s -> s
       | g_, I.Dec (_, v_) :: l_, s ->
-          someEVars (g_, l_, I.Dot (I.Exp (I.newEVar (g_, I.EClo (v_, s))), s))
+          someEVars (g_, l_, I.Dot (I.Exp (I.newEVar g_ (I.EClo (v_, s))), s))
 
     let maxNumberParams a =
       let rec maxNumberParams' n =
@@ -247,7 +247,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
 
     let rec ctxSub = function
       | [], s -> []
-      | d_ :: g_, s -> I.decSub (d_, s) :: ctxSub (g_, I.dot1 s)
+      | d_ :: g_, s -> I.decSub d_ s :: ctxSub (g_, I.dot1 s)
 
     let rec createTags = function
       | 0, l -> I.Null
@@ -261,7 +261,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
     let rec constCases = function
       | g_, vs_, [], abstract, ops -> ops
       | g_, vs_, (I.Const c as h_) :: sgn_, abstract, ops ->
-          let u_, vs'_ = createAtomConst (g_, h_) in
+          let u_, vs'_ = createAtomConst g_ h_ in
           constCases
             ( g_,
               vs_,
@@ -269,13 +269,13 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable (g_, vs_, vs'_) then
+                     begin if Unify.unifiable g_ vs_ vs'_ then
                        Active (abstract u_) :: ops
                      else ops
                      end
                    with MTPAbstract.Error _ -> InActive :: ops)) )
       | g_, vs_, (I.Def c as h_) :: sgn_, abstract, ops ->
-          let u_, vs'_ = createAtomConst (g_, h_) in
+          let u_, vs'_ = createAtomConst g_ h_ in
           constCases
             ( g_,
               vs_,
@@ -283,7 +283,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable (g_, vs_, vs'_) then
+                     begin if Unify.unifiable g_ vs_ vs'_ then
                        Active (abstract u_) :: ops
                      else ops
                      end
@@ -295,7 +295,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
     let rec paramCases = function
       | g_, vs_, 0, abstract, ops -> ops
       | g_, vs_, k, abstract, ops ->
-          let u_, vs'_ = createAtomBVar (g_, k) in
+          let u_, vs'_ = createAtomBVar g_ k in
           paramCases
             ( g_,
               vs_,
@@ -303,7 +303,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable (g_, vs_, vs'_) then
+                     begin if Unify.unifiable g_ vs_ vs'_ then
                        Active (abstract u_) :: ops
                      else ops
                      end
@@ -323,13 +323,13 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
         | 0, ops -> ops
         | d', ops ->
             let n = g - d' + 1 in
-            let (I.Dec (_, v_)) = I.ctxDec (g_, n) in
+            let (I.Dec (_, v_)) = I.ctxDec g_ n in
             let ops' =
               begin if I.targetFam v_ = c then
-                let u_, vs'_ = createAtomBVar (g_, n) in
+                let u_, vs'_ = createAtomBVar g_ n in
                 CsManager.trail (function () ->
                     (try
-                       begin if Unify.unifiable (g_, vs_, vs'_) then
+                       begin if Unify.unifiable g_ vs_ vs'_ then
                          Active (abstract u_) :: ops
                        else ops
                        end
@@ -345,7 +345,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       | g_, k, ((I.Root (I.Const c, _) as v_), s'), abstract, cases ->
           cases (c, g_, I.ctxLength g_, (v_, s'), abstract)
       | g_, k, (I.Pi ((d_, p_), v_), s'), abstract, cases ->
-          let d'_ = I.decSub (d_, s') in
+          let d'_ = I.decSub d_ s' in
           lowerSplitDest
             ( I.Decl (g_, d'_),
               k + 1,
@@ -367,7 +367,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
             let ((g''_, b''), s'') : (I.dctx * S.tag I.ctx) * I.sub =
               Obj.magic
                 (MTPAbstract.abstractSub'
-                   ((g'_, b'_), I.Dot (I.Exp u'_, s'), I.Decl (b0, t_)))
+                   (g'_, b'_) (I.Dot (I.Exp u'_, s')) (I.Decl (b0, t_)))
             in
             let _ =
               begin if !Global.doubleCheck then (
@@ -375,7 +375,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                 ignore (TypeCheck.typeCheckCtx (F.makectx psi''));
                 let psi = aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0, t_))) in
                 ignore (TypeCheck.typeCheckCtx (F.makectx psi));
-                FunTypeCheck.checkSub (psi'', s'', psi))
+                FunTypeCheck.checkSub psi'' s'' psi)
               else ()
               end
             in
@@ -409,7 +409,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                     aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0, t_)))
                   in
                   ignore (TypeCheck.typeCheckCtx (F.makectx psi));
-                  FunTypeCheck.checkSub (psi'', s'', psi))
+                  FunTypeCheck.checkSub psi'' s'' psi)
                 else ()
                 end
               in
@@ -431,7 +431,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       | k, I.Root (c_, s_) -> occursInCon (k, c_) || occursInSpine (k, s_)
       | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
       | k, I.FgnExp (csid_, csfe) ->
-          I.FgnExpStd.fold (csid_, csfe)
+          I.FgnExpStd.fold csid_ csfe
             (function
               | u_, b_ -> b_ || occursInExp (k, Whnf.normalize (u_, I.id)))
             false
@@ -460,7 +460,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
         end;
         begin
           begin if !Global.doubleCheck then
-            FunTypeCheck.isFor (g'_, F.forSub (f_, s'))
+            FunTypeCheck.isFor g'_ (F.forSub f_ s')
           else ()
           end;
           S.State
@@ -468,16 +468,16 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
               (g'_, b'_),
               (ih_, oh),
               d,
-              S.orderSub (o_, s'),
-              map (function i, f'_ -> (i, F.forSub (f'_, s'))) h_,
-              F.forSub (f_, s') )
+              S.orderSub o_ s',
+              map (function i, f'_ -> (i, F.forSub f'_ s')) h_,
+              F.forSub f_ s' )
         end
       end
 
     let abstractCont ((d_, t_), abstract) ((g_, b_), s) =
       abstract
-        ( ( I.Decl (g_, Whnf.normalizeDec (d_, s)),
-            I.Decl (b_, S.normalizeTag (t_, s)) ),
+        ( ( I.Decl (g_, Whnf.normalizeDec d_ s),
+            I.Decl (b_, S.normalizeTag t_ s) ),
           I.dot1 s )
 
     let makeAddressInit s_ k = (s_, k)
@@ -521,7 +521,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           let (I.Dec (xOpt, v_)) = d_ in
           let sc' (gp, bp_) =
             let (g'_, b'_), s', (g0_, b0), p' = sc (gp, bp_) in
-            let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
+            let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
             ( (g'_, b'_),
               I.Dot (I.Exp x_, s'),
               (I.Decl (g0_, d_), I.Decl (b0, t_)),
@@ -537,7 +537,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                   I.ctxLength g_,
                   induction 1,
                   maxNumberCases (v_, a),
-                  Subordinate.below (a, a) )
+                  Subordinate.below a a )
               :: ops
             else ops
             end
@@ -559,7 +559,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           let (I.Dec (xOpt, v_)) = d_ in
           let sc' (gp, bp_) =
             let (g'_, b'_), s', (g0_, b0), p' = sc (gp, bp_) in
-            let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
+            let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
             ( (g'_, b'_),
               I.Dot (I.Exp x_, s'),
               (I.Decl (g0_, d_), I.Decl (b0, t_)),
@@ -582,7 +582,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           let (I.Dec (xOpt, v_)) = d_ in
           let sc' (gp, bp_) =
             let (g'_, b'_), s', (g0_, b0), p' = sc (gp, bp_) in
-            let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
+            let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
             ( (g'_, b'_),
               I.Dot (I.Exp x_, s'),
               (I.Decl (g0_, d_), I.Decl (b0, t_)),
@@ -605,7 +605,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           let (I.Dec (xOpt, v_)) = d_ in
           let sc' (gp, bp_) =
             let (g'_, b'_), s', (g0_, b0), _ = sc (gp, bp_) in
-            ( ( I.Decl (g'_, Names.decName (g'_, I.decSub (d_, s'))),
+            ( ( I.Decl (g'_, Names.decName g'_ (I.decSub d_ s')),
                 I.Decl (b'_, t_) ),
               I.dot1 s',
               (I.Decl (g0_, d_), I.Decl (b0, t_)),
@@ -631,8 +631,8 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
 
     let index (Operator ((s_, index), sl_, { c = k })) = k
 
-    let compare (Operator (_, _, i1_), Operator (_, _, i2_)) =
-      H.compare (i1_, i2_)
+    let compare (Operator (_, _, i1_)) (Operator (_, _, i2_)) =
+      H.compare i1_ i2_
 
     let isInActive = function Active _ -> false | InActive -> true
     let applicable (Operator (_, sl_, i_)) = not (List.exists isInActive sl_)
@@ -675,7 +675,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
             (((" [active: " ^ Int.toString n) ^ " inactive: ") ^ Int.toString m)
             ^ "]"
       in
-      (((("Splitting : " ^ Print.decToString (g_, I.ctxDec (g_, i))) ^ " ")
+      (((("Splitting : " ^ Print.decToString g_ (I.ctxDec g_ i)) ^ " ")
        ^ H.indexToString i_)
       ^ flagToString (active (sl_, 0), inactive (sl_, 0)))
       ^ ""

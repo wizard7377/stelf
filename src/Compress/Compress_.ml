@@ -274,7 +274,7 @@ struct
   and compress_term arg__25 arg__26 =
     begin match (arg__25, arg__26) with
     | g_, (S.ATerm (S.ARoot (S.Var n, sp)), _) ->
-        let a = S.ctxLookup (g_, n) in
+        let a = S.ctxLookup g_ n in
         let astar = compress_type g_ (None, a) in
         S.ATerm (S.ARoot (S.Var n, compress_spine g_ (sp, a, astar)))
     | g_, (S.ATerm (S.ARoot (S.Const n, sp)), _) ->

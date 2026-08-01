@@ -68,7 +68,7 @@ module type SGN = sig
 
   (* {2 Context Lookups} *)
 
-  val ctxDec : dctx * int -> Ast.dec
+  val ctxDec : dctx -> int -> Ast.dec
   (** [ctxDec (G, k)] looks up the [k]-th declaration (1-indexed from the right)
       in context [G], applying the appropriate shift substitution so the
       returned type is valid in [G].
@@ -76,7 +76,7 @@ module type SGN = sig
       Invariant: if {m |\Gamma| \geq k} then {m \Gamma \vdash k : V} where [V]
       is the type in the returned declaration. *)
 
-  val blockDec : dctx * Ast.block * int -> Ast.dec
+  val blockDec : dctx -> Ast.block -> int -> Ast.dec
   (** [blockDec (G, b, i)] returns the [i]-th declaration from the block [b] in
       context [G]. Looks up the block's signature declaration and applies the
       appropriate substitution for projections.
@@ -85,6 +85,6 @@ module type SGN = sig
       {m \Sigma(l) = \mathsf{SOME}\; G_1\; \mathsf{BLOCK}\; D_1 \ldots D_n} then
       [blockDec (G, b, i)] returns {m D_i[s']}. *)
 
-  val rename : cid * string -> unit
+  val rename : cid -> string -> unit
   (** Change the stored name of a constant while preserving its other fields. *)
 end

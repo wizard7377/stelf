@@ -533,13 +533,13 @@ module type CST = sig
     type order
 
     val [@deprecated "Use View equivalent instead"] varg :
-      loc * string list -> order
+      loc -> string list -> order
 
     val [@deprecated "Use View equivalent instead"] lex :
-      loc * order list -> order
+      loc -> order list -> order
 
     val [@deprecated "Use View equivalent instead"] simul :
-      loc * order list -> order
+      loc -> order list -> order
 
     type callpats
 
@@ -549,13 +549,13 @@ module type CST = sig
     type tdecl
 
     val [@deprecated "Use View equivalent instead"] tdecl :
-      order * callpats -> tdecl
+      order -> callpats -> tdecl
 
     (* -bp *)
     type predicate
 
     val [@deprecated "Use View equivalent instead"] predicate :
-      string * loc -> predicate
+      string -> loc -> predicate
 
     (* -bp *)
     type rdecl
@@ -566,21 +566,21 @@ module type CST = sig
     type tableddecl
 
     val [@deprecated "Use View equivalent instead"] tableddecl :
-      string * loc -> tableddecl
+      string -> loc -> tableddecl
 
     type keepTabledecl
 
     val [@deprecated "Use View equivalent instead"] keepTabledecl :
-      string * loc -> keepTabledecl
+      string -> loc -> keepTabledecl
 
     type prove
 
-    val [@deprecated "Use View equivalent instead"] prove : int * tdecl -> prove
+    val [@deprecated "Use View equivalent instead"] prove : int -> tdecl -> prove
 
     type establish
 
     val [@deprecated "Use View equivalent instead"] establish :
-      int * tdecl -> establish
+      int -> tdecl -> establish
 
     type assert_
 
@@ -592,20 +592,20 @@ module type CST = sig
     type theoremdec
 
     val [@deprecated "Use View equivalent instead"] null : decs
-    val [@deprecated "Use View equivalent instead"] decl : decs * decl -> decs
+    val [@deprecated "Use View equivalent instead"] decl : decs -> decl -> decs
     val [@deprecated "Use View equivalent instead"] top : theorem
 
     val [@deprecated "Use View equivalent instead"] exists :
-      decs * theorem -> theorem
+      decs -> theorem -> theorem
 
     val [@deprecated "Use View equivalent instead"] forall :
-      decs * theorem -> theorem
+      decs -> theorem -> theorem
 
     val [@deprecated "Use View equivalent instead"] forallStar :
-      decs * theorem -> theorem
+      decs -> theorem -> theorem
 
     val [@deprecated "Use View equivalent instead"] forallG :
-      (decs * decs) list * theorem -> theorem
+      (decs * decs) list -> theorem -> theorem
 
     val [@deprecated "Use View equivalent instead"] dec :
       string * theorem -> theoremdec
@@ -614,7 +614,7 @@ module type CST = sig
     type wdecl
 
     val [@deprecated "Use View equivalent instead"] wdecl :
-      (string list * string) list * callpats -> wdecl
+      (string list * string) list -> callpats -> wdecl
   end
 
   val [@deprecated "Use View equivalent instead"] show_term : term -> string

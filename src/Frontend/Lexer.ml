@@ -201,7 +201,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
   (* string constants *)
   exception Error of string
 
-  let error (r, msg) = raise (Error (P.wrap (r, msg)))
+  let error r msg = raise (Error (P.wrap r msg))
 
   (* isSym (c) = B iff c is a legal symbolic identifier constituent *)
   (* excludes quote character and digits, which are treated specially *)
@@ -315,8 +315,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
                     begin if isUTF8 c then lexID (Lower, P.Reg (i - 1, i))
                     else
                       error
-                        ( P.Reg (i - 1, i),
-                          "Illegal character " ^ Char.toString c )
+                        (P.Reg (i - 1, i)) ("Illegal character " ^ Char.toString c)
                     end
                   end
                 end
@@ -333,7 +332,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
       lexID' j
     and lexQUID (P.Reg (i, j)) =
       begin if Char.isSpace (char j) then
-        error (P.Reg (i, j + 1), "Whitespace in quoted identifier")
+        error (P.Reg (i, j + 1)) ("Whitespace in quoted identifier")
       else
         begin if isQuote (char j) then qidToToken (P.Reg (i, j))
         else lexQUID (P.Reg (i, j + 1))
@@ -352,8 +351,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
             begin if Char.isSpace c then lexComment (c, i)
             else
               error
-                ( P.Reg (i - 1, i),
-                  "Comment character `%' not followed by white space" )
+                (P.Reg (i - 1, i)) ("Comment character `%' not followed by white space")
             end
           end
     and lexPragmaKey = function
@@ -396,9 +394,8 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
       | Id (_, "use"), r -> (Use, r)
       | Id (_, s), r ->
           error
-            ( r,
-              ("Unknown keyword %" ^ s)
-              ^ " (single line comment starts with `%<whitespace>' or `%%')" )
+            r (("Unknown keyword %" ^ s)
+              ^ " (single line comment starts with `%<whitespace>' or `%%')")
     (* -fp 08/09/02 *)
     (* -rv 11/27/01 *)
     (* -gaw 07/11/08 *)
@@ -415,7 +412,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
       | '%', i -> lexCommentPercent (char i, i + 1)
       | '\004', i ->
           error
-            (P.Reg (i - 1, i - 1), "Unclosed single-line comment at end of file")
+            (P.Reg (i - 1, i - 1)) ("Unclosed single-line comment at end of file")
       | c, i -> lexComment (char i, i + 1)
     (* recover: (EOF, (i-1,i-1)) *)
     and lexCommentPercent = function
@@ -427,7 +424,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
       | '%', l, i -> lexDCommentPercent (char i, l, i + 1)
       | '\004', l, i ->
           error
-            (P.Reg (i - 1, i - 1), "Unclosed delimited comment at end of file")
+            (P.Reg (i - 1, i - 1)) ("Unclosed delimited comment at end of file")
       | c, l, i -> lexDComment (char i, l, i + 1)
     (* recover: (EOF, (i-1,i-1)) *)
     (* pass comment beginning for error message? *)
@@ -435,8 +432,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
       | '{', l, i -> lexDComment (char i, l + 1, i + 1)
       | '.', l, i ->
           error
-            ( P.Reg (i - 2, i),
-              "Unclosed delimited comment at end of file token `%.'" )
+            (P.Reg (i - 2, i)) ("Unclosed delimited comment at end of file token `%.'")
       | c, l, i -> lexDComment (c, l, i)
     (* recover: (EOF, (i-2,i)) *)
     and lexDCommentRBrace = function
@@ -447,9 +443,9 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
       begin match char j with
       | '"' -> (String (string (i, j + 1)), P.Reg (i, j + 1))
       | '\n' ->
-          error (P.Reg (i - 1, i - 1), "Unclosed string constant at end of line")
+          error (P.Reg (i - 1, i - 1)) ("Unclosed string constant at end of line")
       | '\004' ->
-          error (P.Reg (i - 1, i - 1), "Unclosed string constant at end of file")
+          error (P.Reg (i - 1, i - 1)) ("Unclosed string constant at end of file")
       | _ -> lexString (P.Reg (i, j + 1))
       end
       (* recover: (EOL, (i-1,i-1)) *)
@@ -527,7 +523,7 @@ module MakeLexer (Stream : STREAM) : LEXER = struct
 
   (** [lexTerminal (prompt0, prompt1)] lexes from standard input using the given
       prompts. *)
-  let lexTerminal (prompt0, prompt1) =
+  let lexTerminal prompt0 prompt1 =
     lex (function
       | 0 -> begin
           print prompt0;

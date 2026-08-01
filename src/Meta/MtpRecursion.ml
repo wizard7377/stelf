@@ -128,7 +128,7 @@ end) : MTPRECURSION = struct
     let rec closedCtx = function
       | I.Null -> ()
       | I.Decl (g_, d_) ->
-          begin if Abstract.closedDec (g_, (d_, I.id)) then raise Domain
+          begin if Abstract.closedDec g_ (d_, I.id) then raise Domain
           else closedCtx g_
           end
 
@@ -139,11 +139,11 @@ end) : MTPRECURSION = struct
     let rec someEVars = function
       | g_, [], s -> s
       | g_, I.Dec (_, v_) :: l_, s ->
-          someEVars (g_, l_, I.Dot (I.Exp (I.newEVar (g_, I.EClo (v_, s))), s))
+          someEVars (g_, l_, I.Dot (I.Exp (I.newEVar g_ (I.EClo (v_, s))), s))
 
     let rec ctxSub = function
       | [], s -> []
-      | d_ :: g_, s -> I.decSub (d_, s) :: ctxSub (g_, I.dot1 s)
+      | d_ :: g_, s -> I.decSub d_ s :: ctxSub (g_, I.dot1 s)
 
     let rec appendCtx = function
       | gb1, t_, [] -> gb1
@@ -157,7 +157,7 @@ end) : MTPRECURSION = struct
           let t = someEVars (g_, g1_, I.id) in
           let g2'_ = ctxSub (g2_, t) in
           let g'_, b'_ = appendCtx ((g_, b_), S.Parameter (Some n), g2'_) in
-          let s' = I.comp (s, I.Shift (List.length g2'_)) in
+          let s' = I.comp s (I.Shift (List.length g2'_)) in
           let gb'', s'', af'' = createCtx ((g'_, b'_), ll, s') in
           ( gb'',
             s'',
@@ -168,14 +168,14 @@ end) : MTPRECURSION = struct
       | g_, I.Null -> I.Shift (I.ctxLength g_)
       | g_, I.Decl (g0_, I.Dec (_, v_)) ->
           let s = createEVars (g_, g0_) in
-          I.Dot (I.Exp (I.newEVar (g_, I.EClo (v_, s))), s)
+          I.Dot (I.Exp (I.newEVar g_ (I.EClo (v_, s))), s)
 
     let rec checkCtx = function
       | g_, [], (v2_, s) -> false
       | g_, (I.Dec (_, v1_) as d_) :: g2_, (v2_, s) ->
           CsManager.trail (function () ->
-              Unify.unifiable (g_, (v1_, I.id), (v2_, s)))
-          || checkCtx (I.Decl (g_, d_), g2_, (v2_, I.comp (s, I.shift)))
+              Unify.unifiable g_ (v1_, I.id) (v2_, s))
+          || checkCtx (I.Decl (g_, d_), g2_, (v2_, I.comp s I.shift))
 
     let rec checkLabels ((g'_, b'_), (v_, s), ll, l) =
       begin if l < 0 then None
@@ -201,7 +201,7 @@ end) : MTPRECURSION = struct
             List.exists
               (function
                 | Lemma (n', f'_) ->
-                    n = n' && F.convFor ((f_, I.id), (f'_, I.id)))
+                    n = n' && F.convFor (f_, I.id) (f'_, I.id))
               ds'_
           then ds'_
           else l_ :: ds'_
@@ -212,15 +212,15 @@ end) : MTPRECURSION = struct
       let (g'_, b'_), s', af = createCtx ((g0_, b0), ll, I.id) in
       let t' = createEVars (g'_, gall) in
       let af_ = af (A.Head (g'_, (fex, t'), I.ctxLength gall)) in
-      let oex' = S.orderSub (oex, t') in
-      let ocurrent' = S.orderSub (ocurrent, s') in
+      let oex' = S.orderSub oex t' in
+      let ocurrent' = S.orderSub ocurrent s' in
       let sc ds_ =
         let fnew = A.abstractApproxFor af_ in
         begin if
           List.exists
             (function
               | nhist, fhist ->
-                  nih = nhist && F.convFor ((fnew, I.id), (fhist, I.id)))
+                  nih = nhist && F.convFor (fnew, I.id) (fhist, I.id))
             h_
         then ds_
         else Lemma (nih, fnew) :: ds_
@@ -248,13 +248,13 @@ end) : MTPRECURSION = struct
       let rec set_parameter' = function
         | (I.Null, I.Null), _, ds_ -> ds_
         | (I.Decl (g_, d_), I.Decl (b_, S.Parameter _)), k, ds_ ->
-            let (I.Dec (_, v'_) as d'_) = I.decSub (d_, I.Shift k) in
+            let (I.Dec (_, v'_) as d'_) = I.decSub d_ (I.Shift k) in
             let ds'_ =
               CsManager.trail (function () ->
                   begin if
-                    Unify.unifiable (g1_, (v_, I.id), (v'_, I.id))
+                    Unify.unifiable g1_ (v_, I.id) (v'_, I.id)
                     && Unify.unifiable
-                         (g1_, (x_, I.id), (I.Root (I.BVar k, I.Nil), I.id))
+                         g1_ (x_, I.id) (I.Root (I.BVar k, I.Nil), I.id)
                   then sc ds_
                   else ds_
                   end)
@@ -266,7 +266,7 @@ end) : MTPRECURSION = struct
       set_parameter' (gb, 1, ds_)
 
     and ltinit (gb, k, (us_, vs_), usVs', sc, ac, ds_) =
-      ltinitW (gb, k, Whnf.whnfEta (us_, vs_), usVs', sc, ac, ds_)
+      ltinitW (gb, k, Whnf.whnfEta us_ vs_, usVs', sc, ac, ds_)
 
     and ltinitW = function
       | gb, k, (us_, ((I.Root _, _) as vs_)), usVs', sc, ac, ds_ ->
@@ -279,16 +279,16 @@ end) : MTPRECURSION = struct
           ac,
           ds_ ) ->
           ltinit
-            ( (I.Decl (g_, I.decSub (d1_, s1)), I.Decl (b_, S.Parameter None)),
+            ( (I.Decl (g_, I.decSub d1_ s1), I.Decl (b_, S.Parameter None)),
               k + 1,
               ((u_, I.dot1 s1), (v_, I.dot1 s2)),
-              ((u'_, I.comp (s1', I.shift)), (v'_, I.comp (s2', I.shift))),
+              ((u'_, I.comp s1' I.shift), (v'_, I.comp s2' I.shift)),
               sc,
               ac,
               ds_ )
 
     and lt (gb, k, (us_, vs_), (us', vs'_), sc, ac, ds_) =
-      ltW (gb, k, (us_, vs_), Whnf.whnfEta (us', vs'_), sc, ac, ds_)
+      ltW (gb, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ac, ds_)
 
     and ltW = function
       | gb, k, (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_), sc, ac, ds_ ->
@@ -301,9 +301,9 @@ end) : MTPRECURSION = struct
           sc,
           ac,
           ds_ ) ->
-          begin match I.ctxLookup (b_, n) with
+          begin match I.ctxLookup b_ n with
           | S.Parameter _ ->
-              let (I.Dec (_, v'_)) = I.ctxDec (g_, n) in
+              let (I.Dec (_, v'_)) = I.ctxDec g_ n in
               ltSpine (gb, k, (us_, vs_), ((s'_, s'), (v'_, I.id)), sc, ac, ds_)
           | S.Lemma _ -> ds_
           end
@@ -317,8 +317,8 @@ end) : MTPRECURSION = struct
           ac,
           ds_ ) ->
           let ds'_ = ds_ in
-          begin if Subordinate.equiv (I.targetFam v_, I.targetFam v1') then
-            let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
+            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' = function
               | ds'' -> set_parameter (gb, x_, k, sc, ac, ds'')
             in
@@ -331,8 +331,8 @@ end) : MTPRECURSION = struct
                 ac,
                 ds'_ )
           else
-            begin if Subordinate.below (I.targetFam v1', I.targetFam v_) then
-              let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
+              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
               lt
                 ( gb,
                   k,
@@ -352,7 +352,7 @@ end) : MTPRECURSION = struct
       | gb, k, (us_, vs_), ((I.Nil, _), _), _, _, ds_ -> ds_
       | gb, k, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, ac, ds_ ->
           ltSpineW
-            (gb, k, (us_, vs_), ((s_, I.comp (s', s'')), vs'_), sc, ac, ds_)
+            (gb, k, (us_, vs_), ((s_, I.comp s' s''), vs'_), sc, ac, ds_)
       | ( gb,
           k,
           (us_, vs_),
@@ -375,14 +375,14 @@ end) : MTPRECURSION = struct
     and eq ((g_, b_), (us_, vs_), (us', vs'_), sc, ac, ds_) =
       CsManager.trail (function () ->
           begin if
-            Unify.unifiable (g_, vs_, vs'_) && Unify.unifiable (g_, us_, us')
+            Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
           then sc ds_
           else ds_
           end)
 
     and le (gb, k, (us_, vs_), (us', vs'_), sc, ac, ds_) =
       let ds'_ = eq (gb, (us_, vs_), (us', vs'_), sc, ac, ds_) in
-      leW (gb, k, (us_, vs_), Whnf.whnfEta (us', vs'_), sc, ac, ds'_)
+      leW (gb, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ac, ds'_)
 
     and leW = function
       | ( ((g_, b_) as gb),
@@ -394,8 +394,8 @@ end) : MTPRECURSION = struct
           ac,
           ds_ ) ->
           let ds'_ = ac (gb, (v1', s1'), ds_) in
-          begin if Subordinate.equiv (I.targetFam v_, I.targetFam v1') then
-            let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
+            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' = function
               | ds'' -> set_parameter (gb, x_, k, sc, ac, ds'')
             in
@@ -408,8 +408,8 @@ end) : MTPRECURSION = struct
                 ac,
                 ds'_ )
           else
-            begin if Subordinate.below (I.targetFam v1', I.targetFam v_) then
-              let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
+              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
               let sc' = sc in
               let ds'' =
                 le
@@ -485,7 +485,7 @@ end) : MTPRECURSION = struct
     and ordeq = function
       | (g_, b_), S.Arg (us_, vs_), S.Arg (us', vs'_), sc, ac, ds_ ->
           begin if
-            Unify.unifiable (g_, vs_, vs'_) && Unify.unifiable (g_, us_, us')
+            Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
           then sc ds_
           else ds_
           end
@@ -525,9 +525,8 @@ end) : MTPRECURSION = struct
                     (fun v_ ->
                       v'_
                         (Abstract.piDepend
-                           ( (Whnf.normalizeDec (d_, s'), I.Meta),
-                             Whnf.normalize (v_, I.id) ))),
-                    fun f_ -> f'_ (F.All (F.Prim (I.decSub (d_, s')), f_)) ) )
+                           (Whnf.normalizeDec d_ s', I.Meta) (Whnf.normalize (v_, I.id)))),
+                    fun f_ -> f'_ (F.All (F.Prim (I.decSub d_ s'), f_)) ) )
       | (du, de), (g_, b_), w, F.Ex (I.Dec (name, v_), f_), sc ->
           let s', v'_, f'_ = sc (w, de) in
           let v1_ = I.EClo (v_, s') in
@@ -535,7 +534,7 @@ end) : MTPRECURSION = struct
           let f1_ = F.Ex (I.Dec (name, v1_), F.True) in
           let f2_ = f'_ f1_ in
           let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor (g_, f2_)
+            begin if !Global.doubleCheck then FunTypeCheck.isFor g_ f2_
             else ()
             end
           in
@@ -549,7 +548,7 @@ end) : MTPRECURSION = struct
           skolem
             ( (du, de + 1),
               (I.Decl (g_, d2_), I.Decl (b_, t2_)),
-              I.comp (w, I.shift),
+              I.comp w I.shift,
               f_,
               function
               | s, de' ->
@@ -568,20 +567,20 @@ end) : MTPRECURSION = struct
               ( (0, 0),
                 (g_, b_),
                 I.id,
-                F.forSub (frl', s),
+                F.forSub frl' s,
                 function s', _ -> (s', (fun v'_ -> v'_), fun f'_ -> f'_) )
           in
-          let s'' = I.comp (s, s') in
+          let s'' = I.comp s s' in
           updateState
             ( S.State
                 ( n,
                   (g''_, b''),
                   (ih_, oh),
                   d,
-                  S.orderSub (o_, s'),
-                  (n', F.forSub (frl', s''))
-                  :: map (function n', f'_ -> (n', F.forSub (f'_, s'))) h_,
-                  F.forSub (f_, s') ),
+                  S.orderSub o_ s',
+                  (n', F.forSub frl' s'')
+                  :: map (function n', f'_ -> (n', F.forSub f'_ s')) h_,
+                  F.forSub f_ s' ),
               (l_, s'') )
 
     let rec selectFormula = function

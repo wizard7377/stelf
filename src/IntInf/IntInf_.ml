@@ -61,19 +61,19 @@ module IntInf : INT_INF = struct
   let max = Int.max
   let sign = Int.sign
   let sameSign = Int.sameSign
-  let compare (a, b) = if a < b then Less else if a = b then Equal else Greater
+  let compare a b = if a < b then Less else if a = b then Equal else Greater
   let toString = Int.toString
   let scan = Int.scan
   let fromString = Int.fromString
   let fmt = Int.fmt
-  let divmod (a, b) = (Int.div (a, b), Int.mod_ (a, b))
-  let quotrem (a, b) = (Int.quot (a, b), Int.rem (a, b))
+  let divmod a b = (Int.div (a, b), Int.mod_ (a, b))
+  let quotrem a b = (Int.quot (a, b), Int.rem (a, b))
 
-  let rec pow (base, exp) =
+  let rec pow base exp =
     if exp = 0 then 1
     else if exp = 1 then base
     else
-      let half = pow (base, Int.div (exp, 2)) in
+      let half = pow base (Int.div (exp, 2)) in
       if Int.mod_ (exp, 2) = 0 then half * half else half * half * base
 
   let rec log2 n = if n <= 1 then 0 else 1 + log2 (Int.div (n, 2))

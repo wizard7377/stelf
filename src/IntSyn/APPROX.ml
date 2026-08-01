@@ -40,7 +40,7 @@ module type APPROX = sig
   val whnf : exp -> exp
   val uniToApx : IntSyn.uni -> uni
   val classToApx : IntSyn.exp -> exp * uni
-  val exactToApx : IntSyn.exp * IntSyn.exp -> exp * exp * uni
+  val exactToApx : IntSyn.exp -> IntSyn.exp -> exp * exp * uni
 
   exception Ambiguous
 
@@ -50,7 +50,7 @@ module type APPROX = sig
 
   exception Unify of string
 
-  val matchUni : uni * uni -> unit
+  val matchUni : uni -> uni -> unit
   val match_ : exp * exp -> unit
   val makeGroundUni : uni -> bool
 end

@@ -32,7 +32,7 @@ let negative_anonymous_but_dependent () =
   Global.printArrowSugar := true;
   let d_ = IntSyn.Dec (None, IntSyn.Uni IntSyn.Type) in
   let pi = IntSyn.Pi ((d_, IntSyn.Maybe), IntSyn.Uni IntSyn.Type) in
-  let printed = Print.expToString (IntSyn.Null, pi) in
+  let printed = Print.expToString IntSyn.Null pi in
   Global.printArrowSugar := false;
   check_not_contains printed "%pi"
 

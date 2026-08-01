@@ -25,7 +25,7 @@ module type MODSYN = sig
   (*! structure Paths : PATHS !*)
   exception Error of string
 
-  val abbrevify : IntSyn.cid * IntSyn.conDec -> IntSyn.conDec
+  val abbrevify : IntSyn.cid -> IntSyn.conDec -> IntSyn.conDec
   val strictify : IntSyn.conDec -> IntSyn.conDec
 
   type module_
@@ -50,15 +50,15 @@ module type MODSYN = sig
     unit (* action *)
 
   val instantiateModule :
-    module_ * (Names.namespace -> IntSyn.cid * IntSyn.conDec -> IntSyn.conDec) ->
+    module_ -> (Names.namespace -> IntSyn.cid * IntSyn.conDec -> IntSyn.conDec) ->
     module_ (* Names.namespace -> transform *)
 
   (* Extract some entries of the current global signature table in order
      to create a self-contained module.
   *)
-  val abstractModule : Names.namespace * IntSyn.mid option -> module_
+  val abstractModule : Names.namespace -> IntSyn.mid option -> module_
   val reset : unit -> unit
-  val installSigDef : string * module_ -> unit
+  val installSigDef : string -> module_ -> unit
 
   (* Error if would shadow *)
   val lookupSigDef : string -> module_ option

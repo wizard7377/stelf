@@ -105,7 +105,7 @@ end) : PROVER = struct
       | x :: l_, l'_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
-    let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv l1_ l2_ = contains (l1_, l2_) && contains (l2_, l1_)
 
     let insertState s_ =
       begin if Qed.subgoal s_ then solvedStates := s_ :: !solvedStates
@@ -117,11 +117,11 @@ end) : PROVER = struct
       | c :: [] -> I.conDecName (I.sgnLookup c)
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
-    let init (k, (c :: _ as cL)) =
+    let init k (c :: _ as cL) =
       ignore (MetaGlobal.maxFill := k);
       ignore (reset ());
       let cL' = try Order.closure c with Order.Error _ -> cL in
-      begin if equiv (cL, cL') then
+      begin if equiv cL cL' then
         List.app (function s_ -> insertState s_) (Init.init cL)
       else
         raise

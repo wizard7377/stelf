@@ -64,16 +64,16 @@ module MakeModePrint (Names : NAMES) (Formatter : FORMATTER) (Print : PRINT) :
         | g_, _, M.Mnil ->
             [
               F.string "(";
-              P.formatExp (g_, I.Root (I.Const cid, makeSpine g_));
+              P.formatExp g_ (I.Root (I.Const cid, makeSpine g_));
               F.string ")";
             ]
         | g_, I.Pi ((d_, _), v'_), M.Mapp (marg, s_) ->
             let d'_ = nameDec (d_, marg) in
-            let d''_ = Names.decEName (g_, d'_) in
+            let d''_ = Names.decEName g_ d'_ in
             [
               F.string (argToString marg);
               F.string "{";
-              P.formatDec (g_, d''_);
+              P.formatDec g_ d''_;
               F.string "}";
               F.break;
             ]

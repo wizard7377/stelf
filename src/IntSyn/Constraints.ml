@@ -58,12 +58,12 @@ module MakeConstraints (Conv : CONV) : CONSTRAINTS = struct
     | [] -> []
     | { contents = I.Solved } :: cnstrs -> simplify cnstrs
     | ({ contents = I.Eqn (g_, u1_, u2_) } as eqn_) :: cnstrs ->
-        begin if Conv.conv ((u1_, I.id), (u2_, I.id)) then simplify cnstrs
+        begin if Conv.conv (u1_, I.id) (u2_, I.id) then simplify cnstrs
         else eqn_ :: simplify cnstrs
         end
     | ({ contents = I.FgnCnstr (csfc_csid, csfc_ops) } as fgnCnstr_) :: cnstrs
       ->
-        begin if I.FgnCnstrStd.Simplify.apply (csfc_csid, csfc_ops) () then
+        begin if I.FgnCnstrStd.Simplify.apply csfc_csid csfc_ops () then
           simplify cnstrs
         else fgnCnstr_ :: simplify cnstrs
         end

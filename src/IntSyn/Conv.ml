@@ -74,12 +74,12 @@ end) : CONV = struct
             (u2_, dot1 s2) )
     | (FgnExp (csfe1_csid, csfe1_ops), s1), us2 ->
         let us2_e, us2_s = us2 in
-        FgnExpStd.EqualTo.apply (csfe1_csid, csfe1_ops) (EClo (us2_e, us2_s))
+        FgnExpStd.EqualTo.apply csfe1_csid csfe1_ops (EClo (us2_e, us2_s))
     | us1, (FgnExp (csfe2_csid, csfe2_ops), s2) ->
         let us1_e, us1_s = us1 in
-        FgnExpStd.EqualTo.apply (csfe2_csid, csfe2_ops) (EClo (us1_e, us1_s))
+        FgnExpStd.EqualTo.apply csfe2_csid csfe2_ops (EClo (us1_e, us1_s))
     | (EVar (r1, _, _, _), s1), (EVar (r2, _, _, _), s2) ->
-        r1 == r2 && convSub (s1, s2)
+        r1 == r2 && convSub s1 s2
     | _ -> false
 
   and convExp (us1, us2) = convExpW (Whnf.whnf us1, Whnf.whnf us2)
@@ -88,14 +88,14 @@ end) : CONV = struct
     | (Nil, _), (Nil, _) -> true
     | (App (u1_, s1_), s1), (App (u2_, s2_), s2) ->
         convExp ((u1_, s1), (u2_, s2)) && convSpine ((s1_, s1), (s2_, s2))
-    | (SClo (s1_, s1'), s1), ss2_ -> convSpine ((s1_, comp (s1', s1)), ss2_)
-    | ss1_, (SClo (s2_, s2'), s2) -> convSpine (ss1_, (s2_, comp (s2', s2)))
+    | (SClo (s1_, s1'), s1), ss2_ -> convSpine ((s1_, comp s1' s1), ss2_)
+    | ss1_, (SClo (s2_, s2'), s2) -> convSpine (ss1_, (s2_, comp s2' s2))
     | _, _ -> false
 
-  and convSub = function
+  and convSub a b = match a, b with
     | Shift n, Shift m -> true
-    | Shift n, (Dot _ as s2) -> convSub (Dot (Idx (n + 1), Shift (n + 1)), s2)
-    | (Dot _ as s1), Shift m -> convSub (s1, Dot (Idx (m + 1), Shift (m + 1)))
+    | Shift n, (Dot _ as s2) -> convSub (Dot (Idx (n + 1), Shift (n + 1))) s2
+    | (Dot _ as s1), Shift m -> convSub s1 (Dot (Idx (m + 1), Shift (m + 1)))
     | Dot (ft1, s1), Dot (ft2, s2) ->
         begin match (ft1, ft2) with
         | Idx n1, Idx n2 -> n1 = n2
@@ -106,15 +106,15 @@ end) : CONV = struct
         | Undef, Undef -> true
         | _ -> false
         end
-        && convSub (s1, s2)
+        && convSub s1 s2
 
-  and convDec = function
+  and convDec a b = match a, b with
     | (Dec (_, v1_), s1), (Dec (_, v2_), s2) -> convExp ((v1_, s1), (v2_, s2))
     | (BDec (_, (c1, s1)), t1), (BDec (_, (c2, s2)), t2) ->
-        c1 = c2 && convSub (comp (s1, t1), comp (s2, t2))
+        c1 = c2 && convSub (comp s1 t1) (comp s2 t2)
 
   and convDecP (((d1_, p1_), s1), ((d2_, p2_), s2)) =
-    convDec ((d1_, s1), (d2_, s2))
+    convDec (d1_, s1) (d2_, s2)
 
   (* eqUni (L1, L2) = B iff L1 = L2 *)
   (* convExpW ((U1, s1), (U2, s2)) = B

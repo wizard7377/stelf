@@ -65,7 +65,7 @@ module type MEMOTABLE = sig
    *  else new
    *)
   val answerCheck :
-    IntSyn.sub * TableParam.answer * CompSyn.pskeleton -> TableParam.answState
+    IntSyn.sub -> TableParam.answer -> CompSyn.pskeleton -> TableParam.answState
 
   (* reset table *)
   val reset : unit -> unit
@@ -82,7 +82,7 @@ module type MEMOTABLE = sig
    *)
   val updateTable : unit -> bool
   val tableSize : unit -> int
-  val memberCtx : (IntSyn.dctx * IntSyn.exp) * IntSyn.dctx -> IntSyn.dec option
+  val memberCtx : IntSyn.dctx * IntSyn.exp -> IntSyn.dctx -> IntSyn.dec option
 
   val insertIntoTree :
     IntSyn.dctx

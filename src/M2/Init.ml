@@ -72,7 +72,7 @@ end) : INIT with module MetaSyn = Init__0.MetaSyn' = struct
     module I = IntSyn
 
     let init' cid =
-      let v_, _ = M.createAtomConst (I.Null, I.Const cid) in
+      let v_, _ = M.createAtomConst I.Null (I.Const cid) in
       MetaAbstract.abstract
         (M.State
            ( ("/" ^ I.conDecName (I.sgnLookup cid)) ^ "/",

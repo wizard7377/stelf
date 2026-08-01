@@ -28,7 +28,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
 
   exception Error = Error
 
-  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error r msg = raise (Error (Paths.wrap r msg))
 
   (* Build an IntSyn ctx from a decl list (leftmost = outermost). *)
   let makectx decls =
@@ -76,7 +76,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
           | o :: rest ->
               let os, r' = go rest in
               let o', r = convertOrder o in
-              (o' :: os, Paths.join (r, r'))
+              (o' :: os, Paths.join r r')
         in
         let os, r1 = go ords in
         (ThmSyn.Lex os, r1)
@@ -86,7 +86,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
           | o :: rest ->
               let os, r' = go rest in
               let o', r = convertOrder o in
-              (o' :: os, Paths.join (r, r'))
+              (o' :: os, Paths.join r r')
         in
         let os, r1 = go ords in
         (ThmSyn.Simul os, r1)
@@ -100,9 +100,9 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
       match (i, v_, args) with
       | 0, IntSyn.Uni IntSyn.Type, [] -> ()
       | 0, IntSyn.Pi (_, v2_), _ :: rest -> go 0 v2_ rest
-      | 0, IntSyn.Pi (_, _), [] -> error (r, "Missing arguments in call pattern")
+      | 0, IntSyn.Pi (_, _), [] -> error r ("Missing arguments in call pattern")
       | 0, IntSyn.Uni IntSyn.Type, _ :: _ ->
-          error (r, "Extraneous arguments in call pattern")
+          error r ("Extraneous arguments in call pattern")
       | i, IntSyn.Pi (_, v2_), args -> go (i - 1) v2_ args
       | _ -> ()
     in
@@ -113,19 +113,19 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     | IntSyn.ConDec (_, _, i, IntSyn.Normal, v_, IntSyn.Kind) ->
         checkArgNumber (i, v_, p_, r)
     | IntSyn.ConDec (a, _, _, IntSyn.Constraint _, _, _) ->
-        error (r, "Illegal constraint constant " ^ a ^ " in call pattern")
+        error r ("Illegal constraint constant " ^ a ^ " in call pattern")
     | IntSyn.ConDec (a, _, _, IntSyn.Foreign _, _, _) ->
-        error (r, "Illegal foreign constant " ^ a ^ " in call pattern")
+        error r ("Illegal foreign constant " ^ a ^ " in call pattern")
     | IntSyn.ConDec (a, _, _, _, _, IntSyn.Type) ->
-        error (r, "Constant " ^ a ^ " in call pattern not a type family")
+        error r ("Constant " ^ a ^ " in call pattern not a type family")
     | IntSyn.ConDef (a, _, _, _, _, _, _) ->
-        error (r, "Illegal defined constant " ^ a ^ " in call pattern")
+        error r ("Illegal defined constant " ^ a ^ " in call pattern")
     | IntSyn.AbbrevDef (a, _, _, _, _, _) ->
-        error (r, "Illegal abbreviation " ^ a ^ " in call pattern")
+        error r ("Illegal abbreviation " ^ a ^ " in call pattern")
     | IntSyn.BlockDec (a, _, _, _) ->
-        error (r, "Illegal block identifier " ^ a ^ " in call pattern")
+        error r ("Illegal block identifier " ^ a ^ " in call pattern")
     | IntSyn.SkoDec (a, _, _, _, _) ->
-        error (r, "Illegal Skolem constant " ^ a ^ " in call pattern")
+        error r ("Illegal Skolem constant " ^ a ^ " in call pattern")
     | _ -> ()
 
   let resolveCallPat (name, p_, loc) =
@@ -134,10 +134,9 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     match Names.constLookup qid with
     | None ->
         error
-          ( r,
-            "Undeclared identifier "
+          r ("Undeclared identifier "
             ^ Names.qidToString (valOf (Names.constUndef qid))
-            ^ " in call pattern" )
+            ^ " in call pattern")
     | Some cid ->
         checkCallPat (IntSyn.sgnLookup cid, p_, r);
         ((cid, p_), r)
@@ -208,10 +207,9 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     match Names.constLookup qid with
     | None ->
         error
-          ( r,
-            "Undeclared identifier "
+          r ("Undeclared identifier "
             ^ Names.qidToString (valOf (Names.constUndef qid))
-            ^ " in tabled declaration" )
+            ^ " in tabled declaration")
     | Some cid -> (ThmSyn.TabledDecl cid, r)
 
   let keepTabledeclToktDecl ktd =
@@ -224,10 +222,9 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     match Names.constLookup qid with
     | None ->
         error
-          ( r,
-            "Undeclared identifier "
+          r ("Undeclared identifier "
             ^ Names.qidToString (valOf (Names.constUndef qid))
-            ^ " in keepTable declaration" )
+            ^ " in keepTable declaration")
     | Some cid -> (ThmSyn.KeepTableDecl cid, r)
 
   (* ------------------------------------------------------------------ *)
@@ -269,11 +266,11 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     let some_part =
       match g1' with
       | IntSyn.Null -> ""
-      | _ -> "some " ^ Print.ctxToString (g0', g1') ^ "\n"
+      | _ -> "some " ^ Print.ctxToString g0' g1' ^ "\n"
     in
-    Print.ctxToString (IntSyn.Null, g0')
+    Print.ctxToString IntSyn.Null g0'
     ^ "\n" ^ some_part ^ "pi "
-    ^ Print.ctxToString (ctxAppend g0' g1', g2')
+    ^ Print.ctxToString (ctxAppend g0' g1') g2'
 
   let checkFreevars (g0_, (g1_, g2_), r) =
     match g0_ with
@@ -284,29 +281,27 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
         let g1' = Names.ctxLUName g1_ in
         let g2' = Names.ctxLUName g2_ in
         error
-          ( r,
-            "Free variables in context block after term reconstruction:\n"
-            ^ ctxBlockToString (g0', (g1', g2')) )
+          r ("Free variables in context block after term reconstruction:\n"
+            ^ ctxBlockToString (g0', (g1', g2')))
 
   let abstractCtxPair (g1_cst, g2_cst) =
     let r =
       match (RT.ctxRegion g1_cst, RT.ctxRegion g2_cst) with
-      | Some r1, Some r2 -> Paths.join (r1, r2)
+      | Some r1, Some r2 -> Paths.join r1 r2
       | _, Some r2 -> r2
       | Some r1, None -> r1
       | None, None -> Paths.Reg (0, 0)
     in
     let (RT.JWithCtx (g1_, RT.JWithCtx (g2_, _))) =
-      RT.recon (RT.jwithctx (g1_cst, RT.jwithctx (g2_cst, RT.jnothing)))
+      RT.recon (RT.jwithctx g1_cst (RT.jwithctx g2_cst RT.jnothing))
     in
     let g0_, ctxs =
       try Abstract.abstractCtxs [ g1_; g2_ ]
       with Constraints.Error c_ ->
         error
-          ( r,
-            "Constraints remain in context block after term reconstruction:\n"
+          r ("Constraints remain in context block after term reconstruction:\n"
             ^ ctxBlockToString (IntSyn.Null, (g1_, g2_))
-            ^ "\n" ^ Print.cnstrsToString c_ )
+            ^ "\n" ^ Print.cnstrsToString c_)
     in
     let g1'_, g2'_ = match ctxs with [ a; b ] -> (a, b) | _ -> assert false in
     ignore (checkFreevars (g0_, (g1'_, g2'_), r));
@@ -345,7 +340,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     let gbs_cst, g_cst, m_ctx, k = go t ([], IntSyn.Null, IntSyn.Null, 0) in
     ignore (Names.varReset IntSyn.Null);
     let gBs = List.map abstractCtxPair gbs_cst in
-    let (RT.JWithCtx (g_, _)) = RT.recon (RT.jwithctx (g_cst, RT.jnothing)) in
+    let (RT.JWithCtx (g_, _)) = RT.recon (RT.jwithctx g_cst RT.jnothing) in
     ThmSyn.ThDecl (gBs, g_, m_ctx, k)
 
   let theoremDecToTheoremDec td =

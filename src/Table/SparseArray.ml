@@ -46,7 +46,7 @@ end) : SPARSE_ARRAY = struct
     begin if i >= 0 then unsafeUpdate (array, i, v) else raise Subscript
     end
 
-  let extract (array, i, len) =
+  let extract array i len =
     begin if i >= 0 && len >= 0 then
       Vector.tabulate (len, function off -> unsafeSub (array, i + off))
     else raise Subscript

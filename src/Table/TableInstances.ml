@@ -21,14 +21,14 @@ module StringHashTable = HashTable (struct
   type key' = string
 
   let hash = StringHash.stringHash
-  let eq (x__op, y__op) = x__op = y__op
+  let eq x__op y__op = x__op = y__op
 end)
 
 module IntHashTable = HashTable (struct
   type key' = int
 
   let hash n = n
-  let eq (x__op, y__op) = x__op = y__op
+  let eq x__op y__op = x__op = y__op
 end)
 
 module StringRedBlackTree = RedBlackTree (struct

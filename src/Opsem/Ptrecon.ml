@@ -137,9 +137,9 @@ end) : PTRECON = struct
     | o_, (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
         let d'_ = I.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
-          begin match MT.memberCtx ((g_, I.EClo (a_, s)), g_) with
+          begin match MT.memberCtx (g_, I.EClo (a_, s)) g_ with
           | Some d_ ->
-              let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+              let x_ = I.newEVar g_ (I.EClo (a_, s)) in
               solve'
                 ( o_,
                   (g, I.Dot (I.Exp x_, s)),
@@ -163,7 +163,7 @@ end) : PTRECON = struct
         (*      solve' (O, (g, I.dot1 s), C.DProg (I.Decl(G, D'), I.Decl (dPool, C.Dec (r, s, Ha))),
                (fn (O,M) => sc (O, (I.Lam (D', M)))))*)
     | o_, (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
-        let d'_ = Names.decLUName (g_, I.decSub (d_, s)) in
+        let d'_ = Names.decLUName g_ (I.decSub d_ s) in
         solve'
           ( o_,
             (g, I.dot1 s),
@@ -173,22 +173,22 @@ end) : PTRECON = struct
 
   and rSolve = function
     | o_, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
-        begin if Unify.unifiable (g_, (q_, s), ps') then sc (o_, I.Nil)
+        begin if Unify.unifiable g_ (q_, s) ps' then sc (o_, I.Nil)
         else
           let _ =
             begin
               print "Unification Failed -- SHOULD NEVER HAPPEN!\n";
               begin
                 print
-                  (Print.expToString (g_, I.EClo (fst ps', snd ps')) ^ " unify ");
-                print (Print.expToString (g_, I.EClo (q_, s)) ^ "\n")
+                  (Print.expToString g_ (I.EClo (fst ps', snd ps')) ^ " unify ");
+                print (Print.expToString g_ (I.EClo (q_, s)) ^ "\n")
               end
             end
           in
           ()
         end
     | o_, ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc ->
-        begin match Assign.assignable (g_, ps', (q_, s)) with
+        begin match Assign.assignable g_ ps' (q_, s) with
         | Some cnstr ->
             begin if aSolve ((eqns, s), dp, cnstr) then sc (o_, I.Nil)
             else print "aSolve cnstr not solvable -- SHOULD NEVER HAPPEN\n"
@@ -196,7 +196,7 @@ end) : PTRECON = struct
         | None -> print "Clause Head not assignable -- SHOULD NEVER HAPPEN\n"
         end
     | o_, ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
-        let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+        let x_ = I.newEVar g_ (I.EClo (a_, s)) in
         rSolve
           ( o_,
             ps',
@@ -210,7 +210,7 @@ end) : PTRECON = struct
         (* is this EVar redundant? -fp *)
     | o_, ps', (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp), sc
       ->
-        let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+        let x_ = I.newEVar g_ (I.EClo (a_, s)) in
         rSolve
           ( o_,
             ps',
@@ -233,7 +233,7 @@ end) : PTRECON = struct
     | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp), cnstr ->
         let g''_ = compose' (g'_, g_) in
         let s' = shift (g'_, s) in
-        Assign.unifiable (g''_, (n_, s'), (e1, s'))
+        Assign.unifiable g''_ (n_, s') (e1, s')
         && aSolve ((eqns, s), dp, cnstr)
 
   and matchAtom
@@ -277,7 +277,7 @@ end) : PTRECON = struct
             rSolve
               ( o_,
                 ps',
-                (r, I.comp (s, I.Shift k)),
+                (r, I.comp s (I.Shift k)),
                 dp,
                 function o_, s_ -> sc (o_, I.Root (I.BVar k, s_)) )
           else

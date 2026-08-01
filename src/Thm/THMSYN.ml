@@ -65,9 +65,9 @@ module type THMSYN = sig
   type wDecl = WDecl of Names.qid list * callpats
 
   val theoremDecToConDec :
-    (string * thDecl) * Paths.region ->
+    string * thDecl -> Paths.region ->
     (IntSyn.dec IntSyn.ctx * IntSyn.dec IntSyn.ctx) list * IntSyn.conDec
 
   val theoremDecToModeSpine :
-    (string * thDecl) * Paths.region -> ModeSyn.modeSpine
+    string * thDecl -> Paths.region -> ModeSyn.modeSpine
 end

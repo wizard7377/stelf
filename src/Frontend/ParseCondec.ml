@@ -86,53 +86,53 @@ end) : PARSE_CONDEC with module ExtConDec = ParseConDec__0.ExtConDec' = struct
 
     let parseConDec3 (optName, optTm, s) =
       let tm', f' = ParseTerm.parseTerm' (LS.expose s) in
-      (ExtConDec.condef (optName, tm', optTm), f')
+      (ExtConDec.condef optName tm' optTm, f')
 
     let parseConDec2 = function
       | optName, (tm, LS.Cons ((L.Equal, r), s')) ->
           parseConDec3 (optName, Some tm, s')
       | Some name, (tm, f) -> (ExtConDec.condec (name, tm), f)
       | None, (tm, LS.Cons ((t, r), s')) ->
-          Parsing.error (r, "Illegal anonymous declared constant")
+          Parsing.error r ("Illegal anonymous declared constant")
 
     let parseConDec1 = function
       | optName, LS.Cons ((L.Colon, r), s') ->
           parseConDec2 (optName, ParseTerm.parseTerm' (LS.expose s'))
       | optName, LS.Cons ((L.Equal, r), s') -> parseConDec3 (optName, None, s')
       | optName, LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected `:' or `=', found " ^ L.toString t)
+          Parsing.error r ("Expected `:' or `=', found " ^ L.toString t)
 
     let parseBlock = function
       | LS.Cons ((L.Id (_, "block"), r), s') ->
           ParseTerm.parseCtx' (LS.expose s')
       | LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected `block', found " ^ L.toString t)
+          Parsing.error r ("Expected `block', found " ^ L.toString t)
 
     let parseSome = function
       | name, LS.Cons ((L.Id (_, "some"), r), s') ->
           let g1, f' = ParseTerm.parseCtx' (LS.expose s') in
           let g2, f'' = parseBlock f' in
-          (ExtConDec.blockdec (name, g1, g2), f'')
+          (ExtConDec.blockdec name g1 g2, f'')
       | name, (LS.Cons ((L.Id (_, "block"), r), s') as f) ->
           let g2, f' = parseBlock f in
-          (ExtConDec.blockdec (name, [], g2), f')
+          (ExtConDec.blockdec name [] g2, f')
       | name, LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected `some' or `block', found " ^ L.toString t)
+          Parsing.error r ("Expected `some' or `block', found " ^ L.toString t)
 
     let parseBlockDec1 = function
       | name, LS.Cons ((L.Colon, r), s') -> parseSome (name, LS.expose s')
       | name, LS.Cons ((L.Equal, r), s') ->
           let g, f = ParseTerm.parseQualIds' (LS.expose s') in
-          (ExtConDec.blockdef (name, g), f)
+          (ExtConDec.blockdef name g, f)
       | name, LS.Cons ((t, r), s') ->
-          Parsing.error (r, "`:' expected, found token " ^ L.toString t)
+          Parsing.error r ("`:' expected, found token " ^ L.toString t)
 
     let parseBlockDec' = function
       | LS.Cons ((L.Id (idCase, name), r), s') ->
           parseBlockDec1 (name, LS.expose s')
       | LS.Cons ((t, r), s') ->
           Parsing.error
-            (r, "Label identifier expected, found token " ^ L.toString t)
+            r ("Label identifier expected, found token " ^ L.toString t)
 
     let parseConDec' = function
       | LS.Cons ((L.Id (idCase, name), r), s') ->
@@ -141,9 +141,8 @@ end) : PARSE_CONDEC with module ExtConDec = ParseConDec__0.ExtConDec' = struct
       | LS.Cons ((L.Block, r), s') -> parseBlockDec' (LS.expose s')
       | LS.Cons ((t, r), s') ->
           Parsing.error
-            ( r,
-              "Constant or block declaration expected, found token "
-              ^ L.toString t )
+            r ("Constant or block declaration expected, found token "
+              ^ L.toString t)
 
     let parseConDec s = parseConDec' (LS.expose s)
     let parseAbbrev' (LS.Cons ((L.Abbrev, r), s)) = parseConDec s

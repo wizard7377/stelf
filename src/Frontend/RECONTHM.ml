@@ -68,9 +68,9 @@ module type THMEXTSYN = sig
   (*! structure Paths : PATHS  !*)
   type order
 
-  val varg : Paths.region * string list -> order
-  val lex : Paths.region * order list -> order
-  val simul : Paths.region * order list -> order
+  val varg : Paths.region -> string list -> order
+  val lex : Paths.region -> order list -> order
+  val simul : Paths.region -> order list -> order
 
   type callpats
 
@@ -78,12 +78,12 @@ module type THMEXTSYN = sig
 
   type tdecl
 
-  val tdecl : order * callpats -> tdecl
+  val tdecl : order -> callpats -> tdecl
 
   (* -bp *)
   type predicate
 
-  val predicate : string * Paths.region -> predicate
+  val predicate : string -> Paths.region -> predicate
 
   (* -bp *)
   type rdecl
@@ -92,19 +92,19 @@ module type THMEXTSYN = sig
 
   type tableddecl
 
-  val tableddecl : string * Paths.region -> tableddecl
+  val tableddecl : string -> Paths.region -> tableddecl
 
   type keepTabledecl
 
-  val keepTabledecl : string * Paths.region -> keepTabledecl
+  val keepTabledecl : string -> Paths.region -> keepTabledecl
 
   type prove
 
-  val prove : int * tdecl -> prove
+  val prove : int -> tdecl -> prove
 
   type establish
 
-  val establish : int * tdecl -> establish
+  val establish : int -> tdecl -> establish
 
   type assert_
 
@@ -115,18 +115,18 @@ module type THMEXTSYN = sig
   type theoremdec
 
   val null : decs
-  val decl : decs * ExtSyn.dec -> decs
+  val decl : decs -> ExtSyn.dec -> decs
   val top : theorem
-  val exists : decs * theorem -> theorem
-  val forall : decs * theorem -> theorem
-  val forallStar : decs * theorem -> theorem
-  val forallG : (decs * decs) list * theorem -> theorem
+  val exists : decs -> theorem -> theorem
+  val forall : decs -> theorem -> theorem
+  val forallStar : decs -> theorem -> theorem
+  val forallG : (decs * decs) list -> theorem -> theorem
   val dec : string * theorem -> theoremdec
 
   (* world checker *)
   type wdecl
 
-  val wdecl : (string list * string) list * callpats -> wdecl
+  val wdecl : (string list * string) list -> callpats -> wdecl
 end
 
 module type RECON_THM = sig

@@ -74,7 +74,7 @@ end) : ORDER = struct
   let redOrderTable : rDec Table.table = Table.new_ 0
   let reset () = Table.clear orderTable
   let reset_r_order () = Table.clear redOrderTable
-  let install (cid, o_) = Table.insert orderTable (cid, o_)
+  let install cid o_ = Table.insert orderTable (cid, o_)
 
   let uninstall cid =
     begin match Table.lookup orderTable cid with
@@ -85,7 +85,7 @@ end) : ORDER = struct
       end
     end
 
-  let install_r_order (cid, p_) = Table.insert redOrderTable (cid, p_)
+  let install_r_order cid p_ = Table.insert redOrderTable (cid, p_)
 
   let uninstall_r_order cid =
     begin match Table.lookup redOrderTable cid with

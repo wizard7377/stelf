@@ -13,7 +13,7 @@ module type TIMING = sig
 
   type sum
 
-  val sumCenter : string * center list -> sum
+  val sumCenter : string -> center list -> sum
   val toString : center -> string
   val sumToString : sum -> string
 end

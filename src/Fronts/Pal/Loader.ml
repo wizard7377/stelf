@@ -235,25 +235,25 @@ module Make (C : CTX) = struct
         let ns_name = Stdlib.Option.value alias ~default:dep_group_name in
         if ns_name <> dep_group_name then
           match
-            Names.structLookupIn (group_ns, Names.Qid ([], dep_group_name))
+            Names.structLookupIn group_ns (Names.Qid ([], dep_group_name))
           with
           | None -> ()
           | Some mid_dep ->
               let alias_ns = Names.newNamespace () in
               let comps = Names.getComponents mid_dep in
               Names.appConsts
-                (fun (_, cid) -> Names.insertConst (alias_ns, cid))
+                (fun (_, cid) -> Names.insertConst alias_ns cid)
                 comps;
               Names.appStructs
-                (fun (_, m) -> Names.insertStruct (alias_ns, m))
+                (fun (_, m) -> Names.insertStruct alias_ns m)
                 comps;
               let mid_alias =
                 Intsyn.IntSyn.sgnStructAdd
                   (Intsyn.IntSyn.StrDec (ns_name, None))
               in
               Names.installStructName mid_alias;
-              Names.insertStruct (group_ns, mid_alias);
-              Names.installComponents (mid_alias, alias_ns)
+              Names.insertStruct group_ns mid_alias;
+              Names.installComponents mid_alias alias_ns
       in
       let install_dep dep : Reply.outcome =
         match dep with
@@ -315,8 +315,8 @@ module Make (C : CTX) = struct
         Intsyn.IntSyn.sgnStructAdd (Intsyn.IntSyn.StrDec (cfg.name, None))
       in
       Names.installStructName mid;
-      Names.insertStruct (saved_group_ns, mid);
-      Names.installComponents (mid, group_ns);
+      Names.insertStruct saved_group_ns mid;
+      Names.installComponents mid group_ns;
       current_group_ns := saved_group_ns;
       current_load_path := saved_load_path;
       combine [ deps_outcome; main_outcome ]

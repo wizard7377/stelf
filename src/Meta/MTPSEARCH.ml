@@ -49,6 +49,6 @@ module type MTPSEARCH = sig
   exception Error of string
 
   val searchEx :
-    int * IntSyn.exp list * (int -> unit) ->
+    int -> IntSyn.exp list -> (int -> unit) ->
     unit (*      * (IntSyn.Exp * IntSyn.Sub) *)
 end

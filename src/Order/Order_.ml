@@ -66,7 +66,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
     let redOrderTable : rDec Table.table = Table.new_ 0
     let reset () = Table.clear orderTable
     let resetROrder () = Table.clear redOrderTable
-    let install (cid, o_) = Table.insert orderTable (cid, o_)
+    let install cid o_ = Table.insert orderTable (cid, o_)
 
     let uninstall cid =
       begin match Table.lookup orderTable cid with
@@ -77,7 +77,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
         end
       end
 
-    let installROrder (cid, p_) = Table.insert redOrderTable (cid, p_)
+    let installROrder cid p_ = Table.insert redOrderTable (cid, p_)
 
     let uninstallROrder cid =
       begin match Table.lookup redOrderTable cid with

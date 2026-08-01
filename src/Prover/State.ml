@@ -127,7 +127,7 @@ end) : STATE = struct
       | (psi, T.Choose p_), k_ -> findExp (psi, p_) k_
       | (psi, T.PairExp (m_, p_)), k_ ->
           findExp (psi, p_)
-            (Abstract.collectEVars (T.coerceCtx psi, (m_, I.id), k_))
+            (Abstract.collectEVars (T.coerceCtx psi) (m_, I.id) k_)
       | (psi, T.PairBlock (b_, p_)), k_ -> findExp (psi, p_) k_
       | (psi, T.PairPrg (p1_, p2_)), k_ ->
           findExp (psi, p2_) (findExp (psi, p1_) k_)
@@ -155,7 +155,7 @@ end) : STATE = struct
       | (psi, T.AppPrg (_, s_)), k_ -> findExpSpine (psi, s_) k_
       | (psi, T.AppExp (m_, s_)), k_ ->
           findExpSpine (psi, s_)
-            (Abstract.collectEVars (T.coerceCtx psi, (m_, I.id), k_))
+            (Abstract.collectEVars (T.coerceCtx psi) (m_, I.id) k_)
       | (psi, T.AppBlock (_, s_)), k_ -> findExpSpine (psi, s_) k_
       end
 
@@ -178,13 +178,13 @@ end) : STATE = struct
       | (psi, T.Idx _), k_ -> k_
       | (psi, T.Prg p_), k_ -> findExp (psi, p_) k_
       | (psi, T.Exp m_), k_ ->
-          Abstract.collectEVars (T.coerceCtx psi, (m_, I.id), k_)
+          Abstract.collectEVars (T.coerceCtx psi) (m_, I.id) k_
       | (psi, T.Block _), k_ -> k_
       | (psi, T.Undef), k_ -> k_
       end
 
-    let init (f_, w_) =
-      let x_ = T.newEVar (I.Null, f_) in
+    let init f_ w_ =
+      let x_ = T.newEVar I.Null f_ in
       State (w_, I.Null, x_, f_)
 
     let close (State (w_, _, p_, _)) =

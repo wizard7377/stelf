@@ -78,13 +78,11 @@ module MakeModeCheck
       | fileName, None -> (fileName ^ ":") ^ msg
       | fileName, Some occDec ->
           P.wrapLoc'
-            ( P.Loc (fileName, P.occToRegionClause occDec occ),
-              Origins.linesInfoLookup fileName,
-              (("Constant " ^ Names.qidToString (Names.constQid c)) ^ "\n")
-              ^ msg )
+            (P.Loc (fileName, P.occToRegionClause occDec occ)) (Origins.linesInfoLookup fileName) ((("Constant " ^ Names.qidToString (Names.constQid c)) ^ "\n")
+              ^ msg)
       end
 
-    let wrapMsg' (fileName, r, msg) = P.wrapLoc (P.Loc (fileName, r), msg)
+    let wrapMsg' (fileName, r, msg) = P.wrapLoc (P.Loc (fileName, r)) msg
 
     exception ModeError of P.occ * string
     exception Error' of P.occ * string
@@ -199,7 +197,7 @@ module MakeModeCheck
       | d_, k, args, I.App (u_, s_) ->
           let k' = etaContract (u_, 0) in
           begin if
-            k > k' && isUniversal (I.ctxLookup (d_, k')) && unique (k', args)
+            k > k' && isUniversal (I.ctxLookup d_ k') && unique (k', args)
           then checkPattern (d_, k, k' :: args, s_)
           else raise Eta
           end
@@ -226,7 +224,7 @@ module MakeModeCheck
           | I.BVar k' ->
               begin if k' = p then isPattern (d_, k', s_)
               else
-                begin if isUniversal (I.ctxLookup (d_, k')) then
+                begin if isUniversal (I.ctxLookup d_ k') then
                   strictSpineN (d_, p, s_)
                 else false
                 end
@@ -270,7 +268,7 @@ module MakeModeCheck
           freeExpN
             (I.Decl (d_, Universal), d + 1, mode, u_, P.body occ, strictFun)
       | d_, d, mode, I.FgnExp (csfe1, csfe2), occ, strictFun ->
-          I.FgnExpStd.App.apply (csfe1, csfe2) (function u_ ->
+          I.FgnExpStd.App.apply csfe1 csfe2 (function u_ ->
               freeExpN (d_, d, mode, Whnf.normalize (u_, I.id), occ, strictFun))
 
     (** freeSpineN (D, mode, S, occ, strictFun)  = ()
@@ -285,7 +283,7 @@ module MakeModeCheck
     and freeSpineN = function
       | d_, d, mode, I.Nil, _, strictFun -> ()
       | d_, d, mode, I.App (u_, s_), (p, occ), strictFun -> begin
-          freeExpN (d_, d, mode, u_, P.arg (p, occ), strictFun);
+          freeExpN (d_, d, mode, u_, P.arg p occ, strictFun);
           freeSpineN (d_, d, mode, s_, (p + 1, occ), strictFun)
         end
 
@@ -299,7 +297,7 @@ module MakeModeCheck
        (occ and mode are used in error messages)
     *)
     and freeVar (d_, d, mode, k, occ, strictFun) =
-      let status = I.ctxLookup (d_, k) in
+      let status = I.ctxLookup d_ k in
       begin if isFree status || isUniversal status || strictFun (k - d) then ()
       else
         raise
@@ -368,7 +366,7 @@ module MakeModeCheck
     *)
     let rec updateExpN = function
       | d_, I.Root (I.BVar k, s_), u ->
-          begin if isUniversal (I.ctxLookup (d_, k)) then
+          begin if isUniversal (I.ctxLookup d_ k) then
             updateSpineN (d_, s_, u)
           else
             begin if isPattern (d_, k, s_) then updateVarD (d_, k, u)
@@ -469,7 +467,7 @@ module MakeModeCheck
               0,
               M.Minus,
               u_,
-              P.arg (p, occ),
+              P.arg p occ,
               function q -> strictExpN (d_, q, Whnf.normalize (v1_, s)) );
           freeAtom
             ( d_,
@@ -531,7 +529,7 @@ module MakeModeCheck
       | d_, mode, I.Lam (_, u_), occ ->
           groundExpN (I.Decl (d_, Universal), mode, u_, P.body occ)
       | d_, mode, I.FgnExp (csfe1, csfe2), occ ->
-          I.FgnExpStd.fold (csfe1, csfe2)
+          I.FgnExpStd.fold csfe1 csfe2
             (function
               | u_, u ->
                   andUnique
@@ -558,7 +556,7 @@ module MakeModeCheck
       | d_, mode, I.Nil, _ -> Unique
       | d_, mode, I.App (u_, s_), (p, occ) ->
           andUnique
-            ( groundExpN (d_, mode, u_, P.arg (p, occ)),
+            ( groundExpN (d_, mode, u_, P.arg p occ),
               groundSpineN (d_, mode, s_, (p + 1, occ)) )
 
     (** groundVar (D, mode, k, occ)  = u
@@ -577,7 +575,7 @@ module MakeModeCheck
     *)
     and groundVar = function
       | d_, M.Minus1, k, occ ->
-          begin match I.ctxLookup (d_, k) with
+          begin match I.ctxLookup d_ k with
           | Existential (Ground Unique, _) -> Unique
           | Universal -> Unique
           | Existential (Ground Ambig, x) as s ->
@@ -596,7 +594,7 @@ module MakeModeCheck
                      ^ " argument not necessarily ground" ))
           end
       | d_, mode, k, occ ->
-          let status = I.ctxLookup (d_, k) in
+          let status = I.ctxLookup d_ k in
           begin if isGround status || isUniversal status then uniqueness status
           else
             raise
@@ -628,15 +626,15 @@ module MakeModeCheck
       | d_, _, I.Nil, M.Mnil, _ -> Unique
       | d_, M.Plus, I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS), (p, occ) ->
           andUnique
-            ( groundExpN (d_, M.Plus, u_, P.arg (p, occ)),
+            ( groundExpN (d_, M.Plus, u_, P.arg p occ),
               groundAtom (d_, M.Plus, s_, mS, (p + 1, occ)) )
       | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
         ->
-          ignore (groundExpN (d_, M.Minus, u_, P.arg (p, occ)));
+          ignore (groundExpN (d_, M.Minus, u_, P.arg p occ));
           groundAtom (d_, M.Minus, s_, mS, (p + 1, occ))
       | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
         ->
-          ignore (groundExpN (d_, M.Minus1, u_, P.arg (p, occ)));
+          ignore (groundExpN (d_, M.Minus1, u_, P.arg p occ));
           groundAtom (d_, M.Minus, s_, mS, (p + 1, occ))
       | d_, mode, I.App (u_, s_), M.Mapp (_, mS), (p, occ) ->
           groundAtom (d_, mode, s_, mS, (p + 1, occ))

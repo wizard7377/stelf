@@ -50,7 +50,7 @@ module type STATE = sig
 
   (* Focus (EVar, W) *)
   (* focus EVar *)
-  val init : Tomega.for_ * Tomega.worlds -> state
+  val init : Tomega.for_ -> Tomega.worlds -> state
   val close : state -> bool
   val collectT : Tomega.prg -> Tomega.prg list
   val collectLF : Tomega.prg -> IntSyn.exp list

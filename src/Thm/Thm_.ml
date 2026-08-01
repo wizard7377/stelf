@@ -57,7 +57,7 @@ module Make_Thm
     module P = ThmPrint
     module O = Order
 
-    let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+    let error r msg = raise (Error (Paths.wrap r msg))
 
     let unique (((a, p_), r), a_) =
       let rec unique' = function
@@ -68,7 +68,7 @@ module Make_Thm
               (function
                 | x' ->
                     begin if x = x' then
-                      error (r, ("Variable " ^ x) ^ " used more than once")
+                      error r (("Variable " ^ x) ^ " used more than once")
                     else ()
                     end)
               a_;
@@ -76,19 +76,16 @@ module Make_Thm
           end
         | I.Uni _, _, _ ->
             error
-              ( r,
-                "Too many arguments supplied to type family "
-                ^ Names.qidToString (Names.constQid a) )
+              r ("Too many arguments supplied to type family "
+                ^ Names.qidToString (Names.constQid a))
         | I.Pi (_, v_), [], _ ->
             error
-              ( r,
-                "Too few arguments supplied to type family "
-                ^ Names.qidToString (Names.constQid a) )
+              r ("Too few arguments supplied to type family "
+                ^ Names.qidToString (Names.constQid a))
         | I.Root _, _, _ ->
             error
-              ( r,
-                ("Constant " ^ Names.qidToString (Names.constQid a))
-                ^ " is an object, not a type family" )
+              r (("Constant " ^ Names.qidToString (Names.constQid a))
+                ^ " is an object, not a type family")
       in
       let rec skip = function
         | 0, v_, p_, a_ -> unique' (v_, p_, a_)
@@ -119,9 +116,8 @@ module Make_Thm
               | M.Plus -> true
               | _ ->
                   error
-                    ( r,
-                      ((("Expected " ^ x) ^ " to have ") ^ M.modeToString M.Plus)
-                      ^ " mode" )
+                    r (((("Expected " ^ x) ^ " to have ") ^ M.modeToString M.Plus)
+                      ^ " mode")
               end
             else exists' (x, l_, mS)
             end
@@ -136,16 +132,15 @@ module Make_Thm
             then c_
             else aP :: delete (x, c_)
             end
-        | x, [] -> error (r, ("Variable " ^ x) ^ " does not occur as argument")
+        | x, [] -> error r (("Variable " ^ x) ^ " does not occur as argument")
       in
       let rec wfCallpats' = function
         | [], [] -> ()
         | x :: l_, c_ -> wfCallpats' (l_, delete (x, c_))
         | _ ->
             error
-              ( r,
-                ("Mutual argument (" ^ makestring l0_)
-                ^ ") does not cover all call patterns" )
+              r (("Mutual argument (" ^ makestring l0_)
+                ^ ") does not cover all call patterns")
       in
       wfCallpats' (l0_, c0_)
 
@@ -167,9 +162,8 @@ module Make_Thm
             begin match ModeTable.modeLookup a with
             | None ->
                 error
-                  ( r,
-                    ("Expected " ^ Names.qidToString (Names.constQid a))
-                    ^ " to be moded" )
+                  r (("Expected " ^ Names.qidToString (Names.constQid a))
+                    ^ " to be moded")
             | Some mS -> ()
             end;
             allModed cs_
@@ -222,7 +216,7 @@ module Make_Thm
                     O.Empty ) )
           in
           let o'_ = argOrder (o_, p_, I.constImp a) in
-          let s'_ = O.install (a, O.TDec (o'_, m'_)) in
+          let s'_ = O.install a (O.TDec (o'_, m'_)) in
           installOrder (o_, thmsLE, aP :: thmsLT)
 
     let installDecl (o_, L.Callpats l_) =
@@ -231,7 +225,7 @@ module Make_Thm
         map (function a, _ -> a) l_
       end
 
-    let installTerminates (L.TDecl (o_, cp_), rrs) =
+    let installTerminates (L.TDecl (o_, cp_)) rrs =
       begin
         wf ((o_, cp_), rrs);
         installDecl (o_, cp_)
@@ -239,7 +233,7 @@ module Make_Thm
 
     let uninstallTerminates cid = O.uninstall cid
 
-    let installTotal (L.TDecl (o_, cp_), rrs) =
+    let installTotal (L.TDecl (o_, cp_)) rrs =
       begin
         wf ((o_, cp_), rrs);
         installDecl (o_, cp_)
@@ -276,7 +270,7 @@ module Make_Thm
           let o1' = argROrder (o1_, p_, I.constImp a) in
           let o2' = argROrder (o2_, p_, I.constImp a) in
           let pr = argPredicate (pred_, o1', o2') in
-          let s''_ = O.installROrder (a, O.RDec (pr, m'_)) in
+          let s''_ = O.installROrder a (O.RDec (pr, m'_)) in
           installPredicate (L.RedOrder (pred_, o1_, o2_), thmsLE, aP :: thmsLT)
 
     let installRDecl (r_, L.Callpats l_) =
@@ -300,16 +294,15 @@ module Make_Thm
         | x, ((a, p_) as aP) :: c_ ->
             begin if exists' (x, p_) then c_ else aP :: delete (x, c_)
             end
-        | x, [] -> error (r, ("Variable " ^ x) ^ " does not occur as argument")
+        | x, [] -> error r (("Variable " ^ x) ^ " does not occur as argument")
       in
       let rec wfCallpats' = function
         | [], [] -> ()
         | x :: l_, c_ -> wfCallpats' (l_, delete (x, c_))
         | _ ->
             error
-              ( r,
-                ("Mutual argument (" ^ makestring l0_)
-                ^ ") does not cover all call patterns" )
+              r (("Mutual argument (" ^ makestring l0_)
+                ^ ") does not cover all call patterns")
       in
       wfCallpats' (l0_, c0_)
 
@@ -330,16 +323,15 @@ module Make_Thm
         begin if wfOrder o_ = wfOrder o'_ then ()
         else
           error
-            ( r,
-              ("Reduction Order ("
+            r (("Reduction Order ("
               ^ P.rOrderToString
                   (Obj.magic (L.RedOrder (pred_, o_, o'_)) : P.ThmSyn.redOrder)
               )
-              ^ ") requires both orders to be of the same type." )
+              ^ ") requires both orders to be of the same type.")
         end
       end
 
-    let installReduces (L.RDecl (r_, c_), rrs) =
+    let installReduces (L.RDecl (r_, c_)) rrs =
       begin
         wfred ((r_, c_), rrs);
         installRDecl (r_, c_)

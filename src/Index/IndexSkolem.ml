@@ -28,7 +28,7 @@ module MakeIndexSkolem (Global : GLOBAL) (Queue : QUEUE) : Index_.INDEX = struct
     let reset () = Array.modify (function _ -> Queue.empty) indexArray
 
     let update (a, c) =
-      Array.update (indexArray, a, Queue.insert (c, Array.sub (indexArray, a)))
+      Array.update (indexArray, a, Queue.insert c (Array.sub (indexArray, a)))
 
     let install arg__1 arg__2 =
       begin match (arg__1, arg__2) with

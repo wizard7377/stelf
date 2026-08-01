@@ -102,12 +102,12 @@ module type COMPSYN = sig
   val sProgReset : unit -> unit
 
   (* Deterministic flag *)
-  val detTableInsert : IntSyn.cid * bool -> unit
+  val detTableInsert : IntSyn.cid -> bool -> unit
   val detTableCheck : IntSyn.cid -> bool
   val detTableReset : unit -> unit
 
   (* Explicit Substitutions *)
-  val goalSub : goal * IntSyn.sub -> goal
-  val resGoalSub : resGoal * IntSyn.sub -> resGoal
+  val goalSub : goal -> IntSyn.sub -> goal
+  val resGoalSub : resGoal -> IntSyn.sub -> resGoal
   val pskeletonToString : pskeleton -> string
 end

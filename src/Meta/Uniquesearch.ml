@@ -149,13 +149,13 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
       | r, (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
       | r, (I.FgnExp (csid_, csfe), s) ->
-          I.FgnExpStd.fold (csid_, csfe)
+          I.FgnExpStd.fold csid_ csfe
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
     and occursInSpine = function
       | _, (I.Nil, _) -> false
-      | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp (s', s)))
+      | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp s' s))
       | r, (I.App (u_, s_), s) ->
           occursInExp (r, (u_, s)) || occursInSpine (r, (s_, s))
 
@@ -201,7 +201,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
               (fun (m_, acc') -> sc (I.Lam (d'_, m_), acc')),
               acc )
       | max, depth, (C.All (d_, g), s), C.DProg (g_, dPool), sc, acc ->
-          let d'_ = I.decSub (d_, s) in
+          let d'_ = I.decSub d_ s in
           solve
             ( max,
               depth + 1,
@@ -212,7 +212,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
 
     and rSolve = function
       | max, depth, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc, acc ->
-          begin if Unify.unifiable (g_, ps', (q_, s)) then sc (I.Nil, acc)
+          begin if Unify.unifiable g_ ps' (q_, s) then sc (I.Nil, acc)
           else acc
           end
       | ( max,
@@ -222,7 +222,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           (C.DProg (g_, dPool) as dp),
           sc,
           acc ) ->
-          begin match Assign.assignable (g_, ps', (q_, s)) with
+          begin match Assign.assignable g_ ps' (q_, s) with
           | Some cnstr ->
               aSolve ((eqns, s), dp, cnstr, (fun () -> sc (I.Nil, acc)), acc)
           | None -> acc
@@ -234,7 +234,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           (C.DProg (g_, dPool) as dp),
           sc,
           acc ) ->
-          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( max,
               depth,
@@ -261,8 +261,8 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           let dPool0 = pruneCtx (dPool, depth) in
           let w = I.Shift depth in
           let iw = Whnf.invert w in
-          let s' = I.comp (s, iw) in
-          let x_ = I.newEVar (g0_, I.EClo (a_, s')) in
+          let s' = I.comp s iw in
+          let x_ = I.newEVar g0_ (I.EClo (a_, s')) in
           let x'_ = I.EClo (x_, w) in
           rSolve
             ( max,
@@ -280,7 +280,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
                       C.DProg (g0_, dPool0),
                       (fun (m_, acc'') ->
                         try
-                          Unify.unify (g0_, (x_, I.id), (m_, I.id));
+                          Unify.unify g0_ (x_, I.id) (m_, I.id);
                           sc (I.App (I.EClo (m_, w), s_), acc'')
                         with Unify.Unify _ -> acc''),
                       acc' )),
@@ -292,7 +292,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           (C.DProg (g_, dPool) as dp),
           sc,
           acc ) ->
-          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( max,
               depth,
@@ -329,7 +329,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           acc ) ->
           let g''_ = compose' (g'_, g_) in
           let s' = shift (g'_, s) in
-          begin if Assign.unifiable (g''_, (n_, s'), (e1, s')) then
+          begin if Assign.unifiable g''_ (n_, s') (e1, s') then
             aSolve ((eqns, s), dp, cnstr, sc, acc)
           else acc
           end
@@ -369,7 +369,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
                           ( max - 1,
                             depth,
                             ps',
-                            (r, I.comp (s, I.Shift n)),
+                            (r, I.comp s (I.Shift n)),
                             dp,
                             (fun (s_, acc'') ->
                               sc (I.Root (I.BVar n, s_), acc'')),
@@ -390,11 +390,11 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           solve
             ( max,
               0,
-              (Compile.compileGoal (g_, v_), I.id),
+              (Compile.compileGoal g_ v_, I.id),
               Compile.compileCtx false g_,
               (fun (u'_, acc') ->
                 try
-                  Unify.unify (g_, (x_, I.id), (u'_, I.id));
+                  Unify.unify g_ (x_, I.id) (u'_, I.id);
                   searchEx' max (ge, sc, acc')
                 with Unify.Unify _ -> acc'),
               acc )
@@ -413,7 +413,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
                 foldr
                   (function
                     | (I.EVar (_, g_, _, _) as x_), l_ ->
-                        Abstract.collectEVars (g_, (x_, I.id), l_))
+                        Abstract.collectEVars g_ (x_, I.id) l_)
                   [] ge
               in
               let gE' = List.length ge' in

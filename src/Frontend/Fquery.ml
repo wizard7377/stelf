@@ -114,9 +114,9 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     | 0, g_, v_ -> (g_, v_)
     | n, g_, I.Pi ((d_, _), v_) -> lower (n - 1, I.Decl (g_, d_), v_)
 
-  let run (quy, Paths.Loc (fileName, r)) =
+  let run quy (Paths.Loc (fileName, r)) =
     let v_, optName, xs_ =
-      ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
+      ReconQuery.queryToQuery quy (Paths.Loc (fileName, r))
     in
     ignore (Display.chatter_s 3 "%fquery");
     ignore (Display.chatter_s 3 " ");
@@ -128,11 +128,11 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     let g_, v2_ = lower (k, I.Null, v1_) in
     let a = I.targetFam v2_ in
     let w_ = W.lookup a in
-    let v3 = Worldify.worldifyGoal (g_, v2_) in
-    ignore (TypeCheck.typeCheck (g_, (v3, I.Uni I.Type)));
-    let p_ = Converter.convertGoal (T.embedCtx g_, v3) in
+    let v3 = Worldify.worldifyGoal g_ v2_ in
+    ignore (TypeCheck.typeCheck g_ (v3, I.Uni I.Type));
+    let p_ = Converter.convertGoal (T.embedCtx g_) v3 in
     let v_ = Timers.time Timers.delphin Opsem.evalPrg p_ in
-    print (("Delphin: " ^ TomegaPrint.prgToString (I.Null, v_)) ^ "\n")
+    print (("Delphin: " ^ TomegaPrint.prgToString I.Null v_) ^ "\n")
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)
   (* times itself *)
   (* G |- V'' : type *)

@@ -80,7 +80,7 @@ end) : LEMMA with module MetaSyn = Lemma__0.MetaSyn' = struct
             createEVars (M.Prefix (g_, m_, b_))
           in
           ( M.Prefix
-              ( I.Decl (g'_, I.decSub (d_, s')),
+              ( I.Decl (g'_, I.decSub d_ s'),
                 I.Decl (m'_, M.Top),
                 I.Decl (b'_, b) ),
             I.dot1 s' )
@@ -89,17 +89,17 @@ end) : LEMMA with module MetaSyn = Lemma__0.MetaSyn' = struct
           let M.Prefix (g'_, m'_, b'_), s' =
             createEVars (M.Prefix (g_, m_, b_))
           in
-          let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
+          let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
           (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'))
 
-    let apply (M.State (name, gm, v_), a) =
+    let apply (M.State (name, gm, v_)) a =
       let (M.Prefix (g'_, m'_, b'_) as gm'), s' = createEVars gm in
-      let u'_, vs'_ = M.createAtomConst (g'_, I.Const a) in
+      let u'_, vs'_ = M.createAtomConst g'_ (I.Const a) in
       A.abstract
         (M.State
            ( name,
              gm',
-             I.Pi ((I.Dec (None, u'_), I.No), I.EClo (v_, I.comp (s', I.shift)))
+             I.Pi ((I.Dec (None, u'_), I.No), I.EClo (v_, I.comp s' I.shift))
            ))
   end
 

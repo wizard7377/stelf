@@ -49,8 +49,8 @@ module type FUNTYPECHECK = sig
 
   exception Error of string
 
-  val isFor : IntSyn.dctx * FunSyn.for_ -> unit
+  val isFor : IntSyn.dctx -> FunSyn.for_ -> unit
   val check : FunSyn.pro * FunSyn.for_ -> unit
-  val checkSub : FunSyn.lfctx * IntSyn.sub * FunSyn.lfctx -> unit
+  val checkSub : FunSyn.lfctx -> IntSyn.sub -> FunSyn.lfctx -> unit
   val isState : StateSyn.state -> unit
 end

@@ -63,7 +63,7 @@ module Make_Modern
   let ghost' = Cst.View.Loc.(review Ghost)
 
   let combine_fc (r1 : Paths.region) (r2 : Paths.region) : Paths.region =
-    Paths.join (r1, r2)
+    Paths.join r1 r2
 
   let loc_union (l1 : Cst.loc) (l2 : Cst.loc) : Cst.loc =
     let open Cst.View.Loc in
@@ -218,7 +218,7 @@ module Make_Modern
       match (opr, p) with
       | ( (Infix_ ((prec, assoc), _) as o),
           (Atom _ :: Infix_ ((prec', assoc'), _) :: _ as p') ) ->
-          begin match (FX.compare (prec, prec'), assoc, assoc') with
+          begin match (FX.compare prec prec', assoc, assoc') with
           | Greater, _, _ -> shift (o, p')
           | Less, _, _ -> resolve (o, reduce p')
           | Equal, FX.Left, FX.Left -> resolve (o, reduce p')
@@ -230,7 +230,7 @@ module Make_Modern
           end
       | (Infix_ ((prec, _), _) as o), (Atom _ :: Prefix_ (prec', _) :: _ as p')
         ->
-          begin match FX.compare (prec, prec') with
+          begin match FX.compare prec prec' with
           | Greater -> shift (o, p')
           | Less -> resolve (o, reduce p')
           | Equal ->
@@ -240,7 +240,7 @@ module Make_Modern
           end
       | (Prefix_ _ as o), p' -> shift (o, p')
       | (Postfix_ (prec, _) as o), (Atom _ :: Prefix_ (prec', _) :: _ as p') ->
-          begin match FX.compare (prec, prec') with
+          begin match FX.compare prec prec' with
           | Greater -> reduce (shift (o, p'))
           | Less -> resolve (o, reduce p')
           | Equal ->
@@ -250,7 +250,7 @@ module Make_Modern
           end
       | (Postfix_ (prec, _) as o), (Atom _ :: Infix_ ((prec', _), _) :: _ as p')
         ->
-          begin match FX.compare (prec, prec') with
+          begin match FX.compare prec prec' with
           | Greater -> reduce (shift (o, p'))
           | Less -> resolve (o, reduce p')
           | Equal ->

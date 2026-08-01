@@ -158,11 +158,10 @@ end) : RECON_TERM = struct
     raise
       (Error
          (Paths.wrap
-            ( r,
-              (((" " ^ Int.toString !errorCount) ^ " error")
+            r ((((" " ^ Int.toString !errorCount) ^ " error")
               ^ begin if !errorCount > 1 then "s" else ""
               end)
-              ^ " found" )))
+              ^ " found")))
 
   let checkErrors r =
     begin if !errorCount > 0 then die r else ()
@@ -189,13 +188,13 @@ end) : RECON_TERM = struct
         begin
           Display.debug
             (Display.string
-               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
+               (((!errorFileName ^ ":") ^ Paths.wrap r msg) ^ "\n"));
           die r
         end
       end
     end
 
-  let error (r, msg) =
+  let error r msg =
     begin
       errorCount := !errorCount + 1;
       begin
@@ -203,7 +202,7 @@ end) : RECON_TERM = struct
         begin
           Display.debug
             (Display.string
-               (((!errorFileName ^ ":") ^ Paths.wrap (r, msg)) ^ "\n"));
+               (((!errorFileName ^ ":") ^ Paths.wrap r msg) ^ "\n"));
           begin if exceeds (!errorCount, !errorThreshold) then die r else ()
           end
         end
@@ -221,9 +220,9 @@ end) : RECON_TERM = struct
       Print.showConstPath := old;
       raise exn
 
-  let formatExp (g_, u_) =
+  let formatExp g_ u_ =
     withConstPath false (fun () ->
-        try Print.formatExp (g_, u_)
+        try Print.formatExp g_ u_
         with unprintable_ -> F.string "%_unprintable_%")
 
   (* this is a hack, i know *)
@@ -262,17 +261,17 @@ end) : RECON_TERM = struct
      then G' = G, G1 *)
   let rec lowerTypeW = function
     | g_, (IntSyn.Pi ((d_, _), v_), s) ->
-        let d'_ = IntSyn.decSub (d_, s) in
+        let d'_ = IntSyn.decSub d_ s in
         lowerType (decl_ (g_, d'_), (v_, IntSyn.dot1 s))
     | g_, vs_ -> (g_, eClo vs_)
 
   and lowerType (g_, vs_) = lowerTypeW (g_, Whnf.whnfExpandDef vs_)
 
   (* raiseType (G, V) = {{G}} V *)
-  let rec raiseType = function
+  let rec raiseType a1 b1 = match a1, b1 with
     | IntSyn.Null, v_ -> v_
     | IntSyn.Decl (g_, d_), v_ ->
-        raiseType (g_, IntSyn.Pi ((d_, IntSyn.Maybe), v_))
+        raiseType g_ (IntSyn.Pi ((d_, IntSyn.Maybe), v_))
 
   (* open IntSyn *)
   let evarApxTable : Apx.exp StringTree.table = StringTree.new_ 0
@@ -330,14 +329,14 @@ end) : RECON_TERM = struct
 
   let getEVar (name, allowed) =
     begin match Names.getEVarOpt name with
-    | Some (IntSyn.EVar (_, g_, v_, _) as x_) -> (x_, raiseType (g_, v_))
+    | Some (IntSyn.EVar (_, g_, v_, _) as x_) -> (x_, raiseType g_ v_)
     | None ->
         let v_ = Option.valOf (StringTree.lookup evarApxTable name) in
         let v'_ = Apx.apxToClass (IntSyn.Null, v_, Apx.(Level 1), allowed) in
         let g''_, v'' = lowerType (IntSyn.Null, (v'_, IntSyn.id)) in
-        let x_ = IntSyn.newEVar (g''_, v'') in
+        let x_ = IntSyn.newEVar g''_ v'' in
         begin
-          Names.addEVar (x_, name);
+          Names.addEVar x_ name;
           (x_, v'_)
         end
     end
@@ -379,18 +378,18 @@ end) : RECON_TERM = struct
 
   and dec = Dec_ of string option * term * Paths.region
 
-  let lcid (ids, name, r) = Lcid_ (ids, name, r)
-  let ucid (ids, name, r) = Ucid_ (ids, name, r)
-  let quid (ids, name, r) = Quid_ (ids, name, r)
-  let scon (value, r) = Scon_ (value, r)
-  let evar (name, r) = Evar_ (name, r)
-  let fvar (name, r) = Fvar_ (name, r)
+  let lcid ids name r = Lcid_ (ids, name, r)
+  let ucid ids name r = Ucid_ (ids, name, r)
+  let quid ids name r = Quid_ (ids, name, r)
+  let scon value r = Scon_ (value, r)
+  let evar name r = Evar_ (name, r)
+  let fvar name r = Fvar_ (name, r)
   let typ r = Typ_ r
-  let arrow (tm1, tm2) = Arrow_ (tm1, tm2)
-  let pi (d, tm) = Pi_ (d, tm)
-  let lam (d, tm) = Lam_ (d, tm)
-  let app (tm1, tm2) = App_ (tm1, tm2)
-  let hastype (tm1, tm2) = Hastype_ (tm1, tm2)
+  let arrow tm1 tm2 = Arrow_ (tm1, tm2)
+  let pi d tm = Pi_ (d, tm)
+  let lam d tm = Lam_ (d, tm)
+  let app tm1 tm2 = App_ (tm1, tm2)
+  let hastype tm1 tm2 = Hastype_ (tm1, tm2)
   let omitted r = Omitted_ r
   let dec (nameOpt, tm, r) = Dec_ (nameOpt, tm, r)
 
@@ -404,10 +403,10 @@ end) : RECON_TERM = struct
   (* (U, V, L, r) where U ~:~ V ~:~ L *)
   (* U undefined unless L >= kind *)
   (* Phase 3 only *)
-  let backarrow (tm1, tm2) = Arrow_ (tm2, tm1)
+  let backarrow tm1 tm2 = Arrow_ (tm2, tm1)
 
   (* for now *)
-  let dec0 (nameOpt, r) = Dec_ (nameOpt, Omitted_ r, r)
+  let dec0 nameOpt r = Dec_ (nameOpt, Omitted_ r, r)
 
   type job =
     | Jnothing
@@ -419,12 +418,12 @@ end) : RECON_TERM = struct
     | Jof' of term * IntSyn.exp
 
   let jnothing = Jnothing
-  let jand (j1, j2) = Jand (j1, j2)
-  let jwithctx (g, j) = Jwithctx (g, j)
+  let jand j1 j2 = Jand (j1, j2)
+  let jwithctx g j = Jwithctx (g, j)
   let jterm tm = Jterm tm
   let jclass tm = Jclass tm
-  let jof (tm1, tm2) = Jof (tm1, tm2)
-  let jof' (tm, v_) = Jof' (tm, v_)
+  let jof tm1 tm2 = Jof (tm1, tm2)
+  let jof' tm v_ = Jof' (tm, v_)
 
   let rec termRegion = function
     | Internal_ (u_, v_, r) -> r
@@ -433,11 +432,11 @@ end) : RECON_TERM = struct
     | Evar_ (name, r) -> r
     | Fvar_ (name, r) -> r
     | Typ_ r -> r
-    | Arrow_ (tm1, tm2) -> Paths.join (termRegion tm1, termRegion tm2)
-    | Pi_ (tm1, tm2) -> Paths.join (decRegion tm1, termRegion tm2)
-    | Lam_ (tm1, tm2) -> Paths.join (decRegion tm1, termRegion tm2)
-    | App_ (tm1, tm2) -> Paths.join (termRegion tm1, termRegion tm2)
-    | Hastype_ (tm1, tm2) -> Paths.join (termRegion tm1, termRegion tm2)
+    | Arrow_ (tm1, tm2) -> Paths.join (termRegion tm1) (termRegion tm2)
+    | Pi_ (tm1, tm2) -> Paths.join (decRegion tm1) (termRegion tm2)
+    | Lam_ (tm1, tm2) -> Paths.join (decRegion tm1) (termRegion tm2)
+    | App_ (tm1, tm2) -> Paths.join (termRegion tm1) (termRegion tm2)
+    | Hastype_ (tm1, tm2) -> Paths.join (termRegion tm1) (termRegion tm2)
     | Mismatch_ (tm1, tm2, _, _) -> termRegion tm2
     | Omitted_ r -> r
     | Lcid_ (_, _, r) -> r
@@ -455,7 +454,7 @@ end) : RECON_TERM = struct
 
   and ctxRegion' = function
     | IntSyn.Null, r -> Some r
-    | IntSyn.Decl (g, tm), r -> ctxRegion' (g, Paths.join (r, decRegion tm))
+    | IntSyn.Decl (g, tm), r -> ctxRegion' (g, Paths.join r (decRegion tm))
 
   type apx_dec = Dec of string option * Apx.exp | NDec of string option
   type apx_ctx = apx_dec IntSyn.ctx
@@ -499,8 +498,7 @@ end) : RECON_TERM = struct
     else
       begin if notGround then
         error
-          ( termRegion tm,
-            ((("Ambiguous level\n"
+          (termRegion tm) (((("Ambiguous level\n"
              ^ "The level of this term could not be inferred\n")
              ^ "Defaulting to ")
             ^ begin match i with
@@ -508,7 +506,7 @@ end) : RECON_TERM = struct
             | 2 -> "type family"
             | 3 -> "kind"
             end)
-            ^ " level" )
+            ^ " level")
       else ()
       end
     end
@@ -516,9 +514,8 @@ end) : RECON_TERM = struct
   let findOmitted (g_, qid, r) =
     begin
       error
-        ( r,
-          "Undeclared identifier "
-          ^ Names.qidToString (valOf (Names.constUndef qid)) );
+        r ("Undeclared identifier "
+          ^ Names.qidToString (valOf (Names.constUndef qid)));
       Omitted_ r
     end
 
@@ -550,10 +547,9 @@ end) : RECON_TERM = struct
         | IntSyn.AbbrevDef _ -> Constant_ (IntSyn.NSDef cid, r)
         | _ -> begin
             error
-              ( r,
-                (("Invalid identifier\n" ^ "Identifier `")
+              r ((("Invalid identifier\n" ^ "Identifier `")
                 ^ Names.qidToString qid)
-                ^ "' is not a constant, definition or abbreviation" );
+                ^ "' is not a constant, definition or abbreviation");
             Omitted_ r
           end
         end
@@ -583,7 +579,7 @@ end) : RECON_TERM = struct
 
   let rec inferApx = function
     | g_, (Internal_ (u_, v_, r) as tm) ->
-        let u'_, v'_, l'_ = Apx.exactToApx (u_, v_) in
+        let u'_, v'_, l'_ = Apx.exactToApx u_ v_ in
         (tm, u'_, v'_, l'_)
     | g_, (Lcid_ (ids, name, r) as tm) ->
         let qid = Names.Qid (ids, name) in
@@ -597,7 +593,7 @@ end) : RECON_TERM = struct
     | g_, (Scon_ (name, r) as tm) ->
         begin match CsManager.parse name with
         | None -> begin
-            error (r, "Strings unsupported in current signature");
+            error r ("Strings unsupported in current signature");
             inferApx (g_, Omitted_ r)
           end
         | Some (cs, conDec) ->
@@ -606,7 +602,7 @@ end) : RECON_TERM = struct
     | g_, (Constant_ (h_, r) as tm) ->
         let cd = headConDec h_ in
         let u'_, v'_, l'_ =
-          Apx.exactToApx (IntSyn.Root (h_, IntSyn.Nil), IntSyn.conDecType cd)
+          Apx.exactToApx (IntSyn.Root (h_, IntSyn.Nil)) (IntSyn.conDecType cd)
         in
         let rec dropImplicit = function
           | v_, 0 -> v_
@@ -615,7 +611,7 @@ end) : RECON_TERM = struct
         let v'' = dropImplicit (v'_, IntSyn.conDecImp cd) in
         (tm, u'_, v'', l'_)
     | g_, (Bvar_ (k, r) as tm) ->
-        let (Dec (_, v_)) = IntSyn.ctxLookup (g_, k) in
+        let (Dec (_, v_)) = IntSyn.ctxLookup g_ k in
         (tm, undefined_, v_, Apx.(Level 1))
     | g_, (Evar_ (name, r) as tm) ->
         (tm, undefined_, getEVarTypeApx name, Apx.(Level 1))
@@ -720,7 +716,7 @@ end) : RECON_TERM = struct
     let tm', u'_, v'_, l'_ = inferApx (g_, tm) in
     try
       begin
-        Apx.matchUni (l_, l'_);
+        Apx.matchUni l_ l'_;
         begin
           Apx.match_ (v_, v'_);
           (tm', u'_)
@@ -861,20 +857,20 @@ end) : RECON_TERM = struct
     | Elim of (IntSyn.sub * IntSyn.spine -> IntSyn.exp)
     | Intro of IntSyn.exp
 
-  let elimSub (e_, s) = function s', s_ -> e_ (IntSyn.comp (s, s'), s_)
+  let elimSub (e_, s) = function s', s_ -> e_ (IntSyn.comp s s', s_)
 
   let elimApp (e_, u_) = function
     | s, s_ -> e_ (s, IntSyn.App (eClo (u_, s), s_))
 
   let bvarElim n = function
     | s, s_ ->
-        begin match IntSyn.bvarSub (n, s) with
+        begin match IntSyn.bvarSub n s with
         | Idx n' -> root_ (bVar n', s_)
         | Exp u_ -> redex_ (u_, s_)
         end
 
   let fvarElim (name, v_, s) = function
-    | s', s_ -> root_ (fVar (name, v_, IntSyn.comp (s, s')), s_)
+    | s', s_ -> root_ (fVar (name, v_, IntSyn.comp s s'), s_)
 
   let redexElim u_ = function s, s_ -> redex_ (eClo (u_, s), s_)
 
@@ -895,12 +891,12 @@ end) : RECON_TERM = struct
      this conforms to the external interpretation:
      the type of the returned elim form is ([[G]] V) *)
   let evarElim (IntSyn.EVar _ as x_) = function
-    | s, s_ -> eClo (x_, Whnf.spineToSub (s_, s))
+    | s, s_ -> eClo (x_, Whnf.spineToSub s_ s)
 
   let rec etaExpandW = function
     | e_, (IntSyn.Pi (((IntSyn.Dec (_, va) as d_), _), vr), s) ->
-        let u1_ = etaExpand (bvarElim 1, (va, IntSyn.comp (s, IntSyn.shift))) in
-        let d'_ = IntSyn.decSub (d_, s) in
+        let u1_ = etaExpand (bvarElim 1, (va, IntSyn.comp s IntSyn.shift)) in
+        let d'_ = IntSyn.decSub d_ s in
         IntSyn.Lam
           ( d'_,
             etaExpand
@@ -919,8 +915,8 @@ end) : RECON_TERM = struct
 
   let rec addImplicit1W
       (g_, e_, (IntSyn.Pi ((IntSyn.Dec (_, va), _), vr), s), i (* >= 1 *)) =
-    let x_ = Whnf.newLoweredEVar (g_, (va, s)) in
-    addImplicit (g_, elimApp (e_, x_), (vr, Whnf.dotEta (exp_ x_, s)), i - 1)
+    let x_ = Whnf.newLoweredEVar g_ (va, s) in
+    addImplicit (g_, elimApp (e_, x_), (vr, Whnf.dotEta (exp_ x_) s), i - 1)
 
   and addImplicit = function
     | g_, e_, vs_, 0 -> (e_, eClo vs_)
@@ -949,15 +945,13 @@ end) : RECON_TERM = struct
     addDelayed (function () ->
         let xs_ =
           Abstract.collectEVars
-            ( g_,
-              (v2_, IntSyn.id),
-              Abstract.collectEVars (g_, (v1_, IntSyn.id), []) )
+            g_ (v2_, IntSyn.id) (Abstract.collectEVars g_ (v1_, IntSyn.id) [])
         in
         let xnames =
-          List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
+          List.map (function x_ -> (x_, Names.evarName IntSyn.Null x_)) xs_
         in
-        let v1fmt = formatExp (g_, v1_) in
-        let v2fmt = formatExp (g_, v2_) in
+        let v1fmt = formatExp g_ v1_ in
+        let v2fmt = formatExp g_ v2_ in
         let diff =
           F.vbox0 0 1
             [
@@ -977,20 +971,17 @@ end) : RECON_TERM = struct
           end
         in
         error
-          ( r2,
-            (((("Type mismatch\n" ^ diff) ^ "\n") ^ problem_msg) ^ "\n")
-            ^ location_msg ))
+          r2 ((((("Type mismatch\n" ^ diff) ^ "\n") ^ problem_msg) ^ "\n")
+            ^ location_msg))
 
   let delayAmbiguous (g_, u_, r, msg) =
     addDelayed (function () ->
-        let ufmt = formatExp (g_, u_) in
+        let ufmt = formatExp g_ u_ in
         let amb =
-          F.hVbox [ F.string "Inferred:"; F.space; formatExp (g_, u_) ]
+          F.hVbox [ F.string "Inferred:"; F.space; formatExp g_ u_ ]
         in
         error
-          ( r,
-            (("Ambiguous reconstruction\n" ^ F.makestring_fmt amb) ^ "\n") ^ msg
-          ))
+          r ((("Ambiguous reconstruction\n" ^ F.makestring_fmt amb) ^ "\n") ^ msg))
 
   let unifyIdem x =
     ignore (Unify.reset ());
@@ -1031,21 +1022,21 @@ end) : RECON_TERM = struct
   let reportMismatch (g_, vs1, vs2, problem_msg) =
     report (function () ->
         let xs_ =
-          Abstract.collectEVars (g_, vs2, Abstract.collectEVars (g_, vs1, []))
+          Abstract.collectEVars g_ vs2 (Abstract.collectEVars g_ vs1 [])
         in
         let xnames =
-          List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
+          List.map (function x_ -> (x_, Names.evarName IntSyn.Null x_)) xs_
         in
         let eqnsFmt =
           F.hVbox
             [
               F.string "|?";
               F.space;
-              formatExp (g_, eClo vs1);
+              formatExp g_ (eClo vs1);
               F.break_;
               F.string "=";
               F.space;
-              formatExp (g_, eClo vs2);
+              formatExp g_ (eClo vs2);
             ]
         in
         Display.debug (Display.string (F.makestring_fmt eqnsFmt ^ "\n"));
@@ -1058,21 +1049,21 @@ end) : RECON_TERM = struct
 
   let reportUnify' (g_, vs1, vs2) =
     let xs_ =
-      Abstract.collectEVars (g_, vs2, Abstract.collectEVars (g_, vs1, []))
+      Abstract.collectEVars g_ vs2 (Abstract.collectEVars g_ vs1 [])
     in
     let xnames =
-      List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
+      List.map (function x_ -> (x_, Names.evarName IntSyn.Null x_)) xs_
     in
     let eqnsFmt =
       F.hVbox
         [
           F.string "|?";
           F.space;
-          formatExp (g_, eClo vs1);
+          formatExp g_ (eClo vs1);
           F.break_;
           F.string "=";
           F.space;
-          formatExp (g_, eClo vs2);
+          formatExp g_ (eClo vs2);
         ]
     in
     Display.debug (Display.string (F.makestring_fmt eqnsFmt ^ "\n"));
@@ -1107,12 +1098,10 @@ end) : RECON_TERM = struct
     | g_, Omitexact (_, _, r), u_, v_ ->
         let xs_ =
           Abstract.collectEVars
-            ( g_,
-              (u_, IntSyn.id),
-              Abstract.collectEVars (g_, (v_, IntSyn.id), []) )
+            g_ (u_, IntSyn.id) (Abstract.collectEVars g_ (v_, IntSyn.id) [])
         in
         let xnames =
-          List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
+          List.map (function x_ -> (x_, Names.evarName IntSyn.Null x_)) xs_
         in
         let omit =
           F.hVbox
@@ -1123,11 +1112,11 @@ end) : RECON_TERM = struct
               F.space;
               F.string "==>";
               F.space;
-              formatExp (g_, u_);
+              formatExp g_ u_;
               F.break_;
               F.string ":";
               F.space;
-              formatExp (g_, v_);
+              formatExp g_ v_;
             ]
         in
         Display.debug (Display.string (F.makestring_fmt omit ^ "\n"));
@@ -1138,23 +1127,21 @@ end) : RECON_TERM = struct
     | g_, tm, u_, v_ ->
         let xs_ =
           Abstract.collectEVars
-            ( g_,
-              (u_, IntSyn.id),
-              Abstract.collectEVars (g_, (v_, IntSyn.id), []) )
+            g_ (u_, IntSyn.id) (Abstract.collectEVars g_ (v_, IntSyn.id) [])
         in
         let xnames =
-          List.map (function x_ -> (x_, Names.evarName (IntSyn.Null, x_))) xs_
+          List.map (function x_ -> (x_, Names.evarName IntSyn.Null x_)) xs_
         in
         let judg =
           F.hVbox
             [
               F.string "|-";
               F.space;
-              formatExp (g_, u_);
+              formatExp g_ u_;
               F.break_;
               F.string ":";
               F.space;
-              formatExp (g_, v_);
+              formatExp g_ v_;
             ]
         in
         Display.debug (Display.string (F.makestring_fmt judg ^ "\n"));
@@ -1184,7 +1171,7 @@ end) : RECON_TERM = struct
         in
         (tm, Elim e_, v_)
     | g_, (Bvar_ (k, r) as tm) ->
-        let (Dec (_, v_)) = IntSyn.ctxDec (g_, k) in
+        let (Dec (_, v_)) = IntSyn.ctxDec g_ k in
         (tm, Elim (bvarElim k), v_)
     | g_, (Evar_ (name, r) as tm) ->
         Debug.(
@@ -1275,7 +1262,7 @@ end) : RECON_TERM = struct
         let u2_ = toIntro (b2_, (va, s)) in
         ( App_ (tm1', tm2'),
           Elim (elimApp (e1_, u2_)),
-          eClo (vr, Whnf.dotEta (exp_ u2_, s)) )
+          eClo (vr, Whnf.dotEta (exp_ u2_) s) )
     | g_, Hastype_ (tm1, tm2) ->
         let tm2', b2_, l_ = inferExact (g_, tm2) in
         let v_ = toIntro (b2_, (l_, IntSyn.id)) in
@@ -1434,7 +1421,7 @@ end) : RECON_TERM = struct
         with Unify.Unify problem_msg ->
           let r = termRegion tm in
           let u'_ = toIntro (b'_, (v'_, IntSyn.id)) in
-          let uapx, vapx, lapx = Apx.exactToApx (u'_, v'_) in
+          let uapx, vapx, lapx = Apx.exactToApx u'_ v'_ in
           let (tm'', b'', _ (* Vs *)), _ (* true *) =
             checkExact1 (g_, Omitapx (uapx, vapx, lapx, r), vs_)
           in
@@ -1453,7 +1440,7 @@ end) : RECON_TERM = struct
       with Unify.Unify problem_msg ->
         let r = termRegion tm in
         let u'_ = toIntro (b'_, (v'_, IntSyn.id)) in
-        let uapx, vapx, lapx = Apx.exactToApx (u'_, v'_) in
+        let uapx, vapx, lapx = Apx.exactToApx u'_ v'_ in
         let tm'', b'' =
           checkExact (g_, Omitapx (uapx, vapx, lapx, r), vs_, location_msg)
         in
@@ -1548,7 +1535,7 @@ end) : RECON_TERM = struct
         (Paths.root (r', Paths.leaf r, 0, i, os), r')
     | App_ (tm1, tm2), os, rs, i ->
         let oc2, r2 = occIntro tm2 in
-        occElim (tm1, Paths.app (oc2, os), r2 :: rs, i + 1)
+        occElim (tm1, Paths.app oc2 os, r2 :: rs, i + 1)
     | Hastype_ (tm1, tm2), os, rs, i -> occElim (tm1, os, rs, i)
     | tm, os, rs, i ->
         let r' = List.foldr Paths.join (termRegion tm) rs in
@@ -1560,19 +1547,19 @@ end) : RECON_TERM = struct
     | Arrow_ (tm1, tm2) ->
         let oc1, r1 = occIntro tm1 in
         let oc2, r2 = occIntro tm2 in
-        let r' = Paths.join (r1, r2) in
-        (Paths.bind (r', Some oc1, oc2), r')
+        let r' = Paths.join r1 r2 in
+        (Paths.bind r' (Some oc1) oc2, r')
     | Pi_ (Dec_ (name, tm1, r), tm2) ->
         let oc1, r1 = occIntro tm1 in
         let oc2, r2 = occIntro tm2 in
-        let r' = Paths.join (r, r2) in
-        (Paths.bind (r', Some oc1, oc2), r')
+        let r' = Paths.join r r2 in
+        (Paths.bind r' (Some oc1) oc2, r')
         (* not quite consistent with older implementation for dec0 *)
     | Lam_ (Dec_ (name, tm1, r), tm2) ->
         let oc1, r1 = occIntro tm1 in
         let oc2, r2 = occIntro tm2 in
-        let r' = Paths.join (r, r2) in
-        (Paths.bind (r', Some oc1, oc2), r')
+        let r' = Paths.join r r2 in
+        (Paths.bind r' (Some oc1) oc2, r')
         (* not quite consistent with older implementation for dec0 *)
     | Hastype_ (tm1, tm2) -> occIntro tm1
     | tm ->
@@ -1695,13 +1682,13 @@ end) : RECON_TERM = struct
              the ""best effort"" result returned, even if there were
              errors *)
 
-  let reconWithCtx (g_, j) =
+  let reconWithCtx g_ j =
     begin
       queryMode := false;
       reconWithCtx' (g_, j)
     end
 
-  let reconQueryWithCtx (g_, j) =
+  let reconQueryWithCtx g_ j =
     begin
       queryMode := true;
       reconWithCtx' (g_, j)

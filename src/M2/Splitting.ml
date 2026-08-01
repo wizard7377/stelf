@@ -107,7 +107,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     let rec constCases = function
       | g_, vs_, [], abstract, ops -> ops
       | g_, vs_, (I.Const c as h_) :: sgn_, abstract, ops ->
-          let u_, vs'_ = M.createAtomConst (g_, h_) in
+          let u_, vs'_ = M.createAtomConst g_ h_ in
           constCases
             ( g_,
               vs_,
@@ -115,7 +115,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable (g_, vs_, vs'_) then
+                     begin if Unify.unifiable g_ vs_ vs'_ then
                        Active
                          (abstract (I.conDecName (I.sgnLookup c) ^ "/", u_))
                        :: ops
@@ -123,7 +123,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
                      end
                    with MetaAbstract.Error _ -> InActive :: ops)) )
       | g_, vs_, (I.Def c as h_) :: sgn_, abstract, ops ->
-          let u_, vs'_ = M.createAtomConst (g_, h_) in
+          let u_, vs'_ = M.createAtomConst g_ h_ in
           constCases
             ( g_,
               vs_,
@@ -131,7 +131,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable (g_, vs_, vs'_) then
+                     begin if Unify.unifiable g_ vs_ vs'_ then
                        Active
                          (abstract (I.conDecName (I.sgnLookup c) ^ "/", u_))
                        :: ops
@@ -145,7 +145,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     let rec paramCases = function
       | g_, vs_, 0, abstract, ops -> ops
       | g_, vs_, k, abstract, ops ->
-          let u_, vs'_ = M.createAtomBVar (g_, k) in
+          let u_, vs'_ = M.createAtomBVar g_ k in
           paramCases
             ( g_,
               vs_,
@@ -153,7 +153,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable (g_, vs_, vs'_) then
+                     begin if Unify.unifiable g_ vs_ vs'_ then
                        Active (abstract (Int.toString k ^ "/", u_)) :: ops
                      else ops
                      end
@@ -168,7 +168,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               abstract,
               paramCases (g_, (v_, s'), I.ctxLength g_, abstract, []) )
       | g_, (I.Pi ((d_, p_), v_), s'), abstract ->
-          let d'_ = I.decSub (d_, s') in
+          let d'_ = I.decSub d_ s' in
           lowerSplitDest
             ( I.Decl (g_, d'_),
               (v_, I.dot1 s'),
@@ -188,7 +188,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       | k, I.Root (c_, s_) -> occursInCon (k, c_) || occursInSpine (k, s_)
       | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
       | k, I.FgnExp (csid_, fge) ->
-          I.FgnExpStd.fold (csid_, fge)
+          I.FgnExpStd.fold csid_ fge
             (function
               | u_, b_ -> b_ || occursInExp (k, Whnf.normalize (u_, I.id)))
             false
@@ -218,9 +218,9 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     let rec checkExp = function
       | m_, I.Uni _ -> true
       | m_, I.Pi ((d_, p_), v_) ->
-          checkDec (m_, d_) && checkExp (I.Decl (m_, M.Top), v_)
+          checkDec m_ d_ && checkExp (I.Decl (m_, M.Top), v_)
       | m_, I.Lam (d_, v_) ->
-          checkDec (m_, d_) && checkExp (I.Decl (m_, M.Top), v_)
+          checkDec m_ d_ && checkExp (I.Decl (m_, M.Top), v_)
       | m_, I.Root (I.BVar k, s_) -> checkVar (m_, k) && checkSpine (m_, s_)
       | m_, I.Root (_, s_) -> checkSpine (m_, s_)
 
@@ -228,7 +228,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       | m_, I.Nil -> true
       | m_, I.App (u_, s_) -> checkExp (m_, u_) && checkSpine (m_, s_)
 
-    and checkDec (m_, I.Dec (_, v_)) = checkExp (m_, v_)
+    and checkDec m_ (I.Dec (_, v_)) = checkExp (m_, v_)
 
     let modeEq = function
       | Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Plus, _), M.Top ->
@@ -285,14 +285,14 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               ( k,
                 s_,
                 inheritNewRoot
-                  (b_, I.ctxLookup (b_, n - k), k, v_, k', v'_, (b'_, d, d')) )
+                  (b_, I.ctxLookup b_ (n - k), k, v_, k', v'_, (b'_, d, d')) )
           else
             begin if n > k + d then
               skipSpine
                 ( k,
                   s_,
                   inheritBelow
-                    (I.ctxLookup (b_, n - k) - 1, k', v'_, (b'_, d, d')) )
+                    (I.ctxLookup b_ (n - k) - 1, k', v'_, (b'_, d, d')) )
             else
               let (I.Root (c'_, s'_)) = v'_ in
               inheritSpine (b_, k, s_, k', s'_, (b'_, d, d'))
@@ -427,7 +427,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       abstract
         ( name',
           M.Prefix
-            ( I.Decl (g'_, I.decSub (d_, s')),
+            ( I.Decl (g'_, I.decSub d_ s'),
               I.Decl (m'_, mode),
               I.Decl (b'_, b) ),
           I.dot1 s' )
@@ -451,9 +451,9 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
                 makeAddressCont makeAddress )
           in
           let (I.Dec (xOpt, v_)) = d_ in
-          let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
+          let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
           let ops' =
-            begin if b > 0 && (not (isIndex 1)) && checkDec (m_, d_) then
+            begin if b > 0 && (not (isIndex 1)) && checkDec m_ d_ then
               ( makeAddress 1,
                 split (M.Prefix (g'_, m'_, b'_), (d_, s'), abstract) )
               :: ops
@@ -474,7 +474,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
                 makeAddressCont makeAddress )
           in
           ( M.Prefix
-              ( I.Decl (g'_, I.decSub (d_, s')),
+              ( I.Decl (g'_, I.decSub d_ s'),
                 I.Decl (m'_, M.Bot),
                 I.Decl (b'_, b) ),
             I.dot1 s',
@@ -492,7 +492,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
 
     let index (_, sl_) = List.length sl_
 
-    let apply (_, sl_) =
+    let apply _ sl_ =
       map
         (function
           | Active s_ -> s_
@@ -521,7 +521,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
             (((" [active: " ^ Int.toString n) ^ " inactive: ") ^ Int.toString m)
             ^ "]"
       in
-      (((("Splitting : " ^ Print.decToString (g_, I.ctxDec (g_, i))) ^ " (")
+      (((("Splitting : " ^ Print.decToString g_ (I.ctxDec g_ i)) ^ " (")
        ^ indexToString (index op_))
       ^ flagToString (active (sl_, 0), inactive (sl_, 0)))
       ^ ")"

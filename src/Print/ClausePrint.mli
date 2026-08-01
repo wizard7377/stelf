@@ -16,9 +16,9 @@ module MakeClausePrint
     (Print : sig
       module Formatter : FORMATTER
 
-      val formatDec : IntSyn.dctx * IntSyn.dec -> Formatter.format
-      val formatExp : IntSyn.dctx * IntSyn.exp -> Formatter.format
-      val formatSpine : IntSyn.dctx * IntSyn.spine -> Formatter.format list
+      val formatDec : IntSyn.dctx -> IntSyn.dec -> Formatter.format
+      val formatExp : IntSyn.dctx -> IntSyn.exp -> Formatter.format
+      val formatSpine : IntSyn.dctx -> IntSyn.spine -> Formatter.format list
       val formatConDec : IntSyn.conDec -> Formatter.format
       val implicit : bool ref
     end)

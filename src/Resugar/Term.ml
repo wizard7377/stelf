@@ -149,7 +149,7 @@ module Make (Cst : Cst.CST) = struct
 
   let proj_name = function
     | g_, I.Proj (I.Bidx k, i) -> (
-        match I.ctxLookup (g_, k) with
+        match I.ctxLookup g_ k with
         | I.BDec (Some bname, (cid, _)) -> bname ^ "_" ^ parm_name (cid, i)
         | I.BDec (None, (cid, _)) -> "_" ^ parm_name (cid, i)
         | _ -> "_" ^ string_of_int i)
@@ -179,7 +179,7 @@ module Make (Cst : Cst.CST) = struct
      uppercase identifier is exactly how the parser spells a variable. *)
   let head (opts : Options.t) (g_ : I.dctx) (h_ : I.head) : Cst.term =
     match h_ with
-    | I.BVar n -> variable (N.bvarName (g_, n))
+    | I.BVar n -> variable (N.bvarName g_ n)
     | I.Const cid | I.Skonst cid | I.Def cid | I.NSDef cid ->
         lower (const_sym opts cid)
     | I.FVar (name, _, _) -> variable name
@@ -235,12 +235,12 @@ module Make (Cst : Cst.CST) = struct
     | I.Pi ((d_, _), v2_), _ ->
         (* Name the binder before descending, or the body's [bvarName] lookups
            find an unnamed declaration. *)
-        let d'_ = N.decLUName (g_, d_) in
+        let d'_ = N.decLUName g_ d_ in
         let dec = dec_sub opts g_ (d'_, s) in
         let body = exp_sub opts (I.Decl (g_, d'_)) d (v2_, I.dot1 s) in
         T.review (T.Pi (g_loc, [ dec ], body))
     | I.Lam (d_, u_), _ ->
-        let d'_ = N.decLUName (g_, d_) in
+        let d'_ = N.decLUName g_ d_ in
         let dec = dec_sub opts g_ (d'_, s) in
         let body = exp_sub opts (I.Decl (g_, d'_)) d (u_, I.dot1 s) in
         T.review (T.Lam (g_loc, [ dec ], body))
@@ -251,7 +251,7 @@ module Make (Cst : Cst.CST) = struct
         T.review
           (T.Foreign
              ( g_loc,
-               exp_sub opts g_ d (I.FgnExpStd.ToInternal.apply (cs, fe) (), s)
+               exp_sub opts g_ d (I.FgnExpStd.ToInternal.apply cs fe (), s)
              ))
     (* Unreachable after [whnf]; kept so the function is total rather than
        raising from inside a printer. *)
@@ -260,7 +260,7 @@ module Make (Cst : Cst.CST) = struct
   and leaf _ = internal (Cst.Opaque_tag "?") []
 
   and evar opts g_ d x_ s decorate =
-    let node = variable (decorate (N.evarName (g_, x_))) in
+    let node = variable (decorate (N.evarName g_ x_)) in
     if opts.implicit then T.review (T.App (g_loc, node, [ sub opts g_ d s ]))
     else
       let args =
@@ -275,7 +275,7 @@ module Make (Cst : Cst.CST) = struct
       else
         match s with
         | I.Shift k -> [ internal (Cst.Shift_tag k) [] ]
-        | I.Dot (I.Idx k, s) -> variable (N.bvarName (g_, k)) :: go (l + 1) s
+        | I.Dot (I.Idx k, s) -> variable (N.bvarName g_ k) :: go (l + 1) s
         | I.Dot (I.Exp u_, s) ->
             exp_sub opts g_ (d + 1) (u_, I.id) :: go (l + 1) s
         | I.Dot (I.Undef, s) -> internal Cst.Undef_tag [] :: go (l + 1) s
@@ -323,7 +323,7 @@ module Make (Cst : Cst.CST) = struct
   and spine_sub opts g_ d l (sp_, s) : Cst.term list =
     match sp_ with
     | I.Nil -> []
-    | I.SClo (sp_, s') -> spine_sub opts g_ d l (sp_, I.comp (s', s))
+    | I.SClo (sp_, s') -> spine_sub opts g_ d l (sp_, I.comp s' s)
     | I.App (u_, sp_) ->
         if elide l opts.print_length then []
         else if addots l opts.print_length then [ internal Cst.Elided_tag [] ]
@@ -347,7 +347,7 @@ module Make (Cst : Cst.CST) = struct
            CST has no term form for; it goes out as an internal node wrapping
            the corresponding binder chain. *)
         let _, gblock_ = I.constBlock cid in
-        let decs = dec_list_sub opts g_ (gblock_, I.comp (t, s)) in
+        let decs = dec_list_sub opts g_ (gblock_, I.comp t s) in
         dec_of [ x ]
           (internal (Cst.Opaque_tag "%%block")
              [ T.review (T.Pi (g_loc, decs, omitted ())) ])

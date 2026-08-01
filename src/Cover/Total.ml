@@ -152,9 +152,7 @@ end) : TOTAL = struct
         raise
           (Error
              (P.wrapLoc'
-                ( P.Loc (fileName, P.occToRegionDec occDec occ),
-                  Origins.linesInfoLookup fileName,
-                  msg )))
+                (P.Loc (fileName, P.occToRegionDec occDec occ)) (Origins.linesInfoLookup fileName) msg))
     end
 
   (* G is unused here *)
@@ -195,7 +193,7 @@ end) : TOTAL = struct
 
   and checkClauseW = function
     | g_, (I.Pi ((d1_, Maybe), v2_), s), occ ->
-        let d1' = N.decEName (g_, I.decSub (d1_, s)) in
+        let d1' = N.decEName g_ (I.decSub d1_ s) in
         checkClause (I.Decl (g_, d1'), (v2_, I.dot1 s), P.body occ)
     | g_, (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s), occ ->
         ignore (checkClause (I.Decl (g_, d1_), (v2_, I.dot1 s), P.body occ));
@@ -220,7 +218,7 @@ end) : TOTAL = struct
       end
     in
     ignore (checkDynOrderW (g_, (v_, s), 2, occ));
-    try Cover.checkOut (g_, (v_, s))
+    try Cover.checkOut g_ (v_, s)
     with Cover.Error msg ->
       raise (Error' (occ, "Totality: Output of subgoal not covered\n" ^ msg))
   (* can raise Cover.Error for third-order clauses *)

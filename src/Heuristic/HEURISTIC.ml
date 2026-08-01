@@ -20,7 +20,7 @@ module type HEURISTIC = sig
 
   type nonrec index = __0
 
-  val compare : index * index -> order
+  val compare : index -> index -> order
   (** Position (left to right) *)
 
   val index_to_string : index -> string

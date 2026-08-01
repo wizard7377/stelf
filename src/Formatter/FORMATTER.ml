@@ -77,7 +77,7 @@ module type FORMATTER = sig
 
   val open_fmt : TextIO.outstream -> fmtstream
   val close_fmt : fmtstream -> TextIO.outstream
-  val output_fmt : fmtstream * format -> unit
+  val output_fmt : fmtstream -> format -> unit
   val file_open_fmt : string -> (unit -> unit) * fmtstream
   val with_open_fmt : string -> (fmtstream -> 'a) -> 'a
 end

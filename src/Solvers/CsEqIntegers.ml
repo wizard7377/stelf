@@ -103,7 +103,7 @@ struct
       let rec findMSet' = function
         | tried, [] -> None
         | tried, y :: l_ ->
-            begin if eq (x, y) then Some (y, tried @ l_)
+            begin if eq x y then Some (y, tried @ l_)
             else findMSet' (y :: tried, l_)
             end
       in
@@ -160,8 +160,8 @@ struct
 
     and sameSpine = function
       | (Nil, s1), (Nil, s2) -> true
-      | (SClo (s1_, s1'), s1), ss2_ -> sameSpine ((s1_, comp (s1', s1)), ss2_)
-      | ss1_, (SClo (s2_, s2'), s2) -> sameSpine (ss1_, (s2_, comp (s2', s2)))
+      | (SClo (s1_, s1'), s1), ss2_ -> sameSpine ((s1_, comp s1' s1), ss2_)
+      | ss1_, (SClo (s2_, s2'), s2) -> sameSpine (ss1_, (s2_, comp s2' s2))
       | (App (u1_, s1_), s1), (App (u2_, s2_), s2) ->
           sameExp ((u1_, s1), (u2_, s2)) && sameSpine ((s1_, s1), (s2_, s2))
       | _ -> false
@@ -261,8 +261,8 @@ struct
     let solvableSum (Sum (m, monL)) =
       let rec gcd_list = function
         | n1 :: [] -> n1
-        | [ n1; n2 ] -> gcd (n1, n2)
-        | n1 :: n2 :: l -> gcd (gcd (n1, n2), gcd_list l)
+        | [ n1; n2 ] -> gcd n1 n2
+        | n1 :: n2 :: l -> gcd (gcd n1 n2) (gcd_list l)
       in
       let coeffL = List.map (function Mon (n, _) -> n) monL in
       let g = gcd_list coeffL in
@@ -319,13 +319,13 @@ struct
           | Some (Mon (n1, (x1_, s1) :: []), ss1, sum1) ->
               begin match findMon invertMon (g_, sum1) with
               | Some (Mon (n2, (x2_, s2) :: []), ss2, sum2) ->
-                  let s = Unify.intersection (s1, s2) in
+                  let s = Unify.intersection s1 s2 in
                   let ss = Whnf.invert s in
-                  let g'_ = Whnf.strengthen (ss, g_) in
-                  let g = gcd (n1, n2) in
-                  let x1, x2 = solve_gcd (n1, n2) in
-                  let k_ = newEVar (g'_, number ()) in
-                  let z_ = newEVar (g'_, number ()) in
+                  let g'_ = Whnf.strengthen ss g_ in
+                  let g = gcd n1 n2 in
+                  let x1, x2 = solve_gcd n1 n2 in
+                  let k_ = newEVar g'_ (number ()) in
+                  let z_ = newEVar g'_ (number ()) in
                   Assign
                     ( g_,
                       x1_,
@@ -422,11 +422,11 @@ struct
 
     let installFgnExpOps () =
       let csid = !myID in
-      ignore (FgnExpStd.ToInternal.install (csid, toInternal));
-      ignore (FgnExpStd.Map.install (csid, map));
-      ignore (FgnExpStd.App.install (csid, app));
-      ignore (FgnExpStd.UnifyWith.install (csid, unifyWith));
-      ignore (FgnExpStd.EqualTo.install (csid, equalTo));
+      ignore (FgnExpStd.ToInternal.install csid toInternal);
+      ignore (FgnExpStd.Map.install csid map);
+      ignore (FgnExpStd.App.install csid app);
+      ignore (FgnExpStd.UnifyWith.install csid unifyWith);
+      ignore (FgnExpStd.EqualTo.install csid equalTo);
       ()
 
     let makeFgn (arity, opExp) s_ =
@@ -441,14 +441,14 @@ struct
         | e_, n -> Lam (Dec (None, number ()), makeLam e_ (n - 1))
         end
       in
-      let rec expand = function
+      let rec expand a1 b1 = match a1, b1 with
         | (Nil, s), arity -> (makeParams arity, arity)
         | (App (u_, s_), s), arity ->
-            let s'_, arity' = expand ((s_, s), arity - 1) in
-            (App (EClo (u_, comp (s, Shift arity')), s'_), arity')
-        | (SClo (s_, s'), s), arity -> expand ((s_, comp (s', s)), arity)
+            let s'_, arity' = expand (s_, s) (arity - 1) in
+            (App (EClo (u_, comp s (Shift arity')), s'_), arity')
+        | (SClo (s_, s'), s), arity -> expand (s_, comp s' s) arity
       in
-      let s'_, arity' = expand ((s_, id), arity) in
+      let s'_, arity' = expand (s_, id) arity in
       makeLam (toFgn (opExp s'_)) arity'
 
     let makeFgnUnary opSum =
@@ -461,9 +461,9 @@ struct
           | App (u1_, App (u2_, Nil)) ->
               opSum (fromExp (u1_, id), fromExp (u2_, id)) )
 
-    let arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
+    let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
 
-    let init (cs, installF) =
+    let init cs installF =
       begin
         myID := cs;
         begin
@@ -486,7 +486,7 @@ struct
                       None,
                       0,
                       Foreign (!myID, makeFgnUnary unaryMinusSum),
-                      arrow_ (number (), number ()),
+                      arrow_ (number ()) (number ()),
                       Type ),
                   Some (FX.Prefix FX.maxPrec),
                   [] );
@@ -498,7 +498,7 @@ struct
                         None,
                         0,
                         Foreign (!myID, makeFgnBinary plusSum),
-                        arrow_ (number (), arrow_ (number (), number ())),
+                        arrow_ (number ()) (arrow_ (number ()) (number ())),
                         Type ),
                     Some (FX.Infix (FX.dec (FX.dec FX.maxPrec), FX.Left)),
                     [] );
@@ -510,7 +510,7 @@ struct
                           None,
                           0,
                           Foreign (!myID, makeFgnBinary minusSum),
-                          arrow_ (number (), arrow_ (number (), number ())),
+                          arrow_ (number ()) (arrow_ (number ()) (number ())),
                           Type ),
                       Some (FX.Infix (FX.dec (FX.dec FX.maxPrec), FX.Left)),
                       [] );
@@ -522,7 +522,7 @@ struct
                             None,
                             0,
                             Foreign (!myID, makeFgnBinary timesSum),
-                            arrow_ (number (), arrow_ (number (), number ())),
+                            arrow_ (number ()) (arrow_ (number ()) (number ())),
                             Type ),
                         Some (FX.Infix (FX.dec FX.maxPrec, FX.Left)),
                         [] );

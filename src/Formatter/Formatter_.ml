@@ -861,7 +861,7 @@ make the use of {\tt fmtstreams} on files more convenient.
   let open_fmt outs = Formatstream outs
   let close_fmt (Formatstream outs) = outs
 
-  let output_fmt (Formatstream outs, fm) =
+  let output_fmt (Formatstream outs) fm =
     List.foldr
       (function s, _ -> TextIO.output (outs, s))
       ()

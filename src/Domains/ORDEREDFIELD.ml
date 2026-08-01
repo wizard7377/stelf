@@ -17,5 +17,5 @@ module type ORDERED_FIELD = sig
   val ( < ) : number -> number -> bool
   val ( >= ) : number -> number -> bool
   val ( <= ) : number -> number -> bool
-  val compare : number * number -> order
+  val compare : number -> number -> order
 end

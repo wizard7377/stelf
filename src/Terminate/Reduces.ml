@@ -92,9 +92,7 @@ end) : REDUCES = struct
           raise
             (Error
                (P.wrapLoc'
-                  ( P.Loc (fileName, P.occToRegionDec occDec occ),
-                    Origins.linesInfoLookup fileName,
-                    msg )))
+                  (P.Loc (fileName, P.occToRegionDec occDec occ)) (Origins.linesInfoLookup fileName) msg))
       end
 
     let rec concat = function
@@ -107,7 +105,7 @@ end) : REDUCES = struct
             F.hbox
               [
                 F.string "(";
-                Print.formatExp (g_, I.EClo (fst us_, snd us_));
+                Print.formatExp g_ (I.EClo (fst us_, snd us_));
                 F.string ")";
               ]
         | R.Lex l_ ->
@@ -157,7 +155,7 @@ end) : REDUCES = struct
         | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''), _), _), s'')) ->
             ((u'_, s'), (v'', s''))
         | n, ((I.SClo (s'_, s1'), s2'), vs'') ->
-            select''W (n, ((s'_, I.comp (s1', s2')), vs''))
+            select''W (n, ((s'_, I.comp s1' s2'), vs''))
         | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select''
@@ -187,7 +185,7 @@ end) : REDUCES = struct
         | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''), _), _), s'')) ->
             ((u'_, s'), (v'', s''))
         | n, ((I.SClo (s'_, s1'), s2'), vs'') ->
-            select''W (n, ((s'_, I.comp (s1', s2')), vs''))
+            select''W (n, ((s'_, I.comp s1' s2'), vs''))
         | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select''
@@ -232,18 +230,18 @@ end) : REDUCES = struct
       | g_, q_, (I.Pi ((d_, Maybe), v_), s), occ ->
           let o_ =
             getROrder
-              ( I.Decl (g_, N.decLUName (g_, I.decSub (d_, s))),
+              ( I.Decl (g_, N.decLUName g_ (I.decSub d_ s)),
                 I.Decl (q_, C.All),
                 (v_, I.dot1 s),
                 P.body occ )
           in
           begin match o_ with
           | None -> None
-          | Some o'_ -> Some (abstractRO (g_, I.decSub (d_, s), o'_))
+          | Some o'_ -> Some (abstractRO (g_, I.decSub d_ s, o'_))
           end
       | g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
           let o_ =
-            getROrder (g_, q_, (v2_, I.comp (I.invShift, s)), P.body occ)
+            getROrder (g_, q_, (v2_, I.comp I.invShift s), P.body occ)
           in
           begin match o_ with None -> None | Some o'_ -> Some o'_
           end
@@ -264,15 +262,15 @@ end) : REDUCES = struct
         -> begin
           checkClause ((g0_, q0_, rl_), I.Null, I.Null, (v1_, s), P.label occ);
           checkGoal
-            (g0_, q0_, rl_, (v2_, I.comp (I.invShift, s)), vs'_, P.body occ)
+            (g0_, q0_, rl_, (v2_, I.comp I.invShift s), vs'_, P.body occ)
         end
       | g0_, q0_, rl_, (I.Pi ((d_, Maybe), v_), s), (v'_, s'), occ ->
           checkGoal
-            ( I.Decl (g0_, N.decLUName (g0_, I.decSub (d_, s))),
+            ( I.Decl (g0_, N.decLUName g0_ (I.decSub d_ s)),
               I.Decl (q0_, C.All),
-              C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
+              C.shiftRCtx rl_ (function s -> I.comp s I.shift),
               (v_, I.dot1 s),
-              (v'_, I.comp (s', I.shift)),
+              (v'_, I.comp s' I.shift),
               P.body occ )
       | ( g0_,
           q0_,
@@ -380,14 +378,14 @@ end) : REDUCES = struct
       | gqr, g_, q_, (I.Pi ((d_, Maybe), v_), s), occ ->
           checkClause
             ( gqr,
-              I.Decl (g_, N.decEName (g_, I.decSub (d_, s))),
+              I.Decl (g_, N.decEName g_ (I.decSub d_ s)),
               I.Decl (q_, C.Exist),
               (v_, I.dot1 s),
               P.body occ )
       | gqr, g_, q_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
           checkClause
             ( gqr,
-              I.Decl (g_, I.decSub (d_, s)),
+              I.Decl (g_, I.decSub d_ s),
               I.Decl (q_, C.And (P.label occ)),
               (v2_, I.dot1 s),
               P.body occ )
@@ -397,7 +395,7 @@ end) : REDUCES = struct
           ((I.Root (I.Const a, s_), s) as vs_),
           occ ) ->
           let n = I.ctxLength g_ in
-          let rl' = C.shiftRCtx rl_ (function s -> I.comp (s, I.Shift n)) in
+          let rl' = C.shiftRCtx rl_ (function s -> I.comp s (I.Shift n)) in
           checkSubgoals
             (concat (g0_, g_), concat (q0_, q_), rl', vs_, 0, (g_, q_))
       | gqr, g_, q_, (I.Root (I.Def a, s_), s), occ ->
@@ -419,14 +417,14 @@ end) : REDUCES = struct
       | g_, q_, rl_, ((I.Root (I.Const a, s_), s) as vs_), occ -> ()
       | g_, q_, rl_, (I.Pi ((d_, Maybe), v_), s), occ ->
           checkRGoal
-            ( I.Decl (g_, N.decLUName (g_, I.decSub (d_, s))),
+            ( I.Decl (g_, N.decLUName g_ (I.decSub d_ s)),
               I.Decl (q_, C.All),
-              C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
+              C.shiftRCtx rl_ (function s -> I.comp s I.shift),
               (v_, I.dot1 s),
               P.body occ )
       | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ -> begin
           checkRClause (g_, q_, rl_, (v1_, s), P.label occ);
-          checkRGoal (g_, q_, rl_, (v2_, I.comp (I.invShift, s)), P.body occ)
+          checkRGoal (g_, q_, rl_, (v2_, I.comp I.invShift s), P.body occ)
         end
       | g_, q_, rl_, (I.Root (I.Def a, s_), s), occ ->
           raise
@@ -443,11 +441,11 @@ end) : REDUCES = struct
     and checkRImpW = function
       | g_, q_, rl_, (I.Pi ((d'_, Maybe), v'_), s'), (v_, s), occ ->
           checkRImp
-            ( I.Decl (g_, N.decEName (g_, I.decSub (d'_, s'))),
+            ( I.Decl (g_, N.decEName g_ (I.decSub d'_ s')),
               I.Decl (q_, C.Exist),
-              C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
+              C.shiftRCtx rl_ (function s -> I.comp s I.shift),
               (v'_, I.dot1 s'),
-              (v_, I.comp (s, I.shift)),
+              (v_, I.comp s I.shift),
               occ )
       | ( g_,
           q_,
@@ -461,7 +459,7 @@ end) : REDUCES = struct
             | Some o_ -> o_ :: rl_
             end
           in
-          checkRImp (g_, q_, rl', (v2_, I.comp (I.invShift, s')), (v_, s), occ)
+          checkRImp (g_, q_, rl', (v2_, I.comp I.invShift s'), (v_, s), occ)
       | g_, q_, rl_, ((I.Root (I.Const a, s_), s) as vs'_), vs_, occ ->
           checkRGoal (g_, q_, rl_, vs_, occ)
       | g_, q_, rl_, ((I.Root (I.Def a, s_), s) as vs'_), vs_, occ ->
@@ -479,18 +477,18 @@ end) : REDUCES = struct
     and checkRClauseW = function
       | g_, q_, rl_, (I.Pi ((d_, Maybe), v_), s), occ ->
           checkRClause
-            ( I.Decl (g_, N.decEName (g_, I.decSub (d_, s))),
+            ( I.Decl (g_, N.decEName g_ (I.decSub d_ s)),
               I.Decl (q_, C.Exist),
-              C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)),
+              C.shiftRCtx rl_ (function s -> I.comp s I.shift),
               (v_, I.dot1 s),
               P.body occ )
       | g_, q_, rl_, (I.Pi (((I.Dec (_, v1_) as d_), No), v2_), s), occ ->
-          let g'_ = I.Decl (g_, I.decSub (d_, s)) in
+          let g'_ = I.Decl (g_, I.decSub d_ s) in
           let q'_ = I.Decl (q_, C.Exist) in
-          let rl' = C.shiftRCtx rl_ (function s -> I.comp (s, I.shift)) in
+          let rl' = C.shiftRCtx rl_ (function s -> I.comp s I.shift) in
           let rl'' =
             begin match
-              getROrder (g'_, q'_, (v1_, I.comp (s, I.shift)), occ)
+              getROrder (g'_, q'_, (v1_, I.comp s I.shift), occ)
             with
             | None -> rl'
             | Some o_ -> o_ :: rl'
@@ -503,7 +501,7 @@ end) : REDUCES = struct
                 q'_,
                 rl'',
                 (v2_, I.dot1 s),
-                (v1_, I.comp (s, I.shift)),
+                (v1_, I.comp s I.shift),
                 P.label occ )
           end
       | g_, q_, rl_, ((I.Root (I.Const a, s_), s) as vs_), occ ->

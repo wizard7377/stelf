@@ -88,47 +88,43 @@ end) : ABSMACHINE = struct
       | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shiftSub (g_, s))
 
-    let rec raiseType = function
+    let rec raiseType a1 b1 = match a1, b1 with
       | I.Null, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
+      | I.Decl (g_, d_), v_ -> raiseType g_ (I.Pi ((d_, I.Maybe), v_))
 
-    let rec solve = function
+    let rec solve a2 b2 c2 = match a2, b2, c2 with
       | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
           matchAtom ((p, s), dp, sc)
       | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
           solve
-            ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
-              function m_ -> sc (I.Lam (d'_, m_)) )
+            (g, I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha)))) (function m_ -> sc (I.Lam (d'_, m_)))
       | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
-          let d'_ = Names.decLUName (g_, I.decSub (d_, s)) in
+          let d'_ = Names.decLUName g_ (I.decSub d_ s) in
           solve
-            ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
-              function m_ -> sc (I.Lam (d'_, m_)) )
+            (g, I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter))) (function m_ -> sc (I.Lam (d'_, m_)))
 
     and rSolve = function
       | ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
-          begin if Unify.unifiable (g_, (q_, s), ps') then sc I.Nil else ()
+          begin if Unify.unifiable g_ (q_, s) ps' then sc I.Nil else ()
           end
       | ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc ->
-          begin match Assign.assignable (g_, ps', (q_, s)) with
+          begin match Assign.assignable g_ ps' (q_, s) with
           | Some cnstr ->
               aSolve ((eqns, s), dp, cnstr, function () -> sc I.Nil)
           | None -> ()
           end
       | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
-          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
               (r, I.Dot (I.Exp x_, s)),
               dp,
               function
-              | s_ -> solve ((g, s), dp, function m_ -> sc (I.App (m_, s_))) )
+              | s_ -> solve (g, s) dp (function m_ -> sc (I.App (m_, s_))) )
       | ps', (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp), sc
         ->
-          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
               (r, I.Dot (I.Exp x_, s)),
@@ -141,13 +137,13 @@ end) : ABSMACHINE = struct
             (ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
       (* C.In is like C.And but for meta-level ("virtual") dependencies *)
       | ps', (C.In (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
-          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
               (r, I.Dot (I.Exp x_, s)),
               dp,
               function
-              | s_ -> solve ((g, s), dp, function m_ -> sc (I.App (m_, s_))) )
+              | s_ -> solve (g, s) dp (function m_ -> sc (I.App (m_, s_))) )
 
     and aSolve = function
       | (C.Trivial, s), dp, cnstr, sc ->
@@ -159,7 +155,7 @@ end) : ABSMACHINE = struct
           sc ) ->
           let g''_ = compose (g_, g'_) in
           let s' = shiftSub (g'_, s) in
-          begin if Assign.unifiable (g''_, (n_, s'), (e1, s')) then
+          begin if Assign.unifiable g''_ (n_, s') (e1, s') then
             aSolve ((eqns, s), dp, cnstr, sc)
           else ()
           end
@@ -209,7 +205,7 @@ end) : ABSMACHINE = struct
                     CsManager.trail (function () ->
                         rSolve
                           ( ps',
-                            (r, I.comp (s, I.Shift k)),
+                            (r, I.comp s (I.Shift k)),
                             dp,
                             function s_ -> raise (SucceedOnce s_) ));
                     matchDProg (dPool', k + 1)
@@ -219,7 +215,7 @@ end) : ABSMACHINE = struct
                 CsManager.trail (function () ->
                     rSolve
                       ( ps',
-                        (r, I.comp (s, I.Shift k)),
+                        (r, I.comp s (I.Shift k)),
                         dp,
                         function s_ -> sc (I.Root (I.BVar k, s_)) ));
                 matchDProg (dPool', k + 1)

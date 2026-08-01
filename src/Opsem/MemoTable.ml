@@ -108,7 +108,7 @@ end) : MEMOTABLE = struct
       end
     end
 
-  let member (x, (l_ : ctx)) =
+  let member x (l_ : ctx) =
     let rec memb = function
       | x, [] -> None
       | x, ((y, e_) :: l_ as h_) ->
@@ -134,7 +134,7 @@ end) : MEMOTABLE = struct
     | I.Null, s -> s
     | IntSyn.Decl (g_, IntSyn.Dec (_, a_)), s ->
         let s' = ctxToEVarSub (g_, s) in
-        let x_ = IntSyn.newEVar (IntSyn.Null, IntSyn.EClo (a_, s')) in
+        let x_ = IntSyn.newEVar IntSyn.Null (IntSyn.EClo (a_, s')) in
         IntSyn.Dot (IntSyn.Exp x_, s')
 
   (* ---------------------------------------------------------------------- *)
@@ -216,14 +216,14 @@ end) : MEMOTABLE = struct
       | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
-    let rec raiseType = function
+    let rec raiseType a2 b2 = match a2, b2 with
       | I.Null, u_ -> u_
-      | I.Decl (g_, d_), u_ -> raiseType (g_, I.Lam (d_, u_))
+      | I.Decl (g_, d_), u_ -> raiseType g_ (I.Lam (d_, u_))
 
     let rec ctxToAVarSub = function
       | g'_, I.Null, s -> s
       | g'_, I.Decl (d_, I.Dec (_, a_)), s ->
-          let (I.EVar (r, _, _, cnstr) as e_) = I.newEVar (I.Null, a_) in
+          let (I.EVar (r, _, _, cnstr) as e_) = I.newEVar I.Null a_ in
           I.Dot (I.Exp e_, ctxToAVarSub (g'_, d_, s))
       | g'_, I.Decl (d_, I.ADec (_, d)), s ->
           let x_ = I.newAVar () in
@@ -234,7 +234,7 @@ end) : MEMOTABLE = struct
       | (T.Unify (g'_, e1, n_, eqns), s), g_ ->
           let g''_ = compose (g'_, g_) in
           let s' = shift (g'_, s) in
-          Assign__.unifiable (g''_, (n_, s'), (e1, s'))
+          Assign__.unifiable g''_ (n_, s') (e1, s')
           && solveEqn' ((eqns, s), g_)
 
     let nctr = ref 1
@@ -246,14 +246,14 @@ end) : MEMOTABLE = struct
       end
 
     let equalDec = function
-      | I.Dec (_, u_), I.Dec (_, u'_) -> Conv.conv ((u_, I.id), (u'_, I.id))
+      | I.Dec (_, u_), I.Dec (_, u'_) -> Conv.conv (u_, I.id) (u'_, I.id)
       | I.ADec (_, d), I.ADec (_, d') -> d = d'
       | _, _ -> false
 
     let rec equalCtx = function
       | I.Null, s, I.Null, s' -> true
       | I.Decl (g_, d_), s, I.Decl (g'_, d'_), s' ->
-          Conv.convDec ((d_, s), (d'_, s'))
+          Conv.convDec (d_, s) (d'_, s')
           && equalCtx (g_, I.dot1 s, g'_, I.dot1 s')
       | _, _, _, _ -> false
 
@@ -261,8 +261,8 @@ end) : MEMOTABLE = struct
       | T.Trivial, T.Trivial -> true
       | T.Unify (g_, x_, n_, eqn), T.Unify (g'_, x'_, n'_, eqn') ->
           equalCtx (g_, I.id, g'_, I.id)
-          && Conv.conv ((x_, I.id), (x'_, I.id))
-          && Conv.conv ((n_, I.id), (n'_, I.id))
+          && Conv.conv (x_, I.id) (x'_, I.id)
+          && Conv.conv (n_, I.id) (n'_, I.id)
           && equalEqn (eqn, eqn')
       | _, _ -> false
 
@@ -275,7 +275,7 @@ end) : MEMOTABLE = struct
 
     and equalFront = function
       | I.Idx n, I.Idx n' -> n = n'
-      | I.Exp u_, I.Exp v_ -> Conv.conv ((u_, I.id), (v_, I.id))
+      | I.Exp u_, I.Exp v_ -> Conv.conv (u_, I.id) (v_, I.id)
       | I.Undef, I.Undef -> true
 
     let equalSub1 (I.Dot (ms, s), I.Dot (ms', s')) = equalSub (s, s')
@@ -283,13 +283,13 @@ end) : MEMOTABLE = struct
     let rec equalCtx' = function
       | I.Null, I.Null -> true
       | I.Decl (dk, I.Dec (_, a_)), I.Decl (d1_, I.Dec (_, a1_)) ->
-          Conv.conv ((a_, I.id), (a1_, I.id)) && equalCtx' (dk, d1_)
+          Conv.conv (a_, I.id) (a1_, I.id) && equalCtx' (dk, d1_)
       | I.Decl (dk, I.ADec (_, d')), I.Decl (d1_, I.ADec (_, d)) ->
           d = d' && equalCtx' (dk, d1_)
       | _, _ -> false
 
     let compareCtx (g_, g'_) = equalCtx' (g_, g'_)
-    let isExists (d, I.BVar k, d_) = member (k - d, d_)
+    let isExists (d, I.BVar k, d_) = member (k - d) d_
 
     let compHeads = function
       | (d_1_, I.Const k), (d_2_, I.Const k') -> k = k'
@@ -339,7 +339,7 @@ end) : MEMOTABLE = struct
             begin if k > d && k' > d then
               let k1 = k - d in
               let k2 = k' - d in
-              begin match (member (k1, d_t_), member (k2, d_u_)) with
+              begin match (member k1 d_t_, member k2 d_u_) with
               | None, None ->
                   begin if k1 = k2 then
                     try
@@ -637,17 +637,17 @@ end) : MEMOTABLE = struct
       insert' (!nref, (d_u_, nsub_u), gr)
 
     let answCheckVariant (s', answRef, o_) =
-      let rec member = function
+      let rec member a2 b2 = match a2, b2 with
         | (d_, sk), [] -> false
         | (d_, sk), ((d1_, s1), _) :: s_ ->
             begin if equalSub (sk, s1) && equalCtx' (d_, d1_) then true
-            else member ((d_, sk), s_)
+            else member (d_, sk) s_
             end
       in
       let dEVars, sk = A.abstractAnswSub s' in
-      begin if member ((dEVars, sk), T.solutions answRef) then T.Repeated
+      begin if member (dEVars, sk) (T.solutions answRef) then T.Repeated
       else begin
-        T.addSolution (((dEVars, sk), o_), answRef);
+        T.addSolution ((dEVars, sk), o_) answRef;
         T.New_
       end
       end
@@ -775,7 +775,7 @@ end) : MEMOTABLE = struct
             let l = length (T.solutions answRef) in
             begin if l = T.lookup answRef then update aList flag_
             else begin
-              T.updateAnswLookup (l, answRef);
+              T.updateAnswLookup l answRef;
               update aList true
             end
             end
@@ -1011,11 +1011,11 @@ end) : MEMOTABLE = struct
        then return true
          otherwise false
      *)
-  let memberCtx ((g_, v_), g'_) =
+  let memberCtx (g_, v_) g'_ =
     let rec memberCtx' = function
       | (g_, v_), I.Null, n -> None
       | (g_, v_), I.Decl (g'_, (I.Dec (_, v'_) as d'_)), n ->
-          begin if Conv.conv ((v_, I.id), (v'_, I.Shift n)) then Some d'_
+          begin if Conv.conv (v_, I.id) (v'_, I.Shift n) then Some d'_
           else memberCtx' ((g_, v_), g'_, n + 1)
           end
     in

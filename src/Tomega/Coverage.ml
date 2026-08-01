@@ -79,7 +79,7 @@ module MakeTomegaCoverage
           purifyFor
             ( (p_, T.Dot (T.Exp u_, t)),
               (I.Decl (psi, T.UDec d_), f_),
-              T.comp (s, T.shift) )
+              T.comp s T.shift )
 
     let rec purifyCtx = function
       | (T.Shift k as t), psi -> (t, psi, T.id)
@@ -99,38 +99,38 @@ module MakeTomegaCoverage
       | T.Dot (T.Prg p_, t), I.Decl (psi, T.PDec (_, f_, _, _)) ->
           let t', psi', s' = purifyCtx (t, psi) in
           let t'', psi'', s'' =
-            purifyFor ((p_, t'), (psi', T.forSub (f_, s')), s')
+            purifyFor ((p_, t'), (psi', T.forSub f_ s'), s')
           in
           (t'', psi'', T.Dot (T.Undef, s''))
       | T.Dot (f_, t), I.Decl (psi, T.UDec d_) ->
           let t', psi', s' = purifyCtx (t, psi) in
           ( T.Dot (f_, t'),
-            I.Decl (psi', T.UDec (I.decSub (d_, T.coerceSub s'))),
+            I.Decl (psi', T.UDec (I.decSub d_ (T.coerceSub s'))),
             T.dot1 s' )
 
     let purify (psi0, t, psi) =
       let t', psi', s' = purifyCtx (t, psi) in
-      ignore (TomegaTypeCheck.checkSub (psi0, t', psi'));
+      ignore (TomegaTypeCheck.checkSub psi0 t' psi');
       (psi0, t', psi')
 
-    let rec coverageCheckPrg = function
-      | w_, psi, T.Lam (d_, p_) -> coverageCheckPrg (w_, I.Decl (psi, d_), p_)
-      | w_, psi, T.New p_ -> coverageCheckPrg (w_, psi, p_)
-      | w_, psi, T.PairExp (u_, p_) -> coverageCheckPrg (w_, psi, p_)
-      | w_, psi, T.PairBlock (b_, p_) -> coverageCheckPrg (w_, psi, p_)
+    let rec coverageCheckPrg a b c = match a, b, c with
+      | w_, psi, T.Lam (d_, p_) -> coverageCheckPrg w_ (I.Decl (psi, d_)) p_
+      | w_, psi, T.New p_ -> coverageCheckPrg w_ psi p_
+      | w_, psi, T.PairExp (u_, p_) -> coverageCheckPrg w_ psi p_
+      | w_, psi, T.PairBlock (b_, p_) -> coverageCheckPrg w_ psi p_
       | w_, psi, T.PairPrg (p1_, p2_) -> begin
-          coverageCheckPrg (w_, psi, p1_);
-          coverageCheckPrg (w_, psi, p2_)
+          coverageCheckPrg w_ psi p1_;
+          coverageCheckPrg w_ psi p2_
         end
       | w_, psi, Unit -> ()
       | w_, psi, T.Var _ -> ()
       | w_, psi, T.Const _ -> ()
-      | w_, psi, T.Rec (d_, p_) -> coverageCheckPrg (w_, I.Decl (psi, d_), p_)
+      | w_, psi, T.Rec (d_, p_) -> coverageCheckPrg w_ (I.Decl (psi, d_)) p_
       | w_, psi, T.Case (T.Cases omega_) ->
           coverageCheckCases (w_, psi, omega_, [])
       | w_, psi, (T.Let (d_, p1_, p2_) as p_) -> begin
-          coverageCheckPrg (w_, psi, p1_);
-          coverageCheckPrg (w_, I.Decl (psi, d_), p2_)
+          coverageCheckPrg w_ psi p1_;
+          coverageCheckPrg w_ (I.Decl (psi, d_)) p2_
         end
       | w_, psi, T.Redex (p_, s_) -> coverageCheckSpine (w_, psi, s_)
 
@@ -139,7 +139,7 @@ module MakeTomegaCoverage
       | w_, psi, T.AppExp (u_, s_) -> coverageCheckSpine (w_, psi, s_)
       | w_, psi, T.AppBlock (b_, s_) -> coverageCheckSpine (w_, psi, s_)
       | w_, psi, T.AppPrg (p_, s_) -> begin
-          coverageCheckPrg (w_, psi, p_);
+          coverageCheckPrg w_ psi p_;
           coverageCheckSpine (w_, psi, s_)
         end
 
@@ -156,9 +156,9 @@ module MakeTomegaCoverage
               (function psi0, t, _ -> (T.coerceCtx psi0, T.coerceSub t))
               cs'_
           in
-          Cover.coverageCheckCases (w_, cs''_, T.coerceCtx psi')
+          Cover.coverageCheckCases w_ cs''_ (T.coerceCtx psi')
       | w_, psi, (psi', t, p_) :: omega_, cs_ -> begin
-          coverageCheckPrg (w_, psi', p_);
+          coverageCheckPrg w_ psi' p_;
           coverageCheckCases (w_, psi, omega_, (psi', t, psi) :: cs_)
         end
   end

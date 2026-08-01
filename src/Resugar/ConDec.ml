@@ -33,13 +33,13 @@ module Make (Cst : Cst.CST) = struct
   let rec skip_imp = function
     | 0, g_, v_ -> (g_, v_)
     | i, g_, I.Pi ((d_, _), v_) ->
-        skip_imp (i - 1, I.Decl (g_, N.decEName (g_, d_)), v_)
+        skip_imp (i - 1, I.Decl (g_, N.decEName g_ d_), v_)
     | _, g_, v_ -> (g_, v_)
 
   let rec skip_imp2 = function
     | 0, g_, v_, u_ -> (g_, v_, u_)
     | i, g_, I.Pi ((_, _), v_), I.Lam (d'_, u_) ->
-        skip_imp2 (i - 1, I.Decl (g_, N.decEName (g_, d'_)), v_, u_)
+        skip_imp2 (i - 1, I.Decl (g_, N.decEName g_ d'_), v_, u_)
     | _, g_, v_, u_ -> (g_, v_, u_)
 
   (* A kind is a chain of binders ending in [type]. The trailing universe is
@@ -49,7 +49,7 @@ module Make (Cst : Cst.CST) = struct
     match v_ with
     | I.Uni _ -> []
     | I.Pi ((d_, _), v2_) ->
-        let d'_ = N.decLUName (g_, d_) in
+        let d'_ = N.decLUName g_ d_ in
         Tm.dec opts g_ d'_ :: kind_binders opts (I.Decl (g_, d'_)) v2_
     (* Not a well-formed kind. Emitting it as an anonymous binder keeps the
        function total and the output parseable. *)
@@ -146,7 +146,7 @@ module Make (Cst : Cst.CST) = struct
         Fgn
           (List.map
              (fun (g_, u_) -> Tm.exp opts (N.ctxLUName g_) u_)
-             (I.FgnCnstrStd.ToInternal.apply (cs, inner) ()))
+             (I.FgnCnstrStd.ToInternal.apply cs inner ()))
 
   let cnstrs opts cs = List.map (cnstr opts) cs
   let worlds opts cids = List.map (Tm.const_sym opts) cids

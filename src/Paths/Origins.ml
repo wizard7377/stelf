@@ -29,7 +29,7 @@ module MakeOrigins (Global : GLOBAL) (Table : TABLE with type key = string) :
     let linesInfoTable : Paths.linesInfo Table.table = Table.new_ 31
     let reset () = Table.clear linesInfoTable
 
-    let install (string, linesInfo) =
+    let install string linesInfo =
       Table.insert linesInfoTable (string, linesInfo)
 
     let lookup string = Table.lookup linesInfoTable string
@@ -45,7 +45,7 @@ module MakeOrigins (Global : GLOBAL) (Table : TABLE with type key = string) :
         : (string * Paths.occConDec option) Array.array)
   end
 
-  let installOrigin (cid, fileNameOpt) =
+  let installOrigin cid fileNameOpt =
     Array.update (originArray, cid, fileNameOpt)
 
   let originLookup cid = Array.sub (originArray, cid)

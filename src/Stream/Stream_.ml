@@ -18,7 +18,7 @@ module BasicStream : BASIC_STREAM = struct
   let delay d = Stream d
   let expose (Stream d) = d ()
   let empty = Stream (function () -> Empty)
-  let cons (x, s) = Stream (function () -> Cons (x, s))
+  let cons x s = Stream (function () -> Cons (x, s))
 end
 
 (* Note that this implementation is NOT semantically *)
@@ -67,7 +67,7 @@ module BasicMemoStream : BASIC_STREAM = struct
     end
 
   let empty = Stream (function () -> Empty)
-  let cons (x, s) = Stream (function () -> Cons (x, s))
+  let cons x s = Stream (function () -> Cons (x, s))
 end
 
 (* STREAM extends BASIC_STREAMS by operations *)
@@ -120,11 +120,11 @@ module MakeStream (BasicStream : BASIC_STREAM) : STREAM = struct
     | Empty, _ -> []
     | Cons (x, s), n -> x :: takePos (s, n - 1)
 
-  let take (s, n) =
+  let take s n =
     begin if n < 0 then raise Subscript else takePos (s, n)
     end
 
-  let rec fromList = function [] -> empty | x :: l -> cons (x, fromList l)
+  let rec fromList = function [] -> empty | x :: l -> cons x (fromList l)
 
   let rec toList s = toList' (expose s)
   and toList' = function Empty -> [] | Cons (x, s) -> x :: toList s
@@ -135,7 +135,7 @@ module MakeStream (BasicStream : BASIC_STREAM) : STREAM = struct
     | Empty, _ -> empty
     | Cons (_x, s), n -> dropPos (s, n - 1)
 
-  let drop (s, n) =
+  let drop s n =
     begin if n < 0 then raise Subscript else dropPos (s, n)
     end
 

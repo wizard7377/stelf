@@ -38,8 +38,8 @@ end) :
   (*Global.maxCSid*)
 
   let table : table = initializeTable ()
-  let install (csid, f) = Array.update (table, csid, f)
-  let apply (csid, rep) = Array.sub (table, csid) rep
+  let install csid f = Array.update (table, csid, f)
+  let apply csid rep = Array.sub (table, csid) rep
 end
 
 (* # 1 "src/lambda/Fgnopntable.sml.ml" *)

@@ -115,14 +115,14 @@ end) : FILL with module State = Fill__0.State' = struct
             try
               CsManager.trail (function () ->
                   begin
-                    Unify.unify (g_, vs_, (v_, I.id));
+                    Unify.unify g_ vs_ (v_, I.id);
                     o_ :: fs_
                   end)
             with Unify.Unify _ -> fs_)
         | (I.Pi ((I.Dec (_, v1_), _), v2_), s), fs_, o_ ->
-            let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
+            let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
             try_ ((v2_, I.Dot (I.Exp x_, s)), fs_, o_)
-        | (I.EClo (v_, s'), s), fs_, o_ -> try_ ((v_, I.comp (s', s)), fs_, o_)
+        | (I.EClo (v_, s'), s), fs_, o_ -> try_ ((v_, I.comp s' s), fs_, o_)
       in
       let rec matchCtx = function
         | I.Null, _, fs_ -> fs_
@@ -149,30 +149,30 @@ end) : FILL with module State = Fill__0.State' = struct
       | FillWithBVar ((I.EVar (r, g_, v_, _) as y_), n) ->
           let rec doit = function
             | ((I.Root _, _) as vs_), k -> begin
-                Unify.unify (g_, vs_, (v_, I.id));
+                Unify.unify g_ vs_ (v_, I.id);
                 k I.Nil
               end
             | (I.Pi ((I.Dec (_, v1_), _), v2_), s), k ->
-                let x_ = I.newEVar (g_, I.EClo (v1_, s)) in
+                let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
                 doit
                   ( (v2_, I.Dot (I.Exp x_, s)),
                     function s_ -> k (I.App (x_, s_)) )
-            | (I.EClo (v_, t), s), k -> doit ((v_, I.comp (t, s)), k)
+            | (I.EClo (v_, t), s), k -> doit ((v_, I.comp t s), k)
           in
-          let (I.Dec (_, w_)) = I.ctxDec (g_, n) in
+          let (I.Dec (_, w_)) = I.ctxDec g_ n in
           doit
             ( (w_, I.id),
               function
-              | s_ -> Unify.unify (g_, (y_, I.id), (I.Root (I.BVar n, s_), I.id))
+              | s_ -> Unify.unify g_ (y_, I.id) (I.Root (I.BVar n, s_), I.id)
             )
       | FillWithConst ((I.EVar (r, g0_, v_, _) as y_), c) ->
           let rec doit = function
             | ((I.Root _, _) as vs_), k -> begin
-                Unify.unify (g0_, vs_, (v_, I.id));
+                Unify.unify g0_ vs_ (v_, I.id);
                 k I.Nil
               end
             | (I.Pi ((I.Dec (_, v1_), _), v2_), s), k ->
-                let x_ = I.newEVar (g0_, I.EClo (v1_, s)) in
+                let x_ = I.newEVar g0_ (I.EClo (v1_, s)) in
                 doit
                   ( (v2_, I.Dot (I.Exp x_, s)),
                     function s_ -> k (I.App (x_, s_)) )
@@ -182,17 +182,17 @@ end) : FILL with module State = Fill__0.State' = struct
             ( (w_, I.id),
               function
               | s_ ->
-                  Unify.unify (g0_, (y_, I.id), (I.Root (I.Const c, s_), I.id))
+                  Unify.unify g0_ (y_, I.id) (I.Root (I.Const c, s_), I.id)
             )
 
     let menu = function
       | FillWithBVar ((I.EVar (_, g_, _, _) as x_), n) ->
-          begin match I.ctxLookup (Names.ctxName g_, n) with
+          begin match I.ctxLookup (Names.ctxName g_) n with
           | I.Dec (Some x, _) ->
-              (("Fill " ^ Names.evarName (g_, x_)) ^ " with variable ") ^ x
+              (("Fill " ^ Names.evarName g_ x_) ^ " with variable ") ^ x
           end
       | FillWithConst ((I.EVar (_, g_, _, _) as x_), c) ->
-          (("Fill " ^ Names.evarName (g_, x_)) ^ " with constant ")
+          (("Fill " ^ Names.evarName g_ x_) ^ " with constant ")
           ^ IntSyn.conDecName (IntSyn.sgnLookup c)
   end
 

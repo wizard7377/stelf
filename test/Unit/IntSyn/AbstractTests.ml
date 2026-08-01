@@ -8,30 +8,30 @@ open IntSynHelpers
 let test_closed_uni_type () =
   Alcotest.(check bool)
     "Uni Type is closed (no EVars)" true
-    (closedExp (null_ctx, (Uni Type, id_sub)))
+    (closedExp null_ctx (Uni Type, id_sub))
 
 let test_closed_uni_kind () =
   Alcotest.(check bool)
     "Uni Kind is closed (no EVars)" true
-    (closedExp (null_ctx, (Uni Kind, id_sub)))
+    (closedExp null_ctx (Uni Kind, id_sub))
 
 let test_closed_lam () =
   let lam = lam_ (Uni Type) (bvar 1) in
   Alcotest.(check bool)
     "Lam with no EVars is closed" true
-    (closedExp (null_ctx, (lam, id_sub)))
+    (closedExp null_ctx (lam, id_sub))
 
 let test_closed_pi () =
   let pi = Pi ((Dec (None, Uni Type), No), Uni Type) in
   Alcotest.(check bool)
     "Pi with no EVars is closed" true
-    (closedExp (null_ctx, (pi, id_sub)))
+    (closedExp null_ctx (pi, id_sub))
 
 let test_not_closed_evar () =
   let evar = EVar (ref None, null_ctx, Uni Type, ref []) in
   Alcotest.(check bool)
     "Uninstantiated EVar is not closed" false
-    (closedExp (null_ctx, (evar, id_sub)))
+    (closedExp null_ctx (evar, id_sub))
 
 let test_closed_instantiated_evar () =
   (* An instantiated EVar is transparent — closedExp follows the instantiation *)
@@ -39,7 +39,7 @@ let test_closed_instantiated_evar () =
   let evar = EVar (evar_ref, null_ctx, Uni Type, ref []) in
   Alcotest.(check bool)
     "Instantiated EVar (= Uni Type) is closed" true
-    (closedExp (null_ctx, (evar, id_sub)))
+    (closedExp null_ctx (evar, id_sub))
 
 (* closedCtx: all declarations in the context must also be closed *)
 
@@ -60,12 +60,12 @@ let test_not_closed_ctx_with_evar () =
 (* collectEVars: gather all uninstantiated EVars in a term *)
 
 let test_collect_no_evars () =
-  let evars = collectEVars (null_ctx, (Uni Type, id_sub), []) in
+  let evars = collectEVars null_ctx (Uni Type, id_sub) [] in
   Alcotest.(check int) "Uni Type has no EVars" 0 (List.length evars)
 
 let test_collect_one_evar () =
   let evar = EVar (ref None, null_ctx, Uni Type, ref []) in
-  let evars = collectEVars (null_ctx, (evar, id_sub), []) in
+  let evars = collectEVars null_ctx (evar, id_sub) [] in
   Alcotest.(check int) "one EVar collected" 1 (List.length evars)
 
 let test_collect_dedup_evar () =
@@ -73,7 +73,7 @@ let test_collect_dedup_evar () =
   let evar_ref = ref None in
   let evar = EVar (evar_ref, null_ctx, Uni Type, ref []) in
   let pi_with_dup = Pi ((Dec (None, evar), No), evar) in
-  let evars = collectEVars (null_ctx, (pi_with_dup, id_sub), []) in
+  let evars = collectEVars null_ctx (pi_with_dup, id_sub) [] in
   Alcotest.(check int) "same EVar deduplicated" 1 (List.length evars)
 
 let suites =

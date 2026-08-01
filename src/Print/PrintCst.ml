@@ -103,21 +103,21 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
 
   (* ---------------------------------------------------------------- *)
 
-  let formatDec (g_, d_) = to_format (P.decl (env ()) (R.dec (opts ()) g_ d_))
+  let formatDec g_ d_ = to_format (P.decl (env ()) (R.dec (opts ()) g_ d_))
 
-  let formatDecList (g_, ds) =
+  let formatDecList g_ ds =
     to_format (P.decls (env ()) ~brackets:`Braces (R.dec_list (opts ()) g_ ds))
 
   (* The only entry point that needs a pending substitution on a declaration
      list, so it reaches past the assembled interface to [Term]. *)
-  let formatDecList' (g_, (ds, s)) =
+  let formatDecList' g_ (ds, s) =
     to_format
       (P.decls (env ()) ~brackets:`Braces
          (Tm.dec_list_sub (opts ()) g_ (ds, s)))
 
-  let formatExp (g_, u_) = to_format (P.term (env ()) (R.exp (opts ()) g_ u_))
+  let formatExp g_ u_ = to_format (P.term (env ()) (R.exp (opts ()) g_ u_))
 
-  let formatSpine (g_, s_) =
+  let formatSpine g_ s_ =
     List.map (fun t -> to_format (P.term (env ()) t)) (R.spine (opts ()) g_ s_)
 
   let formatConDec condec_ =
@@ -151,11 +151,11 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
                  (List.map (fun c -> show_cnstr (R.cnstr (opts ()) c)) cnstrL)
               ^ "."))
 
-  let formatCtx (g0_, g_) =
+  let formatCtx g0_ g_ =
     to_format (P.decls (env ()) ~brackets:`Braces (R.ctx (opts ()) g0_ g_))
 
-  let decToString (g_, d_) = str (P.decl (env ()) (R.dec (opts ()) g_ d_))
-  let expToString (g_, u_) = str (P.term (env ()) (R.exp (opts ()) g_ u_))
+  let decToString g_ d_ = str (P.decl (env ()) (R.dec (opts ()) g_ d_))
+  let expToString g_ u_ = str (P.term (env ()) (R.exp (opts ()) g_ u_))
 
   let conDecToString condec_ =
     str (P.cmd (env ()) (R.con_dec (opts ()) ~hide:false condec_))
@@ -170,7 +170,7 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
           (List.map (fun c -> show_cnstr (R.cnstr (opts ()) c)) cnstrL)
         ^ "."
 
-  let ctxToString (g0_, g_) =
+  let ctxToString g0_ g_ =
     str (P.decls (env ()) ~brackets:`Braces (R.ctx (opts ()) g0_ g_))
 
   let evarInstToString xnames =
@@ -188,7 +188,7 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
     | [], xs_ -> xs_
     | (u_, _) :: xnames, xs_ ->
         collectEVars
-          (xnames, Abstract.collectEVars (IntSyn.Null, (u_, IntSyn.id), xs_))
+          (xnames, Abstract.collectEVars IntSyn.Null (u_, IntSyn.id) xs_)
 
   let eqCnstr r1 r2 = r1 == r2
 

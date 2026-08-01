@@ -41,10 +41,10 @@ module TomegaNames : TOMEGANAMES = struct
   module T = Tomega
   module I = IntSyn
 
-  let decName = function
-    | psi, T.UDec d_ -> T.UDec (Names.decName (T.coerceCtx psi, d_))
+  let decName a b = match a, b with
+    | psi, T.UDec d_ -> T.UDec (Names.decName (T.coerceCtx psi) d_)
     | psi, T.PDec (x, f_, tc1, tc2) ->
-        let (I.NDec x') = Names.decName (T.coerceCtx psi, I.NDec x) in
+        let (I.NDec x') = Names.decName (T.coerceCtx psi) (I.NDec x) in
         T.PDec (x', f_, tc1, tc2)
 end
 

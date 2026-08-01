@@ -48,30 +48,30 @@ module MakeTypeCheck
     let rec subToString = function
       | g_, I.Dot (I.Idx n, s) -> (Int.toString n ^ ".") ^ subToString (g_, s)
       | g_, I.Dot (I.Exp u_, s) ->
-          (("(" ^ Print.expToString (g_, u_)) ^ ").") ^ subToString (g_, s)
+          (("(" ^ Print.expToString g_ u_) ^ ").") ^ subToString (g_, s)
       | g_, I.Dot (I.Block (I.LVar _ as l_), s) ->
           (lVarToString (g_, l_) ^ ".") ^ subToString (g_, s)
       | g_, I.Shift n -> "^" ^ Int.toString n
 
     and lVarToString = function
       | g_, I.LVar ({ contents = Some b_ }, sk, (l, t)) ->
-          lVarToString (g_, I.blockSub (b_, sk))
+          lVarToString (g_, I.blockSub b_ sk)
       | g_, I.LVar ({ contents = None }, sk, (cid, t)) ->
           ((("#" ^ I.conDecName (I.sgnLookup cid)) ^ "[") ^ subToString (g_, t))
           ^ "]"
 
     let rec checkExp (g_, us_, vs_) =
       let us' = inferExp (g_, us_) in
-      begin if Conv.conv (us', vs_) then ()
+      begin if Conv.conv us' vs_ then ()
       else begin
         let ie_, is_ = us' in
         let ee, es_ = vs_ in
         let inferred_s =
-          try Print.expToString (g_, I.EClo (ie_, is_))
+          try Print.expToString g_ (I.EClo (ie_, is_))
           with _ -> "<print-error>"
         in
         let expected_s =
-          try Print.expToString (g_, I.EClo (ee, es_))
+          try Print.expToString g_ (I.EClo (ee, es_))
           with _ -> "<print-error>"
         in
         let rec show_exp_raw = function
@@ -116,30 +116,30 @@ module MakeTypeCheck
     and inferExpW = function
       | g_, (I.Uni l_, _) -> (I.Uni (inferUni l_), I.id)
       | g_, (I.Pi ((d_, _), v_), s) -> begin
-          checkDec (g_, (d_, s));
-          inferExp (I.Decl (g_, I.decSub (d_, s)), (v_, I.dot1 s))
+          checkDec g_ (d_, s);
+          inferExp (I.Decl (g_, I.decSub d_ s), (v_, I.dot1 s))
         end
       | g_, (I.Root (c_, s_), s) ->
           inferSpine (g_, (s_, s), Whnf.whnf (inferCon (g_, c_), I.id))
       | g_, (I.Lam (d_, u_), s) -> begin
-          checkDec (g_, (d_, s));
+          checkDec g_ (d_, s);
           ( I.Pi
-              ( (I.decSub (d_, s), I.Maybe),
+              ( (I.decSub d_ s, I.Maybe),
                 let v_ie_, s_ie_ =
-                  inferExp (I.Decl (g_, I.decSub (d_, s)), (u_, I.dot1 s))
+                  inferExp (I.Decl (g_, I.decSub d_ s), (u_, I.dot1 s))
                 in
                 I.EClo (v_ie_, s_ie_) ),
             I.id )
         end
       | g_, (I.FgnExp (cs_csfe, fe_csfe), s) ->
-          inferExp (g_, (I.FgnExpStd.ToInternal.apply (cs_csfe, fe_csfe) (), s))
+          inferExp (g_, (I.FgnExpStd.ToInternal.apply cs_csfe fe_csfe (), s))
 
     and inferExp (g_, us_) = inferExpW (g_, Whnf.whnf us_)
 
     and inferSpine = function
       | g_, (I.Nil, _), vs_ -> vs_
       | g_, (I.SClo (s_, s'), s), vs_ ->
-          inferSpine (g_, (s_, I.comp (s', s)), vs_)
+          inferSpine (g_, (s_, I.comp s' s), vs_)
       | g_, (I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2) -> begin
           checkExp (g_, (u_, s1), (v1_, s2));
           inferSpine
@@ -152,60 +152,60 @@ module MakeTypeCheck
 
     and inferCon = function
       | g_, I.BVar k' ->
-          let (I.Dec (_, v_)) = I.ctxDec (g_, k') in
+          let (I.Dec (_, v_)) = I.ctxDec g_ k' in
           v_
       | g_, I.Proj (b_, i) ->
-          let (I.Dec (_, v_)) = I.blockDec (g_, b_, i) in
+          let (I.Dec (_, v_)) = I.blockDec g_ b_ i in
           v_
       | g_, I.Const c -> I.constType c
       | g_, I.Def d -> I.constType d
       | g_, I.Skonst c -> I.constType c
       | g_, I.FgnConst (cs, conDec) -> I.conDecType conDec
 
-    and typeCheck (g_, (u_, v_)) =
+    and typeCheck g_ (u_, v_) =
       begin
         checkCtx g_;
         checkExp (g_, (u_, I.id), (v_, I.id))
       end
 
-    and checkSub = function
+    and checkSub a1 b1 c1 = match a1, b1, c1 with
       | IntSyn.Null, I.Shift 0, IntSyn.Null -> ()
       | I.Decl (g_, d_), I.Shift k, IntSyn.Null ->
-          begin if k > 0 then checkSub (g_, I.Shift (k - 1), I.Null)
+          begin if k > 0 then checkSub g_ (I.Shift (k - 1)) I.Null
           else raise (Error "Substitution not well-typed")
           end
       | g'_, I.Shift k, g_ ->
-          checkSub (g'_, I.Dot (I.Idx (k + 1), I.Shift (k + 1)), g_)
+          checkSub g'_ (I.Dot (I.Idx (k + 1), I.Shift (k + 1))) g_
       | g'_, I.Dot (I.Idx k, s'), I.Decl (g_, I.Dec (_, v2_)) ->
-          ignore (checkSub (g'_, s', g_));
-          let (I.Dec (_, v1_)) = I.ctxDec (g'_, k) in
-          begin if Conv.conv ((v1_, I.id), (v2_, s')) then ()
+          ignore (checkSub g'_ s' g_);
+          let (I.Dec (_, v1_)) = I.ctxDec g'_ k in
+          begin if Conv.conv (v1_, I.id) (v2_, s') then ()
           else
             raise
               (Error
                  ((("Substitution not well-typed \n  found: "
-                   ^ Print.expToString (g'_, v1_))
+                   ^ Print.expToString g'_ v1_)
                   ^ "\n  expected: ")
-                 ^ Print.expToString (g'_, I.EClo (v2_, s'))))
+                 ^ Print.expToString g'_ (I.EClo (v2_, s'))))
           end
       | g'_, I.Dot (I.Exp u_, s'), I.Decl (g_, I.Dec (_, v2_)) ->
-          ignore (checkSub (g'_, s', g_));
-          ignore (typeCheck (g'_, (u_, I.EClo (v2_, s'))));
+          ignore (checkSub g'_ s' g_);
+          ignore (typeCheck g'_ (u_, I.EClo (v2_, s')));
           ()
       | g'_, I.Dot (I.Idx w, t), I.Decl (g_, I.BDec (_, (l, s))) ->
-          ignore (checkSub (g'_, t, g_));
-          let (I.BDec (_, (l', s'))) = I.ctxDec (g'_, w) in
+          ignore (checkSub g'_ t g_);
+          let (I.BDec (_, (l', s'))) = I.ctxDec g'_ w in
           begin if l <> l' then raise (Error "Incompatible block labels found")
           else
-            begin if Conv.convSub (I.comp (s, t), s') then ()
+            begin if Conv.convSub (I.comp s t) s' then ()
             else
               raise (Error "Substitution in block declaration not well-typed")
             end
           end
       | g'_, I.Dot (I.Block (I.Inst i_), t), I.Decl (g_, I.BDec (_, (l, s))) ->
-          ignore (checkSub (g'_, t, g_));
+          ignore (checkSub g'_ t g_);
           let g_, l_ = I.constBlock l in
-          ignore (checkBlock (g'_, i_, (I.comp (s, t), l_)));
+          ignore (checkBlock (g'_, i_, (I.comp s t, l_)));
           ()
       | g'_, (I.Dot (_, _) as s), IntSyn.Null ->
           raise (Error (("Long substitution" ^ "\n") ^ subToString (g'_, s)))
@@ -217,18 +217,18 @@ module MakeTypeCheck
           checkBlock (g_, i_, (I.Dot (I.Exp u_, t), l_))
         end
 
-    and checkDec = function
+    and checkDec a1 b1 = match a1, b1 with
       | g_, (I.Dec (_, v_), s) -> checkExp (g_, (v_, s), (I.Uni I.Type, I.id))
       | g_, (I.BDec (_, (c, t)), s) ->
           let gsome_, piDecs = I.constBlock c in
-          checkSub (g_, I.comp (t, s), gsome_)
+          checkSub g_ (I.comp t s) gsome_
       | g_, (NDec _, _) -> ()
 
     and checkCtx = function
       | IntSyn.Null -> ()
       | I.Decl (g_, d_) -> begin
           checkCtx g_;
-          checkDec (g_, (d_, I.id))
+          checkDec g_ (d_, I.id)
         end
 
     let check (u_, v_) = checkExp (I.Null, (u_, I.id), (v_, I.id))
@@ -237,18 +237,18 @@ module MakeTypeCheck
       let v_ie_, s_ie_ = inferExp (I.Null, (u_, I.id)) in
       I.EClo (v_ie_, s_ie_)
 
-    let infer' (g_, u_) =
+    let infer' g_ u_ =
       let v_ie_, s_ie_ = inferExp (g_, (u_, I.id)) in
       I.EClo (v_ie_, s_ie_)
 
-    let checkConv (u1_, u2_) =
-      begin if Conv.conv ((u1_, I.id), (u2_, I.id)) then ()
+    let checkConv u1_ u2_ =
+      begin if Conv.conv (u1_, I.id) (u2_, I.id) then ()
       else
         raise
           (Error
-             ((("Terms not equal\n  left: " ^ Print.expToString (I.Null, u1_))
+             ((("Terms not equal\n  left: " ^ Print.expToString I.Null u1_)
               ^ "\n  right:")
-             ^ Print.expToString (I.Null, u2_)))
+             ^ Print.expToString I.Null u2_))
       end
   end
 

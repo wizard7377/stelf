@@ -115,7 +115,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           end
 
     let typecheck (MetaSyn.Prefix (g_, m_, b_), v_) =
-      TypeCheck.typeCheck (g_, (v_, I.Uni I.Type))
+      TypeCheck.typeCheck g_ (v_, I.Uni I.Type)
 
     let modeEq = function
       | M.Marg (M.Plus, _), MetaSyn.Top -> true
@@ -138,8 +138,8 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | 0, g_, a -> I.id
       | depth, I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
           let w' = weaken (depth - 1, g'_, a) in
-          begin if Subordinate.belowEq (I.targetFam v_, a) then I.dot1 w'
-          else I.comp (w', I.shift)
+          begin if Subordinate.belowEq (I.targetFam v_) a then I.dot1 w'
+          else I.comp w' I.shift
           end
 
     let countPi v_ =
@@ -158,14 +158,14 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | lG0, g_, (I.Pi ((d_, _), v_), s), mode, adepth ->
           collectExp
             ( lG0,
-              I.Decl (g_, I.decSub (d_, s)),
+              I.Decl (g_, I.decSub d_ s),
               (v_, I.dot1 s),
               mode,
               collectDec (lG0, g_, (d_, s), mode, adepth) )
       | lG0, g_, (I.Lam (d_, u_), s), mode, adepth ->
           collectExp
             ( lG0,
-              I.Decl (g_, I.decSub (d_, s)),
+              I.Decl (g_, I.decSub d_ s),
               (u_, I.dot1 s),
               mode,
               collectDec (lG0, g_, (d_, s), mode, adepth) )
@@ -176,7 +176,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           ((a_, depth) as adepth) ) ->
           let l = I.ctxLength g_ in
           begin if k = l + depth - lG0 && depth > 0 then
-            let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
+            let (I.Dec (_, v_)) = I.ctxDec g_ k in
             collectSpine (lG0, g_, (s_, s), mode, (I.Decl (a_, Bv), depth - 1))
           else collectSpine (lG0, g_, (s_, s), mode, adepth)
           end
@@ -190,13 +190,13 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               let lGp' = I.ctxLength gx - lG0 + depth in
               let w = weaken (lGp', gx, I.targetFam v_) in
               let iw = Whnf.invert w in
-              let gx' = Whnf.strengthen (iw, gx) in
+              let gx' = Whnf.strengthen iw gx in
               let lGp'' = I.ctxLength gx' - lG0 + depth in
               let vraised = raiseType (lGp'', gx', I.EClo (v_, iw)) in
               let (I.EVar (r', _, _, _) as x'_) =
-                I.newEVar (gx', I.EClo (v_, iw))
+                I.newEVar gx' (I.EClo (v_, iw))
               in
-              ignore (Unify.instantiateEVar (r, I.EClo (x'_, w), []));
+              ignore (Unify.instantiateEVar r (I.EClo (x'_, w)) []);
               collectSub
                 ( lG0,
                   g_,
@@ -209,7 +209,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               collectSub (lG0, g_, lGp', s, mode, adepth)
           end
       | lGO, g_, (I.FgnExp (csid_, fge), s), mode, adepth ->
-          I.FgnExpStd.fold (csid_, fge)
+          I.FgnExpStd.fold csid_ fge
             (function
               | u_, adepth' -> collectExp (lGO, g_, (u_, s), mode, adepth'))
             adepth
@@ -233,7 +233,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     and collectSpine = function
       | lG0, g_, (I.Nil, _), mode, adepth -> adepth
       | lG0, g_, (I.SClo (s_, s'), s), mode, adepth ->
-          collectSpine (lG0, g_, (s_, I.comp (s', s)), mode, adepth)
+          collectSpine (lG0, g_, (s_, I.comp s' s), mode, adepth)
       | lG0, g_, (I.App (u_, s_), s), mode, adepth ->
           collectSpine
             (lG0, g_, (s_, s), mode, collectExp (lG0, g_, (u_, s), mode, adepth))
@@ -246,7 +246,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           let rec collectModeW' = function
             | ((I.Nil, _), M.Mnil), adepth -> adepth
             | ((I.SClo (s_, s'), s), m_), adepth ->
-                collectModeW' (((s_, I.comp (s', s)), m_), adepth)
+                collectModeW' (((s_, I.comp s' s), m_), adepth)
             | ((I.App (u_, s_), s), M.Mapp (m, mS)), adepth ->
                 collectModeW'
                   ( ((s_, s), mS),
@@ -285,7 +285,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               g_,
               (v1_, s),
               collectDTop
-                (lG0, I.Decl (g_, I.decSub (d_, s)), (v2_, I.dot1 s), adepth) )
+                (lG0, I.Decl (g_, I.decSub d_ s), (v2_, I.dot1 s), adepth) )
       | lG0, g_, ((I.Root _, s) as vs_), adepth ->
           collectModeW (lG0, g_, MetaSyn.Top, MetaSyn.Top, vs_, adepth)
 
@@ -295,7 +295,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     and collectDBotW = function
       | lG0, g_, (I.Pi ((d_, _), v_), s), adepth ->
           collectDBot
-            (lG0, I.Decl (g_, I.decSub (d_, s)), (v_, I.dot1 s), adepth)
+            (lG0, I.Decl (g_, I.decSub d_ s), (v_, I.dot1 s), adepth)
       | lG0, g_, ((I.Root _, s) as vs_), adepth ->
           collectModeW (lG0, g_, MetaSyn.Bot, MetaSyn.Bot, vs_, adepth)
 
@@ -328,15 +328,13 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | a_, g_, depth, ((I.Uni l_ as v_), s) -> v_
       | a_, g_, depth, (I.Pi ((d_, p_), v_), s) ->
           Abstract.piDepend
-            ( (abstractDec (a_, g_, depth, (d_, s)), p_),
-              abstractExp
-                (a_, I.Decl (g_, I.decSub (d_, s)), depth + 1, (v_, I.dot1 s))
-            )
+            (abstractDec (a_, g_, depth, (d_, s)), p_) (abstractExp
+                (a_, I.Decl (g_, I.decSub d_ s), depth + 1, (v_, I.dot1 s)))
       | a_, g_, depth, (I.Lam (d_, u_), s) ->
           I.Lam
             ( abstractDec (a_, g_, depth, (d_, s)),
               abstractExp
-                (a_, I.Decl (g_, I.decSub (d_, s)), depth + 1, (u_, I.dot1 s))
+                (a_, I.Decl (g_, I.decSub d_ s), depth + 1, (u_, I.dot1 s))
             )
       | a_, g_, depth, (I.Root ((I.BVar k as c_), s_), s) ->
           begin if k > depth then
@@ -353,7 +351,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               abstractSub
                 (a_, g_, depth, (vraised, I.id), s, I.targetFam v_, I.Nil) )
       | a_, g_, depth, (I.FgnExp (csid_, fge), s) ->
-          I.FgnExpStd.Map.apply (csid_, fge) (function u_ ->
+          I.FgnExpStd.Map.apply csid_ fge (function u_ ->
               abstractExp (a_, g_, depth, (u_, s)))
 
     and abstractExp (a_, g_, depth, us_) =
@@ -366,7 +364,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
             ( abstractExp (a_, g_, depth, (u_, s)),
               abstractSpine (a_, g_, depth, (s_, s)) )
       | a_, g_, depth, (I.SClo (s_, s'), s) ->
-          abstractSpine (a_, g_, depth, (s_, I.comp (s', s)))
+          abstractSpine (a_, g_, depth, (s_, I.comp s' s))
 
     and abstractSub (a_, g_, depth, xVt, s, b, s_) =
       abstractSubW (a_, g_, depth, Whnf.whnf xVt, s, b, s_)
@@ -377,7 +375,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           abstractSub
             (a_, g_, depth, xVt, I.Dot (I.Idx (k + 1), I.Shift (k + 1)), b, s_)
       | a_, g_, depth, ((I.Pi (_, xv'), t) as xVt), I.Dot (I.Idx k, s), b, s_ ->
-          let (I.Dec (x, v_)) = I.ctxDec (g_, k) in
+          let (I.Dec (x, v_)) = I.ctxDec g_ k in
           begin if k > depth then
             let k' = lookupBV (a_, k - depth) in
             abstractSub
@@ -429,7 +427,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
             end
           in
           ( MetaSyn.Prefix
-              ( I.Decl (g'_, Names.decName (g'_, d'_)),
+              ( I.Decl (g'_, Names.decName g'_ d'_),
                 I.Decl (m'_, marg),
                 I.Decl (b'_, b) ),
             I.Decl (lG', d'_) )
@@ -443,7 +441,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
             end
           in
           ( MetaSyn.Prefix
-              ( I.Decl (g'_, Names.decName (g'_, I.Dec (None, v''))),
+              ( I.Decl (g'_, Names.decName g'_ (I.Dec (None, v''))),
                 I.Decl (m'_, m),
                 I.Decl
                   ( b'_,

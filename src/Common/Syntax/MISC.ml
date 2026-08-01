@@ -26,34 +26,34 @@ module type MISC = sig
 
       Invariant: {m \Gamma \vdash \uparrow^{{-1}} : \Gamma, V}. *)
 
-  val bvarSub : int * Ast.sub -> Ast.front
+  val bvarSub : int -> Ast.sub -> Ast.front
   (** [bvarSub (n, s)] looks up the [n]-th position in substitution [s],
       returning the {!front} that index [n] maps to.
 
       Invariant: if {m \Gamma \vdash s : \Gamma'} and {m \Gamma' \vdash n : V}
       then [bvarSub (n, s)] = {m F} and {m \Gamma \vdash F : V[s]}. *)
 
-  val frontSub : Ast.front * Ast.sub -> Ast.front
+  val frontSub : Ast.front -> Ast.sub -> Ast.front
   (** [frontSub (Ft, s)] applies substitution [s] to front [Ft].
 
       Invariant: if {m \Gamma \vdash s : \Gamma'} and
       {m \Gamma' \vdash \mathit{Ft} : V} then [frontSub (Ft, s)] =
       {m \mathit{Ft}[s]} and {m \Gamma \vdash \mathit{Ft}[s] : V[s]}. *)
 
-  val decSub : Ast.dec * Ast.sub -> Ast.dec
+  val decSub : Ast.dec -> Ast.sub -> Ast.dec
   (** [decSub (D, s)] applies substitution [s] to declaration [D]. For
       [Dec (x, V)], returns [Dec (x, EClo (V, s))]. For [BDec (n, (l, t))],
       composes the block substitution: [BDec (n, (l, comp (t, s)))]. For
       [NDec x], returns unchanged. *)
 
-  val blockSub : Ast.block * Ast.sub -> Ast.block
+  val blockSub : Ast.block -> Ast.sub -> Ast.block
   (** [blockSub (B, s)] applies substitution [s] to block [B].
 
       Invariant: if {m \Gamma \vdash s : \Gamma'} and
       {m \Gamma' \vdash B\;\mathsf{block}} then
       {m \Gamma \vdash B[s]\;\mathsf{block}}. *)
 
-  val comp : Ast.sub * Ast.sub -> Ast.sub
+  val comp : Ast.sub -> Ast.sub -> Ast.sub
   (** [comp (s1, s2)] computes the composition {m s_1 \circ s_2}.
 
       Invariant: if {m \Gamma' \vdash s_1 : \Gamma} and
@@ -78,7 +78,7 @@ module type MISC = sig
 
   (** {2 Existential Variable Construction} *)
 
-  val newEVar : Ast.dctx * Ast.exp -> Ast.exp
+  val newEVar : Ast.dctx -> Ast.exp -> Ast.exp
   (** [newEVar (G, V)] creates a fresh uninstantiated existential variable
       {m X : \Gamma \vdash V} with an empty constraint list. Returns
       [EVar (ref None, G, V, ref [])]. *)
@@ -93,7 +93,7 @@ module type MISC = sig
       context [G]. Equivalent to [newEVar (G, Uni Type)]. Used when a type must
       be inferred. *)
 
-  val newLVar : Ast.sub * (Ast.cid * Ast.sub) -> Ast.block
+  val newLVar : Ast.sub -> Ast.cid * Ast.sub -> Ast.block
   (** [newLVar (s, (l, t))] creates a fresh uninstantiated block logic variable
       [LVar (ref None, s, (l, t))]. The substitution [s] is suspended, and
       [(l, t)] identifies the block type declaration. *)
@@ -141,7 +141,7 @@ module type MISC = sig
       target.
       @raise Invalid_argument if [targetFamOpt V] returns [None]. *)
 
-  val rename : Ast.cid * string -> unit
+  val rename : Ast.cid -> string -> unit
   (** [rename (c, name)] changes the name of constant [c] in the global
       signature to [name], preserving all other fields. Used by the Flit module
       for name mangling. *)

@@ -26,14 +26,14 @@ module Queue : QUEUE = struct
   type 'a queue = 'a list * 'a list
 
   let empty = ([], [])
-  let insert (x, (inp, out)) = (x :: inp, out)
+  let insert x (inp, out) = (x :: inp, out)
 
   let rec delete = function
     | [], [] -> None
     | inp, x :: out -> Some (x, (inp, out))
     | inp, [] -> delete ([], List.rev inp)
 
-  let insertFront (x, (inp, out)) = (inp, x :: out)
+  let insertFront x (inp, out) = (inp, x :: out)
 
   let deleteEnd = function
     | [], [] -> None

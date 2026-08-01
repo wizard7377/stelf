@@ -68,9 +68,9 @@ module type TABLEPARAM = sig
 
   (* destructively updates answers *)
   val addSolution :
-    ((IntSyn.dctx * IntSyn.sub) * CompSyn.pskeleton) * answer -> unit
+    (IntSyn.dctx * IntSyn.sub) * CompSyn.pskeleton -> answer -> unit
 
-  val updateAnswLookup : int * answer -> unit
+  val updateAnswLookup : int -> answer -> unit
 
   val solutions :
     answer -> ((IntSyn.dctx * IntSyn.sub) * CompSyn.pskeleton) list

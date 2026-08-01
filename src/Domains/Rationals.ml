@@ -33,18 +33,18 @@ module Rationals (Integers : INTEGERS) :
     let normalize = function
       | Fract (0, _, _) -> zero
       | Fract (s, n, d) ->
-          let rec gcd (m, n) =
+          let rec gcd m n =
             begin if m = I.fromInt 0 then n
             else
               begin if n = I.fromInt 0 then m
               else
-                begin if I.( > ) m n then gcd (I.mod_ (m, n), n)
-                else gcd (m, I.mod_ (n, m))
+                begin if I.( > ) m n then gcd (I.mod_ (m, n)) n
+                else gcd m (I.mod_ (n, m))
                 end
               end
             end
           in
-          let g = gcd (n, d) in
+          let g = gcd n d in
           Fract (s, I.div (n, g), I.div (d, g))
 
     let ( ~- ) (Fract (s, n, d)) = Fract (Int.( ~- ) s, n, d)
@@ -84,13 +84,13 @@ module Rationals (Integers : INTEGERS) :
     let abs (Fract (s, n, d)) = Fract (Int.abs s, n, d)
 
     (* Workaround: I.compare returns wrong order path *)
-    let compare (Fract (s1, n1, d1), Fract (s2, n2, d2)) =
+    let compare (Fract (s1, n1, d1)) (Fract (s2, n2, d2)) =
       let a = I.( * ) (I.( * ) (I.fromInt s1) n1) d2 in
       let b = I.( * ) (I.( * ) (I.fromInt s2) n2) d1 in
-      I.compare (a, b)
+      I.compare a b
 
-    let ( > ) q1 q2 = compare (q1, q2) = Greater
-    let ( < ) q1 q2 = compare (q1, q2) = Less
+    let ( > ) q1 q2 = compare q1 q2 = Greater
+    let ( < ) q1 q2 = compare q1 q2 = Less
     let ( >= ) q1 q2 = q1 = q2 || q1 > q2
     let ( <= ) q1 q2 = q1 = q2 || q1 < q2
     let fromInt n = Fract (Int.sign n, I.fromInt (Int.abs n), I.fromInt 1)

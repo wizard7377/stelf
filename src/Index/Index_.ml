@@ -37,7 +37,7 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
     let reset () = Array.modify (function _ -> Queue.empty) indexArray
 
     let update (a, c) =
-      Array.update (indexArray, a, Queue.insert (c, Array.sub (indexArray, a)))
+      Array.update (indexArray, a, Queue.insert c (Array.sub (indexArray, a)))
 
     let install fromCS (I.Const c as h_) =
       begin match (fromCS, I.sgnLookup c) with

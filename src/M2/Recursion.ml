@@ -118,9 +118,9 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       let rec fmtOrder = function
         | Order.Arg (us_, vs_) ->
             [
-              F.string (Print.expToString (g_, I.EClo (fst us_, snd us_)));
+              F.string (Print.expToString g_ (I.EClo (fst us_, snd us_)));
               F.string ":";
-              F.string (Print.expToString (g_, I.EClo (fst vs_, snd vs_)));
+              F.string (Print.expToString g_ (I.EClo (fst vs_, snd vs_)));
             ]
         | Order.Lex l_ -> [ F.string "{"; F.hVbox (fmtOrders l_); F.string "}" ]
         | Order.Simul l_ ->
@@ -139,7 +139,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
         | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''), _), _), s'')) ->
             ((u'_, s'), (v'', s''))
         | n, ((I.SClo (s'_, s1'), s2'), vs'') ->
-            select'W (n, ((s'_, I.comp (s1', s2')), vs''))
+            select'W (n, ((s'_, I.comp s1' s2'), vs''))
         | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select'
@@ -156,13 +156,13 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       let rec set_parameter' = function
         | 0, ops' -> ops'
         | k', ops' ->
-            let (I.Dec (_, v'_) as d'_) = I.ctxDec (g_, k') in
+            let (I.Dec (_, v'_) as d'_) = I.ctxDec g_ k' in
             let ops'' =
               CsManager.trail (function () ->
                   begin if
-                    Unify.unifiable (g_, (v_, I.id), (v'_, I.id))
+                    Unify.unifiable g_ (v_, I.id) (v'_, I.id)
                     && Unify.unifiable
-                         (g_, (x_, I.id), (I.Root (I.BVar k', I.Nil), I.id))
+                         g_ (x_, I.id) (I.Root (I.BVar k', I.Nil), I.id)
                   then sc ops'
                   else ops'
                   end)
@@ -172,7 +172,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       set_parameter' (k, ops)
 
     let rec ltinit (g_, k, (us_, vs_), usVs', sc, ops) =
-      ltinitW (g_, k, Whnf.whnfEta (us_, vs_), usVs', sc, ops)
+      ltinitW (g_, k, Whnf.whnfEta us_ vs_, usVs', sc, ops)
 
     and ltinitW = function
       | g_, k, (us_, ((I.Root _, _) as vs_)), usVs', sc, ops ->
@@ -184,15 +184,15 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
           sc,
           ops ) ->
           ltinit
-            ( I.Decl (g_, I.decSub (d1_, s1)),
+            ( I.Decl (g_, I.decSub d1_ s1),
               k + 1,
               ((u_, I.dot1 s1), (v_, I.dot1 s2)),
-              ((u'_, I.comp (s1', I.shift)), (v'_, I.comp (s2', I.shift))),
+              ((u'_, I.comp s1' I.shift), (v'_, I.comp s2' I.shift)),
               sc,
               ops )
 
     and lt (g_, k, (us_, vs_), (us', vs'_), sc, ops) =
-      ltW (g_, k, (us_, vs_), Whnf.whnfEta (us', vs'_), sc, ops)
+      ltW (g_, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ops)
 
     and ltW = function
       | g_, k, (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_), sc, ops ->
@@ -200,7 +200,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
             (g_, k, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, ops)
       | g_, k, (us_, vs_), ((I.Root (I.BVar n, s'_), s'), vs'_), sc, ops ->
           begin if n <= k then
-            let (I.Dec (_, v'_)) = I.ctxDec (g_, n) in
+            let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             ltSpine (g_, k, (us_, vs_), ((s'_, s'), (v'_, I.id)), sc, ops)
           else ops
           end
@@ -212,8 +212,8 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
             (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
           sc,
           ops ) ->
-          begin if Subordinate.equiv (I.targetFam v_, I.targetFam v1') then
-            let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
+            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' ops' = set_parameter (g_, x_, k, sc, ops') in
             lt
               ( g_,
@@ -223,8 +223,8 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
                 sc',
                 ops )
           else
-            begin if Subordinate.below (I.targetFam v1', I.targetFam v_) then
-              let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
+              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
               lt
                 ( g_,
                   k,
@@ -242,7 +242,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     and ltSpineW = function
       | g_, k, (us_, vs_), ((I.Nil, _), _), _, ops -> ops
       | g_, k, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, ops ->
-          ltSpineW (g_, k, (us_, vs_), ((s_, I.comp (s', s'')), vs'_), sc, ops)
+          ltSpineW (g_, k, (us_, vs_), ((s_, I.comp s' s''), vs'_), sc, ops)
       | ( g_,
           k,
           (us_, vs_),
@@ -263,14 +263,14 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     and eq (g_, (us_, vs_), (us', vs'_), sc, ops) =
       CsManager.trail (function () ->
           begin if
-            Unify.unifiable (g_, vs_, vs'_) && Unify.unifiable (g_, us_, us')
+            Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
           then sc ops
           else ops
           end)
 
     and le (g_, k, (us_, vs_), (us', vs'_), sc, ops) =
       let ops' = eq (g_, (us_, vs_), (us', vs'_), sc, ops) in
-      leW (g_, k, (us_, vs_), Whnf.whnfEta (us', vs'_), sc, ops')
+      leW (g_, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ops')
 
     and leW = function
       | ( g_,
@@ -280,8 +280,8 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
             (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
           sc,
           ops ) ->
-          begin if Subordinate.equiv (I.targetFam v_, I.targetFam v1') then
-            let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
+            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' ops' = set_parameter (g_, x_, k, sc, ops') in
             le
               ( g_,
@@ -291,8 +291,8 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
                 sc',
                 ops )
           else
-            begin if Subordinate.below (I.targetFam v1', I.targetFam v_) then
-              let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
+              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
               le
                 ( g_,
                   k,
@@ -357,7 +357,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     and ordeq = function
       | g_, O.Arg (us_, vs_), O.Arg (us', vs'_), sc, ops ->
           begin if
-            Unify.unifiable (g_, vs_, vs'_) && Unify.unifiable (g_, us_, us')
+            Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
           then sc ops
           else ops
           end
@@ -388,7 +388,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
             createEVars (M.Prefix (g_, m_, b_))
           in
           ( M.Prefix
-              ( I.Decl (g'_, I.decSub (d_, s')),
+              ( I.Decl (g'_, I.decSub d_ s'),
                 I.Decl (m'_, M.Top),
                 I.Decl (b'_, b) ),
             I.dot1 s' )
@@ -397,7 +397,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
           let M.Prefix (g'_, m'_, b'_), s' =
             createEVars (M.Prefix (g_, m_, b_))
           in
-          let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
+          let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
           (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'))
 
     let rec select (g_, vs_) = selectW (g_, Whnf.whnf vs_)
@@ -408,15 +408,15 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
         | g_, (vs1, ((I.Root _, _) as vs2)) -> (g_, (vs1, vs2))
         | g_, ((v1_, s1), (I.Pi ((d_, p_), v2'), s2)) ->
             select'
-              ( I.Decl (g_, I.decSub (d_, s2)),
-                ((v1_, I.comp (s1, I.shift)), (v2', I.dot1 s2)) )
+              ( I.Decl (g_, I.decSub d_ s2),
+                ((v1_, I.comp s1 I.shift), (v2', I.dot1 s2)) )
       in
       select'
-        ( I.Decl (g_, I.decSub (d_, s)),
-          ((v1_, I.comp (s, I.shift)), (v2_, I.dot1 s)) )
+        ( I.Decl (g_, I.decSub d_ s),
+          ((v1_, I.comp s I.shift), (v2_, I.dot1 s)) )
 
     let lemma (s_, t, ops) =
-      let (M.State (name, gm, v_)) = Lemma.apply (s_, t) in
+      let (M.State (name, gm, v_)) = Lemma.apply s_ t in
       let M.Prefix (g'_, m'_, b'_), s' = createEVars gm in
       let g''_, ((I.Root (I.Const a1, s1_), s1), (I.Root (I.Const a2, s2_), s2))
           =
@@ -464,14 +464,14 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     and inputConvSpine = function
       | Modes.Modesyn.ModeSyn.Mnil, ((s1_, _), _), ((s2_, _), _) -> true
       | mS, ((I.SClo (s1_, s1'), s1), vs1), (ss2_, vs2) ->
-          inputConvSpine (mS, ((s1_, I.comp (s1', s1)), vs1), (ss2_, vs2))
+          inputConvSpine (mS, ((s1_, I.comp s1' s1), vs1), (ss2_, vs2))
       | mS, (ss1_, vs1), ((I.SClo (s2_, s2'), s2), vs2) ->
-          inputConvSpine (mS, (ss1_, vs1), ((s2_, I.comp (s2', s2)), vs2))
+          inputConvSpine (mS, (ss1_, vs1), ((s2_, I.comp s2' s2), vs2))
       | ( Modes.Modesyn.ModeSyn.Mapp
             (Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Minus, _), mS),
           ((I.App (u1_, s1_), s1), (I.Pi ((I.Dec (_, v1_), _), w1_), t1)),
           ((I.App (u2_, s2_), s2), (I.Pi ((I.Dec (_, v2_), _), w2_), t2)) ) ->
-          Conv.conv ((v1_, t1), (v2_, t2))
+          Conv.conv (v1_, t1) (v2_, t2)
           && inputConvSpine
                ( mS,
                  ((s1_, s1), (w1_, I.Dot (I.Exp (I.EClo (u1_, s1)), t1))),
@@ -493,14 +493,14 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
             | vs1, (I.Root _, _) -> false
             | ((v1_, s1) as vs1), (I.Pi ((d2_, _), v2_), s2) ->
                 compDec (vs1, (d2_, s2))
-                || compExp ((v1_, I.comp (s1, I.shift)), (v2_, I.dot1 s2))
+                || compExp ((v1_, I.comp s1 I.shift), (v2_, I.dot1 s2))
           and compDec (vs1, (I.Dec (_, v2_), s2)) =
             inputConv (vs1, (v2_, s2))
           in
           let rec check (M.State (name, gm, v_)) = checkW (Whnf.whnf (v_, I.id))
           and checkW (I.Pi ((d_, _), v_), s) =
-            checkDec ((d_, I.comp (s, I.shift)), (v_, I.dot1 s))
-          and checkDec ((I.Dec (_, v1_), s1), vs2) = compExp ((v1_, s1), vs2) in
+            checkDec (d_, I.comp s I.shift) (v_, I.dot1 s)
+          and checkDec (I.Dec (_, v1_), s1) vs2 = compExp ((v1_, s1), vs2) in
           begin if check s'_ then removeDuplicates ops
           else s'_ :: removeDuplicates ops
           end
@@ -518,7 +518,7 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     let menu
         (M.State (name, M.Prefix (g'_, m'_, b'_), I.Pi ((I.Dec (_, v_), _), _))
          as s_) =
-      "Recursion : " ^ Print.expToString (g'_, v_)
+      "Recursion : " ^ Print.expToString g'_ v_
 
     let handleExceptions f p_ = try f p_ with Order.Error s -> raise (Error s)
   end

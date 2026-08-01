@@ -126,5 +126,5 @@ module type PARSER = sig
   val parseStream :
     TextIO.instream -> (fileParseResult * Paths.region) Stream.stream
 
-  val parseTerminalQ : string * string -> ExtQuery.query Stream.stream
+  val parseTerminalQ : string -> string -> ExtQuery.query Stream.stream
 end

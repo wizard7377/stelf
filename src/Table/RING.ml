@@ -14,7 +14,7 @@ module type RING = sig
 
   val init : 'a list -> 'a ring
   val empty : 'a ring -> bool
-  val insert : 'a ring * 'a -> 'a ring
+  val insert : 'a ring -> 'a -> 'a ring
   val delete : 'a ring -> 'a ring
   val current : 'a ring -> 'a
   val next : 'a ring -> 'a ring

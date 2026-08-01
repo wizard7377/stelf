@@ -85,8 +85,8 @@ end) : REDUNDANT = struct
     | T.AppPrg (p_, s_) -> T.AppPrg (convert p_, convertSpine s_)
     | T.SClo (s_, t) -> raise (Error "SClo should not exist")
 
-  and expEqual (e1_, e2_) = Conv.conv ((e1_, I.id), (e2_, I.id))
-  and isubEqual (sub1, sub2) = Conv.convSub (sub1, sub2)
+  and expEqual (e1_, e2_) = Conv.conv (e1_, I.id) (e2_, I.id)
+  and isubEqual (sub1, sub2) = Conv.convSub sub1 sub2
 
   and blockEqual = function
     | I.Bidx x, I.Bidx x' -> x = x'
@@ -99,20 +99,20 @@ end) : REDUNDANT = struct
 
   and decEqual = function
     | T.UDec d1_, (T.UDec d2_, t2) ->
-        Conv.convDec ((d1_, I.id), (d2_, T.coerceSub t2))
+        Conv.convDec (d1_, I.id) (d2_, T.coerceSub t2)
     | T.PDec (_, f1_, _, _), (T.PDec (_, f2_, _, _), t2) ->
-        T.convFor ((f1_, T.id), (f2_, t2))
+        T.convFor (f1_, T.id) (f2_, t2)
     | _ -> false
 
   and caseEqual = function
     | (psi1, t1, p1_) :: o1_, ((psi2, t2, p2_) :: o2_, tAfter) ->
-        let t2' = T.comp (T.invertSub tAfter, t2) in
-        let t = Opsem.createVarSub (psi1, psi2) in
-        let t' = T.comp (t2', t) in
+        let t2' = T.comp (T.invertSub tAfter) t2 in
+        let t = Opsem.createVarSub psi1 psi2 in
+        let t' = T.comp t2' t in
         let doMatch =
           try
             begin
-              Opsem.matchSub (psi1, t1, t');
+              Opsem.matchSub psi1 t1 t';
               true
             end
           with Opsem.NoMatch -> false
@@ -133,10 +133,10 @@ end) : REDUNDANT = struct
   and spineEqual = function
     | T.Nil, (T.Nil, t2) -> true
     | T.AppExp (e1_, s1_), (T.AppExp (e2_, s2_), t2) ->
-        Conv.conv ((e1_, I.id), (e2_, T.coerceSub t2))
+        Conv.conv (e1_, I.id) (e2_, T.coerceSub t2)
         && spineEqual (s1_, (s2_, t2))
     | T.AppBlock (b1_, s1_), (T.AppBlock (b2_, s2_), t2) ->
-        blockEqual (b1_, I.blockSub (b2_, T.coerceSub t2))
+        blockEqual (b1_, I.blockSub b2_ (T.coerceSub t2))
         && spineEqual (s1_, (s2_, t2))
     | T.AppPrg (p1_, s1_), (T.AppPrg (p2_, s2_), t2) ->
         prgEqual (p1_, (p2_, t2)) && spineEqual (s1_, (s2_, t2))
@@ -150,17 +150,17 @@ end) : REDUNDANT = struct
     | T.New p1_, (T.New p2_, t2) -> prgEqual (p1_, (p2_, t2))
     | T.Choose p1_, (T.Choose p2_, t2) -> prgEqual (p1_, (p2_, t2))
     | T.PairExp (u1_, p1_), (T.PairExp (u2_, p2_), t2) ->
-        Conv.conv ((u1_, I.id), (u2_, T.coerceSub t2))
+        Conv.conv (u1_, I.id) (u2_, T.coerceSub t2)
         && prgEqual (p1_, (p2_, t2))
     | T.PairBlock (b1_, p1_), (T.PairBlock (b2_, p2_), t2) ->
-        blockEqual (b1_, I.blockSub (b2_, T.coerceSub t2))
+        blockEqual (b1_, I.blockSub b2_ (T.coerceSub t2))
         && prgEqual (p1_, (p2_, t2))
     | T.PairPrg (p1a, p1b), (T.PairPrg (p2a, p2b), t2) ->
         prgEqual (p1a, (p2a, t2)) && prgEqual (p1b, (p2b, t2))
     | T.Unit, (T.Unit, t2) -> true
     | T.Const lemma1, (T.Const lemma2, _) -> lemma1 = lemma2
     | T.Var x1, (T.Var x2, t2) ->
-        begin match getFrontIndex (T.varSub (x2, t2)) with
+        begin match getFrontIndex (T.varSub x2 t2) with
         | None -> false
         | Some i -> x1 = i
         end
@@ -215,7 +215,7 @@ end) : REDUNDANT = struct
     | T.PClo (p_, t) ->
         begin match getPrgIndex p_ with
         | None -> None
-        | Some i -> getFrontIndex (T.varSub (i, t))
+        | Some i -> getFrontIndex (T.varSub i t)
         end
     | _ -> None
   (* it is possible in the matchSub that we will get PClo under a sub (usually id) *)
@@ -226,7 +226,7 @@ end) : REDUNDANT = struct
     | I.EClo (u_, t) ->
         begin match getExpIndex u_ with
         | None -> None
-        | Some i -> getFrontIndex (T.revCoerceFront (I.bvarSub (i, t)))
+        | Some i -> getFrontIndex (T.revCoerceFront (I.bvarSub i t))
         end
     | I.Lam (I.Dec (_, u1_), u2_) as u_ -> (
         try Some (Whnf.etaContract u_) with eta_ -> None | _ -> None)
@@ -251,12 +251,12 @@ end) : REDUNDANT = struct
   and mergeSpines = function
     | T.Nil, (T.Nil, t2) -> T.Nil
     | T.AppExp (e1_, s1_), (T.AppExp (e2_, s2_), t2) ->
-        begin if Conv.conv ((e1_, I.id), (e2_, T.coerceSub t2)) then
+        begin if Conv.conv (e1_, I.id) (e2_, T.coerceSub t2) then
           T.AppExp (e1_, mergeSpines (s1_, (s2_, t2)))
         else raise (Error "Spine not equal (AppExp)")
         end
     | T.AppBlock (b1_, s1_), (T.AppBlock (b2_, s2_), t2) ->
-        begin if blockEqual (b1_, I.blockSub (b2_, T.coerceSub t2)) then
+        begin if blockEqual (b1_, I.blockSub b2_ (T.coerceSub t2)) then
           T.AppBlock (b1_, mergeSpines (s1_, (s2_, t2)))
         else raise (Error "Spine not equal (AppBlock)")
         end
@@ -286,12 +286,12 @@ end) : REDUNDANT = struct
         end
     | T.PairExp (u1_, p1_), (T.PairExp (u2_, p2_), t2) ->
         let t2' = T.coerceSub t2 in
-        begin if Conv.conv ((u1_, I.id), (u2_, t2')) then
+        begin if Conv.conv (u1_, I.id) (u2_, t2') then
           T.PairExp (u1_, mergePrgs (p1_, (p2_, t2)))
         else raise (Error "cannot merge PairExp")
         end
     | T.PairBlock (b1_, p1_), (T.PairBlock (b2_, p2_), t2) ->
-        let b2' = I.blockSub (b2_, T.coerceSub t2) in
+        let b2' = I.blockSub b2_ (T.coerceSub t2) in
         begin if blockEqual (b1_, b2') then
           T.PairBlock (b1_, mergePrgs (p1_, (p2_, t2)))
         else raise (Error "cannot merge PairBlock")
@@ -307,7 +307,7 @@ end) : REDUNDANT = struct
         else raise (Error "Constants do not Match.")
         end
     | T.Var x1, (T.Var x2, t2) ->
-        begin match getFrontIndex (T.varSub (x2, t2)) with
+        begin match getFrontIndex (T.varSub x2 t2) with
         | None -> raise (Error "Variables do not Match.")
         | Some i ->
             begin if x1 = i then T.Var x1
@@ -427,13 +427,13 @@ end) : REDUNDANT = struct
     | [], c_ -> raise (Error "Case incompatible, cannot merge")
     | ((psi1, t1, p1_) :: o_ as l_), (((psi2, t2, p2_), tAfter) as c_) ->
         let tAfterInv = T.invertSub tAfter in
-        let t3 = T.comp (tAfterInv, t2) in
-        let t = Opsem.createVarSub (psi1, psi2) in
-        let t' = T.comp (t3, t) in
+        let t3 = T.comp tAfterInv t2 in
+        let t = Opsem.createVarSub psi1 psi2 in
+        let t' = T.comp t3 t in
         let doMatch =
           try
             begin
-              Opsem.matchSub (psi1, t1, t');
+              Opsem.matchSub psi1 t1 t';
               true
             end
           with Opsem.NoMatch -> false
@@ -484,12 +484,12 @@ end) : REDUNDANT = struct
   (* Psi1 |- t' : Psi1' *)
   (* If we can get this to match, then Psi1 |- P2[t] *)
   and mergeIfNecessary (((psi1, s1, p1_) as c_), ((psi2, s2, p2_) as c'_)) =
-    let t = Opsem.createVarSub (psi1, psi2) in
-    let t' = T.comp (s2, t) in
+    let t = Opsem.createVarSub psi1 psi2 in
+    let t' = T.comp s2 t in
     let doMatch =
       try
         begin
-          Opsem.matchSub (psi1, s1, t');
+          Opsem.matchSub psi1 s1 t';
           true
         end
       with Opsem.NoMatch -> false

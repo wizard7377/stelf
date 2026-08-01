@@ -458,9 +458,9 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
       | Lex_ of loc * order list
       | Simul_ of loc * order list
 
-    let varg (r, names) = Varg_ (r, names)
-    let lex (r, orders) = Lex_ (r, orders)
-    let simul (r, orders) = Simul_ (r, orders)
+    let varg r names = Varg_ (r, names)
+    let lex r orders = Lex_ (r, orders)
+    let simul r orders = Simul_ (r, orders)
 
     type callpats = (string * string option list * loc) list
 
@@ -468,7 +468,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
 
     type tdecl = order * callpats
 
-    let tdecl (order_, callpats_) = (order_, callpats_)
+    let tdecl order_ callpats_ = (order_, callpats_)
 
     type predicate = string * loc
 
@@ -511,12 +511,12 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
     type theoremdec = string * theorem
 
     let null = []
-    let decl (decs_, decl_) = decs_ @ [ decl_ ]
+    let decl decs_ decl_ = decs_ @ [ decl_ ]
     let top = Top_
-    let exists (decs_, theorem_) = Exists_ (decs_, theorem_)
-    let forall (decs_, theorem_) = Forall_ (decs_, theorem_)
-    let forallStar (decs_, theorem_) = ForallStar_ (decs_, theorem_)
-    let forallG (decs_, theorem_) = ForallG_ (decs_, theorem_)
+    let exists decs_ theorem_ = Exists_ (decs_, theorem_)
+    let forall decs_ theorem_ = Forall_ (decs_, theorem_)
+    let forallStar decs_ theorem_ = ForallStar_ (decs_, theorem_)
+    let forallG decs_ theorem_ = ForallG_ (decs_, theorem_)
     let dec (name_, theorem_) = (name_, theorem_)
 
     type wdecl = (string list * string) list * callpats

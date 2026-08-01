@@ -129,7 +129,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
               (function m_, acck' -> sc (I.Lam (d'_, m_), acck')),
               acck )
       | (C.All (d_, g), s), C.DProg (g_, dPool), sc, acck ->
-          let d'_ = I.decSub (d_, s) in
+          let d'_ = I.decSub d_ s in
           solve
             ( (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
@@ -138,17 +138,17 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
 
     and rSolve = function
       | ps', (C.Eq q_, s), C.DProg (g_, dPool), sc, ((acc, k) as acck) ->
-          begin if Unify.unifiable (g_, ps', (q_, s)) then sc (I.Nil, acck)
+          begin if Unify.unifiable g_ ps' (q_, s) then sc (I.Nil, acck)
           else acc
           end
       | ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc, acck ->
-          begin match Assign.assignable (g_, ps', (q_, s)) with
+          begin match Assign.assignable g_ ps' (q_, s) with
           | Some cnstr ->
               aSolve ((eqns, s), dp, cnstr, function () -> sc (I.Nil, acck))
           | None -> acck |> fst
           end
       | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc, acck ->
-          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
               (r, I.Dot (I.Exp x_, s)),
@@ -162,7 +162,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
                       | m_, acck'' -> (
                           try
                             begin
-                              Unify.unify (g_, (x_, I.id), (m_, I.id));
+                              Unify.unify g_ (x_, I.id) (m_, I.id);
                               sc (I.App (m_, s_), acck'')
                             end
                           with Unify.Unify _ -> fst acck')),
@@ -173,7 +173,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
           (C.DProg (g_, dPool) as dp),
           sc,
           acck ) ->
-          let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
               (r, I.Dot (I.Exp x_, s)),
@@ -202,7 +202,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
           sc ) ->
           let g''_ = compose (g'_, g_) in
           let s' = shiftSub (g'_, s) in
-          begin if Assign.unifiable (g''_, (n_, s'), (e1_, s')) then
+          begin if Assign.unifiable g''_ (n_, s') (e1_, s') then
             aSolve ((eqns_, s), dp, cnstr, sc)
           else []
           end
@@ -236,7 +236,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
                 CsManager.trail (function () ->
                     rSolve
                       ( ps',
-                        (r, I.comp (s, I.Shift n)),
+                        (r, I.comp s (I.Shift n)),
                         dp,
                         (function
                         | s_, acck' -> sc (I.Root (I.BVar n, s_), acck')),
@@ -262,13 +262,13 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
       | r, (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
       | r, (I.FgnExp (csid_, fge), s) ->
-          I.FgnExpStd.fold (csid_, fge)
+          I.FgnExpStd.fold csid_ fge
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
     and occursInSpine = function
       | _, (I.Nil, _) -> false
-      | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp (s', s)))
+      | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp s' s))
       | r, (I.App (u_, s_), s) ->
           occursInExp (r, (u_, s)) || occursInSpine (r, (s_, s))
 
@@ -292,11 +292,11 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       | max, ([], sc) -> [ sc () ]
       | max, (I.EVar (r, g_, v_, _) :: ge, sc) ->
           solve
-            ( (Compile.compileGoal (g_, v_), I.id),
+            ( (Compile.compileGoal g_ v_, I.id),
               Compile.compileCtx false g_,
               (function
               | u'_, (acc', _) -> begin
-                  Unify.instantiateEVar (r, u'_, []);
+                  Unify.instantiateEVar r u'_ [];
                   searchEx' max (ge, sc)
                 end),
               ([], max) )
@@ -338,11 +338,11 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       | [], acc, sc -> sc acc
       | I.EVar (r, g_, v_, _) :: ge, acc, sc ->
           solve
-            ( (Compile.compileGoal (g_, v_), I.id),
+            ( (Compile.compileGoal g_ v_, I.id),
               Compile.compileCtx false g_,
               (function
               | u'_, (acc', _) -> begin
-                  Unify.instantiateEVar (r, u'_, []);
+                  Unify.instantiateEVar r u'_ [];
                   searchAll' (ge, acc', sc)
                 end),
               (acc, !MetaGlobal.maxFill) )

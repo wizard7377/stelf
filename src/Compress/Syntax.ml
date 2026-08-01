@@ -240,11 +240,11 @@ module Syntax = struct
       | TpfnType a, Type, [] -> a
       | _ -> raise (Syntax "simplified-kind mismatch in type reduction")
     in
-    let rec wrap = function
-      | a, KPi (_, b, k) -> TpfnLam (wrap (a, k))
+    let rec wrap a1 b1 = match a1, b1 with
+      | a, KPi (_, b, k) -> TpfnLam (wrap a k)
       | a, Type -> TpfnType a
     in
-    let aw = wrap (a, k) in
+    let aw = wrap a k in
     tp_reduce' (aw, k, sp)
 
   and substs_term x = curryfoldr subst_term x
@@ -388,7 +388,7 @@ module Syntax = struct
     | x -> x
 
   let ntm_eroot_elim = function Lam (ATerm t) -> Lam (eroot_elim t) | x -> x
-  let ctxLookup (g_, n) = subst_tp (Shift (0, n + 1)) (List.nth (g_, n))
+  let ctxLookup g_ n = subst_tp (Shift (0, n + 1)) (List.nth (g_, n))
   let typeOf (Tclass a) = a
   let kindOf (Kclass k) = k
   let sum = foldl (fun (x__op, y__op) -> x__op + y__op) 0

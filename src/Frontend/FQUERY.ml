@@ -67,5 +67,5 @@ module type FQUERY = sig
 
   exception AbortQuery of string
 
-  val run : ExtQuery.query * Paths.location -> unit
+  val run : ExtQuery.query -> Paths.location -> unit
 end

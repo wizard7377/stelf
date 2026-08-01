@@ -41,5 +41,5 @@ module type CONVERTER = sig
     IntSyn.cid * Tomega.lemma list * Tomega.lemma list (* projections *)
 
   (* selections *)
-  val convertGoal : Tomega.dec IntSyn.ctx * IntSyn.exp -> Tomega.prg
+  val convertGoal : Tomega.dec IntSyn.ctx -> IntSyn.exp -> Tomega.prg
 end

@@ -53,7 +53,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
 
   exception Error = Error
 
-  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error r msg = raise (Error (Paths.wrap r msg))
 
   type nonrec param = string option
   type order = Varg of string list | Lex of order list | Simul of order list
@@ -97,16 +97,16 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
     module I = IntSyn
     module M = ModeSyn
 
-    let theoremDecToConDec ((name, ThDecl (gBs, g_, mg, i)), r) =
+    let theoremDecToConDec (name, ThDecl (gBs, g_, mg, i)) r =
       let rec theoremToConDec' = function
         | I.Null, v_ -> v_
         | I.Decl (g_, d_), v_ ->
-            begin if Abstract.closedDec (g_, (d_, I.id)) then
+            begin if Abstract.closedDec g_ (d_, I.id) then
               theoremToConDec'
                 ( g_,
-                  Abstract.piDepend ((Whnf.normalizeDec (d_, I.id), I.Maybe), v_)
+                  Abstract.piDepend (Whnf.normalizeDec d_ I.id, I.Maybe) v_
                 )
-            else error (r, "Free variables in theorem declaration")
+            else error r ("Free variables in theorem declaration")
             end
       in
       ( gBs,
@@ -114,7 +114,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
           (name, None, i, I.Normal, theoremToConDec' (g_, I.Uni I.Type), I.Kind)
       )
 
-    let theoremDecToModeSpine ((name, ThDecl (gBs, g_, mg, i)), r) =
+    let theoremDecToModeSpine (name, ThDecl (gBs, g_, mg, i)) r =
       let rec theoremToModeSpine' = function
         | I.Null, I.Null, mS -> mS
         | I.Decl (g_, I.Dec (x, _)), I.Decl (mg, m), mS ->

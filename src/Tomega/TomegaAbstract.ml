@@ -47,8 +47,8 @@ module TomegaAbstract (TomegaAbstract__0 : sig
   (* Author: Carsten Schuermann *)
   module Global : GLOBAL
 
-  val abstract_raiseType : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
-  val abstract_raiseTerm : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
+  val abstract_raiseType : IntSyn.dctx -> IntSyn.exp -> IntSyn.exp
+  val abstract_raiseTerm : IntSyn.dctx -> IntSyn.exp -> IntSyn.exp
 
   module Whnf : WHNF
   module Subordinate : Subordinate.Subordinate_.SUBORDINATE
@@ -74,14 +74,14 @@ end) : TOMEGAABSTRACT = struct
       | I.Null, t -> (I.Null, t)
       | I.Decl (g_, d_), t ->
           let g'_, t' = shiftCtx (g_, t) in
-          (I.Decl (g'_, I.decSub (d_, t')), I.dot1 t')
+          (I.Decl (g'_, I.decSub d_ t'), I.dot1 t')
 
     let rec dotn = function t, 0 -> t | t, n -> I.dot1 (dotn (t, n - 1))
 
     let rec strengthenToSpine = function
       | I.Shift _, 0, (n, s_) -> s_
       | I.Dot (I.Idx _, t), l, (n, s_) ->
-          let t' = I.comp (t, I.invShift) in
+          let t' = I.comp t I.invShift in
           strengthenToSpine
             (t', l - 1, (n + 1, I.App (I.Root (I.BVar n, I.Nil), s_)))
       | I.Dot (I.Undef, t), l, (n, s_) ->
@@ -89,50 +89,50 @@ end) : TOMEGAABSTRACT = struct
       | I.Shift k, l, (n, s_) ->
           strengthenToSpine (I.Dot (I.Idx (k + 1), I.Shift (k + 1)), l, (n, s_))
 
-    let rec raiseFor = function
+    let rec raiseFor a1 b1 = match a1, b1 with
       | b'_, (T.True, t) -> T.True
       | b'_, (T.And (f1_, f2_), t) ->
-          let f1' = raiseFor (b'_, (f1_, t)) in
-          let f2' = raiseFor (b'_, (f2_, t)) in
+          let f1' = raiseFor b'_ (f1_, t) in
+          let f2' = raiseFor b'_ (f2_, t) in
           T.And (f1', f2')
       | b'_, (T.Ex ((I.Dec (x, v_), q_), f_), t) ->
-          let w = S.weaken (b'_, I.targetFam v_) in
+          let w = S.weaken b'_ (I.targetFam v_) in
           let iw = Whnf.invert w in
-          let b'' = Whnf.strengthen (iw, b'_) in
-          let v'_ = A.raiseType (b'', I.EClo (v_, I.comp (t, iw))) in
+          let b'' = Whnf.strengthen iw b'_ in
+          let v'_ = A.raiseType b'' (I.EClo (v_, I.comp t iw)) in
           let b''', _ = shiftCtx (b'_, I.shift) in
           let t'' = dotn (I.shift, I.ctxLength b'_) in
-          let t' = I.comp (t, t'') in
+          let t' = I.comp t t'' in
           let s_ = strengthenToSpine (iw, I.ctxLength b'_, (1, I.Nil)) in
           let u_ = I.Root (I.BVar (I.ctxLength b''' + 1), s_) in
-          let t''' = Whnf.dotEta (I.Exp u_, t') in
-          let f'_ = raiseFor (b''', (f_, t''')) in
+          let t''' = Whnf.dotEta (I.Exp u_) t' in
+          let f'_ = raiseFor b''' (f_, t''') in
           T.Ex ((I.Dec (x, v'_), q_), f'_)
       | _, (T.All _, _) -> raise Domain
 
-    let rec raisePrg = function
+    let rec raisePrg a1 b1 c1 = match a1, b1, c1 with
       | g_, (T.Unit, t), _ -> T.Unit
       | g_, (T.PairPrg (p1_, p2_), t), T.And (f1_, f2_) ->
-          let p1' = raisePrg (g_, (p1_, t), f1_) in
-          let p2' = raisePrg (g_, (p2_, t), f2_) in
+          let p1' = raisePrg g_ (p1_, t) f1_ in
+          let p2' = raisePrg g_ (p2_, t) f2_ in
           T.PairPrg (p1', p2')
       | g_, (T.PairExp (u_, p_), t), T.Ex ((I.Dec (_, v_), _), f_) ->
-          let w = S.weaken (g_, I.targetFam v_) in
+          let w = S.weaken g_ (I.targetFam v_) in
           let iw = Whnf.invert w in
-          let g'_ = Whnf.strengthen (iw, g_) in
-          let u'_ = A.raiseTerm (g'_, I.EClo (u_, I.comp (t, iw))) in
-          let p'_ = raisePrg (g_, (p_, t), f_) in
+          let g'_ = Whnf.strengthen iw g_ in
+          let u'_ = A.raiseTerm g'_ (I.EClo (u_, I.comp t iw)) in
+          let p'_ = raisePrg g_ (p_, t) f_ in
           T.PairExp (u'_, p'_)
 
-    let raiseP (g_, p_, f_) =
+    let raiseP g_ p_ f_ =
       let g'_, s = T.deblockify g_ in
-      let f'_ = T.forSub (f_, s) in
-      let p'' = raisePrg (g'_, (p_, T.coerceSub s), f'_) in
+      let f'_ = T.forSub f_ s in
+      let p'' = raisePrg g'_ (p_, T.coerceSub s) f'_ in
       p''
 
-    let raiseF (g_, (f_, t)) =
+    let raiseF g_ (f_, t) =
       let g'_, s = T.deblockify g_ in
-      let f'_ = raiseFor (g'_, (f_, I.comp (t, T.coerceSub s))) in
+      let f'_ = raiseFor g'_ (f_, I.comp t (T.coerceSub s)) in
       f'_
   end
 
@@ -184,7 +184,7 @@ end) : TOMEGAABSTRACT = struct
   (* G' |- iw : G     *)
   (* Psi0, G' |- B'' ctx *)
   (*      val P' = T.normalizePrg (P, s)  G' |- P' : F'  *)
-  let raisePrg (g_, p_, f_) = raisePrg (g_, (p_, I.id), f_)
+  let raisePrg g_ p_ f_ = raisePrg g_ (p_, I.id) f_
   let raiseP = raiseP
   let raiseFor = raiseFor
   let raiseF = raiseF

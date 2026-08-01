@@ -51,9 +51,9 @@ module type ORDER = sig
   (** Reduction declaration *)
 
   val resetROrder : unit -> unit
-  val install : IntSyn.cid * tDec -> unit
+  val install : IntSyn.cid -> tDec -> unit
   val uninstall : IntSyn.cid -> bool
-  val installROrder : IntSyn.cid * rDec -> unit
+  val installROrder : IntSyn.cid -> rDec -> unit
   val uninstallROrder : IntSyn.cid -> bool
   val selLookup : IntSyn.cid -> int order
   val selLookupROrder : IntSyn.cid -> predicate

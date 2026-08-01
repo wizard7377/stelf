@@ -54,7 +54,7 @@ module type TRACE = sig
   (* clause c, fam a, nth subgoal *)
   (* clause head == goal *)
   (* failure message *)
-  val signal : IntSyn.dctx * event -> unit
+  val signal : IntSyn.dctx -> event -> unit
   val init : unit -> unit
 
   (* initialize trace, break and tag *)

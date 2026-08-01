@@ -55,9 +55,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
       | fileName, None -> (fileName ^ ":") ^ msg
       | fileName, Some occDec ->
           P.wrapLoc'
-            ( P.Loc (fileName, err occDec occ),
-              Origins.linesInfoLookup fileName,
-              msg )
+            (P.Loc (fileName, err occDec occ)) (Origins.linesInfoLookup fileName) msg
       end
 
     let rec denumber = function
@@ -168,7 +166,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
     and checkHead arg__7 arg__8 arg__9 =
       begin match (arg__7, arg__8, arg__9) with
       | c, ((g_, p_), I.BVar k, occ), err ->
-          begin match I.ctxLookup (p_, k) with
+          begin match I.ctxLookup p_ k with
           | Correct -> []
           | Incorrect (prefNames, n) -> error c (prefNames, n, occ) err
           end
@@ -183,7 +181,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
       begin match (arg__10, arg__11, arg__12) with
       | c, ((g_, p_), n, 0, I.Nil, occ), err -> []
       | c, ((g_, p_), n, 0, I.App (u_, s_), occ), err ->
-          checkExp c ((g_, p_), u_, P.arg (n, occ)) err
+          checkExp c ((g_, p_), u_, P.arg n occ) err
           @ checkSpine c ((g_, p_), n + 1, 0, s_, occ) err
       | c, ((g_, p_), n, i, I.App (u_, s_), occ), err ->
           checkSpine c ((g_, p_), n + 1, i - 1, s_, occ) err

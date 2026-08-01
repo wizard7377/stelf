@@ -20,9 +20,9 @@ module type FIXITY = sig
 
   val maxPrec : precedence
   val minPrec : precedence
-  val less : precedence * precedence -> bool
-  val leq : precedence * precedence -> bool
-  val compare : precedence * precedence -> order
+  val less : precedence -> precedence -> bool
+  val leq : precedence -> precedence -> bool
+  val compare : precedence -> precedence -> order
   val inc : precedence -> precedence
   val dec : precedence -> precedence
 
@@ -58,16 +58,16 @@ module type NAMES = sig
   type namespace
 
   val newNamespace : unit -> namespace
-  val insertConst : namespace * IntSyn.cid -> unit
+  val insertConst : namespace -> IntSyn.cid -> unit
 
-  val insertConstShadow : namespace * IntSyn.cid -> unit
+  val insertConstShadow : namespace -> IntSyn.cid -> unit
   (** Like [insertConst], but silently replaces an existing same-named member
       instead of raising [Error]. Used by [%scope] reopening, where a judgment's
       later case clause is allowed to reuse an earlier clause's label (the
       earlier constant keeps its own [cid] and stays in the signature; it just
       stops being reachable by that name). *)
 
-  val insertStruct : namespace * IntSyn.mid -> unit
+  val insertStruct : namespace -> IntSyn.mid -> unit
   (** shadowing disallowed *)
 
   val appConsts : (string * IntSyn.cid -> unit) -> namespace -> unit
@@ -75,7 +75,7 @@ module type NAMES = sig
 
   val appStructs : (string * IntSyn.mid -> unit) -> namespace -> unit
   val reset : unit -> unit
-  val resetFrom : IntSyn.cid * IntSyn.mid -> unit
+  val resetFrom : IntSyn.cid -> IntSyn.mid -> unit
 
   val installConstName : IntSyn.cid -> unit
   (** The following functions have to do with the mapping from names to
@@ -108,10 +108,10 @@ module type NAMES = sig
   val structUndef : qid -> qid option
   (** shortest undefined prefix of Qid *)
 
-  val constLookupIn : namespace * qid -> IntSyn.cid option
-  val structLookupIn : namespace * qid -> IntSyn.mid option
-  val constUndefIn : namespace * qid -> qid option
-  val structUndefIn : namespace * qid -> qid option
+  val constLookupIn : namespace -> qid -> IntSyn.cid option
+  val structLookupIn : namespace -> qid -> IntSyn.mid option
+  val constUndefIn : namespace -> qid -> qid option
+  val structUndefIn : namespace -> qid -> qid option
 
   val conDecQid : IntSyn.conDec -> qid
   (** This function maps cids/mids to Names. It uses the information in the
@@ -133,7 +133,7 @@ module type NAMES = sig
   val structQid : IntSyn.mid -> qid
   (** will mark if shadowed *)
 
-  val installFixity : IntSyn.cid * Fixity.fixity -> unit
+  val installFixity : IntSyn.cid -> Fixity.fixity -> unit
   (** will mark if shadowed *)
 
   val getFixity : IntSyn.cid -> Fixity.fixity
@@ -141,46 +141,46 @@ module type NAMES = sig
 
   (* Nonfix if undefined *)
 
-  val installAlias : string * IntSyn.cid -> unit
+  val installAlias : string -> IntSyn.cid -> unit
   (** [installAlias (name, cid)] registers [name] as an additional lookup name
       for constant [cid] in the global namespace. *)
 
-  val insertConstAlias : namespace * string * IntSyn.cid -> unit
+  val insertConstAlias : namespace -> string -> IntSyn.cid -> unit
   (** [insertConstAlias (ns, name, cid)] registers [name] as an additional
       lookup name for constant [cid] in the given namespace [ns]. *)
 
-  val installNamePref : IntSyn.cid * (string list * string list) -> unit
+  val installNamePref : IntSyn.cid -> string list * string list -> unit
   (** Name preferences for anonymous variables: a, EPref, UPref *)
 
   val getNamePref : IntSyn.cid -> (string list * string list) option
-  val installComponents : IntSyn.mid * namespace -> unit
+  val installComponents : IntSyn.mid -> namespace -> unit
   val getComponents : IntSyn.mid -> namespace
 
   val varReset : IntSyn.dctx -> unit
   (** EVar and BVar name choices *)
 
-  val addEVar : IntSyn.exp * string -> unit
+  val addEVar : IntSyn.exp -> string -> unit
   (** context in which EVars are created *)
 
   val getEVarOpt : string -> IntSyn.exp option
   (** assumes name not already used *)
 
-  val evarName : IntSyn.dctx * IntSyn.exp -> string
+  val evarName : IntSyn.dctx -> IntSyn.exp -> string
   (** NONE, if undefined or not EVar *)
 
-  val bvarName : IntSyn.dctx * int -> string
+  val bvarName : IntSyn.dctx -> int -> string
   (** create, if undefined *)
 
-  val decName : IntSyn.dctx * IntSyn.dec -> IntSyn.dec
+  val decName : IntSyn.dctx -> IntSyn.dec -> IntSyn.dec
   (** raises Unprintable if undefined *)
 
-  val decEName : IntSyn.dctx * IntSyn.dec -> IntSyn.dec
+  val decEName : IntSyn.dctx -> IntSyn.dec -> IntSyn.dec
   (** status unknown, like decEName *)
 
-  val decUName : IntSyn.dctx * IntSyn.dec -> IntSyn.dec
+  val decUName : IntSyn.dctx -> IntSyn.dec -> IntSyn.dec
   (** assign existential name *)
 
-  val decLUName : IntSyn.dctx * IntSyn.dec -> IntSyn.dec
+  val decLUName : IntSyn.dctx -> IntSyn.dec -> IntSyn.dec
   (** assign universal name *)
 
   val ctxName : IntSyn.dctx -> IntSyn.dctx

@@ -96,7 +96,7 @@ module MakeOpsem
        otherwise exception NoMatch is raised
 *)
   let rec matchPrg (psi, p1_, p2_) =
-    matchVal (psi, (p1_, T.id), T.normalizePrg (p2_, T.id))
+    matchVal (psi, (p1_, T.id), T.normalizePrg p2_ T.id)
 
   and matchVal = function
     | psi, (T.Unit, _), T.Unit -> ()
@@ -108,23 +108,23 @@ module MakeOpsem
         matchVal (psi, (p1_, t1), p2_);
         try
           Unify.unifyBlock
-            (T.coerceCtx psi, I.blockSub (b1_, T.coerceSub t1), b2_)
+            (T.coerceCtx psi) (I.blockSub b1_ (T.coerceSub t1)) b2_
         with Unify.Unify _ -> raise NoMatch
       end
     | psi, (T.PairExp (u1_, p1_), t1), T.PairExp (u2_, p2_) -> begin
         matchVal (psi, (p1_, t1), p2_);
-        try Unify.unify (T.coerceCtx psi, (u1_, T.coerceSub t1), (u2_, I.id))
+        try Unify.unify (T.coerceCtx psi) (u1_, T.coerceSub t1) (u2_, I.id)
         with Unify.Unify _ -> raise NoMatch
       end
     | psi, (T.PClo (p_, t1'), t1), pt ->
-        matchVal (psi, (p_, T.comp (t1', t1)), pt)
+        matchVal (psi, (p_, T.comp t1' t1), pt)
     | psi, (p'_, t1), T.PClo (T.PClo (p_, t2), t3) ->
-        matchVal (psi, (p'_, t1), T.PClo (p_, T.comp (t2, t3)))
+        matchVal (psi, (p'_, t1), T.PClo (p_, T.comp t2 t3))
     | ( psi,
         (p'_, t1),
         T.PClo (T.EVar (_, ({ contents = None } as r), _, _, _, _), t2) ) ->
         let iw = T.invertSub t2 in
-        r := Some (T.PClo (p'_, T.comp (t1, iw)))
+        r := Some (T.PClo (p'_, T.comp t1 iw))
         (* ABP -- just make sure this is right *)
     | psi, (p'_, t1), T.EVar (_, ({ contents = None } as r), _, _, _, _) ->
         r := Some (T.PClo (p'_, t1))
@@ -142,19 +142,19 @@ module MakeOpsem
     | g1_, I.Null -> g1_
     | g1_, I.Decl (g2_, d_) -> I.Decl (append (g1_, g2_), d_)
 
-  and raisePrg = function
+  and raisePrg a1 b1 c1 = match a1, b1, c1 with
     | psi, g_, T.Unit -> T.Unit
     | psi, g_, T.PairPrg (p1_, p2_) ->
-        let p1' = raisePrg (psi, g_, p1_) in
-        let p2' = raisePrg (psi, g_, p2_) in
+        let p1' = raisePrg psi g_ p1_ in
+        let p2' = raisePrg psi g_ p2_ in
         T.PairPrg (p1', p2')
     | psi, g_, T.PairExp (u_, p_) ->
-        let v_ = TypeCheck.infer' (append (T.coerceCtx psi, g_), u_) in
-        let w = S.weaken (g_, I.targetFam v_) in
+        let v_ = TypeCheck.infer' (append (T.coerceCtx psi, g_)) u_ in
+        let w = S.weaken g_ (I.targetFam v_) in
         let iw = Whnf.invert w in
-        let g'_ = Whnf.strengthen (iw, g_) in
-        let u'_ = A.raiseTerm (g'_, I.EClo (u_, iw)) in
-        let p'_ = raisePrg (psi, g_, p_) in
+        let g'_ = Whnf.strengthen iw g_ in
+        let u'_ = A.raiseTerm g'_ (I.EClo (u_, iw)) in
+        let p'_ = raisePrg psi g_ p_ in
         T.PairExp (u'_, p'_)
   (* this is a real time sink, it would be much better if we did not have to
       compute the type information of U,
@@ -169,22 +169,22 @@ module MakeOpsem
     | psi, (T.PairExp (m_, p_), t) ->
         T.PairExp (I.EClo (m_, T.coerceSub t), evalPrg (psi, (p_, t)))
     | psi, (T.PairBlock (b_, p_), t) ->
-        T.PairBlock (I.blockSub (b_, T.coerceSub t), evalPrg (psi, (p_, t)))
+        T.PairBlock (I.blockSub b_ (T.coerceSub t), evalPrg (psi, (p_, t)))
     | psi, (T.PairPrg (p1_, p2_), t) ->
         T.PairPrg (evalPrg (psi, (p1_, t)), evalPrg (psi, (p2_, t)))
     | psi, (T.Redex (p_, s_), t) ->
         evalRedex (psi, evalPrg (psi, (p_, t)), (s_, t))
     | psi, (T.Var k, t) ->
-        begin match T.varSub (k, t) with T.Prg p_ -> evalPrg (psi, (p_, T.id))
+        begin match T.varSub k t with T.Prg p_ -> evalPrg (psi, (p_, T.id))
         end
     | psi, (T.Const lemma, t) -> evalPrg (psi, (T.lemmaDef lemma, t))
     | psi, (T.Lam ((T.UDec (I.BDec _) as d_), p_), t) ->
-        let d'_ = T.decSub (d_, t) in
+        let d'_ = T.decSub d_ t in
         T.Lam (d'_, evalPrg (I.Decl (psi, d'_), (p_, T.dot1 t)))
-    | psi, (T.Lam (d_, p_), t) -> T.Lam (T.decSub (d_, t), T.PClo (p_, T.dot1 t))
+    | psi, (T.Lam (d_, p_), t) -> T.Lam (T.decSub d_ t, T.PClo (p_, T.dot1 t))
     | psi, ((T.Rec (d_, p_) as p'_), t) ->
         evalPrg (psi, (p_, T.Dot (T.Prg (T.PClo (p'_, t)), t)))
-    | psi, (T.PClo (p_, t'), t) -> evalPrg (psi, (p_, T.comp (t', t)))
+    | psi, (T.PClo (p_, t'), t) -> evalPrg (psi, (p_, T.comp t' t))
     | psi, (T.Case (T.Cases o_), t') -> match_ (psi, t', T.Cases (rev o_))
     | psi, (T.EVar (d_, ({ contents = Some p_ } as r), f_, _, _, _), t) ->
         evalPrg (psi, (p_, t))
@@ -193,13 +193,13 @@ module MakeOpsem
         let v'_ = evalPrg (psi, (p2_, T.Dot (T.Prg v_, t))) in
         v'_
     | psi, (T.New (T.Lam (d_, p_)), t) ->
-        let d'_ = T.decSub (d_, t) in
+        let d'_ = T.decSub d_ t in
         let (T.UDec d''_) = d'_ in
-        let d''' = T.UDec (Names.decName (T.coerceCtx psi, d''_)) in
+        let d''' = T.UDec (Names.decName (T.coerceCtx psi) d''_) in
         let v_ = evalPrg (I.Decl (psi, d'''), (p_, T.dot1 t)) in
         let b_ = T.coerceCtx (I.Decl (I.Null, d''')) in
         let g_, t' = T.deblockify b_ in
-        let newP = raisePrg (psi, g_, T.normalizePrg (v_, t')) in
+        let newP = raisePrg psi g_ (T.normalizePrg v_ t') in
         newP
         (* unnecessary naming, remove later --cs *)
     | psi, (T.Box (w_, p_), t) -> evalPrg (psi, (p_, t))
@@ -212,7 +212,7 @@ module MakeOpsem
               substToSpine' (s, g_, T.AppExp (u_, t_acc))
           | I.Dot (I.Idx n, s), I.Decl (g_, I.Dec (_, v_)), t_acc ->
               let us_, _ =
-                Whnf.whnfEta ((I.Root (I.BVar n, I.Nil), I.id), (v_, I.id))
+                Whnf.whnfEta (I.Root (I.BVar n, I.Nil), I.id) (v_, I.id)
               in
               substToSpine'
                 ( s,
@@ -238,11 +238,11 @@ module MakeOpsem
 
   and match_ = function
     | psi, t1, T.Cases ((psi', t2, p_) :: c_) -> (
-        let t = createVarSub (psi, psi') in
-        let t' = T.comp (t2, t) in
+        let t = createVarSub psi psi' in
+        let t' = T.comp t2 t in
         try
           begin
-            matchSub (psi, t1, t');
+            matchSub psi t1 t';
             evalPrg (psi, (p_, t) (*T.normalizeSub*))
           end
         with NoMatch -> match_ (psi, t1, T.Cases c_)
@@ -254,80 +254,80 @@ module MakeOpsem
         )
     | psi, t1, T.Cases [] -> raise Abort
 
-  and createVarSub = function
+  and createVarSub a1 b1 = match a1, b1 with
     | psi, I.Null -> T.Shift (I.ctxLength psi)
     | psi, (I.Decl (psi', T.PDec (name, f_, None, None)) as psi'') ->
-        let t = createVarSub (psi, psi') in
+        let t = createVarSub psi psi' in
         let t' =
-          T.Dot (T.Prg (T.newEVarTC (psi, T.forSub (f_, t), None, None)), t)
+          T.Dot (T.Prg (T.newEVarTC (psi, T.forSub f_ t, None, None)), t)
         in
         t'
     | psi, I.Decl (psi', T.UDec (I.Dec (name, v_))) ->
-        let t = createVarSub (psi, psi') in
+        let t = createVarSub psi psi' in
         T.Dot
           ( T.Exp
               (I.EVar
                  (ref None, T.coerceCtx psi, I.EClo (v_, T.coerceSub t), ref [])),
             t )
     | psi, I.Decl (psi', T.UDec (I.BDec (name, (cid, s)))) ->
-        let t = createVarSub (psi, psi') in
+        let t = createVarSub psi psi' in
         T.Dot
-          ( T.Block (I.LVar (ref None, I.id, (cid, I.comp (s, T.coerceSub t)))),
+          ( T.Block (I.LVar (ref None, I.id, (cid, I.comp s (T.coerceSub t)))),
             t )
 
-  and matchSub = function
+  and matchSub a1 b1 c1 = match a1, b1, c1 with
     | psi, _, T.Shift _ -> ()
     | psi, T.Shift n, (T.Dot _ as t) ->
-        matchSub (psi, T.Dot (T.Idx (n + 1), T.Shift (n + 1)), t)
+        matchSub psi (T.Dot (T.Idx (n + 1), T.Shift (n + 1))) t
     | psi, T.Dot (T.Exp u1_, t1), T.Dot (T.Exp u2_, t2) -> begin
-        matchSub (psi, t1, t2);
-        try Unify.unify (T.coerceCtx psi, (u1_, I.id), (u2_, I.id))
+        matchSub psi t1 t2;
+        try Unify.unify (T.coerceCtx psi) (u1_, I.id) (u2_, I.id)
         with Unify.Unify s -> raise NoMatch
       end
     | psi, T.Dot (T.Exp u1_, t1), T.Dot (T.Idx k, t2) -> begin
-        matchSub (psi, t1, t2);
+        matchSub psi t1 t2;
         try
           Unify.unify
-            (T.coerceCtx psi, (u1_, I.id), (I.Root (I.BVar k, I.Nil), I.id))
+            (T.coerceCtx psi) (u1_, I.id) (I.Root (I.BVar k, I.Nil), I.id)
         with Unify.Unify _ -> raise NoMatch
       end
     | psi, T.Dot (T.Idx k, t1), T.Dot (T.Exp u2_, t2) -> begin
-        matchSub (psi, t1, t2);
+        matchSub psi t1 t2;
         try
           Unify.unify
-            (T.coerceCtx psi, (I.Root (I.BVar k, I.Nil), I.id), (u2_, I.id))
+            (T.coerceCtx psi) (I.Root (I.BVar k, I.Nil), I.id) (u2_, I.id)
         with Unify.Unify _ -> raise NoMatch
       end
     | psi, T.Dot (T.Prg p1_, t1), T.Dot (T.Prg p2_, t2) -> begin
-        matchSub (psi, t1, t2);
+        matchSub psi t1 t2;
         matchPrg (psi, p1_, p2_)
       end
     | psi, T.Dot (T.Prg p1_, t1), T.Dot (T.Idx k, t2) -> begin
-        matchSub (psi, t1, t2);
+        matchSub psi t1 t2;
         matchPrg (psi, p1_, T.Var k)
       end
     | psi, T.Dot (T.Idx k, t1), T.Dot (T.Prg p2_, t2) -> begin
-        matchSub (psi, t1, t2);
+        matchSub psi t1 t2;
         matchPrg (psi, T.Var k, p2_)
       end
     | psi, T.Dot (T.Idx k1, t1), T.Dot (T.Idx k2, t2) ->
-        begin if k1 = k2 then matchSub (psi, t1, t2) else raise NoMatch
+        begin if k1 = k2 then matchSub psi t1 t2 else raise NoMatch
         end
     | psi, T.Dot (T.Idx k, t1), T.Dot (T.Block (I.LVar (r, s1, (c, s2))), t2) ->
         let s1' = Whnf.invert s1 in
-        ignore (r := Some (I.blockSub (I.Bidx k, s1')));
-        matchSub (psi, t1, t2)
+        ignore (r := Some (I.blockSub (I.Bidx k) s1'));
+        matchSub psi t1 t2
     | psi, T.Dot (T.Block b_, t1), T.Dot (T.Block (I.LVar (r, s1, (c, s2))), t2)
       ->
         let s1' = Whnf.invert s1 in
-        ignore (r := Some (I.blockSub (b_, s1')));
-        matchSub (psi, t1, t2)
+        ignore (r := Some (I.blockSub b_ s1'));
+        matchSub psi t1 t2
   (* By Invariant *)
 
   and evalRedex = function
     | psi, v_, (T.Nil, _) -> v_
     | psi, v_, (T.SClo (s_, t1), t2) ->
-        evalRedex (psi, v_, (s_, T.comp (t1, t2)))
+        evalRedex (psi, v_, (s_, T.comp t1 t2))
     | psi, T.Lam (T.UDec (I.Dec (_, a_)), p'_), (T.AppExp (u_, s_), t) ->
         let v_ =
           evalPrg (psi, (p'_, T.Dot (T.Exp (I.EClo (u_, T.coerceSub t)), T.id)))
@@ -338,7 +338,7 @@ module MakeOpsem
           ( psi,
             evalPrg
               ( psi,
-                (p'_, T.Dot (T.Block (I.blockSub (b_, T.coerceSub t)), T.id)) ),
+                (p'_, T.Dot (T.Block (I.blockSub b_ (T.coerceSub t)), T.id)) ),
             (s_, t) )
     | psi, T.Lam (T.PDec _, p'_), (T.AppPrg (p_, s_), t) ->
         let v_ = evalPrg (psi, (p_, t)) in
@@ -426,17 +426,17 @@ module MakeOpsem
             ->
               ignore (printLF (g_, s', g'_) (k - 1));
               print
-                (((((("def " ^ name) ^ " = ") ^ Print.expToString (g_, u_))
+                (((((("def " ^ name) ^ " = ") ^ Print.expToString g_ u_)
                   ^ " : ")
-                 ^ Print.expToString (g_, I.EClo (v_, s')))
+                 ^ Print.expToString g_ (I.EClo (v_, s')))
                 ^ "\n")
           end
         in
         let match_ (psi, t1, T.Cases ((psi', t2, p_) :: c_)) =
-          let t = createVarSub (psi, psi') in
-          let t' = T.comp (t2, t) in
+          let t = createVarSub psi psi' in
+          let t' = T.comp t2 t in
           let m = I.ctxLength psi' in
-          ignore (matchSub (psi, t1, t'));
+          ignore (matchSub psi t1 t');
           let t'' = t in
           let _ =
             printLF (T.coerceCtx psi, T.coerceSub t'', T.coerceCtx psi') (m - d)
@@ -462,7 +462,7 @@ module MakeOpsem
               p2_ ),
           t ) ) ->
         ignore (print (("new " ^ name) ^ "\n"));
-        let d''_ = T.decSub (d'_, t) in
+        let d''_ = T.decSub d'_ t in
         ignore (topLevel (I.Decl (psi, d''_), d + 1, (p1_, T.dot1 t)));
         ()
     | psi, d, (T.Let (d_, p1_, p2_), t) ->
@@ -470,9 +470,9 @@ module MakeOpsem
         let v_ = evalPrg (psi, (p1_, t)) in
         let _ =
           print
-            (((((("val " ^ name) ^ " = ") ^ TomegaPrint.prgToString (psi, v_))
+            (((((("val " ^ name) ^ " = ") ^ TomegaPrint.prgToString psi v_)
               ^ " :: ")
-             ^ TomegaPrint.forToString (psi, f_))
+             ^ TomegaPrint.forToString psi f_)
             ^ "\n")
         in
         let v'_ = topLevel (psi, d + 1, (p2_, T.Dot (T.Prg v_, t))) in

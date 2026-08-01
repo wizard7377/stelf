@@ -77,7 +77,7 @@ module type AST = sig
   (** [ctxPop (Decl (G, D))] returns [G], removing the most recent declaration.
       @raise Match_failure if the context is [Null]. *)
 
-  val ctxLookup : 'a ctx * int -> 'a
+  val ctxLookup : 'a ctx -> int -> 'a
   (** [ctxLookup (G, k)] returns the [k]-th declaration from the right
       (1-indexed). For example, [ctxLookup (G, 1)] returns the most recently
       added declaration.
@@ -475,7 +475,7 @@ module type AST = sig
 
   (** {2 Convenience Constructors} *)
 
-  val arrow_ : exp * exp -> exp
+  val arrow_ : exp -> exp -> exp
   (** [arrow_ (A, B)] constructs the non-dependent function type {m A \to B},
       i.e., [Pi ((Dec (None, A), No), B)]. *)
 

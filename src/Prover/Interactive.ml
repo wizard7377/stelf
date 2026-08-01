@@ -143,14 +143,14 @@ end) : INTERACTIVE = struct
             ( (function
               | f_ ->
                   T.All
-                    ( (T.UDec (Weaken.strengthenDec (d_, w1)), T.Explicit),
+                    ( (T.UDec (Weaken.strengthenDec d_ w1), T.Explicit),
                       f'_ f_ )),
               f''_ )
         | I.Pi ((d_, _), v_), M.Mapp (M.Marg (M.Minus, _), mS), w1, w2, n ->
             let f'_, f''_ =
-              convertFor' (v_, mS, I.comp (w1, I.shift), I.dot1 w2, n + 1)
+              convertFor' (v_, mS, I.comp w1 I.shift, I.dot1 w2, n + 1)
             in
-            (f'_, T.Ex ((I.decSub (d_, w2), T.Explicit), f''_))
+            (f'_, T.Ex ((I.decSub d_ w2, T.Explicit), f''_))
         | I.Uni I.Type, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
@@ -250,11 +250,11 @@ end) : INTERACTIVE = struct
               begin
                 print "\n-----------------------\n";
                 begin
-                  print (TomegaPrint.forToString (psi, f_));
+                  print (TomegaPrint.forToString psi f_);
                   begin
                     print "\n-----------------------\n";
                     begin
-                      print (TomegaPrint.prgToString (psi, p_));
+                      print (TomegaPrint.prgToString psi p_);
                       begin
                         print "\n-----------------------";
                         begin
@@ -274,15 +274,15 @@ end) : INTERACTIVE = struct
           begin
             print "\n=== THEOREM PROVER ====\n";
             begin
-              print (Print.ctxToString (I.Null, g_));
+              print (Print.ctxToString I.Null g_);
               begin
                 print "\n-----------------------\n";
                 begin
-                  print (Print.expToString (g_, v_));
+                  print (Print.expToString g_ v_);
                   begin
                     print "\n-----------------------\n";
                     begin
-                      print (Print.expToString (g_, x_));
+                      print (Print.expToString g_ x_);
                       begin
                         print "\n-----------------------";
                         begin
@@ -343,7 +343,7 @@ end) : INTERACTIVE = struct
           let split = splitMenu (map Split.expand f1_) in
           menu_ := Some (intro @ split @ fill @ elim)
       | S.StateLF y_ :: _ ->
-          let ys_ = Abstract.collectEVars (I.Null, (y_, I.id), []) in
+          let ys_ = Abstract.collectEVars I.Null (y_, I.id) [] in
           let f2_ = map (function y_ -> S.FocusLF y_) ys_ in
           let fill =
             foldr
@@ -393,9 +393,9 @@ end) : INTERACTIVE = struct
       let select c =
         try Intsyn.Order.selLookup c with _ -> Intsyn.Order.Lex []
       in
-      let tc = Tomega.transformTC (I.Null, f_, map select cL) in
+      let tc = Tomega.transformTC I.Null f_ (map select cL) in
       let (w_ :: _) = ws_ in
-      ignore (focus_ := [ S.init (f_, w_) ]);
+      ignore (focus_ := [ S.init f_ w_ ]);
       let p_ =
         begin match !focus_ with
         | [] -> abort "Initialization of proof goal failed\n"
@@ -413,7 +413,7 @@ end) : INTERACTIVE = struct
               end)
           xs_
       in
-      let (ofix :: []) = map (function f -> FixedPoint.expand (f, tc)) f_ in
+      let (ofix :: []) = map (function f -> FixedPoint.expand f tc) f_ in
       ignore (FixedPoint.apply ofix);
       ignore (normalize ());
       ignore (menu ());
@@ -427,7 +427,7 @@ end) : INTERACTIVE = struct
           let rec findIEVar = function
             | [] -> raise (Error ("cannot focus on " ^ n))
             | y_ :: ys_ ->
-                begin if Names.evarName (T.coerceCtx psi, y_) = n then begin
+                begin if Names.evarName (T.coerceCtx psi) y_ = n then begin
                   focus_ := S.StateLF y_ :: !focus_;
                   begin
                     normalize ();
@@ -443,7 +443,7 @@ end) : INTERACTIVE = struct
           let rec findTEVar = function
             | [] -> findIEVar (S.collectLF p_)
             | (T.EVar (psi, r, f_, tc, tCs, y_) as x_) :: xs_ ->
-                begin if Names.evarName (T.coerceCtx psi, y_) = n then begin
+                begin if Names.evarName (T.coerceCtx psi) y_ = n then begin
                   focus_ :=
                     S.State (w_, TomegaPrint.nameCtx psi, x_, f_) :: !focus_;
                   begin

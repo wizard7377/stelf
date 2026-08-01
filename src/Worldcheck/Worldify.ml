@@ -116,10 +116,7 @@ end) : WORLDIFY = struct
     | fileName, None -> (fileName ^ ":") ^ msg
     | fileName, Some occDec ->
         P.wrapLoc'
-          ( P.Loc (fileName, P.occToRegionDec occDec occ),
-            Origins.linesInfoLookup fileName,
-            (("Constant " ^ Names.qidToString (Names.constQid c)) ^ ":") ^ msg
-          )
+          (P.Loc (fileName, P.occToRegionDec occDec occ)) (Origins.linesInfoLookup fileName) ((("Constant " ^ Names.qidToString (Names.constQid c)) ^ ":") ^ msg)
     end
 
   let wrapMsgBlock (c, occ, msg) =
@@ -127,9 +124,7 @@ end) : WORLDIFY = struct
     | fileName, None -> (fileName ^ ":") ^ msg
     | fileName, Some occDec ->
         P.wrapLoc'
-          ( P.Loc (fileName, P.occToRegionDec occDec occ),
-            Origins.linesInfoLookup fileName,
-            (("Block " ^ Names.qidToString (Names.constQid c)) ^ ":") ^ msg )
+          (P.Loc (fileName, P.occToRegionDec occDec occ)) (Origins.linesInfoLookup fileName) ((("Block " ^ Names.qidToString (Names.constQid c)) ^ ":") ^ msg)
     end
 
   type nonrec dlist = IntSyn.dec list
@@ -151,7 +146,7 @@ end) : WORLDIFY = struct
       | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
           let s = createEVarSub (g_, g'_) in
           let v'_ = I.EClo (v_, s) in
-          let x_ = I.newEVar (g_, v'_) in
+          let x_ = I.newEVar g_ v'_ in
           I.Dot (I.Exp x_, s)
 
     let rec collectConstraints = function
@@ -160,27 +155,27 @@ end) : WORLDIFY = struct
       | I.EVar (_, _, _, { contents = constrs }) :: xs_ ->
           Constraints.simplify constrs @ collectConstraints xs_
 
-    let rec collectEVars = function
+    let rec collectEVars a3 b3 c3 = match a3, b3, c3 with
       | g_, I.Dot (I.Exp x_, s), xs_ ->
-          collectEVars (g_, s, Abstract.collectEVars (g_, (x_, I.id), xs_))
+          collectEVars g_ s (Abstract.collectEVars g_ (x_, I.id) xs_)
       | g_, I.Shift _, xs_ -> xs_
 
     let noConstraints (g_, s) =
-      begin match collectConstraints (collectEVars (g_, s, [])) with
+      begin match collectConstraints (collectEVars g_ s []) with
       | [] -> true
       | _ -> false
       end
 
     let formatD (g_, d_) =
-      F.hbox [ F.string "{"; Print.formatDec (g_, d_); F.string "}" ]
+      F.hbox [ F.string "{"; Print.formatDec g_ d_; F.string "}" ]
 
     let rec formatDList = function
       | g_, [], t -> []
       | g_, d_ :: [], t ->
-          let d'_ = I.decSub (d_, t) in
+          let d'_ = I.decSub d_ t in
           [ formatD (g_, d'_) ]
       | g_, d_ :: l_, t ->
-          let d'_ = I.decSub (d_, t) in
+          let d'_ = I.decSub d_ t in
           formatD (g_, d'_)
           :: F.break_
           :: formatDList (I.Decl (g_, d'_), l_, I.dot1 t)
@@ -206,20 +201,20 @@ end) : WORLDIFY = struct
       F.makestring_fmt
         (F.hVbox
            [
-             Print.formatExp (g_, I.EClo (v1_, s1));
+             Print.formatExp g_ (I.EClo (v1_, s1));
              F.break_;
              F.string "<>";
              F.break_;
-             Print.formatExp (g_, I.EClo (v2_, s2));
+             Print.formatExp g_ (I.EClo (v2_, s2));
            ])
 
     module Trace : sig
       val clause : I.cid -> unit
       val constraintsRemain : unit -> unit
       val matchBlock : (I.dctx * dlist) * reg -> unit
-      val unmatched : I.dctx * dlist -> unit
-      val missing : I.dctx * reg -> unit
-      val mismatch : I.dctx * I.eclo * I.eclo -> unit
+      val unmatched : I.dctx -> dlist -> unit
+      val missing : I.dctx -> reg -> unit
+      val mismatch : I.dctx -> I.eclo -> I.eclo -> unit
       val success : unit -> unit
     end = struct
       let clause c =
@@ -246,13 +241,13 @@ end) : WORLDIFY = struct
         else ()
         end
 
-      let missing (g_, r_) =
+      let missing g_ r_ =
         begin if !Global.chatter > 7 then
           print (("Missing hypotheses:\n" ^ worldToString (g_, r_)) ^ "\n")
         else ()
         end
 
-      let mismatch (g_, vs1, vs2) =
+      let mismatch g_ vs1 vs2 =
         begin if !Global.chatter > 7 then
           print (("Mismatch:\n" ^ mismatchToString (g_, vs1, vs2)) ^ "\n")
         else ()
@@ -263,15 +258,15 @@ end) : WORLDIFY = struct
         end
     end
 
-    let decUName (g_, d_) = I.Decl (g_, Names.decUName (g_, d_))
-    let decEName (g_, d_) = I.Decl (g_, Names.decEName (g_, d_))
+    let decUName g_ d_ = I.Decl (g_, Names.decUName g_ d_)
+    let decEName g_ d_ = I.Decl (g_, Names.decEName g_ d_)
 
     let rec equivList = function
       | g_, (_, []), [] -> true
       | g_, (t, I.Dec (_, v1_) :: l1_), I.Dec (_, v2_) :: l2_ -> (
           try
             begin
-              Unify.unify (g_, (v1_, t), (v2_, I.id));
+              Unify.unify g_ (v1_, t) (v2_, I.id);
               equivList (g_, (I.dot1 t, l1_), l2_)
             end
           with
@@ -293,8 +288,8 @@ end) : WORLDIFY = struct
       begin match (arg__3, arg__4) with
       | a, (t, []) -> []
       | a, (t, (I.Dec (_, v_) as d_) :: l_) ->
-          begin if Subordinate.below (I.targetFam v_, a) then
-            I.decSub (d_, t) :: strengthen a (I.dot1 t, l_)
+          begin if Subordinate.below (I.targetFam v_) a then
+            I.decSub d_ t :: strengthen a (I.dot1 t, l_)
           else strengthen a (I.Dot (I.Undef, t), l_)
           end
       end
@@ -320,13 +315,13 @@ end) : WORLDIFY = struct
     let rec eqCtx = function
       | I.Null, I.Null -> true
       | I.Decl (g1_, d1_), I.Decl (g2_, d2_) ->
-          eqCtx (g1_, g2_) && Conv.convDec ((d1_, I.id), (d2_, I.id))
+          eqCtx (g1_, g2_) && Conv.convDec (d1_, I.id) (d2_, I.id)
       | _ -> false
 
     let rec eqList = function
       | [], [] -> true
       | d1_ :: l1_, d2_ :: l2_ ->
-          Conv.convDec ((d1_, I.id), (d2_, I.id)) && eqList (l1_, l2_)
+          Conv.convDec (d1_, I.id) (d2_, I.id) && eqList (l1_, l2_)
       | _ -> false
 
     let eqBlock (b1, b2) =
@@ -353,16 +348,16 @@ end) : WORLDIFY = struct
             subsumedCtx (g_, w_)
           end
       | w_, (g_, I.Pi ((d_, _), v2_), occ) ->
-          checkGoal w_ (decUName (g_, d_), v2_, P.body occ)
+          checkGoal w_ (decUName g_ d_, v2_, P.body occ)
       end
 
     let rec checkClause arg__10 arg__11 =
       begin match (arg__10, arg__11) with
       | w_, (g_, I.Root (a, s_), occ) -> ()
       | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), Maybe), v2_), occ) ->
-          checkClause w_ (decEName (g_, d_), v2_, P.body occ)
+          checkClause w_ (decEName g_ d_, v2_, P.body occ)
       | w_, (g_, I.Pi (((I.Dec (_, v1_) as d_), No), v2_), occ) -> begin
-          checkClause w_ (decEName (g_, d_), v2_, P.body occ);
+          checkClause w_ (decEName g_ d_, v2_, P.body occ);
           checkGoal w_ (g_, v1_, P.label occ)
         end
       end
@@ -382,13 +377,13 @@ end) : WORLDIFY = struct
       | cid :: [] -> Block (cid, I.constBlock cid)
       | cid :: cids -> Plus (Block (cid, I.constBlock cid), worldsToReg' cids)
 
-    let init = function
+    let init a3 b3 = match a3, b3 with
       | _, ((I.Root _, s) as vs_) -> begin
           Trace.success ();
           raise (Success (Whnf.normalize vs_))
         end
       | g_, ((I.Pi (((I.Dec (_, v1_) as d1_), _), v2_) as v_), s) -> begin
-          Trace.unmatched (g_, subGoalToDList (Whnf.normalize (v_, s)));
+          Trace.unmatched g_ (subGoalToDList (Whnf.normalize (v_, s)));
           ()
         end
 
@@ -411,8 +406,8 @@ end) : WORLDIFY = struct
           in
           try
             accR
-              ( (decUName (g_, I.BDec (None, (c, t))), (v_, I.comp (s, I.shift))),
-                Seq (1, piDecs, I.comp (t, I.shift)),
+              ( (decUName g_ (I.BDec (None, (c, t))), (v_, I.comp s I.shift)),
+                Seq (1, piDecs, I.comp t I.shift),
                 k' )
           with Success v_ ->
             raise
@@ -422,7 +417,7 @@ end) : WORLDIFY = struct
       | ( (g_, ((I.Pi (((I.Dec (_, v1_) as d_), _), v2_) as v_), s)),
           (Seq (j, I.Dec (_, v1') :: l2'_, t) as l'_),
           k ) ->
-          begin if Unify.unifiable (g_, (v1_, s), (v1', t)) then
+          begin if Unify.unifiable g_ (v1_, s) (v1', t) then
             accR
               ( ( g_,
                   (v2_, I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, j), I.Nil)), s))
@@ -433,13 +428,13 @@ end) : WORLDIFY = struct
                     I.Dot (I.Exp (I.Root (I.Proj (I.Bidx 1, j), I.Nil)), t) ),
                 k )
           else begin
-            Trace.mismatch (g_, (v1_, I.id), (v1', t));
+            Trace.mismatch g_ (v1_, I.id) (v1', t);
             ()
           end
           end
       | gVs, Seq (_, [], t), k -> k gVs
       | ((g_, (I.Root _, s)) as gVs), (Seq (_, l'_, t) as r_), k -> begin
-          Trace.missing (g_, r_);
+          Trace.missing g_ r_;
           ()
         end
       | gVs, Plus (r1, r2), k -> begin
@@ -467,12 +462,12 @@ end) : WORLDIFY = struct
       | g_, (I.Root (a, s_) as v_), w_, occ -> v_
       | g_, I.Pi (((I.Dec (x, v1_) as d_), Maybe), v2_), w_, occ ->
           ignore (print "{");
-          let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
+          let w2_ = worldifyClause (decEName g_ d_, v2_, w_, P.body occ) in
           ignore (print "}");
           I.Pi ((I.Dec (x, v1_), I.Maybe), w2_)
       | g_, I.Pi (((I.Dec (x, v1_) as d_), No), v2_), w_, occ ->
           let w1_ = worldifyGoal (g_, v1_, w_, P.label occ) in
-          let w2_ = worldifyClause (decEName (g_, d_), v2_, w_, P.body occ) in
+          let w2_ = worldifyClause (decEName g_ d_, v2_, w_, P.body occ) in
           I.Pi ((I.Dec (x, w1_), I.No), w2_)
 
     let worldifyConDec w_ (c, I.ConDec (s, m, k, status, v_, l_)) =
@@ -498,7 +493,7 @@ end) : WORLDIFY = struct
           let w'_ = W.getWorlds a in
           begin
             checkClause w'_ (g_, worldifyClause (I.Null, v_, w'_, P.top), P.top);
-            worldifyBlock (decUName (g_, d_), l_)
+            worldifyBlock (decUName g_ d_, l_)
           end
 
     let rec worldifyBlocks = function
@@ -771,7 +766,7 @@ end) : WORLDIFY = struct
   (* by invariant, other cases cannot apply *)
   let worldify = worldify
 
-  let worldifyGoal = function
+  let worldifyGoal a3 b3 = match a3, b3 with
     | g_, v_ -> worldifyGoal (g_, v_, W.getWorlds (I.targetFam v_), P.top)
 end
 (*! sharing Origins.Paths = Paths !*)

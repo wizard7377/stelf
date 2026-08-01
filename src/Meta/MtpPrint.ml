@@ -100,9 +100,9 @@ end) : MTPPRINT.MTPRINT = struct
           let u1_, s1_ = us_ in
           let u2_, s2_ = vs_ in
           [
-            printFmt (Print.formatExp (g_, I.EClo (u1_, s1_)));
+            printFmt (Print.formatExp g_ (I.EClo (u1_, s1_)));
             Fmt.string ":";
-            printFmt (Print.formatExp (g_, I.EClo (u2_, s2_)));
+            printFmt (Print.formatExp g_ (I.EClo (u2_, s2_)));
           ]
       | g_, S.Lex os_ ->
           [
@@ -132,30 +132,30 @@ end) : MTPPRINT.MTPRINT = struct
       | g_, S.Lemma S.Rl -> [ Fmt.string "<i >" ]
       | g_, S.Lemma S.RLdone -> [ Fmt.string "<i*>" ]
 
-    let rec formatCtx = function
+    let rec formatCtx a1 b1 = match a1, b1 with
       | I.Null, b_ -> []
       | I.Decl (I.Null, d_), I.Decl (I.Null, t_) ->
           begin if !Global.chatter >= 4 then
             [
               Fmt.hVbox
                 (formatTag (I.Null, t_)
-                @ [ Fmt.break_; printFmt (Print.formatDec (I.Null, d_)) ]);
+                @ [ Fmt.break_; printFmt (Print.formatDec I.Null d_) ]);
             ]
-          else [ printFmt (Print.formatDec (I.Null, d_)) ]
+          else [ printFmt (Print.formatDec I.Null d_) ]
           end
       | I.Decl (g_, d_), I.Decl (b_, t_) ->
           begin if !Global.chatter >= 4 then
-            formatCtx (g_, b_)
+            formatCtx g_ b_
             @ [ Fmt.string ","; Fmt.break_; Fmt.break_ ]
             @ [
                 Fmt.hVbox
                   (formatTag (g_, t_)
-                  @ [ Fmt.break_; printFmt (Print.formatDec (g_, d_)) ]);
+                  @ [ Fmt.break_; printFmt (Print.formatDec g_ d_) ]);
               ]
           else
-            formatCtx (g_, b_)
+            formatCtx g_ b_
             @ [ Fmt.string ","; Fmt.break_ ]
-            @ [ Fmt.break_; printFmt (Print.formatDec (g_, d_)) ]
+            @ [ Fmt.break_; printFmt (Print.formatDec g_ d_) ]
           end
 
     let formatState (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_)) =
@@ -165,13 +165,13 @@ end) : MTPPRINT.MTPRINT = struct
           Fmt.break_;
           Fmt.string "========================";
           Fmt.break_;
-          Fmt.hVbox0 1 0 1 (formatCtx (g_, b_));
+          Fmt.hVbox0 1 0 1 (formatCtx g_ b_);
           Fmt.break_;
           Fmt.string "------------------------";
           Fmt.break_;
           Fmt.string
             (FunPrint.Formatter.makestring_fmt
-               (FunPrint.formatForBare (g_, f_)));
+               (FunPrint.formatForBare g_ f_));
         ]
 
     let stateToString s_ = Fmt.makestring_fmt (formatState s_)

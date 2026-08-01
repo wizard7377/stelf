@@ -28,7 +28,7 @@ module Make_ReconConDec
 
   exception Error = Error
 
-  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error r msg = raise (Error (Paths.wrap r msg))
 
   (* Build an IntSyn context from a list of Cst.decl values. *)
   let makectx decls =
@@ -61,11 +61,11 @@ module Make_ReconConDec
     let some_part =
       match g1' with
       | IntSyn.Null -> ""
-      | _ -> "some " ^ Print.ctxToString (g0', g1') ^ "\n"
+      | _ -> "some " ^ Print.ctxToString g0' g1' ^ "\n"
     in
-    Print.ctxToString (IntSyn.Null, g0')
+    Print.ctxToString IntSyn.Null g0'
     ^ "\n" ^ some_part ^ "pi "
-    ^ Print.ctxToString (ctxAppend g0' g1', g2')
+    ^ Print.ctxToString (ctxAppend g0' g1') g2'
 
   let checkFreevars (g0, (g1, g2), r) =
     match g0 with
@@ -76,9 +76,8 @@ module Make_ReconConDec
         let g1' = Names.ctxLUName g1 in
         let g2' = Names.ctxLUName g2 in
         error
-          ( r,
-            "Free variables in context block after term reconstruction:\n"
-            ^ ctxBlockToString (g0', (g1', g2')) )
+          r ("Free variables in context block after term reconstruction:\n"
+            ^ ctxBlockToString (g0', (g1', g2')))
 
   (* Fresh names for anonymous top-level declarations: each `_` names a
      distinct constant (cf. the classic Twelf `- : A.` clause idiom, where
@@ -97,7 +96,7 @@ module Make_ReconConDec
     in
     next ()
 
-  let condecToConDec (condec, loc, abbFlag) =
+  let condecToConDec condec loc abbFlag =
     let (Paths.Loc (filename, r)) = loc in
     match Cst.View.ConDec.view condec with
     | Cst.View.ConDec.ConstantDecl (_, decl) ->
@@ -126,7 +125,7 @@ module Make_ReconConDec
         let i, v'_ =
           try Abstract.abstractDecImp v_
           with Abstract.Error msg ->
-            raise (Abstract.Error (Paths.wrap (r, msg)))
+            raise (Abstract.Error (Paths.wrap r msg))
         in
         let cd =
           Names.nameConDec
@@ -153,7 +152,7 @@ module Make_ReconConDec
         let f =
           match tm2_opt with
           | None -> RT.jterm tm1
-          | Some tm2 -> RT.jof (tm1, tm2)
+          | Some tm2 -> RT.jof tm1 tm2
         in
         let f' = RT.recon f in
         let (u_, oc1), (v_, oc2_opt), l_ =
@@ -164,12 +163,12 @@ module Make_ReconConDec
         in
         ignore (RT.checkErrors r);
         let i, (u'', v'') =
-          try Abstract.abstractDef (u_, v_)
+          try Abstract.abstractDef u_ v_
           with Abstract.Error msg ->
-            raise (Abstract.Error (Paths.wrap (r, msg)))
+            raise (Abstract.Error (Paths.wrap r msg))
         in
         let opt_name = if name = "_" then None else Some name in
-        let ocd = Paths.def (i, oc1, oc2_opt) in
+        let ocd = Paths.def i oc1 oc2_opt in
         let cd =
           if abbFlag then
             Names.nameConDec (IntSyn.AbbrevDef (name, None, i, u'', v'', l_))
@@ -204,24 +203,23 @@ module Make_ReconConDec
         let gblock = makectx lblock in
         let r' =
           match (RT.ctxRegion gsome, RT.ctxRegion gblock) with
-          | Some r1, Some r2 -> Paths.join (r1, r2)
+          | Some r1, Some r2 -> Paths.join r1 r2
           | _, Some r2 -> r2
           | Some r1, None -> r1
           | None, None -> r
         in
         ignore (Names.varReset IntSyn.Null);
         ignore (RT.resetErrors filename);
-        let j = RT.jwithctx (gsome, RT.jwithctx (gblock, RT.jnothing)) in
+        let j = RT.jwithctx gsome (RT.jwithctx gblock RT.jnothing) in
         let (RT.JWithCtx (gsome_, RT.JWithCtx (gblock_, _))) = RT.recon j in
         ignore (RT.checkErrors r);
         let g0_, ctxs =
           try Abstract.abstractCtxs [ gsome_; gblock_ ]
           with Constraints.Error c_ ->
             error
-              ( r',
-                "Constraints remain in context block after term reconstruction:\n"
+              r' ("Constraints remain in context block after term reconstruction:\n"
                 ^ ctxBlockToString (IntSyn.Null, (gsome_, gblock_))
-                ^ "\n" ^ Print.cnstrsToString c_ )
+                ^ "\n" ^ Print.cnstrsToString c_)
         in
         let gsome', gblock' =
           match ctxs with [ a; b ] -> (a, b) | _ -> assert false

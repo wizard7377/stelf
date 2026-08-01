@@ -14,5 +14,5 @@ module HashTable (HashTable__0 : sig
   type key'
 
   val hash : key' -> int
-  val eq : key' * key' -> bool
+  val eq : key' -> key' -> bool
 end) : TABLE with type key = HashTable__0.key'

@@ -68,10 +68,10 @@ module MakeSubordinate
 
     let appReachable f b =
       let rec rch (b, visited) =
-        begin if IntSet.member (b, visited) then visited
+        begin if IntSet.member b visited then visited
         else begin
           ignore (f b);
-          IntSet.foldl rch (IntSet.insert (b, visited)) (adjNodes b)
+          IntSet.foldl rch (IntSet.insert b visited) (adjNodes b)
         end
         end
       in
@@ -84,11 +84,11 @@ module MakeSubordinate
 
     let reach (b, a, visited) =
       let rec rch (b, visited) =
-        begin if IntSet.member (b, visited) then visited
+        begin if IntSet.member b visited then visited
         else
           let adj = adjNodes b in
-          begin if IntSet.member (a, adj) then raise Reachable
-          else IntSet.foldl rch (IntSet.insert (b, visited)) adj
+          begin if IntSet.member a adj then raise Reachable
+          else IntSet.foldl rch (IntSet.insert b visited) adj
           end
         end
       in
@@ -101,7 +101,7 @@ module MakeSubordinate
         memoCounter := !memoCounter + 1;
         begin
           memoInsert ((b, a), (true, !memoCounter));
-          updateFam (b, IntSet.insert (a, adjNodes b))
+          updateFam (b, IntSet.insert a (adjNodes b))
         end
       end
 
@@ -160,7 +160,7 @@ module MakeSubordinate
                   (function
                     | b -> begin
                         fSet (b, true);
-                        freezeList := IntSet.insert (b, !freezeList)
+                        freezeList := IntSet.insert b (!freezeList)
                       end)
                   a)
           l'_
@@ -187,7 +187,7 @@ module MakeSubordinate
           true
         end
 
-    let below (a, b) =
+    let below a b =
       begin match memoLookup (b, a) with
       | None -> computeBelow (a, b)
       | Some (true, c) -> true
@@ -196,11 +196,11 @@ module MakeSubordinate
           end
       end
 
-    let belowEq (a, b) = a = b || below (a, b)
-    let equiv (a, b) = belowEq (a, b) && belowEq (b, a)
+    let belowEq a b = a = b || below a b
+    let equiv a b = belowEq a b && belowEq b a
 
-    let addSubord (a, b) =
-      begin if below (a, b) then ()
+    let addSubord a b =
+      begin if below a b then ()
       else
         begin if fGet b then
           raise
@@ -216,7 +216,7 @@ module MakeSubordinate
 
     let addIfBelowEq a's = function
       | b ->
-          begin if List.exists (function a -> belowEq (a, b)) a's then
+          begin if List.exists (function a -> belowEq a b) a's then
             aboveList := b :: !aboveList
           else ()
           end
@@ -236,8 +236,8 @@ module MakeSubordinate
 
     let insertNewDef (b, a) =
       begin match Table.lookup defGraph a with
-      | None -> Table.insert defGraph (a, IntSet.insert (b, IntSet.empty))
-      | Some bs -> Table.insert defGraph (a, IntSet.insert (b, bs))
+      | None -> Table.insert defGraph (a, IntSet.insert b IntSet.empty)
+      | Some bs -> Table.insert defGraph (a, IntSet.insert b bs)
       end
 
     let installConDec = function
@@ -287,7 +287,7 @@ module MakeSubordinate
 
     and installTypeN' = function
       | I.Pi (((I.Dec (_, v1_) as d_), _), v2_), a -> begin
-          addSubord (I.targetFam v1_, a);
+          addSubord (I.targetFam v1_) a;
           begin
             installTypeN v1_;
             installTypeN' (v2_, a)
@@ -303,7 +303,7 @@ module MakeSubordinate
     let rec installKindN = function
       | I.Uni l_, a -> ()
       | I.Pi ((I.Dec (_, v1_), p_), v2_), a -> begin
-          addSubord (I.targetFam v1_, a);
+          addSubord (I.targetFam v1_) a;
           begin
             installTypeN v1_;
             installKindN (v2_, a)
@@ -344,7 +344,7 @@ module MakeSubordinate
       end
 
     let checkBelow (a, b) =
-      begin if not (below (a, b)) then
+      begin if not (below a b) then
         raise
           (Error
              ((("Subordination violation: "
@@ -369,8 +369,8 @@ module MakeSubordinate
 
     and respectsTypeN v_ = respectsTypeN' (v_, I.targetFam v_)
 
-    let respects (g_, (v_, s)) = respectsTypeN (Whnf.normalize (v_, s))
-    let respectsN (g_, v_) = respectsTypeN v_
+    let respects g_ (v_, s) = respectsTypeN (Whnf.normalize (v_, s))
+    let respectsN g_ v_ = respectsTypeN v_
 
     let famsToString (bs, msg) =
       IntSet.foldl
@@ -387,12 +387,12 @@ module MakeSubordinate
 
     let show () = Table.app showFam soGraph
 
-    let rec weaken = function
+    let rec weaken a1 b1 = match a1, b1 with
       | I.Null, a -> I.id
       | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
-          let w' = weaken (g'_, a) in
-          begin if belowEq (I.targetFam v_, a) then I.dot1 w'
-          else I.comp (w', I.shift)
+          let w' = weaken g'_ a in
+          begin if belowEq (I.targetFam v_) a then I.dot1 w'
+          else I.comp w' I.shift
           end
 
     open! struct
@@ -697,7 +697,7 @@ module MemoTable = HashTable.HashTable (struct
   type key' = int * int
 
   let hash (n, m) = (7 * n) + m
-  let eq (x__op, y__op) = x__op = y__op
+  let eq x__op y__op = x__op = y__op
 end)
 
 module Subordinate =

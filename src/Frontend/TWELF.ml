@@ -244,7 +244,7 @@ module type STELF = sig
     val read : string -> config
     (** suffix of configuration files *)
 
-    val readWithout : string * config -> config
+    val readWithout : string -> config -> config
     (** read config file *)
 
     val load : config -> status
@@ -260,7 +260,7 @@ module type STELF = sig
   val make : string -> status
   (** explicitly define configuration *)
 
-  val install1 : string * (Parser.fileParseResult * Paths.region) -> unit
+  val install1 : string -> Parser.fileParseResult * Paths.region -> unit
 
   (* read and load configuration *)
   val version : string

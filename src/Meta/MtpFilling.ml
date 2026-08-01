@@ -102,7 +102,7 @@ end) : MTPFILLING.MTPFILLING = struct
     let rec createEVars = function
       | g_, (F.True, s) -> ([], F.Unit)
       | g_, (F.Ex (I.Dec (_, v_), f_), s) ->
-          let x_ = I.newEVar (g_, I.EClo (v_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (v_, s)) in
           let x'_ = Whnf.lowerEVar x_ in
           let xs_, p_ = createEVars (g_, (f_, I.Dot (I.Exp x_, s))) in
           (x'_ :: xs_, F.Inx (x_, p_))
@@ -118,21 +118,19 @@ end) : MTPFILLING.MTPFILLING = struct
           try
             begin
               Search.searchEx
-                ( !MTPGlobal.maxFill,
-                  xs_,
-                  function
+                (!MTPGlobal.maxFill) xs_ (function
                   | max -> begin
                       ignore
                         begin if !Global.doubleCheck then
                           map
                             (function
                               | I.EVar (_, g'_, v_, _) as x_ ->
-                                  TypeCheck.typeCheck (g'_, (x_, v_)))
+                                  TypeCheck.typeCheck g'_ (x_, v_))
                             xs_
                         else []
                         end;
                       raise (Success max)
-                    end );
+                    end);
               raise (Error "Filling unsuccessful")
             end
           with Success max ->

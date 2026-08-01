@@ -117,7 +117,7 @@ end) : RECON_CONDEC = struct
   exception Error = Error
 
   (* error (r, msg) raises a syntax error within region r with text msg *)
-  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error r msg = raise (Error (Paths.wrap r msg))
 
   type nonrec name = string
 
@@ -129,9 +129,9 @@ end) : RECON_CONDEC = struct
     | Blockdec of name * ExtSyn.dec list * ExtSyn.dec list
 
   let condec (name, tm) = Condec_ (name, tm)
-  let blockdec (name, ds1, ds2) = Blockdec (name, ds1, ds2)
-  let blockdef (name, worlds) = Blockdef (name, worlds)
-  let condef (nameOpt, tm1, tm2Opt) = Condef_ (nameOpt, tm1, tm2Opt)
+  let blockdec name ds1 ds2 = Blockdec (name, ds1, ds2)
+  let blockdef name worlds = Blockdef (name, worlds)
+  let condef nameOpt tm1 tm2Opt = Condef_ (nameOpt, tm1, tm2Opt)
 
   (* condecToConDec (condec, r) = (SOME(cd), SOME(ocd))
      if condec is a named constant declaration with occurrence tree ocd,
@@ -144,7 +144,7 @@ end) : RECON_CONDEC = struct
   *)
   (* should printing of result be moved to frontend? *)
   (* Wed May 20 08:08:50 1998 -fp *)
-  let condecToConDec = function
+  let condecToConDec a1 b1 c1 = match a1, b1, c1 with
     | Condec_ (name, tm), Paths.Loc (fileName, r), abbFlag ->
         ignore (Names.varReset IntSyn.Null);
         ignore (ExtSyn.resetErrors fileName);
@@ -155,7 +155,7 @@ end) : RECON_CONDEC = struct
         let i, v'_ =
           try Timers.time Timers.abstract Abstract.abstractDecImp v_
           with Abstract.Error msg ->
-            raise (Abstract.Error (Paths.wrap (r, msg)))
+            raise (Abstract.Error (Paths.wrap r msg))
         in
         let cd =
           Names.nameConDec
@@ -184,7 +184,7 @@ end) : RECON_CONDEC = struct
         let f =
           begin match tm2Opt with
           | None -> ExtSyn.jterm tm1
-          | Some tm2 -> ExtSyn.jof (tm1, tm2)
+          | Some tm2 -> ExtSyn.jof tm1 tm2
           end
         in
         let f' = Timers.time Timers.recon ExtSyn.recon f in
@@ -199,13 +199,13 @@ end) : RECON_CONDEC = struct
         let i, (u'', v'') =
           try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
           with Abstract.Error msg ->
-            raise (Abstract.Error (Paths.wrap (r, msg)))
+            raise (Abstract.Error (Paths.wrap r msg))
         in
         let name =
           begin match optName with None -> "_" | Some name -> name
           end
         in
-        let ocd = Paths.def (i, oc1, oc2Opt) in
+        let ocd = Paths.def i oc1 oc2Opt in
         let cd =
           begin if abbFlag then
             Names.nameConDec (IntSyn.AbbrevDef (name, None, i, u'', v'', l_))
@@ -263,13 +263,13 @@ end) : RECON_CONDEC = struct
           let g0'_ = Names.ctxName g0_ in
           let g1'_ = Names.ctxLUName g1_ in
           let g2'_ = Names.ctxLUName g2_ in
-          (((Print.ctxToString (IntSyn.Null, g0'_) ^ "\n")
+          (((Print.ctxToString IntSyn.Null g0'_ ^ "\n")
            ^ begin match g1'_ with
            | IntSyn.Null -> ""
-           | _ -> ("some " ^ Print.ctxToString (g0'_, g1'_)) ^ "\n"
+           | _ -> ("some " ^ Print.ctxToString g0'_ g1'_) ^ "\n"
            end)
           ^ "pi ")
-          ^ Print.ctxToString (ctxAppend (g0'_, g1'_), g2'_)
+          ^ Print.ctxToString (ctxAppend (g0'_, g1'_)) g2'_
         in
         let checkFreevars = function
           | IntSyn.Null, (g1_, g2_), r -> ()
@@ -279,21 +279,20 @@ end) : RECON_CONDEC = struct
               let g1'_ = Names.ctxLUName g1_ in
               let g2'_ = Names.ctxLUName g2_ in
               error
-                ( r,
-                  "Free variables in context block after term reconstruction:\n"
-                  ^ ctxBlockToString (g0'_, (g1'_, g2'_)) )
+                r ("Free variables in context block after term reconstruction:\n"
+                  ^ ctxBlockToString (g0'_, (g1'_, g2'_)))
         in
         let gsome, gblock = (makectx lsome_, makectx lblock_) in
         let r' =
           begin match (ExtSyn.ctxRegion gsome, ExtSyn.ctxRegion gblock) with
-          | Some r1, Some r2 -> Paths.join (r1, r2)
+          | Some r1, Some r2 -> Paths.join r1 r2
           | _, Some r2 -> r2
           end
         in
         ignore (Names.varReset IntSyn.Null);
         ignore (ExtSyn.resetErrors fileName);
         let j =
-          ExtSyn.jwithctx (gsome, ExtSyn.jwithctx (gblock, ExtSyn.jnothing))
+          ExtSyn.jwithctx gsome (ExtSyn.jwithctx gblock ExtSyn.jnothing)
         in
         let (ExtSyn.JWithCtx (gsome_, ExtSyn.JWithCtx (gblock_, _))) =
           Timers.time Timers.recon ExtSyn.recon j
@@ -304,12 +303,11 @@ end) : RECON_CONDEC = struct
           with Constraints.Error c_ ->
             raise
               (error
-                 ( r',
-                   (("Constraints remain in context block after term \
+                 r' ((("Constraints remain in context block after term \
                       reconstruction:\n"
                     ^ ctxBlockToString (IntSyn.Null, (gsome_, gblock_)))
                    ^ "\n")
-                   ^ Print.cnstrsToString c_ ))
+                   ^ Print.cnstrsToString c_))
         in
         ignore (checkFreevars (g0_, (gsome', gblock'), r'));
         let bd =

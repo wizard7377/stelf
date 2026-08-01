@@ -193,7 +193,7 @@ module type LEXER = sig
   (** [lexStream instream] returns an infinite token stream terminated by [Eof].
   *)
 
-  val lexTerminal : string * string -> (token * Paths.region) Stream.stream
+  val lexTerminal : string -> string -> (token * Paths.region) Stream.stream
   val toString : token -> string
 
   val lex : (int -> string) -> (token * Paths.region) Stream.stream

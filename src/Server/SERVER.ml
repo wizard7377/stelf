@@ -15,5 +15,5 @@ open! Basis
 (** Interactive command server for Stelf/STELF. *)
 
 module type SERVER = sig
-  val server : string * string list -> OS.Process.status
+  val server : string -> string list -> OS.Process.status
 end

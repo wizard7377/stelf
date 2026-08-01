@@ -42,7 +42,7 @@ module type COMPILE = sig
   val install : IntSyn.conDecForm -> IntSyn.cid -> unit
   val sProgReset : unit -> unit
   val compileCtx : bool -> IntSyn.dec IntSyn.ctx -> CompSyn.dProg
-  val compileGoal : IntSyn.dec IntSyn.ctx * IntSyn.exp -> CompSyn.goal
+  val compileGoal : IntSyn.dec IntSyn.ctx -> IntSyn.exp -> CompSyn.goal
 
   val compilePsi : bool -> Tomega.dec IntSyn.ctx -> CompSyn.dProg
   (** for the meta theorem prover --cs *)

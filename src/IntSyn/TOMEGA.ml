@@ -148,13 +148,13 @@ module type TOMEGA = sig
   val id : sub
   val shift : sub
   val dot1 : sub -> sub
-  val dotEta : front * sub -> sub
-  val comp : sub * sub -> sub
-  val varSub : int * sub -> front
-  val decSub : dec * sub -> dec
-  val forSub : for_ * sub -> for_
-  val whnfFor : for_ * sub -> for_ * sub
-  val normalizePrg : prg * sub -> prg
+  val dotEta : front -> sub -> sub
+  val comp : sub -> sub -> sub
+  val varSub : int -> sub -> front
+  val decSub : dec -> sub -> dec
+  val forSub : for_ -> sub -> for_
+  val whnfFor : for_ -> sub -> for_ * sub
+  val normalizePrg : prg -> sub -> prg
   val normalizeSub : sub -> sub
   val derefPrg : prg -> prg
   val lemmaLookup : lemma -> conDec
@@ -163,13 +163,13 @@ module type TOMEGA = sig
   val lemmaSize : unit -> int
   val lemmaDef : lemma -> prg
   val lemmaFor : lemma -> for_
-  val eqWorlds : worlds * worlds -> bool
-  val convFor : (for_ * sub) * (for_ * sub) -> bool
-  val newEVar : dec IntSyn.ctx * for_ -> prg
+  val eqWorlds : worlds -> worlds -> bool
+  val convFor : for_ * sub -> for_ * sub -> bool
+  val newEVar : dec IntSyn.ctx -> for_ -> prg
   val newEVarTC : dec IntSyn.ctx * for_ * tC option * tC option -> prg
 
   (* Below are added by Yu Liao *)
-  val ctxDec : dec IntSyn.ctx * int -> dec
+  val ctxDec : dec IntSyn.ctx -> int -> dec
   val revCoerceSub : IntSyn.sub -> sub
   val revCoerceCtx : IntSyn.dec IntSyn.ctx -> dec IntSyn.ctx
 
@@ -179,8 +179,8 @@ module type TOMEGA = sig
   val deblockify : IntSyn.dec IntSyn.ctx -> IntSyn.dec IntSyn.ctx * sub
 
   (* Stuff that has to do with termination conditions *)
-  val tCSub : tC * IntSyn.sub -> tC
+  val tCSub : tC -> IntSyn.sub -> tC
   val normalizeTC : tC -> tC
-  val convTC : tC * tC -> bool
-  val transformTC : IntSyn.dec IntSyn.ctx * for_ * int Order.order list -> tC
+  val convTC : tC -> tC -> bool
+  val transformTC : IntSyn.dec IntSyn.ctx -> for_ -> int Order.order list -> tC
 end

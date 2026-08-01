@@ -20,7 +20,7 @@ module type BASIC_STREAM = sig
 
   (* Eager stream construction *)
   val empty : 'a stream
-  val cons : 'a * 'a stream -> 'a stream
+  val cons : 'a -> 'a stream -> 'a stream
 end
 
 module type STREAM = sig
@@ -34,8 +34,8 @@ module type STREAM = sig
   val map : ('a -> 'b) -> 'a stream -> 'b stream
   val filter : ('a -> bool) -> 'a stream -> 'a stream
   val exists : ('a -> bool) -> 'a stream -> bool
-  val take : 'a stream * int -> 'a list
-  val drop : 'a stream * int -> 'a stream
+  val take : 'a stream -> int -> 'a list
+  val drop : 'a stream -> int -> 'a stream
   val fromList : 'a list -> 'a stream
   val toList : 'a stream -> 'a list
   val tabulate : (int -> 'a) -> 'a stream

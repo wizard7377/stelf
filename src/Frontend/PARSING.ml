@@ -82,9 +82,9 @@ module type PARSING = sig
   type 'a recparser = 'a recParseResult parser
 
   (* useful combinator for recursive parsers *)
-  val recwith : 'a recparser * ('a -> 'b) -> 'b recparser
+  val recwith : 'a recparser -> ('a -> 'b) -> 'b recparser
 
   exception Error of string
 
-  val error : Paths.region * string -> 'a
+  val error : Paths.region -> string -> 'a
 end

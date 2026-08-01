@@ -221,7 +221,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
 
   (* exactToApx (U, V) = (U-, V-)
      if G |- U : V *)
-  let exactToApx (u_, v_) =
+  let exactToApx u_ v_ =
     let v'_, l'_ = classToApx v_ in
     begin match whnfUni l'_ with
     | Level 1 -> (Undefined, v'_, l'_)
@@ -270,7 +270,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         let s = I.Shift (I.ctxLength g_) in
         I.Root (I.FVar (name, I.Uni (apxToUni l_), s), I.Nil)
     | g_, Const h_, l_, allowed (* Type *) ->
-        I.Root (h_, Whnf.newSpineVar (g_, (I.conDecType (headConDec h_), I.id)))
+        I.Root (h_, Whnf.newSpineVar g_ (I.conDecType (headConDec h_), I.id))
   (* convert undetermined CVars to FVars *)
   (* also, does the name of the bound variable here matter? *)
   (* this is probably very bad -- it should be possible to infer
@@ -285,7 +285,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
      then U- = u and G |- U : V[s] and U is the most general such *)
   let rec apxToExactW = function
     | g_, u_, (I.Pi ((d_, _), v_), s), allowed ->
-        let d'_ = I.decSub (d_, s) in
+        let d'_ = I.decSub d_ s in
         I.Lam (d'_, apxToExact (I.Decl (g_, d'_), u_, (v_, I.dot1 s), allowed))
     | g_, u_, (I.Uni l_, s), allowed -> apxToClass (g_, u_, uniToApx l_, allowed)
     | g_, u_, ((I.Root (I.FVar (name, _, _), _), s) as vs_), allowed ->
@@ -294,7 +294,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         begin match whnfUni l_ with
         | Level 1 ->
             let vs_e, vs_s = vs_ in
-            I.newEVar (g_, I.EClo (vs_e, vs_s))
+            I.newEVar g_ (I.EClo (vs_e, vs_s))
         | Level 2 ->
             let name' = getReplacementName (whnf u_, v_, Level 2, allowed) in
             let v'_ = apxToClass (Null, v_, Level 2, allowed) in
@@ -307,7 +307,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         (* U must be a CVar *)
     | g_, u_, vs_, allowed (* an atomic type, not Def *) ->
         let vs_e, vs_s = vs_ in
-        I.newEVar (g_, I.EClo (vs_e, vs_s))
+        I.newEVar g_ (I.EClo (vs_e, vs_s))
 
   and apxToExact (g_, u_, vs_, allowed) =
     apxToExactW (g_, u_, Whnf.whnfExpandDef vs_, allowed)
@@ -356,7 +356,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         r2 := Some l1_
       end
 
-  let matchUni (l1_, l2_) = matchUniW (whnfUni l1_, whnfUni l2_)
+  let matchUni l1_ l2_ = matchUniW (whnfUni l1_, whnfUni l2_)
 
   (* occur (r, u) = ()
        iff r does not occur in u,
@@ -379,7 +379,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
        effect: applies I
        otherwise raises Unify *)
   let rec matchW = function
-    | Uni l1_, Uni l2_ -> matchUni (l1_, l2_)
+    | Uni l1_, Uni l2_ -> matchUni l1_ l2_
     | (Const h1_ as v1_), (Const h2_ as v2_) ->
         begin match (h1_, h2_) with
         | I.Const c1, I.Const c2 ->

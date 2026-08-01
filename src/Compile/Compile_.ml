@@ -200,7 +200,7 @@ module MakeCompile
     | I.Pi ((d_, p_), u_), depth, total ->
         I.Pi ((shiftDec (d_, depth, total), p_), shiftExp (u_, depth + 1, total))
     | I.FgnExp (csfe1, csfe2), depth, total ->
-        I.FgnExpStd.Map.apply (csfe1, csfe2) (function u_ ->
+        I.FgnExpStd.Map.apply csfe1 csfe2 (function u_ ->
             shiftExp (Whnf.normalize (u_, I.id), depth, total))
   (* Tue Apr  2 12:10:24 2002 -fp -bp *)
   (* this is overkill and could be very expensive for deeply nested foreign exps *)
@@ -506,7 +506,7 @@ module MakeCompile
   let compileDClause opt (g_, a_) =
     compileDClauseN I.Ordinary opt (g_, Whnf.normalize (a_, I.id))
 
-  let compileGoal (g_, a_) =
+  let compileGoal g_ a_ =
     compileGoalN I.Ordinary (g_, Whnf.normalize (a_, I.id))
 
   (* compileCtx G = (G, dPool)

@@ -24,7 +24,7 @@ module type INTSET = sig
   type intset
 
   val empty : intset
-  val insert : int * intset -> intset
-  val member : int * intset -> bool
+  val insert : int -> intset -> intset
+  val member : int -> intset -> bool
   val foldl : (int * 'b -> 'b) -> 'b -> intset -> 'b
 end

@@ -6,7 +6,7 @@ module U = Intsyn.Lambda_.UnifyTrail
 
 (* Helper: assert that unify raises Unify exception *)
 let check_unify_fails lbl ctx lhs rhs =
-  match U.unify (ctx, lhs, rhs) with
+  match U.unify ctx lhs rhs with
   | exception U.Unify _ -> ()
   | () -> Alcotest.failf "%s: expected Unify exception but unify succeeded" lbl
 
@@ -19,11 +19,11 @@ let fresh_evar () =
 
 let test_unify_uni_refl () =
   U.reset ();
-  U.unify (null_ctx, (Uni Type, id_sub), (Uni Type, id_sub))
+  U.unify null_ctx (Uni Type, id_sub) (Uni Type, id_sub)
 
 let test_unify_kind_refl () =
   U.reset ();
-  U.unify (null_ctx, (Uni Kind, id_sub), (Uni Kind, id_sub))
+  U.unify null_ctx (Uni Kind, id_sub) (Uni Kind, id_sub)
 
 let test_unify_bvar_clash () =
   (* BVar indices that don't match cause a "Bound variable clash" *)
@@ -35,20 +35,20 @@ let test_unify_bvar_clash () =
 let test_unify_lam_refl () =
   U.reset ();
   let lam = lam_ (Uni Type) (bvar 1) in
-  U.unify (null_ctx, (lam, id_sub), (lam, id_sub))
+  U.unify null_ctx (lam, id_sub) (lam, id_sub)
 
 (* ── EVar instantiation ───────────────────────────── *)
 
 let test_unify_evar_assigns () =
   U.reset ();
   let r, x = fresh_evar () in
-  U.unify (null_ctx, (x, id_sub), (Uni Type, id_sub));
+  U.unify null_ctx (x, id_sub) (Uni Type, id_sub);
   Alcotest.(check bool) "EVar is instantiated after unify" true (!r <> None)
 
 let test_unify_evar_value () =
   U.reset ();
   let r, x = fresh_evar () in
-  U.unify (null_ctx, (x, id_sub), (Uni Type, id_sub));
+  U.unify null_ctx (x, id_sub) (Uni Type, id_sub);
   match !r with
   | None -> Alcotest.fail "EVar not instantiated"
   | Some v ->
@@ -58,7 +58,7 @@ let test_unify_two_evars () =
   U.reset ();
   let r1, x1 = fresh_evar () in
   let r2, x2 = fresh_evar () in
-  U.unify (null_ctx, (x1, id_sub), (x2, id_sub));
+  U.unify null_ctx (x1, id_sub) (x2, id_sub);
   (* at least one of them must be assigned (or they're unified via sharing) *)
   Alcotest.(check bool)
     "at least one EVar is assigned" true
@@ -70,7 +70,7 @@ let test_unify_backtrack_evar () =
   U.reset ();
   let r, x = fresh_evar () in
   U.mark ();
-  U.unify (null_ctx, (x, id_sub), (Uni Type, id_sub));
+  U.unify null_ctx (x, id_sub) (Uni Type, id_sub);
   let () =
     Alcotest.(check bool) "EVar assigned before unwind" true (!r <> None)
   in
@@ -82,8 +82,8 @@ let test_unify_backtrack_two_evars () =
   let r1, x1 = fresh_evar () in
   let r2, x2 = fresh_evar () in
   U.mark ();
-  U.unify (null_ctx, (x1, id_sub), (Uni Type, id_sub));
-  U.unify (null_ctx, (x2, id_sub), (Uni Kind, id_sub));
+  U.unify null_ctx (x1, id_sub) (Uni Type, id_sub);
+  U.unify null_ctx (x2, id_sub) (Uni Kind, id_sub);
   U.unwind ();
   Alcotest.(check bool)
     "both EVars reset after unwind" true
@@ -94,9 +94,9 @@ let test_unify_backtrack_preserves_earlier () =
   U.reset ();
   let r1, x1 = fresh_evar () in
   let r2, x2 = fresh_evar () in
-  U.unify (null_ctx, (x1, id_sub), (Uni Type, id_sub));
+  U.unify null_ctx (x1, id_sub) (Uni Type, id_sub);
   U.mark ();
-  U.unify (null_ctx, (x2, id_sub), (Uni Kind, id_sub));
+  U.unify null_ctx (x2, id_sub) (Uni Kind, id_sub);
   U.unwind ();
   Alcotest.(check bool) "x1 (before mark) still assigned" true (!r1 <> None);
   Alcotest.(check bool) "x2 (after mark) reset" true (!r2 = None)
@@ -108,7 +108,7 @@ let test_unifiable_true () =
   let _, x = fresh_evar () in
   Alcotest.(check bool)
     "EVar unifiable with Uni Type" true
-    (U.unifiable (null_ctx, (x, id_sub), (Uni Type, id_sub)))
+    (U.unifiable null_ctx (x, id_sub) (Uni Type, id_sub))
 
 let test_unifiable_false () =
   (* BVar with different indices are not unifiable *)
@@ -116,7 +116,7 @@ let test_unifiable_false () =
   Alcotest.(check bool)
     "BVar 1 not unifiable with BVar 2" false
     (U.unifiable
-       (null_ctx, (Root (BVar 1, Nil), id_sub), (Root (BVar 2, Nil), id_sub)))
+       null_ctx (Root (BVar 1, Nil), id_sub) (Root (BVar 2, Nil), id_sub))
 
 let suites =
   [

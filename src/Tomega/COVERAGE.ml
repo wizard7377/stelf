@@ -33,5 +33,5 @@ module type TOMEGACOVERAGE = sig
   exception Error of string
 
   val coverageCheckPrg :
-    Tomega.worlds * Tomega.dec IntSyn.ctx * Tomega.prg -> unit
+    Tomega.worlds -> Tomega.dec IntSyn.ctx -> Tomega.prg -> unit
 end

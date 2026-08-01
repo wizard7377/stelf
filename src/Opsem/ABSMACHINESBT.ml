@@ -37,8 +37,6 @@ module type ABSMACHINESBT = sig
   (*! structure IntSyn  : INTSYN !*)
   (*! structure CompSyn : COMPSYN !*)
   val solve :
-    (CompSyn.goal * IntSyn.sub)
-    * CompSyn.dProg
-    * (CompSyn.flatterm list -> unit) ->
+    CompSyn.goal * IntSyn.sub -> CompSyn.dProg -> (CompSyn.flatterm list -> unit) ->
     unit
 end

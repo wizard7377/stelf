@@ -61,7 +61,7 @@ struct
       delphin;
     ]
 
-  let total = Timing.sumCenter ("Total         ", centers)
+  let total = Timing.sumCenter ("Total         ") centers
   let time = Timing.time
   let reset () = List.app Timing.reset centers
 

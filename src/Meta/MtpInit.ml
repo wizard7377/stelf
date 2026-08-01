@@ -91,10 +91,10 @@ end) : MTPINIT.MTPINIT = struct
     module S = StateSyn
     module Fmt = Formatter
 
-    let init (f_, of_) =
+    let init f_ of_ =
       let rec init' = function
         | (g_, b_), S.All (_, o_), F.All (F.Prim d_, f'_), ss_ ->
-            let d'_ = Names.decName (g_, d_) in
+            let d'_ = Names.decName g_ d_ in
             init'
               ( ( I.Decl (g_, d'_),
                   I.Decl (b_, S.Lemma (S.Splits !MTPGlobal.maxSplit)) ),

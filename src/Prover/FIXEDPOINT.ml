@@ -48,7 +48,7 @@ module type FIXEDPOINT = sig
 
   type operator
 
-  val expand : State.focus * Tomega.tC -> operator
+  val expand : State.focus -> Tomega.tC -> operator
   val apply : operator -> unit
   val menu : operator -> string
 end

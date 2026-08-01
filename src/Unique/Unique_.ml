@@ -88,7 +88,7 @@ module MakeUnique
 
     let rec instEVars = function
       | g_, (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
-          let x1_ = I.newEVar (g_, I.EClo (v1_, s)) in
+          let x1_ = I.newEVar g_ (I.EClo (v1_, s)) in
           instEVars (g_, (v2_, I.Dot (I.Exp x1_, s)))
       | g_, ((I.Root _, _) as vs_) -> vs_
 
@@ -97,11 +97,11 @@ module MakeUnique
       | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
           let s = createEVarSub (g_, g'_) in
           let v'_ = I.EClo (v_, s) in
-          let x_ = I.newEVar (g_, v'_) in
+          let x_ = I.newEVar g_ v'_ in
           I.Dot (I.Exp x_, s)
 
-    let unifiable (g_, (u_, s), (u'_, s')) =
-      Unify.unifiable (g_, (u_, s), (u'_, s'))
+    let unifiable g_ (u_, s) (u'_, s') =
+      Unify.unifiable g_ (u_, s) (u'_, s')
 
     let rec unifiableSpines = function
       | g_, (I.Nil, s), (I.Nil, s'), M.Mnil -> true
@@ -109,7 +109,7 @@ module MakeUnique
           (I.App (u1_, s2_), s),
           (I.App (u1', s2'_), s'),
           M.Mapp (M.Marg (M.Plus, _), ms2) ) ->
-          unifiable (g_, (u1_, s), (u1', s'))
+          unifiable g_ (u1_, s) (u1', s')
           && unifiableSpines (g_, (s2_, s), (s2'_, s'), ms2)
       | ( g_,
           (I.App (u1_, s2_), s),
@@ -185,7 +185,7 @@ module MakeUnique
           in
           checkDiffBlocksInternal
             ( I.Decl (g_, d_),
-              (v_, I.comp (s, I.shift)),
+              (v_, I.comp s I.shift),
               (I.dot1 t, piDecs),
               (a, ms),
               (b, xOpt) )
@@ -199,7 +199,7 @@ module MakeUnique
               let v'_, s = instEVars (g_, (v_, t)) in
               checkDiffBlocksInternal
                 ( I.Decl (g_, d_),
-                  (v'_, I.comp (s, I.shift)),
+                  (v'_, I.comp s I.shift),
                   (I.dot1 t, piDecs),
                   (a, ms),
                   (b, xOpt) )
@@ -267,7 +267,7 @@ module MakeUnique
           in
           checkUniqueBlockBlock
             ( I.Decl (g_, d_),
-              (v_, I.comp (s, I.shift)),
+              (v_, I.comp s I.shift),
               (I.dot1 t, piDecs),
               (a, ms),
               (bx, b') )
@@ -432,7 +432,7 @@ module MakeUnique
        checks uniqueness of applicable cases with respect to mode spine ms
        Effect: raises Error (msg) otherwise
     *)
-  let checkUnique (a, ms) =
+  let checkUnique a ms =
     let _ =
       chatter 4 (function () ->
           ("Uniqueness checking family " ^ cName a) ^ "\n")

@@ -31,5 +31,5 @@ module type MODEDEC = sig
     IntSyn.cid -> ModeSyn.modeSpine -> Paths.region -> ModeSyn.modeSpine
 
   val checkFull : IntSyn.cid -> ModeSyn.modeSpine -> Paths.region -> unit
-  val checkPure : IntSyn.cid * ModeSyn.modeSpine -> Paths.region -> unit
+  val checkPure : IntSyn.cid -> ModeSyn.modeSpine -> Paths.region -> unit
 end

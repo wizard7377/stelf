@@ -139,7 +139,7 @@ end) : MTPSTRATEGY = struct
                 end
             | o'_ :: l'_, Some o_ ->
                 begin if MTPSplitting.applicable o'_ then
-                  begin match MTPSplitting.compare (o'_, o_) with
+                  begin match MTPSplitting.compare o'_ o_ with
                   | Less -> findMin' (l'_, Some o'_)
                   | _ -> findMin' (l'_, Some o_)
                   end

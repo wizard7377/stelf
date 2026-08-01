@@ -144,8 +144,8 @@ end) : MTPI = struct
     let empty () = Ring.empty !open_
     let current () = Ring.current !open_
     let delete () = open_ := Ring.delete !open_
-    let insertOpen s_ = open_ := Ring.insert (!open_, s_)
-    let insertSolved s_ = solved_ := Ring.insert (!solved_, s_)
+    let insertOpen s_ = open_ := Ring.insert (!open_) s_
+    let insertSolved s_ = solved_ := Ring.insert (!solved_) s_
     let insert s_ = insertOpen s_
     let collectOpen () = Ring.foldr (fun (a, b) -> a :: b) [] !open_
     let collectSolved () = Ring.foldr (fun (a, b) -> a :: b) [] !solved_
@@ -194,9 +194,9 @@ end) : MTPI = struct
       let formatTuple (g_, p_) =
         let rec formatTuple' = function
           | F.Unit -> []
-          | F.Inx (m_, F.Unit) -> [ printFmt (Print.formatExp (g_, m_)) ]
+          | F.Inx (m_, F.Unit) -> [ printFmt (Print.formatExp g_ m_) ]
           | F.Inx (m_, p'_) ->
-              printFmt (Print.formatExp (g_, m_))
+              printFmt (Print.formatExp g_ m_)
               :: Fmt.string "," :: Fmt.break_ :: formatTuple' p'_
         in
         begin match p_ with
@@ -260,7 +260,7 @@ end) : MTPI = struct
         | k, Splitting o_ :: m_, ((Some k', Some o'_) as kOopt') ->
             let kOopt'' =
               begin if MTPSplitting.applicable o_ then
-                begin match MTPSplitting.compare (o_, o'_) with
+                begin match MTPSplitting.compare o_ o'_ with
                 | Less -> (Some k, Some o_)
                 | _ -> kOopt'
                 end
@@ -325,12 +325,12 @@ end) : MTPI = struct
       | x :: l_, l'_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
-    let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv l1_ l2_ = contains (l1_, l2_) && contains (l2_, l1_)
 
     let rec transformOrder' = function
       | g_, Order.Arg k ->
           let k' = I.ctxLength g_ - k + 1 in
-          let (I.Dec (_, v_)) = I.ctxDec (g_, k') in
+          let (I.Dec (_, v_)) = I.ctxDec g_ k' in
           S.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
       | g_, Order.Lex os_ ->
           S.Lex (map (function o_ -> transformOrder' (g_, o_)) os_)
@@ -346,7 +346,7 @@ end) : MTPI = struct
 
     let select c = try Order.selLookup c with _ -> Order.Lex []
 
-    let init (k, names) =
+    let init k names =
       let cL =
         map
           (function
@@ -357,7 +357,7 @@ end) : MTPI = struct
       ignore (reset ());
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.Null, f_, map select cL) in
-      let slist = MTPInit.init (f_, Obj.magic o_) in
+      let slist = MTPInit.init f_ (Obj.magic o_) in
       let _ =
         begin if List.length slist = 0 then raise Domain else ()
         end

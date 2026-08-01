@@ -105,14 +105,14 @@ end) : CHECKING = struct
 
     let atomicPredToString = function
       | g_, Less ((us_, _), (us', _)) ->
-          (Print.expToString (g_, mkEClo us_) ^ " < ")
-          ^ Print.expToString (g_, mkEClo us')
+          (Print.expToString g_ (mkEClo us_) ^ " < ")
+          ^ Print.expToString g_ (mkEClo us')
       | g_, Leq ((us_, _), (us', _)) ->
-          (Print.expToString (g_, mkEClo us_) ^ " <= ")
-          ^ Print.expToString (g_, mkEClo us')
+          (Print.expToString g_ (mkEClo us_) ^ " <= ")
+          ^ Print.expToString g_ (mkEClo us')
       | g_, Eq ((us_, _), (us', _)) ->
-          (Print.expToString (g_, mkEClo us_) ^ " = ")
-          ^ Print.expToString (g_, mkEClo us')
+          (Print.expToString g_ (mkEClo us_) ^ " = ")
+          ^ Print.expToString g_ (mkEClo us')
 
     let rec atomicRCtxToString = function
       | g_, [] -> " "
@@ -153,7 +153,7 @@ end) : CHECKING = struct
       let rec fmtOrder' = function
         | R.Arg (((u_, s) as us_), ((v_, s') as vs_)) ->
             F.hbox
-              [ F.string "("; Print.formatExp (g_, mkEClo us_); F.string ")" ]
+              [ F.string "("; Print.formatExp g_ (mkEClo us_); F.string ")" ]
         | R.Lex l_ ->
             F.hbox
               [ F.string "{"; F.hOVbox0 1 0 1 (fmtOrders l_); F.string "}" ]
@@ -193,8 +193,8 @@ end) : CHECKING = struct
     let init () = true
     let eqCid (c, c') = c = c'
 
-    let conv ((us_, vs_), (us', vs'_)) =
-      Conv.conv (vs_, vs'_) && Conv.conv (us_, us')
+    let conv (us_, vs_) (us', vs'_) =
+      Conv.conv vs_ vs'_ && Conv.conv us_ us'
 
     let isUniversal = function All -> true | Exist -> false | exist' -> false
     let isExistential = function All -> false | Exist -> true | exist' -> true
@@ -202,7 +202,7 @@ end) : CHECKING = struct
     let rec isParameter (q_, x_) = isParameterW (q_, Whnf.whnf (x_, I.id))
 
     and isParameterW (q_, us_) =
-      try isUniversal (I.ctxLookup (q_, Whnf.etaContract (mkEClo us_)))
+      try isUniversal (I.ctxLookup q_ (Whnf.etaContract (mkEClo us_)))
       with Whnf.Eta -> isFreeEVar us_
 
     and isFreeEVar = function
@@ -216,16 +216,16 @@ end) : CHECKING = struct
       | gq, ((I.Root (I.Const c, s_) as x_), s) -> isAtomicS (gq, (s_, s))
       | gq, ((I.Root (I.Def c, s_) as x_), s) -> isAtomicS (gq, (s_, s))
       | ((g_, q_) as gq), ((I.Root (I.BVar n, s_) as x_), s) ->
-          isExistential (I.ctxLookup (q_, n)) || isAtomicS (gq, (s_, s))
+          isExistential (I.ctxLookup q_ n) || isAtomicS (gq, (s_, s))
       | gq, _ -> false
 
     and isAtomicS = function
       | gq, (I.Nil, _) -> true
-      | gq, (I.SClo (s_, s'), s'') -> isAtomicS (gq, (s_, I.comp (s', s'')))
+      | gq, (I.SClo (s_, s'), s'') -> isAtomicS (gq, (s_, I.comp s' s''))
       | gq, (I.App (u'_, s'_), s1') -> false
 
     let eq (g_, (us_, vs_), (us', vs'_)) =
-      Unify.unifiable (g_, vs_, vs'_) && Unify.unifiable (g_, us_, us')
+      Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
 
     let rec lookupEq = function
       | gq, [], usVs, usVs', sc -> false
@@ -342,8 +342,8 @@ end) : CHECKING = struct
           ((u'_, s1'), (v'_, s2')),
           p'_,
           sc ) ->
-          begin if Subordinate.equiv (I.targetFam v'_, I.targetFam v1_) then
-            let x_ = I.newEVar (g_, I.EClo (v1_, s1)) in
+          begin if Subordinate.equiv (I.targetFam v'_) (I.targetFam v1_) then
+            let x_ = I.newEVar g_ (I.EClo (v1_, s1)) in
             let sc' () = isParameter (q_, x_) && sc () in
             ltInstL
               ( (g_, q_),
@@ -354,8 +354,8 @@ end) : CHECKING = struct
                 p'_,
                 sc' )
           else
-            begin if Subordinate.below (I.targetFam v1_, I.targetFam v'_) then
-              let x_ = I.newEVar (g_, I.EClo (v1_, s1)) in
+            begin if Subordinate.below (I.targetFam v1_) (I.targetFam v'_) then
+              let x_ = I.newEVar g_ (I.EClo (v1_, s1)) in
               ltInstL
                 ( (g_, q_),
                   d_,
@@ -382,8 +382,8 @@ end) : CHECKING = struct
           ((u'_, s1'), (v'_, s2')),
           p'_,
           sc ) ->
-          begin if Subordinate.equiv (I.targetFam v'_, I.targetFam v1_) then
-            let x_ = I.newEVar (g_, I.EClo (v1_, s1)) in
+          begin if Subordinate.equiv (I.targetFam v'_) (I.targetFam v1_) then
+            let x_ = I.newEVar g_ (I.EClo (v1_, s1)) in
             let sc' () = isParameter (q_, x_) && sc () in
             leInstL
               ( (g_, q_),
@@ -394,8 +394,8 @@ end) : CHECKING = struct
                 p'_,
                 sc' )
           else
-            begin if Subordinate.below (I.targetFam v1_, I.targetFam v'_) then
-              let x_ = I.newEVar (g_, I.EClo (v1_, s1)) in
+            begin if Subordinate.below (I.targetFam v1_) (I.targetFam v'_) then
+              let x_ = I.newEVar g_ (I.EClo (v1_, s1)) in
               leInstL
                 ( (g_, q_),
                   d_,
@@ -423,7 +423,7 @@ end) : CHECKING = struct
             (I.Pi ((I.Dec (_, v2''), _), v''), s2'') ),
           p'_,
           sc ) ->
-          let x_ = I.newEVar (g_, I.EClo (v1'', s1'')) in
+          let x_ = I.newEVar g_ (I.EClo (v1'', s1'')) in
           eqInstL
             ( gq,
               d_,
@@ -608,7 +608,7 @@ end) : CHECKING = struct
           p'_,
           sc ) ->
           begin if n = n' then
-            let (I.Dec (_, v'_)) = I.ctxDec (g_, n) in
+            let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             eqSpineIL
               ( gq,
                 d_,
@@ -642,9 +642,9 @@ end) : CHECKING = struct
       | gq, d_, d'_, ((Nil, s), vs_), ((Nil, s'), vs'_), p'_, sc ->
           leftInstantiate (gq, d_, d'_, p'_, sc)
       | gq, d_, d'_, ((I.SClo (s_, s'), s''), vs_), ssVs', p'_, sc ->
-          eqSpineIL (gq, d_, d'_, ((s_, I.comp (s', s'')), vs_), ssVs', p'_, sc)
+          eqSpineIL (gq, d_, d'_, ((s_, I.comp s' s''), vs_), ssVs', p'_, sc)
       | gq, d_, d'_, ssVs, ((I.SClo (s'_, s'), s''), vs'_), p'_, sc ->
-          eqSpineIL (gq, d_, d'_, ssVs, ((s'_, I.comp (s', s'')), vs'_), p'_, sc)
+          eqSpineIL (gq, d_, d'_, ssVs, ((s'_, I.comp s' s''), vs'_), p'_, sc)
       | ( gq,
           d_,
           d'_,
@@ -684,7 +684,7 @@ end) : CHECKING = struct
 
     and ordEqR = function
       | gq, d'_, R.Arg usVs, R.Arg usVs' ->
-          conv (usVs, usVs')
+          conv usVs usVs'
           || eqAtomicR (gq, d'_, usVs, usVs', init, leftInstantiate)
       | gq, d'_, R.Lex o_, R.Lex o'_ -> ordEqsR (gq, d'_, o_, o'_)
       | gq, d'_, R.Simul o_, R.Simul o'_ -> ordEqsR (gq, d'_, o_, o'_)
@@ -727,12 +727,12 @@ end) : CHECKING = struct
           sc,
           k ) ->
           let usVs' =
-            ((u'_, I.comp (s1', I.shift)), (v'_, I.comp (s2', I.shift)))
+            ((u'_, I.comp s1' I.shift), (v'_, I.comp s2' I.shift))
           in
           let usVs = ((u_, I.dot1 s1), (v_, I.dot1 s2)) in
-          let d'_ = shiftACtx d_ (function s -> I.comp (s, I.shift)) in
+          let d'_ = shiftACtx d_ (function s -> I.comp s I.shift) in
           ltAtomicR
-            ( ( I.Decl (g_, N.decLUName (g_, I.decSub (dec_, s2))),
+            ( ( I.Decl (g_, N.decLUName g_ (I.decSub dec_ s2)),
                 I.Decl (q_, All) ),
               d'_,
               usVs,
@@ -752,13 +752,13 @@ end) : CHECKING = struct
           ((u'_, s1'), (v'_, s2')),
           sc,
           k ) ->
-          let d'_ = shiftACtx d_ (function s -> I.comp (s, I.shift)) in
+          let d'_ = shiftACtx d_ (function s -> I.comp s I.shift) in
           let usVs' =
-            ((u'_, I.comp (s1', I.shift)), (v'_, I.comp (s2', I.shift)))
+            ((u'_, I.comp s1' I.shift), (v'_, I.comp s2' I.shift))
           in
           let usVs = ((u_, I.dot1 s1), (v_, I.dot1 s2)) in
           leAtomicR
-            ( ( I.Decl (g_, N.decLUName (g_, I.decSub (dec_, s2))),
+            ( ( I.Decl (g_, N.decLUName g_ (I.decSub dec_ s2)),
                 I.Decl (q_, All) ),
               d'_,
               usVs,
@@ -777,9 +777,9 @@ end) : CHECKING = struct
           sc,
           k ) ->
           eqAtomicR
-            ( ( I.Decl (g_, N.decLUName (g_, I.decSub (dec_, s2))),
+            ( ( I.Decl (g_, N.decLUName g_ (I.decSub dec_ s2)),
                 I.Decl (q_, All) ),
-              shiftACtx d_ (function s -> I.comp (s, I.shift)),
+              shiftACtx d_ (function s -> I.comp s I.shift),
               ((u_, I.dot1 s1'), (v_, I.dot1 s2')),
               ((u'_, I.dot1 s1'), (v'_, I.dot1 s2')),
               sc,
@@ -826,7 +826,7 @@ end) : CHECKING = struct
           begin if isAtomic (gq, us') then
             k (gq, d_, [], Less ((us_, vs_), (us', vs'_)), sc)
           else
-            let (I.Dec (_, v'_)) = I.ctxDec (g_, n) in
+            let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             ltSpineR (gq, d_, (us_, vs_), ((s'_, s'), (v'_, I.id)), sc, k)
           end
       | gq, d_, _, ((I.EVar _, _), _), _, _ -> false
@@ -837,8 +837,8 @@ end) : CHECKING = struct
             (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
           sc,
           k ) ->
-          begin if Subordinate.equiv (I.targetFam v_, I.targetFam v1') then
-            let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
+            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' = function
               | () -> begin
                   ignore (isParameter (q_, x_));
@@ -853,8 +853,8 @@ end) : CHECKING = struct
                 sc',
                 k )
           else
-            begin if Subordinate.below (I.targetFam v1', I.targetFam v_) then
-              let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
+              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
               ltR
                 ( gq,
                   d_,
@@ -872,7 +872,7 @@ end) : CHECKING = struct
     and ltSpineRW = function
       | gq, d_, (us_, vs_), ((I.Nil, _), _), _, _ -> false
       | gq, d_, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, k ->
-          ltSpineR (gq, d_, (us_, vs_), ((s_, I.comp (s', s'')), vs'_), sc, k)
+          ltSpineR (gq, d_, (us_, vs_), ((s_, I.comp s' s''), vs'_), sc, k)
       | ( gq,
           d_,
           (us_, vs_),
@@ -899,8 +899,8 @@ end) : CHECKING = struct
             (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
           sc,
           k ) ->
-          begin if Subordinate.equiv (I.targetFam v_, I.targetFam v1') then
-            let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
+            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' () = isParameter (q_, x_) && sc () in
             leR
               ( gq,
@@ -910,8 +910,8 @@ end) : CHECKING = struct
                 sc',
                 k )
           else
-            begin if Subordinate.below (I.targetFam v1', I.targetFam v_) then
-              let x_ = I.newEVar (g_, I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
+              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
               leR
                 ( gq,
                   d_,
@@ -1023,7 +1023,7 @@ end) : CHECKING = struct
           sc,
           k ) ->
           begin if n = n' then
-            let (I.Dec (_, v'_)) = I.ctxDec (g_, n) in
+            let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             eqSpineR
               (gq, d_, ((s_, s), (v'_, I.id)), ((s'_, s'), (v'_, I.id)), sc, k)
           else k (gq, d_, [], Eq ((us_, vs_), (us', vs'_)), sc)
@@ -1036,9 +1036,9 @@ end) : CHECKING = struct
     and eqSpineRW = function
       | gq, d_, ((Nil, s), vs_), ((Nil, s'), vs'_), sc, k -> true
       | gq, d_, ((I.SClo (s_, s'), s''), vs_), ssVs', sc, k ->
-          eqSpineR (gq, d_, ((s_, I.comp (s', s'')), vs_), ssVs', sc, k)
+          eqSpineR (gq, d_, ((s_, I.comp s' s''), vs_), ssVs', sc, k)
       | gq, d_, ssVs, ((I.SClo (s'_, s'), s''), vs'_), sc, k ->
-          eqSpineR (gq, d_, ssVs, ((s'_, I.comp (s', s'')), vs'_), sc, k)
+          eqSpineR (gq, d_, ssVs, ((s'_, I.comp s' s''), vs'_), sc, k)
       | ( gq,
           d_,
           ((I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2)),
@@ -1122,13 +1122,13 @@ end) : CHECKING = struct
           ((u_, s1), (v_, s2)),
           ((I.Lam (_, u'_), s1'), (I.Pi ((dec', _), v'_), s2')),
           p_ ) ->
-          let d1_ = shiftRCtx d_ (function s -> I.comp (s, I.shift)) in
-          let d1' = shiftACtx d'_ (function s -> I.comp (s, I.shift)) in
-          let usVs = ((u_, I.comp (s1, I.shift)), (v_, I.comp (s2, I.shift))) in
+          let d1_ = shiftRCtx d_ (function s -> I.comp s I.shift) in
+          let d1' = shiftACtx d'_ (function s -> I.comp s I.shift) in
+          let usVs = ((u_, I.comp s1 I.shift), (v_, I.comp s2 I.shift)) in
           let usVs' = ((u'_, I.dot1 s1'), (v'_, I.dot1 s2')) in
-          let p'_ = shiftP p_ (function s -> I.comp (s, I.shift)) in
+          let p'_ = shiftP p_ (function s -> I.comp s I.shift) in
           ltAtomicL
-            ( ( I.Decl (g_, N.decLUName (g_, I.decSub (dec', s2'))),
+            ( ( I.Decl (g_, N.decLUName g_ (I.decSub dec' s2')),
                 I.Decl (q_, All) ),
               d1_,
               d1',
@@ -1148,13 +1148,13 @@ end) : CHECKING = struct
           ((u_, s1), (v_, s2)),
           ((I.Lam (_, u'_), s1'), (I.Pi ((dec', _), v'_), s2')),
           p_ ) ->
-          let d1_ = shiftRCtx d_ (function s -> I.comp (s, I.shift)) in
-          let d1' = shiftACtx d'_ (function s -> I.comp (s, I.shift)) in
-          let usVs = ((u_, I.comp (s1, I.shift)), (v_, I.comp (s2, I.shift))) in
+          let d1_ = shiftRCtx d_ (function s -> I.comp s I.shift) in
+          let d1' = shiftACtx d'_ (function s -> I.comp s I.shift) in
+          let usVs = ((u_, I.comp s1 I.shift), (v_, I.comp s2 I.shift)) in
           let usVs' = ((u'_, I.dot1 s1'), (v'_, I.dot1 s2')) in
-          let p'_ = shiftP p_ (function s -> I.comp (s, I.shift)) in
+          let p'_ = shiftP p_ (function s -> I.comp s I.shift) in
           leAtomicL
-            ( ( I.Decl (g_, N.decLUName (g_, I.decSub (dec', s2'))),
+            ( ( I.Decl (g_, N.decLUName g_ (I.decSub dec' s2')),
                 I.Decl (q_, All) ),
               d1_,
               d1',
@@ -1212,7 +1212,7 @@ end) : CHECKING = struct
           begin if isAtomic (gq, us') then
             leftDecompose (gq, d_, Less (usVs, (us', vs'_)) :: d'_, p_)
           else
-            let (I.Dec (_, v'_)) = I.ctxDec (g_, n) in
+            let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             ltSpineL (gq, d_, d'_, usVs, ((s'_, s'), (v'_, I.id)), p_)
           end
       | gq, d_, d'_, usVs, ((I.Root (I.Const c, s'_), s'), vs'_), p_ ->
@@ -1226,7 +1226,7 @@ end) : CHECKING = struct
     and ltSpineLW = function
       | gq, d_, d'_, usVs, ((I.Nil, _), _), _ -> true
       | gq, d_, d'_, usVs, ((I.SClo (s_, s'), s''), vs'_), p_ ->
-          ltSpineL (gq, d_, d'_, usVs, ((s_, I.comp (s', s'')), vs'_), p_)
+          ltSpineL (gq, d_, d'_, usVs, ((s_, I.comp s' s''), vs'_), p_)
       | ( gq,
           d_,
           d'_,
@@ -1346,7 +1346,7 @@ end) : CHECKING = struct
           (((I.Root (I.BVar n', s'_), s') as us'), vs'_),
           p_ ) ->
           begin if n = n' then
-            let (I.Dec (_, v'_)) = I.ctxDec (g_, n) in
+            let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             eqSpineL
               (gq, d_, d'_, ((s_, s), (v'_, I.id)), ((s'_, s'), (v'_, I.id)), p_)
           else leftDecompose (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p_)
@@ -1361,9 +1361,9 @@ end) : CHECKING = struct
       | gq, d_, d'_, ((Nil, s), vs_), ((Nil, s'), vs'_), p_ ->
           leftDecompose (gq, d_, d'_, p_)
       | gq, d_, d'_, ((I.SClo (s_, s'), s''), vs_), ssVs', p_ ->
-          eqSpineL (gq, d_, d'_, ((s_, I.comp (s', s'')), vs_), ssVs', p_)
+          eqSpineL (gq, d_, d'_, ((s_, I.comp s' s''), vs_), ssVs', p_)
       | gq, d_, d'_, ssVs, ((I.SClo (s'_, s'), s''), vs'_), p_ ->
-          eqSpineL (gq, d_, d'_, ssVs, ((s'_, I.comp (s', s'')), vs'_), p_)
+          eqSpineL (gq, d_, d'_, ssVs, ((s'_, I.comp s' s''), vs'_), p_)
       | ( gq,
           d_,
           d'_,

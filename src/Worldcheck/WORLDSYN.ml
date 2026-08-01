@@ -34,7 +34,7 @@ module type WORLDSYN = sig
   exception Error of string
 
   val reset : unit -> unit
-  val install : IntSyn.cid * Tomega.worlds -> unit
+  val install : IntSyn.cid -> Tomega.worlds -> unit
   val lookup : IntSyn.cid -> Tomega.worlds
 
   (* raises Error if undeclared *)

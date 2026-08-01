@@ -200,24 +200,24 @@ module Make_CompSyn
      then g' = g[s]
      and  G  |- g' : A
   *)
-  let rec goalSub = function
+  let rec goalSub a1 b1 = match a1, b1 with
     | Atom p, s -> Atom (IntSyn.EClo (p, s))
     | Impl (d, a_, ha, g), s ->
         Impl
-          ( resGoalSub (d, s),
+          ( resGoalSub d s,
             IntSyn.EClo (a_, s),
             ha,
-            goalSub (g, IntSyn.dot1 s) )
-    | All (d_, g), s -> All (IntSyn.decSub (d_, s), goalSub (g, IntSyn.dot1 s))
+            goalSub g (IntSyn.dot1 s) )
+    | All (d_, g), s -> All (IntSyn.decSub d_ s, goalSub g (IntSyn.dot1 s))
 
-  and resGoalSub = function
+  and resGoalSub a1 b1 = match a1, b1 with
     | Eq q, s -> Eq (IntSyn.EClo (q, s))
     | And (r, a_, g), s ->
-        And (resGoalSub (r, IntSyn.dot1 s), IntSyn.EClo (a_, s), goalSub (g, s))
+        And (resGoalSub r (IntSyn.dot1 s), IntSyn.EClo (a_, s), goalSub g s)
     | In (r, a_, g), s ->
-        In (resGoalSub (r, IntSyn.dot1 s), IntSyn.EClo (a_, s), goalSub (g, s))
+        In (resGoalSub r (IntSyn.dot1 s), IntSyn.EClo (a_, s), goalSub g s)
     | Exists (d_, r), s ->
-        Exists (IntSyn.decSub (d_, s), resGoalSub (r, IntSyn.dot1 s))
+        Exists (IntSyn.decSub d_ s, resGoalSub r (IntSyn.dot1 s))
 
   (* resGoalSub (r, s) = r'
 

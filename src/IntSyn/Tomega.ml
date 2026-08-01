@@ -243,7 +243,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
 
     let id = Shift 0
 
-    let dotEta = function
+    let dotEta a1 b1 = match a1, b1 with
       | (Idx _ as ft_), s -> Dot (ft_, s)
       | (Exp u_ as ft_), s ->
           let ft' = try Idx (Whnf.etaContract u_) with eta_ -> ft_ in
@@ -254,16 +254,16 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | I.Null -> I.Null
       | I.Decl (g_, d_) -> I.Decl (embedCtx g_, UDec d_)
 
-    let rec orderSub = function
+    let rec orderSub a1 b1 = match a1, b1 with
       | O.Arg ((u_, s1), (v_, s2)), s ->
-          O.Arg ((u_, I.comp (s1, s)), (v_, I.comp (s2, s)))
-      | O.Lex os_, s -> O.Lex (map (function o_ -> orderSub (o_, s)) os_)
-      | O.Simul os_, s -> O.Simul (map (function o_ -> orderSub (o_, s)) os_)
+          O.Arg ((u_, I.comp s1 s), (v_, I.comp s2 s))
+      | O.Lex os_, s -> O.Lex (map (function o_ -> orderSub o_ s) os_)
+      | O.Simul os_, s -> O.Simul (map (function o_ -> orderSub o_ s) os_)
 
     let rec tCSub_ = function
-      | Base o_, s -> Base (orderSub (o_, s))
+      | Base o_, s -> Base (orderSub o_ s)
       | Conj (tc1, tc2), s -> Conj (tCSub_ (tc1, s), tCSub_ (tc2, s))
-      | Abs (d_, tc), s -> Abs (I.decSub (d_, s), tCSub_ (tc, I.dot1 s))
+      | Abs (d_, tc), s -> Abs (I.decSub d_ s, tCSub_ (tc, I.dot1 s))
 
     let tCSubOpt = function
       | None, s -> None
@@ -278,14 +278,14 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
     let rec normalizeTC = function
       | Base o_ -> Base (normalizeTC' o_)
       | Conj (tc1, tc2) -> Conj (normalizeTC tc1, normalizeTC tc2)
-      | Abs (d_, tc) -> Abs (Whnf.normalizeDec (d_, I.id), normalizeTC tc)
+      | Abs (d_, tc) -> Abs (Whnf.normalizeDec d_ I.id, normalizeTC tc)
 
     let normalizeTCOpt = function
       | None -> None
       | Some tc -> Some (normalizeTC tc)
 
     let rec convTC' = function
-      | O.Arg (us1, _), O.Arg (us2, _) -> Conv.conv (us1, us2)
+      | O.Arg (us1, _), O.Arg (us2, _) -> Conv.conv us1 us2
       | O.Lex os1, O.Lex os2 -> convTCs (os1, os2)
       | O.Simul os1, O.Simul os2 -> convTCs (os1, os2)
 
@@ -293,77 +293,77 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | [], [] -> true
       | o1_ :: l1_, o2_ :: l2_ -> convTC' (o1_, o2_) && convTCs (l1_, l2_)
 
-    let rec convTC = function
+    let rec convTC a1 b1 = match a1, b1 with
       | Base o_, Base o'_ -> convTC' (o_, o'_)
       | Conj (tc1, tc2), Conj (tc1', tc2') ->
-          convTC (tc1, tc1') && convTC (tc2, tc2')
+          convTC tc1 tc1' && convTC tc2 tc2'
       | Abs (d_, tc), Abs (d'_, tc') ->
-          Conv.convDec ((d_, I.id), (d'_, I.id)) && convTC (tc, tc')
+          Conv.convDec (d_, I.id) (d'_, I.id) && convTC tc tc'
       | _ -> false
 
     let convTCOpt = function
       | None, None -> true
-      | Some tc1, Some tc2 -> convTC (tc1, tc2)
+      | Some tc1, Some tc2 -> convTC tc1 tc2
       | _ -> false
 
     let rec transformTC' = function
       | g_, O.Arg k ->
           let k' = I.ctxLength g_ - k + 1 in
-          let (I.Dec (_, v_)) = I.ctxDec (g_, k') in
+          let (I.Dec (_, v_)) = I.ctxDec g_ k' in
           O.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
       | g_, O.Lex os_ ->
           O.Lex (map (function o_ -> transformTC' (g_, o_)) os_)
       | g_, O.Simul os_ ->
           O.Simul (map (function o_ -> transformTC' (g_, o_)) os_)
 
-    let rec transformTC = function
+    let rec transformTC a1 b1 c1 = match a1, b1, c1 with
       | g_, All ((UDec d_, _), f_), os_ ->
-          Abs (d_, transformTC (I.Decl (g_, d_), f_, os_))
+          Abs (d_, transformTC (I.Decl (g_, d_)) f_ os_)
       | g_, And (f1_, f2_), o_ :: os_ ->
-          Conj (transformTC (g_, f1_, [ o_ ]), transformTC (g_, f2_, os_))
+          Conj (transformTC g_ f1_ [ o_ ], transformTC g_ f2_ os_)
       | g_, Ex _, o_ :: [] -> Base (transformTC' (g_, o_))
 
-    let rec varSub = function
+    let rec varSub a1 b1 = match a1, b1 with
       | 1, Dot (ft_, t) -> ft_
-      | n, Dot (ft_, t) -> varSub (n - 1, t)
+      | n, Dot (ft_, t) -> varSub (n - 1) t
       | n, Shift k -> Idx (n + k)
 
-    and frontSub = function
-      | Idx n, t -> varSub (n, t)
+    and frontSub a1 b1 = match a1, b1 with
+      | Idx n, t -> varSub n t
       | Exp u_, t -> Exp (I.EClo (u_, coerceSub t))
       | Prg p_, t -> Prg (PClo (p_, t))
-      | Block b_, t -> Block (I.blockSub (b_, coerceSub t))
+      | Block b_, t -> Block (I.blockSub b_ (coerceSub t))
 
-    and comp = function
+    and comp a1 b1 = match a1, b1 with
       | Shift 0, t -> t
       | t, Shift 0 -> t
-      | Shift n, Dot (ft_, t) -> comp (Shift (n - 1), t)
+      | Shift n, Dot (ft_, t) -> comp (Shift (n - 1)) t
       | Shift n, Shift m -> Shift (n + m)
-      | Dot (ft_, t), t' -> Dot (frontSub (ft_, t'), comp (t, t'))
+      | Dot (ft_, t), t' -> Dot (frontSub ft_ t', comp t t')
 
-    let dot1 = function Shift 0 as t -> t | t -> Dot (Idx 1, comp (t, Shift 1))
+    let dot1 = function Shift 0 as t -> t | t -> Dot (Idx 1, comp t (Shift 1))
     let id = Shift 0
     let shift = Shift 1
 
     let rec weakenSub = function
       | I.Null -> id
       | I.Decl (psi, (UDec _ as d_)) -> dot1 (weakenSub psi)
-      | I.Decl (psi, (PDec _ as d_)) -> comp (weakenSub psi, shift)
+      | I.Decl (psi, (PDec _ as d_)) -> comp (weakenSub psi) shift
 
-    let rec forSub = function
-      | All ((d_, q_), f_), t -> All ((decSub (d_, t), q_), forSub (f_, dot1 t))
+    let rec forSub a1 b1 = match a1, b1 with
+      | All ((d_, q_), f_), t -> All ((decSub d_ t, q_), forSub f_ (dot1 t))
       | Ex ((d_, q_), f_), t ->
-          Ex ((I.decSub (d_, coerceSub t), q_), forSub (f_, dot1 t))
-      | And (f1_, f2_), t -> And (forSub (f1_, t), forSub (f2_, t))
-      | FClo (f_, t1), t2 -> forSub (f_, comp (t1, t2))
-      | World (w_, f_), t -> World (w_, forSub (f_, t))
+          Ex ((I.decSub d_ (coerceSub t), q_), forSub f_ (dot1 t))
+      | And (f1_, f2_), t -> And (forSub f1_ t, forSub f2_ t)
+      | FClo (f_, t1), t2 -> forSub f_ (comp t1 t2)
+      | World (w_, f_), t -> World (w_, forSub f_ t)
       | True, _ -> True
 
-    and decSub = function
+    and decSub a1 b1 = match a1, b1 with
       | PDec (x, f_, tc1, None), t ->
           let s = coerceSub t in
-          PDec (x, forSub (f_, t), tCSubOpt (tc1, s), None)
-      | UDec d_, t -> UDec (I.decSub (d_, coerceSub t))
+          PDec (x, forSub f_ t, tCSubOpt (tc1, s), None)
+      | UDec d_, t -> UDec (I.decSub d_ (coerceSub t))
 
     let invertSub s =
       let rec getFrontIndex = function
@@ -378,7 +378,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
         | PClo (p_, t) ->
             begin match getPrgIndex p_ with
             | None -> None
-            | Some i -> getFrontIndex (varSub (i, t))
+            | Some i -> getFrontIndex (varSub i t)
             end
         | _ -> None
       and getExpIndex = function
@@ -387,7 +387,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
         | I.EClo (u_, t) ->
             begin match getExpIndex u_ with
             | None -> None
-            | Some i -> getFrontIndex (revCoerceFront (I.bvarSub (i, t)))
+            | Some i -> getFrontIndex (revCoerceFront (I.bvarSub i t))
             end
         | I.Lam (I.Dec (_, u1_), u2_) as u_ -> (
             try Some (Whnf.etaContract u_) with eta_ -> None | _ -> None)
@@ -423,57 +423,57 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       let s = invertSub w in
       (coerceCtx psi, w, s)
 
-    let rec convFor = function
+    let rec convFor a1 b1 = match a1, b1 with
       | (True, _), (True, _) -> true
       | (All ((d1_, _), f1_), t1), (All ((d2_, _), f2_), t2) ->
-          convDec ((d1_, t1), (d2_, t2))
-          && convFor ((f1_, dot1 t1), (f2_, dot1 t2))
+          convDec (d1_, t1) (d2_, t2)
+          && convFor (f1_, dot1 t1) (f2_, dot1 t2)
       | (Ex ((d1_, _), f1_), t1), (Ex ((d2_, _), f2_), t2) ->
-          Conv.convDec ((d1_, coerceSub t1), (d2_, coerceSub t2))
-          && convFor ((f1_, dot1 t1), (f2_, dot1 t2))
+          Conv.convDec (d1_, coerceSub t1) (d2_, coerceSub t2)
+          && convFor (f1_, dot1 t1) (f2_, dot1 t2)
       | (And (f1_, f1'), t1), (And (f2_, f2'), t2) ->
-          convFor ((f1_, t1), (f2_, t2)) && convFor ((f1', t1), (f2', t2))
+          convFor (f1_, t1) (f2_, t2) && convFor (f1', t1) (f2', t2)
       | _ -> false
 
-    and convDec = function
+    and convDec a1 b1 = match a1, b1 with
       | (UDec d1_, t1), (UDec d2_, t2) ->
-          Conv.convDec ((d1_, coerceSub t1), (d2_, coerceSub t2))
+          Conv.convDec (d1_, coerceSub t1) (d2_, coerceSub t2)
       | (PDec (_, f1_, tc1, tc1'), t1), (PDec (_, f2_, tc2, tc2'), t2) -> begin
-          ignore (convFor ((f1_, t1), (f2_, t2)));
+          ignore (convFor (f1_, t1) (f2_, t2));
           begin
             ignore (convTCOpt (tc1, tc1'));
             convTCOpt (tc2, tc2')
           end
         end
 
-    let newEVar (psi, f_) =
+    let newEVar psi f_ =
       EVar
-        (psi, ref None, f_, None, None, I.newEVar (coerceCtx psi, I.Uni I.Type))
+        (psi, ref None, f_, None, None, I.newEVar (coerceCtx psi) (I.Uni I.Type))
 
     let newEVarTC (psi, f_, tc, tc') =
-      EVar (psi, ref None, f_, tc, tc', I.newEVar (coerceCtx psi, I.Uni I.Type))
+      EVar (psi, ref None, f_, tc, tc', I.newEVar (coerceCtx psi) (I.Uni I.Type))
 
-    let rec exists = function
+    let rec exists a1 b1 = match a1, b1 with
       | x, [] -> false
-      | x, y :: w2_ -> x = y || exists (x, w2_)
+      | x, y :: w2_ -> x = y || exists x w2_
 
     let rec subset = function
       | [], _ -> true
-      | x :: w1_, w2_ -> exists (x, w2_) && subset (w1_, w2_)
+      | x :: w1_, w2_ -> exists x w2_ && subset (w1_, w2_)
 
-    let eqWorlds (Worlds w1_, Worlds w2_) =
+    let eqWorlds (Worlds w1_) (Worlds w2_) =
       subset (w1_, w2_) && subset (w2_, w1_)
 
-    let ctxDec (g_, k) =
+    let ctxDec g_ k =
       let rec ctxDec' = function
         | I.Decl (g'_, UDec (I.Dec (x, v'_))), 1 ->
             UDec (I.Dec (x, I.EClo (v'_, I.Shift k)))
         | I.Decl (g'_, UDec (I.BDec (l, (c, s)))), 1 ->
-            UDec (I.BDec (l, (c, I.comp (s, I.Shift k))))
+            UDec (I.BDec (l, (c, I.comp s (I.Shift k))))
         | I.Decl (g'_, PDec (x, f_, tc1, tc2)), 1 ->
             PDec
               ( x,
-                forSub (f_, Shift k),
+                forSub f_ (Shift k),
                 tCSubOpt (tc1, I.Shift k),
                 tCSubOpt (tc2, I.Shift k) )
         | I.Decl (g'_, _), k' -> ctxDec' (g'_, k' - 1)
@@ -490,8 +490,8 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
           let g'_, t' = deblockify g_ in
           let _, l_ = I.constBlock c in
           let n = List.length l_ in
-          let g''_ = append (g'_, (l_, I.comp (s, coerceSub t'))) in
-          let t'' = comp (t', Shift n) in
+          let g''_ = append (g'_, (l_, I.comp s (coerceSub t'))) in
+          let t'' = comp t' (Shift n) in
           let i_ = I.Inst (mkInst n) in
           let t''' = Dot (Block i_, t'') in
           (g''_, t''')
@@ -499,19 +499,19 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
     and append = function
       | g'_, ([], s) -> g'_
       | g'_, (d_ :: l_, s) ->
-          append (I.Decl (g'_, I.decSub (d_, s)), (l_, I.dot1 s))
+          append (I.Decl (g'_, I.decSub d_ s), (l_, I.dot1 s))
 
-    let rec whnfFor = function
+    let rec whnfFor a1 b1 = match a1, b1 with
       | (All (d_, _), t) as ft_ -> ft_
       | (Ex (d_, f_), t) as ft_ -> ft_
       | (And (f1_, f2_), t) as ft_ -> ft_
-      | FClo (f_, t1), t2 -> whnfFor (f_, comp (t1, t2))
+      | FClo (f_, t1), t2 -> whnfFor f_ (comp t1 t2)
       | (World (w_, f_), t) as ft_ -> ft_
       | (True, _) as ft_ -> ft_
 
-    let rec normalizePrg = function
+    let rec normalizePrg a1 b1 = match a1, b1 with
       | Var n, t ->
-          begin match varSub (n, t) with
+          begin match varSub n t with
           | Prg p_ -> p_
           | Idx _ -> raise Domain
           | Exp _ -> raise Domain
@@ -519,40 +519,40 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
           | Undef -> raise Domain
           end
       | PairExp (u_, p'_), t ->
-          PairExp (Whnf.normalize (u_, coerceSub t), normalizePrg (p'_, t))
+          PairExp (Whnf.normalize (u_, coerceSub t), normalizePrg p'_ t)
       | PairBlock (b_, p'_), t ->
-          PairBlock (I.blockSub (b_, coerceSub t), normalizePrg (p'_, t))
+          PairBlock (I.blockSub b_ (coerceSub t), normalizePrg p'_ t)
       | PairPrg (p1_, p2_), t ->
-          PairPrg (normalizePrg (p1_, t), normalizePrg (p2_, t))
+          PairPrg (normalizePrg p1_ t, normalizePrg p2_ t)
       | Unit, _ -> Unit
       | EVar (_, { contents = Some p_ }, _, _, _, _), t -> PClo (p_, t)
       | (EVar _ as p_), t -> PClo (p_, t)
-      | Lam (d_, p_), t -> Lam (normalizeDec (d_, t), normalizePrg (p_, dot1 t))
-      | Rec (d_, p_), t -> Rec (normalizeDec (d_, t), normalizePrg (p_, dot1 t))
-      | PClo (p_, t), t' -> normalizePrg (p_, comp (t, t'))
+      | Lam (d_, p_), t -> Lam (normalizeDec d_ t, normalizePrg p_ (dot1 t))
+      | Rec (d_, p_), t -> Rec (normalizeDec d_ t, normalizePrg p_ (dot1 t))
+      | PClo (p_, t), t' -> normalizePrg p_ (comp t t')
 
-    and normalizeSpine = function
+    and normalizeSpine a1 b1 = match a1, b1 with
       | Nil, t -> Nil
       | AppExp (u_, s_), t ->
-          AppExp (Whnf.normalize (u_, coerceSub t), normalizeSpine (s_, t))
+          AppExp (Whnf.normalize (u_, coerceSub t), normalizeSpine s_ t)
       | AppPrg (p_, s_), t ->
-          AppPrg (normalizePrg (p_, t), normalizeSpine (s_, t))
+          AppPrg (normalizePrg p_ t, normalizeSpine s_ t)
       | AppBlock (b_, s_), t ->
-          AppBlock (I.blockSub (b_, coerceSub t), normalizeSpine (s_, t))
-      | SClo (s_, t1), t2 -> normalizeSpine (s_, comp (t1, t2))
+          AppBlock (I.blockSub b_ (coerceSub t), normalizeSpine s_ t)
+      | SClo (s_, t1), t2 -> normalizeSpine s_ (comp t1 t2)
 
-    and normalizeDec = function
+    and normalizeDec a1 b1 = match a1, b1 with
       | PDec (name, f_, tc1, None), t ->
           PDec
             ( name,
-              forSub (f_, t),
+              forSub f_ t,
               normalizeTCOpt (tCSubOpt (tc1, coerceSub t)),
               None )
-      | UDec d_, t -> UDec (Whnf.normalizeDec (d_, coerceSub t))
+      | UDec d_, t -> UDec (Whnf.normalizeDec d_ (coerceSub t))
 
     let rec normalizeSub = function
       | Shift n as s -> s
-      | Dot (Prg p_, s) -> Dot (Prg (normalizePrg (p_, id)), normalizeSub s)
+      | Dot (Prg p_, s) -> Dot (Prg (normalizePrg p_ id), normalizeSub s)
       | Dot (Exp e_, s) -> Dot (Exp (Whnf.normalize (e_, I.id)), normalizeSub s)
       | Dot (Block k, s) -> Dot (Block k, normalizeSub s)
       | Dot (Idx k, s) -> Dot (Idx k, normalizeSub s)
@@ -581,7 +581,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
     and flattenCases = function
       | (psi, s, Case (Cases l_)) :: cs_ ->
           map
-            (function psi', s', p'_ -> (psi', comp (s, s'), p'_))
+            (function psi', s', p'_ -> (psi', comp s s', p'_))
             (flattenCases l_)
           @ flattenCases cs_
       | (psi, s, p_) :: cs_ -> (psi, s, p_) :: flattenCases cs_

@@ -38,5 +38,5 @@ open! Basis
 module type UNIQUE = sig
   exception Error of string
 
-  val checkUnique : IntSyn.cid * Modesyn.ModeSyn.modeSpine -> unit
+  val checkUnique : IntSyn.cid -> Modesyn.ModeSyn.modeSpine -> unit
 end

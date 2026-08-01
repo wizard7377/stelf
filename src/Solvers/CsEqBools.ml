@@ -89,7 +89,7 @@ end) : Cs.CS = struct
     let orExp (u_, v_) = Root (Const !orID, App (u_, App (v_, Nil)))
     let impliesExp (u_, v_) = Root (Const !impliesID, App (u_, App (v_, Nil)))
     let iffExp (u_, v_) = Root (Const !iffID, App (u_, App (v_, Nil)))
-    let member eq (x, l_) = List.exists (function y -> eq (x, y)) l_
+    let member eq (x, l_) = List.exists (function y -> eq x y) l_
 
     let differenceSet eq (l1_, l2_) =
       let l1'_ = List.filter (function x -> not (member eq (x, l2_))) l1_ in
@@ -146,8 +146,8 @@ end) : Cs.CS = struct
 
     and sameSpine = function
       | (Nil, s1), (Nil, s2) -> true
-      | (SClo (s1_, s1'), s1), ss2_ -> sameSpine ((s1_, comp (s1', s1)), ss2_)
-      | ss1_, (SClo (s2_, s2'), s2) -> sameSpine (ss1_, (s2_, comp (s2', s2)))
+      | (SClo (s1_, s1'), s1), ss2_ -> sameSpine ((s1_, comp s1' s1), ss2_)
+      | ss1_, (SClo (s2_, s2'), s2) -> sameSpine (ss1_, (s2_, comp s2' s2))
       | (App (u1_, s1_), s1), (App (u2_, s2_), s2) ->
           sameExp ((u1_, s1), (u2_, s2)) && sameSpine ((s1_, s1), (s2_, s2))
       | _ -> false
@@ -296,11 +296,11 @@ end) : Cs.CS = struct
 
     let installFgnExpOps () =
       let csid = !myID in
-      ignore (FgnExpStd.ToInternal.install (csid, toInternal));
-      ignore (FgnExpStd.Map.install (csid, map));
-      ignore (FgnExpStd.App.install (csid, app));
-      ignore (FgnExpStd.UnifyWith.install (csid, unifyWith));
-      ignore (FgnExpStd.EqualTo.install (csid, equalTo));
+      ignore (FgnExpStd.ToInternal.install csid toInternal);
+      ignore (FgnExpStd.Map.install csid map);
+      ignore (FgnExpStd.App.install csid app);
+      ignore (FgnExpStd.UnifyWith.install csid unifyWith);
+      ignore (FgnExpStd.EqualTo.install csid equalTo);
       ()
 
     let makeFgn (arity, opExp) s_ =
@@ -314,14 +314,14 @@ end) : Cs.CS = struct
         | e_, n -> Lam (Dec (None, bool ()), makeLam e_ (n - 1))
         end
       in
-      let rec expand = function
+      let rec expand a1 b1 = match a1, b1 with
         | (Nil, s), arity -> (makeParams arity, arity)
         | (App (u_, s_), s), arity ->
-            let s'_, arity' = expand ((s_, s), arity - 1) in
-            (App (EClo (u_, comp (s, Shift arity')), s'_), arity')
-        | (SClo (s_, s'), s), arity -> expand ((s_, comp (s', s)), arity)
+            let s'_, arity' = expand (s_, s) (arity - 1) in
+            (App (EClo (u_, comp s (Shift arity')), s'_), arity')
+        | (SClo (s_, s'), s), arity -> expand (s_, comp s' s) arity
       in
-      let s'_, arity' = expand ((s_, id), arity) in
+      let s'_, arity' = expand (s_, id) arity in
       makeLam (toFgn (opExp s'_)) arity'
 
     let makeFgnUnary opSum =
@@ -334,9 +334,9 @@ end) : Cs.CS = struct
           | App (u1_, App (u2_, Nil)) ->
               opSum (fromExp (u1_, id), fromExp (u2_, id)) )
 
-    let arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
+    let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
 
-    let init (cs, installF) =
+    let init cs installF =
       begin
         myID := cs;
         begin
@@ -383,7 +383,7 @@ end) : Cs.CS = struct
                           None,
                           0,
                           Foreign (!myID, makeFgnUnary notSum),
-                          arrow_ (bool (), bool ()),
+                          arrow_ (bool ()) (bool ()),
                           Type ),
                       Some (FX.Prefix FX.maxPrec),
                       [] );
@@ -395,7 +395,7 @@ end) : Cs.CS = struct
                             None,
                             0,
                             Foreign (!myID, makeFgnBinary xorSum),
-                            arrow_ (bool (), arrow_ (bool (), bool ())),
+                            arrow_ (bool ()) (arrow_ (bool ()) (bool ())),
                             Type ),
                         Some (FX.Infix (FX.dec FX.maxPrec, FX.Left)),
                         [] );
@@ -407,7 +407,7 @@ end) : Cs.CS = struct
                               None,
                               0,
                               Foreign (!myID, makeFgnBinary andSum),
-                              arrow_ (bool (), arrow_ (bool (), bool ())),
+                              arrow_ (bool ()) (arrow_ (bool ()) (bool ())),
                               Type ),
                           Some (FX.Infix (FX.dec FX.maxPrec, FX.Left)),
                           [] );
@@ -419,7 +419,7 @@ end) : Cs.CS = struct
                                 None,
                                 0,
                                 Foreign (!myID, makeFgnBinary orSum),
-                                arrow_ (bool (), arrow_ (bool (), bool ())),
+                                arrow_ (bool ()) (arrow_ (bool ()) (bool ())),
                                 Type ),
                             Some (FX.Infix (FX.dec FX.maxPrec, FX.Left)),
                             [] );
@@ -431,7 +431,7 @@ end) : Cs.CS = struct
                                   None,
                                   0,
                                   Foreign (!myID, makeFgnBinary impliesSum),
-                                  arrow_ (bool (), arrow_ (bool (), bool ())),
+                                  arrow_ (bool ()) (arrow_ (bool ()) (bool ())),
                                   Type ),
                               Some
                                 (FX.Infix (FX.dec (FX.dec FX.maxPrec), FX.Left)),
@@ -444,7 +444,7 @@ end) : Cs.CS = struct
                                     None,
                                     0,
                                     Foreign (!myID, makeFgnBinary iffSum),
-                                    arrow_ (bool (), arrow_ (bool (), bool ())),
+                                    arrow_ (bool ()) (arrow_ (bool ()) (bool ())),
                                     Type ),
                                 Some
                                   (FX.Infix (FX.dec (FX.dec FX.maxPrec), FX.Left)),

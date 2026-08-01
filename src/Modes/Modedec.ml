@@ -49,7 +49,7 @@ module MakeModeDec () : MODEDEC = struct
 
     type arg = Implicit | Explicit | Local [@@deriving eq, ord, show]
 
-    let error (r, msg) = raise (Error (P.toString r ^ ": " ^ msg))
+    let error r msg = raise (Error (P.toString r ^ ": " ^ msg))
 
     let rec checkName = function
       | M.Mnil -> ()
@@ -164,7 +164,7 @@ module MakeModeDec () : MODEDEC = struct
           checkName mS;
           calcImplicit' (I.sgnLookup a)
         end
-      with Error msg -> error (r, msg)
+      with Error msg -> error r msg
 
     let checkFull a mS r =
       try
@@ -181,16 +181,15 @@ module MakeModeDec () : MODEDEC = struct
             end
           end
         end
-      with Error msg -> error (r, msg)
+      with Error msg -> error r msg
 
     let rec checkPure a1 b1 = match a1, b1 with
       | (a, M.Mnil), r -> ()
       | (a, M.Mapp (M.Marg (M.Minus1, _), mS)), r ->
           error
-            ( r,
-              "Uniqueness modes (-1) not permitted in `%mode' declarations \
-               (use `%unique')" )
-      | (a, M.Mapp (_, mS)), r -> checkPure (a, mS) r
+            r ("Uniqueness modes (-1) not permitted in `%mode' declarations \
+               (use `%unique')")
+      | (a, M.Mapp (_, mS)), r -> checkPure a mS r
   end
 
   (* Representation invariant:

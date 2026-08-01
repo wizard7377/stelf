@@ -99,18 +99,18 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
 
     let infixOp (infixity, tm) =
       Infix
-        (infixity, function tm1, tm2 -> ExtSyn.app (ExtSyn.app (tm, tm1), tm2))
+        (infixity, function tm1, tm2 -> ExtSyn.app (ExtSyn.app tm tm1) tm2)
 
     let prefixOp (prec, tm) =
-      Prefix (prec, function tm1 -> ExtSyn.app (tm, tm1))
+      Prefix (prec, function tm1 -> ExtSyn.app tm tm1)
 
     let postfixOp (prec, tm) =
-      Postfix (prec, function tm1 -> ExtSyn.app (tm, tm1))
+      Postfix (prec, function tm1 -> ExtSyn.app tm tm1)
 
     let idToTerm = function
-      | L.Lower, ids, name, r -> ExtSyn.lcid (ids, name, r)
-      | L.Upper, ids, name, r -> ExtSyn.ucid (ids, name, r)
-      | L.Quoted, ids, name, r -> ExtSyn.quid (ids, name, r)
+      | L.Lower, ids, name, r -> ExtSyn.lcid ids name r
+      | L.Upper, ids, name, r -> ExtSyn.ucid ids name r
+      | L.Quoted, ids, name, r -> ExtSyn.quid ids name r
 
     let isQuoted = function L.Quoted -> true | _ -> false
 
@@ -119,10 +119,10 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
 
     module P : sig
       val reduce : stack -> stack
-      val reduceAll : Paths.region * stack -> ExtSyn.term
-      val shiftAtom : ExtSyn.term * stack -> stack
-      val shift : Paths.region * opr * stack -> stack
-      val resolve : Paths.region * opr * stack -> stack
+      val reduceAll : Paths.region -> stack -> ExtSyn.term
+      val shiftAtom : ExtSyn.term -> stack -> stack
+      val shift : Paths.region -> opr -> stack -> stack
+      val resolve : Paths.region -> opr -> stack -> stack
     end = struct
       let reduce = function
         | Atom tm2 :: Infix (_, con) :: Atom tm1 :: p' ->
@@ -134,85 +134,80 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
         | Atom e :: [] -> e
         | p -> reduceRec (reduce p)
 
-      let reduceAll = function
+      let reduceAll a1 b1 = match a1, b1 with
         | r, Atom e :: [] -> e
-        | r, Infix _ :: p' -> Parsing.error (r, "Incomplete infix expression")
-        | r, Prefix _ :: p' -> Parsing.error (r, "Incomplete prefix expression")
-        | r, [] -> Parsing.error (r, "Empty expression")
+        | r, Infix _ :: p' -> Parsing.error r ("Incomplete infix expression")
+        | r, Prefix _ :: p' -> Parsing.error r ("Incomplete prefix expression")
+        | r, [] -> Parsing.error r ("Empty expression")
         | r, p -> reduceRec (reduce p)
 
-      let shiftAtom = function
+      let shiftAtom a1 b1 = match a1, b1 with
         | tm, (Atom _ :: p' as p) -> reduce (Atom tm :: juxOp :: p)
         | tm, p -> Atom tm :: p
 
-      let shift = function
+      let shift a1 b1 c1 = match a1, b1, c1 with
         | r, (Atom _ as opr), (Atom _ :: p' as p) -> reduce (opr :: juxOp :: p)
         | r, Infix _, Infix _ :: p' ->
-            Parsing.error (r, "Consective infix operators")
+            Parsing.error r ("Consective infix operators")
         | r, Infix _, Prefix _ :: p' ->
-            Parsing.error (r, "Infix operator following prefix operator")
-        | r, Infix _, [] -> Parsing.error (r, "Leading infix operator")
+            Parsing.error r ("Infix operator following prefix operator")
+        | r, Infix _, [] -> Parsing.error r ("Leading infix operator")
         | r, (Prefix _ as opr), (Atom _ :: p' as p) -> opr :: juxOp :: p
         | r, Postfix _, Infix _ :: p' ->
-            Parsing.error (r, "Postfix operator following infix operator")
+            Parsing.error r ("Postfix operator following infix operator")
         | r, Postfix _, Prefix _ :: p' ->
-            Parsing.error (r, "Postfix operator following prefix operator")
-        | r, Postfix _, [] -> Parsing.error (r, "Leading postfix operator")
+            Parsing.error r ("Postfix operator following prefix operator")
+        | r, Postfix _, [] -> Parsing.error r ("Leading postfix operator")
         | r, opr, p -> opr :: p
 
-      let rec resolve = function
+      let rec resolve a1 b1 c1 = match a1, b1, c1 with
         | ( r,
             (Infix ((prec, assoc), _) as opr),
             (Atom _ :: Infix ((prec', assoc'), _) :: p' as p) ) ->
-            begin match (FX.compare (prec, prec'), assoc, assoc') with
-            | Greater, _, _ -> shift (r, opr, p)
-            | Less, _, _ -> resolve (r, opr, reduce p)
-            | Equal, FX.Left, FX.Left -> resolve (r, opr, reduce p)
-            | Equal, FX.Right, FX.Right -> shift (r, opr, p)
+            begin match (FX.compare prec prec', assoc, assoc') with
+            | Greater, _, _ -> shift r opr p
+            | Less, _, _ -> resolve r opr (reduce p)
+            | Equal, FX.Left, FX.Left -> resolve r opr (reduce p)
+            | Equal, FX.Right, FX.Right -> shift r opr p
             | _ ->
                 Parsing.error
-                  (r, "Ambiguous: infix following infix of identical precedence")
+                  r ("Ambiguous: infix following infix of identical precedence")
             end
         | ( r,
             (Infix ((prec, assoc), _) as opr),
             (Atom _ :: Prefix (prec', _) :: p' as p) ) ->
-            begin match FX.compare (prec, prec') with
-            | Greater -> shift (r, opr, p)
-            | Less -> resolve (r, opr, reduce p)
+            begin match FX.compare prec prec' with
+            | Greater -> shift r opr p
+            | Less -> resolve r opr (reduce p)
             | Equal ->
                 Parsing.error
-                  ( r,
-                    "Ambiguous: infix following prefix of identical precedence"
-                  )
+                  r ("Ambiguous: infix following prefix of identical precedence")
             end
-        | r, (Prefix _ as opr), p -> shift (r, opr, p)
+        | r, (Prefix _ as opr), p -> shift r opr p
         | ( r,
             (Postfix (prec, _) as opr),
             (Atom _ :: Prefix (prec', _) :: p' as p) ) ->
-            begin match FX.compare (prec, prec') with
-            | Greater -> reduce (shift (r, opr, p))
-            | Less -> resolve (r, opr, reduce p)
+            begin match FX.compare prec prec' with
+            | Greater -> reduce (shift r opr p)
+            | Less -> resolve r opr (reduce p)
             | Equal ->
                 Parsing.error
-                  ( r,
-                    "Ambiguous: postfix following prefix of identical \
-                     precedence" )
+                  r ("Ambiguous: postfix following prefix of identical \
+                     precedence")
             end
         | ( r,
             (Postfix (prec, _) as opr),
             (Atom _ :: Infix ((prec', _), _) :: p' as p) ) ->
-            begin match FX.compare (prec, prec') with
-            | Greater -> reduce (shift (r, opr, p))
-            | Less -> resolve (r, opr, reduce p)
+            begin match FX.compare prec prec' with
+            | Greater -> reduce (shift r opr p)
+            | Less -> resolve r opr (reduce p)
             | Equal ->
                 Parsing.error
-                  ( r,
-                    "Ambiguous: postfix following infix of identical precedence"
-                  )
+                  r ("Ambiguous: postfix following infix of identical precedence")
             end
         | r, (Postfix _ as opr), (Atom _ :: [] as p) ->
-            reduce (shift (r, opr, p))
-        | r, opr, p -> shift (r, opr, p)
+            reduce (shift r opr p)
+        | r, opr, p -> shift r opr p
     end
 
     let rec parseQualId' = function
@@ -229,23 +224,23 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       | LS.Cons ((L.Id (_, "|"), r), s') -> LS.expose s'
       | LS.Cons ((L.Rparen, r), s') as f -> f
       | LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected `|', found token " ^ L.toString t)
+          Parsing.error r ("Expected `|', found token " ^ L.toString t)
 
     let rec parseQualIds1 = function
       | ls, (LS.Cons (((L.Id (_, id) as t), r0), s') as f) ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
-          let r = Paths.join (r0, r1) in
+          let r = Paths.join r0 r1 in
           let f'' = stripBar f' in
           parseQualIds1 ((ids, name) :: ls, f'')
       | ls, LS.Cons ((L.Rparen, r), s') -> (ls, LS.expose s')
       | ls, LS.Cons ((t, r), s) ->
-          Parsing.error (r, "Expected label, found token " ^ L.toString t)
+          Parsing.error r ("Expected label, found token " ^ L.toString t)
 
     let parseQualIds' = function
       | LS.Cons ((L.Lparen, r), s') -> parseQualIds1 ([], LS.expose s')
       | LS.Cons ((t, r), s') ->
           Parsing.error
-            (r, "Expected list of labels, found token " ^ L.toString t)
+            r ("Expected list of labels, found token " ^ L.toString t)
 
     let stripRParen = function
       | LS.Cons ((L.Rparen, r), s') -> LS.expose s'
@@ -257,14 +252,14 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
           ((qid, (ids, name)), stripRParen f')
       | LS.Cons ((t, r), s'), qid ->
-          Parsing.error (r, "Expected identifier, found token " ^ L.toString t)
+          Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
     let parseSubordPair1 = function
       | LS.Cons ((L.Id _, _), _) as f ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
           parseSubordPair2 (f', (ids, name))
       | LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected identifier, found token " ^ L.toString t)
+          Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
     let rec parseSubord' = function
       | LS.Cons ((L.Lparen, r), s'), qidpairs ->
@@ -273,7 +268,7 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       | (LS.Cons ((L.Dot, _), _) as f), qidpairs -> (List.rev qidpairs, f)
       | LS.Cons ((t, r), s'), qidpairs ->
           Parsing.error
-            (r, "Expected a pair of identifiers, found token " ^ L.toString t)
+            r ("Expected a pair of identifiers, found token " ^ L.toString t)
 
     let rec parseFreeze' = function
       | (LS.Cons ((L.Id _, _), _) as f), qids ->
@@ -281,7 +276,7 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           parseFreeze' (f', (ids, name) :: qids)
       | (LS.Cons ((L.Dot, _), _) as f), qids -> (List.rev qids, f)
       | LS.Cons ((t, r), s'), qids ->
-          Parsing.error (r, "Expected identifier, found token " ^ L.toString t)
+          Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
     let parseThaw' (f, qids) = parseFreeze' (f, qids)
 
@@ -291,7 +286,7 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           parseDeterministic' (f', (ids, name) :: qids)
       | (LS.Cons ((L.Dot, _), _) as f), qids -> (List.rev qids, f)
       | LS.Cons ((t, r), s'), qids ->
-          Parsing.error (r, "Expected identifier, found token " ^ L.toString t)
+          Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
     let rec parseCompile' = function
       | (LS.Cons ((L.Id _, _), _) as f), qids ->
@@ -299,73 +294,73 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           parseCompile' (f', (ids, name) :: qids)
       | (LS.Cons ((L.Dot, _), _) as f), qids -> (List.rev qids, f)
       | LS.Cons ((t, r), s'), qids ->
-          Parsing.error (r, "Expected identifier, found token " ^ L.toString t)
+          Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
     let rec parseExp (s, p) = parseExp' (LS.expose s, p)
 
     and parseExp' = function
       | (LS.Cons ((L.Id _, r0), _) as f), p ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
-          let r = Paths.join (r0, r1) in
+          let r = Paths.join r0 r1 in
           let tm = idToTerm (idCase, ids, name, r) in
-          begin if isQuoted idCase then parseExp' (f', P.shiftAtom (tm, p))
+          begin if isQuoted idCase then parseExp' (f', P.shiftAtom tm p)
           else
             begin match Names.fixityLookup (Names.Qid (ids, name)) with
-            | FX.Nonfix -> parseExp' (f', P.shiftAtom (tm, p))
+            | FX.Nonfix -> parseExp' (f', P.shiftAtom tm p)
             | FX.Infix (prec, assoc) ->
-                parseExp' (f', P.resolve (r, infixOp ((prec, assoc), tm), p))
+                parseExp' (f', P.resolve r (infixOp ((prec, assoc), tm)) p)
             | FX.Prefix prec ->
-                parseExp' (f', P.resolve (r, prefixOp (prec, tm), p))
+                parseExp' (f', P.resolve r (prefixOp (prec, tm)) p)
             | FX.Postfix prec ->
-                parseExp' (f', P.resolve (r, postfixOp (prec, tm), p))
+                parseExp' (f', P.resolve r (postfixOp (prec, tm)) p)
             end
           end
       | LS.Cons ((L.Underscore, r), s), p ->
-          parseExp (s, P.shiftAtom (ExtSyn.omitted r, p))
+          parseExp (s, P.shiftAtom (ExtSyn.omitted r) p)
       | LS.Cons ((L.Type, r), s), p ->
-          parseExp (s, P.shiftAtom (ExtSyn.typ r, p))
-      | LS.Cons ((L.Colon, r), s), p -> parseExp (s, P.resolve (r, colonOp, p))
+          parseExp (s, P.shiftAtom (ExtSyn.typ r) p)
+      | LS.Cons ((L.Colon, r), s), p -> parseExp (s, P.resolve r colonOp p)
       | LS.Cons ((L.Backarrow, r), s), p ->
-          parseExp (s, P.resolve (r, backArrowOp, p))
-      | LS.Cons ((L.Arrow, r), s), p -> parseExp (s, P.resolve (r, arrowOp, p))
+          parseExp (s, P.resolve r backArrowOp p)
+      | LS.Cons ((L.Arrow, r), s), p -> parseExp (s, P.resolve r arrowOp p)
       | LS.Cons ((L.Lparen, r), s), p -> decideRParen (r, parseExp (s, []), p)
-      | (LS.Cons ((L.Rparen, r), s) as f), p -> (P.reduceAll (r, p), f)
+      | (LS.Cons ((L.Rparen, r), s) as f), p -> (P.reduceAll r p, f)
       | LS.Cons ((L.Lbrace, r), s), p -> decideRBrace (r, parseDec s, p)
-      | (LS.Cons ((L.Rbrace, r), s) as f), p -> (P.reduceAll (r, p), f)
+      | (LS.Cons ((L.Rbrace, r), s) as f), p -> (P.reduceAll r p, f)
       | LS.Cons ((L.Lbracket, r), s), p -> decideRBracket (r, parseDec s, p)
-      | (LS.Cons ((L.Rbracket, r), s) as f), p -> (P.reduceAll (r, p), f)
-      | (LS.Cons ((L.Equal, r), s) as f), p -> (P.reduceAll (r, p), f)
-      | (LS.Cons ((L.Dot, r), s) as f), p -> (P.reduceAll (r, p), f)
-      | (LS.Cons ((L.Eof, r), s) as f), p -> (P.reduceAll (r, p), f)
-      | (LS.Cons ((L.Solve, r), s) as f), p -> (P.reduceAll (r, p), f)
-      | (LS.Cons ((L.Define, r), s) as f), p -> (P.reduceAll (r, p), f)
+      | (LS.Cons ((L.Rbracket, r), s) as f), p -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Equal, r), s) as f), p -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Dot, r), s) as f), p -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Eof, r), s) as f), p -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Solve, r), s) as f), p -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Define, r), s) as f), p -> (P.reduceAll r p, f)
       | LS.Cons ((L.String str, r), s), p ->
-          parseExp (s, P.shiftAtom (ExtSyn.scon (str, r), p))
+          parseExp (s, P.shiftAtom (ExtSyn.scon str r) p)
       | LS.Cons ((t, r), s), p ->
           Parsing.error
-            (r, ("Unexpected token " ^ L.toString t) ^ " found in expression")
+            r (("Unexpected token " ^ L.toString t) ^ " found in expression")
 
     and parseDec s = parseDec' (LS.expose s)
 
     and parseDec' = function
       | LS.Cons ((L.Id (L.Quoted, name), r), s') ->
-          Parsing.error (r, "Illegal bound quoted identifier " ^ name)
+          Parsing.error r ("Illegal bound quoted identifier " ^ name)
       | LS.Cons ((L.Id (idCase, name), r), s') ->
           begin match Names.fixityLookup (Names.Qid ([], name)) with
           | FX.Nonfix -> parseDec1 (Some name, LS.expose s')
           | FX.Infix _ ->
-              Parsing.error (r, "Cannot bind infix identifier " ^ name)
+              Parsing.error r ("Cannot bind infix identifier " ^ name)
           | FX.Prefix _ ->
-              Parsing.error (r, "Cannot bind prefix identifier " ^ name)
+              Parsing.error r ("Cannot bind prefix identifier " ^ name)
           | FX.Postfix _ ->
-              Parsing.error (r, "Cannot bind postfix identifier " ^ name)
+              Parsing.error r ("Cannot bind postfix identifier " ^ name)
           end
       | LS.Cons ((L.Underscore, r), s') -> parseDec1 (None, LS.expose s')
       | LS.Cons ((L.Eof, r), s') ->
-          Parsing.error (r, "Unexpected end of stream in declaration")
+          Parsing.error r ("Unexpected end of stream in declaration")
       | LS.Cons ((t, r), s') ->
           Parsing.error
-            (r, "Expected variable name, found token " ^ L.toString t)
+            r ("Expected variable name, found token " ^ L.toString t)
 
     and parseDec1 = function
       | x, LS.Cons ((L.Colon, r), s') ->
@@ -375,54 +370,52 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       | x, (LS.Cons ((L.Rbracket, _), _) as f) -> ((x, None), f)
       | x, LS.Cons ((t, r), s') ->
           Parsing.error
-            ( r,
-              "Expected optional type declaration, found token " ^ L.toString t
-            )
+            r ("Expected optional type declaration, found token " ^ L.toString t)
 
     and decideRParen = function
       | r0, (tm, LS.Cons ((L.Rparen, r), s)), p ->
-          parseExp (s, P.shiftAtom (tm, p))
+          parseExp (s, P.shiftAtom tm p)
       | r0, (tm, LS.Cons ((_, r), s)), p ->
-          Parsing.error (Paths.join (r0, r), "Unmatched open parenthesis")
+          Parsing.error (Paths.join r0 r) ("Unmatched open parenthesis")
 
     and decideRBrace = function
       | r0, ((x, yOpt), LS.Cons ((L.Rbrace, r), s)), p ->
           let dec =
             begin match yOpt with
-            | None -> ExtSyn.dec0 (x, Paths.join (r0, r))
-            | Some y -> ExtSyn.dec (x, y, Paths.join (r0, r))
+            | None -> ExtSyn.dec0 x (Paths.join r0 r)
+            | Some y -> ExtSyn.dec (x, y, Paths.join r0 r)
             end
           in
           let tm, f' = parseExp (s, []) in
-          parseExp' (f', P.shiftAtom (ExtSyn.pi (dec, tm), p))
+          parseExp' (f', P.shiftAtom (ExtSyn.pi dec tm) p)
       | r0, (dec, LS.Cons ((_, r), s)), p ->
-          Parsing.error (Paths.join (r0, r), "Unmatched open brace")
+          Parsing.error (Paths.join r0 r) ("Unmatched open brace")
 
     and decideRBracket = function
       | r0, ((x, yOpt), LS.Cons ((L.Rbracket, r), s)), p ->
           let dec =
             begin match yOpt with
-            | None -> ExtSyn.dec0 (x, Paths.join (r0, r))
-            | Some y -> ExtSyn.dec (x, y, Paths.join (r0, r))
+            | None -> ExtSyn.dec0 x (Paths.join r0 r)
+            | Some y -> ExtSyn.dec (x, y, Paths.join r0 r)
             end
           in
           let tm, f' = parseExp (s, []) in
-          parseExp' (f', P.shiftAtom (ExtSyn.lam (dec, tm), p))
+          parseExp' (f', P.shiftAtom (ExtSyn.lam dec tm) p)
       | r0, (dec, LS.Cons ((_, r), s)), p ->
-          Parsing.error (Paths.join (r0, r), "Unmatched open bracket")
+          Parsing.error (Paths.join r0 r) ("Unmatched open bracket")
 
     let rec stripRBrace = function
       | LS.Cons ((L.Rbrace, r), s') -> (LS.expose s', r)
       | LS.Cons ((t, r), _) ->
-          Parsing.error (r, "Expected `}', found " ^ L.toString t)
+          Parsing.error r ("Expected `}', found " ^ L.toString t)
 
     and parseBracedDec (r, f) =
       let (x, yOpt), f' = parseDec' f in
       let f'', r2 = stripRBrace f' in
       let d =
         begin match yOpt with
-        | None -> ExtSyn.dec0 (x, Paths.join (r, r2))
-        | Some y -> ExtSyn.dec (x, y, Paths.join (r, r2))
+        | None -> ExtSyn.dec0 x (Paths.join r r2)
+        | Some y -> ExtSyn.dec (x, y, Paths.join r r2)
         end
       in
       (d, f'')
@@ -433,7 +426,7 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           parseCtx (false, d :: ds, f')
       | b, ds, (LS.Cons ((t, r), s') as f) ->
           begin if b then
-            Parsing.error (r, "Expected `{', found " ^ L.toString t)
+            Parsing.error r ("Expected `{', found " ^ L.toString t)
           else (ds, f)
           end
   end

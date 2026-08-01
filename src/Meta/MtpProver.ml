@@ -94,7 +94,7 @@ end) : MTPPROVER.MTPROVER = struct
     let rec transformOrder' = function
       | g_, Order.Arg k ->
           let k' = I.ctxLength g_ - k + 1 in
-          let (I.Dec (_, v_)) = I.ctxDec (g_, k') in
+          let (I.Dec (_, v_)) = I.ctxDec g_ k' in
           S.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
       | g_, Order.Lex os_ ->
           S.Lex (map (function o_ -> transformOrder' (g_, o_)) os_)
@@ -123,7 +123,7 @@ end) : MTPPROVER.MTPROVER = struct
       | x :: l_, l'_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
-    let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv l1_ l2_ = contains (l1_, l2_) && contains (l2_, l1_)
     let insertState s_ = openStates := s_ :: !openStates
 
     let rec cLToString = function
@@ -131,16 +131,16 @@ end) : MTPPROVER.MTPROVER = struct
       | c :: [] -> I.conDecName (I.sgnLookup c)
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
-    let init (k, (c :: _ as cL)) =
+    let init k (c :: _ as cL) =
       ignore (MTPGlobal.maxFill := k);
       ignore (reset ());
       let cL' = try Order.closure c with Order.Error _ -> cL in
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.Null, f_, map select cL) in
-      begin if equiv (cL, cL') then
+      begin if equiv cL cL' then
         List.app
           (function s_ -> insertState s_)
-          (Obj.magic (MTPInit.init (f_, Obj.magic o_)))
+          (Obj.magic (MTPInit.init f_ (Obj.magic o_)))
       else
         raise
           (Error

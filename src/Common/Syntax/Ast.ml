@@ -71,9 +71,9 @@ struct
   (* ctxLookup (G, k) = D, kth declaration in G from right to left
      Invariant: 1 <= k <= |G|, where |G| is length of G
   *)
-  let rec ctxLookup = function
+  let rec ctxLookup a1 b1 = match a1, b1 with
     | Decl (_, d_), 1 -> d_
-    | Decl (g'_, _), k' -> ctxLookup (g'_, k' - 1)
+    | Decl (g'_, _), k' -> ctxLookup g'_ (k' - 1)
     | Null, _ -> invalid_arg "ctxLookup: out of bounds"
 
   (*    | ctxLookup (Null, k') = (print (""Looking up k' = "" ^ Int.toString k' ^ ""\n""); raise Error ""Out of Bounce\n"")*)
@@ -297,7 +297,7 @@ struct
   (* constraints *)
   type nonrec cnstr = cnstr_ ref
 
-  let arrow_ (a, b) = Pi ((Dec (None, a), No), b)
+  let arrow_ a b = Pi ((Dec (None, a), No), b)
 
   let conDecName = function
     | ConDec (name, _, _, _, _, _)

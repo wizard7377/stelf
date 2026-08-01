@@ -99,11 +99,11 @@ end) : STATESYN.STATESYN = struct
     module F = FunSyn
     module I = IntSyn
 
-    let rec orderSub = function
+    let rec orderSub a b = match a, b with
       | Arg ((u_, s1), (v_, s2)), s ->
-          Arg ((u_, I.comp (s1, s)), (v_, I.comp (s2, s)))
-      | Lex os_, s -> Lex (map (function o_ -> orderSub (o_, s)) os_)
-      | Simul os_, s -> Simul (map (function o_ -> orderSub (o_, s)) os_)
+          Arg ((u_, I.comp s1 s), (v_, I.comp s2 s))
+      | Lex os_, s -> Lex (map (function o_ -> orderSub o_ s) os_)
+      | Simul os_, s -> Simul (map (function o_ -> orderSub o_ s) os_)
 
     let rec normalizeOrder = function
       | Arg (us_, vs_) ->
@@ -111,14 +111,14 @@ end) : STATESYN.STATESYN = struct
       | Lex os_ -> Lex (map normalizeOrder os_)
       | Simul os_ -> Simul (map normalizeOrder os_)
 
-    let rec convOrder = function
-      | Arg (us1, _), Arg (us2, _) -> Conv.conv (us1, us2)
+    let rec convOrder a b = match a, b with
+      | Arg (us1, _), Arg (us2, _) -> Conv.conv us1 us2
       | Lex os1, Lex os2 -> convOrders (os1, os2)
       | Simul os1, Simul os2 -> convOrders (os1, os2)
 
     and convOrders = function
       | [], [] -> true
-      | o1_ :: l1_, o2_ :: l2_ -> convOrder (o1_, o2_) && convOrders (l1_, l2_)
+      | o1_ :: l1_, o2_ :: l2_ -> convOrder o1_ o2_ && convOrders (l1_, l2_)
 
     let decreaseInfo = function
       | Splits k -> Splits (k - 1)
@@ -131,7 +131,7 @@ end) : STATESYN.STATESYN = struct
 
     let splitDepth (Splits k) = k
 
-    let normalizeTag = function
+    let normalizeTag a b = match a, b with
       | (Parameter _ as t_), _ -> t_
       | Lemma k_, s -> Lemma k_
   end

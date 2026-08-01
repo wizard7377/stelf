@@ -48,5 +48,5 @@ module type LEMMA = sig
 
   exception Error of string
 
-  val apply : MetaSyn.state * IntSyn.cid -> MetaSyn.state
+  val apply : MetaSyn.state -> IntSyn.cid -> MetaSyn.state
 end

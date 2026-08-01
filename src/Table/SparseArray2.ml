@@ -61,13 +61,13 @@ end) : SPARSE_ARRAY2 = struct
     else raise General.Subscript
     end
 
-  let row (array, i, (j, len)) =
+  let row array i (j, len) =
     begin if i >= 0 && j >= 0 && len >= 0 then
       Vector.tabulate (len, function off -> unsafeSub (array, i, j + off))
     else raise General.Subscript
     end
 
-  let column (array, j, (i, len)) =
+  let column array j (i, len) =
     begin if j >= 0 && i >= 0 && len >= 0 then
       Vector.tabulate (len, function off -> unsafeSub (array, i + off, j))
     else raise General.Subscript

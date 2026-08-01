@@ -11,56 +11,56 @@ module Make_Misc
   let shift : Ast.sub = Ast.Shift 1
   let invShift : Ast.sub = Ast.Dot (Ast.Undef, id)
 
-  let rec bvarSub (n, s) =
+  let rec bvarSub n s =
     match (n, s) with
     | 1, Ast.Dot (ft, _) -> ft
-    | n, Ast.Dot (_, s') -> bvarSub (n - 1, s')
+    | n, Ast.Dot (_, s') -> bvarSub (n - 1) s'
     | n, Ast.Shift k -> Ast.Idx (n + k)
 
-  and frontSub (ft, s) =
+  and frontSub ft s =
     match ft with
-    | Ast.Idx n -> bvarSub (n, s)
+    | Ast.Idx n -> bvarSub n s
     | Ast.Exp u -> Ast.Exp (Ast.EClo (u, s))
     | Ast.Axp u -> Ast.Axp (Ast.EClo (u, s))
-    | Ast.Block b -> Ast.Block (blockSub (b, s))
+    | Ast.Block b -> Ast.Block (blockSub b s)
     | Ast.Undef -> Ast.Undef
 
-  and decSub (d, s) =
+  and decSub d s =
     match d with
     | Ast.Dec (x, v) -> Ast.Dec (x, Ast.EClo (v, s))
-    | Ast.BDec (n, (l, t)) -> Ast.BDec (n, (l, comp (t, s)))
+    | Ast.BDec (n, (l, t)) -> Ast.BDec (n, (l, comp t s))
     | Ast.ADec (x, d) -> Ast.ADec (x, d)
     | Ast.NDec x -> Ast.NDec x
 
-  and blockSub (b, s) =
+  and blockSub b s =
     match b with
     | Ast.Bidx k -> (
-        match bvarSub (k, s) with
+        match bvarSub k s with
         | Ast.Idx k' -> Ast.Bidx k'
         | Ast.Block b' -> b'
         | Ast.Exp _ | Ast.Axp _ | Ast.Undef -> b)
     | Ast.LVar (r, sk, (l, t)) ->
         begin match !r with
-        | Some b' -> blockSub (b', comp (sk, s))
-        | None -> Ast.LVar (r, comp (sk, s), (l, t))
+        | Some b' -> blockSub b' (comp sk s)
+        | None -> Ast.LVar (r, comp sk s, (l, t))
         end
     | Ast.Inst us -> Ast.Inst (List.map (fun u -> Ast.EClo (u, s)) us)
 
-  and comp (s1, s2) =
+  and comp s1 s2 =
     match (s1, s2) with
     | Ast.Shift 0, s | s, Ast.Shift 0 -> s
-    | Ast.Shift n, Ast.Dot (_, s) -> comp (Ast.Shift (n - 1), s)
+    | Ast.Shift n, Ast.Dot (_, s) -> comp (Ast.Shift (n - 1)) s
     | Ast.Shift n, Ast.Shift m -> Ast.Shift (n + m)
-    | Ast.Dot (ft, s), s' -> Ast.Dot (frontSub (ft, s'), comp (s, s'))
+    | Ast.Dot (ft, s), s' -> Ast.Dot (frontSub ft s', comp s s')
 
   let dot1 s =
-    match s with Ast.Shift 0 -> s | _ -> Ast.Dot (Ast.Idx 1, comp (s, shift))
+    match s with Ast.Shift 0 -> s | _ -> Ast.Dot (Ast.Idx 1, comp s shift)
 
-  let invDot1 s = comp (comp (shift, s), invShift)
-  let newEVar (g, v) = Ast.EVar (ref None, g, v, ref [])
+  let invDot1 s = comp (comp shift s) invShift
+  let newEVar g v = Ast.EVar (ref None, g, v, ref [])
   let newAVar () = Ast.AVar (ref None)
-  let newTypeVar g = newEVar (g, Ast.Uni Ast.Type)
-  let newLVar (sk, (cid, t)) = Ast.LVar (ref None, sk, (cid, t))
+  let newTypeVar g = newEVar g (Ast.Uni Ast.Type)
+  let newLVar sk (cid, t) = Ast.LVar (ref None, sk, (cid, t))
 
   let rec headOpt = function
     | Ast.Tag (_, u) -> headOpt u
@@ -108,5 +108,5 @@ module Make_Misc
     | Some cid -> cid
     | None -> invalid_arg "targetFam"
 
-  let rename (_cid, _new_name) = ()
+  let rename _cid _new_name = ()
 end

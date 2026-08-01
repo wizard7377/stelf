@@ -70,15 +70,15 @@ module type SOLVE = sig
   exception AbortQuery of string
 
   val solve :
-    ExtQuery.define list * ExtQuery.solve * Paths.location ->
+    ExtQuery.define list -> ExtQuery.solve -> Paths.location ->
     (IntSyn.conDec * Paths.occConDec option) list
 
   val query :
-    (int option * int option * ExtQuery.query) * Paths.location -> unit
+    int option * int option * ExtQuery.query -> Paths.location -> unit
 
   (* may raise AbortQuery(msg) *)
   val querytabled :
-    (int option * int option * ExtQuery.query) * Paths.location -> unit
+    int option * int option * ExtQuery.query -> Paths.location -> unit
 
   (* may raise AbortQuery(msg) *)
   val qLoop : unit -> bool

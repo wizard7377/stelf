@@ -149,9 +149,9 @@ end) : TABLED = struct
     | I.Null, s -> s
     | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
-  let rec raiseType = function
+  let rec raiseType a1 b1 = match a1, b1 with
     | I.Null, v_ -> v_
-    | I.Decl (g_, d_), v_ -> raiseType (g_, I.Lam (d_, v_))
+    | I.Decl (g_, d_), v_ -> raiseType g_ (I.Lam (d_, v_))
 
   let rec compose = function
     | I.Null, g_ -> g_
@@ -184,13 +184,13 @@ end) : TABLED = struct
   let rec ctxToEVarSub = function
     | I.Null, s -> s
     | I.Decl (g_, I.Dec (_, a_)), s ->
-        let x_ = I.newEVar (I.Null, a_) in
+        let x_ = I.newEVar I.Null a_ in
         I.Dot (I.Exp x_, ctxToEVarSub (g_, s))
 
   let rec ctxToAVarSub = function
     | I.Null, s -> s
     | I.Decl (g_, I.Dec (_, a_)), s ->
-        let x_ = I.newEVar (I.Null, a_) in
+        let x_ = I.newEVar I.Null a_ in
         I.Dot (I.Exp x_, ctxToAVarSub (g_, s))
     | I.Decl (g_, I.ADec (_, d)), s ->
         let x_ = I.newAVar () in
@@ -211,7 +211,7 @@ end) : TABLED = struct
     | (T.Unify (g'_, e1, n_, eqns), s), g_ ->
         let g''_ = append (g'_, g_) in
         let s' = shift (g''_, s) in
-        Assign.unifiable (g''_, (n_, s'), (e1, s')) && solveEqn ((eqns, s), g_)
+        Assign.unifiable g''_ (n_, s') (e1, s') && solveEqn ((eqns, s), g_)
   (* G, G' |- s' : D, G, G' *)
   (* . |- s : D *)
   (* D, G, G' |- e1 and D, G, G' |- N and D, G |- eqns *)
@@ -219,15 +219,15 @@ end) : TABLED = struct
   let unifySub' (g_, s1, s2) =
     try
       begin
-        Unify.unifySub (g_, s1, s2);
+        Unify.unifySub g_ s1 s2;
         true
       end
     with Unify.Unify msg -> false
 
-  let unify (g_, us_, us') =
+  let unify g_ us_ us' =
     try
       begin
-        Unify.unify (g_, us_, us');
+        Unify.unify g_ us_ us';
         true
       end
     with Unify.Unify msg -> false
@@ -237,10 +237,10 @@ end) : TABLED = struct
     | C.DProg (g_, dPool), (C.Impl (r, a_, ha, g), s) ->
         let d'_ = IntSyn.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
-          begin match MT.memberCtx ((g_, I.EClo (a_, s)), g_) with
+          begin match MT.memberCtx (g_, I.EClo (a_, s)) g_ with
           | Some _ ->
               let (C.Atom p) = g in
-              let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+              let x_ = I.newEVar g_ (I.EClo (a_, s)) in
               getHypGoal (C.DProg (g_, dPool), (g, I.Dot (I.Exp x_, s)))
               (* is g always atomic? *)
           | None ->
@@ -254,16 +254,16 @@ end) : TABLED = struct
               (g, I.dot1 s) )
         end
     | C.DProg (g_, dPool), (C.All (d_, g), s) ->
-        let d'_ = I.decSub (d_, s) in
+        let d'_ = I.decSub d_ s in
         getHypGoal
           ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
             (g, I.dot1 s) )
 
-  let updateGlobalTable (goal, flag) =
+  let updateGlobalTable goal flag =
     let (C.DProg (g_, dPool) as dProg), (p, s) =
       getHypGoal (C.DProg (I.Null, I.Null), (goal, I.id))
     in
-    let g'_, dAVars, dEVars, u'_, eqn', s' = A.abstractEVarCtx (dProg, p, s) in
+    let g'_, dAVars, dEVars, u'_, eqn', s' = A.abstractEVarCtx dProg p s in
     let _ =
       begin if solveEqn ((eqn', s'), g'_) then ()
       else print "\nresidual equation not solvable!\n"
@@ -334,17 +334,17 @@ end) : TABLED = struct
           ctxToEVarSub (d'_, I.Shift (I.ctxLength d'_))
           (* I.id *)
         in
-        let scomp = I.comp (s1, s1') in
+        let scomp = I.comp s1 s1' in
         let ss = shift (g_, s) in
         let ss1 = shift (g_, scomp) in
-        let a = I.comp (asub, s) in
+        let a = I.comp asub s in
         let ass = shift (g_, a) in
-        let easub = I.comp (asub, esub) in
+        let easub = I.comp asub esub in
         begin
           CsManager.trail (function () ->
               begin if
                 unifySub' (g_, shift (g_, esub), ss)
-                && unifySub' (g_, shift (g_, I.comp (asub, esub)), ss1)
+                && unifySub' (g_, shift (g_, I.comp asub esub), ss1)
               then sc o1_
               else ()
               end);
@@ -373,7 +373,7 @@ end) : TABLED = struct
           ctxToEVarSub (dEVars, I.Shift (I.ctxLength dEVars))
           (* I.id *)
         in
-        let scomp = I.comp (s1, s1') in
+        let scomp = I.comp s1 s1' in
         let ss = shift (g_, s) in
         let ss1 = shift (g_, scomp) in
         begin
@@ -432,11 +432,11 @@ end) : TABLED = struct
       ref =
     ref (fun _ -> failwith "solve_fn not yet initialized")
 
-  let rec solve = function
+  let rec solve a2 b2 c2 = match a2, b2, c2 with
     | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
         begin if TabledSyn.tabledLookup (I.targetFam p) then
           let g'_, dAVars, dEVars, u'_, eqn', s' =
-            A.abstractEVarCtx (dp, p, s)
+            A.abstractEVarCtx dp p s
           in
           let _ =
             begin if solveEqn ((eqn', s'), g'_) then ()
@@ -455,7 +455,7 @@ end) : TABLED = struct
                   dp,
                   function
                   | pskeleton ->
-                      begin match MT.answerCheck (s', answRef, pskeleton) with
+                      begin match MT.answerCheck s' answRef pskeleton with
                       | repeated -> ()
                       | new_ -> sc pskeleton
                       end )
@@ -513,9 +513,9 @@ end) : TABLED = struct
     | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
         let d'_ = I.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
-          begin match MT.memberCtx ((g_, I.EClo (a_, s)), g_) with
+          begin match MT.memberCtx (g_, I.EClo (a_, s)) g_ with
           | Some _ ->
-              let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+              let x_ = I.newEVar g_ (I.EClo (a_, s)) in
               !solve_fn_ref
                 ( (g, I.Dot (I.Exp x_, s)),
                   C.DProg (g_, dPool),
@@ -533,7 +533,7 @@ end) : TABLED = struct
               function o_ -> sc o_ )
         end
     | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
-        let d'_ = I.decSub (d_, s) in
+        let d'_ = I.decSub d_ s in
         !solve_fn_ref
           ( (g, I.dot1 s),
             C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
@@ -541,15 +541,15 @@ end) : TABLED = struct
 
   and rSolve = function
     | ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
-        begin if Unify.unifiable (g_, ps', (q_, s)) then sc [] else ()
+        begin if Unify.unifiable g_ ps' (q_, s) then sc [] else ()
         end
     | ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc ->
-        begin match Assign.assignable (g_, ps', (q_, s)) with
+        begin match Assign.assignable g_ ps' (q_, s) with
         | Some cnstr -> aSolve ((eqns, s), dp, cnstr, function s_ -> sc s_)
         | None -> ()
         end
     | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
-        let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+        let x_ = I.newEVar g_ (I.EClo (a_, s)) in
         rSolve
           ( ps',
             (r, I.Dot (I.Exp x_, s)),
@@ -559,7 +559,7 @@ end) : TABLED = struct
           )
         (* is this EVar redundant? -fp *)
     | ps', (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp), sc ->
-        let x_ = I.newEVar (g_, I.EClo (a_, s)) in
+        let x_ = I.newEVar g_ (I.EClo (a_, s)) in
         rSolve (ps', (r, I.Dot (I.Exp x_, s)), dp, function s_ -> sc s_)
     | ( ps',
         (C.Axists (I.ADec (Some x_, d), r), s),
@@ -578,7 +578,7 @@ end) : TABLED = struct
       ->
         let g''_ = append (g'_, g_) in
         let s' = shift (g'_, s) in
-        begin if Assign.unifiable (g''_, (n_, s'), (e1, s')) then
+        begin if Assign.unifiable g''_ (n_, s') (e1, s') then
           aSolve ((eqns, s), dp, cnstr, sc)
         else ()
         end
@@ -604,7 +604,7 @@ end) : TABLED = struct
             CsManager.trail (function () ->
                 rSolve
                   ( ps',
-                    (r, I.comp (s, I.Shift k)),
+                    (r, I.comp s (I.Shift k)),
                     dp,
                     function s_ -> sc (C.Dc k :: s_) ));
             matchDProg (g_, dPool', k + 1)
@@ -701,7 +701,7 @@ end) : TABLED = struct
             dp,
             function
             | pskeleton ->
-                begin match MT.answerCheck (s', answRef, pskeleton) with
+                begin match MT.answerCheck s' answRef pskeleton with
                 | repeated -> ()
                 | new_ -> sc pskeleton
                 end )

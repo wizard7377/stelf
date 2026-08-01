@@ -84,7 +84,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    let delay (search, params_) () =
+    let delay search params_ () =
       try search params_ with Search.Error s -> raise (Error s)
 
     let makeAddressInit s_ k = (s_, k)
@@ -101,7 +101,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
           abstractEx,
           makeAddress ) ->
           ( [],
-            (makeAddress 0, delay (Search.searchEx, (g_, ge, vs_, abstractEx)))
+            (makeAddress 0, delay Search.searchEx (g_, ge, vs_, abstractEx))
           )
       | ( g_,
           ge,
@@ -111,7 +111,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
           makeAddress ) ->
           let go', o_ =
             operators
-              ( I.Decl (g_, I.decSub (d_, s)),
+              ( I.Decl (g_, I.decSub d_ s),
                 ge,
                 (v2_, I.dot1 s),
                 abstractAll,
@@ -119,7 +119,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
                 makeAddressCont makeAddress )
           in
           ( ( makeAddress 0,
-              delay (Search.searchAll, (g_, ge, (v1_, s), abstractAll)) )
+              delay Search.searchAll (g_, ge, (v1_, s), abstractAll) )
             :: go',
             o_ )
 
@@ -131,7 +131,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
             createEVars (M.Prefix (g_, m_, b_))
           in
           ( M.Prefix
-              ( I.Decl (g'_, I.decSub (d_, s')),
+              ( I.Decl (g'_, I.decSub d_ s'),
                 I.Decl (m'_, M.Top),
                 I.Decl (b'_, b) ),
             I.dot1 s',
@@ -141,7 +141,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
           let M.Prefix (g'_, m'_, b'_), s', ge' =
             createEVars (M.Prefix (g_, m_, b_))
           in
-          let x_ = I.newEVar (g'_, I.EClo (v_, s')) in
+          let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
           let x'_ = Whnf.lowerEVar x_ in
           (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'), x'_ :: ge')
 
@@ -162,12 +162,12 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
       in
       operators (g'_, ge', (v_, s'), abstractAll, abstractEx, makeAddressInit s_)
 
-    let apply (_, f) = f ()
+    let apply _ f = f ()
 
     let menu ((M.State (name, M.Prefix (g_, m_, b_), v_), k), sl_) =
       let rec toString = function
-        | g_, I.Pi ((I.Dec (_, v_), _), _), 0 -> Print.expToString (g_, v_)
-        | g_, (I.Root _ as v_), 0 -> Print.expToString (g_, v_)
+        | g_, I.Pi ((I.Dec (_, v_), _), _), 0 -> Print.expToString g_ v_
+        | g_, (I.Root _ as v_), 0 -> Print.expToString g_ v_
         | g_, I.Pi ((d_, _), v_), k -> toString (I.Decl (g_, d_), v_, k - 1)
       in
       "Filling   : " ^ toString (g_, v_, k)

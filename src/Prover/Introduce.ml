@@ -81,23 +81,23 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
     let rec expand = function
       | S.Focus ((T.EVar (psi, r, T.All ((d_, _), f_), None, None, _) as r_), w_)
         ->
-          let d'_ = TomegaNames.decName (psi, d_) in
-          Some (r_, T.Lam (d'_, T.newEVar (I.Decl (strip psi, d'_), f_)))
+          let d'_ = TomegaNames.decName psi d_ in
+          Some (r_, T.Lam (d'_, T.newEVar (I.Decl (strip psi, d'_)) f_))
       | S.Focus
           ( (T.EVar
                (psi, r, T.Ex (((I.Dec (_, v_) as d_), _), f_), None, None, _) as
              r_),
             w_ ) ->
-          let x_ = I.newEVar (T.coerceCtx psi, v_) in
-          let y_ = T.newEVar (psi, T.forSub (f_, T.Dot (T.Exp x_, T.id))) in
+          let x_ = I.newEVar (T.coerceCtx psi) v_ in
+          let y_ = T.newEVar psi (T.forSub f_ (T.Dot (T.Exp x_, T.id))) in
           Some (r_, T.PairExp (x_, y_))
       | S.Focus ((T.EVar (psi, r, True, None, None, _) as r_), w_) ->
           Some (r_, T.Unit)
       | S.Focus (T.EVar (psi, r, T.FClo (f_, s), tc1, tc2, x_), w_) ->
-          expand (S.Focus (T.EVar (psi, r, T.forSub (f_, s), tc1, tc2, x_), w_))
+          expand (S.Focus (T.EVar (psi, r, T.forSub f_ s, tc1, tc2, x_), w_))
       | S.Focus (T.EVar (psi, r, _, _, _, _), w_) -> None
 
-    let apply (T.EVar (_, r, _, _, _, _), p_) = r := Some p_
+    let apply (T.EVar (_, r, _, _, _, _)) p_ = r := Some p_
     let menu (r, p_) = "Intro " ^ TomegaPrint.nameEVar r
   end
 

@@ -38,7 +38,7 @@ module MemoTable = HashTable.HashTable (struct
   type key' = int * int
 
   let hash (n, m) = (7 * n) + m
-  let eq (x__op, y__op) = x__op = y__op
+  let eq x__op y__op = x__op = y__op
 end)
 
 module WorldSyn = WorldSyn.WorldSyn (struct

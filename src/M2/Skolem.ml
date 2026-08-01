@@ -108,7 +108,7 @@ end) : SKOLEM = struct
                     | v_ ->
                         k
                           (Abstract.piDepend
-                             ((Whnf.normalizeDec (d_, s), I.Meta), v_)) )
+                             (Whnf.normalizeDec d_ s, I.Meta) v_) )
             | M.Mapp (M.Marg (M.Minus, _), mS') ->
                 let (I.Dec (_, v'_)) = d_ in
                 let v'' = k (Whnf.normalize (v'_, s)) in

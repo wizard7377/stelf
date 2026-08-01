@@ -199,9 +199,9 @@ end) : SUBTREE = struct
       | I.Null, s -> s
       | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
 
-    let rec raiseType = function
+    let rec raiseType a2 b2 = match a2, b2 with
       | I.Null, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Lam (d_, v_))
+      | I.Decl (g_, d_), v_ -> raiseType g_ (I.Lam (d_, v_))
 
     let rec printSub = function
       | IntSyn.Shift n -> print (("Shift " ^ Int.toString n) ^ "\n")
@@ -552,7 +552,7 @@ end) : SUBTREE = struct
                         ( Body,
                           depth,
                           glocal_u1_,
-                          (u_, I.comp (s', s)),
+                          (u_, I.comp s' s),
                           u2_,
                           cnstr )
                   | I.FgnExp (_, ops), _ ->
@@ -573,7 +573,7 @@ end) : SUBTREE = struct
             assignExp
               ( nvaronly,
                 depth + 1,
-                I.Decl (glocal_u1_, I.decSub (d1_, s1)),
+                I.Decl (glocal_u1_, I.decSub d1_ s1),
                 (u1_, I.dot1 s1),
                 u2_,
                 cnstr' )
@@ -589,7 +589,7 @@ end) : SUBTREE = struct
             assignExp
               ( nvaronly,
                 depth + 1,
-                I.Decl (glocal_u1_, I.decSub (d1_, s1)),
+                I.Decl (glocal_u1_, I.decSub d1_ s1),
                 (u1_, I.dot1 s1),
                 u2_,
                 cnstr' )
@@ -604,7 +604,7 @@ end) : SUBTREE = struct
         | nvaronly, depth, glocal_u1_, ((I.EClo (u_, s'), s) as us1), u2_, cnstr
           ->
             assignExp
-              (nvaronly, depth, glocal_u1_, (u_, I.comp (s', s)), u2_, cnstr)
+              (nvaronly, depth, glocal_u1_, (u_, I.comp s' s), u2_, cnstr)
         | ( nvaronly,
             depth,
             glocal_u1_,
@@ -619,7 +619,7 @@ end) : SUBTREE = struct
         | nvaronly, depth, glocal_u1_, (Nil, _), Nil, cnstr -> cnstr
         | nvaronly, depth, glocal_u1_, (I.SClo (s1_, s1'), s1), s_, cnstr ->
             assignSpine
-              (nvaronly, depth, glocal_u1_, (s1_, I.comp (s1', s1)), s_, cnstr)
+              (nvaronly, depth, glocal_u1_, (s1_, I.comp s1' s1), s_, cnstr)
         | ( nvaronly,
             depth,
             glocal_u1_,
@@ -696,7 +696,7 @@ end) : SUBTREE = struct
       in
       try assign' (nsub_query, nsub) with Assignment msg -> None
 
-    let unifyW = function
+    let unifyW a3 b3 c3 = match a3, b3, c3 with
       | g_, ((I.AVar ({ contents = None } as r) as x_), I.Shift 0), us2 ->
           r := Some (I.EClo (fst us2, snd us2))
       | g_, ((I.AVar ({ contents = None } as r) as x_), s), ((u_, s2) as us2) ->
@@ -704,19 +704,19 @@ end) : SUBTREE = struct
           print "unifyW -- not s = Id\n";
           begin
             print
-              (("Us2 = " ^ Print.expToString (g_, I.EClo (fst us2, snd us2)))
+              (("Us2 = " ^ Print.expToString g_ (I.EClo (fst us2, snd us2)))
               ^ "\n");
             r := Some (I.EClo (fst us2, snd us2))
           end
         end
-      | g_, xs1, us2 -> Unify.unifyW (g_, xs1, us2)
+      | g_, xs1, us2 -> Unify.unifyW g_ xs1 us2
 
-    let unify (g_, xs1, us2) = unifyW (g_, Whnf.whnf xs1, Whnf.whnf us2)
+    let unify g_ xs1 us2 = unifyW g_ (Whnf.whnf xs1) (Whnf.whnf us2)
 
-    let unifiable (g_, us1, us2) =
+    let unifiable g_ us1 us2 =
       try
         begin
-          unify (g_, us1, us2);
+          unify g_ us1 us2;
           true
         end
       with Unify.Unify msg -> false
@@ -726,13 +726,13 @@ end) : SUBTREE = struct
       | i, gquery, I.Decl (gclause, I.Dec (_, a_)), asub ->
           let s = ctxToExplicitSub (i + 1, gquery, gclause, asub) in
           let (I.EVar (x'_, _, _, _) as u'_) =
-            I.newEVar (gquery, I.EClo (a_, s))
+            I.newEVar gquery (I.EClo (a_, s))
           in
           begin
             begin match S.lookup asub i with
             | None -> ()
             | Some (Assign (glocal_u_, u_)) ->
-                x'_ := Some (raiseType (glocal_u_, u_))
+                x'_ := Some (raiseType glocal_u_ u_)
             end;
             I.Dot (I.Exp u'_, s)
           end
@@ -753,7 +753,7 @@ end) : SUBTREE = struct
       | C.UnifyEq (glocal, e1, n_, eqns), s, gquery ->
           let g_ = compose' (glocal, gquery) in
           let s' = shift (glocal, s) in
-          begin if unifiable (g_, (n_, s'), (e1, s')) then
+          begin if unifiable g_ (n_, s') (e1, s') then
             solveAuxG (eqns, s, gquery)
           else false
           end
@@ -762,7 +762,7 @@ end) : SUBTREE = struct
       | gquery, gclause, [], s -> true
       | gquery, gclause, Eqn (glocal, u1_, u2_) :: cnstr, s ->
           Unify.unifiable
-            (compose' (gquery, glocal), (u1_, I.id), (u2_, shift (glocal, s)))
+            (compose' (gquery, glocal)) (u1_, I.id) (u2_, shift (glocal, s))
           && solveCnstr (gquery, gclause, cnstr, s)
 
     let solveResiduals

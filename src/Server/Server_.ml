@@ -520,7 +520,7 @@ module Server : SERVER = struct
         serveTop Stelf.Abort
       end
 
-  let server (name, _) =
+  let server name _ =
     begin
       print (Stelf.version ^ "\n");
       begin

@@ -219,25 +219,25 @@ end) : Cs.CS = struct
       ignore
         (Vector.mapi
            (function j, value -> Array2.update (array, i, j, value + f j))
-           (Array2.row (array, i, (j, len))))
+           (Array2.row array i (j, len)))
 
     let incrArray2Col (array, j, (i, len), f) =
       ignore
         (Vector.mapi
            (function i, value -> Array2.update (array, i, j, value + f i))
-           (Array2.column (array, j, (i, len))))
+           (Array2.column array j (i, len)))
 
     let clearArray2Row (array, i, (j, len)) =
       ignore
         (Vector.mapi
            (function j, _value -> Array2.update (array, i, j, zero))
-           (Array2.row (array, i, (j, len))))
+           (Array2.row array i (j, len)))
 
     let clearArray2Col (array, j, (i, len)) =
       ignore
         (Vector.mapi
            (function i, _value -> Array2.update (array, i, j, zero))
-           (Array2.column (array, j, (i, len))))
+           (Array2.column array j (i, len)))
 
     let label = function Row i -> rlabel i | Col j -> clabel j
     let restriction (l : label) = !(l.restr)
@@ -304,7 +304,7 @@ end) : Cs.CS = struct
             print (toString d)
           end
         in
-        let vec = Array2.row (tableau.coeffs, row, (0, nCols ())) in
+        let vec = Array2.row tableau.coeffs row (0, nCols ()) in
         begin
           begin match l.owner with Var _ -> print "V" | Exp _ -> print "E"
           end;
@@ -471,7 +471,7 @@ end) : Cs.CS = struct
 
     let findPivot row =
       let compareScore = function
-        | Some d, Some d' -> compare (d, d')
+        | Some d, Some d' -> compare d d'
         | Some _d, None -> Less
         | None, Some _d' -> Greater
         | None, None -> Equal
@@ -522,9 +522,9 @@ end) : Cs.CS = struct
 
     let pivot (row, col) =
       let pCoeffInverse = inverse (coeff (row, col)) in
-      let pRowVector = Array2.row (tableau.coeffs, row, (0, nCols ())) in
+      let pRowVector = Array2.row tableau.coeffs row (0, nCols ()) in
       let pRow j = Vector.sub (pRowVector, j) in
-      let pColVector = Array2.column (tableau.coeffs, col, (0, nRows ())) in
+      let pColVector = Array2.column tableau.coeffs col (0, nRows ()) in
       let pCol i = Vector.sub (pColVector, i) in
       let pConst = const row in
       let pRLabel = rlabel row in
@@ -569,7 +569,7 @@ end) : Cs.CS = struct
         begin match findPivot row with
         | Some (i, j) ->
             begin if i <> row then begin
-              Trail.log (tableau.trail, Pivot (i, j));
+              Trail.log tableau.trail (Pivot (i, j));
               begin
                 pivot (i, j);
                 maximizeRow row
@@ -583,15 +583,15 @@ end) : Cs.CS = struct
       end
 
     let delayMon (Mon (_n, usL), cnstr) =
-      List.app (function us_ -> Unify.delay (us_, cnstr)) usL
+      List.app (function us_ -> Unify.delay us_ cnstr) usL
 
     let unifyRestr (Restr (g_, proof, _strict), proof') =
-      begin if Unify.unifiable (g_, (proof, id), (proof', id)) then ()
+      begin if Unify.unifiable g_ (proof, id) (proof', id) then ()
       else raise Error
       end
 
     let unifySum (g_, sum, d) =
-      begin if Unify.unifiable (g_, (toExp sum, id), (constant d, id)) then ()
+      begin if Unify.unifiable g_ (toExp sum, id) (constant d, id) then ()
       else raise Error
       end
 
@@ -615,7 +615,7 @@ end) : Cs.CS = struct
               }
             in
             begin
-              Trail.log (tableau.trail, Insert (Col new_));
+              Trail.log tableau.trail (Insert (Col new_));
               begin
                 delayMon (mon, ref (makeCnstr l.tag));
                 begin
@@ -663,7 +663,7 @@ end) : Cs.CS = struct
               begin
                 (label (Row new_)).dead := isConstant new_;
                 begin
-                  Trail.log (tableau.trail, Insert (Row new_));
+                  Trail.log tableau.trail (Insert (Row new_));
                   Row new_
                 end
               end
@@ -672,14 +672,14 @@ end) : Cs.CS = struct
         end
       end
 
-    and insert (g_, us_) =
+    and insert g_ us_ =
       let sum = fromExp us_ in
       insertDecomp (decomposeSum (g_, sum), Exp (g_, sum))
 
     and minimize row =
       let killColumn (j, (l : label)) =
         begin if (not (dead l)) && coeff (row, j) <> zero then begin
-          Trail.log (tableau.trail, Kill (Col j));
+          Trail.log tableau.trail (Kill (Col j));
           begin
             (Array.sub (tableau.clabels, j)).dead := true;
             begin
@@ -701,7 +701,7 @@ end) : Cs.CS = struct
       let killRow (i, (l : label)) =
         begin if not (dead l) then
           begin if isConstant i then begin
-            Trail.log (tableau.trail, Kill (Row i));
+            Trail.log tableau.trail (Kill (Row i));
             begin
               (Array.sub (tableau.rlabels, i)).dead := true;
               begin
@@ -722,14 +722,14 @@ end) : Cs.CS = struct
             | Some pos' ->
                 let l' = label pos' in
                 begin
-                  Trail.log (tableau.trail, Kill (Row i));
+                  Trail.log tableau.trail (Kill (Row i));
                   begin
                     (Array.sub (tableau.rlabels, i)).dead := true;
                     begin match (restriction l, restriction l') with
                     | Some restr, Some (Restr (_, proof', _)) ->
                         unifyRestr (restr, proof')
                     | Some _, None -> begin
-                        Trail.log (tableau.trail, Restrict pos');
+                        Trail.log tableau.trail (Restrict pos');
                         l'.restr := restriction l
                       end
                     | None, _ -> ()
@@ -770,14 +770,14 @@ end) : Cs.CS = struct
                 in
                 begin match non_null with
                 | row :: _ -> begin
-                    Trail.log (tableau.trail, Pivot (row, col));
+                    Trail.log tableau.trail (Pivot (row, col));
                     begin
                       pivot (row, col);
                       restrict (Row row, restr)
                     end
                   end
                 | [] -> begin
-                    Trail.log (tableau.trail, Restrict (Col col));
+                    Trail.log tableau.trail (Restrict (Col col));
                     (label (Col col)).restr := Some restr
                   end
                 end
@@ -792,11 +792,11 @@ end) : Cs.CS = struct
             | None ->
                 begin match maximizeRow row with
                 | Unbounded col -> begin
-                    Trail.log (tableau.trail, Restrict (Row row));
+                    Trail.log tableau.trail (Restrict (Row row));
                     begin
                       (Array.sub (tableau.rlabels, row)).restr := Some restr;
                       begin if const row < zero then begin
-                        Trail.log (tableau.trail, Pivot (row, col));
+                        Trail.log tableau.trail (Pivot (row, col));
                         pivot (row, col)
                       end
                       else ()
@@ -804,12 +804,12 @@ end) : Cs.CS = struct
                     end
                   end
                 | Positive -> begin
-                    Trail.log (tableau.trail, Restrict (Row row));
+                    Trail.log tableau.trail (Restrict (Row row));
                     (Array.sub (tableau.rlabels, row)).restr := Some restr
                   end
                 | Maximized value ->
                     begin if value = zero then begin
-                      Trail.log (tableau.trail, Restrict (Row row));
+                      Trail.log tableau.trail (Restrict (Row row));
                       begin
                         (Array.sub (tableau.rlabels, row)).restr := Some restr;
                         minimize row
@@ -839,7 +839,7 @@ end) : Cs.CS = struct
     and update (g_, pos, sum) =
       let l = label pos in
       begin
-        Trail.log (tableau.trail, UpdateOwner (pos, l.owner, l.tag));
+        Trail.log tableau.trail (UpdateOwner (pos, l.owner, l.tag));
         begin
           setOwnership (pos, Exp (g_, sum), ref 0);
           begin if dead l then
@@ -868,7 +868,7 @@ end) : Cs.CS = struct
                     let tag = ref 0 in
                     begin
                       Trail.log
-                        (tableau.trail, UpdateOwner (pos, l.owner, l.tag));
+                        tableau.trail (UpdateOwner (pos, l.owner, l.tag));
                       begin
                         setOwnership (pos, Var (g_, mon), tag);
                         delayMon (mon, ref (makeCnstr tag))
@@ -882,11 +882,11 @@ end) : Cs.CS = struct
       end
 
     and restrictions pos =
-      let member (x, l) = List.exists (function y -> x = y) l in
+      let member x l = List.exists (function y -> x = y) l in
       let test l = restricted l && not (dead l) in
       let rec reachable = function
         | (Row row as pos) :: candidates, tried, closure ->
-            begin if member (pos, tried) then
+            begin if member pos tried then
               reachable (candidates, tried, closure)
             else
               let new_candidates =
@@ -907,7 +907,7 @@ end) : Cs.CS = struct
               reachable (new_candidates @ candidates, pos :: tried, closure')
             end
         | (Col col as pos) :: candidates, tried, closure ->
-            begin if member (pos, tried) then
+            begin if member pos tried then
               reachable (candidates, tried, closure)
             else
               let candidates' =
@@ -1027,15 +1027,15 @@ end) : Cs.CS = struct
       end
 
     let mark () = Trail.mark tableau.trail
-    let unwind () = Trail.unwind (tableau.trail, undo)
+    let unwind () = Trail.unwind tableau.trail undo
 
     let rec fst = function
       | App (u1_, _), s -> (u1_, s)
-      | SClo (s_, s'), s -> fst (s_, comp (s', s))
+      | SClo (s_, s'), s -> fst (s_, comp s' s)
 
     let rec snd = function
       | App (_u1_, s_), s -> fst (s_, s)
-      | SClo (s_, s'), s -> snd (s_, comp (s', s))
+      | SClo (s_, s'), s -> snd (s_, comp s' s)
 
     let isConstantExp u_ =
       begin match fromExp (u_, id) with Sum (m, []) -> Some m | _ -> None
@@ -1053,10 +1053,10 @@ end) : Cs.CS = struct
                 begin if d > zero then gtNExp d else raise Error
                 end
             | None ->
-                let proof = newEVar (g_, gt0 w_) in
+                let proof = newEVar g_ (gt0 w_) in
                 let _ =
                   restrict
-                    ( insert (g_, (w_, id)),
+                    ( insert g_ (w_, id),
                       Restr (g_, gtGeq (w_, constant zero, proof), true) )
                 in
                 proof
@@ -1088,9 +1088,9 @@ end) : Cs.CS = struct
                 begin if d >= zero then geqN0 d else raise Error
                 end
             | None ->
-                let proof = newEVar (g_, geq0 w_) in
+                let proof = newEVar g_ (geq0 w_) in
                 let _ =
-                  restrict (insert (g_, (w_, id)), Restr (g_, proof, false))
+                  restrict (insert g_ (w_, id), Restr (g_, proof, false))
                 in
                 proof
             end
@@ -1114,34 +1114,31 @@ end) : Cs.CS = struct
       | _g_, _s_, _n -> None
 
     let pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
-    let arrow (u_, v_) = Pi ((Dec (None, u_), No), v_)
+    let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
 
     let installFgnCnstrOps () =
       let csid = !myID in
       let _ =
         FgnCnstrStd.ToInternal.install
-          ( csid,
-            function
+          csid (function
             | MyFgnCnstrRep tag -> toInternal tag
-            | fc -> raise (UnexpectedFgnCnstr fc) )
+            | fc -> raise (UnexpectedFgnCnstr fc))
       in
       let _ =
         FgnCnstrStd.Awake.install
-          ( csid,
-            function
+          csid (function
             | MyFgnCnstrRep tag -> awake tag
-            | fc -> raise (UnexpectedFgnCnstr fc) )
+            | fc -> raise (UnexpectedFgnCnstr fc))
       in
       let _ =
         FgnCnstrStd.Simplify.install
-          ( csid,
-            function
+          csid (function
             | MyFgnCnstrRep tag -> simplify tag
-            | fc -> raise (UnexpectedFgnCnstr fc) )
+            | fc -> raise (UnexpectedFgnCnstr fc))
       in
       ()
 
-    let init (cs, installF) =
+    let init cs installF =
       begin
         myID := cs;
         begin
@@ -1152,7 +1149,7 @@ end) : Cs.CS = struct
                     None,
                     0,
                     Constraint (!myID, solveGt),
-                    arrow_ (number (), arrow_ (number (), Uni Type)),
+                    arrow_ (number ()) (arrow_ (number ()) (Uni Type)),
                     Kind ),
                 Some (FX.Infix (FX.minPrec, FX.None)),
                 [
@@ -1168,7 +1165,7 @@ end) : Cs.CS = struct
                       None,
                       0,
                       Constraint (!myID, solveGeq),
-                      arrow_ (number (), arrow_ (number (), Uni Type)),
+                      arrow_ (number ()) (arrow_ (number ()) (Uni Type)),
                       Kind ),
                   Some (FX.Infix (FX.minPrec, FX.None)),
                   [
@@ -1194,16 +1191,15 @@ end) : Cs.CS = struct
                                   ( "Z",
                                     number (),
                                     arrow_
-                                      ( gt
+                                      (gt
                                           ( Root (BVar 3, Nil),
-                                            Root (BVar 2, Nil) ),
-                                        gt
+                                            Root (BVar 2, Nil) )) (gt
                                           ( plus
                                               (Root (BVar 4, Nil))
                                               (Root (BVar 2, Nil)),
                                             plus
                                               (Root (BVar 3, Nil))
-                                              (Root (BVar 2, Nil)) ) ) ) ) ),
+                                              (Root (BVar 2, Nil)) )) ) ) ),
                         Type ),
                     None,
                     [] );
@@ -1225,16 +1221,15 @@ end) : Cs.CS = struct
                                     ( "Z",
                                       number (),
                                       arrow_
-                                        ( geq
+                                        (geq
                                             ( Root (BVar 3, Nil),
-                                              Root (BVar 2, Nil) ),
-                                          geq
+                                              Root (BVar 2, Nil) )) (geq
                                             ( plus
                                                 (Root (BVar 4, Nil))
                                                 (Root (BVar 2, Nil)),
                                               plus
                                                 (Root (BVar 3, Nil))
-                                                (Root (BVar 2, Nil)) ) ) ) )
+                                                (Root (BVar 2, Nil)) )) ) )
                             ),
                           Type ),
                       None,
@@ -1254,12 +1249,11 @@ end) : Cs.CS = struct
                                   ( "Y",
                                     number (),
                                     arrow_
-                                      ( gt
+                                      (gt
                                           ( Root (BVar 2, Nil),
-                                            Root (BVar 1, Nil) ),
-                                        geq
+                                            Root (BVar 1, Nil) )) (geq
                                           ( Root (BVar 3, Nil),
-                                            Root (BVar 2, Nil) ) ) ) ),
+                                            Root (BVar 2, Nil) )) ) ),
                             Type ),
                         None,
                         [] );

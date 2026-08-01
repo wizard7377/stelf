@@ -48,7 +48,7 @@ module type MPI = sig
 
   exception Error of string
 
-  val init : int * string list -> unit
+  val init : int -> string list -> unit
   val select : int -> unit
   val print : unit -> unit
   val next : unit -> unit

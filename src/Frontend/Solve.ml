@@ -274,7 +274,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   *)
   let solve' (defines, solve_, Paths.Loc (fileName, r)) =
     let a_, finish =
-      ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
+      ReconQuery.solveToSolve defines solve_ (Paths.Loc (fileName, r))
     in
     ignore (Display.chatter_s 3 "%solve ");
     let _ =
@@ -287,9 +287,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     in
     let search () =
       AbsMachine.solve
-        ( (g, IntSyn.id),
-          CompSyn.DProg (IntSyn.Null, IntSyn.Null),
-          function m_ -> raise (Solution m_) )
+        (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) (function m_ -> raise (Solution m_))
     in
     begin
       CsManager.reset ();
@@ -324,7 +322,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
 *)
   let solveSbt (defines, solve_, Paths.Loc (fileName, r)) =
     let a_, finish =
-      ReconQuery.solveToSolve (defines, solve_, Paths.Loc (fileName, r))
+      ReconQuery.solveToSolve defines solve_ (Paths.Loc (fileName, r))
     in
     ignore (Display.chatter_s 3 "%solve ");
     let _ =
@@ -383,7 +381,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (* %query <expected> <try> A or %query <expected> <try> X : A *)
   let query' ((expected, try_, quy), Paths.Loc (fileName, r)) =
     let a_, optName, xs_ =
-      ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
+      ReconQuery.queryToQuery quy (Paths.Loc (fileName, r))
     in
     let _ =
       Display.chatter_s 3
@@ -438,7 +436,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     in
     let search () =
       AbsMachine.solve
-        ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit)
+        (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit
     in
     begin
       begin if not (boundEq (try_, Some 0)) then begin
@@ -487,7 +485,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
   (* %query <expected> <try> A or %query <expected> <try> X : A *)
   let querySbt ((expected, try_, quy), Paths.Loc (fileName, r)) =
     let a_, optName, xs_ =
-      ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
+      ReconQuery.queryToQuery quy (Paths.Loc (fileName, r))
     in
     let _ =
       Display.chatter_s 3
@@ -557,7 +555,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     in
     let search () =
       AbsMachineSbt.solve
-        ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit)
+        (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit
     in
     begin
       begin if not (boundEq (try_, Some 0)) then begin
@@ -620,13 +618,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
 or  %querytabled <expected solutions> <max stages tried>  X : A
   note : %querytabled terminates if we have found the expected number of
   solutions or if we have reached the maximal number of stages *)
-  let querytabled ((numSol, try_, quy), Paths.Loc (fileName, r)) =
+  let querytabled (numSol, try_, quy) (Paths.Loc (fileName, r)) =
     let _ =
       Display.chatter_s 3
         ((("%querytabled " ^ boundToString numSol) ^ " ") ^ boundToString try_)
     in
     let a_, optName, xs_ =
-      ReconQuery.queryToQuery (quy, Paths.Loc (fileName, r))
+      ReconQuery.queryToQuery quy (Paths.Loc (fileName, r))
     in
     ignore (Display.chatter_s 4 " ");
     let _ =
@@ -756,7 +754,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     let tabledSearch () =
       begin
         Tabled.solve
-          ((g, IntSyn.id), CompSyn.DProg (IntSyn.Null, IntSyn.Null), scInit);
+          (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit;
         begin
           CsManager.reset ();
           begin
@@ -823,7 +821,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           (("Number of suspended goals : " ^ Int.toString (Tabled.suspGoalNo ()))
           ^ "\n");
         Display.chatter_s 3 "\n____________________________________________\n\n";
-        Tabled.updateGlobalTable (g, !status)
+        Tabled.updateGlobalTable g (!status)
       end
     end
 
@@ -850,7 +848,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     qLoops
       begin
         CsManager.reset ();
-        Parser.parseTerminalQ ("?- ", "   ")
+        Parser.parseTerminalQ ("?- ") ("   ")
       end
 
   and qLoops s = qLoops' (Timers.time Timers.parsing S.expose s)
@@ -859,7 +857,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     | empty_ -> true
     | S.Cons (query_, s') ->
         let a_, optName, xs_ =
-          ReconQuery.queryToQuery (query_, Paths.Loc ("stdIn", Paths.Reg (0, 0)))
+          ReconQuery.queryToQuery query_ (Paths.Loc ("stdIn", Paths.Reg (0, 0)))
         in
         let g =
           Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)
@@ -917,7 +915,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     qLoopsT
       begin
         CsManager.reset ();
-        Parser.parseTerminalQ ("?- ", "   ")
+        Parser.parseTerminalQ ("?- ") ("   ")
       end
 
   and qLoopsT s = qLoopsT' (Timers.time Timers.parsing S.expose s)
@@ -927,7 +925,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     | S.Cons (query_, s') ->
         let solExists = ref false in
         let a_, optName, xs_ =
-          ReconQuery.queryToQuery (query_, Paths.Loc ("stdIn", Paths.Reg (0, 0)))
+          ReconQuery.queryToQuery query_ (Paths.Loc ("stdIn", Paths.Reg (0, 0)))
         in
         let g =
           Timers.time Timers.compiling Compile.compileGoal (IntSyn.Null, a_)

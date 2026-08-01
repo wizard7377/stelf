@@ -58,5 +58,5 @@ module type MTPSPLITTING = sig
   val apply : operator -> StateSyn.state list
   val menu : operator -> string
   val index : operator -> int
-  val compare : operator * operator -> order
+  val compare : operator -> operator -> order
 end

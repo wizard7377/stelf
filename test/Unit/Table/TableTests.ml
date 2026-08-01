@@ -100,7 +100,7 @@ let test_queue_empty () =
     (Q.delete Q.empty = None)
 
 let test_queue_fifo () =
-  let q = Q.insert (1, Q.insert (2, Q.insert (3, Q.empty))) in
+  let q = Q.insert 1 (Q.insert 2 (Q.insert 3 Q.empty)) in
   (* insert prepends, so insertion order reversed: delete order is 3, 2, 1 *)
   match Q.delete q with
   | None -> Alcotest.fail "queue unexpectedly empty"
@@ -116,14 +116,14 @@ let test_queue_fifo () =
                 "FIFO order" [ 3; 2; 1 ] [ x1; x2; x3 ]))
 
 let test_queue_insert_front () =
-  let q = Q.insert (2, Q.empty) in
-  let q = Q.insertFront (1, q) in
+  let q = Q.insert 2 Q.empty in
+  let q = Q.insertFront 1 q in
   match Q.delete q with
   | None -> Alcotest.fail "queue unexpectedly empty"
   | Some (x, _) -> Alcotest.(check int) "insertFront element dequeued first" 1 x
 
 let test_queue_to_list () =
-  let q = Q.insert (1, Q.insert (2, Q.empty)) in
+  let q = Q.insert 1 (Q.insert 2 Q.empty) in
   let l, _ = Q.toList q in
   Alcotest.(check bool) "toList produces non-empty list" true (l <> [])
 
@@ -162,7 +162,7 @@ let test_ring_empty () =
 
 let test_ring_insert () =
   let r = R.init [ 1; 2 ] in
-  let r' = R.insert (r, 0) in
+  let r' = R.insert r 0 in
   let sum = R.foldr (fun (x, acc) -> x + acc) 0 r' in
   Alcotest.(check int) "insert adds element (sum now includes 0)" 3 sum
 

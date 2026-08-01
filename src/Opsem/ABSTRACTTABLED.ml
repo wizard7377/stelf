@@ -38,7 +38,7 @@ module type ABSTRACTTABLED = sig
   exception Error of string
 
   val abstractEVarCtx :
-    CompSyn.dProg * IntSyn.exp * IntSyn.sub ->
+    CompSyn.dProg -> IntSyn.exp -> IntSyn.sub ->
     IntSyn.dctx
     * IntSyn.dctx
     * IntSyn.dctx
@@ -47,5 +47,5 @@ module type ABSTRACTTABLED = sig
     * IntSyn.sub
 
   val abstractAnswSub : IntSyn.sub -> IntSyn.dctx * IntSyn.sub
-  val raiseType : IntSyn.dctx * IntSyn.exp -> IntSyn.exp
+  val raiseType : IntSyn.dctx -> IntSyn.exp -> IntSyn.exp
 end

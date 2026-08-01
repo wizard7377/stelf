@@ -42,7 +42,7 @@ module Ring : RING = struct
   (* insert ([], x) = [x]
      insert ([a1, a2 ... an], x) = [x, a1, a2, ... an]
   *)
-  let insert ((r, l), y) = (r, y :: l)
+  let insert (r, l) y = (r, y :: l)
 
   (* current [] = raise Empty
      current [a1, a2 ... an] = a1

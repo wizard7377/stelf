@@ -112,8 +112,8 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     let empty () = Ring.empty !openRing
     let current () = Ring.current !openRing
     let delete () = openRing := Ring.delete !openRing
-    let insertOpen s_ = openRing := Ring.insert (!openRing, s_)
-    let insertSolved s_ = solvedRing := Ring.insert (!solvedRing, s_)
+    let insertOpen s_ = openRing := Ring.insert (!openRing) s_
+    let insertSolved s_ = solvedRing := Ring.insert (!solvedRing) s_
 
     let insert s_ =
       begin if Qed.subgoal s_ then begin
@@ -265,13 +265,13 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | x :: l_, l'_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
-    let equiv (l1_, l2_) = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv l1_ l2_ = contains (l1_, l2_) && contains (l2_, l1_)
 
     let init' (k, (c :: _ as cL)) =
       ignore (MetaGlobal.maxFill := k);
       ignore (reset ());
       let cL' = try Order.closure c with Order.Error _ -> cL in
-      begin if equiv (cL, cL') then
+      begin if equiv cL cL' then
         List.app (function s_ -> insert s_) (Init.init cL)
       else
         raise
@@ -281,7 +281,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
              ^ cLToString cL'))
       end
 
-    let init (k, nL) =
+    let init k nL =
       let rec cids = function
         | [] -> []
         | name :: nL ->
@@ -370,7 +370,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         let s'_ =
           try
             Lemma.apply
-              (s_, valOf (Names.constLookup (valOf (Names.stringToQid name))))
+              s_ (valOf (Names.constLookup (valOf (Names.stringToQid name))))
           with
           | Splitting.Error s -> abort ("Splitting Error: " ^ s)
           | Filling.Error s -> abort ("Filling Error: " ^ s)

@@ -107,7 +107,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
       | k, I.Lam (d_, v_) ->
           ( or ) (occursInDec (k, d_), occursInExp (k + 1, v_))
       | k, I.FgnExp (csfe_csid, csfe_ops) ->
-          I.FgnExpStd.fold (csfe_csid, csfe_ops)
+          I.FgnExpStd.fold csfe_csid csfe_ops
             (function
               | u_, dp_ ->
                   ( or ) (dp_, occursInExp (k, Whnf.normalize (u_, I.id))))
@@ -132,24 +132,24 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
 
-    let piDepend = function
+    let piDepend a1 b1 = match a1, b1 with
       | (d_, I.No), v_ -> I.Pi ((d_, I.No), v_)
       | (d_, I.Meta), v_ -> I.Pi ((d_, I.Meta), v_)
       | (d_, I.Maybe), v_ -> I.Pi ((d_, occursInExp (1, v_)), v_)
 
-    let rec raiseType = function
+    let rec raiseType a1 b1 = match a1, b1 with
       | I.Null, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType (g_, I.Pi ((d_, I.Maybe), v_))
+      | I.Decl (g_, d_), v_ -> raiseType g_ (I.Pi ((d_, I.Maybe), v_))
 
-    let rec raiseTerm = function
+    let rec raiseTerm a1 b1 = match a1, b1 with
       | I.Null, u_ -> u_
-      | I.Decl (g_, d_), u_ -> raiseTerm (g_, I.Lam (d_, u_))
+      | I.Decl (g_, d_), u_ -> raiseTerm g_ (I.Lam (d_, u_))
 
     let rec collectExpW = function
       | g_, (I.Uni l_, s), k_ -> k_
       | g_, (I.Pi ((d_, _), v_), s), k_ ->
           collectExp
-            ( I.Decl (g_, I.decSub (d_, s)),
+            ( I.Decl (g_, I.decSub d_ s),
               (v_, I.dot1 s),
               collectDec (g_, (d_, s), k_) )
       | g_, (I.Root ((I.FVar (name, v_, s') as f_), s_), s), k_ ->
@@ -165,22 +165,22 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
               (I.Proj ((I.LVar ({ contents = None }, sk, (l, t)) as l_), i), s_),
             s ),
           k_ ) ->
-          collectSpine (g_, (s_, s), collectBlock (g_, I.blockSub (l_, s), k_))
+          collectSpine (g_, (s_, s), collectBlock (g_, I.blockSub l_ s, k_))
       | g_, (I.Root (_, s_), s), k_ -> collectSpine (g_, (s_, s), k_)
       | g_, (I.Lam (d_, u_), s), k_ ->
           collectExp
-            ( I.Decl (g_, I.decSub (d_, s)),
+            ( I.Decl (g_, I.decSub d_ s),
               (u_, I.dot1 s),
               collectDec (g_, (d_, s), k_) )
       | g_, ((I.EVar (r, gx, v_, cnstrs) as x_), s), k_ ->
           begin if exists (eqEVar x_) k_ then collectSub (g_, s, k_)
           else
-            let v'_ = raiseType (gx, v_) in
+            let v'_ = raiseType gx v_ in
             let k'_ = collectExp (I.Null, (v'_, I.id), k_) in
             collectSub (g_, s, I.Decl (k'_, Ev x_))
           end
       | g_, (I.FgnExp (csfe_csid, csfe_ops), s), k_ ->
-          I.FgnExpStd.fold (csfe_csid, csfe_ops)
+          I.FgnExpStd.fold csfe_csid csfe_ops
             (function u_, k_ -> collectExp (g_, (u_, s), k_))
             k_
 
@@ -189,13 +189,13 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     and collectSpine = function
       | g_, (I.Nil, _), k_ -> k_
       | g_, (I.SClo (s_, s'), s), k_ ->
-          collectSpine (g_, (s_, I.comp (s', s)), k_)
+          collectSpine (g_, (s_, I.comp s' s), k_)
       | g_, (I.App (u_, s_), s), k_ ->
           collectSpine (g_, (s_, s), collectExp (g_, (u_, s), k_))
 
     and collectDec = function
       | g_, (I.Dec (_, v_), s), k_ -> collectExp (g_, (v_, s), k_)
-      | g_, (I.BDec (_, (_, t)), s), k_ -> collectSub (g_, I.comp (t, s), k_)
+      | g_, (I.BDec (_, (_, t)), s), k_ -> collectSub (g_, I.comp t s, k_)
       | g_, (I.NDec _, s), k_ -> k_
 
     and collectSub = function
@@ -208,10 +208,10 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
 
     and collectBlock = function
       | g_, I.LVar ({ contents = Some b_ }, sk, _), k_ ->
-          collectBlock (g_, I.blockSub (b_, sk), k_)
+          collectBlock (g_, I.blockSub b_ sk, k_)
       | g_, (I.LVar (_, sk, (l, t)) as l_), k_ ->
-          begin if exists (eqLVar l_) k_ then collectSub (g_, I.comp (t, sk), k_)
-          else I.Decl (collectSub (g_, I.comp (t, sk), k_), Lv l_)
+          begin if exists (eqLVar l_) k_ then collectSub (g_, I.comp t sk, k_)
+          else I.Decl (collectSub (g_, I.comp t sk, k_), Lv l_)
           end
 
     let rec collectCtx = function
@@ -254,8 +254,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
       | k_, depth, ((I.Uni l_ as u_), s) -> u_
       | k_, depth, (I.Pi ((d_, p_), v_), s) ->
           piDepend
-            ( (abstractDec (k_, depth, (d_, s)), p_),
-              abstractExp (k_, depth + 1, (v_, I.dot1 s)) )
+            (abstractDec (k_, depth, (d_, s)), p_) (abstractExp (k_, depth + 1, (v_, I.dot1 s)))
       | k_, depth, (I.Root ((I.FVar _ as f_), s_), s) ->
           I.Root
             (abstractFVar (k_, depth, f_), abstractSpine (k_, depth, (s_, s)))
@@ -273,7 +272,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
           I.Root
             (abstractEVar (k_, depth, x_), abstractSub (k_, depth, s, I.Nil))
       | k_, depth, (I.FgnExp (csfe_csid, csfe_ops), s) ->
-          I.FgnExpStd.Map.apply (csfe_csid, csfe_ops) (function u_ ->
+          I.FgnExpStd.Map.apply csfe_csid csfe_ops (function u_ ->
               abstractExp (k_, depth, (u_, s)))
 
     and abstractExp (k_, depth, us_) = abstractExpW (k_, depth, Whnf.whnf us_)
@@ -293,7 +292,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     and abstractSpine = function
       | k_, depth, (I.Nil, _) -> I.Nil
       | k_, depth, (I.SClo (s_, s'), s) ->
-          abstractSpine (k_, depth, (s_, I.comp (s', s)))
+          abstractSpine (k_, depth, (s_, I.comp s' s))
       | k_, depth, (I.App (u_, s_), s) ->
           I.App
             ( abstractExp (k_, depth, (u_, s)),
@@ -328,7 +327,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     let rec abstractKPi = function
       | I.Null, v_ -> v_
       | I.Decl (k'_, Ev (I.EVar (_, gx, vx, _))), v_ ->
-          let v'_ = raiseType (gx, vx) in
+          let v'_ = raiseType gx vx in
           let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
           abstractKPi (k'_, I.Pi ((I.Dec (None, v''), I.Maybe), v_))
       | I.Decl (k'_, Fv (name, v'_)), v_ ->
@@ -341,7 +340,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     let rec abstractKLam = function
       | I.Null, u_ -> u_
       | I.Decl (k'_, Ev (I.EVar (_, gx, vx, _))), u_ ->
-          let v'_ = raiseType (gx, vx) in
+          let v'_ = raiseType gx vx in
           abstractKLam
             (k'_, I.Lam (I.Dec (None, abstractExp (k'_, 0, (v'_, I.id))), u_))
       | I.Decl (k'_, Fv (name, v'_)), u_ ->
@@ -353,7 +352,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     let rec abstractKCtx = function
       | I.Null -> I.Null
       | I.Decl (k'_, Ev (I.EVar (_, gx, vx, _))) ->
-          let v'_ = raiseType (gx, vx) in
+          let v'_ = raiseType gx vx in
           let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
           I.Decl (abstractKCtx k'_, I.Dec (None, v''))
       | I.Decl (k'_, Fv (name, v'_)) ->
@@ -368,7 +367,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
       ignore (checkConstraints k_);
       (I.ctxLength k_, abstractKPi (k_, abstractExp (k_, 0, (v_, I.id))))
 
-    let abstractDef (u_, v_) =
+    let abstractDef u_ v_ =
       let k_ =
         collectExp (I.Null, (u_, I.id), collectExp (I.Null, (v_, I.id), I.Null))
       in
@@ -389,22 +388,22 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
       ignore (checkConstraints k_);
       (abstractKCtx k_, abstractCtxlist (k_, 0, gs_))
 
-    let closedDec (g_, (I.Dec (_, v_), s)) =
+    let closedDec g_ (I.Dec (_, v_), s) =
       begin match collectExp (g_, (v_, s), I.Null) with
       | I.Null -> true
       | _ -> false
       end
 
-    let rec closedSub = function
+    let rec closedSub a1 b1 = match a1, b1 with
       | g_, I.Shift _ -> true
-      | g_, I.Dot (I.Idx _, s) -> closedSub (g_, s)
+      | g_, I.Dot (I.Idx _, s) -> closedSub g_ s
       | g_, I.Dot (I.Exp u_, s) ->
           begin match collectExp (g_, (u_, I.id), I.Null) with
-          | I.Null -> closedSub (g_, s)
+          | I.Null -> closedSub g_ s
           | _ -> false
           end
 
-    let closedExp (g_, (u_, s)) =
+    let closedExp g_ (u_, s) =
       begin match collectExp (g_, (u_, I.id), I.Null) with
       | I.Null -> true
       | _ -> false
@@ -412,18 +411,18 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
 
     let rec closedCtx = function
       | I.Null -> true
-      | I.Decl (g_, d_) -> closedCtx g_ && closedDec (g_, (d_, I.id))
+      | I.Decl (g_, d_) -> closedCtx g_ && closedDec g_ (d_, I.id)
 
     let rec closedFor = function
       | psi, True -> true
       | psi, T.All ((d_, _), f_) ->
           closedDEC (psi, d_) && closedFor (I.Decl (psi, d_), f_)
       | psi, T.Ex ((d_, _), f_) ->
-          closedDec (T.coerceCtx psi, (d_, I.id))
+          closedDec (T.coerceCtx psi) (d_, I.id)
           && closedFor (I.Decl (psi, T.UDec d_), f_)
 
     and closedDEC = function
-      | psi, T.UDec d_ -> closedDec (T.coerceCtx psi, (d_, I.id))
+      | psi, T.UDec d_ -> closedDec (T.coerceCtx psi) (d_, I.id)
       | psi, T.PDec (_, f_, _, _) -> closedFor (psi, f_)
 
     let rec closedCTX = function
@@ -439,10 +438,10 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
       | I.Decl (k_, Ev x_) -> x_ :: kToEVars k_
       | I.Decl (k_, _) -> kToEVars k_
 
-    let collectEVars (g_, us_, xs_) =
+    let collectEVars g_ us_ xs_ =
       kToEVars (collectExp (g_, us_, evarsToK xs_))
 
-    let collectEVarsSpine (g_, (s_, s), xs_) =
+    let collectEVarsSpine g_ (s_, s) xs_ =
       kToEVars (collectSpine (g_, (s_, s), evarsToK xs_))
 
     let rec collectPrg = function
@@ -516,7 +515,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     let rec abstractPsi = function
       | I.Null -> I.Null
       | I.Decl (k'_, Ev (I.EVar (_, gx, vx, _))) ->
-          let v'_ = raiseType (gx, vx) in
+          let v'_ = raiseType gx vx in
           let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
           I.Decl (abstractPsi k'_, T.UDec (I.Dec (None, v'')))
       | I.Decl (k'_, Fv (name, v'_)) ->
@@ -526,7 +525,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
           let t' = abstractSOME (k'_, t) in
           I.Decl (abstractPsi k'_, T.UDec (I.BDec (None, (l, t'))))
       | I.Decl (k'_, Pv (T.EVar (gx, _, fx_, tc1, tc2, _))) ->
-          let f'_ = abstractFor (k'_, 0, T.forSub (fx_, T.id)) in
+          let f'_ = abstractFor (k'_, 0, T.forSub fx_ T.id) in
           let tc1' = abstractTCOpt (k'_, 0, tc1) in
           let tc2' = abstractTCOpt (k'_, 0, tc2) in
           I.Decl (abstractPsi k'_, T.PDec (None, f'_, tc1, tc2))

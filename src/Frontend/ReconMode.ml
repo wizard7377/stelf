@@ -99,7 +99,7 @@ end) : RECON_MODE = struct
   (*! structure Paths = Paths' !*)
   exception Error = Error
 
-  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error r msg = raise (Error (Paths.wrap r msg))
 
   open! struct
     module M = Modes.Modesyn.ModeSyn
@@ -123,11 +123,11 @@ end) : RECON_MODE = struct
 
       let mnil r = (M.Mnil, r)
 
-      let mapp (((m, r1), name), (mS, r2)) =
-        (M.Mapp (M.Marg (m, name), mS), P.join (r1, r2))
+      let mapp ((m, r1), name) (mS, r2) =
+        (M.Mapp (M.Marg (m, name), mS), P.join r1 r2)
 
       let mroot (ids, id, r1, (mS, r2)) =
-        let r = P.join (r1, r2) in
+        let r = P.join r1 r2 in
         (((None, Some (ids, id), mS), r) : mterm)
 
       let toModedec nmS = nmS
@@ -137,11 +137,11 @@ end) : RECON_MODE = struct
       type nonrec mterm =
         T.dec I.ctx * M.mode I.ctx -> (I.cid * M.modeSpine) * P.region
 
-      let mpi ((m, _), d, t) (g, d_) = t (I.Decl (g, d), I.Decl (d_, m))
+      let mpi (m, _) d t (g, d_) = t (I.Decl (g, d), I.Decl (d_, m))
 
-      let mroot (tm, r) (g, d_) =
+      let mroot tm r (g, d_) =
         let (T.JWithCtx (g_, T.JOf ((v_, _), _, _))) =
-          T.recon (T.jwithctx (g, T.jof (tm, T.typ r)))
+          T.recon (T.jwithctx g (T.jof tm (T.typ r)))
         in
         ignore (T.checkErrors r);
         let rec convertSpine = function
@@ -151,18 +151,17 @@ end) : RECON_MODE = struct
                 try Whnf.etaContract u_
                 with eta_ ->
                   error
-                    ( r,
-                      ("Argument " ^ Print.expToString (g_, u_))
-                      ^ " not a variable" )
+                    r (("Argument " ^ Print.expToString g_ u_)
+                      ^ " not a variable")
               in
-              let (I.Dec (name, _)) = I.ctxLookup (g_, k) in
-              let mode = I.ctxLookup (d_, k) in
+              let (I.Dec (name, _)) = I.ctxLookup g_ k in
+              let mode = I.ctxLookup d_ k in
               M.Mapp (M.Marg (mode, name), convertSpine s_)
         in
         let convertExp = function
           | I.Root (I.Const a, s_) -> (a, convertSpine s_)
           | I.Root (I.Def d, s_) -> (d, convertSpine s_)
-          | _ -> error (r, "Call pattern not an atomic type")
+          | _ -> error r ("Call pattern not an atomic type")
         in
         let a, mS = convertExp (Whnf.normalize (v_, I.id)) in
         begin
@@ -183,13 +182,12 @@ end) : RECON_MODE = struct
           begin match Names.constLookup qid with
           | None ->
               error
-                ( r,
-                  ("Undeclared identifier "
+                r (("Undeclared identifier "
                   ^ Names.qidToString (valOf (Names.constUndef qid)))
-                  ^ " in mode declaration" )
+                  ^ " in mode declaration")
           | Some cid -> ((cid, ModeDec.shortToFull cid mS r), r)
           end
-      | _ -> error (Paths.Reg (0, 0), "Internal mode declaration state")
+      | _ -> error (Paths.Reg (0, 0)) ("Internal mode declaration state")
   end
 
   (* structure Short *)

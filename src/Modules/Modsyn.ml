@@ -92,7 +92,7 @@ end) : MODSYN = struct
       | Pi ((d_, p_), v_) -> Pi ((trDec d_, p_), trExp v_)
       | Root (h_, s_) -> Root (trHead h_, trSpine s_)
       | Lam (d_, u_) -> Lam (trDec d_, trExp u_)
-      | FgnExp (csfe1, csfe2) as u_ -> FgnExpStd.Map.apply (csfe1, csfe2) trExp
+      | FgnExp (csfe1, csfe2) as u_ -> FgnExpStd.Map.apply csfe1 csfe2 trExp
     and trDec (Dec (name, v_)) = Dec (name, trExp v_)
     and trSpine = function
       | Nil -> Nil
@@ -157,7 +157,7 @@ end) : MODSYN = struct
         with Strict.Error _ -> condec)
     | IntSyn.AbbrevDef _ as condec -> condec
 
-  let abbrevify (cid, condec_) =
+  let abbrevify cid condec_ =
     begin match condec_ with
     | I.ConDec (name, parent, i, _, v_, l_) ->
         let u_ = Whnf.normalize (I.Root (I.Const cid, I.Nil), I.id) in
@@ -212,7 +212,7 @@ end) : MODSYN = struct
       in
       let _ =
         begin match nsOpt with
-        | Some ns -> Names.insertStruct (ns, mid')
+        | Some ns -> Names.insertStruct ns mid'
         | _ -> ()
         end
       in
@@ -221,7 +221,7 @@ end) : MODSYN = struct
         end
       in
       let ns = Names.newNamespace () in
-      ignore (Names.installComponents (mid', ns));
+      ignore (Names.installComponents mid' ns);
       IntTree.insert structMap (mid, mid')
     in
     let doConst (cid, ConstInfo (condec_var, fixity, namePrefOpt, origin)) =
@@ -238,7 +238,7 @@ end) : MODSYN = struct
       in
       let _ =
         begin match nsOpt with
-        | Some ns -> Names.insertConst (ns, cid')
+        | Some ns -> Names.insertConst ns cid'
         | _ -> ()
         end
       in
@@ -250,13 +250,13 @@ end) : MODSYN = struct
       let _ =
         begin match fixity with
         | Names.Fixity.Nonfix -> ()
-        | _ -> Names.installFixity (cid', fixity)
+        | _ -> Names.installFixity cid' fixity
         end
       in
       let _ =
         begin match namePrefOpt with
         | None -> ()
-        | Some (n1, n2) -> Names.installNamePref (cid', (n1, n2))
+        | Some (n1, n2) -> Names.installNamePref cid' (n1, n2)
         end
       in
       IntTree.insert constMap (cid, cid')
@@ -276,13 +276,13 @@ end) : MODSYN = struct
     let mid = IntSyn.sgnStructAdd strdec in
     let _ =
       begin match nsOpt with
-      | Some namespace -> Names.insertStruct (namespace, mid)
+      | Some namespace -> Names.insertStruct namespace mid
       | _ -> ()
       end
     in
     ignore (Names.installStructName mid);
     let ns = Names.newNamespace () in
-    ignore (Names.installComponents (mid, ns));
+    ignore (Names.installComponents mid ns);
     installModule (module_, Some mid, None, installAction, transformConDec)
 
   let installSig (module_, nsOpt, installAction, isDef) =
@@ -292,7 +292,7 @@ end) : MODSYN = struct
     in
     installModule (module_, None, nsOpt, installAction, transformConDec)
 
-  let abstractModule (namespace, topOpt) =
+  let abstractModule namespace topOpt =
     let structTable : structInfo IntTree.table = IntTree.new_ 0 in
     let constTable : constInfo IntTree.table = IntTree.new_ 0 in
     let mapParent =
@@ -331,15 +331,15 @@ end) : MODSYN = struct
       (structTable, constTable, namespace)
     end
 
-  let instantiateModule (((_, _, namespace) as module_), transform) =
+  let instantiateModule ((_, _, namespace) as module_) transform =
     let transformConDec = transform namespace in
     let mid = IntSyn.sgnStructAdd (IntSyn.StrDec ("wheresubj", None)) in
     let ns = Names.newNamespace () in
-    ignore (Names.installComponents (mid, ns));
+    ignore (Names.installComponents mid ns);
     let _ =
       installModule (module_, Some mid, None, (fun _ -> ()), transformConDec)
     in
-    abstractModule (ns, Some mid)
+    abstractModule ns (Some mid)
 
   open! struct
     let defList : string list ref = ref []
@@ -378,7 +378,7 @@ end) : MODSYN = struct
 
   let sigDefSize () = !defCount
 
-  let installSigDef (id, module_) =
+  let installSigDef id module_ =
     begin match defsInsert (id, module_) with
     | None -> begin
         defList := id :: !defList;

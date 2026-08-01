@@ -33,7 +33,7 @@ module Heuristic : HEURISTIC = struct
     let int_compare (a, b) =
       if a < b then Less else if a = b then Equal else Greater
 
-    let compare = function
+    let compare a1 b1 = match a1, b1 with
       | ( { sd = k1; ind = None; c = c1; m = m1; r = r1; p = p1 },
           { sd = k2; ind = None; c = c2; m = m2; r = r2; p = p2 } ) ->
           begin match

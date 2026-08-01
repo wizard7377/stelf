@@ -133,7 +133,7 @@ end) : FUNNAMES.FUNNAMES = struct
        Effect: update mappings from constants to print names and identifiers
                to constants, taking into account shadowing
     *)
-  let installName (name, lemma) =
+  let installName name lemma =
     let shadowed = hashInsert (name, lemma) in
     begin
       Array.update (nameArray, lemma, NameInfo name);

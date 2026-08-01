@@ -101,19 +101,19 @@ module MakeCover
   module F = Print.Formatter
   module N = Names
 
-  let rec weaken = function
+  let rec weaken a3 b3 = match a3, b3 with
     | I.Null, a -> I.id
     | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
-        let w' = weaken (g'_, a) in
-        begin if Subordinate.belowEq (I.targetFam v_, a) then I.dot1 w'
-        else I.comp (w', I.shift)
+        let w' = weaken g'_ a in
+        begin if Subordinate.belowEq (I.targetFam v_) a then I.dot1 w'
+        else I.comp w' I.shift
         end
 
   let createEVar (g_, v_) =
-    let w = weaken (g_, I.targetFam v_) in
+    let w = weaken g_ (I.targetFam v_) in
     let iw = Whnf.invert w in
-    let g'_ = Whnf.strengthen (iw, g_) in
-    let x'_ = Whnf.newLoweredEVar (g'_, (v_, iw)) in
+    let g'_ = Whnf.strengthen iw g_ in
+    let x'_ = Whnf.newLoweredEVar g'_ (v_, iw) in
     let x_ = I.EClo (x'_, w) in
     x_
 
@@ -138,12 +138,12 @@ module MakeCover
   let rec abbrevCGoal = function
     | g_, v_, 0, ci -> (g_, abbrevCGoal' (g_, v_, ci))
     | g_, I.Pi ((d_, p_), v_), p, ci ->
-        let d'_ = N.decEName (g_, d_) in
+        let d'_ = N.decEName g_ d_ in
         abbrevCGoal (I.Decl (g_, d'_), v_, p - 1, ci)
 
   and abbrevCGoal' = function
     | g_, I.Pi ((d_, p_), v_), ci ->
-        let d'_ = N.decUName (g_, d_) in
+        let d'_ = N.decUName g_ d_ in
         I.Pi ((d'_, p_), abbrevCGoal' (I.Decl (g_, d'_), v_, ci))
     | g_, I.Root (a, s_), ci -> I.Root (a, abbrevCSpine (s_, ci))
 
@@ -152,11 +152,11 @@ module MakeCover
     let g_, v'_ = abbrevCGoal (I.Null, v_, p, ci) in
     F.hVbox
       [
-        Print.formatCtx (I.Null, g_);
+        Print.formatCtx I.Null g_;
         F.break_;
         F.string "|-";
         F.space;
-        Print.formatExp (g_, v'_);
+        Print.formatExp g_ v'_;
       ]
 
   let rec formatCGoals = function
@@ -173,8 +173,8 @@ module MakeCover
   let showSplitVar (v_, p, k, ci) =
     ignore (N.varReset I.Null);
     let g_, v'_ = abbrevCGoal (I.Null, v_, p, ci) in
-    let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
-    (("Split " ^ x) ^ " in ") ^ Print.expToString (g_, v'_)
+    let (I.Dec (Some x, _)) = I.ctxLookup g_ k in
+    (("Split " ^ x) ^ " in ") ^ Print.expToString g_ v'_
 
   let showPendingGoal (v_, p, ci, lab) =
     F.makestring_fmt
@@ -193,7 +193,7 @@ module MakeCover
 
   let rec initCGoal' = function
     | a, k, g_, I.Pi ((d_, p_), v_) ->
-        let d'_ = N.decEName (g_, d_) in
+        let d'_ = N.decEName g_ d_ in
         let v'_, p = initCGoal' (a, k + 1, I.Decl (g_, d'_), v_) in
         (I.Pi ((d'_, I.Maybe), v'_), p)
     | a, k, g_, I.Uni I.Type -> (I.Root (a, buildSpine k), k)
@@ -208,15 +208,15 @@ module MakeCover
     let fmt =
       F.hVbox
         [
-          Print.formatCtx (I.Null, g'_);
+          Print.formatCtx I.Null g'_;
           F.break_;
           F.string "|-";
           F.space;
-          Print.formatExp (g'_, I.EClo (fst us1, snd us1));
+          Print.formatExp g'_ (I.EClo (fst us1, snd us1));
           F.break_;
           F.string "=";
           F.space;
-          Print.formatExp (g'_, I.EClo (fst us2, snd us2));
+          Print.formatExp g'_ (I.EClo (fst us2, snd us2));
         ]
     in
     F.makestring_fmt fmt
@@ -250,14 +250,14 @@ module MakeCover
     | e, (Cands ks as cands) -> cands
     | e, Fail -> Fail
 
-  let unifiable (g_, us1, us2) = Unify.unifiable (g_, us1, us2)
+  let unifiable g_ us1 us2 = Unify.unifiable g_ us1 us2
 
   let rec matchEqns = function
     | [] -> true
     | Eqn (g_, us1, ((u2_, s2) as us2)) :: es ->
         begin match Whnf.makePatSub s2 with
-        | None -> unifiable (g_, us1, us2)
-        | Some s2' -> unifiable (g_, us1, (u2_, s2'))
+        | None -> unifiable g_ us1 us2
+        | Some s2' -> unifiable g_ us1 (u2_, s2')
         end
         && matchEqns es
 
@@ -278,7 +278,7 @@ module MakeCover
     | g_, qs_, Cands ks -> Cands ks
     | g_, qs_, Fail -> Fail
     | g_, qs_, Eqns _ ->
-        let xs_ = Abstract.collectEVars (g_, qs_, []) in
+        let xs_ = Abstract.collectEVars g_ qs_ [] in
         let constrs = collectConstraints xs_ in
         begin match constrs with [] -> Eqns [] | _ -> Fail
         end
@@ -329,14 +329,14 @@ module MakeCover
             end
         | I.Proj (I.Bidx k1, i1), I.Proj (I.LVar (r2, I.Shift k2, (l2, t2)), i2)
           ->
-            let (I.BDec (bOpt, (l1, t1))) = I.ctxDec (g_, k1) in
+            let (I.BDec (bOpt, (l1, t1))) = I.ctxDec g_ k1 in
             begin if l1 <> l2 || i1 <> i2 then
               fail "block index / block variable clash"
             else
               let cands2 =
-                matchSub (g_, d, t1, I.comp (t2, I.Shift k2), cands)
+                matchSub (g_, d, t1, I.comp t2 (I.Shift k2), cands)
               in
-              ignore (Unify.instantiateLVar (r2, I.Bidx (k1 - k2)));
+              ignore (Unify.instantiateLVar r2 (I.Bidx (k1 - k2)));
               matchSpine (g_, d, (s1_, s1), (s2_, s2), cands2)
             end
         | I.BVar k1, I.Proj _ ->
@@ -349,14 +349,14 @@ module MakeCover
         end
     | g_, d, (I.Lam (d1_, u1_), s1), (I.Lam (d2_, u2_), s2), cands ->
         matchExp
-          ( I.Decl (g_, I.decSub (d1_, s1)),
+          ( I.Decl (g_, I.decSub d1_ s1),
             d + 1,
             (u1_, I.dot1 s1),
             (u2_, I.dot1 s2),
             cands )
     | g_, d, (I.Lam (d1_, u1_), s1), (u2_, s2), cands ->
         matchExp
-          ( I.Decl (g_, I.decSub (d1_, s1)),
+          ( I.Decl (g_, I.decSub d1_ s1),
             d + 1,
             (u1_, I.dot1 s1),
             ( I.Redex
@@ -365,7 +365,7 @@ module MakeCover
             cands )
     | g_, d, (u1_, s1), (I.Lam (d2_, u2_), s2), cands ->
         matchExp
-          ( I.Decl (g_, I.decSub (d2_, s2)),
+          ( I.Decl (g_, I.decSub d2_ s2),
             d + 1,
             ( I.Redex
                 (I.EClo (u1_, I.shift), I.App (I.Root (I.BVar 1, I.Nil), I.Nil)),
@@ -378,9 +378,9 @@ module MakeCover
   and matchSpine = function
     | g_, d, (I.Nil, _), (I.Nil, _), cands -> cands
     | g_, d, (I.SClo (s1_, s1'), s1), ss2_, cands ->
-        matchSpine (g_, d, (s1_, I.comp (s1', s1)), ss2_, cands)
+        matchSpine (g_, d, (s1_, I.comp s1' s1), ss2_, cands)
     | g_, d, ss1_, (I.SClo (s2_, s2'), s2), cands ->
-        matchSpine (g_, d, ss1_, (s2_, I.comp (s2', s2)), cands)
+        matchSpine (g_, d, ss1_, (s2_, I.comp s2' s2), cands)
     | g_, d, (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2), cands ->
         let cands' = matchExp (g_, d, (u1_, s1), (u2_, s2), cands) in
         matchSpine (g_, d, (s1_, s1), (s2_, s2), cands')
@@ -444,9 +444,9 @@ module MakeCover
   and matchTopSpine = function
     | g_, d, (I.Nil, _), (I.Nil, _), Cnil, cands -> cands
     | g_, d, (I.SClo (s1_, s1'), s1), ss2_, ci, cands ->
-        matchTopSpine (g_, d, (s1_, I.comp (s1', s1)), ss2_, ci, cands)
+        matchTopSpine (g_, d, (s1_, I.comp s1' s1), ss2_, ci, cands)
     | g_, d, ss1_, (I.SClo (s2_, s2'), s2), ci, cands ->
-        matchTopSpine (g_, d, ss1_, (s2_, I.comp (s2', s2)), ci, cands)
+        matchTopSpine (g_, d, ss1_, (s2_, I.comp s2' s2), ci, cands)
     | g_, d, (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2), Match ci', cands ->
         let cands' = matchExp (g_, d, (u1_, s1), (u2_, s2), cands) in
         matchTopSpine (g_, d, (s1_, s1), (s2_, s2), ci', cands')
@@ -458,7 +458,7 @@ module MakeCover
         checkConstraints
           (g_, qs, resolveCands (matchTop (g_, 0, ps', qs, ci, Eqns [])))
     | g_, ps', (I.Pi ((I.Dec (_, v1_), _), v2_), s), ci ->
-        let x1_ = Whnf.newLoweredEVar (g_, (v1_, s)) in
+        let x1_ = Whnf.newLoweredEVar g_ (v1_, s) in
         matchClause (g_, ps', (v2_, I.Dot (I.Exp x1_, s)), ci)
 
   let rec matchSig = function
@@ -492,7 +492,7 @@ module MakeCover
   let rec matchCtx = function
     | g_, s', I.Null, v_, k, ci, klist -> klist
     | g_, s', I.Decl (g''_, I.Dec (_, v'_)), v_, k, ci, klist ->
-        let s'' = I.comp (I.shift, s') in
+        let s'' = I.comp I.shift s' in
         let cands =
           CsManager.trail (function () ->
               matchClause (g_, (v_, I.id), (v'_, s''), ci))
@@ -500,9 +500,9 @@ module MakeCover
         matchCtx' (g_, s'', g''_, v_, k + 1, ci, addKs (cands, klist))
     | g_, s', I.Decl (g''_, I.BDec (_, (cid, s))), v_, k, ci, klist ->
         let gsome_, piDecs = I.constBlock cid in
-        let s'' = I.comp (I.shift, s') in
+        let s'' = I.comp I.shift s' in
         let klist' =
-          matchBlocks (g_, I.comp (s, s''), piDecs, v_, k, 1, ci, klist)
+          matchBlocks (g_, I.comp s s'', piDecs, v_, k, 1, ci, klist)
         in
         matchCtx' (g_, s'', g''_, v_, k + 1, ci, klist')
 
@@ -518,7 +518,7 @@ module MakeCover
         let cands'' = checkConstraints (g_, (v'_, s'), cands') in
         addKs (cands'', CandList [])
     | g_, v_, ci, ((I.Pi ((I.Dec (_, v1'), _), v2') as v'_), s'), p ->
-        let x1_ = Whnf.newLoweredEVar (g_, (v1', s')) in
+        let x1_ = Whnf.newLoweredEVar g_ (v1', s') in
         matchOut (g_, v_, ci, (v2', I.Dot (I.Exp x1_, s')), p - 1)
 
   let rec match_ = function
@@ -536,18 +536,18 @@ module MakeCover
     | g_, I.Pi ((d_, _), v'_), p, ci, ccs ->
         match_ (I.Decl (g_, d_), v'_, p - 1, ci, ccs)
 
-  let rec insert = function
+  let rec insert a3 b3 = match a3, b3 with
     | k, [] -> [ (k, 1) ]
     | k, ((k', n') :: ksn' as ksn) ->
         begin match Int.compare (k, k') with
         | Less -> (k, 1) :: ksn
         | Equal -> (k', n' + 1) :: ksn'
-        | Greater -> (k', n') :: insert (k, ksn')
+        | Greater -> (k', n') :: insert k ksn'
         end
 
-  let rec join = function
+  let rec join a3 b3 = match a3, b3 with
     | [], ksn -> ksn
-    | k :: ks, ksn -> join (ks, insert (k, ksn))
+    | k :: ks, ksn -> join ks (insert k ksn)
 
   let rec selectCand = function
     | Covered -> None
@@ -557,17 +557,17 @@ module MakeCover
     | [], ksn -> Some ksn
     | Fail :: klist, ksn -> selectCand' (klist, ksn)
     | Cands [] :: klist, ksn -> selectCand' (klist, ksn)
-    | Cands ks :: klist, ksn -> selectCand' (klist, join (ks, ksn))
+    | Cands ks :: klist, ksn -> selectCand' (klist, join ks ksn)
 
   let rec instEVars (vs_, p, xsRev) = instEVarsW (Whnf.whnf vs_, p, xsRev)
 
   and instEVarsW = function
     | vs_, 0, xsRev -> (vs_, xsRev)
     | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev ->
-        let x1_ = Whnf.newLoweredEVar (I.Null, (v1_, s)) in
+        let x1_ = Whnf.newLoweredEVar I.Null (v1_, s) in
         instEVars ((v2_, I.Dot (I.Exp x1_, s)), p - 1, Some x1_ :: xsRev)
     | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev ->
-        let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
+        let l1_ = I.newLVar (I.Shift 0) (l, I.comp t s) in
         instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev)
 
   open! struct
@@ -587,7 +587,7 @@ module MakeCover
         let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
         (I.App (x_, s_), vs_)
 
-  let createAtomConst (g_, h_) =
+  let createAtomConst g_ h_ =
     let cid =
       match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false
     in
@@ -595,8 +595,8 @@ module MakeCover
     let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
     (I.Root (h_, s_), vs_)
 
-  let createAtomBVar (g_, k) =
-    let (I.Dec (_, v_)) = I.ctxDec (g_, k) in
+  let createAtomBVar g_ k =
+    let (I.Dec (_, v_)) = I.ctxDec g_ k in
     let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
     (I.Root (I.BVar k, s_), vs_)
 
@@ -607,18 +607,18 @@ module MakeCover
   let rec constCases = function
     | g_, vs_, [], sc -> ()
     | g_, vs_, (I.Const c as h_) :: sgn', sc ->
-        let u_, vs'_ = createAtomConst (g_, h_) in
+        let u_, vs'_ = createAtomConst g_ h_ in
         let _ =
           CsManager.trail (function () ->
-              begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+              begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
               end)
         in
         constCases (g_, vs_, sgn', sc)
     | g_, vs_, (I.Def c as h_) :: sgn', sc ->
-        let u_, vs'_ = createAtomConst (g_, h_) in
+        let u_, vs'_ = createAtomConst g_ h_ in
         let _ =
           CsManager.trail (function () ->
-              begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+              begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
               end)
         in
         constCases (g_, vs_, sgn', sc)
@@ -629,10 +629,10 @@ module MakeCover
   let rec paramCases = function
     | g_, vs_, 0, sc -> ()
     | g_, vs_, k, sc ->
-        let u_, vs'_ = createAtomBVar (g_, k) in
+        let u_, vs'_ = createAtomBVar g_ k in
         let _ =
           CsManager.trail (function () ->
-              begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+              begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
               end)
         in
         paramCases (g_, vs_, k - 1, sc)
@@ -641,7 +641,7 @@ module MakeCover
     | I.Null -> I.id
     | I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
         let s = createEVarSub g'_ in
-        let x_ = Whnf.newLoweredEVar (I.Null, (v_, s)) in
+        let x_ = Whnf.newLoweredEVar I.Null (v_, s) in
         I.Dot (I.Exp x_, s)
 
   let blockName cid = I.conDecName (I.sgnLookup cid)
@@ -649,8 +649,8 @@ module MakeCover
   let rec blockCases (g_, vs_, cid, (gsome_, piDecs), sc) =
     let t = createEVarSub gsome_ in
     let sk = I.Shift (I.ctxLength g_) in
-    let t' = I.comp (t, sk) in
-    let lvar = I.newLVar (sk, (cid, t)) in
+    let t' = I.comp t sk in
+    let lvar = I.newLVar sk (cid, t) in
     blockCases' (g_, vs_, (lvar, 1), (t', piDecs), sc)
 
   and blockCases' = function
@@ -659,7 +659,7 @@ module MakeCover
         let u_, vs'_ = createAtomProj (g_, I.Proj (lvar, i), (v'_, t)) in
         let _ =
           CsManager.trail (function () ->
-              begin if Unify.unifiable (g_, vs_, vs'_) then sc u_ else ()
+              begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
               end)
         in
         let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.Nil)), t) in
@@ -676,7 +676,7 @@ module MakeCover
     | (I.EVar (_, g_, v_, _) as x_), w_, sc ->
         let sc' = function
           | u_ ->
-              begin if Unify.unifiable (g_, (x_, I.id), (u_, I.id)) then sc ()
+              begin if Unify.unifiable g_ (x_, I.id) (u_, I.id) then sc ()
               else ()
               end
         in
@@ -695,7 +695,7 @@ module MakeCover
     let v'' = Whnf.normalize (v'_, I.id) in
     let _ =
       begin if !Global.doubleCheck then
-        try TypeCheck.typeCheck (I.Null, (v'', I.Uni I.Type))
+        try TypeCheck.typeCheck I.Null (v'', I.Uni I.Type)
         with TypeCheck.Error _ ->
           (* Coverage splitting can produce terms where higher-order EVars
               are not fully instantiated by pattern unification (e.g., when
@@ -759,25 +759,25 @@ module MakeCover
   and instEVarsSkipW = function
     | vs_, 0, xsRev, ci -> (vs_, xsRev)
     | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev, ci ->
-        let x1_ = Whnf.newLoweredEVar (I.Null, (v1_, s)) in
+        let x1_ = Whnf.newLoweredEVar I.Null (v1_, s) in
         let eVarOpt =
           begin if occursInMatchPos (1, v2_, ci) then Some x1_ else None
           end
         in
         instEVarsSkip ((v2_, I.Dot (I.Exp x1_, s)), p - 1, eVarOpt :: xsRev, ci)
     | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev, ci ->
-        let l1_ = I.newLVar (I.Shift 0, (l, I.comp (t, s))) in
+        let l1_ = I.newLVar (I.Shift 0) (l, I.comp t s) in
         instEVarsSkip ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev, ci)
 
   let targetBelowEq = function
     | a, I.EVar ({ contents = None }, gy, vy, { contents = [] }) ->
-        Subordinate.belowEq (a, I.targetFam vy)
+        Subordinate.belowEq a (I.targetFam vy)
     | a, I.EVar ({ contents = None }, gy, vy, { contents = _ :: _ }) -> true
 
   let rec recursive = function
     | I.EVar ({ contents = Some u_ }, gx, vx, _) as x_ ->
         let a = I.targetFam vx in
-        let ys_ = Abstract.collectEVars (gx, (x_, I.id), []) in
+        let ys_ = Abstract.collectEVars gx (x_, I.id) [] in
         let recp = List.exists (function y_ -> targetBelowEq (a, y_)) ys_ in
         recp
     | I.Lam (d_, u_) -> recursive u_
@@ -797,7 +797,7 @@ module MakeCover
       resetCount ();
       begin
         chatter 7 (function () ->
-            (("Trying " ^ Print.expToString (I.Null, x_)) ^ " : ") ^ ".\n");
+            (("Trying " ^ Print.expToString I.Null x_) ^ " : ") ^ ".\n");
         try
           begin
             splitEVar
@@ -843,7 +843,7 @@ module MakeCover
   let finitary (v_, p, w_, ci) =
     let _ =
       begin if !Global.doubleCheck then
-        TypeCheck.typeCheck (I.Null, (v_, I.Uni I.Type))
+        TypeCheck.typeCheck I.Null (v_, I.Uni I.Type)
       else ()
       end
     in
@@ -851,13 +851,13 @@ module MakeCover
     finitarySplits
       (xsRev, 1, w_, (function () -> ignore (abstract (v1_, s))), [])
 
-  let eqExp (us_, us') = Conv.conv (us_, us')
+  let eqExp (us_, us') = Conv.conv us_ us'
 
   let rec eqInpSpine = function
     | ms, (I.SClo (s1_, s1'), s1), ss2_ ->
-        eqInpSpine (ms, (s1_, I.comp (s1', s1)), ss2_)
+        eqInpSpine (ms, (s1_, I.comp s1' s1), ss2_)
     | ms, ss1_, (I.SClo (s2_, s2'), s2) ->
-        eqInpSpine (ms, ss1_, (s2_, I.comp (s2', s2)))
+        eqInpSpine (ms, ss1_, (s2_, I.comp s2' s2))
     | M.Mnil, (I.Nil, s), (I.Nil, s') -> true
     | ( M.Mapp (M.Marg (M.Plus, _), ms'),
         (I.App (u_, s_), s),
@@ -901,14 +901,14 @@ module MakeCover
 
   let rec unifyUOutSpine = function
     | ms, (I.SClo (s1_, s1'), s1), ss2_ ->
-        unifyUOutSpine (ms, (s1_, I.comp (s1', s1)), ss2_)
+        unifyUOutSpine (ms, (s1_, I.comp s1' s1), ss2_)
     | ms, ss1_, (I.SClo (s2_, s2'), s2) ->
-        unifyUOutSpine (ms, ss1_, (s2_, I.comp (s2', s2)))
+        unifyUOutSpine (ms, ss1_, (s2_, I.comp s2' s2))
     | M.Mnil, (I.Nil, s1), (I.Nil, s2) -> true
     | ( M.Mapp (M.Marg (M.Minus1, _), ms'),
         (I.App (u1_, s1_), s1),
         (I.App (u2_, s2_), s2) ) ->
-        Unify.unifiable (I.Null, (u1_, s1), (u2_, s2))
+        Unify.unifiable I.Null (u1_, s1) (u2_, s2)
         && unifyUOutSpine (ms', (s1_, s1), (s2_, s2))
     | M.Mapp (_, ms'), (I.App (u1_, s1_), s1), (I.App (u2_, s2_), s2) ->
         unifyUOutSpine (ms', (s1_, s1), (s2_, s2))
@@ -1064,11 +1064,11 @@ module MakeCover
 
   and createCoverGoalW = function
     | g_, (I.Pi ((d1_, p1_), v2_), s), 0, ms ->
-        let d1' = I.decSub (d1_, s) in
+        let d1' = I.decSub d1_ s in
         let v2' = createCoverGoal (I.Decl (g_, d1'), (v2_, I.dot1 s), 0, ms) in
         I.Pi ((d1', p1_), v2')
     | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s), p, ms ->
-        let x_ = Whnf.newLoweredEVar (g_, (v1_, s)) in
+        let x_ = Whnf.newLoweredEVar g_ (v1_, s) in
         createCoverGoal (g_, (v2_, I.Dot (I.Exp x_, s)), p - 1, ms)
     | g_, (I.Root ((I.Const cid as a), s_), s), p, ms ->
         I.Root (a, createCoverSpine (g_, (s_, s), (I.constType cid, I.id), ms))
@@ -1093,7 +1093,7 @@ module MakeCover
                 Whnf.whnf (v2_, I.Dot (I.Exp (I.EClo (u1_, s)), s')),
                 ms' ) )
     | g_, (I.SClo (s_, s'), s), vs_, ms ->
-        createCoverSpine (g_, (s_, I.comp (s', s)), vs_, ms)
+        createCoverSpine (g_, (s_, I.comp s' s), vs_, ms)
 
   (*****************)
   (* Strengthening *)
@@ -1889,7 +1889,7 @@ val _ = pr ()
        checks coverage for type family a with respect to mode spine ms
        Effect: raises Error (msg) otherwise
     *)
-  let checkCovers (a, ms) =
+  let checkCovers a ms =
     let _ =
       chatter 4 (function () ->
           ("Input coverage checking family " ^ N.qidToString (N.constQid a))
@@ -1907,7 +1907,7 @@ val _ = pr ()
     let v0, p = initCGoal a in
     let _ =
       begin if !Global.doubleCheck then
-        TypeCheck.typeCheck (I.Null, (v0, I.Uni I.Type))
+        TypeCheck.typeCheck I.Null (v0, I.Uni I.Type)
       else ()
       end
     in
@@ -1944,14 +1944,14 @@ val _ = pr ()
        checks if the most general goal V' is locally output-covered by V
        Effect: raises Error (msg) otherwise
     *)
-  let checkOut (g_, (v_, s)) =
+  let checkOut g_ (v_, s) =
     let a = I.targetFam v_ in
     let (Some ms) = ModeTable.modeLookup a in
     let cOut = outCoverInst ms in
     let v'_, q = createCoverClause (g_, I.EClo (v_, s), 0) in
     let _ =
       begin if !Global.doubleCheck then
-        TypeCheck.typeCheck (I.Null, (v'_, I.Uni I.Type))
+        TypeCheck.typeCheck I.Null (v'_, I.Uni I.Type)
       else ()
       end
     in
@@ -1993,13 +1993,13 @@ val _ = pr ()
     ignore (N.varReset I.Null);
     F.hVbox
       ([
-         Print.formatCtx (I.Null, g_);
+         Print.formatCtx I.Null g_;
          F.break_;
          F.break_;
          F.string "|-";
          F.space;
        ]
-      @ Print.formatSpine (g_, s_))
+      @ Print.formatSpine g_ s_)
 
   let showPendingCGoal (CGoal (g_, s_), lab) =
     F.makestring_fmt
@@ -2014,13 +2014,13 @@ val _ = pr ()
 
   let showCClause (CClause (g_, s_)) =
     ignore (N.varReset I.Null);
-    F.makestring_fmt (F.hVbox ([ F.string "!- " ] @ Print.formatSpine (g_, s_)))
+    F.makestring_fmt (F.hVbox ([ F.string "!- " ] @ Print.formatSpine g_ s_))
 
   let showSplitVar (CGoal (g_, s_), k) =
     ignore (N.varReset I.Null);
-    let (I.Dec (Some x, _)) = I.ctxLookup (g_, k) in
+    let (I.Dec (Some x, _)) = I.ctxLookup g_ k in
     (("Split " ^ x) ^ " in ")
-    ^ F.makestring_fmt (F.hVbox (Print.formatSpine (g_, s_)))
+    ^ F.makestring_fmt (F.hVbox (Print.formatSpine g_ s_))
 
   (* newEVarSubst (G, G') = s
        Invariant:   If G = xn:Vn,...,x1:V1
@@ -2031,7 +2031,7 @@ val _ = pr ()
     | g_, I.Null -> I.Shift (I.ctxLength g_)
     | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
         let s' = newEVarSubst (g_, g'_) in
-        let x_ = Whnf.newLoweredEVar (g_, (v_, s')) in
+        let x_ = Whnf.newLoweredEVar g_ (v_, s') in
         I.Dot (I.Exp x_, s')
         (* was val V' = I.EClo (V, s')
                  val X = I.newEVar (G, V') Mon Feb 28 15:34:31 2011 -cs *)
@@ -2040,7 +2040,7 @@ val _ = pr ()
         I.Dot (I.Undef, s')
     | g_, I.Decl (g'_, (I.BDec (_, (b, t)) as d_)) ->
         let s' = newEVarSubst (g_, g'_) in
-        let l1_ = I.newLVar (s', (b, t)) in
+        let l1_ = I.newLVar s' (b, t) in
         I.Dot (I.Block l1_, s')
 
   (* was  val L1 = I.newLVar (I.Shift(0), (b, I.comp(t, s')))
@@ -2065,7 +2065,7 @@ val _ = pr ()
     | g_, (si_, ti), Cands ks -> Cands ks
     | g_, (si_, ti), Fail -> Fail
     | g_, (si_, ti), Eqns _ ->
-        let xs_ = Abstract.collectEVarsSpine (g_, (si_, ti), []) in
+        let xs_ = Abstract.collectEVarsSpine g_ (si_, ti) [] in
         let constrs = collectConstraints xs_ in
         begin match constrs with
         | [] -> Eqns []
@@ -2113,8 +2113,8 @@ val _ = pr ()
        Invariant: G abstracts all EVars in S[s]
        G |- S' : {{G'}}type
     *)
-  let abstractSpine (s_, s) =
-    let g'_, s'_ = Abstract.abstractSpine (s_, s) in
+  let abstractSpine s_ s =
+    let g'_, s'_ = Abstract.abstractSpine s_ s in
     let namedG' = N.ctxName g'_ in
     let _ =
       begin if !Global.doubleCheck then TypeCheck.typeCheckCtx namedG'
@@ -2175,7 +2175,7 @@ val _ = pr ()
       let x_ = kthSub (s, k) in
       ignore (resetCases ());
       let _ =
-        splitEVar (x_, w, function () -> addCase (abstractSpine (s_, s)))
+        splitEVar (x_, w, function () -> addCase (abstractSpine s_ s))
       in
       Some (getCases ())
       (* for splitting, EVars are always global *)
@@ -2197,7 +2197,7 @@ val _ = pr ()
     let s = newEVarSubst (I.Null, g_) in
     let xsRev = subToXsRev s in
     finitarySplits
-      (xsRev, 1, w, (function () -> ignore (abstractSpine (s_, s))), [])
+      (xsRev, 1, w, (function () -> ignore (abstractSpine s_ s)), [])
 
   (* G = xn:Vn,...,x1:V1 *)
   (* for splitting, EVars are always global *)
@@ -2211,7 +2211,7 @@ val _ = pr ()
   let contractAll (CGoal (g_, s_), ucands) =
     let s = newEVarSubst (I.Null, g_) in
     let xsRev = subToXsRev s in
-    begin if unifyUOut (xsRev, ucands) then Some (abstractSpine (s_, s))
+    begin if unifyUOut (xsRev, ucands) then Some (abstractSpine s_ s)
     else None
     end
   (* as in splitVar, may raise Constraints.Error *)
@@ -2354,7 +2354,7 @@ val _ = pr ()
         substToSpine' (s, g_, I.App (u_, t_))
     | I.Dot (I.Idx n, s), I.Decl (g_, I.Dec (_, v_)), t_ ->
         let us_, _ =
-          Whnf.whnfEta ((I.Root (I.BVar n, I.Nil), I.id), (v_, I.id))
+          Whnf.whnfEta (I.Root (I.BVar n, I.Nil), I.id) (v_, I.id)
         in
         substToSpine' (s, g_, I.App (I.EClo (fst us_, snd us_), t_))
     | I.Dot (_, s), I.Decl (g_, I.BDec (_, (l_, t))), t_ ->
@@ -2392,7 +2392,7 @@ val _ = pr ()
         (* G' |- _.s : G,_ *)
     | I.Decl (g_, (I.Dec _ as d_)) ->
         let g'_, s = purify' g_ in
-        (I.Decl (g'_, I.decSub (d_, s)), I.dot1 s)
+        (I.Decl (g'_, I.decSub d_ s), I.dot1 s)
         (* G' |- s : G *)
         (* G |- D : type *)
         (* G' |- D[s] : type *)
@@ -2425,7 +2425,7 @@ val _ = pr ()
        there exists at least one index k and substitution   Phi |- t : Gk
        s.t.  sk o t = s
     *)
-  let coverageCheckCases (w, cs_, g_) =
+  let coverageCheckCases w cs_ g_ =
     ignore (chatter 4 (function () -> "[Tomega coverage checker..."));
     ignore (chatter 4 (function () -> "\n"));
     let ccs =

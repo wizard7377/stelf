@@ -223,7 +223,7 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       | I.Decl (psi, Block (CtxBlock (_, g_))) ->
           lfctxLength psi + I.ctxLength g_
 
-    let lfctxLFDec (psi, k) =
+    let lfctxLFDec psi k =
       let rec lfctxLFDec' = function
         | I.Decl (psi', (Prim (I.Dec (x, v'_)) as ld)), 1 -> (ld, I.Shift k)
         | I.Decl (psi', Prim _), k' -> lfctxLFDec' (psi', k' - 1)
@@ -235,29 +235,29 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       in
       lfctxLFDec' (psi, k)
 
-    let rec dot1n = function
+    let rec dot1n a1 b1 = match a1, b1 with
       | I.Null, s -> s
-      | I.Decl (g_, _), s -> I.dot1 (dot1n (g_, s))
+      | I.Decl (g_, _), s -> I.dot1 (dot1n g_ s)
 
-    let rec convFor = function
+    let rec convFor a1 b1 = match a1, b1 with
       | (True, _), (True, _) -> true
       | (All (Prim d1_, f1_), s1), (All (Prim d2_, f2_), s2) ->
-          Conv.convDec ((d1_, s1), (d2_, s2))
-          && convFor ((f1_, I.dot1 s1), (f2_, I.dot1 s2))
+          Conv.convDec (d1_, s1) (d2_, s2)
+          && convFor (f1_, I.dot1 s1) (f2_, I.dot1 s2)
       | ( (All (Block (CtxBlock (_, g1_)), f1_), s1),
           (All (Block (CtxBlock (_, g2_)), f2_), s2) ) ->
           convForBlock ((ctxToList g1_, f1_, s1), (ctxToList g1_, f2_, s2))
       | (Ex (d1_, f1_), s1), (Ex (d2_, f2_), s2) ->
-          Conv.convDec ((d1_, s1), (d2_, s2))
-          && convFor ((f1_, I.dot1 s1), (f2_, I.dot1 s2))
+          Conv.convDec (d1_, s1) (d2_, s2)
+          && convFor (f1_, I.dot1 s1) (f2_, I.dot1 s2)
       | (And (f1_, f1'), s1), (And (f2_, f2'), s2) ->
-          convFor ((f1_, s1), (f2_, s2)) && convFor ((f1', s1), (f2', s2))
+          convFor (f1_, s1) (f2_, s2) && convFor (f1', s1) (f2', s2)
       | _ -> false
 
     and convForBlock = function
-      | ([], f1_, s1), ([], f2_, s2) -> convFor ((f1_, s1), (f2_, s2))
+      | ([], f1_, s1), ([], f2_, s2) -> convFor (f1_, s1) (f2_, s2)
       | (d1_ :: g1_, f1_, s1), (d2_ :: g2_, f2_, s2) ->
-          Conv.convDec ((d1_, s1), (d2_, s2))
+          Conv.convDec (d1_, s1) (d2_, s2)
           && convForBlock ((g1_, f1_, I.dot1 s1), (g2_, f2_, I.dot1 s2))
       | _ -> false
 
@@ -265,26 +265,26 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       | I.Null, s -> (I.Null, s)
       | I.Decl (g_, d_), s ->
           let g'_, s' = ctxSub (g_, s) in
-          (I.Decl (g'_, I.decSub (d_, s')), I.dot1 s)
+          (I.Decl (g'_, I.decSub d_ s'), I.dot1 s)
 
-    let rec forSub = function
+    let rec forSub a1 b1 = match a1, b1 with
       | All (Prim d_, f_), s ->
-          All (Prim (I.decSub (d_, s)), forSub (f_, I.dot1 s))
+          All (Prim (I.decSub d_ s), forSub f_ (I.dot1 s))
       | All (Block (CtxBlock (name, g_)), f_), s ->
           let g'_, s' = ctxSub (g_, s) in
-          All (Block (CtxBlock (name, g'_)), forSub (f_, s'))
-      | Ex (d_, f_), s -> Ex (I.decSub (d_, s), forSub (f_, I.dot1 s))
+          All (Block (CtxBlock (name, g'_)), forSub f_ s')
+      | Ex (d_, f_), s -> Ex (I.decSub d_ s, forSub f_ (I.dot1 s))
       | True, s -> True
-      | And (f1_, f2_), s -> And (forSub (f1_, s), forSub (f2_, s))
+      | And (f1_, f2_), s -> And (forSub f1_ s, forSub f2_ s)
 
-    let mdecSub (MDec (name, f_), s) = MDec (name, forSub (f_, s))
+    let mdecSub (MDec (name, f_)) s = MDec (name, forSub f_ s)
 
-    let rec normalizeFor = function
+    let rec normalizeFor a1 b1 = match a1, b1 with
       | All (Prim d_, f_), s ->
-          All (Prim (Whnf.normalizeDec (d_, s)), normalizeFor (f_, I.dot1 s))
+          All (Prim (Whnf.normalizeDec d_ s), normalizeFor f_ (I.dot1 s))
       | Ex (d_, f_), s ->
-          Ex (Whnf.normalizeDec (d_, s), normalizeFor (f_, I.dot1 s))
-      | And (f1_, f2_), s -> And (normalizeFor (f1_, s), normalizeFor (f2_, s))
+          Ex (Whnf.normalizeDec d_ s, normalizeFor f_ (I.dot1 s))
+      | And (f1_, f2_), s -> And (normalizeFor f1_ s, normalizeFor f2_ s)
       | True, _ -> True
   end
 

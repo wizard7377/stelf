@@ -79,7 +79,7 @@ end) : STRICT = struct
       | p, I.Lam (d_, u_) -> strictArgParm (p + 1, u_)
 
     let occToString = function
-      | Some ocd, occ -> Paths.wrap (Paths.occToRegionDef1 ocd occ, "")
+      | Some ocd, occ -> Paths.wrap (Paths.occToRegionDef1 ocd occ) ("")
       | None, occ -> "Error: "
 
     let decToVarName = function
@@ -113,7 +113,7 @@ end) : STRICT = struct
       let rec oit = function
         | (0, v_), occ -> ()
         | (i, I.Pi ((d_, p_), v_)), occ ->
-            begin match Abstract.piDepend ((d_, p_), v_) with
+            begin match Abstract.piDepend (d_, p_) v_ with
             | I.Pi ((d'_, Maybe), v_) -> oit ((i - 1, v_), Paths.body occ)
             | _ ->
                 raise

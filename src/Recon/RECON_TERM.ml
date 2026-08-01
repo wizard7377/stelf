@@ -108,11 +108,11 @@ module type RECON_TERM = sig
   val jnothing : t
   (** The empty job. Unit for {!jand}. *)
 
-  val jand : t * t -> t
+  val jand : t -> t -> t
   (** [jand (j1, j2)] reconstructs [j1] and [j2] together, sharing metavariables
       between them. *)
 
-  val jwithctx : Cst.decl Ast.ctx * t -> t
+  val jwithctx : Cst.decl Ast.ctx -> t -> t
   (** [jwithctx (g, j)] reconstructs [j] under the additional hypotheses [g],
       which are themselves reconstructed first. Used for the [some]/[pi] parts
       of a context block and for theorem quantifiers. *)
@@ -124,7 +124,7 @@ module type RECON_TERM = sig
   (** [jclass tm] reconstructs [tm] as a classifier — a type or a kind —
       inferring which universe it inhabits. *)
 
-  val jof : Cst.term * Cst.term -> t
+  val jof : Cst.term -> Cst.term -> t
   (** [jof (tm, ty)] reconstructs [tm] checked {i against} the classifier [ty],
       which is itself reconstructed. This is the ascription form, and it gives
       better error messages than reconstructing the two separately. *)

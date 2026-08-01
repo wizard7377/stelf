@@ -103,7 +103,7 @@ end) : INFERENCE.INFERENCE = struct
 
     let rec createEVars = function
       | g_, (I.Pi ((I.Dec (_, v_), meta_), v'_), s) ->
-          let x_ = I.newEVar (g_, I.EClo (v_, s)) in
+          let x_ = I.newEVar g_ (I.EClo (v_, s)) in
           let x'_ = Whnf.lowerEVar x_ in
           let xs_, fVs' = createEVars (g_, (v'_, I.Dot (I.Exp x_, s))) in
           (x'_ :: xs_, fVs')
@@ -113,7 +113,7 @@ end) : INFERENCE.INFERENCE = struct
       | g_, b_, (I.Pi ((_, meta_), _) as v_) -> (
           let _ =
             begin if !Global.doubleCheck then
-              TypeCheck.typeCheck (g_, (v_, I.Uni I.Type))
+              TypeCheck.typeCheck g_ (v_, I.Uni I.Type)
             else ()
             end
           in
@@ -121,11 +121,9 @@ end) : INFERENCE.INFERENCE = struct
           try
             begin match
               UniqueSearch.searchEx
-                ( 2,
-                  xs_,
-                  function
+                2 xs_ (function
                   | [] -> [ Whnf.normalize (v'_, s') ]
-                  | _ -> raise (UniqueSearch.Error "Too many solutions") )
+                  | _ -> raise (UniqueSearch.Error "Too many solutions"))
             with
             | vf'' :: [] -> Some vf''
             | [] -> None
@@ -153,7 +151,7 @@ end) : INFERENCE.INFERENCE = struct
                       ( ( I.Decl (g'_, I.Dec (None, v'')),
                           I.Decl (b'_, S.Lemma (S.Splits !MTPGlobal.maxSplit))
                         ),
-                        I.comp (w', I.shift) ) )
+                        I.comp w' I.shift ) )
           end
       | gb0, (I.Decl (g_, d_), I.Decl (b_, t_)), n ->
           let (g0'_, b0'), sc' = expand' (gb0, (g_, b_), n + 1) in
@@ -177,9 +175,9 @@ end) : INFERENCE.INFERENCE = struct
             (g'_, b'_),
             (ih_, oh),
             d,
-            S.orderSub (o_, w'),
-            map (function i, f'_ -> (i, F.forSub (f'_, w'))) h_,
-            F.forSub (f_, w') )
+            S.orderSub o_ w',
+            map (function i, f'_ -> (i, F.forSub f'_ w')) h_,
+            F.forSub f_ w' )
       in
       let _ =
         begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s'_)

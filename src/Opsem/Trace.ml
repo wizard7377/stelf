@@ -62,24 +62,24 @@ end) : TRACE = struct
   let headToString = function
     | g_, I.Const c -> N.qidToString (N.constQid c)
     | g_, I.Def d -> N.qidToString (N.constQid d)
-    | g_, I.BVar k -> N.bvarName (g_, k)
+    | g_, I.BVar k -> N.bvarName g_ k
 
   let expToString gu = P.expToString gu ^ ". "
   let decToString gd = P.decToString gd ^ ". "
 
   let eqnToString (g_, u1_, u2_) =
-    ((P.expToString (g_, u1_) ^ " = ") ^ P.expToString (g_, u2_)) ^ ". "
+    ((P.expToString g_ u1_ ^ " = ") ^ P.expToString g_ u2_) ^ ". "
 
   let newline () = print "\n"
 
   let rec printCtx = function
     | I.Null -> print "No hypotheses or parameters. "
-    | I.Decl (I.Null, d_) -> print (decToString (I.Null, d_))
+    | I.Decl (I.Null, d_) -> print (decToString I.Null d_)
     | I.Decl (g_, d_) -> begin
         printCtx g_;
         begin
           newline ();
-          print (decToString (g_, d_))
+          print (decToString g_ d_)
         end
       end
 
@@ -191,12 +191,12 @@ end) : TRACE = struct
 
   let setEVarInst xs_ =
     currentEVarInst :=
-      List.map (function x_ -> (x_, N.evarName (I.Null, x_))) xs_
+      List.map (function x_ -> (x_, N.evarName I.Null x_)) xs_
 
   let setGoal (g_, v_) =
     begin
       currentGoal := (g_, v_);
-      setEVarInst (Abstract.collectEVars (g_, (v_, I.id), []))
+      setEVarInst (Abstract.collectEVars g_ (v_, I.id) [])
     end
 
   type nonrec goalTag = int option
@@ -312,9 +312,9 @@ end) : TRACE = struct
   (* clause head == goal *)
   (* failure message *)
   let eventToString = function
-    | g_, IntroHyp (_, d_) -> "% Introducing hypothesis\n" ^ decToString (g_, d_)
+    | g_, IntroHyp (_, d_) -> "% Introducing hypothesis\n" ^ decToString g_ d_
     | g_, DischargeHyp (_, I.Dec (Some x, _)) -> "% Discharging hypothesis " ^ x
-    | g_, IntroParm (_, d_) -> "% Introducing parameter\n" ^ decToString (g_, d_)
+    | g_, IntroParm (_, d_) -> "% Introducing parameter\n" ^ decToString g_ d_
     | g_, DischargeParm (_, I.Dec (Some x, _)) -> "% Discharging parameter " ^ x
     | g_, Resolved (hc, ha) ->
         (("% Resolved with clause " ^ headToString (g_, hc)) ^ "\n")
@@ -323,7 +323,7 @@ end) : TRACE = struct
         (("% Solving subgoal (" ^ Int.toString (msg ())) ^ ") of clause ")
         ^ headToString (g_, hc)
     | g_, SolveGoal (Some tag, _, v_) ->
-        (("% Goal " ^ Int.toString tag) ^ ":\n") ^ expToString (g_, v_)
+        (("% Goal " ^ Int.toString tag) ^ ":\n") ^ expToString g_ v_
     | g_, SucceedGoal (Some tag, _, v_) ->
         ("% Goal " ^ Int.toString tag) ^ " succeeded"
     | g_, CommitGoal (Some tag, _, v_) ->
@@ -333,7 +333,7 @@ end) : TRACE = struct
           ^ "% Retrying goal ")
          ^ Int.toString tag)
         ^ ":\n")
-        ^ expToString (g_, v_)
+        ^ expToString g_ v_
     | g_, FailGoal (Some tag, _, v_) -> "% Failed goal " ^ Int.toString tag
     | g_, Unify ((hc, ha), q_, p_) ->
         (("% Trying clause " ^ headToString (g_, hc)) ^ "\n")
@@ -382,7 +382,7 @@ end) : TRACE = struct
     | g_, Unify (_, q_, p_) ->
         setEVarInst
           (Abstract.collectEVars
-             (g_, (p_, I.id), Abstract.collectEVars (g_, (q_, I.id), [])))
+             g_ (p_, I.id) (Abstract.collectEVars g_ (q_, I.id) []))
     | _ -> ()
   (* show substitution for variables in clause head if tracing unification *)
 
@@ -456,12 +456,12 @@ end) : TRACE = struct
     begin match !watchForTag with None -> false | Some _ -> true
     end
 
-  let rec signal (g_, e) =
+  let rec signal g_ e =
     begin if monitorDetail e then
       begin if skipping () then
         begin if watchFor e then begin
           watchForTag := None;
-          signal (g_, e)
+          signal g_ e
         end
         else begin
           ignore (monitorTrace (!traceTSpec, g_, e));

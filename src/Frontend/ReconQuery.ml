@@ -112,21 +112,21 @@ end) : RECON_QUERY = struct
   exception Error = Error
 
   (* error (r, msg) raises a syntax error within region r with text msg *)
-  let error (r, msg) = raise (Error (Paths.wrap (r, msg)))
+  let error r msg = raise (Error (Paths.wrap r msg))
 
   type nonrec name = string
 
   (* Queries, with optional proof term variable *)
   type query = Query_ of name option * T.term
 
-  let query (nameOpt, tm) = Query_ (nameOpt, tm)
+  let query nameOpt tm = Query_ (nameOpt, tm)
 
   (* define := <constant name> option * <def body> * <type> option *)
   type define = Define_ of string option * T.term * T.term option
   type solve = Solve_ of string option * T.term * Paths.region
 
-  let define (nameOpt, tm1, tm2Opt) = Define_ (nameOpt, tm1, tm2Opt)
-  let solve (nameOpt, tm, r) = Solve_ (nameOpt, tm, r)
+  let define nameOpt tm1 tm2Opt = Define_ (nameOpt, tm1, tm2Opt)
+  let solve nameOpt tm r = Solve_ (nameOpt, tm, r)
 
   (* freeVar (XOpt, [(X1,""X1""),...,(Xn,""Xn"")]) = true
      iff XOpt = SOME(""Xi""), false otherwise
@@ -146,7 +146,7 @@ end) : RECON_QUERY = struct
   *)
   (* call TypeCheck... if !doubleCheck = true? *)
   (* Wed May 20 08:00:28 1998 -fp *)
-  let queryToQuery (Query_ (optName, tm), Paths.Loc (fileName, r)) =
+  let queryToQuery (Query_ (optName, tm)) (Paths.Loc (fileName, r)) =
     ignore (Names.varReset IntSyn.Null);
     ignore (T.resetErrors fileName);
     let (T.JClass ((v_, oc), l_)) =
@@ -156,13 +156,13 @@ end) : RECON_QUERY = struct
     let _ =
       begin match l_ with
       | IntSyn.Type -> ()
-      | _ -> error (r, "Query was not a type")
+      | _ -> error r ("Query was not a type")
       end
     in
     let xs_ = Names.namedEVars () in
     let _ =
       begin if freeVar (optName, xs_) then
-        error (r, ("Proof term variable " ^ valOf optName) ^ " occurs in type")
+        error r (("Proof term variable " ^ valOf optName) ^ " occurs in type")
       else ()
       end
     in
@@ -180,13 +180,13 @@ end) : RECON_QUERY = struct
     let i, (u'_, v'_) =
       try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
       with Abstract.Error msg ->
-        raise (Abstract.Error (Paths.wrap (Paths.toRegion oc1, msg)))
+        raise (Abstract.Error (Paths.wrap (Paths.toRegion oc1) msg))
     in
     let name =
       begin match optName with None -> "_" | Some name -> name
       end
     in
-    let ocd = Paths.def (i, oc1, oc2Opt) in
+    let ocd = Paths.def i oc1 oc2Opt in
     let cd =
       try
         begin
@@ -218,7 +218,7 @@ end) : RECON_QUERY = struct
   let finishSolve (Solve_ (nameOpt, tm, r), u_, v_) =
     let i, (u'_, v'_) =
       try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
-      with Abstract.Error msg -> raise (Abstract.Error (Paths.wrap (r, msg)))
+      with Abstract.Error msg -> raise (Abstract.Error (Paths.wrap r msg))
     in
     let name =
       begin match nameOpt with None -> "_" | Some name -> name
@@ -266,25 +266,25 @@ end) : RECON_QUERY = struct
   (* call TypeCheck... if !doubleCheck = true? *)
   (* Wed May 20 08:00:28 1998 -fp *)
   let solveToSolve
-      (defines, (Solve_ (optName, tm, r0) as sol), Paths.Loc (fileName, r)) =
+      defines (Solve_ (optName, tm, r0) as sol) (Paths.Loc (fileName, r)) =
     ignore (Names.varReset IntSyn.Null);
     ignore (T.resetErrors fileName);
     let mkd = function
       | Define_ (_, tm1, None) -> T.jterm tm1
-      | Define_ (_, tm1, Some tm2) -> T.jof (tm1, tm2)
+      | Define_ (_, tm1, Some tm2) -> T.jof tm1 tm2
     in
     let rec mkj = function
       | [] -> T.jnothing
-      | def :: defs -> T.jand (mkd def, mkj defs)
+      | def :: defs -> T.jand (mkd def) (mkj defs)
     in
     let (T.JAnd (defines', T.JClass ((v_, _), l_))) =
-      Timers.time Timers.recon T.reconQuery (T.jand (mkj defines, T.jclass tm))
+      Timers.time Timers.recon T.reconQuery (T.jand (mkj defines) (T.jclass tm))
     in
     ignore (T.checkErrors r);
     let _ =
       begin match l_ with
       | IntSyn.Type -> ()
-      | _ -> error (r0, "Query was not a type")
+      | _ -> error r0 ("Query was not a type")
       end
     in
     let rec sc = function

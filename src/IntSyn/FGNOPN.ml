@@ -19,6 +19,6 @@ module type FGN_OPN = sig
   type result
   type nonrec func = rep -> arg -> result
 
-  val install : csid * func -> unit
-  val apply : csid * rep -> arg -> result
+  val install : csid -> func -> unit
+  val apply : csid -> rep -> arg -> result
 end

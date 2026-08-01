@@ -10,5 +10,5 @@ open Table_
 module RedBlackTree (RedBlackTree__0 : sig
   type key'
 
-  val compare : key' * key' -> order
+  val compare : key' -> key' -> order
 end) : TABLE with type key = RedBlackTree__0.key'

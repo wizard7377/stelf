@@ -33,19 +33,19 @@ module type PATHS = sig
   val getLinesInfo : unit -> linesInfo
   (** new line starts at character i *)
 
-  val join : region * region -> region
+  val join : region -> region -> region
   (** get lines info for current file *)
 
   val toString : region -> string
   (** join(r1,r2) = smallest region enclosing r1 and r2 *)
 
-  val wrap : region * string -> string
+  val wrap : region -> string -> string
   (** line1.col1-line2.col2, parsable by Emacs *)
 
-  val wrapLoc : location * string -> string
+  val wrapLoc : location -> string -> string
   (** add region to error message, parsable by Emacs *)
 
-  val wrapLoc' : location * linesInfo option * string -> string
+  val wrapLoc' : location -> linesInfo option -> string -> string
   (** add location to error message, also parsable *)
 
   (* add location to error message in line.col format *)
@@ -71,7 +71,7 @@ module type PATHS = sig
   val label : occ -> occ
   val body : occ -> occ
   val head : occ -> occ
-  val arg : int * occ -> occ
+  val arg : int -> occ -> occ
 
   type occExp
   (** An occurrence tree is a data structure mapping occurrences in a term to
@@ -85,11 +85,11 @@ module type PATHS = sig
   val leaf : region -> occExp
   (** occurrence tree for s spines *)
 
-  val bind : region * occExp option * occExp -> occExp
+  val bind : region -> occExp option -> occExp -> occExp
   (** could be _ or identifier *)
 
   val root : region * occExp * int * int * occSpine -> occExp
-  val app : occExp * occSpine -> occSpine
+  val app : occExp -> occSpine -> occSpine
   val nils : occSpine
 
   type occConDec
@@ -97,13 +97,13 @@ module type PATHS = sig
   val dec : int * occExp -> occConDec
   (** occurrence tree for constant declarations *)
 
-  val def : int * occExp * occExp option -> occConDec
+  val def : int -> occExp -> occExp option -> occConDec
   (** (#implicit, v) in c : V *)
 
   val toRegion : occExp -> region
   (** (#implicit, u, v) in c : V = U *)
 
-  val toRegionSpine : occSpine * region -> region
+  val toRegionSpine : occSpine -> region -> region
   val posToPath : occExp -> int -> path
   val occToRegionExp : occExp -> occ -> region
   val occToRegionDec : occConDec -> occ -> region

@@ -177,8 +177,8 @@ module Impl () = struct
     (match scope_installs with
     | Some acc ->
         acc := cid :: !acc;
-        Names.insertConstShadow (ns, cid)
-    | None -> Names.insertConst (ns, cid));
+        Names.insertConstShadow ns cid
+    | None -> Names.insertConst ns cid);
     (match cd with
     | BlockDec _ -> Subordinate.Subordinate_.Subordinate.installBlock cid
     | BlockDef _ -> ()
@@ -352,8 +352,8 @@ module Impl () = struct
        still rendered here through the Display bus; extracting them as values
        requires a solution-callback API (phase 3). *)
     let run_query loc q : int =
-      let v_, opt_name, xs_ = Recon.ReconQuery.queryToQuery (q, loc) in
-      let g = Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, v_) in
+      let v_, opt_name, xs_ = Recon.ReconQuery.queryToQuery q loc in
+      let g = Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null v_ in
       let solutions = ref 0 in
       let exception Done in
       let sc m_ =
@@ -364,7 +364,7 @@ module Impl () = struct
             (fun (e_, n) ->
               msg
                 (n ^ " = "
-                ^ Print.Print_.expToString (Intsyn.IntSyn.Null, e_)
+                ^ Print.Print_.expToString Intsyn.IntSyn.Null e_
                 ^ "\n"))
             xs_;
           match opt_name with
@@ -372,17 +372,15 @@ module Impl () = struct
           | Some name ->
               msg
                 (name ^ " = "
-                ^ Print.Print_.expToString (Intsyn.IntSyn.Null, m_)
+                ^ Print.Print_.expToString Intsyn.IntSyn.Null m_
                 ^ "\n")
         end;
         raise Done
       in
       (try
          Opsem.Opsem_.AbsMachine.solve
-           ( (g, Intsyn.IntSyn.id),
-             Compile.CompSyn.CompSyn.DProg
-               (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null),
-             sc )
+           (g, Intsyn.IntSyn.id) (Compile.CompSyn.CompSyn.DProg
+               (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null)) sc
        with Done -> ());
       if !solutions = 0 && !Global.Global_.Global.chatter >= 3 then
         msg "No solution.\n";
@@ -426,18 +424,18 @@ module Impl () = struct
         | Some a -> a
       in
       let families = List.map resolve_family tms in
-      List.app (fun a -> WorldSyn.install (a, w_)) families;
+      List.app (fun a -> WorldSyn.install a w_) families;
       List.app (fun a -> WorldSyn.worldcheck w_ a) families
 
     let install_condec_cmd ?(inline = false)
         ?(scope_installs : Intsyn.IntSyn.cid list ref option = None) ns condec
         loc : Intsyn.IntSyn.cid option =
-      match Recon.ReconConDec.condecToConDec (condec, loc, inline) with
+      match Recon.ReconConDec.condecToConDec condec loc inline with
       | Some cd, _ -> Some (install_condec ~scope_installs ns cd)
       | None, _ -> None
 
     let name_to_cid ns label id =
-      match Names.constLookupIn (ns, Names.Qid ([], id)) with
+      match Names.constLookupIn ns (Names.Qid ([], id)) with
       | None ->
           failwith'
             ("Undeclared identifier " ^ id ^ " in " ^ label ^ " declaration")
@@ -539,10 +537,10 @@ module Impl () = struct
       | Cst.SolveCmd_ (Cst.Solve_ (_, stm) as sol) ->
           let v_, sc_fn =
             Recon.ReconQuery.solveToSolve
-              ([], sol, loc_of filename (term_loc stm))
+              [] sol (loc_of filename (term_loc stm))
           in
           let g =
-            Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, v_)
+            Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null v_
           in
           let exception Done of Intsyn.IntSyn.exp in
           let sc m_ = raise (Done m_) in
@@ -550,10 +548,8 @@ module Impl () = struct
             match
               try
                 Opsem.Opsem_.AbsMachine.solve
-                  ( (g, Intsyn.IntSyn.id),
-                    Compile.CompSyn.CompSyn.DProg
-                      (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null),
-                    sc );
+                  (g, Intsyn.IntSyn.id) (Compile.CompSyn.CompSyn.DProg
+                      (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null)) sc;
                 None
               with Done m_ -> Some m_
             with
@@ -621,7 +617,7 @@ module Impl () = struct
       | Cst.DeterministicCmd_ ids ->
           let cids = List.map (name_to_cid ns "deterministic") ids in
           List.app
-            (fun cid -> Compile.CompSyn.CompSyn.detTableInsert (cid, true))
+            (fun cid -> Compile.CompSyn.CompSyn.detTableInsert cid true)
             cids;
           []
       | Cst.PrecCmd_ (fix, prec, ids) ->
@@ -638,14 +634,14 @@ module Impl () = struct
           List.app
             (fun id ->
               let cid = name_to_cid ns "prec" id in
-              Names.installFixity (cid, fixity))
+              Names.installFixity cid fixity)
             ids;
           []
       | Cst.SymbolCmd_ (pref, id) ->
           let cid = name_to_cid ns "symbol" id in
-          Names.installAlias (pref, cid);
-          Names.insertConstAlias (ns, pref, cid);
-          Names.installNamePref (cid, ([ pref ], [ pref ]));
+          Names.installAlias pref cid;
+          Names.insertConstAlias ns pref cid;
+          Names.installNamePref cid ([ pref ], [ pref ]);
           []
       | Cst.InlineCmd_ (name, tm) ->
           let condec = Cst.ConstantDef_ (name, tm, None) in
@@ -692,13 +688,13 @@ module Impl () = struct
           []
       | Cst.TotalCmd_ (intros, body) ->
           let t_, rrs = build_thm_tdecl "%total" intros body in
-          let la_ = ThmInst.installTotal (t_, rrs) in
+          let la_ = ThmInst.installTotal t_ rrs in
           List.app ThmTotal.install la_;
           List.app ThmTotal.checkFam la_;
           []
       | Cst.TerminatesCmd_ (intros, body) ->
           let t_, rrs = build_thm_tdecl "%terminates" intros body in
-          let la_ = ThmInst.installTerminates (t_, rrs) in
+          let la_ = ThmInst.installTerminates t_ rrs in
           ignore la_;
           []
       | Cst.CoversCmd_ md ->
@@ -709,7 +705,7 @@ module Impl () = struct
       | Cst.ProseCmd_ _id -> []
       | Cst.ReducesCmd_ (pred_str, body) ->
           let r_, rrs = build_thm_rdecl pred_str body in
-          let la_ = ThmInst.installReduces (r_, rrs) in
+          let la_ = ThmInst.installReduces r_ rrs in
           List.app Terminate.Terminate_.Reduces.checkFamReduction la_;
           []
       | Cst.UniqueCmd_ tm ->
@@ -741,10 +737,10 @@ module Impl () = struct
           []
       | Cst.QueryTabledCmd_ (numSol, try_, _d, (Cst.Query_ (_, qtm) as q)) ->
           let a_, opt_name, xs_ =
-            Recon.ReconQuery.queryToQuery (q, loc_of filename (term_loc qtm))
+            Recon.ReconQuery.queryToQuery q (loc_of filename (term_loc qtm))
           in
           let g =
-            Compile.Compile_.Compile.compileGoal (Intsyn.IntSyn.Null, a_)
+            Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null a_
           in
           let solutions = ref 0 in
           let stages = ref 1 in
@@ -761,7 +757,7 @@ module Impl () = struct
                 (fun (e_, n) ->
                   msg
                     (n ^ " = "
-                    ^ Print.Print_.expToString (Intsyn.IntSyn.Null, e_)
+                    ^ Print.Print_.expToString Intsyn.IntSyn.Null e_
                     ^ "\n"))
                 xs_;
               match opt_name with
@@ -769,7 +765,7 @@ module Impl () = struct
               | Some name ->
                   msg
                     (name ^ " = "
-                    ^ Print.Print_.expToString (Intsyn.IntSyn.Null, a_)
+                    ^ Print.Print_.expToString Intsyn.IntSyn.Null a_
                     ^ "\n")
             end;
             match numSol with
@@ -790,7 +786,7 @@ module Impl () = struct
           Opsem.Opsem_.Tabled_.reset ();
           Opsem.Opsem_.Tabled_.fillTable ();
           (try
-             Opsem.Opsem_.Tabled_.solve ((g, Intsyn.IntSyn.id), dprog, sc);
+             Opsem.Opsem_.Tabled_.solve (g, Intsyn.IntSyn.id) dprog sc;
              loop ()
            with Done -> ());
           if !solutions = 0 && !chatter >= 3 then msg "No tabled solution.\n";
@@ -802,7 +798,7 @@ module Impl () = struct
             | last :: prefix -> Names.Qid (List.rev prefix, last)
           in
           let mid =
-            match Names.structLookupIn (ns, qid) with
+            match Names.structLookupIn ns qid with
             | Some m -> m
             | None -> (
                 match Names.structLookup qid with
@@ -829,9 +825,9 @@ module Impl () = struct
               (match scope_installs with
               | Some acc -> acc := cid :: !acc
               | None -> ());
-              Names.insertConst (ns, cid))
+              Names.insertConst ns cid)
             comps;
-          Names.appStructs (fun (_, m) -> Names.insertStruct (ns, m)) comps;
+          Names.appStructs (fun (_, m) -> Names.insertStruct ns m) comps;
           []
       | Cst.Scope_ (name, body_cmd) ->
           (* A `%scope NAME` naming NAME already in [ns] reopens that
@@ -840,7 +836,7 @@ module Impl () = struct
              unrelated commands -- to accumulate into the same structure)
              rather than declaring a fresh, colliding one. *)
           let mid, child_ns =
-            match Names.structLookupIn (ns, Names.Qid ([], name)) with
+            match Names.structLookupIn ns (Names.Qid ([], name)) with
             | Some mid -> (mid, Names.getComponents mid)
             | None ->
                 let child_ns = Names.newNamespace () in
@@ -848,7 +844,7 @@ module Impl () = struct
                   Intsyn.IntSyn.sgnStructAdd (Intsyn.IntSyn.StrDec (name, None))
                 in
                 Names.installStructName mid;
-                Names.insertStruct (ns, mid);
+                Names.insertStruct ns mid;
                 (mid, child_ns)
           in
           (* A %scope session stays open (bare-visible) across multiple
@@ -877,7 +873,7 @@ module Impl () = struct
             install1 ~path ~scope_installs:(Some body_installs) child_ns
               body_cmd
           in
-          Names.installComponents (mid, child_ns);
+          Names.installComponents mid child_ns;
           rs
       | Cst.Use_ _ ->
           failwith'

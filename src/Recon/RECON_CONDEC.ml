@@ -22,7 +22,7 @@ module type RECON_CONDEC = sig
   exception Error of string
 
   val condecToConDec :
-    Cst.conDec * Paths.location * bool ->
+    Cst.conDec -> Paths.location -> bool ->
     Ast.conDec option * Paths.occConDec option
 
   (* optional ConDec is absent for anonymous definitions *)

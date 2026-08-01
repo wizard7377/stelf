@@ -71,40 +71,40 @@ module type EXTSYN = sig
   type dec
 
   (* variable declaration *)
-  val lcid : string list * string * Paths.region -> term
+  val lcid : string list -> string -> Paths.region -> term
 
   (* lower case id *)
-  val ucid : string list * string * Paths.region -> term
+  val ucid : string list -> string -> Paths.region -> term
 
   (* upper case id *)
-  val quid : string list * string * Paths.region -> term
+  val quid : string list -> string -> Paths.region -> term
 
   (* quoted id, currently not parsed *)
-  val scon : string * Paths.region -> term
+  val scon : string -> Paths.region -> term
 
   (* string constant *)
   (* unconditionally interpreted as such *)
-  val evar : string * Paths.region -> term
-  val fvar : string * Paths.region -> term
+  val evar : string -> Paths.region -> term
+  val fvar : string -> Paths.region -> term
   val typ : Paths.region -> term
 
   (* type, region for ""type"" *)
-  val arrow : term * term -> term
+  val arrow : term -> term -> term
 
   (* tm -> tm *)
-  val backarrow : term * term -> term
+  val backarrow : term -> term -> term
 
   (* tm <- tm *)
-  val pi : dec * term -> term
+  val pi : dec -> term -> term
 
   (* {d} tm *)
-  val lam : dec * term -> term
+  val lam : dec -> term -> term
 
   (* [d] tm *)
-  val app : term * term -> term
+  val app : term -> term -> term
 
   (* tm tm *)
-  val hastype : term * term -> term
+  val hastype : term -> term -> term
 
   (* tm : tm *)
   val omitted : Paths.region -> term
@@ -114,7 +114,7 @@ module type EXTSYN = sig
   val dec : string option * term * Paths.region -> dec
 
   (* id : tm | _ : tm *)
-  val dec0 : string option * Paths.region -> dec
+  val dec0 : string option -> Paths.region -> dec
 end
 
 (* id | _  (type omitted) *)
@@ -142,12 +142,12 @@ module type RECON_TERM = sig
   type job
 
   val jnothing : job
-  val jand : job * job -> job
-  val jwithctx : dec IntSyn.ctx * job -> job
+  val jand : job -> job -> job
+  val jwithctx : dec IntSyn.ctx -> job -> job
   val jterm : term -> job
   val jclass : term -> job
-  val jof : term * term -> job
-  val jof' : term * IntSyn.exp -> job
+  val jof : term -> term -> job
+  val jof' : term -> IntSyn.exp -> job
 
   type job_ =
     | JNothing
@@ -160,8 +160,8 @@ module type RECON_TERM = sig
 
   val recon : job -> job_
   val reconQuery : job -> job_
-  val reconWithCtx : IntSyn.dctx * job -> job_
-  val reconQueryWithCtx : IntSyn.dctx * job -> job_
+  val reconWithCtx : IntSyn.dctx -> job -> job_
+  val reconQueryWithCtx : IntSyn.dctx -> job -> job_
   val termRegion : term -> Paths.region
   val decRegion : dec -> Paths.region
   val ctxRegion : dec IntSyn.ctx -> Paths.region option

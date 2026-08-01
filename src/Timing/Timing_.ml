@@ -63,7 +63,7 @@ module Timing : TIMING = struct
 
        Warning: the centers should not overlap!
     *)
-  let sumCenter (name, l) = (name, l)
+  let sumCenter name l = (name, l)
   let stdTime (n, time) = StringCvt.padLeft ' ' n (Time.toString time)
 
   let timesToString
@@ -110,7 +110,7 @@ module Counting : TIMING = struct
     ignore (counters := !counters + 1);
     f x
 
-  let sumCenter (name, l) = (name, l)
+  let sumCenter name l = (name, l)
   let toString' (name, n) = ((name ^ ": ") ^ Int.toString n) ^ "\n"
   let toString (name, { contents = n }) = toString' (name, n)
 

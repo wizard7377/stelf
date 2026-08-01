@@ -13,7 +13,7 @@ module HashTable (HashTable__0 : sig
   type key'
 
   val hash : key' -> int
-  val eq : key' * key' -> bool
+  val eq : key' -> key' -> bool
 end) : TABLE with type key = HashTable__0.key' = struct
   open HashTable__0
 
@@ -33,7 +33,7 @@ end) : TABLE with type key = HashTable__0.key' = struct
     let bucket = Array.sub (a, index) in
     let rec insertB
         (Cons (({ contents = hash', ((key', _datum') as e') } as r'), br')) =
-      begin if hashVal = hash' && eq (key, key') then begin
+      begin if hashVal = hash' && eq key key' then begin
         r' := (hashVal, e);
         Some e'
       end
@@ -64,7 +64,7 @@ end) : TABLE with type key = HashTable__0.key' = struct
     let hashVal = hash key in
     let rec lookup' = function
       | Cons ({ contents = hash1, (key1, datum1) }, br) ->
-          begin if hashVal = hash1 && eq (key, key1) then Some datum1
+          begin if hashVal = hash1 && eq key key1 then Some datum1
           else lookup' !br
           end
       | Nil -> None
@@ -78,7 +78,7 @@ end) : TABLE with type key = HashTable__0.key' = struct
     let bucket = Array.sub (a, index) in
     let rec deleteBR = function
       | { contents = Cons ({ contents = hash1, (key1, _) }, br1) } as br ->
-          begin if hashVal = hash1 && eq (key, key1) then br := !br1
+          begin if hashVal = hash1 && eq key key1 then br := !br1
           else deleteBR br1
           end
       | _br -> ()
@@ -86,7 +86,7 @@ end) : TABLE with type key = HashTable__0.key' = struct
     let deleteA = function
       | Nil -> ()
       | Cons ({ contents = hash1, (key1, _) }, br1) ->
-          begin if hashVal = hash1 && eq (key, key1) then
+          begin if hashVal = hash1 && eq key key1 then
             Array.update (a, index, !br1)
           else deleteBR br1
           end
