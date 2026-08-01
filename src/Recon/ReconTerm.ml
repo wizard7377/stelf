@@ -953,10 +953,10 @@ struct
             ++ string fstr ++ nl ());
         error r ((("Ambiguous reconstruction\n" ^ fstr) ^ "\n") ^ msg))
 
-  let unifyIdem x =
+  let unifyIdem (g_, us_, vs_) =
     ignore (Unify.reset ());
     let _ =
-      try Unify.unify x
+      try Unify.unify g_ us_ vs_
       with Unify.Unify _ as e ->
         begin
           Unify.unwind ();
@@ -966,9 +966,9 @@ struct
     ignore (Unify.reset ());
     ()
 
-  let unifiableIdem x =
+  let unifiableIdem (g_, us_, vs_) =
     ignore (Unify.reset ());
-    let ok = Unify.unifiable x in
+    let ok = Unify.unifiable g_ us_ vs_ in
     let _ =
       begin if ok then Unify.reset () else Unify.unwind ()
       end
@@ -1493,21 +1493,21 @@ struct
 
   let rec occElim = function
     | Constant (h_, r), os, rs, i ->
-        let r' = List.foldr Paths.join r rs in
+        let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
         ( Paths.root (r', Paths.leaf r, IntSyn.conDecImp (headConDec h_), i, os),
           r' )
     | Bvar (k, r), os, rs, i ->
-        let r' = List.foldr Paths.join r rs in
+        let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
         (Paths.root (r', Paths.leaf r, 0, i, os), r')
     | Fvar (name, r), os, rs, i ->
-        let r' = List.foldr Paths.join r rs in
+        let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
         (Paths.root (r', Paths.leaf r, 0, i, os), r')
     | App (tm1, tm2), os, rs, i ->
         let oc2, r2 = occIntro tm2 in
         occElim (tm1, Paths.app oc2 os, r2 :: rs, i + 1)
     | Hastype (tm1, tm2), os, rs, i -> occElim (tm1, os, rs, i)
     | tm, os, rs, i ->
-        let r' = List.foldr Paths.join (termRegion tm) rs in
+        let r' = List.foldr (fun (a, b) -> Paths.join a b) (termRegion tm) rs in
         (Paths.leaf r', r')
 
   and occIntro = function

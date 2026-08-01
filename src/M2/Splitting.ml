@@ -492,7 +492,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
 
     let index (_, sl_) = List.length sl_
 
-    let apply _ sl_ =
+    let apply (_, sl_) =
       map
         (function
           | Active s_ -> s_

@@ -331,7 +331,7 @@ end) : CHECKING = struct
           eqInstL (gq, d_, d'_, usVs, usVs', p_, sc)
 
     and ltInstL (gq, d_, d'_, usVs, usVs', p'_, sc) =
-      ltInstLW (gq, d_, d'_, Whnf.whnfEta usVs, usVs', p'_, sc)
+      ltInstLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), usVs', p'_, sc)
 
     and ltInstLW = function
       | ( ((g_, q_) as gq),
@@ -371,7 +371,7 @@ end) : CHECKING = struct
           leftInstantiate (gq, d_, Less (usVs, usVs') :: d'_, p'_, sc)
 
     and leInstL (gq, d_, d'_, usVs, usVs', p'_, sc) =
-      leInstLW (gq, d_, d'_, Whnf.whnfEta usVs, usVs', p'_, sc)
+      leInstLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), usVs', p'_, sc)
 
     and leInstLW = function
       | ( ((g_, q_) as gq),
@@ -411,7 +411,7 @@ end) : CHECKING = struct
           leftInstantiate (gq, d_, Less (usVs, usVs') :: d'_, p_, sc)
 
     and eqInstL (gq, d_, d'_, usVs, usVs', p'_, sc) =
-      eqInstLW (gq, d_, d'_, Whnf.whnfEta usVs, Whnf.whnfEta usVs', p'_, sc)
+      eqInstLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p'_, sc)
 
     and eqInstLW = function
       | ( ((g_, q_) as gq),
@@ -715,7 +715,7 @@ end) : CHECKING = struct
           ordLeR (gq, d_, o_, o'_) && leSimulR (gq, d_, l_, l'_)
 
     and ltAtomicR (gq, d_, usVs, usVs', sc, k) =
-      ltAtomicRW (gq, d_, Whnf.whnfEta usVs, usVs', sc, k)
+      ltAtomicRW (gq, d_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), usVs', sc, k)
 
     and ltAtomicRW = function
       | gq, d_, ((us_, ((I.Root _, s') as vs_)) as usVs), usVs', sc, k ->
@@ -741,7 +741,7 @@ end) : CHECKING = struct
               k )
 
     and leAtomicR (gq, d_, usVs, usVs', sc, k) =
-      leAtomicRW (gq, d_, Whnf.whnfEta usVs, usVs', sc, k)
+      leAtomicRW (gq, d_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), usVs', sc, k)
 
     and leAtomicRW = function
       | gq, d_, ((us_, ((I.Root _, s') as vs_)) as usVs), usVs', sc, k ->
@@ -767,7 +767,7 @@ end) : CHECKING = struct
               k )
 
     and eqAtomicR (((g_, q_) as gq), d_, usVs, usVs', sc, k) =
-      eqAtomicRW (gq, d_, Whnf.whnfEta usVs, Whnf.whnfEta usVs', sc, k)
+      eqAtomicRW (gq, d_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), sc, k)
 
     and eqAtomicRW = function
       | ( ((g_, q_) as gq),
@@ -794,7 +794,7 @@ end) : CHECKING = struct
       | gq, d_, (us_, vs_), (us', vs'_), sc, k -> false
 
     and ltR (((g_, q_) as gq), d_, usVs, usVs', sc, k) =
-      ltRW (gq, d_, usVs, Whnf.whnfEta usVs', sc, k)
+      ltRW (gq, d_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), sc, k)
 
     and ltRW = function
       | ( gq,
@@ -889,7 +889,7 @@ end) : CHECKING = struct
                  k )
 
     and leR (gq, d_, usVs, usVs', sc, k) =
-      leRW (gq, d_, usVs, Whnf.whnfEta usVs', sc, k)
+      leRW (gq, d_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), sc, k)
 
     and leRW = function
       | ( ((g_, q_) as gq),
@@ -1111,7 +1111,7 @@ end) : CHECKING = struct
           leSimulL (gq, Leq (o_, o'_) :: d_, d'_, l_, l'_, p_)
 
     and ltAtomicL (gq, d_, d'_, usVs, usVs', p_) =
-      ltAtomicLW (gq, d_, d'_, usVs, Whnf.whnfEta usVs', p_)
+      ltAtomicLW (gq, d_, d'_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p_)
 
     and ltAtomicLW = function
       | ((g_, q_) as gq), d_, d'_, usVs, (us', ((I.Root _, s') as vs'_)), p_ ->
@@ -1137,7 +1137,7 @@ end) : CHECKING = struct
               p'_ )
 
     and leAtomicL (gq, d_, d'_, usVs, usVs', p_) =
-      leAtomicLW (gq, d_, d'_, usVs, Whnf.whnfEta usVs', p_)
+      leAtomicLW (gq, d_, d'_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p_)
 
     and leAtomicLW = function
       | gq, d_, d'_, usVs, (us', ((I.Root (h_, s_), s') as vs'_)), p_ ->
@@ -1163,7 +1163,7 @@ end) : CHECKING = struct
               p'_ )
 
     and eqAtomicL (gq, d_, d'_, usVs, usVs', p_) =
-      eqAtomicLW (gq, d_, d'_, Whnf.whnfEta usVs, Whnf.whnfEta usVs', p_)
+      eqAtomicLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p_)
 
     and eqAtomicLW = function
       | ( gq,
@@ -1243,7 +1243,7 @@ end) : CHECKING = struct
                  p_ )
 
     and eqL (gq, d_, d'_, usVs, usVs', p_) =
-      eqLW (gq, d_, d'_, Whnf.whnfEta usVs, Whnf.whnfEta usVs', p_)
+      eqLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p_)
 
     and eqLW = function
       | ( gq,

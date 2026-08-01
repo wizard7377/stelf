@@ -92,10 +92,10 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       | Prefix of FX.precedence * ('a -> 'a)
       | Postfix of FX.precedence * ('a -> 'a)
 
-    let juxOp = Infix ((FX.inc FX.maxPrec, FX.Left), ExtSyn.app)
-    let arrowOp = Infix ((FX.dec FX.minPrec, FX.Right), ExtSyn.arrow)
-    let backArrowOp = Infix ((FX.dec FX.minPrec, FX.Left), ExtSyn.backarrow)
-    let colonOp = Infix ((FX.dec (FX.dec FX.minPrec), FX.Left), ExtSyn.hastype)
+    let juxOp = Infix ((FX.inc FX.maxPrec, FX.Left), fun (a, b) -> ExtSyn.app a b)
+    let arrowOp = Infix ((FX.dec FX.minPrec, FX.Right), fun (a, b) -> ExtSyn.arrow a b)
+    let backArrowOp = Infix ((FX.dec FX.minPrec, FX.Left), fun (a, b) -> ExtSyn.backarrow a b)
+    let colonOp = Infix ((FX.dec (FX.dec FX.minPrec), FX.Left), fun (a, b) -> ExtSyn.hastype a b)
 
     let infixOp (infixity, tm) =
       Infix
@@ -245,7 +245,7 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
     let stripRParen = function
       | LS.Cons ((L.Rparen, r), s') -> LS.expose s'
       | LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected closing `)', found " ^ L.toString t)
+          Parsing.error r ("Expected closing `)', found " ^ L.toString t)
 
     let parseSubordPair2 = function
       | (LS.Cons ((L.Id _, _), _) as f), qid ->

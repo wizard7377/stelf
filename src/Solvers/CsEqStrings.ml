@@ -463,7 +463,7 @@ end) : Cs.CS = struct
 
     let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
 
-    let init cs installF =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin

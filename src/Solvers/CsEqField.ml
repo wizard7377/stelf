@@ -100,7 +100,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
       let rec findMSet' = function
         | tried, [] -> None
         | tried, y :: l_ ->
-            begin if eq x y then Some (y, tried @ l_)
+            begin if eq (x, y) then Some (y, tried @ l_)
             else findMSet' (y :: tried, l_)
             end
       in
@@ -377,7 +377,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
 
     let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
 
-    let init cs installF =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin

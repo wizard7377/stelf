@@ -183,7 +183,7 @@ module Make_CompSyn
   let sProgInstall (cid, conDec) = Array.update (sProgArray, cid, conDec)
   let sProgLookup cid = Array.sub (sProgArray, cid)
   let sProgReset () = Array.modify (function _ -> Void) sProgArray
-  let detTableInsert = Table.insert detTable
+  let detTableInsert k v = Table.insert detTable (k, v)
 
   let detTableCheck cid =
     begin match Table.lookup detTable cid with

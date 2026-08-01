@@ -100,7 +100,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
     let stripRParen = function
       | LS.Cons ((L.Rparen, r), s') -> LS.expose s'
       | LS.Cons ((t, r), _) ->
-          Parsing.error (r, "Expected `)', found " ^ L.toString t)
+          Parsing.error r ("Expected `)', found " ^ L.toString t)
 
     let decideRBrace = function
       | r0, (orders, LS.Cons ((L.Rbrace, r), s')) ->
@@ -118,7 +118,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | r0, (ids, LS.Cons ((L.Rparen, r), s')) ->
           (Some (E.varg r ids), LS.expose s')
       | r0, (order, LS.Cons ((t, r), _)) ->
-          Parsing.error (P.join r0 r, "Expected `)', found " ^ L.toString t)
+          Parsing.error (P.join r0 r) ("Expected `)', found " ^ L.toString t)
 
     let rec parseIds = function
       | LS.Cons ((L.Id (L.Upper, id), r), s') ->
@@ -269,14 +269,14 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | gbs, (LS.Cons ((L.Rparen, r), s') as f) -> (gbs, f)
       | gbs, LS.Cons ((L.Id (_, "|"), r), s') -> parseSome (gbs, LS.expose s')
       | gbs, LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected `)' or `|', found " ^ L.toString t)
+          Parsing.error r ("Expected `)' or `|', found " ^ L.toString t)
 
     let stripParen (gbs, LS.Cons ((L.Rparen, r), s')) = (gbs, LS.expose s')
 
     let parseGBs = function
       | LS.Cons ((L.Lparen, r), s') -> stripParen (parseSome ([], LS.expose s'))
       | LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected `(', found " ^ L.toString t)
+          Parsing.error r ("Expected `(', found " ^ L.toString t)
 
     let rec forallG (gbs', f') r =
       let t'', f'' = parseForallStar f' in

@@ -182,7 +182,7 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
                 | Assign (g_, EVar (r, _, _, cnstrs), w_, ss) ->
                     let w'_ = pruneExp (g_, (w_, id), ss, r) in
                     Unify.instantiateEVar r w'_ (!cnstrs)
-                | Delay (u_, cnstr) -> delayExp ((u_, id), cnstr)
+                | Delay (u_, cnstr) -> delayExp (u_, id) cnstr
               in
               List.app execResidual residualL
           | Fail -> raise (Match "Foreign Expression Mismatch")
@@ -199,7 +199,7 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
                 | Assign (g_, EVar (r, _, _, cnstrs), w_, ss) ->
                     let w'_ = pruneExp (g_, (w_, id), ss, r) in
                     Unify.instantiateEVar r w'_ (!cnstrs)
-                | Delay (u_, cnstr) -> delayExp ((u_, id), cnstr)
+                | Delay (u_, cnstr) -> delayExp (u_, id) cnstr
               in
               List.app execOp opL
           | Fail -> raise (Match "Foreign Expression Mismatch")

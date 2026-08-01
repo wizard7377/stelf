@@ -319,7 +319,7 @@ end) : TWELF.STELF = struct
       end
 
     let expToString gu =
-      begin if !Global.chatter >= 3 then Print.expToString gu else ""
+      begin if !Global.chatter >= 3 then (let g__, u__ = gu in Print.expToString g__ u__) else ""
       end
 
     let printProgTeX () =
@@ -633,8 +633,8 @@ end) : TWELF.STELF = struct
             begin match
               handleExceptions 4 fileName
                 (function
-                  | args -> begin
-                      install1 args;
+                  | fn__, dr__ -> begin
+                      install1 fn__ dr__;
                       Ok
                     end)
                 (fileName, (dec_, r))
@@ -666,7 +666,7 @@ end) : TWELF.STELF = struct
             with Names.Error msg -> raise (Names.Error (Paths.wrap r msg))
           in
           let _ =
-            try List.app Subordinate.addSubord cidpairs
+            try List.app (fun (a__, b__) -> Subordinate.addSubord a__ b__) cidpairs
             with Subordinate.Error msg ->
               raise (Subordinate.Error (Paths.wrap r msg))
           in
@@ -907,7 +907,10 @@ end) : TWELF.STELF = struct
                       raise (ModeTable.Error (Paths.wrap r msg))))
               mdecs
           in
-          ignore (List.app (function mdec, r -> ModeDec.checkPure mdec r) mdecs);
+          ignore
+            (List.app
+               (function (a__, ms__), r -> ModeDec.checkPure a__ ms__ r)
+               mdecs);
           let _ =
             List.app
               (function
@@ -946,8 +949,10 @@ end) : TWELF.STELF = struct
           let _ =
             List.app
               (function
-                | mdec, r -> (
-                    try Timers.time Timers.coverage Unique.checkUnique mdec
+                | (a__, ms__), r -> (
+                    try
+                      Timers.time Timers.coverage
+                        (fun () -> Unique.checkUnique a__ ms__) ()
                     with Unique.Error msg ->
                       raise (Unique.Error (Paths.wrap r msg))))
               mdecs
@@ -963,12 +968,17 @@ end) : TWELF.STELF = struct
       | fileName, (Parser.CoversDec mterms, r) ->
           let mdecs = List.map ReconMode.modeToMode mterms in
           ignore (ReconTerm.checkErrors r);
-          ignore (List.app (function mdec, r -> ModeDec.checkPure mdec r) mdecs);
+          ignore
+            (List.app
+               (function (a__, ms__), r -> ModeDec.checkPure a__ ms__ r)
+               mdecs);
           let _ =
             List.app
               (function
-                | mdec, r -> (
-                    try Timers.time Timers.coverage Cover.checkCovers mdec
+                | (a__, ms__), r -> (
+                    try
+                      Timers.time Timers.coverage
+                        (fun () -> Cover.checkCovers a__ ms__) ()
                     with Cover.Error msg ->
                       raise (Cover.Error (Paths.wrap r msg))))
               mdecs

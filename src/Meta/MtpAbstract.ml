@@ -936,7 +936,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
   let weaken = weaken
   let raiseType = raiseType
   let abstractSub = abstractSubAll
-  let abstractSub' = abstractNew
+  let abstractSub' a b c = abstractNew (a, b, c)
   let abstractApproxFor = abstractApproxFor
 end
 (*! sharing Abstract.IntSyn = IntSyn' !*)

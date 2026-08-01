@@ -3,7 +3,7 @@ include SMLOFNJ
 module SMLofNJ : SML_OF_NJ = struct
   let () = Printexc.record_backtrace true
   let exportML _ = true
-  let exportFn _ = ()
+  let exportFn _ _ = ()
   let getCmdName () = Sys.argv.(0)
   let getArgs () = Sys.argv |> Array.to_list |> List.tl
   let getAllArgs () = Sys.argv |> Array.to_list

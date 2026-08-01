@@ -1095,10 +1095,10 @@ module MakeNames
   (*      IntSyn.ADec(SOME(name), d) *)
   (* use #l as base name preference for label l *)
 
-  let decName = decName' Exist
-  let decEName = decName' Exist
-  let decUName = decName' (Univ Global)
-  let decLUName = decName' (Univ Local)
+  let decName g_ d_ = decName' Exist (g_, d_)
+  let decEName g_ d_ = decName' Exist (g_, d_)
+  let decUName g_ d_ = decName' (Univ Global) (g_, d_)
+  let decLUName g_ d_ = decName' (Univ Local) (g_, d_)
 
   (* ctxName G = G'
 

@@ -568,7 +568,7 @@ end) : MTPSEARCH.MTPSEARCH = struct
        success continuation will raise exception
     *)
   (* Shared contexts of EVars in GE may recompiled many times *)
-  let searchEx = search
+  let searchEx a b c = search (a, b, c)
 end
 (*! sharing Names.IntSyn = IntSyn' !*)
 (*! structure CsManager : CS_MANAGER !*)

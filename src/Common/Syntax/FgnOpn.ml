@@ -81,7 +81,7 @@ module type S = sig
       FGN_OPN with type arg = dec ctx * exp and type result = fgnUnify
 
     val fold : Ast.csid -> fgnExp -> (exp * 'a -> 'a) -> 'a -> 'a
-    (** [fold (csid, fe) f init] folds [f] over the internal subterms of foreign
+    (** [fold csid fe f init] folds [f] over the internal subterms of foreign
         expression [fe], threading accumulator [init]. *)
   end
 
@@ -155,10 +155,10 @@ module FgnOpn
           type nonrec result = fgnUnify
         end)
 
-    let fold (csfe : Ast.csid * exn) (f : Ast.exp * 'a -> 'a) (b : 'a) : 'a =
+    let fold (csid : Ast.csid) (fe : exn) (f : Ast.exp * 'a -> 'a) (b : 'a) : 'a =
       let r = ref b in
       let g u_ = r := f (u_, !r) in
-      App.apply csfe g;
+      App.apply csid fe g;
       !r
   end
 

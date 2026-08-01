@@ -162,7 +162,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
       in
       operators (g'_, ge', (v_, s'), abstractAll, abstractEx, makeAddressInit s_)
 
-    let apply _ f = f ()
+    let apply (_, f) = f ()
 
     let menu ((M.State (name, M.Prefix (g_, m_, b_), v_), k), sl_) =
       let rec toString = function

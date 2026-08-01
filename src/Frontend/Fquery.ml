@@ -107,7 +107,7 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
      Abbreviate as empty string if chatter level is < 3.
   *)
   let expToString gu =
-    begin if !Global.chatter >= 3 then Print.expToString gu else ""
+    begin if !Global.chatter >= 3 then (let g__, u__ = gu in Print.expToString g__ u__) else ""
     end
 
   let rec lower = function

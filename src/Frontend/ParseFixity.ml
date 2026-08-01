@@ -141,8 +141,8 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
       | name, r0, prefENames, prefUNames, LS.Cons ((L.Rparen, r), s') ->
           (((Names.Qid ([], name), r0), (prefENames, prefUNames)), LS.expose s')
       | name, r0, prefENames, prefUNames, LS.Cons ((t, r), s') ->
-          Parsing.error
-            (r, "Expected name preference or ')', found " ^ L.toString t)
+          Parsing.error r
+            ("Expected name preference or ')', found " ^ L.toString t)
 
     let parseName3 = function
       | name, r0, prefEName, LS.Cons ((L.Id (_, prefUName), r), s') ->
@@ -163,8 +163,8 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
       | name, r0, prefENames, LS.Cons ((L.Rparen, r), s') ->
           parseName3 (name, r0, prefENames, LS.expose s')
       | name, r0, prefENames, LS.Cons ((t, r), s') ->
-          Parsing.error
-            (r, "Expected name preference or ')', found " ^ L.toString t)
+          Parsing.error r
+            ("Expected name preference or ')', found " ^ L.toString t)
 
     let parseName2 = function
       | name, r0, LS.Cons ((L.Id (_, prefEName), r), s') ->

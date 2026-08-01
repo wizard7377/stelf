@@ -222,7 +222,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     type nonrec tableddecl = string * Paths.region
 
-    let tableddecl t_ = t_
+    let tableddecl a b = (a, b)
 
     let tableddeclTotabledDecl = function
       | name, r ->
@@ -238,7 +238,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     type nonrec keepTabledecl = string * Paths.region
 
-    let keepTabledecl t_ = t_
+    let keepTabledecl a b = (a, b)
 
     let keepTabledeclToktDecl = function
       | name, r ->
@@ -385,7 +385,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     type nonrec wdecl = (string list * string) list * callpats
 
-    let wdecl t_ = t_
+    let wdecl a b = (a, b)
 
     let wdeclTowDecl = function
       | w_, cp ->

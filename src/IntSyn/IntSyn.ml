@@ -56,10 +56,10 @@ module FgnExpStd = struct
     type nonrec result = fgnUnify
   end)
 
-  let fold (csfe : csid * fgnExp) (f : exp * 'a -> 'a) (b : 'a) : 'a =
+  let fold (csid : csid) (fe : fgnExp) (f : exp * 'a -> 'a) (b : 'a) : 'a =
     let r = ref b in
     let g u_ = r := f (u_, !r) in
-    App.apply csfe g;
+    App.apply csid fe g;
     !r
 end
 

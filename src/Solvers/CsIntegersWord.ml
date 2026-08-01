@@ -554,7 +554,7 @@ end) : Cs.CS = struct
       in
       ()
 
-    let init cs installF =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin

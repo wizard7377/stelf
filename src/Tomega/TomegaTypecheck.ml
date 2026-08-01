@@ -74,7 +74,7 @@ end) : TOMEGATYPECHECK = struct
           begin match T.varSub k t with T.Idx k' -> T.Var k'
           end
 
-    let rec inferSpine (psi, s_, ft_) = inferSpineW (psi, s_, T.whnfFor ft_)
+    let rec inferSpine (psi, s_, (f_, t_)) = inferSpineW (psi, s_, T.whnfFor f_ t_)
 
     and inferSpineW = function
       | psi, T.Nil, (f_, t) -> (f_, t)
@@ -129,7 +129,7 @@ end) : TOMEGATYPECHECK = struct
       | psi, T.Redex (p_, s_) ->
           let f1_ = inferPrg (psi, p_) in
           let f2_ = inferSpine (psi, s_, (f1_, T.id)) in
-          T.forSub f2_
+          (let f__, t__ = f2_ in T.forSub f__ t__)
       | psi, T.Rec ((T.PDec (_, f_, _, _) as d_), p_) ->
           ignore (checkPrg (I.Decl (psi, d_)) (p_, (f_, T.id)));
           f_
@@ -138,7 +138,7 @@ end) : TOMEGATYPECHECK = struct
           let f2_ = inferPrg (I.Decl (psi, d_), p2_) in
           f2_
 
-    and checkPrg psi (p_, ft_) = checkPrgW (psi, (p_, T.whnfFor ft_))
+    and checkPrg psi (p_, (f_, t_)) = checkPrgW (psi, (p_, T.whnfFor f_ t_))
 
     and checkPrgW = function
       | _, (Unit, (True, _)) ->
@@ -263,7 +263,7 @@ end) : TOMEGATYPECHECK = struct
       | T.ValDec (_, _, f_) -> f_
       end
 
-    and convFor (psi, ft1, ft2) = convForW (psi, T.whnfFor ft1, T.whnfFor ft2)
+    and convFor (psi, (f1_, t1_), (f2_, t2_)) = convForW (psi, T.whnfFor f1_ t1_, T.whnfFor f2_ t2_)
 
     and convForW = function
       | _, (T.True, _), (T.True, _) -> ()

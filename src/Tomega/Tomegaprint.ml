@@ -735,15 +735,17 @@ end) : TOMEGAPRINT = struct
              p_,
              function lemma -> lookup (names, projs) lemma ))
 
-    let formatFun args_ =
+    let formatFun a b =
+      let args_ = (a, b) in
       begin
         Names.varReset I.Null;
         formatPrg0 args_
       end
 
-    let funToString args_ = Fmt.makestring_fmt (formatFun args_)
+    let funToString a b = Fmt.makestring_fmt (formatFun a b)
 
-    let prgToString args_ =
+    let prgToString a b =
+      let args_ = (a, b) in
       Fmt.makestring_fmt (formatPrg3 (function _ -> "?") args_)
 
     let rec nameCtx = function
@@ -1223,7 +1225,7 @@ end) : TOMEGAPRINT = struct
   let formatFor = formatFor
   let forToString = forToString
   let formatFun = formatFun
-  let formatPrg = formatPrg3 (function _ -> "?")
+  let formatPrg a b = formatPrg3 (function _ -> "?") (a, b)
 
   (*    val formatLemmaDec = formatLemmaDec *)
   let evarName = evarName

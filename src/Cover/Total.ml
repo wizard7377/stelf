@@ -306,7 +306,7 @@ end) : TOTAL = struct
     let _ =
       try
         begin
-          Timers.time Timers.coverage Cover.checkCovers (a, ms);
+          Timers.time Timers.coverage (fun () -> Cover.checkCovers a ms) ();
           Display.chatter_s 4
             (("Covers (input): " ^ N.qidToString (N.constQid a)) ^ "\n")
         end

@@ -97,7 +97,7 @@ end) : INTRODUCE with module State = Introduce__0.State' = struct
           expand (S.Focus (T.EVar (psi, r, T.forSub f_ s, tc1, tc2, x_), w_))
       | S.Focus (T.EVar (psi, r, _, _, _, _), w_) -> None
 
-    let apply (T.EVar (_, r, _, _, _, _)) p_ = r := Some p_
+    let apply (T.EVar (_, r, _, _, _, _), p_) = r := Some p_
     let menu (r, p_) = "Intro " ^ TomegaPrint.nameEVar r
   end
 

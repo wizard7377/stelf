@@ -634,9 +634,9 @@ module MakeConverter
             else lookupbase a
             end
           in
-          let rec apply (s_, mS) ft_ = applyW ((s_, mS), T.whnfFor ft_)
+          let rec apply (s_, mS) (f_, t_) = applyW ((s_, mS), T.whnfFor f_ t_)
           and applyW = function
-            | (I.Nil, M.Mnil), ft' -> (T.Nil, T.forSub ft')
+            | (I.Nil, M.Mnil), ft' -> (T.Nil, (let f__, t__ = ft' in T.forSub f__ t__))
             | ( (I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS)),
                 (T.All (d_, f'_), t') ) ->
                 let u'_ = strengthenExp u_ w1 in

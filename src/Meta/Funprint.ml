@@ -132,7 +132,8 @@ end) : FUNPRINT.FUNPRINT = struct
 
     let formatForBare g_ f_ = Fmt.hVbox (formatFor' (g_, (f_, I.id)))
 
-    let formatPro args_ names =
+    let formatPro psi p_ names =
+      let args_ = (psi, p_) in
       let nameLookup index = List.nth (names, index) in
       let blockName (g1_, g2_) =
         let rec blockName' = function
@@ -429,9 +430,9 @@ end) : FUNPRINT.FUNPRINT = struct
         [
           formatFor I.Null f_ names; Fmt.break_; formatPro I.Null p_ names;
         ]
-
-    let forToString args_ names = Fmt.makestring_fmt (formatFor args_ names)
-    let proToString args_ names = Fmt.makestring_fmt (formatPro args_ names)
+    let forToString psi f_ names = Fmt.makestring_fmt (formatFor psi f_ names)
+    let proToString psi p_ names = Fmt.makestring_fmt (formatPro psi p_ names)
+    let proToString psi p_ names = Fmt.makestring_fmt (formatPro psi p_ names)
     let lemmaDecToString args_ = Fmt.makestring_fmt (formatLemmaDec args_)
   end
 

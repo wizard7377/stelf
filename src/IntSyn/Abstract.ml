@@ -983,7 +983,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
   let abstractCtxs = abstractCtxs
   let abstractTomegaSub = abstractTomegaSub
   let abstractTomegaPrg = abstractTomegaPrg
-  let abstractSpine = abstractSpineExt
+  let abstractSpine s_ s = abstractSpineExt (s_, s)
   let collectEVars = collectEVars
   let collectEVarsSpine = collectEVarsSpine
   let closedCtx = closedCtx

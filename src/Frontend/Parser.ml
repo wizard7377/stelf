@@ -616,8 +616,8 @@ end) :
   (* ABP 4/4/03 *)
   let parseStream = parseTLStream
 
-  let parseTerminalQ prompts =
-    parseQ (lexStreamToParsing (L.lexTerminal prompts))
+  let parseTerminalQ p1__ p2__ =
+    parseQ (lexStreamToParsing (L.lexTerminal p1__ p2__))
 end
 (*! sharing ParseTerm.Lexer = Parsing'.Lexer !*)
 (* local ... in *)

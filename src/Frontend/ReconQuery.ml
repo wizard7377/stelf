@@ -178,7 +178,7 @@ end) : RECON_QUERY = struct
   let finishDefine (Define_ (optName, tm, clsOpt), ((u_, oc1), (v_, oc2Opt), l_))
       =
     let i, (u'_, v'_) =
-      try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
+      try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u_ v_) ()
       with Abstract.Error msg ->
         raise (Abstract.Error (Paths.wrap (Paths.toRegion oc1) msg))
     in
@@ -217,7 +217,7 @@ end) : RECON_QUERY = struct
 
   let finishSolve (Solve_ (nameOpt, tm, r), u_, v_) =
     let i, (u'_, v'_) =
-      try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
+      try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u_ v_) ()
       with Abstract.Error msg -> raise (Abstract.Error (Paths.wrap r msg))
     in
     let name =

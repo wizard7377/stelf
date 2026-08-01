@@ -235,7 +235,8 @@ end) : WORLDIFY = struct
         else ()
         end
 
-      let unmatched gl_ =
+      let unmatched g_ l_ =
+        let gl_ = (g_, l_) in
         begin if !Global.chatter > 7 then
           print (("Unmatched hypotheses:\n" ^ hypsToString gl_) ^ "\n")
         else ()
@@ -377,7 +378,7 @@ end) : WORLDIFY = struct
       | cid :: [] -> Block (cid, I.constBlock cid)
       | cid :: cids -> Plus (Block (cid, I.constBlock cid), worldsToReg' cids)
 
-    let init a3 b3 = match a3, b3 with
+    let init = function
       | _, ((I.Root _, s) as vs_) -> begin
           Trace.success ();
           raise (Success (Whnf.normalize vs_))

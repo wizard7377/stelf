@@ -179,7 +179,7 @@ end) : CONV = struct
        Effects: EVars may be lowered
     *)
   (* convDecP see convDec *)
-  let conv = convExp
+  let conv us1 us2 = convExp (us1, us2)
   let conv_dec = convDec
   let conv_sub = convSub
   let convDec = convDec

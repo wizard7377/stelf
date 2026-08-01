@@ -381,7 +381,8 @@ end) : ABSMACHINESBT = struct
                there is a choice depending on how we compiled signature
              *)
   (* trail to undo EVar instantiations *)
-  let solve args =
+  let solve a b c =
+    let args = (a, b, c) in
     begin match !CompSyn.optimize with
     | CompSyn.No -> begin
         mSig := matchSig;

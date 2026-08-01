@@ -698,8 +698,8 @@ module Impl () = struct
           ignore la_;
           []
       | Cst.CoversCmd_ md ->
-          let mdec, _r = Recon.ReconMode.modeToMode md in
-          Cover.checkCovers mdec;
+          let (cid__, ms__), _r = Recon.ReconMode.modeToMode md in
+          Cover.checkCovers cid__ ms__;
           []
       | Cst.NameCmd_ _id -> []
       | Cst.ProseCmd_ _id -> []
@@ -722,7 +722,7 @@ module Impl () = struct
           | None -> [ Reply.Response "unique: expected a type family name\n" ]
           | Some ((cid, mS) as mdec) ->
               UniqueTable.installMode cid mS;
-              Unique.checkUnique mdec;
+              Unique.checkUnique cid mS;
               []
           end
       | Cst.UnionCmd_ (id, ids) ->

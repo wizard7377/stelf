@@ -192,7 +192,7 @@ open Table.TableInstances
 module Key' = struct
   type key' = int
 
-  let compare ((a, b) : key' * key') : Basis.order =
+  let compare (a : key') (b : key') : Basis.order =
     if a < b then Less else if a > b then Greater else Equal
 end
 

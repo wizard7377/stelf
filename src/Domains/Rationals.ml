@@ -87,7 +87,7 @@ module Rationals (Integers : INTEGERS) :
     let compare (Fract (s1, n1, d1)) (Fract (s2, n2, d2)) =
       let a = I.( * ) (I.( * ) (I.fromInt s1) n1) d2 in
       let b = I.( * ) (I.( * ) (I.fromInt s2) n2) d1 in
-      I.compare a b
+      I.compare (a, b)
 
     let ( > ) q1 q2 = compare q1 q2 = Greater
     let ( < ) q1 q2 = compare q1 q2 = Less

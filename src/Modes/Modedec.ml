@@ -183,7 +183,7 @@ module MakeModeDec () : MODEDEC = struct
         end
       with Error msg -> error r msg
 
-    let rec checkPure a1 b1 = match a1, b1 with
+    let rec checkPure a mS r = match (a, mS), r with
       | (a, M.Mnil), r -> ()
       | (a, M.Mapp (M.Marg (M.Minus1, _), mS)), r ->
           error

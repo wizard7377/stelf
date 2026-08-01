@@ -266,7 +266,7 @@ end) : MODSYN = struct
       IntTree.app doConst constTable
     end
 
-  let decToDef x = strictify (abbrevify x)
+  let decToDef (cid, condec_) = strictify (abbrevify cid condec_)
 
   let installStruct (strdec, module_, nsOpt, installAction, isDef) =
     let transformConDec =

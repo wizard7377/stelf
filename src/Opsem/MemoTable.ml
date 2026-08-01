@@ -1000,7 +1000,7 @@ end) : MEMOTABLE = struct
             answRef,
             status )
 
-  let answerCheck = answCheck
+  let answerCheck a b c = answCheck (a, b, c)
   let updateTable = updateTable
   let tableSize () = length !answList
 

@@ -68,7 +68,7 @@ end) : FIXEDPOINT with module State = FixedPoint__0.State' = struct
       let x_ = T.newEVar (I.Decl (psi, d_)) (T.forSub f_ (T.Shift 1)) in
       (r, T.Rec (d_, x_))
 
-    let apply r p_ = r := Some p_
+    let apply (r, p_) = r := Some p_
     let menu _ = "Recursion introduction"
   end
 

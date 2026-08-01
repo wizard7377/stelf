@@ -64,8 +64,8 @@ end) : TRACE = struct
     | g_, I.Def d -> N.qidToString (N.constQid d)
     | g_, I.BVar k -> N.bvarName g_ k
 
-  let expToString gu = P.expToString gu ^ ". "
-  let decToString gd = P.decToString gd ^ ". "
+  let expToString g u = P.expToString g u ^ ". "
+  let decToString g d = P.decToString g d ^ ". "
 
   let eqnToString (g_, u1_, u2_) =
     ((P.expToString g_ u1_ ^ " = ") ^ P.expToString g_ u2_) ^ ". "
@@ -261,7 +261,7 @@ end) : TRACE = struct
         breakAction g_
       end
     | 'g' -> begin
-        print (expToString !currentGoal);
+        print (let g__, u__ = !currentGoal in expToString g__ u__);
         breakAction g_
       end
     | 'i' -> begin

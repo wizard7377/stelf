@@ -265,8 +265,8 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
     in
     transformConDec
 
-  let moduleWhere : ModSyn.module_ * whereclause -> ModSyn.module_ = function
-    | module_, wherecl ->
+  let moduleWhere : ModSyn.module_ -> whereclause -> ModSyn.module_ =
+    fun module_ wherecl ->
         let mark, markStruct = IntSyn.sgnSize () in
         let module' = ModSyn.instantiateModule module_ (applyEqns wherecl) in
         ignore (Names.resetFrom mark markStruct);

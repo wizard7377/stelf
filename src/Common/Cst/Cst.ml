@@ -472,7 +472,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
 
     type predicate = string * loc
 
-    let predicate predicate_ = predicate_
+    let predicate s l = (s, l)
 
     type rdecl = predicate * order * order * callpats
 
@@ -481,19 +481,19 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
 
     type tableddecl = string * loc
 
-    let tableddecl tableddecl_ = tableddecl_
+    let tableddecl a b = (a, b)
 
     type keepTabledecl = string * loc
 
-    let keepTabledecl keepTabledecl_ = keepTabledecl_
+    let keepTabledecl a b = (a, b)
 
     type prove = int * tdecl
 
-    let prove prove_ = prove_
+    let prove a b = (a, b)
 
     type establish = int * tdecl
 
-    let establish establish_ = establish_
+    let establish a b = (a, b)
 
     type assert_ = callpats
 
@@ -521,7 +521,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
 
     type wdecl = (string list * string) list * callpats
 
-    let wdecl wdecl_ = wdecl_
+    let wdecl a b = (a, b)
   end
 
   open Lens

@@ -6,7 +6,7 @@ module Macro (C : CST.CST) : MACRO.MACRO with module C = C = struct
   let args (n, _) = n
   let create n cmd = (n, cmd)
 
-  let rec apply _n cmd args = go_cmd 0 args cmd
+  let rec apply (_n, cmd) args = go_cmd 0 args cmd
 
   and go_cmd i args (cmd : C.cmd) : C.cmd =
     let open C.View.Cmd in

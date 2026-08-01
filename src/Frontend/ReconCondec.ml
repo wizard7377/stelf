@@ -197,7 +197,7 @@ end) : RECON_CONDEC = struct
         in
         ignore (ExtSyn.checkErrors r);
         let i, (u'', v'') =
-          try Timers.time Timers.abstract Abstract.abstractDef (u_, v_)
+          try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u_ v_) ()
           with Abstract.Error msg ->
             raise (Abstract.Error (Paths.wrap r msg))
         in

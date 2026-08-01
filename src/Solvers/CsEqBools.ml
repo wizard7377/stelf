@@ -89,7 +89,7 @@ end) : Cs.CS = struct
     let orExp (u_, v_) = Root (Const !orID, App (u_, App (v_, Nil)))
     let impliesExp (u_, v_) = Root (Const !impliesID, App (u_, App (v_, Nil)))
     let iffExp (u_, v_) = Root (Const !iffID, App (u_, App (v_, Nil)))
-    let member eq (x, l_) = List.exists (function y -> eq x y) l_
+    let member eq (x, l_) = List.exists (function y -> eq (x, y)) l_
 
     let differenceSet eq (l1_, l2_) =
       let l1'_ = List.filter (function x -> not (member eq (x, l2_))) l1_ in
@@ -336,7 +336,7 @@ end) : Cs.CS = struct
 
     let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
 
-    let init cs installF =
+    let init (cs, installF) =
       begin
         myID := cs;
         begin

@@ -181,7 +181,7 @@ end) : STRICT = struct
   (* may not be sound in general *)
   (* Wed Aug 25 16:39:57 2004 -fp *)
   let check = strictTop
-  let checkType = occursInType
+  let checkType u_ occ = occursInType (u_, occ)
 end
 (*! structure IntSyn' : INTSYN !*)
 (*! sharing Whnf.IntSyn = IntSyn' !*)

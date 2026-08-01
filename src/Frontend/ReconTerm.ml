@@ -983,10 +983,10 @@ end) : RECON_TERM = struct
         error
           r ((("Ambiguous reconstruction\n" ^ F.makestring_fmt amb) ^ "\n") ^ msg))
 
-  let unifyIdem x =
+  let unifyIdem (g_, us_, vs_) =
     ignore (Unify.reset ());
     let _ =
-      try Unify.unify x
+      try Unify.unify g_ us_ vs_
       with Unify.Unify _ as e ->
         begin
           Unify.unwind ();
@@ -997,9 +997,9 @@ end) : RECON_TERM = struct
     ()
   (* this reset should be unnecessary -- for safety only *)
 
-  let unifiableIdem x =
+  let unifiableIdem (g_, us_, vs_) =
     ignore (Unify.reset ());
-    let ok = Unify.unifiable x in
+    let ok = Unify.unifiable g_ us_ vs_ in
     let _ =
       begin if ok then Unify.reset () else Unify.unwind ()
       end
@@ -1522,23 +1522,23 @@ end) : RECON_TERM = struct
 
   let rec occElim = function
     | Constant_ (h_, r), os, rs, i ->
-        let r' = List.foldr Paths.join r rs in
+        let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
         ( Paths.root (r', Paths.leaf r, IntSyn.conDecImp (headConDec h_), i, os),
           r' )
         (* should probably treat a constant with Foreign
              attribute as a redex *)
     | Bvar_ (k, r), os, rs, i ->
-        let r' = List.foldr Paths.join r rs in
+        let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
         (Paths.root (r', Paths.leaf r, 0, i, os), r')
     | Fvar_ (name, r), os, rs, i ->
-        let r' = List.foldr Paths.join r rs in
+        let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
         (Paths.root (r', Paths.leaf r, 0, i, os), r')
     | App_ (tm1, tm2), os, rs, i ->
         let oc2, r2 = occIntro tm2 in
         occElim (tm1, Paths.app oc2 os, r2 :: rs, i + 1)
     | Hastype_ (tm1, tm2), os, rs, i -> occElim (tm1, os, rs, i)
     | tm, os, rs, i ->
-        let r' = List.foldr Paths.join (termRegion tm) rs in
+        let r' = List.foldr (fun (a, b) -> Paths.join a b) (termRegion tm) rs in
         (Paths.leaf r', r')
   (* this is some kind of redex or evar-under-substitution
            also catches simple introduction forms like `type' *)

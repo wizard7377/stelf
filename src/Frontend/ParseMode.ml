@@ -125,7 +125,7 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
     let stripRParen = function
       | LS.Cons ((L.Rparen, r), s') -> (LS.expose s', r)
       | LS.Cons ((t, r), s') ->
-          Parsing.error (r, "Expected closing `)', found " ^ L.toString t)
+          Parsing.error r ("Expected closing `)', found " ^ L.toString t)
 
     let stripRBrace = function
       | LS.Cons ((L.Rbrace, r), s') -> (LS.expose s', r)

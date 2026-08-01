@@ -61,7 +61,7 @@ module IntInf : INT_INF = struct
   let max = Int.max
   let sign = Int.sign
   let sameSign = Int.sameSign
-  let compare a b = if a < b then Less else if a = b then Equal else Greater
+  let compare (a, b) = if a < b then Less else if a = b then Equal else Greater
   let toString = Int.toString
   let scan = Int.scan
   let fromString = Int.fromString

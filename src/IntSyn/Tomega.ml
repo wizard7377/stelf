@@ -872,7 +872,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
   let deblockify = deblockify
 
   (* Stuff that has to do with termination conditions *)
-  let tCSub = tCSub_
+  let tCSub tc s = tCSub_ (tc, s)
   let normalizeTC = normalizeTC
   let convTC = convTC
   let transformTC = transformTC
