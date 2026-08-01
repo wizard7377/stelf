@@ -65,6 +65,7 @@ DEF	src/Common/Syntax/Misc.ml:35	blockSub	b s
 CALL	src/Common/Syntax/Misc.ml:38	bvarSub	k s
 CALL	src/Common/Syntax/Misc.ml:44	comp	sk s
 CALL	src/Common/Syntax/Misc.ml:44	blockSub	b' (comp (sk, s))
+DEFERRED	src/Common/Syntax/Misc.ml:44	comp	
 CALL	src/Common/Syntax/Misc.ml:45	comp	sk s
 DEF	src/Common/Syntax/Misc.ml:49	comp	s1 s2
 CALL	src/Common/Syntax/Misc.ml:52	comp	(Ast.Shift (n - 1)) s
@@ -75,6 +76,7 @@ CALL	src/Common/Syntax/Misc.ml:57	comp	s shift
 VALUEUSE	src/Common/Syntax/Misc.ml:59	shift	
 CALL	src/Common/Syntax/Misc.ml:59	comp	shift s
 CALL	src/Common/Syntax/Misc.ml:59	comp	(comp (shift, s)) invShift
+DEFERRED	src/Common/Syntax/Misc.ml:59	comp	
 DEF	src/Common/Syntax/Misc.ml:60	newEVar	g v
 CALL	src/Common/Syntax/Misc.ml:62	newEVar	g (Ast.Uni Ast.Type)
 DEF	src/Common/Syntax/Misc.ml:63	newLVar	sk (cid, t)
@@ -93,6 +95,7 @@ DEF	src/Common/Syntax/Sgn.ml:54	blockSub	b s
 CALL	src/Common/Syntax/Sgn.ml:57	bvarSub	k s
 CALL	src/Common/Syntax/Sgn.ml:64	comp	sk s
 CALL	src/Common/Syntax/Sgn.ml:64	blockSub	b' (comp (sk, s))
+DEFERRED	src/Common/Syntax/Sgn.ml:64	comp	
 CALL	src/Common/Syntax/Sgn.ml:65	comp	sk s
 DEF	src/Common/Syntax/Sgn.ml:69	comp	s1 s2
 CALL	src/Common/Syntax/Sgn.ml:72	comp	(Ast.Shift (n - 1)) s
@@ -355,10 +358,12 @@ CALL	src/Cover/Cover_.ml:545	insert	k ksn'
 DEFFUN	src/Cover/Cover_.ml:548	join	 a3 b3 = match a3, b3 with
 CALL	src/Cover/Cover_.ml:550	insert	k ksn
 CALL	src/Cover/Cover_.ml:550	join	ks (insert (k, ksn))
+DEFERRED	src/Cover/Cover_.ml:550	insert	
 CALL	src/Cover/Cover_.ml:560	join	ks ksn
 CALL	src/Cover/Cover_.ml:567	Whnf.newLoweredEVar	I.Null (v1_, s)
 CALL	src/Cover/Cover_.ml:570	I.comp	t s
 CALL	src/Cover/Cover_.ml:570	I.newLVar	(I.Shift 0) (l, I.comp (t, s))
+DEFERRED	src/Cover/Cover_.ml:570	I.comp	
 DEF	src/Cover/Cover_.ml:590	createAtomConst	g_ h_
 DEF	src/Cover/Cover_.ml:598	createAtomBVar	g_ k
 CALL	src/Cover/Cover_.ml:599	I.ctxDec	g_ k
@@ -377,6 +382,7 @@ CALL	src/Cover/Cover_.ml:698	TypeCheck.typeCheck	I.Null (v'', I.Uni I.Type)
 CALL	src/Cover/Cover_.ml:762	Whnf.newLoweredEVar	I.Null (v1_, s)
 CALL	src/Cover/Cover_.ml:769	I.comp	t s
 CALL	src/Cover/Cover_.ml:769	I.newLVar	(I.Shift 0) (l, I.comp (t, s))
+DEFERRED	src/Cover/Cover_.ml:769	I.comp	
 CALL	src/Cover/Cover_.ml:774	Subordinate.belowEq	a (I.targetFam vy)
 CALL	src/Cover/Cover_.ml:780	Abstract.collectEVars	gx (x_, I.id) []
 CALL	src/Cover/Cover_.ml:800	Print.expToString	I.Null x_
@@ -449,6 +455,7 @@ VALUEUSE	src/Cover/Total.ml:128	install
 ESCALATE	src/Cover/Total.ml:154	wrapLoc' (>1 effectful arg)	(P.Loc (fileName, P.occToRegionDec occDec occ)) (Origins.linesInfoLookup fileName) msg
 CALL	src/Cover/Total.ml:198	I.decSub	d1_ s
 CALL	src/Cover/Total.ml:198	N.decEName	g_ (I.decSub (d1_, s))
+DEFERRED	src/Cover/Total.ml:198	I.decSub	
 CALL	src/Cover/Total.ml:223	Cover.checkOut	g_ (v_, s)
 DECLINE	src/Cover/Total.ml:237	error -- tuple arity mismatch	
 DECLINE	src/Cover/Total.ml:263	error -- tuple arity mismatch	
@@ -543,14 +550,17 @@ CALL	src/Frontend/ParseMode.ml:141	E.Short.mapp	mId mS'
 CALL	src/Frontend/ParseMode.ml:143	Parsing.error	r ("Expected mode or `.', found " ^ L.toString t)
 CALL	src/Frontend/ParseMode.ml:155	P.join	r r'
 CALL	src/Frontend/ParseMode.ml:155	ParseTerm.ExtSyn.dec0	x (P.join (r, r'))
+DEFERRED	src/Frontend/ParseMode.ml:155	P.join	
 CALL	src/Frontend/ParseMode.ml:156	P.join	r r'
 DECLINE	src/Frontend/ParseMode.ml:156	ParseTerm.ExtSyn.dec -- name has ambiguous arity	
 CALL	src/Frontend/ParseMode.ml:160	E.Full.mpi	m dec t'
 DECLINE	src/Frontend/ParseMode.ml:164	LS.delay -- argument is not a literal tuple	
 CALL	src/Frontend/ParseMode.ml:166	P.join	r r1
 CALL	src/Frontend/ParseMode.ml:166	E.Full.mroot	t' (P.join (r, r1))
+DEFERRED	src/Frontend/ParseMode.ml:166	P.join	
 CALL	src/Frontend/ParseMode.ml:171	P.join	r' r1
 CALL	src/Frontend/ParseMode.ml:171	E.Full.mroot	t' (P.join (r', r1))
+DEFERRED	src/Frontend/ParseMode.ml:171	P.join	
 CALL	src/Frontend/ParseMode.ml:173	Parsing.error	r ("Expected mode or identifier, found " ^ L.toString t)
 DECLINE	src/Frontend/ParseMode.ml:178	LS.delay -- argument is not a literal tuple	
 DECLINE	src/Frontend/ParseMode.ml:183	E.Short.mroot -- tuple arity mismatch	
@@ -560,6 +570,7 @@ CALL	src/Frontend/ParseMode.ml:192	Parsing.error	r ("Expected identifier, found 
 CALL	src/Frontend/ParseMode.ml:200	Parsing.error	r ("Expected identifier or mode, found " ^ L.toString t)
 CALL	src/Frontend/ParseModule.ml:92	Paths.join	r0 r1
 CALL	src/Frontend/ParseModule.ml:92	E.strexp	ids id (Paths.join (r0, r1))
+DEFERRED	src/Frontend/ParseModule.ml:92	Paths.join	
 CALL	src/Frontend/ParseModule.ml:94	Parsing.error	r ("Expected structure identifier, found token " ^ L.toString t)
 CALL	src/Frontend/ParseModule.ml:102	Parsing.error	r2 ("Expected `=', found token " ^ L.toString t)
 CALL	src/Frontend/ParseModule.ml:105	Parsing.error	r ("Expected `:=', found token " ^ L.toString t)
@@ -581,10 +592,12 @@ CALL	src/Frontend/ParseModule.ml:166	E.sigid	id r
 CALL	src/Frontend/ParseModule.ml:176	Parsing.error	r ("Expected signature name or expression, found token " ^ L.toString t)
 CALL	src/Frontend/ParseModule.ml:183	Parsing.recwith	parseSigExp' (function sigexp -> E.sigdef (idOpt, sigexp))
 CALL	src/Frontend/ParseModule.ml:184	E.sigdef	idOpt sigexp
+DEFERRED	src/Frontend/ParseModule.ml:184	E.sigdef	
 CALL	src/Frontend/ParseModule.ml:187	Parsing.error	r ("Expected `=', found token " ^ L.toString t)
 CALL	src/Frontend/ParseModule.ml:193	Parsing.error	r ("Expected signature identifier, found token " ^ L.toString t)
 CALL	src/Frontend/ParseModule.ml:200	Parsing.recwith	parseSigExp' (function sigexp -> E.structdec (idOpt, sigexp))
 CALL	src/Frontend/ParseModule.ml:201	E.structdec	idOpt sigexp
+DEFERRED	src/Frontend/ParseModule.ml:201	E.structdec	
 VALUEUSE	src/Frontend/ParseModule.ml:205	strexp	
 CALL	src/Frontend/ParseModule.ml:205	E.structdef	idOpt strexp
 CALL	src/Frontend/ParseModule.ml:207	Parsing.error	r ("Expected `:' or `=', found token " ^ L.toString t)
@@ -596,6 +609,7 @@ CALL	src/Frontend/ParseQuery.ml:119	Parsing.error	r ("Expected `:' or `=', found
 CALL	src/Frontend/ParseQuery.ml:126	Parsing.error	r ("Expected identifier or `_', found " ^ L.toString t)
 CALL	src/Frontend/ParseQuery.ml:133	P.join	r0 r
 CALL	src/Frontend/ParseQuery.ml:133	ExtQuery.solve	nameOpt tm (P.join (r0, r))
+DEFERRED	src/Frontend/ParseQuery.ml:133	P.join	
 CALL	src/Frontend/ParseQuery.ml:135	Parsing.error	r ("Expected `:', found " ^ L.toString t)
 CALL	src/Frontend/ParseQuery.ml:143	Parsing.error	r ("Expected identifier or `_', found " ^ L.toString t)
 CALL	src/Frontend/ParseQuery.ml:152	Parsing.error	r ("Expected %define or %solve, found " ^ L.toString t)
@@ -609,6 +623,7 @@ DECLINE	src/Frontend/ParseTerm.ml:98	FX.dec -- name has ambiguous arity
 DECLINE	src/Frontend/ParseTerm.ml:98	FX.dec -- name has ambiguous arity	
 CALL	src/Frontend/ParseTerm.ml:102	ExtSyn.app	tm tm1
 CALL	src/Frontend/ParseTerm.ml:102	ExtSyn.app	(ExtSyn.app (tm, tm1)) tm2
+DEFERRED	src/Frontend/ParseTerm.ml:102	ExtSyn.app	
 CALL	src/Frontend/ParseTerm.ml:105	ExtSyn.app	tm tm1
 CALL	src/Frontend/ParseTerm.ml:108	ExtSyn.app	tm tm1
 CALL	src/Frontend/ParseTerm.ml:111	ExtSyn.lcid	ids name r
@@ -683,6 +698,7 @@ CALL	src/Frontend/ParseTerm.ml:340	P.reduceAll	r p
 CALL	src/Frontend/ParseTerm.ml:341	P.reduceAll	r p
 CALL	src/Frontend/ParseTerm.ml:343	ExtSyn.scon	str r
 CALL	src/Frontend/ParseTerm.ml:343	P.shiftAtom	(ExtSyn.scon (str, r)) p
+DEFERRED	src/Frontend/ParseTerm.ml:343	ExtSyn.scon	
 CALL	src/Frontend/ParseTerm.ml:345	Parsing.error	r (("Unexpected token " ^ L.toString t) ^ " found in expression")
 CALL	src/Frontend/ParseTerm.ml:352	Parsing.error	r ("Illegal bound quoted identifier " ^ name)
 CALL	src/Frontend/ParseTerm.ml:357	Parsing.error	r ("Cannot bind infix identifier " ^ name)
@@ -694,25 +710,33 @@ CALL	src/Frontend/ParseTerm.ml:377	Parsing.error	r ("Expected optional type decl
 CALL	src/Frontend/ParseTerm.ml:384	P.shiftAtom	tm p
 CALL	src/Frontend/ParseTerm.ml:386	Paths.join	r0 r
 CALL	src/Frontend/ParseTerm.ml:386	Parsing.error	(Paths.join (r0, r)) ("Unmatched open parenthesis")
+DEFERRED	src/Frontend/ParseTerm.ml:386	Paths.join	
 CALL	src/Frontend/ParseTerm.ml:392	Paths.join	r0 r
 CALL	src/Frontend/ParseTerm.ml:392	ExtSyn.dec0	x (Paths.join (r0, r))
+DEFERRED	src/Frontend/ParseTerm.ml:392	Paths.join	
 CALL	src/Frontend/ParseTerm.ml:393	Paths.join	r0 r
 DECLINE	src/Frontend/ParseTerm.ml:393	ExtSyn.dec -- name has ambiguous arity	
 CALL	src/Frontend/ParseTerm.ml:397	ExtSyn.pi	dec tm
 CALL	src/Frontend/ParseTerm.ml:397	P.shiftAtom	(ExtSyn.pi (dec, tm)) p
+DEFERRED	src/Frontend/ParseTerm.ml:397	ExtSyn.pi	
 CALL	src/Frontend/ParseTerm.ml:399	Paths.join	r0 r
 CALL	src/Frontend/ParseTerm.ml:399	Parsing.error	(Paths.join (r0, r)) ("Unmatched open brace")
+DEFERRED	src/Frontend/ParseTerm.ml:399	Paths.join	
 CALL	src/Frontend/ParseTerm.ml:405	Paths.join	r0 r
 CALL	src/Frontend/ParseTerm.ml:405	ExtSyn.dec0	x (Paths.join (r0, r))
+DEFERRED	src/Frontend/ParseTerm.ml:405	Paths.join	
 CALL	src/Frontend/ParseTerm.ml:406	Paths.join	r0 r
 DECLINE	src/Frontend/ParseTerm.ml:406	ExtSyn.dec -- name has ambiguous arity	
 CALL	src/Frontend/ParseTerm.ml:410	ExtSyn.lam	dec tm
 CALL	src/Frontend/ParseTerm.ml:410	P.shiftAtom	(ExtSyn.lam (dec, tm)) p
+DEFERRED	src/Frontend/ParseTerm.ml:410	ExtSyn.lam	
 CALL	src/Frontend/ParseTerm.ml:412	Paths.join	r0 r
 CALL	src/Frontend/ParseTerm.ml:412	Parsing.error	(Paths.join (r0, r)) ("Unmatched open bracket")
+DEFERRED	src/Frontend/ParseTerm.ml:412	Paths.join	
 CALL	src/Frontend/ParseTerm.ml:417	Parsing.error	r ("Expected `}', found " ^ L.toString t)
 CALL	src/Frontend/ParseTerm.ml:424	Paths.join	r r2
 CALL	src/Frontend/ParseTerm.ml:424	ExtSyn.dec0	x (Paths.join (r, r2))
+DEFERRED	src/Frontend/ParseTerm.ml:424	Paths.join	
 CALL	src/Frontend/ParseTerm.ml:425	Paths.join	r r2
 DECLINE	src/Frontend/ParseTerm.ml:425	ExtSyn.dec -- name has ambiguous arity	
 CALL	src/Frontend/ParseTerm.ml:436	Parsing.error	r ("Expected `{', found " ^ L.toString t)
@@ -741,6 +765,7 @@ CALL	src/Frontend/ParseThm.ml:213	Parsing.error	r ("Expected theorem identifier,
 CALL	src/Frontend/ParseThm.ml:225	Parsing.error	r ("Expected `}', found " ^ L.toString t)
 CALL	src/Frontend/ParseThm.ml:232	P.join	r r2
 CALL	src/Frontend/ParseThm.ml:232	E.ExtSyn.dec0	x (P.join (r, r2))
+DEFERRED	src/Frontend/ParseThm.ml:232	P.join	
 CALL	src/Frontend/ParseThm.ml:233	P.join	r r2
 DECLINE	src/Frontend/ParseThm.ml:233	E.ExtSyn.dec -- name has ambiguous arity	
 CALL	src/Frontend/ParseThm.ml:241	E.decl	drs dr
@@ -929,6 +954,7 @@ CALL	src/Frontend/ReconCondec.ml:281	error	r ("Free variables in context block a
 CALL	src/Frontend/ReconCondec.ml:289	Paths.join	r1 r2
 CALL	src/Frontend/ReconCondec.ml:296	ExtSyn.jwithctx	gblock ExtSyn.jnothing
 CALL	src/Frontend/ReconCondec.ml:296	ExtSyn.jwithctx	gsome (ExtSyn.jwithctx (gblock, ExtSyn.jnothing))
+DEFERRED	src/Frontend/ReconCondec.ml:296	ExtSyn.jwithctx	
 CALL	src/Frontend/ReconCondec.ml:306	error	r' ((("Constraints remain in context block after term \\n                      reconstruct...
 CALL	src/Frontend/ReconMode.ml:102	Paths.wrap	r msg
 DEF	src/Frontend/ReconMode.ml:102	error	r msg
@@ -939,8 +965,10 @@ DEF	src/Frontend/ReconMode.ml:140	mpi	(m, _) d t
 DEF	src/Frontend/ReconMode.ml:142	mroot	tm r
 CALL	src/Frontend/ReconMode.ml:144	T.jof	tm (T.typ r)
 CALL	src/Frontend/ReconMode.ml:144	T.jwithctx	g (T.jof (tm, T.typ r))
+DEFERRED	src/Frontend/ReconMode.ml:144	T.jof	
 CALL	src/Frontend/ReconMode.ml:153	error	r (("Argument " ^ Print.expToString (g_, u_))\n                      ^ " not a variable")
 CALL	src/Frontend/ReconMode.ml:155	Print.expToString	g_ u_
+DEFERRED	src/Frontend/ReconMode.ml:155	Print.expToString	
 CALL	src/Frontend/ReconMode.ml:158	I.ctxLookup	g_ k
 CALL	src/Frontend/ReconMode.ml:159	I.ctxLookup	d_ k
 CALL	src/Frontend/ReconMode.ml:165	error	r ("Call pattern not an atomic type")
@@ -954,6 +982,7 @@ DEF	src/Frontend/ReconModule.ml:123	coninst	(ids, id, r1) tm r2
 CALL	src/Frontend/ReconModule.ml:126	ModSyn.Names.constLookupIn	ns qid
 CALL	src/Frontend/ReconModule.ml:128	error	r1 ("Undeclared identifier "\n            ^ ModSyn.Names.qidToString\n                (val...
 CALL	src/Frontend/ReconModule.ml:132	ModSyn.Names.constUndefIn	ns qid
+DEFERRED	src/Frontend/ReconModule.ml:132	ModSyn.Names.constUndefIn	
 CALL	src/Frontend/ReconModule.ml:143	ModSyn.Names.constLookupIn	ns2 (ModSyn.Names.Qid ([], name))
 CALL	src/Frontend/ReconModule.ml:146	error	r1 ("Instantiating structure lacks component "\n              ^ Names.qidToString (ModSyn....
 CALL	src/Frontend/ReconModule.ml:155	ModSyn.Names.structLookupIn	ns2 (ModSyn.Names.Qid ([], name))
@@ -962,6 +991,7 @@ DEF	src/Frontend/ReconModule.ml:170	strinst	(ids, id, r1) strexp r3
 CALL	src/Frontend/ReconModule.ml:174	ModSyn.Names.structLookupIn	ns qid
 CALL	src/Frontend/ReconModule.ml:176	error	r1 ("Undeclared structure "\n              ^ Names.qidToString (valOf (ModSyn.Names.struct...
 CALL	src/Frontend/ReconModule.ml:179	ModSyn.Names.structUndefIn	ns qid
+DEFERRED	src/Frontend/ReconModule.ml:179	ModSyn.Names.structUndefIn	
 DECLINE	src/Frontend/ReconModule.ml:184	strexp -- argument is not a literal tuple	
 DEF	src/Frontend/ReconModule.ml:198	sigid	id r
 CALL	src/Frontend/ReconModule.ml:200	error	r ("Undefined signature " ^ id)
@@ -978,6 +1008,7 @@ DEF	src/Frontend/ReconModule.ml:237	structdecToStructDec	structdec moduleOpt
 DECLINE	src/Frontend/ReconModule.ml:246	IntTree.insert -- argument is not a literal tuple	
 CALL	src/Frontend/ReconModule.ml:255	ExtSyn.internalInst	conDec_ (ModSyn.abbrevify (cid, IntSyn.sgnLookup cid)) r
 CALL	src/Frontend/ReconModule.ml:256	ModSyn.abbrevify	cid (IntSyn.sgnLookup cid)
+DEFERRED	src/Frontend/ReconModule.ml:256	ModSyn.abbrevify	
 CALL	src/Frontend/ReconModule.ml:264	ExtSyn.externalInst	conDec_ tm r
 CALL	src/Frontend/ReconModule.ml:277	ModSyn.instantiateModule	module_ (applyEqns wherecl)
 CALL	src/Frontend/ReconModule.ml:278	Names.resetFrom	mark markStruct
@@ -1072,6 +1103,7 @@ CALL	src/Frontend/ReconTerm.ml:922	Whnf.newLoweredEVar	g_ (va, s)
 CALL	src/Frontend/ReconTerm.ml:923	Whnf.dotEta	(exp_ x_) s
 CALL	src/Frontend/ReconTerm.ml:951	Abstract.collectEVars	g_ (v2_, IntSyn.id) (Abstract.collectEVars (g_, (v1_, IntSyn.id), []))
 CALL	src/Frontend/ReconTerm.ml:954	Abstract.collectEVars	g_ (v1_, IntSyn.id) []
+DEFERRED	src/Frontend/ReconTerm.ml:954	Abstract.collectEVars	
 CALL	src/Frontend/ReconTerm.ml:957	Names.evarName	IntSyn.Null x_
 CALL	src/Frontend/ReconTerm.ml:959	formatExp	g_ v1_
 CALL	src/Frontend/ReconTerm.ml:960	formatExp	g_ v2_
@@ -1085,21 +1117,25 @@ DECLINE	src/Frontend/ReconTerm.ml:1011	Unify.unifiable -- argument is not a lite
 DECLINE	src/Frontend/ReconTerm.ml:1013	Unify.unwind -- argument is not a literal tuple	
 CALL	src/Frontend/ReconTerm.ml:1034	Abstract.collectEVars	g_ vs1 []
 CALL	src/Frontend/ReconTerm.ml:1034	Abstract.collectEVars	g_ vs2 (Abstract.collectEVars (g_, vs1, []))
+DEFERRED	src/Frontend/ReconTerm.ml:1034	Abstract.collectEVars	
 CALL	src/Frontend/ReconTerm.ml:1037	Names.evarName	IntSyn.Null x_
 CALL	src/Frontend/ReconTerm.ml:1044	formatExp	g_ (eClo vs1)
 CALL	src/Frontend/ReconTerm.ml:1048	formatExp	g_ (eClo vs2)
 CALL	src/Frontend/ReconTerm.ml:1061	Abstract.collectEVars	g_ vs1 []
 CALL	src/Frontend/ReconTerm.ml:1061	Abstract.collectEVars	g_ vs2 (Abstract.collectEVars (g_, vs1, []))
+DEFERRED	src/Frontend/ReconTerm.ml:1061	Abstract.collectEVars	
 CALL	src/Frontend/ReconTerm.ml:1064	Names.evarName	IntSyn.Null x_
 CALL	src/Frontend/ReconTerm.ml:1071	formatExp	g_ (eClo vs1)
 CALL	src/Frontend/ReconTerm.ml:1075	formatExp	g_ (eClo vs2)
 CALL	src/Frontend/ReconTerm.ml:1109	Abstract.collectEVars	g_ (u_, IntSyn.id) (Abstract.collectEVars (g_, (v_, IntSyn.id), []))
 CALL	src/Frontend/ReconTerm.ml:1112	Abstract.collectEVars	g_ (v_, IntSyn.id) []
+DEFERRED	src/Frontend/ReconTerm.ml:1112	Abstract.collectEVars	
 CALL	src/Frontend/ReconTerm.ml:1115	Names.evarName	IntSyn.Null x_
 CALL	src/Frontend/ReconTerm.ml:1126	formatExp	g_ u_
 CALL	src/Frontend/ReconTerm.ml:1130	formatExp	g_ v_
 CALL	src/Frontend/ReconTerm.ml:1140	Abstract.collectEVars	g_ (u_, IntSyn.id) (Abstract.collectEVars (g_, (v_, IntSyn.id), []))
 CALL	src/Frontend/ReconTerm.ml:1143	Abstract.collectEVars	g_ (v_, IntSyn.id) []
+DEFERRED	src/Frontend/ReconTerm.ml:1143	Abstract.collectEVars	
 CALL	src/Frontend/ReconTerm.ml:1146	Names.evarName	IntSyn.Null x_
 CALL	src/Frontend/ReconTerm.ml:1153	formatExp	g_ u_
 CALL	src/Frontend/ReconTerm.ml:1157	formatExp	g_ v_
@@ -1156,6 +1192,7 @@ CALL	src/Frontend/ReconThm.ml:324	error	r ("Free variables in context block afte
 CALL	src/Frontend/ReconThm.ml:332	Paths.join	r1 r2
 CALL	src/Frontend/ReconThm.ml:337	T.jwithctx	g2 T.jnothing
 CALL	src/Frontend/ReconThm.ml:337	T.jwithctx	g1 (T.jwithctx (g2, T.jnothing))
+DEFERRED	src/Frontend/ReconThm.ml:337	T.jwithctx	
 CALL	src/Frontend/ReconThm.ml:342	error	r ((("Constraints remain in context block after term reconstruction:\n"\n               ^ ...
 DEF	src/Frontend/ReconThm.ml:354	exists	g' t
 DEF	src/Frontend/ReconThm.ml:361	forall	g' t
@@ -1706,6 +1743,7 @@ CALL	src/IntSyn/Tomega.ml:357	forSub	f2_ t
 CALL	src/IntSyn/Tomega.ml:357	forSub	f1_ t
 CALL	src/IntSyn/Tomega.ml:358	comp	t1 t2
 CALL	src/IntSyn/Tomega.ml:358	forSub	f_ (comp (t1, t2))
+DEFERRED	src/IntSyn/Tomega.ml:358	comp	
 CALL	src/IntSyn/Tomega.ml:359	forSub	f_ t
 DEFFUN	src/IntSyn/Tomega.ml:362	decSub	 a1 b1 = match a1, b1 with
 CALL	src/IntSyn/Tomega.ml:365	forSub	f_ t
@@ -1738,6 +1776,7 @@ CALL	src/IntSyn/Tomega.ml:502	I.decSub	d_ s
 DEFFUN	src/IntSyn/Tomega.ml:504	whnfFor	 a1 b1 = match a1, b1 with
 CALL	src/IntSyn/Tomega.ml:508	comp	t1 t2
 CALL	src/IntSyn/Tomega.ml:508	whnfFor	f_ (comp (t1, t2))
+DEFERRED	src/IntSyn/Tomega.ml:508	comp	
 DEFFUN	src/IntSyn/Tomega.ml:512	normalizePrg	 a1 b1 = match a1, b1 with
 CALL	src/IntSyn/Tomega.ml:514	varSub	n t
 CALL	src/IntSyn/Tomega.ml:522	normalizePrg	p'_ t
@@ -1751,6 +1790,7 @@ CALL	src/IntSyn/Tomega.ml:531	normalizePrg	p_ (dot1 t)
 CALL	src/IntSyn/Tomega.ml:531	normalizeDec	d_ t
 CALL	src/IntSyn/Tomega.ml:532	comp	t t'
 CALL	src/IntSyn/Tomega.ml:532	normalizePrg	p_ (comp (t, t'))
+DEFERRED	src/IntSyn/Tomega.ml:532	comp	
 DEFFUN	src/IntSyn/Tomega.ml:534	normalizeSpine	 a1 b1 = match a1, b1 with
 CALL	src/IntSyn/Tomega.ml:537	normalizeSpine	s_ t
 CALL	src/IntSyn/Tomega.ml:539	normalizeSpine	s_ t
@@ -1759,6 +1799,7 @@ CALL	src/IntSyn/Tomega.ml:541	normalizeSpine	s_ t
 CALL	src/IntSyn/Tomega.ml:541	I.blockSub	b_ (coerceSub t)
 CALL	src/IntSyn/Tomega.ml:542	comp	t1 t2
 CALL	src/IntSyn/Tomega.ml:542	normalizeSpine	s_ (comp (t1, t2))
+DEFERRED	src/IntSyn/Tomega.ml:542	comp	
 DEFFUN	src/IntSyn/Tomega.ml:544	normalizeDec	 a1 b1 = match a1, b1 with
 CALL	src/IntSyn/Tomega.ml:548	forSub	f_ t
 CALL	src/IntSyn/Tomega.ml:551	Whnf.normalizeDec	d_ (coerceSub t)
@@ -1809,6 +1850,7 @@ CALL	src/IntSyn/Unify.ml:192	intersection	s1 s2
 VALUEUSE	src/IntSyn/Unify.ml:193	shift	
 CALL	src/IntSyn/Unify.ml:193	intersection	s1 s2
 CALL	src/IntSyn/Unify.ml:193	comp	(intersection (s1, s2)) shift
+DEFERRED	src/IntSyn/Unify.ml:193	intersection	
 CALL	src/IntSyn/Unify.ml:196	intersection	s1 (Dot (Idx (n2 + 1), Shift (n2 + 1)))
 CALL	src/IntSyn/Unify.ml:198	intersection	(Dot (Idx (n1 + 1), Shift (n1 + 1))) s2
 CALL	src/IntSyn/Unify.ml:208	bvarSub	n ss
@@ -1875,8 +1917,10 @@ CALL	src/IntSyn/Unify.ml:685	unifySub	g_ s1 s2
 DEFFUN	src/IntSyn/Unify.ml:688	unifyBlock	 a3 b3 c3 = match a3, b3, c3 with
 CALL	src/IntSyn/Unify.ml:690	blockSub	b1_ s
 CALL	src/IntSyn/Unify.ml:690	unifyBlock	g_ (blockSub (b1_, s)) b2_
+DEFERRED	src/IntSyn/Unify.ml:690	blockSub	
 CALL	src/IntSyn/Unify.ml:692	blockSub	b2_ s
 CALL	src/IntSyn/Unify.ml:692	unifyBlock	g_ b1_ (blockSub (b2_, s))
+DEFERRED	src/IntSyn/Unify.ml:692	blockSub	
 CALL	src/IntSyn/Unify.ml:703	comp	t2 s2
 CALL	src/IntSyn/Unify.ml:703	comp	t1 s1
 ESCALATE	src/IntSyn/Unify.ml:703	unifySub (>1 effectful arg)	g_ (comp (t1, s1)) (comp (t2, s2))
@@ -1884,8 +1928,10 @@ CALL	src/IntSyn/Unify.ml:705	instantiateLVar	r1 (LVar (r2, Shift (k2 - k1), (l2,
 CALL	src/IntSyn/Unify.ml:706	instantiateLVar	r2 (LVar (r1, Shift (k1 - k2), (l1, t1)))
 CALL	src/IntSyn/Unify.ml:712	blockSub	b2_ (Whnf.invert s1)
 CALL	src/IntSyn/Unify.ml:712	instantiateLVar	r1 (blockSub (b2_, Whnf.invert s1))
+DEFERRED	src/IntSyn/Unify.ml:712	blockSub	
 CALL	src/IntSyn/Unify.ml:714	blockSub	b1_ (Whnf.invert s2)
 CALL	src/IntSyn/Unify.ml:714	instantiateLVar	r2 (blockSub (b1_, Whnf.invert s2))
+DEFERRED	src/IntSyn/Unify.ml:714	blockSub	
 CALL	src/IntSyn/Unify.ml:739	FgnCnstrStd.Awake.apply	csfc_csid csfc_ops
 DEF	src/IntSyn/Unify.ml:743	unifyW	g_ us1 us2
 DEF	src/IntSyn/Unify.ml:749	unify	g_ us1 us2
@@ -1921,12 +1967,14 @@ CALL	src/IntSyn/Whnf.ml:96	comp	s1' s1
 CALL	src/IntSyn/Whnf.ml:99	comp	s2' s2
 CALL	src/IntSyn/Whnf.ml:104	frontSub	(Exp u2_) s2
 CALL	src/IntSyn/Whnf.ml:104	dotEta	(frontSub (Exp u2_, s2)) s1
+DEFERRED	src/IntSyn/Whnf.ml:104	frontSub	
 CALL	src/IntSyn/Whnf.ml:120	decSub	d'_ s'
 CALL	src/IntSyn/Whnf.ml:126	newEVar	g_ (EClo (v_, s_))
 CALL	src/IntSyn/Whnf.ml:147	bvarSub	k s
 CALL	src/IntSyn/Whnf.ml:152	blockSub	b_ s
 CALL	src/IntSyn/Whnf.ml:158	comp	sk s
 CALL	src/IntSyn/Whnf.ml:158	blockSub	b_ (comp (sk, s))
+DEFERRED	src/IntSyn/Whnf.ml:158	comp	
 CALL	src/IntSyn/Whnf.ml:160	comp	sk s
 CALL	src/IntSyn/Whnf.ml:162	comp	s' s
 CALL	src/IntSyn/Whnf.ml:185	comp	s' s
@@ -1938,10 +1986,12 @@ DEF	src/IntSyn/Whnf.ml:205	newLoweredEVar	g_ vs_
 CALL	src/IntSyn/Whnf.ml:209	newLoweredEVar	g_ (va, s)
 CALL	src/IntSyn/Whnf.ml:210	dotEta	(Exp x_) s
 CALL	src/IntSyn/Whnf.ml:210	newSpineVar	g_ (vr, dotEta (Exp x_, s))
+DEFERRED	src/IntSyn/Whnf.ml:210	dotEta	
 DEF	src/IntSyn/Whnf.ml:213	newSpineVar	g_ vs_
 DEFFUN	src/IntSyn/Whnf.ml:215	spineToSub	 a1 b1 = match a1, b1 with
 CALL	src/IntSyn/Whnf.ml:217	dotEta	(Exp u_) s
 CALL	src/IntSyn/Whnf.ml:217	spineToSub	s_ (dotEta (Exp u_, s))
+DEFERRED	src/IntSyn/Whnf.ml:217	dotEta	
 CALL	src/IntSyn/Whnf.ml:221	comp	s' s
 CALL	src/IntSyn/Whnf.ml:235	decSub	d_ s
 VALUEUSE	src/IntSyn/Whnf.ml:237	shift	
@@ -1956,6 +2006,7 @@ DEFFUN	src/IntSyn/Whnf.ml:273	normalizeSpine	 a1 b1 = match a1, b1 with
 CALL	src/IntSyn/Whnf.ml:275	normalizeSpine	s_ s
 CALL	src/IntSyn/Whnf.ml:276	comp	s' s
 CALL	src/IntSyn/Whnf.ml:276	normalizeSpine	s_ (comp (s', s))
+DEFERRED	src/IntSyn/Whnf.ml:276	comp	
 DEFFUN	src/IntSyn/Whnf.ml:278	normalizeDec	 a1 b1 = match a1, b1 with
 CALL	src/IntSyn/Whnf.ml:280	comp	t s
 CALL	src/IntSyn/Whnf.ml:282	normalizeDec	d_ s
@@ -2160,6 +2211,7 @@ CALL	src/M2/Search.ml:345	Unify.instantiateEVar	r u'_ []
 VALUEUSE	src/M2/Search.ml:487	searchEx	
 CALL	src/M2/Skolem.ml:110	Abstract.piDepend	(Whnf.normalizeDec (d_, s), I.Meta) v_
 CALL	src/M2/Skolem.ml:111	Whnf.normalizeDec	d_ s
+DEFERRED	src/M2/Skolem.ml:111	Whnf.normalizeDec	
 DECLINE	src/M2/Skolem.ml:119	IndexSkolem.install -- argument is not a literal tuple	
 VALUEUSE	src/M2/Skolem.ml:122	Compile.install	
 DECLINE	src/M2/Skolem.ml:139	install -- argument is not a literal tuple	
@@ -2184,6 +2236,7 @@ CALL	src/M2/Splitting.ml:477	I.decSub	d_ s'
 DEF	src/M2/Splitting.ml:495	apply	_ sl_
 CALL	src/M2/Splitting.ml:524	I.ctxDec	g_ i
 CALL	src/M2/Splitting.ml:524	Print.decToString	g_ (I.ctxDec (g_, i))
+DEFERRED	src/M2/Splitting.ml:524	I.ctxDec	
 VALUEUSE	src/M2/Splitting.ml:709	expand	
 VALUEUSE	src/M2/Splitting.ml:710	apply	
 VALUEUSE	src/M2/Strategy.ml:141	Splitting.expand	
@@ -2224,9 +2277,11 @@ CALL	src/Meta/Funprint.ml:78	P.formatDec	g''_ d''_
 CALL	src/Meta/Funprint.ml:87	Names.decName	g_ d_
 CALL	src/Meta/Funprint.ml:90	I.decSub	d'_ s
 CALL	src/Meta/Funprint.ml:90	P.formatDec	g_ (I.decSub (d'_, s))
+DEFERRED	src/Meta/Funprint.ml:90	I.decSub	
 CALL	src/Meta/Funprint.ml:101	Names.decName	g_ d_
 CALL	src/Meta/Funprint.ml:104	I.decSub	d'_ s
 CALL	src/Meta/Funprint.ml:104	P.formatDec	g_ (I.decSub (d'_, s))
+DEFERRED	src/Meta/Funprint.ml:104	I.decSub	
 DEF	src/Meta/Funprint.ml:111	formatFor	psi f_
 DEF	src/Meta/Funprint.ml:133	formatForBare	g_ f_
 CALL	src/Meta/Funprint.ml:142	Names.decName	g1_ d_
@@ -2447,6 +2502,8 @@ DEFFUN	src/Meta/MtpAbstract.ml:476	raiseType	 a1 b1 = match a1, b1 with
 CALL	src/Meta/MtpAbstract.ml:479	raiseType	g_ (Abstract.piDepend ((Whnf.normalizeDec (d_, I.id), I.Maybe), v_))
 CALL	src/Meta/MtpAbstract.ml:480	Whnf.normalizeDec	d_ I.id
 CALL	src/Meta/MtpAbstract.ml:480	Abstract.piDepend	(Whnf.normalizeDec (d_, I.id), I.Maybe) v_
+DEFERRED	src/Meta/MtpAbstract.ml:480	Abstract.piDepend	
+DEFERRED	src/Meta/MtpAbstract.ml:480	Whnf.normalizeDec	
 CALL	src/Meta/MtpAbstract.ml:491	Whnf.strengthen	iw g_
 CALL	src/Meta/MtpAbstract.ml:493	raiseType	gw_ v''
 VALUEUSE	src/Meta/MtpAbstract.ml:500	I.shift	
@@ -2636,6 +2693,7 @@ CALL	src/Meta/MtpSplitting.ml:412	FunTypeCheck.checkSub	psi'' s'' psi
 CALL	src/Meta/MtpSplitting.ml:434	I.FgnExpStd.fold	csid_ csfe
 CALL	src/Meta/MtpSplitting.ml:463	F.forSub	f_ s'
 CALL	src/Meta/MtpSplitting.ml:463	FunTypeCheck.isFor	g'_ (F.forSub (f_, s'))
+DEFERRED	src/Meta/MtpSplitting.ml:463	F.forSub	
 CALL	src/Meta/MtpSplitting.ml:471	S.orderSub	o_ s'
 CALL	src/Meta/MtpSplitting.ml:472	F.forSub	f'_ s'
 CALL	src/Meta/MtpSplitting.ml:473	F.forSub	f_ s'
@@ -2647,10 +2705,12 @@ CALL	src/Meta/MtpSplitting.ml:562	I.newEVar	g'_ (I.EClo (v_, s'))
 CALL	src/Meta/MtpSplitting.ml:585	I.newEVar	g'_ (I.EClo (v_, s'))
 CALL	src/Meta/MtpSplitting.ml:608	I.decSub	d_ s'
 CALL	src/Meta/MtpSplitting.ml:608	Names.decName	g'_ (I.decSub (d_, s'))
+DEFERRED	src/Meta/MtpSplitting.ml:608	I.decSub	
 DEF	src/Meta/MtpSplitting.ml:634	compare	(Operator (_, _, i1_)) (Operator (_, _, i2_))
 CALL	src/Meta/MtpSplitting.ml:635	H.compare	i1_ i2_
 CALL	src/Meta/MtpSplitting.ml:678	I.ctxDec	g_ i
 CALL	src/Meta/MtpSplitting.ml:678	Print.decToString	g_ (I.ctxDec (g_, i))
+DEFERRED	src/Meta/MtpSplitting.ml:678	I.ctxDec	
 VALUEUSE	src/Meta/MtpSplitting.ml:917	expand	
 VALUEUSE	src/Meta/MtpSplitting.ml:920	apply	
 VALUEUSE	src/Meta/MtpSplitting.ml:922	compare	
@@ -2674,6 +2734,7 @@ VALUEUSE	src/Meta/Relfun.ml:176	I.shift
 VALUEUSE	src/Meta/Relfun.ml:176	I.shift	
 CALL	src/Meta/Relfun.ml:176	I.comp	I.shift w
 CALL	src/Meta/Relfun.ml:176	Weaken.strengthenSub	(I.comp (I.shift, w)) I.shift
+DEFERRED	src/Meta/Relfun.ml:176	I.comp	
 VALUEUSE	src/Meta/Relfun.ml:177	I.shift	
 CALL	src/Meta/Relfun.ml:177	Weaken.strengthenSub	w I.shift
 CALL	src/Meta/Relfun.ml:181	I.bvarSub	1 w
@@ -2723,6 +2784,7 @@ CALL	src/Meta/Relfun.ml:424	I.comp	z1 I.shift
 VALUEUSE	src/Meta/Relfun.ml:426	I.shift	
 CALL	src/Meta/Relfun.ml:426	I.comp	I.shift xc
 CALL	src/Meta/Relfun.ml:426	I.comp	z2 (I.comp (I.shift, xc))
+DEFERRED	src/Meta/Relfun.ml:426	I.comp	
 CALL	src/Meta/Relfun.ml:428	Whnf.dotEta	(I.Exp ur') z2n
 CALL	src/Meta/Relfun.ml:438	Weaken.strengthenExp	v1_ w
 CALL	src/Meta/Relfun.ml:440	Weaken.strengthenExp	u_ w1
@@ -2935,6 +2997,7 @@ DEFFUN	src/Opsem/Absmachine.ml:95	solve	 a2 b2 c2 = match a2, b2, c2 with
 ESCALATE	src/Opsem/Absmachine.ml:100	solve (>1 effectful arg)	(g, I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha)))) (function m_ ...
 CALL	src/Opsem/Absmachine.ml:105	I.decSub	d_ s
 CALL	src/Opsem/Absmachine.ml:105	Names.decLUName	g_ (I.decSub (d_, s))
+DEFERRED	src/Opsem/Absmachine.ml:105	I.decSub	
 ESCALATE	src/Opsem/Absmachine.ml:106	solve (>1 effectful arg)	(g, I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter))) (function m_ -> sc...
 CALL	src/Opsem/Absmachine.ml:113	Unify.unifiable	g_ (q_, s) ps'
 CALL	src/Opsem/Absmachine.ml:116	Assign.assignable	g_ ps' (q_, s)
@@ -2955,6 +3018,7 @@ CALL	src/Opsem/AbsmachineSbt.ml:110	raiseType	g_ (I.Pi ((d_, I.Maybe), v_))
 CALL	src/Opsem/AbsmachineSbt.ml:147	I.newEVar	gglobal (I.EClo (a_, s'))
 CALL	src/Opsem/AbsmachineSbt.ml:164	I.decSub	d_ s
 CALL	src/Opsem/AbsmachineSbt.ml:164	Names.decLUName	g_ (I.decSub (d_, s))
+DEFERRED	src/Opsem/AbsmachineSbt.ml:164	I.decSub	
 CALL	src/Opsem/AbsmachineSbt.ml:172	Unify.unifiable	g_ ps' (q_, s)
 CALL	src/Opsem/AbsmachineSbt.ml:175	Assign.assignable	g_ ps' (q_, s)
 CALL	src/Opsem/AbsmachineSbt.ml:180	I.newEVar	g_ (I.EClo (a_, s))
@@ -2982,6 +3046,7 @@ CALL	src/Opsem/AbstractTabled.ml:357	Unify.instantiateEVar	r (I.EClo (x'_, w)) [
 CALL	src/Opsem/AbstractTabled.ml:358	raiseType	gx' (I.EClo (v_, iw))
 CALL	src/Opsem/AbstractTabled.ml:359	I.comp	ss s
 CALL	src/Opsem/AbstractTabled.ml:359	I.comp	w (I.comp (ss, s))
+DEFERRED	src/Opsem/AbstractTabled.ml:359	I.comp	
 DECLINE	src/Opsem/AbstractTabled.ml:370	member -- argument is not a literal tuple	
 CALL	src/Opsem/AbstractTabled.ml:381	raiseType	gx v_
 CALL	src/Opsem/AbstractTabled.ml:404	raiseType	gx v_
@@ -3063,6 +3128,7 @@ CALL	src/Opsem/Ptrecon.ml:140	MT.memberCtx	(g_, I.EClo (a_, s)) g_
 CALL	src/Opsem/Ptrecon.ml:142	I.newEVar	g_ (I.EClo (a_, s))
 CALL	src/Opsem/Ptrecon.ml:166	I.decSub	d_ s
 CALL	src/Opsem/Ptrecon.ml:166	Names.decLUName	g_ (I.decSub (d_, s))
+DEFERRED	src/Opsem/Ptrecon.ml:166	I.decSub	
 CALL	src/Opsem/Ptrecon.ml:176	Unify.unifiable	g_ (q_, s) ps'
 CALL	src/Opsem/Ptrecon.ml:183	Print.expToString	g_ (I.EClo (fst ps', snd ps'))
 CALL	src/Opsem/Ptrecon.ml:184	Print.expToString	g_ (I.EClo (q_, s))
@@ -3214,6 +3280,7 @@ CALL	src/Opsem/Tmachine.ml:106	T.signal	g_ (T.IntroHyp (ha, d'_))
 CALL	src/Opsem/Tmachine.ml:112	T.signal	g_ (T.DischargeHyp (ha, d'_))
 CALL	src/Opsem/Tmachine.ml:116	I.decSub	d_ s
 CALL	src/Opsem/Tmachine.ml:116	N.decUName	g_ (I.decSub (d_, s))
+DEFERRED	src/Opsem/Tmachine.ml:116	I.decSub	
 CALL	src/Opsem/Tmachine.ml:118	T.signal	g_ (T.IntroParm (ha, d'_))
 CALL	src/Opsem/Tmachine.ml:124	T.signal	g_ (T.DischargeParm (ha, d'_))
 CALL	src/Opsem/Tmachine.ml:130	T.signal	g_ (T.Unify (hcHa, I.EClo (q_, s), I.EClo (fst ps', snd ps')))
@@ -3259,6 +3326,7 @@ CALL	src/Opsem/Trace.ml:326	expToString	g_ v_
 CALL	src/Opsem/Trace.ml:336	expToString	g_ v_
 CALL	src/Opsem/Trace.ml:384	Abstract.collectEVars	g_ (p_, I.id) (Abstract.collectEVars (g_, (q_, I.id), []))
 CALL	src/Opsem/Trace.ml:385	Abstract.collectEVars	g_ (q_, I.id) []
+DEFERRED	src/Opsem/Trace.ml:385	Abstract.collectEVars	
 DEF	src/Opsem/Trace.ml:459	signal	g_ e
 CALL	src/Opsem/Trace.ml:464	signal	g_ e
 SIG	src/Order/ORDER.ml:54	install	IntSyn.cid -> tDec
@@ -3438,6 +3506,7 @@ DEF	src/Prover/Fixedpoint.ml:65	expand	(S.Focus (T.EVar (psi, r, f_, _, tCs, _),
 CALL	src/Prover/Fixedpoint.ml:66	Names.decName	(T.coerceCtx psi) (I.NDec None)
 CALL	src/Prover/Fixedpoint.ml:68	T.forSub	f_ (T.Shift 1)
 CALL	src/Prover/Fixedpoint.ml:68	T.newEVar	(I.Decl (psi, d_)) (T.forSub (f_, T.Shift 1))
+DEFERRED	src/Prover/Fixedpoint.ml:68	T.forSub	
 DEF	src/Prover/Fixedpoint.ml:71	apply	r p_
 VALUEUSE	src/Prover/Fixedpoint.ml:98	expand	
 VALUEUSE	src/Prover/Fixedpoint.ml:99	apply	
@@ -3473,6 +3542,7 @@ CALL	src/Prover/Introduce.ml:85	T.newEVar	(I.Decl (strip psi, d'_)) f_
 CALL	src/Prover/Introduce.ml:91	I.newEVar	(T.coerceCtx psi) v_
 CALL	src/Prover/Introduce.ml:92	T.forSub	f_ (T.Dot (T.Exp x_, T.id))
 CALL	src/Prover/Introduce.ml:92	T.newEVar	psi (T.forSub (f_, T.Dot (T.Exp x_, T.id)))
+DEFERRED	src/Prover/Introduce.ml:92	T.forSub	
 CALL	src/Prover/Introduce.ml:97	T.forSub	f_ s
 DECLINE	src/Prover/Introduce.ml:97	expand -- argument is not a literal tuple	
 DEF	src/Prover/Introduce.ml:100	apply	(T.EVar (_, r, _, _, _, _)) p_
@@ -3540,6 +3610,7 @@ CALL	src/Prover/Split.ml:115	I.newEVar	g'_ (I.EClo (v_, iw))
 CALL	src/Prover/Split.ml:124	I.newEVar	I.Null (I.EClo (v1_, s))
 CALL	src/Prover/Split.ml:127	I.comp	t s
 CALL	src/Prover/Split.ml:127	I.newLVar	(I.Shift 0) (l, I.comp (t, s))
+DEFERRED	src/Prover/Split.ml:127	I.comp	
 DEF	src/Prover/Split.ml:147	createAtomConst	g_ h_
 DEF	src/Prover/Split.ml:155	createAtomBVar	g_ k
 CALL	src/Prover/Split.ml:156	I.ctxDec	g_ k
@@ -3557,6 +3628,7 @@ CALL	src/Prover/Split.ml:249	Unify.unifiable	I.Null (x_, I.id) (u_, I.id)
 CALL	src/Prover/Split.ml:259	I.newEVar	I.Null (I.EClo (v1', s'_))
 CALL	src/Prover/Split.ml:263	I.comp	s (T.coerceSub t')
 CALL	src/Prover/Split.ml:263	I.newLVar	(I.Shift 0) (l, I.comp (s, T.coerceSub t'))
+DEFERRED	src/Prover/Split.ml:263	I.comp	
 CALL	src/Prover/Split.ml:273	T.newEVar	psi (T.FClo (f_, t))
 CALL	src/Prover/Split.ml:283	Print.expToString	I.Null x_
 CALL	src/Prover/Split.ml:287	Print.expToString	g_ x_
@@ -3600,6 +3672,7 @@ DECLINE	src/Recon/ReconConDec.ml:193	Typecheck.Typecheck_.TypeCheck.check -- nam
 CALL	src/Recon/ReconConDec.ml:207	Paths.join	r1 r2
 CALL	src/Recon/ReconConDec.ml:214	RT.jwithctx	gblock RT.jnothing
 CALL	src/Recon/ReconConDec.ml:214	RT.jwithctx	gsome (RT.jwithctx (gblock, RT.jnothing))
+DEFERRED	src/Recon/ReconConDec.ml:214	RT.jwithctx	
 CALL	src/Recon/ReconConDec.ml:220	error	r' ("Constraints remain in context block after term reconstruction:\n"\n                ^ ...
 DECLINE	src/Recon/ReconMode.ml:31	Stdlib.String.sub -- name has ambiguous arity	
 CALL	src/Recon/ReconModule.ml:33	Paths.wrap	r msg
@@ -3609,9 +3682,11 @@ CALL	src/Recon/ReconModule.ml:63	sigexpToSigexp	inner_se module_opt
 CALL	src/Recon/ReconModule.ml:73	ModSyn.Names.constLookupIn	ns qid
 CALL	src/Recon/ReconModule.ml:75	error	r ("Undeclared identifier "\n                            ^ ModSyn.Names.qidToString\n     ...
 CALL	src/Recon/ReconModule.ml:79	ModSyn.Names.constUndefIn	ns qid
+DEFERRED	src/Recon/ReconModule.ml:79	ModSyn.Names.constUndefIn	
 CALL	src/Recon/ReconModule.ml:85	ModSyn.Names.structLookupIn	ns qid
 CALL	src/Recon/ReconModule.ml:87	error	r1 ("Undeclared structure "\n                              ^ ModSyn.Names.qidToString\n   ...
 CALL	src/Recon/ReconModule.ml:91	ModSyn.Names.structUndefIn	ns qid
+DEFERRED	src/Recon/ReconModule.ml:91	ModSyn.Names.structUndefIn	
 VALUEUSE	src/Recon/ReconModule.ml:95	strexp	
 CALL	src/Recon/ReconModule.ml:113	ModSyn.Names.constLookupIn	ns2 (ModSyn.Names.Qid ([], name))
 CALL	src/Recon/ReconModule.ml:115	error	r1 ("Instantiating structure lacks component "\n              ^ ModSyn.Names.qidToString (...
@@ -3625,6 +3700,7 @@ VALUEUSE	src/Recon/ReconModule.ml:150	strexp
 DECLINE	src/Recon/ReconModule.ml:161	IntTree.insert -- argument is not a literal tuple	
 CALL	src/Recon/ReconModule.ml:170	RT.internalInst	conDec_ (ModSyn.abbrevify (cid, IntSyn.sgnLookup cid)) r
 CALL	src/Recon/ReconModule.ml:171	ModSyn.abbrevify	cid (IntSyn.sgnLookup cid)
+DEFERRED	src/Recon/ReconModule.ml:171	ModSyn.abbrevify	
 CALL	src/Recon/ReconModule.ml:177	RT.externalInst	conDec_ tm r
 DEF	src/Recon/ReconModule.ml:186	moduleWhere	module_ wherecl
 CALL	src/Recon/ReconModule.ml:188	ModSyn.instantiateModule	module_ (applyEqns wherecl)
@@ -3727,6 +3803,7 @@ CALL	src/Recon/ReconTerm.ml:886	Whnf.newLoweredEVar	g_ (va, s)
 CALL	src/Recon/ReconTerm.ml:887	Whnf.dotEta	(exp x_) s
 CALL	src/Recon/ReconTerm.ml:916	Abstract.collectEVars	g_ (v2_, IntSyn.id) (Abstract.collectEVars (g_, (v1_, IntSyn.id), []))
 CALL	src/Recon/ReconTerm.ml:919	Abstract.collectEVars	g_ (v1_, IntSyn.id) []
+DEFERRED	src/Recon/ReconTerm.ml:919	Abstract.collectEVars	
 CALL	src/Recon/ReconTerm.ml:922	Names.evarName	IntSyn.Null x_
 CALL	src/Recon/ReconTerm.ml:924	formatExp	g_ v1_
 CALL	src/Recon/ReconTerm.ml:925	formatExp	g_ v2_
@@ -3740,21 +3817,25 @@ DECLINE	src/Recon/ReconTerm.ml:978	Unify.unifiable -- argument is not a literal 
 DECLINE	src/Recon/ReconTerm.ml:980	Unify.unwind -- argument is not a literal tuple	
 CALL	src/Recon/ReconTerm.ml:1000	Abstract.collectEVars	g_ vs1 []
 CALL	src/Recon/ReconTerm.ml:1000	Abstract.collectEVars	g_ vs2 (Abstract.collectEVars (g_, vs1, []))
+DEFERRED	src/Recon/ReconTerm.ml:1000	Abstract.collectEVars	
 CALL	src/Recon/ReconTerm.ml:1003	Names.evarName	IntSyn.Null x_
 CALL	src/Recon/ReconTerm.ml:1010	formatExp	g_ (eClo vs1)
 CALL	src/Recon/ReconTerm.ml:1014	formatExp	g_ (eClo vs2)
 CALL	src/Recon/ReconTerm.ml:1032	Abstract.collectEVars	g_ vs1 []
 CALL	src/Recon/ReconTerm.ml:1032	Abstract.collectEVars	g_ vs2 (Abstract.collectEVars (g_, vs1, []))
+DEFERRED	src/Recon/ReconTerm.ml:1032	Abstract.collectEVars	
 CALL	src/Recon/ReconTerm.ml:1035	Names.evarName	IntSyn.Null x_
 CALL	src/Recon/ReconTerm.ml:1042	formatExp	g_ (eClo vs1)
 CALL	src/Recon/ReconTerm.ml:1046	formatExp	g_ (eClo vs2)
 CALL	src/Recon/ReconTerm.ml:1083	Abstract.collectEVars	g_ (u_, IntSyn.id) (Abstract.collectEVars (g_, (v_, IntSyn.id), []))
 CALL	src/Recon/ReconTerm.ml:1086	Abstract.collectEVars	g_ (v_, IntSyn.id) []
+DEFERRED	src/Recon/ReconTerm.ml:1086	Abstract.collectEVars	
 CALL	src/Recon/ReconTerm.ml:1089	Names.evarName	IntSyn.Null x_
 CALL	src/Recon/ReconTerm.ml:1100	formatExp	g_ u_
 CALL	src/Recon/ReconTerm.ml:1104	formatExp	g_ v_
 CALL	src/Recon/ReconTerm.ml:1117	Abstract.collectEVars	g_ (u_, IntSyn.id) (Abstract.collectEVars (g_, (v_, IntSyn.id), []))
 CALL	src/Recon/ReconTerm.ml:1120	Abstract.collectEVars	g_ (v_, IntSyn.id) []
+DEFERRED	src/Recon/ReconTerm.ml:1120	Abstract.collectEVars	
 CALL	src/Recon/ReconTerm.ml:1123	Names.evarName	IntSyn.Null x_
 CALL	src/Recon/ReconTerm.ml:1130	formatExp	g_ u_
 CALL	src/Recon/ReconTerm.ml:1134	formatExp	g_ v_
@@ -3808,6 +3889,7 @@ CALL	src/Recon/ReconThm.ml:286	error	r ("Free variables in context block after t
 CALL	src/Recon/ReconThm.ml:294	Paths.join	r1 r2
 CALL	src/Recon/ReconThm.ml:300	RT.jwithctx	g2_cst RT.jnothing
 CALL	src/Recon/ReconThm.ml:300	RT.jwithctx	g1_cst (RT.jwithctx (g2_cst, RT.jnothing))
+DEFERRED	src/Recon/ReconThm.ml:300	RT.jwithctx	
 CALL	src/Recon/ReconThm.ml:305	error	r ("Constraints remain in context block after term reconstruction:\n"\n            ^ ctxBl...
 CALL	src/Recon/ReconThm.ml:348	RT.jwithctx	g_cst RT.jnothing
 CALL	src/Resugar/ConDec.ml:36	N.decEName	g_ d_
@@ -3889,6 +3971,7 @@ CALL	src/Solvers/CsEqBools.ml:320	expand	(s_, s) (arity - 1)
 CALL	src/Solvers/CsEqBools.ml:321	comp	s (Shift arity')
 CALL	src/Solvers/CsEqBools.ml:322	comp	s' s
 CALL	src/Solvers/CsEqBools.ml:322	expand	(s_, comp (s', s)) arity
+DEFERRED	src/Solvers/CsEqBools.ml:322	comp	
 CALL	src/Solvers/CsEqBools.ml:324	expand	(s_, id) arity
 DEF	src/Solvers/CsEqBools.ml:337	arrow	u_ v_
 DEF	src/Solvers/CsEqBools.ml:339	init	cs installF
@@ -3926,6 +4009,7 @@ CALL	src/Solvers/CsEqField.ml:361	expand	(s_, s) (Int.(arity - 1))
 CALL	src/Solvers/CsEqField.ml:362	comp	s (Shift arity')
 CALL	src/Solvers/CsEqField.ml:363	comp	s' s
 CALL	src/Solvers/CsEqField.ml:363	expand	(s_, comp (s', s)) arity
+DEFERRED	src/Solvers/CsEqField.ml:363	comp	
 CALL	src/Solvers/CsEqField.ml:365	expand	(s_, id) arity
 DEF	src/Solvers/CsEqField.ml:378	arrow	u_ v_
 DEF	src/Solvers/CsEqField.ml:380	init	cs installF
@@ -3966,6 +4050,7 @@ CALL	src/Solvers/CsEqIntegers.ml:447	expand	(s_, s) (arity - 1)
 CALL	src/Solvers/CsEqIntegers.ml:448	comp	s (Shift arity')
 CALL	src/Solvers/CsEqIntegers.ml:449	comp	s' s
 CALL	src/Solvers/CsEqIntegers.ml:449	expand	(s_, comp (s', s)) arity
+DEFERRED	src/Solvers/CsEqIntegers.ml:449	comp	
 CALL	src/Solvers/CsEqIntegers.ml:451	expand	(s_, id) arity
 DEF	src/Solvers/CsEqIntegers.ml:464	arrow	u_ v_
 DEF	src/Solvers/CsEqIntegers.ml:466	init	cs installF
@@ -3995,6 +4080,7 @@ CALL	src/Solvers/CsEqStrings.ml:450	expand	(s_, s) (arity - 1)
 CALL	src/Solvers/CsEqStrings.ml:451	comp	s (Shift arity')
 CALL	src/Solvers/CsEqStrings.ml:452	comp	s s'
 CALL	src/Solvers/CsEqStrings.ml:452	expand	(s_, comp (s, s')) arity
+DEFERRED	src/Solvers/CsEqStrings.ml:452	comp	
 CALL	src/Solvers/CsEqStrings.ml:454	expand	(s_, id) arity
 DEF	src/Solvers/CsEqStrings.ml:464	arrow	u_ v_
 DEF	src/Solvers/CsEqStrings.ml:466	init	cs installF
@@ -4499,6 +4585,7 @@ VALUEUSE	src/Terminate/Checking.ml:733	I.shift
 CALL	src/Terminate/Checking.ml:733	I.comp	s I.shift
 CALL	src/Terminate/Checking.ml:735	I.decSub	dec_ s2
 CALL	src/Terminate/Checking.ml:735	N.decLUName	g_ (I.decSub (dec_, s2))
+DEFERRED	src/Terminate/Checking.ml:735	I.decSub	
 DECLINE	src/Terminate/Checking.ml:744	Whnf.whnfEta -- argument is not a literal tuple	
 VALUEUSE	src/Terminate/Checking.ml:755	I.shift	
 CALL	src/Terminate/Checking.ml:755	I.comp	s I.shift
@@ -4508,10 +4595,12 @@ VALUEUSE	src/Terminate/Checking.ml:757	I.shift
 CALL	src/Terminate/Checking.ml:757	I.comp	s1' I.shift
 CALL	src/Terminate/Checking.ml:761	I.decSub	dec_ s2
 CALL	src/Terminate/Checking.ml:761	N.decLUName	g_ (I.decSub (dec_, s2))
+DEFERRED	src/Terminate/Checking.ml:761	I.decSub	
 DECLINE	src/Terminate/Checking.ml:770	Whnf.whnfEta -- argument is not a literal tuple	
 DECLINE	src/Terminate/Checking.ml:770	Whnf.whnfEta -- argument is not a literal tuple	
 CALL	src/Terminate/Checking.ml:780	I.decSub	dec_ s2
 CALL	src/Terminate/Checking.ml:780	N.decLUName	g_ (I.decSub (dec_, s2))
+DEFERRED	src/Terminate/Checking.ml:780	I.decSub	
 VALUEUSE	src/Terminate/Checking.ml:782	I.shift	
 CALL	src/Terminate/Checking.ml:782	I.comp	s I.shift
 DECLINE	src/Terminate/Checking.ml:797	Whnf.whnfEta -- argument is not a literal tuple	
@@ -4543,6 +4632,7 @@ VALUEUSE	src/Terminate/Checking.ml:1129	I.shift
 CALL	src/Terminate/Checking.ml:1129	I.comp	s I.shift
 CALL	src/Terminate/Checking.ml:1131	I.decSub	dec' s2'
 CALL	src/Terminate/Checking.ml:1131	N.decLUName	g_ (I.decSub (dec', s2'))
+DEFERRED	src/Terminate/Checking.ml:1131	I.decSub	
 DECLINE	src/Terminate/Checking.ml:1140	Whnf.whnfEta -- argument is not a literal tuple	
 VALUEUSE	src/Terminate/Checking.ml:1151	I.shift	
 CALL	src/Terminate/Checking.ml:1151	I.comp	s I.shift
@@ -4556,6 +4646,7 @@ VALUEUSE	src/Terminate/Checking.ml:1155	I.shift
 CALL	src/Terminate/Checking.ml:1155	I.comp	s I.shift
 CALL	src/Terminate/Checking.ml:1157	I.decSub	dec' s2'
 CALL	src/Terminate/Checking.ml:1157	N.decLUName	g_ (I.decSub (dec', s2'))
+DEFERRED	src/Terminate/Checking.ml:1157	I.decSub	
 DECLINE	src/Terminate/Checking.ml:1166	Whnf.whnfEta -- argument is not a literal tuple	
 DECLINE	src/Terminate/Checking.ml:1166	Whnf.whnfEta -- argument is not a literal tuple	
 CALL	src/Terminate/Checking.ml:1215	I.ctxDec	g_ n
@@ -4572,26 +4663,31 @@ CALL	src/Terminate/Reduces.ml:160	I.comp	s1' s2'
 CALL	src/Terminate/Reduces.ml:190	I.comp	s1' s2'
 CALL	src/Terminate/Reduces.ml:235	I.decSub	d_ s
 CALL	src/Terminate/Reduces.ml:235	N.decLUName	g_ (I.decSub (d_, s))
+DEFERRED	src/Terminate/Reduces.ml:235	I.decSub	
 CALL	src/Terminate/Reduces.ml:242	I.decSub	d_ s
 CALL	src/Terminate/Reduces.ml:246	I.comp	I.invShift s
 CALL	src/Terminate/Reduces.ml:267	I.comp	I.invShift s
 CALL	src/Terminate/Reduces.ml:271	I.decSub	d_ s
 CALL	src/Terminate/Reduces.ml:271	N.decLUName	g0_ (I.decSub (d_, s))
+DEFERRED	src/Terminate/Reduces.ml:271	I.decSub	
 VALUEUSE	src/Terminate/Reduces.ml:273	I.shift	
 CALL	src/Terminate/Reduces.ml:273	I.comp	s I.shift
 VALUEUSE	src/Terminate/Reduces.ml:275	I.shift	
 CALL	src/Terminate/Reduces.ml:275	I.comp	s' I.shift
 CALL	src/Terminate/Reduces.ml:383	I.decSub	d_ s
 CALL	src/Terminate/Reduces.ml:383	N.decEName	g_ (I.decSub (d_, s))
+DEFERRED	src/Terminate/Reduces.ml:383	I.decSub	
 CALL	src/Terminate/Reduces.ml:390	I.decSub	d_ s
 CALL	src/Terminate/Reduces.ml:400	I.comp	s (I.Shift n)
 CALL	src/Terminate/Reduces.ml:422	I.decSub	d_ s
 CALL	src/Terminate/Reduces.ml:422	N.decLUName	g_ (I.decSub (d_, s))
+DEFERRED	src/Terminate/Reduces.ml:422	I.decSub	
 VALUEUSE	src/Terminate/Reduces.ml:424	I.shift	
 CALL	src/Terminate/Reduces.ml:424	I.comp	s I.shift
 CALL	src/Terminate/Reduces.ml:429	I.comp	I.invShift s
 CALL	src/Terminate/Reduces.ml:446	I.decSub	d'_ s'
 CALL	src/Terminate/Reduces.ml:446	N.decEName	g_ (I.decSub (d'_, s'))
+DEFERRED	src/Terminate/Reduces.ml:446	I.decSub	
 VALUEUSE	src/Terminate/Reduces.ml:448	I.shift	
 CALL	src/Terminate/Reduces.ml:448	I.comp	s I.shift
 VALUEUSE	src/Terminate/Reduces.ml:450	I.shift	
@@ -4599,6 +4695,7 @@ CALL	src/Terminate/Reduces.ml:450	I.comp	s I.shift
 CALL	src/Terminate/Reduces.ml:464	I.comp	I.invShift s'
 CALL	src/Terminate/Reduces.ml:482	I.decSub	d_ s
 CALL	src/Terminate/Reduces.ml:482	N.decEName	g_ (I.decSub (d_, s))
+DEFERRED	src/Terminate/Reduces.ml:482	I.decSub	
 VALUEUSE	src/Terminate/Reduces.ml:484	I.shift	
 CALL	src/Terminate/Reduces.ml:484	I.comp	s I.shift
 CALL	src/Terminate/Reduces.ml:488	I.decSub	d_ s
@@ -4644,6 +4741,7 @@ DEF	src/Thm/Thmsyn.ml:100	theoremDecToConDec	(name, ThDecl (gBs, g_, mg, i)) r
 CALL	src/Thm/Thmsyn.ml:104	Abstract.closedDec	g_ (d_, I.id)
 CALL	src/Thm/Thmsyn.ml:107	Whnf.normalizeDec	d_ I.id
 CALL	src/Thm/Thmsyn.ml:107	Abstract.piDepend	(Whnf.normalizeDec (d_, I.id), I.Maybe) v_
+DEFERRED	src/Thm/Thmsyn.ml:107	Whnf.normalizeDec	
 CALL	src/Thm/Thmsyn.ml:109	error	r ("Free variables in theorem declaration")
 DEF	src/Thm/Thmsyn.ml:117	theoremDecToModeSpine	(name, ThDecl (gBs, g_, mg, i)) r
 VALUEUSE	src/Thm/Thmsyn.ml:149	theoremDecToConDec	
@@ -4691,6 +4789,7 @@ VALUEUSE	src/Tomega/Converter.ml:329	I.shift
 VALUEUSE	src/Tomega/Converter.ml:329	I.shift	
 CALL	src/Tomega/Converter.ml:329	I.comp	I.shift w
 CALL	src/Tomega/Converter.ml:329	strengthenSub	(I.comp (I.shift, w)) I.shift
+DEFERRED	src/Tomega/Converter.ml:329	I.comp	
 VALUEUSE	src/Tomega/Converter.ml:330	I.shift	
 CALL	src/Tomega/Converter.ml:330	strengthenSub	w I.shift
 CALL	src/Tomega/Converter.ml:333	I.bvarSub	1 w
@@ -4810,10 +4909,12 @@ CALL	src/Tomega/Normalize.ml:64	normalizeFor	f2_ t
 CALL	src/Tomega/Normalize.ml:64	normalizeFor	f1_ t
 CALL	src/Tomega/Normalize.ml:65	T.comp	t1 t2
 CALL	src/Tomega/Normalize.ml:65	normalizeFor	f_ (T.comp (t1, t2))
+DEFERRED	src/Tomega/Normalize.ml:65	T.comp	
 CALL	src/Tomega/Normalize.ml:66	normalizeFor	f_ t
 DEFFUN	src/Tomega/Normalize.ml:69	normalizePrg	 a1 b1 = match a1, b1 with
 CALL	src/Tomega/Normalize.ml:71	T.varSub	n t
 CALL	src/Tomega/Normalize.ml:71	normalizePrg	p_ (T.Dot (T.varSub (n, t), T.id))
+DEFERRED	src/Tomega/Normalize.ml:71	T.varSub	
 CALL	src/Tomega/Normalize.ml:72	normalizePrg	p'_ (T.dot1 t)
 CALL	src/Tomega/Normalize.ml:75	normalizePrg	p'_ t
 CALL	src/Tomega/Normalize.ml:77	normalizePrg	p2_ t
@@ -4858,6 +4959,7 @@ CALL	src/Tomega/Opsem.ml:196	T.decSub	d_ t
 CALL	src/Tomega/Opsem.ml:198	Names.decName	(T.coerceCtx psi) d''_
 CALL	src/Tomega/Opsem.ml:202	T.normalizePrg	v_ t'
 CALL	src/Tomega/Opsem.ml:202	raisePrg	psi g_ (T.normalizePrg (v_, t'))
+DEFERRED	src/Tomega/Opsem.ml:202	T.normalizePrg	
 CALL	src/Tomega/Opsem.ml:215	Whnf.whnfEta	(I.Root (I.BVar n, I.Nil), I.id) (v_, I.id)
 CALL	src/Tomega/Opsem.ml:241	createVarSub	psi psi'
 CALL	src/Tomega/Opsem.ml:242	T.comp	t2 t
@@ -4951,6 +5053,7 @@ CALL	src/Tomega/TomegaAbstract.ml:99	S.weaken	b'_ (I.targetFam v_)
 CALL	src/Tomega/TomegaAbstract.ml:101	Whnf.strengthen	iw b'_
 CALL	src/Tomega/TomegaAbstract.ml:102	I.comp	t iw
 CALL	src/Tomega/TomegaAbstract.ml:102	A.raiseType	b'' (I.EClo (v_, I.comp (t, iw)))
+DEFERRED	src/Tomega/TomegaAbstract.ml:102	I.comp	
 VALUEUSE	src/Tomega/TomegaAbstract.ml:103	I.shift	
 VALUEUSE	src/Tomega/TomegaAbstract.ml:104	I.shift	
 CALL	src/Tomega/TomegaAbstract.ml:105	I.comp	t t''
@@ -4963,6 +5066,7 @@ CALL	src/Tomega/TomegaAbstract.ml:120	S.weaken	g_ (I.targetFam v_)
 CALL	src/Tomega/TomegaAbstract.ml:122	Whnf.strengthen	iw g_
 CALL	src/Tomega/TomegaAbstract.ml:123	I.comp	t iw
 CALL	src/Tomega/TomegaAbstract.ml:123	A.raiseTerm	g'_ (I.EClo (u_, I.comp (t, iw)))
+DEFERRED	src/Tomega/TomegaAbstract.ml:123	I.comp	
 CALL	src/Tomega/TomegaAbstract.ml:124	raisePrg	g_ (p_, t) f_
 DEF	src/Tomega/TomegaAbstract.ml:127	raiseP	g_ p_ f_
 CALL	src/Tomega/TomegaAbstract.ml:129	T.forSub	f_ s
@@ -4970,6 +5074,7 @@ CALL	src/Tomega/TomegaAbstract.ml:130	raisePrg	g'_ (p_, T.coerceSub s) f'_
 DEF	src/Tomega/TomegaAbstract.ml:133	raiseF	g_ (f_, t)
 CALL	src/Tomega/TomegaAbstract.ml:135	I.comp	t (T.coerceSub s)
 CALL	src/Tomega/TomegaAbstract.ml:135	raiseFor	g'_ (f_, I.comp (t, T.coerceSub s))
+DEFERRED	src/Tomega/TomegaAbstract.ml:135	I.comp	
 CALL	src/Tomega/TomegaAbstract.ml:187	raisePrg	g_ (p_, I.id) f_
 DEF	src/Tomega/TomegaAbstract.ml:187	raisePrg	g_ p_ f_
 VALUEUSE	src/Tomega/TomegaAbstract.ml:188	raiseP	
@@ -5014,6 +5119,7 @@ CALL	src/Tomega/TomegaTypecheck.ml:201	checkPrg	psi (p1_, (f1_, T.id))
 VALUEUSE	src/Tomega/TomegaTypecheck.ml:204	T.shift	
 CALL	src/Tomega/TomegaTypecheck.ml:204	T.comp	t T.shift
 CALL	src/Tomega/TomegaTypecheck.ml:204	checkPrg	(I.Decl (psi, d_)) (p2_, (f2_, T.comp (t, T.shift)))
+DEFERRED	src/Tomega/TomegaTypecheck.ml:204	T.comp	
 CALL	src/Tomega/TomegaTypecheck.ml:214	TA.raiseF	(I.Decl (I.Null, d_)) (f'_, I.id)
 DECLINE	src/Tomega/TomegaTypecheck.ml:216	convFor -- tuple arity mismatch	
 DECLINE	src/Tomega/TomegaTypecheck.ml:226	convFor -- tuple arity mismatch	
@@ -5081,6 +5187,7 @@ CALL	src/Tomega/TomegaTypecheck.ml:454	checkFor	psi (f1_, t)
 CALL	src/Tomega/TomegaTypecheck.ml:455	checkFor	psi (f2_, t)
 CALL	src/Tomega/TomegaTypecheck.ml:457	T.comp	t' t
 CALL	src/Tomega/TomegaTypecheck.ml:457	checkFor	psi (f_, T.comp (t', t))
+DEFERRED	src/Tomega/TomegaTypecheck.ml:457	T.comp	
 CALL	src/Tomega/TomegaTypecheck.ml:458	checkFor	psi (f_, t)
 CALL	src/Tomega/TomegaTypecheck.ml:464	TypeCheck.checkDec	(T.coerceCtx psi) (d_, I.id)
 CALL	src/Tomega/TomegaTypecheck.ml:468	checkFor	psi (f_, T.id)
@@ -5094,6 +5201,7 @@ CALL	src/Tomega/TomegaTypecheck.ml:486	checkSub	g_ s' g'_
 CALL	src/Tomega/TomegaTypecheck.ml:487	T.ctxDec	g_ k
 CALL	src/Tomega/TomegaTypecheck.ml:490	I.comp	s (T.coerceSub s')
 CALL	src/Tomega/TomegaTypecheck.ml:490	Conv.convSub	(I.comp (s, T.coerceSub s')) s1
+DEFERRED	src/Tomega/TomegaTypecheck.ml:490	I.comp	
 CALL	src/Tomega/TomegaTypecheck.ml:495	checkSub	g_ s g'_
 CALL	src/Tomega/TomegaTypecheck.ml:496	T.ctxDec	g_ k
 DECLINE	src/Tomega/TomegaTypecheck.ml:497	convFor -- tuple arity mismatch	
@@ -5234,11 +5342,13 @@ CALL	src/Typecheck/Typecheck_.ml:196	checkSub	g'_ t g_
 CALL	src/Typecheck/Typecheck_.ml:197	I.ctxDec	g'_ w
 CALL	src/Typecheck/Typecheck_.ml:200	I.comp	s t
 CALL	src/Typecheck/Typecheck_.ml:200	Conv.convSub	(I.comp (s, t)) s'
+DEFERRED	src/Typecheck/Typecheck_.ml:200	I.comp	
 CALL	src/Typecheck/Typecheck_.ml:206	checkSub	g'_ t g_
 CALL	src/Typecheck/Typecheck_.ml:208	I.comp	s t
 DEFFUN	src/Typecheck/Typecheck_.ml:220	checkDec	 a1 b1 = match a1, b1 with
 CALL	src/Typecheck/Typecheck_.ml:224	I.comp	t s
 CALL	src/Typecheck/Typecheck_.ml:224	checkSub	g_ (I.comp (t, s)) gsome_
+DEFERRED	src/Typecheck/Typecheck_.ml:224	I.comp	
 CALL	src/Typecheck/Typecheck_.ml:231	checkDec	g_ (d_, I.id)
 DEF	src/Typecheck/Typecheck_.ml:240	infer'	g_ u_
 DEF	src/Typecheck/Typecheck_.ml:244	checkConv	u1_ u2_
@@ -5276,6 +5386,7 @@ CALL	src/Worldcheck/WorldSyn.ml:194	I.newEVar	g_ v'_
 DEFFUN	src/Worldcheck/WorldSyn.ml:203	collectEVars	 a2 b2 c2 = match a2, b2, c2 with
 CALL	src/Worldcheck/WorldSyn.ml:205	Abstract.collectEVars	g_ (x_, I.id) xs_
 CALL	src/Worldcheck/WorldSyn.ml:205	collectEVars	g_ s (Abstract.collectEVars (g_, (x_, I.id), xs_))
+DEFERRED	src/Worldcheck/WorldSyn.ml:205	Abstract.collectEVars	
 CALL	src/Worldcheck/WorldSyn.ml:209	collectEVars	g_ s []
 CALL	src/Worldcheck/WorldSyn.ml:215	Print.formatDec	g_ d_
 CALL	src/Worldcheck/WorldSyn.ml:220	I.decSub	d_ t
@@ -5320,6 +5431,7 @@ CALL	src/Worldcheck/Worldify.ml:154	I.newEVar	g_ v'_
 DEFFUN	src/Worldcheck/Worldify.ml:163	collectEVars	 a3 b3 c3 = match a3, b3, c3 with
 CALL	src/Worldcheck/Worldify.ml:165	Abstract.collectEVars	g_ (x_, I.id) xs_
 CALL	src/Worldcheck/Worldify.ml:165	collectEVars	g_ s (Abstract.collectEVars (g_, (x_, I.id), xs_))
+DEFERRED	src/Worldcheck/Worldify.ml:165	Abstract.collectEVars	
 CALL	src/Worldcheck/Worldify.ml:169	collectEVars	g_ s []
 CALL	src/Worldcheck/Worldify.ml:175	Print.formatDec	g_ d_
 CALL	src/Worldcheck/Worldify.ml:180	I.decSub	d_ t
@@ -5569,12 +5681,15 @@ DECLINE	test/Unit/Table/TableTests.ml:98	check -- name has ambiguous arity
 CALL	test/Unit/Table/TableTests.ml:103	Q.insert	3 Q.empty
 CALL	test/Unit/Table/TableTests.ml:103	Q.insert	2 (Q.insert (3, Q.empty))
 CALL	test/Unit/Table/TableTests.ml:103	Q.insert	1 (Q.insert (2, Q.insert (3, Q.empty)))
+DEFERRED	test/Unit/Table/TableTests.ml:103	Q.insert	
+DEFERRED	test/Unit/Table/TableTests.ml:103	Q.insert	
 DECLINE	test/Unit/Table/TableTests.ml:115	check -- name has ambiguous arity	
 CALL	test/Unit/Table/TableTests.ml:119	Q.insert	2 Q.empty
 CALL	test/Unit/Table/TableTests.ml:120	Q.insertFront	1 q
 DECLINE	test/Unit/Table/TableTests.ml:123	check -- name has ambiguous arity	
 CALL	test/Unit/Table/TableTests.ml:126	Q.insert	2 Q.empty
 CALL	test/Unit/Table/TableTests.ml:126	Q.insert	1 (Q.insert (2, Q.empty))
+DEFERRED	test/Unit/Table/TableTests.ml:126	Q.insert	
 DECLINE	test/Unit/Table/TableTests.ml:128	check -- name has ambiguous arity	
 DECLINE	test/Unit/Table/TableTests.ml:133	R.init -- argument is not a literal tuple	
 DECLINE	test/Unit/Table/TableTests.ml:134	check -- name has ambiguous arity	

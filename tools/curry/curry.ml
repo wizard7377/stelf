@@ -475,7 +475,15 @@ let escape s =
   if String.length s > 90 then String.sub s 0 90 ^ "..." else s
 
 (* Nested call sites produce overlapping ranges (`f (g (a,b), c)`). Keep the
-   outer edit and drop the inner one; re-running the tool converges. *)
+   outer edit and drop the inner one.
+
+   Return the dropped *edits*, not a count. A fresh `curry patch` invocation does
+   NOT pick them up: `collect_targets` reads the tree as it finds it, so once run
+   1 has rewritten `val g : a * b -> c` to `val g : a -> b -> c`, `g` is no
+   longer a target and the deferred inner `g (a, b)` is never looked at again --
+   it survives as a type error with no row in curry-sites.txt pointing at it.
+   `patch` therefore loops in-process (see patch_rounds), where `targets` stays
+   populated across rounds. *)
 let non_overlapping eds =
   (* Group by file first -- offsets from different files are incomparable. *)
   let sorted =
@@ -491,10 +499,10 @@ let non_overlapping eds =
       (fun (kept, dropped, cur_file, last_end) ed ->
         if ed.file <> cur_file then (ed :: kept, dropped, ed.file, ed.e)
         else if ed.s >= last_end then (ed :: kept, dropped, cur_file, ed.e)
-        else (kept, dropped + 1, cur_file, last_end))
-      ([], 0, "", min_int) sorted
+        else (kept, ed :: dropped, cur_file, last_end))
+      ([], [], "", min_int) sorted
   in
-  (List.rev kept, dropped)
+  (List.rev kept, List.rev dropped)
 
 let () =
   let cmd = if Array.length Sys.argv > 1 then Sys.argv.(1) else "locate" in
@@ -514,32 +522,39 @@ let () =
     Printf.printf "\n%d target names (arity %d-%d)\n" (List.length names) min_arity max_arity
   end
   else begin
-    List.iter
-      (fun f ->
-        match parse_file f with
-        | exception e -> Printf.eprintf "PARSE FAIL %s: %s\n" f (Printexc.to_string e)
-        | src, ast -> analyse f src ast)
-      files;
-    let all = !edits in
-    let count k = List.length (List.filter (fun e -> e.kind = k) all) in
-    (* ESCALATE, VALUEUSE and DECLINE are report-only: never applied by `patch`.
-       Whitelisting the four auto kinds -- rather than blacklisting -- is what
-       makes adding a report-only kind safe. *)
-    let auto = List.filter (fun e -> List.mem e.kind [ "SIG"; "DEF"; "DEFFUN"; "CALL" ]) all in
-    let kept, dropped = non_overlapping auto in
-    Printf.eprintf
-      "SIG=%d DEF=%d DEFFUN=%d CALL=%d ESCALATE=%d VALUEUSE=%d DECLINE=%d | auto=%d kept=%d overlap-deferred=%d\n"
-      (count "SIG") (count "DEF") (count "DEFFUN") (count "CALL") (count "ESCALATE")
-      (count "VALUEUSE") (count "DECLINE")
-      (List.length auto) (List.length kept) dropped;
-    Hashtbl.fold (fun k v acc -> (k, v) :: acc) diag []
-    |> List.sort compare
-    |> List.iter (fun (k, v) -> Printf.eprintf "  %-46s %5d\n" k v);
-    if cmd = "locate" then
+    (* One analysis pass over the tree as it currently sits on disk. `patch`
+       calls this repeatedly, so it must start from a clean slate each time. *)
+    let scan () =
+      edits := [];
+      Hashtbl.reset diag;
       List.iter
-        (fun e -> Printf.printf "%s\t%s:%d\t%s\t%s\n" e.kind e.file e.line e.note (escape e.repl))
-        (List.sort (fun a b -> compare (a.file, a.line) (b.file, b.line)) all)
-    else if cmd = "patch" then begin
+        (fun f ->
+          match parse_file f with
+          | exception e -> Printf.eprintf "PARSE FAIL %s: %s\n" f (Printexc.to_string e)
+          | src, ast -> analyse f src ast)
+        files;
+      let all = !edits in
+      (* ESCALATE, VALUEUSE and DECLINE are report-only: never applied by
+         `patch`. Whitelisting the four auto kinds -- rather than blacklisting --
+         is what makes adding a report-only kind safe. *)
+      let auto = List.filter (fun e -> List.mem e.kind [ "SIG"; "DEF"; "DEFFUN"; "CALL" ]) all in
+      let kept, deferred = non_overlapping auto in
+      (all, auto, kept, deferred)
+    in
+    let report all auto kept deferred =
+      let count k = List.length (List.filter (fun e -> e.kind = k) all) in
+      Printf.eprintf
+        "SIG=%d DEF=%d DEFFUN=%d CALL=%d ESCALATE=%d VALUEUSE=%d DECLINE=%d | auto=%d kept=%d overlap-deferred=%d\n"
+        (count "SIG") (count "DEF") (count "DEFFUN") (count "CALL") (count "ESCALATE")
+        (count "VALUEUSE") (count "DECLINE")
+        (List.length auto) (List.length kept) (List.length deferred);
+      Hashtbl.fold (fun k v acc -> (k, v) :: acc) diag []
+      |> List.sort compare
+      |> List.iter (fun (k, v) -> Printf.eprintf "  %-46s %5d\n" k v)
+    in
+    (* Apply a round's edits. Bottom-up within each file so earlier ranges stay
+       valid. Returns (edits applied, files written). *)
+    let apply kept =
       let by_file = Hashtbl.create 64 in
       List.iter
         (fun e ->
@@ -561,7 +576,55 @@ let () =
           in
           if out <> src then (write_file f out; incr nf))
         by_file;
-      Printf.eprintf "patched %d edits across %d files\n" !ne !nf
+      (!ne, !nf)
+    in
+    if cmd = "locate" then begin
+      let all, auto, kept, deferred = scan () in
+      report all auto kept deferred;
+      let rows =
+        all
+        @ List.map (fun e -> { e with kind = "DEFERRED"; repl = "" }) deferred
+      in
+      List.iter
+        (fun e -> Printf.printf "%s\t%s:%d\t%s\t%s\n" e.kind e.file e.line e.note (escape e.repl))
+        (List.sort (fun a b -> compare (a.file, a.line) (b.file, b.line)) rows)
+    end
+    else if cmd = "patch" then begin
+      (* Loop in-process rather than telling the operator to re-run. A fresh
+         invocation re-runs `collect_targets` against the already-patched tree,
+         where the curried signatures no longer parse as targets -- so the
+         deferred inner sites would silently vanish from the worklist. Here
+         `targets` is fixed from round 1 and only the sources are re-read. *)
+      let total_e = ref 0 and total_f = ref 0 in
+      let rec rounds n prev_deferred =
+        if n > 10 then begin
+          Printf.eprintf "ABORT: patch did not converge in 10 rounds\n";
+          exit 1
+        end;
+        let all, auto, kept, deferred = scan () in
+        Printf.eprintf "-- round %d: " n;
+        report all auto kept deferred;
+        if kept = [] then
+          Printf.eprintf "converged after %d round(s); %d deferred remain\n" (n - 1)
+            (List.length deferred)
+        else begin
+          (* The nesting depth of overlapping edits is finite, so the deferred
+             set must shrink. If it does not, the tool is producing an edit it
+             cannot make progress on -- stop rather than spin. *)
+          if n > 1 && List.length deferred >= prev_deferred then begin
+            Printf.eprintf "ABORT: deferred count did not decrease (%d -> %d)\n" prev_deferred
+              (List.length deferred);
+            exit 1
+          end;
+          let ne, nf = apply kept in
+          total_e := !total_e + ne;
+          total_f := !total_f + nf;
+          Printf.eprintf "   applied %d edits across %d files\n" ne nf;
+          rounds (n + 1) (List.length deferred)
+        end
+      in
+      rounds 1 max_int;
+      Printf.eprintf "patched %d edits across %d file-writes total\n" !total_e !total_f
     end
     else (Printf.eprintf "usage: curry [targets|locate|patch]\n"; exit 1)
   end
