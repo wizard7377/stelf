@@ -22,7 +22,7 @@ module ISet = Set.Make (Int)
 let min_arity = 2
 let max_arity = 3
 
-let scan_roots = [ "src"; "test" ]
+let scan_roots = [ "src"; "test"; "bin" ]
 let excluded_dirs = [ "_build"; ".git"; "basis"; "twelf"; "tools"; "examples"; "exercises" ]
 
 (* ------------------------------------------------------------------ *)
@@ -331,16 +331,27 @@ let analyse file src ast =
     match e.pexp_desc with
     | Pexp_apply ({ pexp_desc = Pexp_ident lid; pexp_loc = floc; _ }, (Nolabel, arg) :: _) -> (
         let name = Longident.last lid.txt in
+        (* A decline is not "nothing to do" -- it is work the build will surface
+           as a type error later. Emit it as a located row so the residue can be
+           enumerated up front and worked as a list, rather than met one
+           compilation unit at a time (`@check` reports only the first error per
+           unit, so an n-site file costs n build iterations to discover). *)
+        let decline reason =
+          bump ("decline: " ^ reason);
+          add { file; s = e.pexp_loc.loc_start.pos_cnum; e = e.pexp_loc.loc_end.pos_cnum;
+                repl = ""; kind = "DECLINE"; line = line e.pexp_loc;
+                note = String.concat "." (Longident.flatten lid.txt) ^ " -- " ^ reason }
+        in
         (if Hashtbl.mem targets name && is_basis_qualified lid.txt then
            bump "decline: basis-qualified callee (out of scope)"
          else if Hashtbl.mem targets name then
            match (target_arity name, arg.pexp_desc) with
-           | None, _ -> bump "decline: name has ambiguous arity"
-           | Some ar, Pexp_tuple parts when List.length parts <> ar -> bump "decline: tuple arity mismatch"
+           | None, _ -> decline "name has ambiguous arity"
+           | Some ar, Pexp_tuple parts when List.length parts <> ar -> decline "tuple arity mismatch"
            | Some _, Pexp_tuple parts when not (List.for_all (fun (l, _) -> l = None) parts) ->
-               bump "decline: labelled tuple"
+               decline "labelled tuple"
            | Some _, Pexp_tuple _ -> ()
-           | Some _, _ -> bump "decline: argument is not a literal tuple");
+           | Some _, _ -> decline "argument is not a literal tuple");
         match (target_arity name, arg.pexp_desc) with
         | Some ar, Pexp_tuple parts
           when (not (is_basis_qualified lid.txt))
@@ -378,7 +389,7 @@ let analyse file src ast =
            && (not (is_basis_qualified lid.txt))
            && (not (Hashtbl.mem callee_pos e.pexp_loc.loc_start.pos_cnum))
            && target_arity (Longident.last lid.txt) <> None ->
-        bump "z: target name used as a value (Phase C residue)";
+        bump "valueuse: target name passed as a value (residue)";
         add { file; s = e.pexp_loc.loc_start.pos_cnum; e = e.pexp_loc.loc_end.pos_cnum;
               repl = ""; kind = "VALUEUSE"; line = line e.pexp_loc;
               note = String.concat "." (Longident.flatten lid.txt) }
@@ -443,7 +454,14 @@ let analyse file src ast =
     { Ast_iterator.default_iterator with
       value_description = (fun self vd -> do_val vd; Ast_iterator.default_iterator.value_description self vd);
       expr = (fun self e -> do_apply e; Ast_iterator.default_iterator.expr self e);
-      value_binding = (fun self vb -> do_binding vb; Ast_iterator.default_iterator.value_binding self vb)
+      value_binding = (fun self vb -> do_binding vb; Ast_iterator.default_iterator.value_binding self vb);
+      (* Do not descend into attribute payloads. `[@@deriving eq, ord, show]`
+         parses as a structure of bare identifiers, so `eq` and `show` -- which
+         are also target names -- were being reported as value uses. They are
+         deriver names, not references. Skipping also guarantees the patcher can
+         never splice bytes inside a payload, where a rewrite would be silently
+         wrong. *)
+      attribute = (fun _ _ -> ())
     }
   in
   match ast with Impl st -> it.structure it st | Intf sg -> it.signature it sg
@@ -504,11 +522,15 @@ let () =
       files;
     let all = !edits in
     let count k = List.length (List.filter (fun e -> e.kind = k) all) in
-    (* ESCALATE and VALUEUSE are report-only: never applied by `patch`. *)
+    (* ESCALATE, VALUEUSE and DECLINE are report-only: never applied by `patch`.
+       Whitelisting the four auto kinds -- rather than blacklisting -- is what
+       makes adding a report-only kind safe. *)
     let auto = List.filter (fun e -> List.mem e.kind [ "SIG"; "DEF"; "DEFFUN"; "CALL" ]) all in
     let kept, dropped = non_overlapping auto in
-    Printf.eprintf "SIG=%d DEF=%d DEFFUN=%d CALL=%d ESCALATE=%d | auto=%d kept=%d overlap-deferred=%d\n"
+    Printf.eprintf
+      "SIG=%d DEF=%d DEFFUN=%d CALL=%d ESCALATE=%d VALUEUSE=%d DECLINE=%d | auto=%d kept=%d overlap-deferred=%d\n"
       (count "SIG") (count "DEF") (count "DEFFUN") (count "CALL") (count "ESCALATE")
+      (count "VALUEUSE") (count "DECLINE")
       (List.length auto) (List.length kept) dropped;
     Hashtbl.fold (fun k v acc -> (k, v) :: acc) diag []
     |> List.sort compare
