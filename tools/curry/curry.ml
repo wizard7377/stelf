@@ -299,15 +299,48 @@ let fresh_names words arity =
 (* Per-file analysis                                                   *)
 (* ------------------------------------------------------------------ *)
 
-let analyse file src ast =
+(* [round] is the patch round within a single `patch` invocation. Round 1 sees
+   virgin source; later rounds re-scan text this invocation has already
+   rewritten, and exist for exactly one reason -- to pick up the edits that were
+   deferred because their byte ranges overlapped an outer edit.
+
+   Cascading deeper is NOT a goal of the loop, and allowing it is a bug. A
+   signature stops splitting when its next component is a type alias, but the
+   corresponding call site does not:
+
+     val conv : eclo * eclo -> bool      (IntSyn.eclo = exp * sub)
+     conv ((u1_, I.id), (u2_, I.id))
+       -> conv (u1_, I.id) (u2_, I.id)   round 1, correct; sig now eclo -> eclo
+       -> conv u1_ I.id (u2_, I.id)      round 2, WRONG -- sig did not follow
+
+   So rounds >= 2 refuse to split a site past the arity known at invocation
+   start. Genuinely deeper nesting (`(cid * mS) * region`) is the *cross-
+   invocation* loop's job, where collect_targets re-runs and sees the new
+   level. *)
+let analyse ~round file src ast =
   let words = file_words src in
   let line (l : Location.t) = l.loc_start.pos_lnum in
   let ok (l : Location.t) = (not l.loc_ghost) && l.loc_end.pos_cnum > l.loc_start.pos_cnum in
 
   (* --- signatures: `a * b -> c` becomes `a -> b -> c` --- *)
   let do_val (vd : value_description) =
+    (* Rounds >= 2 emit no signature edits at all -- the same one-level-per-
+       invocation rule the CALL and DEF guards enforce, and for the same reason.
+       A SIG edit is never overlap-deferred (one per `val`, and `val` types do
+       not nest inside one another), so the loop has no SIG work to pick up.
+
+       Without this, signatures advance two levels while definitions advance
+       one, because a DEFFUN definition can never cascade: once
+       `let f = function` has become `let f a1 b1 = match a1, b1 with`, the
+       parameters are Ppat_vars and neither definition pattern matches. That
+       desync is what produced
+
+         val piDepend : (dec * depend) * exp -> exp
+           -> dec -> depend -> exp -> exp        (sig, two levels)
+         let piDepend a1 b1 = ...                (def, one level) *)
     match val_tuple_arg vd with
-    | Some parts when target_arity vd.pval_name.txt = Some (List.length parts) ->
+    | Some parts
+      when round = 1 && target_arity vd.pval_name.txt = Some (List.length parts) ->
         let arg =
           match vd.pval_type.ptyp_desc with Ptyp_arrow (_, a, _) -> a | _ -> assert false
         in
@@ -346,8 +379,18 @@ let analyse file src ast =
     | Pexp_apply (fn, _) -> Hashtbl.replace callee_pos fn.pexp_loc.loc_start.pos_cnum ()
     | _ -> ());
     match e.pexp_desc with
-    | Pexp_apply ({ pexp_desc = Pexp_ident lid; pexp_loc = floc; _ }, (Nolabel, arg) :: _) -> (
+    | Pexp_apply ({ pexp_desc = Pexp_ident lid; pexp_loc = floc; _ }, ((Nolabel, arg) :: _ as all_args))
+      -> (
         let name = Longident.last lid.txt in
+        (* Already-curried guard -- see the note on `round` above. A call that
+           supplies at least `arity` arguments has had its split; splitting the
+           first one again is the type-alias cascade. *)
+        let already_split =
+          round > 1
+          && match target_arity name with
+             | Some ar -> List.length all_args >= ar
+             | None -> false
+        in
         (* A decline is not "nothing to do" -- it is work the build will surface
            as a type error later. Emit it as a located row so the residue can be
            enumerated up front and worked as a list, rather than met one
@@ -372,6 +415,7 @@ let analyse file src ast =
         match (target_arity name, arg.pexp_desc) with
         | Some ar, Pexp_tuple parts
           when (not (is_basis_qualified lid.txt))
+               && (not already_split)
                && List.length parts = ar
                && List.for_all (fun (l, _) -> l = None) parts ->
             let parts = List.map snd parts in
@@ -431,10 +475,16 @@ let analyse file src ast =
             match vb.pvb_expr.pexp_desc with
             (* let f (x, y) = body *)
             | Pexp_function
-                ({ pparam_desc = Pparam_val (Nolabel, None, ({ ppat_desc = Ppat_tuple (parts, Closed); _ } as p));
+                (({ pparam_desc = Pparam_val (Nolabel, None, ({ ppat_desc = Ppat_tuple (parts, Closed); _ } as p));
                    pparam_loc; _ }
-                :: _, _, _)
-              when List.length parts = ar && List.for_all (fun (l, _) -> l = None) parts ->
+                :: _ as params), _, _)
+              (* Already-split guard, the definition twin of the call-site one:
+                 `let insert ((r, l), y)` becomes `let insert (r, l) y` in round
+                 1, and `'a ring = 'a list * 'a list` makes that pattern still
+                 look splittable even though `val insert : 'a ring * 'a -> 'a
+                 ring` has stopped. *)
+              when (not (round > 1 && List.length params >= ar))
+                   && List.length parts = ar && List.for_all (fun (l, _) -> l = None) parts ->
                 let parts = List.map snd parts in
                 if ok pparam_loc && List.for_all (fun q -> ok q.ppat_loc) parts then begin
                   ignore p;
@@ -544,14 +594,14 @@ let () =
   else begin
     (* One analysis pass over the tree as it currently sits on disk. `patch`
        calls this repeatedly, so it must start from a clean slate each time. *)
-    let scan () =
+    let scan ~round () =
       edits := [];
       Hashtbl.reset diag;
       List.iter
         (fun f ->
           match parse_file f with
           | exception e -> Printf.eprintf "PARSE FAIL %s: %s\n" f (Printexc.to_string e)
-          | src, ast -> analyse f src ast)
+          | src, ast -> analyse ~round f src ast)
         files;
       let all = !edits in
       (* VALUEUSE and DECLINE are report-only: never applied by `patch`.
@@ -609,7 +659,7 @@ let () =
       (!ne, !nf)
     in
     if cmd = "locate" then begin
-      let all, auto, kept, deferred = scan () in
+      let all, auto, kept, deferred = scan ~round:1 () in
       report all auto kept deferred;
       let rows =
         all
@@ -631,7 +681,7 @@ let () =
           Printf.eprintf "ABORT: patch did not converge in 10 rounds\n";
           exit 1
         end;
-        let all, auto, kept, deferred = scan () in
+        let all, auto, kept, deferred = scan ~round:n () in
         Printf.eprintf "-- round %d: " n;
         report all auto kept deferred;
         if kept = [] then
