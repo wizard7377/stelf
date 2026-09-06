@@ -111,12 +111,10 @@ end) : INFERENCE.INFERENCE = struct
 
     let forward = function
       | g_, b_, (I.Pi ((_, meta_), _) as v_) -> (
-          let _ =
-            begin if !Global.doubleCheck then
+          ignore begin if !Global.doubleCheck then
               TypeCheck.typeCheck g_ (v_, I.Uni I.Type)
             else ()
-            end
-          in
+            end;
           let xs_, (v'_, s') = createEVars (g_, (v_, I.id)) in
           try
             begin match
@@ -158,15 +156,11 @@ end) : INFERENCE.INFERENCE = struct
           ((I.Decl (g0'_, d_), I.Decl (b0', t_)), sc')
 
     let expand (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_) as s_) =
-      let _ =
-        begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g_ else ()
-        end
-      in
+      ignore begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g_ else ()
+        end;
       let (gnew, bnew), sc = expand' ((g_, b_), (g_, b_), 0) in
-      let _ =
-        begin if !Global.doubleCheck then TypeCheck.typeCheckCtx gnew else ()
-        end
-      in
+      ignore begin if !Global.doubleCheck then TypeCheck.typeCheckCtx gnew else ()
+        end;
       let (g'_, b'_), w' = sc ((gnew, bnew), I.id) in
       ignore (TypeCheck.typeCheckCtx g'_);
       let s'_ =
@@ -179,11 +173,9 @@ end) : INFERENCE.INFERENCE = struct
             map (function i, f'_ -> (i, F.forSub f'_ w')) h_,
             F.forSub f_ w' )
       in
-      let _ =
-        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s'_)
+      ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s'_)
         else ()
-        end
-      in
+        end;
       function () -> s'_
 
     let apply f = f ()

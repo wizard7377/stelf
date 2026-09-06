@@ -89,11 +89,9 @@ end) : TOMEGATYPECHECK = struct
           (T.All ((T.UDec (I.BDec (_, (cid, s))), _), f2_), t2) ) ->
           let (T.UDec (I.BDec (_, (cid', s')))) = T.ctxDec psi k in
           let g'_, _ = I.conDecBlock (I.sgnLookup cid') in
-          let _ =
-            begin if cid <> cid' then raise (Error "Block label incompatible")
+          ignore begin if cid <> cid' then raise (Error "Block label incompatible")
             else ()
-            end
-          in
+            end;
           let s'' = T.coerceSub (T.comp (T.embedSub s) t2) in
           ignore (Conv.convSub s' s'');
           inferSpine (psi, s_, (f2_, T.Dot (T.Block (I.Bidx k), t2)))
@@ -173,15 +171,11 @@ end) : TOMEGATYPECHECK = struct
             (T.Ex ((I.BDec (_, (cid, s)), _), f2_), t) ) ) ->
           let (T.UDec (I.BDec (_, (cid', s')))) = T.ctxDec psi k in
           let g'_, _ = I.conDecBlock (I.sgnLookup cid) in
-          let _ =
-            begin if cid' <> cid then raise (Error "Block label mismatch")
+          ignore begin if cid' <> cid then raise (Error "Block label mismatch")
             else ()
-            end
-          in
-          let _ =
-            convSub
-              (psi, T.embedSub s', T.comp (T.embedSub s) t, T.revCoerceCtx g'_)
-          in
+            end;
+          ignore (convSub
+              (psi, T.embedSub s', T.comp (T.embedSub s) t, T.revCoerceCtx g'_));
           checkPrg psi (p_, (f2_, T.Dot (T.Block (I.Bidx k), t)))
       | psi, (T.PairPrg (p1_, p2_), (T.And (f1_, f2_), t)) ->
           ignore (chatter 4 (function () -> "[and"));
@@ -200,9 +194,7 @@ end) : TOMEGATYPECHECK = struct
           ignore (chatter 4 (function () -> "[let"));
           ignore (checkPrg psi (p1_, (f1_, T.id)));
           ignore (chatter 4 (function () -> "."));
-          let _ =
-            checkPrg (I.Decl (psi, d_)) (p2_, (f2_, T.comp t T.shift))
-          in
+          ignore (checkPrg (I.Decl (psi, d_)) (p2_, (f2_, T.comp t T.shift)));
           ignore (chatter 4 (function () -> "]\n"));
           ()
       | ( psi,
@@ -277,29 +269,21 @@ end) : TOMEGATYPECHECK = struct
           ignore (TypeCheck.typeCheck g_ (I.EClo (a1_, s1), I.Uni I.Type));
           ignore (TypeCheck.typeCheck g_ (I.EClo (a2_, s2), I.Uni I.Type));
           let d'_ = T.decSub d_ t1 in
-          let _ =
-            convFor (I.Decl (psi, d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2))
-          in
+          ignore (convFor (I.Decl (psi, d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2)));
           ()
       | ( psi,
           (T.All (((T.UDec (I.BDec (_, (l1, s1))) as d_), _), f1_), t1),
           (T.All ((T.UDec (I.BDec (_, (l2, s2))), _), f2_), t2) ) ->
-          let _ =
-            begin if l1 <> l2 then raise (Error "Contextblock clash") else ()
-            end
-          in
+          ignore begin if l1 <> l2 then raise (Error "Contextblock clash") else ()
+            end;
           let g'_, _ = I.conDecBlock (I.sgnLookup l1) in
-          let _ =
-            convSub
+          ignore (convSub
               ( psi,
                 T.comp (T.embedSub s1) t1,
                 T.comp (T.embedSub s2) t2,
-                T.embedCtx g'_ )
-          in
+                T.embedCtx g'_ ));
           let d'_ = T.decSub d_ t1 in
-          let _ =
-            convFor (I.Decl (psi, d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2))
-          in
+          ignore (convFor (I.Decl (psi, d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2)));
           ()
       | ( psi,
           (T.Ex (((I.Dec (_, a1_) as d_), _), f1_), t1),
@@ -311,32 +295,24 @@ end) : TOMEGATYPECHECK = struct
           ignore (TypeCheck.typeCheck g_ (I.EClo (a1_, s1), I.Uni I.Type));
           ignore (TypeCheck.typeCheck g_ (I.EClo (a2_, s2), I.Uni I.Type));
           let d'_ = I.decSub d_ s1 in
-          let _ =
-            convFor
-              (I.Decl (psi, T.UDec d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2))
-          in
+          ignore (convFor
+              (I.Decl (psi, T.UDec d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2)));
           ()
       | ( psi,
           (T.Ex (((I.BDec (name, (l1, s1)) as d_), _), f1_), t1),
           (T.Ex ((I.BDec (_, (l2, s2)), _), f2_), t2) ) ->
-          let _ =
-            begin if l1 <> l2 then raise (Error "Contextblock clash") else ()
-            end
-          in
+          ignore begin if l1 <> l2 then raise (Error "Contextblock clash") else ()
+            end;
           let g'_, _ = I.conDecBlock (I.sgnLookup l1) in
           let s1 = T.coerceSub t1 in
-          let _ =
-            convSub
+          ignore (convSub
               ( psi,
                 T.comp (T.embedSub s1) t1,
                 T.comp (T.embedSub s2) t2,
-                T.embedCtx g'_ )
-          in
+                T.embedCtx g'_ ));
           let d'_ = I.decSub d_ s1 in
-          let _ =
-            convFor
-              (I.Decl (psi, T.UDec d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2))
-          in
+          ignore (convFor
+              (I.Decl (psi, T.UDec d'_), (f1_, T.dot1 t1), (f2_, T.dot1 t2)));
           ()
       | psi, (T.And (f1_, f1'), t1), (T.And (f2_, f2'), t2) ->
           ignore (convFor (psi, (f1_, t1), (f2_, t2)));
@@ -347,9 +323,7 @@ end) : TOMEGATYPECHECK = struct
           (T.All ((T.PDec (_, f2_, _, _), _), f2'), t2) ) ->
           ignore (convFor (psi, (f1_, t1), (f2_, t2)));
           let d'_ = T.decSub d_ t1 in
-          let _ =
-            convFor (I.Decl (psi, d'_), (f1', T.dot1 t1), (f2', T.dot1 t2))
-          in
+          ignore (convFor (I.Decl (psi, d'_), (f1', T.dot1 t1), (f2', T.dot1 t2)));
           ()
       | psi, (T.World (w1_, f1_), t1), (T.World (w2_, f2_), t2) ->
           ignore (convFor (psi, (f1_, t1), (f2_, t2)));
@@ -381,21 +355,13 @@ end) : TOMEGATYPECHECK = struct
           I.Decl (g'_, T.UDec (I.BDec (_, (l, s)))) ) ->
           let (T.UDec (I.BDec (_, (l1, s11)))) = T.ctxDec g_ v1 in
           let (T.UDec (I.BDec (_, (l2, s22)))) = T.ctxDec g_ v2 in
-          let _ =
-            begin if l1 = l2 then () else raise (Error "Sub not equivalent")
-            end
-          in
-          let _ =
-            begin if l1 = l then () else raise (Error "Sub not equivalent")
-            end
-          in
+          ignore begin if l1 = l2 then () else raise (Error "Sub not equivalent")
+            end;
+          ignore begin if l1 = l then () else raise (Error "Sub not equivalent")
+            end;
           let g''_, _ = I.conDecBlock (I.sgnLookup l) in
-          let _ =
-            convSub (g_, T.embedSub s11, T.embedSub s22, T.revCoerceCtx g''_)
-          in
-          let _ =
-            convSub (g_, T.embedSub s11, T.embedSub s, T.revCoerceCtx g''_)
-          in
+          ignore (convSub (g_, T.embedSub s11, T.embedSub s22, T.revCoerceCtx g''_));
+          ignore (convSub (g_, T.embedSub s11, T.embedSub s, T.revCoerceCtx g''_));
           convSub (g_, s1, s2, g'_)
       | ( g_,
           T.Dot (T.Prg p1_, s1),

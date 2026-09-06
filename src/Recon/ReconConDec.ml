@@ -132,18 +132,14 @@ module Make_ReconConDec
             (IntSyn.ConDec (name, None, i, IntSyn.Normal, v'_, l_))
         in
         let ocd = Paths.dec (i, oc) in
-        let _ =
-          Display.chatter_s 3 ~kind:Display.Response
-            (Print.conDecToString cd ^ "\n")
-        in
-        let _ =
-          if !Global.doubleCheck then
+        ignore (Display.chatter_s 3 ~kind:Display.Response
+            (Print.conDecToString cd ^ "\n"));
+        ignore (if !Global.doubleCheck then
             begin try Typecheck.Typecheck_.TypeCheck.check (v'_, IntSyn.Uni l_)
             with Typecheck.Typecheck_.TypeCheck.Error msg ->
               Printf.eprintf "DOUBLE-CHECK FAIL on ConDec %s: %s\n%!" name msg;
               raise (Typecheck.Typecheck_.TypeCheck.Error msg)
-            end
-        in
+            end);
         (Some cd, Some ocd)
     | Cst.View.ConDec.ConstantDef (_, name, tm1, tm2_opt) ->
         (* Case B: constant definition / abbreviation *)
@@ -178,12 +174,9 @@ module Make_ReconConDec
               (IntSyn.ConDef (name, None, i, u'', v'', l_, IntSyn.ancestor u''))
           end
         in
-        let _ =
-          Display.chatter_s 3 ~kind:Display.Response
-            (Print.conDecToString cd ^ "\n")
-        in
-        let _ =
-          if !Global.doubleCheck then begin
+        ignore (Display.chatter_s 3 ~kind:Display.Response
+            (Print.conDecToString cd ^ "\n"));
+        ignore (if !Global.doubleCheck then begin
             (try Typecheck.Typecheck_.TypeCheck.check (v'', IntSyn.Uni l_)
              with Typecheck.Typecheck_.TypeCheck.Error msg ->
                Printf.eprintf "DOUBLE-CHECK FAIL on ConDef %s (type): %s\n%!"
@@ -194,8 +187,7 @@ module Make_ReconConDec
               Printf.eprintf "DOUBLE-CHECK FAIL on ConDef %s (term): %s\n%!"
                 name msg;
               raise (Typecheck.Typecheck_.TypeCheck.Error msg)
-          end
-        in
+          end);
         (Option.map (fun _ -> cd) opt_name, Some ocd)
     | Cst.View.ConDec.BlockDecl (_, name, lsome, lblock) ->
         (* Case C: block declaration *)
@@ -229,10 +221,8 @@ module Make_ReconConDec
           Names.nameConDec
             (IntSyn.BlockDec (name, None, gsome', ctxToList gblock'))
         in
-        let _ =
-          Display.chatter_s 3 ~kind:Display.Response
-            (Print.conDecToString bd ^ "\n")
-        in
+        ignore (Display.chatter_s 3 ~kind:Display.Response
+            (Print.conDecToString bd ^ "\n"));
         (Some bd, None)
     | Cst.View.ConDec.BlockDef (_, name, worlds) ->
         (* Case D: block definition *)
@@ -252,10 +242,8 @@ module Make_ReconConDec
             w'
         in
         let bd = Names.nameConDec (IntSyn.BlockDef (name, None, cids)) in
-        let _ =
-          Display.chatter_s 3 ~kind:Display.Response
-            (Print.conDecToString bd ^ "\n")
-        in
+        ignore (Display.chatter_s 3 ~kind:Display.Response
+            (Print.conDecToString bd ^ "\n"));
         (Some bd, None)
     | _ -> raise (Error "condecToConDec: unrecognised conDec variant")
 end

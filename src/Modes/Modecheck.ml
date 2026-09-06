@@ -491,12 +491,10 @@ module MakeModeCheck
        see updateAtom', and performs additional freeness check if required
     *)
     let updateAtom (d_, mode, s_, a, mS, (p, occ)) =
-      let _ =
-        begin if !checkFree then
+      ignore begin if !checkFree then
           freeAtom (d_, ambiguate mode, s_, (I.constType a, I.id), mS, (p, occ))
         else ()
-        end
-      in
+        end;
       updateAtom' (d_, mode, s_, mS, (p, occ))
 
     (* ------------------------------------------- groundness check *)
@@ -872,40 +870,32 @@ module MakeModeCheck
         end
 
     let checkMode a ms =
-      let _ =
-        begin if !Global.chatter > 3 then
+      ignore begin if !Global.chatter > 3 then
           print'
             (("Mode checking family " ^ Names.qidToString (Names.constQid a))
             ^ ":\n")
         else ()
-        end
-      in
+        end;
       let clist = Index.lookup a in
       ignore (checkFree := false);
       ignore (checkAll clist);
-      let _ =
-        begin if !Global.chatter > 3 then print' "\n" else ()
-        end
-      in
+      ignore begin if !Global.chatter > 3 then print' "\n" else ()
+        end;
       ()
 
     let checkFreeOut a ms =
-      let _ =
-        begin if !Global.chatter > 3 then
+      ignore begin if !Global.chatter > 3 then
           print'
             (("Checking output freeness of "
              ^ Names.qidToString (Names.constQid a))
             ^ ":\n")
         else ()
-        end
-      in
+        end;
       let clist = Index.lookup a in
       ignore (checkFree := true);
       ignore (checkAll clist);
-      let _ =
-        begin if !Global.chatter > 3 then print' "\n" else ()
-        end
-      in
+      ignore begin if !Global.chatter > 3 then print' "\n" else ()
+        end;
       ()
   end
 

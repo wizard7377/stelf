@@ -533,11 +533,9 @@ end) : MTPRECURSION = struct
           let v2_ = Whnf.normalize (v'_ v1_, I.id) in
           let f1_ = F.Ex (I.Dec (name, v1_), F.True) in
           let f2_ = f'_ f1_ in
-          let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor g_ f2_
+          ignore begin if !Global.doubleCheck then FunTypeCheck.isFor g_ f2_
             else ()
-            end
-          in
+            end;
           let d2_ = I.Dec (None, v2_) in
           let t2_ =
             begin match f2_ with
@@ -601,11 +599,9 @@ end) : MTPRECURSION = struct
           (nih + 1, updateState (s_, (ds_, I.id)))
 
     let expand (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_) as s_) =
-      let _ =
-        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
+      ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
         else ()
-        end
-      in
+        end;
       let _, s'_ = selectFormula (1, (I.Null, ih_, oh), s_) in
       s'_
 

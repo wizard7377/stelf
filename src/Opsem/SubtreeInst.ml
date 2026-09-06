@@ -972,11 +972,9 @@ end) : MEMOTABLE = struct
                       d'_,
                       (I.ctxLength dAVars, I.ctxLength dEVars) )
                 in
-                let _ =
-                  begin if solveEqn' ((eqn, shift (g'_, esub)), g'_) then ()
+                ignore begin if solveEqn' ((eqn, shift (g'_, esub)), g'_) then ()
                   else print " failed to solve eqn_query\n"
-                  end
-                in
+                  end;
                 let easub = normalizeSub (I.comp asub esub) in
                 begin if solveEqnI' ((eqn', shift (g'_, easub)), g'_) then
                   T.RepeatedEntry ((esub, asub), answRef', status')
@@ -1006,8 +1004,7 @@ end) : MEMOTABLE = struct
       let d_r1_ = copy d_t_ in
       let d_r2_ = copy dsq in
       let choose = ref (function (match_ : bool) -> ()) in
-      let _ =
-        S.forall squery (function nv, u_ ->
+      ignore (S.forall squery (function nv, u_ ->
             begin match S.lookup nsub_t nv with
             | Some t_v ->
                 begin match
@@ -1031,8 +1028,7 @@ end) : MEMOTABLE = struct
                     end
                 end
             | None -> S.insert rho_u (nv, u_)
-            end)
-      in
+            end));
       begin if isId rho_t then begin
         ( ! ) choose true;
         VariantSub (d_r2_, rho_u)

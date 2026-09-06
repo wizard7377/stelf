@@ -175,16 +175,14 @@ end) : PTRECON = struct
     | o_, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
         begin if Unify.unifiable g_ (q_, s) ps' then sc (o_, I.Nil)
         else
-          let _ =
-            begin
+          let () = ignore begin
               print "Unification Failed -- SHOULD NEVER HAPPEN!\n";
               begin
                 print
                   (Print.expToString g_ (I.EClo (fst ps', snd ps')) ^ " unify ");
                 print (Print.expToString g_ (I.EClo (q_, s)) ^ "\n")
               end
-            end
-          in
+            end in
           ()
         end
     | o_, ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc ->

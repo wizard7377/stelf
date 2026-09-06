@@ -607,10 +607,8 @@ module MakeCompile
         let (g_, head_), r_ =
           compileSClauseN fromCS (I.Null, I.Null, Whnf.normalize (a_, I.id))
         in
-        let _ =
-          C.sProgInstall
-            (a, C.SClause (compileDClauseN fromCS true (I.Null, a_)))
-        in
+        ignore (C.sProgInstall
+            (a, C.SClause (compileDClauseN fromCS true (I.Null, a_))));
         begin match head_ with
         | None -> raise (Error "Install via normal index")
         | Some (h_, eqs_) ->

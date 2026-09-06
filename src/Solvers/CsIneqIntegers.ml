@@ -1169,10 +1169,8 @@ struct
                 end
             | None ->
                 let proof = newEVar g_ (geq0 w_) in
-                let _ =
-                  restrictBB
-                    (exploreBB (insert g_ (w_, id), Restr (g_, proof)))
-                in
+                ignore (restrictBB
+                    (exploreBB (insert g_ (w_, id), Restr (g_, proof))));
                 proof
             end
           in
@@ -1199,24 +1197,18 @@ struct
 
     let installFgnCnstrOps () =
       let csid = !myID in
-      let _ =
-        FgnCnstrStd.ToInternal.install
+      ignore (FgnCnstrStd.ToInternal.install
           csid (function
             | MyFgnCnstrRep tag -> toInternal tag
-            | fc -> raise (UnexpectedFgnCnstr fc))
-      in
-      let _ =
-        FgnCnstrStd.Awake.install
+            | fc -> raise (UnexpectedFgnCnstr fc)));
+      ignore (FgnCnstrStd.Awake.install
           csid (function
             | MyFgnCnstrRep tag -> awake tag
-            | fc -> raise (UnexpectedFgnCnstr fc))
-      in
-      let _ =
-        FgnCnstrStd.Simplify.install
+            | fc -> raise (UnexpectedFgnCnstr fc)));
+      ignore (FgnCnstrStd.Simplify.install
           csid (function
             | MyFgnCnstrRep tag -> simplify tag
-            | fc -> raise (UnexpectedFgnCnstr fc))
-      in
+            | fc -> raise (UnexpectedFgnCnstr fc)));
       ()
 
     let init (cs, installF) =

@@ -47,14 +47,10 @@ module Make_ReconQuery
     ignore (RT.resetErrors filename);
     let (RT.JClass ((v_, _oc), l_)) = RT.reconQuery (RT.jclass tm) in
     ignore (RT.checkErrors r);
-    let _ =
-      match l_ with IntSyn.Type -> () | _ -> error r ("Query was not a type")
-    in
+    ignore (match l_ with IntSyn.Type -> () | _ -> error r ("Query was not a type"));
     let xs_ = Names.namedEVars () in
-    let _ =
-      if freeVar (opt_name, xs_) then
-        error r ("Proof term variable " ^ valOf opt_name ^ " occurs in type")
-    in
+    ignore (if freeVar (opt_name, xs_) then
+        error r ("Proof term variable " ^ valOf opt_name ^ " occurs in type"));
     (v_, opt_name, xs_)
 
   (* Finish a definition within a solve/query context *)
@@ -74,15 +70,11 @@ module Make_ReconQuery
         IntSyn.AbbrevDef (name, None, i, u'_, v'_, l_)
     in
     let cd = Names.nameConDec cd in
-    let _ =
-      Display.chatter_s 3 ~kind:Display.Response (Print.conDecToString cd ^ "\n")
-    in
-    let _ =
-      if !Global.doubleCheck then begin
+    ignore (Display.chatter_s 3 ~kind:Display.Response (Print.conDecToString cd ^ "\n"));
+    ignore (if !Global.doubleCheck then begin
         Typecheck.Typecheck_.TypeCheck.check (v'_, IntSyn.Uni l_);
         Typecheck.Typecheck_.TypeCheck.check (u'_, v'_)
-      end
-    in
+      end);
     let con_dec_opt = match opt_name with None -> None | Some _ -> Some cd in
     (con_dec_opt, Some ocd)
 
@@ -101,15 +93,11 @@ module Make_ReconQuery
         IntSyn.AbbrevDef (name, None, i, u'_, v'_, IntSyn.Type)
     in
     let cd = Names.nameConDec cd in
-    let _ =
-      Display.chatter_s 3 ~kind:Display.Response (Print.conDecToString cd ^ "\n")
-    in
-    let _ =
-      if !Global.doubleCheck then begin
+    ignore (Display.chatter_s 3 ~kind:Display.Response (Print.conDecToString cd ^ "\n"));
+    ignore (if !Global.doubleCheck then begin
         Typecheck.Typecheck_.TypeCheck.check (v'_, IntSyn.Uni IntSyn.Type);
         Typecheck.Typecheck_.TypeCheck.check (u'_, v'_)
-      end
-    in
+      end);
     match nameOpt with None -> None | Some _ -> Some cd
 
   let solveToSolve defines sol loc =

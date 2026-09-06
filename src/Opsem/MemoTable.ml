@@ -429,8 +429,7 @@ end) : MEMOTABLE = struct
       let d_r1_ = copy d_t_ in
       let d_r2_ = copy d_u_ in
       let choose = ref (function (match_ : bool) -> ()) in
-      let _ =
-        S.forall nsub_u (function nv, u_ ->
+      ignore (S.forall nsub_u (function nv, u_ ->
             begin match S.lookup nsub_t nv with
             | Some t_v ->
                 begin match
@@ -454,8 +453,7 @@ end) : MEMOTABLE = struct
                     end
                 end
             | None -> S.insert rho_u (nv, u_)
-            end)
-      in
+            end));
       begin if isId rho_t then begin
         ( ! ) choose true;
         VariantSub (d_r2_, rho_u)
@@ -697,11 +695,9 @@ end) : MEMOTABLE = struct
           )
       in
       let esub = ctxToAVarSub (g_, dAEVars, I.Shift 0) in
-      let _ =
-        begin if solveEqn' ((eqn, shift (g_, esub)), g_) then ()
+      ignore begin if solveEqn' ((eqn, shift (g_, esub)), g_) then ()
         else print " failed to solve eqn_query\n"
-        end
-      in
+        end;
       begin match result () with
       | _, T.NewEntry answRef -> begin
           begin

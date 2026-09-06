@@ -369,16 +369,14 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                 (MTPAbstract.abstractSub'
                    (g'_, b'_) (I.Dot (I.Exp u'_, s')) (I.Decl (b0, t_)))
             in
-            let _ =
-              begin if !Global.doubleCheck then (
+            ignore begin if !Global.doubleCheck then (
                 let psi'' = aux (g''_, b'') in
                 ignore (TypeCheck.typeCheckCtx (F.makectx psi''));
                 let psi = aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0, t_))) in
                 ignore (TypeCheck.typeCheckCtx (F.makectx psi));
                 FunTypeCheck.checkSub psi'' s'' psi)
               else ()
-              end
-            in
+              end;
             abstract ((g''_, b''), s'')
           in
           lowerSplitDest (g'_, 0, (v_, s'), abstract', constAndParamCases cases)
@@ -401,8 +399,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                   ((Obj.magic MTPAbstract.abstractSub)
                      (t, b1_, (g'_, b'_), I.Dot (I.Exp u'_, s'), I.Decl (b0, t_)))
               in
-              let _ =
-                begin if !Global.doubleCheck then (
+              ignore begin if !Global.doubleCheck then (
                   let psi'' = aux (g''_, b'') in
                   ignore (TypeCheck.typeCheckCtx (F.makectx psi''));
                   let psi =
@@ -411,8 +408,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
                   ignore (TypeCheck.typeCheckCtx (F.makectx psi));
                   FunTypeCheck.checkSub psi'' s'' psi)
                 else ()
-                end
-              in
+                end;
               abstract ((g''_, b''), s'')
             end
           in
@@ -614,11 +610,9 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
           (sc', ops)
 
     let expand (S.State (n, (g0_, b0), _, _, o_, _, _) as s0) =
-      let _ =
-        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s0)
+      ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s0)
         else ()
-        end
-      in
+        end;
       let _, ops =
         expand'
           ( (g0_, b0),

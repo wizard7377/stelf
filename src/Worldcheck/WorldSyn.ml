@@ -405,8 +405,7 @@ end) : WORLDSYN = struct
           try getWorlds b with Error msg -> raise (Error' (occ, msg))
         in
         let rb = worldsToReg wb in
-        let _ =
-          begin if subsumedLookup b then ()
+        ignore begin if subsumedLookup b then ()
           else
             try
               begin
@@ -414,8 +413,7 @@ end) : WORLDSYN = struct
                 subsumedInsert b
               end
             with Error msg -> raise (Error' (occ, msg))
-          end
-        in
+          end;
         let l_ = subGoalToDList v_ in
         begin
           accR ((g_, l_), rb, b, init b);
@@ -449,14 +447,12 @@ end) : WORLDSYN = struct
         end
 
     let worldcheck w_ a =
-      let _ =
-        begin if !Global.chatter > 3 then
+      ignore begin if !Global.chatter > 3 then
           print
             (("World checking family " ^ Names.qidToString (Names.constQid a))
             ^ ":\n")
         else ()
-        end
-      in
+        end;
       ignore (subsumedReset ());
       let rec checkAll = function
         | [] -> ()
@@ -478,10 +474,8 @@ end) : WORLDSYN = struct
             checkAll clist
       in
       ignore (checkAll (Index.lookup a));
-      let _ =
-        begin if !Global.chatter = 4 then print "\n" else ()
-        end
-      in
+      ignore begin if !Global.chatter = 4 then print "\n" else ()
+        end;
       ()
 
     let rec ctxAppend = function

@@ -230,10 +230,8 @@ module Reductio = struct
   let flex_left = function
     | (({ contents = None } as r), a), (s : subst), rhs ->
         let pps = try prepattern s with Domain -> raise NonPattern in
-        let _ =
-          begin if pp_ispat pps then () else raise NonPattern
-          end
-        in
+        ignore begin if pp_ispat pps then () else raise NonPattern
+          end;
         let ppsi = pp_invert pps in
         let rhs' = subst_term ppsi (termof rhs) in
         ignore (r := Some rhs');
@@ -422,16 +420,12 @@ module Reductio = struct
 
   and matching_succeeds g_ (p, q) =
     let p' = matching p in
-    let _ =
-      begin if check_equality_constraints p' then ()
+    ignore begin if check_equality_constraints p' then ()
       else raise (Matching "residual equality constraints failed")
-      end
-    in
-    let _ =
-      begin if check_typing_constraints g_ q then ()
+      end;
+    ignore begin if check_typing_constraints g_ q then ()
       else raise (Matching "residual typing constraints failed")
-      end
-    in
+      end;
     true
   (* evar side-effects affect q, raises Matching if matching fails *)
 
@@ -500,11 +494,9 @@ module Reductio = struct
   and check_type' = function
     | g_, Type, [] -> true
     | g_, KPi (_, a, k), m :: s ->
-        let _ =
-          begin if check_spinelt (g_, m, a) then ()
+        ignore begin if check_spinelt (g_, m, a) then ()
           else raise (Error "argument type mismatch")
-          end
-        in
+          end;
         let k' = subst_knd (TermDot (termof m, a, Id)) k in
         check_type' (g_, k', s)
     | _ -> false
@@ -530,11 +522,9 @@ module Reductio = struct
   and synth' = function
     | g_, (TRoot (_, _) as a), [] -> a
     | g_, TPi (_, a, b), m :: s ->
-        let _ =
-          begin if check_spinelt (g_, m, a) then ()
+        ignore begin if check_spinelt (g_, m, a) then ()
           else raise (Error "argument type mismatch")
-          end
-        in
+          end;
         let b' = subst_tp (TermDot (termof m, a, Id)) b in
         synth' (g_, b', s)
     | _ -> raise (Error "applying nonfunction to argument")

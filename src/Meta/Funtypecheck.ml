@@ -269,10 +269,8 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           | _ -> raise (Error "Typecheck Error: Declaration")
           end
       | psi, delta, F.New (b_, ds_) ->
-          let _ =
-            TypeCheck.typeCheck
-              (F.makectx (I.Decl (psi, F.Block b_))) (I.Uni I.Type, I.Uni I.Kind)
-          in
+          ignore (TypeCheck.typeCheck
+              (F.makectx (I.Decl (psi, F.Block b_))) (I.Uni I.Type, I.Uni I.Kind));
           let psi', delta', s' =
             assume (I.Decl (psi, F.Block b_), shiftBlock (b_, delta), ds_)
           in
@@ -280,8 +278,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
       | psi, delta, F.App ((kk, u_), ds_) ->
           begin match infer (delta, kk) with
           | F.MDec (name, F.All (F.Prim (I.Dec (_, v_)), f_)), s ->
-              let _ =
-                try TypeCheck.typeCheck (F.makectx psi) (u_, I.EClo (v_, s))
+              ignore (try TypeCheck.typeCheck (F.makectx psi) (u_, I.EClo (v_, s))
                 with TypeCheck.Error msg ->
                   raise
                     (Error
@@ -290,8 +287,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
                          ^ Print.expToString
                              (F.makectx psi) (TypeCheck.infer' (F.makectx psi) u_))
                         ^ " expected ")
-                       ^ Print.expToString (F.makectx psi) (I.EClo (v_, s))))
-              in
+                       ^ Print.expToString (F.makectx psi) (I.EClo (v_, s)))));
               let dd = F.MDec (name, F.forSub f_ (I.Dot (I.Exp u_, s))) in
               let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
               (psi', F.mdecSub dd s' :: delta', s')

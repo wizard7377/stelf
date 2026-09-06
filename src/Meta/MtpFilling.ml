@@ -108,10 +108,8 @@ end) : MTPFILLING.MTPFILLING = struct
           (x'_ :: xs_, F.Inx (x_, p_))
 
     let expand (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_) as s_) =
-      let _ =
-        begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g_ else ()
-        end
-      in
+      ignore begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g_ else ()
+        end;
       let xs_, p_ = createEVars (g_, (f_, I.id)) in
       function
       | () -> (

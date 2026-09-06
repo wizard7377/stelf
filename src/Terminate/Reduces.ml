@@ -211,8 +211,7 @@ end) : REDUCES = struct
     and getROrderW = function
       | g_, q_, ((I.Root (I.Const a, s_), s) as vs_), occ ->
           let o_ = selectROrder (a, (s_, s)) in
-          let _ =
-            begin match o_ with
+          ignore begin match o_ with
             | None -> ()
             | Some o_ ->
                 begin if !Global.chatter > 5 then
@@ -224,8 +223,7 @@ end) : REDUCES = struct
                     ^ "\n")
                 else ()
                 end
-            end
-          in
+            end;
           o_
       | g_, q_, (I.Pi ((d_, Maybe), v_), s), occ ->
           let o_ =
@@ -517,16 +515,14 @@ end) : REDUCES = struct
             | Some o_ -> o_
             end
           in
-          let _ =
-            begin if !Global.chatter > 4 then
+          ignore begin if !Global.chatter > 4 then
               print
                 (((("Verifying reduction property:\n" ^ rlistToString (g_, rl_))
                   ^ " ---> ")
                  ^ orderToString (g_, ro_))
                 ^ " \n")
             else ()
-            end
-          in
+            end;
           begin if C.deduce (g_, q_, rl_, ro_) then ()
           else
             raise
@@ -597,14 +593,12 @@ end) : REDUCES = struct
             end
           end
       in
-      let _ =
-        begin if !Global.chatter > 3 then
+      ignore begin if !Global.chatter > 3 then
           print
             (("Reduction checking family " ^ N.qidToString (N.constQid a))
             ^ ":\n")
         else ()
-        end
-      in
+        end;
       checkFam' (Index.lookup a)
 
     let checkFam a =
@@ -655,14 +649,12 @@ end) : REDUCES = struct
             end
           end
       in
-      let _ =
-        begin if !Global.chatter > 3 then
+      ignore begin if !Global.chatter > 3 then
           print
             (("Termination checking family " ^ N.qidToString (N.constQid a))
             ^ "\n")
         else ()
-        end
-      in
+        end;
       checkFam' (Index.lookup a)
 
     let reset () =

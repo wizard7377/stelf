@@ -420,12 +420,10 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           in
           let d'_ = abstractDec (a_, g_, 0, (d_, I.id)) in
           let (I.Dec (_, v_)) = d'_ in
-          let _ =
-            begin if !Global.doubleCheck then
+          ignore begin if !Global.doubleCheck then
               typecheck (MetaSyn.Prefix (g'_, m'_, b'_), v_)
             else ()
-            end
-          in
+            end;
           ( MetaSyn.Prefix
               ( I.Decl (g'_, Names.decName g'_ d'_),
                 I.Decl (m'_, marg),
@@ -434,12 +432,10 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | I.Decl (a_, Ev (r, v_, m)), gm ->
           let MetaSyn.Prefix (g'_, m'_, b'_), lG' = abstractCtx (a_, gm) in
           let v'' = abstractExp (a_, lG', 0, (v_, I.id)) in
-          let _ =
-            begin if !Global.doubleCheck then
+          ignore begin if !Global.doubleCheck then
               typecheck (MetaSyn.Prefix (g'_, m'_, b'_), v'')
             else ()
-            end
-          in
+            end;
           ( MetaSyn.Prefix
               ( I.Decl (g'_, Names.decName g'_ (I.Dec (None, v''))),
                 I.Decl (m'_, m),
@@ -458,10 +454,8 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       let gm', _ = abstractCtx (a_, gm) in
       let v'_ = abstractExp (a_, g_, 0, (v_, I.id)) in
       let s_ = MetaSyn.State (name, gm', v'_) in
-      let _ =
-        begin if !Global.doubleCheck then typecheck (gm', v'_) else ()
-        end
-      in
+      ignore begin if !Global.doubleCheck then typecheck (gm', v'_) else ()
+        end;
       s_
   end
 

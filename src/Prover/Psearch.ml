@@ -323,24 +323,21 @@ end) : SEARCH = struct
             | [] -> ()
             | hc :: sgn' ->
                 let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
-                let _ =
-                  CsManager.trail (function () ->
+                ignore (CsManager.trail (function () ->
                       rSolve
                         ( max - 1,
                           depth,
                           ps',
                           (r, I.id),
                           dp,
-                          function s_ -> sc (I.Root (hc, s_)) ))
-                in
+                          function s_ -> sc (I.Root (hc, s_)) )));
                 matchSig' sgn'
           in
           let rec matchBlock = function
             | [], (n, i) -> ()
             | (r, s, h'_) :: rGs', (n, i) ->
                 begin if eqHead (ha, h'_) then
-                  let _ =
-                    CsManager.trail (function () ->
+                  let () = ignore (CsManager.trail (function () ->
                         rSolve
                           ( max - 1,
                             depth,
@@ -348,8 +345,7 @@ end) : SEARCH = struct
                             (r, I.comp s (I.Shift n)),
                             dp,
                             function
-                            | s_ -> sc (I.Root (I.Proj (I.Bidx n, i), s_)) ))
-                  in
+                            | s_ -> sc (I.Root (I.Proj (I.Bidx n, i), s_)) ))) in
                   matchBlock (rGs', (n, i + 1))
                 else matchBlock (rGs', (n, i + 1))
                 end
@@ -358,16 +354,14 @@ end) : SEARCH = struct
             | I.Null, _ -> matchSig' (Index.lookup (cidFromHead ha))
             | I.Decl (dPool', C.Dec (r, s, ha')), n ->
                 begin if eqHead (ha, ha') then
-                  let _ =
-                    CsManager.trail (function () ->
+                  let () = ignore (CsManager.trail (function () ->
                         rSolve
                           ( max - 1,
                             depth,
                             ps',
                             (r, I.comp s (I.Shift n)),
                             dp,
-                            function s_ -> sc (I.Root (I.BVar n, s_)) ))
-                  in
+                            function s_ -> sc (I.Root (I.BVar n, s_)) ))) in
                   matchDProg (dPool', n + 1)
                 else matchDProg (dPool', n + 1)
                 end

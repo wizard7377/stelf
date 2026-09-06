@@ -571,23 +571,15 @@ module MakeConverter
           let c' = wmap c in
           let n = I.ctxLength psi0 + I.ctxLength g_ in
           let gsome_, lpi = I.constBlock c in
-          let _ =
-            TypeCheck.typeCheckCtx
-              (T.coerceCtx (append (append (psi0, psi), T.embedCtx g_)))
-          in
-          let _ =
-            TypeCheck.typeCheckSub
-              (T.coerceCtx (append (append (psi0, psi), T.embedCtx g_))) s gsome_
-          in
+          ignore (TypeCheck.typeCheckCtx
+              (T.coerceCtx (append (append (psi0, psi), T.embedCtx g_))));
+          ignore (TypeCheck.typeCheckSub
+              (T.coerceCtx (append (append (psi0, psi), T.embedCtx g_))) s gsome_);
           let gsome', lpi' = I.constBlock c' in
-          let _ =
-            TypeCheck.typeCheckCtx
-              (T.coerceCtx (append (append (psi0, psi), T.embedCtx g_)))
-          in
-          let _ =
-            TypeCheck.typeCheckSub
-              (T.coerceCtx (append (append (psi0, psi), T.embedCtx g_))) s gsome'
-          in
+          ignore (TypeCheck.typeCheckCtx
+              (T.coerceCtx (append (append (psi0, psi), T.embedCtx g_))));
+          ignore (TypeCheck.typeCheckSub
+              (T.coerceCtx (append (append (psi0, psi), T.embedCtx g_))) s gsome');
           traversePos (l_, wmap, projs)
             ( (psi0, psi, I.Decl (g_, I.BDec (x, (c', s)))),
               v_,
@@ -596,9 +588,7 @@ module MakeConverter
           ((psi0, g_, b_), (I.Root (I.Const a, s_) as v_), Some (w1, (p_, q_)))
         ) ->
           let psi1 = append (psi0, append (g_, T.embedCtx b_)) in
-          let _ =
-            TomegaTypeCheck.checkCtx (append (append (psi0, g_), T.embedCtx b_))
-          in
+          ignore (TomegaTypeCheck.checkCtx (append (append (psi0, g_), T.embedCtx b_)));
           let n = domain (psi1, w1) in
           let m = I.ctxLength psi0 in
           let lookupbase a =
@@ -648,10 +638,8 @@ module MakeConverter
                 applyW ((s_, mS), ft_)
           in
           let s''_, f''_ = apply (s_, modeSpine a) (f_, T.id) in
-          let _ =
-            TomegaTypeCheck.checkFor
-              (append (append (psi0, g_), T.embedCtx b_)) (T.forSub f''_ (T.embedSub w1))
-          in
+          ignore (TomegaTypeCheck.checkFor
+              (append (append (psi0, g_), T.embedCtx b_)) (T.forSub f''_ (T.embedSub w1)));
           let p'' = T.Redex (hp, s''_) in
           let b = I.ctxLength b_ in
           let w1' = peeln (b, w1) in
@@ -664,15 +652,11 @@ module MakeConverter
                 (I.Decl (g'_, I.decSub d_ s'), I.dot1 s')
           in
           let b'', _ = subCtx (b'_, w1') in
-          let _ =
-            TomegaTypeCheck.checkCtx
-              (append (append (psi0, g_), T.embedCtx b''))
-          in
+          ignore (TomegaTypeCheck.checkCtx
+              (append (append (psi0, g_), T.embedCtx b'')));
           let gb', iota = T.deblockify b'_ in
-          let _ =
-            try TypeCheck.typeCheckSub gb' (T.coerceSub iota) b'_
-            with TypeCheck.Error _ -> raise (Error' iota)
-          in
+          ignore (try TypeCheck.typeCheckSub gb' (T.coerceSub iota) b'_
+            with TypeCheck.Error _ -> raise (Error' iota));
           let rr_ = T.forSub f''_ iota in
           let f'''_ = TA.raiseFor gb' (rr_, I.id) in
           let rec lift = function
@@ -683,10 +667,8 @@ module MakeConverter
           in
           let p''' = lift (b'_, p'') in
           ignore (TomegaTypeCheck.checkCtx (append (psi0, g_)));
-          let _ =
-            TomegaTypeCheck.checkFor
-              (append (psi0, g_)) (T.forSub f'''_ (T.embedSub w1'))
-          in
+          ignore (TomegaTypeCheck.checkFor
+              (append (psi0, g_)) (T.forSub f'''_ (T.embedSub w1')));
           let psi1'', w2, z2 = strengthen (psi1, (a, s_), w1, M.Minus) in
           let w3 = peeln (b, w2) in
           let z3 = peeln (b, z2) in
@@ -695,10 +677,8 @@ module MakeConverter
           let f4_ = T.forSub f'''_ (T.embedSub z3) in
           ignore (TomegaTypeCheck.checkCtx psi1'');
           ignore (TomegaTypeCheck.checkCtx (append (psi2, T.embedCtx b3')));
-          let _ =
-            try TomegaTypeCheck.checkFor psi2 f4_
-            with _ -> raise (Error "")
-          in
+          ignore (try TomegaTypeCheck.checkFor psi2 f4_
+            with _ -> raise (Error ""));
           let b3, sigma3 = T.deblockify b3' in
           let pat'' = T.normalizePrg pat' sigma3 in
           let pat = TA.raisePrg b3 pat'' f4_ in
@@ -833,12 +813,10 @@ module MakeConverter
         let sig_ = Worldify.worldify a in
         let dynSig = dynamicSig (psi0, a, w_) in
         let statSig = staticSig (psi0, sig_) in
-        let _ =
-          map
+        ignore (map
             (function
               | I.ConDec (_, _, _, _, u_, v_) -> TypeCheck.check (u_, I.Uni v_))
-            sig_
-        in
+            sig_);
         ignore (validSig (psi0, statSig));
         ignore (validSig (psi0, dynSig));
         let c0_ = traverse (psi0, l_, dynSig, wmap, projs) in

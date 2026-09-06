@@ -165,19 +165,15 @@ end) : SPLIT with module State = Split__0.State' = struct
       | g_, vs_, [], sc -> ()
       | g_, vs_, (I.Const c as h_) :: sgn', sc ->
           let u_, vs'_ = createAtomConst g_ h_ in
-          let _ =
-            CsManager.trail (function () ->
+          ignore (CsManager.trail (function () ->
                 begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
-                end)
-          in
+                end));
           constCases (g_, vs_, sgn', sc)
       | g_, vs_, (I.Def c as h_) :: sgn', sc ->
           let u_, vs'_ = createAtomConst g_ h_ in
-          let _ =
-            CsManager.trail (function () ->
+          ignore (CsManager.trail (function () ->
                 begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
-                end)
-          in
+                end));
           constCases (g_, vs_, sgn', sc)
       | g_, vs_, _ :: sgn', sc ->
           (* Skip other head types *)
@@ -187,11 +183,9 @@ end) : SPLIT with module State = Split__0.State' = struct
       | g_, vs_, 0, sc -> ()
       | g_, vs_, k, sc ->
           let u_, vs'_ = createAtomBVar g_ k in
-          let _ =
-            CsManager.trail (function () ->
+          ignore (CsManager.trail (function () ->
                 begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
-                end)
-          in
+                end));
           paramCases (g_, vs_, k - 1, sc)
 
     let rec createEVarSub = function
@@ -215,11 +209,9 @@ end) : SPLIT with module State = Split__0.State' = struct
       | g_, vs_, (lvar, i), (t, []), sc -> ()
       | g_, vs_, (lvar, i), (t, I.Dec (_, v'_) :: piDecs), sc ->
           let u_, vs'_ = createAtomProj (g_, I.Proj (lvar, i), (v'_, t)) in
-          let _ =
-            CsManager.trail (function () ->
+          ignore (CsManager.trail (function () ->
                 begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
-                end)
-          in
+                end));
           let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.Nil)), t) in
           blockCases' (g_, vs_, (lvar, i + 1), (t', piDecs), sc)
 
@@ -278,10 +270,8 @@ end) : SPLIT with module State = Split__0.State' = struct
         begin match (arg__1, arg__2) with
         | (g_, i), ([], _, _, _) -> []
         | (g_, i), (x_ :: xs_, f_, w_, sc) ->
-            let _ =
-              Display.chatter_s 6
-                (("Split " ^ Print.expToString I.Null x_) ^ ".\n")
-            in
+            ignore (Display.chatter_s 6
+                (("Split " ^ Print.expToString I.Null x_) ^ ".\n"));
             let os_ = splitXs (g_, i + 1) (xs_, f_, w_, sc) in
             ignore (resetCases ());
             let s = Print.expToString g_ x_ in

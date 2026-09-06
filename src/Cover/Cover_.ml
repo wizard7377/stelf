@@ -608,19 +608,15 @@ module MakeCover
     | g_, vs_, [], sc -> ()
     | g_, vs_, (I.Const c as h_) :: sgn', sc ->
         let u_, vs'_ = createAtomConst g_ h_ in
-        let _ =
-          CsManager.trail (function () ->
+        ignore (CsManager.trail (function () ->
               begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
-              end)
-        in
+              end));
         constCases (g_, vs_, sgn', sc)
     | g_, vs_, (I.Def c as h_) :: sgn', sc ->
         let u_, vs'_ = createAtomConst g_ h_ in
-        let _ =
-          CsManager.trail (function () ->
+        ignore (CsManager.trail (function () ->
               begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
-              end)
-        in
+              end));
         constCases (g_, vs_, sgn', sc)
     | g_, vs_, _ :: sgn', sc ->
         (* Skip other head types (Skonst, NSDef, etc.) *)
@@ -630,11 +626,9 @@ module MakeCover
     | g_, vs_, 0, sc -> ()
     | g_, vs_, k, sc ->
         let u_, vs'_ = createAtomBVar g_ k in
-        let _ =
-          CsManager.trail (function () ->
+        ignore (CsManager.trail (function () ->
               begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
-              end)
-        in
+              end));
         paramCases (g_, vs_, k - 1, sc)
 
   let rec createEVarSub = function
@@ -657,11 +651,9 @@ module MakeCover
     | g_, vs_, (lvar, i), (t, []), sc -> ()
     | g_, vs_, (lvar, i), (t, I.Dec (_, v'_) :: piDecs), sc ->
         let u_, vs'_ = createAtomProj (g_, I.Proj (lvar, i), (v'_, t)) in
-        let _ =
-          CsManager.trail (function () ->
+        ignore (CsManager.trail (function () ->
               begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
-              end)
-        in
+              end));
         let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.Nil)), t) in
         blockCases' (g_, vs_, (lvar, i + 1), (t', piDecs), sc)
 
@@ -682,9 +674,7 @@ module MakeCover
         in
         ignore (paramCases (g_, (v_, I.id), I.ctxLength g_, sc'));
         ignore (worldCases (g_, (v_, I.id), w_, sc'));
-        let _ =
-          constCases (g_, (v_, I.id), Index.lookup (I.targetFam v_), sc')
-        in
+        ignore (constCases (g_, (v_, I.id), Index.lookup (I.targetFam v_), sc'));
         ()
     | I.Lam (d_, u_), w_, sc -> lowerSplitW (u_, w_, sc)
 
@@ -693,8 +683,7 @@ module MakeCover
   let abstract (v_, s) =
     let i, v'_ = Abstract.abstractDecImp (I.EClo (v_, s)) in
     let v'' = Whnf.normalize (v'_, I.id) in
-    let _ =
-      begin if !Global.doubleCheck then
+    ignore begin if !Global.doubleCheck then
         try TypeCheck.typeCheck I.Null (v'', I.Uni I.Type)
         with TypeCheck.Error _ ->
           (* Coverage splitting can produce terms where higher-order EVars
@@ -706,8 +695,7 @@ module MakeCover
               that the type checker cannot verify due to the abstraction. *)
           ()
       else ()
-      end
-    in
+      end;
     (v'', i)
 
   let splitVar (v_, p, k, (w_, ci)) =
@@ -716,9 +704,7 @@ module MakeCover
       let (v1_, s), xsRev = instEVars ((v_, I.id), p, []) in
       let (Some x_) = List.nth (xsRev, k - 1) in
       ignore (resetCases ());
-      let _ =
-        splitEVar (x_, w_, function () -> addCase (abstract (v1_, s)))
-      in
+      ignore (splitEVar (x_, w_, function () -> addCase (abstract (v1_, s))));
       Some (getCases ())
     with Constraints.Error constrs ->
       begin
@@ -841,12 +827,10 @@ module MakeCover
             CsManager.trail (function () -> finitary1 (x_, k, w_, f, cands)) )
 
   let finitary (v_, p, w_, ci) =
-    let _ =
-      begin if !Global.doubleCheck then
+    ignore begin if !Global.doubleCheck then
         TypeCheck.typeCheck I.Null (v_, I.Uni I.Type)
       else ()
-      end
-    in
+      end;
     let (v1_, s), xsRev = instEVarsSkip ((v_, I.id), p, [], ci) in
     finitarySplits
       (xsRev, 1, w_, (function () -> ignore (abstract (v1_, s))), [])
@@ -947,15 +931,13 @@ module MakeCover
     let g_, _ = isolateSplittable (I.Null, v_, p) in
     let ucands = contractionCands (g_, 1) in
     let n = List.length ucands in
-    let _ =
-      begin if n > 0 then
+    ignore begin if n > 0 then
         chatter 6 (function () ->
             ((("Found " ^ Int.toString n) ^ " contraction ")
             ^ pluralize (n, "candidate"))
             ^ "\n")
       else ()
-      end
-    in
+      end;
     let vpOpt' =
       begin if n > 0 then
         try contractAll (v_, p, ucands)
@@ -967,15 +949,13 @@ module MakeCover
       else Some (v_, p)
       end
     in
-    let _ =
-      begin match vpOpt' with
+    ignore begin match vpOpt' with
       | None ->
           chatter 6 (function () ->
               "Case impossible: conflicting unique outputs\n")
       | Some (v'_, p') ->
           chatter 6 (function () -> showPendingGoal (v'_, p', ci, lab) ^ "\n")
-      end
-    in
+      end;
     vpOpt'
 
   let rec findMin ((k, n) :: kns) = findMin' ((k, n), kns)
@@ -1890,27 +1870,21 @@ val _ = pr ()
        Effect: raises Error (msg) otherwise
     *)
   let checkCovers a ms =
-    let _ =
-      chatter 4 (function () ->
+    ignore (chatter 4 (function () ->
           ("Input coverage checking family " ^ N.qidToString (N.constQid a))
-          ^ "\n")
-    in
+          ^ "\n"));
     ignore (checkNoDef a);
-    let _ =
-      try Subordinate.checkNoDef a
+    ignore (try Subordinate.checkNoDef a
       with Subordinate.Error msg ->
         raise
           (Error
              ((("Coverage checking " ^ N.qidToString (N.constQid a)) ^ ":\n")
-             ^ msg))
-    in
+             ^ msg)));
     let v0, p = initCGoal a in
-    let _ =
-      begin if !Global.doubleCheck then
+    ignore begin if !Global.doubleCheck then
         TypeCheck.typeCheck I.Null (v0, I.Uni I.Type)
       else ()
-      end
-    in
+      end;
     ignore (CsManager.reset ());
     let cIn = inCoverInst ms in
     let cs = Index.lookup a in
@@ -1919,8 +1893,7 @@ val _ = pr ()
     let v0 = createCoverGoal (I.Null, (v0, I.id), p, ms) in
     let v0, p = abstract (v0, I.id) in
     let missing = cover (v0, p, (w_, cIn), Input ccs, Top, []) in
-    let _ =
-      begin match missing with
+    ignore begin match missing with
       | [] -> ()
       | _ :: _ ->
           raise
@@ -1929,8 +1902,7 @@ val _ = pr ()
                 ^ missingToString (missing, ms))
                ^ "\n"))
       end
-      (* all cases covered *)
-    in
+      (* all cases covered *);
     ()
 
   (* convert mode spine to cover instructions *)
@@ -1949,18 +1921,15 @@ val _ = pr ()
     let (Some ms) = ModeTable.modeLookup a in
     let cOut = outCoverInst ms in
     let v'_, q = createCoverClause (g_, I.EClo (v_, s), 0) in
-    let _ =
-      begin if !Global.doubleCheck then
+    ignore begin if !Global.doubleCheck then
         TypeCheck.typeCheck I.Null (v'_, I.Uni I.Type)
       else ()
-      end
-    in
+      end;
     let v0 = createCoverGoal (I.Null, (v'_, I.id), q, ms) in
     let v0', p = abstract (v0, I.id) in
     let w_ = W.lookup a in
     let missing = cover (v0', p, (w_, cOut), Output (v'_, q), Top, []) in
-    let _ =
-      begin match missing with
+    ignore begin match missing with
       | [] -> ()
       | _ :: _ ->
           raise
@@ -1968,8 +1937,7 @@ val _ = pr ()
                (("Output coverage error --- missing cases:\n"
                 ^ missingToString (missing, ms))
                ^ "\n"))
-      end
-    in
+      end;
     ()
 
   (* must be defined and well-moded *)
@@ -2116,11 +2084,9 @@ val _ = pr ()
   let abstractSpine s_ s =
     let g'_, s'_ = Abstract.abstractSpine s_ s in
     let namedG' = N.ctxName g'_ in
-    let _ =
-      begin if !Global.doubleCheck then TypeCheck.typeCheckCtx namedG'
+    ignore begin if !Global.doubleCheck then TypeCheck.typeCheckCtx namedG'
       (* TypeCheck.typeCheckSpine (namedG', S') *) else ()
-      end
-    in
+      end;
     CGoal (namedG', s'_)
   (* for printing purposes *)
 
@@ -2174,9 +2140,7 @@ val _ = pr ()
       let s = newEVarSubst (I.Null, g_) in
       let x_ = kthSub (s, k) in
       ignore (resetCases ());
-      let _ =
-        splitEVar (x_, w, function () -> addCase (abstractSpine s_ s))
-      in
+      ignore (splitEVar (x_, w, function () -> addCase (abstractSpine s_ s)));
       Some (getCases ())
       (* for splitting, EVars are always global *)
       (* G = xn:V1,...,x1:Vn *)
@@ -2220,15 +2184,13 @@ val _ = pr ()
   let contract ((CGoal (g_, s_) as cg), lab) =
     let ucands = contractionCands (g_, 1) in
     let n = List.length ucands in
-    let _ =
-      begin if n > 0 then
+    ignore begin if n > 0 then
         chatter 6 (function () ->
             ((("Found " ^ Int.toString n) ^ " contraction ")
             ^ pluralize (n, "candidate"))
             ^ "\n")
       else ()
-      end
-    in
+      end;
     let cgOpt' =
       begin if n > 0 then
         try contractAll (cg, ucands)
@@ -2241,15 +2203,13 @@ val _ = pr ()
       end
       (* no progress if constraints remain *)
     in
-    let _ =
-      begin match cgOpt' with
+    ignore begin match cgOpt' with
       | None ->
           chatter 6 (function () ->
               "Case impossible: conflicting unique outputs\n")
       | Some cg' ->
           chatter 6 (function () -> showPendingCGoal (cg', lab) ^ "\n")
-      end
-    in
+      end;
     cgOpt' (* no candidates, no progress *)
 
   (* cover (cg, w, ccs, lab, missing) = missing'
@@ -2432,24 +2392,20 @@ val _ = pr ()
       List.map (function gi_, si -> CClause (gi_, substToSpine (si, g_))) cs_
     in
     ignore (chatter 6 (function () -> "[Begin covering clauses]\n"));
-    let _ =
-      List.app
+    ignore (List.app
         (function cc -> chatter 6 (function () -> showCClause cc ^ "\n"))
-        ccs
-    in
+        ccs);
     ignore (chatter 6 (function () -> "[End covering clauses]\n"));
     let pureG = purify g_ in
     let namedG = N.ctxLUName pureG in
     let r0_ = substToSpine (I.id, namedG) in
     let cg0 = CGoal (namedG, r0_) in
     let missing = cover (cg0, w, ccs, Top, []) in
-    let _ =
-      begin match missing with
+    ignore begin match missing with
       | [] -> ()
       | _ :: _ -> raise (Error "Coverage error")
       end
-      (* all cases covered *)
-    in
+      (* all cases covered *);
     ignore (chatter 4 (function () -> "]\n"));
     ()
   (* Question: are all the Gi's above named already? *)

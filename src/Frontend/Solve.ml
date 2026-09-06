@@ -277,11 +277,9 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       ReconQuery.solveToSolve defines solve_ (Paths.Loc (fileName, r))
     in
     ignore (Display.chatter_s 3 "%solve ");
-    let _ =
-      Display.chatter_s 3
+    ignore (Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-        ^ ".\n")
-    in
+        ^ ".\n"));
     let g =
       Timers.time Timers.compiling (fun () -> Compile.compileGoal IntSyn.Null a_) ()
     in
@@ -325,11 +323,9 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       ReconQuery.solveToSolve defines solve_ (Paths.Loc (fileName, r))
     in
     ignore (Display.chatter_s 3 "%solve ");
-    let _ =
-      Display.chatter_s 3
+    ignore (Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-        ^ ".\n")
-    in
+        ^ ".\n"));
     let g =
       Timers.time Timers.compiling (fun () -> Compile.compileGoal IntSyn.Null a_) ()
     in
@@ -386,17 +382,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let a_, optName, xs_ =
       ReconQuery.queryToQuery quy (Paths.Loc (fileName, r))
     in
-    let _ =
-      Display.chatter_s 3
+    ignore (Display.chatter_s 3
         (((("%query " ^ boundToString expected) ^ " ") ^ boundToString try_)
-        ^ "\n")
-    in
+        ^ "\n"));
     ignore (Display.chatter_s 4 " ");
-    let _ =
-      Display.chatter_s 3
+    ignore (Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-        ^ ".\n")
-    in
+        ^ ".\n"));
     let g =
       Timers.time Timers.compiling (fun () -> Compile.compileGoal IntSyn.Null a_) ()
     in
@@ -490,17 +482,13 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let a_, optName, xs_ =
       ReconQuery.queryToQuery quy (Paths.Loc (fileName, r))
     in
-    let _ =
-      Display.chatter_s 3
+    ignore (Display.chatter_s 3
         (((("%query " ^ boundToString expected) ^ " ") ^ boundToString try_)
-        ^ "\n")
-    in
+        ^ "\n"));
     ignore (Display.chatter_s 4 " ");
-    let _ =
-      Display.chatter_s 3
+    ignore (Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-        ^ ".\n")
-    in
+        ^ ".\n"));
     let g =
       Timers.time Timers.compiling (fun () -> Compile.compileGoal IntSyn.Null a_) ()
     in
@@ -623,19 +611,15 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
   note : %querytabled terminates if we have found the expected number of
   solutions or if we have reached the maximal number of stages *)
   let querytabled (numSol, try_, quy) (Paths.Loc (fileName, r)) =
-    let _ =
-      Display.chatter_s 3
-        ((("%querytabled " ^ boundToString numSol) ^ " ") ^ boundToString try_)
-    in
+    ignore (Display.chatter_s 3
+        ((("%querytabled " ^ boundToString numSol) ^ " ") ^ boundToString try_));
     let a_, optName, xs_ =
       ReconQuery.queryToQuery quy (Paths.Loc (fileName, r))
     in
     ignore (Display.chatter_s 4 " ");
-    let _ =
-      Display.chatter_s 3
+    ignore (Display.chatter_s 3
         (("\n" ^ Timers.time Timers.printing expToString (IntSyn.Null, a_))
-        ^ ".\n")
-    in
+        ^ ".\n"));
     let g =
       Timers.time Timers.compiling (fun () -> Compile.compileGoal IntSyn.Null a_) ()
     in

@@ -491,8 +491,7 @@ struct
   let rec sgnAutoCompressUpTo' n0 n f =
     begin if n0 > n then ()
     else
-      let _ =
-        begin match Sgn.sub n0 with
+      let () = ignore begin match Sgn.sub n0 with
         | Some _ -> ()
         | None -> (
             try
@@ -508,8 +507,7 @@ struct
               end
             with NoModes -> ())
         end
-        (* if not, compress it *)
-      in
+        (* if not, compress it *) in
       sgnAutoCompressUpTo' (n0 + 1) n f
       (* has this entry already been processed? *)
     end

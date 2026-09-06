@@ -21,7 +21,7 @@ let () =
   Printexc.record_backtrace true;
   Fmt_tty.setup_std_outputs ();
   Display.register (fun m ->
-      let _ = Display.fmt Fmt.stderr (Display.Info.body_to_form m.msg) in
+      ignore (Display.fmt Fmt.stderr (Display.Info.body_to_form m.msg));
       Lwt.return ())
 
 let show_input (input : string) : unit =

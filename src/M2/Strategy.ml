@@ -192,10 +192,8 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
     let run givenStates =
       ignore (printInit ());
       let os = fill (givenStates, ([], [])) in
-      let _ =
-        begin match os with [], _ -> printQed () | _ -> ()
-        end
-      in
+      ignore begin match os with [], _ -> printQed () | _ -> ()
+        end;
       os
   end
 
@@ -358,10 +356,8 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
     let run givenStates =
       ignore (printInit ());
       let os = recurse (givenStates, ([], [])) in
-      let _ =
-        begin match os with [], _ -> printQed () | _ -> ()
-        end
-      in
+      ignore begin match os with [], _ -> printQed () | _ -> ()
+        end;
       os
   end
 

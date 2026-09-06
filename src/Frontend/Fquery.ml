@@ -120,10 +120,8 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     in
     ignore (Display.chatter_s 3 "%fquery");
     ignore (Display.chatter_s 3 " ");
-    let _ =
-      Display.chatter_s 3
-        (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n")
-    in
+    ignore (Display.chatter_s 3
+        (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n"));
     let k, v1_ = Abstract.abstractDecImp v_ in
     let g_, v2_ = lower (k, I.Null, v1_) in
     let a = I.targetFam v2_ in

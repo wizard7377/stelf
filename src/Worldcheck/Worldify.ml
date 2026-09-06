@@ -392,10 +392,8 @@ end) : WORLDIFY = struct
       | gVs, One, k -> k gVs
       | ((g_, (v_, s)) as gVs), Block (c, (someDecs, piDecs)), k -> (
           let t = createEVarSub (g_, someDecs) in
-          let _ =
-            Trace.matchBlock
-              ((g_, subGoalToDList (Whnf.normalize (v_, s))), Seq (1, piDecs, t))
-          in
+          ignore (Trace.matchBlock
+              ((g_, subGoalToDList (Whnf.normalize (v_, s))), Seq (1, piDecs, t)));
           let k' = function
             | g'_, vs'_ ->
                 begin if noConstraints (g_, t) then k (g'_, vs'_)
@@ -515,14 +513,12 @@ end) : WORLDIFY = struct
       ignore (print "[?");
       let w'_ = worldifyWorld w_ in
       ignore (print ";");
-      let _ =
-        begin if !Global.chatter > 3 then
+      ignore begin if !Global.chatter > 3 then
           print
             (("World checking family " ^ Names.qidToString (Names.constQid a))
             ^ ":\n")
         else ()
-        end
-      in
+        end;
       let condecs =
         map
           (function
@@ -531,20 +527,16 @@ end) : WORLDIFY = struct
                 with Error' (occ, s) -> raise (Error (wrapMsg (c, occ, s)))))
           (Index.lookup a)
       in
-      let _ =
-        map
+      ignore (map
           (function
             | condec_ -> begin
                 print "#";
                 checkConDec w_ condec_
               end)
-          condecs
-      in
+          condecs);
       ignore (print "]");
-      let _ =
-        begin if !Global.chatter = 4 then print "\n" else ()
-        end
-      in
+      ignore begin if !Global.chatter = 4 then print "\n" else ()
+        end;
       condecs
   end
 

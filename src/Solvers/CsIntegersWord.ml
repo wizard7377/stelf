@@ -339,11 +339,9 @@ end) : Cs.CS = struct
               let cnstr =
                 makeCnstrPlus (g_, proof, eclo_ us1, eclo_ us2, eclo_ us3)
               in
-              let _ =
-                List.app
+              ignore (List.app
                   (function us_ -> Unify.delay us_ (ref cnstr))
-                  [ us1; us2; us3 ]
-              in
+                  [ us1; us2; us3 ]);
               Some proof
           end
       | g_, s_, n -> None
@@ -413,11 +411,9 @@ end) : Cs.CS = struct
               let cnstr =
                 makeCnstrTimes (g_, proof, eclo_ us1, eclo_ us2, eclo_ us3)
               in
-              let _ =
-                List.app
+              ignore (List.app
                   (function us_ -> Unify.delay us_ (ref cnstr))
-                  [ us1; us2; us3 ]
-              in
+                  [ us1; us2; us3 ]);
               Some proof
           end
       | g_, s_, n -> None
@@ -458,11 +454,9 @@ end) : Cs.CS = struct
               let cnstr =
                 makeCnstrQuot (g_, proof, eclo_ us1, eclo_ us2, eclo_ us3)
               in
-              let _ =
-                List.app
+              ignore (List.app
                   (function us_ -> Unify.delay us_ (ref cnstr))
-                  [ us1; us2; us3 ]
-              in
+                  [ us1; us2; us3 ]);
               Some proof
           end
       | g_, s_, n -> None
@@ -522,8 +516,7 @@ end) : Cs.CS = struct
 
     let installFgnCnstrOps () =
       let csid = !myID in
-      let _ =
-        FgnCnstrStd.ToInternal.install
+      ignore (FgnCnstrStd.ToInternal.install
           csid (function
             | MyFgnCnstrRepPlus (g_, _, u1_, u2_, u3) ->
                 toInternalPlus (g_, u1_, u2_, u3)
@@ -531,10 +524,8 @@ end) : Cs.CS = struct
                 toInternalTimes (g_, u1_, u2_, u3)
             | MyFgnCnstrRepQuot (g_, _, u1_, u2_, u3) ->
                 toInternalQuot (g_, u1_, u2_, u3)
-            | fc -> raise (UnexpectedFgnCnstr fc))
-      in
-      let _ =
-        FgnCnstrStd.Awake.install
+            | fc -> raise (UnexpectedFgnCnstr fc)));
+      ignore (FgnCnstrStd.Awake.install
           csid (function
             | MyFgnCnstrRepPlus (g_, proof, u1_, u2_, u3) ->
                 awakePlus (g_, proof, u1_, u2_, u3)
@@ -542,16 +533,13 @@ end) : Cs.CS = struct
                 awakeTimes (g_, proof, u1_, u2_, u3)
             | MyFgnCnstrRepQuot (g_, proof, u1_, u2_, u3) ->
                 awakeQuot (g_, proof, u1_, u2_, u3)
-            | fc -> raise (UnexpectedFgnCnstr fc))
-      in
-      let _ =
-        FgnCnstrStd.Simplify.install
+            | fc -> raise (UnexpectedFgnCnstr fc)));
+      ignore (FgnCnstrStd.Simplify.install
           csid (function
             | MyFgnCnstrRepPlus _ -> fun () -> false
             | MyFgnCnstrRepTimes _ -> fun () -> false
             | MyFgnCnstrRepQuot _ -> fun () -> false
-            | fc -> raise (UnexpectedFgnCnstr fc))
-      in
+            | fc -> raise (UnexpectedFgnCnstr fc)));
       ()
 
     let init (cs, installF) =

@@ -91,11 +91,9 @@ module MakePrint
     let lvars : I.block option ref list ref = ref []
 
     let lookuplvar l =
-      let _ =
-        begin if List.exists (function r -> r = l) !lvars then ()
+      ignore begin if List.exists (function r -> r = l) !lvars then ()
         else lvars := !lvars @ [ l ]
-        end
-      in
+        end;
       let rec find (r :: l_) n =
         begin if r = l then n else find l_ (n + 1)
         end

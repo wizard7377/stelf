@@ -326,8 +326,7 @@ end) : SUBTREE = struct
 
     let compatibleSub (nsub_t, nsub_e) =
       let sg, rho_t, rho_e = (nid (), nid (), nid ()) in
-      let _ =
-        S.forall nsub_e (function nv, (l', e_) ->
+      ignore (S.forall nsub_e (function nv, (l', e_) ->
             begin match S.lookup nsub_t nv with
             | Some (l, t_) ->
                 begin if l = l' then
@@ -341,8 +340,7 @@ end) : SUBTREE = struct
                 else raise (Generalization "Labels don't agree\n")
                 end
             | None -> S.insert rho_e (nv, (l', e_))
-            end)
-      in
+            end));
       begin if isId sg then None else Some (sg, rho_t, rho_e)
       end
 
@@ -685,13 +683,11 @@ end) : SUBTREE = struct
                         cnstrSub,
                         !cref )))
         in
-        let _ =
-          S.forall nsub_left (function nv, (nvaronly, u_) ->
+        ignore (S.forall nsub_left (function nv, (nvaronly, u_) ->
               begin match S.lookup cnstrSub nv with
               | None -> raise (Error "Left-over nsubstitution")
               | Some (I.AVar a_) -> a_ := Some (normalizeNExp (u_, cnstrSub))
-              end)
-        in
+              end));
         Some (S.union nsub_query_left nsub_query', cnstrSub, !cref)
       in
       try assign' (nsub_query, nsub) with Assignment msg -> None

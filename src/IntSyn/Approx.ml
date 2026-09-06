@@ -151,10 +151,8 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
     begin match varLookupRef r with
     | Some (_, name) -> name
     | None ->
-        let _ =
-          begin if allowed then () else raise Ambiguous
-          end
-        in
+        ignore begin if allowed then () else raise Ambiguous
+          end;
         let pref =
           begin match whnfUni l_ with Level 2 -> "A" | Level 3 -> "K"
           end

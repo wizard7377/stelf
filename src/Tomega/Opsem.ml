@@ -438,9 +438,7 @@ module MakeOpsem
           let m = I.ctxLength psi' in
           ignore (matchSub psi t1 t');
           let t'' = t in
-          let _ =
-            printLF (T.coerceCtx psi, T.coerceSub t'', T.coerceCtx psi') (m - d)
-          in
+          ignore (printLF (T.coerceCtx psi, T.coerceSub t'', T.coerceCtx psi') (m - d));
           topLevel (psi, m, (p_, t''))
           (* Psi |- t : Psi' *)
           (* Psi' |- t2 . shift(k) : Psi'' *)
@@ -468,13 +466,11 @@ module MakeOpsem
     | psi, d, (T.Let (d_, p1_, p2_), t) ->
         let (T.PDec (Some name, f_, _, _)) = d_ in
         let v_ = evalPrg (psi, (p1_, t)) in
-        let _ =
-          print
+        ignore (print
             (((((("val " ^ name) ^ " = ") ^ TomegaPrint.prgToString psi v_)
               ^ " :: ")
              ^ TomegaPrint.forToString psi f_)
-            ^ "\n")
-        in
+            ^ "\n"));
         let v'_ = topLevel (psi, d + 1, (p2_, T.Dot (T.Prg v_, t))) in
         v'_
 

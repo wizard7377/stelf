@@ -596,13 +596,11 @@ end) : RELFUN.RELFUN = struct
               Whnf.normalize (Weaken.strengthenExp v_ v, I.id)
             in
             let psi', w2 = strengthen (psi, (a', s_), w1, M.Minus) in
-            let _ =
-              begin if !Global.doubleCheck then
+            ignore begin if !Global.doubleCheck then
                 TypeCheck.typeCheck
                   (F.makectx psi') (I.Uni I.Type, I.Uni I.Kind)
               else ()
-              end
-            in
+              end;
             let w3 = Weaken.strengthenSub w1 w2 in
             let d4, w4, t4, ds_ =
               transformDec (ts_, (psi', I.Null), d, (a', s_), w1, w2, w3)
@@ -623,13 +621,11 @@ end) : RELFUN.RELFUN = struct
                   w1,
                   M.Minus )
             in
-            let _ =
-              begin if !Global.doubleCheck then
+            ignore begin if !Global.doubleCheck then
                 TypeCheck.typeCheck
                   (F.makectx dummy) (I.Uni I.Type, I.Uni I.Kind)
               else ()
-              end
-            in
+              end;
             let g = I.ctxLength g_ in
             let w1' = peeln (g, w1) in
             let w2' = peeln (g, w2) in

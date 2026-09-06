@@ -59,12 +59,10 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
 
     let checkConstraints k_ =
       let constraints = collectConstraints k_ in
-      let _ =
-        begin match constraints with
+      ignore begin match constraints with
         | [] -> ()
         | _ -> raise (C.Error constraints)
-        end
-      in
+        end;
       ()
 
     let eqEVar arg__1 arg__2 =

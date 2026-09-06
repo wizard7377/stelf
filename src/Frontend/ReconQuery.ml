@@ -153,19 +153,15 @@ end) : RECON_QUERY = struct
       Timers.time Timers.recon T.reconQuery (T.jclass tm)
     in
     ignore (T.checkErrors r);
-    let _ =
-      begin match l_ with
+    ignore begin match l_ with
       | IntSyn.Type -> ()
       | _ -> error r ("Query was not a type")
-      end
-    in
+      end;
     let xs_ = Names.namedEVars () in
-    let _ =
-      begin if freeVar (optName, xs_) then
+    ignore begin if freeVar (optName, xs_) then
         error r (("Proof term variable " ^ valOf optName) ^ " occurs in type")
       else ()
-      end
-    in
+      end;
     (v_, optName, xs_)
   (* construct an external term for the result of the query
         val res = (case optName
@@ -196,18 +192,14 @@ end) : RECON_QUERY = struct
       with Strict.Error _ -> IntSyn.AbbrevDef (name, None, i, u'_, v'_, l_)
     in
     let cd = Names.nameConDec cd in
-    let _ =
-      Display.chatter_s 3
-        (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
-    in
-    let _ =
-      begin if !Global.doubleCheck then begin
+    ignore (Display.chatter_s 3
+        (Timers.time Timers.printing Print.conDecToString cd ^ "\n"));
+    ignore begin if !Global.doubleCheck then begin
         Timers.time Timers.checking TypeCheck.check (v'_, IntSyn.Uni l_);
         Timers.time Timers.checking TypeCheck.check (u'_, v'_)
       end
       else ()
-      end
-    in
+      end;
     let conDecOpt =
       begin match optName with None -> None | Some _ -> Some cd
       end
@@ -235,18 +227,14 @@ end) : RECON_QUERY = struct
         IntSyn.AbbrevDef (name, None, i, u'_, v'_, IntSyn.Type)
     in
     let cd = Names.nameConDec cd in
-    let _ =
-      Display.chatter_s 3
-        (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
-    in
-    let _ =
-      begin if !Global.doubleCheck then begin
+    ignore (Display.chatter_s 3
+        (Timers.time Timers.printing Print.conDecToString cd ^ "\n"));
+    ignore begin if !Global.doubleCheck then begin
         Timers.time Timers.checking TypeCheck.check (v'_, IntSyn.Uni IntSyn.Type);
         Timers.time Timers.checking TypeCheck.check (u'_, v'_)
       end
       else ()
-      end
-    in
+      end;
     let conDecOpt =
       begin match nameOpt with None -> None | Some _ -> Some cd
       end
@@ -281,12 +269,10 @@ end) : RECON_QUERY = struct
       Timers.time Timers.recon T.reconQuery (T.jand (mkj defines) (T.jclass tm))
     in
     ignore (T.checkErrors r);
-    let _ =
-      begin match l_ with
+    ignore begin match l_ with
       | IntSyn.Type -> ()
       | _ -> error r0 ("Query was not a type")
-      end
-    in
+      end;
     let rec sc = function
       | m_, [], _ ->
           begin match finishSolve (sol, m_, v_) with

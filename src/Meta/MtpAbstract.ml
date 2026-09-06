@@ -530,17 +530,13 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           let k'_ = cf (I.ctxLength g_, k_) in
           let k' = I.ctxLength k'_ in
           let gk_, bk = abstractCtx k'_ in
-          let _ =
-            begin if !Global.doubleCheck then TypeCheck.typeCheckCtx gk_ else ()
-            end
-          in
+          ignore begin if !Global.doubleCheck then TypeCheck.typeCheckCtx gk_ else ()
+            end;
           let w' = I.comp w (I.Shift (k' - k)) in
           let fk = abstractFor (k'_, 0, (f_, s)) in
-          let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor gk_ fk
+          ignore begin if !Global.doubleCheck then FunTypeCheck.isFor gk_ fk
             else ()
-            end
-          in
+            end;
           let gk1, gk2 = split (gk_, k' - k) in
           (gk1, allClo (gk2, fk))
       | k_, w, Block ((g_, t, d, g2_), af_) ->
@@ -553,27 +549,21 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           let k''_ = extend (k'_, g2_) in
           let w' = F.dot1n (F.listToCtx g2_) (I.comp w (I.Shift (k' - k))) in
           let gk_, f'_ = makeFor (k''_, w', af_) in
-          let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor gk_ f'_
+          ignore begin if !Global.doubleCheck then FunTypeCheck.isFor gk_ f'_
             else ()
-            end
-          in
+            end;
           let gk1, gk2 = split (gk_, List.length g2_) in
           let f''_ =
             raiseFor (0, gk2, f'_, I.id, function w, _ -> F.dot1n gk2 w)
           in
-          let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor gk1 f''_
+          ignore begin if !Global.doubleCheck then FunTypeCheck.isFor gk1 f''_
             else ()
-            end
-          in
+            end;
           let gk11, gk12 = split (gk1, k' - k) in
           let f'''_ = allClo (gk12, f''_) in
-          let _ =
-            begin if !Global.doubleCheck then FunTypeCheck.isFor gk11 f'''_
+          ignore begin if !Global.doubleCheck then FunTypeCheck.isFor gk11 f'''_
             else ()
-            end
-          in
+            end;
           (gk11, f'''_)
 
     let abstractApproxFor = function

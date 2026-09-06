@@ -712,8 +712,7 @@ module MakeNames
   (* installNamePref' (cid, (ePref, uPref)) see installNamePref *)
   let installNamePref' (cid, (ePref, uPref)) =
     let l_ = IntSyn.constUni cid in
-    let _ =
-      begin match l_ with
+    ignore begin match l_ with
       | Type ->
           raise
             (Error
@@ -721,8 +720,7 @@ module MakeNames
                 ^ " cannot be given name preference\n")
                ^ "Name preferences can only be established for type families"))
       | Kind -> ()
-      end
-    in
+      end;
     Array.update (namePrefArray, cid, Some (ePref, uPref))
 
   (* installNamePref (cid, (ePref, uPrefOpt)) = ()

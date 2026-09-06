@@ -1,7 +1,8 @@
-; Refactoring tool: converts SML-style tuple-argument functions to curried form.
+; Refactoring tool: mechanical source-to-source passes over the port.
 ; Depends on nothing in src/, so the compiler-libs vs. project module-name
 ; collisions noted in CLAUDE.md (Lambda / Lexer / Parser) do not arise here.
 
 (executable
- (name curry)
+ (name refactor)
+ (modules Core Pass_curry Pass_letunit Pass_selftest Refactor)
  (libraries compiler-libs.common))

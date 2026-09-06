@@ -118,9 +118,7 @@ end) : SKOLEM = struct
                 let h_ = I.Skonst sk in
                 ignore (IndexSkolem.install I.Ordinary h_);
                 ignore (Names.installConstName sk);
-                let _ =
-                  Timers.time Timers.compiling Compile.install I.Ordinary sk
-                in
+                ignore (Timers.time Timers.compiling Compile.install I.Ordinary sk);
                 let s_ = spine d in
                 ignore (Display.chatter_s 3 (Print.conDecToString sd_ ^ "\n"));
                 installSkolem'

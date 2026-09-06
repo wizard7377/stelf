@@ -334,8 +334,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
               printMenu ()
             end
         | 1, Filling o_ :: _ ->
-            let _ =
-              begin match Timers.time Timers.filling Filling.apply o_ with
+            ignore begin match Timers.time Timers.filling Filling.apply o_ with
               | [] -> abort "Filling unsuccessful: no object found"
               | s_ :: _ -> begin
                   delete ();
@@ -344,8 +343,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
                     pushHistory ()
                   end
                 end
-              end
-            in
+              end;
             begin
               menu ();
               printMenu ()

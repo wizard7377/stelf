@@ -695,15 +695,13 @@ end) : RECON_TERM = struct
         let tm1', u1_ =
           checkApx (g_, tm1, v2_, l_, "Ascription did not hold")
         in
-        let _ =
-          addDelayed (function () ->
+        ignore (addDelayed (function () ->
               filterLevel
                 ( tm,
                   l_,
                   2,
                   "Ascription can only be applied to objects and type families"
-                ))
-        in
+                )));
         (Hastype_ (tm1', tm2'), u1_, v2_, l_)
     | g_, Omitted_ r ->
         let l_ = Apx.newLVar () in
@@ -757,13 +755,11 @@ end) : RECON_TERM = struct
     | g_, Jterm tm ->
         ignore (clearDelayed ());
         let tm', u_, v_, l_ = inferApx (g_, tm) in
-        let _ =
-          filterLevel
+        ignore (filterLevel
             ( tm',
               l_,
               2,
-              "The term in this position must be an object or a type family" )
-        in
+              "The term in this position must be an object or a type family" ));
         ignore (runDelayed ());
         Jterm tm'
     | g_, Jclass tm ->
@@ -777,13 +773,11 @@ end) : RECON_TERM = struct
               next_ l_,
               "The term in this position must be a type or a kind" )
         in
-        let _ =
-          filterLevel
+        ignore (filterLevel
             ( tm',
               next_ l_,
               3,
-              "The term in this position must be a type or a kind" )
-        in
+              "The term in this position must be a type or a kind" ));
         ignore (runDelayed ());
         Jclass tm'
     | g_, Jof (tm1, tm2) ->
@@ -800,13 +794,11 @@ end) : RECON_TERM = struct
         let tm1', u1_ =
           checkApx (g_, tm1, v2_, l_, "Ascription in declaration did not hold")
         in
-        let _ =
-          filterLevel
+        ignore (filterLevel
             ( tm1',
               l_,
               2,
-              "The term in this position must be an object or a type family" )
-        in
+              "The term in this position must be an object or a type family" ));
         ignore (runDelayed ());
         Jof (tm1', tm2')
     | g_, Jof' (tm1, v_) ->
@@ -816,13 +808,11 @@ end) : RECON_TERM = struct
         let tm1', u1_ =
           checkApx (g_, tm1, v2_, l_, "Ascription in declaration did not hold")
         in
-        let _ =
-          filterLevel
+        ignore (filterLevel
             ( tm1',
               l_,
               2,
-              "The term in this position must be an object or a type family" )
-        in
+              "The term in this position must be an object or a type family" ));
         ignore (runDelayed ());
         Jof' (tm1', v_)
 
@@ -985,14 +975,12 @@ end) : RECON_TERM = struct
 
   let unifyIdem (g_, us_, vs_) =
     ignore (Unify.reset ());
-    let _ =
-      try Unify.unify g_ us_ vs_
+    ignore (try Unify.unify g_ us_ vs_
       with Unify.Unify _ as e ->
         begin
           Unify.unwind ();
           raise e
-        end
-    in
+        end);
     ignore (Unify.reset ());
     ()
   (* this reset should be unnecessary -- for safety only *)
@@ -1000,10 +988,8 @@ end) : RECON_TERM = struct
   let unifiableIdem (g_, us_, vs_) =
     ignore (Unify.reset ());
     let ok = Unify.unifiable g_ us_ vs_ in
-    let _ =
-      begin if ok then Unify.reset () else Unify.unwind ()
-      end
-    in
+    ignore begin if ok then Unify.reset () else Unify.unwind ()
+      end;
     ok
   (* this reset should be unnecessary -- for safety only *)
 
@@ -1067,8 +1053,7 @@ end) : RECON_TERM = struct
         ]
     in
     Display.debug (Display.string (F.makestring_fmt eqnsFmt ^ "\n"));
-    let _ =
-      try unifyIdem (g_, vs1, vs2)
+    ignore (try unifyIdem (g_, vs1, vs2)
       with Unify.Unify msg as e ->
         begin
           Display.debug
@@ -1076,8 +1061,7 @@ end) : RECON_TERM = struct
                ((("Failed: " ^ msg) ^ "\n")
                ^ "Continuing with subterm replaced by _\n"));
           raise e
-        end
-    in
+        end);
     ignore (reportInst xnames);
     ignore (reportConstraints xnames);
     ()
@@ -1277,15 +1261,11 @@ end) : RECON_TERM = struct
     | g_, Mismatch_ (tm1, tm2, location_msg, problem_msg) ->
         let tm1', _, v1_ = inferExact (g_, tm1) in
         let tm2', b_, v_ = inferExactN (g_, tm2) in
-        let _ =
-          begin if !trace then
+        ignore begin if !trace then
             reportMismatch (g_, (v1_, IntSyn.id), (v_, IntSyn.id), problem_msg)
           else ()
-          end
-        in
-        let _ =
-          delayMismatch (g_, v1_, v_, termRegion tm2', location_msg, problem_msg)
-        in
+          end;
+        ignore (delayMismatch (g_, v1_, v_, termRegion tm2', location_msg, problem_msg));
         (Mismatch_ (tm1', tm2', location_msg, problem_msg), b_, v_)
     | g_, Omitapx (u_, v_, l_, r) ->
         let v'_ =
@@ -1378,9 +1358,7 @@ end) : RECON_TERM = struct
     | g_, Mismatch_ (tm1, tm2, location_msg, problem_msg), vhs ->
         let tm1', _, v1_ = inferExact (g_, tm1) in
         let (tm2', b_, v_), ok2 = checkExact1 (g_, tm2, vhs) in
-        let _ =
-          delayMismatch (g_, v1_, v_, termRegion tm2', location_msg, problem_msg)
-        in
+        ignore (delayMismatch (g_, v1_, v_, termRegion tm2', location_msg, problem_msg));
         ((Mismatch_ (tm1', tm2', location_msg, problem_msg), b_, v_), ok2)
     | g_, Omitapx (u_, v_, l_, r (* = Vhs *)), vhs ->
         let v'_ = eClo vhs in
@@ -1425,9 +1403,7 @@ end) : RECON_TERM = struct
           let (tm'', b'', _ (* Vs *)), _ (* true *) =
             checkExact1 (g_, Omitapx (uapx, vapx, lapx, r), vs_)
           in
-          let _ =
-            delayMismatch (g_, v'_, eClo vs_, r, location_msg, problem_msg)
-          in
+          ignore (delayMismatch (g_, v'_, eClo vs_, r, location_msg, problem_msg));
           (Mismatch_ (tm', tm'', location_msg, problem_msg), b'')
       end
     else
@@ -1444,9 +1420,7 @@ end) : RECON_TERM = struct
         let tm'', b'' =
           checkExact (g_, Omitapx (uapx, vapx, lapx, r), vs_, location_msg)
         in
-        let _ =
-          delayMismatch (g_, v'_, eClo vs_, r, location_msg, problem_msg)
-        in
+        ignore (delayMismatch (g_, v'_, eClo vs_, r, location_msg, problem_msg));
         (Mismatch_ (tm', tm'', location_msg, problem_msg), b'')
     end
 
@@ -1497,9 +1471,7 @@ end) : RECON_TERM = struct
     | g_, Mismatch_ (tm1, tm2, location_msg, problem_msg), vhs ->
         let tm1', _, l1_ = inferExact (g_, tm1) in
         let (tm2', b_, l_), ok2 = unifyExact (g_, tm2, vhs) in
-        let _ =
-          delayMismatch (g_, l1_, l_, termRegion tm2', location_msg, problem_msg)
-        in
+        ignore (delayMismatch (g_, l1_, l_, termRegion tm2', location_msg, problem_msg));
         ((Mismatch_ (tm1', tm2', location_msg, problem_msg), b_, l_), ok2)
     | ( g_,
         Omitapx

@@ -207,16 +207,14 @@ end) : TOTAL = struct
 
   and checkGoalW (g_, (v_, s), occ) =
     let a = I.targetFam v_ in
-    let _ =
-      begin if not (total a) then
+    ignore begin if not (total a) then
         raise
           (Error'
              ( occ,
                ("Subgoal " ^ N.qidToString (N.constQid a))
                ^ " not declared to be total" ))
       else ()
-      end
-    in
+      end;
     ignore (checkDynOrderW (g_, (v_, s), 2, occ));
     try Cover.checkOut g_ (v_, s)
     with Cover.Error msg ->
@@ -283,44 +281,35 @@ end) : TOTAL = struct
     *)
   let checkFam a =
     ignore (Cover.checkNoDef a);
-    let _ =
-      try Subordinate.checkNoDef a
+    ignore (try Subordinate.checkNoDef a
       with Subordinate.Error msg ->
         raise
           (Subordinate.Error
              ((("Totality checking " ^ N.qidToString (N.constQid a)) ^ ":\n")
              ^ msg))
-      (* a cannot depend on type-level definitions *)
-    in
-    let _ =
-      try
+      (* a cannot depend on type-level definitions *));
+    ignore (try
         begin
           Timers.time Timers.terminate Reduces.checkFam a;
           Display.chatter_s 4
             (("Terminates: " ^ N.qidToString (N.constQid a)) ^ "\n")
         end
-      with Reduces.Error msg -> raise (Reduces.Error msg)
-    in
+      with Reduces.Error msg -> raise (Reduces.Error msg));
     let (Some ms) = ModeTable.modeLookup a in
     ignore (checkDefinite (a, ms));
-    let _ =
-      try
+    ignore (try
         begin
           Timers.time Timers.coverage (fun () -> Cover.checkCovers a ms) ();
           Display.chatter_s 4
             (("Covers (input): " ^ N.qidToString (N.constQid a)) ^ "\n")
         end
-      with Cover.Error msg -> raise (Cover.Error msg)
-    in
-    let _ =
-      Display.chatter_s 4
+      with Cover.Error msg -> raise (Cover.Error msg));
+    ignore (Display.chatter_s 4
         (("Output coverage checking family " ^ N.qidToString (N.constQid a))
-        ^ "\n")
-    in
+        ^ "\n"));
     ignore (ModeCheck.checkFreeOut a ms);
     let cs = Index.lookup a in
-    let _ =
-      try
+    ignore (try
         begin
           Timers.time Timers.coverage checkOutCover cs;
           begin
@@ -330,8 +319,7 @@ end) : TOTAL = struct
               (("Covers (output): " ^ N.qidToString (N.constQid a)) ^ "\n")
           end
         end
-      with Cover.Error msg -> raise (Cover.Error msg)
-    in
+      with Cover.Error msg -> raise (Cover.Error msg));
     ()
   (* Ensuring that there is no bad interaction with type-level definitions *)
   (* a cannot be a type-level definition *)

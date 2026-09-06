@@ -264,11 +264,9 @@ end) : TABLED = struct
       getHypGoal (C.DProg (I.Null, I.Null), (goal, I.id))
     in
     let g'_, dAVars, dEVars, u'_, eqn', s' = A.abstractEVarCtx dProg p s in
-    let _ =
-      begin if solveEqn ((eqn', s'), g'_) then ()
+    ignore begin if solveEqn ((eqn', s'), g'_) then ()
       else print "\nresidual equation not solvable!\n"
-      end
-    in
+      end;
     let status =
       begin if flag then TableParam.Complete else TableParam.Incomplete
       end
@@ -438,14 +436,12 @@ end) : TABLED = struct
           let g'_, dAVars, dEVars, u'_, eqn', s' =
             A.abstractEVarCtx dp p s
           in
-          let _ =
-            begin if solveEqn ((eqn', s'), g'_) then ()
+          ignore begin if solveEqn ((eqn', s'), g'_) then ()
             else
               print
                 "\n\
                  residual equation not solvable! -- This should never happen! \n"
-            end
-          in
+            end;
           begin match
             MT.callCheck (dAVars, dEVars, g'_, u'_, eqn', T.Incomplete)
           with

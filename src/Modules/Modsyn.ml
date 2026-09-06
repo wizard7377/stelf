@@ -210,16 +210,12 @@ end) : MODSYN = struct
         | Some mid -> Some (Names.getComponents mid)
         end
       in
-      let _ =
-        begin match nsOpt with
+      ignore begin match nsOpt with
         | Some ns -> Names.insertStruct ns mid'
         | _ -> ()
-        end
-      in
-      let _ =
-        begin match parent with None -> Names.installStructName mid' | _ -> ()
-        end
-      in
+        end;
+      ignore begin match parent with None -> Names.installStructName mid' | _ -> ()
+        end;
       let ns = Names.newNamespace () in
       ignore (Names.installComponents mid' ns);
       IntTree.insert structMap (mid, mid')
@@ -236,29 +232,21 @@ end) : MODSYN = struct
         | Some mid -> Some (Names.getComponents mid)
         end
       in
-      let _ =
-        begin match nsOpt with
+      ignore begin match nsOpt with
         | Some ns -> Names.insertConst ns cid'
         | _ -> ()
-        end
-      in
-      let _ =
-        begin match parent with None -> Names.installConstName cid' | _ -> ()
-        end
-      in
+        end;
+      ignore begin match parent with None -> Names.installConstName cid' | _ -> ()
+        end;
       ignore (installAction (cid', origin));
-      let _ =
-        begin match fixity with
+      ignore begin match fixity with
         | Names.Fixity.Nonfix -> ()
         | _ -> Names.installFixity cid' fixity
-        end
-      in
-      let _ =
-        begin match namePrefOpt with
+        end;
+      ignore begin match namePrefOpt with
         | None -> ()
         | Some (n1, n2) -> Names.installNamePref cid' (n1, n2)
-        end
-      in
+        end;
       IntTree.insert constMap (cid, cid')
     in
     begin
@@ -274,12 +262,10 @@ end) : MODSYN = struct
       end
     in
     let mid = IntSyn.sgnStructAdd strdec in
-    let _ =
-      begin match nsOpt with
+    ignore begin match nsOpt with
       | Some namespace -> Names.insertStruct namespace mid
       | _ -> ()
-      end
-    in
+      end;
     ignore (Names.installStructName mid);
     let ns = Names.newNamespace () in
     ignore (Names.installComponents mid ns);
@@ -336,9 +322,7 @@ end) : MODSYN = struct
     let mid = IntSyn.sgnStructAdd (IntSyn.StrDec ("wheresubj", None)) in
     let ns = Names.newNamespace () in
     ignore (Names.installComponents mid ns);
-    let _ =
-      installModule (module_, Some mid, None, (fun _ -> ()), transformConDec)
-    in
+    ignore (installModule (module_, Some mid, None, (fun _ -> ()), transformConDec));
     abstractModule ns (Some mid)
 
   open! struct

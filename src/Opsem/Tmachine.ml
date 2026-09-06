@@ -212,7 +212,7 @@ end) : ABSMACHINE = struct
     and matchAtom
         (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
       let tag = T.tagGoal () in
-      let _ = T.signal g_ (T.SolveGoal (tag, ha, I.EClo (fst ps', snd ps'))) in
+      ignore (T.signal g_ (T.SolveGoal (tag, ha, I.EClo (fst ps', snd ps'))));
       let deterministic = C.detTableCheck (cidFromHead ha) in
       let exception SucceedOnce of I.spine in
       let rec matchSig = function

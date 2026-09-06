@@ -162,12 +162,9 @@ end) : RECON_CONDEC = struct
             (IntSyn.ConDec (name, None, i, IntSyn.Normal, v'_, l_))
         in
         let ocd = Paths.dec (i, oc) in
-        let _ =
-          Display.chatter_s 3 ~kind:Display.Response
-            (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
-        in
-        let _ =
-          begin if !Global.doubleCheck then
+        ignore (Display.chatter_s 3 ~kind:Display.Response
+            (Timers.time Timers.printing Print.conDecToString cd ^ "\n"));
+        ignore begin if !Global.doubleCheck then
             begin try
               Timers.time Timers.checking TypeCheck.check (v'_, IntSyn.Uni l_)
             with TypeCheck.Error msg ->
@@ -175,8 +172,7 @@ end) : RECON_CONDEC = struct
               raise (TypeCheck.Error msg)
             end
           else ()
-          end
-        in
+          end;
         (Some cd, Some ocd)
     | Condef_ (optName, tm1, tm2Opt), Paths.Loc (fileName, r), abbFlag ->
         ignore (Names.varReset IntSyn.Null);
@@ -218,12 +214,9 @@ end) : RECON_CONDEC = struct
             (* (case optName of NONE => () | _ => Strict.checkType ((i, V''), SOME(ocd))); *)
           end
         in
-        let _ =
-          Display.chatter_s 3 ~kind:Display.Response
-            (Timers.time Timers.printing Print.conDecToString cd ^ "\n")
-        in
-        let _ =
-          begin if !Global.doubleCheck then begin
+        ignore (Display.chatter_s 3 ~kind:Display.Response
+            (Timers.time Timers.printing Print.conDecToString cd ^ "\n"));
+        ignore begin if !Global.doubleCheck then begin
             (try Timers.time Timers.checking TypeCheck.check (v'', IntSyn.Uni l_)
              with TypeCheck.Error msg ->
                let n = match optName with None -> "_" | Some n -> n in
@@ -238,8 +231,7 @@ end) : RECON_CONDEC = struct
               raise (TypeCheck.Error msg)
           end
           else ()
-          end
-        in
+          end;
         let optConDec =
           begin match optName with None -> None | Some _ -> Some cd
           end
@@ -313,10 +305,8 @@ end) : RECON_CONDEC = struct
         let bd =
           IntSyn.BlockDec (name, None, gsome', ctxToList (gblock', []))
         in
-        let _ =
-          Display.chatter_s 3 ~kind:Display.Response
-            (Timers.time Timers.printing Print.conDecToString bd ^ "\n")
-        in
+        ignore (Display.chatter_s 3 ~kind:Display.Response
+            (Timers.time Timers.printing Print.conDecToString bd ^ "\n"));
         (Some bd, None)
         (* closed nf *)
     | Blockdef (name, w_), Paths.Loc (fileName, r), abbFlag ->
@@ -337,10 +327,8 @@ end) : RECON_CONDEC = struct
             w'_
         in
         let bd = IntSyn.BlockDef (name, None, w''_) in
-        let _ =
-          Display.chatter_s 3 ~kind:Display.Response
-            (Timers.time Timers.printing Print.conDecToString bd ^ "\n")
-        in
+        ignore (Display.chatter_s 3 ~kind:Display.Response
+            (Timers.time Timers.printing Print.conDecToString bd ^ "\n"));
         (Some bd, None)
 
   let internalInst _ = raise Match

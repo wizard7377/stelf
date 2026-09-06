@@ -146,10 +146,8 @@ module MakeTomegaCoverage
     and coverageCheckCases = function
       | w_, psi, [], [] -> ()
       | w_, psi, [], cs_ ->
-          let _ =
-            chatter 5 (function () ->
-                Int.toString (List.length cs_) ^ " cases to be checked\n")
-          in
+          ignore (chatter 5 (function () ->
+                Int.toString (List.length cs_) ^ " cases to be checked\n"));
           let ((_, _, psi') :: _ as cs'_) = map purify cs_ in
           let cs''_ =
             map

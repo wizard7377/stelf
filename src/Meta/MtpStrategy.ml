@@ -202,10 +202,8 @@ end) : MTPSTRATEGY = struct
       let openStates, solvedStates = fill (Obj.magic givenStates, ([], [])) in
       let openStates' = map MTPrint.nameState (Obj.magic openStates) in
       let solvedStates' = map MTPrint.nameState (Obj.magic solvedStates) in
-      let _ =
-        begin match openStates with [] -> printQed () | _ -> ()
-        end
-      in
+      ignore begin match openStates with [] -> printQed () | _ -> ()
+        end;
       ( (Obj.magic openStates' : S.state list),
         (Obj.magic solvedStates' : S.state list) )
   end

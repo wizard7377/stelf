@@ -152,8 +152,7 @@ module MakeSubordinate
     let freeze l_ =
       ignore (freezeList := IntSet.empty);
       let l'_ = map expandFamilyAbbrevs l_ in
-      let _ =
-        List.app
+      ignore (List.app
           (function
             | a ->
                 appReachable
@@ -163,8 +162,7 @@ module MakeSubordinate
                         freezeList := IntSet.insert b (!freezeList)
                       end)
                   a)
-          l'_
-      in
+          l'_);
       let cids = IntSet.foldl (fun (x, acc) -> x :: acc) [] !freezeList in
       cids
 
@@ -451,18 +449,14 @@ module MakeSubordinate
       ignore (print (("Defined : " ^ Int.toString !defined) ^ "\n"));
       ignore (print (("Abbrevs : " ^ Int.toString !abbrev) ^ "\n"));
       ignore (print (("Other   : " ^ Int.toString !other) ^ "\n"));
-      let _ =
-        print (("Max definition height: " ^ Int.toString !maxHeight) ^ "\n")
-      in
-      let _ =
-        ArraySlice.appi
+      ignore (print (("Max definition height: " ^ Int.toString !maxHeight) ^ "\n"));
+      ignore (ArraySlice.appi
           (function
             | h, i ->
                 print
                   ((((" Height " ^ Int.toString h) ^ ": ") ^ Int.toString i)
                   ^ " definitions\n"))
-          (ArraySlice.slice (heightArray, 0, Some (!maxHeight + 1)))
-      in
+          (ArraySlice.slice (heightArray, 0, Some (!maxHeight + 1))));
       ()
   end
 

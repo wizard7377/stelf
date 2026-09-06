@@ -135,22 +135,18 @@ module MakeUnique
       end
 
     let checkDiffConstConst (I.Const cid, I.Const cid', ms) =
-      let _ =
-        chatter 6 (function () ->
-            ((("?- " ^ cName cid) ^ " ~ ") ^ cName cid') ^ "\n")
-      in
+      ignore (chatter 6 (function () ->
+            ((("?- " ^ cName cid) ^ " ~ ") ^ cName cid') ^ "\n"));
       let vs_ = instEVars (I.Null, (I.constType cid, I.id)) in
       let vs'_ = instEVars (I.Null, (I.constType cid', I.id)) in
-      let _ =
-        CsManager.trail (function () ->
+      ignore (CsManager.trail (function () ->
             begin if unifiableRoots (I.Null, vs_, vs'_, ms) then
               raise
                 (Error
                    (((("Constants " ^ cName cid) ^ " and ") ^ cName cid')
                    ^ " overlap\n"))
             else ()
-            end)
-      in
+            end));
       ()
 
     let rec checkUniqueConstConsts = function
@@ -172,8 +168,7 @@ module MakeUnique
       | g_, (v_, s), (t, (I.Dec (yOpt, v'_) as d_) :: piDecs), (a, ms), (b, xOpt)
         ->
           let a' = I.targetFam v'_ in
-          let _ =
-            begin if a = a' then
+          ignore begin if a = a' then
               checkNotUnifiableTypes
                 ( g_,
                   (v_, s),
@@ -181,8 +176,7 @@ module MakeUnique
                   ms,
                   ((b, xOpt), (b, yOpt)) )
             else ()
-            end
-          in
+            end;
           checkDiffBlocksInternal
             ( I.Decl (g_, d_),
               (v_, I.comp s I.shift),
@@ -194,8 +188,7 @@ module MakeUnique
       | g_, (t, []), (a, ms), b -> ()
       | g_, (t, (I.Dec (xOpt, v_) as d_) :: piDecs), (a, ms), b ->
           let a' = I.targetFam v_ in
-          let _ =
-            begin if a = a' then
+          ignore begin if a = a' then
               let v'_, s = instEVars (g_, (v_, t)) in
               checkDiffBlocksInternal
                 ( I.Decl (g_, d_),
@@ -204,8 +197,7 @@ module MakeUnique
                   (a, ms),
                   (b, xOpt) )
             else ()
-            end
-          in
+            end;
           checkUniqueBlockInternal'
             (I.Decl (g_, d_), (I.dot1 t, piDecs), (a, ms), b)
 
@@ -216,38 +208,30 @@ module MakeUnique
     let rec checkUniqueBlockConsts = function
       | g_, vs_, [], ms, bx -> ()
       | g_, vs_, I.Const cid :: cs, ms, bx ->
-          let _ =
-            chatter 6 (function () ->
-                ((("?- " ^ pName bx) ^ " ~ ") ^ cName cid) ^ "\n")
-          in
+          ignore (chatter 6 (function () ->
+                ((("?- " ^ pName bx) ^ " ~ ") ^ cName cid) ^ "\n"));
           let vs'_ = instEVars (g_, (I.constType cid, I.id)) in
-          let _ =
-            CsManager.trail (function () ->
+          ignore (CsManager.trail (function () ->
                 begin if unifiableRoots (g_, vs_, vs'_, ms) then
                   raise
                     (Error
                        (((("Block " ^ pName bx) ^ " and constant ") ^ cName cid)
                        ^ " overlap"))
                 else ()
-                end)
-          in
+                end));
           checkUniqueBlockConsts (g_, vs_, cs, ms, bx)
       | g_, vs_, I.Def cid :: cs, ms, bx ->
-          let _ =
-            chatter 6 (function () ->
-                ((("?- " ^ pName bx) ^ " ~ ") ^ cName cid) ^ "\n")
-          in
+          ignore (chatter 6 (function () ->
+                ((("?- " ^ pName bx) ^ " ~ ") ^ cName cid) ^ "\n"));
           let vs'_ = instEVars (g_, (I.constType cid, I.id)) in
-          let _ =
-            CsManager.trail (function () ->
+          ignore (CsManager.trail (function () ->
                 begin if unifiableRoots (g_, vs_, vs'_, ms) then
                   raise
                     (Error
                        (((("Block " ^ pName bx) ^ " and constant ") ^ cName cid)
                        ^ " overlap"))
                 else ()
-                end)
-          in
+                end));
           checkUniqueBlockConsts (g_, vs_, cs, ms, bx)
       | g_, vs_, _ :: cs, ms, bx ->
           (* Skip other head types *)
@@ -258,13 +242,11 @@ module MakeUnique
       | g_, (v_, s), (t, (I.Dec (yOpt, v'_) as d_) :: piDecs), (a, ms), (bx, b')
         ->
           let a' = I.targetFam v'_ in
-          let _ =
-            begin if a = a' then
+          ignore begin if a = a' then
               checkNotUnifiableTypes
                 (g_, (v_, s), instEVars (g_, (v'_, t)), ms, (bx, (b', yOpt)))
             else ()
-            end
-          in
+            end;
           checkUniqueBlockBlock
             ( I.Decl (g_, d_),
               (v_, I.comp s I.shift),
@@ -277,28 +259,20 @@ module MakeUnique
       | g_, vs_, b :: bs, (a, ms), bx ->
           let gsome_, piDecs = I.constBlock b in
           let t = createEVarSub (g_, gsome_) in
-          let _ =
-            checkUniqueBlockBlock (g_, vs_, (t, piDecs), (a, ms), (bx, b))
-          in
+          ignore (checkUniqueBlockBlock (g_, vs_, (t, piDecs), (a, ms), (bx, b)));
           checkUniqueBlockBlocks (g_, vs_, bs, (a, ms), bx)
 
     let rec checkUniqueBlock' = function
       | g_, (t, []), bs, cs, (a, ms), b -> ()
       | g_, (t, (I.Dec (xOpt, v_) as d_) :: piDecs), bs, cs, (a, ms), b ->
           let a' = I.targetFam v_ in
-          let _ =
-            begin if a = a' then
+          ignore begin if a = a' then
               let v'_, s = instEVars (g_, (v_, t)) in
-              let _ =
-                checkUniqueBlockBlocks (g_, (v'_, s), bs, (a, ms), (b, xOpt))
-              in
-              let _ =
-                checkUniqueBlockConsts (g_, (v'_, s), cs, ms, (b, xOpt))
-              in
+              ignore (checkUniqueBlockBlocks (g_, (v'_, s), bs, (a, ms), (b, xOpt)));
+              ignore (checkUniqueBlockConsts (g_, (v'_, s), cs, ms, (b, xOpt)));
               ()
             else ()
-            end
-          in
+            end;
           checkUniqueBlock'
             (I.Decl (g_, d_), (I.dot1 t, piDecs), bs, cs, (a, ms), b)
 
@@ -433,16 +407,12 @@ module MakeUnique
        Effect: raises Error (msg) otherwise
     *)
   let checkUnique a ms =
-    let _ =
-      chatter 4 (function () ->
-          ("Uniqueness checking family " ^ cName a) ^ "\n")
-    in
+    ignore (chatter 4 (function () ->
+          ("Uniqueness checking family " ^ cName a) ^ "\n"));
     ignore (checkNoDef a);
-    let _ =
-      try Subordinate.checkNoDef a
+    ignore (try Subordinate.checkNoDef a
       with Subordinate.Error msg ->
-        raise (Error ((("Coverage checking " ^ cName a) ^ ":\n") ^ msg))
-    in
+        raise (Error ((("Coverage checking " ^ cName a) ^ ":\n") ^ msg)));
     let cs = Index.lookup a in
     let (T.Worlds bs) =
       try W.lookup a
@@ -454,25 +424,17 @@ module MakeUnique
              ^ cName a))
       (* worlds declarations for a *)
     in
-    let _ =
-      try checkUniqueConsts (cs, ms)
+    ignore (try checkUniqueConsts (cs, ms)
       with Error msg ->
-        raise (Error ((("Uniqueness checking " ^ cName a) ^ ":\n") ^ msg))
-    in
-    let _ =
-      try checkUniqueWorlds (bs, cs, (a, ms))
+        raise (Error ((("Uniqueness checking " ^ cName a) ^ ":\n") ^ msg)));
+    ignore (try checkUniqueWorlds (bs, cs, (a, ms))
       with Error msg ->
-        raise (Error ((("Uniqueness checking " ^ cName a) ^ ":\n") ^ msg))
-    in
-    let _ =
-      chatter 5 (function () ->
-          ("Checking uniqueness modes for family " ^ cName a) ^ "\n")
-    in
-    let _ =
-      try UniqueCheck.checkMode a ms
+        raise (Error ((("Uniqueness checking " ^ cName a) ^ ":\n") ^ msg)));
+    ignore (chatter 5 (function () ->
+          ("Checking uniqueness modes for family " ^ cName a) ^ "\n"));
+    ignore (try UniqueCheck.checkMode a ms
       with UniqueCheck.Error msg ->
-        raise (Error ((("Uniqueness mode checking " ^ cName a) ^ ":\n") ^ msg))
-    in
+        raise (Error ((("Uniqueness mode checking " ^ cName a) ^ ":\n") ^ msg)));
     ()
   (* lookup constants defining a *)
 end

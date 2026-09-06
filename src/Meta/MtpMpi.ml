@@ -300,11 +300,9 @@ end) : MTPI = struct
       end
       else
         let s_ = current () in
-        let _ =
-          begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
+        ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
           else ()
-          end
-        in
+          end;
         begin
           print "\n";
           begin
@@ -358,10 +356,8 @@ end) : MTPI = struct
       let f_ = RelFun.convertFor cL in
       let o_ = transformOrder (I.Null, f_, map select cL) in
       let slist = MTPInit.init f_ (Obj.magic o_) in
-      let _ =
-        begin if List.length slist = 0 then raise Domain else ()
-        end
-      in
+      ignore begin if List.length slist = 0 then raise Domain else ()
+        end;
       try
         begin
           ignore
@@ -388,14 +384,12 @@ end) : MTPI = struct
             let s'_ = Timers.time Timers.splitting MTPSplitting.apply o_ in
             ignore (pushHistory ());
             ignore (delete ());
-            let _ =
-              ignore
+            ignore (ignore
                 (map
                    (function
                      | s_ ->
                          insert (Obj.magic (MTPrint.nameState (Obj.magic s_))))
-                   s'_)
-            in
+                   s'_));
             begin
               menu ();
               printMenu ()

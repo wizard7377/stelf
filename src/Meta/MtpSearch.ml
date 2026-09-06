@@ -325,32 +325,28 @@ end) : MTPSEARCH.MTPSEARCH = struct
             | [] -> ()
             | hc :: sgn' ->
                 let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
-                let _ =
-                  CsManager.trail (function () ->
+                ignore (CsManager.trail (function () ->
                       rSolve
                         ( max - 1,
                           depth,
                           ps',
                           (r, I.id),
                           dp,
-                          function s_ -> sc (I.Root (hc, s_)) ))
-                in
+                          function s_ -> sc (I.Root (hc, s_)) )));
                 matchSig' sgn'
           in
           let rec matchDProg = function
             | I.Null, _ -> matchSig' (Index.lookup (cidFromHead ha))
             | I.Decl (dPool', C.Dec (r, s, ha')), n ->
                 begin if eqHead (ha, ha') then
-                  let _ =
-                    CsManager.trail (function () ->
+                  let () = ignore (CsManager.trail (function () ->
                         rSolve
                           ( max - 1,
                             depth,
                             ps',
                             (r, I.comp s (I.Shift n)),
                             dp,
-                            function s_ -> sc (I.Root (I.BVar n, s_)) ))
-                  in
+                            function s_ -> sc (I.Root (I.BVar n, s_)) ))) in
                   matchDProg (dPool', n + 1)
                 else matchDProg (dPool', n + 1)
                 end

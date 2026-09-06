@@ -106,12 +106,10 @@ module MakeCsManager (Global : GLOBAL) (Unify : UNIFY) (Fixity : FIXITY) :
 
     let installSolver solver =
       let cs = !nextCS in
-      let _ =
-        begin if !nextCS > maxCS then
+      ignore begin if !nextCS > maxCS then
           raise (Error "too many constraint solvers")
         else ()
-        end
-      in
+        end;
       ignore (Array.update (csArray, cs, Solver (solver, ref false)));
       ignore (nextCS := !nextCS + 1);
       cs

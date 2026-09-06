@@ -335,10 +335,8 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
                 let gy = pruneCtx (ss, g_, rOccur) in
                 let v'_ = pruneExp (g_, (v_, s), ss, rOccur) in
                 let y_ = newEVar gy v'_ in
-                let _ =
-                  addConstraint
-                    cnstrs (ref (Eqn (g_, EClo (x_, s), EClo (y_, Whnf.invert ss))))
-                in
+                ignore (addConstraint
+                    cnstrs (ref (Eqn (g_, EClo (x_, s), EClo (y_, Whnf.invert ss)))));
                 y_
             end
           end
@@ -629,16 +627,14 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
           ((Root (Def d2, s2_), s2) as us2) ) =
       let (Anc (_, h1, c1Opt)) = defAncestor d1 in
       let (Anc (_, h2, c2Opt)) = defAncestor d2 in
-      let _ =
-        begin match (c1Opt, c2Opt) with
+      ignore begin match (c1Opt, c2Opt) with
         | Some c1, Some c2 ->
             begin if c1 <> c2 then
               raise (Unify "Irreconcilable defined constant clash")
             else ()
             end
         | _ -> ()
-        end
-      in
+        end;
       begin match Int.compare (h1, h2) with
       | Equal -> unifyExpW (g_, Whnf.expandDef us1, Whnf.expandDef us2)
       | Less -> unifyExpW (g_, us1, Whnf.expandDef us2)
