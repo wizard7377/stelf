@@ -292,16 +292,12 @@ end) : RECON_TERM = struct
         begin match Names.getEVarOpt name with
         | Some (IntSyn.EVar (_, _, v_, _)) ->
             let v'_, _ (* Type *) = Apx.classToApx v_ in
-            begin
-              StringTree.insert evarApxTable (name, v'_);
-              v'_
-            end
+            StringTree.insert evarApxTable (name, v'_);
+            v'_
         | None ->
             let v_ = Apx.newCVar () in
-            begin
-              StringTree.insert evarApxTable (name, v_);
-              v_
-            end
+            StringTree.insert evarApxTable (name, v_);
+            v_
         end
     end
 
@@ -335,10 +331,8 @@ end) : RECON_TERM = struct
         let v'_ = Apx.apxToClass (IntSyn.Null, v_, Apx.(Level 1), allowed) in
         let g''_, v'' = lowerType (IntSyn.Null, (v'_, IntSyn.id)) in
         let x_ = IntSyn.newEVar g''_ v'' in
-        begin
-          Names.addEVar x_ name;
-          (x_, v'_)
-        end
+        Names.addEVar x_ name;
+        (x_, v'_)
     end
 
   let getFVarType (name, allowed) =
@@ -347,10 +341,8 @@ end) : RECON_TERM = struct
     | None ->
         let v_ = Option.valOf (StringTree.lookup fvarApxTable name) in
         let v'_ = Apx.apxToClass (IntSyn.Null, v_, Apx.(Level 1), allowed) in
-        begin
-          StringTree.insert fvarTable (name, v'_);
-          v'_
-        end
+        StringTree.insert fvarTable (name, v'_);
+        v'_
     end
 
   (* External syntax of terms *)
@@ -1165,10 +1157,8 @@ end) : RECON_TERM = struct
           try getEVar (name, false)
           with Apx.Ambiguous ->
             let x_, v_ = getEVar (name, true) in
-            begin
-              delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
-              (x_, v_)
-            end
+            delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
+            (x_, v_)
         in
         let s = IntSyn.Shift (IntSyn.ctxLength g_) in
         (tm, Elim (elimSub (evarElim x_, s)), eClo (v_, s))
@@ -1182,15 +1172,13 @@ end) : RECON_TERM = struct
           try getFVarType (name, false)
           with Apx.Ambiguous ->
             let v_ = getFVarType (name, true) in
-            begin
-              Debug.(
-                msg ~src:Group.approx ~level:Level.Debug
-                  (Fmt.shown_exact
-                     (fun name -> "ambiguous type for FVar " ^ name)
-                     name));
-              delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
-              v_
-            end
+            Debug.(
+              msg ~src:Group.approx ~level:Level.Debug
+                (Fmt.shown_exact
+                   (fun name -> "ambiguous type for FVar " ^ name)
+                   name));
+            delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
+            v_
         in
         let s = IntSyn.Shift (IntSyn.ctxLength g_) in
         (tm, Elim (fvarElim (name, v_, s)), EClo (v_, s))
@@ -1272,40 +1260,36 @@ end) : RECON_TERM = struct
           try Apx.apxToClass (g_, v_, l_, false)
           with Ambiguous ->
             let v'_ = Apx.apxToClass (g_, v_, l_, true) in
-            begin
-              delayAmbiguous
-                ( g_,
-                  v'_,
-                  r,
-                  "Omitted term has ambiguous "
-                  ^ begin match Apx.whnfUni l_ with
-                  | Apx.Level 1 -> "type"
-                  | Apx.Level 2 -> "kind"
-                  | Apx.Level 3 -> "hyperkind"
-                  (* yes, this can happen in pathological cases, e.g.
-                                  a : type. b = a : _ _. *)
-                  (* FIX: this violates an invariant in printing *)
-                  end );
-              v'_
-            end
+            delayAmbiguous
+              ( g_,
+                v'_,
+                r,
+                "Omitted term has ambiguous "
+                ^ begin match Apx.whnfUni l_ with
+                | Apx.Level 1 -> "type"
+                | Apx.Level 2 -> "kind"
+                | Apx.Level 3 -> "hyperkind"
+                (* yes, this can happen in pathological cases, e.g.
+                                a : type. b = a : _ _. *)
+                (* FIX: this violates an invariant in printing *)
+                end );
+            v'_
         in
         let u'_ =
           try Apx.apxToExact (g_, u_, (v'_, IntSyn.id), false)
           with Ambiguous ->
             let u'_ = Apx.apxToExact (g_, u_, (v'_, IntSyn.id), true) in
-            begin
-              delayAmbiguous
-                ( g_,
-                  u'_,
-                  r,
-                  ("Omitted "
-                  ^ begin match Apx.whnfUni l_ with
-                  | Apx.Level 2 -> "type"
-                  | Apx.Level 3 -> "kind"
-                  end)
-                  ^ " is ambiguous" );
-              u'_
-            end
+            delayAmbiguous
+              ( g_,
+                u'_,
+                r,
+                ("Omitted "
+                ^ begin match Apx.whnfUni l_ with
+                | Apx.Level 2 -> "type"
+                | Apx.Level 3 -> "kind"
+                end)
+                ^ " is ambiguous" );
+            u'_
         in
         (Omitexact (u'_, v'_, r), Intro u'_, v'_)
 
@@ -1313,10 +1297,8 @@ end) : RECON_TERM = struct
     begin if not !trace then inferExactN (g_, tm)
     else
       let tm', b'_, v'_ = inferExactN (g_, tm) in
-      begin
-        reportInfer (g_, tm', toIntro (b'_, (v'_, IntSyn.id)), v'_);
-        (tm', b'_, v'_)
-      end
+      reportInfer (g_, tm', toIntro (b'_, (v'_, IntSyn.id)), v'_);
+      (tm', b'_, v'_)
     end
 
   and inferExactDec (g_, Dec_ (name, tm, r)) =
@@ -1366,19 +1348,17 @@ end) : RECON_TERM = struct
           try Apx.apxToExact (g_, u_, vhs, false)
           with Ambiguous ->
             let u'_ = Apx.apxToExact (g_, u_, vhs, true) in
-            begin
-              delayAmbiguous
-                ( g_,
-                  u'_,
-                  r,
-                  ("Omitted "
-                  ^ begin match Apx.whnfUni l_ with
-                  | Apx.Level 2 -> "type"
-                  | Apx.Level 3 -> "kind"
-                  end)
-                  ^ " is ambiguous" );
-              u'_
-            end
+            delayAmbiguous
+              ( g_,
+                u'_,
+                r,
+                ("Omitted "
+                ^ begin match Apx.whnfUni l_ with
+                | Apx.Level 2 -> "type"
+                | Apx.Level 3 -> "kind"
+                end)
+                ^ " is ambiguous" );
+            u'_
         in
         ((Omitexact (u'_, v'_, r), Intro u'_, v'_), true)
     | g_, tm, vhs ->

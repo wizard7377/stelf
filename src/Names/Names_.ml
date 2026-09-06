@@ -345,20 +345,18 @@ module MakeNames
   let uninstallConst cid =
     let condec_ = IntSyn.sgnLookup cid in
     let id = IntSyn.conDecName condec_ in
-    begin
-      begin match Array.sub (shadowArray, cid) with
-      | None ->
-          begin if topLookup id = Some cid then topDelete id else ()
-          end
-      | Some cid' -> begin
-          ignore (topInsert (id, cid'));
-          Array.update (shadowArray, cid, None)
+    begin match Array.sub (shadowArray, cid) with
+    | None ->
+        begin if topLookup id = Some cid then topDelete id else ()
         end
-      end;
-      begin
-        Array.update (fixityArray, cid, Fixity.Nonfix);
-        Array.update (namePrefArray, cid, None)
+    | Some cid' -> begin
+        ignore (topInsert (id, cid'));
+        Array.update (shadowArray, cid, None)
       end
+    end;
+    begin
+      Array.update (fixityArray, cid, Fixity.Nonfix);
+      Array.update (namePrefArray, cid, None)
     end
 
   let installStructName mid =
@@ -372,18 +370,16 @@ module MakeNames
   let uninstallStruct mid =
     let strdec = IntSyn.sgnStructLookup mid in
     let id = IntSyn.strDecName strdec in
-    begin
-      begin match Array.sub (structShadowArray, mid) with
-      | None ->
-          begin if topStructLookup id = Some mid then topStructDelete id else ()
-          end
-      | Some mid' -> begin
-          ignore (topStructInsert (id, mid'));
-          Array.update (structShadowArray, mid, None)
+    begin match Array.sub (structShadowArray, mid) with
+    | None ->
+        begin if topStructLookup id = Some mid then topStructDelete id else ()
         end
-      end;
-      Array.update (componentsArray, mid, dummyNamespace)
-    end
+    | Some mid' -> begin
+        ignore (topStructInsert (id, mid'));
+        Array.update (structShadowArray, mid, None)
+      end
+    end;
+    Array.update (componentsArray, mid, dummyNamespace)
 
   let resetFrom mark markStruct =
     let limit, limitStruct = IntSyn.sgnSize () in
@@ -395,10 +391,8 @@ module MakeNames
       end
       end
     in
-    begin
-      ct uninstallConst (mark, limit - 1);
-      ct uninstallStruct (markStruct, limitStruct - 1)
-    end
+    ct uninstallConst (mark, limit - 1);
+    ct uninstallStruct (markStruct, limitStruct - 1)
 
   (* reset () = ()
        Effect: clear name tables related to constants
@@ -686,10 +680,8 @@ module MakeNames
     *)
   let installFixity cid fixity =
     let name = qidToString (constQid cid) in
-    begin
-      checkFixity (name, cid, argNumber fixity);
-      Array.update (fixityArray, cid, fixity)
-    end
+    checkFixity (name, cid, argNumber fixity);
+    Array.update (fixityArray, cid, fixity)
 
   (* getFixity (cid) = fixity
        fixity defaults to Fixity.Nonfix, if nothing has been declared
@@ -999,17 +991,13 @@ module MakeNames
   let newEVarName = function
     | g_, (IntSyn.EVar (r, _, v_, cnstr_) as x_) ->
         let name = tryNextName (g_, namePrefOf (Exist, v_)) in
-        begin
-          evarInsert (x_, name);
-          name
-        end
+        evarInsert (x_, name);
+        name
         (* use name preferences below *)
     | g_, (IntSyn.AVar r as x_) ->
         let name = tryNextName (g_, namePrefOf' (Exist, None)) in
-        begin
-          evarInsert (x_, name);
-          name
-        end
+        evarInsert (x_, name);
+        name
   (* use name preferences below *)
 
   (* evarName (G, X) = name
@@ -1021,10 +1009,8 @@ module MakeNames
     begin match evarLookup x_ with
     | None ->
         let name = newEVarName (g_, x_) in
-        begin
-          varInsert (name, Evar x_);
-          name
-        end
+        varInsert (name, Evar x_);
+        name
     | Some name -> name
     end
 

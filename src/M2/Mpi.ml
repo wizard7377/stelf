@@ -245,16 +245,14 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       end
       else
         let s_ = current () in
+        print "\n";
         begin
-          print "\n";
+          print (MetaPrint.stateToString s_);
           begin
-            print (MetaPrint.stateToString s_);
+            print "\nSelect from the following menu:\n";
             begin
-              print "\nSelect from the following menu:\n";
-              begin
-                print (menuToString ());
-                print "\n"
-              end
+              print (menuToString ());
+              print "\n"
             end
           end
         end

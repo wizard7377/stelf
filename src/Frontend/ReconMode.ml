@@ -164,10 +164,8 @@ end) : RECON_MODE = struct
           | _ -> error r ("Call pattern not an atomic type")
         in
         let a, mS = convertExp (Whnf.normalize (v_, I.id)) in
-        begin
-          ModeDec.checkFull a mS r;
-          ((a, mS), r)
-        end
+        ModeDec.checkFull a mS r;
+        ((a, mS), r)
 
       let toModedec t =
         ignore (Names.varReset I.Null);

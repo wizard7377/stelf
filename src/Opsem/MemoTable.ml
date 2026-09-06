@@ -351,14 +351,12 @@ end) : MEMOTABLE = struct
               | Some (x, dec1), Some (x', dec2) ->
                   begin if k1 = k2 && equalDec (dec1, dec2) then
                     let s'_ = genSpine (d, s1_, s2_) in
+                    ignore (delete (x, d_t_));
                     begin
-                      ignore (delete (x, d_t_));
+                      ignore (delete (x', d_u_));
                       begin
-                        ignore (delete (x', d_u_));
-                        begin
-                          ignore (insertList ((x, dec1), ds_));
-                          I.Root (h1_, s'_)
-                        end
+                        ignore (insertList ((x, dec1), ds_));
+                        I.Root (h1_, s'_)
                       end
                     end
                   else genNVar ((rho_t, t_v), (rho_u, u_))
@@ -441,16 +439,14 @@ end) : MEMOTABLE = struct
                   end
                 | Variant t'_ ->
                     let restc = !choose in
-                    begin
-                      S.insert sigma (nv, t'_);
-                      choose :=
-                        function
-                        | match_ -> begin
-                            restc match_;
-                            begin if match_ then () else ()
-                            end
+                    S.insert sigma (nv, t'_);
+                    choose :=
+                      function
+                      | match_ -> begin
+                          restc match_;
+                          begin if match_ then () else ()
                           end
-                    end
+                        end
                 end
             | None -> S.insert rho_u (nv, u_)
             end));
@@ -779,10 +775,8 @@ end) : MEMOTABLE = struct
       in
       let flag_ = update !answList false in
       let r = flag_ || !added in
-      begin
-        added := false;
-        r
-      end
+      added := false;
+      r
   end
 
   (* index for normal variables *)

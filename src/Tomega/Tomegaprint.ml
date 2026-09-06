@@ -737,10 +737,8 @@ end) : TOMEGAPRINT = struct
 
     let formatFun a b =
       let args_ = (a, b) in
-      begin
-        Names.varReset I.Null;
-        formatPrg0 args_
-      end
+      Names.varReset I.Null;
+      formatPrg0 args_
 
     let funToString a b = Fmt.makestring_fmt (formatFun a b)
 

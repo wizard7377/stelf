@@ -168,12 +168,10 @@ end) : ABSMACHINE = struct
         | [] -> ()
         | hc :: sgn' ->
             let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
-            begin
-              CsManager.trail (function () ->
-                  rSolve
-                    (ps', (r, I.id), dp, function s_ -> sc (I.Root (hc, s_))));
-              matchSig sgn'
-            end
+            CsManager.trail (function () ->
+                rSolve
+                  (ps', (r, I.id), dp, function s_ -> sc (I.Root (hc, s_))));
+            matchSig sgn'
       in
       let rec matchSigDet = function
         | [] -> ()

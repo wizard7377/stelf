@@ -338,11 +338,9 @@ module MakeCompile
               convertKRes (resG, k_, i - 1) )
     in
     let r = convertKRes (C.Assign (r'_, eqs_), List.rev k_, left) in
-    begin
-      Display.chatter_s 6 "\nClause LH Eqn";
-      Display.chatter_s 6 (CPrint.clauseToString "\t" (g_, r));
-      r
-    end
+    Display.chatter_s 6 "\nClause LH Eqn";
+    Display.chatter_s 6 (CPrint.clauseToString "\t" (g_, r));
+    r
 
   (*  compileSbtHead (G, R as I.Root (h, S)) = r
 
@@ -367,12 +365,10 @@ module MakeCompile
             (I.Decl (g_, I.ADec (Some ("AVar " ^ Int.toString i), d)), k_, i - 1)
     in
     let g'_ = convertKRes (g_, List.rev k_, left) in
-    begin
-      Display.chatter_s 6 "\nClause Sbt Eqn";
-      Display.chatter_s 6
-        (CPrint.clauseToString "\t" (g'_, C.Assign (h'_, eqs_)));
-      (g'_, Some (h'_, eqs_))
-    end
+    Display.chatter_s 6 "\nClause Sbt Eqn";
+    Display.chatter_s 6
+      (CPrint.clauseToString "\t" (g'_, C.Assign (h'_, eqs_)));
+    (g'_, Some (h'_, eqs_))
   (* insert R' together with Eqs and G and sc C.True *)
 
   (* compileGoalN  fromCS A => g

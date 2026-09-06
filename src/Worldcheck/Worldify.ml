@@ -344,10 +344,8 @@ end) : WORLDIFY = struct
       begin match (arg__8, arg__9) with
       | w_, (g_, I.Root (I.Const a, s_), occ) ->
           let w'_ = W.getWorlds a in
-          begin
-            subsumedWorld a w'_ w_;
-            subsumedCtx (g_, w_)
-          end
+          subsumedWorld a w'_ w_;
+          subsumedCtx (g_, w_)
       | w_, (g_, I.Pi ((d_, _), v2_), occ) ->
           checkGoal w_ (decUName g_ d_, v2_, P.body occ)
       end
@@ -451,10 +449,8 @@ end) : WORLDIFY = struct
         let b = I.targetFam v_ in
         let wb = W.getWorlds b in
         let rb = worldsToReg wb in
-        begin
-          accR ((g_, (v_, I.id)), rb, init);
-          raise (Error' (occ, "World violation"))
-        end
+        accR ((g_, (v_, I.id)), rb, init);
+        raise (Error' (occ, "World violation"))
       with Success v'_ -> v'_
 
     let rec worldifyClause = function
@@ -490,10 +486,8 @@ end) : WORLDIFY = struct
       | g_, (I.Dec (_, v_) as d_) :: l_ ->
           let a = I.targetFam v_ in
           let w'_ = W.getWorlds a in
-          begin
-            checkClause w'_ (g_, worldifyClause (I.Null, v_, w'_, P.top), P.top);
-            worldifyBlock (decUName g_ d_, l_)
-          end
+          checkClause w'_ (g_, worldifyClause (I.Null, v_, w'_, P.top), P.top);
+          worldifyBlock (decUName g_ d_, l_)
 
     let rec worldifyBlocks = function
       | [] -> ()

@@ -158,10 +158,8 @@ end) : Cs.CS = struct
     let rand (min, size) =
       let nextrand () =
         let t = a *. !seed in
-        begin
-          seed := t -. (m *. Float.of_int (Float.to_int (t /. m)));
-          (!seed -. 1.0) /. (m -. 1.0)
-        end
+        seed := t -. (m *. Float.of_int (Float.to_int (t /. m)));
+        (!seed -. 1.0) /. (m -. 1.0)
       in
       Stdlib.( + ) min (Float.to_int (nextrand () *. Float.of_int size))
 
@@ -194,17 +192,13 @@ end) : Cs.CS = struct
 
     let incrNRows () =
       let old = nRows () in
-      begin
-        tableau.nrows := Stdlib.( + ) old 1;
-        old
-      end
+      tableau.nrows := Stdlib.( + ) old 1;
+      old
 
     let incrNCols () =
       let old = nCols () in
-      begin
-        tableau.ncols := Stdlib.( + ) old 1;
-        old
-      end
+      tableau.ncols := Stdlib.( + ) old 1;
+      old
 
     let decrNRows () = tableau.nrows := Stdlib.( - ) (nRows ()) 1
     let decrNCols () = tableau.ncols := Stdlib.( - ) (nCols ()) 1
@@ -305,25 +299,23 @@ end) : Cs.CS = struct
           end
         in
         let vec = Array2.row tableau.coeffs row (0, nCols ()) in
+        begin match l.owner with Var _ -> print "V" | Exp _ -> print "E"
+        end;
         begin
-          begin match l.owner with Var _ -> print "V" | Exp _ -> print "E"
+          begin if restricted l then print ">" else print "*"
           end;
           begin
-            begin if restricted l then print ">" else print "*"
+            begin if dead l then print "#" else print ""
             end;
             begin
-              begin if dead l then print "#" else print ""
-              end;
+              print "\t";
               begin
-                print "\t";
+                ignore (Vector.mapi printCol vec);
                 begin
-                  ignore (Vector.mapi printCol vec);
+                  print "\t";
                   begin
-                    print "\t";
-                    begin
-                      print (toString (const row));
-                      print "\n"
-                    end
+                    print (toString (const row));
+                    print "\n"
                   end
                 end
               end
@@ -331,27 +323,25 @@ end) : Cs.CS = struct
           end
         end
       in
+      print "\t";
       begin
-        print "\t";
+        Array.app printLabel (tableau.clabels, 0, nCols ());
         begin
-          Array.app printLabel (tableau.clabels, 0, nCols ());
+          print "\n";
           begin
-            print "\n";
+            Array.app printRow (tableau.rlabels, 0, nRows ());
             begin
-              Array.app printRow (tableau.rlabels, 0, nRows ());
+              print "Columns:\n";
               begin
-                print "Columns:\n";
+                Array.app
+                  (function _, (l : label) -> displaySum (ownerSum l.owner))
+                  (tableau.clabels, 0, nCols ());
                 begin
+                  print "Rows:\n";
                   Array.app
-                    (function _, (l : label) -> displaySum (ownerSum l.owner))
-                    (tableau.clabels, 0, nCols ());
-                  begin
-                    print "Rows:\n";
-                    Array.app
-                      (function
-                        | _, (l : label) -> displaySum (ownerSum l.owner))
-                      (tableau.rlabels, 0, nRows ())
-                  end
+                    (function
+                      | _, (l : label) -> displaySum (ownerSum l.owner))
+                    (tableau.rlabels, 0, nRows ())
                 end
               end
             end
@@ -529,35 +519,33 @@ end) : Cs.CS = struct
       let pConst = const row in
       let pRLabel = rlabel row in
       let pCLabel = clabel col in
+      Array.modify
+        (function
+          | i, value ->
+              begin if i = row then -(value * pCoeffInverse)
+              else value - (pConst * pCol i * pCoeffInverse)
+              end)
+        (tableau.consts, 0, nRows ());
       begin
-        Array.modify
+        Array2.modify Array2.ColMajor
           (function
-            | i, value ->
-                begin if i = row then -(value * pCoeffInverse)
-                else value - (pConst * pCol i * pCoeffInverse)
+            | i, j, value ->
+                begin match (i = row, j = col) with
+                | true, true -> pCoeffInverse
+                | true, false -> -(value * pCoeffInverse)
+                | false, true -> value * pCoeffInverse
+                | false, false -> value - (pRow j * pCol i * pCoeffInverse)
                 end)
-          (tableau.consts, 0, nRows ());
+          {
+            base = tableau.coeffs;
+            row = 0;
+            col = 0;
+            nrows = nRows ();
+            ncols = nCols ();
+          };
         begin
-          Array2.modify Array2.ColMajor
-            (function
-              | i, j, value ->
-                  begin match (i = row, j = col) with
-                  | true, true -> pCoeffInverse
-                  | true, false -> -(value * pCoeffInverse)
-                  | false, true -> value * pCoeffInverse
-                  | false, false -> value - (pRow j * pCol i * pCoeffInverse)
-                  end)
-            {
-              base = tableau.coeffs;
-              row = 0;
-              col = 0;
-              nrows = nRows ();
-              ncols = nCols ();
-            };
-          begin
-            Array.update (tableau.rlabels, row, pCLabel);
-            Array.update (tableau.clabels, col, pRLabel)
-          end
+          Array.update (tableau.rlabels, row, pCLabel);
+          Array.update (tableau.clabels, col, pRLabel)
         end
       end
 
@@ -614,14 +602,12 @@ end) : Cs.CS = struct
                 dead = ref false;
               }
             in
+            Trail.log tableau.trail (Insert (Col new_));
             begin
-              Trail.log tableau.trail (Insert (Col new_));
+              delayMon (mon, ref (makeCnstr l.tag));
               begin
-                delayMon (mon, ref (makeCnstr l.tag));
-                begin
-                  Array.update (tableau.clabels, new_, l);
-                  (n, Col new_)
-                end
+                Array.update (tableau.clabels, new_, l);
+                (n, Col new_)
               end
             end
         end
@@ -643,29 +629,27 @@ end) : Cs.CS = struct
         | Col col -> incrArray2 (tableau.coeffs, new_, col, d)
         end
       in
+      List.app insertWPos wposL;
       begin
-        List.app insertWPos wposL;
-        begin
-          incrArray (tableau.consts, new_, d);
-          begin match isSubsumed new_ with
-          | Some pos -> begin
-              clearArray2Row (tableau.coeffs, new_, (0, nCols ()));
+        incrArray (tableau.consts, new_, d);
+        begin match isSubsumed new_ with
+        | Some pos -> begin
+            clearArray2Row (tableau.coeffs, new_, (0, nCols ()));
+            begin
+              Array.update (tableau.consts, new_, zero);
               begin
-                Array.update (tableau.consts, new_, zero);
-                begin
-                  decrNRows ();
-                  pos
-                end
+                decrNRows ();
+                pos
               end
             end
-          | None -> begin
-              setOwnership (Row new_, owner, ref 0);
+          end
+        | None -> begin
+            setOwnership (Row new_, owner, ref 0);
+            begin
+              (label (Row new_)).dead := isConstant new_;
               begin
-                (label (Row new_)).dead := isConstant new_;
-                begin
-                  Trail.log tableau.trail (Insert (Row new_));
-                  Row new_
-                end
+                Trail.log tableau.trail (Insert (Row new_));
+                Row new_
               end
             end
           end
@@ -721,19 +705,17 @@ end) : Cs.CS = struct
             begin match isSubsumed i with
             | Some pos' ->
                 let l' = label pos' in
+                Trail.log tableau.trail (Kill (Row i));
                 begin
-                  Trail.log tableau.trail (Kill (Row i));
-                  begin
-                    (Array.sub (tableau.rlabels, i)).dead := true;
-                    begin match (restriction l, restriction l') with
-                    | Some restr, Some (Restr (_, proof', _)) ->
-                        unifyRestr (restr, proof')
-                    | Some _, None -> begin
-                        Trail.log tableau.trail (Restrict pos');
-                        l'.restr := restriction l
-                      end
-                    | None, _ -> ()
+                  (Array.sub (tableau.rlabels, i)).dead := true;
+                  begin match (restriction l, restriction l') with
+                  | Some restr, Some (Restr (_, proof', _)) ->
+                      unifyRestr (restr, proof')
+                  | Some _, None -> begin
+                      Trail.log tableau.trail (Restrict pos');
+                      l'.restr := restriction l
                     end
+                  | None, _ -> ()
                   end
                 end
             | None -> ()
@@ -742,10 +724,8 @@ end) : Cs.CS = struct
         else ()
         end
       in
-      begin
-        Array.app killColumn (tableau.clabels, 0, nCols ());
-        Array.app killRow (tableau.rlabels, 0, nRows ())
-      end
+      Array.app killColumn (tableau.clabels, 0, nCols ());
+      Array.app killRow (tableau.rlabels, 0, nRows ())
 
     and restrict = function
       | (Col col as pos), restr ->
@@ -829,54 +809,48 @@ end) : Cs.CS = struct
       let tag'' =
         (label (insertDecomp (decomp'', Exp (g_, Sum (zero, []))))).tag
       in
-      begin
-        restrict (pos', Restr (g_, geq00 (), false));
-        begin match findTag tag'' with
-        | Some pos'' -> restrict (pos'', Restr (g_, geq00 (), false))
-        end
+      restrict (pos', Restr (g_, geq00 (), false));
+      begin match findTag tag'' with
+      | Some pos'' -> restrict (pos'', Restr (g_, geq00 (), false))
       end
 
     and update (g_, pos, sum) =
       let l = label pos in
+      Trail.log tableau.trail (UpdateOwner (pos, l.owner, l.tag));
       begin
-        Trail.log tableau.trail (UpdateOwner (pos, l.owner, l.tag));
-        begin
-          setOwnership (pos, Exp (g_, sum), ref 0);
-          begin if dead l then
-            begin match pos with
-            | Row row ->
-                begin if isConstant row then unifySum (g_, sum, const row)
-                else
-                  begin match isSubsumed row with
-                  | Some pos' -> update (g_, pos', sum)
-                  end
+        setOwnership (pos, Exp (g_, sum), ref 0);
+        begin if dead l then
+          begin match pos with
+          | Row row ->
+              begin if isConstant row then unifySum (g_, sum, const row)
+              else
+                begin match isSubsumed row with
+                | Some pos' -> update (g_, pos', sum)
                 end
-            | Col _col -> unifySum (g_, sum, zero)
-            end
-          else
-            let isVar = function
-              | Sum (m, (Mon (n, _) as mon) :: []) ->
-                  begin if m = zero && n = one then Some mon else None
-                  end
-              | _sum -> None
-            in
-            begin match isVar sum with
-            | Some mon ->
-                begin match findMon mon with
-                | Some _ -> insertEqual (g_, pos, sum)
-                | None ->
-                    let tag = ref 0 in
-                    begin
-                      Trail.log
-                        tableau.trail (UpdateOwner (pos, l.owner, l.tag));
-                      begin
-                        setOwnership (pos, Var (g_, mon), tag);
-                        delayMon (mon, ref (makeCnstr tag))
-                      end
-                    end
+              end
+          | Col _col -> unifySum (g_, sum, zero)
+          end
+        else
+          let isVar = function
+            | Sum (m, (Mon (n, _) as mon) :: []) ->
+                begin if m = zero && n = one then Some mon else None
                 end
-            | None -> insertEqual (g_, pos, sum)
-            end
+            | _sum -> None
+          in
+          begin match isVar sum with
+          | Some mon ->
+              begin match findMon mon with
+              | Some _ -> insertEqual (g_, pos, sum)
+              | None ->
+                  let tag = ref 0 in
+                  Trail.log
+                    tableau.trail (UpdateOwner (pos, l.owner, l.tag));
+                  begin
+                    setOwnership (pos, Var (g_, mon), tag);
+                    delayMon (mon, ref (makeCnstr tag))
+                  end
+              end
+          | None -> insertEqual (g_, pos, sum)
           end
         end
       end
@@ -954,10 +928,8 @@ end) : Cs.CS = struct
             let owner = (label pos).owner in
             let g_ = ownerContext owner in
             let sum = normalize (ownerSum owner) in
-            begin
-              update (g_, pos, sum);
-              true
-            end
+            update (g_, pos, sum);
+            true
         | None -> true
         end
       with Error -> false
@@ -998,28 +970,26 @@ end) : Cs.CS = struct
           dead = ref true;
         }
       in
+      Array.modify (function _ -> l) (tableau.rlabels, 0, nRows ());
       begin
-        Array.modify (function _ -> l) (tableau.rlabels, 0, nRows ());
+        Array.modify (function _ -> l) (tableau.clabels, 0, nCols ());
         begin
-          Array.modify (function _ -> l) (tableau.clabels, 0, nCols ());
+          Array.modify (function _ -> zero) (tableau.consts, 0, nRows ());
           begin
-            Array.modify (function _ -> zero) (tableau.consts, 0, nRows ());
+            Array2.modify Array2.RowMajor
+              (function _ -> zero)
+              {
+                base = tableau.coeffs;
+                row = 0;
+                col = 0;
+                nrows = nRows ();
+                ncols = nCols ();
+              };
             begin
-              Array2.modify Array2.RowMajor
-                (function _ -> zero)
-                {
-                  base = tableau.coeffs;
-                  row = 0;
-                  col = 0;
-                  nrows = nRows ();
-                  ncols = nCols ();
-                };
+              tableau.nrows := 0;
               begin
-                tableau.nrows := 0;
-                begin
-                  tableau.ncols := 0;
-                  Trail.reset tableau.trail
-                end
+                tableau.ncols := 0;
+                Trail.reset tableau.trail
               end
             end
           end

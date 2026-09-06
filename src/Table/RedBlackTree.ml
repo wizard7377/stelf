@@ -211,17 +211,15 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             | Greater -> restore_right (Black (entry1, left, ins right))
             end
       in
-      begin
-        oldEntry := None;
-        let new_dict =
-          begin match ins dict with
-          | Red ((_, Red _, _) as t) -> Black t
-          | Red ((_, _, Red _) as t) -> Black t
-          | dict -> dict
-          end
-        in
-        (new_dict, !oldEntry)
-      end
+      oldEntry := None;
+      let new_dict =
+        begin match ins dict with
+        | Red ((_, Red _, _) as t) -> Black t
+        | Red ((_, _, Red _) as t) -> Black t
+        | dict -> dict
+        end
+      in
+      (new_dict, !oldEntry)
 
     let app f dict =
       let rec ap = function
@@ -305,10 +303,8 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
         function
         | entry ->
             let dict, oldEntry = insertShadow (!table, entry) in
-            begin
-              table := dict;
-              oldEntry
-            end)
+            table := dict;
+            oldEntry)
 
   let lookup table key = lookup !table key
 

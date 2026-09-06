@@ -125,10 +125,8 @@ end) : FUNPRINT.FUNPRINT = struct
             ]
       in
       let formatFor0 args_ = Fmt.vbox0 0 1 (formatFor1 args_) in
-      begin
-        Names.varReset I.Null;
-        formatFor0 (0, F.makectx psi, (f_, I.id))
-      end
+      Names.varReset I.Null;
+      formatFor0 (0, F.makectx psi, (f_, I.id))
 
     let formatForBare g_ f_ = Fmt.hVbox (formatFor' (g_, (f_, I.id)))
 
@@ -420,10 +418,8 @@ end) : FUNPRINT.FUNPRINT = struct
       let formatPro0 (psi, F.Rec (dd, p_)) =
         Fmt.vbox0 0 1 (formatPro1 (0, psi, p_))
       in
-      begin
-        Names.varReset I.Null;
-        formatPro0 args_
-      end
+      Names.varReset I.Null;
+      formatPro0 args_
 
     let formatLemmaDec (F.LemmaDec (names, p_, f_)) =
       Fmt.vbox0 0 1

@@ -482,10 +482,8 @@ struct
   let sgnAutoCompress n f =
     try
       let modes = f n in
-      begin
-        Sgn.set_modes n modes;
-        Sgn.update (n, compress (n, IntSyn.sgnLookup n))
-      end
+      Sgn.set_modes n modes;
+      Sgn.update (n, compress (n, IntSyn.sgnLookup n))
     with NoModes -> ()
 
   let rec sgnAutoCompressUpTo' n0 n f =
@@ -496,13 +494,11 @@ struct
         | None -> (
             try
               let modes = f n0 in
+              Sgn.set_modes n0 modes;
               begin
-                Sgn.set_modes n0 modes;
-                begin
-                  Sgn.update (n0, compress (n0, IntSyn.sgnLookup n0));
-                  begin if n0 mod 100 = 0 then print (Int.toString n0 ^ "\n")
-                  else ()
-                  end
+                Sgn.update (n0, compress (n0, IntSyn.sgnLookup n0));
+                begin if n0 mod 100 = 0 then print (Int.toString n0 ^ "\n")
+                else ()
                 end
               end
             with NoModes -> ())

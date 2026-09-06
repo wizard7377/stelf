@@ -75,10 +75,8 @@ module MakeSubordinate
         end
         end
       in
-      begin
-        ignore (rch (b, IntSet.empty));
-        ()
-      end
+      ignore (rch (b, IntSet.empty));
+      ()
 
     exception Reachable
 
@@ -336,10 +334,8 @@ module MakeSubordinate
 
     let installBlock b =
       let (I.BlockDec (_, _, g_, ds_)) = I.sgnLookup b in
-      begin
-        installSome g_;
-        List.app (function d_ -> installDec d_) ds_
-      end
+      installSome g_;
+      List.app (function d_ -> installDec d_) ds_
 
     let checkBelow (a, b) =
       begin if not (below a b) then

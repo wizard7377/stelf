@@ -347,18 +347,14 @@ end) : SUBTREE = struct
     let mkNode = function
       | Node (_, children_), sg, rho1, ((g_, rc) as gr), rho2 ->
           let c = S.new_ () in
-          begin
-            S.insertList c
-              [ (1, Node (rho1, children_)); (2, Leaf (rho2, g_, rc)) ];
-            Node (sg, c)
-          end
+          S.insertList c
+            [ (1, Node (rho1, children_)); (2, Leaf (rho2, g_, rc)) ];
+          Node (sg, c)
       | Leaf (_, g1_, rc1), sg, rho1, ((g2_, rc2) as gr), rho2 ->
           let c = S.new_ () in
-          begin
-            S.insertList c
-              [ (1, Leaf (rho1, g1_, rc1)); (2, Leaf (rho2, g2_, rc2)) ];
-            Node (sg, c)
-          end
+          S.insertList c
+            [ (1, Leaf (rho1, g1_, rc1)); (2, Leaf (rho2, g2_, rc2)) ];
+          Node (sg, c)
 
     let rec compareChild
         ( children,
@@ -408,10 +404,8 @@ end) : SUBTREE = struct
     let rec normalizeNExp = function
       | I.NVar n, csub ->
           let a_ = I.newAVar () in
-          begin
-            S.insert csub (n, a_);
-            a_
-          end
+          S.insert csub (n, a_);
+          a_
       | I.Root (h_, s_), nsub -> I.Root (h_, normalizeNSpine (s_, nsub))
       | I.Lam (d_, u_), nsub ->
           I.Lam (normalizeNDec (d_, nsub), normalizeNExp (u_, nsub))
@@ -724,25 +718,21 @@ end) : SUBTREE = struct
           let (I.EVar (x'_, _, _, _) as u'_) =
             I.newEVar gquery (I.EClo (a_, s))
           in
-          begin
-            begin match S.lookup asub i with
-            | None -> ()
-            | Some (Assign (glocal_u_, u_)) ->
-                x'_ := Some (raiseType glocal_u_ u_)
-            end;
-            I.Dot (I.Exp u'_, s)
-          end
+          begin match S.lookup asub i with
+          | None -> ()
+          | Some (Assign (glocal_u_, u_)) ->
+              x'_ := Some (raiseType glocal_u_ u_)
+          end;
+          I.Dot (I.Exp u'_, s)
       | i, gquery, I.Decl (gclause, I.ADec (_, d)), asub ->
           let (I.AVar x'_ as u'_) = I.newAVar () in
-          begin
-            begin match S.lookup asub i with
-            | None -> ()
-            | Some (Assign (glocal_u_, u_)) -> x'_ := Some u_
-            end;
-            I.Dot
-              ( I.Exp (I.EClo (u'_, I.Shift (-d))),
-                ctxToExplicitSub (i + 1, gquery, gclause, asub) )
-          end
+          begin match S.lookup asub i with
+          | None -> ()
+          | Some (Assign (glocal_u_, u_)) -> x'_ := Some u_
+          end;
+          I.Dot
+            ( I.Exp (I.EClo (u'_, I.Shift (-d))),
+              ctxToExplicitSub (i + 1, gquery, gclause, asub) )
 
     let rec solveAuxG = function
       | trivial_, s, gquery -> true
@@ -815,11 +805,9 @@ end) : SUBTREE = struct
 
     let retrieval (n, (Node (s, children_) as sTree), g_, r, sc) =
       let nsub_query, assignSub = (querySubId (), assignSubId ()) in
-      begin
-        S.insert nsub_query (1, (I.Null, (Body, r)));
-        S.forall children_ (function _, c_ ->
-            retrieveChild (n, c_, nsub_query, assignSub, [], g_, sc))
-      end
+      S.insert nsub_query (1, (I.Null, (Body, r)));
+      S.forall children_ (function _, c_ ->
+          retrieveChild (n, c_, nsub_query, assignSub, [], g_, sc))
 
     let retrieveAll (num, child_, nsub_query, assignSub, cnstr, candSet) =
       let i = ref 0 in
@@ -896,13 +884,11 @@ end) : SUBTREE = struct
           end
         end
       in
+      S.insert nsub_query (1, (I.Null, (Body, r)));
       begin
-        S.insert nsub_query (1, (I.Null, (Body, r)));
-        begin
-          S.forall children_ (function _, c_ ->
-              retrieveAll (n, c_, nsub_query, assignSub, [], candSet));
-          solveCandidate (1, candSet)
-        end
+        S.forall children_ (function _, c_ ->
+            retrieveAll (n, c_, nsub_query, assignSub, [], candSet));
+        solveCandidate (1, candSet)
       end
 
     let matchSig (a, g_, ((I.Root (ha, s_), s) as ps), sc) =
@@ -931,12 +917,10 @@ end) : SUBTREE = struct
     let sProgInstall (a, C.Head (e_, g_, eqs_, cid), r_) =
       let n, tree = Array.sub (indexArray, a) in
       let nsub_goal = S.new_ () in
+      S.insert nsub_goal (1, (Body, e_));
       begin
-        S.insert nsub_goal (1, (Body, e_));
-        begin
-          tree := insert (!tree, nsub_goal, (g_, CGoals (eqs_, cid, r_, !n + 1)));
-          n := !n + 1
-        end
+        tree := insert (!tree, nsub_goal, (g_, CGoals (eqs_, cid, r_, !n + 1)));
+        n := !n + 1
       end
   end
 

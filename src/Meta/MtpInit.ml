@@ -108,12 +108,10 @@ end) : MTPINIT.MTPINIT = struct
         | gb, o_, (True as f'_), ss_ ->
             S.State (List.length ss_ + 1, gb, (f_, of_), 1, o_, [], f'_) :: ss_
       in
+      Names.varReset I.Null;
       begin
-        Names.varReset I.Null;
-        begin
-          MTPData.maxFill := 0;
-          init' ((I.Null, I.Null), of_, f_, [])
-        end
+        MTPData.maxFill := 0;
+        init' ((I.Null, I.Null), of_, f_, [])
       end
   end
 

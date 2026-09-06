@@ -188,16 +188,12 @@ struct
         begin match Names.getEVarOpt name with
         | Some (IntSyn.EVar (_, _, v_, _)) ->
             let v'_, _ (* Type *) = Apx.classToApx v_ in
-            begin
-              StringTree.insert evarApxTable (name, v'_);
-              v'_
-            end
+            StringTree.insert evarApxTable (name, v'_);
+            v'_
         | None ->
             let v_ = Apx.newCVar () in
-            begin
-              StringTree.insert evarApxTable (name, v_);
-              v_
-            end
+            StringTree.insert evarApxTable (name, v_);
+            v_
         end
     end
 
@@ -229,10 +225,8 @@ struct
         let v'_ = Apx.apxToClass (IntSyn.Null, v_, Apx.(Level 1), allowed) in
         let g''_, v'' = lowerType (IntSyn.Null, (v'_, IntSyn.id)) in
         let x_ = IntSyn.newEVar g''_ v'' in
-        begin
-          Names.addEVar x_ name;
-          (x_, v'_)
-        end
+        Names.addEVar x_ name;
+        (x_, v'_)
     end
 
   let getFVarType (name, allowed) =
@@ -241,10 +235,8 @@ struct
     | None ->
         let v_ = Option.valOf (StringTree.lookup fvarApxTable name) in
         let v'_ = Apx.apxToClass (IntSyn.Null, v_, Apx.(Level 1), allowed) in
-        begin
-          StringTree.insert fvarTable (name, v'_);
-          v'_
-        end
+        StringTree.insert fvarTable (name, v'_);
+        v'_
     end
 
   (* Internal term type — richer than Cst.term; includes reconstruction-internal nodes *)
@@ -1130,10 +1122,8 @@ struct
           try getEVar (name, false)
           with Apx.Ambiguous ->
             let x_, v_ = getEVar (name, true) in
-            begin
-              delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
-              (x_, v_)
-            end
+            delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
+            (x_, v_)
         in
         let s = IntSyn.Shift (IntSyn.ctxLength g_) in
         (tm, Elim (elimSub (evarElim x_, s)), eClo (v_, s))
@@ -1147,17 +1137,15 @@ struct
           try getFVarType (name, false)
           with Apx.Ambiguous ->
             let v_ = getFVarType (name, true) in
-            begin
-              Display.debug ~level:Display.Level.verbose
-                Display.Form.(
-                  string "Type of FVar" ++ string name
-                  ++ string
-                       " is ambiguous, but continuing with one of the \
-                        possibilities"
-                  ++ nl ());
-              delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
-              v_
-            end
+            Display.debug ~level:Display.Level.verbose
+              Display.Form.(
+                string "Type of FVar" ++ string name
+                ++ string
+                     " is ambiguous, but continuing with one of the \
+                      possibilities"
+                ++ nl ());
+            delayAmbiguous (g_, v_, r, "Free variable has ambiguous type");
+            v_
         in
         let s = IntSyn.Shift (IntSyn.ctxLength g_) in
         (tm, Elim (fvarElim (name, v_, s)), EClo (v_, s))
@@ -1241,49 +1229,45 @@ struct
           try Apx.apxToClass (g_, v_, l_, false)
           with Ambiguous ->
             let v'_ = Apx.apxToClass (g_, v_, l_, true) in
-            begin
-              Display.debug ~level:Display.Level.verbose
-                Display.Form.(
-                  string
-                    "Classifier of omitted term is ambiguous, but continuing \
-                     with one of the possibilities"
-                  ++ nl ());
-              delayAmbiguous
-                ( g_,
-                  v'_,
-                  r,
-                  "Omitted term has ambiguous "
-                  ^ begin match Apx.whnfUni l_ with
-                  | Apx.Level 1 -> "type"
-                  | Apx.Level 2 -> "kind"
-                  | Apx.Level 3 -> "hyperkind"
-                  end );
-              v'_
-            end
+            Display.debug ~level:Display.Level.verbose
+              Display.Form.(
+                string
+                  "Classifier of omitted term is ambiguous, but continuing \
+                   with one of the possibilities"
+                ++ nl ());
+            delayAmbiguous
+              ( g_,
+                v'_,
+                r,
+                "Omitted term has ambiguous "
+                ^ begin match Apx.whnfUni l_ with
+                | Apx.Level 1 -> "type"
+                | Apx.Level 2 -> "kind"
+                | Apx.Level 3 -> "hyperkind"
+                end );
+            v'_
         in
         let u'_ =
           try Apx.apxToExact (g_, u_, (v'_, IntSyn.id), false)
           with Ambiguous ->
             let u'_ = Apx.apxToExact (g_, u_, (v'_, IntSyn.id), true) in
-            begin
-              Display.debug ~level:Display.Level.verbose
-                Display.Form.(
-                  string
-                    "Exact term of omitted term is ambiguous, but continuing \
-                     with one of the possibilities"
-                  ++ nl ());
-              delayAmbiguous
-                ( g_,
-                  u'_,
-                  r,
-                  ("Omitted "
-                  ^ begin match Apx.whnfUni l_ with
-                  | Apx.Level 2 -> "type"
-                  | Apx.Level 3 -> "kind"
-                  end)
-                  ^ " is ambiguous" );
-              u'_
-            end
+            Display.debug ~level:Display.Level.verbose
+              Display.Form.(
+                string
+                  "Exact term of omitted term is ambiguous, but continuing \
+                   with one of the possibilities"
+                ++ nl ());
+            delayAmbiguous
+              ( g_,
+                u'_,
+                r,
+                ("Omitted "
+                ^ begin match Apx.whnfUni l_ with
+                | Apx.Level 2 -> "type"
+                | Apx.Level 3 -> "kind"
+                end)
+                ^ " is ambiguous" );
+            u'_
         in
         (Omitexact (u'_, v'_, r), Intro u'_, v'_)
 
@@ -1291,10 +1275,8 @@ struct
     begin if not !trace then inferExactN (g_, tm)
     else
       let tm', b'_, v'_ = inferExactN (g_, tm) in
-      begin
-        reportInfer (g_, tm', toIntro (b'_, (v'_, IntSyn.id)), v'_);
-        (tm', b'_, v'_)
-      end
+      reportInfer (g_, tm', toIntro (b'_, (v'_, IntSyn.id)), v'_);
+      (tm', b'_, v'_)
     end
 
   and inferExactDec (g_, Dec (name, tm, r)) =
@@ -1343,19 +1325,17 @@ struct
           try Apx.apxToExact (g_, u_, vhs, false)
           with Ambiguous ->
             let u'_ = Apx.apxToExact (g_, u_, vhs, true) in
-            begin
-              delayAmbiguous
-                ( g_,
-                  u'_,
-                  r,
-                  ("Omitted "
-                  ^ begin match Apx.whnfUni l_ with
-                  | Apx.Level 2 -> "type"
-                  | Apx.Level 3 -> "kind"
-                  end)
-                  ^ " is ambiguous" );
-              u'_
-            end
+            delayAmbiguous
+              ( g_,
+                u'_,
+                r,
+                ("Omitted "
+                ^ begin match Apx.whnfUni l_ with
+                | Apx.Level 2 -> "type"
+                | Apx.Level 3 -> "kind"
+                end)
+                ^ " is ambiguous" );
+            u'_
         in
         ((Omitexact (u'_, v'_, r), Intro u'_, v'_), true)
     | g_, tm, vhs ->

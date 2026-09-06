@@ -492,16 +492,14 @@ end) : REDUCES = struct
             | Some o_ -> o_ :: rl'
             end
           in
-          begin
-            checkRClause (g'_, q'_, rl'', (v2_, I.dot1 s), P.body occ);
-            checkRImp
-              ( g'_,
-                q'_,
-                rl'',
-                (v2_, I.dot1 s),
-                (v1_, I.comp s I.shift),
-                P.label occ )
-          end
+          checkRClause (g'_, q'_, rl'', (v2_, I.dot1 s), P.body occ);
+          checkRImp
+            ( g'_,
+              q'_,
+              rl'',
+              (v2_, I.dot1 s),
+              (v1_, I.comp s I.shift),
+              P.label occ )
       | g_, q_, rl_, ((I.Root (I.Const a, s_), s) as vs_), occ ->
           let ro_ =
             begin match selectROrder (a, (s_, s)) with

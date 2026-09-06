@@ -222,30 +222,28 @@ end) : ABSMACHINE = struct
           end
         | hc :: sgn' ->
             let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
-            begin
-              begin if
-                CsManager.trail (function () ->
-                    rSolve
-                      ( ps',
-                        (r, I.id),
-                        dp,
-                        (hc, ha),
-                        function
-                        | s_ -> begin
-                            T.signal
-                              g_ (T.SucceedGoal
-                                  (tag, (hc, ha), I.EClo (fst ps', snd ps')));
-                            sc (I.Root (hc, s_))
-                          end ))
-              then begin
-                T.signal
-                  g_ (T.RetryGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
-                ()
-              end
-              else ()
-              end;
-              matchSig sgn'
+            begin if
+              CsManager.trail (function () ->
+                  rSolve
+                    ( ps',
+                      (r, I.id),
+                      dp,
+                      (hc, ha),
+                      function
+                      | s_ -> begin
+                          T.signal
+                            g_ (T.SucceedGoal
+                                (tag, (hc, ha), I.EClo (fst ps', snd ps')));
+                          sc (I.Root (hc, s_))
+                        end ))
+            then begin
+              T.signal
+                g_ (T.RetryGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
+              ()
             end
+            else ()
+            end;
+            matchSig sgn'
       in
       let rec matchSigDet = function
         | [] -> begin

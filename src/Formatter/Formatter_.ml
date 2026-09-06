@@ -899,10 +899,8 @@ make the use of {\tt fmtstreams} on files more convenient.
           raise exn
         end
     in
-    begin
-      close_func ();
-      result
-    end
+    close_func ();
+    result
 
   (* Aliases to match FORMATTER signature *)
   let indent = indent_

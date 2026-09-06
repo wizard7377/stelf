@@ -675,20 +675,18 @@ end) : TWELF.STELF = struct
             with Subordinate.Error msg ->
               raise (Subordinate.Error (Paths.wrap r msg))
           in
-          begin
-            Display.chatter_s 3
-              ("%freeze"
-              ^ List.foldr
-                  (function
-                    | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s)
-                  ".\n" cids);
-            Display.chatter_s 4
-              ("Frozen:"
-              ^ List.foldr
-                  (function
-                    | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s)
-                  "\n" frozen)
-          end
+          Display.chatter_s 3
+            ("%freeze"
+            ^ List.foldr
+                (function
+                  | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s)
+                ".\n" cids);
+          Display.chatter_s 4
+            ("Frozen:"
+            ^ List.foldr
+                (function
+                  | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s)
+                "\n" frozen)
       | fileName, (Parser.ThawDec qids, r) ->
           ignore begin if not !Global.unsafe then
               raise (ThmSyn.Error "%thaw not safe: Toggle `unsafe' flag")
@@ -747,17 +745,15 @@ end) : TWELF.STELF = struct
             try List.map toCid qids
             with Names.Error msg -> raise (Names.Error (Paths.wrap r msg))
           in
-          begin
-            List.app insertCid cids;
-            Display.chatter_s 3
-              ((begin if !Global.chatter >= 4 then "%" else ""
-                end
-               ^ "%deterministic")
-              ^ List.foldr
-                  (function
-                    | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s)
-                  ".\n" cids)
-          end
+          List.app insertCid cids;
+          Display.chatter_s 3
+            ((begin if !Global.chatter >= 4 then "%" else ""
+              end
+             ^ "%deterministic")
+            ^ List.foldr
+                (function
+                  | a, s -> (" " ^ Names.qidToString (Names.constQid a)) ^ s)
+                ".\n" cids)
       | fileName, (Parser.Compile qids, r) ->
           let toCid qid =
             begin match Names.constLookup qid with
@@ -1315,10 +1311,8 @@ end) : TWELF.STELF = struct
       begin match result with
       | Value (module_, s') ->
           let (S.Cons (declr, s'')) = Timers.time Timers.parsing S.expose s' in
-          begin
-            install1WithSig (fileName, Some module_, declr);
-            s''
-          end
+          install1WithSig (fileName, Some module_, declr);
+          s''
       | Exception exn -> raise exn
       end
 
@@ -1531,10 +1525,8 @@ end) : TWELF.STELF = struct
 
     and decl' cid =
       let conDec = IntSyn.sgnLookup cid in
-      begin
-        msg (Print.conDecToString conDec ^ "\n");
-        Ok
-      end
+      msg (Print.conDecToString conDec ^ "\n");
+      Ok
 
     module ModFile : sig
       type mfile
@@ -1659,13 +1651,11 @@ end) : TWELF.STELF = struct
       let loadAbort = function
         | mfile, Ok ->
             let status = loadFile (ModFile.fileName mfile) in
-            begin
-              begin match status with
-              | Ok -> ModFile.makeUnmodified mfile
-              | _ -> ()
-              end;
-              status
-            end
+            begin match status with
+            | Ok -> ModFile.makeUnmodified mfile
+            | _ -> ()
+            end;
+            status
         | _, Abort -> Abort
 
       let rec load ((_, sources) as config) =

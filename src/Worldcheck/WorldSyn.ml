@@ -393,10 +393,8 @@ end) : WORLDSYN = struct
       | [], rb, b -> ()
       | cid :: cids, rb, b ->
           let someDecs, piDecs = I.constBlock cid in
-          begin
-            checkSubsumedBlock (Names.ctxName someDecs, piDecs, rb, b);
-            checkSubsumedWorlds (cids, rb, b)
-          end
+          checkSubsumedBlock (Names.ctxName someDecs, piDecs, rb, b);
+          checkSubsumedWorlds (cids, rb, b)
 
     let checkBlocks (T.Worlds cids) (g_, v_, occ) =
       try
@@ -415,14 +413,12 @@ end) : WORLDSYN = struct
             with Error msg -> raise (Error' (occ, msg))
           end;
         let l_ = subGoalToDList v_ in
-        begin
-          accR ((g_, l_), rb, b, init b);
-          raise
-            (Error'
-               ( occ,
-                 F.makestring_fmt
-                   (formatSubsump "World violation" (g_, l_, rb, b)) ))
-        end
+        accR ((g_, l_), rb, b, init b);
+        raise
+          (Error'
+             ( occ,
+               F.makestring_fmt
+                 (formatSubsump "World violation" (g_, l_, rb, b)) ))
       with Success -> ()
 
     let rec checkClause = function
@@ -505,10 +501,8 @@ end) : WORLDSYN = struct
       | [] -> ()
       | cid :: cids ->
           let someDecs, piDecs = constBlock cid in
-          begin
-            checkSubordBlock (I.Null, someDecs, piDecs);
-            checkSubordWorlds cids
-          end
+          checkSubordBlock (I.Null, someDecs, piDecs);
+          checkSubordWorlds cids
 
     let install a (T.Worlds cids as w_) =
       begin

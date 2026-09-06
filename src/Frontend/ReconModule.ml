@@ -158,10 +158,8 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
       | Some mid2 -> addStructEqn (rEqns, r1, r2, name :: ids, mid1, mid2)
       end
     in
-    begin
-      ModSyn.Names.appConsts doConst ns1;
-      ModSyn.Names.appStructs doStruct ns1
-    end
+    ModSyn.Names.appConsts doConst ns1;
+    ModSyn.Names.appStructs doStruct ns1
 
   let strinst (ids, id, r1) strexp r3 : inst =
    fun (ns, eqns) ->
@@ -177,10 +175,8 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
     in
     let mid2, r2 = strexp () in
     let rEqns = ref eqns in
-    begin
-      addStructEqn (rEqns, r2, r3, [], mid1, mid2);
-      !rEqns
-    end
+    addStructEqn (rEqns, r2, r3, [], mid1, mid2);
+    !rEqns
 
   type nonrec whereclause = ModSyn.Names.namespace -> eqn list
 

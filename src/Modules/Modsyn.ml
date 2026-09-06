@@ -249,10 +249,8 @@ end) : MODSYN = struct
         end;
       IntTree.insert constMap (cid, cid')
     in
-    begin
-      IntTree.app doStruct structTable;
-      IntTree.app doConst constTable
-    end
+    IntTree.app doStruct structTable;
+    IntTree.app doConst constTable
 
   let decToDef (cid, condec_) = strictify (abbrevify cid condec_)
 
@@ -294,10 +292,8 @@ end) : MODSYN = struct
       let strdec = IntSyn.sgnStructLookup mid in
       let strdec' = mapStrDecParent mapParent strdec in
       let ns = Names.getComponents mid in
-      begin
-        IntTree.insert structTable (mid, StructInfo strdec');
-        doNS ns
-      end
+      IntTree.insert structTable (mid, StructInfo strdec');
+      doNS ns
     and doConst (_, cid) =
       let condec_var = IntSyn.sgnLookup cid in
       let condec' = mapConDecParent mapParent condec_var in
@@ -312,10 +308,8 @@ end) : MODSYN = struct
         Names.appConsts doConst ns
       end
     in
-    begin
-      doNS namespace;
-      (structTable, constTable, namespace)
-    end
+    doNS namespace;
+    (structTable, constTable, namespace)
 
   let instantiateModule ((_, _, namespace) as module_) transform =
     let transformConDec = transform namespace in
@@ -349,16 +343,12 @@ end) : MODSYN = struct
       begin if i <= mark then l
       else
         let (h :: t) = l in
-        begin
-          defsDelete h;
-          ct (t, i - 1)
-        end
+        defsDelete h;
+        ct (t, i - 1)
       end
     in
-    begin
-      defList := ct (!defList, !defCount);
-      defCount := mark
-    end
+    defList := ct (!defList, !defCount);
+    defCount := mark
 
   let sigDefSize () = !defCount
 

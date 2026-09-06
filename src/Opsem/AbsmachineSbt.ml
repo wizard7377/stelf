@@ -227,11 +227,9 @@ end) : ABSMACHINESBT = struct
         | [] -> ()
         | (I.Const c as hc) :: sgn' ->
             let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
-            begin
-              CsManager.trail (function () ->
-                  rSolve (ps', (r, I.id), dp, function s_ -> sc (C.Pc c :: s_)));
-              mSig sgn'
-            end
+            CsManager.trail (function () ->
+                rSolve (ps', (r, I.id), dp, function s_ -> sc (C.Pc c :: s_)));
+            mSig sgn'
       in
       mSig (Index.lookup (cidFromHead ha))
 

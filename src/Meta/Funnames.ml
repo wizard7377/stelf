@@ -135,10 +135,8 @@ end) : FUNNAMES.FUNNAMES = struct
     *)
   let installName name lemma =
     let shadowed = hashInsert (name, lemma) in
-    begin
-      Array.update (nameArray, lemma, NameInfo name);
-      shadow shadowed
-    end
+    Array.update (nameArray, lemma, NameInfo name);
+    shadow shadowed
   (* returns optional shadowed entry *)
 
   (* nameLookup (name) = SOME(cid),  if cid has name and is not shadowed,

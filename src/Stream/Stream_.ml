@@ -51,20 +51,16 @@ module BasicMemoStream : BASIC_STREAM = struct
     let memoFun () =
       try
         let r = d () in
-        begin
-          (memo := function () -> r);
-          r
-        end
+        (memo := function () -> r);
+        r
       with exn ->
         begin
           (memo := function () -> raise exn);
           raise exn
         end
     in
-    begin
-      memo := memoFun;
-      Stream (function () -> !memo ())
-    end
+    memo := memoFun;
+    Stream (function () -> !memo ())
 
   let empty = Stream (function () -> Empty)
   let cons x s = Stream (function () -> Cons (x, s))

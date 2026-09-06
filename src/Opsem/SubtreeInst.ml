@@ -471,26 +471,24 @@ end) : MEMOTABLE = struct
             && Conv.conv (n_, I.id) (n'_, I.id)
           then
             let d' = d + I.ctxLength g'_ in
-            begin
-              begin if k - d' > 0 then
-                begin match member (k - d') d'_ with
-                | None -> ()
-                | Some (x, dec_v) ->
-                    begin match RBSet.lookup asub (k - d') with
-                    | None -> begin
-                        ignore (delete (x, d'_));
-                        ignore (S.insert asub (k - d', I.Idx (k - d')))
-                      end
-                    | Some _ -> ()
+            begin if k - d' > 0 then
+              begin match member (k - d') d'_ with
+              | None -> ()
+              | Some (x, dec_v) ->
+                  begin match RBSet.lookup asub (k - d') with
+                  | None -> begin
+                      ignore (delete (x, d'_));
+                      ignore (S.insert asub (k - d', I.Idx (k - d')))
                     end
-                end
-              else begin
-                print "Impossible -- Found BVar instead of EVar\n";
-                raise (Error "Impossibe -- Found BVar instead of EVar ")
+                  | Some _ -> ()
+                  end
               end
-              end;
-              equalEqn' (d, (d_, eqn), (d'_, eqn'), asub)
+            else begin
+              print "Impossible -- Found BVar instead of EVar\n";
+              raise (Error "Impossibe -- Found BVar instead of EVar ")
             end
+            end;
+            equalEqn' (d, (d_, eqn), (d'_, eqn'), asub)
           else false
           end
       | d, _, _, asub -> false
@@ -523,10 +521,8 @@ end) : MEMOTABLE = struct
           let fasub =
             assignCtx ((fun asub -> ()), (d1, 0), (d1_, g1_), (d2_, g2_))
           in
-          begin
-            fasub asub;
-            true
-          end
+          fasub asub;
+          true
         with Assignment msg -> false
       else false
       end
@@ -554,10 +550,8 @@ end) : MEMOTABLE = struct
             collectSpine (d, d'_, d_, s_)
           end
       in
-      begin
-        S.forall nsub (function nv, (du, u_) -> collectExp (0, d'_, d_, u_));
-        (d'_, d_)
-      end
+      S.forall nsub (function nv, (du, u_) -> collectExp (0, d'_, d_, u_));
+      (d'_, d_)
 
     let rec convAssSub' (g_, idx_k, d_, asub, d, ((evars, avars) as evarsl)) =
       begin match RBSet.lookup asub d with
@@ -800,14 +794,12 @@ end) : MEMOTABLE = struct
               | Some (x, dec1), Some (x', dec2) ->
                   begin if k1 = k2 && equalDec (dec1, dec2) then
                     let s'_ = genSpine (d, s1_, s2_) in
+                    ignore (delete (x, d_t_));
                     begin
-                      ignore (delete (x, d_t_));
+                      ignore (delete (x', d_u_));
                       begin
-                        ignore (delete (x', d_u_));
-                        begin
-                          ignore (insertList ((x, dec1), ds_));
-                          I.Root (h1_, s'_)
-                        end
+                        ignore (insertList ((x, dec1), ds_));
+                        I.Root (h1_, s'_)
                       end
                     end
                   else genNVar ((rho_t, (d, t_v)), (rho_u, (d, u_)))
@@ -1016,16 +1008,14 @@ end) : MEMOTABLE = struct
                   end
                 | Variant (dt_, t'_) ->
                     let restc = !choose in
-                    begin
-                      S.insert sigma (nv, (dt_, t'_));
-                      choose :=
-                        function
-                        | match_ -> begin
-                            restc match_;
-                            begin if match_ then () else ()
-                            end
+                    S.insert sigma (nv, (dt_, t'_));
+                    choose :=
+                      function
+                      | match_ -> begin
+                          restc match_;
+                          begin if match_ then () else ()
                           end
-                    end
+                        end
                 end
             | None -> S.insert rho_u (nv, u_)
             end));
@@ -1350,10 +1340,8 @@ end) : MEMOTABLE = struct
       in
       let flag_ = update !answList false in
       let r = flag_ || !added in
-      begin
-        added := false;
-        r
-      end
+      added := false;
+      r
   end
 
   (* index for normal variables *)

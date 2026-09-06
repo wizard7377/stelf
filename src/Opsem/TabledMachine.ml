@@ -338,16 +338,14 @@ end) : TABLED = struct
         let a = I.comp asub s in
         let ass = shift (g_, a) in
         let easub = I.comp asub esub in
-        begin
-          CsManager.trail (function () ->
-              begin if
-                unifySub' (g_, shift (g_, esub), ss)
-                && unifySub' (g_, shift (g_, I.comp asub esub), ss1)
-              then sc o1_
-              else ()
-              end);
-          retrieve' ((g_, u_, s), (esub, asub), a_, sc)
-        end
+        CsManager.trail (function () ->
+            begin if
+              unifySub' (g_, shift (g_, esub), ss)
+              && unifySub' (g_, shift (g_, I.comp asub esub), ss1)
+            then sc o1_
+            else ()
+            end);
+        retrieve' ((g_, u_, s), (esub, asub), a_, sc)
 
   (* currently not used -- however, it may be better to not use the same retrieval function for
       subsumption and variant retrieval, and we want to revive this function *)
@@ -374,12 +372,10 @@ end) : TABLED = struct
         let scomp = I.comp s1 s1' in
         let ss = shift (g_, s) in
         let ss1 = shift (g_, scomp) in
-        begin
-          CsManager.trail (function () ->
-              begin if unifySub' (g_, ss, ss1) then sc o1_ else ()
-              end);
-          retrieveV ((g_, u_, s), a_, sc)
-        end
+        CsManager.trail (function () ->
+            begin if unifySub' (g_, ss, ss1) then sc o1_ else ()
+            end);
+        retrieveV ((g_, u_, s), a_, sc)
   (* for subsumption we must combine it with asumb!!! *)
 
   let retrieveSW ((g_, u_, s), asub, answL, sc) =
@@ -408,10 +404,8 @@ end) : TABLED = struct
     let lkp = T.lookup answRef in
     let asw' = List.take (rev (T.solutions answRef), T.lookup answRef) in
     let answ' = List.drop (asw', !k) in
-    begin
-      k := lkp;
-      retrieveSW ((g_, u_, s), asub, answ', sc)
-    end
+    k := lkp;
+    retrieveSW ((g_, u_, s), asub, answ', sc)
 
   (* ---------------------------------------------------------------------- *)
   (* solve ((g, s), dp, sc) => ()
@@ -469,17 +463,15 @@ end) : TABLED = struct
               end
               else
                 let le = T.lookup answRef in
-                begin
-                  suspGoals :=
-                    ( Loop,
-                      (g'_, u'_, s'),
-                      sc,
-                      Unify.suspend (),
-                      (asub, answRef),
-                      ref le )
-                    :: !suspGoals;
-                  retrieve (ref 0, (g'_, u'_, s'), (asub, answRef), sc)
-                end
+                suspGoals :=
+                  ( Loop,
+                    (g'_, u'_, s'),
+                    sc,
+                    Unify.suspend (),
+                    (asub, answRef),
+                    ref le )
+                  :: !suspGoals;
+                retrieve (ref 0, (g'_, u'_, s'), (asub, answRef), sc)
               end
           | T.RepeatedEntry (asub, answRef, Complete) ->
               begin if T.noAnswers answRef then ()
@@ -585,11 +577,9 @@ end) : TABLED = struct
       | [] -> ()
       | (I.Const c as hc) :: sgn' ->
           let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
-          begin
-            CsManager.trail (function () ->
-                rSolve (ps', (r, I.id), dp, function s_ -> sc (C.Pc c :: s_)));
-            matchSig sgn'
-          end
+          CsManager.trail (function () ->
+              rSolve (ps', (r, I.id), dp, function s_ -> sc (C.Pc c :: s_)));
+          matchSig sgn'
       (* trail to undo EVar instantiations *)
       (* return indicates failure *)
     in

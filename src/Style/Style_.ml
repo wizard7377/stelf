@@ -262,10 +262,8 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
 
     let check () =
       let n, _ = I.sgnSize () in
-      begin
-        ignore @@ map print (checkAll (0, n));
-        ()
-      end
+      ignore @@ map print (checkAll (0, n));
+      ()
   end
 
   (* indicates positivity *)

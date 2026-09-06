@@ -175,17 +175,15 @@ end) : PROVER = struct
         else makeSignature !solvedStates
         end
       in
-      begin
-        install' is_;
-        begin if !Global.chatter > 2 then begin
-          print "% ------------------\n";
-          begin
-            print (MetaPrint.sgnToString is_);
-            print "% ------------------\n"
-          end
+      install' is_;
+      begin if !Global.chatter > 2 then begin
+        print "% ------------------\n";
+        begin
+          print (MetaPrint.sgnToString is_);
+          print "% ------------------\n"
         end
-        else ()
-        end
+      end
+      else ()
       end
 
     let printState () =
@@ -196,18 +194,16 @@ end) : PROVER = struct
             print' l_
           end
       in
+      print "Open problems:\n";
       begin
-        print "Open problems:\n";
+        print "==============\n\n";
         begin
-          print "==============\n\n";
+          print' !openStates;
           begin
-            print' !openStates;
+            print "Solved problems:\n";
             begin
-              print "Solved problems:\n";
-              begin
-                print "================\n\n";
-                print' !solvedStates
-              end
+              print "================\n\n";
+              print' !solvedStates
             end
           end
         end

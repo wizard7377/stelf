@@ -169,12 +169,10 @@ module Make_Thm
             allModed cs_
           end
       in
+      allModed c_;
       begin
-        allModed c_;
-        begin
-          uniqueCallpats (c_, rs);
-          wfOrder o_
-        end
+        uniqueCallpats (c_, rs);
+        wfOrder o_
       end
 
     let rec argPos = function
@@ -318,17 +316,15 @@ module Make_Thm
         | [] -> []
         | o_ :: l_ -> wfOrder o_ :: wfOrders l_
       in
-      begin
-        uniqueCallpats (c_, rs);
-        begin if wfOrder o_ = wfOrder o'_ then ()
-        else
-          error
-            r (("Reduction Order ("
-              ^ P.rOrderToString
-                  (Obj.magic (L.RedOrder (pred_, o_, o'_)) : P.ThmSyn.redOrder)
-              )
-              ^ ") requires both orders to be of the same type.")
-        end
+      uniqueCallpats (c_, rs);
+      begin if wfOrder o_ = wfOrder o'_ then ()
+      else
+        error
+          r (("Reduction Order ("
+            ^ P.rOrderToString
+                (Obj.magic (L.RedOrder (pred_, o_, o'_)) : P.ThmSyn.redOrder)
+            )
+            ^ ") requires both orders to be of the same type.")
       end
 
     let installReduces (L.RDecl (r_, c_)) rrs =

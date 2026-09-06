@@ -436,10 +436,8 @@ module Server : SERVER = struct
     | "quit", args -> ()
     | "Config.read", args ->
         let fileName = get_file (args, "sources.cfg") in
-        begin
-          globalConfig := Some (Stelf.Config.read fileName);
-          serve Stelf.Ok
-        end
+        globalConfig := Some (Stelf.Config.read fileName);
+        serve Stelf.Ok
     | "Config.load", args -> begin
         begin match !globalConfig with
         | None -> globalConfig := Some (Stelf.Config.read "sources.cfg")
@@ -456,10 +454,8 @@ module Server : SERVER = struct
       end
     | "make", args ->
         let fileName = get_file (args, "sources.cfg") in
-        begin
-          globalConfig := Some (Stelf.Config.read fileName);
-          serve (Stelf.Config.load (valOf !globalConfig))
-        end
+        globalConfig := Some (Stelf.Config.read fileName);
+        serve (Stelf.Config.load (valOf !globalConfig))
     | "reset", args -> begin
         check_empty args;
         begin

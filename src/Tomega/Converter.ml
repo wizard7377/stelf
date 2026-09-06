@@ -235,11 +235,9 @@ module MakeConverter
             | g_, I.Null -> g_
             | g_, I.Decl (g'_, d_) -> I.Decl (append (g_, g'_), d_)
           in
-          begin
-            TypeCheck.typeCheck
-              (T.coerceCtx (append (psi0, T.embedCtx g_))) (v_, I.Uni I.Type);
-            validSig (psi0, sig_)
-          end
+          TypeCheck.typeCheck
+            (T.coerceCtx (append (psi0, T.embedCtx g_))) (v_, I.Uni I.Type);
+          validSig (psi0, sig_)
 
     let convertOneFor cid =
       let v_ =

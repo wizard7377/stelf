@@ -227,14 +227,12 @@ end) : INTERACTIVE = struct
     let printStats () =
       let nopen = 0 in
       let nsolved = 0 in
+      print "Statistics:\n\n";
       begin
-        print "Statistics:\n\n";
+        print (("Number of goals : " ^ Int.toString (nopen + nsolved)) ^ "\n");
         begin
-          print (("Number of goals : " ^ Int.toString (nopen + nsolved)) ^ "\n");
-          begin
-            print (("     open goals : " ^ Int.toString nopen) ^ "\n");
-            print (("   solved goals : " ^ Int.toString nsolved) ^ "\n")
-          end
+          print (("     open goals : " ^ Int.toString nopen) ^ "\n");
+          print (("   solved goals : " ^ Int.toString nsolved) ^ "\n")
         end
       end
 

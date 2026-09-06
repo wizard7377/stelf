@@ -287,27 +287,25 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       AbsMachine.solve
         (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) (function m_ -> raise (Solution m_))
     in
-    begin
-      CsManager.reset ();
+    CsManager.reset ();
+    try
+      begin
+        TimeLimit.timeLimit !Global.timeLimit
+          (Timers.time Timers.solving search)
+          ();
+        raise (AbortQuery "No solution to %solve found")
+      end
+      (* Call to solve raises Solution _ if there is a solution,
+        returns () if there is none.  It could also not terminate
+        *)
+    with Solution m_ -> (
       try
         begin
-          TimeLimit.timeLimit !Global.timeLimit
-            (Timers.time Timers.solving search)
-            ();
-          raise (AbortQuery "No solution to %solve found")
+          Display.chatter_s 3 " OK\n";
+          finish m_
         end
-        (* Call to solve raises Solution _ if there is a solution,
-          returns () if there is none.  It could also not terminate
-          *)
-      with Solution m_ -> (
-        try
-          begin
-            Display.chatter_s 3 " OK\n";
-            finish m_
-          end
-        with TimeLimit.TimeOut ->
-          raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
-    end
+      with TimeLimit.TimeOut ->
+        raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
 
   (* self timing *)
   (* echo declaration, according to chatter level *)
@@ -329,40 +327,38 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     let g =
       Timers.time Timers.compiling (fun () -> Compile.compileGoal IntSyn.Null a_) ()
     in
-    begin
-      CsManager.reset ();
+    CsManager.reset ();
+    try
+      begin
+        TimeLimit.timeLimit !Global.timeLimit
+          (fun (a__, b__, c__) ->
+            Timers.time Timers.solving
+              (fun () -> AbsMachineSbt.solve a__ b__ c__) ())
+          ( (g, IntSyn.id),
+            CompSyn.DProg (IntSyn.Null, IntSyn.Null),
+            function skel -> raise (SolutionSkel skel) );
+        raise (AbortQuery "No solution to %solve found")
+      end
+      (* Call to solve raises Solution _ if there is a solution,
+        returns () if there is none.  It could also not terminate
+        *)
+    with SolutionSkel skel -> (
       try
         begin
-          TimeLimit.timeLimit !Global.timeLimit
-            (fun (a__, b__, c__) ->
-              Timers.time Timers.solving
-                (fun () -> AbsMachineSbt.solve a__ b__ c__) ())
-            ( (g, IntSyn.id),
-              CompSyn.DProg (IntSyn.Null, IntSyn.Null),
-              function skel -> raise (SolutionSkel skel) );
-          raise (AbortQuery "No solution to %solve found")
+          Display.chatter_s 2 " OK\n";
+          try
+            begin
+              Timers.time Timers.ptrecon PtRecon.solve
+                ( skel,
+                  (g, IntSyn.id),
+                  CompSyn.DProg (IntSyn.Null, IntSyn.Null),
+                  function skel, m_ -> raise (Solution m_) );
+              raise (AbortQuery "Proof reconstruction for %solve failed")
+            end
+          with Solution m_ -> finish m_
         end
-        (* Call to solve raises Solution _ if there is a solution,
-          returns () if there is none.  It could also not terminate
-          *)
-      with SolutionSkel skel -> (
-        try
-          begin
-            Display.chatter_s 2 " OK\n";
-            try
-              begin
-                Timers.time Timers.ptrecon PtRecon.solve
-                  ( skel,
-                    (g, IntSyn.id),
-                    CompSyn.DProg (IntSyn.Null, IntSyn.Null),
-                    function skel, m_ -> raise (Solution m_) );
-                raise (AbortQuery "Proof reconstruction for %solve failed")
-              end
-            with Solution m_ -> finish m_
-          end
-        with TimeLimit.TimeOut ->
-          raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
-    end
+      with TimeLimit.TimeOut ->
+        raise (AbortQuery "\n----------- TIME OUT ---------------\n"))
   (* self timing *)
   (* echo declaration, according to chatter level *)
 
@@ -433,32 +429,30 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       AbsMachine.solve
         (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit
     in
-    begin
-      begin if not (boundEq (try_, Some 0)) then begin
-        CsManager.reset ();
-        (try
-           try
-             TimeLimit.timeLimit !Global.timeLimit
-               (Timers.time Timers.solving search)
-               ()
-           with Done -> ()
-           (* printing is timed into solving! *)
-         with TimeLimit.TimeOut ->
-           raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
-        CsManager.reset ();
-        checkSolutions (expected, try_, !solutions)
-      end
-      (* solve query if bound > 0 *)
-      (* in case Done was raised *)
-      (* check if number of solutions is correct *)
-        else begin
-        Display.chatter_s 3 "Skipping query (bound = 0)\n";
-        Display.chatter_s 4 "skipping"
-      end
-      end;
-      Display.chatter_s 3 "____________________________________________\n\n";
-      Display.chatter_s 4 " OK\n"
+    begin if not (boundEq (try_, Some 0)) then begin
+      CsManager.reset ();
+      (try
+         try
+           TimeLimit.timeLimit !Global.timeLimit
+             (Timers.time Timers.solving search)
+             ()
+         with Done -> ()
+         (* printing is timed into solving! *)
+       with TimeLimit.TimeOut ->
+         raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
+      CsManager.reset ();
+      checkSolutions (expected, try_, !solutions)
     end
+    (* solve query if bound > 0 *)
+    (* in case Done was raised *)
+    (* check if number of solutions is correct *)
+      else begin
+      Display.chatter_s 3 "Skipping query (bound = 0)\n";
+      Display.chatter_s 4 "skipping"
+    end
+    end;
+    Display.chatter_s 3 "____________________________________________\n\n";
+    Display.chatter_s 4 " OK\n"
 
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)
   (* times itself *)
@@ -548,32 +542,30 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
       AbsMachineSbt.solve
         (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit
     in
-    begin
-      begin if not (boundEq (try_, Some 0)) then begin
-        CsManager.reset ();
-        (try
-           try
-             TimeLimit.timeLimit !Global.timeLimit
-               (Timers.time Timers.solving search)
-               ()
-           with Done -> ()
-         with TimeLimit.TimeOut ->
-           raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
-        CsManager.reset ();
-        checkSolutions (expected, try_, !solutions)
-      end
-      (* solve query if bound > 0 *)
-      (* printing is timed into solving! *)
-      (* in case Done was raised *)
-      (* check if number of solutions is correct *)
-        else begin
-        Display.chatter_s 3 "Skipping query (bound = 0)\n";
-        Display.chatter_s 4 "skipping"
-      end
-      end;
-      Display.chatter_s 3 "____________________________________________\n\n";
-      Display.chatter_s 4 " OK\n"
+    begin if not (boundEq (try_, Some 0)) then begin
+      CsManager.reset ();
+      (try
+         try
+           TimeLimit.timeLimit !Global.timeLimit
+             (Timers.time Timers.solving search)
+             ()
+         with Done -> ()
+       with TimeLimit.TimeOut ->
+         raise (AbortQuery "\n----------- TIME OUT ---------------\n"));
+      CsManager.reset ();
+      checkSolutions (expected, try_, !solutions)
     end
+    (* solve query if bound > 0 *)
+    (* printing is timed into solving! *)
+    (* in case Done was raised *)
+    (* check if number of solutions is correct *)
+      else begin
+      Display.chatter_s 3 "Skipping query (bound = 0)\n";
+      Display.chatter_s 4 "skipping"
+    end
+    end;
+    Display.chatter_s 3 "____________________________________________\n\n";
+    Display.chatter_s 4 " OK\n"
 
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)
   (* times itself *)
@@ -754,63 +746,61 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
       (* in case Done was raised *)
       (* next stage until table doesn't change *)
     in
+    begin if not (boundEq (try_, Some 0)) then
+      try
+        begin
+          CsManager.reset ();
+          try
+            TimeLimit.timeLimit !Global.timeLimit
+              (Timers.time Timers.solving tabledSearch)
+              ()
+          with TimeLimit.TimeOut ->
+            begin
+              Display.debug
+                (Display.string "\n----------- TIME OUT ---------------\n");
+              raise Done
+            end
+        end
+        (* solve query if bound > 0 *)
+      with Done -> ()
+    else begin
+      Display.chatter_s 3 "Skipping query (bound = 0)\n";
+      Display.chatter_s 2 "skipping"
+    end
+    end;
     begin
-      begin if not (boundEq (try_, Some 0)) then
-        try
-          begin
-            CsManager.reset ();
-            try
-              TimeLimit.timeLimit !Global.timeLimit
-                (Timers.time Timers.solving tabledSearch)
-                ()
-            with TimeLimit.TimeOut ->
-              begin
-                Display.debug
-                  (Display.string "\n----------- TIME OUT ---------------\n");
-                raise Done
-              end
-          end
-          (* solve query if bound > 0 *)
-        with Done -> ()
-      else begin
-        Display.chatter_s 3 "Skipping query (bound = 0)\n";
-        Display.chatter_s 2 "skipping"
-      end
+      Display.chatter_s 3 "\n____________________________________________\n\n";
+      Display.chatter_s 3
+        ((((("number of stages: tried " ^ boundToString try_) ^ " \n")
+          ^ "terminated after ")
+         ^ Int.toString !stages)
+        ^ " stages \n \n");
+      begin if !solExists then ()
+      else Display.chatter_s 3 "\nNO solution exists to query \n\n"
       end;
-      begin
-        Display.chatter_s 3 "\n____________________________________________\n\n";
-        Display.chatter_s 3
-          ((((("number of stages: tried " ^ boundToString try_) ^ " \n")
-            ^ "terminated after ")
-           ^ Int.toString !stages)
-          ^ " stages \n \n");
-        begin if !solExists then ()
-        else Display.chatter_s 3 "\nNO solution exists to query \n\n"
-        end;
-        begin if !status then
-          Display.chatter_s 3 "Tabled evaluation COMPLETE \n \n"
-        else Display.chatter_s 3 "Tabled evaluation NOT COMPLETE \n \n"
-        end;
-        Display.chatter_s 3 "\n____________________________________________\n\n";
-        Display.chatter_s 3 "\n Table Indexing parameters: \n";
-        begin match !TableParam.strategy with
-        | variant_ -> Display.chatter_s 3 "\n Table Strategy := Variant \n"
-        | subsumption_ ->
-            Display.chatter_s 3 "\n Table Strategy := Subsumption \n"
-        end;
-        begin if !TableParam.strengthen then
-          Display.chatter_s 3 "\n Strengthening := true \n"
-        else Display.chatter_s 3 "\n Strengthening := false \n"
-        end;
-        Display.chatter_s 3
-          (("\nNumber of table indices : " ^ Int.toString (Tabled.tableSize ()))
-          ^ "\n");
-        Display.chatter_s 3
-          (("Number of suspended goals : " ^ Int.toString (Tabled.suspGoalNo ()))
-          ^ "\n");
-        Display.chatter_s 3 "\n____________________________________________\n\n";
-        Tabled.updateGlobalTable g (!status)
-      end
+      begin if !status then
+        Display.chatter_s 3 "Tabled evaluation COMPLETE \n \n"
+      else Display.chatter_s 3 "Tabled evaluation NOT COMPLETE \n \n"
+      end;
+      Display.chatter_s 3 "\n____________________________________________\n\n";
+      Display.chatter_s 3 "\n Table Indexing parameters: \n";
+      begin match !TableParam.strategy with
+      | variant_ -> Display.chatter_s 3 "\n Table Strategy := Variant \n"
+      | subsumption_ ->
+          Display.chatter_s 3 "\n Table Strategy := Subsumption \n"
+      end;
+      begin if !TableParam.strengthen then
+        Display.chatter_s 3 "\n Strengthening := true \n"
+      else Display.chatter_s 3 "\n Strengthening := false \n"
+      end;
+      Display.chatter_s 3
+        (("\nNumber of table indices : " ^ Int.toString (Tabled.tableSize ()))
+        ^ "\n");
+      Display.chatter_s 3
+        (("Number of suspended goals : " ^ Int.toString (Tabled.suspGoalNo ()))
+        ^ "\n");
+      Display.chatter_s 3 "\n____________________________________________\n\n";
+      Tabled.updateGlobalTable g (!status)
     end
 
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)

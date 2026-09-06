@@ -204,10 +204,8 @@ end) : TOMEGATYPECHECK = struct
           let (T.All ((T.UDec d''_, _), f'_)) = inferPrg (psi, p'_) in
           ignore (chatter 5 (function () -> "][new2..."));
           let f''_ = TA.raiseF (I.Decl (I.Null, d_)) (f'_, I.id) in
-          begin
-            convFor (psi, (f''_, T.id), (f_, t));
-            chatter 5 (function () -> "]\n")
-          end
+          convFor (psi, (f''_, T.id), (f_, t));
+          chatter 5 (function () -> "]\n")
       | psi, (T.Redex (p1_, s2_), (f_, t)) ->
           let f'_ = inferPrg (psi, p1_) in
           checkSpine (psi, s2_, (f'_, T.id), (f_, t))
