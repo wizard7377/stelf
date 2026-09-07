@@ -75,7 +75,7 @@ end) : RECON_MODE = struct
       let mapp (m, r1) name (mS, r2) =
         (M.Mapp (M.Marg (m, name), mS), P.join r1 r2)
 
-      let mroot (ids, id, r1, (mS, r2)) =
+      let mroot ids id r1 (mS, r2) =
         let r = P.join r1 r2 in
         (((None, Some (ids, id), mS), r) : mterm)
 

@@ -122,13 +122,13 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
           (E.Full.toModedec t', f')
       | (L.Id (_, name), r), f ->
           let mS', f' = parseShortSpine f in
-          (E.Short.toModedec (E.Short.mroot ([], name, r, mS')), f')
+          (E.Short.toModedec (E.Short.mroot [] name r mS'), f')
 
     let parseModeParen = function
       | LS.Cons ((L.Id (_, name), r0), s'), r ->
           let mS', f' = parseShortSpine (LS.expose s') in
           let f'', r' = stripRParen f' in
-          ( E.Short.toModedec (E.Short.mroot ([], name, P.join r r', mS')),
+          ( E.Short.toModedec (E.Short.mroot [] name (P.join r r') mS'),
             f'' )
       | LS.Cons ((t, r), s'), _ ->
           Parsing.error r ("Expected identifier, found " ^ L.toString t)
