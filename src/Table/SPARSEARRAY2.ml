@@ -20,6 +20,12 @@ module type SPARSE_ARRAY2 = sig
   type traversal = RowMajor | ColMajor [@@deriving eq, ord, show]
 
   val array : 'a -> 'a array
+
+  (* `sub` and `update` stay tupled together. `sub` carries two arities
+     across signatures and so is out of reach of a name-keyed rewrite;
+     currying `update` alone would split the pair, and callers use them in
+     one expression -- `Array2.update (a, i, j, Array2.sub (a, i, j) + v)`
+     in CsIneqField.ml:196. *)
   val sub : 'a array * int * int -> 'a
   val update : 'a array * int * int * 'a -> unit
   val row : 'a array -> int -> int * int -> 'a Vector.vector
