@@ -102,6 +102,114 @@ noted above:
   was fixed by destructuring at the binding (`let mode_, mname = …`) rather than
   by projecting at the call.
 
+## Phase E: the width->=4 names, by hand
+
+Phase E was deferred with the note that width >= 4 "wants labelled arguments or
+records, which is design work, not a mechanical pass". That was half right. The
+design question turned out to be small; what actually stopped the tool was name
+collision. `collect_targets` keys on `Longident.last`, and every one of these
+names is also borne by an unrelated function of a different arity somewhere in
+the tree -- `root` occurs 61 times in 22 files, `solve` 174 in 46, `update` 130
+in 29, `matchSig` in seven modules at four arities. So this phase was done by
+hand, one name at a time.
+
+Measured by widening the pass's window to `[4, 99]` and running
+`refactor curry targets`, the set was **23 names over 26 signature sites**. The
+tool was used only to measure; every edit here is manual.
+
+### The criterion
+
+A tuple stays a tuple when it **has a name** -- it is spelled as a type alias, or
+appears as a type elsewhere in the signature. It is an argument list, and
+curries, when it is spelled inline in that one `val` and nowhere else.
+
+Applied honestly the keep bucket is one row, not the several the width suggested.
+
+### Verdicts
+
+| name | site | verdict |
+|---|---|---|
+| `deduce` | Terminate/CHECKING.ml | curried 4 |
+| `installSig` / `installStruct` | Modules/MODSYN.ml | curried 4 / 5; tupled `action` callback kept |
+| `defn` `tydefn` `abbrev` `tyabbrev` | Compress/SGN.ml | curried 5; follows `tycondec` in the same signature |
+| `newEVarTC` | IntSyn/TOMEGA.ml | curried 4; follows sibling `newEVar` |
+| `apxToClass` | IntSyn/APPROX.ml | curried 4 |
+| `apxToExact` | IntSyn/APPROX.ml | curried 4; `IntSyn.eclo` kept |
+| `invertible` | IntSyn/UNIFY.ml | curried 4; `IntSyn.eclo` kept |
+| `invertSub` | IntSyn/UNIFY.ml | curried 4 |
+| `searchEx` / `searchAll` | M2/SEARCH.ml | curried 4; `exp * sub` kept |
+| `mroot` | Frontend/RECONMODE.ml (`Short`) | curried 4; `mspine` kept |
+| `rdecl` | Frontend/RECONTHM.ml | curried 4 |
+| `rdecl` | Common/Cst/CST.ml | curried 4 -- see below |
+| `abstractSub` | Meta/MTPABSTRACT.ml | curried 5; `(dctx * tag ctx)` kept |
+| `root` | Paths/PATHS.ml | curried 5; follows siblings `bind`, `app` |
+| `matchSig` | Compile/SUBTREE.ml | curried 4; `eclo` and tupled callback kept |
+| `solve` | Opsem/PTRECON.ml | curried 5; `(goal, sub)` split to match ABSMACHINE |
+| `callCheck` | MEMOTABLE.ml + SWSUBTREE.ml | curried 6 |
+| `insertIntoTree` | MEMOTABLE.ml + SWSUBTREE.ml | curried 7 |
+| `update` | Table/SPARSEARRAY2.ml | **kept tupled** |
+
+`Cst.rdecl` was planned as a keep and the plan was wrong. `type rdecl =
+predicate * order * order * callpats` sits beside it and the implementation is
+the identity on that type, which is the coupling argument for keeping it. But
+`predicate`, `tdecl`, `tableddecl`, `keepTabledecl`, `prove` and `establish` in
+the same module have exactly that shape -- `type tdecl = order * callpats` /
+`let tdecl order callpats = (order, callpats)` -- and every one is already
+curried. Family consistency won.
+
+`SparseArray2.update` is the only keep, and not because its tuple is a value:
+it is a plain argument list. Its sibling `sub` is arity 3, so it sits in the
+dual-arity set this document already defers, and callers use the two in one
+expression -- `Array2.update (a, i, j, Array2.sub (a, i, j) + v)` at
+CsIneqField.ml:196. Splitting that pair reads worse than leaving it. If `sub` is
+ever brought into scope, both move together.
+
+One name, two verdicts: `rdecl` is the worked example of why name-keying failed.
+ReconThm's destructures pair components and joins their regions; Cst's is the
+identity on its own type alias. A `Longident.last` rewrite sees one name.
+
+### The compiler as the call-site oracle, and its two blind spots
+
+Grep inherits exactly the collision problem that stopped the tool, so it was not
+the worklist. Per name: edit the `val` and the definition, run
+`dune build @check`, and the type errors *are* the complete call-site list --
+`f (a,b,c,d)` cannot typecheck against `f : a -> b -> c -> d -> e` by accident,
+and warning 5 is fatal in these libraries, so under-application is caught too.
+
+Two sites the compiler could not have caught, both found by grepping for
+un-applied uses:
+
+- **`Obj.magic`.** MtpSplitting.ml:370 applies `MTPAbstract.abstractSub` through
+  `Obj.magic`, which erases the arity. Left tupled it would have compiled
+  cleanly and then read the fields of a partial-application closure as if it
+  were a 5-tuple. A tree-wide sweep for `Obj.magic` applied to any of the 23
+  names finds no other site.
+- **Higher-order wrappers.** M2/Filling.ml's local `delay search params ()`
+  forwarded the arguments as a tuple, and Solve.ml's three `PtRecon.solve` calls
+  go through `Timers.time`. `Timers.time` is polymorphic in the argument, so a
+  curried callee still typechecks -- it just times a partial application. Both
+  use the `Timers.time c (fun () -> ...) ()` form the earlier round already
+  established at Solve.ml:287.
+
+### Residue
+
+`refactor curry targets` over `[4, 99]` now reports one name, `update`, the
+deliberate keep.
+
+Deliberately not touched, and still tupled at arity >= 4: internal helpers that
+back nothing exported -- `AbstractTabled.ml:705` `abstractSub` (10 parameters),
+`MetaAbstract.ml:334` (7), `MtpAbstract.ml:263` (5), `Abstract.ml:266` (4),
+`Uniquesearch.ml:161` `solve` (6), `MtpSearch.ml:158` (5), `Psearch.ml:159` (5),
+`M2/Search.ml:92` (4), `Cover_.ml:437` `matchSig` (5). Also `Unify.ml`'s
+`invertExp`, which shares a `let rec ... and` chain with the curried `invertSub`
+and is now visibly inconsistent with it, and `Ptrecon.ml:113`'s `solve'`, whose
+`(goal, sub)` pair is the match scrutinee.
+
+No labelled arguments were introduced. `callCheck`'s three adjacent `IntSyn.dctx`
+is the one place they would genuinely help; the definitions already name them
+`dAVars` / `dEVars` / `g`, every call site passes them in that order, and adding
+labels is a redesign rather than the currying that was asked for.
+
 ## Reproducing
 
 ```bash
