@@ -72,8 +72,13 @@ which is exactly what the warning is able to tell apart and a text scan is not.
 
 `-w -A+5+66` now stands in all 30 library `dune` files, and warning 66 remains
 fatal (`dune-workspace`'s `-warn-error` list does not exempt it). A new dead
-`open!` is a build error. `docs/warning66-baseline.txt` is empty, following the
-`docs/warning5-baseline.txt` convention: no occurrence is accepted.
+`open!` is a build error.
+
+`docs/warning66-baseline.txt` is empty **because nothing survives the gate, not
+because nothing was checked** — the two states look identical in a 0-byte file,
+and `docs/warning5-baseline.txt` carries the same ambiguity. Every `open!` in the
+30 instrumented libraries was measured; the file is the accepted-occurrence list
+and it is empty because there is nothing left to accept.
 
 ## `open! Formatter__Formatter_`
 
@@ -106,7 +111,10 @@ the answer is not derivable from the text, only from resolution.
 ## Out of scope
 
 - `test/Print/dune` sets `(:standard -w -A)`, so its 40 `open!` lines are
-  unmeasured and untouched. `test/` and `bin/` have no others.
+  unmeasured, untouched **and ungated** — it is the one place in the tree where a
+  new dead `open!` can accumulate silently while everywhere else errors on it.
+  That exemption is deliberate, not an oversight: a test executable's prelude is
+  not worth a sweep. `test/` and `bin/` have no other `open!` lines.
 - `src/Table/Table.mli` is absent from `src/Table/dune`'s `(modules …)`, so it is
   never compiled and produces no data. Left alone, as everywhere else.
 - **Qualifying the survivors** is still deferred. Warning 66 says an open
