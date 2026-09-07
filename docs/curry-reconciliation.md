@@ -183,13 +183,21 @@ un-applied uses:
   `Obj.magic`, which erases the arity. Left tupled it would have compiled
   cleanly and then read the fields of a partial-application closure as if it
   were a 5-tuple. A tree-wide sweep for `Obj.magic` applied to any of the 23
-  names finds no other site.
+  names finds no other site. **This is the one edit in the phase that nothing
+  checks**: the compiler cannot see through the magic, and the meta-prover is
+  not exercised by any of the five suites. It rests on reading the five
+  arguments against `abstractSubAll t b1 (g0, b0) s b` position by position.
+  The sibling at `:340` is unaffected -- there `Obj.magic` wraps the *result* of
+  an already-curried `abstractSub'`, not the function.
 - **Higher-order wrappers.** M2/Filling.ml's local `delay search params ()`
   forwarded the arguments as a tuple, and Solve.ml's three `PtRecon.solve` calls
-  go through `Timers.time`. `Timers.time` is polymorphic in the argument, so a
-  curried callee still typechecks -- it just times a partial application. Both
-  use the `Timers.time c (fun () -> ...) ()` form the earlier round already
-  established at Solve.ml:287.
+  go through `Timers.time`, which is polymorphic in the argument, so a curried
+  callee typechecks while only the first application lands inside the wrapper.
+  Both use the `Timers.time c (fun () -> ...) ()` form the earlier round
+  established at Solve.ml:287. Nothing observable turns on it today --
+  `Timers.time` resolves through `MakeTimers (Timing)` to
+  `Timing_.ml:59`, `let time _ f x = f x`, with the CPU-timer lines commented
+  out at `:44` -- but the thunk keeps the shape correct if timing is restored.
 
 ### Residue
 
