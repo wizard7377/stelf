@@ -20,16 +20,17 @@ end) : MEMOTABLE = struct
   (*! structure IntSyn = MemoTable.IntSyn !*)
   (*! structure CompSyn = MemoTable.CompSyn !*)
   (*! structure TableParam = MemoTable.TableParam !*)
-  let callCheck args =
+  let callCheck dAVars dEVars g u eqn status =
     begin match !TableParam.strategy with
-    | Variant -> MemoTable.callCheck args
-    | Subsumption -> MemoTableInst.callCheck args
+    | Variant -> MemoTable.callCheck dAVars dEVars g u eqn status
+    | Subsumption -> MemoTableInst.callCheck dAVars dEVars g u eqn status
     end
 
-  let insertIntoTree args =
+  let insertIntoTree dAVars dEVars g u eqn answRef status =
     begin match !TableParam.strategy with
-    | Variant -> MemoTable.insertIntoTree args
-    | Subsumption -> MemoTableInst.insertIntoTree args
+    | Variant -> MemoTable.insertIntoTree dAVars dEVars g u eqn answRef status
+    | Subsumption ->
+        MemoTableInst.insertIntoTree dAVars dEVars g u eqn answRef status
     end
 
   let answerCheck args =

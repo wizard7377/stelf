@@ -1179,7 +1179,7 @@ end) : MEMOTABLE = struct
           makeCtx (n + 1, g, dEVars)
         end
 
-    let callCheck (a, dAVars, dEVars, g, u, eqn, status) =
+    let callCheck a dAVars dEVars g u eqn status =
       let n, tree = Array.sub (indexArray, a) in
       let sq = S.new_ () in
       let dAEVars = compose (dEVars, dAVars) in
@@ -1213,7 +1213,7 @@ end) : MEMOTABLE = struct
         end
       end
 
-    let insertIntoTree (a, dAVars, dEVars, g, u, eqn, answRef, status) =
+    let insertIntoTree a dAVars dEVars g u eqn answRef status =
       let n, tree = Array.sub (indexArray, a) in
       let sq = S.new_ () in
       let dAEVars = compose (dEVars, dAVars) in
@@ -1818,20 +1818,13 @@ end) : MEMOTABLE = struct
   (* new solutions were added *)
   let reset = reset
 
-  let callCheck (dAVars, dEVars, g, u, eqn, status) =
-        callCheck
-          (cidFromHead (I.targetHead u), dAVars, dEVars, g, u, eqn, status)
+  let callCheck dAVars dEVars g u eqn status =
+    callCheck (cidFromHead (I.targetHead u)) dAVars dEVars g u eqn status
 
-  let insertIntoTree (dAVars, dEVars, g, u, eqn, answRef, status) =
-        insertIntoTree
-          ( cidFromHead (I.targetHead u),
-            dAVars,
-            dEVars,
-            g,
-            u,
-            eqn,
-            answRef,
-            status )
+  let insertIntoTree dAVars dEVars g u eqn answRef status =
+    insertIntoTree
+      (cidFromHead (I.targetHead u))
+      dAVars dEVars g u eqn answRef status
 
   let answerCheck a b c = answCheck (a, b, c)
   let updateTable = updateTable

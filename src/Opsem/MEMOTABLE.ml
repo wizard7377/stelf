@@ -21,12 +21,12 @@ module type MEMOTABLE = sig
    * SIDE EFFECT: D, G |- U added to table
    *)
   val callCheck :
-    IntSyn.dctx
-    * IntSyn.dctx
-    * IntSyn.dctx
-    * IntSyn.exp
-    * TableParam.resEqn
-    * TableParam.status ->
+    IntSyn.dctx ->
+    IntSyn.dctx ->
+    IntSyn.dctx ->
+    IntSyn.exp ->
+    TableParam.resEqn ->
+    TableParam.status ->
     TableParam.callCheckResult
 
   (* answer check/insert *)
@@ -62,12 +62,12 @@ module type MEMOTABLE = sig
   val memberCtx : IntSyn.dctx -> IntSyn.exp -> IntSyn.dctx -> IntSyn.dec option
 
   val insertIntoTree :
-    IntSyn.dctx
-    * IntSyn.dctx
-    * IntSyn.dctx
-    * IntSyn.exp
-    * TableParam.resEqn
-    * TableParam.answer
-    * TableParam.status ->
+    IntSyn.dctx ->
+    IntSyn.dctx ->
+    IntSyn.dctx ->
+    IntSyn.exp ->
+    TableParam.resEqn ->
+    TableParam.answer ->
+    TableParam.status ->
     TableParam.callCheckResult
 end

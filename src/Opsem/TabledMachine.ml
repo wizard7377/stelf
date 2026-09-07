@@ -253,7 +253,7 @@ end) : TABLED = struct
       end
     in
     begin if TabledSyn.keepTable (IntSyn.targetFam u') then
-      begin match MT.callCheck (dAVars, dEVars, g', u', eqn', status) with
+      begin match MT.callCheck dAVars dEVars g' u' eqn' status with
       | T.RepeatedEntry (_, answRef, _) ->
           TableParam.globalTable :=
             (dAVars, dEVars, g', u', eqn', answRef, status)
@@ -270,7 +270,7 @@ end) : TABLED = struct
       | [] -> ()
       | (dAVars, dEVars, g', u', eqn', answRef, status) :: rest ->
           begin match
-            MT.insertIntoTree (dAVars, dEVars, g', u', eqn', answRef, status)
+            MT.insertIntoTree dAVars dEVars g' u' eqn' answRef status
           with
           | T.NewEntry _ -> insert rest
           | _ -> ()
@@ -418,7 +418,7 @@ end) : TABLED = struct
                  residual equation not solvable! -- This should never happen! \n"
             end;
           begin match
-            MT.callCheck (dAVars, dEVars, g', u', eqn', T.Incomplete)
+            MT.callCheck dAVars dEVars g' u' eqn' T.Incomplete
           with
           | T.NewEntry answRef ->
               matchAtom
