@@ -159,7 +159,7 @@ module type TOMEGA = sig
   val eqWorlds : worlds -> worlds -> bool
   val convFor : for_ -> sub -> for_ * sub -> bool
   val newEVar : dec IntSyn.ctx -> for_ -> prg
-  val newEVarTC : dec IntSyn.ctx * for_ * tC option * tC option -> prg
+  val newEVarTC : dec IntSyn.ctx -> for_ -> tC option -> tC option -> prg
 
   (* Below are added by Yu Liao *)
   val ctxDec : dec IntSyn.ctx -> int -> dec

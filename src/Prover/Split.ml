@@ -227,7 +227,7 @@ end) : SPLIT with module State = Split__0.State' = struct
           T.Dot (T.Block l_, t')
       | I.Decl (psi, T.PDec (_, f, tc1, tc2)) ->
           let t' = createSub psi in
-          let y = T.newEVarTC (I.Null, T.FClo (f, t'), tc1, tc2) in
+          let y = T.newEVarTC I.Null (T.FClo (f, t')) tc1 tc2 in
           T.Dot (T.Prg y, t')
 
     let rec mkCases (a, f) = match a with

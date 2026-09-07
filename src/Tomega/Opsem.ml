@@ -238,7 +238,7 @@ module MakeOpsem
     | psi, (I.Decl (psi', T.PDec (name, f, None, None)) as psi'') ->
         let t = createVarSub psi psi' in
         let t' =
-          T.Dot (T.Prg (T.newEVarTC (psi, T.forSub f t, None, None)), t)
+          T.Dot (T.Prg (T.newEVarTC psi (T.forSub f t) None None), t)
         in
         t'
     | psi, I.Decl (psi', T.UDec (I.Dec (name, v))) ->

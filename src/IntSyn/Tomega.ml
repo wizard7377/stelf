@@ -443,7 +443,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       EVar
         (psi, ref None, f, None, None, I.newEVar (coerceCtx psi) (I.Uni I.Type))
 
-    let newEVarTC (psi, f, tc, tc') =
+    let newEVarTC psi f tc tc' =
       EVar (psi, ref None, f, tc, tc', I.newEVar (coerceCtx psi) (I.Uni I.Type))
 
     let rec exists a1 b1 = match a1, b1 with
