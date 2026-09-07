@@ -81,7 +81,7 @@ module type PATHS = sig
   val bind : region -> occExp option -> occExp -> occExp
   (** could be _ or identifier *)
 
-  val root : region * occExp * int * int * occSpine -> occExp
+  val root : region -> occExp -> int -> int -> occSpine -> occExp
   val app : occExp -> occSpine -> occSpine
   val nils : occSpine
 

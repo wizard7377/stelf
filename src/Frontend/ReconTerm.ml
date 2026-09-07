@@ -1419,16 +1419,16 @@ end) : RECON_TERM = struct
   let rec occElim (tm, os, rs, i) = match tm with
     | Constant_ (h, r) ->
         let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
-        ( Paths.root (r', Paths.leaf r, IntSyn.conDecImp (headConDec h), i, os),
+        ( Paths.root r' (Paths.leaf r) (IntSyn.conDecImp (headConDec h)) i os,
           r' )
         (* should probably treat a constant with Foreign
              attribute as a redex *)
     | Bvar_ (k, r) ->
         let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
-        (Paths.root (r', Paths.leaf r, 0, i, os), r')
+        (Paths.root r' (Paths.leaf r) 0 i os, r')
     | Fvar_ (name, r) ->
         let r' = List.foldr (fun (a, b) -> Paths.join a b) r rs in
-        (Paths.root (r', Paths.leaf r, 0, i, os), r')
+        (Paths.root r' (Paths.leaf r) 0 i os, r')
     | App_ (tm1, tm2) ->
         let oc2, r2 = occIntro tm2 in
         occElim (tm1, Paths.app oc2 os, r2 :: rs, i + 1)
