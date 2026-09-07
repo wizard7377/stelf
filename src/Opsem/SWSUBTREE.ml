@@ -92,5 +92,5 @@ module type MEMOTABLE = sig
    *)
   val updateTable : unit -> bool
   val tableSize : unit -> int
-  val memberCtx : IntSyn.dctx * IntSyn.exp -> IntSyn.dctx -> IntSyn.dec option
+  val memberCtx : IntSyn.dctx -> IntSyn.exp -> IntSyn.dctx -> IntSyn.dec option
 end

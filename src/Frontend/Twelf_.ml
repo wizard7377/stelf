@@ -589,7 +589,7 @@ end) : TWELF.STELF = struct
           with Constraints.Error eqns ->
             raise (ReconTerm.Error (Paths.wrap r (constraintsMsg eqns))))
       | fileName, (Parser.Query (expected, try_, query_), r) -> (
-          try Solve.query (expected, try_, query_) (Paths.Loc (fileName, r))
+          try Solve.query expected try_ query_ (Paths.Loc (fileName, r))
           with Solve.AbortQuery msg ->
             raise (Solve.AbortQuery (Paths.wrap r msg)))
       | fileName, (Parser.FQuery query_, r) -> (
@@ -597,7 +597,7 @@ end) : TWELF.STELF = struct
           with Fquery.AbortQuery msg ->
             raise (Fquery.AbortQuery (Paths.wrap r msg)))
       | fileName, (Parser.Querytabled (numSol, try_, query_), r) -> (
-          try Solve.querytabled (numSol, try_, query_) (Paths.Loc (fileName, r))
+          try Solve.querytabled numSol try_ query_ (Paths.Loc (fileName, r))
           with Solve.AbortQuery msg ->
             raise (Solve.AbortQuery (Paths.wrap r msg)))
       | fileName, (Parser.TrustMe (dec_, r'), r) ->
@@ -783,7 +783,7 @@ end) : TWELF.STELF = struct
           ignore (TomegaTypeCheck.checkPrg IntSyn.Null (p_, f_));
           let f cid = IntSyn.conDecName (IntSyn.sgnLookup cid) in
           ignore (Display.chatter_s 2
-              (("\n" ^ TomegaPrint.funToString (map f cids, projs) p_) ^ "\n"));
+              (("\n" ^ TomegaPrint.funToString (map f cids) projs p_) ^ "\n"));
           ignore (Display.chatter_s 3
               ((begin if !Global.chatter >= 4 then "%" else ""
                 end
@@ -987,10 +987,10 @@ end) : TWELF.STELF = struct
               (("%keeptabled " ^ ThmPrint.keepTableDeclToString t_) ^ ".\n"));
           ()
       | fileName, (Parser.TheoremDec tdec, r) ->
-          let tdec_ = ReconThm.theoremDecToTheoremDec tdec in
+          let tname, tdecl = ReconThm.theoremDecToTheoremDec tdec in
           ignore (ReconTerm.checkErrors r);
           let gBs, (IntSyn.ConDec (name, _, k, _, v_, l_) as e_) =
-            ThmSyn.theoremDecToConDec tdec_ r
+            ThmSyn.theoremDecToConDec tname tdecl r
           in
           ignore (FunSyn.labelReset ());
           ignore (List.foldr
@@ -1003,7 +1003,7 @@ end) : TWELF.STELF = struct
                            FunSyn.ctxToList g2_ )))
               0 gBs);
           let cid = installConDec IntSyn.Ordinary (e_, (fileName, None), r) in
-          let ms_ = ThmSyn.theoremDecToModeSpine tdec_ r in
+          let ms_ = ThmSyn.theoremDecToModeSpine tname tdecl r in
           let convert_mode = function
             | ModeSyn.Plus -> Modes.Modesyn.ModeSyn.Plus
             | ModeSyn.Star -> Modes.Modesyn.ModeSyn.Star

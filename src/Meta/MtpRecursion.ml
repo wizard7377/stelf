@@ -201,7 +201,7 @@ end) : MTPRECURSION = struct
             List.exists
               (function
                 | Lemma (n', f'_) ->
-                    n = n' && F.convFor (f_, I.id) (f'_, I.id))
+                    n = n' && F.convFor f_ I.id (f'_, I.id))
               ds'_
           then ds'_
           else l_ :: ds'_
@@ -220,7 +220,7 @@ end) : MTPRECURSION = struct
           List.exists
             (function
               | nhist, fhist ->
-                  nih = nhist && F.convFor (fnew, I.id) (fhist, I.id))
+                  nih = nhist && F.convFor fnew I.id (fhist, I.id))
             h_
         then ds_
         else Lemma (nih, fnew) :: ds_
@@ -495,7 +495,7 @@ end) : MTPRECURSION = struct
                     (fun v_ ->
                       v'_
                         (Abstract.piDepend
-                           (Whnf.normalizeDec d_ s', I.Meta) (Whnf.normalize (v_, I.id)))),
+                           (Whnf.normalizeDec d_ s') I.Meta (Whnf.normalize (v_, I.id)))),
                     fun f_ -> f'_ (F.All (F.Prim (I.decSub d_ s'), f_)) ) )
       | (du, de), (g_, b_), F.Ex (I.Dec (name, v_), f_) ->
           let s', v'_, f'_ = sc (w, de) in

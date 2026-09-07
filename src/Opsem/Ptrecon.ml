@@ -137,7 +137,7 @@ end) : PTRECON = struct
     | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool) ->
         let d'_ = I.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
-          begin match MT.memberCtx (g_, I.EClo (a_, s)) g_ with
+          begin match MT.memberCtx g_ (I.EClo (a_, s)) g_ with
           | Some d_ ->
               let x_ = I.newEVar g_ (I.EClo (a_, s)) in
               solve'

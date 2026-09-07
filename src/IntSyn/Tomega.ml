@@ -298,7 +298,7 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | Conj (tc1, tc2), Conj (tc1', tc2') ->
           convTC tc1 tc1' && convTC tc2 tc2'
       | Abs (d_, tc), Abs (d'_, tc') ->
-          Conv.convDec (d_, I.id) (d'_, I.id) && convTC tc tc'
+          Conv.convDec d_ I.id (d'_, I.id) && convTC tc tc'
       | _ -> false
 
     let convTCOpt = function
@@ -423,23 +423,23 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       let s = invertSub w in
       (coerceCtx psi, w, s)
 
-    let rec convFor a1 b1 = match a1, b1 with
+    let rec convFor a1 a2 b1 = match (a1, a2), b1 with
       | (True, _), (True, _) -> true
       | (All ((d1_, _), f1_), t1), (All ((d2_, _), f2_), t2) ->
-          convDec (d1_, t1) (d2_, t2)
-          && convFor (f1_, dot1 t1) (f2_, dot1 t2)
+          convDec d1_ t1 (d2_, t2)
+          && convFor f1_ (dot1 t1) (f2_, dot1 t2)
       | (Ex ((d1_, _), f1_), t1), (Ex ((d2_, _), f2_), t2) ->
-          Conv.convDec (d1_, coerceSub t1) (d2_, coerceSub t2)
-          && convFor (f1_, dot1 t1) (f2_, dot1 t2)
+          Conv.convDec d1_ (coerceSub t1) (d2_, coerceSub t2)
+          && convFor f1_ (dot1 t1) (f2_, dot1 t2)
       | (And (f1_, f1'), t1), (And (f2_, f2'), t2) ->
-          convFor (f1_, t1) (f2_, t2) && convFor (f1', t1) (f2', t2)
+          convFor f1_ t1 (f2_, t2) && convFor f1' t1 (f2', t2)
       | _ -> false
 
-    and convDec a1 b1 = match a1, b1 with
+    and convDec a1 a2 b1 = match (a1, a2), b1 with
       | (UDec d1_, t1), (UDec d2_, t2) ->
-          Conv.convDec (d1_, coerceSub t1) (d2_, coerceSub t2)
+          Conv.convDec d1_ (coerceSub t1) (d2_, coerceSub t2)
       | (PDec (_, f1_, tc1, tc1'), t1), (PDec (_, f2_, tc2, tc2'), t2) -> begin
-          ignore (convFor (f1_, t1) (f2_, t2));
+          ignore (convFor f1_ t1 (f2_, t2));
           begin
             ignore (convTCOpt (tc1, tc1'));
             convTCOpt (tc2, tc2')

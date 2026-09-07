@@ -35,7 +35,7 @@ module type TABLED = sig
   (*! structure IntSyn : INTSYN !*)
   (*! structure CompSyn : COMPSYN !*)
   val solve :
-    CompSyn.goal * IntSyn.sub -> CompSyn.dProg -> (CompSyn.pskeleton -> unit) ->
+    CompSyn.goal -> IntSyn.sub -> CompSyn.dProg -> (CompSyn.pskeleton -> unit) ->
     unit
 
   val updateGlobalTable : CompSyn.goal -> bool -> unit

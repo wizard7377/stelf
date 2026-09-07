@@ -239,25 +239,25 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       | I.Null, s -> s
       | I.Decl (g_, _), s -> I.dot1 (dot1n g_ s)
 
-    let rec convFor a1 b1 = match a1, b1 with
+    let rec convFor a1 a2 b1 = match (a1, a2), b1 with
       | (True, _), (True, _) -> true
       | (All (Prim d1_, f1_), s1), (All (Prim d2_, f2_), s2) ->
-          Conv.convDec (d1_, s1) (d2_, s2)
-          && convFor (f1_, I.dot1 s1) (f2_, I.dot1 s2)
+          Conv.convDec d1_ s1 (d2_, s2)
+          && convFor f1_ (I.dot1 s1) (f2_, I.dot1 s2)
       | ( (All (Block (CtxBlock (_, g1_)), f1_), s1),
           (All (Block (CtxBlock (_, g2_)), f2_), s2) ) ->
           convForBlock ((ctxToList g1_, f1_, s1), (ctxToList g1_, f2_, s2))
       | (Ex (d1_, f1_), s1), (Ex (d2_, f2_), s2) ->
-          Conv.convDec (d1_, s1) (d2_, s2)
-          && convFor (f1_, I.dot1 s1) (f2_, I.dot1 s2)
+          Conv.convDec d1_ s1 (d2_, s2)
+          && convFor f1_ (I.dot1 s1) (f2_, I.dot1 s2)
       | (And (f1_, f1'), s1), (And (f2_, f2'), s2) ->
-          convFor (f1_, s1) (f2_, s2) && convFor (f1', s1) (f2', s2)
+          convFor f1_ s1 (f2_, s2) && convFor f1' s1 (f2', s2)
       | _ -> false
 
     and convForBlock = function
-      | ([], f1_, s1), ([], f2_, s2) -> convFor (f1_, s1) (f2_, s2)
+      | ([], f1_, s1), ([], f2_, s2) -> convFor f1_ s1 (f2_, s2)
       | (d1_ :: g1_, f1_, s1), (d2_ :: g2_, f2_, s2) ->
-          Conv.convDec (d1_, s1) (d2_, s2)
+          Conv.convDec d1_ s1 (d2_, s2)
           && convForBlock ((g1_, f1_, I.dot1 s1), (g2_, f2_, I.dot1 s2))
       | _ -> false
 

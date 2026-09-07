@@ -69,7 +69,7 @@ module type MTPABSTRACT = sig
     (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
 
   val abstractSub' :
-    IntSyn.dctx * StateSyn.tag IntSyn.ctx -> IntSyn.sub -> StateSyn.tag IntSyn.ctx ->
+    IntSyn.dctx -> StateSyn.tag IntSyn.ctx -> IntSyn.sub -> StateSyn.tag IntSyn.ctx ->
     (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
 
   val abstractApproxFor : approxFor -> FunSyn.for_

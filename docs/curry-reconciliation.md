@@ -67,14 +67,49 @@ category account of every difference.
   `src/Table/dune`'s `(modules …)`, so the file is dead and uncompiled.
   Pre-existing, unrelated to this refactor, left alone.
 
+## Phase D: the single-arity names are now exhausted
+
+Two further rounds (96 tool edits) cleared the last 18 single-arity targets —
+`abstractSub'`, `addSolution`, `checkType`, `coninst`, `convDec`, `convFor`,
+`conv_dec`, `formatFun`, `funToString`, `mapp`, `memberCtx`, `piDepend`, `query`,
+`querytabled`, `solve`, `strinst`, `theoremDecToConDec`, `theoremDecToModeSpine`.
+`curry locate` now reports `auto=0`; every remaining decline is one of the eight
+dual-arity names (`check`, `condec`, `dec`, `matchBlock`, `match_`,
+`sProgInstall`, `sub`, `update`), which a name-keyed rewrite cannot disambiguate
+without types.
+
+**16 hand fixes were needed**, in the shape the tool structurally cannot see: a
+definition already curried into `let f a b = match a, b with` (the output of an
+earlier round, or of `defun`) rather than destructuring the tuple in the
+parameter. The tool rewrites the `val` and the call sites and leaves the
+definition, so the type checker names each one. The fix is uniform —
+`let f a1 a2 b = match (a1, a2), b with` — and was applied to `convDec`,
+`piDepend`, `convFor`, `solve`, `checkType`, `addSolution`, `formatFun`,
+`funToString`, `abstractSub'` and `query`.
+
+Two other residue shapes appeared, both predicted by the `Longident.last` risk
+noted above:
+
+- **Local shadows of a target name.** `Tomega.ml`'s own `convDec`,
+  `AbstractTabled.ml`'s and `MtpAbstract.ml`'s own `piDepend` are distinct
+  functions that happen to share a target's name, so their call sites were
+  rewritten too. All three have the same tupled shape, so currying them is
+  consistent rather than a repair — but the tool could equally have hit a
+  function where it was not.
+- **Call sites passing a tuple-valued *variable*.** `E.Short.mapp mId mS'`,
+  `ThmSyn.theoremDecToConDec tdec_ r` and `AbsMachineSbt.solve` under
+  `TimeLimit.timeLimit` are declined as "argument is not a literal tuple". Each
+  was fixed by destructuring at the binding (`let mode_, mname = …`) rather than
+  by projecting at the call.
+
 ## Reproducing
 
 ```bash
-dune build tools/curry/curry.exe
-./_build/default/tools/curry/curry.exe targets            # the val table
-./_build/default/tools/curry/curry.exe locate > docs/curry-sites.txt
-./_build/default/tools/curry/curry.exe locate src/Compress   # scoped to one library
-./_build/default/tools/curry/curry.exe patch  src/Compress   # apply
+dune build tools/refactor/refactor.exe
+./_build/default/tools/refactor/refactor.exe curry targets            # the val table
+./_build/default/tools/refactor/refactor.exe curry locate > docs/curry-sites.txt
+./_build/default/tools/refactor/refactor.exe curry locate src/Compress   # scoped
+./_build/default/tools/refactor/refactor.exe curry patch  src/Compress   # apply
 ```
 
 `patch` applies only `SIG`/`DEF`/`DEFFUN`/`CALL` edits; `ESCALATE` and `VALUEUSE`

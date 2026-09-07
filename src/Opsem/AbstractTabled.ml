@@ -102,7 +102,7 @@ end) : ABSTRACTTABLED = struct
     let rec equalCtx (a, s, b, s') = match a, b with
       | I.Null, I.Null -> true
       | I.Decl (g_, d_), I.Decl (g'_, d'_) ->
-          Conv.convDec (d_, s) (d'_, s')
+          Conv.convDec d_ s (d'_, s')
           && equalCtx (g_, I.dot1 s, g'_, I.dot1 s')
       | I.Decl (g_, d_), I.Null -> false
       | I.Null, I.Decl (g'_, d'_) -> false
@@ -195,7 +195,7 @@ end) : ABSTRACTTABLED = struct
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
 
-    let piDepend a1 b1 = match a1, b1 with
+    let piDepend a1 a2 b1 = match (a1, a2), b1 with
       | (d_, I.No), v_ -> I.Pi ((d_, I.No), v_)
       | (d_, I.Meta), v_ -> I.Pi ((d_, I.Meta), v_)
       | (d_, I.Maybe), v_ -> I.Pi ((d_, occursInExp (1, v_)), v_)
@@ -501,7 +501,7 @@ end) : ABSTRACTTABLED = struct
                 (v_, I.dot1 s),
                 eqn )
           in
-          (posEA'', vars'', piDepend (d_, p_) v'_, eqn2)
+          (posEA'', vars'', piDepend d_ p_ v'_, eqn2)
       | gs_, posEA, (I.Root (h_, s_), s) ->
           let posEA', vars', s_, eqn' =
             abstractSpine

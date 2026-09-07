@@ -324,7 +324,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | ((I.Uni l_ as v_), s) -> v_
       | (I.Pi ((d_, p_), v_), s) ->
           Abstract.piDepend
-            (abstractDec (a_, g_, depth, (d_, s)), p_) (abstractExp
+            (abstractDec (a_, g_, depth, (d_, s))) p_ (abstractExp
                 (a_, I.Decl (g_, I.decSub d_ s), depth + 1, (v_, I.dot1 s)))
       | (I.Lam (d_, u_), s) ->
           I.Lam

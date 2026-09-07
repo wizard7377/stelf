@@ -113,7 +113,7 @@ end) : STRICT = struct
       let rec oit = function
         | (0, v_), occ -> ()
         | (i, I.Pi ((d_, p_), v_)), occ ->
-            begin match Abstract.piDepend (d_, p_) v_ with
+            begin match Abstract.piDepend d_ p_ v_ with
             | I.Pi ((d'_, Maybe), v_) -> oit ((i - 1, v_), Paths.body occ)
             | _ ->
                 raise
@@ -181,7 +181,7 @@ end) : STRICT = struct
   (* may not be sound in general *)
   (* Wed Aug 25 16:39:57 2004 -fp *)
   let check = strictTop
-  let checkType u_ occ = occursInType (u_, occ)
+  let checkType k u_ occ = occursInType ((k, u_), occ)
 end
 (*! structure IntSyn' : INTSYN !*)
 (*! sharing Whnf.IntSyn = IntSyn' !*)

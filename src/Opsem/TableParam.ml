@@ -81,9 +81,9 @@ module MakeTableParam (Global : GLOBAL) : TABLEPARAM = struct
   let resetGlobalTable () = globalTable := []
   let emptyAnsw () = ref { solutions = []; lookup = 0 }
 
-  let addSolution s_ answRef =
+  let addSolution g_ s s_ answRef =
     let { solutions = sList; lookup = k } = !answRef in
-    answRef := { solutions = s_ :: sList; lookup = k }
+    answRef := { solutions = ((g_, s), s_) :: sList; lookup = k }
 
   let updateAnswLookup k' answRef =
     let { solutions = sList; lookup = k } = !answRef in

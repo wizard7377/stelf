@@ -130,7 +130,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
 
-    let piDepend a1 b1 = match a1, b1 with
+    let piDepend a1 a2 b1 = match (a1, a2), b1 with
       | (d_, I.No), v_ -> I.Pi ((d_, I.No), v_)
       | (d_, I.Meta), v_ -> I.Pi ((d_, I.Meta), v_)
       | (d_, I.Maybe), v_ -> I.Pi ((d_, occursInExp (1, v_)), v_)
@@ -248,7 +248,7 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
       | ((I.Uni l_ as u_), s) -> u_
       | (I.Pi ((d_, p_), v_), s) ->
           piDepend
-            (abstractDec (k_, depth, (d_, s)), p_) (abstractExp (k_, depth + 1, (v_, I.dot1 s)))
+            (abstractDec (k_, depth, (d_, s))) p_ (abstractExp (k_, depth + 1, (v_, I.dot1 s)))
       | (I.Root ((I.FVar _ as f_), s_), s) ->
           I.Root
             (abstractFVar (k_, depth, f_), abstractSpine (k_, depth, (s_, s)))

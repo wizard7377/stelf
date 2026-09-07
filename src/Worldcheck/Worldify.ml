@@ -316,13 +316,13 @@ end) : WORLDIFY = struct
     let rec eqCtx = function
       | I.Null, I.Null -> true
       | I.Decl (g1_, d1_), I.Decl (g2_, d2_) ->
-          eqCtx (g1_, g2_) && Conv.convDec (d1_, I.id) (d2_, I.id)
+          eqCtx (g1_, g2_) && Conv.convDec d1_ I.id (d2_, I.id)
       | _ -> false
 
     let rec eqList = function
       | [], [] -> true
       | d1_ :: l1_, d2_ :: l2_ ->
-          Conv.convDec (d1_, I.id) (d2_, I.id) && eqList (l1_, l2_)
+          Conv.convDec d1_ I.id (d2_, I.id) && eqList (l1_, l2_)
       | _ -> false
 
     let eqBlock (b1, b2) =

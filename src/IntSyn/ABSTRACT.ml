@@ -17,7 +17,7 @@ open Tomega
 module type ABSTRACT = sig
   exception Error of string
 
-  val piDepend : IntSyn.dec * IntSyn.depend -> IntSyn.exp -> IntSyn.exp
+  val piDepend : IntSyn.dec -> IntSyn.depend -> IntSyn.exp -> IntSyn.exp
   val closedDec : IntSyn.dec IntSyn.ctx -> IntSyn.dec * IntSyn.sub -> bool
   val closedSub : IntSyn.dec IntSyn.ctx -> IntSyn.sub -> bool
   val closedExp : IntSyn.dec IntSyn.ctx -> IntSyn.exp * IntSyn.sub -> bool

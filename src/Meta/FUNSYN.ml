@@ -136,7 +136,7 @@ module type FUNSYN = sig
   val lfctxLength : lfctx -> int
   val lfctxLFDec : lfctx -> int -> lFDec * IntSyn.sub
   val dot1n : IntSyn.dctx -> IntSyn.sub -> IntSyn.sub
-  val convFor : for_ * IntSyn.sub -> for_ * IntSyn.sub -> bool
+  val convFor : for_ -> IntSyn.sub -> for_ * IntSyn.sub -> bool
   val forSub : for_ -> IntSyn.sub -> for_
   val normalizeFor : for_ -> IntSyn.sub -> for_
   val listToCtx : IntSyn.dec list -> IntSyn.dctx

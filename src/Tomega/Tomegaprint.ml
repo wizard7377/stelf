@@ -735,12 +735,12 @@ end) : TOMEGAPRINT = struct
              p_,
              function lemma -> lookup (names, projs) lemma ))
 
-    let formatFun a b =
-      let args_ = (a, b) in
+    let formatFun a1 a2 b =
+      let args_ = ((a1, a2), b) in
       Names.varReset I.Null;
       formatPrg0 args_
 
-    let funToString a b = Fmt.makestring_fmt (formatFun a b)
+    let funToString a1 a2 b = Fmt.makestring_fmt (formatFun a1 a2 b)
 
     let prgToString a b =
       let args_ = (a, b) in

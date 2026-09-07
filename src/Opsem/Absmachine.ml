@@ -92,17 +92,17 @@ end) : ABSMACHINE = struct
       | I.Null, v_ -> v_
       | I.Decl (g_, d_), v_ -> raiseType g_ (I.Pi ((d_, I.Maybe), v_))
 
-    let rec solve a2 b2 c2 = match a2, b2, c2 with
+    let rec solve a1 a2 b2 c2 = match (a1, a2), b2, c2 with
       | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
           matchAtom ((p, s), dp, sc)
       | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
           solve
-            (g, I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha)))) (function m_ -> sc (I.Lam (d'_, m_)))
+            g (I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha)))) (function m_ -> sc (I.Lam (d'_, m_)))
       | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
           let d'_ = Names.decLUName g_ (I.decSub d_ s) in
           solve
-            (g, I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter))) (function m_ -> sc (I.Lam (d'_, m_)))
+            g (I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter))) (function m_ -> sc (I.Lam (d'_, m_)))
 
     and rSolve (ps', a, b, sc) = match a, b with
       | (C.Eq q_, s), C.DProg (g_, dPool) ->
@@ -121,7 +121,7 @@ end) : ABSMACHINE = struct
               (r, I.Dot (I.Exp x_, s)),
               dp,
               function
-              | s_ -> solve (g, s) dp (function m_ -> sc (I.App (m_, s_))) )
+              | s_ -> solve g s dp (function m_ -> sc (I.App (m_, s_))) )
       | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp)
         ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
@@ -143,7 +143,7 @@ end) : ABSMACHINE = struct
               (r, I.Dot (I.Exp x_, s)),
               dp,
               function
-              | s_ -> solve (g, s) dp (function m_ -> sc (I.App (m_, s_))) )
+              | s_ -> solve g s dp (function m_ -> sc (I.App (m_, s_))) )
 
     and aSolve (a, b, cnstr, sc) = match a, b with
       | (C.Trivial, s), dp ->

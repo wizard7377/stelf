@@ -154,7 +154,7 @@ end) : TOMEGATYPECHECK = struct
           checkPrg (I.Decl (psi, d_)) (p_, (f2_, T.dot1 t))
       | (T.Lam (T.UDec d_, p_), (T.All ((T.UDec d'_, _), f_), t2)) ->
           ignore (chatter 4 (function () -> "[lam[u]"));
-          ignore (Conv.convDec (d_, I.id) (d'_, T.coerceSub t2));
+          ignore (Conv.convDec d_ I.id (d'_, T.coerceSub t2));
           ignore (chatter 4 (function () -> "]"));
           checkPrg (I.Decl (psi, T.UDec d_)) (p_, (f_, T.dot1 t2))
       | (T.PairExp (m_, p_), (T.Ex ((I.Dec (x, a_), _), f2_), t)) ->

@@ -119,7 +119,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
   type nonrec eqn = IntSyn.cid * inst_ * Paths.region
   type nonrec inst = ModSyn.Names.namespace * eqn list -> eqn list
 
-  let coninst (ids, id, r1) tm r2 : inst =
+  let coninst ids id r1 tm r2 : inst =
    fun (ns, eqns) ->
     let qid = ModSyn.Names.Qid (ids, id) in
     begin match ModSyn.Names.constLookupIn ns qid with
@@ -161,7 +161,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
     ModSyn.Names.appConsts doConst ns1;
     ModSyn.Names.appStructs doStruct ns1
 
-  let strinst (ids, id, r1) strexp r3 : inst =
+  let strinst ids id r1 strexp r3 : inst =
    fun (ns, eqns) ->
     let qid = ModSyn.Names.Qid (ids, id) in
     let mid1 =

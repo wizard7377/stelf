@@ -164,7 +164,7 @@ module type TOMEGA = sig
   val lemmaDef : lemma -> prg
   val lemmaFor : lemma -> for_
   val eqWorlds : worlds -> worlds -> bool
-  val convFor : for_ * sub -> for_ * sub -> bool
+  val convFor : for_ -> sub -> for_ * sub -> bool
   val newEVar : dec IntSyn.ctx -> for_ -> prg
   val newEVarTC : dec IntSyn.ctx * for_ * tC option * tC option -> prg
 

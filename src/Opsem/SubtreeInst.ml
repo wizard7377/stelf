@@ -433,7 +433,7 @@ end) : MEMOTABLE = struct
     let rec equalCtx (a, s, b, s') = match a, b with
       | I.Null, I.Null -> true
       | I.Decl (g_, (I.Dec (_, a_) as d_)), I.Decl (g'_, (I.Dec (_, a'_) as d'_)) ->
-          Conv.convDec (d_, s) (d'_, s')
+          Conv.convDec d_ s (d'_, s')
           && equalCtx (g_, I.dot1 s, g'_, I.dot1 s')
       | _, _ -> false
 
@@ -1165,7 +1165,7 @@ end) : MEMOTABLE = struct
       let dEVars, sk = A.abstractAnswSub s' in
       begin if member (dEVars, sk) (T.solutions answRef) then T.Repeated
       else begin
-        T.addSolution ((dEVars, sk), o_) answRef;
+        T.addSolution dEVars sk o_ answRef;
         T.New_
       end
       end
@@ -1863,7 +1863,7 @@ end) : MEMOTABLE = struct
        then return true
          otherwise false
     *)
-  let memberCtx (g_, v_) g'_ =
+  let memberCtx g_ v_ g'_ =
     let rec instanceCtx' (a, b, n) = match a, b with
       | (g_, v_), I.Null -> None
       | (g_, v_), I.Decl (g'_, (I.Dec (_, v'_) as d'_)) ->

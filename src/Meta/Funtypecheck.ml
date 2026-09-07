@@ -169,7 +169,7 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
         | I.Null -> vn
         | I.Decl (g'_, (I.Dec (_, v'_) as d_)) ->
             begin if Subordinate.belowEq (I.targetFam v'_) a then
-              raiseType'' (g'_, Abstract.piDepend (d_, I.Maybe) vn, a)
+              raiseType'' (g'_, Abstract.piDepend d_ I.Maybe vn, a)
             else raiseType'' (g'_, Weaken.strengthenExp vn I.shift, a)
             end
       in

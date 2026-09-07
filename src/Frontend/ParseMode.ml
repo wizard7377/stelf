@@ -136,9 +136,9 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
       | LS.Cons ((L.Dot, r), s') as f -> (E.Short.mnil r, f)
       | LS.Cons ((L.Rparen, r), s') as f -> (E.Short.mnil r, f)
       | LS.Cons ((L.Id (_, id), r), s') ->
-          let mId = validateMArg (r, splitModeId (r, id)) in
+          let mode_, mname = validateMArg (r, splitModeId (r, id)) in
           let mS', f' = parseShortSpine (LS.expose s') in
-          (E.Short.mapp mId mS', f')
+          (E.Short.mapp mode_ mname mS', f')
       | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected mode or `.', found " ^ L.toString t)
 

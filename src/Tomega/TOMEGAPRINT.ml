@@ -38,12 +38,12 @@ module type TOMEGAPRINT = sig
   val forToString : Tomega.dec IntSyn.ctx -> Tomega.for_ -> string
 
   val formatFun :
-    string list * Tomega.lemma list -> Tomega.prg -> Formatter.format
+    string list -> Tomega.lemma list -> Tomega.prg -> Formatter.format
 
   val formatPrg : Tomega.dec IntSyn.ctx -> Tomega.prg -> Formatter.format
 
   (*  val formatLemmaDec: FunSyn.LemmaDec -> Formatter.format *)
-  val funToString : string list * Tomega.lemma list -> Tomega.prg -> string
+  val funToString : string list -> Tomega.lemma list -> Tomega.prg -> string
 
   (* funToString ((names, projs), P)  = s
      cids is the list of mututal recursive type families.  (could also be names)

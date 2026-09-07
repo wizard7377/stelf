@@ -73,10 +73,10 @@ module type MODEXTSYN = sig
   type inst
 
   val coninst :
-    string list * string * Paths.region -> ExtSyn.term -> Paths.region -> inst
+    string list -> string -> Paths.region -> ExtSyn.term -> Paths.region -> inst
 
   val strinst :
-    string list * string * Paths.region -> strexp -> Paths.region -> inst
+    string list -> string -> Paths.region -> strexp -> Paths.region -> inst
 
   type sigexp
 

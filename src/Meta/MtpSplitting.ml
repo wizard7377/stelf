@@ -367,7 +367,7 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
             let ((g''_, b''), s'') : (I.dctx * S.tag I.ctx) * I.sub =
               Obj.magic
                 (MTPAbstract.abstractSub'
-                   (g'_, b'_) (I.Dot (I.Exp u'_, s')) (I.Decl (b0, t_)))
+                   g'_ b'_ (I.Dot (I.Exp u'_, s')) (I.Decl (b0, t_)))
             in
             ignore begin if !Global.doubleCheck then (
                 let psi'' = aux (g''_, b'') in

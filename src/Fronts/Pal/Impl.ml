@@ -379,7 +379,7 @@ module Impl () = struct
       in
       (try
          Opsem.Opsem_.AbsMachine.solve
-           (g, Intsyn.IntSyn.id) (Compile.CompSyn.CompSyn.DProg
+           g Intsyn.IntSyn.id (Compile.CompSyn.CompSyn.DProg
                (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null)) sc
        with Done -> ());
       if !solutions = 0 && !Global.Global_.Global.chatter >= 3 then
@@ -548,7 +548,7 @@ module Impl () = struct
             match
               try
                 Opsem.Opsem_.AbsMachine.solve
-                  (g, Intsyn.IntSyn.id) (Compile.CompSyn.CompSyn.DProg
+                  g Intsyn.IntSyn.id (Compile.CompSyn.CompSyn.DProg
                       (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null)) sc;
                 None
               with Done m_ -> Some m_
@@ -786,7 +786,7 @@ module Impl () = struct
           Opsem.Opsem_.Tabled_.reset ();
           Opsem.Opsem_.Tabled_.fillTable ();
           (try
-             Opsem.Opsem_.Tabled_.solve (g, Intsyn.IntSyn.id) dprog sc;
+             Opsem.Opsem_.Tabled_.solve g Intsyn.IntSyn.id dprog sc;
              loop ()
            with Done -> ());
           if !solutions = 0 && !chatter >= 3 then msg "No tabled solution.\n";

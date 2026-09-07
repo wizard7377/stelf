@@ -108,13 +108,13 @@ end) : CONV = struct
         end
         && convSub s1 s2
 
-  and convDec a b = match a, b with
+  and convDec a1 a2 b = match (a1, a2), b with
     | (Dec (_, v1_), s1), (Dec (_, v2_), s2) -> convExp ((v1_, s1), (v2_, s2))
     | (BDec (_, (c1, s1)), t1), (BDec (_, (c2, s2)), t2) ->
         c1 = c2 && convSub (comp s1 t1) (comp s2 t2)
 
   and convDecP (((d1_, p1_), s1), ((d2_, p2_), s2)) =
-    convDec (d1_, s1) (d2_, s2)
+    convDec d1_ s1 (d2_, s2)
 
   (* eqUni (L1, L2) = B iff L1 = L2 *)
   (* convExpW ((U1, s1), (U2, s2)) = B

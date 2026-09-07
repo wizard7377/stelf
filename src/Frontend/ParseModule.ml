@@ -115,7 +115,7 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
         let _, f2 = parseColonEqual' f1 in
         let tm, f3 = ParseTerm.parseTerm' f2 in
         let r2, f4 = parseDot' f3 in
-        (E.coninst (ids, id, Paths.join r0 r1) tm (Paths.join r0 r2), f4)
+        (E.coninst ids id (Paths.join r0 r1) tm (Paths.join r0 r2), f4)
     | LS.Cons ((t, r), s') ->
         Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
@@ -125,7 +125,7 @@ end) : PARSE_MODULE with module ModExtSyn = ParseModule__0.ModExtSyn' = struct
         let _, f2 = parseColonEqual' f1 in
         let strexp, f3 = parseStructExp' f2 in
         let r3, f4 = parseDot' f3 in
-        ( E.strinst (ids, id, Paths.join r1 r2) strexp (Paths.join r0 r3),
+        ( E.strinst ids id (Paths.join r1 r2) strexp (Paths.join r0 r3),
           f4 )
     | LS.Cons ((t, r), s') ->
         Parsing.error

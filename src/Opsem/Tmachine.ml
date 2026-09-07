@@ -478,10 +478,10 @@ end) : ABSMACHINE = struct
   (* #succeeds >= 1 -- allows backtracking *)
   (* deep backtracking *)
   (* shallow backtracking *)
-  let solve gs dp sc =
+  let solve g s dp sc =
     begin
       T.init ();
-      solve' (gs, dp, sc)
+      solve' ((g, s), dp, sc)
     end
 end
 (*! sharing Trace.IntSyn = IntSyn' !*)

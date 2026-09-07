@@ -237,7 +237,7 @@ end) : TABLED = struct
     | C.DProg (g_, dPool), (C.Impl (r, a_, ha, g), s) ->
         let d'_ = IntSyn.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
-          begin match MT.memberCtx (g_, I.EClo (a_, s)) g_ with
+          begin match MT.memberCtx g_ (I.EClo (a_, s)) g_ with
           | Some _ ->
               let (C.Atom p) = g in
               let x_ = I.newEVar g_ (I.EClo (a_, s)) in
@@ -424,7 +424,7 @@ end) : TABLED = struct
       ref =
     ref (fun _ -> failwith "solve_fn not yet initialized")
 
-  let rec solve a2 b2 c2 = match a2, b2, c2 with
+  let rec solve a1 a2 b2 c2 = match (a1, a2), b2, c2 with
     | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
         begin if TabledSyn.tabledLookup (I.targetFam p) then
           let g'_, dAVars, dEVars, u'_, eqn', s' =
@@ -501,7 +501,7 @@ end) : TABLED = struct
     | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
         let d'_ = I.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
-          begin match MT.memberCtx (g_, I.EClo (a_, s)) g_ with
+          begin match MT.memberCtx g_ (I.EClo (a_, s)) g_ with
           | Some _ ->
               let x_ = I.newEVar g_ (I.EClo (a_, s)) in
               !solve_fn_ref

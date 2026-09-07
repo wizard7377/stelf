@@ -80,7 +80,7 @@ module type EXTMODES = sig
     type mspine
 
     val mnil : Paths.region -> mspine
-    val mapp : mode * string option -> mspine -> mspine
+    val mapp : mode -> string option -> mspine -> mspine
     val mroot : string list * string * Paths.region * mspine -> mterm
     val toModedec : mterm -> modedec
   end

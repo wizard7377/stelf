@@ -74,11 +74,11 @@ module type SOLVE = sig
     (IntSyn.conDec * Paths.occConDec option) list
 
   val query :
-    int option * int option * ExtQuery.query -> Paths.location -> unit
+    int option -> int option -> ExtQuery.query -> Paths.location -> unit
 
   (* may raise AbortQuery(msg) *)
   val querytabled :
-    int option * int option * ExtQuery.query -> Paths.location -> unit
+    int option -> int option -> ExtQuery.query -> Paths.location -> unit
 
   (* may raise AbortQuery(msg) *)
   val qLoop : unit -> bool

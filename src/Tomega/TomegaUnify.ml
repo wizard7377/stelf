@@ -102,7 +102,7 @@ end) : TOMEGAUNIFY = struct
 
     and unifyDec (psi, a, b) = match a, b with
       | T.UDec d1_, T.UDec d2_ ->
-          begin if Conv.convDec (d1_, I.id) (d2_, I.id) then ()
+          begin if Conv.convDec d1_ I.id (d2_, I.id) then ()
           else raise (Unify "Declaration mismatch")
           end
       | T.PDec (_, f1_, _, _), T.PDec (_, f2_, _, _) ->

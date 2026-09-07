@@ -99,9 +99,9 @@ end) : REDUNDANT = struct
 
   and decEqual = function
     | T.UDec d1_, (T.UDec d2_, t2) ->
-        Conv.convDec (d1_, I.id) (d2_, T.coerceSub t2)
+        Conv.convDec d1_ I.id (d2_, T.coerceSub t2)
     | T.PDec (_, f1_, _, _), (T.PDec (_, f2_, _, _), t2) ->
-        T.convFor (f1_, T.id) (f2_, t2)
+        T.convFor f1_ T.id (f2_, t2)
     | _ -> false
 
   and caseEqual = function

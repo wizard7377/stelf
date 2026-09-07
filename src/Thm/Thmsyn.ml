@@ -97,14 +97,14 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
     module I = IntSyn
     module M = ModeSyn
 
-    let theoremDecToConDec (name, ThDecl (gBs, g_, mg, i)) r =
+    let theoremDecToConDec name (ThDecl (gBs, g_, mg, i)) r =
       let rec theoremToConDec' (a, v_) = match a with
         | I.Null -> v_
         | I.Decl (g_, d_) ->
             begin if Abstract.closedDec g_ (d_, I.id) then
               theoremToConDec'
                 ( g_,
-                  Abstract.piDepend (Whnf.normalizeDec d_ I.id, I.Maybe) v_
+                  Abstract.piDepend (Whnf.normalizeDec d_ I.id) I.Maybe v_
                 )
             else error r ("Free variables in theorem declaration")
             end
@@ -114,7 +114,7 @@ end) : THMSYN with module Names = ThmSyn__0.Names' = struct
           (name, None, i, I.Normal, theoremToConDec' (g_, I.Uni I.Type), I.Kind)
       )
 
-    let theoremDecToModeSpine (name, ThDecl (gBs, g_, mg, i)) r =
+    let theoremDecToModeSpine name (ThDecl (gBs, g_, mg, i)) r =
       let rec theoremToModeSpine' (a, b, mS) = match a, b with
         | I.Null, I.Null -> mS
         | I.Decl (g_, I.Dec (x, _)), I.Decl (mg, m) ->

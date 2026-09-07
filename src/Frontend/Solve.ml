@@ -285,7 +285,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     in
     let search () =
       AbsMachine.solve
-        (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) (function m_ -> raise (Solution m_))
+        g IntSyn.id (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) (function m_ -> raise (Solution m_))
     in
     CsManager.reset ();
     try
@@ -331,10 +331,11 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     try
       begin
         TimeLimit.timeLimit !Global.timeLimit
-          (fun (a__, b__, c__) ->
+          (fun (a__, b__, c__, d__) ->
             Timers.time Timers.solving
-              (fun () -> AbsMachineSbt.solve a__ b__ c__) ())
-          ( (g, IntSyn.id),
+              (fun () -> AbsMachineSbt.solve a__ b__ c__ d__) ())
+          ( g,
+            IntSyn.id,
             CompSyn.DProg (IntSyn.Null, IntSyn.Null),
             function skel -> raise (SolutionSkel skel) );
         raise (AbortQuery "No solution to %solve found")
@@ -427,7 +428,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     in
     let search () =
       AbsMachine.solve
-        (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit
+        g IntSyn.id (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit
     in
     begin if not (boundEq (try_, Some 0)) then begin
       CsManager.reset ();
@@ -540,7 +541,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
     in
     let search () =
       AbsMachineSbt.solve
-        (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit
+        g IntSyn.id (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit
     in
     begin if not (boundEq (try_, Some 0)) then begin
       CsManager.reset ();
@@ -586,8 +587,8 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
        *)
 
   (* %query <expected> <try> A or %query <expected> <try> X : A  *)
-  let query a__ b__ =
-    let args = (a__, b__) in
+  let query a1 a2 a3 b__ =
+    let args = ((a1, a2, a3), b__) in
     begin match !Compile.optimize with
     | CompSyn.Indexing -> querySbt args
     | CompSyn.LinearHeads -> query' args
@@ -602,7 +603,7 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
 or  %querytabled <expected solutions> <max stages tried>  X : A
   note : %querytabled terminates if we have found the expected number of
   solutions or if we have reached the maximal number of stages *)
-  let querytabled (numSol, try_, quy) (Paths.Loc (fileName, r)) =
+  let querytabled numSol try_ quy (Paths.Loc (fileName, r)) =
     ignore (Display.chatter_s 3
         ((("%querytabled " ^ boundToString numSol) ^ " ") ^ boundToString try_));
     let a_, optName, xs_ =
@@ -734,7 +735,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
     let tabledSearch () =
       begin
         Tabled.solve
-          (g, IntSyn.id) (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit;
+          g IntSyn.id (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit;
         begin
           CsManager.reset ();
           begin
@@ -874,7 +875,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           begin
             Timers.time Timers.solving
               (fun () ->
-                AbsMachine.solve (g, IntSyn.id)
+                AbsMachine.solve g IntSyn.id
                   (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit)
               ();
             Display.debug (Display.string "No more solutions\n");
@@ -956,7 +957,7 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
           begin
             Timers.time Timers.solving
               (fun () ->
-                Tabled.solve (g, IntSyn.id)
+                Tabled.solve g IntSyn.id
                   (CompSyn.DProg (IntSyn.Null, IntSyn.Null)) scInit)
               ();
             try loop ()

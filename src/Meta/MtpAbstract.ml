@@ -160,7 +160,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
 
-    let piDepend a1 b1 = match a1, b1 with
+    let piDepend a1 a2 b1 = match (a1, a2), b1 with
       | (d_, I.No), v_ -> I.Pi ((d_, I.No), v_)
       | (d_, I.Meta), v_ -> I.Pi ((d_, I.Meta), v_)
       | (d_, I.Maybe), v_ -> I.Pi ((d_, occursInExp (1, v_)), v_)
@@ -271,7 +271,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       | ((I.Uni l_ as u_), s) -> u_
       | (I.Pi ((d_, p_), v_), s) ->
           piDepend
-            (abstractDec (k_, depth, (d_, s)), p_) (abstractExp (k_, depth + 1, (v_, I.dot1 s)))
+            (abstractDec (k_, depth, (d_, s))) p_ (abstractExp (k_, depth + 1, (v_, I.dot1 s)))
       | (I.Root ((I.BVar k as h_), s_), s) ->
           begin if k > depth then
             let k' = lookupBV (k_, k - depth) in
@@ -476,7 +476,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       | I.Null, v_ -> v_
       | I.Decl (g_, d_), v_ ->
           raiseType
-            g_ (Abstract.piDepend (Whnf.normalizeDec d_ I.id, I.Maybe) v_)
+            g_ (Abstract.piDepend (Whnf.normalizeDec d_ I.id) I.Maybe v_)
 
     let rec raiseFor (k, gorig, a, w, sc) = match a with
       | (F.True as f_) -> f_
@@ -924,7 +924,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
   let weaken = weaken
   let raiseType = raiseType
   let abstractSub = abstractSubAll
-  let abstractSub' a b c = abstractNew (a, b, c)
+  let abstractSub' a1 a2 b c = abstractNew ((a1, a2), b, c)
   let abstractApproxFor = abstractApproxFor
 end
 (*! sharing Abstract.IntSyn = IntSyn' !*)
