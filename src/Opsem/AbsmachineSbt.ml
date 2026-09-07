@@ -212,15 +212,10 @@ end) : ABSMACHINESBT = struct
 
     and matchIndexSig
         (((I.Root (ha, s_), s) as ps'), (C.DProg (g, dPool) as dp), sc) =
-      SubTree.matchSig
-        ( cidFromHead ha,
-          g,
-          ps',
-          function
-          | (conjGoals, s), clauseName ->
-              sSolve
-                ((conjGoals, s), dp, function s -> sc (C.Pc clauseName :: s))
-        )
+      SubTree.matchSig (cidFromHead ha) g ps' (function
+        | (conjGoals, s), clauseName ->
+            sSolve
+              ((conjGoals, s), dp, function s -> sc (C.Pc clauseName :: s)))
 
     and matchAtom
         (((I.Root (ha, s_), s) as ps'), (C.DProg (g, dPool) as dp), sc) =

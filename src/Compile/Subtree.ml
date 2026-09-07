@@ -808,11 +808,11 @@ end) : SUBTREE = struct
         solveCandidate (1, candSet)
       end
 
-    let matchSig (a, g, ((I.Root (ha, s_), s) as ps), sc) =
+    let matchSig a g ((I.Root (ha, s_), s) as ps) sc =
       let n, tree = Array.sub (indexArray, a) in
       retrieveCandidates (n, !tree, g, I.EClo (fst ps, snd ps), sc)
 
-    let matchSigIt (a, g, ((I.Root (ha, s_), s) as ps), sc) =
+    let matchSigIt a g ((I.Root (ha, s_), s) as ps) sc =
       let n, tree = Array.sub (indexArray, a) in
       retrieval (n, !tree, g, I.EClo (fst ps, snd ps), sc)
 
