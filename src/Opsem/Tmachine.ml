@@ -77,29 +77,29 @@ end) : ABSMACHINE = struct
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
 
-    let rec compose = function
-      | g_, I.Null -> g_
-      | g_, IntSyn.Decl (g'_, d_) -> IntSyn.Decl (compose (g_, g'_), d_)
+    let rec compose (g_, a) = match a with
+      | I.Null -> g_
+      | IntSyn.Decl (g'_, d_) -> IntSyn.Decl (compose (g_, g'_), d_)
 
-    let rec shiftSub = function
-      | I.Null, s -> s
-      | IntSyn.Decl (g_, d_), s -> I.dot1 (shiftSub (g_, s))
+    let rec shiftSub (a, s) = match a with
+      | I.Null -> s
+      | IntSyn.Decl (g_, d_) -> I.dot1 (shiftSub (g_, s))
 
     let rec subgoalNum = function
       | I.Nil -> 1
       | I.App (u_, s_) -> 1 + subgoalNum s_
 
-    let rec goalToType = function
-      | C.All (d_, g), s ->
+    let rec goalToType (a, s) = match a with
+      | C.All (d_, g) ->
           I.Pi ((I.decSub d_ s, I.Maybe), goalToType (g, I.dot1 s))
-      | C.Impl (_, a_, _, g), s ->
+      | C.Impl (_, a_, _, g) ->
           I.Pi ((I.Dec (None, I.EClo (a_, s)), I.No), goalToType (g, I.dot1 s))
-      | C.Atom p, s -> I.EClo (p, s)
+      | C.Atom p -> I.EClo (p, s)
 
-    let rec solve' = function
-      | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
+    let rec solve' (a, b, sc) = match a, b with
+      | (C.Atom p, s), (C.DProg (g_, dPool) as dp) ->
           matchAtom ((p, s), dp, sc)
-      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
+      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool) ->
           let (I.Dec (Some x, _) as d'_) =
             N.decUName g_ (I.Dec (None, I.EClo (a_, s)))
           in
@@ -112,7 +112,7 @@ end) : ABSMACHINE = struct
                   T.signal g_ (T.DischargeHyp (ha, d'_));
                   sc (I.Lam (d'_, m_))
                 end )
-      | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
+      | (C.All (d_, g), s), C.DProg (g_, dPool) ->
           let (I.Dec (Some x, v_) as d'_) = N.decUName g_ (I.decSub d_ s) in
           let ha = I.targetHead v_ in
           ignore (T.signal g_ (T.IntroParm (ha, d'_)));
@@ -125,8 +125,8 @@ end) : ABSMACHINE = struct
                   sc (I.Lam (d'_, m_))
                 end )
 
-    and rSolve = function
-      | ps', (C.Eq q_, s), C.DProg (g_, dPool), hcHa, sc -> begin
+    and rSolve (ps', a, b, hcHa, sc) = match a, b with
+      | (C.Eq q_, s), C.DProg (g_, dPool) -> begin
           T.signal
             g_ (T.Unify (hcHa, I.EClo (q_, s), I.EClo (fst ps', snd ps')));
           begin match Unify.unifiable' g_ (q_, s) ps' with
@@ -143,13 +143,13 @@ end) : ABSMACHINE = struct
             end
           end
         end
-      | ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), hcHa, sc ->
+      | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           begin match Assign.assignable g_ ps' (q_, s) with
           | Some cnstr ->
               aSolve ((eqns, s), dp, hcHa, cnstr, function () -> sc I.Nil)
           | None -> false
           end
-      | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), hcHa, sc ->
+      | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
@@ -161,11 +161,7 @@ end) : ABSMACHINE = struct
                   T.signal g_ (T.Subgoal (hcHa, function () -> subgoalNum s_));
                   solve' ((g, s), dp, function m_ -> sc (I.App (m_, s_)))
                 end )
-      | ( ps',
-          (C.Exists (I.Dec (_, a_), r), s),
-          (C.DProg (g_, dPool) as dp),
-          hcHa,
-          sc ) ->
+      | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
@@ -173,11 +169,7 @@ end) : ABSMACHINE = struct
               dp,
               hcHa,
               function s_ -> sc (I.App (x_, s_)) )
-      | ( ps',
-          (C.Axists (I.ADec (_, d), r), s),
-          (C.DProg (g_, dPool) as dp),
-          hcHa,
-          sc ) ->
+      | (C.Axists (I.ADec (_, d), r), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newAVar () in
           rSolve
             ( ps',
@@ -186,8 +178,8 @@ end) : ABSMACHINE = struct
               hcHa,
               sc )
 
-    and aSolve = function
-      | (trivial_, s), (C.DProg (g_, dPool) as dp), hcHa, cnstr, sc ->
+    and aSolve (a, b, hcHa, cnstr, sc) = match a, b with
+      | (trivial_, s), (C.DProg (g_, dPool) as dp) ->
           begin if Assign.solveCnstr cnstr then begin
             T.signal g_ (T.Resolved (fst hcHa, snd hcHa));
             begin
@@ -197,11 +189,7 @@ end) : ABSMACHINE = struct
           end
           else false
           end
-      | ( (C.UnifyEq (g'_, e1, n_, eqns), s),
-          (C.DProg (g_, dPool) as dp),
-          hcHa,
-          cnstr,
-          sc ) ->
+      | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           let g''_ = compose (g_, g'_) in
           let s' = shiftSub (g'_, s) in
           begin if Assign.unifiable g''_ (n_, s') (e1, s') then

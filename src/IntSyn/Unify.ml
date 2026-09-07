@@ -147,13 +147,13 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
       | FVar (x, v_, s'), cnstr -> delayExp ((v_, id), cnstr)
       | h_, _ -> ()
 
-    and delaySpine = function
-      | (Nil, s), cnstr -> ()
-      | (App (u_, s_), s), cnstr -> begin
+    and delaySpine (a, cnstr) = match a with
+      | (Nil, s) -> ()
+      | (App (u_, s_), s) -> begin
           delayExp ((u_, s), cnstr);
           delaySpine ((s_, s), cnstr)
         end
-      | (SClo (s_, s'), s), cnstr -> delaySpine ((s_, comp s' s), cnstr)
+      | (SClo (s_, s'), s) -> delaySpine ((s_, comp s' s), cnstr)
 
     and delayDec ((Dec (name, v_), s), cnstr) = delayExp ((v_, s), cnstr)
 
@@ -198,18 +198,18 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
           intersection (Dot (Idx (n1 + 1), Shift (n1 + 1))) s2
       | Shift _, Shift _ -> id
 
-    let rec weakenSub = function
-      | g_, Shift n, ss ->
+    let rec weakenSub (g_, a, ss) = match a with
+      | Shift n ->
           begin if n < ctxLength g_ then
             weakenSub (g_, Dot (Idx (n + 1), Shift (n + 1)), ss)
           else id
           end
-      | g_, Dot (Idx n, s'), ss ->
+      | Dot (Idx n, s') ->
           begin match bvarSub n ss with
           | Undef -> comp (weakenSub (g_, s', ss)) shift
           | Idx _ -> dot1 (weakenSub (g_, s', ss))
           end
-      | g_, Dot (Undef, s'), ss -> comp (weakenSub (g_, s', ss)) shift
+      | Dot (Undef, s') -> comp (weakenSub (g_, s', ss)) shift
 
     let rec invertExp (g_, us_, ss, rOccur) =
       invertExpW (g_, Whnf.whnf us_, ss, rOccur)
@@ -248,49 +248,49 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
     and invertDec (g_, (Dec (name, v_), s), ss, rOccur) =
       Dec (name, invertExp (g_, (v_, s), ss, rOccur))
 
-    and invertSpine = function
-      | g_, (Nil, s), ss, rOccur -> Nil
-      | g_, (App (u_, s_), s), ss, rOccur ->
+    and invertSpine (g_, a, ss, rOccur) = match a with
+      | (Nil, s) -> Nil
+      | (App (u_, s_), s) ->
           App
             ( invertExp (g_, (u_, s), ss, rOccur),
               invertSpine (g_, (s_, s), ss, rOccur) )
-      | g_, (SClo (s_, s'), s), ss, rOccur ->
+      | (SClo (s_, s'), s) ->
           invertSpine (g_, (s_, comp s' s), ss, rOccur)
 
-    and invertHead = function
-      | g_, BVar k, ss, rOccur ->
+    and invertHead (g_, a, ss, rOccur) = match a with
+      | BVar k ->
           begin match bvarSub k ss with
           | Undef -> raise NotInvertible
           | Idx k' -> BVar k'
           end
-      | g_, (Const _ as h_), ss, rOccur -> h_
-      | g_, Proj ((Bidx k as b_), i), ss, rOccur ->
+      | (Const _ as h_) -> h_
+      | Proj ((Bidx k as b_), i) ->
           begin match blockSub b_ ss with Bidx k' -> Proj (Bidx k', i)
           end
-      | g_, (Proj (LVar (r, sk, (l, t)), i) as h_), ss, rOccur -> begin
+      | (Proj (LVar (r, sk, (l, t)), i) as h_) -> begin
           ignore (invertSub (g_, t, id, rOccur));
           h_
         end
-      | g_, (Skonst _ as h_), ss, rOccur -> h_
-      | g_, (Def _ as h_), ss, rOccur -> h_
-      | g_, FVar (x, v_, s'), ss, rOccur -> begin
+      | (Skonst _ as h_) -> h_
+      | (Def _ as h_) -> h_
+      | FVar (x, v_, s') -> begin
           ignore (invertExp (g_, (v_, id), id, rOccur));
           FVar (x, v_, comp s' ss)
         end
-      | g_, (FgnConst _ as h_), ss, rOccur -> h_
+      | (FgnConst _ as h_) -> h_
 
-    and invertSub = function
-      | g_, (Shift n as s), ss, rOccur ->
+    and invertSub (g_, a, ss, rOccur) = match a with
+      | (Shift n as s) ->
           begin if n < ctxLength g_ then
             invertSub (g_, Dot (Idx (n + 1), Shift (n + 1)), ss, rOccur)
           else comp s ss
           end
-      | g_, Dot (Idx n, s'), ss, rOccur ->
+      | Dot (Idx n, s') ->
           begin match bvarSub n ss with
           | Undef -> raise NotInvertible
           | ft_ -> Dot (ft_, invertSub (g_, s', ss, rOccur))
           end
-      | g_, Dot (Exp u_, s'), ss, rOccur ->
+      | Dot (Exp u_, s') ->
           Dot
             ( Exp (invertExp (g_, (u_, id), ss, rOccur)),
               invertSub (g_, s', ss, rOccur) )
@@ -350,64 +350,64 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
           Dec (name, pruneExp (g_, (v_, s), ss, rOccur))
       | g_, (NDec x, _), _, _ -> NDec x
 
-    and pruneSpine = function
-      | g_, (Nil, s), ss, rOccur -> Nil
-      | g_, (App (u_, s_), s), ss, rOccur ->
+    and pruneSpine (g_, a, ss, rOccur) = match a with
+      | (Nil, s) -> Nil
+      | (App (u_, s_), s) ->
           App
             ( pruneExp (g_, (u_, s), ss, rOccur),
               pruneSpine (g_, (s_, s), ss, rOccur) )
-      | g_, (SClo (s_, s'), s), ss, rOccur ->
+      | (SClo (s_, s'), s) ->
           pruneSpine (g_, (s_, comp s' s), ss, rOccur)
 
-    and pruneHead = function
-      | g_, BVar k, ss, rOccur ->
+    and pruneHead (g_, a, ss, rOccur) = match a with
+      | BVar k ->
           begin match bvarSub k ss with
           | Undef -> raise (Unify "Parameter dependency")
           | Idx k' -> BVar k'
           end
-      | g_, (Const _ as h_), ss, rOccur -> h_
-      | g_, Proj ((Bidx k as b_), i), ss, rOccur ->
+      | (Const _ as h_) -> h_
+      | Proj ((Bidx k as b_), i) ->
           begin match blockSub b_ ss with Bidx k' -> Proj (Bidx k', i)
           end
-      | g_, (Proj (LVar (r, sk, (l, t)), i) as h_), ss, rOccur -> begin
+      | (Proj (LVar (r, sk, (l, t)), i) as h_) -> begin
           ignore (pruneSub (g_, t, id, rOccur));
           h_
         end
-      | g_, (Skonst _ as h_), ss, rOccur -> h_
-      | g_, (Def _ as h_), ss, rOccur -> h_
-      | g_, FVar (x, v_, s'), ss, rOccur -> begin
+      | (Skonst _ as h_) -> h_
+      | (Def _ as h_) -> h_
+      | FVar (x, v_, s') -> begin
           ignore (pruneExp (g_, (v_, id), id, rOccur));
           FVar (x, v_, comp s' ss)
         end
-      | g_, (FgnConst _ as h_), ss, rOccur -> h_
+      | (FgnConst _ as h_) -> h_
 
-    and pruneSub = function
-      | g_, (Shift n as s), ss, rOccur ->
+    and pruneSub (g_, a, ss, rOccur) = match a with
+      | (Shift n as s) ->
           if n < ctxLength g_ then
             pruneSub (g_, Dot (Idx (n + 1), Shift (n + 1)), ss, rOccur)
           else comp s ss
-      | g_, Dot (Idx n, s'), ss, rOccur ->
+      | Dot (Idx n, s') ->
           begin match bvarSub n ss with
           | Undef -> raise (Unify "Not prunable")
           | ft_ -> Dot (ft_, pruneSub (g_, s', ss, rOccur))
           end
-      | g_, Dot (Exp u_, s'), ss, rOccur ->
+      | Dot (Exp u_, s') ->
           Dot
             ( Exp (pruneExp (g_, (u_, id), ss, rOccur)),
               pruneSub (g_, s', ss, rOccur) )
 
-    and pruneCtx = function
-      | Shift n, Null, rOccur -> Null
-      | Dot (Idx k, t), Decl (g_, d_), rOccur ->
+    and pruneCtx (a, b, rOccur) = match a, b with
+      | Shift n, Null -> Null
+      | Dot (Idx k, t), Decl (g_, d_) ->
           let t' = comp t invShift in
           let d'_ = pruneDec (g_, (d_, id), t', rOccur) in
           Decl (pruneCtx (t', g_, rOccur), d'_)
-      | Dot (Undef, t), Decl (g_, d), rOccur -> pruneCtx (t, g_, rOccur)
-      | Shift n, g_, rOccur ->
+      | Dot (Undef, t), Decl (g_, d) -> pruneCtx (t, g_, rOccur)
+      | Shift n, g_ ->
           pruneCtx (Dot (Idx (n + 1), Shift (n + 1)), g_, rOccur)
 
-    let rec unifyExpW = function
-      | g_, ((FgnExp (csfe1_csid, csfe1_ops), _) as us1), us2 ->
+    let rec unifyExpW (g_, a, b) = match a, b with
+      | ((FgnExp (csfe1_csid, csfe1_ops), _) as us1), us2 ->
           begin match
             FgnExpStd.UnifyWith.apply csfe1_csid csfe1_ops
               ( g_,
@@ -424,7 +424,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
               List.app execResidual residualL
           | Fail -> raise (Unify "Foreign Expression Mismatch")
           end
-      | g_, us1, ((FgnExp (csfe2_csid, csfe2_ops), _) as us2) ->
+      | us1, ((FgnExp (csfe2_csid, csfe2_ops), _) as us2) ->
           begin match
             FgnExpStd.UnifyWith.apply csfe2_csid csfe2_ops
               ( g_,
@@ -441,8 +441,8 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
               List.app execOp opL
           | Fail -> raise (Unify "Foreign Expression Mismatch")
           end
-      | g_, (Uni l1_, _), (Uni l2_, _) -> ()
-      | g_, ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
+      | (Uni l1_, _), (Uni l2_, _) -> ()
+      | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
           begin match (h1_, h2_) with
           | BVar k1, BVar k2 ->
               begin if k1 = k2 then unifySpine (g_, (s1_, s1), (s2_, s2))
@@ -507,30 +507,28 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
               unifyExp (g_, us1, (w2_, s2))
           | _ -> raise (Unify "Head mismatch")
           end
-      | g_, (Pi ((d1_, _), u1_), s1), (Pi ((d2_, _), u2_), s2) -> begin
+      | (Pi ((d1_, _), u1_), s1), (Pi ((d2_, _), u2_), s2) -> begin
           unifyDec (g_, (d1_, s1), (d2_, s2));
           unifyExp (Decl (g_, decSub d1_ s1), (u1_, dot1 s1), (u2_, dot1 s2))
         end
-      | g_, ((Pi (_, _), _) as us1), ((Root (Def _, _), _) as us2) ->
+      | ((Pi (_, _), _) as us1), ((Root (Def _, _), _) as us2) ->
           unifyExpW (g_, us1, Whnf.expandDef us2)
-      | g_, ((Root (Def _, _), _) as us1), ((Pi (_, _), _) as us2) ->
+      | ((Root (Def _, _), _) as us1), ((Pi (_, _), _) as us2) ->
           unifyExpW (g_, Whnf.expandDef us1, us2)
-      | g_, (Lam (d1_, u1_), s1), (Lam (d2_, u2_), s2) ->
+      | (Lam (d1_, u1_), s1), (Lam (d2_, u2_), s2) ->
           unifyExp (Decl (g_, decSub d1_ s1), (u1_, dot1 s1), (u2_, dot1 s2))
-      | g_, (Lam (d1_, u1_), s1), (u2_, s2) ->
+      | (Lam (d1_, u1_), s1), (u2_, s2) ->
           unifyExp
             ( Decl (g_, decSub d1_ s1),
               (u1_, dot1 s1),
               (Redex (EClo (u2_, shift), App (Root (BVar 1, Nil), Nil)), dot1 s2)
             )
-      | g_, (u1_, s1), (Lam (d2_, u2_), s2) ->
+      | (u1_, s1), (Lam (d2_, u2_), s2) ->
           unifyExp
             ( Decl (g_, decSub d2_ s2),
               (Redex (EClo (u1_, shift), App (Root (BVar 1, Nil), Nil)), dot1 s1),
               (u2_, dot1 s2) )
-      | ( g_,
-          (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1),
-          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2) ) ->
+      | (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1), (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2) ->
           begin if r1 == r2 then
             begin if Whnf.isPatSub s1 then
               begin if Whnf.isPatSub s2 then
@@ -586,7 +584,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
               end
             end
           end
-      | g_, ((EVar (r, gx, v_, cnstrs), s) as us1), ((u2_, s2) as us2) ->
+      | ((EVar (r, gx, v_, cnstrs), s) as us1), ((u2_, s2) as us2) ->
           begin if Whnf.isPatSub s then
             let ss = Whnf.invert s in
             let u2' = pruneExp (g_, us2, ss, r) in
@@ -601,7 +599,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
                        let us2_e_, us2_s_ = us2 in
                        EClo (us2_e_, us2_s_) )))
           end
-      | g_, ((u1_, s1) as us1), ((EVar (r, gx, v_, cnstrs), s) as us2) ->
+      | ((u1_, s1) as us1), ((EVar (r, gx, v_, cnstrs), s) as us2) ->
           begin if Whnf.isPatSub s then
             let ss = Whnf.invert s in
             let u1' = pruneExp (g_, us1, ss, r) in
@@ -616,7 +614,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
                        let us2_e_, us2_s_ = us2 in
                        EClo (us2_e_, us2_s_) )))
           end
-      | g_, us1, us2 -> raise (Unify "Expression clash")
+      | us1, us2 -> raise (Unify "Expression clash")
 
     and unifyExp (g_, ((e1_, s1) as us1), ((e2_, s2) as us2)) =
       unifyExpW (g_, Whnf.whnf us1, Whnf.whnf us2)
@@ -641,13 +639,13 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
       | Greater -> unifyExpW (g_, Whnf.expandDef us1, us2)
       end
 
-    and unifySpine = function
-      | g_, (Nil, _), (Nil, _) -> ()
-      | g_, (SClo (s1_, s1'), s1), ss_ ->
+    and unifySpine (g_, a, b) = match a, b with
+      | (Nil, _), (Nil, _) -> ()
+      | (SClo (s1_, s1'), s1), ss_ ->
           unifySpine (g_, (s1_, comp s1' s1), ss_)
-      | g_, ss_, (SClo (s2_, s2'), s2) ->
+      | ss_, (SClo (s2_, s2'), s2) ->
           unifySpine (g_, ss_, (s2_, comp s2' s2))
-      | g_, (App (u1_, s1_), s1), (App (u2_, s2_), s2) -> begin
+      | (App (u1_, s1_), s1), (App (u2_, s2_), s2) -> begin
           unifyExp (g_, (u1_, s1), (u2_, s2));
           unifySpine (g_, (s1_, s1), (s2_, s2))
         end
@@ -683,10 +681,8 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
           unifyBlock g_ b1_ (blockSub b2_ s)
       | g_, b1_, b2_ -> unifyBlockW (g_, b1_, b2_)
 
-    and unifyBlockW = function
-      | ( g_,
-          LVar (r1, (Shift k1 as s1), (l1, t1)),
-          LVar (r2, (Shift k2 as s2), (l2, t2)) ) ->
+    and unifyBlockW (g_, b1_, b2_) = match b1_, b2_ with
+      | LVar (r1, (Shift k1 as s1), (l1, t1)), LVar (r2, (Shift k2 as s2), (l2, t2)) ->
           begin if l1 <> l2 then raise (Unify "Label clash")
           else
             begin if r1 == r2 then ()
@@ -699,11 +695,11 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
             end
             end
           end
-      | g_, LVar (r1, s1, (l1, t1)), b2_ ->
+      | LVar (r1, s1, (l1, t1)), b2_ ->
           instantiateLVar r1 (blockSub b2_ (Whnf.invert s1))
-      | g_, b1_, LVar (r2, s2, (l2, t2)) ->
+      | b1_, LVar (r2, s2, (l2, t2)) ->
           instantiateLVar r2 (blockSub b1_ (Whnf.invert s2))
-      | g_, Bidx n1, Bidx n2 ->
+      | Bidx n1, Bidx n2 ->
           begin if n1 <> n2 then raise (Unify "Block index clash") else ()
           end
 

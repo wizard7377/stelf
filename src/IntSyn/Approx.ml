@@ -281,12 +281,12 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
      if u : V-
      and G' |- V : L and G |- s : G'
      then U- = u and G |- U : V[s] and U is the most general such *)
-  let rec apxToExactW = function
-    | g_, u_, (I.Pi ((d_, _), v_), s), allowed ->
+  let rec apxToExactW (g_, u_, b, allowed) = match b with
+    | (I.Pi ((d_, _), v_), s) ->
         let d'_ = I.decSub d_ s in
         I.Lam (d'_, apxToExact (I.Decl (g_, d'_), u_, (v_, I.dot1 s), allowed))
-    | g_, u_, (I.Uni l_, s), allowed -> apxToClass (g_, u_, uniToApx l_, allowed)
-    | g_, u_, ((I.Root (I.FVar (name, _, _), _), s) as vs_), allowed ->
+    | (I.Uni l_, s) -> apxToClass (g_, u_, uniToApx l_, allowed)
+    | ((I.Root (I.FVar (name, _, _), _), s) as vs_) ->
         let v_, l_, _ (* Next L *) = findByReplacementName name in
         let (Uni l_) = whnf l_ in
         begin match whnfUni l_ with
@@ -303,7 +303,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
                   substitutions in Vs instead *)
         end
         (* U must be a CVar *)
-    | g_, u_, vs_, allowed (* an atomic type, not Def *) ->
+    | vs_ (* an atomic type, not Def *) ->
         let vs_e, vs_s = vs_ in
         I.newEVar g_ (I.EClo (vs_e, vs_s))
 
@@ -316,12 +316,12 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (* occurUni (r, l) = ()
        iff r does not occur in l,
        otherwise raises Unify *)
-  let rec occurUniW = function
-    | r, Next l_ -> occurUniW (r, l_)
-    | r, LVar r' ->
+  let rec occurUniW (r, a) = match a with
+    | Next l_ -> occurUniW (r, l_)
+    | LVar r' ->
         begin if r == r' then raise (Unify "Level circularity") else ()
         end
-    | r, _ -> ()
+    | _ -> ()
 
   let occurUni (r, l_) = occurUniW (r, whnfUni l_)
 
@@ -359,14 +359,14 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (* occur (r, u) = ()
        iff r does not occur in u,
        otherwise raises Unify *)
-  let rec occurW = function
-    | r, _ when !r == None -> false
-    | r, Arrow (v1_, v2_) -> begin occur' (r, v1_) || occur' (r, v2_) end
-    | r, CVar r' ->
+  let rec occurW (r, a) = match a with
+    | _ when !r == None -> false
+    | Arrow (v1_, v2_) -> begin occur' (r, v1_) || occur' (r, v2_) end
+    | CVar r' ->
         begin if r == r' then raise (Unify "Type/kind variable occurrence")
         else false
         end
-    | r, _ -> false
+    | _ -> false
 
   and occur' (r, u_) = occurW (r, whnf u_)
 

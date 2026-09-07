@@ -95,11 +95,11 @@ end) : PARSE_CONDEC with module ExtConDec = ParseConDec__0.ExtConDec' = struct
       | None, (tm, LS.Cons ((t, r), s')) ->
           Parsing.error r ("Illegal anonymous declared constant")
 
-    let parseConDec1 = function
-      | optName, LS.Cons ((L.Colon, r), s') ->
+    let parseConDec1 (optName, a) = match a with
+      | LS.Cons ((L.Colon, r), s') ->
           parseConDec2 (optName, ParseTerm.parseTerm' (LS.expose s'))
-      | optName, LS.Cons ((L.Equal, r), s') -> parseConDec3 (optName, None, s')
-      | optName, LS.Cons ((t, r), s') ->
+      | LS.Cons ((L.Equal, r), s') -> parseConDec3 (optName, None, s')
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected `:' or `=', found " ^ L.toString t)
 
     let parseBlock = function
@@ -108,23 +108,23 @@ end) : PARSE_CONDEC with module ExtConDec = ParseConDec__0.ExtConDec' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected `block', found " ^ L.toString t)
 
-    let parseSome = function
-      | name, LS.Cons ((L.Id (_, "some"), r), s') ->
+    let parseSome (name, a) = match a with
+      | LS.Cons ((L.Id (_, "some"), r), s') ->
           let g1, f' = ParseTerm.parseCtx' (LS.expose s') in
           let g2, f'' = parseBlock f' in
           (ExtConDec.blockdec name g1 g2, f'')
-      | name, (LS.Cons ((L.Id (_, "block"), r), s') as f) ->
+      | (LS.Cons ((L.Id (_, "block"), r), s') as f) ->
           let g2, f' = parseBlock f in
           (ExtConDec.blockdec name [] g2, f')
-      | name, LS.Cons ((t, r), s') ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected `some' or `block', found " ^ L.toString t)
 
-    let parseBlockDec1 = function
-      | name, LS.Cons ((L.Colon, r), s') -> parseSome (name, LS.expose s')
-      | name, LS.Cons ((L.Equal, r), s') ->
+    let parseBlockDec1 (name, a) = match a with
+      | LS.Cons ((L.Colon, r), s') -> parseSome (name, LS.expose s')
+      | LS.Cons ((L.Equal, r), s') ->
           let g, f = ParseTerm.parseQualIds' (LS.expose s') in
           (ExtConDec.blockdef name g, f)
-      | name, LS.Cons ((t, r), s') ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("`:' expected, found token " ^ L.toString t)
 
     let parseBlockDec' = function

@@ -99,9 +99,9 @@ end) : PTRECON = struct
     | I.Null, g_ -> g_
     | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
-  let rec shift = function
-    | I.Null, s -> s
-    | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
+  let rec shift (a, s) = match a with
+    | I.Null -> s
+    | IntSyn.Decl (g_, d_) -> I.dot1 (shift (g_, s))
 
   (* We write
        G |- M : g
@@ -131,10 +131,10 @@ end) : PTRECON = struct
      Effects: instantiation of EVars in g, s, and dp
               any effect  sc M  might have
   *)
-  let rec solve' = function
-    | o_, (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
+  let rec solve' (o_, a, b, sc) = match a, b with
+    | (C.Atom p, s), (C.DProg (g_, dPool) as dp) ->
         matchAtom (o_, (p, s), dp, sc)
-    | o_, (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
+    | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool) ->
         let d'_ = I.Dec (None, I.EClo (a_, s)) in
         begin if !TableParam.strengthen then
           begin match MT.memberCtx (g_, I.EClo (a_, s)) g_ with
@@ -162,7 +162,7 @@ end) : PTRECON = struct
         end
         (*      solve' (O, (g, I.dot1 s), C.DProg (I.Decl(G, D'), I.Decl (dPool, C.Dec (r, s, Ha))),
                (fn (O,M) => sc (O, (I.Lam (D', M)))))*)
-    | o_, (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
+    | (C.All (d_, g), s), C.DProg (g_, dPool) ->
         let d'_ = Names.decLUName g_ (I.decSub d_ s) in
         solve'
           ( o_,
@@ -171,8 +171,8 @@ end) : PTRECON = struct
             function o_, m_ -> sc (o_, I.Lam (d'_, m_)) )
   (* val D' = I.decSub (D, s) *)
 
-  and rSolve = function
-    | o_, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
+  and rSolve (o_, ps', a, b, sc) = match a, b with
+    | (C.Eq q_, s), C.DProg (g_, dPool) ->
         begin if Unify.unifiable g_ (q_, s) ps' then sc (o_, I.Nil)
         else
           let () = ignore begin
@@ -185,7 +185,7 @@ end) : PTRECON = struct
             end in
           ()
         end
-    | o_, ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc ->
+    | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
         begin match Assign.assignable g_ ps' (q_, s) with
         | Some cnstr ->
             begin if aSolve ((eqns, s), dp, cnstr) then sc (o_, I.Nil)
@@ -193,7 +193,7 @@ end) : PTRECON = struct
             end
         | None -> print "Clause Head not assignable -- SHOULD NEVER HAPPEN\n"
         end
-    | o_, ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
+    | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
         let x_ = I.newEVar g_ (I.EClo (a_, s)) in
         rSolve
           ( o_,
@@ -206,7 +206,7 @@ end) : PTRECON = struct
                   (o_, (g, s), dp, function o_, m_ -> sc (o_, I.App (m_, s_)))
           )
         (* is this EVar redundant? -fp *)
-    | o_, ps', (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp), sc
+    | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp)
       ->
         let x_ = I.newEVar g_ (I.EClo (a_, s)) in
         rSolve
@@ -215,20 +215,16 @@ end) : PTRECON = struct
             (r, I.Dot (I.Exp x_, s)),
             dp,
             function o_, s_ -> sc (o_, I.App (x_, s_)) )
-    | ( o_,
-        ps',
-        (C.Axists (I.ADec (Some x_, d), r), s),
-        (C.DProg (g_, dPool) as dp),
-        sc ) ->
+    | (C.Axists (I.ADec (Some x_, d), r), s), (C.DProg (g_, dPool) as dp) ->
         let x'_ = I.newAVar () in
         rSolve
           (o_, ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
   (* we don't increase the proof term here! *)
   (* fail *)
 
-  and aSolve = function
-    | (trivial_, s), dp, cnstr -> Assign.solveCnstr cnstr
-    | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp), cnstr ->
+  and aSolve (a, b, cnstr) = match a, b with
+    | (trivial_, s), dp -> Assign.solveCnstr cnstr
+    | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp) ->
         let g''_ = compose' (g'_, g_) in
         let s' = shift (g'_, s) in
         Assign.unifiable g''_ (n_, s') (e1, s')
@@ -237,9 +233,9 @@ end) : PTRECON = struct
   and matchAtom
       (ho :: o_, ((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc)
       =
-    let rec matchSig = function
-      | [], k -> raise (Error " \noracle #Pc does not exist \n")
-      | (I.Const c as hc) :: sgn', k ->
+    let rec matchSig (a, k) = match a with
+      | [] -> raise (Error " \noracle #Pc does not exist \n")
+      | (I.Const c as hc) :: sgn' ->
           begin if c = k then
             let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
             rSolve
@@ -250,7 +246,7 @@ end) : PTRECON = struct
                 function o_, s_ -> sc (o_, I.Root (hc, s_)) )
           else matchSig (sgn', k)
           end
-      | (I.Def d as hc) :: sgn', k ->
+      | (I.Def d as hc) :: sgn' ->
           begin if d = k then
             let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
             rSolve
@@ -263,14 +259,14 @@ end) : PTRECON = struct
           end
       (* should not happen *)
     in
-    let rec matchDProg = function
-      | I.Null, i, k ->
+    let rec matchDProg (a, i, k) = match a, i with
+      | I.Null, i ->
           raise
             (Error
                "\n\
                \ selected dynamic clause number does not exist in current \
                 dynamic clause pool!\n")
-      | I.Decl (dPool', C.Dec (r, s, ha')), 1, k ->
+      | I.Decl (dPool', C.Dec (r, s, ha')), 1 ->
           begin if eqHead (ha, ha') then
             rSolve
               ( o_,
@@ -282,7 +278,7 @@ end) : PTRECON = struct
             raise
               (Error "\n selected dynamic clause does not match current goal!\n")
           end
-      | I.Decl (dPool', dc), i, k -> matchDProg (dPool', i - 1, k)
+      | I.Decl (dPool', dc), i -> matchDProg (dPool', i - 1, k)
     in
     begin match ho with
     | C.Pc i -> matchSig (Index.lookup (cidFromHead ha), i)

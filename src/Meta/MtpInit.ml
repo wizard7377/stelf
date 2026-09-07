@@ -92,8 +92,8 @@ end) : MTPINIT.MTPINIT = struct
     module Fmt = Formatter
 
     let init f_ of_ =
-      let rec init' = function
-        | (g_, b_), S.All (_, o_), F.All (F.Prim d_, f'_), ss_ ->
+      let rec init' (gb, a, b, ss_) = match gb, a, b with
+        | (g_, b_), S.All (_, o_), F.All (F.Prim d_, f'_) ->
             let d'_ = Names.decName g_ d_ in
             init'
               ( ( I.Decl (g_, d'_),
@@ -101,11 +101,11 @@ end) : MTPINIT.MTPINIT = struct
                 o_,
                 f'_,
                 ss_ )
-        | gb, S.And (o1_, o2_), F.And (f1_, f2_), ss_ ->
+        | gb, S.And (o1_, o2_), F.And (f1_, f2_) ->
             init' (gb, o1_, f1_, init' (gb, o2_, f2_, ss_))
-        | gb, o_, (F.Ex _ as f'_), ss_ ->
+        | gb, o_, (F.Ex _ as f'_) ->
             S.State (List.length ss_ + 1, gb, (f_, of_), 1, o_, [], f'_) :: ss_
-        | gb, o_, (True as f'_), ss_ ->
+        | gb, o_, (True as f'_) ->
             S.State (List.length ss_ + 1, gb, (f_, of_), 1, o_, [], f'_) :: ss_
       in
       Names.varReset I.Null;

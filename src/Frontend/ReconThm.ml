@@ -139,34 +139,33 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     type nonrec callpats = (string * string option list * Paths.region) list
 
-    let rec checkArgNumber = function
-      | 0, I.Uni I.Type, [], r -> ()
-      | 0, I.Pi (_, v2_), arg :: args, r -> checkArgNumber (0, v2_, args, r)
-      | 0, I.Pi (_, v2_), [], r -> error r ("Missing arguments in call pattern")
-      | 0, I.Uni I.Type, arg :: args, r ->
+    let rec checkArgNumber (i, a, b, r) = match i, a, b with
+      | 0, I.Uni I.Type, [] -> ()
+      | 0, I.Pi (_, v2_), arg :: args -> checkArgNumber (0, v2_, args, r)
+      | 0, I.Pi (_, v2_), [] -> error r ("Missing arguments in call pattern")
+      | 0, I.Uni I.Type, arg :: args ->
           error r ("Extraneous arguments in call pattern")
-      | i, I.Pi (_, v2_), args, r -> checkArgNumber (i - 1, v2_, args, r)
+      | i, I.Pi (_, v2_), args -> checkArgNumber (i - 1, v2_, args, r)
 
-    let checkCallPat = function
-      | I.ConDec (_, _, i, I.Normal, v_, I.Kind), p_, r ->
+    let checkCallPat (b, p_, r) = match b with
+      | I.ConDec (_, _, i, I.Normal, v_, I.Kind) ->
           checkArgNumber (i, v_, p_, r)
-      | I.ConDec (a, _, _, I.Constraint _, _, _), p_, r ->
+      | I.ConDec (a, _, _, I.Constraint _, _, _) ->
           error r (("Illegal constraint constant " ^ a) ^ " in call pattern")
-      | I.ConDec (a, _, _, I.Foreign _, _, _), p_, r ->
+      | I.ConDec (a, _, _, I.Foreign _, _, _) ->
           error r (("Illegal foreign constant " ^ a) ^ " in call pattern")
-      | I.ConDec (a, _, _, _, _, I.Type), p_, r ->
+      | I.ConDec (a, _, _, _, _, I.Type) ->
           error r (("Constant " ^ a) ^ " in call pattern not a type family")
-      | I.ConDef (a, _, _, _, _, _, _), p_, r ->
+      | I.ConDef (a, _, _, _, _, _, _) ->
           error r (("Illegal defined constant " ^ a) ^ " in call pattern")
-      | I.AbbrevDef (a, _, _, _, _, _), p_, r ->
+      | I.AbbrevDef (a, _, _, _, _, _) ->
           error r (("Illegal abbreviation " ^ a) ^ " in call pattern")
-      | I.BlockDec (a, _, _, _), p_, r ->
+      | I.BlockDec (a, _, _, _) ->
           error r (("Illegal block identifier " ^ a) ^ " in call pattern")
-      | I.SkoDec (a, _, _, _, _), p_, r ->
+      | I.SkoDec (a, _, _, _, _) ->
           error r (("Illegal Skolem constant " ^ a) ^ " in call pattern")
 
-    let resolveCallPat = function
-      | name, p_, r ->
+    let resolveCallPat (name, p_, r) =
           let qid = Names.Qid ([], name) in
           begin match Names.constLookup qid with
           | None ->
@@ -196,8 +195,8 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let tdecl (o_, r) c_ = ((o_, c_), r)
 
-    let tdeclTotDecl = function
-      | (o_, c_), r ->
+    let tdeclTotDecl (a, r) = match a with
+      | (o_, c_) ->
           let c'_, rs = resolveCallpats c_ in
           (ThmSyn.TDecl (o_, c'_), (r, rs))
 
@@ -215,8 +214,8 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       let r = Paths.join r1 r2 in
       ((p_, o1_, o2_, c_), Paths.join r0 r)
 
-    let rdeclTorDecl = function
-      | (p_, o1_, o2_, c_), r ->
+    let rdeclTorDecl (a, r) = match a with
+      | (p_, o1_, o2_, c_) ->
           let c'_, rs = resolveCallpats c_ in
           (ThmSyn.RDecl (ThmSyn.RedOrder (p_, o1_, o2_), c'_), (r, rs))
 
@@ -224,8 +223,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let tableddecl a b = (a, b)
 
-    let tableddeclTotabledDecl = function
-      | name, r ->
+    let tableddeclTotabledDecl (name, r) =
           let qid = Names.Qid ([], name) in
           begin match Names.constLookup qid with
           | None ->
@@ -240,8 +238,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let keepTabledecl a b = (a, b)
 
-    let keepTabledeclToktDecl = function
-      | name, r ->
+    let keepTabledeclToktDecl (name, r) =
           let qid = Names.Qid ([], name) in
           begin match Names.constLookup qid with
           | None ->
@@ -288,9 +285,9 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let dec (name, t) = (name, t)
 
-    let rec ctxAppend = function
-      | g_, IntSyn.Null -> g_
-      | g_, I.Decl (g'_, d_) -> I.Decl (ctxAppend (g_, g'_), d_)
+    let rec ctxAppend (g_, a) = match a with
+      | IntSyn.Null -> g_
+      | I.Decl (g'_, d_) -> I.Decl (ctxAppend (g_, g'_), d_)
 
     let rec ctxMap arg__1 arg__2 =
       begin match (arg__1, arg__2) with
@@ -311,9 +308,9 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
       ^ "pi ")
       ^ Print.ctxToString (ctxAppend (g0'_, g1'_)) g2'_
 
-    let checkFreevars = function
-      | IntSyn.Null, (g1_, g2_), r -> ()
-      | g0_, (g1_, g2_), r ->
+    let checkFreevars (g0_, a, r) = match g0_, a with
+      | IntSyn.Null, (g1_, g2_) -> ()
+      | g0_, (g1_, g2_) ->
           ignore (Names.varReset IntSyn.Null);
           let g0'_ = Names.ctxName g0_ in
           let g1'_ = Names.ctxLUName g1_ in
@@ -387,8 +384,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
 
     let wdecl a b = (a, b)
 
-    let wdeclTowDecl = function
-      | w_, cp ->
+    let wdeclTowDecl (w_, cp) =
           let cp'_, rs = resolveCallpats cp in
           (ThmSyn.WDecl (abstractWDecl w_, cp'_), rs)
   end

@@ -80,9 +80,9 @@ struct
   (* ctxLookup (Null, k')  should not occur by invariant *)
   (* ctxLength G = |G|, the number of declarations in G *)
   let ctxLength g_ =
-    let rec ctxLength' = function
-      | Null, n -> n
-      | Decl (g_, _), n -> ctxLength' (g_, n + 1)
+    let rec ctxLength' (a, n) = match a with
+      | Null -> n
+      | Decl (g_, _) -> ctxLength' (g_, n + 1)
     in
     ctxLength' (g_, 0)
 

@@ -195,9 +195,9 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
     let lemmaSize () = !nextLemma
 
     let listToCtx gin =
-      let rec listToCtx' = function
-        | g_, [] -> g_
-        | g_, d_ :: ds_ -> listToCtx' (I.Decl (g_, d_), ds_)
+      let rec listToCtx' (g_, a) = match a with
+        | [] -> g_
+        | d_ :: ds_ -> listToCtx' (I.Decl (g_, d_), ds_)
       in
       listToCtx' (I.Null, gin)
 
@@ -208,9 +208,9 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
       in
       ctxToList' (gin, [])
 
-    let rec union = function
-      | g_, I.Null -> g_
-      | g_, I.Decl (g'_, d_) -> I.Decl (union (g_, g'_), d_)
+    let rec union (g_, a) = match a with
+      | I.Null -> g_
+      | I.Decl (g'_, d_) -> I.Decl (union (g_, g'_), d_)
 
     let rec makectx = function
       | I.Null -> I.Null
@@ -261,9 +261,9 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
           && convForBlock ((g1_, f1_, I.dot1 s1), (g2_, f2_, I.dot1 s2))
       | _ -> false
 
-    let rec ctxSub = function
-      | I.Null, s -> (I.Null, s)
-      | I.Decl (g_, d_), s ->
+    let rec ctxSub (a, s) = match a with
+      | I.Null -> (I.Null, s)
+      | I.Decl (g_, d_) ->
           let g'_, s' = ctxSub (g_, s) in
           (I.Decl (g'_, I.decSub d_ s'), I.dot1 s)
 

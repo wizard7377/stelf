@@ -135,23 +135,23 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       | _, I.Meta -> I.Meta
       | I.No, I.No -> I.No
 
-    let rec occursInExp = function
-      | k, I.Uni _ -> I.No
-      | k, I.Pi (dp_, v_) ->
+    let rec occursInExp (k, a) = match a with
+      | I.Uni _ -> I.No
+      | I.Pi (dp_, v_) ->
           ( or ) (occursInDecP (k, dp_), occursInExp (k + 1, v_))
-      | k, I.Root (h_, s_) -> occursInHead (k, h_, occursInSpine (k, s_))
-      | k, I.Lam (d_, v_) ->
+      | I.Root (h_, s_) -> occursInHead (k, h_, occursInSpine (k, s_))
+      | I.Lam (d_, v_) ->
           ( or ) (occursInDec (k, d_), occursInExp (k + 1, v_))
 
-    and occursInHead = function
-      | k, I.BVar k', dp_ ->
+    and occursInHead (k, a, dp_) = match a, dp_ with
+      | I.BVar k', dp_ ->
           begin if k = k' then I.Maybe else dp_
           end
-      | k, I.Const _, dp_ -> dp_
-      | k, I.Def _, dp_ -> dp_
-      | k, I.Skonst _, I.No -> I.No
-      | k, I.Skonst _, I.Meta -> I.Meta
-      | k, I.Skonst _, I.Maybe -> I.Meta
+      | I.Const _, dp_ -> dp_
+      | I.Def _, dp_ -> dp_
+      | I.Skonst _, I.No -> I.No
+      | I.Skonst _, I.Meta -> I.Meta
+      | I.Skonst _, I.Maybe -> I.Meta
 
     and occursInSpine = function
       | _, I.Nil -> I.No
@@ -183,29 +183,29 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           let gp', gx' = restore (n - 1, g_) in
           (gp', I.Decl (gx', d_))
 
-    let rec concat = function
-      | gp, I.Null -> gp
-      | gp, I.Decl (g_, d_) -> I.Decl (concat (gp, g_), d_)
+    let rec concat (gp, a) = match a with
+      | I.Null -> gp
+      | I.Decl (g_, d_) -> I.Decl (concat (gp, g_), d_)
 
-    let rec collectExpW = function
-      | tag_, d, g_, (I.Uni l_, s), k_ -> k_
-      | tag_, d, g_, (I.Pi ((d_, _), v_), s), k_ ->
+    let rec collectExpW (tag_, d, g_, a, k_) = match a with
+      | (I.Uni l_, s) -> k_
+      | (I.Pi ((d_, _), v_), s) ->
           collectExp
             ( tag_,
               d,
               I.Decl (g_, I.decSub d_ s),
               (v_, I.dot1 s),
               collectDec (tag_, d, g_, (d_, s), k_) )
-      | tag_, d, g_, (I.Root (_, s_), s), k_ ->
+      | (I.Root (_, s_), s) ->
           collectSpine (S.decrease tag_, d, g_, (s_, s), k_)
-      | tag_, d, g_, (I.Lam (d_, u_), s), k_ ->
+      | (I.Lam (d_, u_), s) ->
           collectExp
             ( tag_,
               d,
               I.Decl (g_, I.decSub d_ s),
               (u_, I.dot1 s),
               collectDec (tag_, d, g_, (d_, s), k_) )
-      | tag_, d, g_, ((I.EVar (r, gdX, v_, cnstrs) as x_), s), k_ ->
+      | ((I.EVar (r, gdX, v_, cnstrs) as x_), s) ->
           begin if exists (eqEVar x_) k_ then collectSub (tag_, d, g_, s, k_)
           else
             let gp, gx = restore (I.ctxLength gdX - d, gdX) in
@@ -227,7 +227,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
                   ( collectExp (tag_, d, gp, (v'_, I.id), k_),
                     Ev (r', v'_, tag_, d) ) )
           end
-      | tag_, d, g_, (I.FgnExp (csid_, csfe), s), k_ ->
+      | (I.FgnExp (csid_, csfe), s) ->
           I.FgnExpStd.fold csid_ csfe
             (function u_, k'_ -> collectExp (tag_, d, g_, (u_, s), k'_))
             k_
@@ -235,72 +235,72 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
     and collectExp (tag_, d, g_, us_, k_) =
       collectExpW (tag_, d, g_, Whnf.whnf us_, k_)
 
-    and collectSpine = function
-      | tag_, d, g_, (I.Nil, _), k_ -> k_
-      | tag_, d, g_, (I.SClo (s_, s'), s), k_ ->
+    and collectSpine (tag_, d, g_, a, k_) = match a with
+      | (I.Nil, _) -> k_
+      | (I.SClo (s_, s'), s) ->
           collectSpine (tag_, d, g_, (s_, I.comp s' s), k_)
-      | tag_, d, g_, (I.App (u_, s_), s), k_ ->
+      | (I.App (u_, s_), s) ->
           collectSpine
             (tag_, d, g_, (s_, s), collectExp (tag_, d, g_, (u_, s), k_))
 
     and collectDec (tag_, d, g_, (I.Dec (_, v_), s), k_) =
       collectExp (tag_, d, g_, (v_, s), k_)
 
-    and collectSub = function
-      | tag_, d, g_, I.Shift _, k_ -> k_
-      | tag_, d, g_, I.Dot (I.Idx _, s), k_ -> collectSub (tag_, d, g_, s, k_)
-      | tag_, d, g_, I.Dot (I.Exp u_, s), k_ ->
+    and collectSub (tag_, d, g_, a, k_) = match a with
+      | I.Shift _ -> k_
+      | I.Dot (I.Idx _, s) -> collectSub (tag_, d, g_, s, k_)
+      | I.Dot (I.Exp u_, s) ->
           collectSub (tag_, d, g_, s, collectExp (tag_, d, g_, (u_, I.id), k_))
 
-    let rec abstractEVar = function
-      | I.Decl (k'_, Ev (r', _, _, d)), depth, (I.EVar (r, _, _, _) as x_) ->
+    let rec abstractEVar (a, depth, b) = match a, b with
+      | I.Decl (k'_, Ev (r', _, _, d)), (I.EVar (r, _, _, _) as x_) ->
           begin if r == r' then (I.BVar (depth + 1), d)
           else abstractEVar (k'_, depth + 1, x_)
           end
-      | I.Decl (k'_, Bv _), depth, x_ -> abstractEVar (k'_, depth + 1, x_)
+      | I.Decl (k'_, Bv _), x_ -> abstractEVar (k'_, depth + 1, x_)
 
     let lookupBV (k_, i) =
-      let rec lookupBV' = function
-        | I.Decl (k_, Ev (r, v_, _, _)), i, k -> lookupBV' (k_, i, k + 1)
-        | I.Decl (k_, Bv _), 1, k -> k
-        | I.Decl (k_, Bv _), i, k -> lookupBV' (k_, i - 1, k + 1)
+      let rec lookupBV' (a, i, k) = match a, i with
+        | I.Decl (k_, Ev (r, v_, _, _)), i -> lookupBV' (k_, i, k + 1)
+        | I.Decl (k_, Bv _), 1 -> k
+        | I.Decl (k_, Bv _), i -> lookupBV' (k_, i - 1, k + 1)
       in
       lookupBV' (k_, i, 1)
 
-    let rec abstractExpW = function
-      | k_, depth, ((I.Uni l_ as u_), s) -> u_
-      | k_, depth, (I.Pi ((d_, p_), v_), s) ->
+    let rec abstractExpW (k_, depth, a) = match a with
+      | ((I.Uni l_ as u_), s) -> u_
+      | (I.Pi ((d_, p_), v_), s) ->
           piDepend
             (abstractDec (k_, depth, (d_, s)), p_) (abstractExp (k_, depth + 1, (v_, I.dot1 s)))
-      | k_, depth, (I.Root ((I.BVar k as h_), s_), s) ->
+      | (I.Root ((I.BVar k as h_), s_), s) ->
           begin if k > depth then
             let k' = lookupBV (k_, k - depth) in
             I.Root (I.BVar (k' + depth), abstractSpine (k_, depth, (s_, s)))
           else I.Root (h_, abstractSpine (k_, depth, (s_, s)))
           end
-      | k_, depth, (I.Root (h_, s_), s) ->
+      | (I.Root (h_, s_), s) ->
           I.Root (h_, abstractSpine (k_, depth, (s_, s)))
-      | k_, depth, (I.Lam (d_, u_), s) ->
+      | (I.Lam (d_, u_), s) ->
           I.Lam
             ( abstractDec (k_, depth, (d_, s)),
               abstractExp (k_, depth + 1, (u_, I.dot1 s)) )
-      | k_, depth, ((I.EVar (_, g_, _, _) as x_), s) ->
+      | ((I.EVar (_, g_, _, _) as x_), s) ->
           let h_, d = abstractEVar (k_, depth, x_) in
           I.Root (h_, abstractSub (I.ctxLength g_ - d, k_, depth, s, I.Nil))
-      | k_, depth, (I.FgnExp (csid_, csfe), s) ->
+      | (I.FgnExp (csid_, csfe), s) ->
           I.FgnExpStd.Map.apply csid_ csfe (function u_ ->
               abstractExp (k_, depth, (u_, s)))
 
     and abstractExp (k_, depth, us_) = abstractExpW (k_, depth, Whnf.whnf us_)
 
-    and abstractSub = function
-      | n, k_, depth, I.Shift k, s_ ->
+    and abstractSub (n, k_, depth, a, s_) = match a with
+      | I.Shift k ->
           begin if n > 0 then
             abstractSub
               (n, k_, depth, I.Dot (I.Idx (k + 1), I.Shift (k + 1)), s_)
           else s_
           end
-      | n, k_, depth, I.Dot (I.Idx k, s), s_ ->
+      | I.Dot (I.Idx k, s) ->
           let h_ =
             begin if k > depth then
               let k' = lookupBV (k_, k - depth) in
@@ -309,7 +309,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
             end
           in
           abstractSub (n - 1, k_, depth, s, I.App (I.Root (h_, I.Nil), s_))
-      | n, k_, depth, I.Dot (I.Exp u_, s), s_ ->
+      | I.Dot (I.Exp u_, s) ->
           abstractSub
             ( n - 1,
               k_,
@@ -317,11 +317,11 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
               s,
               I.App (abstractExp (k_, depth, (u_, I.id)), s_) )
 
-    and abstractSpine = function
-      | k_, depth, (I.Nil, _) -> I.Nil
-      | k_, depth, (I.SClo (s_, s'), s) ->
+    and abstractSpine (k_, depth, a) = match a with
+      | (I.Nil, _) -> I.Nil
+      | (I.SClo (s_, s'), s) ->
           abstractSpine (k_, depth, (s_, I.comp s' s))
-      | k_, depth, (I.App (u_, s_), s) ->
+      | (I.App (u_, s_), s) ->
           I.App
             ( abstractExp (k_, depth, (u_, s)),
               abstractSpine (k_, depth, (s_, s)) )
@@ -362,23 +362,23 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           let g'_, b'_ = abstractCtx k'_ in
           (I.Decl (g'_, d'_), I.Decl (b'_, tag_))
 
-    let rec abstractGlobalSub = function
-      | k_, I.Shift _, I.Null -> I.Shift (I.ctxLength k_)
-      | k_, I.Shift n, (I.Decl _ as b_) ->
+    let rec abstractGlobalSub (k_, a, b) = match a, b with
+      | I.Shift _, I.Null -> I.Shift (I.ctxLength k_)
+      | I.Shift n, (I.Decl _ as b_) ->
           abstractGlobalSub (k_, I.Dot (I.Idx (n + 1), I.Shift (n + 1)), b_)
-      | k_, I.Dot (I.Idx k, s'), I.Decl (b_, (S.Parameter _ as t_)) ->
+      | I.Dot (I.Idx k, s'), I.Decl (b_, (S.Parameter _ as t_)) ->
           I.Dot (I.Idx (lookupBV (k_, k)), abstractGlobalSub (k_, s', b_))
-      | k_, I.Dot (I.Exp u_, s'), I.Decl (b_, (S.Lemma _ as t_)) ->
+      | I.Dot (I.Exp u_, s'), I.Decl (b_, (S.Lemma _ as t_)) ->
           I.Dot
             ( I.Exp (abstractExp (k_, 0, (u_, I.id))),
               abstractGlobalSub (k_, s', b_) )
 
-    let rec collectGlobalSub = function
-      | g0_, I.Shift _, I.Null, collect -> collect
-      | g0_, s, (I.Decl (_, S.Parameter (Some l)) as b_), collect ->
+    let rec collectGlobalSub (g0_, a, b, collect) = match a, b with
+      | I.Shift _, I.Null -> collect
+      | s, (I.Decl (_, S.Parameter (Some l)) as b_) ->
           let (F.LabelDec (name, _, g2_)) = F.labelLookup l in
           skip (g0_, List.length g2_, s, b_, collect)
-      | g0_, I.Dot (I.Exp u_, s), I.Decl (b_, tag_), collect ->
+      | I.Dot (I.Exp u_, s), I.Decl (b_, tag_) ->
           collectGlobalSub
             ( g0_,
               s,
@@ -387,9 +387,9 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
               | d, k_ -> collect (d, collectExp (tag_, d, g0_, (u_, I.id), k_))
             )
 
-    and skip = function
-      | g0_, 0, s, b_, collect -> collectGlobalSub (g0_, s, b_, collect)
-      | I.Decl (g0_, d_), n, s, I.Decl (b_, (S.Parameter _ as t_)), collect ->
+    and skip (a, n, s, b, collect) = match a, n, b with
+      | g0_, 0, b_ -> collectGlobalSub (g0_, s, b_, collect)
+      | I.Decl (g0_, d_), n, I.Decl (b_, (S.Parameter _ as t_)) ->
           skip
             ( g0_,
               n - 1,
@@ -403,9 +403,9 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       (abstractCtx k_, abstractGlobalSub (k_, s, b_))
 
     let abstractSubAll (t, b1_, (g0_, b0), s, b_) =
-      let rec skip'' = function
-        | k_, (I.Null, I.Null) -> k_
-        | k_, (I.Decl (g0_, d_), I.Decl (b0, tag_)) ->
+      let rec skip'' (k_, a) = match a with
+        | (I.Null, I.Null) -> k_
+        | (I.Decl (g0_, d_), I.Decl (b0, tag_)) ->
             I.Decl (skip'' (k_, (g0_, b0)), Bv (d_, tag_))
       in
       let collect2 = collectGlobalSub (g0_, s, b_, function _, k'_ -> k'_) in
@@ -418,24 +418,24 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       let k_ = collect2 (d, k1_) in
       (abstractCtx k_, abstractGlobalSub (k_, s, b_))
 
-    let rec abstractFor = function
-      | k_, depth, (F.All (F.Prim d_, f_), s) ->
+    let rec abstractFor (k_, depth, a) = match a with
+      | (F.All (F.Prim d_, f_), s) ->
           F.All
             ( F.Prim (abstractDec (k_, depth, (d_, s))),
               abstractFor (k_, depth + 1, (f_, I.dot1 s)) )
-      | k_, depth, (F.Ex (d_, f_), s) ->
+      | (F.Ex (d_, f_), s) ->
           F.Ex
             ( abstractDec (k_, depth, (d_, s)),
               abstractFor (k_, depth + 1, (f_, I.dot1 s)) )
-      | k_, depth, (True, s) -> F.True
-      | k_, depth, (F.And (f1_, f2_), s) ->
+      | (True, s) -> F.True
+      | (F.And (f1_, f2_), s) ->
           F.And
             ( abstractFor (k_, depth, (f1_, s)),
               abstractFor (k_, depth, (f2_, s)) )
 
-    let rec allClo = function
-      | I.Null, f_ -> f_
-      | I.Decl (gx, d_), f_ -> allClo (gx, F.All (F.Prim d_, f_))
+    let rec allClo (a, f_) = match a with
+      | I.Null -> f_
+      | I.Decl (gx, d_) -> allClo (gx, F.All (F.Prim d_, f_))
 
     let rec convert = function
       | I.Null -> I.Null
@@ -459,13 +459,13 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       | I.Null -> I.shift
       | I.Decl (g_, _) -> I.dot1 (shift g_)
 
-    let rec ctxSub = function
-      | [], s -> []
-      | d_ :: g_, s -> I.decSub d_ s :: ctxSub (g_, I.dot1 s)
+    let rec ctxSub (a, s) = match a with
+      | [] -> []
+      | d_ :: g_ -> I.decSub d_ s :: ctxSub (g_, I.dot1 s)
 
-    let rec weaken2 = function
-      | I.Null, a, i -> (I.id, function s_ -> s_)
-      | I.Decl (g'_, (I.Dec (name, v_) as d_)), a, i ->
+    let rec weaken2 (b, a, i) = match b with
+      | I.Null -> (I.id, function s_ -> s_)
+      | I.Decl (g'_, (I.Dec (name, v_) as d_)) ->
           let w', s'_ = weaken2 (g'_, a, i + 1) in
           begin if Subordinate.belowEq (I.targetFam v_) a then
             (I.dot1 w', function s_ -> I.App (I.Root (I.BVar i, I.Nil), s_))
@@ -478,9 +478,9 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           raiseType
             g_ (Abstract.piDepend (Whnf.normalizeDec d_ I.id, I.Maybe) v_)
 
-    let rec raiseFor = function
-      | k, gorig, (F.True as f_), w, sc -> f_
-      | k, gorig, F.Ex (I.Dec (name, v_), f_), w, sc ->
+    let rec raiseFor (k, gorig, a, w, sc) = match a with
+      | (F.True as f_) -> f_
+      | F.Ex (I.Dec (name, v_), f_) ->
           let g_ = F.listToCtx (ctxSub (F.ctxToList gorig, w)) in
           let g = I.ctxLength g_ in
           let s = sc (w, k) in
@@ -491,14 +491,13 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           let v'' = Whnf.normalize (v'_, iw) in
           let v''' = Whnf.normalize (raiseType gw_ v'', I.id) in
           let s''' = s_ I.Nil in
-          let sc' = function
-            | w', k' ->
+          let sc' (w', k') =
                 let s' = sc (w', k') in
                 I.Dot (I.Exp (I.Root (I.BVar (g + k' - k), s''')), s')
           in
           let f'_ = raiseFor (k + 1, gorig, f_, I.comp w I.shift, sc') in
           F.Ex (I.Dec (name, v'''), f'_)
-      | k, gorig, F.All (F.Prim (I.Dec (name, v_)), f_), w, sc ->
+      | F.All (F.Prim (I.Dec (name, v_)), f_) ->
           let g_ = F.listToCtx (ctxSub (F.ctxToList gorig, w)) in
           let g = I.ctxLength g_ in
           let s = sc (w, k) in
@@ -509,20 +508,19 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
           let v'' = Whnf.normalize (v'_, iw) in
           let v''' = Whnf.normalize (raiseType gw_ v'', I.id) in
           let s''' = s_ I.Nil in
-          let sc' = function
-            | w', k' ->
+          let sc' (w', k') =
                 let s' = sc (w', k') in
                 I.Dot (I.Exp (I.Root (I.BVar (g + k' - k), s''')), s')
           in
           let f'_ = raiseFor (k + 1, gorig, f_, I.comp w I.shift, sc') in
           F.All (F.Prim (I.Dec (name, v''')), f'_)
 
-    let rec extend = function
-      | k_, [] -> k_
-      | k_, d_ :: l_ -> extend (I.Decl (k_, Bv (d_, S.None)), l_)
+    let rec extend (k_, a) = match a with
+      | [] -> k_
+      | d_ :: l_ -> extend (I.Decl (k_, Bv (d_, S.None)), l_)
 
-    let rec makeFor = function
-      | k_, w, Head (g_, (f_, s), d) ->
+    let rec makeFor (k_, w, a) = match a with
+      | Head (g_, (f_, s), d) ->
           let cf =
             collectGlobalSub (g_, s, createEmptyB d, function _, k'_ -> k'_)
           in
@@ -539,7 +537,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
             end;
           let gk1, gk2 = split (gk_, k' - k) in
           (gk1, allClo (gk2, fk))
-      | k_, w, Block ((g_, t, d, g2_), af_) ->
+      | Block ((g_, t, d, g2_), af_) ->
           let k = I.ctxLength k_ in
           let collect =
             collectGlobalSub (g_, t, createEmptyB d, function _, k'_ -> k'_)

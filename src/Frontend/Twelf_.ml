@@ -349,15 +349,14 @@ end) : TWELF.STELF = struct
     let abortFileMsg chlev (fileName, msg) =
       abort chlev (((fileName ^ ":") ^ msg) ^ "\n")
 
-    let abortIO = function
-      | fileName, _ -> begin
+    let abortIO (fileName, _) = begin
           msg (("IO Error on file " ^ fileName) ^ "\n");
           Abort
         end
 
-    let rec joinregion = function
-      | r, [] -> r
-      | r, r' :: rs -> joinregion (Paths.join r r', rs)
+    let rec joinregion (r, a) = match a with
+      | [] -> r
+      | r' :: rs -> joinregion (Paths.join r r', rs)
 
     let joinregions (r :: rs) = joinregion (r, rs)
 
@@ -1182,8 +1181,8 @@ end) : TWELF.STELF = struct
                    (Paths.wrap r ("%use declaration needs to be at top level")))
           end
 
-    and install1WithSig = function
-      | fileName, moduleOpt, (Parser.SigDef sigdef, r) ->
+    and install1WithSig (fileName, moduleOpt, a) = match moduleOpt, a with
+      | moduleOpt, (Parser.SigDef sigdef, r) ->
           let idOpt, module_, wherecls =
             ReconModule.sigdefToSigdef sigdef moduleOpt
           in
@@ -1207,7 +1206,7 @@ end) : TWELF.STELF = struct
           in
           ignore (Display.chatter_s 3 (("%sig " ^ name) ^ " = { ... }.\n"));
           ()
-      | fileName, moduleOpt, (Parser.StructDec structdec, r) ->
+      | moduleOpt, (Parser.StructDec structdec, r) ->
           begin match
             ReconModule.structdecToStructDec structdec moduleOpt
           with
@@ -1253,7 +1252,7 @@ end) : TWELF.STELF = struct
                 end;
               ()
           end
-      | fileName, moduleOpt, (Parser.Include sigexp, r) ->
+      | moduleOpt, (Parser.Include sigexp, r) ->
           let module_, wherecls =
             ReconModule.sigexpToSigexp sigexp moduleOpt
           in
@@ -1267,7 +1266,7 @@ end) : TWELF.STELF = struct
           ignore begin if !Global.chatter = 3 then msg "%include { ... }.\n" else ()
             end;
           ()
-      | fileName, None, (Parser.Open strexp, r) ->
+      | None, (Parser.Open strexp, r) ->
           let mid = ReconModule.strexpToStrexp strexp in
           let ns = ModSyn.Names.getComponents mid in
           let module_ = ModSyn.abstractModule ns (Some mid) in
@@ -1544,9 +1543,9 @@ end) : TWELF.STELF = struct
       let fileName (file, _) = file
       let editName edit (file, mtime) = (edit file, mtime)
 
-      let modified = function
-        | _, { contents = None } -> true
-        | _, { contents = Some _ } -> false
+      let modified (_, a) = match a with
+        | { contents = None } -> true
+        | { contents = Some _ } -> false
 
       let makeModified (_, mtime) = mtime := None
       let makeUnmodified (_, mtime) = mtime := Some Time.zeroTime

@@ -100,9 +100,9 @@ struct
     let solveNumber (g_, s_, k) = Some (numberExp (fromInt k))
 
     let findMSet eq (x, l_) =
-      let rec findMSet' = function
-        | tried, [] -> None
-        | tried, y :: l_ ->
+      let rec findMSet' (tried, a) = match a with
+        | [] -> None
+        | y :: l_ ->
             begin if eq (x, y) then Some (y, tried @ l_)
             else findMSet' (y :: tried, l_)
             end
@@ -138,7 +138,7 @@ struct
           end
       | Mon (n, us_ :: usL) -> timesExp (toExpMon (Mon (n, usL)), toExpEClo us_)
 
-    and toExpEClo = function u_, Shift 0 -> u_ | u_, s_ -> EClo (u_, s_)
+    and toExpEClo (u_, s_) = match s_ with Shift 0 -> u_ | s_ -> EClo (u_, s_)
 
     let rec compatibleMon (Mon (_, usL1), Mon (_, usL2)) =
       equalMSet (function us1, us2 -> sameExpW (us1, us2)) (usL1, usL2)
@@ -269,9 +269,9 @@ struct
       rem (m, gcd_list coeffL) = zero
 
     let findMon f (g_, Sum (m, monL)) =
-      let rec findMon' = function
-        | [], monL2 -> None
-        | mon :: monL1, monL2 ->
+      let rec findMon' (a, monL2) = match a with
+        | [] -> None
+        | mon :: monL1 ->
             begin match f (g_, mon, Sum (m, monL1 @ monL2)) with
             | Some _ as result -> result
             | None -> findMon' (monL1, mon :: monL2)
@@ -293,17 +293,15 @@ struct
       let cnstr = ref (Eqn (g_, u_, numberExp zero)) in
       Delay (u_, cnstr)
 
-    and solveSum = function
-      | ( g_,
-          (Sum (m, Mon (n, ((EVar (r, _, _, _) as x_), s) :: []) :: []) as sum)
-        ) ->
+    and solveSum (g_, a) = match a with
+      | (Sum (m, Mon (n, ((EVar (r, _, _, _) as x_), s) :: []) :: []) as sum) ->
           begin if Whnf.isPatSub s then
             [ Assign (g_, x_, numberExp (-quot (m, n)), Whnf.invert s) ]
           else [ delaySum (g_, sum) ]
           end
-      | g_, sum ->
-          let invertMon = function
-            | g_, (Mon (n, (EVar (r, _, _, _), s) :: []) as mon), sum ->
+      | sum ->
+          let invertMon (g_, a, sum) = match a with
+            | (Mon (n, (EVar (r, _, _, _), s) :: []) as mon) ->
                 begin if Whnf.isPatSub s then
                   let ss = Whnf.invert s in
                   let rhs_ = toFgn sum in
@@ -313,7 +311,7 @@ struct
                   end
                 else None
                 end
-            | g_, mon, sum -> None
+            | mon -> None
           in
           begin match findMon invertMon (g_, sum) with
           | Some (Mon (n1, (x1_, s1) :: []), ss1, sum1) ->

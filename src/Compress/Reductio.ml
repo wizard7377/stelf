@@ -190,9 +190,9 @@ module Reductio = struct
   (* prepattern: convert a subst into a ppsubst *)
   (* raises Domain if it is not a prepattern *)
   (* pp_ispat: is this ppsubst a pattern substitution? *)
-  let rec pp_ispat = function
-    | [], shift -> true
-    | n :: s, shift ->
+  let rec pp_ispat (a, shift) = match a with
+    | [] -> true
+    | n :: s ->
         let isn x = x = n in
         let hasn s = List.exists isn s in
         n < shift && (not (hasn s)) && pp_ispat (s, shift)
@@ -331,13 +331,13 @@ module Reductio = struct
   (* PERF: this second elt_eroot_elim on elt' seems like it ought to be unnecessary if
 	     I eliminate all eroots at synth time *)
   let matching p =
-    let rec matching' = function
-      | c :: p, p' -> (
+    let rec matching' (a, p') = match a with
+      | c :: p -> (
           try
             let eqs = match_one c in
             matching' (eqs @ p, p')
           with NonPattern -> matching' (p, c :: p'))
-      | [], p' -> p'
+      | [] -> p'
     in
     matching' (p, [])
 
@@ -429,11 +429,11 @@ module Reductio = struct
     true
   (* evar side-effects affect q, raises Matching if matching fails *)
 
-  and check_spinelt = function
-    | g_, Elt t, a -> check (g_, t, a)
-    | g_, AElt t, a -> check (g_, ATerm t, a)
-    | g_, Ascribe (t, a), a' -> tp_eq (a, a') && check (g_, NTerm t, a)
-    | g_, Omit, _ -> raise (Error "cannot check omitted arguments")
+  and check_spinelt (g_, b, a') = match b, a' with
+    | Elt t, a -> check (g_, t, a)
+    | AElt t, a -> check (g_, ATerm t, a)
+    | Ascribe (t, a), a' -> tp_eq (a, a') && check (g_, NTerm t, a)
+    | Omit, _ -> raise (Error "cannot check omitted arguments")
 
   and check = function
     | g_, NTerm (Lam t), TPi (_, a, b) -> check (ctxcons (a, g_), t, b)
@@ -450,13 +450,13 @@ module Reductio = struct
         (* creates ref cells for evars *)
     | _ -> false
 
-  and check_kind = function
-    | g_, Type -> true
-    | g_, KPi (Omit, a, k) ->
+  and check_kind (g_, b) = match b with
+    | Type -> true
+    | KPi (Omit, a, k) ->
         check_type Con_lf (g_, a)
         && check_kind (ctxcons (a, g_), k)
         && Strict.check_strict_kind k
-    | g_, KPi (_, a, k) ->
+    | KPi (_, a, k) ->
         check_type Con_lf (g_, a) && check_kind (ctxcons (a, g_), k)
 
   and check_type arg__7 arg__8 =
@@ -501,9 +501,9 @@ module Reductio = struct
         check_type' (g_, k', s)
     | _ -> false
 
-  and synth = function
-    | g_, ARoot (Var n, s) -> synth' (g_, ctxLookup g_ n, s)
-    | g_, ARoot (Const n, s) ->
+  and synth (g_, a) = match a with
+    | ARoot (Var n, s) -> synth' (g_, ctxLookup g_ n, s)
+    | ARoot (Const n, s) ->
         let b =
           begin match Sgn.classifier n with
           | Tclass b -> b
@@ -517,7 +517,7 @@ module Reductio = struct
         (* DEBUG		 val _ = l3 := (p, q, aopt)::(!l3) *)
         (* raises Matching if not *)
         (* by invariant, aopt must be SOME *)
-    | g_, (ERoot _ as t) -> elt_synth (g_, eroot_elim_plus t)
+    | (ERoot _ as t) -> elt_synth (g_, eroot_elim_plus t)
 
   and synth' = function
     | g_, (TRoot (_, _) as a), [] -> a
@@ -529,15 +529,15 @@ module Reductio = struct
         synth' (g_, b', s)
     | _ -> raise (Error "applying nonfunction to argument")
 
-  and elt_synth = function
-    | g_, AElt t -> synth (g_, t)
-    | g_, Ascribe (t, a) ->
+  and elt_synth (g_, b) = match b with
+    | AElt t -> synth (g_, t)
+    | Ascribe (t, a) ->
         begin if check (g_, NTerm t, a) then a
         else raise (Error "ascription doesn't check")
         end
-    | g_, Elt _ ->
+    | Elt _ ->
         raise (Error "trying to synthesize a merely checkable element")
-    | g_, Omit -> raise (Error "trying to synthesize an omitted argument")
+    | Omit -> raise (Error "trying to synthesize an omitted argument")
 
   (* similar to above but we just have a putative type and its kind, and return nothing but constraints *)
   (* returns true on success or raises Matching on failure *)

@@ -129,60 +129,56 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           begin if r == r' then Some e_ else atxLookup (m_, r)
           end
 
-    let rec raiseType = function
-      | 0, g_, v_ -> v_
-      | depth, I.Decl (g_, d_), v_ ->
+    let rec raiseType (depth, a, v_) = match depth, a with
+      | 0, g_ -> v_
+      | depth, I.Decl (g_, d_) ->
           raiseType (depth - 1, g_, I.Pi ((d_, I.Maybe), v_))
 
-    let rec weaken = function
-      | 0, g_, a -> I.id
-      | depth, I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
+    let rec weaken (depth, g_, a) = match depth, g_ with
+      | 0, g_ -> I.id
+      | depth, I.Decl (g'_, (I.Dec (name, v_) as d_)) ->
           let w' = weaken (depth - 1, g'_, a) in
           begin if Subordinate.belowEq (I.targetFam v_) a then I.dot1 w'
           else I.comp w' I.shift
           end
 
     let countPi v_ =
-      let rec countPi' = function
-        | I.Root _, n -> n
-        | I.Pi (_, v_), n -> countPi' (v_, n + 1)
-        | I.EClo (v_, _), n -> countPi' (v_, n)
+      let rec countPi' (a, n) = match a with
+        | I.Root _ -> n
+        | I.Pi (_, v_) -> countPi' (v_, n + 1)
+        | I.EClo (v_, _) -> countPi' (v_, n)
       in
       countPi' (v_, 0)
 
     let rec collectExp (lG0, g_, us_, mode, adepth) =
       collectExpW (lG0, g_, Whnf.whnf us_, mode, adepth)
 
-    and collectExpW = function
-      | lG0, g_, (I.Uni _, s), mode, adepth -> adepth
-      | lG0, g_, (I.Pi ((d_, _), v_), s), mode, adepth ->
+    and collectExpW (lG0, g_, a, mode, b) = match lG0, a, b with
+      | lG0, (I.Uni _, s), adepth -> adepth
+      | lG0, (I.Pi ((d_, _), v_), s), adepth ->
           collectExp
             ( lG0,
               I.Decl (g_, I.decSub d_ s),
               (v_, I.dot1 s),
               mode,
               collectDec (lG0, g_, (d_, s), mode, adepth) )
-      | lG0, g_, (I.Lam (d_, u_), s), mode, adepth ->
+      | lG0, (I.Lam (d_, u_), s), adepth ->
           collectExp
             ( lG0,
               I.Decl (g_, I.decSub d_ s),
               (u_, I.dot1 s),
               mode,
               collectDec (lG0, g_, (d_, s), mode, adepth) )
-      | ( lG0,
-          g_,
-          ((I.Root (I.BVar k, s_), s) as us_),
-          mode,
-          ((a_, depth) as adepth) ) ->
+      | lG0, ((I.Root (I.BVar k, s_), s) as us_), ((a_, depth) as adepth) ->
           let l = I.ctxLength g_ in
           begin if k = l + depth - lG0 && depth > 0 then
             let (I.Dec (_, v_)) = I.ctxDec g_ k in
             collectSpine (lG0, g_, (s_, s), mode, (I.Decl (a_, Bv), depth - 1))
           else collectSpine (lG0, g_, (s_, s), mode, adepth)
           end
-      | lG0, g_, (I.Root (c_, s_), s), mode, adepth ->
+      | lG0, (I.Root (c_, s_), s), adepth ->
           collectSpine (lG0, g_, (s_, s), mode, adepth)
-      | lG0, g_, (I.EVar (r, gx, v_, cnstrs), s), mode, ((a_, depth) as adepth)
+      | lG0, (I.EVar (r, gx, v_, cnstrs), s), ((a_, depth) as adepth)
         ->
           begin match atxLookup (a_, r) with
           | None ->
@@ -208,7 +204,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               let lGp' = countPi v_ in
               collectSub (lG0, g_, lGp', s, mode, adepth)
           end
-      | lGO, g_, (I.FgnExp (csid_, fge), s), mode, adepth ->
+      | lGO, (I.FgnExp (csid_, fge), s), adepth ->
           I.FgnExpStd.fold csid_ fge
             (function
               | u_, adepth' -> collectExp (lGO, g_, (u_, s), mode, adepth'))
@@ -230,24 +226,24 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               mode,
               collectExp (lG0, g_, (u_, I.id), mode, adepth) )
 
-    and collectSpine = function
-      | lG0, g_, (I.Nil, _), mode, adepth -> adepth
-      | lG0, g_, (I.SClo (s_, s'), s), mode, adepth ->
+    and collectSpine (lG0, g_, a, mode, adepth) = match a with
+      | (I.Nil, _) -> adepth
+      | (I.SClo (s_, s'), s) ->
           collectSpine (lG0, g_, (s_, I.comp s' s), mode, adepth)
-      | lG0, g_, (I.App (u_, s_), s), mode, adepth ->
+      | (I.App (u_, s_), s) ->
           collectSpine
             (lG0, g_, (s_, s), mode, collectExp (lG0, g_, (u_, s), mode, adepth))
 
     and collectDec (lG0, g_, (I.Dec (x, v_), s), mode, adepth) =
       collectExp (lG0, g_, (v_, s), mode, adepth)
 
-    let collectModeW = function
-      | lG0, g_, modeIn, modeRec, (I.Root (I.Const cid, s_), s), adepth ->
-          let rec collectModeW' = function
-            | ((I.Nil, _), M.Mnil), adepth -> adepth
-            | ((I.SClo (s_, s'), s), m_), adepth ->
+    let collectModeW (lG0, g_, modeIn, modeRec, a, adepth) = match a with
+      | (I.Root (I.Const cid, s_), s) ->
+          let rec collectModeW' (a, adepth) = match a with
+            | ((I.Nil, _), M.Mnil) -> adepth
+            | ((I.SClo (s_, s'), s), m_) ->
                 collectModeW' (((s_, I.comp s' s), m_), adepth)
-            | ((I.App (u_, s_), s), M.Mapp (m, mS)), adepth ->
+            | ((I.App (u_, s_), s), M.Mapp (m, mS)) ->
                 collectModeW'
                   ( ((s_, s), mS),
                     begin if modeEq (m, modeIn) then
@@ -257,7 +253,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
           in
           let mS = valOf (ModeTable.modeLookup cid) in
           collectModeW' (((s_, s), mS), adepth)
-      | lG0, g_, modeIn, modeRec, (I.Pi ((d_, p_), v_), s), adepth ->
+      | (I.Pi ((d_, p_), v_), s) ->
           raise
             (Error
                "Implementation restricted to the Horn fragment of the meta \
@@ -278,25 +274,25 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
     let rec collectDTop (lG0, g_, vs_, adepth) =
       collectDTopW (lG0, g_, Whnf.whnf vs_, adepth)
 
-    and collectDTopW = function
-      | lG0, g_, (I.Pi (((I.Dec (x, v1_) as d_), No), v2_), s), adepth ->
+    and collectDTopW (lG0, g_, a, adepth) = match a with
+      | (I.Pi (((I.Dec (x, v1_) as d_), No), v2_), s) ->
           collectG
             ( lG0,
               g_,
               (v1_, s),
               collectDTop
                 (lG0, I.Decl (g_, I.decSub d_ s), (v2_, I.dot1 s), adepth) )
-      | lG0, g_, ((I.Root _, s) as vs_), adepth ->
+      | ((I.Root _, s) as vs_) ->
           collectModeW (lG0, g_, MetaSyn.Top, MetaSyn.Top, vs_, adepth)
 
     let rec collectDBot (lG0, g_, vs_, adepth) =
       collectDBotW (lG0, g_, Whnf.whnf vs_, adepth)
 
-    and collectDBotW = function
-      | lG0, g_, (I.Pi ((d_, _), v_), s), adepth ->
+    and collectDBotW (lG0, g_, a, adepth) = match a with
+      | (I.Pi ((d_, _), v_), s) ->
           collectDBot
             (lG0, I.Decl (g_, I.decSub d_ s), (v_, I.dot1 s), adepth)
-      | lG0, g_, ((I.Root _, s) as vs_), adepth ->
+      | ((I.Root _, s) as vs_) ->
           collectModeW (lG0, g_, MetaSyn.Bot, MetaSyn.Bot, vs_, adepth)
 
     let collect (MetaSyn.Prefix (g_, m_, b_), v_) =
@@ -308,73 +304,73 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       a_
 
     let lookupEV (a_, r) =
-      let rec lookupEV' = function
-        | I.Decl (a_, Ev (r, v_, _)), r', k ->
+      let rec lookupEV' (a, r', k) = match a with
+        | I.Decl (a_, Ev (r, v_, _)) ->
             begin if r == r' then (k, v_) else lookupEV' (a_, r', k + 1)
             end
-        | I.Decl (a_, Bv), r', k -> lookupEV' (a_, r', k + 1)
+        | I.Decl (a_, Bv) -> lookupEV' (a_, r', k + 1)
       in
       lookupEV' (a_, r, 1)
 
     let lookupBV (a_, i) =
-      let rec lookupBV' = function
-        | I.Decl (a_, Ev (r, v_, _)), i, k -> lookupBV' (a_, i, k + 1)
-        | I.Decl (a_, Bv), 1, k -> k
-        | I.Decl (a_, Bv), i, k -> lookupBV' (a_, i - 1, k + 1)
+      let rec lookupBV' (a, i, k) = match a, i with
+        | I.Decl (a_, Ev (r, v_, _)), i -> lookupBV' (a_, i, k + 1)
+        | I.Decl (a_, Bv), 1 -> k
+        | I.Decl (a_, Bv), i -> lookupBV' (a_, i - 1, k + 1)
       in
       lookupBV' (a_, i, 1)
 
-    let rec abstractExpW = function
-      | a_, g_, depth, ((I.Uni l_ as v_), s) -> v_
-      | a_, g_, depth, (I.Pi ((d_, p_), v_), s) ->
+    let rec abstractExpW (a_, g_, depth, a) = match a with
+      | ((I.Uni l_ as v_), s) -> v_
+      | (I.Pi ((d_, p_), v_), s) ->
           Abstract.piDepend
             (abstractDec (a_, g_, depth, (d_, s)), p_) (abstractExp
                 (a_, I.Decl (g_, I.decSub d_ s), depth + 1, (v_, I.dot1 s)))
-      | a_, g_, depth, (I.Lam (d_, u_), s) ->
+      | (I.Lam (d_, u_), s) ->
           I.Lam
             ( abstractDec (a_, g_, depth, (d_, s)),
               abstractExp
                 (a_, I.Decl (g_, I.decSub d_ s), depth + 1, (u_, I.dot1 s))
             )
-      | a_, g_, depth, (I.Root ((I.BVar k as c_), s_), s) ->
+      | (I.Root ((I.BVar k as c_), s_), s) ->
           begin if k > depth then
             let k' = lookupBV (a_, k - depth) in
             I.Root (I.BVar (k' + depth), abstractSpine (a_, g_, depth, (s_, s)))
           else I.Root (c_, abstractSpine (a_, g_, depth, (s_, s)))
           end
-      | a_, g_, depth, (I.Root (c_, s_), s) ->
+      | (I.Root (c_, s_), s) ->
           I.Root (c_, abstractSpine (a_, g_, depth, (s_, s)))
-      | a_, g_, depth, (I.EVar (r, _, v_, _), s) ->
+      | (I.EVar (r, _, v_, _), s) ->
           let k, vraised = lookupEV (a_, r) in
           I.Root
             ( I.BVar (k + depth),
               abstractSub
                 (a_, g_, depth, (vraised, I.id), s, I.targetFam v_, I.Nil) )
-      | a_, g_, depth, (I.FgnExp (csid_, fge), s) ->
+      | (I.FgnExp (csid_, fge), s) ->
           I.FgnExpStd.Map.apply csid_ fge (function u_ ->
               abstractExp (a_, g_, depth, (u_, s)))
 
     and abstractExp (a_, g_, depth, us_) =
       abstractExpW (a_, g_, depth, Whnf.whnf us_)
 
-    and abstractSpine = function
-      | a_, g_, depth, (I.Nil, _) -> I.Nil
-      | a_, g_, depth, (I.App (u_, s_), s) ->
+    and abstractSpine (a_, g_, depth, a) = match a with
+      | (I.Nil, _) -> I.Nil
+      | (I.App (u_, s_), s) ->
           I.App
             ( abstractExp (a_, g_, depth, (u_, s)),
               abstractSpine (a_, g_, depth, (s_, s)) )
-      | a_, g_, depth, (I.SClo (s_, s'), s) ->
+      | (I.SClo (s_, s'), s) ->
           abstractSpine (a_, g_, depth, (s_, I.comp s' s))
 
     and abstractSub (a_, g_, depth, xVt, s, b, s_) =
       abstractSubW (a_, g_, depth, Whnf.whnf xVt, s, b, s_)
 
-    and abstractSubW = function
-      | a_, g_, depth, (I.Root _, _), s, b, s_ -> s_
-      | a_, g_, depth, ((I.Pi _, _) as xVt), I.Shift k, b, s_ ->
+    and abstractSubW (a_, g_, depth, a, c, b, s_) = match a, c with
+      | (I.Root _, _), s -> s_
+      | ((I.Pi _, _) as xVt), I.Shift k ->
           abstractSub
             (a_, g_, depth, xVt, I.Dot (I.Idx (k + 1), I.Shift (k + 1)), b, s_)
-      | a_, g_, depth, ((I.Pi (_, xv'), t) as xVt), I.Dot (I.Idx k, s), b, s_ ->
+      | ((I.Pi (_, xv'), t) as xVt), I.Dot (I.Idx k, s) ->
           let (I.Dec (x, v_)) = I.ctxDec g_ k in
           begin if k > depth then
             let k' = lookupBV (a_, k - depth) in
@@ -396,7 +392,7 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
                 b,
                 I.App (I.Root (I.BVar k, I.Nil), s_) )
           end
-      | a_, g_, depth, ((I.Pi (_, xv'), t) as xVt), I.Dot (I.Exp u_, s), b, s_
+      | ((I.Pi (_, xv'), t) as xVt), I.Dot (I.Exp u_, s)
         ->
           abstractSub
             ( a_,

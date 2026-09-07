@@ -257,14 +257,14 @@ end) : Cs.CS = struct
       in
       unifyRigid' (al1, al2)
 
-    let rec unifyString = function
-      | g_, Concat (String prefix :: al), str, cnstr ->
+    let rec unifyString (g_, a, str, cnstr) = match a with
+      | Concat (String prefix :: al) ->
           begin if String.isPrefix prefix str then
             let suffix = String.extract (str, String.size prefix, None) in
             unifyString (g_, Concat al, suffix, cnstr)
           else Failure
           end
-      | g_, Concat al, str, cnstr ->
+      | Concat al ->
           let rec unifyString' = function
             | al, [] -> (Failure, [])
             | [], Decomp (parse, parsedL) :: [] ->

@@ -125,9 +125,9 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
     let findMin = function
       | [] -> None
       | o_ :: l_ ->
-          let rec findMin' = function
-            | [], k, result -> result
-            | o'_ :: l'_, k, result ->
+          let rec findMin' (a, k, result) = match a with
+            | [] -> result
+            | o'_ :: l'_ ->
                 let k' = Splitting.index o'_ in
                 begin if Splitting.index o'_ < k then
                   findMin' (l'_, k', Some o'_)
@@ -293,9 +293,9 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
     let findMin = function
       | [] -> None
       | o_ :: l_ ->
-          let rec findMin' = function
-            | [], k, result -> result
-            | o'_ :: l'_, k, result ->
+          let rec findMin' (a, k, result) = match a with
+            | [] -> result
+            | o'_ :: l'_ ->
                 let k' = Splitting.index o'_ in
                 begin if Splitting.index o'_ < k then
                   findMin' (l'_, k', Some o'_)

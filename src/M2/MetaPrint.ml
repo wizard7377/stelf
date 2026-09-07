@@ -76,18 +76,17 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
       end
 
     let fmtPrefix gm =
-      let rec fmtPrefix' = function
-        | M.Prefix (I.Null, I.Null, I.Null), fmt_ -> fmt_
-        | ( M.Prefix
-              (I.Decl (I.Null, d_), I.Decl (I.Null, mode), I.Decl (I.Null, b)),
-            fmt_ ) ->
+      let rec fmtPrefix' (a, fmt_) = match a with
+        | M.Prefix (I.Null, I.Null, I.Null) -> fmt_
+        | M.Prefix
+              (I.Decl (I.Null, d_), I.Decl (I.Null, mode), I.Decl (I.Null, b)) ->
             [
               F.string (depthToString b);
               F.string (modeToString mode);
               Print.formatDec I.Null d_;
             ]
             @ fmt_
-        | M.Prefix (I.Decl (g_, d_), I.Decl (m_, mode), I.Decl (b_, b)), fmt_ ->
+        | M.Prefix (I.Decl (g_, d_), I.Decl (m_, mode), I.Decl (b_, b)) ->
             fmtPrefix'
               ( M.Prefix (g_, m_, b_),
                 [

@@ -296,9 +296,9 @@ module MakeSubordinate
 
     and installTypeN v_ = installTypeN' (v_, I.targetFam v_)
 
-    let rec installKindN = function
-      | I.Uni l_, a -> ()
-      | I.Pi ((I.Dec (_, v1_), p_), v2_), a -> begin
+    let rec installKindN (b, a) = match b with
+      | I.Uni l_ -> ()
+      | I.Pi ((I.Dec (_, v1_), p_), v2_) -> begin
           addSubord (I.targetFam v1_) a;
           begin
             installTypeN v1_;

@@ -30,17 +30,17 @@ module Make (Cst : Cst.CST) = struct
   (* Skip the leading implicit binders, naming each as it goes. [decEName], not
      [decLUName]: an implicit binder stands for something the elaborator will
      infer, so it gets an existential name. *)
-  let rec skip_imp = function
-    | 0, g_, v_ -> (g_, v_)
-    | i, g_, I.Pi ((d_, _), v_) ->
+  let rec skip_imp (i, g_, a) = match i, a with
+    | 0, v_ -> (g_, v_)
+    | i, I.Pi ((d_, _), v_) ->
         skip_imp (i - 1, I.Decl (g_, N.decEName g_ d_), v_)
-    | _, g_, v_ -> (g_, v_)
+    | _, v_ -> (g_, v_)
 
-  let rec skip_imp2 = function
-    | 0, g_, v_, u_ -> (g_, v_, u_)
-    | i, g_, I.Pi ((_, _), v_), I.Lam (d'_, u_) ->
+  let rec skip_imp2 (i, g_, a, b) = match i, a, b with
+    | 0, v_, u_ -> (g_, v_, u_)
+    | i, I.Pi ((_, _), v_), I.Lam (d'_, u_) ->
         skip_imp2 (i - 1, I.Decl (g_, N.decEName g_ d'_), v_, u_)
-    | _, g_, v_, u_ -> (g_, v_, u_)
+    | _, v_, u_ -> (g_, v_, u_)
 
   (* A kind is a chain of binders ending in [type]. The trailing universe is
      dropped: [%sort] supplies it, and there is no surface syntax for writing
@@ -153,9 +153,9 @@ module Make (Cst : Cst.CST) = struct
 
   (* An existential variable's solution is only meaningful under the context it
      was created in, so it is abstracted over that context first. *)
-  let rec abstract_lam = function
-    | I.Null, u_ -> u_
-    | I.Decl (g_, d_), u_ -> abstract_lam (g_, I.Lam (d_, u_))
+  let rec abstract_lam (a, u_) = match a with
+    | I.Null -> u_
+    | I.Decl (g_, d_) -> abstract_lam (g_, I.Lam (d_, u_))
 
   let evar_inst (opts : Options.t) (xs : (I.exp * string) list) :
       (string * Cst.term) list =

@@ -72,15 +72,15 @@ end) : STRICT = struct
 
     and strictDec (k, p, I.Dec (_, v_)) = strictExp (k, p, v_)
 
-    let rec strictArgParm = function
-      | p, (I.Root _ as u_) -> strictExp (0, p, u_)
-      | p, (I.Pi _ as u_) -> strictExp (0, p, u_)
-      | p, (I.FgnExp _ as u_) -> strictExp (0, p, u_)
-      | p, I.Lam (d_, u_) -> strictArgParm (p + 1, u_)
+    let rec strictArgParm (p, a) = match a with
+      | (I.Root _ as u_) -> strictExp (0, p, u_)
+      | (I.Pi _ as u_) -> strictExp (0, p, u_)
+      | (I.FgnExp _ as u_) -> strictExp (0, p, u_)
+      | I.Lam (d_, u_) -> strictArgParm (p + 1, u_)
 
-    let occToString = function
-      | Some ocd, occ -> Paths.wrap (Paths.occToRegionDef1 ocd occ) ("")
-      | None, occ -> "Error: "
+    let occToString (a, occ) = match a with
+      | Some ocd -> Paths.wrap (Paths.occToRegionDef1 ocd occ) ("")
+      | None -> "Error: "
 
     let decToVarName = function
       | I.Dec (None, _) -> "implicit variable"

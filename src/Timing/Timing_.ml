@@ -115,9 +115,9 @@ module Counting : TIMING = struct
   let toString (name, { contents = n }) = toString' (name, n)
 
   let sumToString (name, centers) =
-    let rec sumup = function
-      | [], total -> toString' (name, total)
-      | (_, { contents = n }) :: centers, total -> sumup (centers, total + n)
+    let rec sumup (a, total) = match a with
+      | [] -> toString' (name, total)
+      | (_, { contents = n }) :: centers -> sumup (centers, total + n)
     in
     sumup (centers, 0)
 end

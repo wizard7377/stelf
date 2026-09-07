@@ -273,18 +273,18 @@ end) : RECON_QUERY = struct
       | IntSyn.Type -> ()
       | _ -> error r0 ("Query was not a type")
       end;
-    let rec sc = function
-      | m_, [], _ ->
+    let rec sc (m_, a, b) = match a, b with
+      | [], _ ->
           begin match finishSolve (sol, m_, v_) with
           | None -> []
           | Some conDec_ -> [ (conDec_, None) ]
           end
-      | m_, def :: defs, T.JAnd (T.JTerm ((u_, oc1), v_, l_), f) ->
+      | def :: defs, T.JAnd (T.JTerm ((u_, oc1), v_, l_), f) ->
           begin match finishDefine (def, ((u_, oc1), (v_, None), l_)) with
           | None, _ -> sc (m_, defs, f)
           | Some conDec_, ocdOpt -> (conDec_, ocdOpt) :: sc (m_, defs, f)
           end
-      | m_, def :: defs, T.JAnd (T.JOf ((u_, oc1), (v_, oc2), l_), f) ->
+      | def :: defs, T.JAnd (T.JOf ((u_, oc1), (v_, oc2), l_), f) ->
           begin match finishDefine (def, ((u_, oc1), (v_, Some oc2), l_)) with
           | None, _ -> sc (m_, defs, f)
           | Some conDec_, ocdOpt -> (conDec_, ocdOpt) :: sc (m_, defs, f)

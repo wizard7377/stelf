@@ -195,9 +195,9 @@ end) : REDUNDANT = struct
         (psi, t, convert p_) :: convertCases c'_
     | c_ -> c_
 
-  and removeRedundancy = function
-    | c_, [] -> (c_, [])
-    | c_, c'_ :: rest ->
+  and removeRedundancy (c_, a) = match a with
+    | [] -> (c_, [])
+    | c'_ :: rest ->
         let (c''_ :: cs_) = mergeIfNecessary (c_, c'_) in
         let c''', rest' = removeRedundancy (c''_, rest) in
         (c''', cs_ @ rest')
@@ -367,10 +367,10 @@ end) : REDUNDANT = struct
                    |  _ => raise Error ""Root does not Match."")
 *)
   and invertSub s =
-    let rec lookup = function
-      | n, T.Shift _, p -> None
-      | n, T.Dot (T.Undef, s'), p -> lookup (n + 1, s', p)
-      | n, T.Dot (ft_, s'), p ->
+    let rec lookup (n, a, p) = match a with
+      | T.Shift _ -> None
+      | T.Dot (T.Undef, s') -> lookup (n + 1, s', p)
+      | T.Dot (ft_, s') ->
           begin match getFrontIndex ft_ with
           | None -> lookup (n + 1, s', p)
           | Some k ->
@@ -378,17 +378,17 @@ end) : REDUNDANT = struct
               end
           end
     in
-    let rec invertSub'' = function
-      | 0, si -> si
-      | p, si ->
+    let rec invertSub'' (p, si) = match p with
+      | 0 -> si
+      | p ->
           begin match lookup (1, s, p) with
           | Some k -> invertSub'' (p - 1, T.Dot (T.Idx k, si))
           | None -> invertSub'' (p - 1, T.Dot (T.Undef, si))
           end
     in
-    let rec invertSub' = function
-      | n, T.Shift p -> invertSub'' (p, T.Shift n)
-      | n, T.Dot (_, s') -> invertSub' (n + 1, s')
+    let rec invertSub' (n, a) = match a with
+      | T.Shift p -> invertSub'' (p, T.Shift n)
+      | T.Dot (_, s') -> invertSub' (n + 1, s')
     in
     invertSub' (0, s)
 

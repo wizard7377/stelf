@@ -126,9 +126,9 @@ end) : SEARCH = struct
       | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
-    let rec shift = function
-      | I.Null, s -> s
-      | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
+    let rec shift (a, s) = match a with
+      | I.Null -> s
+      | IntSyn.Decl (g_, d_) -> I.dot1 (shift (g_, s))
 
     let exists p_ k_ =
       let rec exists' = function
@@ -139,14 +139,14 @@ end) : SEARCH = struct
 
     let rec occursInExp (r, vs_) = occursInExpW (r, Whnf.whnf vs_)
 
-    and occursInExpW = function
-      | r, (I.Uni _, _) -> false
-      | r, (I.Pi ((d_, _), v_), s) ->
+    and occursInExpW (r, a) = match a with
+      | (I.Uni _, _) -> false
+      | (I.Pi ((d_, _), v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
-      | r, (I.Root (_, s_), s) -> occursInSpine (r, (s_, s))
-      | r, (I.Lam (d_, v_), s) ->
+      | (I.Root (_, s_), s) -> occursInSpine (r, (s_, s))
+      | (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
-      | r, (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
+      | (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
 
     and occursInSpine = function
       | _, (I.Nil, _) -> false
@@ -183,10 +183,10 @@ end) : SEARCH = struct
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
 
-    let rec solve = function
-      | max, depth, (C.Atom p, s), dp, sc ->
+    let rec solve (max, depth, a, dp, sc) = match a, dp with
+      | (C.Atom p, s), dp ->
           matchAtom (max, depth, (p, s), dp, sc)
-      | max, depth, (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
+      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool) ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
           solve
             ( max,
@@ -194,7 +194,7 @@ end) : SEARCH = struct
               (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
               function m_ -> sc (I.Lam (d'_, m_)) )
-      | max, depth, (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
+      | (C.All (d_, g), s), C.DProg (g_, dPool) ->
           let d'_ = I.decSub d_ s in
           solve
             ( max,
@@ -203,22 +203,17 @@ end) : SEARCH = struct
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
               function m_ -> sc (I.Lam (d'_, m_)) )
 
-    and rSolve = function
-      | max, depth, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
+    and rSolve (max, depth, ps', a, b, sc) = match a, b with
+      | (C.Eq q_, s), C.DProg (g_, dPool) ->
           begin if Unify.unifiable g_ ps' (q_, s) then sc I.Nil else ()
           end
-      | ( max,
-          depth,
-          ps',
-          (C.Assign (q_, eqns), s),
-          (C.DProg (g_, dPool) as dp),
-          sc ) ->
+      | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           begin match Assign.assignable g_ ps' (q_, s) with
           | Some cnstr ->
               aSolve ((eqns, s), dp, cnstr, function () -> sc I.Nil)
           | None -> ()
           end
-      | max, depth, ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc
+      | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp)
         ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
@@ -235,7 +230,7 @@ end) : SEARCH = struct
                       (g, s),
                       dp,
                       function m_ -> sc (I.App (m_, s_)) ) )
-      | max, depth, ps', (C.In (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc
+      | (C.In (r, a_, g), s), (C.DProg (g_, dPool) as dp)
         ->
           let g0_ = pruneCtx (g_, depth) in
           let dPool0 = pruneCtx (dPool, depth) in
@@ -268,12 +263,7 @@ end) : SEARCH = struct
                               end
                             with Unify.Unify _ -> ()) )
                   end )
-      | ( max,
-          depth,
-          ps',
-          (C.Exists (I.Dec (_, a_), r), s),
-          (C.DProg (g_, dPool) as dp),
-          sc ) ->
+      | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( max,
@@ -282,12 +272,7 @@ end) : SEARCH = struct
               (r, I.Dot (I.Exp x_, s)),
               dp,
               function s_ -> sc (I.App (x_, s_)) )
-      | ( max,
-          depth,
-          ps',
-          (C.Axists (I.ADec (Some x_, d), r), s),
-          (C.DProg (g_, dPool) as dp),
-          sc ) ->
+      | (C.Axists (I.ADec (Some x_, d), r), s), (C.DProg (g_, dPool) as dp) ->
           let x'_ = I.newAVar () in
           rSolve
             ( max,
@@ -297,14 +282,11 @@ end) : SEARCH = struct
               dp,
               sc )
 
-    and aSolve = function
-      | (trivial_, s), dp, cnstr, sc ->
+    and aSolve (a, b, cnstr, sc) = match a, b with
+      | (trivial_, s), dp ->
           begin if Assign.solveCnstr cnstr then sc () else ()
           end
-      | ( (C.UnifyEq (g'_, e1, n_, eqns), s),
-          (C.DProg (g_, dPool) as dp),
-          cnstr,
-          sc ) ->
+      | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           let g''_ = compose' (g'_, g_) in
           let s' = shift (g'_, s) in
           begin if Assign.unifiable g''_ (n_, s') (e1, s') then

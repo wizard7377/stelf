@@ -113,28 +113,28 @@ module MakePrint
       | I.SClo (s_, _) -> isNil s_
 
     let subToSpine (depth, s) =
-      let rec sTS = function
-        | I.Shift k, s_ ->
+      let rec sTS (a, s_) = match a with
+        | I.Shift k ->
             begin if k < depth then
               sTS (I.Dot (I.Idx (k + 1), I.Shift (k + 1)), s_)
             else s_
             end
-        | I.Dot (I.Idx k, s), s_ -> sTS (s, I.App (I.Root (I.BVar k, I.Nil), s_))
-        | I.Dot (I.Exp u_, s), s_ -> sTS (s, I.App (u_, s_))
+        | I.Dot (I.Idx k, s) -> sTS (s, I.App (I.Root (I.BVar k, I.Nil), s_))
+        | I.Dot (I.Exp u_, s) -> sTS (s, I.App (u_, s_))
       in
       sTS (s, I.Nil)
 
     type argStatus = TooFew | Exact of I.spine | TooMany of I.spine * I.spine
 
-    let sclo' = function
-      | TooFew, s -> TooFew
-      | Exact s_, s -> Exact (I.SClo (s_, s))
-      | TooMany (s_, s'_), s -> TooMany (I.SClo (s_, s), I.SClo (s'_, s))
+    let sclo' (a, s) = match a with
+      | TooFew -> TooFew
+      | Exact s_ -> Exact (I.SClo (s_, s))
+      | TooMany (s_, s'_) -> TooMany (I.SClo (s_, s), I.SClo (s'_, s))
 
-    let sclo'' = function
-      | TooFew, s -> TooFew
-      | Exact s_, s -> Exact s_
-      | TooMany (s_, s'_), s -> TooMany (s_, I.SClo (s'_, s))
+    let sclo'' (a, s) = match a with
+      | TooFew -> TooFew
+      | Exact s_ -> Exact s_
+      | TooMany (s_, s'_) -> TooMany (s_, I.SClo (s'_, s))
 
     let rec dropImp = function
       | 0, s_, 0 -> Exact s_
@@ -216,12 +216,12 @@ module MakePrint
       | I.Dec (None, _) -> Int.toString i
       end
 
-    let projName = function
-      | g_, I.Proj (I.Bidx k, i) ->
+    let projName (g_, a) = match a with
+      | I.Proj (I.Bidx k, i) ->
           let (I.BDec (Some bname, (cid, t))) = I.ctxLookup g_ k in
           (bname ^ "_") ^ parmName (cid, i)
-      | g_, I.Proj (I.LVar (r, _, (cid, t)), i) -> "_" ^ parmName (cid, i)
-      | g_, I.Proj (I.Inst iota, i) -> "*"
+      | I.Proj (I.LVar (r, _, (cid, t)), i) -> "_" ^ parmName (cid, i)
+      | I.Proj (I.Inst iota, i) -> "*"
 
     let constQid cid =
       begin if !noShadow then Names.conDecQid (I.sgnLookup cid)
@@ -241,25 +241,23 @@ module MakePrint
 
     let worldsToString w_ = F.makestring_fmt (formatWorlds w_)
 
-    let fmtCon = function
-      | g_, I.BVar n -> str0 (Symbol.bvar (Names.bvarName g_ n))
-      | g_, I.Const cid -> fmtConstPath (Symbol.const, constQid cid)
-      | g_, I.Skonst cid -> fmtConstPath (Symbol.skonst, constQid cid)
-      | g_, I.Def cid -> fmtConstPath (Symbol.def, constQid cid)
-      | g_, I.NSDef cid -> fmtConstPath (Symbol.def, constQid cid)
-      | g_, I.FVar (name, _, _) -> str0 (Symbol.fvar name)
-      | g_, (I.Proj (I.Bidx k, i) as h_) ->
+    let fmtCon (g_, a) = match a with
+      | I.BVar n -> str0 (Symbol.bvar (Names.bvarName g_ n))
+      | I.Const cid -> fmtConstPath (Symbol.const, constQid cid)
+      | I.Skonst cid -> fmtConstPath (Symbol.skonst, constQid cid)
+      | I.Def cid -> fmtConstPath (Symbol.def, constQid cid)
+      | I.NSDef cid -> fmtConstPath (Symbol.def, constQid cid)
+      | I.FVar (name, _, _) -> str0 (Symbol.fvar name)
+      | (I.Proj (I.Bidx k, i) as h_) ->
           str0 (Symbol.const (projName (g_, h_)))
-      | ( g_,
-          (I.Proj (I.LVar (({ contents = None } as r), sk, (cid, t)), i) as h_)
-        ) ->
+      | (I.Proj (I.LVar (({ contents = None } as r), sk, (cid, t)), i) as h_) ->
           let n = lookuplvar r in
           fmtConstPath
             ( (function
               | l0 ->
                   Symbol.const (((("#[" ^ l0) ^ n) ^ "]") ^ projName (g_, h_))),
               constQid cid )
-      | g_, I.FgnConst (cs, conDec) ->
+      | I.FgnConst (cs, conDec) ->
           let name = I.conDecName conDec in
           begin match (Names.constLookup (Names.Qid ([], name)), !noShadow) with
           | Some _, false -> str0 (Symbol.const (("%" ^ name) ^ "%"))
@@ -272,13 +270,13 @@ module MakePrint
     let evarArgs' (g_, d, x_, s) =
       OpArgs (FX.Nonfix, [ fmtAVar (g_, x_) ], subToSpine (I.ctxLength g_, s))
 
-    let rec fst = function
-      | I.App (u1_, _), s -> (u1_, s)
-      | I.SClo (s_, s'), s -> fst (s_, I.comp s' s)
+    let rec fst (a, s) = match a with
+      | I.App (u1_, _) -> (u1_, s)
+      | I.SClo (s_, s') -> fst (s_, I.comp s' s)
 
-    let rec snd = function
-      | I.App (u1_, s_), s -> fst (s_, s)
-      | I.SClo (s_, s'), s -> snd (s_, I.comp s' s)
+    let rec snd (a, s) = match a with
+      | I.App (u1_, s_) -> fst (s_, s)
+      | I.SClo (s_, s') -> snd (s_, I.comp s' s)
 
     let elide l =
       begin match !printLength with None -> false | Some l' -> l > l'
@@ -303,19 +301,19 @@ module MakePrint
       | FX.Postfix p, FX.Postfix p' -> p = p'
       | _ -> false
 
-    let addAccum = function
-      | fmt, _, [] -> fmt
-      | fmt, FX.Infix (_, FX.Left), accum -> F.hVbox ([ fmt ] @ accum)
-      | fmt, FX.Infix (_, FX.Right), accum -> F.hVbox (accum @ [ fmt ])
-      | fmt, FX.Prefix _, accum -> F.hVbox (accum @ [ fmt ])
-      | fmt, FX.Postfix _, accum -> F.hVbox ([ fmt ] @ accum)
+    let addAccum (fmt, a, accum) = match a, accum with
+      | _, [] -> fmt
+      | FX.Infix (_, FX.Left), accum -> F.hVbox ([ fmt ] @ accum)
+      | FX.Infix (_, FX.Right), accum -> F.hVbox (accum @ [ fmt ])
+      | FX.Prefix _, accum -> F.hVbox (accum @ [ fmt ])
+      | FX.Postfix _, accum -> F.hVbox ([ fmt ] @ accum)
 
     let aa (Ctxt (fixity, accum, l), fmt) = addAccum (fmt, fixity, accum)
     let fmtUni = function I.Type -> sym "type" | I.Kind -> sym "kind"
 
-    let rec fmtExpW = function
-      | g_, d, ctx, (I.Uni l_, s) -> aa (ctx, fmtUni l_)
-      | g_, d, ctx, (I.Pi (((I.Dec (name_opt, _) as d_), p_), v2_), s)
+    let rec fmtExpW (g_, d, ctx, a) = match a with
+      | (I.Uni l_, s) -> aa (ctx, fmtUni l_)
+      | (I.Pi (((I.Dec (name_opt, _) as d_), p_), v2_), s)
         when !Global.printArrowSugar
              && match (name_opt, p_) with None, I.No -> true | _ -> false ->
           let hops, gf, (uf, sf) =
@@ -346,7 +344,7 @@ module MakePrint
           let (Ctxt (fixity', accum, _l)) = ctx in
           addAccum
             (parens ((fixity', FX.Prefix binderPrec), whole), fixity', accum)
-      | g_, d, ctx, (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s) ->
+      | (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s) ->
           begin match p_ with
           | I.Maybe ->
               let d'_ = Names.decLUName g_ d_ in
@@ -363,14 +361,14 @@ module MakePrint
                   ctx,
                   (braces (g_, d, ((d'_, v2_), s)), I.dot1 s) )
           end
-      | g_, d, ctx, (I.Pi (((I.BDec _ as d_), p_), v2_), s) ->
+      | (I.Pi (((I.BDec _ as d_), p_), v2_), s) ->
           let d'_ = Names.decLUName g_ d_ in
           fmtLevel
             ( I.Decl (g_, d'_),
               d,
               ctx,
               (braces (g_, d, ((d'_, v2_), s)), I.dot1 s) )
-      | g_, d, ctx, (I.Pi (((I.ADec _ as d_), p_), v2_), s) ->
+      | (I.Pi (((I.ADec _ as d_), p_), v2_), s) ->
           let braces =
             OpArgs
               ( FX.Prefix binderPrec,
@@ -378,26 +376,26 @@ module MakePrint
                 IntSyn.App (v2_, IntSyn.Nil) )
           in
           fmtLevel (I.Decl (g_, d_), d, ctx, (braces, I.dot1 s))
-      | g_, d, ctx, ((I.Root (h_r_, sp_r_) as u_), s) ->
+      | ((I.Root (h_r_, sp_r_) as u_), s) ->
           fmtOpArgs (g_, d, ctx, opargs (g_, d, (h_r_, sp_r_)), s)
-      | g_, d, ctx, (I.Lam (d_, u_), s) ->
+      | (I.Lam (d_, u_), s) ->
           let d'_ = Names.decLUName g_ d_ in
           fmtLevel
             ( I.Decl (g_, d'_),
               d,
               ctx,
               (brackets (g_, d, ((d'_, u_), s)), I.dot1 s) )
-      | g_, d, ctx, ((I.EVar _ as x_), s) ->
+      | ((I.EVar _ as x_), s) ->
           begin if !implicit then
             aa (ctx, F.hVbox (fmtEVar (g_, x_) :: fmtSub (g_, d, s)))
           else fmtOpArgs (g_, d, ctx, evarArgs (g_, d, x_, s), I.id)
           end
-      | g_, d, ctx, ((I.AVar _ as x_), s) ->
+      | ((I.AVar _ as x_), s) ->
           begin if !implicit then
             aa (ctx, F.hVbox (fmtAVar (g_, x_) :: fmtSub (g_, d, s)))
           else fmtOpArgs (g_, d, ctx, evarArgs' (g_, d, x_, s), I.id)
           end
-      | g_, d, ctx, ((I.FgnExp (cs_fe, fe_fe) as u_), s) ->
+      | ((I.FgnExp (cs_fe, fe_fe) as u_), s) ->
           fmtExp
             (g_, d, ctx, (I.FgnExpStd.ToInternal.apply cs_fe fe_fe (), s))
 
@@ -437,12 +435,12 @@ module MakePrint
       else opargsExplicit (g_, d, r_)
       end
 
-    and fmtOpArgs = function
-      | g_, d, ctx, (OpArgs (_, opFmts, s'_) as oa), s ->
+    and fmtOpArgs (g_, d, ctx, a, s) = match a with
+      | (OpArgs (_, opFmts, s'_) as oa) ->
           begin if isNil s'_ then aa (ctx, List.hd opFmts)
           else fmtLevel (g_, d, ctx, (oa, s))
           end
-      | g_, d, ctx, EtaLong u'_, s -> fmtExpW (g_, d, ctx, (u'_, s))
+      | EtaLong u'_ -> fmtExpW (g_, d, ctx, (u'_, s))
 
     and fmtSub (g_, d, s) = str_ "[" :: fmtSub' (g_, d, 0, s)
 
@@ -450,13 +448,13 @@ module MakePrint
       begin if elide l then [ ldots ] else fmtSub'' (g_, d, l, s)
       end
 
-    and fmtSub'' = function
-      | g_, d, l, I.Shift k -> [ str_ ("^" ^ Int.toString k); str_ "]" ]
-      | g_, d, l, I.Dot (I.Idx k, s) ->
+    and fmtSub'' (g_, d, l, a) = match a with
+      | I.Shift k -> [ str_ ("^" ^ Int.toString k); str_ "]" ]
+      | I.Dot (I.Idx k, s) ->
           str_ (Names.bvarName g_ k)
           :: str_ "." :: F.break
           :: fmtSub' (g_, d, l + 1, s)
-      | g_, d, l, I.Dot (I.Exp u_, s) ->
+      | I.Dot (I.Exp u_, s) ->
           fmtExp (g_, d + 1, noCtxt, (u_, I.id))
           :: str_ "." :: F.break
           :: fmtSub' (g_, d, l + 1, s)
@@ -466,11 +464,11 @@ module MakePrint
       else fmtExpW (g_, d, ctx, Whnf.whnf (u_, s))
       end
 
-    and fmtSpine = function
-      | g_, d, l, (I.Nil, _) -> []
-      | g_, d, l, (I.SClo (s_, s'), s) ->
+    and fmtSpine (g_, d, l, a) = match a with
+      | (I.Nil, _) -> []
+      | (I.SClo (s_, s'), s) ->
           fmtSpine (g_, d, l, (s_, I.comp s' s))
-      | g_, d, l, (I.App (u_, s_), s) ->
+      | (I.App (u_, s_), s) ->
           begin if elide l then []
           else
             begin if addots l then [ ldots ]
@@ -480,26 +478,20 @@ module MakePrint
             end
           end
 
-    and fmtSpine' = function
-      | g_, d, l, (I.Nil, _) -> []
-      | g_, d, l, (I.SClo (s_, s'), s) ->
+    and fmtSpine' (g_, d, l, a) = match a with
+      | (I.Nil, _) -> []
+      | (I.SClo (s_, s'), s) ->
           fmtSpine' (g_, d, l, (s_, I.comp s' s))
-      | g_, d, l, (s_, s) -> F.break :: fmtSpine (g_, d, l + 1, (s_, s))
+      | (s_, s) -> F.break :: fmtSpine (g_, d, l + 1, (s_, s))
 
-    and fmtLevel = function
-      | ( g_,
-          d,
-          Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Nonfix as fixity), fmts, s_), s) ) ->
+    and fmtLevel (g_, d, a, b) = match a, b with
+      | Ctxt (fixity', accum, l), (OpArgs ((FX.Nonfix as fixity), fmts, s_), s) ->
           let atm = fmtSpine (g_, d, 0, (s_, s)) in
           addAccum
             ( parens ((fixity', fixity), F.hVbox (fmts @ [ F.break ] @ atm)),
               fixity',
               accum )
-      | ( g_,
-          d,
-          Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Infix (p, FX.Left) as fixity), fmts, s_), s) ) ->
+      | Ctxt (fixity', accum, l), (OpArgs ((FX.Infix (p, FX.Left) as fixity), fmts, s_), s) ->
           let accMore = eqFix (fixity, fixity') in
           let rhs =
             begin if accMore && elide l then []
@@ -523,10 +515,7 @@ module MakePrint
             let both = fmtExp (g_, d, Ctxt (fixity, rhs, 0), fst (s_, s)) in
             addAccum (parens ((fixity', fixity), both), fixity', accum)
           end
-      | ( g_,
-          d,
-          Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Infix (p, FX.Right) as fixity), fmts, s_), s) ) ->
+      | Ctxt (fixity', accum, l), (OpArgs ((FX.Infix (p, FX.Right) as fixity), fmts, s_), s) ->
           let accMore = eqFix (fixity, fixity') in
           let lhs =
             begin if accMore && elide l then []
@@ -547,20 +536,14 @@ module MakePrint
             let both = fmtExp (g_, d, Ctxt (fixity, lhs, 0), snd (s_, s)) in
             addAccum (parens ((fixity', fixity), both), fixity', accum)
           end
-      | ( g_,
-          d,
-          Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Infix (_, FX.None) as fixity), fmts, s_), s) ) ->
+      | Ctxt (fixity', accum, l), (OpArgs ((FX.Infix (_, FX.None) as fixity), fmts, s_), s) ->
           let lhs = fmtExp (g_, d + 1, Ctxt (fixity, [], 0), fst (s_, s)) in
           let rhs = fmtExp (g_, d + 1, Ctxt (fixity, [], 0), snd (s_, s)) in
           addAccum
             ( parens ((fixity', fixity), F.hVbox ([ lhs ] @ fmts @ [ rhs ])),
               fixity',
               accum )
-      | ( g_,
-          d,
-          Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Prefix _ as fixity), fmts, s_), s) ) ->
+      | Ctxt (fixity', accum, l), (OpArgs ((FX.Prefix _ as fixity), fmts, s_), s) ->
           let accMore = eqFix (fixity', fixity) in
           let pfx =
             begin if accMore && elide l then []
@@ -575,10 +558,7 @@ module MakePrint
             let whole = fmtExp (g_, d, Ctxt (fixity, pfx, 0), fst (s_, s)) in
             addAccum (parens ((fixity', fixity), whole), fixity', accum)
           end
-      | ( g_,
-          d,
-          Ctxt (fixity', accum, l),
-          (OpArgs ((FX.Postfix _ as fixity), fmts, s_), s) ) ->
+      | Ctxt (fixity', accum, l), (OpArgs ((FX.Postfix _ as fixity), fmts, s_), s) ->
           let accMore = eqFix (fixity', fixity) in
           let pfx =
             begin if accMore && elide l then []
@@ -625,50 +605,50 @@ module MakePrint
       | [ f ] -> [ f ]
       | f :: rest -> f :: F.break :: sym "%->" :: F.space :: joinArrowChain rest
 
-    and fmtDec = function
-      | g_, d, (I.Dec (x, v_), s) ->
+    and fmtDec (g_, d, a) = match a with
+      | (I.Dec (x, v_), s) ->
           F.hVbox
             [
               str0 (Symbol.bvar (nameOf x));
               F.space;
               fmtExp (g_, d + 1, noCtxt, (v_, s));
             ]
-      | g_, d, (I.BDec (x, (cid, t)), s) ->
+      | (I.BDec (x, (cid, t)), s) ->
           let gsome_, gblock_ = I.constBlock cid in
           F.hVbox
             ([ str0 (Symbol.const (nameOf x)); F.space ]
             @ fmtDecList' (g_, (gblock_, I.comp t s)))
-      | g_, d, (I.ADec (x, _), s) ->
+      | (I.ADec (x, _), s) ->
           F.hVbox [ str0 (Symbol.bvar (nameOf x)); sym "_" ]
-      | g_, d, (I.NDec (Some name), s) -> F.hVbox [ sym name ]
+      | (I.NDec (Some name), s) -> F.hVbox [ sym name ]
 
-    and fmtDecList' = function
-      | g0_, ([], s) -> []
-      | g0_, (d_ :: [], s) -> [ sym "{"; fmtDec (g0_, 0, (d_, s)); sym "}" ]
-      | g0_, (d_ :: l_, s) ->
+    and fmtDecList' (g0_, a) = match a with
+      | ([], s) -> []
+      | (d_ :: [], s) -> [ sym "{"; fmtDec (g0_, 0, (d_, s)); sym "}" ]
+      | (d_ :: l_, s) ->
           sym "{"
           :: fmtDec (g0_, 0, (d_, s))
           :: sym "}" :: F.break
           :: fmtDecList' (I.Decl (g0_, d_), (l_, I.dot1 s))
 
-    let rec skipI = function
-      | 0, g_, v_ -> (g_, v_)
-      | i, g_, I.Pi ((d_, _), v_) ->
+    let rec skipI (i, g_, a) = match i, a with
+      | 0, v_ -> (g_, v_)
+      | i, I.Pi ((d_, _), v_) ->
           skipI (i - 1, I.Decl (g_, Names.decEName g_ d_), v_)
 
-    let rec skipI2 = function
-      | 0, g_, v_, u_ -> (g_, v_, u_)
-      | i, g_, I.Pi ((d_, _), v_), I.Lam (d'_, u_) ->
+    let rec skipI2 (i, g_, a, b) = match i, a, b with
+      | 0, v_, u_ -> (g_, v_, u_)
+      | i, I.Pi ((d_, _), v_), I.Lam (d'_, u_) ->
           skipI2 (i - 1, I.Decl (g_, Names.decEName g_ d'_), v_, u_)
 
-    let rec ctxToDecList = function
-      | I.Null, l_ -> l_
-      | I.Decl (g_, d_), l_ -> ctxToDecList (g_, d_ :: l_)
+    let rec ctxToDecList (a, l_) = match a with
+      | I.Null -> l_
+      | I.Decl (g_, d_) -> ctxToDecList (g_, d_ :: l_)
 
-    let rec fmtDecList = function
-      | g0_, [] -> []
-      | g0_, d_ :: [] -> [ sym "{"; fmtDec (g0_, 0, (d_, I.id)); sym "}" ]
-      | g0_, d_ :: l_ ->
+    let rec fmtDecList (g0_, a) = match a with
+      | [] -> []
+      | d_ :: [] -> [ sym "{"; fmtDec (g0_, 0, (d_, I.id)); sym "}" ]
+      | d_ :: l_ ->
           sym "{"
           :: fmtDec (g0_, 0, (d_, I.id))
           :: sym "}" :: F.break
@@ -689,10 +669,10 @@ module MakePrint
       | _ -> [ fmtExp (g_, d, noCtxt, (v_, I.id)) ]
       end
 
-    let fmtBlock = function
-      | I.Null, lblock_ ->
+    let fmtBlock (gsome_, lblock_) = match gsome_ with
+      | I.Null ->
           [ sym "block"; F.break ] @ fmtDecList (I.Null, lblock_)
-      | gsome_, lblock_ ->
+      | gsome_ ->
           [
             F.hVbox ([ sym "some"; F.space ] @ fmtCtx (I.Null, gsome_));
             F.break;
@@ -700,8 +680,8 @@ module MakePrint
           ]
     (* Fix *)
 
-    let fmtConDec = function
-      | hide, (I.ConDec (_, _, imp, _, v_, l_) as condec) ->
+    let fmtConDec (hide, a) = match a with
+      | (I.ConDec (_, _, imp, _, v_, l_) as condec) ->
           let qid = Names.conDecQid condec in
           ignore (Names.varReset IntSyn.Null);
           let g_, v_ =
@@ -727,7 +707,7 @@ module MakePrint
                   vfmt;
                 ]
           end
-      | hide, (I.SkoDec (_, _, imp, v_, l_) as condec) ->
+      | (I.SkoDec (_, _, imp, v_, l_) as condec) ->
           let qid = Names.conDecQid condec in
           ignore (Names.varReset IntSyn.Null);
           let g_, v_ =
@@ -744,7 +724,7 @@ module MakePrint
               F.break;
               vfmt;
             ]
-      | hide, (I.BlockDec (_, _, gsome_, lblock_) as condec) ->
+      | (I.BlockDec (_, _, gsome_, lblock_) as condec) ->
           let qid = Names.conDecQid condec in
           ignore (Names.varReset IntSyn.Null);
           F.hVbox
@@ -757,7 +737,7 @@ module MakePrint
              ]
             @ fmtBlock (gsome_, lblock_)
             @ [ full_stop ])
-      | hide, (I.BlockDef (_, _, w_) as condec) ->
+      | (I.BlockDef (_, _, w_) as condec) ->
           let qid = Names.conDecQid condec in
           ignore (Names.varReset IntSyn.Null);
           F.hVbox
@@ -769,7 +749,7 @@ module MakePrint
                F.break;
              ]
             @ [ formatWorlds (T.Worlds w_); full_stop ])
-      | hide, (I.ConDef (_, _, imp, u_, v_, l_, _) as condec) ->
+      | (I.ConDef (_, _, imp, u_, v_, l_, _) as condec) ->
           let qid = Names.conDecQid condec in
           ignore (Names.varReset IntSyn.Null);
           let g_, v_, u_ =
@@ -790,7 +770,7 @@ module MakePrint
               F.space;
               ufmt;
             ]
-      | hide, (I.AbbrevDef (_, _, imp, u_, v_, l_) as condec) ->
+      | (I.AbbrevDef (_, _, imp, u_, v_, l_) as condec) ->
           let qid = Names.conDecQid condec in
           ignore (Names.varReset IntSyn.Null);
           let g_, v_, u_ =
@@ -846,12 +826,12 @@ module MakePrint
       | { contents = cnstr_ } :: cnstrL ->
           fmtCnstr cnstr_ @ [ str_ ";"; F.break ] @ fmtCnstrL cnstrL
 
-    let rec abstractLam = function
-      | I.Null, u_ -> u_
-      | I.Decl (g_, d_), u_ -> abstractLam (g_, I.Lam (d_, u_))
+    let rec abstractLam (a, u_) = match a with
+      | I.Null -> u_
+      | I.Decl (g_, d_) -> abstractLam (g_, I.Lam (d_, u_))
 
-    let fmtNamedEVar = function
-      | (I.EVar (_, g_, _, _) as u_), name ->
+    let fmtNamedEVar (a, name) = match a with
+      | (I.EVar (_, g_, _, _) as u_) ->
           let u'_ = abstractLam (g_, u_) in
           F.hVbox
             [
@@ -861,7 +841,7 @@ module MakePrint
               F.break;
               fmtExp (I.Null, 0, noCtxt, (u'_, I.id));
             ]
-      | u_, name ->
+      | u_ ->
           F.hVbox
             [
               str0 (Symbol.evar name);
@@ -877,16 +857,16 @@ module MakePrint
       | (u_, name) :: xs_ ->
           fmtNamedEVar (u_, name) :: str_ ";" :: F.break :: fmtEVarInst xs_
 
-    let rec collectEVars = function
-      | [], xs_ -> xs_
-      | (u_, _) :: xnames, xs_ ->
+    let rec collectEVars (a, xs_) = match a with
+      | [] -> xs_
+      | (u_, _) :: xnames ->
           collectEVars (xnames, Abstract.collectEVars I.Null (u_, I.id) xs_)
 
     let eqCnstr r1 r2 = r1 == r2
 
-    let rec mergeConstraints = function
-      | [], cnstrs2 -> cnstrs2
-      | cnstr :: cnstrs1, cnstrs2 ->
+    let rec mergeConstraints (a, cnstrs2) = match a with
+      | [] -> cnstrs2
+      | cnstr :: cnstrs1 ->
           begin if List.exists (eqCnstr cnstr) cnstrs2 then
             mergeConstraints (cnstrs1, cnstrs2)
           else cnstr :: mergeConstraints (cnstrs1, cnstrs2)

@@ -104,9 +104,9 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    let rec constCases = function
-      | g_, vs_, [], abstract, ops -> ops
-      | g_, vs_, (I.Const c as h_) :: sgn_, abstract, ops ->
+    let rec constCases (g_, vs_, a, abstract, ops) = match a with
+      | [] -> ops
+      | (I.Const c as h_) :: sgn_ ->
           let u_, vs'_ = M.createAtomConst g_ h_ in
           constCases
             ( g_,
@@ -122,7 +122,7 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
                      else ops
                      end
                    with MetaAbstract.Error _ -> InActive :: ops)) )
-      | g_, vs_, (I.Def c as h_) :: sgn_, abstract, ops ->
+      | (I.Def c as h_) :: sgn_ ->
           let u_, vs'_ = M.createAtomConst g_ h_ in
           constCases
             ( g_,
@@ -138,13 +138,13 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
                      else ops
                      end
                    with MetaAbstract.Error _ -> InActive :: ops)) )
-      | g_, vs_, _ :: sgn_, abstract, ops ->
+      | _ :: sgn_ ->
           (* Skip other head types *)
           constCases (g_, vs_, sgn_, abstract, ops)
 
-    let rec paramCases = function
-      | g_, vs_, 0, abstract, ops -> ops
-      | g_, vs_, k, abstract, ops ->
+    let rec paramCases (g_, vs_, k, abstract, ops) = match k with
+      | 0 -> ops
+      | k ->
           let u_, vs'_ = M.createAtomBVar g_ k in
           paramCases
             ( g_,
@@ -159,15 +159,15 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
                      end
                    with MetaAbstract.Error _ -> InActive :: ops)) )
 
-    let rec lowerSplitDest = function
-      | g_, ((I.Root (I.Const c, _) as v_), s'), abstract ->
+    let rec lowerSplitDest (g_, a, abstract) = match a with
+      | ((I.Root (I.Const c, _) as v_), s') ->
           constCases
             ( g_,
               (v_, s'),
               Index.lookup c,
               abstract,
               paramCases (g_, (v_, s'), I.ctxLength g_, abstract, []) )
-      | g_, (I.Pi ((d_, p_), v_), s'), abstract ->
+      | (I.Pi ((d_, p_), v_), s') ->
           let d'_ = I.decSub d_ s' in
           lowerSplitDest
             ( I.Decl (g_, d'_),
@@ -182,22 +182,22 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           | name', u'_ ->
               abstract (name', M.Prefix (g_, m_, b_), I.Dot (I.Exp u'_, s)) )
 
-    let rec occursInExp = function
-      | k, I.Uni _ -> false
-      | k, I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExp (k + 1, v_)
-      | k, I.Root (c_, s_) -> occursInCon (k, c_) || occursInSpine (k, s_)
-      | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
-      | k, I.FgnExp (csid_, fge) ->
+    let rec occursInExp (k, a) = match a with
+      | I.Uni _ -> false
+      | I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExp (k + 1, v_)
+      | I.Root (c_, s_) -> occursInCon (k, c_) || occursInSpine (k, s_)
+      | I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
+      | I.FgnExp (csid_, fge) ->
           I.FgnExpStd.fold csid_ fge
             (function
               | u_, b_ -> b_ || occursInExp (k, Whnf.normalize (u_, I.id)))
             false
 
-    and occursInCon = function
-      | k, I.BVar k' -> k = k'
-      | k, I.Const _ -> false
-      | k, I.Def _ -> false
-      | k, I.Skonst _ -> false
+    and occursInCon (k, a) = match a with
+      | I.BVar k' -> k = k'
+      | I.Const _ -> false
+      | I.Def _ -> false
+      | I.Skonst _ -> false
 
     and occursInSpine = function
       | _, I.Nil -> false
@@ -215,18 +215,18 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
       | I.Decl (m_, M.Bot), 1 -> false
       | I.Decl (m_, _), k -> checkVar (m_, k - 1)
 
-    let rec checkExp = function
-      | m_, I.Uni _ -> true
-      | m_, I.Pi ((d_, p_), v_) ->
+    let rec checkExp (m_, a) = match a with
+      | I.Uni _ -> true
+      | I.Pi ((d_, p_), v_) ->
           checkDec m_ d_ && checkExp (I.Decl (m_, M.Top), v_)
-      | m_, I.Lam (d_, v_) ->
+      | I.Lam (d_, v_) ->
           checkDec m_ d_ && checkExp (I.Decl (m_, M.Top), v_)
-      | m_, I.Root (I.BVar k, s_) -> checkVar (m_, k) && checkSpine (m_, s_)
-      | m_, I.Root (_, s_) -> checkSpine (m_, s_)
+      | I.Root (I.BVar k, s_) -> checkVar (m_, k) && checkSpine (m_, s_)
+      | I.Root (_, s_) -> checkSpine (m_, s_)
 
-    and checkSpine = function
-      | m_, I.Nil -> true
-      | m_, I.App (u_, s_) -> checkExp (m_, u_) && checkSpine (m_, s_)
+    and checkSpine (m_, a) = match a with
+      | I.Nil -> true
+      | I.App (u_, s_) -> checkExp (m_, u_) && checkSpine (m_, s_)
 
     and checkDec m_ (I.Dec (_, v_)) = checkExp (m_, v_)
 
@@ -237,49 +237,49 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           true
       | _ -> false
 
-    let rec inheritBelow = function
-      | b', k', I.Lam (d'_, u'_), bdd' ->
+    let rec inheritBelow (b', k', a, bdd') = match a, bdd' with
+      | I.Lam (d'_, u'_), bdd' ->
           inheritBelow (b', k' + 1, u'_, inheritBelowDec (b', k', d'_, bdd'))
-      | b', k', I.Pi ((d'_, _), v'_), bdd' ->
+      | I.Pi ((d'_, _), v'_), bdd' ->
           inheritBelow (b', k' + 1, v'_, inheritBelowDec (b', k', d'_, bdd'))
-      | b', k', I.Root (I.BVar n', s'_), (b'_, d, d') ->
+      | I.Root (I.BVar n', s'_), (b'_, d, d') ->
           begin if n' = k' + d' && n' > k' then
             inheritBelowSpine (b', k', s'_, (I.Decl (b'_, b'), d, d' - 1))
           else inheritBelowSpine (b', k', s'_, (b'_, d, d'))
           end
-      | b', k', I.Root (c_, s'_), bdd' -> inheritBelowSpine (b', k', s'_, bdd')
+      | I.Root (c_, s'_), bdd' -> inheritBelowSpine (b', k', s'_, bdd')
 
-    and inheritBelowSpine = function
-      | b', k', I.Nil, bdd' -> bdd'
-      | b', k', I.App (u'_, s'_), bdd' ->
+    and inheritBelowSpine (b', k', a, bdd') = match a with
+      | I.Nil -> bdd'
+      | I.App (u'_, s'_) ->
           inheritBelowSpine (b', k', s'_, inheritBelow (b', k', u'_, bdd'))
 
     and inheritBelowDec (b', k', I.Dec (x, v'_), bdd') =
       inheritBelow (b', k', v'_, bdd')
 
-    let rec skip = function
-      | k, I.Lam (d_, u_), bdd' -> skip (k + 1, u_, skipDec (k, d_, bdd'))
-      | k, I.Pi ((d_, _), v_), bdd' -> skip (k + 1, v_, skipDec (k, d_, bdd'))
-      | k, I.Root (I.BVar n, s_), (b'_, d, d') ->
+    let rec skip (k, a, bdd') = match a, bdd' with
+      | I.Lam (d_, u_), bdd' -> skip (k + 1, u_, skipDec (k, d_, bdd'))
+      | I.Pi ((d_, _), v_), bdd' -> skip (k + 1, v_, skipDec (k, d_, bdd'))
+      | I.Root (I.BVar n, s_), (b'_, d, d') ->
           begin if n = k + d && n > k then skipSpine (k, s_, (b'_, d - 1, d'))
           else skipSpine (k, s_, (b'_, d, d'))
           end
-      | k, I.Root (c_, s_), bdd' -> skipSpine (k, s_, bdd')
+      | I.Root (c_, s_), bdd' -> skipSpine (k, s_, bdd')
 
-    and skipSpine = function
-      | k, I.Nil, bdd' -> bdd'
-      | k, I.App (u_, s_), bdd' -> skipSpine (k, s_, skip (k, u_, bdd'))
+    and skipSpine (k, a, bdd') = match a with
+      | I.Nil -> bdd'
+      | I.App (u_, s_) -> skipSpine (k, s_, skip (k, u_, bdd'))
 
     and skipDec (k, I.Dec (x, v_), bdd') = skip (k, v_, bdd')
 
-    let rec inheritExp = function
-      | b_, k, I.Lam (d_, u_), k', I.Lam (d'_, u'_), bdd' ->
+    let rec inheritExp (b_, k, a, k', b, bdd') = match a, b, bdd' with
+      | I.Lam (d_, u_), I.Lam (d'_, u'_), bdd' ->
           inheritExp
             (b_, k + 1, u_, k' + 1, u'_, inheritDec (b_, k, d_, k', d'_, bdd'))
-      | b_, k, I.Pi ((d_, _), v_), k', I.Pi ((d'_, _), v'_), bdd' ->
+      | I.Pi ((d_, _), v_), I.Pi ((d'_, _), v'_), bdd' ->
           inheritExp
             (b_, k + 1, v_, k' + 1, v'_, inheritDec (b_, k, d_, k', d'_, bdd'))
-      | b_, k, (I.Root (I.BVar n, s_) as v_), k', v'_, (b'_, d, d') ->
+      | (I.Root (I.BVar n, s_) as v_), v'_, (b'_, d, d') ->
           begin if n = k + d && n > k then
             skipSpine
               ( k,
@@ -298,40 +298,29 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               inheritSpine (b_, k, s_, k', s'_, (b'_, d, d'))
             end
           end
-      | b_, k, I.Root (c_, s_), k', I.Root (c'_, s'_), bdd' ->
+      | I.Root (c_, s_), I.Root (c'_, s'_), bdd' ->
           inheritSpine (b_, k, s_, k', s'_, bdd')
 
-    and inheritNewRoot = function
-      | ( b_,
-          b,
-          k,
-          I.Root (I.BVar n, s_),
-          k',
-          (I.Root (I.BVar n', s'_) as v'_),
-          (b'_, d, d') ) ->
+    and inheritNewRoot (b_, b, k, v_, k', a, c) = match v_, a, c with
+      | I.Root (I.BVar n, s_), (I.Root (I.BVar n', s'_) as v'_), (b'_, d, d') ->
           begin if n' = k' + d' && n' > k' then
             inheritBelow (b, k', v'_, (b'_, d - 1, d'))
           else inheritBelow (b - 1, k', v'_, (b'_, d - 1, d'))
           end
-      | b_, b, k, v_, k', v'_, (b'_, d, d') ->
+      | v_, v'_, (b'_, d, d') ->
           inheritBelow (b - 1, k', v'_, (b'_, d - 1, d'))
 
-    and inheritSpine = function
-      | b_, k, I.Nil, k', I.Nil, bdd' -> bdd'
-      | b_, k, I.App (u_, s_), k', I.App (u'_, s'_), bdd' ->
+    and inheritSpine (b_, k, a, k', b, bdd') = match a, b with
+      | I.Nil, I.Nil -> bdd'
+      | I.App (u_, s_), I.App (u'_, s'_) ->
           inheritSpine
             (b_, k, s_, k', s'_, inheritExp (b_, k, u_, k', u'_, bdd'))
 
     and inheritDec (b_, k, I.Dec (_, v_), k', I.Dec (_, v'_), bdd') =
       inheritExp (b_, k, v_, k', v'_, bdd')
 
-    let rec inheritDTop = function
-      | ( b_,
-          k,
-          I.Pi ((I.Dec (_, v1_), I.No), v2_),
-          k',
-          I.Pi ((I.Dec (_, v1'), I.No), v2'),
-          bdd' ) ->
+    let rec inheritDTop (b_, k, a, k', b, bdd') = match a, b with
+      | I.Pi ((I.Dec (_, v1_), I.No), v2_), I.Pi ((I.Dec (_, v1'), I.No), v2') ->
           inheritG
             ( b_,
               k,
@@ -339,24 +328,14 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
               k',
               v1',
               inheritDTop (b_, k + 1, v2_, k' + 1, v2', bdd') )
-      | ( b_,
-          k,
-          (I.Root (I.Const cid, s_) as v_),
-          k',
-          (I.Root (I.Const cid', s'_) as v'_),
-          bdd' ) ->
+      | (I.Root (I.Const cid, s_) as v_), (I.Root (I.Const cid', s'_) as v'_) ->
           let mS = valOf (ModeTable.modeLookup cid) in
           inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd')
 
-    and inheritDBot = function
-      | ( b_,
-          k,
-          I.Pi ((I.Dec (_, v1_), I.No), v2_),
-          k',
-          I.Pi ((I.Dec (_, v1'), I.No), v2'),
-          bdd' ) ->
+    and inheritDBot (b_, k, a, k', b, bdd') = match a, b with
+      | I.Pi ((I.Dec (_, v1_), I.No), v2_), I.Pi ((I.Dec (_, v1'), I.No), v2') ->
           inheritDBot (b_, k + 1, v2_, k' + 1, v2', bdd')
-      | b_, k, I.Root (I.Const cid, s_), k', I.Root (I.Const cid', s'_), bdd' ->
+      | I.Root (I.Const cid, s_), I.Root (I.Const cid', s'_) ->
           let mS = valOf (ModeTable.modeLookup cid) in
           inheritSpineMode (M.Bot, mS, b_, k, s_, k', s'_, bdd')
 
@@ -378,16 +357,9 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
           s'_,
           inheritSpineMode (M.Top, mS, b_, k, s_, k', s'_, bdd') )
 
-    and inheritSpineMode = function
-      | mode, Modes.Modesyn.ModeSyn.Mnil, b_, k, I.Nil, k', I.Nil, bdd' -> bdd'
-      | ( mode,
-          Modes.Modesyn.ModeSyn.Mapp (m, mS),
-          b_,
-          k,
-          I.App (u_, s_),
-          k',
-          I.App (u'_, s'_),
-          bdd' ) ->
+    and inheritSpineMode (mode, a, b_, k, b, k', c, bdd') = match a, b, c with
+      | Modes.Modesyn.ModeSyn.Mnil, I.Nil, I.Nil -> bdd'
+      | Modes.Modesyn.ModeSyn.Mapp (m, mS), I.App (u_, s_), I.App (u'_, s'_) ->
           begin if modeEq (m, mode) then
             inheritSpineMode
               ( mode,
@@ -435,14 +407,11 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
     let makeAddressInit s_ k = (s_, k)
     let makeAddressCont makeAddress k = makeAddress (k + 1)
 
-    let rec expand' = function
-      | M.Prefix (I.Null, I.Null, I.Null), isIndex, abstract, makeAddress ->
+    let rec expand' (a, isIndex, abstract, makeAddress) = match a with
+      | M.Prefix (I.Null, I.Null, I.Null) ->
           (M.Prefix (I.Null, I.Null, I.Null), I.id, [])
-      | ( M.Prefix
-            (I.Decl (g_, d_), I.Decl (m_, (M.Top as mode)), I.Decl (b_, b)),
-          isIndex,
-          abstract,
-          makeAddress ) ->
+      | M.Prefix
+            (I.Decl (g_, d_), I.Decl (m_, (M.Top as mode)), I.Decl (b_, b)) ->
           let M.Prefix (g'_, m'_, b'_), s', ops =
             expand'
               ( M.Prefix (g_, m_, b_),
@@ -461,11 +430,8 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
             end
           in
           (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'), ops')
-      | ( M.Prefix
-            (I.Decl (g_, d_), I.Decl (m_, (M.Bot as mode)), I.Decl (b_, b)),
-          isIndex,
-          abstract,
-          makeAddress ) ->
+      | M.Prefix
+            (I.Decl (g_, d_), I.Decl (m_, (M.Bot as mode)), I.Decl (b_, b)) ->
           let M.Prefix (g'_, m'_, b'_), s', ops =
             expand'
               ( M.Prefix (g_, m_, b_),
@@ -500,15 +466,15 @@ end) : SPLITTING.SPLITTING with module MetaSyn = Splitting__0.MetaSyn' = struct
         sl_
 
     let menu (((M.State (name, M.Prefix (g_, m_, b_), v_), i), sl_) as op_) =
-      let rec active = function
-        | [], n -> n
-        | InActive :: l_, n -> active (l_, n)
-        | Active _ :: l_, n -> active (l_, n + 1)
+      let rec active (a, n) = match a with
+        | [] -> n
+        | InActive :: l_ -> active (l_, n)
+        | Active _ :: l_ -> active (l_, n + 1)
       in
-      let rec inactive = function
-        | [], n -> n
-        | InActive :: l_, n -> inactive (l_, n + 1)
-        | Active _ :: l_, n -> inactive (l_, n)
+      let rec inactive (a, n) = match a with
+        | [] -> n
+        | InActive :: l_ -> inactive (l_, n + 1)
+        | Active _ :: l_ -> inactive (l_, n)
       in
       let indexToString = function
         | 0 -> "zero cases"

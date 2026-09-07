@@ -136,9 +136,9 @@ module RBSet : RBSET = struct
       in
       Set (!nItems, dict')
 
-    let rec insertList = function
-      | s_, [] -> s_
-      | s_, e :: list -> insertList (insert s_ e, list)
+    let rec insertList (s_, a) = match a with
+      | [] -> s_
+      | e :: list -> insertList (insert s_ e, list)
 
     let insertLast (Set (n, dict), datum) =
       let (Set (n', dic')) = insert (Set (n, dict)) (n + 1, datum) in
@@ -262,10 +262,10 @@ module RBSet : RBSET = struct
       | (Black (_, _, b) as t) :: rest -> (t, left (b, rest))
       | _ -> (Empty, [])
 
-    and left = function
-      | Empty, rest -> rest
-      | (Red (_, a, _) as t), rest -> left (a, t :: rest)
-      | (Black (_, a, _) as t), rest -> left (a, t :: rest)
+    and left (b, rest) = match b with
+      | Empty -> rest
+      | (Red (_, a, _) as t) -> left (a, t :: rest)
+      | (Black (_, a, _) as t) -> left (a, t :: rest)
 
     let start m = left (m, [])
 
@@ -294,11 +294,11 @@ module RBSet : RBSET = struct
     let getEntry = function Red (x, _, _) -> x | Black (x, _, _) -> x
 
     let union (Set (n1, s1), Set (n2, s2)) =
-      let rec ins = function
-        | (Empty, _), n, result -> (n, result)
-        | (Red (x, _, _), r), n, result ->
+      let rec ins (a, n, result) = match a with
+        | (Empty, _) -> (n, result)
+        | (Red (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
-        | (Black (x, _, _), r), n, result ->
+        | (Black (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
       in
       let rec union' (t1, t2, n, result) =
@@ -346,11 +346,11 @@ module RBSet : RBSET = struct
       Set (n, linkAll result)
 
     let difference (Set (_, s1), Set (_, s2)) =
-      let rec ins = function
-        | (Empty, _), n, result -> (n, result)
-        | (Red (x, _, _), r), n, result ->
+      let rec ins (a, n, result) = match a with
+        | (Empty, _) -> (n, result)
+        | (Red (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
-        | (Black (x, _, _), r), n, result ->
+        | (Black (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
       in
       let rec diff (t1, t2, n, result) =
@@ -371,11 +371,11 @@ module RBSet : RBSET = struct
       Set (n, linkAll result)
 
     let difference2 (Set (_, s1), Set (_, s2)) =
-      let rec ins = function
-        | (Empty, _), n, result -> (n, result)
-        | (Red (x, _, _), r), n, result ->
+      let rec ins (a, n, result) = match a with
+        | (Empty, _) -> (n, result)
+        | (Red (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
-        | (Black (x, _, _), r), n, result ->
+        | (Black (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
       in
       let rec diff (t1, t2, (n1, result1), (n2, result2)) =
@@ -400,11 +400,11 @@ module RBSet : RBSET = struct
       (Set (n1, linkAll result1), Set (n2, linkAll result2))
 
     let diffMod f_ (Set (_, s1), Set (_, s2)) =
-      let rec ins = function
-        | (Empty, _), n, result -> (n, result)
-        | (Red (x, _, _), r), n, result ->
+      let rec ins (a, n, result) = match a with
+        | (Empty, _) -> (n, result)
+        | (Red (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
-        | (Black (x, _, _), r), n, result ->
+        | (Black (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
       in
       let rec diff (t1, t2, (n1, result1), (n2, result2)) =
@@ -432,11 +432,11 @@ module RBSet : RBSET = struct
       (Set (n1, linkAll result1), Set (n2, linkAll result2))
 
     let splitSets f_ (Set (_, s1), Set (_, s2)) =
-      let rec ins = function
-        | (Empty, _), n, result -> (n, result)
-        | (Red (x, _, _), r), n, result ->
+      let rec ins (a, n, result) = match a with
+        | (Empty, _) -> (n, result)
+        | (Red (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
-        | (Black (x, _, _), r), n, result ->
+        | (Black (x, _, _), r) ->
             ins (next r, n + 1, addItem (x, result))
       in
       let rec split

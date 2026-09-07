@@ -117,10 +117,10 @@ module MakeCompile
 
   fun etaSpine (S, n) = etaSpine' (S, n) handle Eta => false
 *)
-  let rec etaSpine = function
-    | I.Nil, n -> n = 0
-    | I.App (I.Root (I.BVar k, I.Nil), s_), n -> k = n && etaSpine (s_, n - 1)
-    | I.App (a_, s_), n -> false
+  let rec etaSpine (a, n) = match a with
+    | I.Nil -> n = 0
+    | I.App (I.Root (I.BVar k, I.Nil), s_) -> k = n && etaSpine (s_, n - 1)
+    | I.App (a_, s_) -> false
 
   (* collectHead (h, K, Vars, depth) = (K', Vars', replaced)
      adds to K and Vars as in collectExp and collectSpine
@@ -149,23 +149,23 @@ module MakeCompile
 
       for each new variable (d, k-d) for depth wrt locally bound variables
    *)
-  let rec collectSpine = function
-    | I.Nil, k_, vars_, depth -> (k_, vars_)
-    | I.App (u_, s_), k_, vars_, depth ->
+  let rec collectSpine (a, k_, vars_, depth) = match a with
+    | I.Nil -> (k_, vars_)
+    | I.App (u_, s_) ->
         let k'_, vars' = collectExp (u_, k_, vars_, depth) in
         collectSpine (s_, k'_, vars', depth)
 
-  and collectExp = function
-    | I.Root ((I.BVar k as h), s_), k_, vars_, depth ->
+  and collectExp (a, k_, vars_, depth) = match a with
+    | I.Root ((I.BVar k as h), s_) ->
         let k'_, vars', replaced = collectHead (h, s_, k_, vars_, depth) in
         begin if replaced then (k'_, vars')
         else collectSpine (s_, k'_, vars', depth)
         end
-    | (I.Root (I.Def k, s_) as u_), k_, vars_, depth ->
+    | (I.Root (I.Def k, s_) as u_) ->
         ((depth, Def k) :: k_, vars_)
-    | I.Root (h, s_), k_, vars_, depth -> collectSpine (s_, k_, vars_, depth)
-    | I.Lam (d_, u_), k_, vars_, depth -> collectExp (u_, k_, vars_, depth + 1)
-    | I.FgnExp (cs, fe), k_, vars_, depth -> ((depth, Fgn) :: k_, vars_)
+    | I.Root (h, s_) -> collectSpine (s_, k_, vars_, depth)
+    | I.Lam (d_, u_) -> collectExp (u_, k_, vars_, depth + 1)
+    | I.FgnExp (cs, fe) -> ((depth, Fgn) :: k_, vars_)
 
   (* don't collect D, since it is ignored in unification *)
   (* | collectExp (I.Uni(L), K, Vars, depth) = (K, Vars) *)
@@ -181,15 +181,15 @@ module MakeCompile
 
      Invariants: U is NF, S is in NF
   *)
-  let shiftHead = function
-    | (I.BVar k as h), depth, total ->
+  let shiftHead (a, depth, total) = match a with
+    | (I.BVar k as h) ->
         begin if k > depth then I.BVar (k + total) else I.BVar k
         end
-    | (I.Const k as h), depth, total -> h
-    | (I.Def k as h), depth, total -> h
-    | (I.NSDef k as h), depth, total -> h
-    | (I.FgnConst _ as h), depth, total -> h
-    | (I.Skonst k as h), depth, total -> h
+    | (I.Const k as h) -> h
+    | (I.Def k as h) -> h
+    | (I.NSDef k as h) -> h
+    | (I.FgnConst _ as h) -> h
+    | (I.Skonst k as h) -> h
 
   let rec shiftExp = function
     | I.Root (h, s_), depth, total ->
@@ -229,8 +229,8 @@ module MakeCompile
    and
       Eqn accumulates residual equation UnifyEq(Gl, M, N)
   *)
-  let linearHead = function
-    | g_, (I.BVar k as h), s_, left, vars_, depth, total ->
+  let linearHead (g_, a, s_, left, vars_, depth, total) = match a with
+    | (I.BVar k as h) ->
         begin if k > depth then
           begin if etaSpine (s_, depth) then
             begin if seen (k - depth, vars_) then
@@ -241,11 +241,11 @@ module MakeCompile
           end
         else (left, vars_, h, false)
         end
-    | g_, (I.Const k as h), s_, left, vars_, depth, total ->
+    | (I.Const k as h) ->
         (left, vars_, h, false)
-    | g_, (I.FgnConst (k, conDec_) as h), s_, left, vars_, depth, total ->
+    | (I.FgnConst (k, conDec_) as h) ->
         (left, vars_, h, false)
-    | g_, (I.Skonst k as h), s_, left, vars_, depth, total ->
+    | (I.Skonst k as h) ->
         (left, vars_, h, false)
   (*
      | linearHead(G, (h as I.NSDef k), s, S, left, Vars, depth, total) =
@@ -264,13 +264,13 @@ module MakeCompile
 
      ""For any U', U = U' iff (N = U' and Eqn)""
   *)
-  let rec linearExp = function
-    | gl_, (I.Root ((I.Def k as h), s_) as u_), left, vars_, depth, total, eqns
+  let rec linearExp (gl_, a, left, vars_, depth, total, eqns) = match a with
+    | (I.Root ((I.Def k as h), s_) as u_)
       ->
         let n_ = I.Root (I.BVar (left + depth), I.Nil) in
         let u'_ = shiftExp (u_, depth, total) in
         (left - 1, vars_, n_, C.UnifyEq (gl_, u'_, n_, eqns))
-    | gl_, (I.Root (h, s_) as u_), left, vars_, depth, total, eqns ->
+    | (I.Root (h, s_) as u_) ->
         let left', vars', h', replaced =
           linearHead (gl_, h, s_, left, vars_, depth, total)
         in
@@ -285,13 +285,13 @@ module MakeCompile
           (left'', vars'', I.Root (h', s'_), eqns')
         end
         (* h = h' not replaced *)
-    | gl_, I.Lam (d_, u_), left, vars_, depth, total, eqns ->
+    | I.Lam (d_, u_) ->
         let d'_ = shiftDec (d_, depth, total) in
         let left', vars', u'_, eqns' =
           linearExp (I.Decl (gl_, d'_), u_, left, vars_, depth + 1, total, eqns)
         in
         (left', vars', I.Lam (d'_, u'_), eqns')
-    | gl_, (I.FgnExp (cs, ops) as u_), left, vars_, depth, total, eqns ->
+    | (I.FgnExp (cs, ops) as u_) ->
         let n_ = I.Root (I.BVar (left + depth), I.Nil) in
         let u'_ = shiftExp (u_, depth, total) in
         (left - 1, vars_, n_, C.UnifyEq (gl_, u'_, n_, eqns))
@@ -301,9 +301,9 @@ module MakeCompile
      *)
 
   (* should be impossible  Mon Apr 15 14:54:42 2002 -fp *)
-  and linearSpine = function
-    | gl_, I.Nil, left, vars_, depth, total, eqns -> (left, vars_, I.Nil, eqns)
-    | gl_, I.App (u_, s_), left, vars_, depth, total, eqns ->
+  and linearSpine (gl_, a, left, vars_, depth, total, eqns) = match a with
+    | I.Nil -> (left, vars_, I.Nil, eqns)
+    | I.App (u_, s_) ->
         let left', vars', u'_, eqns' =
           linearExp (gl_, u_, left, vars_, depth, total, eqns)
         in
@@ -330,9 +330,9 @@ module MakeCompile
     let left', _, r'_, eqs_ =
       linearExp (I.Null, r_, left, [], 0, left, C.Trivial)
     in
-    let rec convertKRes = function
-      | resG, [], 0 -> resG
-      | resG, (d, k) :: k_, i ->
+    let rec convertKRes (resG, a, i) = match a, i with
+      | [], 0 -> resG
+      | (d, k) :: k_, i ->
           C.Axists
             ( I.ADec (Some ("A" ^ Int.toString i), d),
               convertKRes (resG, k_, i - 1) )
@@ -358,9 +358,9 @@ module MakeCompile
     let left', _, h'_, eqs_ =
       linearExp (I.Null, h_, left, [], 0, left, C.Trivial)
     in
-    let rec convertKRes = function
-      | g_, [], 0 -> g_
-      | g_, (d, k) :: k_, i ->
+    let rec convertKRes (g_, a, i) = match a, i with
+      | [], 0 -> g_
+      | (d, k) :: k_, i ->
           convertKRes
             (I.Decl (g_, I.ADec (Some ("AVar " ^ Int.toString i), d)), k_, i - 1)
     in

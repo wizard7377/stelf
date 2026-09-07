@@ -80,13 +80,13 @@ end) : ABSMACHINE = struct
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
 
-    let rec compose = function
-      | g_, I.Null -> g_
-      | g_, IntSyn.Decl (g'_, d_) -> IntSyn.Decl (compose (g_, g'_), d_)
+    let rec compose (g_, a) = match a with
+      | I.Null -> g_
+      | IntSyn.Decl (g'_, d_) -> IntSyn.Decl (compose (g_, g'_), d_)
 
-    let rec shiftSub = function
-      | I.Null, s -> s
-      | IntSyn.Decl (g_, d_), s -> I.dot1 (shiftSub (g_, s))
+    let rec shiftSub (a, s) = match a with
+      | I.Null -> s
+      | IntSyn.Decl (g_, d_) -> I.dot1 (shiftSub (g_, s))
 
     let rec raiseType a1 b1 = match a1, b1 with
       | I.Null, v_ -> v_
@@ -104,17 +104,17 @@ end) : ABSMACHINE = struct
           solve
             (g, I.dot1 s) (C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter))) (function m_ -> sc (I.Lam (d'_, m_)))
 
-    and rSolve = function
-      | ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
+    and rSolve (ps', a, b, sc) = match a, b with
+      | (C.Eq q_, s), C.DProg (g_, dPool) ->
           begin if Unify.unifiable g_ (q_, s) ps' then sc I.Nil else ()
           end
-      | ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc ->
+      | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           begin match Assign.assignable g_ ps' (q_, s) with
           | Some cnstr ->
               aSolve ((eqns, s), dp, cnstr, function () -> sc I.Nil)
           | None -> ()
           end
-      | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
+      | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
@@ -122,7 +122,7 @@ end) : ABSMACHINE = struct
               dp,
               function
               | s_ -> solve (g, s) dp (function m_ -> sc (I.App (m_, s_))) )
-      | ps', (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp), sc
+      | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp)
         ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
@@ -130,13 +130,13 @@ end) : ABSMACHINE = struct
               (r, I.Dot (I.Exp x_, s)),
               dp,
               function s_ -> sc (I.App (x_, s_)) )
-      | ps', (C.Axists (I.ADec (_, d), r), s), (C.DProg (g_, dPool) as dp), sc
+      | (C.Axists (I.ADec (_, d), r), s), (C.DProg (g_, dPool) as dp)
         ->
           let x'_ = I.newAVar () in
           rSolve
             (ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
       (* C.In is like C.And but for meta-level ("virtual") dependencies *)
-      | ps', (C.In (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
+      | (C.In (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
@@ -145,14 +145,11 @@ end) : ABSMACHINE = struct
               function
               | s_ -> solve (g, s) dp (function m_ -> sc (I.App (m_, s_))) )
 
-    and aSolve = function
-      | (C.Trivial, s), dp, cnstr, sc ->
+    and aSolve (a, b, cnstr, sc) = match a, b with
+      | (C.Trivial, s), dp ->
           begin if Assign.solveCnstr cnstr then sc () else ()
           end
-      | ( (C.UnifyEq (g'_, e1, n_, eqns), s),
-          (C.DProg (g_, dPool) as dp),
-          cnstr,
-          sc ) ->
+      | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           let g''_ = compose (g_, g'_) in
           let s' = shiftSub (g'_, s) in
           begin if Assign.unifiable g''_ (n_, s') (e1, s') then

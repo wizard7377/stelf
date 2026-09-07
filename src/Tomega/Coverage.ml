@@ -73,9 +73,9 @@ module MakeTomegaCoverage
 
     let chatter chlev f = Display.chatter_s chlev ("[coverage] " ^ f ())
 
-    let rec purifyFor = function
-      | (T.Unit, t), (psi, T.True), s -> (t, psi, s)
-      | (T.PairExp (u_, p_), t), (psi, T.Ex ((d_, _), f_)), s ->
+    let rec purifyFor (a, b, s) = match a, b with
+      | (T.Unit, t), (psi, T.True) -> (t, psi, s)
+      | (T.PairExp (u_, p_), t), (psi, T.Ex ((d_, _), f_)) ->
           purifyFor
             ( (p_, T.Dot (T.Exp u_, t)),
               (I.Decl (psi, T.UDec d_), f_),
@@ -134,18 +134,18 @@ module MakeTomegaCoverage
         end
       | w_, psi, T.Redex (p_, s_) -> coverageCheckSpine (w_, psi, s_)
 
-    and coverageCheckSpine = function
-      | w_, psi, T.Nil -> ()
-      | w_, psi, T.AppExp (u_, s_) -> coverageCheckSpine (w_, psi, s_)
-      | w_, psi, T.AppBlock (b_, s_) -> coverageCheckSpine (w_, psi, s_)
-      | w_, psi, T.AppPrg (p_, s_) -> begin
+    and coverageCheckSpine (w_, psi, a) = match a with
+      | T.Nil -> ()
+      | T.AppExp (u_, s_) -> coverageCheckSpine (w_, psi, s_)
+      | T.AppBlock (b_, s_) -> coverageCheckSpine (w_, psi, s_)
+      | T.AppPrg (p_, s_) -> begin
           coverageCheckPrg w_ psi p_;
           coverageCheckSpine (w_, psi, s_)
         end
 
-    and coverageCheckCases = function
-      | w_, psi, [], [] -> ()
-      | w_, psi, [], cs_ ->
+    and coverageCheckCases (w_, psi, a, cs_) = match a, cs_ with
+      | [], [] -> ()
+      | [], cs_ ->
           ignore (chatter 5 (function () ->
                 Int.toString (List.length cs_) ^ " cases to be checked\n"));
           let ((_, _, psi') :: _ as cs'_) = map purify cs_ in
@@ -155,7 +155,7 @@ module MakeTomegaCoverage
               cs'_
           in
           Cover.coverageCheckCases w_ cs''_ (T.coerceCtx psi')
-      | w_, psi, (psi', t, p_) :: omega_, cs_ -> begin
+      | (psi', t, p_) :: omega_, cs_ -> begin
           coverageCheckPrg w_ psi' p_;
           coverageCheckCases (w_, psi, omega_, (psi', t, psi) :: cs_)
         end

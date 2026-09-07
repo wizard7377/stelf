@@ -727,8 +727,8 @@ end) : Cs.CS = struct
       Array.app killColumn (tableau.clabels, 0, nCols ());
       Array.app killRow (tableau.rlabels, 0, nRows ())
 
-    and restrict = function
-      | (Col col as pos), restr ->
+    and restrict (a, restr) = match a with
+      | (Col col as pos) ->
           let l = label pos in
           begin if dead l then unifyRestr (restr, geq00 ())
           else
@@ -763,7 +763,7 @@ end) : Cs.CS = struct
                 end
             end
           end
-      | (Row row as pos), restr ->
+      | (Row row as pos) ->
           let l = label pos in
           begin if dead l then unifyRestr (restr, geqN0 (const row))
           else
@@ -999,13 +999,13 @@ end) : Cs.CS = struct
     let mark () = Trail.mark tableau.trail
     let unwind () = Trail.unwind tableau.trail undo
 
-    let rec fst = function
-      | App (u1_, _), s -> (u1_, s)
-      | SClo (s_, s'), s -> fst (s_, comp s' s)
+    let rec fst (a, s) = match a with
+      | App (u1_, _) -> (u1_, s)
+      | SClo (s_, s') -> fst (s_, comp s' s)
 
-    let rec snd = function
-      | App (_u1_, s_), s -> fst (s_, s)
-      | SClo (s_, s'), s -> snd (s_, comp s' s)
+    let rec snd (a, s) = match a with
+      | App (_u1_, s_) -> fst (s_, s)
+      | SClo (s_, s') -> snd (s_, comp s' s)
 
     let isConstantExp u_ =
       begin match fromExp (u_, id) with Sum (m, []) -> Some m | _ -> None

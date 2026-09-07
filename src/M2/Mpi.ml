@@ -169,17 +169,17 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       | c :: [] -> I.conDecName (I.sgnLookup c)
       | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
 
-    let rec splittingToMenu = function
-      | [], a_ -> a_
-      | o_ :: l_, a_ -> splittingToMenu (l_, Splitting o_ :: a_)
+    let rec splittingToMenu (a, a_) = match a with
+      | [] -> a_
+      | o_ :: l_ -> splittingToMenu (l_, Splitting o_ :: a_)
 
-    let rec fillingToMenu = function
-      | [], a_ -> a_
-      | o_ :: l_, a_ -> fillingToMenu (l_, Filling o_ :: a_)
+    let rec fillingToMenu (a, a_) = match a with
+      | [] -> a_
+      | o_ :: l_ -> fillingToMenu (l_, Filling o_ :: a_)
 
-    let rec recursionToMenu = function
-      | [], a_ -> a_
-      | o_ :: l_, a_ -> recursionToMenu (l_, Recursion o_ :: a_)
+    let rec recursionToMenu (a, a_) = match a with
+      | [] -> a_
+      | o_ :: l_ -> recursionToMenu (l_, Recursion o_ :: a_)
 
     let menu () =
       begin if empty () then menu_ := None
@@ -202,13 +202,13 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       end
 
     let menuToString () =
-      let rec menuToString' = function
-        | k, [] -> ""
-        | k, Splitting o_ :: m_ ->
+      let rec menuToString' (k, a) = match a with
+        | [] -> ""
+        | Splitting o_ :: m_ ->
             ((menuToString' (k + 1, m_) ^ "\n") ^ format k) ^ Splitting.menu o_
-        | k, Filling o_ :: m_ ->
+        | Filling o_ :: m_ ->
             ((menuToString' (k + 1, m_) ^ "\n") ^ format k) ^ Filling.menu o_
-        | k, Recursion o_ :: m_ ->
+        | Recursion o_ :: m_ ->
             ((menuToString' (k + 1, m_) ^ "\n") ^ format k) ^ Recursion.menu o_
       in
       begin match !menu_ with
@@ -217,9 +217,9 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       end
 
     let makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
-      let rec makeConDec' = function
-        | I.Null, v_, k -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
-        | I.Decl (g_, d_), v_, k ->
+      let rec makeConDec' (a, v_, k) = match a with
+        | I.Null -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
+        | I.Decl (g_, d_) ->
             makeConDec' (g_, I.Pi ((d_, I.Maybe), v_), k + 1)
       in
       makeConDec' (g_, v_, 0)

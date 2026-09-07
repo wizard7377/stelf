@@ -93,22 +93,12 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
     let rec operators (g_, ge, vs_, abstractAll, abstractEx, makeAddress) =
       operatorsW (g_, ge, Whnf.whnf vs_, abstractAll, abstractEx, makeAddress)
 
-    and operatorsW = function
-      | ( g_,
-          ge,
-          ((I.Root (c_, s_), _) as vs_),
-          abstractAll,
-          abstractEx,
-          makeAddress ) ->
+    and operatorsW (g_, ge, a, abstractAll, abstractEx, makeAddress) = match a with
+      | ((I.Root (c_, s_), _) as vs_) ->
           ( [],
             (makeAddress 0, delay Search.searchEx (g_, ge, vs_, abstractEx))
           )
-      | ( g_,
-          ge,
-          (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s),
-          abstractAll,
-          abstractEx,
-          makeAddress ) ->
+      | (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s) ->
           let go', o_ =
             operators
               ( I.Decl (g_, I.decSub d_ s),
@@ -165,10 +155,10 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
     let apply (_, f) = f ()
 
     let menu ((M.State (name, M.Prefix (g_, m_, b_), v_), k), sl_) =
-      let rec toString = function
-        | g_, I.Pi ((I.Dec (_, v_), _), _), 0 -> Print.expToString g_ v_
-        | g_, (I.Root _ as v_), 0 -> Print.expToString g_ v_
-        | g_, I.Pi ((d_, _), v_), k -> toString (I.Decl (g_, d_), v_, k - 1)
+      let rec toString (g_, a, k) = match a, k with
+        | I.Pi ((I.Dec (_, v_), _), _), 0 -> Print.expToString g_ v_
+        | (I.Root _ as v_), 0 -> Print.expToString g_ v_
+        | I.Pi ((d_, _), v_), k -> toString (I.Decl (g_, d_), v_, k - 1)
       in
       "Filling   : " ^ toString (g_, v_, k)
   end

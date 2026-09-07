@@ -107,10 +107,10 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
     let postfixOp (prec, tm) =
       Postfix (prec, function tm1 -> ExtSyn.app tm tm1)
 
-    let idToTerm = function
-      | L.Lower, ids, name, r -> ExtSyn.lcid ids name r
-      | L.Upper, ids, name, r -> ExtSyn.ucid ids name r
-      | L.Quoted, ids, name, r -> ExtSyn.quid ids name r
+    let idToTerm (a, ids, name, r) = match a with
+      | L.Lower -> ExtSyn.lcid ids name r
+      | L.Upper -> ExtSyn.ucid ids name r
+      | L.Quoted -> ExtSyn.quid ids name r
 
     let isQuoted = function L.Quoted -> true | _ -> false
 
@@ -226,14 +226,14 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected `|', found token " ^ L.toString t)
 
-    let rec parseQualIds1 = function
-      | ls, (LS.Cons (((L.Id (_, id) as t), r0), s') as f) ->
+    let rec parseQualIds1 (ls, a) = match a with
+      | (LS.Cons (((L.Id (_, id) as t), r0), s') as f) ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
           let r = Paths.join r0 r1 in
           let f'' = stripBar f' in
           parseQualIds1 ((ids, name) :: ls, f'')
-      | ls, LS.Cons ((L.Rparen, r), s') -> (ls, LS.expose s')
-      | ls, LS.Cons ((t, r), s) ->
+      | LS.Cons ((L.Rparen, r), s') -> (ls, LS.expose s')
+      | LS.Cons ((t, r), s) ->
           Parsing.error r ("Expected label, found token " ^ L.toString t)
 
     let parseQualIds' = function
@@ -247,11 +247,11 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected closing `)', found " ^ L.toString t)
 
-    let parseSubordPair2 = function
-      | (LS.Cons ((L.Id _, _), _) as f), qid ->
+    let parseSubordPair2 (a, qid) = match a with
+      | (LS.Cons ((L.Id _, _), _) as f) ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
           ((qid, (ids, name)), stripRParen f')
-      | LS.Cons ((t, r), s'), qid ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
     let parseSubordPair1 = function
@@ -261,45 +261,45 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
-    let rec parseSubord' = function
-      | LS.Cons ((L.Lparen, r), s'), qidpairs ->
+    let rec parseSubord' (b, qidpairs) = match b with
+      | LS.Cons ((L.Lparen, r), s') ->
           let qidpair, f = parseSubordPair1 (LS.expose s') in
           parseSubord' (f, qidpair :: qidpairs)
-      | (LS.Cons ((L.Dot, _), _) as f), qidpairs -> (List.rev qidpairs, f)
-      | LS.Cons ((t, r), s'), qidpairs ->
+      | (LS.Cons ((L.Dot, _), _) as f) -> (List.rev qidpairs, f)
+      | LS.Cons ((t, r), s') ->
           Parsing.error
             r ("Expected a pair of identifiers, found token " ^ L.toString t)
 
-    let rec parseFreeze' = function
-      | (LS.Cons ((L.Id _, _), _) as f), qids ->
+    let rec parseFreeze' (a, qids) = match a with
+      | (LS.Cons ((L.Id _, _), _) as f) ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
           parseFreeze' (f', (ids, name) :: qids)
-      | (LS.Cons ((L.Dot, _), _) as f), qids -> (List.rev qids, f)
-      | LS.Cons ((t, r), s'), qids ->
+      | (LS.Cons ((L.Dot, _), _) as f) -> (List.rev qids, f)
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
     let parseThaw' (f, qids) = parseFreeze' (f, qids)
 
-    let rec parseDeterministic' = function
-      | (LS.Cons ((L.Id _, _), _) as f), qids ->
+    let rec parseDeterministic' (a, qids) = match a with
+      | (LS.Cons ((L.Id _, _), _) as f) ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
           parseDeterministic' (f', (ids, name) :: qids)
-      | (LS.Cons ((L.Dot, _), _) as f), qids -> (List.rev qids, f)
-      | LS.Cons ((t, r), s'), qids ->
+      | (LS.Cons ((L.Dot, _), _) as f) -> (List.rev qids, f)
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
-    let rec parseCompile' = function
-      | (LS.Cons ((L.Id _, _), _) as f), qids ->
+    let rec parseCompile' (a, qids) = match a with
+      | (LS.Cons ((L.Id _, _), _) as f) ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
           parseCompile' (f', (ids, name) :: qids)
-      | (LS.Cons ((L.Dot, _), _) as f), qids -> (List.rev qids, f)
-      | LS.Cons ((t, r), s'), qids ->
+      | (LS.Cons ((L.Dot, _), _) as f) -> (List.rev qids, f)
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected identifier, found token " ^ L.toString t)
 
     let rec parseExp (s, p) = parseExp' (LS.expose s, p)
 
-    and parseExp' = function
-      | (LS.Cons ((L.Id _, r0), _) as f), p ->
+    and parseExp' (a, p) = match a with
+      | (LS.Cons ((L.Id _, r0), _) as f) ->
           let (ids, (L.Id (idCase, name), r1)), f' = parseQualId' f in
           let r = Paths.join r0 r1 in
           let tm = idToTerm (idCase, ids, name, r) in
@@ -315,28 +315,28 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
                 parseExp' (f', P.resolve r (postfixOp (prec, tm)) p)
             end
           end
-      | LS.Cons ((L.Underscore, r), s), p ->
+      | LS.Cons ((L.Underscore, r), s) ->
           parseExp (s, P.shiftAtom (ExtSyn.omitted r) p)
-      | LS.Cons ((L.Type, r), s), p ->
+      | LS.Cons ((L.Type, r), s) ->
           parseExp (s, P.shiftAtom (ExtSyn.typ r) p)
-      | LS.Cons ((L.Colon, r), s), p -> parseExp (s, P.resolve r colonOp p)
-      | LS.Cons ((L.Backarrow, r), s), p ->
+      | LS.Cons ((L.Colon, r), s) -> parseExp (s, P.resolve r colonOp p)
+      | LS.Cons ((L.Backarrow, r), s) ->
           parseExp (s, P.resolve r backArrowOp p)
-      | LS.Cons ((L.Arrow, r), s), p -> parseExp (s, P.resolve r arrowOp p)
-      | LS.Cons ((L.Lparen, r), s), p -> decideRParen (r, parseExp (s, []), p)
-      | (LS.Cons ((L.Rparen, r), s) as f), p -> (P.reduceAll r p, f)
-      | LS.Cons ((L.Lbrace, r), s), p -> decideRBrace (r, parseDec s, p)
-      | (LS.Cons ((L.Rbrace, r), s) as f), p -> (P.reduceAll r p, f)
-      | LS.Cons ((L.Lbracket, r), s), p -> decideRBracket (r, parseDec s, p)
-      | (LS.Cons ((L.Rbracket, r), s) as f), p -> (P.reduceAll r p, f)
-      | (LS.Cons ((L.Equal, r), s) as f), p -> (P.reduceAll r p, f)
-      | (LS.Cons ((L.Dot, r), s) as f), p -> (P.reduceAll r p, f)
-      | (LS.Cons ((L.Eof, r), s) as f), p -> (P.reduceAll r p, f)
-      | (LS.Cons ((L.Solve, r), s) as f), p -> (P.reduceAll r p, f)
-      | (LS.Cons ((L.Define, r), s) as f), p -> (P.reduceAll r p, f)
-      | LS.Cons ((L.String str, r), s), p ->
+      | LS.Cons ((L.Arrow, r), s) -> parseExp (s, P.resolve r arrowOp p)
+      | LS.Cons ((L.Lparen, r), s) -> decideRParen (r, parseExp (s, []), p)
+      | (LS.Cons ((L.Rparen, r), s) as f) -> (P.reduceAll r p, f)
+      | LS.Cons ((L.Lbrace, r), s) -> decideRBrace (r, parseDec s, p)
+      | (LS.Cons ((L.Rbrace, r), s) as f) -> (P.reduceAll r p, f)
+      | LS.Cons ((L.Lbracket, r), s) -> decideRBracket (r, parseDec s, p)
+      | (LS.Cons ((L.Rbracket, r), s) as f) -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Equal, r), s) as f) -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Dot, r), s) as f) -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Eof, r), s) as f) -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Solve, r), s) as f) -> (P.reduceAll r p, f)
+      | (LS.Cons ((L.Define, r), s) as f) -> (P.reduceAll r p, f)
+      | LS.Cons ((L.String str, r), s) ->
           parseExp (s, P.shiftAtom (ExtSyn.scon str r) p)
-      | LS.Cons ((t, r), s), p ->
+      | LS.Cons ((t, r), s) ->
           Parsing.error
             r (("Unexpected token " ^ L.toString t) ^ " found in expression")
 
@@ -362,24 +362,24 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           Parsing.error
             r ("Expected variable name, found token " ^ L.toString t)
 
-    and parseDec1 = function
-      | x, LS.Cons ((L.Colon, r), s') ->
+    and parseDec1 (x, a) = match a with
+      | LS.Cons ((L.Colon, r), s') ->
           let tm, f'' = parseExp (s', []) in
           ((x, Some tm), f'')
-      | x, (LS.Cons ((L.Rbrace, _), _) as f) -> ((x, None), f)
-      | x, (LS.Cons ((L.Rbracket, _), _) as f) -> ((x, None), f)
-      | x, LS.Cons ((t, r), s') ->
+      | (LS.Cons ((L.Rbrace, _), _) as f) -> ((x, None), f)
+      | (LS.Cons ((L.Rbracket, _), _) as f) -> ((x, None), f)
+      | LS.Cons ((t, r), s') ->
           Parsing.error
             r ("Expected optional type declaration, found token " ^ L.toString t)
 
-    and decideRParen = function
-      | r0, (tm, LS.Cons ((L.Rparen, r), s)), p ->
+    and decideRParen (r0, a, p) = match a with
+      | (tm, LS.Cons ((L.Rparen, r), s)) ->
           parseExp (s, P.shiftAtom tm p)
-      | r0, (tm, LS.Cons ((_, r), s)), p ->
+      | (tm, LS.Cons ((_, r), s)) ->
           Parsing.error (Paths.join r0 r) ("Unmatched open parenthesis")
 
-    and decideRBrace = function
-      | r0, ((x, yOpt), LS.Cons ((L.Rbrace, r), s)), p ->
+    and decideRBrace (r0, a, p) = match a with
+      | ((x, yOpt), LS.Cons ((L.Rbrace, r), s)) ->
           let dec =
             begin match yOpt with
             | None -> ExtSyn.dec0 x (Paths.join r0 r)
@@ -388,11 +388,11 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           in
           let tm, f' = parseExp (s, []) in
           parseExp' (f', P.shiftAtom (ExtSyn.pi dec tm) p)
-      | r0, (dec, LS.Cons ((_, r), s)), p ->
+      | (dec, LS.Cons ((_, r), s)) ->
           Parsing.error (Paths.join r0 r) ("Unmatched open brace")
 
-    and decideRBracket = function
-      | r0, ((x, yOpt), LS.Cons ((L.Rbracket, r), s)), p ->
+    and decideRBracket (r0, a, p) = match a with
+      | ((x, yOpt), LS.Cons ((L.Rbracket, r), s)) ->
           let dec =
             begin match yOpt with
             | None -> ExtSyn.dec0 x (Paths.join r0 r)
@@ -401,7 +401,7 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
           in
           let tm, f' = parseExp (s, []) in
           parseExp' (f', P.shiftAtom (ExtSyn.lam dec tm) p)
-      | r0, (dec, LS.Cons ((_, r), s)), p ->
+      | (dec, LS.Cons ((_, r), s)) ->
           Parsing.error (Paths.join r0 r) ("Unmatched open bracket")
 
     let rec stripRBrace = function
@@ -420,11 +420,11 @@ end) : PARSE_TERM with module ExtSyn = ParseTerm__0.ExtSyn' = struct
       in
       (d, f'')
 
-    let rec parseCtx = function
-      | b, ds, (LS.Cons ((L.Lbrace, r), s') as _bs) ->
+    let rec parseCtx (b, ds, a) = match a with
+      | (LS.Cons ((L.Lbrace, r), s') as _bs) ->
           let d, f' = parseBracedDec (r, LS.expose s') in
           parseCtx (false, d :: ds, f')
-      | b, ds, (LS.Cons ((t, r), s') as f) ->
+      | (LS.Cons ((t, r), s') as f) ->
           begin if b then
             Parsing.error r ("Expected `{', found " ^ L.toString t)
           else (ds, f)

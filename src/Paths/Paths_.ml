@@ -143,12 +143,12 @@ module MakePaths () : PATHS = struct
   (* u;s *)
   (* nil *)
   (* occToPath (occ, p) = p'(p) and occ corresponds to p' *)
-  let rec occToPath = function
-    | Top_, path -> path
-    | Label_ occ, path -> occToPath (occ, Label path)
-    | Body_ occ, path -> occToPath (occ, Body path)
-    | Head_ occ, path -> occToPath (occ, Head)
-    | Arg_ (n, occ), path -> occToPath (occ, Arg (n, path))
+  let rec occToPath (a, path) = match a with
+    | Top_ -> path
+    | Label_ occ -> occToPath (occ, Label path)
+    | Body_ occ -> occToPath (occ, Body path)
+    | Head_ occ -> occToPath (occ, Head)
+    | Arg_ (n, occ) -> occToPath (occ, Arg (n, path))
   (* path = Here by invariant *)
 
   type occConDec = Dec_ of int * occExp | Def_ of int * occExp * occExp option
@@ -194,9 +194,9 @@ module MakePaths () : PATHS = struct
             end
           end
     (* check? mark? *)
-    and toPathSpine = function
-      | Nils, n -> None
-      | App_ (u, s), n ->
+    and toPathSpine (a, n) = match a with
+      | Nils -> None
+      | App_ (u, s) ->
           begin if inside u then Some (n, toPath u) else toPathSpine (s, n + 1)
           end
     in
@@ -238,9 +238,9 @@ module MakePaths () : PATHS = struct
         end
     | Leaf_ r, _ -> r
 
-  and pathToRegionSpine = function
-    | App_ (u, s), 1, path -> pathToRegion (u, path)
-    | App_ (u, s), n, path -> pathToRegionSpine (s, n - 1, path)
+  and pathToRegionSpine (a, n, path) = match a, n with
+    | App_ (u, s), 1 -> pathToRegion (u, path)
+    | App_ (u, s), n -> pathToRegionSpine (s, n - 1, path)
 
   (* possible if leaf was _ (underscore) *)
   (* other combinations should be impossible *)

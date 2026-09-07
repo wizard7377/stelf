@@ -109,16 +109,16 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
           Parsing.error r ("Expected mode `+', `-', `*', or `-1'  found " ^ id)
       end
 
-    let validateMArg = function
-      | r, ((mode, Some id) as mId) ->
+    let validateMArg (r, a) = match a with
+      | ((mode, Some id) as mId) ->
           begin if L.isUpper id then mId
           else Parsing.error r ("Expected free uppercase variable, found " ^ id)
           end
-      | r, (_, None) -> Parsing.error r ("Missing variable following mode")
+      | (_, None) -> Parsing.error r ("Missing variable following mode")
 
-    let validateMode = function
-      | r, (mode, None) -> mode
-      | r, (_, Some id) ->
+    let validateMode (r, a) = match a with
+      | (mode, None) -> mode
+      | (_, Some id) ->
           Parsing.error
             r ("Expected simple mode, found mode followed by identifier " ^ id)
 
@@ -199,9 +199,9 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
       | LS.Cons ((t, r), _) ->
           Parsing.error r ("Expected identifier or mode, found " ^ L.toString t)
 
-    and parseModeNext = function
-      | modedec, (LS.Cons ((L.Dot, _), s') as f) -> ([ modedec ], f)
-      | modedec, f ->
+    and parseModeNext (modedec, a) = match a with
+      | (LS.Cons ((L.Dot, _), s') as f) -> ([ modedec ], f)
+      | f ->
           let mdecs, f' = parseMode1 f in
           (modedec :: mdecs, f')
 

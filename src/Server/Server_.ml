@@ -73,9 +73,9 @@ module Server : SERVER = struct
 
   (* Command argument types *)
   (* File names, given a default *)
-  let get_file = function
-    | "", default -> default
-    | fileName, default -> fileName
+  let get_file (fileName, default) = match fileName with
+    | "" -> default
+    | fileName -> fileName
 
   (* File names, not defaults *)
   let get_file_required = function
@@ -289,209 +289,209 @@ module Server : SERVER = struct
      See http://www.Cs.cmu.edu/~stelf/guide-1-4/ for more information,\n\
      or type M-x stelf-info (C-c C-h) in Emacs.\n"
 
-  let rec serve' = function
-    | "set", args -> begin
+  let rec serve' (t, args) = match t with
+    | "set" -> begin
         set_parm (tokenize args);
         serve Stelf.Ok
       end
-    | "get", args -> begin
+    | "get" -> begin
         print (get_parm (tokenize args) ^ "\n");
         serve Stelf.Ok
       end
-    | "Style.check", args -> begin
+    | "Style.check" -> begin
         check_empty args;
         begin
           ();
           serve Stelf.Ok
         end
       end
-    | "Print.sgn", args -> begin
+    | "Print.sgn" -> begin
         check_empty args;
         begin
           Stelf.Print.sgn ();
           serve Stelf.Ok
         end
       end
-    | "Print.prog", args -> begin
+    | "Print.prog" -> begin
         check_empty args;
         begin
           Stelf.Print.prog ();
           serve Stelf.Ok
         end
       end
-    | "Print.subord", args -> begin
+    | "Print.subord" -> begin
         check_empty args;
         begin
           Stelf.Print.subord ();
           serve Stelf.Ok
         end
       end
-    | "Print.domains", args -> begin
+    | "Print.domains" -> begin
         check_empty args;
         begin
           Stelf.Print.domains ();
           serve Stelf.Ok
         end
       end
-    | "Print.TeX.sgn", args -> begin
+    | "Print.TeX.sgn" -> begin
         check_empty args;
         begin
           Stelf.Print.TeX.sgn ();
           serve Stelf.Ok
         end
       end
-    | "Print.TeX.prog", args -> begin
+    | "Print.TeX.prog" -> begin
         check_empty args;
         begin
           Stelf.Print.TeX.prog ();
           serve Stelf.Ok
         end
       end
-    | "Trace.trace", args -> begin
+    | "Trace.trace" -> begin
         Stelf.Trace.trace (Stelf.Trace.Some (get_ids (tokenize args)));
         serve Stelf.Ok
       end
-    | "Trace.traceAll", args -> begin
+    | "Trace.traceAll" -> begin
         check_empty args;
         begin
           Stelf.Trace.trace Stelf.Trace.All;
           serve Stelf.Ok
         end
       end
-    | "Trace.untrace", args -> begin
+    | "Trace.untrace" -> begin
         check_empty args;
         begin
           Stelf.Trace.trace Stelf.Trace.None;
           serve Stelf.Ok
         end
       end
-    | "Trace.break", args -> begin
+    | "Trace.break" -> begin
         Stelf.Trace.break (Stelf.Trace.Some (get_ids (tokenize args)));
         serve Stelf.Ok
       end
-    | "Trace.breakAll", args -> begin
+    | "Trace.breakAll" -> begin
         check_empty args;
         begin
           Stelf.Trace.break Stelf.Trace.All;
           serve Stelf.Ok
         end
       end
-    | "Trace.unbreak", args -> begin
+    | "Trace.unbreak" -> begin
         check_empty args;
         begin
           Stelf.Trace.break Stelf.Trace.None;
           serve Stelf.Ok
         end
       end
-    | "Trace.show", args -> begin
+    | "Trace.show" -> begin
         check_empty args;
         begin
           Stelf.Trace.show ();
           serve Stelf.Ok
         end
       end
-    | "Trace.reset", args -> begin
+    | "Trace.reset" -> begin
         check_empty args;
         begin
           Stelf.Trace.reset ();
           serve Stelf.Ok
         end
       end
-    | "Timers.show", args -> begin
+    | "Timers.show" -> begin
         check_empty args;
         begin
           Stelf.Timers.show ();
           serve Stelf.Ok
         end
       end
-    | "Timers.reset", args -> begin
+    | "Timers.reset" -> begin
         check_empty args;
         begin
           Stelf.Timers.reset ();
           serve Stelf.Ok
         end
       end
-    | "Timers.check", args -> begin
+    | "Timers.check" -> begin
         check_empty args;
         begin
           Stelf.Timers.check ();
           serve Stelf.Ok
         end
       end
-    | "OS.chDir", args -> begin
+    | "OS.chDir" -> begin
         Stelf.OS.chDir (get_file_required args);
         serve Stelf.Ok
       end
-    | "OS.getDir", args -> begin
+    | "OS.getDir" -> begin
         check_empty args;
         begin
           print (Stelf.OS.getDir () ^ "\n");
           serve Stelf.Ok
         end
       end
-    | "OS.exit", args -> begin
+    | "OS.exit" -> begin
         check_empty args;
         ()
       end
-    | "quit", args -> ()
-    | "Config.read", args ->
+    | "quit" -> ()
+    | "Config.read" ->
         let fileName = get_file (args, "sources.cfg") in
         globalConfig := Some (Stelf.Config.read fileName);
         serve Stelf.Ok
-    | "Config.load", args -> begin
+    | "Config.load" -> begin
         begin match !globalConfig with
         | None -> globalConfig := Some (Stelf.Config.read "sources.cfg")
         | _ -> ()
         end;
         serve (Stelf.Config.load (valOf !globalConfig))
       end
-    | "Config.append", args -> begin
+    | "Config.append" -> begin
         begin match !globalConfig with
         | None -> globalConfig := Some (Stelf.Config.read "sources.cfg")
         | _ -> ()
         end;
         serve (Stelf.Config.append (valOf !globalConfig))
       end
-    | "make", args ->
+    | "make" ->
         let fileName = get_file (args, "sources.cfg") in
         globalConfig := Some (Stelf.Config.read fileName);
         serve (Stelf.Config.load (valOf !globalConfig))
-    | "reset", args -> begin
+    | "reset" -> begin
         check_empty args;
         begin
           Stelf.reset ();
           serve Stelf.Ok
         end
       end
-    | "loadFile", args -> serve (Stelf.loadFile (get_file_required args))
-    | "readDecl", args -> begin
+    | "loadFile" -> serve (Stelf.loadFile (get_file_required args))
+    | "readDecl" -> begin
         check_empty args;
         serve (Stelf.readDecl ())
       end
-    | "decl", args -> serve (Stelf.decl (get_id (tokenize args)))
-    | "top", args -> begin
+    | "decl" -> serve (Stelf.decl (get_id (tokenize args)))
+    | "top" -> begin
         check_empty args;
         begin
           Stelf.top ();
           serve Stelf.Ok
         end
       end
-    | "Table.top", args -> begin
+    | "Table.top" -> begin
         check_empty args;
         begin
           Stelf.Table.top ();
           serve Stelf.Ok
         end
       end
-    | "version", args -> begin
+    | "version" -> begin
         print (Stelf.version ^ "\n");
         serve Stelf.Ok
       end
-    | "help", args -> begin
+    | "help" -> begin
         print helpString;
         serve Stelf.Ok
       end
-    | t, args -> error ("Unrecognized command " ^ quote t)
+    | t -> error ("Unrecognized command " ^ quote t)
 
   and serveLine () = serve' (readLine ())
 

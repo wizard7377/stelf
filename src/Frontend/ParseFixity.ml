@@ -98,17 +98,17 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
       else prec
       end
 
-    let parseFixCon = function
-      | fixity, LS.Cons ((L.Id (_, name), r), s') ->
+    let parseFixCon (fixity, a) = match a with
+      | LS.Cons ((L.Id (_, name), r), s') ->
           (((Names.Qid ([], name), r), fixity), LS.expose s')
-      | fixity, LS.Cons ((t, r), s') ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error
             r ("Expected identifier to assign fixity, found " ^ L.toString t)
 
-    let parseFixPrec = function
-      | fixity, LS.Cons ((L.Id (id_case, name), r), s') ->
+    let parseFixPrec (fixity, a) = match a with
+      | LS.Cons ((L.Id (id_case, name), r), s') ->
           parseFixCon (fixity (idToPrec (r, (id_case, name))), LS.expose s')
-      | fixity, LS.Cons ((t, r), s') ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected precedence, found " ^ L.toString t)
 
     let parseInfix = function
@@ -133,49 +133,49 @@ end) : PARSE_FIXITY with module Names = ParseFixity__0.Names' = struct
 
     let parseFixity s = parseFixity' (LS.expose s)
 
-    let rec parseName5 = function
-      | name, r0, prefENames, prefUNames, LS.Cons ((L.Id (_, prefUName), r), s')
+    let rec parseName5 (name, r0, prefENames, prefUNames, a) = match a with
+      | LS.Cons ((L.Id (_, prefUName), r), s')
         ->
           parseName5
             (name, r0, prefENames, prefUNames @ [ prefUName ], LS.expose s')
-      | name, r0, prefENames, prefUNames, LS.Cons ((L.Rparen, r), s') ->
+      | LS.Cons ((L.Rparen, r), s') ->
           (((Names.Qid ([], name), r0), (prefENames, prefUNames)), LS.expose s')
-      | name, r0, prefENames, prefUNames, LS.Cons ((t, r), s') ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r
             ("Expected name preference or ')', found " ^ L.toString t)
 
-    let parseName3 = function
-      | name, r0, prefEName, LS.Cons ((L.Id (_, prefUName), r), s') ->
+    let parseName3 (name, r0, prefEName, f) = match f with
+      | LS.Cons ((L.Id (_, prefUName), r), s') ->
           ( ((Names.Qid ([], name), r0), (prefEName, [ prefUName ])),
             LS.expose s' )
-      | name, r0, prefEName, LS.Cons ((L.Lparen, r), s') ->
+      | LS.Cons ((L.Lparen, r), s') ->
           parseName5 (name, r0, prefEName, [], LS.expose s')
-      | name, r0, prefEName, f ->
+      | f ->
           (((Names.Qid ([], name), r0), (prefEName, [])), f)
 
-    let rec parseName4 = function
-      | name, r0, prefENames, LS.Cons ((L.Id (_, prefEName), r), s') ->
+    let rec parseName4 (name, r0, prefENames, a) = match a with
+      | LS.Cons ((L.Id (_, prefEName), r), s') ->
           begin if L.isUpper prefEName then
             parseName4 (name, r0, prefENames @ [ prefEName ], LS.expose s')
           else
             Parsing.error r ("Expected uppercase identifer, found " ^ prefEName)
           end
-      | name, r0, prefENames, LS.Cons ((L.Rparen, r), s') ->
+      | LS.Cons ((L.Rparen, r), s') ->
           parseName3 (name, r0, prefENames, LS.expose s')
-      | name, r0, prefENames, LS.Cons ((t, r), s') ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r
             ("Expected name preference or ')', found " ^ L.toString t)
 
-    let parseName2 = function
-      | name, r0, LS.Cons ((L.Id (_, prefEName), r), s') ->
+    let parseName2 (name, r0, a) = match a with
+      | LS.Cons ((L.Id (_, prefEName), r), s') ->
           begin if L.isUpper prefEName then
             parseName3 (name, r0, [ prefEName ], LS.expose s')
           else
             Parsing.error r ("Expected uppercase identifer, found " ^ prefEName)
           end
-      | name, r0, LS.Cons ((L.Lparen, r), s') ->
+      | LS.Cons ((L.Lparen, r), s') ->
           parseName4 (name, r0, [], LS.expose s')
-      | name, r0, LS.Cons ((t, r), s') ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected name preference, found " ^ L.toString t)
 
     let parseName1 = function

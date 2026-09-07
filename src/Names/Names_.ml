@@ -125,27 +125,27 @@ module MakeNames
      if V expects exactly n arguments,
      raises Error(msg) otherwise
   *)
-  let rec checkAtomic = function
-    | name, IntSyn.Pi (d_, v_), 0 -> true
-    | name, IntSyn.Pi (d_, v_), n ->
+  let rec checkAtomic (name, v, n) = match v, n with
+    | IntSyn.Pi (d_, v_), 0 -> true
+    | IntSyn.Pi (d_, v_), n ->
         Debug.msg' ~level:Debug.Level.Debug
           (fun f (name, v_, n) ->
             Format.fprintf f "checkAtomic: %s %s %d" name v_ n)
           (name, IntSyn.show_exp v_, n);
         checkAtomic (name, v_, n - 1)
-    | name, IntSyn.Uni _, 0 ->
+    | IntSyn.Uni _, 0 ->
         Debug.msg ~level:Debug.Level.Debug
           (Debug.Fmt.shown_exact
              (fun name -> "checkAtomic: " ^ name ^ " is a universe")
              name);
         true
-    | name, IntSyn.Root _, 0 ->
+    | IntSyn.Root _, 0 ->
         Debug.msg ~level:Debug.Level.Debug
           (Debug.Fmt.shown_exact
              (fun name -> "checkAtomic: " ^ name ^ " is a root")
              name);
         true
-    | name, v, n ->
+    | v, n ->
         Debug.msg ~level:Debug.Level.Debug
           (Debug.Fmt.shown_exact
              (fun name ->
@@ -160,12 +160,12 @@ module MakeNames
      if constant c expects exactly n explicit arguments,
      raises Error (msg) otherwise
   *)
-  let checkArgNumber = function
-    | IntSyn.ConDec (name, _, i, _, v_, l_), n -> checkAtomic (name, v_, i + n)
-    | IntSyn.SkoDec (name, _, i, v_, l_), n -> checkAtomic (name, v_, i + n)
-    | IntSyn.ConDef (name, _, i, _, v_, l_, _), n ->
+  let checkArgNumber (a, n) = match a with
+    | IntSyn.ConDec (name, _, i, _, v_, l_) -> checkAtomic (name, v_, i + n)
+    | IntSyn.SkoDec (name, _, i, v_, l_) -> checkAtomic (name, v_, i + n)
+    | IntSyn.ConDef (name, _, i, _, v_, l_, _) ->
         checkAtomic (name, v_, i + n)
-    | IntSyn.AbbrevDef (name, _, i, _, v_, l_), n ->
+    | IntSyn.AbbrevDef (name, _, i, _, v_, l_) ->
         checkAtomic (name, v_, i + n)
 
   (** checkFixity (name, cidOpt, n) = () if n = 0 (no requirement on arguments)
@@ -424,9 +424,9 @@ module MakeNames
   let structComps mid = (fun (r, _) -> r) (Array.sub (componentsArray, mid))
   let constComps mid = (fun (_, r) -> r) (Array.sub (componentsArray, mid))
 
-  let rec findStruct = function
-    | structTable, id :: [] -> StringTree.lookup structTable id
-    | structTable, id :: ids ->
+  let rec findStruct (structTable, a) = match a with
+    | id :: [] -> StringTree.lookup structTable id
+    | id :: ids ->
         begin match StringTree.lookup structTable id with
         | None -> None
         | Some mid -> findStruct (structComps mid, ids)
@@ -440,13 +440,13 @@ module MakeNames
         | Some mid -> findStruct (structComps mid, ids)
         end
 
-  let rec findUndefStruct = function
-    | structTable, id :: [], ids' ->
+  let rec findUndefStruct (structTable, a, ids') = match a with
+    | id :: [] ->
         begin match StringTree.lookup structTable id with
         | None -> Some (Qid (rev ids', id))
         | Some _ -> None
         end
-    | structTable, id :: ids, ids' ->
+    | id :: ids ->
         begin match StringTree.lookup structTable id with
         | None -> Some (Qid (rev ids', id))
         | Some mid -> findUndefStruct (structComps mid, ids, id :: ids')
@@ -830,12 +830,12 @@ module MakeNames
     let evarReset () = evarList := []
 
     let evarLookup x_ =
-      let rec evlk = function
-        | r, [] -> None
-        | r, (IntSyn.EVar (r', _, _, _), name) :: l ->
+      let rec evlk (r, a) = match a with
+        | [] -> None
+        | (IntSyn.EVar (r', _, _, _), name) :: l ->
             begin if r == r' then Some name else evlk (r, l)
             end
-        | r, (IntSyn.AVar r', name) :: l ->
+        | (IntSyn.AVar r', name) :: l ->
             begin if r == r' then Some name else evlk (r, l)
             end
       in
@@ -847,15 +847,14 @@ module MakeNames
     let evarInsert entry = evarList := entry :: !evarList
     let namedEVars () = !evarList
 
-    let rec evarCnstr' = function
-      | [], acc -> acc
-      | ( ((IntSyn.EVar ({ contents = None }, _, _, cnstrs), name) as xn_) :: l,
-          acc ) ->
+    let rec evarCnstr' (a, acc) = match a with
+      | [] -> acc
+      | ((IntSyn.EVar ({ contents = None }, _, _, cnstrs), name) as xn_) :: l ->
           begin match Constraints.simplify !cnstrs with
           | [] -> evarCnstr' (l, acc)
           | _ :: _ -> evarCnstr' (l, xn_ :: acc)
           end
-      | _ :: l, acc -> evarCnstr' (l, acc)
+      | _ :: l -> evarCnstr' (l, acc)
 
     let evarCnstr () = evarCnstr' (!evarList, [])
     let indexTable : int StringTree.table = StringTree.new_ 0
@@ -863,12 +862,12 @@ module MakeNames
     let indexLookup = StringTree.lookup indexTable
     let indexClear () = StringTree.clear indexTable
 
-    let nextIndex' = function
-      | name, None -> begin
+    let nextIndex' (name, a) = match a with
+      | None -> begin
           indexInsert (name, 1);
           1
         end
-      | name, Some i -> begin
+      | Some i -> begin
           indexInsert (name, i + 1);
           i + 1
         end
@@ -973,9 +972,9 @@ module MakeNames
     else name
     end
 
-  let findName = function
-    | g_, base, Local -> findNameLocal (g_, base, 0)
-    | g_, base, Global -> tryNextName (g_, base)
+  let findName (g_, base, a) = match a with
+    | Local -> findNameLocal (g_, base, 0)
+    | Global -> tryNextName (g_, base)
 
   let takeNonDigits = Substring.takel (fun x -> not (Char.isDigit x))
 
@@ -988,13 +987,13 @@ module MakeNames
        where name is the next unused name appropriate for X,
        based on the name preference declaration for A if X:A
     *)
-  let newEVarName = function
-    | g_, (IntSyn.EVar (r, _, v_, cnstr_) as x_) ->
+  let newEVarName (g_, a) = match a with
+    | (IntSyn.EVar (r, _, v_, cnstr_) as x_) ->
         let name = tryNextName (g_, namePrefOf (Exist, v_)) in
         evarInsert (x_, name);
         name
         (* use name preferences below *)
-    | g_, (IntSyn.AVar r as x_) ->
+    | (IntSyn.AVar r as x_) ->
         let name = tryNextName (g_, namePrefOf' (Exist, None)) in
         evarInsert (x_, name);
         name
@@ -1125,9 +1124,9 @@ module MakeNames
        with i implicit abstractions
        Used for implicit EVar in constant definitions after abstraction.
     *)
-  let rec defEName' = function
-    | g_, 0, uv -> uv
-    | g_, i, (IntSyn.Lam (d_, u_), IntSyn.Pi ((_, p_ (* = D *)), v_)) ->
+  let rec defEName' (g_, i, uv) = match i, uv with
+    | 0, uv -> uv
+    | i, (IntSyn.Lam (d_, u_), IntSyn.Pi ((_, p_ (* = D *)), v_)) ->
         let d'_ = decEName g_ d_ in
         let u'_, v'_ = defEName' (IntSyn.Decl (g_, d'_), i - 1, (u_, v_)) in
         (IntSyn.Lam (d'_, u'_), IntSyn.Pi ((d'_, p_), v'_))

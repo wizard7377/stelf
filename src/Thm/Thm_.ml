@@ -87,16 +87,16 @@ module Make_Thm
               r (("Constant " ^ Names.qidToString (Names.constQid a))
                 ^ " is an object, not a type family")
       in
-      let rec skip = function
-        | 0, v_, p_, a_ -> unique' (v_, p_, a_)
-        | k, I.Pi (_, v_), p_, a_ -> skip (k - 1, v_, p_, a_)
+      let rec skip (k, a, p_, a_) = match k, a with
+        | 0, v_ -> unique' (v_, p_, a_)
+        | k, I.Pi (_, v_) -> skip (k - 1, v_, p_, a_)
       in
       skip (I.constImp a, I.constType a, p_, a_)
 
     let uniqueCallpats (l_, rs) =
-      let rec uniqueCallpats' = function
-        | ([], []), a_ -> ()
-        | (aP :: l_, r :: rs), a_ ->
+      let rec uniqueCallpats' (a, a_) = match a with
+        | ([], []) -> ()
+        | (aP :: l_, r :: rs) ->
             uniqueCallpats' ((l_, rs), unique ((aP, r), a_))
       in
       uniqueCallpats' ((l_, rs), [])
@@ -107,10 +107,10 @@ module Make_Thm
         | s :: [] -> s
         | s :: l_ -> (s ^ " ") ^ makestring l_
       in
-      let rec exists' = function
-        | x, [], _ -> false
-        | x, None :: l_, M.Mapp (_, mS) -> exists' (x, l_, mS)
-        | x, Some y :: l_, M.Mapp (M.Marg (mode, _), mS) ->
+      let rec exists' (x, a, b) = match a, b with
+        | [], _ -> false
+        | None :: l_, M.Mapp (_, mS) -> exists' (x, l_, mS)
+        | Some y :: l_, M.Mapp (M.Marg (mode, _), mS) ->
             begin if x = y then
               begin match mode with
               | M.Plus -> true
@@ -122,17 +122,17 @@ module Make_Thm
             else exists' (x, l_, mS)
             end
       in
-      let rec skip = function
-        | 0, x, p_, mS -> exists' (x, p_, mS)
-        | k, x, p_, M.Mapp (_, mS) -> skip (k - 1, x, p_, mS)
+      let rec skip (k, x, p_, a) = match k, a with
+        | 0, mS -> exists' (x, p_, mS)
+        | k, M.Mapp (_, mS) -> skip (k - 1, x, p_, mS)
       in
-      let rec delete = function
-        | x, ((a, p_) as aP) :: c_ ->
+      let rec delete (x, b) = match b with
+        | ((a, p_) as aP) :: c_ ->
             begin if skip (I.constImp a, x, p_, valOf (ModeTable.modeLookup a))
             then c_
             else aP :: delete (x, c_)
             end
-        | x, [] -> error r (("Variable " ^ x) ^ " does not occur as argument")
+        | [] -> error r (("Variable " ^ x) ^ " does not occur as argument")
       in
       let rec wfCallpats' = function
         | [], [] -> ()
@@ -175,10 +175,10 @@ module Make_Thm
         wfOrder o_
       end
 
-    let rec argPos = function
-      | x, [], n -> None
-      | x, None :: l_, n -> argPos (x, l_, n + 1)
-      | x, Some x' :: l_, n ->
+    let rec argPos (x, a, n) = match a with
+      | [] -> None
+      | None :: l_ -> argPos (x, l_, n + 1)
+      | Some x' :: l_ ->
           begin if x = x' then Some n else argPos (x, l_, n + 1)
           end
 
@@ -188,18 +188,18 @@ module Make_Thm
       | Some n -> n
       end
 
-    let rec argOrder = function
-      | L.Varg l_, p_, n -> O.Arg (locate (l_, p_, n))
-      | L.Simul l_, p_, n -> O.Simul (argOrderL (l_, p_, n))
-      | L.Lex l_, p_, n -> O.Lex (argOrderL (l_, p_, n))
+    let rec argOrder (a, p_, n) = match a with
+      | L.Varg l_ -> O.Arg (locate (l_, p_, n))
+      | L.Simul l_ -> O.Simul (argOrderL (l_, p_, n))
+      | L.Lex l_ -> O.Lex (argOrderL (l_, p_, n))
 
-    and argOrderL = function
-      | [], p_, n -> []
-      | o_ :: l_, p_, n -> argOrder (o_, p_, n) :: argOrderL (l_, p_, n)
+    and argOrderL (a, p_, n) = match a with
+      | [] -> []
+      | o_ :: l_ -> argOrder (o_, p_, n) :: argOrderL (l_, p_, n)
 
-    let rec argOrderMutual = function
-      | [], k, a_ -> a_
-      | p_ :: l_, k, a_ -> argOrderMutual (l_, k, k (p_, a_))
+    let rec argOrderMutual (a, k, a_) = match a with
+      | [] -> a_
+      | p_ :: l_ -> argOrderMutual (l_, k, k (p_, a_))
 
     let rec installOrder = function
       | _, [], _ -> ()
@@ -239,19 +239,19 @@ module Make_Thm
 
     let uninstallTotal cid = O.uninstall cid
 
-    let rec argROrder = function
-      | L.Varg l_, p_, n -> O.Arg (locate (l_, p_, n))
-      | L.Simul l_, p_, n -> O.Simul (argROrderL (l_, p_, n))
-      | L.Lex l_, p_, n -> O.Lex (argROrderL (l_, p_, n))
+    let rec argROrder (a, p_, n) = match a with
+      | L.Varg l_ -> O.Arg (locate (l_, p_, n))
+      | L.Simul l_ -> O.Simul (argROrderL (l_, p_, n))
+      | L.Lex l_ -> O.Lex (argROrderL (l_, p_, n))
 
-    and argROrderL = function
-      | [], p_, n -> []
-      | o_ :: l_, p_, n -> argROrder (o_, p_, n) :: argROrderL (l_, p_, n)
+    and argROrderL (a, p_, n) = match a with
+      | [] -> []
+      | o_ :: l_ -> argROrder (o_, p_, n) :: argROrderL (l_, p_, n)
 
-    let argPredicate = function
-      | L.Less, o_, o'_ -> O.Less (o_, o'_)
-      | L.Leq, o_, o'_ -> O.Leq (o_, o'_)
-      | L.Eq, o_, o'_ -> O.Eq (o_, o'_)
+    let argPredicate (a, o_, o'_) = match a with
+      | L.Less -> O.Less (o_, o'_)
+      | L.Leq -> O.Leq (o_, o'_)
+      | L.Eq -> O.Eq (o_, o'_)
 
     let rec installPredicate = function
       | _, [], _ -> ()
@@ -283,16 +283,16 @@ module Make_Thm
         | s :: [] -> s
         | s :: l_ -> (s ^ " ") ^ makestring l_
       in
-      let rec exists' = function
-        | x, [] -> false
-        | x, None :: l_ -> exists' (x, l_)
-        | x, Some y :: l_ -> x = y || exists' (x, l_)
+      let rec exists' (x, a) = match a with
+        | [] -> false
+        | None :: l_ -> exists' (x, l_)
+        | Some y :: l_ -> x = y || exists' (x, l_)
       in
-      let rec delete = function
-        | x, ((a, p_) as aP) :: c_ ->
+      let rec delete (x, b) = match b with
+        | ((a, p_) as aP) :: c_ ->
             begin if exists' (x, p_) then c_ else aP :: delete (x, c_)
             end
-        | x, [] -> error r (("Variable " ^ x) ^ " does not occur as argument")
+        | [] -> error r (("Variable " ^ x) ^ " does not occur as argument")
       in
       let rec wfCallpats' = function
         | [], [] -> ()

@@ -70,13 +70,13 @@ end) : TOMEGAABSTRACT = struct
       let raiseTerm = TomegaAbstract__0.abstract_raiseTerm
     end
 
-    let rec shiftCtx = function
-      | I.Null, t -> (I.Null, t)
-      | I.Decl (g_, d_), t ->
+    let rec shiftCtx (a, t) = match a with
+      | I.Null -> (I.Null, t)
+      | I.Decl (g_, d_) ->
           let g'_, t' = shiftCtx (g_, t) in
           (I.Decl (g'_, I.decSub d_ t'), I.dot1 t')
 
-    let rec dotn = function t, 0 -> t | t, n -> I.dot1 (dotn (t, n - 1))
+    let rec dotn (t, n) = match n with 0 -> t | n -> I.dot1 (dotn (t, n - 1))
 
     let rec strengthenToSpine = function
       | I.Shift _, 0, (n, s_) -> s_

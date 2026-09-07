@@ -102,22 +102,22 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | LS.Cons ((t, r), _) ->
           Parsing.error r ("Expected `)', found " ^ L.toString t)
 
-    let decideRBrace = function
-      | r0, (orders, LS.Cons ((L.Rbrace, r), s')) ->
+    let decideRBrace (r0, a) = match a with
+      | (orders, LS.Cons ((L.Rbrace, r), s')) ->
           (Some (E.lex r0 orders), LS.expose s')
-      | r0, (order, LS.Cons ((t, r), _)) ->
+      | (order, LS.Cons ((t, r), _)) ->
           Parsing.error (P.join r0 r) ("Expected `}', found " ^ L.toString t)
 
-    let decideRBracket = function
-      | r0, (orders, LS.Cons ((L.Rbracket, r), s')) ->
+    let decideRBracket (r0, a) = match a with
+      | (orders, LS.Cons ((L.Rbracket, r), s')) ->
           (Some (E.simul r0 orders), LS.expose s')
-      | r0, (order, LS.Cons ((t, r), _)) ->
+      | (order, LS.Cons ((t, r), _)) ->
           Parsing.error (P.join r0 r) ("Expected `]', found " ^ L.toString t)
 
-    let decideRParen = function
-      | r0, (ids, LS.Cons ((L.Rparen, r), s')) ->
+    let decideRParen (r0, a) = match a with
+      | (ids, LS.Cons ((L.Rparen, r), s')) ->
           (Some (E.varg r ids), LS.expose s')
-      | r0, (order, LS.Cons ((t, r), _)) ->
+      | (order, LS.Cons ((t, r), _)) ->
           Parsing.error (P.join r0 r) ("Expected `)', found " ^ L.toString t)
 
     let rec parseIds = function
@@ -171,11 +171,11 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
 
     and parseOrders f = parseOrders' (parseOrderOpt f)
 
-    and parseOrders' = function
-      | Some order, f' ->
+    and parseOrders' (a, f') = match a with
+      | Some order ->
           let orders, f'' = parseOrders f' in
           (order :: orders, f'')
-      | None, f' -> ([], f')
+      | None -> ([], f')
 
     let rec parseOrder f = parseOrder' (parseOrderOpt f)
 
@@ -253,22 +253,22 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected `pi', found " ^ L.toString t)
 
-    let rec parseSome = function
-      | gbs, LS.Cons ((L.Id (_, "some"), r), s') ->
+    let rec parseSome (gbs, a) = match a with
+      | LS.Cons ((L.Id (_, "some"), r), s') ->
           let g1, f' = parseDecs (LS.expose s') in
           let g2, f'' = parsePi f' in
           parseSome' ((g1, g2) :: gbs, f'')
-      | gbs, (LS.Cons ((L.Id (_, "pi"), r), s') as f) ->
+      | (LS.Cons ((L.Id (_, "pi"), r), s') as f) ->
           let g2, f' = parsePi f in
           parseSome' ((E.null, g2) :: gbs, f')
-      | gbs, (LS.Cons ((L.Rparen, r), s') as f) -> (gbs, f)
-      | gbs, LS.Cons ((t, r), s') ->
+      | (LS.Cons ((L.Rparen, r), s') as f) -> (gbs, f)
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected `some' or `pi', found " ^ L.toString t)
 
-    and parseSome' = function
-      | gbs, (LS.Cons ((L.Rparen, r), s') as f) -> (gbs, f)
-      | gbs, LS.Cons ((L.Id (_, "|"), r), s') -> parseSome (gbs, LS.expose s')
-      | gbs, LS.Cons ((t, r), s') ->
+    and parseSome' (gbs, a) = match a with
+      | (LS.Cons ((L.Rparen, r), s') as f) -> (gbs, f)
+      | LS.Cons ((L.Id (_, "|"), r), s') -> parseSome (gbs, LS.expose s')
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected `)' or `|', found " ^ L.toString t)
 
     let stripParen (gbs, LS.Cons ((L.Rparen, r), s')) = (gbs, LS.expose s')

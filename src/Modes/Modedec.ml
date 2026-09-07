@@ -75,9 +75,9 @@ module MakeModeDec () : MODEDEC = struct
       | M.Minus1, M.Plus -> false
       | _ -> true
 
-    let rec empty = function
-      | 0, ms, v_ -> (ms, v_)
-      | k, ms, I.Pi (_, v_) ->
+    let rec empty (k, ms, a) = match k, a with
+      | 0, v_ -> (ms, v_)
+      | k, I.Pi (_, v_) ->
           empty (k - 1, I.Decl (ms, (M.Marg (M.Star, None), Implicit)), v_)
 
     let rec inferVar = function
@@ -99,32 +99,32 @@ module MakeModeDec () : MODEDEC = struct
           end
       | I.Decl (ms, md), mode, k -> I.Decl (inferVar (ms, mode, k - 1), md)
 
-    let rec inferExp = function
-      | ms, mode, I.Root (I.BVar k, s_) ->
+    let rec inferExp (ms, mode, a) = match a with
+      | I.Root (I.BVar k, s_) ->
           inferSpine (inferVar (ms, mode, k), mode, s_)
-      | ms, mode, I.Root (I.Const cid, s_) -> inferSpine (ms, mode, s_)
-      | ms, mode, I.Root (I.Def cid, s_) -> inferSpine (ms, mode, s_)
-      | ms, mode, I.Root (I.FgnConst (cs, conDec), s_) ->
+      | I.Root (I.Const cid, s_) -> inferSpine (ms, mode, s_)
+      | I.Root (I.Def cid, s_) -> inferSpine (ms, mode, s_)
+      | I.Root (I.FgnConst (cs, conDec), s_) ->
           inferSpine (ms, mode, s_)
-      | ms, mode, I.Lam ((I.Dec (nameOpt, _) as d_), u_) ->
+      | I.Lam ((I.Dec (nameOpt, _) as d_), u_) ->
           I.ctxPop
             (inferExp
                ( I.Decl
                    (inferDec (ms, mode, d_), (M.Marg (mode, nameOpt), Local)),
                  mode,
                  u_ ))
-      | ms, mode, I.Pi (((I.Dec (nameOpt, _) as d_), _), v_) ->
+      | I.Pi (((I.Dec (nameOpt, _) as d_), _), v_) ->
           I.ctxPop
             (inferExp
                ( I.Decl
                    (inferDec (ms, mode, d_), (M.Marg (mode, nameOpt), Local)),
                  mode,
                  v_ ))
-      | ms, mode, I.FgnExp _ -> ms
+      | I.FgnExp _ -> ms
 
-    and inferSpine = function
-      | ms, mode, I.Nil -> ms
-      | ms, mode, I.App (u_, s_) ->
+    and inferSpine (ms, mode, a) = match a with
+      | I.Nil -> ms
+      | I.App (u_, s_) ->
           inferSpine (inferExp (ms, mode, u_), mode, s_)
 
     and inferDec (ms, mode, I.Dec (_, v_)) = inferExp (ms, mode, v_)

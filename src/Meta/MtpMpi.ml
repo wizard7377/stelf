@@ -212,9 +212,9 @@ end) : MTPI = struct
          ^ Formatter.makestring_fmt (formatTuple (g_, p_)))
         ^ "\n")
 
-    let rec splittingToMenu = function
-      | [], a_ -> a_
-      | o_ :: l_, a_ -> splittingToMenu (l_, Splitting o_ :: a_)
+    let rec splittingToMenu (a, a_) = match a with
+      | [] -> a_
+      | o_ :: l_ -> splittingToMenu (l_, Splitting o_ :: a_)
 
     let fillingToMenu (o_, a_) = Filling o_ :: a_
     let recursionToMenu (o_, a_) = Recursion o_ :: a_
@@ -242,10 +242,10 @@ end) : MTPI = struct
       end
 
     let menuToString () =
-      let rec menuToString' = function
-        | k, [], (None, _) -> (Some k, "")
-        | k, [], ((Some _ as kopt'), _) -> (kopt', "")
-        | k, Splitting o_ :: m_, ((None, None) as kOopt') ->
+      let rec menuToString' (k, a, kOopt) = match a, kOopt with
+        | [], (None, _) -> (Some k, "")
+        | [], ((Some _ as kopt'), _) -> (kopt', "")
+        | Splitting o_ :: m_, ((None, None) as kOopt') ->
             let kOopt'' =
               begin if MTPSplitting.applicable o_ then (Some k, Some o_)
               else kOopt'
@@ -257,7 +257,7 @@ end) : MTPI = struct
                 ((s ^ "\n* ") ^ format k) ^ MTPSplitting.menu o_
               else ((s ^ "\n  ") ^ format k) ^ MTPSplitting.menu o_
               end )
-        | k, Splitting o_ :: m_, ((Some k', Some o'_) as kOopt') ->
+        | Splitting o_ :: m_, ((Some k', Some o'_) as kOopt') ->
             let kOopt'' =
               begin if MTPSplitting.applicable o_ then
                 begin match MTPSplitting.compare o_ o'_ with
@@ -273,13 +273,13 @@ end) : MTPI = struct
                 ((s ^ "\n* ") ^ format k) ^ MTPSplitting.menu o_
               else ((s ^ "\n  ") ^ format k) ^ MTPSplitting.menu o_
               end )
-        | k, Filling o_ :: m_, kOopt ->
+        | Filling o_ :: m_, kOopt ->
             let kopt, s = menuToString' (k + 1, m_, kOopt) in
             (kopt, ((s ^ "\n  ") ^ format k) ^ MTPFilling.menu o_)
-        | k, Recursion o_ :: m_, kOopt ->
+        | Recursion o_ :: m_, kOopt ->
             let kopt, s = menuToString' (k + 1, m_, kOopt) in
             (kopt, ((s ^ "\n  ") ^ format k) ^ MTPRecursion.menu o_)
-        | k, Inference o_ :: m_, kOopt ->
+        | Inference o_ :: m_, kOopt ->
             let kopt, s = menuToString' (k + 1, m_, kOopt) in
             (kopt, ((s ^ "\n  ") ^ format k) ^ Inference.menu o_)
       in
@@ -325,22 +325,22 @@ end) : MTPI = struct
 
     let equiv l1_ l2_ = contains (l1_, l2_) && contains (l2_, l1_)
 
-    let rec transformOrder' = function
-      | g_, Order.Arg k ->
+    let rec transformOrder' (g_, a) = match a with
+      | Order.Arg k ->
           let k' = I.ctxLength g_ - k + 1 in
           let (I.Dec (_, v_)) = I.ctxDec g_ k' in
           S.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
-      | g_, Order.Lex os_ ->
+      | Order.Lex os_ ->
           S.Lex (map (function o_ -> transformOrder' (g_, o_)) os_)
-      | g_, Order.Simul os_ ->
+      | Order.Simul os_ ->
           S.Simul (map (function o_ -> transformOrder' (g_, o_)) os_)
 
-    let rec transformOrder = function
-      | g_, F.All (F.Prim d_, f_), os_ ->
+    let rec transformOrder (g_, a, b) = match a, b with
+      | F.All (F.Prim d_, f_), os_ ->
           S.All (d_, transformOrder (I.Decl (g_, d_), f_, os_))
-      | g_, F.And (f1_, f2_), o_ :: os_ ->
+      | F.And (f1_, f2_), o_ :: os_ ->
           S.And (transformOrder (g_, f1_, [ o_ ]), transformOrder (g_, f2_, os_))
-      | g_, F.Ex _, o_ :: [] -> transformOrder' (g_, o_)
+      | F.Ex _, o_ :: [] -> transformOrder' (g_, o_)
 
     let select c = try Order.selLookup c with _ -> Order.Lex []
 

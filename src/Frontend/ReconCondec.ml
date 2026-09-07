@@ -242,13 +242,13 @@ end) : RECON_CONDEC = struct
           | [] -> IntSyn.Null
           | d_ :: l_ -> IntSyn.Decl (makectx l_, d_)
         in
-        let rec ctxToList = function
-          | IntSyn.Null, acc -> acc
-          | IntSyn.Decl (g_, d_), acc -> ctxToList (g_, d_ :: acc)
+        let rec ctxToList (a, acc) = match a with
+          | IntSyn.Null -> acc
+          | IntSyn.Decl (g_, d_) -> ctxToList (g_, d_ :: acc)
         in
-        let rec ctxAppend = function
-          | g_, IntSyn.Null -> g_
-          | g_, IntSyn.Decl (g'_, d_) -> IntSyn.Decl (ctxAppend (g_, g'_), d_)
+        let rec ctxAppend (g_, a) = match a with
+          | IntSyn.Null -> g_
+          | IntSyn.Decl (g'_, d_) -> IntSyn.Decl (ctxAppend (g_, g'_), d_)
         in
         let ctxBlockToString (g0_, (g1_, g2_)) =
           ignore (Names.varReset IntSyn.Null);
@@ -263,9 +263,9 @@ end) : RECON_CONDEC = struct
           ^ "pi ")
           ^ Print.ctxToString (ctxAppend (g0'_, g1'_)) g2'_
         in
-        let checkFreevars = function
-          | IntSyn.Null, (g1_, g2_), r -> ()
-          | g0_, (g1_, g2_), r ->
+        let checkFreevars (g0_, a, r) = match g0_, a with
+          | IntSyn.Null, (g1_, g2_) -> ()
+          | g0_, (g1_, g2_) ->
               ignore (Names.varReset IntSyn.Null);
               let g0'_ = Names.ctxName g0_ in
               let g1'_ = Names.ctxLUName g1_ in

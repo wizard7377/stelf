@@ -114,9 +114,9 @@ module MakeModeCheck
        Invariant:
        B iff k does not occur in ks
     *)
-    let rec unique = function
-      | k, [] -> true
-      | k, k' :: ks -> k <> k' && unique (k, ks)
+    let rec unique (k, a) = match a with
+      | [] -> true
+      | k' :: ks -> k <> k' && unique (k, ks)
 
     (** isUniversal S = B
 
@@ -192,9 +192,9 @@ module MakeModeCheck
          and for all k in mS: k is parameter
          and for all k', k'' in mS: k' <> k''
     *)
-    let rec checkPattern = function
-      | d_, k, args, I.Nil -> ()
-      | d_, k, args, I.App (u_, s_) ->
+    let rec checkPattern (d_, k, args, a) = match a with
+      | I.Nil -> ()
+      | I.App (u_, s_) ->
           let k' = etaContract (u_, 0) in
           begin if
             k > k' && isUniversal (I.ctxLookup d_ k') && unique (k', args)
@@ -253,21 +253,21 @@ module MakeModeCheck
 
        (occ and mode are used in error messages)
     *)
-    let rec freeExpN = function
-      | d_, d, mode, I.Root (I.BVar k, s_), occ, strictFun -> begin
+    let rec freeExpN (d_, d, mode, a, occ, strictFun) = match a with
+      | I.Root (I.BVar k, s_) -> begin
           freeVar (d_, d, mode, k, P.head occ, strictFun);
           freeSpineN (d_, d, mode, s_, (1, occ), strictFun)
         end
-      | d_, d, mode, I.Root (I.Const _, s_), occ, strictFun ->
+      | I.Root (I.Const _, s_) ->
           freeSpineN (d_, d, mode, s_, (1, occ), strictFun)
-      | d_, d, mode, I.Root (I.Def _, s_), occ, strictFun ->
+      | I.Root (I.Def _, s_) ->
           freeSpineN (d_, d, mode, s_, (1, occ), strictFun)
-      | d_, d, mode, I.Root (I.FgnConst (cs, conDec), s_), occ, strictFun ->
+      | I.Root (I.FgnConst (cs, conDec), s_) ->
           freeSpineN (d_, d, mode, s_, (1, occ), strictFun)
-      | d_, d, mode, I.Lam (_, u_), occ, strictFun ->
+      | I.Lam (_, u_) ->
           freeExpN
             (I.Decl (d_, Universal), d + 1, mode, u_, P.body occ, strictFun)
-      | d_, d, mode, I.FgnExp (csfe1, csfe2), occ, strictFun ->
+      | I.FgnExp (csfe1, csfe2) ->
           I.FgnExpStd.App.apply csfe1 csfe2 (function u_ ->
               freeExpN (d_, d, mode, Whnf.normalize (u_, I.id), occ, strictFun))
 
@@ -280,9 +280,9 @@ module MakeModeCheck
 
        (occ and mode are used in error messages)
     *)
-    and freeSpineN = function
-      | d_, d, mode, I.Nil, _, strictFun -> ()
-      | d_, d, mode, I.App (u_, s_), (p, occ), strictFun -> begin
+    and freeSpineN (d_, d, mode, a, b, strictFun) = match a, b with
+      | I.Nil, _ -> ()
+      | I.App (u_, s_), (p, occ) -> begin
           freeExpN (d_, d, mode, u_, P.arg p occ, strictFun);
           freeSpineN (d_, d, mode, s_, (p + 1, occ), strictFun)
         end
@@ -316,14 +316,14 @@ module MakeModeCheck
        then D' >= D where D'(k) Unknown for all existential variables k
             in U that are free in D
     *)
-    let rec nonStrictExpN = function
-      | d_, I.Root (I.BVar k, s_) -> nonStrictSpineN (nonStrictVarD (d_, k), s_)
-      | d_, I.Root (I.Const c, s_) -> nonStrictSpineN (d_, s_)
-      | d_, I.Root (I.Def d, s_) -> nonStrictSpineN (d_, s_)
-      | d_, I.Root (I.FgnConst (cs, conDec), s_) -> nonStrictSpineN (d_, s_)
-      | d_, I.Lam (_, u_) ->
+    let rec nonStrictExpN (d_, a) = match a with
+      | I.Root (I.BVar k, s_) -> nonStrictSpineN (nonStrictVarD (d_, k), s_)
+      | I.Root (I.Const c, s_) -> nonStrictSpineN (d_, s_)
+      | I.Root (I.Def d, s_) -> nonStrictSpineN (d_, s_)
+      | I.Root (I.FgnConst (cs, conDec), s_) -> nonStrictSpineN (d_, s_)
+      | I.Lam (_, u_) ->
           I.ctxPop (nonStrictExpN (I.Decl (d_, Universal), u_))
-      | d_, I.FgnExp (csfe1, csfe2) ->
+      | I.FgnExp (csfe1, csfe2) ->
           raise
             (Error "Foreign expressions not permitted when checking freeness")
 
@@ -334,9 +334,9 @@ module MakeModeCheck
        then D' >= D' where D'(k) Unkown for all existential variables k
             in S that are Free in D
     *)
-    and nonStrictSpineN = function
-      | d_, I.Nil -> d_
-      | d_, I.App (u_, s_) -> nonStrictSpineN (nonStrictExpN (d_, u_), s_)
+    and nonStrictSpineN (d_, a) = match a with
+      | I.Nil -> d_
+      | I.App (u_, s_) -> nonStrictSpineN (nonStrictExpN (d_, u_), s_)
 
     (** nonStrictVarD (D, k) = D'
 
@@ -364,8 +364,8 @@ module MakeModeCheck
 
        u is the uniqueness property for the new ground assumptions
     *)
-    let rec updateExpN = function
-      | d_, I.Root (I.BVar k, s_), u ->
+    let rec updateExpN (d_, a, u) = match a with
+      | I.Root (I.BVar k, s_) ->
           begin if isUniversal (I.ctxLookup d_ k) then
             updateSpineN (d_, s_, u)
           else
@@ -377,12 +377,12 @@ module MakeModeCheck
               end
             end
           end
-      | d_, I.Root (I.Const c, s_), u -> updateSpineN (d_, s_, u)
-      | d_, I.Root (I.Def d, s_), u -> updateSpineN (d_, s_, u)
-      | d_, I.Root (I.FgnConst (cs, conDec), s_), u -> updateSpineN (d_, s_, u)
-      | d_, I.Lam (_, u_), u ->
+      | I.Root (I.Const c, s_) -> updateSpineN (d_, s_, u)
+      | I.Root (I.Def d, s_) -> updateSpineN (d_, s_, u)
+      | I.Root (I.FgnConst (cs, conDec), s_) -> updateSpineN (d_, s_, u)
+      | I.Lam (_, u_) ->
           I.ctxPop (updateExpN (I.Decl (d_, Universal), u_, u))
-      | d_, I.FgnExp (csfe1, csfe2), u -> d_
+      | I.FgnExp (csfe1, csfe2) -> d_
 
     (** updateSpineN (D, S, u) = D'
 
@@ -391,9 +391,9 @@ module MakeModeCheck
        then D' >= D' where D'(k) Ground for all existential variables k
             with a strict occurrence in S
     *)
-    and updateSpineN = function
-      | d_, I.Nil, u -> d_
-      | d_, I.App (u_, s_), u -> updateSpineN (updateExpN (d_, u_, u), s_, u)
+    and updateSpineN (d_, a, u) = match a with
+      | I.Nil -> d_
+      | I.App (u_, s_) -> updateSpineN (updateExpN (d_, u_, u), s_, u)
 
     (** updateVarD (D, k, u) = D'
 
@@ -402,10 +402,10 @@ module MakeModeCheck
        and  k is an existential variable
        then D' >= D where k is updated as described in  updateExpN
     *)
-    and updateVarD = function
-      | I.Decl (d_, Existential (_, name)), 1, u ->
+    and updateVarD (a, k, u) = match a, k with
+      | I.Decl (d_, Existential (_, name)), 1 ->
           I.Decl (d_, Existential (Ground u, name))
-      | I.Decl (d_, status), k, u -> I.Decl (updateVarD (d_, k - 1, u), status)
+      | I.Decl (d_, status), k -> I.Decl (updateVarD (d_, k - 1, u), status)
 
     (* ----------------------- mode context update by argument modes *)
     (** updateAtom (D, m, S, mS, (p,occ)) = D'
@@ -424,25 +424,25 @@ module MakeModeCheck
 
        (p,occ) is used in error message if freeness is to be checked
     *)
-    let rec updateAtom' = function
-      | d_, _mode, I.Nil, M.Mnil, _ -> d_
-      | d_, M.Plus, I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS), (p, occ) ->
+    let rec updateAtom' (d_, _mode, a, b, c) = match _mode, a, b, c with
+      | _mode, I.Nil, M.Mnil, _ -> d_
+      | M.Plus, I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS), (p, occ) ->
           updateAtom' (updateExpN (d_, u_, Unique), M.Plus, s_, mS, (p + 1, occ))
-      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
+      | M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
         ->
           updateAtom' (updateExpN (d_, u_, Ambig), M.Minus, s_, mS, (p + 1, occ))
-      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
+      | M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
         ->
           updateAtom' (updateExpN (d_, u_, Ambig), M.Minus, s_, mS, (p + 1, occ))
-      | d_, M.Minus1, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
+      | M.Minus1, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
         ->
           updateAtom'
             (updateExpN (d_, u_, Ambig), M.Minus1, s_, mS, (p + 1, occ))
-      | d_, M.Minus1, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
+      | M.Minus1, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
         ->
           updateAtom'
             (updateExpN (d_, u_, Unique), M.Minus1, s_, mS, (p + 1, occ))
-      | d_, mode, I.App (u_, s_), M.Mapp (_, mS), (p, occ) ->
+      | mode, I.App (u_, s_), M.Mapp (_, mS), (p, occ) ->
           updateAtom' (d_, mode, s_, mS, (p + 1, occ))
       (* when checking freeness, all arguments must be input (+) or output (-) *)
       (* therefore, no case for M.Mapp (M.Marg (M.Minus, _), mS) is provided here *)
@@ -454,14 +454,9 @@ module MakeModeCheck
                   G ~ D
                   mode = (-) or (+); ( * ) or (-1) are excluded
     *)
-    let rec freeAtom = function
-      | d_, _mode, I.Nil, _vs_, M.Mnil, _ -> ()
-      | ( d_,
-          M.Minus,
-          I.App (u_, s_),
-          (I.Pi ((I.Dec (_, v1_), _), v2_), s),
-          M.Mapp (M.Marg (M.Minus, _), mS),
-          (p, occ) ) -> begin
+    let rec freeAtom (d_, _mode, a, _vs_, b, c) = match _mode, a, _vs_, b, c with
+      | _mode, I.Nil, _vs_, M.Mnil, _ -> ()
+      | M.Minus, I.App (u_, s_), (I.Pi ((I.Dec (_, v1_), _), v2_), s), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ) -> begin
           freeExpN
             ( d_,
               0,
@@ -477,7 +472,7 @@ module MakeModeCheck
               mS,
               (p + 1, occ) )
         end
-      | d_, mode, I.App (u_, s_), (I.Pi (_, v2_), s), M.Mapp (_, mS), (p, occ)
+      | mode, I.App (u_, s_), (I.Pi (_, v2_), s), M.Mapp (_, mS), (p, occ)
         ->
           freeAtom
             ( d_,
@@ -513,20 +508,20 @@ module MakeModeCheck
 
        (occ and mode are used in error messages)
     *)
-    let rec groundExpN = function
-      | d_, mode, I.Root (I.BVar k, s_), occ ->
+    let rec groundExpN (d_, mode, a, occ) = match a with
+      | I.Root (I.BVar k, s_) ->
           andUnique
             ( groundVar (d_, mode, k, P.head occ),
               groundSpineN (d_, mode, s_, (1, occ)) )
-      | d_, mode, I.Root (I.Const c, s_), occ ->
+      | I.Root (I.Const c, s_) ->
           groundSpineN (d_, mode, s_, (1, occ))
-      | d_, mode, I.Root (I.Def d, s_), occ ->
+      | I.Root (I.Def d, s_) ->
           groundSpineN (d_, mode, s_, (1, occ))
-      | d_, mode, I.Root (I.FgnConst (cs, conDec), s_), occ ->
+      | I.Root (I.FgnConst (cs, conDec), s_) ->
           groundSpineN (d_, mode, s_, (1, occ))
-      | d_, mode, I.Lam (_, u_), occ ->
+      | I.Lam (_, u_) ->
           groundExpN (I.Decl (d_, Universal), mode, u_, P.body occ)
-      | d_, mode, I.FgnExp (csfe1, csfe2), occ ->
+      | I.FgnExp (csfe1, csfe2) ->
           I.FgnExpStd.fold csfe1 csfe2
             (function
               | u_, u ->
@@ -550,9 +545,9 @@ module MakeModeCheck
 
        (occ and mode are used in error messages)
     *)
-    and groundSpineN = function
-      | d_, mode, I.Nil, _ -> Unique
-      | d_, mode, I.App (u_, s_), (p, occ) ->
+    and groundSpineN (d_, mode, a, b) = match a, b with
+      | I.Nil, _ -> Unique
+      | I.App (u_, s_), (p, occ) ->
           andUnique
             ( groundExpN (d_, mode, u_, P.arg p occ),
               groundSpineN (d_, mode, s_, (p + 1, occ)) )
@@ -571,8 +566,8 @@ module MakeModeCheck
 
        (occ and mode are used in error messages)
     *)
-    and groundVar = function
-      | d_, M.Minus1, k, occ ->
+    and groundVar (d_, mode, k, occ) = match mode with
+      | M.Minus1 ->
           begin match I.ctxLookup d_ k with
           | Existential (Ground Unique, _) -> Unique
           | Universal -> Unique
@@ -591,7 +586,7 @@ module MakeModeCheck
                      ^ M.modeToString M.Minus1)
                      ^ " argument not necessarily ground" ))
           end
-      | d_, mode, k, occ ->
+      | mode ->
           let status = I.ctxLookup d_ k in
           begin if isGround status || isUniversal status then uniqueness status
           else
@@ -620,21 +615,21 @@ module MakeModeCheck
 
        ((p,occ) used in error messages)
     *)
-    let rec groundAtom = function
-      | d_, _, I.Nil, M.Mnil, _ -> Unique
-      | d_, M.Plus, I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS), (p, occ) ->
+    let rec groundAtom (d_, mode, a, b, c) = match mode, a, b, c with
+      | _, I.Nil, M.Mnil, _ -> Unique
+      | M.Plus, I.App (u_, s_), M.Mapp (M.Marg (M.Plus, _), mS), (p, occ) ->
           andUnique
             ( groundExpN (d_, M.Plus, u_, P.arg p occ),
               groundAtom (d_, M.Plus, s_, mS, (p + 1, occ)) )
-      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
+      | M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus, _), mS), (p, occ)
         ->
           ignore (groundExpN (d_, M.Minus, u_, P.arg p occ));
           groundAtom (d_, M.Minus, s_, mS, (p + 1, occ))
-      | d_, M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
+      | M.Minus, I.App (u_, s_), M.Mapp (M.Marg (M.Minus1, _), mS), (p, occ)
         ->
           ignore (groundExpN (d_, M.Minus1, u_, P.arg p occ));
           groundAtom (d_, M.Minus, s_, mS, (p + 1, occ))
-      | d_, mode, I.App (u_, s_), M.Mapp (_, mS), (p, occ) ->
+      | mode, I.App (u_, s_), M.Mapp (_, mS), (p, occ) ->
           groundAtom (d_, mode, s_, mS, (p + 1, occ))
 
     let ctxPush (m, ds_) = List.map (function d_ -> I.Decl (d_, m)) ds_
@@ -665,14 +660,14 @@ module MakeModeCheck
        that have no mode information associated with them
        (occ used in error messages)
     *)
-    let rec checkD1 = function
-      | d_, I.Pi ((I.Dec (name, _), Maybe), v_), occ, k ->
+    let rec checkD1 (d_, b, occ, k) = match b with
+      | I.Pi ((I.Dec (name, _), Maybe), v_) ->
           checkD1
             ( I.Decl (d_, Existential (Free, name)),
               v_,
               P.body occ,
               function I.Decl (d'_, m) -> ctxPush (m, k d'_) )
-      | d_, I.Pi ((I.Dec (name, v1_), No), v2_), occ, k ->
+      | I.Pi ((I.Dec (name, v1_), No), v2_) ->
           checkD1
             ( I.Decl (d_, Existential (Free, name)),
               v2_,
@@ -680,7 +675,7 @@ module MakeModeCheck
               function
               | I.Decl (d'_, m) ->
                   ctxPush (m, checkG1 (d'_, v1_, P.label occ, k)) )
-      | d_, I.Root (I.Const a, s_), occ, k ->
+      | I.Root (I.Const a, s_) ->
           let rec checkAll = function
             | [] -> ()
             | mS :: mSs ->
@@ -698,7 +693,7 @@ module MakeModeCheck
                 checkSome (k (updateAtom (d_, M.Plus, s_, a, mS, (1, occ))))
           in
           checkAll (lookup (a, occ))
-      | d_, I.Root (I.Def d, s_), occ, k ->
+      | I.Root (I.Def d, s_) ->
           let rec checkAll = function
             | [] -> ()
             | mS :: mSs ->
@@ -731,15 +726,15 @@ module MakeModeCheck
        that have no mode information associated with them
        (occ used in error messages)
     *)
-    and checkG1 = function
-      | d_, I.Pi ((_, Maybe), v_), occ, k ->
+    and checkG1 (d_, b, occ, k) = match b with
+      | I.Pi ((_, Maybe), v_) ->
           ctxPop
             (checkG1
                ( I.Decl (d_, Universal),
                  v_,
                  P.body occ,
                  function I.Decl (d'_, m) -> ctxPush (m, k d'_) ))
-      | d_, I.Pi ((I.Dec (_, v1_), No), v2_), occ, k ->
+      | I.Pi ((I.Dec (_, v1_), No), v2_) ->
           ctxPop
             begin
               checkD1 (d_, v1_, P.label occ, function d'_ -> [ d'_ ]);
@@ -749,7 +744,7 @@ module MakeModeCheck
                   P.body occ,
                   function I.Decl (d'_, m) -> ctxPush (m, k d'_) )
             end
-      | d_, I.Root (I.Const a, s_), occ, k ->
+      | I.Root (I.Const a, s_) ->
           let rec checkList arg__1 arg__2 =
             begin match (arg__1, arg__2) with
             | found, [] -> []
@@ -775,7 +770,7 @@ module MakeModeCheck
             end
           in
           checkList false (lookup (a, occ))
-      | d_, I.Root (I.Def d, s_), occ, k ->
+      | I.Root (I.Def d, s_) ->
           let rec checkList arg__3 arg__4 =
             begin match (arg__3, arg__4) with
             | found, [] -> []

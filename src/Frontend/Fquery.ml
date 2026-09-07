@@ -110,9 +110,9 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     begin if !Global.chatter >= 3 then (let g__, u__ = gu in Print.expToString g__ u__) else ""
     end
 
-  let rec lower = function
-    | 0, g_, v_ -> (g_, v_)
-    | n, g_, I.Pi ((d_, _), v_) -> lower (n - 1, I.Decl (g_, d_), v_)
+  let rec lower (n, g_, a) = match n, a with
+    | 0, v_ -> (g_, v_)
+    | n, I.Pi ((d_, _), v_) -> lower (n - 1, I.Decl (g_, d_), v_)
 
   let run quy (Paths.Loc (fileName, r)) =
     let v_, optName, xs_ =

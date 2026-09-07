@@ -74,14 +74,14 @@ module Make (Cst : Cst.CST) = struct
   (* Turn a substitution into the spine that applying it corresponds to, so an
      existential variable's substitution can be shown as its arguments. *)
   let sub_to_spine (depth, s) =
-    let rec go = function
-      | I.Shift k, s_ ->
+    let rec go (a, s_) = match a with
+      | I.Shift k ->
           if k < depth then go (I.Dot (I.Idx (k + 1), I.Shift (k + 1)), s_)
           else s_
-      | I.Dot (I.Idx k, s), s_ -> go (s, I.App (I.Root (I.BVar k, I.Nil), s_))
-      | I.Dot (I.Exp u_, s), s_ -> go (s, I.App (u_, s_))
-      | I.Dot (I.Undef, s), s_ -> go (s, I.App (I.Root (I.BVar 0, I.Nil), s_))
-      | I.Dot ((I.Block _ | I.Axp _), s), s_ ->
+      | I.Dot (I.Idx k, s) -> go (s, I.App (I.Root (I.BVar k, I.Nil), s_))
+      | I.Dot (I.Exp u_, s) -> go (s, I.App (u_, s_))
+      | I.Dot (I.Undef, s) -> go (s, I.App (I.Root (I.BVar 0, I.Nil), s_))
+      | I.Dot ((I.Block _ | I.Axp _), s) ->
           go (s, I.App (I.Root (I.BVar 0, I.Nil), s_))
     in
     go (s, I.Nil)

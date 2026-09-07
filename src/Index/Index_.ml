@@ -78,9 +78,9 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
       iter (limit - 1)
 
     let lookup a =
-      let lk = function
-        | l, None -> l
-        | l, Some q' -> begin
+      let lk (l, b) = match b with
+        | None -> l
+        | Some q' -> begin
             Array.update (indexArray, a, q');
             l
           end

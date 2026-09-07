@@ -136,16 +136,16 @@ end) : ORDER = struct
     end
 
   let mutual a =
-    let rec mutual' = function
-      | Empty, a's -> a's
-      | Le (a, m_), a's -> mutual' (m_, a :: a's)
-      | Lt (a, m_), a's -> mutual' (m_, a :: a's)
+    let rec mutual' (b, a's) = match b with
+      | Empty -> a's
+      | Le (a, m_) -> mutual' (m_, a :: a's)
+      | Lt (a, m_) -> mutual' (m_, a :: a's)
     in
     mutual' (mut_lookup a, [])
 
-  let rec closure = function
-    | [], a2s -> a2s
-    | a :: a1s, a2s ->
+  let rec closure (b, a2s) = match b with
+    | [] -> a2s
+    | a :: a1s ->
         begin if List.exists (function a' -> a = a') a2s then closure (a1s, a2s)
         else closure (mutual a @ a1s, a :: a2s)
         end

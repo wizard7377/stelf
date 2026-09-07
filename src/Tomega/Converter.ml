@@ -165,31 +165,31 @@ module MakeConverter
           let g'_, s' = strengthenCtx g_ s in
           (I.Decl (g'_, strengthenDec d_ s'), I.dot1 s')
 
-    let rec strengthenFor = function
-      | T.True, s -> T.True
-      | T.And (f1_, f2_), s ->
+    let rec strengthenFor (a, s) = match a with
+      | T.True -> T.True
+      | T.And (f1_, f2_) ->
           T.And (strengthenFor (f1_, s), strengthenFor (f2_, s))
-      | T.All ((T.UDec d_, q_), f_), s ->
+      | T.All ((T.UDec d_, q_), f_) ->
           T.All
             ((T.UDec (strengthenDec d_ s), q_), strengthenFor (f_, I.dot1 s))
-      | T.Ex ((d_, q_), f_), s ->
+      | T.Ex ((d_, q_), f_) ->
           T.Ex ((strengthenDec d_ s, q_), strengthenFor (f_, I.dot1 s))
 
-    let rec strengthenOrder = function
-      | Intsyn.Order.Arg ((u_, s1), (v_, s2)), s ->
+    let rec strengthenOrder (a, s) = match a with
+      | Intsyn.Order.Arg ((u_, s1), (v_, s2)) ->
           Intsyn.Order.Arg
             ((u_, strengthenSub s1 s), (v_, strengthenSub s2 s))
-      | Intsyn.Order.Simul os_, s ->
+      | Intsyn.Order.Simul os_ ->
           Intsyn.Order.Simul
             (map (function o_ -> strengthenOrder (o_, s)) os_)
-      | Intsyn.Order.Lex os_, s ->
+      | Intsyn.Order.Lex os_ ->
           Intsyn.Order.Lex (map (function o_ -> strengthenOrder (o_, s)) os_)
 
-    let rec strengthenTC = function
-      | T.Base o_, s -> T.Base (strengthenOrder (o_, s))
-      | T.Conj (tc1, tc2), s ->
+    let rec strengthenTC (a, s) = match a with
+      | T.Base o_ -> T.Base (strengthenOrder (o_, s))
+      | T.Conj (tc1, tc2) ->
           T.Conj (strengthenTC (tc1, s), strengthenTC (tc2, s))
-      | T.Abs (d_, tc), s ->
+      | T.Abs (d_, tc) ->
           T.Abs (strengthenDec d_ s, strengthenTC (tc, I.dot1 s))
 
     let rec strengthenSpine a1 b1 = match a1, b1 with
@@ -215,9 +215,9 @@ module MakeConverter
           let psi'', s'' = strengthenPsi' psi s' in
           (T.UDec d'_ :: psi'', s'')
 
-    let rec ctxSub = function
-      | I.Null, s -> (I.Null, s)
-      | I.Decl (g_, d_), s ->
+    let rec ctxSub (a, s) = match a with
+      | I.Null -> (I.Null, s)
+      | I.Decl (g_, d_) ->
           let g'_, s' = ctxSub (g_, s) in
           (I.Decl (g'_, I.decSub d_ s'), I.dot1 s)
 
@@ -228,12 +228,12 @@ module MakeConverter
       | M.Mapp (M.Marg (M.Star, _), mS) ->
           raise (Error "+ or - mode expected, * found")
 
-    let rec validSig = function
-      | psi0, [] -> ()
-      | psi0, (g_, v_) :: sig_ ->
-          let rec append = function
-            | g_, I.Null -> g_
-            | g_, I.Decl (g'_, d_) -> I.Decl (append (g_, g'_), d_)
+    let rec validSig (psi0, a) = match a with
+      | [] -> ()
+      | (g_, v_) :: sig_ ->
+          let rec append (g_, a) = match a with
+            | I.Null -> g_
+            | I.Decl (g'_, d_) -> I.Decl (append (g_, g'_), d_)
           in
           TypeCheck.typeCheck
             (T.coerceCtx (append (psi0, T.embedCtx g_))) (v_, I.Uni I.Type);
@@ -271,10 +271,10 @@ module MakeConverter
         | _ -> raise (Error "type family must be +/- moded")
       in
       let shiftPlus mS =
-        let rec shiftPlus' = function
-          | M.Mnil, n -> n
-          | M.Mapp (M.Marg (M.Plus, _), mS'), n -> shiftPlus' (mS', n + 1)
-          | M.Mapp (M.Marg (M.Minus, _), mS'), n -> shiftPlus' (mS', n)
+        let rec shiftPlus' (a, n) = match a with
+          | M.Mnil -> n
+          | M.Mapp (M.Marg (M.Plus, _), mS') -> shiftPlus' (mS', n + 1)
+          | M.Mapp (M.Marg (M.Minus, _), mS') -> shiftPlus' (mS', n)
         in
         shiftPlus' (mS, 0)
       in
@@ -298,23 +298,23 @@ module MakeConverter
       let _, f'_ = createIH l_ in
       f'_
 
-    let rec occursInExpN = function
-      | k, I.Uni _ -> false
-      | k, I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExpN (k + 1, v_)
-      | k, I.Root (h_, s_) -> occursInHead (k, h_) || occursInSpine (k, s_)
-      | k, I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExpN (k + 1, v_)
-      | k, I.FgnExp (csid_, csfe) ->
+    let rec occursInExpN (k, a) = match a with
+      | I.Uni _ -> false
+      | I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExpN (k + 1, v_)
+      | I.Root (h_, s_) -> occursInHead (k, h_) || occursInSpine (k, s_)
+      | I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExpN (k + 1, v_)
+      | I.FgnExp (csid_, csfe) ->
           I.FgnExpStd.fold csid_ csfe
             (function
               | u_, dp_ -> dp_ || occursInExp (k, Whnf.normalize (u_, I.id)))
             false
 
-    and occursInHead = function
-      | k, I.BVar k' -> k = k'
-      | k, I.Const _ -> false
-      | k, I.Def _ -> false
-      | k, I.FgnConst _ -> false
-      | k, I.Proj _ -> false
+    and occursInHead (k, a) = match a with
+      | I.BVar k' -> k = k'
+      | I.Const _ -> false
+      | I.Def _ -> false
+      | I.FgnConst _ -> false
+      | I.Proj _ -> false
 
     and occursInSpine = function
       | _, I.Nil -> false
@@ -331,7 +331,7 @@ module MakeConverter
       begin if isIdx1 (I.bvarSub 1 w) then dot1inv w else shiftinv w
       end
 
-    let rec peeln = function 0, w -> w | n, w -> peeln (n - 1, peel w)
+    let rec peeln (n, w) = match n with 0 -> w | n -> peeln (n - 1, peel w)
 
     let rec popn = function
       | 0, psi -> (psi, I.Null)
@@ -353,19 +353,19 @@ module MakeConverter
             let l_ = args (s'_, mS) in
             if M.modeEqual m m' then u_ :: l_ else l_
       in
-      let rec strengthenArgs = function
-        | [], s -> []
-        | u_ :: l_, s -> strengthenExp u_ s :: strengthenArgs (l_, s)
+      let rec strengthenArgs (a, s) = match a with
+        | [] -> []
+        | u_ :: l_ -> strengthenExp u_ s :: strengthenArgs (l_, s)
       in
-      let rec occursInArgs = function
-        | n, [] -> false
-        | n, u_ :: l_ -> occursInExp (n, u_) || occursInArgs (n, l_)
+      let rec occursInArgs (n, a) = match a with
+        | [] -> false
+        | u_ :: l_ -> occursInExp (n, u_) || occursInArgs (n, l_)
       in
-      let rec occursInPsi = function
-        | n, ([], l_) -> occursInArgs (n, l_)
-        | n, (T.UDec (I.Dec (_, v_)) :: psi1, l_) ->
+      let rec occursInPsi (n, a) = match a with
+        | ([], l_) -> occursInArgs (n, l_)
+        | (T.UDec (I.Dec (_, v_)) :: psi1, l_) ->
             occursInExp (n, v_) || occursInPsi (n + 1, (psi1, l_))
-        | n, (T.UDec (I.BDec (_, (cid, s))) :: psi1, l_) ->
+        | (T.UDec (I.BDec (_, (cid, s))) :: psi1, l_) ->
             let (I.BlockDec (_, _, g_, _)) = I.sgnLookup cid in
             occursInSub (n, s, g_) || occursInPsi (n + 1, (psi1, l_))
       and occursInSub = function
@@ -377,16 +377,16 @@ module MakeConverter
         | n, I.Dot (I.Exp u_, s), I.Decl (g_, _) ->
             occursInExp (n, u_) || occursInSub (n, s, g_)
         | n, I.Dot (I.Block _, s), I.Decl (g_, _) -> occursInSub (n, s, g_)
-      and occursInG = function
-        | n, I.Null, k -> k n
-        | n, I.Decl (g_, I.Dec (_, v_)), k ->
+      and occursInG (n, a, k) = match a with
+        | I.Null -> k n
+        | I.Decl (g_, I.Dec (_, v_)) ->
             occursInG
               (n, g_, function n' -> occursInExp (n', v_) || k (n' + 1))
       in
       let occursBlock (g_, (psi2, l_)) =
-        let rec occursBlock = function
-          | I.Null, n -> false
-          | I.Decl (g_, d_), n ->
+        let rec occursBlock (a, n) = match a with
+          | I.Null -> false
+          | I.Decl (g_, d_) ->
               occursInPsi (n, (psi2, l_)) || occursBlock (g_, n + 1)
         in
         occursBlock (g_, 1)
@@ -406,9 +406,9 @@ module MakeConverter
             let v'_ = strengthenExp v_ w' in
             (I.Decl (g'_, I.Dec (name, v'_)), I.dot1 w')
       in
-      let rec strengthen' = function
-        | I.Null, psi2, l_, w1 -> (I.Null, I.id, I.id)
-        | I.Decl (psi1, (T.UDec (I.Dec (name, v_)) as ld)), psi2, l_, w1 ->
+      let rec strengthen' (a, psi2, l_, w1) = match a with
+        | I.Null -> (I.Null, I.id, I.id)
+        | I.Decl (psi1, (T.UDec (I.Dec (name, v_)) as ld)) ->
             begin if isIdx1 (I.bvarSub 1 w1) then
               let w1' = dot1inv w1 in
               let psi1', w', z' = strengthen' (psi1, ld :: psi2, l_, w1') in
@@ -431,14 +431,14 @@ module MakeConverter
                 (psi1'', I.comp w' I.shift, z')
               end
             end
-        | I.Decl (psi1, (T.PDec (name, f_, None, None) as d_)), psi2, l_, w1 ->
+        | I.Decl (psi1, (T.PDec (name, f_, None, None) as d_)) ->
             let w1' = dot1inv w1 in
             let psi1', w', z' = strengthen' (psi1, d_ :: psi2, l_, w1') in
             let f'_ = strengthenFor (f_, w') in
             ( I.Decl (psi1', T.PDec (name, f'_, None, None)),
               I.dot1 w',
               I.dot1 z' )
-        | I.Decl (psi1, (T.UDec (I.BDec (name, (cid, s))) as ld)), psi2, l_, w1
+        | I.Decl (psi1, (T.UDec (I.BDec (name, (cid, s))) as ld))
           ->
             let w1' = dot1inv w1 in
             let psi1', w', z' = strengthen' (psi1, ld :: psi2, l_, w1') in
@@ -514,9 +514,9 @@ module MakeConverter
 
     let rename (I.BDec (_, (c, s))) v_ =
       let g_, l_ = I.constBlock c in
-      let rec makeSubst = function
-        | n, g_, s, [], f -> (g_, f)
-        | n, g_, s, (I.Dec (x, v'_) as d_) :: l_, f ->
+      let rec makeSubst (n, g_, s, a, f) = match a with
+        | [] -> (g_, f)
+        | (I.Dec (x, v'_) as d_) :: l_ ->
             begin if S.belowEq (I.targetFam v'_) (I.targetFam v_) then
               makeSubst (n + 1, I.Decl (g_, I.decSub d_ s), I.dot1 s, l_, f)
             else makeSubst (n, g_, I.comp s I.shift, l_, f)
@@ -525,9 +525,9 @@ module MakeConverter
       let g'_, f = makeSubst (1, g_, s, l_, function x, i -> I.Proj (x, i)) in
       (g_, renameExp f v_)
 
-    let rec append = function
-      | g_, I.Null -> g_
-      | g_, I.Decl (g'_, d_) -> I.Decl (append (g_, g'_), d_)
+    let rec append (g_, a) = match a with
+      | I.Null -> g_
+      | I.Decl (g'_, d_) -> I.Decl (append (g_, g'_), d_)
 
     let rec traverseNeg arg__7 arg__8 =
       begin match (arg__7, arg__8) with
@@ -595,20 +595,20 @@ module MakeConverter
             let (T.ValDec (_, p_, f_)) = T.lemmaLookup l in
             (T.Const l, f_)
           in
-          let rec lookup = function
-            | (b :: [], None, f_), a ->
+          let rec lookup (c, a) = match c with
+            | (b :: [], None, f_) ->
                 begin if a = b then
                   let p_ = T.Var n in
                   (p_, f_)
                 else lookupbase a
                 end
-            | (b :: [], Some (lemma :: []), f_), a ->
+            | (b :: [], Some (lemma :: []), f_) ->
                 begin if a = b then
                   let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Var n, T.Nil)) in
                   (p_, f_)
                 else lookupbase a
                 end
-            | (b :: l_, Some (lemma :: lemmas), T.And (f1_, f2_)), a ->
+            | (b :: l_, Some (lemma :: lemmas), T.And (f1_, f2_)) ->
                 begin if a = b then
                   let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Var n, T.Nil)) in
                   (p_, f1_)
@@ -643,9 +643,9 @@ module MakeConverter
           let w1' = peeln (b, w1) in
           let b'_, _ = strengthenCtx b_ w1' in
           let n' = n - I.ctxLength b'_ in
-          let rec subCtx = function
-            | I.Null, s -> (I.Null, s)
-            | I.Decl (g_, d_), s ->
+          let rec subCtx (a, s) = match a with
+            | I.Null -> (I.Null, s)
+            | I.Decl (g_, d_) ->
                 let g'_, s' = subCtx (g_, s) in
                 (I.Decl (g'_, I.decSub d_ s'), I.dot1 s')
           in
@@ -657,9 +657,9 @@ module MakeConverter
             with TypeCheck.Error _ -> raise (Error' iota));
           let rr_ = T.forSub f''_ iota in
           let f'''_ = TA.raiseFor gb' (rr_, I.id) in
-          let rec lift = function
-            | I.Null, p_ -> p_
-            | I.Decl (g_, d_), p_ ->
+          let rec lift (a, p_) = match a with
+            | I.Null -> p_
+            | I.Decl (g_, d_) ->
                 let bint, _ = T.deblockify (I.Decl (I.Null, d_)) in
                 lift (g_, T.New (T.Lam (T.UDec d_, p_)))
           in
@@ -710,9 +710,9 @@ module MakeConverter
       traverseSig' sig_
 
     let transformWorlds (fams, T.Worlds cids) =
-      let rec transformList = function
-        | [], w -> []
-        | (I.Dec (x, v_) as d_) :: l_, w ->
+      let rec transformList (c, w) = match c with
+        | [] -> []
+        | (I.Dec (x, v_) as d_) :: l_ ->
             begin if
               List.foldr
                 (function a, b -> b && S.belowEq a (I.targetFam v_))
@@ -764,9 +764,9 @@ module MakeConverter
             let d'_ = I.decSub d_ s' in
             (I.Decl (g0_, d'_), I.dot1 s')
       in
-      let rec findDecs' = function
-        | [], sig_ -> sig_
-        | cid :: cids', sig_ ->
+      let rec findDecs' (a, sig_) = match a with
+        | [] -> sig_
+        | cid :: cids' ->
             let (I.BlockDec (s, m, g_, l_)) = I.sgnLookup cid in
             let g0_, s' = mediateSub g_ in
             let d'_ = Names.decName g0_ (I.BDec (None, (cid, s'))) in
@@ -776,9 +776,9 @@ module MakeConverter
       in
       findDecs' (cids, [])
 
-    let rec staticSig = function
-      | psi0, [] -> []
-      | psi0, I.ConDec (name, _, _, _, v_, I.Type) :: sig_ ->
+    let rec staticSig (psi0, a) = match a with
+      | [] -> []
+      | I.ConDec (name, _, _, _, v_, I.Type) :: sig_ ->
           (I.Null, Whnf.normalize (v_, I.Shift (I.ctxLength psi0)))
           :: staticSig (psi0, sig_)
 
@@ -847,14 +847,14 @@ module MakeConverter
       | T.And (f1_, f2_) -> 1 + depthConj f2_
       | f_ -> 1
 
-    let rec createProjection = function
-      | psi, depth, (T.And (f1_, f2_) as f_), pattern_ ->
+    let rec createProjection (psi, depth, a, pattern_) = match a with
+      | (T.And (f1_, f2_) as f_) ->
           createProjection
             ( I.Decl (psi, T.PDec (None, f1_, None, None)),
               depth + 1,
               T.forSub f2_ (T.Shift 1),
               T.PairPrg (T.Var (depth + 2), pattern_) )
-      | psi, depth, f_, pattern_ -> (
+      | f_ -> (
           let psi' = I.Decl (psi, T.PDec (None, f_, None, None)) in
           let depth' = depth + 1 in
           function
@@ -876,14 +876,14 @@ module MakeConverter
           let lemma = T.lemmaAdd (T.ValDec ("#" ^ name, p_, f''_)) in
           lemma :: installProjection (cids, n - 1, f_, proj)
 
-    let rec installSelection = function
-      | cid :: [], lemma :: [], f1_, main ->
+    let rec installSelection (a, b, c, main) = match a, b, c with
+      | cid :: [], lemma :: [], f1_ ->
           let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Const main, T.Nil)) in
           let name = I.conDecName (I.sgnLookup cid) in
           ignore (TomegaTypeCheck.checkPrg I.Null (p_, f1_));
           let lemma' = T.lemmaAdd (T.ValDec (name, p_, f1_)) in
           [ lemma' ]
-      | cid :: cids, lemma :: lemmas, T.And (f1_, f2_), main ->
+      | cid :: cids, lemma :: lemmas, T.And (f1_, f2_) ->
           let p_ = T.Redex (T.Const lemma, T.AppPrg (T.Const main, T.Nil)) in
           let name = I.conDecName (I.sgnLookup cid) in
           ignore (TomegaTypeCheck.checkPrg I.Null (p_, f1_));

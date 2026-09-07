@@ -91,23 +91,23 @@ end) : MTPPROVER.MTPROVER = struct
     let openStates : S.state list ref = ref []
     let solvedStates : S.state list ref = ref []
 
-    let rec transformOrder' = function
-      | g_, Order.Arg k ->
+    let rec transformOrder' (g_, a) = match a with
+      | Order.Arg k ->
           let k' = I.ctxLength g_ - k + 1 in
           let (I.Dec (_, v_)) = I.ctxDec g_ k' in
           S.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
-      | g_, Order.Lex os_ ->
+      | Order.Lex os_ ->
           S.Lex (map (function o_ -> transformOrder' (g_, o_)) os_)
-      | g_, Order.Simul os_ ->
+      | Order.Simul os_ ->
           S.Simul (map (function o_ -> transformOrder' (g_, o_)) os_)
 
-    let rec transformOrder = function
-      | g_, F.All (F.Prim d_, f_), os_ ->
+    let rec transformOrder (g_, true_, a) = match true_, a with
+      | F.All (F.Prim d_, f_), os_ ->
           S.All (d_, transformOrder (I.Decl (g_, d_), f_, os_))
-      | g_, F.And (f1_, f2_), o_ :: os_ ->
+      | F.And (f1_, f2_), o_ :: os_ ->
           S.And (transformOrder (g_, f1_, [ o_ ]), transformOrder (g_, f2_, os_))
-      | g_, F.Ex _, o_ :: [] -> transformOrder' (g_, o_)
-      | g_, true_, o_ :: [] -> transformOrder' (g_, o_)
+      | F.Ex _, o_ :: [] -> transformOrder' (g_, o_)
+      | true_, o_ :: [] -> transformOrder' (g_, o_)
 
     let select c = try Order.selLookup c with _ -> Order.Lex []
     let error s = raise (Error s)

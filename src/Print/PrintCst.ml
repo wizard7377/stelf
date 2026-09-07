@@ -184,17 +184,17 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
 
   (* Pure IntSyn traversals, not printing: moved across unchanged from
      [Print_]. *)
-  let rec collectEVars = function
-    | [], xs_ -> xs_
-    | (u_, _) :: xnames, xs_ ->
+  let rec collectEVars (a, xs_) = match a with
+    | [] -> xs_
+    | (u_, _) :: xnames ->
         collectEVars
           (xnames, Abstract.collectEVars IntSyn.Null (u_, IntSyn.id) xs_)
 
   let eqCnstr r1 r2 = r1 == r2
 
-  let rec mergeConstraints = function
-    | [], cnstrs2 -> cnstrs2
-    | cnstr :: cnstrs1, cnstrs2 ->
+  let rec mergeConstraints (a, cnstrs2) = match a with
+    | [] -> cnstrs2
+    | cnstr :: cnstrs1 ->
         if List.exists (eqCnstr cnstr) cnstrs2 then
           mergeConstraints (cnstrs1, cnstrs2)
         else cnstr :: mergeConstraints (cnstrs1, cnstrs2)

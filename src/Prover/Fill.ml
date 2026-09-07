@@ -110,8 +110,8 @@ end) : FILL with module State = Fill__0.State' = struct
     exception Success of int
 
     let expand (S.FocusLF (I.EVar (r, g_, v_, _) as y_)) =
-      let rec try_ = function
-        | ((I.Root _, _) as vs_), fs_, o_ -> (
+      let rec try_ (a, fs_, o_) = match a with
+        | ((I.Root _, _) as vs_) -> (
             try
               CsManager.trail (function () ->
                   begin
@@ -119,10 +119,10 @@ end) : FILL with module State = Fill__0.State' = struct
                     o_ :: fs_
                   end)
             with Unify.Unify _ -> fs_)
-        | (I.Pi ((I.Dec (_, v1_), _), v2_), s), fs_, o_ ->
+        | (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
             let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
             try_ ((v2_, I.Dot (I.Exp x_, s)), fs_, o_)
-        | (I.EClo (v_, s'), s), fs_, o_ -> try_ ((v_, I.comp s' s), fs_, o_)
+        | (I.EClo (v_, s'), s) -> try_ ((v_, I.comp s' s), fs_, o_)
       in
       let rec matchCtx = function
         | I.Null, _, fs_ -> fs_
@@ -133,31 +133,31 @@ end) : FILL with module State = Fill__0.State' = struct
                 try_ ((v_, I.Shift (n + 1)), fs_, FillWithBVar (y_, n + 1)) )
         | I.Decl (g_, I.NDec _), n, fs_ -> matchCtx (g_, n + 1, fs_)
       in
-      let rec matchSig = function
-        | [], fs_ -> fs_
-        | I.Const c :: l_, fs_ ->
+      let rec matchSig (a, fs_) = match a with
+        | [] -> fs_
+        | I.Const c :: l_ ->
             matchSig
               (l_, try_ ((I.constType c, I.id), fs_, FillWithConst (y_, c)))
-        | I.Def c :: l_, fs_ ->
+        | I.Def c :: l_ ->
             matchSig
               (l_, try_ ((I.constType c, I.id), fs_, FillWithConst (y_, c)))
-        | _ :: l_, fs_ -> matchSig (l_, fs_)
+        | _ :: l_ -> matchSig (l_, fs_)
       in
       matchCtx (g_, 0, matchSig (Index.lookup (I.targetFam v_), []))
 
     let apply = function
       | FillWithBVar ((I.EVar (r, g_, v_, _) as y_), n) ->
-          let rec doit = function
-            | ((I.Root _, _) as vs_), k -> begin
+          let rec doit (a, k) = match a with
+            | ((I.Root _, _) as vs_) -> begin
                 Unify.unify g_ vs_ (v_, I.id);
                 k I.Nil
               end
-            | (I.Pi ((I.Dec (_, v1_), _), v2_), s), k ->
+            | (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
                 let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
                 doit
                   ( (v2_, I.Dot (I.Exp x_, s)),
                     function s_ -> k (I.App (x_, s_)) )
-            | (I.EClo (v_, t), s), k -> doit ((v_, I.comp t s), k)
+            | (I.EClo (v_, t), s) -> doit ((v_, I.comp t s), k)
           in
           let (I.Dec (_, w_)) = I.ctxDec g_ n in
           doit
@@ -166,12 +166,12 @@ end) : FILL with module State = Fill__0.State' = struct
               | s_ -> Unify.unify g_ (y_, I.id) (I.Root (I.BVar n, s_), I.id)
             )
       | FillWithConst ((I.EVar (r, g0_, v_, _) as y_), c) ->
-          let rec doit = function
-            | ((I.Root _, _) as vs_), k -> begin
+          let rec doit (a, k) = match a with
+            | ((I.Root _, _) as vs_) -> begin
                 Unify.unify g0_ vs_ (v_, I.id);
                 k I.Nil
               end
-            | (I.Pi ((I.Dec (_, v1_), _), v2_), s), k ->
+            | (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
                 let x_ = I.newEVar g0_ (I.EClo (v1_, s)) in
                 doit
                   ( (v2_, I.Dot (I.Exp x_, s)),

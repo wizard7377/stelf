@@ -116,8 +116,8 @@ module Make_CPrint (Print_ : PRINT) (Formatter_ : FORMATTER) (Names_ : NAMES) :
     end
 
   (* conDecToString (c, clause) printed representation of static clause *)
-  let conDecToString = function
-    | c, SClause r ->
+  let conDecToString (c, a) = match a with
+    | SClause r ->
         ignore (Names.varReset IntSyn.Null);
         let name = IntSyn.conDecName (IntSyn.sgnLookup c) in
         let l = String.size name in
@@ -126,7 +126,7 @@ module Make_CPrint (Print_ : PRINT) (Formatter_ : FORMATTER) (Names_ : NAMES) :
         end)
         ^ clauseToString "\t" (IntSyn.Null, r)
         ^ "\n"
-    | c, Void -> Print.conDecToString (IntSyn.sgnLookup c) ^ "\n\n"
+    | Void -> Print.conDecToString (IntSyn.sgnLookup c) ^ "\n\n"
 
   (* sProgToString () = printed representation of static program *)
   let sProgToString () =

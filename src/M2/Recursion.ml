@@ -153,9 +153,9 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       select (O.selLookup c)
 
     let set_parameter (g_, (I.EVar (r, _, v_, _) as x_), k, sc, ops) =
-      let rec set_parameter' = function
-        | 0, ops' -> ops'
-        | k', ops' ->
+      let rec set_parameter' (k', ops') = match k' with
+        | 0 -> ops'
+        | k' ->
             let (I.Dec (_, v'_) as d'_) = I.ctxDec g_ k' in
             let ops'' =
               CsManager.trail (function () ->
@@ -174,15 +174,10 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     let rec ltinit (g_, k, (us_, vs_), usVs', sc, ops) =
       ltinitW (g_, k, Whnf.whnfEta us_ vs_, usVs', sc, ops)
 
-    and ltinitW = function
-      | g_, k, (us_, ((I.Root _, _) as vs_)), usVs', sc, ops ->
+    and ltinitW (g_, k, a, usVs', sc, ops) = match a, usVs' with
+      | (us_, ((I.Root _, _) as vs_)), usVs' ->
           lt (g_, k, (us_, vs_), usVs', sc, ops)
-      | ( g_,
-          k,
-          ((I.Lam (d1_, u_), s1), (I.Pi (d2_, v_), s2)),
-          ((u'_, s1'), (v'_, s2')),
-          sc,
-          ops ) ->
+      | ((I.Lam (d1_, u_), s1), (I.Pi (d2_, v_), s2)), ((u'_, s1'), (v'_, s2')) ->
           ltinit
             ( I.Decl (g_, I.decSub d1_ s1),
               k + 1,
@@ -272,14 +267,9 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       let ops' = eq (g_, (us_, vs_), (us', vs'_), sc, ops) in
       leW (g_, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ops')
 
-    and leW = function
-      | ( g_,
-          k,
-          ((u_, s1), (v_, s2)),
-          ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
-          sc,
-          ops ) ->
+    and leW (g_, k, a, b, sc, ops) = match a, b with
+      | ((u_, s1), (v_, s2)), ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
           begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
             let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' ops' = set_parameter (g_, x_, k, sc, ops') in
@@ -303,18 +293,18 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
             else ops
             end
           end
-      | g_, k, (us_, vs_), (us', vs'_), sc, ops ->
+      | (us_, vs_), (us', vs'_) ->
           lt (g_, k, (us_, vs_), (us', vs'_), sc, ops)
 
-    let rec ordlt = function
-      | g_, O.Arg usVs, O.Arg usVs', sc, ops ->
+    let rec ordlt (g_, a, b, sc, ops) = match a, b with
+      | O.Arg usVs, O.Arg usVs' ->
           ltinit (g_, 0, usVs, usVs', sc, ops)
-      | g_, O.Lex l_, O.Lex l'_, sc, ops -> ordltLex (g_, l_, l'_, sc, ops)
-      | g_, O.Simul l_, O.Simul l'_, sc, ops -> ordltSimul (g_, l_, l'_, sc, ops)
+      | O.Lex l_, O.Lex l'_ -> ordltLex (g_, l_, l'_, sc, ops)
+      | O.Simul l_, O.Simul l'_ -> ordltSimul (g_, l_, l'_, sc, ops)
 
-    and ordltLex = function
-      | g_, [], [], sc, ops -> ops
-      | g_, o_ :: l_, o'_ :: l'_, sc, ops ->
+    and ordltLex (g_, a, b, sc, ops) = match a, b with
+      | [], [] -> ops
+      | o_ :: l_, o'_ :: l'_ ->
           let ops' =
             CsManager.trail (function () -> ordlt (g_, o_, o'_, sc, ops))
           in
@@ -325,9 +315,9 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
               (function ops'' -> ordltLex (g_, l_, l'_, sc, ops'')),
               ops' )
 
-    and ordltSimul = function
-      | g_, [], [], sc, ops -> ops
-      | g_, o_ :: l_, o'_ :: l'_, sc, ops ->
+    and ordltSimul (g_, a, b, sc, ops) = match a, b with
+      | [], [] -> ops
+      | o_ :: l_, o'_ :: l'_ ->
           let ops'' =
             CsManager.trail (function () ->
                 ordlt
@@ -344,9 +334,9 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
               (function ops' -> ordltSimul (g_, l_, l'_, sc, ops')),
               ops'' )
 
-    and ordleSimul = function
-      | g_, [], [], sc, ops -> sc ops
-      | g_, o_ :: l_, o'_ :: l'_, sc, ops ->
+    and ordleSimul (g_, a, b, sc, ops) = match a, b with
+      | [], [] -> sc ops
+      | o_ :: l_, o'_ :: l'_ ->
           ordle
             ( g_,
               o_,
@@ -354,19 +344,19 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
               (function ops' -> ordleSimul (g_, l_, l'_, sc, ops')),
               ops )
 
-    and ordeq = function
-      | g_, O.Arg (us_, vs_), O.Arg (us', vs'_), sc, ops ->
+    and ordeq (g_, a, b, sc, ops) = match a, b with
+      | O.Arg (us_, vs_), O.Arg (us', vs'_) ->
           begin if
             Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
           then sc ops
           else ops
           end
-      | g_, O.Lex l_, O.Lex l'_, sc, ops -> ordeqs (g_, l_, l'_, sc, ops)
-      | g_, O.Simul l_, O.Simul l'_, sc, ops -> ordeqs (g_, l_, l'_, sc, ops)
+      | O.Lex l_, O.Lex l'_ -> ordeqs (g_, l_, l'_, sc, ops)
+      | O.Simul l_, O.Simul l'_ -> ordeqs (g_, l_, l'_, sc, ops)
 
-    and ordeqs = function
-      | g_, [], [], sc, ops -> sc ops
-      | g_, o_ :: l_, o'_ :: l'_, sc, ops ->
+    and ordeqs (g_, a, b, sc, ops) = match a, b with
+      | [], [] -> sc ops
+      | o_ :: l_, o'_ :: l'_ ->
           ordeq
             ( g_,
               o_,
@@ -404,9 +394,9 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
 
     and selectW (g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s)) =
       let rec select' (g_, (vs1, vs2)) = selectW' (g_, (vs1, Whnf.whnf vs2))
-      and selectW' = function
-        | g_, (vs1, ((I.Root _, _) as vs2)) -> (g_, (vs1, vs2))
-        | g_, ((v1_, s1), (I.Pi ((d_, p_), v2'), s2)) ->
+      and selectW' (g_, a) = match a with
+        | (vs1, ((I.Root _, _) as vs2)) -> (g_, (vs1, vs2))
+        | ((v1_, s1), (I.Pi ((d_, p_), v2'), s2)) ->
             select'
               ( I.Decl (g_, I.decSub d_ s2),
                 ((v1_, I.comp s1 I.shift), (v2', I.dot1 s2)) )
@@ -432,15 +422,15 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
             :: ops'),
         ops )
 
-    let rec expandLazy' = function
-      | s_, empty_, ops -> ops
-      | s_, O.Le (t, l_), ops -> expandLazy' (s_, l_, ordle (lemma (s_, t, ops)))
-      | s_, O.Lt (t, l_), ops -> expandLazy' (s_, l_, ordlt (lemma (s_, t, ops)))
+    let rec expandLazy' (s_, empty_, ops) = match empty_ with
+      | empty_ -> ops
+      | O.Le (t, l_) -> expandLazy' (s_, l_, ordle (lemma (s_, t, ops)))
+      | O.Lt (t, l_) -> expandLazy' (s_, l_, ordlt (lemma (s_, t, ops)))
 
     let recursionDepth v_ =
-      let rec recursionDepth' = function
-        | I.Root _, n -> n
-        | I.Pi (_, v_), n -> recursionDepth' (v_, n + 1)
+      let rec recursionDepth' (a, n) = match a with
+        | I.Root _ -> n
+        | I.Pi (_, v_) -> recursionDepth' (v_, n + 1)
       in
       recursionDepth' (v_, 0)
 

@@ -118,12 +118,12 @@ end) : SPLIT with module State = Split__0.State' = struct
 
     let rec instEVars (vs_, p, xsRev) = instEVarsW (Whnf.whnf vs_, p, xsRev)
 
-    and instEVarsW = function
-      | vs_, 0, xsRev -> (vs_, xsRev)
-      | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p, xsRev ->
+    and instEVarsW (vs_, p, xsRev) = match vs_, p with
+      | vs_, 0 -> (vs_, xsRev)
+      | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p ->
           let x1_ = I.newEVar I.Null (I.EClo (v1_, s)) in
           instEVars ((v2_, I.Dot (I.Exp x1_, s)), p - 1, Some x1_ :: xsRev)
-      | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p, xsRev ->
+      | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p ->
           let l1_ = I.newLVar (I.Shift 0) (l, I.comp t s) in
           instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev)
 
@@ -137,9 +137,9 @@ end) : SPLIT with module State = Split__0.State' = struct
 
     let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
 
-    and createEVarSpineW = function
-      | g_, ((I.Root _, s) as vs_) -> (I.Nil, vs_)
-      | g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
+    and createEVarSpineW (g_, a) = match a with
+      | ((I.Root _, s) as vs_) -> (I.Nil, vs_)
+      | (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
           let x_ = createEVar (g_, I.EClo (v1_, s)) in
           let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
           (I.App (x_, s_), vs_)
@@ -161,27 +161,27 @@ end) : SPLIT with module State = Split__0.State' = struct
       let s_, vs'_ = createEVarSpine (g_, (v_, s)) in
       (I.Root (h_, s_), vs'_)
 
-    let rec constCases = function
-      | g_, vs_, [], sc -> ()
-      | g_, vs_, (I.Const c as h_) :: sgn', sc ->
+    let rec constCases (g_, vs_, a, sc) = match a with
+      | [] -> ()
+      | (I.Const c as h_) :: sgn' ->
           let u_, vs'_ = createAtomConst g_ h_ in
           ignore (CsManager.trail (function () ->
                 begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
                 end));
           constCases (g_, vs_, sgn', sc)
-      | g_, vs_, (I.Def c as h_) :: sgn', sc ->
+      | (I.Def c as h_) :: sgn' ->
           let u_, vs'_ = createAtomConst g_ h_ in
           ignore (CsManager.trail (function () ->
                 begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
                 end));
           constCases (g_, vs_, sgn', sc)
-      | g_, vs_, _ :: sgn', sc ->
+      | _ :: sgn' ->
           (* Skip other head types *)
           constCases (g_, vs_, sgn', sc)
 
-    let rec paramCases = function
-      | g_, vs_, 0, sc -> ()
-      | g_, vs_, k, sc ->
+    let rec paramCases (g_, vs_, k, sc) = match k with
+      | 0 -> ()
+      | k ->
           let u_, vs'_ = createAtomBVar g_ k in
           ignore (CsManager.trail (function () ->
                 begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
@@ -205,9 +205,9 @@ end) : SPLIT with module State = Split__0.State' = struct
       let lvar = I.newLVar sk (cid, t') in
       blockCases' (g_, vs_, (lvar, 1), (t', piDecs), sc)
 
-    and blockCases' = function
-      | g_, vs_, (lvar, i), (t, []), sc -> ()
-      | g_, vs_, (lvar, i), (t, I.Dec (_, v'_) :: piDecs), sc ->
+    and blockCases' (g_, vs_, a, b, sc) = match a, b with
+      | (lvar, i), (t, []) -> ()
+      | (lvar, i), (t, I.Dec (_, v'_) :: piDecs) ->
           let u_, vs'_ = createAtomProj (g_, I.Proj (lvar, i), (v'_, t)) in
           ignore (CsManager.trail (function () ->
                 begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
@@ -215,9 +215,9 @@ end) : SPLIT with module State = Split__0.State' = struct
           let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.Nil)), t) in
           blockCases' (g_, vs_, (lvar, i + 1), (t', piDecs), sc)
 
-    let rec worldCases = function
-      | g_, vs_, T.Worlds [], sc -> ()
-      | g_, vs_, T.Worlds (cid :: cids), sc -> begin
+    let rec worldCases (g_, vs_, a, sc) = match a with
+      | T.Worlds [] -> ()
+      | T.Worlds (cid :: cids) -> begin
           blockCases (g_, vs_, cid, I.constBlock cid, sc);
           worldCases (g_, vs_, T.Worlds cids, sc)
         end
@@ -259,9 +259,9 @@ end) : SPLIT with module State = Split__0.State' = struct
           let y_ = T.newEVarTC (I.Null, T.FClo (f_, t'), tc1, tc2) in
           T.Dot (T.Prg y_, t')
 
-    let rec mkCases = function
-      | [], f_ -> []
-      | (psi, t) :: cs, f_ ->
+    let rec mkCases (a, f_) = match a with
+      | [] -> []
+      | (psi, t) :: cs ->
           let x_ = T.newEVar psi (T.FClo (f_, t)) in
           (psi, t, x_) :: mkCases (cs, f_)
 

@@ -95,8 +95,8 @@ end) : MTPPRINT.MTPRINT = struct
       let g'_ = Names.ctxName g_ in
       S.State (n, (g'_, b_), (ih_, oh), d, o_, h_, f_)
 
-    let rec formatOrder = function
-      | g_, S.Arg (us_, vs_) ->
+    let rec formatOrder (g_, a) = match a with
+      | S.Arg (us_, vs_) ->
           let u1_, s1_ = us_ in
           let u2_, s2_ = vs_ in
           [
@@ -104,33 +104,33 @@ end) : MTPPRINT.MTPRINT = struct
             Fmt.string ":";
             printFmt (Print.formatExp g_ (I.EClo (u2_, s2_)));
           ]
-      | g_, S.Lex os_ ->
+      | S.Lex os_ ->
           [
             Fmt.string "{";
             Fmt.hVbox0 1 0 1 (formatOrders (g_, os_));
             Fmt.string "}";
           ]
-      | g_, S.Simul os_ ->
+      | S.Simul os_ ->
           [
             Fmt.string "[";
             Fmt.hVbox0 1 0 1 (formatOrders (g_, os_));
             Fmt.string "]";
           ]
 
-    and formatOrders = function
-      | g_, [] -> []
-      | g_, o_ :: [] -> formatOrder (g_, o_)
-      | g_, o_ :: os_ ->
+    and formatOrders (g_, a) = match a with
+      | [] -> []
+      | o_ :: [] -> formatOrder (g_, o_)
+      | o_ :: os_ ->
           formatOrder (g_, o_)
           @ [ Fmt.string ","; Fmt.break_ ]
           @ formatOrders (g_, os_)
 
-    let formatTag = function
-      | g_, S.Parameter l -> [ Fmt.string "<p>" ]
-      | g_, S.Lemma (S.Splits k) ->
+    let formatTag (g_, a) = match a with
+      | S.Parameter l -> [ Fmt.string "<p>" ]
+      | S.Lemma (S.Splits k) ->
           [ Fmt.string "<i"; Fmt.string (Int.toString k); Fmt.string ">" ]
-      | g_, S.Lemma S.Rl -> [ Fmt.string "<i >" ]
-      | g_, S.Lemma S.RLdone -> [ Fmt.string "<i*>" ]
+      | S.Lemma S.Rl -> [ Fmt.string "<i >" ]
+      | S.Lemma S.RLdone -> [ Fmt.string "<i*>" ]
 
     let rec formatCtx a1 b1 = match a1, b1 with
       | I.Null, b_ -> []

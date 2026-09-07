@@ -43,9 +43,9 @@ module Strict = struct
     | _, _ -> raise EtaContract
     end
 
-  let rec pattern_spine' = function
-    | d_, [] -> true
-    | d_, n :: s ->
+  let rec pattern_spine' (d_, a) = match a with
+    | [] -> true
+    | n :: s ->
         let isn x = x = n in
         let hasn s = List.exists isn s in
         hasn d_ && (not (hasn s)) && pattern_spine' (d_, s)

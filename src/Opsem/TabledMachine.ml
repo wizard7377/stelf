@@ -141,13 +141,13 @@ end) : TABLED = struct
     | I.Def a, I.Def a' -> a = a'
     | _ -> false
 
-  let rec append = function
-    | I.Null, g_ -> g_
-    | IntSyn.Decl (g'_, d_), g_ -> IntSyn.Decl (append (g'_, g_), d_)
+  let rec append (a, g_) = match a with
+    | I.Null -> g_
+    | IntSyn.Decl (g'_, d_) -> IntSyn.Decl (append (g'_, g_), d_)
 
-  let rec shift = function
-    | I.Null, s -> s
-    | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
+  let rec shift (a, s) = match a with
+    | I.Null -> s
+    | IntSyn.Decl (g_, d_) -> I.dot1 (shift (g_, s))
 
   let rec raiseType a1 b1 = match a1, b1 with
     | I.Null, v_ -> v_
@@ -181,18 +181,18 @@ end) : TABLED = struct
      then . |- s : D where s = X_n....X_1.id
 
     *)
-  let rec ctxToEVarSub = function
-    | I.Null, s -> s
-    | I.Decl (g_, I.Dec (_, a_)), s ->
+  let rec ctxToEVarSub (a, s) = match a with
+    | I.Null -> s
+    | I.Decl (g_, I.Dec (_, a_)) ->
         let x_ = I.newEVar I.Null a_ in
         I.Dot (I.Exp x_, ctxToEVarSub (g_, s))
 
-  let rec ctxToAVarSub = function
-    | I.Null, s -> s
-    | I.Decl (g_, I.Dec (_, a_)), s ->
+  let rec ctxToAVarSub (a, s) = match a with
+    | I.Null -> s
+    | I.Decl (g_, I.Dec (_, a_)) ->
         let x_ = I.newEVar I.Null a_ in
         I.Dot (I.Exp x_, ctxToAVarSub (g_, s))
-    | I.Decl (g_, I.ADec (_, d)), s ->
+    | I.Decl (g_, I.ADec (_, d)) ->
         let x_ = I.newAVar () in
         I.Dot (I.Exp (I.EClo (x_, I.Shift (-d))), ctxToAVarSub (g_, s))
 
@@ -206,9 +206,9 @@ end) : TABLED = struct
        return true, if VarDefs are solvable
               false otherwise
  *)
-  let rec solveEqn = function
-    | (trivial_, s), g_ -> true
-    | (T.Unify (g'_, e1, n_, eqns), s), g_ ->
+  let rec solveEqn (a, g_) = match a with
+    | (trivial_, s) -> true
+    | (T.Unify (g'_, e1, n_, eqns), s) ->
         let g''_ = append (g'_, g_) in
         let s' = shift (g''_, s) in
         Assign.unifiable g''_ (n_, s') (e1, s') && solveEqn ((eqns, s), g_)
@@ -325,9 +325,9 @@ end) : TABLED = struct
      any effect  sc O1  might have
 
    *)
-  let rec retrieve' = function
-    | (g_, u_, s), asub, [], sc -> ()
-    | (g_, u_, s), (esub, asub), ((d'_, s1), o1_) :: a_, sc ->
+  let rec retrieve' (b, c, d, sc) = match b, c, d with
+    | (g_, u_, s), asub, [] -> ()
+    | (g_, u_, s), (esub, asub), ((d'_, s1), o1_) :: a_ ->
         let s1' =
           ctxToEVarSub (d'_, I.Shift (I.ctxLength d'_))
           (* I.id *)
@@ -362,9 +362,9 @@ end) : TABLED = struct
         Effects: instantiation of EVars in s
 
    *)
-  let rec retrieveV = function
-    | (g_, u_, s), [], sc -> ()
-    | (g_, u_, s), ((dEVars, s1), o1_) :: a_, sc ->
+  let rec retrieveV (a, b, sc) = match a, b with
+    | (g_, u_, s), [] -> ()
+    | (g_, u_, s), ((dEVars, s1), o1_) :: a_ ->
         let s1' =
           ctxToEVarSub (dEVars, I.Shift (I.ctxLength dEVars))
           (* I.id *)
@@ -527,16 +527,16 @@ end) : TABLED = struct
             C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
             function o_ -> sc o_ )
 
-  and rSolve = function
-    | ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
+  and rSolve (ps', a, b, sc) = match a, b with
+    | (C.Eq q_, s), C.DProg (g_, dPool) ->
         begin if Unify.unifiable g_ ps' (q_, s) then sc [] else ()
         end
-    | ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc ->
+    | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
         begin match Assign.assignable g_ ps' (q_, s) with
         | Some cnstr -> aSolve ((eqns, s), dp, cnstr, function s_ -> sc s_)
         | None -> ()
         end
-    | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
+    | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
         let x_ = I.newEVar g_ (I.EClo (a_, s)) in
         rSolve
           ( ps',
@@ -546,23 +546,20 @@ end) : TABLED = struct
             | s1_ -> !solve_fn_ref ((g, s), dp, function s2_ -> sc (s1_ @ s2_))
           )
         (* is this EVar redundant? -fp *)
-    | ps', (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp), sc ->
+    | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp) ->
         let x_ = I.newEVar g_ (I.EClo (a_, s)) in
         rSolve (ps', (r, I.Dot (I.Exp x_, s)), dp, function s_ -> sc s_)
-    | ( ps',
-        (C.Axists (I.ADec (Some x_, d), r), s),
-        (C.DProg (g_, dPool) as dp),
-        sc ) ->
+    | (C.Axists (I.ADec (Some x_, d), r), s), (C.DProg (g_, dPool) as dp) ->
         let x'_ = I.newAVar () in
         rSolve (ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
   (* we don't increase the proof term here! *)
   (* fail *)
 
-  and aSolve = function
-    | (trivial_, s), dp, cnstr, sc ->
+  and aSolve (a, b, cnstr, sc) = match a, b with
+    | (trivial_, s), dp ->
         begin if Assign.solveCnstr cnstr then sc [] else ()
         end
-    | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp), cnstr, sc
+    | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp)
       ->
         let g''_ = append (g'_, g_) in
         let s' = shift (g'_, s) in
@@ -676,12 +673,12 @@ end) : TABLED = struct
       then retrieve all new answers
      else fail
      *)
-  let retrieval = function
-    | Loop, (g'_, u'_, s'), sc, (asub, answRef), n ->
+  let retrieval (a, b, sc, c, n) = match a, b, c with
+    | Loop, (g'_, u'_, s'), (asub, answRef) ->
         begin if T.noAnswers answRef then ()
         else retrieve (n, (g'_, u'_, s'), (asub, answRef), sc)
         end
-    | Divergence ((p, s), dp), (g'_, u'_, s'), sc, (asub, answRef), n ->
+    | Divergence ((p, s), dp), (g'_, u'_, s'), (asub, answRef) ->
         matchAtom
           ( (p, s),
             dp,

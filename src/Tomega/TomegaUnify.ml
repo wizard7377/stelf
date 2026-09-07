@@ -86,26 +86,26 @@ end) : TOMEGAUNIFY = struct
     let rec unifyFor psi f1_ f2_ =
       unifyForN (psi, T.forSub f1_ T.id, T.forSub f2_ T.id)
 
-    and unifyForN = function
-      | psi, T.True, T.True -> ()
-      | psi, T.Ex ((d1_, _), f1_), T.Ex ((d2_, _), f2_) -> begin
+    and unifyForN (psi, a, b) = match a, b with
+      | T.True, T.True -> ()
+      | T.Ex ((d1_, _), f1_), T.Ex ((d2_, _), f2_) -> begin
           unifyDec (psi, T.UDec d1_, T.UDec d2_);
           unifyFor (I.Decl (psi, T.UDec d1_)) f1_ f2_
         end
-      | psi, T.All ((d1_, _), f1_), T.All ((d2_, _), f2_) -> begin
+      | T.All ((d1_, _), f1_), T.All ((d2_, _), f2_) -> begin
           unifyDec (psi, d1_, d2_);
           unifyFor (I.Decl (psi, d1_)) f1_ f2_
         end
-      | psi, T.FVar (_, r), f_ -> r := Some f_
-      | psi, f_, T.FVar (_, r) -> r := Some f_
-      | psi, _, _ -> raise (Unify "Formula mismatch")
+      | T.FVar (_, r), f_ -> r := Some f_
+      | f_, T.FVar (_, r) -> r := Some f_
+      | _, _ -> raise (Unify "Formula mismatch")
 
-    and unifyDec = function
-      | psi, T.UDec d1_, T.UDec d2_ ->
+    and unifyDec (psi, a, b) = match a, b with
+      | T.UDec d1_, T.UDec d2_ ->
           begin if Conv.convDec (d1_, I.id) (d2_, I.id) then ()
           else raise (Unify "Declaration mismatch")
           end
-      | psi, T.PDec (_, f1_, _, _), T.PDec (_, f2_, _, _) ->
+      | T.PDec (_, f1_, _, _), T.PDec (_, f2_, _, _) ->
           unifyFor psi f1_ f2_
   end
 

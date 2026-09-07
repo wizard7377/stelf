@@ -150,9 +150,9 @@ end) : PROVER = struct
       end
 
     let makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
-      let rec makeConDec' = function
-        | I.Null, v_, k -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
-        | I.Decl (g_, d_), v_, k ->
+      let rec makeConDec' (a, v_, k) = match a with
+        | I.Null -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
+        | I.Decl (g_, d_) ->
             makeConDec' (g_, I.Pi ((d_, I.Maybe), v_), k + 1)
       in
       makeConDec' (g_, v_, 0)

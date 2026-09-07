@@ -238,8 +238,8 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
       end
     in
     ignore (List.app add eqns);
-    let doInst = function
-      | (Internal cid, r), conDec_ ->
+    let doInst (a, conDec_) = match a with
+      | (Internal cid, r) ->
           begin try
             ModSyn.strictify
               (ExtSyn.internalInst
@@ -250,7 +250,7 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
                  ((msg ^ "\nin instantiation generated for ")
                  ^ Names.qidToString (Names.constQid cid)))
           end
-      | (External tm, r), conDec_ ->
+      | (External tm, r) ->
           ModSyn.strictify (ExtSyn.externalInst conDec_ tm r)
     in
     let transformConDec (cid, conDec_) =

@@ -43,9 +43,9 @@ module Queue : QUEUE = struct
   (* toList q ==> (l, NONE)  means q == l and toList is constant time *)
   (* toList q ==> (l, SOME(q')) means q == l == q' *)
   (* and toList q' is constant time *)
-  let toList = function
-    | [], out -> (out, None)
-    | inp, out ->
+  let toList (inp, out) = match inp with
+    | [] -> (out, None)
+    | inp ->
         let out' = out @ List.rev inp in
         (out', Some ([], out'))
 end

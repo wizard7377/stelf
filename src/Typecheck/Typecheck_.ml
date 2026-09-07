@@ -45,18 +45,18 @@ module MakeTypeCheck
   open! struct
     module I = IntSyn
 
-    let rec subToString = function
-      | g_, I.Dot (I.Idx n, s) -> (Int.toString n ^ ".") ^ subToString (g_, s)
-      | g_, I.Dot (I.Exp u_, s) ->
+    let rec subToString (g_, a) = match a with
+      | I.Dot (I.Idx n, s) -> (Int.toString n ^ ".") ^ subToString (g_, s)
+      | I.Dot (I.Exp u_, s) ->
           (("(" ^ Print.expToString g_ u_) ^ ").") ^ subToString (g_, s)
-      | g_, I.Dot (I.Block (I.LVar _ as l_), s) ->
+      | I.Dot (I.Block (I.LVar _ as l_), s) ->
           (lVarToString (g_, l_) ^ ".") ^ subToString (g_, s)
-      | g_, I.Shift n -> "^" ^ Int.toString n
+      | I.Shift n -> "^" ^ Int.toString n
 
-    and lVarToString = function
-      | g_, I.LVar ({ contents = Some b_ }, sk, (l, t)) ->
+    and lVarToString (g_, a) = match a with
+      | I.LVar ({ contents = Some b_ }, sk, (l, t)) ->
           lVarToString (g_, I.blockSub b_ sk)
-      | g_, I.LVar ({ contents = None }, sk, (cid, t)) ->
+      | I.LVar ({ contents = None }, sk, (cid, t)) ->
           ((("#" ^ I.conDecName (I.sgnLookup cid)) ^ "[") ^ subToString (g_, t))
           ^ "]"
 
@@ -113,15 +113,15 @@ module MakeTypeCheck
 
     and inferUni I.Type = I.Kind
 
-    and inferExpW = function
-      | g_, (I.Uni l_, _) -> (I.Uni (inferUni l_), I.id)
-      | g_, (I.Pi ((d_, _), v_), s) -> begin
+    and inferExpW (g_, a) = match a with
+      | (I.Uni l_, _) -> (I.Uni (inferUni l_), I.id)
+      | (I.Pi ((d_, _), v_), s) -> begin
           checkDec g_ (d_, s);
           inferExp (I.Decl (g_, I.decSub d_ s), (v_, I.dot1 s))
         end
-      | g_, (I.Root (c_, s_), s) ->
+      | (I.Root (c_, s_), s) ->
           inferSpine (g_, (s_, s), Whnf.whnf (inferCon (g_, c_), I.id))
-      | g_, (I.Lam (d_, u_), s) -> begin
+      | (I.Lam (d_, u_), s) -> begin
           checkDec g_ (d_, s);
           ( I.Pi
               ( (I.decSub d_ s, I.Maybe),
@@ -131,36 +131,36 @@ module MakeTypeCheck
                 I.EClo (v_ie_, s_ie_) ),
             I.id )
         end
-      | g_, (I.FgnExp (cs_csfe, fe_csfe), s) ->
+      | (I.FgnExp (cs_csfe, fe_csfe), s) ->
           inferExp (g_, (I.FgnExpStd.ToInternal.apply cs_csfe fe_csfe (), s))
 
     and inferExp (g_, us_) = inferExpW (g_, Whnf.whnf us_)
 
-    and inferSpine = function
-      | g_, (I.Nil, _), vs_ -> vs_
-      | g_, (I.SClo (s_, s'), s), vs_ ->
+    and inferSpine (g_, b, c) = match b, c with
+      | (I.Nil, _), vs_ -> vs_
+      | (I.SClo (s_, s'), s), vs_ ->
           inferSpine (g_, (s_, I.comp s' s), vs_)
-      | g_, (I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2) -> begin
+      | (I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2) -> begin
           checkExp (g_, (u_, s1), (v1_, s2));
           inferSpine
             (g_, (s_, s1), Whnf.whnf (v2_, I.Dot (I.Exp (I.EClo (u_, s1)), s2)))
         end
-      | g_, ((I.App _, _) as ss_), ((I.Root (I.Def _, _), _) as vs_) ->
+      | ((I.App _, _) as ss_), ((I.Root (I.Def _, _), _) as vs_) ->
           inferSpine (g_, ss_, Whnf.expandDef vs_)
-      | g_, (I.App (u_, s_), _), (v_, s) ->
+      | (I.App (u_, s_), _), (v_, s) ->
           raise (Error "Expression is applied, but not a function")
 
-    and inferCon = function
-      | g_, I.BVar k' ->
+    and inferCon (g_, a) = match a with
+      | I.BVar k' ->
           let (I.Dec (_, v_)) = I.ctxDec g_ k' in
           v_
-      | g_, I.Proj (b_, i) ->
+      | I.Proj (b_, i) ->
           let (I.Dec (_, v_)) = I.blockDec g_ b_ i in
           v_
-      | g_, I.Const c -> I.constType c
-      | g_, I.Def d -> I.constType d
-      | g_, I.Skonst c -> I.constType c
-      | g_, I.FgnConst (cs, conDec) -> I.conDecType conDec
+      | I.Const c -> I.constType c
+      | I.Def d -> I.constType d
+      | I.Skonst c -> I.constType c
+      | I.FgnConst (cs, conDec) -> I.conDecType conDec
 
     and typeCheck g_ (u_, v_) =
       begin
@@ -210,9 +210,9 @@ module MakeTypeCheck
       | g'_, (I.Dot (_, _) as s), IntSyn.Null ->
           raise (Error (("Long substitution" ^ "\n") ^ subToString (g'_, s)))
 
-    and checkBlock = function
-      | g_, [], (_, []) -> ()
-      | g_, u_ :: i_, (t, I.Dec (_, v_) :: l_) -> begin
+    and checkBlock (g_, a, b) = match a, b with
+      | [], (_, []) -> ()
+      | u_ :: i_, (t, I.Dec (_, v_) :: l_) -> begin
           checkExp (g_, (u_, I.id), (v_, t));
           checkBlock (g_, i_, (I.Dot (I.Exp u_, t), l_))
         end

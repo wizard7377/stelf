@@ -115,14 +115,14 @@ module Whnf () : WHNF = struct
       | ((Uni _, s1) as us_), _ -> us_
       | ((Pi _, s1) as us_), _ -> us_
 
-    and lowerEVar' = function
-      | g_, (Pi ((d'_, _), v'_), s') ->
+    and lowerEVar' (g_, a) = match a with
+      | (Pi ((d'_, _), v'_), s') ->
           let d''_ = decSub d'_ s' in
           let x'_, u_ =
             lowerEVar' (Decl (g_, d''_), whnfExpandDef (v'_, dot1 s'))
           in
           (x'_, Lam (d''_, u_))
-      | g_, (v_, s_) ->
+      | (v_, s_) ->
           let x'_ = newEVar g_ (EClo (v_, s_)) in
           (x'_, x'_)
 
@@ -142,26 +142,26 @@ module Whnf () : WHNF = struct
                "Typing ambiguous -- constraint of functional type cannot be \
                 simplified")
 
-    and whnfRoot = function
-      | (BVar k, s_), s ->
+    and whnfRoot (a, s) = match a with
+      | (BVar k, s_) ->
           begin match bvarSub k s with
           | Idx k -> (Root (BVar k, SClo (s_, s)), id)
           | Exp u_ -> whnfRedex (whnf (u_, id), (s_, s))
           end
-      | (Proj ((Bidx _ as b_), i), s_), s ->
+      | (Proj ((Bidx _ as b_), i), s_) ->
           begin match blockSub b_ s with
           | Bidx k as b'_ -> (Root (Proj (b'_, i), SClo (s_, s)), id)
           | LVar _ as b'_ -> whnfRoot ((Proj (b'_, i), SClo (s_, s)), id)
           | Inst l_ -> whnfRedex (whnf (List.nth (l_, i - 1), id), (s_, s))
           end
-      | (Proj (LVar ({ contents = Some b_ }, sk, (l, t)), i), s_), s ->
+      | (Proj (LVar ({ contents = Some b_ }, sk, (l, t)), i), s_) ->
           whnfRoot ((Proj (blockSub b_ (comp sk s), i), SClo (s_, s)), id)
-      | (Proj ((LVar (r, sk, (l, t)) as l_), i), s_), s ->
+      | (Proj ((LVar (r, sk, (l, t)) as l_), i), s_) ->
           (Root (Proj (LVar (r, comp sk s, (l, t)), i), SClo (s_, s)), id)
-      | (FVar (name, v_, s'), s_), s ->
+      | (FVar (name, v_, s'), s_) ->
           (Root (FVar (name, v_, comp s' s), SClo (s_, s)), id)
-      | (NSDef d, s_), s -> whnfRedex (whnf (IntSyn.constDef d, id), (s_, s))
-      | (h_, s_), s -> (Root (h_, SClo (s_, s)), id)
+      | (NSDef d, s_) -> whnfRedex (whnf (IntSyn.constDef d, id), (s_, s))
+      | (h_, s_) -> (Root (h_, SClo (s_, s)), id)
 
     and whnf = function
       | (Uni _ as u_), s -> (u_, s)
@@ -196,19 +196,19 @@ module Whnf () : WHNF = struct
 
     and whnfExpandDef us_ = whnfExpandDefW (whnf us_)
 
-    let rec newLoweredEVarW = function
-      | g_, (Pi ((d_, _), v_), s) ->
+    let rec newLoweredEVarW (g_, a) = match a with
+      | (Pi ((d_, _), v_), s) ->
           let d'_ = decSub d_ s in
           Lam (d'_, newLoweredEVar (Decl (g_, d'_)) (v_, dot1 s))
-      | g_, (v_, s_) -> newEVar g_ (EClo (v_, s_))
+      | (v_, s_) -> newEVar g_ (EClo (v_, s_))
 
     and newLoweredEVar g_ vs_ = newLoweredEVarW (g_, whnfExpandDef vs_)
 
-    let rec newSpineVarW = function
-      | g_, (Pi ((Dec (_, va), _), vr), s) ->
+    let rec newSpineVarW (g_, a) = match a with
+      | (Pi ((Dec (_, va), _), vr), s) ->
           let x_ = newLoweredEVar g_ (va, s) in
           App (x_, newSpineVar g_ (vr, dotEta (Exp x_) s))
-      | g_, _ -> Nil
+      | _ -> Nil
 
     and newSpineVar g_ vs_ = newSpineVarW (g_, whnfExpandDef vs_)
 
@@ -228,9 +228,9 @@ module Whnf () : WHNF = struct
       | Skonst cid -> constType cid
       | Def cid -> constType cid
 
-    let rec etaExpand' = function
-      | u_, (Root _, s) -> u_
-      | u_, (Pi ((d_, _), v_), s) ->
+    let rec etaExpand' (u_, a) = match a with
+      | (Root _, s) -> u_
+      | (Pi ((d_, _), v_), s) ->
           Lam
             ( decSub d_ s,
               etaExpand'
@@ -291,24 +291,24 @@ module Whnf () : WHNF = struct
       | Decl (g_, d_) -> Decl (normalizeCtx g_, normalizeDec d_ id)
 
     let invert s =
-      let rec lookup = function
-        | n, Shift _, p -> None
-        | n, Dot (Undef, s'), p -> lookup (n + 1, s', p)
-        | n, Dot (Idx k, s'), p ->
+      let rec lookup (n, a, p) = match a with
+        | Shift _ -> None
+        | Dot (Undef, s') -> lookup (n + 1, s', p)
+        | Dot (Idx k, s') ->
             begin if k = p then Some n else lookup (n + 1, s', p)
             end
       in
-      let rec invert'' = function
-        | 0, si -> si
-        | p, si ->
+      let rec invert'' (p, si) = match p with
+        | 0 -> si
+        | p ->
             begin match lookup (1, s, p) with
             | Some k -> invert'' (p - 1, Dot (Idx k, si))
             | None -> invert'' (p - 1, Dot (Undef, si))
             end
       in
-      let rec invert' = function
-        | n, Shift p -> invert'' (p, Shift n)
-        | n, Dot (_, s') -> invert' (n + 1, s')
+      let rec invert' (n, a) = match a with
+        | Shift p -> invert'' (p, Shift n)
+        | Dot (_, s') -> invert' (n + 1, s')
       in
       invert' (0, s)
 

@@ -506,9 +506,9 @@ We thus get:
          \end{itemize}
 \end{itemize}
 *)
-  let rec pphv = function
-    | _mw, _li, _bl, _is, _ss, mp, ch, _lb, [], res -> (max_ (mp, ch), res)
-    | mw, li, bl, is, ss, mp, ch, lb, (gpwdth, flist, brk) :: t, res ->
+  let rec pphv (_mw, _li, _bl, _is, _ss, mp, ch, _lb, a, res) = match _mw, _li, _bl, _is, _ss, _lb, a with
+    | _mw, _li, _bl, _is, _ss, _lb, [] -> (max_ (mp, ch), res)
+    | mw, li, bl, is, ss, lb, (gpwdth, flist, brk) :: t ->
         let ch1, s1, mp =
           begin if
             lb = Ebk
@@ -531,48 +531,48 @@ We thus get:
   (* Now print the elements of the group using default for horizontal tabs *)
   (* Now print rest of horizontal-vertical box *)
 
-  and ppv = function
-    | _mw, _li, _ci, _bl, _is, _ss, max, gw, [], res -> (max_ (max, gw), res)
-    | mw, li, _ci, bl, is, ss, max, gw, Dbk :: t, res ->
+  and ppv (mw, li, _ci, bl, is, ss, max, gw, a, res) = match mw, li, _ci, bl, is, ss, a with
+    | _mw, _li, _ci, _bl, _is, _ss, [] -> (max_ (max, gw), res)
+    | mw, li, _ci, bl, is, ss, Dbk :: t ->
         let n, s = print'p (mw, li, bl, is, ss, Vert, Dbk, res) in
         ppv (mw, li, li + n, bl, is, ss, max_ (max, gw), n, t, s)
-    | mw, li, _ci, bl, is, ss, max, gw, (Brk (_, _) as b) :: t, res ->
+    | mw, li, _ci, bl, is, ss, (Brk (_, _) as b) :: t ->
         let n, s = print'p (mw, li, bl, is, ss, Vert, b, res) in
         ppv (mw, li, li + n, bl, is, ss, max_ (max, gw), n, t, s)
-    | mw, li, ci, bl, is, ss, max, gw, h :: t, res ->
+    | mw, li, ci, bl, is, ss, h :: t ->
         let n, s = print'p (mw, ci, bl, is, ss, Vert, h, res) in
         ppv (mw, li, ci + n, bl, is, ss, max, gw + n, t, s)
 
-  and pph = function
-    | _mw, _id, _bl, _is, _ss, [], nres, sres -> (nres, sres)
-    | mw, id, bl, is, ss, h :: t, nres, sres ->
+  and pph (_mw, _id, _bl, _is, _ss, a, nres, sres) = match _mw, _id, _bl, _is, _ss, a with
+    | _mw, _id, _bl, _is, _ss, [] -> (nres, sres)
+    | mw, id, bl, is, ss, h :: t ->
         let n, s = print'p (mw, id, bl, is, ss, Hori, h, sres) in
         pph (mw, id + n, bl, is, ss, t, n + nres, s)
 
-  and print'p = function
-    | _mw, _id, _bl, _is, _ss, _mo, Str (n, s), res -> (n, s :: res)
-    | _mw, _id, _bl, _is, _ss, Hori, Brk (b, _i), res ->
+  and print'p (_mw, id, _bl, _is, ss, _mo, a, res) = match _mw, id, _bl, _is, ss, _mo, a with
+    | _mw, _id, _bl, _is, _ss, _mo, Str (n, s) -> (n, s :: res)
+    | _mw, _id, _bl, _is, _ss, Hori, Brk (b, _i) ->
         ( b,
           begin if !bailout_ then spmod b else sp_ b
           end
           :: res )
-    | _mw, id, _bl, _is, ss, Vert, Brk (_b, i), res ->
+    | _mw, id, _bl, _is, ss, Vert, Brk (_b, i) ->
         ( i,
           begin if !bailout_ then spmod (id + i) else sp_ (id + i)
           end
           :: nl_ ss :: res )
-    | _mw, _id, bl, _is, _ss, Hori, Dbk, res ->
+    | _mw, _id, bl, _is, _ss, Hori, Dbk ->
         ( bl,
           begin if !bailout_ then spmod bl else sp_ bl
           end
           :: res )
-    | _mw, id, _bl, is, ss, Vert, Dbk, res ->
+    | _mw, id, _bl, is, ss, Vert, Dbk ->
         ( is,
           begin if !bailout_ then spmod (id + is) else sp_ (id + is)
           end
           :: nl_ ss :: res )
-    | _mw, _id, _bl, _is, _ss, _mo, Ebk, res -> (0, res)
-    | mw, id, _bl, is, ss, _mo, Hbx ((min, _max), blanks, l), res ->
+    | _mw, _id, _bl, _is, _ss, _mo, Ebk -> (0, res)
+    | mw, id, _bl, is, ss, _mo, Hbx ((min, _max), blanks, l) ->
         begin if
           !bailout_ && id + min >= mw && id mod !pagewidth_ >= !bailoutSpot_
         then
@@ -587,7 +587,7 @@ We thus get:
               nl_ ss :: res )
         else pph (mw, id, blanks, is, ss, l, 0, res)
         end
-    | mw, id, bl, _is, ss, _mo, Vbx ((min, _max), indent, skip, l), res ->
+    | mw, id, bl, _is, ss, _mo, Vbx ((min, _max), indent, skip, l) ->
         begin if
           !bailout_ && id + min >= mw && id mod !pagewidth_ >= !bailoutSpot_
         then
@@ -596,14 +596,7 @@ We thus get:
             (mw + !pagewidth_, id, id, bl, indent, skip, 0, 0, l, nl_ ss :: res)
         else ppv (mw, id, id, bl, indent, skip, 0, 0, l, res)
         end
-    | ( mw,
-        id,
-        _bl,
-        _is,
-        ss,
-        _mo,
-        Hvx (((min, _max), (_nmode, _xmode)), blanks, indent, skip, l),
-        res ) ->
+    | mw, id, _bl, _is, ss, _mo, Hvx (((min, _max), (_nmode, _xmode)), blanks, indent, skip, l) ->
         let gl = gh ([], l, []) in
         begin if
           !bailout_ && id + min >= mw && id mod !pagewidth_ >= !bailoutSpot_
@@ -621,14 +614,7 @@ We thus get:
               nl_ ss :: res )
         else pphv (mw, id, blanks, indent, skip, 0, 0, Ebk, gl, res)
         end
-    | ( mw,
-        id,
-        _bl,
-        is,
-        ss,
-        _mo,
-        Hov (((min, max), (nmode, xmode)), blanks, indent, skip, l),
-        res ) ->
+    | mw, id, _bl, is, ss, _mo, Hov (((min, max), (nmode, xmode)), blanks, indent, skip, l) ->
         begin if max <= mw - id then
           begin if xmode = Hori then pph (mw, id, blanks, is, ss, l, 0, res)
           else ppv (mw, id, id, blanks, indent, skip, 0, 0, l, res)

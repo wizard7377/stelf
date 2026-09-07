@@ -82,9 +82,9 @@ end) : ABSTRACTTABLED = struct
       | I.Shift n -> 0
       | I.Dot (e_, s) -> 1 + lengthSub s
 
-    let rec compose' = function
-      | I.Null, g_ -> g_
-      | IntSyn.Decl (g'_, d_), g_ -> IntSyn.Decl (compose' (g'_, g_), d_)
+    let rec compose' (a, g_) = match a with
+      | I.Null -> g_
+      | IntSyn.Decl (g'_, d_) -> IntSyn.Decl (compose' (g'_, g_), d_)
 
     let rec isId = function
       | I.Shift n -> n = 0
@@ -92,20 +92,20 @@ end) : ABSTRACTTABLED = struct
       | I.Dot (I.Undef, s') as s -> isId' (s, 0)
       | I.Dot (I.Exp _, s) -> false
 
-    and isId' = function
-      | I.Shift n, k -> n = k
-      | I.Dot (I.Idx i, s), k ->
+    and isId' (a, k) = match a with
+      | I.Shift n -> n = k
+      | I.Dot (I.Idx i, s) ->
           let k' = k + 1 in
           i = k' && isId' (s, k')
-      | I.Dot (I.Undef, s), k -> isId' (s, k + 1)
+      | I.Dot (I.Undef, s) -> isId' (s, k + 1)
 
-    let rec equalCtx = function
-      | I.Null, s, I.Null, s' -> true
-      | I.Decl (g_, d_), s, I.Decl (g'_, d'_), s' ->
+    let rec equalCtx (a, s, b, s') = match a, b with
+      | I.Null, I.Null -> true
+      | I.Decl (g_, d_), I.Decl (g'_, d'_) ->
           Conv.convDec (d_, s) (d'_, s')
           && equalCtx (g_, I.dot1 s, g'_, I.dot1 s')
-      | I.Decl (g_, d_), s, I.Null, s' -> false
-      | I.Null, s, I.Decl (g'_, d'_), s' -> false
+      | I.Decl (g_, d_), I.Null -> false
+      | I.Null, I.Decl (g'_, d'_) -> false
 
     let eqEVarW arg__1 arg__2 =
       begin match (arg__1, arg__2) with
@@ -163,30 +163,30 @@ end) : ABSTRACTTABLED = struct
       | _, I.Meta -> I.Meta
       | I.No, I.No -> I.No
 
-    let rec occursInExp = function
-      | k, I.Uni _ -> I.No
-      | k, I.Pi (dp_, v_) ->
+    let rec occursInExp (k, a) = match a with
+      | I.Uni _ -> I.No
+      | I.Pi (dp_, v_) ->
           ( or ) (occursInDecP (k, dp_), occursInExp (k + 1, v_))
-      | k, I.Root (h_, s_) -> occursInHead (k, h_, occursInSpine (k, s_))
-      | k, I.Lam (d_, v_) ->
+      | I.Root (h_, s_) -> occursInHead (k, h_, occursInSpine (k, s_))
+      | I.Lam (d_, v_) ->
           ( or ) (occursInDec (k, d_), occursInExp (k + 1, v_))
-      | k, I.FgnExp (csid_, csfe) ->
+      | I.FgnExp (csid_, csfe) ->
           I.FgnExpStd.fold csid_ csfe
             (function
               | u_, dp_ ->
                   ( or ) (dp_, occursInExp (k, Whnf.normalize (u_, I.id))))
             I.No
 
-    and occursInHead = function
-      | k, I.BVar k', dp_ ->
+    and occursInHead (k, a, dp_) = match a, dp_ with
+      | I.BVar k', dp_ ->
           begin if k = k' then I.Maybe else dp_
           end
-      | k, I.Const _, dp_ -> dp_
-      | k, I.Def _, dp_ -> dp_
-      | k, I.FgnConst _, dp_ -> dp_
-      | k, I.Skonst _, I.No -> I.No
-      | k, I.Skonst _, I.Meta -> I.Meta
-      | k, I.Skonst _, I.Maybe -> I.Meta
+      | I.Const _, dp_ -> dp_
+      | I.Def _, dp_ -> dp_
+      | I.FgnConst _, dp_ -> dp_
+      | I.Skonst _, I.No -> I.No
+      | I.Skonst _, I.Meta -> I.Meta
+      | I.Skonst _, I.Maybe -> I.Meta
 
     and occursInSpine = function
       | _, I.Nil -> I.No
@@ -208,16 +208,16 @@ end) : ABSTRACTTABLED = struct
       | I.Null, g_ -> g_
       | I.Decl (g_, d_), g'_ -> reverseCtx (g_, I.Decl (g'_, d_))
 
-    let rec ctxToEVarSub = function
-      | I.Null, s -> s
-      | IntSyn.Decl (g_, IntSyn.Dec (_, a_)), s ->
+    let rec ctxToEVarSub (a, s) = match a with
+      | I.Null -> s
+      | IntSyn.Decl (g_, IntSyn.Dec (_, a_)) ->
           let s' = ctxToEVarSub (g_, s) in
           let x_ = IntSyn.newEVar IntSyn.Null (I.EClo (a_, s')) in
           IntSyn.Dot (IntSyn.Exp x_, s')
 
-    let rec collectExpW = function
-      | gss, gl_, (I.Uni l_, s), k_, dupVars, flag, d -> (k_, dupVars)
-      | gss, gl_, (I.Pi ((d_, _), v_), s), k_, dupVars, flag, d ->
+    let rec collectExpW (gss, gl_, a, k_, dupVars, flag, d) = match a with
+      | (I.Uni l_, s) -> (k_, dupVars)
+      | (I.Pi ((d_, _), v_), s) ->
           let k'_, _ = collectDec (gss, (d_, s), (k_, dupVars), d, false) in
           collectExp
             ( gss,
@@ -227,9 +227,9 @@ end) : ABSTRACTTABLED = struct
               dupVars,
               flag,
               d )
-      | gss, gl_, (I.Root (_, s_), s), k_, dupVars, flag, d ->
+      | (I.Root (_, s_), s) ->
           collectSpine (gss, gl_, (s_, s), k_, dupVars, flag, d)
-      | gss, gl_, (I.Lam (d_, u_), s), k_, dupVars, flag, d ->
+      | (I.Lam (d_, u_), s) ->
           let k'_, _ = collectDec (gss, (d_, s), (k_, dupVars), d, false) in
           collectExp
             ( gss,
@@ -239,10 +239,10 @@ end) : ABSTRACTTABLED = struct
               dupVars,
               flag,
               d + 1 )
-      | gss, gl_, ((I.EVar (r, gx, v_, cnstrs) as x_), s), k_, dupVars, flag, d
+      | ((I.EVar (r, gx, v_, cnstrs) as x_), s)
         ->
           collectEVar (gss, gl_, (x_, s), k_, dupVars, flag, d)
-      | gss, gl_, (I.FgnExp (csid_, csfe), s), k_, dupVars, flag, d ->
+      | (I.FgnExp (csid_, csfe), s) ->
           I.FgnExpStd.fold csid_ csfe
             (function
               | u_, kd' ->
@@ -253,11 +253,11 @@ end) : ABSTRACTTABLED = struct
     and collectExp (gss, gl_, us_, k_, dupVars, flag, d) =
       collectExpW (gss, gl_, Whnf.whnf us_, k_, dupVars, flag, d)
 
-    and collectSpine = function
-      | gss, gl_, (I.Nil, _), k_, dupVars, flag, d -> (k_, dupVars)
-      | gss, gl_, (I.SClo (s_, s'), s), k_, dupVars, flag, d ->
+    and collectSpine (gss, gl_, a, k_, dupVars, flag, d) = match a with
+      | (I.Nil, _) -> (k_, dupVars)
+      | (I.SClo (s_, s'), s) ->
           collectSpine (gss, gl_, (s_, I.comp s' s), k_, dupVars, flag, d)
-      | gss, gl_, (I.App (u_, s_), s), k_, dupVars, flag, d ->
+      | (I.App (u_, s_), s) ->
           let k'_, dupVars' =
             collectExp (gss, gl_, (u_, s), k_, dupVars, flag, d)
           in
@@ -439,79 +439,53 @@ end) : ABSTRACTTABLED = struct
       in
       (k'_, dupVars')
 
-    and collectSub = function
-      | gss, gl_, I.Shift _, k_, dupVars, flag, d -> (k_, dupVars)
-      | gss, gl_, I.Dot (I.Idx _, s), k_, dupVars, flag, d ->
+    and collectSub (gss, gl_, a, k_, dupVars, flag, d) = match a with
+      | I.Shift _ -> (k_, dupVars)
+      | I.Dot (I.Idx _, s) ->
           collectSub (gss, gl_, s, k_, dupVars, flag, d)
-      | ( gss,
-          gl_,
-          I.Dot (I.Exp (I.EVar ({ contents = Some u_ }, _, _, _) as x_), s),
-          k_,
-          dupVars,
-          flag,
-          d ) ->
+      | I.Dot (I.Exp (I.EVar ({ contents = Some u_ }, _, _, _) as x_), s) ->
           let u'_ = Whnf.normalize (u_, I.id) in
           let k'_, dupVars' =
             collectExp (gss, gl_, (u'_, I.id), k_, dupVars, flag, d)
           in
           collectSub (gss, gl_, s, k'_, dupVars', flag, d)
-      | ( gss,
-          gl_,
-          I.Dot (I.Exp (I.AVar { contents = Some u'_ } as u_), s),
-          k_,
-          dupVars,
-          flag,
-          d ) ->
+      | I.Dot (I.Exp (I.AVar { contents = Some u'_ } as u_), s) ->
           let k'_, dupVars' =
             collectExp (gss, gl_, (u'_, I.id), k_, dupVars, flag, d)
           in
           collectSub (gss, gl_, s, k'_, dupVars', flag, d)
-      | gss, gl_, I.Dot (I.Exp (I.EClo (u'_, s')), s), k_, dupVars, flag, d ->
+      | I.Dot (I.Exp (I.EClo (u'_, s')), s) ->
           let u_ = Whnf.normalize (u'_, s') in
           let k'_, dupVars' =
             collectExp (gss, gl_, (u_, I.id), k_, dupVars, flag, d)
           in
           collectSub (gss, gl_, s, k'_, dupVars', flag, d)
-      | gss, gl_, I.Dot (I.Exp u_, s), k_, dupVars, flag, d ->
+      | I.Dot (I.Exp u_, s) ->
           let k'_, dupVars' =
             collectExp (gss, gl_, (u_, I.id), k_, dupVars, flag, d)
           in
           collectSub (gss, gl_, s, k'_, dupVars', flag, d)
-      | gss, gl_, I.Dot (I.Undef, s), k_, dupVars, flag, d ->
+      | I.Dot (I.Undef, s) ->
           collectSub (gss, gl_, s, k_, dupVars, flag, d)
 
-    let rec collectCtx = function
-      | gss, C.DProg (I.Null, I.Null), (k_, dupVars), d -> (k_, dupVars)
-      | ( gss,
-          C.DProg (I.Decl (g_, d_), I.Decl (dPool, parameter_)),
-          (k_, dupVars),
-          d ) ->
+    let rec collectCtx (gss, a, b, d) = match a, b with
+      | C.DProg (I.Null, I.Null), (k_, dupVars) -> (k_, dupVars)
+      | C.DProg (I.Decl (g_, d_), I.Decl (dPool, parameter_)), (k_, dupVars) ->
           let k'_, dupVars' =
             collectCtx (gss, C.DProg (g_, dPool), (k_, dupVars), d - 1)
           in
           collectDec (gss, (d_, I.id), (k'_, dupVars'), d - 1, false)
-      | ( gss,
-          C.DProg (I.Decl (g_, d_), I.Decl (dPool, C.Dec (r, s, ha))),
-          (k_, dupVars),
-          d ) ->
+      | C.DProg (I.Decl (g_, d_), I.Decl (dPool, C.Dec (r, s, ha))), (k_, dupVars) ->
           let k'_, dupVars' =
             collectCtx (gss, C.DProg (g_, dPool), (k_, dupVars), d - 1)
           in
           collectDec (gss, (d_, I.id), (k'_, dupVars'), d - 1, false)
 
-    let rec abstractExpW = function
-      | flag, gs_, posEA, vars_, gl_, total, depth, ((I.Uni l_ as u_), s), eqn
+    let rec abstractExpW (flag, a, b, vars_, gl_, total, depth, c, eqn) = match a, b, c with
+      | gs_, posEA, ((I.Uni l_ as u_), s)
         ->
           (posEA, vars_, u_, eqn)
-      | ( flag,
-          gs_,
-          posEA,
-          vars_,
-          gl_,
-          total,
-          depth,
-          (I.Pi ((d_, p_), v_), s),
-          eqn ) ->
+      | gs_, posEA, (I.Pi ((d_, p_), v_), s) ->
           let posEA', vars', d_, _ =
             abstractDec (gs_, posEA, vars_, gl_, total, depth, (d_, s), None)
           in
@@ -528,13 +502,13 @@ end) : ABSTRACTTABLED = struct
                 eqn )
           in
           (posEA'', vars'', piDepend (d_, p_) v'_, eqn2)
-      | flag, gs_, posEA, vars_, gl_, total, depth, (I.Root (h_, s_), s), eqn ->
+      | gs_, posEA, (I.Root (h_, s_), s) ->
           let posEA', vars', s_, eqn' =
             abstractSpine
               (flag, gs_, posEA, vars_, gl_, total, depth, (s_, s), eqn)
           in
           (posEA', vars', I.Root (h_, s_), eqn')
-      | flag, gs_, posEA, vars_, gl_, total, depth, (I.Lam (d_, u_), s), eqn ->
+      | gs_, posEA, (I.Lam (d_, u_), s) ->
           let posEA', vars', d'_, _ =
             abstractDec (gs_, posEA, vars_, gl_, total, depth, (d_, s), None)
           in
@@ -551,15 +525,7 @@ end) : ABSTRACTTABLED = struct
                 eqn )
           in
           (posEA'', vars'', I.Lam (d'_, u'_), eqn2)
-      | ( flag,
-          ((gss, ss) as gs_),
-          ((epos, apos) as posEA),
-          vars_,
-          gl_,
-          total,
-          depth,
-          ((I.EVar (_, gx, vx, _) as x_), s),
-          eqn ) ->
+      | ((gss, ss) as gs_), ((epos, apos) as posEA), ((I.EVar (_, gx, vx, _) as x_), s) ->
           begin if isId (I.comp ss s) then
             abstractEVarFap
               (flag, gs_, posEA, vars_, gl_, total, depth, (x_, s), eqn)
@@ -759,8 +725,8 @@ end) : ABSTRACTTABLED = struct
           end
       end
 
-    and abstractSub = function
-      | flag, gs_, posEA, vars_, gl_, total, depth, I.Shift k, s_, eqn ->
+    and abstractSub (flag, gs_, posEA, vars_, gl_, total, depth, a, s_, eqn) = match a with
+      | I.Shift k ->
           begin if k < depth then
             abstractSub
               ( flag,
@@ -775,7 +741,7 @@ end) : ABSTRACTTABLED = struct
                 eqn )
           else (posEA, vars_, s_, eqn)
           end
-      | flag, gs_, posEA, vars_, gl_, total, depth, I.Dot (I.Idx k, s), s_, eqn
+      | I.Dot (I.Idx k, s)
         ->
           abstractSub
             ( flag,
@@ -788,7 +754,7 @@ end) : ABSTRACTTABLED = struct
               s,
               I.App (I.Root (I.BVar k, I.Nil), s_),
               eqn )
-      | flag, gs_, posEA, vars_, gl_, total, depth, I.Dot (I.Exp u_, s), s_, eqn
+      | I.Dot (I.Exp u_, s)
         ->
           let posEA', vars', u'_, eqn' =
             abstractExp
@@ -806,10 +772,10 @@ end) : ABSTRACTTABLED = struct
               I.App (u'_, s_),
               eqn' )
 
-    and abstractSpine = function
-      | flag, gs_, posEA, vars_, gl_, total, depth, (I.Nil, _), eqn ->
+    and abstractSpine (flag, gs_, posEA, vars_, gl_, total, depth, a, eqn) = match a with
+      | (I.Nil, _) ->
           (posEA, vars_, I.Nil, eqn)
-      | flag, gs_, posEA, vars_, gl_, total, depth, (I.SClo (s_, s'), s), eqn ->
+      | (I.SClo (s_, s'), s) ->
           abstractSpine
             ( flag,
               gs_,
@@ -820,7 +786,7 @@ end) : ABSTRACTTABLED = struct
               depth,
               (s_, I.comp s' s),
               eqn )
-      | flag, gs_, posEA, vars_, gl_, total, depth, (I.App (u_, s_), s), eqn ->
+      | (I.App (u_, s_), s) ->
           let posEA', vars', u'_, eqn' =
             abstractExp
               (flag, gs_, posEA, vars_, gl_, total, depth, (u_, s), eqn)
@@ -831,17 +797,17 @@ end) : ABSTRACTTABLED = struct
           in
           (posEA'', vars'', I.App (u'_, s'_), eqn'')
 
-    and abstractSub' = function
-      | flag, gs_, epos, vars_, total, I.Shift k ->
+    and abstractSub' (flag, gs_, epos, vars_, total, a) = match a with
+      | I.Shift k ->
           begin if k < 0 then raise (Error "Substitution out of range\n")
           else (epos, vars_, I.Shift (k + total))
           end
-      | flag, gs_, epos, vars_, total, I.Dot (I.Idx k, s) ->
+      | I.Dot (I.Idx k, s) ->
           let epos', vars', s' =
             abstractSub' (flag, gs_, epos, vars_, total, s)
           in
           (epos', vars', I.Dot (I.Idx k, s'))
-      | flag, gs_, epos, vars_, total, I.Dot (I.Exp u_, s) ->
+      | I.Dot (I.Exp u_, s) ->
           let (ep, _), vars', u'_, _ =
             abstractExp
               ( false,
@@ -859,8 +825,8 @@ end) : ABSTRACTTABLED = struct
           in
           (epos'', vars'', I.Dot (I.Exp u'_, s'))
 
-    and abstractDec = function
-      | gs_, posEA, vars_, gl_, total, depth, (I.Dec (x, v_), s), None ->
+    and abstractDec (gs_, posEA, vars_, gl_, total, depth, a, b) = match a, b with
+      | (I.Dec (x, v_), s), None ->
           let posEA', vars', v'_, eqn =
             abstractExp
               ( false,
@@ -874,24 +840,17 @@ end) : ABSTRACTTABLED = struct
                 TableParam.Trivial )
           in
           (posEA', vars', I.Dec (x, v'_), eqn)
-      | gs_, posEA, vars_, gl_, total, depth, (I.Dec (x, v_), s), Some eqn ->
+      | (I.Dec (x, v_), s), Some eqn ->
           let posEA', vars', v'_, eqn' =
             abstractExp
               (true, gs_, posEA, vars_, gl_, total, depth, (v_, s), eqn)
           in
           (posEA', vars', I.Dec (x, v'_), eqn')
 
-    let rec abstractCtx' = function
-      | gs_, epos, vars_, total, depth, C.DProg (I.Null, I.Null), g'_, eqn ->
+    let rec abstractCtx' (gs_, epos, vars_, total, depth, a, g'_, eqn) = match a with
+      | C.DProg (I.Null, I.Null) ->
           (epos, vars_, g'_, eqn)
-      | ( gs_,
-          epos,
-          vars_,
-          total,
-          depth,
-          C.DProg (I.Decl (g_, d_), I.Decl (dPool, parameter_)),
-          g'_,
-          eqn ) ->
+      | C.DProg (I.Decl (g_, d_), I.Decl (dPool, parameter_)) ->
           let d = IntSyn.ctxLength g_ in
           let (epos', _), vars', d'_, _ =
             abstractDec
@@ -913,14 +872,7 @@ end) : ABSTRACTTABLED = struct
               C.DProg (g_, dPool),
               I.Decl (g'_, d'_),
               eqn )
-      | ( gs_,
-          epos,
-          vars_,
-          total,
-          depth,
-          C.DProg (I.Decl (g_, d_), I.Decl (dPool, _)),
-          g'_,
-          eqn ) ->
+      | C.DProg (I.Decl (g_, d_), I.Decl (dPool, _)) ->
           let d = IntSyn.ctxLength g_ in
           let (epos', _), vars', d'_, _ =
             abstractDec
@@ -947,13 +899,9 @@ end) : ABSTRACTTABLED = struct
       abstractCtx'
         (gs_, epos, vars_, total, depth, dProg, I.Null, TableParam.Trivial)
 
-    let rec makeEVarCtx = function
-      | gs_, vars_, dEVars, I.Null, total -> dEVars
-      | ( gs_,
-          vars_,
-          dEVars,
-          I.Decl (k'_, (_, Ev (I.EVar (_, gx, vx, _) as e_))),
-          total ) ->
+    let rec makeEVarCtx (gs_, vars_, dEVars, a, total) = match a with
+      | I.Null -> dEVars
+      | I.Decl (k'_, (_, Ev (I.EVar (_, gx, vx, _) as e_))) ->
           let v'_ = raiseType gx vx in
           let _, vars', v'', _ =
             abstractExp
@@ -972,17 +920,15 @@ end) : ABSTRACTTABLED = struct
           dEVars''
 
     let makeAVarCtx (vars_, dupVars) =
-      let rec avarCtx = function
-        | vars_, I.Null, k -> I.Null
-        | ( vars_,
-            I.Decl (k'_, Av ((I.EVar ({ contents = None }, gx, vx, _) as e_), d)),
-            k ) ->
+      let rec avarCtx (vars_, a, k) = match a with
+        | I.Null -> I.Null
+        | I.Decl (k'_, Av ((I.EVar ({ contents = None }, gx, vx, _) as e_), d)) ->
             I.Decl
               ( avarCtx (vars_, k'_, k + 1),
                 I.ADec
                   ( Some ((("AVar " ^ Int.toString k) ^ "--") ^ Int.toString d),
                     d ) )
-        | vars_, I.Decl (k'_, Av ((I.EVar (_, gx, vx, _) as e_), d)), k ->
+        | I.Decl (k'_, Av ((I.EVar (_, gx, vx, _) as e_), d)) ->
             I.Decl
               ( avarCtx (vars_, k'_, k + 1),
                 I.ADec
@@ -991,14 +937,14 @@ end) : ABSTRACTTABLED = struct
       in
       avarCtx (vars_, dupVars, 0)
 
-    let rec lowerEVar' = function
-      | x_, g_, (I.Pi ((d'_, _), v'_), s') ->
+    let rec lowerEVar' (x_, g_, vs'_) = match vs'_ with
+      | (I.Pi ((d'_, _), v'_), s') ->
           let d''_ = I.decSub d'_ s' in
           let x'_, u_ =
             lowerEVar' (x_, I.Decl (g_, d''_), Whnf.whnf (v'_, I.dot1 s'))
           in
           (x'_, I.Lam (d''_, u_))
-      | x_, g_, vs'_ ->
+      | vs'_ ->
           let x'_ = x_ in
           (x'_, x'_)
 
@@ -1008,22 +954,21 @@ end) : ABSTRACTTABLED = struct
           I.EVar (ref (Some u_), I.Null, v_, ref [])
       | _, x_, _ -> x_
 
-    and lowerEVar = function
-      | e_, (I.EVar (r, g_, v_, { contents = [] }) as x_) ->
+    and lowerEVar (e_, a) = match a with
+      | (I.EVar (r, g_, v_, { contents = [] }) as x_) ->
           lowerEVar1 (e_, x_, Whnf.whnf (v_, I.id))
-      | e_, I.EVar _ ->
+      | I.EVar _ ->
           raise
             (Error
                "abstraction : LowerEVars: Typing ambiguous -- constraint of \
                 functional type cannot be simplified")
 
-    let rec evarsToSub = function
-      | I.Null, s -> s
-      | ( I.Decl
+    let rec evarsToSub (a, s) = match a with
+      | I.Null -> s
+      | I.Decl
             ( k'_,
               (_, Ev (I.EVar (({ contents = None } as i_), gx, vx, cnstr) as e_))
-            ),
-          s ) ->
+            ) ->
           let v'_ = raiseType gx vx in
           let x_ =
             lowerEVar1
@@ -1032,9 +977,9 @@ end) : ABSTRACTTABLED = struct
           let s' = evarsToSub (k'_, s) in
           I.Dot (I.Exp x_, s')
 
-    let rec avarsToSub = function
-      | I.Null, s -> s
-      | I.Decl (vars', Av ((I.EVar (i_, gx, vx, cnstr) as e_), d)), s ->
+    let rec avarsToSub (a, s) = match a with
+      | I.Null -> s
+      | I.Decl (vars', Av ((I.EVar (i_, gx, vx, cnstr) as e_), d)) ->
           let s' = avarsToSub (vars', s) in
           let (I.AVar r as x'_) = I.newAVar () in
           I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s')

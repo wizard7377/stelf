@@ -57,12 +57,9 @@ end) : ASSIGN = struct
   open! struct
     open IntSyn
 
-    let rec assignExpW = function
-      | g_, (Uni l1_, _), (Uni l2_, _), cnstr -> cnstr
-      | ( g_,
-          ((Root (h1_, s1_), s1) as us1),
-          ((Root (h2_, s2_), s2) as us2),
-          cnstr ) ->
+    let rec assignExpW (g_, a, b, cnstr) = match a, b with
+      | (Uni l1_, _), (Uni l2_, _) -> cnstr
+      | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
           begin match (h1_, h2_) with
           | Const c1, Const c2 ->
               begin if c1 = c2 then assignSpine (g_, (s1_, s1), (s2_, s2), cnstr)
@@ -98,54 +95,51 @@ end) : ASSIGN = struct
               assignExp (g_, us1, (w2_, s2), cnstr)
           | _ -> raise (Assignment "Head mismatch ")
           end
-      | g_, (Lam (d1_, u1_), s1), (Lam (d2_, u2_), s2), cnstr ->
+      | (Lam (d1_, u1_), s1), (Lam (d2_, u2_), s2) ->
           assignExp
             (Decl (g_, decSub d1_ s1), (u1_, dot1 s1), (u2_, dot1 s2), cnstr)
-      | g_, (u1_, s1), (Lam (d2_, u2_), s2), cnstr ->
+      | (u1_, s1), (Lam (d2_, u2_), s2) ->
           assignExp
             ( Decl (g_, decSub d2_ s2),
               (Redex (EClo (u1_, shift), App (Root (BVar 1, Nil), Nil)), dot1 s1),
               (u2_, dot1 s2),
               cnstr )
-      | ( g_,
-          (Pi (((Dec (_, v1_) as d1_), _), u1_), s1),
-          (Pi (((Dec (_, v2_) as d2_), _), u2_), s2),
-          cnstr ) ->
+      | (Pi (((Dec (_, v1_) as d1_), _), u1_), s1), (Pi (((Dec (_, v2_) as d2_), _), u2_), s2) ->
           let cnstr' = assignExp (g_, (v1_, s1), (v2_, s2), cnstr) in
           assignExp
             (Decl (g_, decSub d1_ s1), (u1_, dot1 s1), (u2_, dot1 s2), cnstr')
-      | g_, ((u_, s1) as us1), ((EVar (r2, _, _, _), s2) as us2), cnstr -> begin
+      | ((u_, s1) as us1), ((EVar (r2, _, _, _), s2) as us2) -> begin
           r2 := Some (EClo (fst us1, snd us1));
           cnstr
         end
-      | g_, ((u_, s1) as us1), ((AVar r2, s2) as us2), cnstr -> begin
+      | ((u_, s1) as us1), ((AVar r2, s2) as us2) -> begin
           r2 := Some (EClo (fst us1, snd us1));
           cnstr
         end
-      | g_, (Lam (d1_, u1_), s1), (u2_, s2), cnstr ->
+      | (Lam (d1_, u1_), s1), (u2_, s2) ->
           assignExp
             ( Decl (g_, decSub d1_ s1),
               (u1_, dot1 s1),
               (Redex (EClo (u2_, shift), App (Root (BVar 1, Nil), Nil)), dot1 s2),
               cnstr )
-      | g_, us1, ((EClo (u_, s'), s) as us2), cnstr ->
+      | us1, ((EClo (u_, s'), s) as us2) ->
           assignExp (g_, us1, (u_, comp s' s), cnstr)
-      | g_, ((EVar (r, _, v_, cnstr_), s) as us1), us2, cnstr ->
+      | ((EVar (r, _, v_, cnstr_), s) as us1), us2 ->
           Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2)) :: cnstr
-      | g_, ((EClo (u_, s'), s) as us1), us2, cnstr ->
+      | ((EClo (u_, s'), s) as us1), us2 ->
           assignExp (g_, (u_, comp s' s), us2, cnstr)
-      | g_, ((FgnExp (_, fe), _) as us1), us2, cnstr ->
+      | ((FgnExp (_, fe), _) as us1), us2 ->
           Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2)) :: cnstr
-      | g_, us1, ((FgnExp (_, fe), _) as us2), cnstr ->
+      | us1, ((FgnExp (_, fe), _) as us2) ->
           Eqn (g_, EClo (fst us1, snd us1), EClo (fst us2, snd us2)) :: cnstr
 
-    and assignSpine = function
-      | g_, (Nil, _), (Nil, _), cnstr -> cnstr
-      | g_, (SClo (s1_, s1'), s1), ss_, cnstr ->
+    and assignSpine (g_, a, b, cnstr) = match a, b with
+      | (Nil, _), (Nil, _) -> cnstr
+      | (SClo (s1_, s1'), s1), ss_ ->
           assignSpine (g_, (s1_, comp s1' s1), ss_, cnstr)
-      | g_, ss_, (SClo (s2_, s2'), s2), cnstr ->
+      | ss_, (SClo (s2_, s2'), s2) ->
           assignSpine (g_, ss_, (s2_, comp s2' s2), cnstr)
-      | g_, (App (u1_, s1_), s1), (App (u2_, s2_), s2), cnstr ->
+      | (App (u1_, s1_), s1), (App (u2_, s2_), s2) ->
           let cnstr' = assignExp (g_, (u1_, s1), (u2_, s2), cnstr) in
           assignSpine (g_, (s1_, s1), (s2_, s2), cnstr')
 
@@ -278,11 +272,11 @@ end) : ASSIGN = struct
       | IntSyn.Root ((IntSyn.Const cid as h_), s_), s -> Some cid
       | _, _ -> None
     in
-    let rec ithElem = function
-      | k, (IntSyn.App (u_, s_), s) ->
+    let rec ithElem (k, a) = match a with
+      | (IntSyn.App (u_, s_), s) ->
           begin if k = i then constExp (u_, s) else ithElem (k + 1, (s_, s))
           end
-      | k, (Nil, s) -> None
+      | (Nil, s) -> None
     in
     ithElem (0, (s_, s))
   (* #implicit arguments to predicate *)

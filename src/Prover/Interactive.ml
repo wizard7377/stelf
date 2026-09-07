@@ -155,10 +155,10 @@ end) : INTERACTIVE = struct
         | _ -> raise (Error "type family must be +/- moded")
       in
       let shiftPlus mS =
-        let rec shiftPlus' = function
-          | M.Mnil, n -> n
-          | M.Mapp (M.Marg (M.Plus, _), mS'), n -> shiftPlus' (mS', n + 1)
-          | M.Mapp (M.Marg (M.Minus, _), mS'), n -> shiftPlus' (mS', n)
+        let rec shiftPlus' (a, n) = match a with
+          | M.Mnil -> n
+          | M.Mapp (M.Marg (M.Plus, _), mS') -> shiftPlus' (mS', n + 1)
+          | M.Mapp (M.Marg (M.Minus, _), mS') -> shiftPlus' (mS', n)
         in
         shiftPlus' (mS, 0)
       in
@@ -201,21 +201,21 @@ end) : INTERACTIVE = struct
       end
 
     let menuToString () =
-      let rec menuToString' = function
-        | k, [] -> ""
-        | k, Split o_ :: m_ ->
+      let rec menuToString' (k, a) = match a with
+        | [] -> ""
+        | Split o_ :: m_ ->
             let s = menuToString' (k + 1, m_) in
             ((s ^ "\n  ") ^ format k) ^ Split.menu o_
-        | k, Introduce o_ :: m_ ->
+        | Introduce o_ :: m_ ->
             let s = menuToString' (k + 1, m_) in
             ((s ^ "\n  ") ^ format k) ^ Introduce.menu o_
-        | k, Fill o_ :: m_ ->
+        | Fill o_ :: m_ ->
             let s = menuToString' (k + 1, m_) in
             ((s ^ "\n  ") ^ format k) ^ Fill.menu o_
-        | k, Fix o_ :: m_ ->
+        | Fix o_ :: m_ ->
             let s = menuToString' (k + 1, m_) in
             ((s ^ "\n  ") ^ format k) ^ FixedPoint.menu o_
-        | k, Elim o_ :: m_ ->
+        | Elim o_ :: m_ ->
             let s = menuToString' (k + 1, m_) in
             ((s ^ "\n  ") ^ format k) ^ Elim.menu o_
       in

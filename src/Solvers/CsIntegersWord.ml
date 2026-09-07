@@ -272,21 +272,21 @@ end) : Cs.CS = struct
     let solveNumber (g_, s_, k) = Some (numberExp (W.fromInt k))
     let eclo_ (u_, s_) = EClo (u_, s_)
 
-    let rec fst = function
-      | App (u1_, _), s -> (u1_, s)
-      | SClo (s_, s'), s -> fst (s_, comp s' s)
+    let rec fst (a, s) = match a with
+      | App (u1_, _) -> (u1_, s)
+      | SClo (s_, s') -> fst (s_, comp s' s)
 
-    let rec snd = function
-      | App (_, s_), s -> fst (s_, s)
-      | SClo (s_, s'), s -> snd (s_, comp s' s)
+    let rec snd (a, s) = match a with
+      | App (_, s_) -> fst (s_, s)
+      | SClo (s_, s') -> snd (s_, comp s' s)
 
-    let rec trd = function
-      | App (_, s_), s -> snd (s_, s)
-      | SClo (s_, s'), s -> trd (s_, comp s' s)
+    let rec trd (a, s) = match a with
+      | App (_, s_) -> snd (s_, s)
+      | SClo (s_, s') -> trd (s_, comp s' s)
 
-    let rec fth = function
-      | App (_, s_), s -> trd (s_, s)
-      | SClo (s_, s'), s -> fth (s_, comp s' s)
+    let rec fth (a, s) = match a with
+      | App (_, s_) -> trd (s_, s)
+      | SClo (s_, s') -> fth (s_, comp s' s)
 
     let rec toInternalPlus (g_, u1_, u2_, u3) () =
       [ (g_, plusExp (u1_, u2_, u3)) ]
@@ -300,8 +300,8 @@ end) : Cs.CS = struct
     and makeCnstrPlus (g_, proof, u1_, u2_, u3) =
       FgnCnstr (!myID, MyFgnCnstrRepPlus (g_, proof, u1_, u2_, u3))
 
-    and solvePlus = function
-      | g_, s_, 0 ->
+    and solvePlus (g_, s_, n) = match n with
+      | 0 ->
           let us1 = fst (s_, id) in
           let us2 = snd (s_, id) in
           let us3 = trd (s_, id) in
@@ -344,7 +344,7 @@ end) : Cs.CS = struct
                   [ us1; us2; us3 ]);
               Some proof
           end
-      | g_, s_, n -> None
+      | n -> None
 
     and toInternalTimes (g_, u1_, u2_, u3) () =
       [ (g_, timesExp (u1_, u2_, u3)) ]
@@ -358,8 +358,8 @@ end) : Cs.CS = struct
     and makeCnstrTimes (g_, proof, u1_, u2_, u3) =
       FgnCnstr (!myID, MyFgnCnstrRepTimes (g_, proof, u1_, u2_, u3))
 
-    and solveTimes = function
-      | g_, s_, 0 ->
+    and solveTimes (g_, s_, n) = match n with
+      | 0 ->
           let us1 = fst (s_, id) in
           let us2 = snd (s_, id) in
           let us3 = trd (s_, id) in
@@ -416,7 +416,7 @@ end) : Cs.CS = struct
                   [ us1; us2; us3 ]);
               Some proof
           end
-      | g_, s_, n -> None
+      | n -> None
 
     and toInternalQuot (g_, u1_, u2_, u3) () = [ (g_, quotExp (u1_, u2_, u3)) ]
 
@@ -429,8 +429,8 @@ end) : Cs.CS = struct
     and makeCnstrQuot (g_, proof, u1_, u2_, u3) =
       FgnCnstr (!myID, MyFgnCnstrRepQuot (g_, proof, u1_, u2_, u3))
 
-    and solveQuot = function
-      | g_, s_, 0 ->
+    and solveQuot (g_, s_, n) = match n with
+      | 0 ->
           let us1 = fst (s_, id) in
           let us2 = snd (s_, id) in
           let us3 = trd (s_, id) in
@@ -459,7 +459,7 @@ end) : Cs.CS = struct
                   [ us1; us2; us3 ]);
               Some proof
           end
-      | g_, s_, n -> None
+      | n -> None
 
     let solveProvePlus (g_, s_, k) =
       let us1 = fst (s_, id) in

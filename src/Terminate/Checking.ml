@@ -103,21 +103,21 @@ end) : CHECKING = struct
 
     let mkEClo (u, s) = I.EClo (u, s)
 
-    let atomicPredToString = function
-      | g_, Less ((us_, _), (us', _)) ->
+    let atomicPredToString (g_, a) = match a with
+      | Less ((us_, _), (us', _)) ->
           (Print.expToString g_ (mkEClo us_) ^ " < ")
           ^ Print.expToString g_ (mkEClo us')
-      | g_, Leq ((us_, _), (us', _)) ->
+      | Leq ((us_, _), (us', _)) ->
           (Print.expToString g_ (mkEClo us_) ^ " <= ")
           ^ Print.expToString g_ (mkEClo us')
-      | g_, Eq ((us_, _), (us', _)) ->
+      | Eq ((us_, _), (us', _)) ->
           (Print.expToString g_ (mkEClo us_) ^ " = ")
           ^ Print.expToString g_ (mkEClo us')
 
-    let rec atomicRCtxToString = function
-      | g_, [] -> " "
-      | g_, o_ :: [] -> atomicPredToString (g_, o_)
-      | g_, o_ :: d'_ ->
+    let rec atomicRCtxToString (g_, a) = match a with
+      | [] -> " "
+      | o_ :: [] -> atomicPredToString (g_, o_)
+      | o_ :: d'_ ->
           (atomicRCtxToString (g_, d'_) ^ ", ") ^ atomicPredToString (g_, o_)
 
     let rec shiftO arg__1 arg__2 =
@@ -173,19 +173,19 @@ end) : CHECKING = struct
           fmtOrder (g_, o_); F.break; F.string comp; F.break; fmtOrder (g_, o'_);
         ]
 
-    let rec fmtPredicate' = function
-      | g_, Less (o_, o'_) -> fmtComparison (g_, o_, "<", o'_)
-      | g_, Leq (o_, o'_) -> fmtComparison (g_, o_, "<=", o'_)
-      | g_, Eq (o_, o'_) -> fmtComparison (g_, o_, "=", o'_)
-      | g_, Pi (d_, p_) ->
+    let rec fmtPredicate' (g_, a) = match a with
+      | Less (o_, o'_) -> fmtComparison (g_, o_, "<", o'_)
+      | Leq (o_, o'_) -> fmtComparison (g_, o_, "<=", o'_)
+      | Eq (o_, o'_) -> fmtComparison (g_, o_, "=", o'_)
+      | Pi (d_, p_) ->
           F.hbox [ F.string "Pi "; fmtPredicate' (I.Decl (g_, d_), p_) ]
 
     let fmtPredicate (g_, p_) = fmtPredicate' (Names.ctxName g_, p_)
 
-    let rec fmtRGCtx' = function
-      | g_, [] -> ""
-      | g_, p_ :: [] -> F.makestring_fmt (fmtPredicate' (g_, p_))
-      | g_, p_ :: rl_ ->
+    let rec fmtRGCtx' (g_, a) = match a with
+      | [] -> ""
+      | p_ :: [] -> F.makestring_fmt (fmtPredicate' (g_, p_))
+      | p_ :: rl_ ->
           (F.makestring_fmt (fmtPredicate' (g_, p_)) ^ " ,")
           ^ fmtRGCtx' (g_, rl_)
 
@@ -219,47 +219,47 @@ end) : CHECKING = struct
           isExistential (I.ctxLookup q_ n) || isAtomicS (gq, (s_, s))
       | gq, _ -> false
 
-    and isAtomicS = function
-      | gq, (I.Nil, _) -> true
-      | gq, (I.SClo (s_, s'), s'') -> isAtomicS (gq, (s_, I.comp s' s''))
-      | gq, (I.App (u'_, s'_), s1') -> false
+    and isAtomicS (gq, a) = match a with
+      | (I.Nil, _) -> true
+      | (I.SClo (s_, s'), s'') -> isAtomicS (gq, (s_, I.comp s' s''))
+      | (I.App (u'_, s'_), s1') -> false
 
     let eq (g_, (us_, vs_), (us', vs'_)) =
       Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
 
-    let rec lookupEq = function
-      | gq, [], usVs, usVs', sc -> false
-      | gq, Less (_, _) :: d_, usVs, usVs', sc ->
+    let rec lookupEq (a, b, usVs, usVs', sc) = match a, b with
+      | gq, [] -> false
+      | gq, Less (_, _) :: d_ ->
           lookupEq (gq, d_, usVs, usVs', sc)
-      | ((g_, q_) as gq), Eq (usVs1, usVs1') :: d_, usVs, usVs', sc ->
+      | ((g_, q_) as gq), Eq (usVs1, usVs1') :: d_ ->
           CsManager.trail (function () ->
               eq (g_, usVs1, usVs) && eq (g_, usVs1', usVs') && sc ())
           || CsManager.trail (function () ->
               eq (g_, usVs1, usVs') && eq (g_, usVs1', usVs) && sc ())
           || lookupEq (gq, d_, usVs, usVs', sc)
 
-    let rec lookupLt = function
-      | gq, [], usVs, usVs', sc -> false
-      | gq, Eq (_, _) :: d_, usVs, usVs', sc ->
+    let rec lookupLt (a, b, usVs, usVs', sc) = match a, b with
+      | gq, [] -> false
+      | gq, Eq (_, _) :: d_ ->
           lookupLt (gq, d_, usVs, usVs', sc)
-      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, usVs, usVs', sc ->
+      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_ ->
           CsManager.trail (function () ->
               eq (g_, usVs1, usVs) && eq (g_, usVs1', usVs') && sc ())
           || lookupLt (gq, d_, usVs, usVs', sc)
 
-    let rec eqAtomic = function
-      | ((g_, q_) as gq), [], d'_, usVs, usVs', sc ->
+    let rec eqAtomic (a, d_, d'_, usVs, usVs', sc) = match a, d_ with
+      | ((g_, q_) as gq), [] ->
           CsManager.trail (function () -> eq (g_, usVs, usVs') && sc ())
           || lookupEq (gq, d'_, usVs, usVs', sc)
-      | ((g_, q_) as gq), d_, d'_, usVs, usVs', sc ->
+      | ((g_, q_) as gq), d_ ->
           CsManager.trail (function () -> eq (g_, usVs, usVs') && sc ())
           || lookupEq (gq, d_, usVs, usVs', sc)
           || lookupEq (gq, d'_, usVs, usVs', sc)
           || transEq (gq, d_, d'_, usVs, usVs', sc)
 
-    and transEq = function
-      | ((g_, q_) as gq), [], d_, usVs, usVs', sc -> false
-      | ((g_, q_) as gq), Eq (usVs1, usVs1') :: d_, d'_, usVs, usVs', sc ->
+    and transEq (a, b, d'_, usVs, usVs', sc) = match a, b, d'_ with
+      | ((g_, q_) as gq), [], d_ -> false
+      | ((g_, q_) as gq), Eq (usVs1, usVs1') :: d_, d'_ ->
           CsManager.trail (function () ->
               eq (g_, usVs1', usVs')
               && sc ()
@@ -269,20 +269,20 @@ end) : CHECKING = struct
               && sc ()
               && eqAtomicR (gq, d_ @ d'_, usVs, usVs1', sc, atomic))
           || transEq (gq, d_, Eq (usVs1, usVs1') :: d'_, usVs, usVs', sc)
-      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, d'_, usVs, usVs', sc ->
+      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, d'_ ->
           transEq (gq, d_, d'_, usVs, usVs', sc)
 
-    and ltAtomic = function
-      | ((g_, q_) as gq), [], d'_, usVs, usVs', sc ->
+    and ltAtomic (a, d_, d'_, usVs, usVs', sc) = match a, d_ with
+      | ((g_, q_) as gq), [] ->
           lookupLt (gq, d'_, usVs, usVs', sc)
-      | ((g_, q_) as gq), d_, d'_, usVs, usVs', sc ->
+      | ((g_, q_) as gq), d_ ->
           lookupLt (gq, d_, usVs, usVs', sc)
           || lookupLt (gq, d'_, usVs, usVs', sc)
           || transLt (gq, d_, d'_, usVs, usVs', sc)
 
-    and transLt = function
-      | ((g_, q_) as gq), [], d_, usVs, usVs', sc -> false
-      | ((g_, q_) as gq), Eq (usVs1, usVs1') :: d_, d'_, usVs, usVs', sc ->
+    and transLt (a, b, d'_, usVs, usVs', sc) = match a, b, d'_ with
+      | ((g_, q_) as gq), [], d_ -> false
+      | ((g_, q_) as gq), Eq (usVs1, usVs1') :: d_, d'_ ->
           CsManager.trail (function () ->
               eq (g_, usVs1', usVs')
               && sc ()
@@ -292,7 +292,7 @@ end) : CHECKING = struct
               && sc ()
               && ltAtomicR (gq, d_ @ d'_, usVs, usVs1', sc, atomic))
           || transLt (gq, d_, Eq (usVs1, usVs1') :: d'_, usVs, usVs', sc)
-      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, d'_, usVs, usVs', sc ->
+      | ((g_, q_) as gq), Less (usVs1, usVs1') :: d_, d'_ ->
           CsManager.trail (function () ->
               eq (g_, usVs1', usVs')
               && sc ()
@@ -303,14 +303,14 @@ end) : CHECKING = struct
               && ltAtomicR (gq, d_ @ d'_, usVs, usVs1, sc, atomic))
           || transLt (gq, d_, Less (usVs1, usVs1') :: d'_, usVs, usVs', sc)
 
-    and atomic = function
-      | gq, d_, d'_, Eq (usVs, usVs'), sc ->
+    and atomic (gq, d_, d'_, a, sc) = match a with
+      | Eq (usVs, usVs') ->
           eqAtomic (gq, d_, d'_, usVs, usVs', sc)
-      | gq, d_, d'_, Less (usVs, usVs'), sc ->
+      | Less (usVs, usVs') ->
           ltAtomic (gq, d_, d'_, usVs, usVs', sc)
 
-    and leftInstantiate = function
-      | ((g_, q_) as gq), [], d'_, p_, sc ->
+    and leftInstantiate (a, b, d'_, p_, sc) = match a, b with
+      | ((g_, q_) as gq), [] ->
           begin if atomic (gq, d'_, [], p_, sc) then begin
             begin if !Global.chatter > 4 then
               print
@@ -323,25 +323,19 @@ end) : CHECKING = struct
           end
           else false
           end
-      | gq, Less (usVs, usVs') :: d_, d'_, p_, sc ->
+      | gq, Less (usVs, usVs') :: d_ ->
           ltInstL (gq, d_, d'_, usVs, usVs', p_, sc)
-      | gq, Leq (usVs, usVs') :: d_, d'_, p_, sc ->
+      | gq, Leq (usVs, usVs') :: d_ ->
           leInstL (gq, d_, d'_, usVs, usVs', p_, sc)
-      | gq, Eq (usVs, usVs') :: d_, d'_, p_, sc ->
+      | gq, Eq (usVs, usVs') :: d_ ->
           eqInstL (gq, d_, d'_, usVs, usVs', p_, sc)
 
     and ltInstL (gq, d_, d'_, usVs, usVs', p'_, sc) =
       ltInstLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), usVs', p'_, sc)
 
-    and ltInstLW = function
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          ( (I.Lam ((I.Dec (_, v1_) as dec_), u_), s1),
-            (I.Pi ((I.Dec (_, v2_), _), v_), s2) ),
-          ((u'_, s1'), (v'_, s2')),
-          p'_,
-          sc ) ->
+    and ltInstLW (a, d_, d'_, usVs, usVs', p'_, sc) = match a, usVs, usVs' with
+      | ((g_, q_) as gq), ( (I.Lam ((I.Dec (_, v1_) as dec_), u_), s1),
+            (I.Pi ((I.Dec (_, v2_), _), v_), s2) ), ((u'_, s1'), (v'_, s2')) ->
           begin if Subordinate.equiv (I.targetFam v'_) (I.targetFam v1_) then
             let x_ = I.newEVar g_ (I.EClo (v1_, s1)) in
             let sc' () = isParameter (q_, x_) && sc () in
@@ -367,21 +361,15 @@ end) : CHECKING = struct
             else false
             end
           end
-      | gq, d_, d'_, usVs, usVs', p'_, sc ->
+      | gq, usVs, usVs' ->
           leftInstantiate (gq, d_, Less (usVs, usVs') :: d'_, p'_, sc)
 
     and leInstL (gq, d_, d'_, usVs, usVs', p'_, sc) =
       leInstLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), usVs', p'_, sc)
 
-    and leInstLW = function
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          ( (I.Lam (I.Dec (_, v1_), u_), s1),
-            (I.Pi ((I.Dec (_, v2_), _), v_), s2) ),
-          ((u'_, s1'), (v'_, s2')),
-          p'_,
-          sc ) ->
+    and leInstLW (a, d_, d'_, usVs, usVs', p'_, sc) = match a, usVs, usVs', p'_ with
+      | ((g_, q_) as gq), ( (I.Lam (I.Dec (_, v1_), u_), s1),
+            (I.Pi ((I.Dec (_, v2_), _), v_), s2) ), ((u'_, s1'), (v'_, s2')), p'_ ->
           begin if Subordinate.equiv (I.targetFam v'_) (I.targetFam v1_) then
             let x_ = I.newEVar g_ (I.EClo (v1_, s1)) in
             let sc' () = isParameter (q_, x_) && sc () in
@@ -407,22 +395,16 @@ end) : CHECKING = struct
             else false
             end
           end
-      | gq, d_, d'_, usVs, usVs', p_, sc ->
+      | gq, usVs, usVs', p_ ->
           leftInstantiate (gq, d_, Less (usVs, usVs') :: d'_, p_, sc)
 
     and eqInstL (gq, d_, d'_, usVs, usVs', p'_, sc) =
       eqInstLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p'_, sc)
 
-    and eqInstLW = function
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          ( (I.Lam (I.Dec (_, v1'), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
-          ( (I.Lam (I.Dec (_, v1''), u''), s1''),
-            (I.Pi ((I.Dec (_, v2''), _), v''), s2'') ),
-          p'_,
-          sc ) ->
+    and eqInstLW (a, d_, d'_, usVs, usVs', p'_, sc) = match a, usVs, usVs' with
+      | ((g_, q_) as gq), ( (I.Lam (I.Dec (_, v1'), u'_), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ), ( (I.Lam (I.Dec (_, v1''), u''), s1''),
+            (I.Pi ((I.Dec (_, v2''), _), v''), s2'') ) ->
           let x_ = I.newEVar g_ (I.EClo (v1'', s1'')) in
           eqInstL
             ( gq,
@@ -436,17 +418,11 @@ end) : CHECKING = struct
                   ignore (isParameter (q_, x_));
                   sc ()
                 end )
-      | gq, d_, d'_, usVs, usVs', p'_, sc ->
+      | gq, usVs, usVs' ->
           eqIL (gq, d_, d'_, usVs, usVs', p'_, sc)
 
-    and eqIL = function
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          (((I.Root (I.Const c, s_), s), vs_) as usVs),
-          (((I.Root (I.Const c', s'_), s'), vs'_) as usVs'),
-          p'_,
-          sc ) ->
+    and eqIL (a, d_, d'_, b, d, p'_, sc) = match a, b, d with
+      | ((g_, q_) as gq), (((I.Root (I.Const c, s_), s), vs_) as usVs), (((I.Root (I.Const c', s'_), s'), vs'_) as usVs') ->
           begin if eqCid (c, c') then
             eqSpineIL
               ( gq,
@@ -470,13 +446,7 @@ end) : CHECKING = struct
             true
           end
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          (((I.Root (I.Def c, s_), s), vs_) as usVs),
-          (((I.Root (I.Def c', s'_), s'), vs'_) as usVs'),
-          p'_,
-          sc ) ->
+      | ((g_, q_) as gq), (((I.Root (I.Def c, s_), s), vs_) as usVs), (((I.Root (I.Def c', s'_), s'), vs'_) as usVs') ->
           begin if eqCid (c, c') then
             eqSpineIL
               ( gq,
@@ -500,13 +470,7 @@ end) : CHECKING = struct
             true
           end
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          (((I.Root (I.Const c, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n, s'_), s') as us'), vs'_),
-          p'_,
-          sc ) ->
+      | ((g_, q_) as gq), (((I.Root (I.Const c, s_), s) as us_), vs_), (((I.Root (I.BVar n, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             leftInstantiate
               (gq, d_, Eq ((us', vs'_), (us_, vs_)) :: d'_, p'_, sc)
@@ -525,13 +489,7 @@ end) : CHECKING = struct
             true
           end
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          (((I.Root (I.Def c, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n, s'_), s') as us'), vs'_),
-          p'_,
-          sc ) ->
+      | ((g_, q_) as gq), (((I.Root (I.Def c, s_), s) as us_), vs_), (((I.Root (I.BVar n, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             leftInstantiate
               (gq, d_, Eq ((us', vs'_), (us_, vs_)) :: d'_, p'_, sc)
@@ -550,13 +508,7 @@ end) : CHECKING = struct
             true
           end
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.Def c, s'_), s') as us'), vs'_),
-          p'_,
-          sc ) ->
+      | ((g_, q_) as gq), (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.Def c, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us_) then
             leftInstantiate
               (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p'_, sc)
@@ -575,13 +527,7 @@ end) : CHECKING = struct
             true
           end
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.Const c, s'_), s') as us'), vs'_),
-          p'_,
-          sc ) ->
+      | ((g_, q_) as gq), (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.Const c, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us_) then
             leftInstantiate
               (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p'_, sc)
@@ -600,13 +546,7 @@ end) : CHECKING = struct
             true
           end
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n', s'_), s') as us'), vs'_),
-          p'_,
-          sc ) ->
+      | ((g_, q_) as gq), (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.BVar n', s'_), s') as us'), vs'_) ->
           begin if n = n' then
             let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             eqSpineIL
@@ -621,7 +561,7 @@ end) : CHECKING = struct
             leftInstantiate
               (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p'_, sc)
           end
-      | ((g_, q_) as gq), d_, d'_, usVs, usVs', p'_, sc -> begin
+      | ((g_, q_) as gq), usVs, usVs' -> begin
           begin if !Global.chatter > 4 then
             print
               (((((" Proved: " ^ atomicRCtxToString (g_, Eq (usVs, usVs') :: d_))
@@ -638,20 +578,14 @@ end) : CHECKING = struct
       eqSpineILW
         (gq, d_, d'_, (ss_, Whnf.whnf vs_), (ss'_, Whnf.whnf vs'_), p'_, sc)
 
-    and eqSpineILW = function
-      | gq, d_, d'_, ((Nil, s), vs_), ((Nil, s'), vs'_), p'_, sc ->
+    and eqSpineILW (gq, d_, d'_, ssVs, ssVs', p'_, sc) = match ssVs, ssVs' with
+      | ((Nil, s), vs_), ((Nil, s'), vs'_) ->
           leftInstantiate (gq, d_, d'_, p'_, sc)
-      | gq, d_, d'_, ((I.SClo (s_, s'), s''), vs_), ssVs', p'_, sc ->
+      | ((I.SClo (s_, s'), s''), vs_), ssVs' ->
           eqSpineIL (gq, d_, d'_, ((s_, I.comp s' s''), vs_), ssVs', p'_, sc)
-      | gq, d_, d'_, ssVs, ((I.SClo (s'_, s'), s''), vs'_), p'_, sc ->
+      | ssVs, ((I.SClo (s'_, s'), s''), vs'_) ->
           eqSpineIL (gq, d_, d'_, ssVs, ((s'_, I.comp s' s''), vs'_), p'_, sc)
-      | ( gq,
-          d_,
-          d'_,
-          ((I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2)),
-          ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')),
-          p'_,
-          sc ) ->
+      | ((I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2)), ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
           let d1_ =
             Eq (((u_, s1), (v1_, s2)), ((u'_, s1'), (v1', s2'))) :: d_
           in
@@ -664,68 +598,63 @@ end) : CHECKING = struct
               p'_,
               sc )
 
-    and rightDecompose = function
-      | gq, d'_, Less (o_, o'_) -> ordLtR (gq, d'_, o_, o'_)
-      | gq, d'_, Leq (o_, o'_) -> ordLeR (gq, d'_, o_, o'_)
-      | gq, d'_, Eq (o_, o'_) -> ordEqR (gq, d'_, o_, o'_)
+    and rightDecompose (gq, d'_, a) = match a with
+      | Less (o_, o'_) -> ordLtR (gq, d'_, o_, o'_)
+      | Leq (o_, o'_) -> ordLeR (gq, d'_, o_, o'_)
+      | Eq (o_, o'_) -> ordEqR (gq, d'_, o_, o'_)
 
-    and ordLtR = function
-      | gq, d'_, R.Arg usVs, R.Arg usVs' ->
+    and ordLtR (gq, d'_, a, b) = match a, b with
+      | R.Arg usVs, R.Arg usVs' ->
           ltAtomicR (gq, d'_, usVs, usVs', init, leftInstantiate)
-      | gq, d'_, R.Lex o_, R.Lex o'_ -> ltLexR (gq, d'_, o_, o'_)
-      | gq, d'_, R.Simul o_, R.Simul o'_ -> ltSimulR (gq, d'_, o_, o'_)
+      | R.Lex o_, R.Lex o'_ -> ltLexR (gq, d'_, o_, o'_)
+      | R.Simul o_, R.Simul o'_ -> ltSimulR (gq, d'_, o_, o'_)
 
-    and ordLeR = function
-      | gq, d'_, R.Arg usVs, R.Arg usVs' ->
+    and ordLeR (gq, d'_, a, b) = match a, b with
+      | R.Arg usVs, R.Arg usVs' ->
           leAtomicR (gq, d'_, usVs, usVs', init, leftInstantiate)
-      | gq, d'_, R.Lex o_, R.Lex o'_ ->
+      | R.Lex o_, R.Lex o'_ ->
           ltLexR (gq, d'_, o_, o'_) || ordEqsR (gq, d'_, o_, o'_)
-      | gq, d'_, R.Simul o_, R.Simul o'_ -> leSimulR (gq, d'_, o_, o'_)
+      | R.Simul o_, R.Simul o'_ -> leSimulR (gq, d'_, o_, o'_)
 
-    and ordEqR = function
-      | gq, d'_, R.Arg usVs, R.Arg usVs' ->
+    and ordEqR (gq, d'_, a, b) = match a, b with
+      | R.Arg usVs, R.Arg usVs' ->
           conv usVs usVs'
           || eqAtomicR (gq, d'_, usVs, usVs', init, leftInstantiate)
-      | gq, d'_, R.Lex o_, R.Lex o'_ -> ordEqsR (gq, d'_, o_, o'_)
-      | gq, d'_, R.Simul o_, R.Simul o'_ -> ordEqsR (gq, d'_, o_, o'_)
+      | R.Lex o_, R.Lex o'_ -> ordEqsR (gq, d'_, o_, o'_)
+      | R.Simul o_, R.Simul o'_ -> ordEqsR (gq, d'_, o_, o'_)
 
-    and ordEqsR = function
-      | gq, d'_, [], [] -> true
-      | gq, d'_, o_ :: l_, o'_ :: l'_ ->
+    and ordEqsR (gq, d'_, a, b) = match a, b with
+      | [], [] -> true
+      | o_ :: l_, o'_ :: l'_ ->
           ordEqR (gq, d'_, o_, o'_) && ordEqsR (gq, d'_, l_, l'_)
 
-    and ltLexR = function
-      | gq, d'_, [], [] -> false
-      | gq, d'_, o_ :: l_, o'_ :: l'_ ->
+    and ltLexR (gq, d'_, a, b) = match a, b with
+      | [], [] -> false
+      | o_ :: l_, o'_ :: l'_ ->
           ordLtR (gq, d'_, o_, o'_)
           || (ordEqR (gq, d'_, o_, o'_) && ltLexR (gq, d'_, l_, l'_))
 
     and leLexR (gq, d'_, l_, l'_) =
       ltLexR (gq, d'_, l_, l'_) || ordEqsR (gq, d'_, l_, l'_)
 
-    and ltSimulR = function
-      | gq, d_, [], [] -> false
-      | gq, d_, o_ :: l_, o'_ :: l'_ ->
+    and ltSimulR (gq, d_, a, b) = match a, b with
+      | [], [] -> false
+      | o_ :: l_, o'_ :: l'_ ->
           (ordLtR (gq, d_, o_, o'_) && leSimulR (gq, d_, l_, l'_))
           || (ordEqR (gq, d_, o_, o'_) && ltSimulR (gq, d_, l_, l'_))
 
-    and leSimulR = function
-      | gq, d_, [], [] -> true
-      | gq, d_, o_ :: l_, o'_ :: l'_ ->
+    and leSimulR (gq, d_, a, b) = match a, b with
+      | [], [] -> true
+      | o_ :: l_, o'_ :: l'_ ->
           ordLeR (gq, d_, o_, o'_) && leSimulR (gq, d_, l_, l'_)
 
     and ltAtomicR (gq, d_, usVs, usVs', sc, k) =
       ltAtomicRW (gq, d_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), usVs', sc, k)
 
-    and ltAtomicRW = function
-      | gq, d_, ((us_, ((I.Root _, s') as vs_)) as usVs), usVs', sc, k ->
+    and ltAtomicRW (a, d_, b, c, sc, k) = match a, b, c with
+      | gq, ((us_, ((I.Root _, s') as vs_)) as usVs), usVs' ->
           ltR (gq, d_, usVs, usVs', sc, k)
-      | ( ((g_, q_) as gq),
-          d_,
-          ((I.Lam (_, u_), s1), (I.Pi ((dec_, _), v_), s2)),
-          ((u'_, s1'), (v'_, s2')),
-          sc,
-          k ) ->
+      | ((g_, q_) as gq), ((I.Lam (_, u_), s1), (I.Pi ((dec_, _), v_), s2)), ((u'_, s1'), (v'_, s2')) ->
           let usVs' =
             ((u'_, I.comp s1' I.shift), (v'_, I.comp s2' I.shift))
           in
@@ -743,15 +672,10 @@ end) : CHECKING = struct
     and leAtomicR (gq, d_, usVs, usVs', sc, k) =
       leAtomicRW (gq, d_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), usVs', sc, k)
 
-    and leAtomicRW = function
-      | gq, d_, ((us_, ((I.Root _, s') as vs_)) as usVs), usVs', sc, k ->
+    and leAtomicRW (a, d_, b, c, sc, k) = match a, b, c with
+      | gq, ((us_, ((I.Root _, s') as vs_)) as usVs), usVs' ->
           leR (gq, d_, usVs, usVs', sc, k)
-      | ( ((g_, q_) as gq),
-          d_,
-          ((I.Lam (_, u_), s1), (I.Pi ((dec_, _), v_), s2)),
-          ((u'_, s1'), (v'_, s2')),
-          sc,
-          k ) ->
+      | ((g_, q_) as gq), ((I.Lam (_, u_), s1), (I.Pi ((dec_, _), v_), s2)), ((u'_, s1'), (v'_, s2')) ->
           let d'_ = shiftACtx d_ (function s -> I.comp s I.shift) in
           let usVs' =
             ((u'_, I.comp s1' I.shift), (v'_, I.comp s2' I.shift))
@@ -769,13 +693,8 @@ end) : CHECKING = struct
     and eqAtomicR (((g_, q_) as gq), d_, usVs, usVs', sc, k) =
       eqAtomicRW (gq, d_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), sc, k)
 
-    and eqAtomicRW = function
-      | ( ((g_, q_) as gq),
-          d_,
-          ((I.Lam (_, u_), s1), (I.Pi ((dec_, _), v_), s2)),
-          ((I.Lam (_, u'_), s1'), (I.Pi ((dec', _), v'_), s2')),
-          sc,
-          k ) ->
+    and eqAtomicRW (a, d_, b, c, sc, k) = match a, b, c with
+      | ((g_, q_) as gq), ((I.Lam (_, u_), s1), (I.Pi ((dec_, _), v_), s2)), ((I.Lam (_, u'_), s1'), (I.Pi ((dec', _), v'_), s2')) ->
           eqAtomicR
             ( ( I.Decl (g_, N.decLUName g_ (I.decSub dec_ s2)),
                 I.Decl (q_, All) ),
@@ -784,14 +703,9 @@ end) : CHECKING = struct
               ((u'_, I.dot1 s1'), (v'_, I.dot1 s2')),
               sc,
               k )
-      | ( gq,
-          d_,
-          (us_, ((I.Root _, s2) as vs_)),
-          (us', ((I.Root _, s2') as vs'_)),
-          sc,
-          k ) ->
+      | gq, (us_, ((I.Root _, s2) as vs_)), (us', ((I.Root _, s2') as vs'_)) ->
           eqR (gq, d_, (us_, vs_), (us', vs'_), sc, k)
-      | gq, d_, (us_, vs_), (us', vs'_), sc, k -> false
+      | gq, (us_, vs_), (us', vs'_) -> false
 
     and ltR (((g_, q_) as gq), d_, usVs, usVs', sc, k) =
       ltRW (gq, d_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), sc, k)
@@ -891,14 +805,9 @@ end) : CHECKING = struct
     and leR (gq, d_, usVs, usVs', sc, k) =
       leRW (gq, d_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), sc, k)
 
-    and leRW = function
-      | ( ((g_, q_) as gq),
-          d_,
-          ((u_, s1), (v_, s2)),
-          ( (I.Lam (I.Dec (_, v1'), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
-          sc,
-          k ) ->
+    and leRW (a, d_, usVs, usVs', sc, k) = match a, usVs, usVs' with
+      | ((g_, q_) as gq), ((u_, s1), (v_, s2)), ( (I.Lam (I.Dec (_, v1'), u'_), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
           begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
             let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' () = isParameter (q_, x_) && sc () in
@@ -922,34 +831,19 @@ end) : CHECKING = struct
             else false
             end
           end
-      | gq, d_, usVs, usVs', sc, k ->
+      | gq, usVs, usVs' ->
           ltR (gq, d_, usVs, usVs', sc, k) || eqR (gq, d_, usVs, usVs', sc, k)
 
     and eqR (((g_, q_) as gq), d_, usVs, usVs', sc, k) =
       CsManager.trail (function () -> eq (g_, usVs, usVs') && sc ())
       || eqR' (gq, d_, usVs, usVs', sc, k)
 
-    and eqR' = function
-      | ( gq,
-          d_,
-          (us_, ((I.Pi ((I.Dec (_, v2'), _), v'_), s2') as vs_)),
-          (us', ((I.Root _, s2'') as vs'_)),
-          sc,
-          k ) ->
+    and eqR' (a, d_, b, d, sc, k) = match a, b, d with
+      | gq, (us_, ((I.Pi ((I.Dec (_, v2'), _), v'_), s2') as vs_)), (us', ((I.Root _, s2'') as vs'_)) ->
           false
-      | ( gq,
-          d_,
-          (us_, ((I.Root _, s2') as vs_)),
-          (us', ((I.Pi ((I.Dec (_, v2''), _), v''), s2'') as vs'_)),
-          sc,
-          k ) ->
+      | gq, (us_, ((I.Root _, s2') as vs_)), (us', ((I.Pi ((I.Dec (_, v2''), _), v''), s2'') as vs'_)) ->
           false
-      | ( gq,
-          d_,
-          (((I.Root (I.Const c, s_), s), vs_) as usVs),
-          (((I.Root (I.Const c', s'_), s'), vs'_) as usVs'),
-          sc,
-          k ) ->
+      | gq, (((I.Root (I.Const c, s_), s), vs_) as usVs), (((I.Root (I.Const c', s'_), s'), vs'_) as usVs') ->
           begin if eqCid (c, c') then
             eqSpineR
               ( gq,
@@ -960,32 +854,17 @@ end) : CHECKING = struct
                 k )
           else false
           end
-      | ( gq,
-          d_,
-          (((I.Root (I.Const c, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n, s'_), s') as us'), vs'_),
-          sc,
-          k ) ->
+      | gq, (((I.Root (I.Const c, s_), s) as us_), vs_), (((I.Root (I.BVar n, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             k (gq, d_, [], Eq ((us', vs'_), (us_, vs_)), sc)
           else false
           end
-      | ( gq,
-          d_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.Const c, s'_), s') as us'), vs'_),
-          sc,
-          k ) ->
+      | gq, (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.Const c, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us_) then
             k (gq, d_, [], Eq ((us_, vs_), (us', vs'_)), sc)
           else false
           end
-      | ( gq,
-          d_,
-          (((I.Root (I.Def c, s_), s), vs_) as usVs),
-          (((I.Root (I.Def c', s'_), s'), vs'_) as usVs'),
-          sc,
-          k ) ->
+      | gq, (((I.Root (I.Def c, s_), s), vs_) as usVs), (((I.Root (I.Def c', s'_), s'), vs'_) as usVs') ->
           begin if eqCid (c, c') then
             eqSpineR
               ( gq,
@@ -996,55 +875,35 @@ end) : CHECKING = struct
                 k )
           else false
           end
-      | ( gq,
-          d_,
-          (((I.Root (I.Def c, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n, s'_), s') as us'), vs'_),
-          sc,
-          k ) ->
+      | gq, (((I.Root (I.Def c, s_), s) as us_), vs_), (((I.Root (I.BVar n, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             k (gq, d_, [], Eq ((us', vs'_), (us_, vs_)), sc)
           else false
           end
-      | ( gq,
-          d_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.Def c, s'_), s') as us'), vs'_),
-          sc,
-          k ) ->
+      | gq, (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.Def c, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us_) then
             k (gq, d_, [], Eq ((us_, vs_), (us', vs'_)), sc)
           else false
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n', s'_), s') as us'), vs'_),
-          sc,
-          k ) ->
+      | ((g_, q_) as gq), (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.BVar n', s'_), s') as us'), vs'_) ->
           begin if n = n' then
             let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             eqSpineR
               (gq, d_, ((s_, s), (v'_, I.id)), ((s'_, s'), (v'_, I.id)), sc, k)
           else k (gq, d_, [], Eq ((us_, vs_), (us', vs'_)), sc)
           end
-      | gq, d_, usVs, usVs', sc, k -> k (gq, d_, [], Eq (usVs, usVs'), sc)
+      | gq, usVs, usVs' -> k (gq, d_, [], Eq (usVs, usVs'), sc)
 
     and eqSpineR (gq, d_, (ss_, vs_), (ss'_, vs'_), sc, k) =
       eqSpineRW (gq, d_, (ss_, Whnf.whnf vs_), (ss'_, Whnf.whnf vs'_), sc, k)
 
-    and eqSpineRW = function
-      | gq, d_, ((Nil, s), vs_), ((Nil, s'), vs'_), sc, k -> true
-      | gq, d_, ((I.SClo (s_, s'), s''), vs_), ssVs', sc, k ->
+    and eqSpineRW (gq, d_, ssVs, ssVs', sc, k) = match ssVs, ssVs' with
+      | ((Nil, s), vs_), ((Nil, s'), vs'_) -> true
+      | ((I.SClo (s_, s'), s''), vs_), ssVs' ->
           eqSpineR (gq, d_, ((s_, I.comp s' s''), vs_), ssVs', sc, k)
-      | gq, d_, ssVs, ((I.SClo (s'_, s'), s''), vs'_), sc, k ->
+      | ssVs, ((I.SClo (s'_, s'), s''), vs'_) ->
           eqSpineR (gq, d_, ssVs, ((s'_, I.comp s' s''), vs'_), sc, k)
-      | ( gq,
-          d_,
-          ((I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2)),
-          ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')),
-          sc,
-          k ) ->
+      | ((I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2)), ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
           eqAtomicR
             (gq, d_, ((u_, s1), (v1_, s2)), ((u'_, s1'), (v1', s2')), sc, k)
           && eqSpineR
@@ -1054,30 +913,30 @@ end) : CHECKING = struct
                  ((s'_, s1'), (v2', I.Dot (I.Exp (I.EClo (u'_, s1')), s2'))),
                  sc,
                  k )
-      | gq, d_, ssVs, ssVs', sc, k -> false
+      | ssVs, ssVs' -> false
 
-    let rec leftDecompose = function
-      | ((g_, q_) as gq), [], d'_, p_ -> rightDecompose (gq, d'_, p_)
-      | gq, Less (R.Arg usVs, R.Arg usVs') :: d_, d'_, p_ ->
+    let rec leftDecompose (a, b, d'_, p_) = match a, b with
+      | ((g_, q_) as gq), [] -> rightDecompose (gq, d'_, p_)
+      | gq, Less (R.Arg usVs, R.Arg usVs') :: d_ ->
           ltAtomicL (gq, d_, d'_, usVs, usVs', p_)
-      | gq, Less (R.Lex o_, R.Lex o'_) :: d_, d'_, p_ ->
+      | gq, Less (R.Lex o_, R.Lex o'_) :: d_ ->
           ltLexL (gq, d_, d'_, o_, o'_, p_)
-      | gq, Less (R.Simul o_, R.Simul o'_) :: d_, d'_, p_ ->
+      | gq, Less (R.Simul o_, R.Simul o'_) :: d_ ->
           ltSimulL (gq, d_, d'_, o_, o'_, p_)
-      | gq, Leq (R.Arg usVs, R.Arg usVs') :: d_, d'_, p_ ->
+      | gq, Leq (R.Arg usVs, R.Arg usVs') :: d_ ->
           leAtomicL (gq, d_, d'_, usVs, usVs', p_)
-      | gq, Leq (R.Lex o_, R.Lex o'_) :: d_, d'_, p_ ->
+      | gq, Leq (R.Lex o_, R.Lex o'_) :: d_ ->
           leftDecompose (gq, Less (R.Lex o_, R.Lex o'_) :: d_, d'_, p_)
           && leftDecompose (gq, Eq (R.Lex o_, R.Lex o'_) :: d_, d'_, p_)
-      | gq, Leq (R.Simul o_, R.Simul o'_) :: d_, d'_, p_ ->
+      | gq, Leq (R.Simul o_, R.Simul o'_) :: d_ ->
           leSimulL (gq, d_, d'_, o_, o'_, p_)
-      | gq, Eq (R.Arg usVs, R.Arg usVs') :: d_, d'_, p_ ->
+      | gq, Eq (R.Arg usVs, R.Arg usVs') :: d_ ->
           eqAtomicL (gq, d_, d'_, usVs, usVs', p_)
-      | gq, Eq (R.Lex o_, R.Lex o'_) :: d_, d'_, p_ ->
+      | gq, Eq (R.Lex o_, R.Lex o'_) :: d_ ->
           eqsL (gq, d_, d'_, o_, o'_, p_)
-      | gq, Eq (R.Simul o_, R.Simul o'_) :: d_, d'_, p_ ->
+      | gq, Eq (R.Simul o_, R.Simul o'_) :: d_ ->
           eqsL (gq, d_, d'_, o_, o'_, p_)
-      | ((g_, q_) as gq), Pi (dec_, o_) :: d_, d'_, p_ -> begin
+      | ((g_, q_) as gq), Pi (dec_, o_) :: d_ -> begin
           begin if !Global.chatter > 3 then begin
             print " Ignoring quantified order ";
             print (F.makestring_fmt (fmtPredicate (g_, Pi (dec_, o_))))
@@ -1087,41 +946,36 @@ end) : CHECKING = struct
           leftDecompose (gq, d_, d'_, p_)
         end
 
-    and ltLexL = function
-      | gq, d_, d'_, [], [], p_ -> true
-      | gq, d_, d'_, o_ :: l_, o'_ :: l'_, p_ ->
+    and ltLexL (gq, d_, d'_, a, b, p_) = match a, b with
+      | [], [] -> true
+      | o_ :: l_, o'_ :: l'_ ->
           leftDecompose (gq, Less (o_, o'_) :: d_, d'_, p_)
           && ltLexL (gq, Eq (o_, o'_) :: d_, d'_, l_, l'_, p_)
 
-    and eqsL = function
-      | gq, d_, d'_, [], [], p_ -> true
-      | gq, d_, d'_, o_ :: l_, o'_ :: l'_, p_ ->
+    and eqsL (gq, d_, d'_, a, b, p_) = match a, b with
+      | [], [] -> true
+      | o_ :: l_, o'_ :: l'_ ->
           leftDecompose (gq, Eq (o_, o'_) :: d_, d'_, p_)
           && eqsL (gq, d_, d'_, l_, l'_, p_)
 
-    and ltSimulL = function
-      | gq, d_, d'_, [], [], p_ -> leftDecompose (gq, d_, d'_, p_)
-      | gq, d_, d'_, o_ :: l_, o'_ :: l'_, p_ ->
+    and ltSimulL (gq, d_, d'_, a, b, p_) = match a, b with
+      | [], [] -> leftDecompose (gq, d_, d'_, p_)
+      | o_ :: l_, o'_ :: l'_ ->
           leSimulL (gq, Less (o_, o'_) :: d_, d'_, l_, l'_, p_)
           || ltSimulL (gq, Eq (o_, o'_) :: d_, d'_, l_, l'_, p_)
 
-    and leSimulL = function
-      | gq, d_, d'_, [], [], p_ -> leftDecompose (gq, d_, d'_, p_)
-      | gq, d_, d'_, o_ :: l_, o'_ :: l'_, p_ ->
+    and leSimulL (gq, d_, d'_, a, b, p_) = match a, b with
+      | [], [] -> leftDecompose (gq, d_, d'_, p_)
+      | o_ :: l_, o'_ :: l'_ ->
           leSimulL (gq, Leq (o_, o'_) :: d_, d'_, l_, l'_, p_)
 
     and ltAtomicL (gq, d_, d'_, usVs, usVs', p_) =
       ltAtomicLW (gq, d_, d'_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p_)
 
-    and ltAtomicLW = function
-      | ((g_, q_) as gq), d_, d'_, usVs, (us', ((I.Root _, s') as vs'_)), p_ ->
+    and ltAtomicLW (a, d_, d'_, b, c, p_) = match a, b, c with
+      | ((g_, q_) as gq), usVs, (us', ((I.Root _, s') as vs'_)) ->
           ltL (gq, d_, d'_, usVs, (us', vs'_), p_)
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          ((u_, s1), (v_, s2)),
-          ((I.Lam (_, u'_), s1'), (I.Pi ((dec', _), v'_), s2')),
-          p_ ) ->
+      | ((g_, q_) as gq), ((u_, s1), (v_, s2)), ((I.Lam (_, u'_), s1'), (I.Pi ((dec', _), v'_), s2')) ->
           let d1_ = shiftRCtx d_ (function s -> I.comp s I.shift) in
           let d1' = shiftACtx d'_ (function s -> I.comp s I.shift) in
           let usVs = ((u_, I.comp s1 I.shift), (v_, I.comp s2 I.shift)) in
@@ -1139,15 +993,10 @@ end) : CHECKING = struct
     and leAtomicL (gq, d_, d'_, usVs, usVs', p_) =
       leAtomicLW (gq, d_, d'_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p_)
 
-    and leAtomicLW = function
-      | gq, d_, d'_, usVs, (us', ((I.Root (h_, s_), s') as vs'_)), p_ ->
+    and leAtomicLW (a, d_, d'_, b, c, p_) = match a, b, c with
+      | gq, usVs, (us', ((I.Root (h_, s_), s') as vs'_)) ->
           leL (gq, d_, d'_, usVs, (us', vs'_), p_)
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          ((u_, s1), (v_, s2)),
-          ((I.Lam (_, u'_), s1'), (I.Pi ((dec', _), v'_), s2')),
-          p_ ) ->
+      | ((g_, q_) as gq), ((u_, s1), (v_, s2)), ((I.Lam (_, u'_), s1'), (I.Pi ((dec', _), v'_), s2')) ->
           let d1_ = shiftRCtx d_ (function s -> I.comp s I.shift) in
           let d1' = shiftACtx d'_ (function s -> I.comp s I.shift) in
           let usVs = ((u_, I.comp s1 I.shift), (v_, I.comp s2 I.shift)) in
@@ -1165,34 +1014,14 @@ end) : CHECKING = struct
     and eqAtomicL (gq, d_, d'_, usVs, usVs', p_) =
       eqAtomicLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p_)
 
-    and eqAtomicLW = function
-      | ( gq,
-          d_,
-          d'_,
-          (us_, ((I.Root _, s) as vs_)),
-          (us', ((I.Root _, s') as vs'_)),
-          p_ ) ->
+    and eqAtomicLW (gq, d_, d'_, a, b, p_) = match a, b with
+      | (us_, ((I.Root _, s) as vs_)), (us', ((I.Root _, s') as vs'_)) ->
           eqL (gq, d_, d'_, (us_, vs_), (us', vs'_), p_)
-      | ( gq,
-          d_,
-          d'_,
-          (us_, ((I.Root _, s) as vs_)),
-          (us', ((I.Pi _, s') as vs'_)),
-          p_ ) ->
+      | (us_, ((I.Root _, s) as vs_)), (us', ((I.Pi _, s') as vs'_)) ->
           true
-      | ( gq,
-          d_,
-          d'_,
-          (us_, ((I.Pi _, s) as vs_)),
-          (us', ((I.Root _, s') as vs'_)),
-          p_ ) ->
+      | (us_, ((I.Pi _, s) as vs_)), (us', ((I.Root _, s') as vs'_)) ->
           true
-      | ( gq,
-          d_,
-          d'_,
-          (us_, ((I.Pi _, s) as vs_)),
-          (us', ((I.Pi _, s') as vs'_)),
-          p_ ) ->
+      | (us_, ((I.Pi _, s) as vs_)), (us', ((I.Pi _, s') as vs'_)) ->
           leftDecompose (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p_)
 
     and leL (gq, d_, d'_, usVs, usVs', p_) =
@@ -1202,22 +1031,17 @@ end) : CHECKING = struct
     and ltL (gq, d_, d'_, usVs, (us', vs'_), p_) =
       ltLW (gq, d_, d'_, usVs, (Whnf.whnf us', vs'_), p_)
 
-    and ltLW = function
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          usVs,
-          (((I.Root (I.BVar n, s'_), s') as us'), vs'_),
-          p_ ) ->
+    and ltLW (a, d_, d'_, usVs, b, p_) = match a, b with
+      | ((g_, q_) as gq), (((I.Root (I.BVar n, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             leftDecompose (gq, d_, Less (usVs, (us', vs'_)) :: d'_, p_)
           else
             let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             ltSpineL (gq, d_, d'_, usVs, ((s'_, s'), (v'_, I.id)), p_)
           end
-      | gq, d_, d'_, usVs, ((I.Root (I.Const c, s'_), s'), vs'_), p_ ->
+      | gq, ((I.Root (I.Const c, s'_), s'), vs'_) ->
           ltSpineL (gq, d_, d'_, usVs, ((s'_, s'), (I.constType c, I.id)), p_)
-      | gq, d_, d'_, usVs, ((I.Root (I.Def c, s'_), s'), vs'_), p_ ->
+      | gq, ((I.Root (I.Def c, s'_), s'), vs'_) ->
           ltSpineL (gq, d_, d'_, usVs, ((s'_, s'), (I.constType c, I.id)), p_)
 
     and ltSpineL (gq, d_, d'_, usVs, (ss'_, vs'_), p_) =
@@ -1245,34 +1069,14 @@ end) : CHECKING = struct
     and eqL (gq, d_, d'_, usVs, usVs', p_) =
       eqLW (gq, d_, d'_, (let a__, b__ = usVs in Whnf.whnfEta a__ b__), (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), p_)
 
-    and eqLW = function
-      | ( gq,
-          d_,
-          d'_,
-          (us_, ((I.Pi ((I.Dec (_, v2'), _), v'_), s2') as vs_)),
-          (us', ((I.Pi ((I.Dec (_, v2''), _), v''), s2'') as vs'_)),
-          p_ ) ->
+    and eqLW (a, d_, d'_, b, d, p_) = match a, b, d with
+      | gq, (us_, ((I.Pi ((I.Dec (_, v2'), _), v'_), s2') as vs_)), (us', ((I.Pi ((I.Dec (_, v2''), _), v''), s2'') as vs'_)) ->
           leftDecompose (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p_)
-      | ( gq,
-          d_,
-          d'_,
-          (us_, ((I.Pi ((I.Dec (_, v2'), _), v'_), s2') as vs_)),
-          (us', ((I.Root _, s2'') as vs'_)),
-          p_ ) ->
+      | gq, (us_, ((I.Pi ((I.Dec (_, v2'), _), v'_), s2') as vs_)), (us', ((I.Root _, s2'') as vs'_)) ->
           true
-      | ( gq,
-          d_,
-          d'_,
-          (us_, ((I.Root _, s2') as vs_)),
-          (us', ((I.Pi ((I.Dec (_, v2''), _), v''), s2'') as vs'_)),
-          p_ ) ->
+      | gq, (us_, ((I.Root _, s2') as vs_)), (us', ((I.Pi ((I.Dec (_, v2''), _), v''), s2'') as vs'_)) ->
           true
-      | ( gq,
-          d_,
-          d'_,
-          (((I.Root (I.Const c, s_), s), vs_) as usVs),
-          (((I.Root (I.Const c', s'_), s'), vs'_) as usVs'),
-          p_ ) ->
+      | gq, (((I.Root (I.Const c, s_), s), vs_) as usVs), (((I.Root (I.Const c', s'_), s'), vs'_) as usVs') ->
           begin if eqCid (c, c') then
             eqSpineL
               ( gq,
@@ -1283,32 +1087,17 @@ end) : CHECKING = struct
                 p_ )
           else true
           end
-      | ( gq,
-          d_,
-          d'_,
-          (((I.Root (I.Const c, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n, s'_), s') as us'), vs'_),
-          p_ ) ->
+      | gq, (((I.Root (I.Const c, s_), s) as us_), vs_), (((I.Root (I.BVar n, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             leftDecompose (gq, d_, Eq ((us', vs'_), (us_, vs_)) :: d'_, p_)
           else true
           end
-      | ( gq,
-          d_,
-          d'_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.Const c, s'_), s') as us'), vs'_),
-          p_ ) ->
+      | gq, (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.Const c, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us_) then
             leftDecompose (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p_)
           else true
           end
-      | ( gq,
-          d_,
-          d'_,
-          (((I.Root (I.Def c, s_), s), vs_) as usVs),
-          (((I.Root (I.Def c', s'_), s'), vs'_) as usVs'),
-          p_ ) ->
+      | gq, (((I.Root (I.Def c, s_), s), vs_) as usVs), (((I.Root (I.Def c', s'_), s'), vs'_) as usVs') ->
           begin if eqCid (c, c') then
             eqSpineL
               ( gq,
@@ -1319,57 +1108,37 @@ end) : CHECKING = struct
                 p_ )
           else true
           end
-      | ( gq,
-          d_,
-          d'_,
-          (((I.Root (I.Def c, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n, s'_), s') as us'), vs'_),
-          p_ ) ->
+      | gq, (((I.Root (I.Def c, s_), s) as us_), vs_), (((I.Root (I.BVar n, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             leftDecompose (gq, d_, Eq ((us', vs'_), (us_, vs_)) :: d'_, p_)
           else true
           end
-      | ( gq,
-          d_,
-          d'_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.Def c, s'_), s') as us'), vs'_),
-          p_ ) ->
+      | gq, (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.Def c, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us_) then
             leftDecompose (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p_)
           else true
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          d'_,
-          (((I.Root (I.BVar n, s_), s) as us_), vs_),
-          (((I.Root (I.BVar n', s'_), s') as us'), vs'_),
-          p_ ) ->
+      | ((g_, q_) as gq), (((I.Root (I.BVar n, s_), s) as us_), vs_), (((I.Root (I.BVar n', s'_), s') as us'), vs'_) ->
           begin if n = n' then
             let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             eqSpineL
               (gq, d_, d'_, ((s_, s), (v'_, I.id)), ((s'_, s'), (v'_, I.id)), p_)
           else leftDecompose (gq, d_, Eq ((us_, vs_), (us', vs'_)) :: d'_, p_)
           end
-      | gq, d_, d'_, usVs, usVs', p_ ->
+      | gq, usVs, usVs' ->
           leftDecompose (gq, d_, Eq (usVs, usVs') :: d'_, p_)
 
     and eqSpineL (gq, d_, d'_, (ss_, vs_), (ss'_, vs'_), p_) =
       eqSpineLW (gq, d_, d'_, (ss_, Whnf.whnf vs_), (ss'_, Whnf.whnf vs'_), p_)
 
-    and eqSpineLW = function
-      | gq, d_, d'_, ((Nil, s), vs_), ((Nil, s'), vs'_), p_ ->
+    and eqSpineLW (gq, d_, d'_, ssVs, ssVs', p_) = match ssVs, ssVs' with
+      | ((Nil, s), vs_), ((Nil, s'), vs'_) ->
           leftDecompose (gq, d_, d'_, p_)
-      | gq, d_, d'_, ((I.SClo (s_, s'), s''), vs_), ssVs', p_ ->
+      | ((I.SClo (s_, s'), s''), vs_), ssVs' ->
           eqSpineL (gq, d_, d'_, ((s_, I.comp s' s''), vs_), ssVs', p_)
-      | gq, d_, d'_, ssVs, ((I.SClo (s'_, s'), s''), vs'_), p_ ->
+      | ssVs, ((I.SClo (s'_, s'), s''), vs'_) ->
           eqSpineL (gq, d_, d'_, ssVs, ((s'_, I.comp s' s''), vs'_), p_)
-      | ( gq,
-          d_,
-          d'_,
-          ((I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2)),
-          ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')),
-          p_ ) ->
+      | ((I.App (u_, s_), s1), (I.Pi ((I.Dec (_, v1_), _), v2_), s2)), ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
           let d1_ =
             Eq (R.Arg ((u_, s1), (v1_, s2)), R.Arg ((u'_, s1'), (v1', s2')))
             :: d_

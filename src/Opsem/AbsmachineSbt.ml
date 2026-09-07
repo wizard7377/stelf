@@ -96,9 +96,9 @@ end) : ABSMACHINESBT = struct
       | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
-    let rec shift = function
-      | I.Null, s -> s
-      | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
+    let rec shift (a, s) = match a with
+      | I.Null -> s
+      | IntSyn.Decl (g_, d_) -> I.dot1 (shift (g_, s))
 
     let rec invShiftN (n, s) =
       begin if n = 0 then I.comp I.invShift s
@@ -140,43 +140,43 @@ end) : ABSMACHINESBT = struct
           printSub s
         end
 
-    let rec ctxToEVarSub = function
-      | gglobal, I.Null, s -> s
-      | gglobal, I.Decl (g_, I.Dec (_, a_)), s ->
+    let rec ctxToEVarSub (gglobal, a, s) = match a with
+      | I.Null -> s
+      | I.Decl (g_, I.Dec (_, a_)) ->
           let s' = ctxToEVarSub (gglobal, g_, s) in
           let x_ = I.newEVar gglobal (I.EClo (a_, s')) in
           I.Dot (I.Exp x_, s')
-      | gglobal, I.Decl (g_, I.ADec (_, d)), s ->
+      | I.Decl (g_, I.ADec (_, d)) ->
           let x_ = I.newAVar () in
           I.Dot
             (I.Exp (I.EClo (x_, I.Shift (-d))), ctxToEVarSub (gglobal, g_, s))
 
-    let rec solve' = function
-      | (C.Atom p, s), (C.DProg (g_, dpool) as dp), sc ->
+    let rec solve' (a, b, sc) = match a, b with
+      | (C.Atom p, s), (C.DProg (g_, dpool) as dp) ->
           matchAtom ((p, s), dp, sc)
-      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
+      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool) ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
           solve'
             ( (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
               sc )
-      | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
+      | (C.All (d_, g), s), C.DProg (g_, dPool) ->
           let d'_ = Names.decLUName g_ (I.decSub d_ s) in
           solve'
             ( (g, I.dot1 s),
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
               sc )
 
-    and rSolve = function
-      | ps', (C.Eq q_, s), C.DProg (g_, dPool), sc ->
+    and rSolve (ps', a, b, sc) = match a, b with
+      | (C.Eq q_, s), C.DProg (g_, dPool) ->
           begin if Unify.unifiable g_ ps' (q_, s) then sc [] else ()
           end
-      | ps', (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp), sc ->
+      | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           begin match Assign.assignable g_ ps' (q_, s) with
           | Some cnstr -> aSolve ((eqns, s), dp, cnstr, function () -> sc [])
           | None -> ()
           end
-      | ps', (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp), sc ->
+      | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( ps',
@@ -185,24 +185,21 @@ end) : ABSMACHINESBT = struct
               function
               | skel1 ->
                   solve' ((g, s), dp, function skel2 -> sc (skel1 @ skel2)) )
-      | ps', (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp), sc
+      | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp)
         ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve (ps', (r, I.Dot (I.Exp x_, s)), dp, sc)
-      | ps', (C.Axists (I.ADec (_, d), r), s), (C.DProg (g_, dPool) as dp), sc
+      | (C.Axists (I.ADec (_, d), r), s), (C.DProg (g_, dPool) as dp)
         ->
           let x'_ = I.newAVar () in
           rSolve
             (ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
 
-    and aSolve = function
-      | (trivial_, s), dp, cnstr, sc ->
+    and aSolve (a, b, cnstr, sc) = match a, b with
+      | (trivial_, s), dp ->
           begin if Assign.solveCnstr cnstr then sc () else ()
           end
-      | ( (C.UnifyEq (g'_, e1, n_, eqns), s),
-          (C.DProg (g_, dPool) as dp),
-          cnstr,
-          sc ) ->
+      | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           let g''_ = compose' (g'_, g_) in
           let s' = shift (g'_, s) in
           begin if Assign.unifiable g''_ (n_, s') (e1, s') then
@@ -210,9 +207,9 @@ end) : ABSMACHINESBT = struct
           else ()
           end
 
-    and sSolve = function
-      | (C.True, s), dp, sc -> sc []
-      | (C.Conjunct (g, a_, sgoals), s), (C.DProg (g_, dPool) as dp), sc ->
+    and sSolve (a, b, sc) = match a, b with
+      | (C.True, s), dp -> sc []
+      | (C.Conjunct (g, a_, sgoals), s), (C.DProg (g_, dPool) as dp) ->
           solve'
             ( (g, s),
               dp,

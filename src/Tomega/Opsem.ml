@@ -138,9 +138,9 @@ module MakeOpsem
 
   (* ABP -- normalizePrg invariant does not state what happens to non-free EVArs,
        and there are some embedded under PClo... *)
-  let rec append = function
-    | g1_, I.Null -> g1_
-    | g1_, I.Decl (g2_, d_) -> I.Decl (append (g1_, g2_), d_)
+  let rec append (g1_, a) = match a with
+    | I.Null -> g1_
+    | I.Decl (g2_, d_) -> I.Decl (append (g1_, g2_), d_)
 
   and raisePrg a1 b1 c1 = match a1, b1, c1 with
     | psi, g_, T.Unit -> T.Unit
@@ -164,35 +164,35 @@ module MakeOpsem
   (* G  |- w  : G'    *)
   (* G' |- iw : G     *)
   (* Psi0, G' |- B'' ctx *)
-  and evalPrg = function
-    | psi, (T.Unit, t) -> T.Unit
-    | psi, (T.PairExp (m_, p_), t) ->
+  and evalPrg (psi, a) = match a with
+    | (T.Unit, t) -> T.Unit
+    | (T.PairExp (m_, p_), t) ->
         T.PairExp (I.EClo (m_, T.coerceSub t), evalPrg (psi, (p_, t)))
-    | psi, (T.PairBlock (b_, p_), t) ->
+    | (T.PairBlock (b_, p_), t) ->
         T.PairBlock (I.blockSub b_ (T.coerceSub t), evalPrg (psi, (p_, t)))
-    | psi, (T.PairPrg (p1_, p2_), t) ->
+    | (T.PairPrg (p1_, p2_), t) ->
         T.PairPrg (evalPrg (psi, (p1_, t)), evalPrg (psi, (p2_, t)))
-    | psi, (T.Redex (p_, s_), t) ->
+    | (T.Redex (p_, s_), t) ->
         evalRedex (psi, evalPrg (psi, (p_, t)), (s_, t))
-    | psi, (T.Var k, t) ->
+    | (T.Var k, t) ->
         begin match T.varSub k t with T.Prg p_ -> evalPrg (psi, (p_, T.id))
         end
-    | psi, (T.Const lemma, t) -> evalPrg (psi, (T.lemmaDef lemma, t))
-    | psi, (T.Lam ((T.UDec (I.BDec _) as d_), p_), t) ->
+    | (T.Const lemma, t) -> evalPrg (psi, (T.lemmaDef lemma, t))
+    | (T.Lam ((T.UDec (I.BDec _) as d_), p_), t) ->
         let d'_ = T.decSub d_ t in
         T.Lam (d'_, evalPrg (I.Decl (psi, d'_), (p_, T.dot1 t)))
-    | psi, (T.Lam (d_, p_), t) -> T.Lam (T.decSub d_ t, T.PClo (p_, T.dot1 t))
-    | psi, ((T.Rec (d_, p_) as p'_), t) ->
+    | (T.Lam (d_, p_), t) -> T.Lam (T.decSub d_ t, T.PClo (p_, T.dot1 t))
+    | ((T.Rec (d_, p_) as p'_), t) ->
         evalPrg (psi, (p_, T.Dot (T.Prg (T.PClo (p'_, t)), t)))
-    | psi, (T.PClo (p_, t'), t) -> evalPrg (psi, (p_, T.comp t' t))
-    | psi, (T.Case (T.Cases o_), t') -> match_ (psi, t', T.Cases (rev o_))
-    | psi, (T.EVar (d_, ({ contents = Some p_ } as r), f_, _, _, _), t) ->
+    | (T.PClo (p_, t'), t) -> evalPrg (psi, (p_, T.comp t' t))
+    | (T.Case (T.Cases o_), t') -> match_ (psi, t', T.Cases (rev o_))
+    | (T.EVar (d_, ({ contents = Some p_ } as r), f_, _, _, _), t) ->
         evalPrg (psi, (p_, t))
-    | psi, (T.Let (d_, p1_, p2_), t) ->
+    | (T.Let (d_, p1_, p2_), t) ->
         let v_ = evalPrg (psi, (p1_, t)) in
         let v'_ = evalPrg (psi, (p2_, T.Dot (T.Prg v_, t))) in
         v'_
-    | psi, (T.New (T.Lam (d_, p_)), t) ->
+    | (T.New (T.Lam (d_, p_)), t) ->
         let d'_ = T.decSub d_ t in
         let (T.UDec d''_) = d'_ in
         let d''' = T.UDec (Names.decName (T.coerceCtx psi) d''_) in
@@ -202,15 +202,15 @@ module MakeOpsem
         let newP = raisePrg psi g_ (T.normalizePrg v_ t') in
         newP
         (* unnecessary naming, remove later --cs *)
-    | psi, (T.Box (w_, p_), t) -> evalPrg (psi, (p_, t))
-    | psi, (T.Choose p_, t) ->
-        let rec substToSpine' = function
-          | I.Shift n, I.Null, t_acc -> t_acc
-          | I.Shift n, (I.Decl _ as g_), t_acc ->
+    | (T.Box (w_, p_), t) -> evalPrg (psi, (p_, t))
+    | (T.Choose p_, t) ->
+        let rec substToSpine' (a, b, t_acc) = match a, b with
+          | I.Shift n, I.Null -> t_acc
+          | I.Shift n, (I.Decl _ as g_) ->
               substToSpine' (I.Dot (I.Idx (n + 1), I.Shift (n + 1)), g_, t_acc)
-          | I.Dot (I.Exp u_, s), I.Decl (g_, v_), t_acc ->
+          | I.Dot (I.Exp u_, s), I.Decl (g_, v_) ->
               substToSpine' (s, g_, T.AppExp (u_, t_acc))
-          | I.Dot (I.Idx n, s), I.Decl (g_, I.Dec (_, v_)), t_acc ->
+          | I.Dot (I.Idx n, s), I.Decl (g_, I.Dec (_, v_)) ->
               let us_, _ =
                 Whnf.whnfEta (I.Root (I.BVar n, I.Nil), I.id) (v_, I.id)
               in
@@ -221,11 +221,11 @@ module MakeOpsem
                   T.AppExp (I.EClo (u_eta, s_eta), t_acc) )
           (* Eta-expand *)
         in
-        let rec choose = function
-          | k, I.Null -> raise Abort
-          | k, I.Decl (psi', T.PDec _) -> choose (k + 1, psi')
-          | k, I.Decl (psi', T.UDec (I.Dec _)) -> choose (k + 1, psi')
-          | k, I.Decl (psi', T.UDec (I.BDec (_, (l1, s1)))) -> (
+        let rec choose (k, a) = match a with
+          | I.Null -> raise Abort
+          | I.Decl (psi', T.PDec _) -> choose (k + 1, psi')
+          | I.Decl (psi', T.UDec (I.Dec _)) -> choose (k + 1, psi')
+          | I.Decl (psi', T.UDec (I.BDec (_, (l1, s1)))) -> (
               let gsome_, gpi = I.constBlock l1 in
               let s_ =
                 substToSpine' (s1, gsome_, T.AppBlock (I.Bidx k, T.Nil))
@@ -236,8 +236,8 @@ module MakeOpsem
         choose (1, psi)
   (* This function was imported from Cover.fun. *)
 
-  and match_ = function
-    | psi, t1, T.Cases ((psi', t2, p_) :: c_) -> (
+  and match_ (psi, t1, a) = match a with
+    | T.Cases ((psi', t2, p_) :: c_) -> (
         let t = createVarSub psi psi' in
         let t' = T.comp t2 t in
         try
@@ -252,7 +252,7 @@ module MakeOpsem
         (* Note that since we are missing the shift(k), it is possible
            * that t' has extra DOTs in there that weren't removed *)
         )
-    | psi, t1, T.Cases [] -> raise Abort
+    | T.Cases [] -> raise Abort
 
   and createVarSub a1 b1 = match a1, b1 with
     | psi, I.Null -> T.Shift (I.ctxLength psi)
@@ -324,23 +324,23 @@ module MakeOpsem
         matchSub psi t1 t2
   (* By Invariant *)
 
-  and evalRedex = function
-    | psi, v_, (T.Nil, _) -> v_
-    | psi, v_, (T.SClo (s_, t1), t2) ->
+  and evalRedex (psi, a, b) = match a, b with
+    | v_, (T.Nil, _) -> v_
+    | v_, (T.SClo (s_, t1), t2) ->
         evalRedex (psi, v_, (s_, T.comp t1 t2))
-    | psi, T.Lam (T.UDec (I.Dec (_, a_)), p'_), (T.AppExp (u_, s_), t) ->
+    | T.Lam (T.UDec (I.Dec (_, a_)), p'_), (T.AppExp (u_, s_), t) ->
         let v_ =
           evalPrg (psi, (p'_, T.Dot (T.Exp (I.EClo (u_, T.coerceSub t)), T.id)))
         in
         evalRedex (psi, v_, (s_, t))
-    | psi, T.Lam (T.UDec _, p'_), (T.AppBlock (b_, s_), t) ->
+    | T.Lam (T.UDec _, p'_), (T.AppBlock (b_, s_), t) ->
         evalRedex
           ( psi,
             evalPrg
               ( psi,
                 (p'_, T.Dot (T.Block (I.blockSub b_ (T.coerceSub t)), T.id)) ),
             (s_, t) )
-    | psi, T.Lam (T.PDec _, p'_), (T.AppPrg (p_, s_), t) ->
+    | T.Lam (T.PDec _, p'_), (T.AppPrg (p_, s_), t) ->
         let v_ = evalPrg (psi, (p_, t)) in
         let v'_ = evalPrg (psi, (p'_, T.Dot (T.Prg v_, T.id))) in
         evalRedex (psi, v'_, (s_, t))
@@ -416,9 +416,9 @@ module MakeOpsem
        d = | Psi' |
 
     *)
-  let rec topLevel = function
-    | psi, d, (T.Unit, t) -> ()
-    | psi, d, (T.Let (d'_, p1_, T.Case cs_), t) ->
+  let rec topLevel (psi, d, a) = match a with
+    | (T.Unit, t) -> ()
+    | (T.Let (d'_, p1_, T.Case cs_), t) ->
         let rec printLF arg__1 arg__2 =
           begin match (arg__1, arg__2) with
           | (_, _, _), 0 -> ()
@@ -452,18 +452,16 @@ module MakeOpsem
              Invariant:
              G |- s : G'
           *)
-    | ( psi,
-        d,
-        ( T.Let
+    | ( T.Let
             ( d_,
               T.Lam ((T.UDec (I.BDec (Some name, (cid, s))) as d'_), p1_),
               p2_ ),
-          t ) ) ->
+          t ) ->
         ignore (print (("new " ^ name) ^ "\n"));
         let d''_ = T.decSub d'_ t in
         ignore (topLevel (I.Decl (psi, d''_), d + 1, (p1_, T.dot1 t)));
         ()
-    | psi, d, (T.Let (d_, p1_, p2_), t) ->
+    | (T.Let (d_, p1_, p2_), t) ->
         let (T.PDec (Some name, f_, _, _)) = d_ in
         let v_ = evalPrg (psi, (p1_, t)) in
         ignore (print

@@ -127,9 +127,9 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
       | I.Null, g_ -> g_
       | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
 
-    let rec shift = function
-      | I.Null, s -> s
-      | IntSyn.Decl (g_, d_), s -> I.dot1 (shift (g_, s))
+    let rec shift (a, s) = match a with
+      | I.Null -> s
+      | IntSyn.Decl (g_, d_) -> I.dot1 (shift (g_, s))
 
     let exists p_ k_ =
       let rec exists' = function
@@ -140,15 +140,15 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
 
     let rec occursInExp (r, vs_) = occursInExpW (r, Whnf.whnf vs_)
 
-    and occursInExpW = function
-      | r, (I.Uni _, _) -> false
-      | r, (I.Pi ((d_, _), v_), s) ->
+    and occursInExpW (r, a) = match a with
+      | (I.Uni _, _) -> false
+      | (I.Pi ((d_, _), v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
-      | r, (I.Root (_, s_), s) -> occursInSpine (r, (s_, s))
-      | r, (I.Lam (d_, v_), s) ->
+      | (I.Root (_, s_), s) -> occursInSpine (r, (s_, s))
+      | (I.Lam (d_, v_), s) ->
           occursInDec (r, (d_, s)) || occursInExp (r, (v_, I.dot1 s))
-      | r, (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
-      | r, (I.FgnExp (csid_, csfe), s) ->
+      | (I.EVar (r', _, v'_, _), s) -> r == r' || occursInExp (r, (v'_, s))
+      | (I.FgnExp (csid_, csfe), s) ->
           I.FgnExpStd.fold csid_ csfe
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
@@ -188,10 +188,10 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
 
-    let rec solve = function
-      | max, depth, (C.Atom p, s), dp, sc, acc ->
+    let rec solve (max, depth, a, dp, sc, acc) = match a, dp with
+      | (C.Atom p, s), dp ->
           matchAtom (max, depth, (p, s), dp, sc, acc)
-      | max, depth, (C.Impl (r, a_, h_, g), s), C.DProg (g_, dPool), sc, acc ->
+      | (C.Impl (r, a_, h_, g), s), C.DProg (g_, dPool) ->
           let d'_ = I.Dec (None, I.EClo (a_, s)) in
           solve
             ( max,
@@ -200,7 +200,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
               C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, h_))),
               (fun (m_, acc') -> sc (I.Lam (d'_, m_), acc')),
               acc )
-      | max, depth, (C.All (d_, g), s), C.DProg (g_, dPool), sc, acc ->
+      | (C.All (d_, g), s), C.DProg (g_, dPool) ->
           let d'_ = I.decSub d_ s in
           solve
             ( max,
@@ -210,30 +210,18 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
               (fun (m_, acc') -> sc (I.Lam (d'_, m_), acc')),
               acc )
 
-    and rSolve = function
-      | max, depth, ps', (C.Eq q_, s), C.DProg (g_, dPool), sc, acc ->
+    and rSolve (max, depth, ps', a, b, sc, acc) = match a, b with
+      | (C.Eq q_, s), C.DProg (g_, dPool) ->
           begin if Unify.unifiable g_ ps' (q_, s) then sc (I.Nil, acc)
           else acc
           end
-      | ( max,
-          depth,
-          ps',
-          (C.Assign (q_, eqns), s),
-          (C.DProg (g_, dPool) as dp),
-          sc,
-          acc ) ->
+      | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           begin match Assign.assignable g_ ps' (q_, s) with
           | Some cnstr ->
               aSolve ((eqns, s), dp, cnstr, (fun () -> sc (I.Nil, acc)), acc)
           | None -> acc
           end
-      | ( max,
-          depth,
-          ps',
-          (C.And (r, a_, g), s),
-          (C.DProg (g_, dPool) as dp),
-          sc,
-          acc ) ->
+      | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( max,
@@ -250,13 +238,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
                     (fun (m_, acc'') -> sc (I.App (m_, s_), acc'')),
                     acc' )),
               acc )
-      | ( max,
-          depth,
-          ps',
-          (C.In (r, a_, g), s),
-          (C.DProg (g_, dPool) as dp),
-          sc,
-          acc ) ->
+      | (C.In (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
           let g0_ = pruneCtx (g_, depth) in
           let dPool0 = pruneCtx (dPool, depth) in
           let w = I.Shift depth in
@@ -285,13 +267,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
                         with Unify.Unify _ -> acc''),
                       acc' )),
               acc )
-      | ( max,
-          depth,
-          ps',
-          (C.Exists (I.Dec (_, a_), r), s),
-          (C.DProg (g_, dPool) as dp),
-          sc,
-          acc ) ->
+      | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp) ->
           let x_ = I.newEVar g_ (I.EClo (a_, s)) in
           rSolve
             ( max,
@@ -301,13 +277,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
               dp,
               (fun (s_, acc') -> sc (I.App (x_, s_), acc')),
               acc )
-      | ( max,
-          depth,
-          ps',
-          (C.Axists (I.ADec (Some x_, d), r), s),
-          (C.DProg (g_, dPool) as dp),
-          sc,
-          acc ) ->
+      | (C.Axists (I.ADec (Some x_, d), r), s), (C.DProg (g_, dPool) as dp) ->
           let x'_ = I.newAVar () in
           rSolve
             ( max,
@@ -318,15 +288,11 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
               sc,
               acc )
 
-    and aSolve = function
-      | (trivial_, s), dp, cnstr, sc, acc ->
+    and aSolve (a, b, cnstr, sc, acc) = match a, b with
+      | (trivial_, s), dp ->
           begin if Assign.solveCnstr cnstr then sc () else acc
           end
-      | ( (C.UnifyEq (g'_, e1, n_, eqns), s),
-          (C.DProg (g_, dPool) as dp),
-          cnstr,
-          sc,
-          acc ) ->
+      | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp) ->
           let g''_ = compose' (g'_, g_) in
           let s' = shift (g'_, s) in
           begin if Assign.unifiable g''_ (n_, s') (e1, s') then
@@ -342,9 +308,9 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           (C.DProg (g_, dPool) as dp),
           sc,
           acc ) ->
-          let rec matchSig' = function
-            | [], acc' -> acc'
-            | hc :: sgn', acc' ->
+          let rec matchSig' (a, acc') = match a with
+            | [] -> acc'
+            | hc :: sgn' ->
                 let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
                 let acc''' =
                   CsManager.trail (function () ->

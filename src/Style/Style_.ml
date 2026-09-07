@@ -89,8 +89,8 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
       else Incorrect (prefNames, n)
       end
 
-    let checkVar = function
-      | I.Dec (Some n, v_), pol ->
+    let checkVar (a, pol) = match a with
+      | I.Dec (Some n, v_) ->
           begin match Names.getNamePref (I.targetFam v_) with
           | None -> Correct
           | Some (prefENames, prefUNames) ->
@@ -99,7 +99,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
               | Minus -> checkVariablename (n, prefUNames)
               end
           end
-      | I.Dec (None, v_), pol -> Correct
+      | I.Dec (None, v_) -> Correct
 
     let implicitHead = function
       | I.BVar k -> 0

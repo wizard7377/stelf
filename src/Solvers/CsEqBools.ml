@@ -72,10 +72,10 @@ end) : Cs.CS = struct
     let trueExp () = Root (Const !trueID, Nil)
     let falseExp () = Root (Const !falseID, Nil)
 
-    let solveBool = function
-      | g_, s_, 0 -> Some (trueExp ())
-      | g_, s_, 1 -> Some (falseExp ())
-      | g_, s_, k -> None
+    let solveBool (g_, s_, k) = match k with
+      | 0 -> Some (trueExp ())
+      | 1 -> Some (falseExp ())
+      | k -> None
 
     let notID = (ref (-1) : cid ref)
     let xorID = (ref (-1) : cid ref)
@@ -124,7 +124,7 @@ end) : Cs.CS = struct
       | Mon (us_ :: []) -> toExpEClo us_
       | Mon (us_ :: usL) -> andExp (toExpMon (Mon usL), toExpEClo us_)
 
-    and toExpEClo = function u_, Shift 0 -> u_ | u_, s_ -> EClo (u_, s_)
+    and toExpEClo (u_, s_) = match s_ with Shift 0 -> u_ | s_ -> EClo (u_, s_)
 
     let rec compatibleMon (Mon usL1, Mon usL2) =
       equalSet (function us1, us2 -> sameExp (us1, us2)) (usL1, usL2)
@@ -217,9 +217,9 @@ end) : Cs.CS = struct
       List.app (function u_, s_ -> f (EClo (u_, s_))) usL
 
     let findMon f (g_, Sum (m, monL)) =
-      let rec findMon' = function
-        | [], monL2 -> None
-        | mon :: monL1, monL2 ->
+      let rec findMon' (a, monL2) = match a with
+        | [] -> None
+        | mon :: monL1 ->
             begin match f (g_, mon, Sum (m, monL1 @ monL2)) with
             | Some _ as result -> result
             | None -> findMon' (monL1, mon :: monL2)

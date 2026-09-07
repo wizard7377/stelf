@@ -82,19 +82,19 @@ module MakeUnique
     let chatter chlev f = Display.chatter_s chlev (f ())
     let cName cid = N.qidToString (N.constQid cid)
 
-    let pName = function
-      | cid, Some x -> (("#" ^ cName cid) ^ "_") ^ x
-      | cid, None -> ("#" ^ cName cid) ^ "_?"
+    let pName (cid, a) = match a with
+      | Some x -> (("#" ^ cName cid) ^ "_") ^ x
+      | None -> ("#" ^ cName cid) ^ "_?"
 
-    let rec instEVars = function
-      | g_, (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
+    let rec instEVars (g_, a) = match a with
+      | (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
           let x1_ = I.newEVar g_ (I.EClo (v1_, s)) in
           instEVars (g_, (v2_, I.Dot (I.Exp x1_, s)))
-      | g_, ((I.Root _, _) as vs_) -> vs_
+      | ((I.Root _, _) as vs_) -> vs_
 
-    let rec createEVarSub = function
-      | g_, I.Null -> I.Shift (I.ctxLength g_)
-      | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
+    let rec createEVarSub (g_, a) = match a with
+      | I.Null -> I.Shift (I.ctxLength g_)
+      | I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
           let s = createEVarSub (g_, g'_) in
           let v'_ = I.EClo (v_, s) in
           let x_ = I.newEVar g_ v'_ in
@@ -103,18 +103,12 @@ module MakeUnique
     let unifiable g_ (u_, s) (u'_, s') =
       Unify.unifiable g_ (u_, s) (u'_, s')
 
-    let rec unifiableSpines = function
-      | g_, (I.Nil, s), (I.Nil, s'), M.Mnil -> true
-      | ( g_,
-          (I.App (u1_, s2_), s),
-          (I.App (u1', s2'_), s'),
-          M.Mapp (M.Marg (M.Plus, _), ms2) ) ->
+    let rec unifiableSpines (g_, a, b, c) = match a, b, c with
+      | (I.Nil, s), (I.Nil, s'), M.Mnil -> true
+      | (I.App (u1_, s2_), s), (I.App (u1', s2'_), s'), M.Mapp (M.Marg (M.Plus, _), ms2) ->
           unifiable g_ (u1_, s) (u1', s')
           && unifiableSpines (g_, (s2_, s), (s2'_, s'), ms2)
-      | ( g_,
-          (I.App (u1_, s2_), s),
-          (I.App (u1', s2'_), s'),
-          M.Mapp (M.Marg (mode, _), ms2) ) ->
+      | (I.App (u1_, s2_), s), (I.App (u1', s2'_), s'), M.Mapp (M.Marg (mode, _), ms2) ->
           unifiableSpines (g_, (s2_, s), (s2'_, s'), ms2)
 
     let unifiableRoots
@@ -149,23 +143,23 @@ module MakeUnique
             end));
       ()
 
-    let rec checkUniqueConstConsts = function
-      | c, [], ms -> ()
-      | c, c' :: cs', ms -> begin
+    let rec checkUniqueConstConsts (c, a, ms) = match a with
+      | [] -> ()
+      | c' :: cs' -> begin
           checkDiffConstConst (c, c', ms);
           checkUniqueConstConsts (c, cs', ms)
         end
 
-    let rec checkUniqueConsts = function
-      | [], ms -> ()
-      | c :: cs, ms -> begin
+    let rec checkUniqueConsts (a, ms) = match a with
+      | [] -> ()
+      | c :: cs -> begin
           checkUniqueConstConsts (c, cs, ms);
           checkUniqueConsts (cs, ms)
         end
 
-    let rec checkDiffBlocksInternal = function
-      | g_, vs_, (t, []), (a, ms), bx -> ()
-      | g_, (v_, s), (t, (I.Dec (yOpt, v'_) as d_) :: piDecs), (a, ms), (b, xOpt)
+    let rec checkDiffBlocksInternal (g_, vs_, c, d, bx) = match vs_, c, d, bx with
+      | vs_, (t, []), (a, ms), bx -> ()
+      | (v_, s), (t, (I.Dec (yOpt, v'_) as d_) :: piDecs), (a, ms), (b, xOpt)
         ->
           let a' = I.targetFam v'_ in
           ignore begin if a = a' then
@@ -184,9 +178,9 @@ module MakeUnique
               (a, ms),
               (b, xOpt) )
 
-    let rec checkUniqueBlockInternal' = function
-      | g_, (t, []), (a, ms), b -> ()
-      | g_, (t, (I.Dec (xOpt, v_) as d_) :: piDecs), (a, ms), b ->
+    let rec checkUniqueBlockInternal' (g_, c, d, b) = match c, d with
+      | (t, []), (a, ms) -> ()
+      | (t, (I.Dec (xOpt, v_) as d_) :: piDecs), (a, ms) ->
           let a' = I.targetFam v_ in
           ignore begin if a = a' then
               let v'_, s = instEVars (g_, (v_, t)) in
@@ -205,9 +199,9 @@ module MakeUnique
       let t = createEVarSub (I.Null, gsome_) in
       checkUniqueBlockInternal' (I.Null, (t, piDecs), (a, ms), b)
 
-    let rec checkUniqueBlockConsts = function
-      | g_, vs_, [], ms, bx -> ()
-      | g_, vs_, I.Const cid :: cs, ms, bx ->
+    let rec checkUniqueBlockConsts (g_, vs_, a, ms, bx) = match a with
+      | [] -> ()
+      | I.Const cid :: cs ->
           ignore (chatter 6 (function () ->
                 ((("?- " ^ pName bx) ^ " ~ ") ^ cName cid) ^ "\n"));
           let vs'_ = instEVars (g_, (I.constType cid, I.id)) in
@@ -220,7 +214,7 @@ module MakeUnique
                 else ()
                 end));
           checkUniqueBlockConsts (g_, vs_, cs, ms, bx)
-      | g_, vs_, I.Def cid :: cs, ms, bx ->
+      | I.Def cid :: cs ->
           ignore (chatter 6 (function () ->
                 ((("?- " ^ pName bx) ^ " ~ ") ^ cName cid) ^ "\n"));
           let vs'_ = instEVars (g_, (I.constType cid, I.id)) in
@@ -233,13 +227,13 @@ module MakeUnique
                 else ()
                 end));
           checkUniqueBlockConsts (g_, vs_, cs, ms, bx)
-      | g_, vs_, _ :: cs, ms, bx ->
+      | _ :: cs ->
           (* Skip other head types *)
           checkUniqueBlockConsts (g_, vs_, cs, ms, bx)
 
-    let rec checkUniqueBlockBlock = function
-      | g_, vs_, (t, []), (a, ms), (bx, b') -> ()
-      | g_, (v_, s), (t, (I.Dec (yOpt, v'_) as d_) :: piDecs), (a, ms), (bx, b')
+    let rec checkUniqueBlockBlock (g_, vs_, b, c, d) = match vs_, b, c, d with
+      | vs_, (t, []), (a, ms), (bx, b') -> ()
+      | (v_, s), (t, (I.Dec (yOpt, v'_) as d_) :: piDecs), (a, ms), (bx, b')
         ->
           let a' = I.targetFam v'_ in
           ignore begin if a = a' then
@@ -254,17 +248,17 @@ module MakeUnique
               (a, ms),
               (bx, b') )
 
-    let rec checkUniqueBlockBlocks = function
-      | g_, vs_, [], (a, ms), bx -> ()
-      | g_, vs_, b :: bs, (a, ms), bx ->
+    let rec checkUniqueBlockBlocks (g_, vs_, c, d, bx) = match c, d with
+      | [], (a, ms) -> ()
+      | b :: bs, (a, ms) ->
           let gsome_, piDecs = I.constBlock b in
           let t = createEVarSub (g_, gsome_) in
           ignore (checkUniqueBlockBlock (g_, vs_, (t, piDecs), (a, ms), (bx, b)));
           checkUniqueBlockBlocks (g_, vs_, bs, (a, ms), bx)
 
-    let rec checkUniqueBlock' = function
-      | g_, (t, []), bs, cs, (a, ms), b -> ()
-      | g_, (t, (I.Dec (xOpt, v_) as d_) :: piDecs), bs, cs, (a, ms), b ->
+    let rec checkUniqueBlock' (g_, c, bs, cs, d, b) = match c, d with
+      | (t, []), (a, ms) -> ()
+      | (t, (I.Dec (xOpt, v_) as d_) :: piDecs), (a, ms) ->
           let a' = I.targetFam v_ in
           ignore begin if a = a' then
               let v'_, s = instEVars (g_, (v_, t)) in
@@ -280,9 +274,9 @@ module MakeUnique
       let t = createEVarSub (I.Null, gsome_) in
       checkUniqueBlock' (I.Null, (t, piDecs), bs, cs, (a, ms), b)
 
-    let rec checkUniqueWorlds = function
-      | [], cs, (a, ms) -> ()
-      | b :: bs, cs, (a, ms) -> begin
+    let rec checkUniqueWorlds (c, cs, d) = match c, d with
+      | [], (a, ms) -> ()
+      | b :: bs, (a, ms) -> begin
           checkUniqueBlockInternal (I.constBlock b, (a, ms), b);
           begin
             checkUniqueBlock (I.constBlock b, b :: bs, cs, (a, ms), b);

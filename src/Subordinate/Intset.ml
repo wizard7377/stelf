@@ -129,10 +129,10 @@ module IntSet : INTSET = struct
   let member x t = lookup t x
 
   let foldl f a t =
-    let rec fo = function
-      | Empty, r -> r
-      | Red (x, left, right), r -> fo (right, f (x, fo (left, r)))
-      | Black (x, left, right), r -> fo (right, f (x, fo (left, r)))
+    let rec fo (a, r) = match a with
+      | Empty -> r
+      | Red (x, left, right) -> fo (right, f (x, fo (left, r)))
+      | Black (x, left, right) -> fo (right, f (x, fo (left, r)))
     in
     fo (t, a)
 end

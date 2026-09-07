@@ -156,25 +156,25 @@ end) : TOTAL = struct
     end
 
   (* G is unused here *)
-  let rec checkDynOrder = function
-    | g_, vs_, 0, occ -> begin
+  let rec checkDynOrder (g_, vs_, a, occ) = match a with
+    | 0 -> begin
         Display.chatter_s 5
           "Output coverage: skipping redundant checking of third-order  clause\n";
         ()
       end
-    | g_, vs_, n, occ -> checkDynOrderW (g_, Whnf.whnf vs_, n, occ)
+    | n -> checkDynOrderW (g_, Whnf.whnf vs_, n, occ)
   (* n > 0 *)
   (* Sun Jan  5 12:17:06 2003 -fp *)
   (* Functional calculus now checks this *)
   (* raise Error' (occ, ""Output coverage for clauses of order >= 3 not yet implemented"") *)
 
-  and checkDynOrderW = function
-    | g_, (I.Root _, s), n, occ -> ()
-    | g_, (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s), n, occ -> begin
+  and checkDynOrderW (g_, a, n, occ) = match a with
+    | (I.Root _, s) -> ()
+    | (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s) -> begin
         checkDynOrder (g_, (v1_, s), n - 1, P.label occ);
         checkDynOrder (I.Decl (g_, d1_), (v2_, I.dot1 s), n, P.body occ)
       end
-    | g_, (I.Pi ((d1_, Maybe), v2_), s), n, occ ->
+    | (I.Pi ((d1_, Maybe), v2_), s) ->
         checkDynOrder (I.Decl (g_, d1_), (v2_, I.dot1 s), n, P.body occ)
 
   (* static (= dependent) assumption --- consider only body *)
@@ -191,14 +191,14 @@ end) : TOTAL = struct
     *)
   let rec checkClause (g_, vs_, occ) = checkClauseW (g_, Whnf.whnf vs_, occ)
 
-  and checkClauseW = function
-    | g_, (I.Pi ((d1_, Maybe), v2_), s), occ ->
+  and checkClauseW (g_, a, occ) = match a with
+    | (I.Pi ((d1_, Maybe), v2_), s) ->
         let d1' = N.decEName g_ (I.decSub d1_ s) in
         checkClause (I.Decl (g_, d1'), (v2_, I.dot1 s), P.body occ)
-    | g_, (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s), occ ->
+    | (I.Pi (((I.Dec (_, v1_) as d1_), No), v2_), s) ->
         ignore (checkClause (I.Decl (g_, d1_), (v2_, I.dot1 s), P.body occ));
         checkGoal (g_, (v1_, s), P.label occ)
-    | g_, (I.Root _, s), occ -> ()
+    | (I.Root _, s) -> ()
   (* clause head *)
   (* subgoal *)
   (* quantifier *)
@@ -225,11 +225,11 @@ end) : TOTAL = struct
        iff every mode in mode spine ms is either input or output
        Effect: raises Error (msg) otherwise
     *)
-  let rec checkDefinite = function
-    | a, M.Mnil -> ()
-    | a, M.Mapp (M.Marg (M.Plus, _), ms') -> checkDefinite (a, ms')
-    | a, M.Mapp (M.Marg (M.Minus, _), ms') -> checkDefinite (a, ms')
-    | a, M.Mapp (M.Marg (M.Star, xOpt), ms') ->
+  let rec checkDefinite (a, b) = match b with
+    | M.Mnil -> ()
+    | M.Mapp (M.Marg (M.Plus, _), ms') -> checkDefinite (a, ms')
+    | M.Mapp (M.Marg (M.Minus, _), ms') -> checkDefinite (a, ms')
+    | M.Mapp (M.Marg (M.Star, xOpt), ms') ->
         error
           ( a,
             P.top,

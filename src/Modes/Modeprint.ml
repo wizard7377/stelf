@@ -60,14 +60,14 @@ module MakeModePrint (Names : NAMES) (Formatter : FORMATTER) (Print : PRINT) :
 
     let fmtModeDec (cid, mS) =
       let v_ = I.constType cid in
-      let rec fmtModeDec' = function
-        | g_, _, M.Mnil ->
+      let rec fmtModeDec' (g_, a, b) = match a, b with
+        | _, M.Mnil ->
             [
               F.string "(";
               P.formatExp g_ (I.Root (I.Const cid, makeSpine g_));
               F.string ")";
             ]
-        | g_, I.Pi ((d_, _), v'_), M.Mapp (marg, s_) ->
+        | I.Pi ((d_, _), v'_), M.Mapp (marg, s_) ->
             let d'_ = nameDec (d_, marg) in
             let d''_ = Names.decEName g_ d'_ in
             [

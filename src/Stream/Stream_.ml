@@ -125,7 +125,7 @@ module MakeStream (BasicStream : BASIC_STREAM) : STREAM = struct
   let rec toList s = toList' (expose s)
   and toList' = function Empty -> [] | Cons (x, s) -> x :: toList s
 
-  let rec dropPos = function s, 0 -> s | s, n -> drop' (expose s, n)
+  let rec dropPos (s, n) = match n with 0 -> s | n -> drop' (expose s, n)
 
   and drop' = function
     | Empty, _ -> empty

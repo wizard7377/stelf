@@ -184,9 +184,9 @@ end) : WORLDSYN = struct
           formatReg rb;
         ]
 
-    let rec createEVarSub = function
-      | g_, I.Null -> I.Shift (I.ctxLength g_)
-      | g_, I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
+    let rec createEVarSub (g_, a) = match a with
+      | I.Null -> I.Shift (I.ctxLength g_)
+      | I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
           let s = createEVarSub (g_, g'_) in
           let v'_ = I.EClo (v_, s) in
           let x_ = I.newEVar g_ v'_ in
@@ -212,12 +212,12 @@ end) : WORLDSYN = struct
     let formatD (g_, d_) =
       F.hbox [ F.string "{"; Print.formatDec g_ d_; F.string "}" ]
 
-    let rec formatDList = function
-      | g_, [], t -> []
-      | g_, d_ :: [], t ->
+    let rec formatDList (g_, a, t) = match a with
+      | [] -> []
+      | d_ :: [] ->
           let d'_ = I.decSub d_ t in
           [ formatD (g_, d'_) ]
-      | g_, d_ :: l_, t ->
+      | d_ :: l_ ->
           let d'_ = I.decSub d_ t in
           formatD (g_, d'_)
           :: F.break_
@@ -332,9 +332,9 @@ end) : WORLDSYN = struct
           end
       end
 
-    let rec accR = function
-      | gl_, One, b, k -> k gl_
-      | ((g_, l_) as gl_), Block (someDecs, piDecs), b, k ->
+    let rec accR (a, c, b, k) = match a, c with
+      | gl_, One -> k gl_
+      | ((g_, l_) as gl_), Block (someDecs, piDecs) ->
           let t = createEVarSub (g_, someDecs) in
           ignore (Trace.matchBlock (gl_, Seq (piDecs, t)));
           let k' = function
@@ -347,10 +347,7 @@ end) : WORLDSYN = struct
                 end
           in
           accR (gl_, Seq (piDecs, t), b, k')
-      | ( (g_, ((I.Dec (_, v1_) as d_) :: l2_ as l_)),
-          (Seq ((I.Dec (_, v1') :: l2'_ as b'_), t) as l'_),
-          b,
-          k ) ->
+      | (g_, ((I.Dec (_, v1_) as d_) :: l2_ as l_)), (Seq ((I.Dec (_, v1') :: l2'_ as b'_), t) as l'_) ->
           begin if Unify.unifiable g_ (v1_, I.id) (v1', t) then
             accR ((decUName g_ d_, l2_), Seq (l2'_, I.dot1 t), b, k)
           else
@@ -363,17 +360,17 @@ end) : WORLDSYN = struct
                 ((decUName g_ d_, l2_), Seq (b'_, I.comp t I.shift), b, k)
             end
           end
-      | gl_, Seq ([], t), b, k -> k gl_
-      | ((g_, []) as gl_), (Seq (l'_, t) as r_), b, k -> begin
+      | gl_, Seq ([], t) -> k gl_
+      | ((g_, []) as gl_), (Seq (l'_, t) as r_) -> begin
           Trace.missing g_ r_;
           ()
         end
-      | gl_, Plus (r1, r2), b, k -> begin
+      | gl_, Plus (r1, r2) -> begin
           CsManager.trail (function () -> accR (gl_, r1, b, k));
           accR (gl_, r2, b, k)
         end
-      | gl_, Star One, b, k -> k gl_
-      | gl_, (Star r' as r), b, k -> begin
+      | gl_, Star One -> k gl_
+      | gl_, (Star r' as r) -> begin
           CsManager.trail (function () -> k gl_);
           accR (gl_, r', b, function gl' -> accR (gl', r, b, k))
         end
@@ -389,9 +386,9 @@ end) : WORLDSYN = struct
         end
       with Success -> ()
 
-    let rec checkSubsumedWorlds = function
-      | [], rb, b -> ()
-      | cid :: cids, rb, b ->
+    let rec checkSubsumedWorlds (a, rb, b) = match a with
+      | [] -> ()
+      | cid :: cids ->
           let someDecs, piDecs = I.constBlock cid in
           checkSubsumedBlock (Names.ctxName someDecs, piDecs, rb, b);
           checkSubsumedWorlds (cids, rb, b)
@@ -421,13 +418,13 @@ end) : WORLDSYN = struct
                  (formatSubsump "World violation" (g_, l_, rb, b)) ))
       with Success -> ()
 
-    let rec checkClause = function
-      | g_, I.Root (a, s_), w_, occ -> ()
-      | g_, I.Pi (((I.Dec (_, v1_) as d_), Maybe), v2_), w_, occ -> begin
+    let rec checkClause (g_, b, w_, occ) = match b with
+      | I.Root (a, s_) -> ()
+      | I.Pi (((I.Dec (_, v1_) as d_), Maybe), v2_) -> begin
           checkClause (decEName g_ d_, v2_, w_, P.body occ);
           checkGoal (g_, v1_, w_, P.label occ)
         end
-      | g_, I.Pi (((I.Dec (_, v1_) as d_), No), v2_), w_, occ -> begin
+      | I.Pi (((I.Dec (_, v1_) as d_), No), v2_) -> begin
           checkBlocks w_ (g_, v1_, P.label occ);
           begin
             checkClause (decEName g_ d_, v2_, w_, P.body occ);
@@ -435,9 +432,9 @@ end) : WORLDSYN = struct
           end
         end
 
-    and checkGoal = function
-      | g_, I.Root (a, s_), w_, occ -> ()
-      | g_, I.Pi (((I.Dec (_, v1_) as d_), _), v2_), w_, occ -> begin
+    and checkGoal (g_, b, w_, occ) = match b with
+      | I.Root (a, s_) -> ()
+      | I.Pi (((I.Dec (_, v1_) as d_), _), v2_) -> begin
           checkGoal (decUName g_ d_, v2_, w_, P.body occ);
           checkClause (g_, v1_, w_, P.label occ)
         end
@@ -474,19 +471,19 @@ end) : WORLDSYN = struct
         end;
       ()
 
-    let rec ctxAppend = function
-      | g_, I.Null -> g_
-      | g_, I.Decl (g'_, d_) -> I.Decl (ctxAppend (g_, g'_), d_)
+    let rec ctxAppend (g_, a) = match a with
+      | I.Null -> g_
+      | I.Decl (g'_, d_) -> I.Decl (ctxAppend (g_, g'_), d_)
 
     let rec checkSubordBlock (g_, g'_, l_) =
       checkSubordBlock' (ctxAppend (g_, g'_), l_)
 
-    and checkSubordBlock' = function
-      | g_, (I.Dec (_, v_) as d_) :: l'_ -> begin
+    and checkSubordBlock' (g_, a) = match a with
+      | (I.Dec (_, v_) as d_) :: l'_ -> begin
           Subordinate.respectsN g_ v_;
           checkSubordBlock' (I.Decl (g_, d_), l'_)
         end
-      | g_, [] -> ()
+      | [] -> ()
 
     let conDecBlock = function
       | I.BlockDec (_, _, gsome_, lpi) -> (gsome_, lpi)

@@ -399,9 +399,9 @@ struct
             []
             (tableau.rlabels, 0, nRows ())
         in
-        let filter = function
-          | j, l, [] -> []
-          | j, (l : label), candidates ->
+        let filter (j, a, candidates) = match a, candidates with
+          | l, [] -> []
+          | (l : label), candidates ->
               begin if not (dead l) then
                 List.filter
                   (function i -> coeff (i, j) = coeff (row, j))
@@ -660,8 +660,8 @@ struct
       let sum = fromExp us_ in
       insertDecomp (decomposeSum (g_, sum), Exp (g_, sum))
 
-    and restrict = function
-      | (Col col as pos), restr ->
+    and restrict (a, restr) = match a with
+      | (Col col as pos) ->
           let l = label pos in
           begin if dead l then begin
             unifyRestr (restr, geqNExp zero_int);
@@ -705,7 +705,7 @@ struct
                 end
             end
           end
-      | (Row row as pos), restr ->
+      | (Row row as pos) ->
           let l = label pos in
           begin if dead l then begin
             unifyRestr (restr, geqNExp (floor (const row)));
@@ -1113,13 +1113,13 @@ struct
     let mark () = Trail.mark tableau.trail
     let unwind () = Trail.unwind tableau.trail undo
 
-    let rec fst = function
-      | App (u1_, _), s -> (u1_, s)
-      | SClo (s_, s'), s -> fst (s_, comp s' s)
+    let rec fst (a, s) = match a with
+      | App (u1_, _) -> (u1_, s)
+      | SClo (s_, s') -> fst (s_, comp s' s)
 
-    let rec snd = function
-      | App (u1_, s_), s -> fst (s_, s)
-      | SClo (s_, s'), s -> snd (s_, comp s' s)
+    let rec snd (a, s) = match a with
+      | App (u1_, s_) -> fst (s_, s)
+      | SClo (s_, s') -> snd (s_, comp s' s)
 
     let isConstantExp u_ =
       begin match fromExp (u_, id) with Sum (m, []) -> Some m | _ -> None
@@ -1129,8 +1129,8 @@ struct
       begin match isConstantExp u_ with Some d -> d = zero_int | None -> false
       end
 
-    let solveGeq = function
-      | g_, s_, 0 -> (
+    let solveGeq (g_, s_, n) = match n with
+      | 0 -> (
           let solveGeq0 w_ =
             begin match isConstantExp w_ with
             | Some d ->
@@ -1160,7 +1160,7 @@ struct
               Some (geqAdd (w_, constant zero_int, u2_, proof))
             end
           with Error -> None)
-      | g_, s_, n -> None
+      | n -> None
 
     let pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
     let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)

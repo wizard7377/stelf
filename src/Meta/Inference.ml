@@ -101,16 +101,16 @@ end) : INFERENCE.INFERENCE = struct
 
     exception Success
 
-    let rec createEVars = function
-      | g_, (I.Pi ((I.Dec (_, v_), meta_), v'_), s) ->
+    let rec createEVars (g_, a) = match a with
+      | (I.Pi ((I.Dec (_, v_), meta_), v'_), s) ->
           let x_ = I.newEVar g_ (I.EClo (v_, s)) in
           let x'_ = Whnf.lowerEVar x_ in
           let xs_, fVs' = createEVars (g_, (v'_, I.Dot (I.Exp x_, s))) in
           (x'_ :: xs_, fVs')
-      | g_, ((_, s) as fVs) -> ([], fVs)
+      | ((_, s) as fVs) -> ([], fVs)
 
-    let forward = function
-      | g_, b_, (I.Pi ((_, meta_), _) as v_) -> (
+    let forward (g_, b_, a) = match a with
+      | (I.Pi ((_, meta_), _) as v_) -> (
           ignore begin if !Global.doubleCheck then
               TypeCheck.typeCheck g_ (v_, I.Uni I.Type)
             else ()
@@ -127,14 +127,12 @@ end) : INFERENCE.INFERENCE = struct
             | [] -> None
             end
           with UniqueSearch.Error _ -> None)
-      | g_, b_, v_ -> None
+      | v_ -> None
 
-    let rec expand' = function
-      | (g0_, b0), (I.Null, I.Null), n ->
+    let rec expand' (gb0, a, n) = match gb0, a with
+      | (g0_, b0), (I.Null, I.Null) ->
           ((I.Null, I.Null), function (g'_, b'_), w' -> ((g'_, b'_), w'))
-      | ( (g0_, b0),
-          (I.Decl (g_, (I.Dec (_, v_) as d_)), I.Decl (b_, (S.Lemma rl_ as t_))),
-          n ) ->
+      | (g0_, b0), (I.Decl (g_, (I.Dec (_, v_) as d_)), I.Decl (b_, (S.Lemma rl_ as t_))) ->
           let (g0'_, b0'), sc' = expand' ((g0_, b0), (g_, b_), n + 1) in
           let s = I.Shift (n + 1) in
           let vs_ = Whnf.normalize (v_, s) in
@@ -151,7 +149,7 @@ end) : INFERENCE.INFERENCE = struct
                         ),
                         I.comp w' I.shift ) )
           end
-      | gb0, (I.Decl (g_, d_), I.Decl (b_, t_)), n ->
+      | gb0, (I.Decl (g_, d_), I.Decl (b_, t_)) ->
           let (g0'_, b0'), sc' = expand' (gb0, (g_, b_), n + 1) in
           ((I.Decl (g0'_, d_), I.Decl (b0', t_)), sc')
 

@@ -260,14 +260,14 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | O.Lex os_, s -> O.Lex (map (function o_ -> orderSub o_ s) os_)
       | O.Simul os_, s -> O.Simul (map (function o_ -> orderSub o_ s) os_)
 
-    let rec tCSub_ = function
-      | Base o_, s -> Base (orderSub o_ s)
-      | Conj (tc1, tc2), s -> Conj (tCSub_ (tc1, s), tCSub_ (tc2, s))
-      | Abs (d_, tc), s -> Abs (I.decSub d_ s, tCSub_ (tc, I.dot1 s))
+    let rec tCSub_ (a, s) = match a with
+      | Base o_ -> Base (orderSub o_ s)
+      | Conj (tc1, tc2) -> Conj (tCSub_ (tc1, s), tCSub_ (tc2, s))
+      | Abs (d_, tc) -> Abs (I.decSub d_ s, tCSub_ (tc, I.dot1 s))
 
-    let tCSubOpt = function
-      | None, s -> None
-      | Some tc, s -> Some (tCSub_ (tc, s))
+    let tCSubOpt (a, s) = match a with
+      | None -> None
+      | Some tc -> Some (tCSub_ (tc, s))
 
     let rec normalizeTC' = function
       | O.Arg (us_, vs_) ->
@@ -306,14 +306,14 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | Some tc1, Some tc2 -> convTC tc1 tc2
       | _ -> false
 
-    let rec transformTC' = function
-      | g_, O.Arg k ->
+    let rec transformTC' (g_, a) = match a with
+      | O.Arg k ->
           let k' = I.ctxLength g_ - k + 1 in
           let (I.Dec (_, v_)) = I.ctxDec g_ k' in
           O.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
-      | g_, O.Lex os_ ->
+      | O.Lex os_ ->
           O.Lex (map (function o_ -> transformTC' (g_, o_)) os_)
-      | g_, O.Simul os_ ->
+      | O.Simul os_ ->
           O.Simul (map (function o_ -> transformTC' (g_, o_)) os_)
 
     let rec transformTC a1 b1 c1 = match a1, b1, c1 with
@@ -392,24 +392,24 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
         | I.Lam (I.Dec (_, u1_), u2_) as u_ -> (
             try Some (Whnf.etaContract u_) with eta_ -> None | _ -> None)
       and getBlockIndex = function I.Bidx k -> Some k | _ -> None in
-      let rec lookup = function
-        | n, Shift _, p -> None
-        | n, Dot (Undef, s'), p -> lookup (n + 1, s', p)
-        | n, Dot (Idx k, s'), p ->
+      let rec lookup (n, a, p) = match a with
+        | Shift _ -> None
+        | Dot (Undef, s') -> lookup (n + 1, s', p)
+        | Dot (Idx k, s') ->
             begin if k = p then Some n else lookup (n + 1, s', p)
             end
       in
-      let rec invertSub'' = function
-        | 0, si -> si
-        | p, si ->
+      let rec invertSub'' (p, si) = match p with
+        | 0 -> si
+        | p ->
             begin match lookup (1, s, p) with
             | Some k -> invertSub'' (p - 1, Dot (Idx k, si))
             | None -> invertSub'' (p - 1, Dot (Undef, si))
             end
       in
-      let rec invertSub' = function
-        | n, Shift p -> invertSub'' (p, Shift n)
-        | n, Dot (_, s') -> invertSub' (n + 1, s')
+      let rec invertSub' (n, a) = match a with
+        | Shift p -> invertSub'' (p, Shift n)
+        | Dot (_, s') -> invertSub' (n + 1, s')
       in
       invertSub' (0, s)
 
@@ -496,9 +496,9 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
           let t''' = Dot (Block i_, t'') in
           (g''_, t''')
 
-    and append = function
-      | g'_, ([], s) -> g'_
-      | g'_, (d_ :: l_, s) ->
+    and append (g'_, a) = match a with
+      | ([], s) -> g'_
+      | (d_ :: l_, s) ->
           append (I.Decl (g'_, I.decSub d_ s), (l_, I.dot1 s))
 
     let rec whnfFor a1 b1 = match a1, b1 with
