@@ -451,7 +451,7 @@ end) : TWELF.STELF = struct
         end
       in
       ignore (try
-          ModSyn.installStruct (strdec, module_, !context, installAction, isDef)
+          ModSyn.installStruct strdec module_ !context installAction isDef
         with Names.Error msg -> raise (Names.Error (Paths.wrap r msg)));
       ()
 
@@ -463,7 +463,7 @@ end) : TWELF.STELF = struct
             (Print.conDecToString (IntSyn.sgnLookup cid) ^ "\n")
         end
       in
-      ignore (try ModSyn.installSig (module_, !context, installAction, isDef)
+      ignore (try ModSyn.installSig module_ !context installAction isDef
         with Names.Error msg -> raise (Names.Error (Paths.wrap r msg)));
       ()
 

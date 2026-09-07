@@ -25,19 +25,19 @@ module type MODSYN = sig
   type transform = IntSyn.cid * IntSyn.ConDec -> IntSyn.ConDec
   *)
   val installStruct :
-    IntSyn.strDec
-    * module_
-    * Names.namespace option
-    * (IntSyn.cid * (string * Paths.occConDec option) -> unit)
-    * bool ->
-    unit (* action *)
+    IntSyn.strDec ->
+    module_ ->
+    Names.namespace option ->
+    (IntSyn.cid * (string * Paths.occConDec option) -> unit) (* action *) ->
+    bool ->
+    unit
 
   val installSig :
-    module_
-    * Names.namespace option
-    * (IntSyn.cid * (string * Paths.occConDec option) -> unit)
-    * bool ->
-    unit (* action *)
+    module_ ->
+    Names.namespace option ->
+    (IntSyn.cid * (string * Paths.occConDec option) -> unit) (* action *) ->
+    bool ->
+    unit
 
   val instantiateModule :
     module_ -> (Names.namespace -> IntSyn.cid * IntSyn.conDec -> IntSyn.conDec) ->

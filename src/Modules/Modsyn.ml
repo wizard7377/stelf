@@ -247,7 +247,7 @@ end) : MODSYN = struct
 
   let decToDef (cid, condec) = strictify (abbrevify cid condec)
 
-  let installStruct (strdec, module_, nsOpt, installAction, isDef) =
+  let installStruct strdec module_ nsOpt installAction isDef =
     let transformConDec =
       begin if isDef then decToDef else function _, condec_var -> condec_var
       end
@@ -262,7 +262,7 @@ end) : MODSYN = struct
     ignore (Names.installComponents mid ns);
     installModule (module_, Some mid, None, installAction, transformConDec)
 
-  let installSig (module_, nsOpt, installAction, isDef) =
+  let installSig module_ nsOpt installAction isDef =
     let transformConDec =
       begin if isDef then decToDef else function _, condec_var -> condec_var
       end
