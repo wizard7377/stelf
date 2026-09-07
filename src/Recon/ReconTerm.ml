@@ -216,7 +216,7 @@ struct
     | Some (IntSyn.EVar (_, g, v, _) as x) -> (x, raiseType g v)
     | None ->
         let v = Option.valOf (StringTree.lookup evarApxTable name) in
-        let v' = Apx.apxToClass (IntSyn.Null, v, Apx.(Level 1), allowed) in
+        let v' = Apx.apxToClass IntSyn.Null v Apx.(Level 1) allowed in
         let g'', v'' = lowerType (IntSyn.Null, (v', IntSyn.id)) in
         let x = IntSyn.newEVar g'' v'' in
         Names.addEVar x name;
@@ -228,7 +228,7 @@ struct
     | Some v -> v
     | None ->
         let v = Option.valOf (StringTree.lookup fvarApxTable name) in
-        let v' = Apx.apxToClass (IntSyn.Null, v, Apx.(Level 1), allowed) in
+        let v' = Apx.apxToClass IntSyn.Null v Apx.(Level 1) allowed in
         StringTree.insert fvarTable (name, v');
         v'
     end
@@ -1216,9 +1216,9 @@ struct
         (Mismatch (tm1', tm2', location_msg, problem_msg), b, v)
     | Omitapx (u, v, l, r) ->
         let v' =
-          try Apx.apxToClass (g, v, l, false)
+          try Apx.apxToClass g v l false
           with Ambiguous ->
-            let v' = Apx.apxToClass (g, v, l, true) in
+            let v' = Apx.apxToClass g v l true in
             Display.debug ~level:Display.Level.verbose
               Display.Form.(
                 string
@@ -1238,9 +1238,9 @@ struct
             v'
         in
         let u' =
-          try Apx.apxToExact (g, u, (v', IntSyn.id), false)
+          try Apx.apxToExact g u (v', IntSyn.id) false
           with Ambiguous ->
-            let u' = Apx.apxToExact (g, u, (v', IntSyn.id), true) in
+            let u' = Apx.apxToExact g u (v', IntSyn.id) true in
             Display.debug ~level:Display.Level.verbose
               Display.Form.(
                 string
@@ -1312,9 +1312,9 @@ struct
     | Omitapx (u, v, l, r (* = Vhs *)) ->
         let v' = eClo vhs in
         let u' =
-          try Apx.apxToExact (g, u, vhs, false)
+          try Apx.apxToExact g u vhs false
           with Ambiguous ->
-            let u' = Apx.apxToExact (g, u, vhs, true) in
+            let u' = Apx.apxToExact g u vhs true in
             delayAmbiguous
               ( g,
                 u',
@@ -1417,7 +1417,7 @@ struct
         ignore (delayMismatch (g, l1, l, termRegion tm2', location_msg, problem_msg));
         ((Mismatch (tm1', tm2', location_msg, problem_msg), b, l), ok2)
     | Omitapx (v, l, nL, r) ->
-        let l' = Apx.apxToClass (g, l, nL, false) in
+        let l' = Apx.apxToClass g l nL false in
         let v' = eClo vhs in
         ((Omitexact (v', l', r), Intro v', l'), true)
     | tm ->

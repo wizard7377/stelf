@@ -38,8 +38,8 @@ module type APPROX = sig
   exception Ambiguous
 
   val apxToUni : uni -> IntSyn.uni
-  val apxToClass : IntSyn.dctx * exp * uni * bool -> IntSyn.exp
-  val apxToExact : IntSyn.dctx * exp * IntSyn.eclo * bool -> IntSyn.exp
+  val apxToClass : IntSyn.dctx -> exp -> uni -> bool -> IntSyn.exp
+  val apxToExact : IntSyn.dctx -> exp -> IntSyn.eclo -> bool -> IntSyn.exp
 
   exception Unify of string
 

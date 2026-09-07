@@ -248,12 +248,12 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
           of v is ground
           v : L-
      post: V is most general such that V- = v and G |- V : L *)
-  let rec apxToClassW (g, a, b, allowed) = match a, b with
+  let rec apxToClassW g a b allowed = match a, b with
     | Uni l, _ (* Next L *) -> I.Uni (apxToUni l)
     | Arrow (v1, v2), l ->
-        let v1' = apxToClass (g, v1, type_, allowed) in
+        let v1' = apxToClass g v1 type_ allowed in
         let d = I.Dec (None, v1') in
-        let v2' = apxToClass (I.Decl (g, d), v2, l, allowed) in
+        let v2' = apxToClass (I.Decl (g, d)) v2 l allowed in
         I.Pi ((d, I.Maybe), v2')
     | (CVar r as v), l (* Type or Kind *) ->
         let name = getReplacementName (v, Uni l, Next l, allowed) in
@@ -266,18 +266,18 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (* this is probably very bad -- it should be possible to infer
          more accurately which pis can be dependent *)
 
-  and apxToClass (g, v, l, allowed) = apxToClassW (g, whnf v, l, allowed)
+  and apxToClass g v l allowed = apxToClassW g (whnf v) l allowed
 
   (* Undefined case impossible *)
   (* apxToExact (G, u, (V, s), allowed) = U
      if u : V-
      and G' |- V : L and G |- s : G'
      then U- = u and G |- U : V[s] and U is the most general such *)
-  let rec apxToExactW (g, u, b, allowed) = match b with
+  let rec apxToExactW g u b allowed = match b with
     | (I.Pi ((d, _), v), s) ->
         let d' = I.decSub d s in
-        I.Lam (d', apxToExact (I.Decl (g, d'), u, (v, I.dot1 s), allowed))
-    | (I.Uni l, s) -> apxToClass (g, u, uniToApx l, allowed)
+        I.Lam (d', apxToExact (I.Decl (g, d')) u (v, I.dot1 s) allowed)
+    | (I.Uni l, s) -> apxToClass g u (uniToApx l) allowed
     | ((I.Root (I.FVar (name, _, _), _), s) as vs) ->
         let v, l, _ (* Next L *) = findByReplacementName name in
         let (Uni l) = whnf l in
@@ -287,7 +287,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
             I.newEVar g (I.EClo (vs_e, vs_s))
         | Level 2 ->
             let name' = getReplacementName (whnf u, v, Level 2, allowed) in
-            let v' = apxToClass (Null, v, Level 2, allowed) in
+            let v' = apxToClass Null v (Level 2) allowed in
             let s' = I.Shift (I.ctxLength g) in
             I.Root (I.FVar (name', v', s'), I.Nil)
         (* NOTE: V' differs from Vs by a Shift *)
@@ -299,8 +299,8 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         let vs_e, vs_s = vs in
         I.newEVar g (I.EClo (vs_e, vs_s))
 
-  and apxToExact (g, u, vs, allowed) =
-    apxToExactW (g, u, Whnf.whnfExpandDef vs, allowed)
+  and apxToExact g u vs allowed =
+    apxToExactW g u (Whnf.whnfExpandDef vs) allowed
 
   (* matching for the approximate language *)
   exception Unify = Unify
