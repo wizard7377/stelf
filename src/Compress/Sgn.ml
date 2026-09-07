@@ -72,7 +72,7 @@ module Sgn = struct
       abbreviation = false;
     }
 
-  let defn (s, a, oa, m, om) =
+  let defn s a oa m om =
     {
       name = s;
       classifier = Tclass a;
@@ -82,7 +82,7 @@ module Sgn = struct
       abbreviation = false;
     }
 
-  let tydefn (s, k, ok, a, oa) =
+  let tydefn s k ok a oa =
     {
       name = s;
       classifier = Kclass k;
@@ -92,7 +92,7 @@ module Sgn = struct
       abbreviation = false;
     }
 
-  let abbrev (s, a, oa, m, om) =
+  let abbrev s a oa m om =
     {
       name = s;
       classifier = Tclass a;
@@ -102,7 +102,7 @@ module Sgn = struct
       abbreviation = true;
     }
 
-  let tyabbrev (s, k, ok, a, oa) =
+  let tyabbrev s k ok a oa =
     {
       name = s;
       classifier = Kclass k;

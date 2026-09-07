@@ -15,16 +15,16 @@ module type SGN = sig
   val tycondec : string -> Syntax.knd -> Syntax.knd -> sigent
 
   val defn :
-    string * Syntax.tp * Syntax.tp * Syntax.term * Syntax.term -> sigent
+    string -> Syntax.tp -> Syntax.tp -> Syntax.term -> Syntax.term -> sigent
 
   val tydefn :
-    string * Syntax.knd * Syntax.knd * Syntax.tp * Syntax.tp -> sigent
+    string -> Syntax.knd -> Syntax.knd -> Syntax.tp -> Syntax.tp -> sigent
 
   val abbrev :
-    string * Syntax.tp * Syntax.tp * Syntax.term * Syntax.term -> sigent
+    string -> Syntax.tp -> Syntax.tp -> Syntax.term -> Syntax.term -> sigent
 
   val tyabbrev :
-    string * Syntax.knd * Syntax.knd * Syntax.tp * Syntax.tp -> sigent
+    string -> Syntax.knd -> Syntax.knd -> Syntax.tp -> Syntax.tp -> sigent
 
   val typeOfSigent : sigent -> Syntax.tp
   val classifier : int -> Syntax.class_

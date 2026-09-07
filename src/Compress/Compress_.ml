@@ -321,25 +321,25 @@ struct
         let a = xlate_type a in
         let astar = compress_type [] (None, a) in
         let mstar = compress_term [] (m, a) in
-        Sgn.defn (name, astar, a, mstar, m)
+        Sgn.defn name astar a mstar m
     | cid, IntSyn.ConDef (name, None, _, a, k, IntSyn.Kind, _) ->
         let a = xlate_type a in
         let k = xlate_kind k in
         let kstar = compress_kind [] (None, k) in
         let astar = compress_type (Syntax.explodeKind kstar) (None, a) in
-        Sgn.tydefn (name, kstar, k, astar, a)
+        Sgn.tydefn name kstar k astar a
     | cid, IntSyn.AbbrevDef (name, None, _, m, a, I.Type) ->
         let m = xlate_term m in
         let a = xlate_type a in
         let astar = compress_type [] (None, a) in
         let mstar = compress_term [] (m, a) in
-        Sgn.abbrev (name, astar, a, mstar, m)
+        Sgn.abbrev name astar a mstar m
     | cid, IntSyn.AbbrevDef (name, None, _, a, k, IntSyn.Kind) ->
         let a = xlate_type a in
         let k = xlate_kind k in
         let kstar = compress_kind [] (None, k) in
         let astar = compress_type (Syntax.explodeKind kstar) (None, a) in
-        Sgn.tyabbrev (name, kstar, k, astar, a)
+        Sgn.tyabbrev name kstar k astar a
     | _ -> raise Unimp
 
   let sgnLookup cid =
