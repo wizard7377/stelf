@@ -318,7 +318,7 @@ end) : PARSE_THM with module ThmExtSyn = ParseThm__0.ThmExtSyn' = struct
       let p, f2 = parsePredicate f1 in
       let oIn, f3 = parseOrder f2 in
       let callpats, f4 = parseCallPats f3 in
-      (E.rdecl (p, oOut, oIn, E.callpats callpats), f4)
+      (E.rdecl p oOut oIn (E.callpats callpats), f4)
 
     let parseReduces' (LS.Cons ((L.Reduces, r), s')) = parseRDecl (LS.expose s')
 

@@ -476,7 +476,7 @@ module Make_Cst (Paths : Paths.PATHS.PATHS) = struct
 
     type rdecl = predicate * order * order * callpats
 
-    let rdecl (predicate, order1, order2, callpats) =
+    let rdecl predicate order1 order2 callpats =
       (predicate, order1, order2, callpats)
 
     type tableddecl = string * loc

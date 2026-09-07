@@ -33,7 +33,7 @@ module type THMEXTSYN = sig
   (* -bp *)
   type rdecl
 
-  val rdecl : predicate * order * order * callpats -> rdecl
+  val rdecl : predicate -> order -> order -> callpats -> rdecl
 
   type tableddecl
 

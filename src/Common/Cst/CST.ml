@@ -561,7 +561,7 @@ module type CST = sig
     type rdecl
 
     val [@deprecated "Use View equivalent instead"] rdecl :
-      predicate * order * order * callpats -> rdecl
+      predicate -> order -> order -> callpats -> rdecl
 
     type tableddecl
 

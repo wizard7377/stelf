@@ -159,7 +159,7 @@ end) : RECON_THM with module ThmSyn = ReconThm__0.ThmSyn' = struct
     type nonrec rdecl =
       (ThmSyn.predicate * ThmSyn.order * ThmSyn.order * callpats) * Paths.region
 
-    let rdecl ((p, r0), (o1, r1), (o2, r2), c) =
+    let rdecl (p, r0) (o1, r1) (o2, r2) c =
       let r = Paths.join r1 r2 in
       ((p, o1, o2, c), Paths.join r0 r)
 
