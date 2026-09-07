@@ -27,11 +27,11 @@ module type MTPABSTRACT = sig
   val raiseType : IntSyn.dctx -> IntSyn.exp -> IntSyn.exp
 
   val abstractSub :
-    IntSyn.sub
-    * StateSyn.tag IntSyn.ctx
-    * (IntSyn.dctx * StateSyn.tag IntSyn.ctx)
-    * IntSyn.sub
-    * StateSyn.tag IntSyn.ctx ->
+    IntSyn.sub ->
+    StateSyn.tag IntSyn.ctx ->
+    (IntSyn.dctx * StateSyn.tag IntSyn.ctx) ->
+    IntSyn.sub ->
+    StateSyn.tag IntSyn.ctx ->
     (IntSyn.dctx * StateSyn.tag IntSyn.ctx) * IntSyn.sub
 
   val abstractSub' :

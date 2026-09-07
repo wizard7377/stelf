@@ -369,7 +369,7 @@ end) : MTPABSTRACT.MTPABSTRACT = struct
       let k = cf (0, I.Null) in
       (abstractCtx k, abstractGlobalSub (k, s, b))
 
-    let abstractSubAll (t, b1, (g0, b0), s, b) =
+    let abstractSubAll t b1 (g0, b0) s b =
       let rec skip'' (k, a) = match a with
         | (I.Null, I.Null) -> k
         | (I.Decl (g0, d), I.Decl (b0, tag)) ->
