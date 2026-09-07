@@ -273,7 +273,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       in
       deepen' (1, [])
 
-    let searchEx (g, ge, vs, sc) =
+    let searchEx g ge vs sc =
       begin
         begin if !Global.chatter > 5 then print "[Search: " else ()
         end;
@@ -306,7 +306,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
                 end),
               (acc, !MetaGlobal.maxFill) )
 
-    let searchAll (g, ge, vs, sc) =
+    let searchAll g ge vs sc =
       searchAll' (selectEVar (ge, vs, []), [], sc)
   end
 

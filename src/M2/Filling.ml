@@ -47,8 +47,8 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    let delay search params () =
-      try search params with Search.Error s -> raise (Error s)
+    let delay search g ge vs sc () =
+      try search g ge vs sc with Search.Error s -> raise (Error s)
 
     let makeAddressInit s k = (s, k)
     let makeAddressCont makeAddress k = makeAddress (k + 1)
@@ -59,7 +59,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
     and operatorsW (g, ge, a, abstractAll, abstractEx, makeAddress) = match a with
       | ((I.Root (c, s), _) as vs) ->
           ( [],
-            (makeAddress 0, delay Search.searchEx (g, ge, vs, abstractEx))
+            (makeAddress 0, delay Search.searchEx g ge vs abstractEx)
           )
       | (I.Pi (((I.Dec (_, v1) as d), p), v2), s) ->
           let go', o =
@@ -72,7 +72,7 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
                 makeAddressCont makeAddress )
           in
           ( ( makeAddress 0,
-              delay Search.searchAll (g, ge, (v1, s), abstractAll) )
+              delay Search.searchAll g ge (v1, s) abstractAll )
             :: go',
             o )
 

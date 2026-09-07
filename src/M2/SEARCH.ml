@@ -13,16 +13,16 @@ module type OLDSEARCH = sig
   exception Error of string
 
   val searchEx :
-    IntSyn.dctx
-    * IntSyn.exp list
-    * (IntSyn.exp * IntSyn.sub)
-    * (unit -> MetaSyn.state) ->
+    IntSyn.dctx ->
+    IntSyn.exp list ->
+    IntSyn.exp * IntSyn.sub ->
+    (unit -> MetaSyn.state) ->
     MetaSyn.state list
 
   val searchAll :
-    IntSyn.dctx
-    * IntSyn.exp list
-    * (IntSyn.exp * IntSyn.sub)
-    * (MetaSyn.state list -> MetaSyn.state list) ->
+    IntSyn.dctx ->
+    IntSyn.exp list ->
+    IntSyn.exp * IntSyn.sub ->
+    (MetaSyn.state list -> MetaSyn.state list) ->
     MetaSyn.state list
 end
