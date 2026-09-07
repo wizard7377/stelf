@@ -1113,7 +1113,7 @@ end) : CHECKING = struct
               ((s', s1'), (v2', I.Dot (I.Exp (I.EClo (u', s1')), s2'))),
               p )
 
-    let deduce (g, q, d, p) = leftDecompose ((g, q), d, [], p)
+    let deduce g q d p = leftDecompose ((g, q), d, [], p)
   end
 
   (* Reasoning about order relations *)

@@ -38,5 +38,5 @@ module type CHECKING = sig
   val shiftPred :
     order predicate -> (IntSyn.sub -> IntSyn.sub) -> order predicate
 
-  val deduce : IntSyn.dctx * qctx * rctx * order predicate -> bool
+  val deduce : IntSyn.dctx -> qctx -> rctx -> order predicate -> bool
 end

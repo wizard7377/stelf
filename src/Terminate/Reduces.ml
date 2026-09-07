@@ -282,7 +282,7 @@ end) : REDUCES = struct
               end
               else ()
               end;
-              begin if C.deduce (g0, q0, rl, C.Leq (p, p')) then ()
+              begin if C.deduce g0 q0 rl (C.Leq (p, p')) then ()
               else
                 raise
                   (Error'
@@ -302,7 +302,7 @@ end) : REDUCES = struct
               end
               else ()
               end;
-              begin if C.deduce (g0, q0, rl, C.Less (p, p')) then ()
+              begin if C.deduce g0 q0 rl (C.Less (p, p')) then ()
               else
                 raise
                   (Error'
@@ -488,7 +488,7 @@ end) : REDUCES = struct
                 ^ " \n")
             else ()
             end;
-          begin if C.deduce (g, q, rl, ro) then ()
+          begin if C.deduce g q rl ro then ()
           else
             raise
               (Error'
