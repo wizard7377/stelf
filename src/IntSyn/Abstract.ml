@@ -123,9 +123,9 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
       | I.Skonst _, I.Meta -> I.Meta
       | I.Skonst _, I.Maybe -> I.Meta
 
-    and occursInSpine = function
-      | _, I.Nil -> I.No
-      | k, I.App (u_, s_) -> ( or ) (occursInExp (k, u_), occursInSpine (k, s_))
+    and occursInSpine (k, a) = match a with
+      | I.Nil -> I.No
+      | I.App (u_, s_) -> ( or ) (occursInExp (k, u_), occursInSpine (k, s_))
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
@@ -438,10 +438,10 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
     let collectEVarsSpine g_ (s_, s) xs_ =
       kToEVars (collectSpine (g_, (s_, s), evarsToK xs_))
 
-    let rec collectPrg = function
-      | _, (T.EVar (psi, r, f_, _, _, _) as p_), k_ -> I.Decl (k_, Pv p_)
-      | psi, Unit, k_ -> k_
-      | psi, T.PairExp (u_, p_), k_ ->
+    let rec collectPrg (a, b, k_) = match a, b with
+      | _, (T.EVar (psi, r, f_, _, _, _) as p_) -> I.Decl (k_, Pv p_)
+      | psi, Unit -> k_
+      | psi, T.PairExp (u_, p_) ->
           collectPrg (psi, p_, collectExp (T.coerceCtx psi, (u_, I.id), k_))
 
     let rec abstractPVar (a, depth, b) = match a, b with

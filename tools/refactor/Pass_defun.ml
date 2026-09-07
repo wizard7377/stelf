@@ -207,11 +207,26 @@ let sites_of ~with_any src ast =
             else if mix_n > 0 && not with_any then
               decline ln "mixed `_`/name position -- deferred to the --with-any stage"
             else
-              let hoisted = function Uni _ -> true | Mix _ -> with_any | Vary -> false in
-              let vary =
-                List.init arity (fun i -> i)
-                |> List.filter (fun i -> not (hoisted (List.nth verdicts i)))
+              (* Hoisting a Mix position gives its `_` branches a binding they did
+                 not have: they used to see whatever the enclosing scope held for
+                 that name. Where one of them mentions it, demote the position back
+                 into the scrutinee instead of capturing it. `Uni` needs no such
+                 check -- every branch already bound the name to that component. *)
+              let hoist =
+                Array.init arity (fun i ->
+                    match List.nth verdicts i with
+                    | Uni _ -> true
+                    | Mix n ->
+                        with_any
+                        && (usable src cases i n
+                           || (bump "with-any: position demoted -- an `_` branch mentions the name";
+                               false))
+                    | Vary -> false)
               in
+              let vary = List.init arity (fun i -> i) |> List.filter (fun i -> not hoist.(i)) in
+              if Array.for_all not hoist then
+                decline ln "no position survives the capture check"
+              else
               let single = vary = [] in
               if single && (List.length cases > 1 || (List.hd cases).pc_guard <> None) then
                 decline ln "every position irrefutable but more than one branch (or a guard)"
@@ -247,9 +262,8 @@ let sites_of ~with_any src ast =
                        Hoisted names are taboo so a fresh one cannot collide. *)
                     let taboo =
                       ref
-                        (List.filter_map
-                           (fun v -> match v with Uni (Some n) | Mix n -> Some n | _ -> None)
-                           verdicts)
+                        (List.filteri (fun i _ -> hoist.(i)) verdicts
+                        |> List.filter_map (function Uni (Some n) | Mix n -> Some n | _ -> None))
                     in
                     let vnames =
                       List.map
@@ -265,9 +279,9 @@ let sites_of ~with_any src ast =
                     let slots =
                       Array.init arity (fun i ->
                           match List.nth verdicts i with
-                          | Uni (Some n) -> Var n
+                          | _ when not hoist.(i) -> Var (List.assoc i vnames)
+                          | Uni (Some n) | Mix n -> Var n
                           | Uni None -> Any
-                          | Mix n -> Var n
                           | Vary -> Var (List.assoc i vnames))
                     in
                     let arrow_end =

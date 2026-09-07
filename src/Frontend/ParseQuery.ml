@@ -105,17 +105,17 @@ end) : PARSE_QUERY with module ExtQuery = ParseQuery__0.ExtQuery' = struct
       let tm', f' = ParseTerm.parseTerm' (LS.expose s) in
       (ExtQuery.define optName tm' optT, f')
 
-    let parseDefine3 = function
-      | optName, (tm, LS.Cons ((L.Equal, r), s')) ->
+    let parseDefine3 (optName, a) = match a with
+      | (tm, LS.Cons ((L.Equal, r), s')) ->
           parseDefine4 (optName, Some tm, s')
-      | _, (tm, LS.Cons ((t, r), _)) ->
+      | (tm, LS.Cons ((t, r), _)) ->
           Parsing.error r ("Expected `=', found " ^ L.toString t)
 
-    let parseDefine2 = function
-      | optName, LS.Cons ((L.Colon, r), s') ->
+    let parseDefine2 (optName, a) = match a with
+      | LS.Cons ((L.Colon, r), s') ->
           parseDefine3 (optName, ParseTerm.parseTerm' (LS.expose s'))
-      | optName, LS.Cons ((L.Equal, r), s') -> parseDefine4 (optName, None, s')
-      | _, LS.Cons ((t, r), _) ->
+      | LS.Cons ((L.Equal, r), s') -> parseDefine4 (optName, None, s')
+      | LS.Cons ((t, r), _) ->
           Parsing.error r ("Expected `:' or `=', found " ^ L.toString t)
 
     let parseDefine1 = function
@@ -125,21 +125,21 @@ end) : PARSE_QUERY with module ExtQuery = ParseQuery__0.ExtQuery' = struct
       | LS.Cons ((t, r), _) ->
           Parsing.error r ("Expected identifier or `_', found " ^ L.toString t)
 
-    let parseSolve3 = function
-      | defns, nameOpt, LS.Cons ((L.Colon, r), s'), r0 ->
+    let parseSolve3 (defns, nameOpt, a, r0) = match a with
+      | LS.Cons ((L.Colon, r), s') ->
           let tm, (LS.Cons ((_, r), _) as f') =
             ParseTerm.parseTerm' (LS.expose s')
           in
           ((List.rev defns, ExtQuery.solve nameOpt tm (P.join r0 r)), f')
-      | _, _, LS.Cons ((t, r), s'), r0 ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected `:', found " ^ L.toString t)
 
-    let rec parseSolve2 = function
-      | defns, LS.Cons ((L.Underscore, r), s'), r0 ->
+    let rec parseSolve2 (defns, a, r0) = match a with
+      | LS.Cons ((L.Underscore, r), s') ->
           parseSolve3 (defns, None, LS.expose s', r0)
-      | defns, LS.Cons ((L.Id (_, name), r), s'), r0 ->
+      | LS.Cons ((L.Id (_, name), r), s') ->
           parseSolve3 (defns, Some name, LS.expose s', r0)
-      | _, LS.Cons ((t, r), s'), r0 ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected identifier or `_', found " ^ L.toString t)
 
     and parseSolve1 (defns, a) = match a with

@@ -316,9 +316,9 @@ module MakeConverter
       | I.FgnConst _ -> false
       | I.Proj _ -> false
 
-    and occursInSpine = function
-      | _, I.Nil -> false
-      | k, I.App (u_, s_) -> occursInExpN (k, u_) || occursInSpine (k, s_)
+    and occursInSpine (k, a) = match a with
+      | I.Nil -> false
+      | I.App (u_, s_) -> occursInExpN (k, u_) || occursInSpine (k, s_)
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExpN (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
@@ -368,15 +368,15 @@ module MakeConverter
         | (T.UDec (I.BDec (_, (cid, s))) :: psi1, l_) ->
             let (I.BlockDec (_, _, g_, _)) = I.sgnLookup cid in
             occursInSub (n, s, g_) || occursInPsi (n + 1, (psi1, l_))
-      and occursInSub = function
-        | _, _, I.Null -> false
-        | n, I.Shift k, g_ ->
+      and occursInSub (n, a, b) = match a, b with
+        | _, I.Null -> false
+        | I.Shift k, g_ ->
             occursInSub (n, I.Dot (I.Idx (k + 1), I.Shift (k + 1)), g_)
-        | n, I.Dot (I.Idx k, s), I.Decl (g_, _) ->
+        | I.Dot (I.Idx k, s), I.Decl (g_, _) ->
             n = k || occursInSub (n, s, g_)
-        | n, I.Dot (I.Exp u_, s), I.Decl (g_, _) ->
+        | I.Dot (I.Exp u_, s), I.Decl (g_, _) ->
             occursInExp (n, u_) || occursInSub (n, s, g_)
-        | n, I.Dot (I.Block _, s), I.Decl (g_, _) -> occursInSub (n, s, g_)
+        | I.Dot (I.Block _, s), I.Decl (g_, _) -> occursInSub (n, s, g_)
       and occursInG (n, a, k) = match a with
         | I.Null -> k n
         | I.Decl (g_, I.Dec (_, v_)) ->
@@ -740,9 +740,9 @@ module MakeConverter
       (T.Worlds cids', wmap)
 
     let dynamicSig (psi0, a, T.Worlds cids) =
-      let rec findDec = function
-        | g_, _, [], w, sig_ -> sig_
-        | g_, n, d_ :: l_, w, sig_ ->
+      let rec findDec (g_, n, c, w, sig_) = match c with
+        | [] -> sig_
+        | d_ :: l_ ->
             let (I.Dec (x, v'_) as d'_) = I.decSub d_ w in
             let b = I.targetFam v'_ in
             let sig'_ =
@@ -865,9 +865,9 @@ module MakeConverter
                      [ (psi', T.Dot (T.Prg pattern_, T.Shift depth'), T.Var k) ]),
                 f'_ ))
 
-    let rec installProjection = function
-      | [], _, f_, proj -> []
-      | cid :: cids, n, f_, proj ->
+    let rec installProjection (a, n, f_, proj) = match a with
+      | [] -> []
+      | cid :: cids ->
           let p'_, f'_ = proj n in
           let p_ = T.Lam (T.PDec (None, f_, None, None), p'_) in
           let f''_ = T.All ((T.PDec (None, f_, None, None), T.Explicit), f'_) in

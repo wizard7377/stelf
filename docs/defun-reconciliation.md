@@ -38,7 +38,7 @@ parser never sees them. A regex rewriter would have edited them.
 |---|---|---|
 | `DEFUN` | 876 sites (4,629 edits) | rewritten to `= match … with` |
 | `DEFUN1` | 33 | one branch, every position irrefutable — no `match` at all |
-| `DECLINE` | 102 | mixed `_`/name position; deferred to `--with-any` |
+| `DECLINE` | 102 | mixed `_`/name position; taken up by `--with-any` (below) |
 | `SKIP` | 985 | not a tupled `function` in the required shape |
 
 `SKIP` breaks down as 799 "a case pattern is not an unlabelled closed tuple"
@@ -73,6 +73,28 @@ Scoping is invisible to an AST comparison and the types usually coincide, so thi
 stage rests on a token scan rather than on the verifier. Sites needing it are
 declined *whole* under the default stage — never half-hoisted — so the later run
 still finds a `function` to rewrite.
+
+The scan is `usable`: a Mix position may be hoisted only if every branch that
+binds `_` there mentions the name nowhere in its own pattern, guard or body. A
+branch binding the name at that very position is exempt, since it re-binds it to
+the component the parameter holds. Where the scan fails, the position is *demoted*
+back into the scrutinee rather than the site being lost — the `_` branches keep
+their `_` and go on reading the outer binding.
+
+Run over the 102 declined sites, `--with-any` rewrote **99** (498 edits, 54 files,
+again 0 escalations), demoted **5** positions, and declined 3 sites outright for
+having nothing left to hoist. `src/Frontend/ParseMode.ml:185` is the shape the
+guard exists for:
+
+```ocaml
+let parseModeParen = function
+  | LS.Cons ((L.Id (_, name), r0), s'), r -> … P.join r r' …
+  | LS.Cons ((t, r), s'), _              -> Parsing.error r …
+```
+
+Hoisting `r` would put a parameter where the second branch expects its own
+pattern binding. Here the inner `(t, r)` would in fact have shadowed it, so the
+decline is conservative rather than necessary — which is the intended direction.
 
 ## Guards, stated so they are not relaxed later
 

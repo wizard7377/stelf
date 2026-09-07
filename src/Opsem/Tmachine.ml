@@ -272,13 +272,13 @@ end) : ABSMACHINE = struct
                 sc (I.Root (hc, s_))
               end)
       in
-      let rec matchDProg = function
-        | I.Null, _ ->
+      let rec matchDProg (a, k) = match a with
+        | I.Null ->
             begin if deterministic then
               matchSigDet (Index.lookup (cidFromHead ha))
             else matchSig (Index.lookup (cidFromHead ha))
             end
-        | I.Decl (dPool', C.Dec (r, s, ha')), k ->
+        | I.Decl (dPool', C.Dec (r, s, ha')) ->
             begin if eqHead (ha, ha') then
               begin if deterministic then
                 try
@@ -346,7 +346,7 @@ end) : ABSMACHINE = struct
               end
             else matchDProg (dPool', k + 1)
             end
-        | I.Decl (dPool', parameter_), k -> matchDProg (dPool', k + 1)
+        | I.Decl (dPool', parameter_) -> matchDProg (dPool', k + 1)
       in
       let rec matchConstraint (cnstrSolve, try_) =
         let succeeded =

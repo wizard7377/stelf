@@ -438,9 +438,9 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       | I.Def _ -> false
       | I.Skonst _ -> false
 
-    and occursInSpine = function
-      | _, I.Nil -> false
-      | k, I.App (u_, s_) -> occursInExp (k, u_) || occursInSpine (k, s_)
+    and occursInSpine (k, a) = match a with
+      | I.Nil -> false
+      | I.App (u_, s_) -> occursInExp (k, u_) || occursInSpine (k, s_)
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
@@ -647,9 +647,9 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
         | 1 -> "1 case"
         | n -> Int.toString n ^ " cases"
       in
-      let flagToString = function
-        | _, 0 -> ""
-        | n, m ->
+      let flagToString (n, m) = match m with
+        | 0 -> ""
+        | m ->
             (((" [active: " ^ Int.toString n) ^ " inactive: ") ^ Int.toString m)
             ^ "]"
       in

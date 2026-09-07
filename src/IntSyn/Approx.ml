@@ -256,18 +256,18 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
           of v is ground
           v : L-
      post: V is most general such that V- = v and G |- V : L *)
-  let rec apxToClassW = function
-    | g_, Uni l_, _, allowed (* Next L *) -> I.Uni (apxToUni l_)
-    | g_, Arrow (v1_, v2_), l_, allowed ->
+  let rec apxToClassW (g_, a, b, allowed) = match a, b with
+    | Uni l_, _ (* Next L *) -> I.Uni (apxToUni l_)
+    | Arrow (v1_, v2_), l_ ->
         let v1' = apxToClass (g_, v1_, type_, allowed) in
         let d_ = I.Dec (None, v1') in
         let v2' = apxToClass (I.Decl (g_, d_), v2_, l_, allowed) in
         I.Pi ((d_, I.Maybe), v2')
-    | g_, (CVar r as v_), l_, allowed (* Type or Kind *) ->
+    | (CVar r as v_), l_ (* Type or Kind *) ->
         let name = getReplacementName (v_, Uni l_, Next l_, allowed) in
         let s = I.Shift (I.ctxLength g_) in
         I.Root (I.FVar (name, I.Uni (apxToUni l_), s), I.Nil)
-    | g_, Const h_, l_, allowed (* Type *) ->
+    | Const h_, l_ (* Type *) ->
         I.Root (h_, Whnf.newSpineVar g_ (I.conDecType (headConDec h_), I.id))
   (* convert undetermined CVars to FVars *)
   (* also, does the name of the bound variable here matter? *)

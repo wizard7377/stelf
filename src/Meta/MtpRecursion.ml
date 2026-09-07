@@ -245,9 +245,9 @@ end) : MTPRECURSION = struct
 
     and set_parameter
         (((g1_, b1_) as gb), (I.EVar (r, _, v_, _) as x_), k, sc, ac, ds_) =
-      let rec set_parameter' = function
-        | (I.Null, I.Null), _, ds_ -> ds_
-        | (I.Decl (g_, d_), I.Decl (b_, S.Parameter _)), k, ds_ ->
+      let rec set_parameter' (a, k, ds_) = match a with
+        | (I.Null, I.Null) -> ds_
+        | (I.Decl (g_, d_), I.Decl (b_, S.Parameter _)) ->
             let (I.Dec (_, v'_) as d'_) = I.decSub d_ (I.Shift k) in
             let ds'_ =
               CsManager.trail (function () ->
@@ -260,7 +260,7 @@ end) : MTPRECURSION = struct
                   end)
             in
             set_parameter' ((g_, b_), k + 1, ds'_)
-        | (I.Decl (g_, d_), I.Decl (b_, _)), k, ds_ ->
+        | (I.Decl (g_, d_), I.Decl (b_, _)) ->
             set_parameter' ((g_, b_), k + 1, ds_)
       in
       set_parameter' (gb, 1, ds_)
@@ -284,32 +284,20 @@ end) : MTPRECURSION = struct
     and lt (gb, k, (us_, vs_), (us', vs'_), sc, ac, ds_) =
       ltW (gb, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ac, ds_)
 
-    and ltW = function
-      | gb, k, (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_), sc, ac, ds_ ->
+    and ltW (a, k, b, d, sc, ac, ds_) = match a, b, d with
+      | gb, (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_) ->
           ltSpine
             (gb, k, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, ac, ds_)
-      | ( ((g_, b_) as gb),
-          k,
-          (us_, vs_),
-          ((I.Root (I.BVar n, s'_), s'), vs'_),
-          sc,
-          ac,
-          ds_ ) ->
+      | ((g_, b_) as gb), (us_, vs_), ((I.Root (I.BVar n, s'_), s'), vs'_) ->
           begin match I.ctxLookup b_ n with
           | S.Parameter _ ->
               let (I.Dec (_, v'_)) = I.ctxDec g_ n in
               ltSpine (gb, k, (us_, vs_), ((s'_, s'), (v'_, I.id)), sc, ac, ds_)
           | S.Lemma _ -> ds_
           end
-      | gb, _, _, ((I.EVar _, _), _), _, _, ds_ -> ds_
-      | ( ((g_, b_) as gb),
-          k,
-          ((u_, s1), (v_, s2)),
-          ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
-          sc,
-          ac,
-          ds_ ) ->
+      | gb, _, ((I.EVar _, _), _) -> ds_
+      | ((g_, b_) as gb), ((u_, s1), (v_, s2)), ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
           let ds'_ = ds_ in
           begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
             let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
@@ -342,18 +330,12 @@ end) : MTPRECURSION = struct
     and ltSpine (gb, k, (us_, vs_), (ss'_, vs'_), sc, ac, ds_) =
       ltSpineW (gb, k, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, ac, ds_)
 
-    and ltSpineW = function
-      | gb, k, (us_, vs_), ((I.Nil, _), _), _, _, ds_ -> ds_
-      | gb, k, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, ac, ds_ ->
+    and ltSpineW (gb, k, a, b, sc, ac, ds_) = match a, b with
+      | (us_, vs_), ((I.Nil, _), _) -> ds_
+      | (us_, vs_), ((I.SClo (s_, s'), s''), vs'_) ->
           ltSpineW
             (gb, k, (us_, vs_), ((s_, I.comp s' s''), vs'_), sc, ac, ds_)
-      | ( gb,
-          k,
-          (us_, vs_),
-          ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')),
-          sc,
-          ac,
-          ds_ ) ->
+      | (us_, vs_), ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
           let ds'_ =
             le (gb, k, (us_, vs_), ((u'_, s1'), (v1', s2')), sc, ac, ds_)
           in

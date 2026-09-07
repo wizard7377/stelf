@@ -122,30 +122,30 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
         Trail.log globalTrail (Solve (cnstr, cnstr_))
       end
 
-    let rec delayExpW = function
-      | ((Uni l_ as u_), s1), _ -> ()
-      | (Pi ((d_, p_), u_), s), cnstr -> begin
+    let rec delayExpW (a, cnstr) = match a with
+      | ((Uni l_ as u_), s1) -> ()
+      | (Pi ((d_, p_), u_), s) -> begin
           delayDec ((d_, s), cnstr);
           delayExp ((u_, dot1 s), cnstr)
         end
-      | (Root (h_, s_), s), cnstr -> begin
+      | (Root (h_, s_), s) -> begin
           delayHead (h_, cnstr);
           delaySpine ((s_, s), cnstr)
         end
-      | (Lam (d_, u_), s), cnstr -> begin
+      | (Lam (d_, u_), s) -> begin
           delayDec ((d_, s), cnstr);
           delayExp ((u_, dot1 s), cnstr)
         end
-      | (EVar (g_, r, v_, cnstrs), s), cnstr -> addConstraint cnstrs cnstr
-      | (FgnExp (csfe_csid, csfe_ops), s), cnstr ->
+      | (EVar (g_, r, v_, cnstrs), s) -> addConstraint cnstrs cnstr
+      | (FgnExp (csfe_csid, csfe_ops), s) ->
           FgnExpStd.App.apply csfe_csid csfe_ops (function u_ ->
               delayExp ((u_, s), cnstr))
 
     and delayExp (us_, cnstr) = delayExpW (Whnf.whnf us_, cnstr)
 
-    and delayHead = function
-      | FVar (x, v_, s'), cnstr -> delayExp ((v_, id), cnstr)
-      | h_, _ -> ()
+    and delayHead (h_, cnstr) = match h_ with
+      | FVar (x, v_, s') -> delayExp ((v_, id), cnstr)
+      | h_ -> ()
 
     and delaySpine (a, cnstr) = match a with
       | (Nil, s) -> ()
@@ -214,23 +214,23 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
     let rec invertExp (g_, us_, ss, rOccur) =
       invertExpW (g_, Whnf.whnf us_, ss, rOccur)
 
-    and invertExpW = function
-      | g_, ((Uni _ as u_), s), _, _ -> u_
-      | g_, (Pi ((d_, p_), v_), s), ss, rOccur ->
+    and invertExpW (g_, a, ss, rOccur) = match a with
+      | ((Uni _ as u_), s) -> u_
+      | (Pi ((d_, p_), v_), s) ->
           Pi
             ( (invertDec (g_, (d_, s), ss, rOccur), p_),
               invertExp
                 (Decl (g_, decSub d_ s), (v_, dot1 s), dot1 ss, rOccur) )
-      | g_, (Lam (d_, v_), s), ss, rOccur ->
+      | (Lam (d_, v_), s) ->
           Lam
             ( invertDec (g_, (d_, s), ss, rOccur),
               invertExp
                 (Decl (g_, decSub d_ s), (v_, dot1 s), dot1 ss, rOccur) )
-      | g_, (Root (h_, s_), s), ss, rOccur ->
+      | (Root (h_, s_), s) ->
           Root
             ( invertHead (g_, h_, ss, rOccur),
               invertSpine (g_, (s_, s), ss, rOccur) )
-      | g_, ((EVar (r, gx, v_, cnstrs) as x_), s), ss, rOccur ->
+      | ((EVar (r, gx, v_, cnstrs) as x_), s) ->
           begin if rOccur == r then raise NotInvertible
           else
             begin if Whnf.isPatSub s then
@@ -241,7 +241,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
             else EClo (x_, invertSub (g_, s, ss, rOccur))
             end
           end
-      | g_, (FgnExp (csfe_csid, csfe_ops), s), ss, rOccur ->
+      | (FgnExp (csfe_csid, csfe_ops), s) ->
           FgnExpStd.Map.apply csfe_csid csfe_ops (function u_ ->
               invertExp (g_, (u_, s), ss, rOccur))
 
@@ -298,23 +298,23 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
     let rec pruneExp (g_, us_, ss, rOccur) =
       pruneExpW (g_, Whnf.whnf us_, ss, rOccur)
 
-    and pruneExpW = function
-      | g_, ((Uni _ as u_), s), _, _ -> u_
-      | g_, (Pi ((d_, p_), v_), s), ss, rOccur ->
+    and pruneExpW (g_, a, ss, rOccur) = match a with
+      | ((Uni _ as u_), s) -> u_
+      | (Pi ((d_, p_), v_), s) ->
           Pi
             ( (pruneDec (g_, (d_, s), ss, rOccur), p_),
               pruneExp (Decl (g_, decSub d_ s), (v_, dot1 s), dot1 ss, rOccur)
             )
-      | g_, (Lam (d_, v_), s), ss, rOccur ->
+      | (Lam (d_, v_), s) ->
           Lam
             ( pruneDec (g_, (d_, s), ss, rOccur),
               pruneExp (Decl (g_, decSub d_ s), (v_, dot1 s), dot1 ss, rOccur)
             )
-      | g_, (Root (h_, s_), s), ss, rOccur ->
+      | (Root (h_, s_), s) ->
           Root
             ( pruneHead (g_, h_, ss, rOccur),
               pruneSpine (g_, (s_, s), ss, rOccur) )
-      | g_, ((EVar (r, gx, v_, cnstrs) as x_), s), ss, rOccur ->
+      | ((EVar (r, gx, v_, cnstrs) as x_), s) ->
           begin if rOccur == r then raise (Unify "Variable occurrence")
           else
             begin if Whnf.isPatSub s then
@@ -340,15 +340,15 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
                 y_
             end
           end
-      | g_, (FgnExp (csfe_csid, csfe_ops), s), ss, rOccur ->
+      | (FgnExp (csfe_csid, csfe_ops), s) ->
           FgnExpStd.Map.apply csfe_csid csfe_ops (function u_ ->
               pruneExp (g_, (u_, s), ss, rOccur))
-      | g_, ((AVar _ as x_), s), ss, rOccur -> raise (Unify "Left-over AVar")
+      | ((AVar _ as x_), s) -> raise (Unify "Left-over AVar")
 
-    and pruneDec = function
-      | g_, (Dec (name, v_), s), ss, rOccur ->
+    and pruneDec (g_, a, ss, rOccur) = match a with
+      | (Dec (name, v_), s) ->
           Dec (name, pruneExp (g_, (v_, s), ss, rOccur))
-      | g_, (NDec x, _), _, _ -> NDec x
+      | (NDec x, _) -> NDec x
 
     and pruneSpine (g_, a, ss, rOccur) = match a with
       | (Nil, s) -> Nil

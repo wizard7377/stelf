@@ -150,17 +150,17 @@ end) : MTPSEARCH.MTPSEARCH = struct
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
-    and occursInSpine = function
-      | _, (I.Nil, _) -> false
-      | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp s' s))
-      | r, (I.App (u_, s_), s) ->
+    and occursInSpine (r, a) = match a with
+      | (I.Nil, _) -> false
+      | (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp s' s))
+      | (I.App (u_, s_), s) ->
           occursInExp (r, (u_, s)) || occursInSpine (r, (s_, s))
 
     and occursInDec (r, (I.Dec (_, v_), s)) = occursInExp (r, (v_, s))
 
-    let rec nonIndex = function
-      | _, [] -> true
-      | r, I.EVar (_, _, v_, _) :: ge ->
+    let rec nonIndex (r, a) = match a with
+      | [] -> true
+      | I.EVar (_, _, v_, _) :: ge ->
           (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge)
 
     let rec selectEVar = function
@@ -296,13 +296,9 @@ end) : MTPSEARCH.MTPSEARCH = struct
           else ()
           end
 
-    and matchAtom = function
-      | 0, _, _, _, _ -> ()
-      | ( max,
-          depth,
-          ((I.Root (ha, _), _) as ps'),
-          (C.DProg (g_, dPool) as dp),
-          sc ) ->
+    and matchAtom (max, depth, a, b, sc) = match max, a, b with
+      | 0, _, _ -> ()
+      | max, ((I.Root (ha, _), _) as ps'), (C.DProg (g_, dPool) as dp) ->
           let rec matchSig' = function
             | [] -> ()
             | hc :: sgn' ->
@@ -317,9 +313,9 @@ end) : MTPSEARCH.MTPSEARCH = struct
                           function s_ -> sc (I.Root (hc, s_)) )));
                 matchSig' sgn'
           in
-          let rec matchDProg = function
-            | I.Null, _ -> matchSig' (Index.lookup (cidFromHead ha))
-            | I.Decl (dPool', C.Dec (r, s, ha')), n ->
+          let rec matchDProg (a, n) = match a with
+            | I.Null -> matchSig' (Index.lookup (cidFromHead ha))
+            | I.Decl (dPool', C.Dec (r, s, ha')) ->
                 begin if eqHead (ha, ha') then
                   let () = ignore (CsManager.trail (function () ->
                         rSolve
@@ -332,7 +328,7 @@ end) : MTPSEARCH.MTPSEARCH = struct
                   matchDProg (dPool', n + 1)
                 else matchDProg (dPool', n + 1)
                 end
-            | I.Decl (dPool', parameter_), n -> matchDProg (dPool', n + 1)
+            | I.Decl (dPool', parameter_) -> matchDProg (dPool', n + 1)
           in
           matchDProg (dPool, 1)
 

@@ -421,13 +421,13 @@ For our grouping function we distinguish the following cases:
     group
 \end{itemize}
 *)
-  let rec gh = function
-    | [], [], _ -> []
-    | cg, [], res -> rev ((summaxwidth cg, cg, Ebk) :: res)
-    | cg, Dbk :: t, res -> gh ([], t, (summaxwidth cg, cg, Dbk) :: res)
-    | cg, (Brk (_, _) as b) :: t, res ->
+  let rec gh (cg, a, res) = match cg, a with
+    | [], [] -> []
+    | cg, [] -> rev ((summaxwidth cg, cg, Ebk) :: res)
+    | cg, Dbk :: t -> gh ([], t, (summaxwidth cg, cg, Dbk) :: res)
+    | cg, (Brk (_, _) as b) :: t ->
         gh ([], t, (summaxwidth cg, cg, b) :: res)
-    | cg, h :: t, res -> gh (cg @ [ h ], t, res)
+    | cg, h :: t -> gh (cg @ [ h ], t, res)
 
   (*
 Finally here comes the function {\ml pphv} to print a

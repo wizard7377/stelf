@@ -124,14 +124,14 @@ end) : FILL with module State = Fill__0.State' = struct
             try_ ((v2_, I.Dot (I.Exp x_, s)), fs_, o_)
         | (I.EClo (v_, s'), s) -> try_ ((v_, I.comp s' s), fs_, o_)
       in
-      let rec matchCtx = function
-        | I.Null, _, fs_ -> fs_
-        | I.Decl (g_, I.Dec (x, v_)), n, fs_ ->
+      let rec matchCtx (a, n, fs_) = match a with
+        | I.Null -> fs_
+        | I.Decl (g_, I.Dec (x, v_)) ->
             matchCtx
               ( g_,
                 n + 1,
                 try_ ((v_, I.Shift (n + 1)), fs_, FillWithBVar (y_, n + 1)) )
-        | I.Decl (g_, I.NDec _), n, fs_ -> matchCtx (g_, n + 1, fs_)
+        | I.Decl (g_, I.NDec _) -> matchCtx (g_, n + 1, fs_)
       in
       let rec matchSig (a, fs_) = match a with
         | [] -> fs_

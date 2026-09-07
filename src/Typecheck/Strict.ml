@@ -48,13 +48,13 @@ end) : STRICT = struct
           k' <= k && patSpine (k, s_) && indexDistinct s_
       | _ -> false
 
-    let rec strictExp = function
-      | _, _, I.Uni _ -> false
-      | k, p, I.Lam (d_, u_) ->
+    let rec strictExp (k, p, a) = match a with
+      | I.Uni _ -> false
+      | I.Lam (d_, u_) ->
           strictDec (k, p, d_) || strictExp (k + 1, p + 1, u_)
-      | k, p, I.Pi ((d_, _), u_) ->
+      | I.Pi ((d_, _), u_) ->
           strictDec (k, p, d_) || strictExp (k + 1, p + 1, u_)
-      | k, p, I.Root (h_, s_) ->
+      | I.Root (h_, s_) ->
           begin match h_ with
           | I.BVar k' ->
               begin if k' = p then patSpine (k, s_)
@@ -64,11 +64,11 @@ end) : STRICT = struct
           | I.Def d -> strictSpine (k, p, s_)
           | I.FgnConst (cs, conDec) -> strictSpine (k, p, s_)
           end
-      | k, p, I.FgnExp (cs, ops) -> false
+      | I.FgnExp (cs, ops) -> false
 
-    and strictSpine = function
-      | _, _, I.Nil -> false
-      | k, p, I.App (u_, s_) -> strictExp (k, p, u_) || strictSpine (k, p, s_)
+    and strictSpine (k, p, a) = match a with
+      | I.Nil -> false
+      | I.App (u_, s_) -> strictExp (k, p, u_) || strictSpine (k, p, s_)
 
     and strictDec (k, p, I.Dec (_, v_)) = strictExp (k, p, v_)
 
@@ -87,14 +87,14 @@ end) : STRICT = struct
       | I.Dec (Some x, _) -> "variable " ^ x
 
     let strictTop ((u_, v_), ocdOpt) =
-      let rec strictArgParms = function
-        | I.Root (I.BVar _, _), _, occ ->
+      let rec strictArgParms (a, b, occ) = match a, b with
+        | I.Root (I.BVar _, _), _ ->
             raise
               (Error (occToString (ocdOpt, occ) ^ "Head not rigid, use %abbrev"))
-        | I.Root _, _, _ -> ()
-        | I.Pi _, _, _ -> ()
-        | I.FgnExp _, _, _ -> ()
-        | I.Lam (d_, u'_), I.Pi (_, v'_), occ ->
+        | I.Root _, _ -> ()
+        | I.Pi _, _ -> ()
+        | I.FgnExp _, _ -> ()
+        | I.Lam (d_, u'_), I.Pi (_, v'_) ->
             begin if strictArgParm (1, u'_) then
               strictArgParms (u'_, v'_, Paths.body occ)
             else
@@ -104,7 +104,7 @@ end) : STRICT = struct
                     ^ decToVarName d_)
                    ^ ", use %abbrev"))
             end
-        | (I.Lam _ as u_), (I.Root (I.Def _, _) as v_), occ ->
+        | (I.Lam _ as u_), (I.Root (I.Def _, _) as v_) ->
             strictArgParms (u_, Whnf.normalize (Whnf.expandDef (v_, I.id)), occ)
       in
       strictArgParms (u_, v_, Paths.top)

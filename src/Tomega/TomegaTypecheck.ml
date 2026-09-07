@@ -136,37 +136,35 @@ end) : TOMEGATYPECHECK = struct
 
     and checkPrg psi (p_, (f_, t_)) = checkPrgW (psi, (p_, T.whnfFor f_ t_))
 
-    and checkPrgW = function
-      | _, (Unit, (True, _)) ->
+    and checkPrgW (psi, a) = match a with
+      | (Unit, (True, _)) ->
           ignore (chatter 4 (function () -> "[true]"));
           ()
-      | psi, (T.Const lemma, (f_, t)) ->
+      | (T.Const lemma, (f_, t)) ->
           convFor (psi, (inferLemma lemma, T.id), (f_, t))
-      | psi, (T.Var k, (f_, t)) ->
+      | (T.Var k, (f_, t)) ->
           begin match T.ctxDec psi k with
           | T.PDec (_, f'_, _, _) -> convFor (psi, (f'_, T.id), (f_, t))
           end
-      | ( psi,
-          ( T.Lam ((T.PDec (x, f1_, _, _) as d_), p_),
-            (T.All ((T.PDec (x', f1', _, _), _), f2_), t) ) ) ->
+      | ( T.Lam ((T.PDec (x, f1_, _, _) as d_), p_),
+            (T.All ((T.PDec (x', f1', _, _), _), f2_), t) ) ->
           ignore (chatter 4 (function () -> "[lam[p]"));
           ignore (convFor (psi, (f1_, T.id), (f1', t)));
           ignore (chatter 4 (function () -> "]"));
           checkPrg (I.Decl (psi, d_)) (p_, (f2_, T.dot1 t))
-      | psi, (T.Lam (T.UDec d_, p_), (T.All ((T.UDec d'_, _), f_), t2)) ->
+      | (T.Lam (T.UDec d_, p_), (T.All ((T.UDec d'_, _), f_), t2)) ->
           ignore (chatter 4 (function () -> "[lam[u]"));
           ignore (Conv.convDec (d_, I.id) (d'_, T.coerceSub t2));
           ignore (chatter 4 (function () -> "]"));
           checkPrg (I.Decl (psi, T.UDec d_)) (p_, (f_, T.dot1 t2))
-      | psi, (T.PairExp (m_, p_), (T.Ex ((I.Dec (x, a_), _), f2_), t)) ->
+      | (T.PairExp (m_, p_), (T.Ex ((I.Dec (x, a_), _), f2_), t)) ->
           ignore (chatter 4 (function () -> "[pair [e]"));
           let g_ = T.coerceCtx psi in
           ignore (TypeCheck.typeCheck g_ (m_, I.EClo (a_, T.coerceSub t)));
           ignore (chatter 4 (function () -> "]"));
           checkPrg psi (p_, (f2_, T.Dot (T.Exp m_, t)))
-      | ( psi,
-          ( T.PairBlock (I.Bidx k, p_),
-            (T.Ex ((I.BDec (_, (cid, s)), _), f2_), t) ) ) ->
+      | ( T.PairBlock (I.Bidx k, p_),
+            (T.Ex ((I.BDec (_, (cid, s)), _), f2_), t) ) ->
           let (T.UDec (I.BDec (_, (cid', s')))) = T.ctxDec psi k in
           let g'_, _ = I.conDecBlock (I.sgnLookup cid) in
           ignore begin if cid' <> cid then raise (Error "Block label mismatch")
@@ -175,39 +173,38 @@ end) : TOMEGATYPECHECK = struct
           ignore (convSub
               (psi, T.embedSub s', T.comp (T.embedSub s) t, T.revCoerceCtx g'_));
           checkPrg psi (p_, (f2_, T.Dot (T.Block (I.Bidx k), t)))
-      | psi, (T.PairPrg (p1_, p2_), (T.And (f1_, f2_), t)) ->
+      | (T.PairPrg (p1_, p2_), (T.And (f1_, f2_), t)) ->
           ignore (chatter 4 (function () -> "[and"));
           ignore (checkPrg psi (p1_, (f1_, t)));
           ignore (chatter 4 (function () -> "..."));
           ignore (checkPrg psi (p2_, (f2_, t)));
           ignore (chatter 4 (function () -> "]"));
           ()
-      | psi, (T.Case omega_, ft_) -> checkCases (psi, (omega_, ft_))
-      | psi, (T.Rec ((T.PDec (x, f_, _, _) as d_), p_), (f'_, t)) ->
+      | (T.Case omega_, ft_) -> checkCases (psi, (omega_, ft_))
+      | (T.Rec ((T.PDec (x, f_, _, _) as d_), p_), (f'_, t)) ->
           ignore (chatter 4 (function () -> "[rec"));
           ignore (convFor (psi, (f_, T.id), (f'_, t)));
           ignore (chatter 4 (function () -> "]\n"));
           checkPrg (I.Decl (psi, d_)) (p_, (f'_, t))
-      | psi, (T.Let ((T.PDec (_, f1_, _, _) as d_), p1_, p2_), (f2_, t)) ->
+      | (T.Let ((T.PDec (_, f1_, _, _) as d_), p1_, p2_), (f2_, t)) ->
           ignore (chatter 4 (function () -> "[let"));
           ignore (checkPrg psi (p1_, (f1_, T.id)));
           ignore (chatter 4 (function () -> "."));
           ignore (checkPrg (I.Decl (psi, d_)) (p2_, (f2_, T.comp t T.shift)));
           ignore (chatter 4 (function () -> "]\n"));
           ()
-      | ( psi,
-          ( T.New (T.Lam (T.UDec (I.BDec (_, (cid, s)) as d_), p_) as p'_),
-            (f_, t) ) ) ->
+      | ( T.New (T.Lam (T.UDec (I.BDec (_, (cid, s)) as d_), p_) as p'_),
+            (f_, t) ) ->
           ignore (chatter 5 (function () -> "[new1..."));
           let (T.All ((T.UDec d''_, _), f'_)) = inferPrg (psi, p'_) in
           ignore (chatter 5 (function () -> "][new2..."));
           let f''_ = TA.raiseF (I.Decl (I.Null, d_)) (f'_, I.id) in
           convFor (psi, (f''_, T.id), (f_, t));
           chatter 5 (function () -> "]\n")
-      | psi, (T.Redex (p1_, s2_), (f_, t)) ->
+      | (T.Redex (p1_, s2_), (f_, t)) ->
           let f'_ = inferPrg (psi, p1_) in
           checkSpine (psi, s2_, (f'_, T.id), (f_, t))
-      | psi, (T.Box (w_, p_), (T.World (w'_, f_), t)) ->
+      | (T.Box (w_, p_), (T.World (w'_, f_), t)) ->
           checkPrgW (psi, (p_, (f_, t)))
 
     and checkSpine (psi, a, b, c) = match a, b, c with

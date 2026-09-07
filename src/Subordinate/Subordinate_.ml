@@ -281,18 +281,18 @@ module MakeSubordinate
         end
       end
 
-    and installTypeN' = function
-      | I.Pi (((I.Dec (_, v1_) as d_), _), v2_), a -> begin
+    and installTypeN' (b, a) = match b with
+      | I.Pi (((I.Dec (_, v1_) as d_), _), v2_) -> begin
           addSubord (I.targetFam v1_) a;
           begin
             installTypeN v1_;
             installTypeN' (v2_, a)
           end
         end
-      | (I.Root (I.Def _, _) as v_), a ->
+      | (I.Root (I.Def _, _) as v_) ->
           let v'_ = Whnf.normalize (Whnf.expandDef (v_, I.id)) in
           installTypeN' (v'_, a)
-      | I.Root _, _ -> ()
+      | I.Root _ -> ()
 
     and installTypeN v_ = installTypeN' (v_, I.targetFam v_)
 
@@ -348,18 +348,18 @@ module MakeSubordinate
       else ()
       end
 
-    let rec respectsTypeN' = function
-      | I.Pi (((I.Dec (_, v1_) as d_), _), v2_), a -> begin
+    let rec respectsTypeN' (b, a) = match b with
+      | I.Pi (((I.Dec (_, v1_) as d_), _), v2_) -> begin
           checkBelow (I.targetFam v1_, a);
           begin
             respectsTypeN v1_;
             respectsTypeN' (v2_, a)
           end
         end
-      | (I.Root (I.Def _, _) as v_), a ->
+      | (I.Root (I.Def _, _) as v_) ->
           let v'_ = Whnf.normalize (Whnf.expandDef (v_, I.id)) in
           respectsTypeN' (v'_, a)
-      | I.Root _, _ -> ()
+      | I.Root _ -> ()
 
     and respectsTypeN v_ = respectsTypeN' (v_, I.targetFam v_)
 

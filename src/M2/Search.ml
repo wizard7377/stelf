@@ -108,9 +108,9 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
       | I.Null, g' -> g'
       | I.Decl (g_, d_), g'_ -> I.Decl (compose (g_, g'_), d_)
 
-    let rec shiftSub = function
-      | I.Null, _ -> I.id
-      | I.Decl (g_, d_), s -> I.dot1 (shiftSub (g_, s))
+    let rec shiftSub (a, s) = match a with
+      | I.Null -> I.id
+      | I.Decl (g_, d_) -> I.dot1 (shiftSub (g_, s))
 
     let cidFromHead = function I.Const a -> a | I.Def a -> a | I.Skonst a -> a
 
@@ -217,9 +217,9 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
         in
         matchSig' (Index.lookup (cidFromHead ha), acc')
       in
-      let rec matchDProg = function
-        | I.Null, _, acc' -> matchSig acc'
-        | I.Decl (dPool', C.Dec (r, s, ha')), n, acc' ->
+      let rec matchDProg (a, n, acc') = match a with
+        | I.Null -> matchSig acc'
+        | I.Decl (dPool', C.Dec (r, s, ha')) ->
             begin if eqHead (ha, ha') then
               let acc'' =
                 CsManager.trail (function () ->
@@ -234,7 +234,7 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
               matchDProg (dPool', n + 1, acc'')
             else matchDProg (dPool', n + 1, acc')
             end
-        | I.Decl (dPool', parameter_), n, acc' ->
+        | I.Decl (dPool', parameter_) ->
             matchDProg (dPool', n + 1, acc')
       in
       begin if k < 0 then acc else matchDProg (dPool, 1, acc)
@@ -255,22 +255,22 @@ end) : OLDSEARCH with module MetaSyn = OLDSearch__0.MetaSyn' = struct
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
-    and occursInSpine = function
-      | _, (I.Nil, _) -> false
-      | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp s' s))
-      | r, (I.App (u_, s_), s) ->
+    and occursInSpine (r, a) = match a with
+      | (I.Nil, _) -> false
+      | (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp s' s))
+      | (I.App (u_, s_), s) ->
           occursInExp (r, (u_, s)) || occursInSpine (r, (s_, s))
 
     and occursInDec (r, (I.Dec (_, v_), s)) = occursInExp (r, (v_, s))
 
-    let rec nonIndex = function
-      | _, [] -> true
-      | r, I.EVar (_, _, v_, _) :: ge ->
+    let rec nonIndex (r, a) = match a with
+      | [] -> true
+      | I.EVar (_, _, v_, _) :: ge ->
           (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge)
 
-    let rec selectEVar = function
-      | [], _, acc -> acc
-      | (I.EVar (r, _, _, _) as x_) :: ge, vs_, acc ->
+    let rec selectEVar (a, vs_, acc) = match a with
+      | [] -> acc
+      | (I.EVar (r, _, _, _) as x_) :: ge ->
           begin if occursInExp (r, vs_) && nonIndex (r, acc) then
             selectEVar (ge, vs_, x_ :: acc)
           else selectEVar (ge, vs_, acc)

@@ -112,9 +112,9 @@ module MakeStream (BasicStream : BASIC_STREAM) : STREAM = struct
 
   let rec takePos = function _s, 0 -> [] | s, n -> take' (expose s, n)
 
-  and take' = function
-    | Empty, _ -> []
-    | Cons (x, s), n -> x :: takePos (s, n - 1)
+  and take' (a, n) = match a with
+    | Empty -> []
+    | Cons (x, s) -> x :: takePos (s, n - 1)
 
   let take s n =
     begin if n < 0 then raise Subscript else takePos (s, n)
@@ -127,9 +127,9 @@ module MakeStream (BasicStream : BASIC_STREAM) : STREAM = struct
 
   let rec dropPos (s, n) = match n with 0 -> s | n -> drop' (expose s, n)
 
-  and drop' = function
-    | Empty, _ -> empty
-    | Cons (_x, s), n -> dropPos (s, n - 1)
+  and drop' (a, n) = match a with
+    | Empty -> empty
+    | Cons (_x, s) -> dropPos (s, n - 1)
 
   let drop s n =
     begin if n < 0 then raise Subscript else dropPos (s, n)

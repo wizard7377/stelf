@@ -1647,15 +1647,15 @@ end) : TWELF.STELF = struct
         in
         (d, List.filter (fun x -> not (redundant x)) fs)
 
-      let loadAbort = function
-        | mfile, Ok ->
+      let loadAbort (mfile, a) = match a with
+        | Ok ->
             let status = loadFile (ModFile.fileName mfile) in
             begin match status with
             | Ok -> ModFile.makeUnmodified mfile
             | _ -> ()
             end;
             status
-        | _, Abort -> Abort
+        | Abort -> Abort
 
       let rec load ((_, sources) as config) =
         begin

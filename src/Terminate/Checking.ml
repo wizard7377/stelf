@@ -710,20 +710,15 @@ end) : CHECKING = struct
     and ltR (((g_, q_) as gq), d_, usVs, usVs', sc, k) =
       ltRW (gq, d_, usVs, (let a__, b__ = usVs' in Whnf.whnfEta a__ b__), sc, k)
 
-    and ltRW = function
-      | ( gq,
-          d_,
-          (us_, vs_),
-          (((I.Root (I.Const c, s'_), s') as us'), vs'_),
-          sc,
-          k ) ->
+    and ltRW (a, d_, b, d, sc, k) = match a, b, d with
+      | gq, (us_, vs_), (((I.Root (I.Const c, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             k (gq, d_, [], Less ((us_, vs_), (us', vs'_)), sc)
           else
             ltSpineR
               (gq, d_, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, k)
           end
-      | gq, d_, (us_, vs_), (((I.Root (I.Def c, s'_), s') as us'), vs'_), sc, k
+      | gq, (us_, vs_), (((I.Root (I.Def c, s'_), s') as us'), vs'_)
         ->
           begin if isAtomic (gq, us') then
             k (gq, d_, [], Less ((us_, vs_), (us', vs'_)), sc)
@@ -731,26 +726,16 @@ end) : CHECKING = struct
             ltSpineR
               (gq, d_, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, k)
           end
-      | ( ((g_, q_) as gq),
-          d_,
-          (us_, vs_),
-          (((I.Root (I.BVar n, s'_), s') as us'), vs'_),
-          sc,
-          k ) ->
+      | ((g_, q_) as gq), (us_, vs_), (((I.Root (I.BVar n, s'_), s') as us'), vs'_) ->
           begin if isAtomic (gq, us') then
             k (gq, d_, [], Less ((us_, vs_), (us', vs'_)), sc)
           else
             let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             ltSpineR (gq, d_, (us_, vs_), ((s'_, s'), (v'_, I.id)), sc, k)
           end
-      | gq, d_, _, ((I.EVar _, _), _), _, _ -> false
-      | ( ((g_, q_) as gq),
-          d_,
-          ((u_, s1), (v_, s2)),
-          ( (I.Lam (I.Dec (_, v1'), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
-          sc,
-          k ) ->
+      | gq, _, ((I.EVar _, _), _) -> false
+      | ((g_, q_) as gq), ((u_, s1), (v_, s2)), ( (I.Lam (I.Dec (_, v1'), u'_), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
           begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
             let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' = function
@@ -783,16 +768,11 @@ end) : CHECKING = struct
     and ltSpineR (gq, d_, (us_, vs_), (ss'_, vs'_), sc, k) =
       ltSpineRW (gq, d_, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, k)
 
-    and ltSpineRW = function
-      | gq, d_, (us_, vs_), ((I.Nil, _), _), _, _ -> false
-      | gq, d_, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, k ->
+    and ltSpineRW (gq, d_, a, b, sc, k) = match a, b with
+      | (us_, vs_), ((I.Nil, _), _) -> false
+      | (us_, vs_), ((I.SClo (s_, s'), s''), vs'_) ->
           ltSpineR (gq, d_, (us_, vs_), ((s_, I.comp s' s''), vs'_), sc, k)
-      | ( gq,
-          d_,
-          (us_, vs_),
-          ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')),
-          sc,
-          k ) ->
+      | (us_, vs_), ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
           leAtomicR (gq, d_, (us_, vs_), ((u'_, s1'), (v1', s2')), sc, k)
           || ltSpineR
                ( gq,
@@ -1047,16 +1027,11 @@ end) : CHECKING = struct
     and ltSpineL (gq, d_, d'_, usVs, (ss'_, vs'_), p_) =
       ltSpineLW (gq, d_, d'_, usVs, (ss'_, Whnf.whnf vs'_), p_)
 
-    and ltSpineLW = function
-      | gq, d_, d'_, usVs, ((I.Nil, _), _), _ -> true
-      | gq, d_, d'_, usVs, ((I.SClo (s_, s'), s''), vs'_), p_ ->
+    and ltSpineLW (gq, d_, d'_, usVs, a, p_) = match a with
+      | ((I.Nil, _), _) -> true
+      | ((I.SClo (s_, s'), s''), vs'_) ->
           ltSpineL (gq, d_, d'_, usVs, ((s_, I.comp s' s''), vs'_), p_)
-      | ( gq,
-          d_,
-          d'_,
-          usVs,
-          ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')),
-          p_ ) ->
+      | ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
           leAtomicL (gq, d_, d'_, usVs, ((u'_, s1'), (v1', s2')), p_)
           && ltSpineL
                ( gq,

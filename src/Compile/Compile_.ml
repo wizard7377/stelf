@@ -125,8 +125,8 @@ module MakeCompile
   (* collectHead (h, K, Vars, depth) = (K', Vars', replaced)
      adds to K and Vars as in collectExp and collectSpine
    *)
-  let collectHead = function
-    | (I.BVar k as h), s_, k_, vars_, depth ->
+  let collectHead (a, s_, k_, vars_, depth) = match a with
+    | (I.BVar k as h) ->
         begin if k > depth then
           begin if etaSpine (s_, depth) then
             begin if seen (k - depth, vars_) then
@@ -137,7 +137,7 @@ module MakeCompile
           end
         else (k_, vars_, false)
         end
-    | _, _, k_, vars_, depth -> (k_, vars_, false)
+    | _ -> (k_, vars_, false)
 
   (* collectExp (U, K, Vars, depth) = (K', Vars')
       collectSpine (S, K, Vars, depth) = (K', Vars')
@@ -191,24 +191,24 @@ module MakeCompile
     | (I.FgnConst _ as h) -> h
     | (I.Skonst k as h) -> h
 
-  let rec shiftExp = function
-    | I.Root (h, s_), depth, total ->
+  let rec shiftExp (a, depth, total) = match a with
+    | I.Root (h, s_) ->
         I.Root (shiftHead (h, depth, total), shiftSpine (s_, depth, total))
-    | I.Uni l_, _, _ -> I.Uni l_
-    | I.Lam (d_, u_), depth, total ->
+    | I.Uni l_ -> I.Uni l_
+    | I.Lam (d_, u_) ->
         I.Lam (shiftDec (d_, depth, total), shiftExp (u_, depth + 1, total))
-    | I.Pi ((d_, p_), u_), depth, total ->
+    | I.Pi ((d_, p_), u_) ->
         I.Pi ((shiftDec (d_, depth, total), p_), shiftExp (u_, depth + 1, total))
-    | I.FgnExp (csfe1, csfe2), depth, total ->
+    | I.FgnExp (csfe1, csfe2) ->
         I.FgnExpStd.Map.apply csfe1 csfe2 (function u_ ->
             shiftExp (Whnf.normalize (u_, I.id), depth, total))
   (* Tue Apr  2 12:10:24 2002 -fp -bp *)
   (* this is overkill and could be very expensive for deeply nested foreign exps *)
   (* calling normalize here because U may not be normal *)
 
-  and shiftSpine = function
-    | I.Nil, _, _ -> I.Nil
-    | I.App (u_, s_), depth, total ->
+  and shiftSpine (a, depth, total) = match a with
+    | I.Nil -> I.Nil
+    | I.App (u_, s_) ->
         I.App (shiftExp (u_, depth, total), shiftSpine (s_, depth, total))
 
   and shiftDec (I.Dec (x, v_), depth, total) =

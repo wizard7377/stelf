@@ -122,10 +122,10 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
       | M.Marg (M.Minus, _), MetaSyn.Bot -> true
       | _ -> false
 
-    let rec atxLookup = function
-      | I.Null, _ -> None
-      | I.Decl (m_, Bv), r -> atxLookup (m_, r)
-      | I.Decl (m_, (Ev (r', _, _) as e_)), r ->
+    let rec atxLookup (a, r) = match a with
+      | I.Null -> None
+      | I.Decl (m_, Bv) -> atxLookup (m_, r)
+      | I.Decl (m_, (Ev (r', _, _) as e_)) ->
           begin if r == r' then Some e_ else atxLookup (m_, r)
           end
 
@@ -210,14 +210,14 @@ end) : METAABSTRACT with module MetaSyn = MetaAbstract__0.MetaSyn = struct
               | u_, adepth' -> collectExp (lGO, g_, (u_, s), mode, adepth'))
             adepth
 
-    and collectSub = function
-      | _, _, 0, _, _, adepth -> adepth
-      | lG0, g_, lG', I.Shift k, mode, adepth ->
+    and collectSub (lG0, g_, lG', a, mode, b) = match lG', a, b with
+      | 0, _, adepth -> adepth
+      | lG', I.Shift k, adepth ->
           collectSub
             (lG0, g_, lG', I.Dot (I.Idx (k + 1), I.Shift (k + 1)), mode, adepth)
-      | lG0, g_, lG', I.Dot (I.Idx k, s), mode, ((a_, depth) as adepth) ->
+      | lG', I.Dot (I.Idx k, s), ((a_, depth) as adepth) ->
           collectSub (lG0, g_, lG' - 1, s, mode, adepth)
-      | lG0, g_, lG', I.Dot (I.Exp u_, s), mode, adepth ->
+      | lG', I.Dot (I.Exp u_, s), adepth ->
           collectSub
             ( lG0,
               g_,

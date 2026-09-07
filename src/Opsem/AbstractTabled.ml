@@ -188,9 +188,9 @@ end) : ABSTRACTTABLED = struct
       | I.Skonst _, I.Meta -> I.Meta
       | I.Skonst _, I.Maybe -> I.Meta
 
-    and occursInSpine = function
-      | _, I.Nil -> I.No
-      | k, I.App (u_, s_) -> ( or ) (occursInExp (k, u_), occursInSpine (k, s_))
+    and occursInSpine (k, a) = match a with
+      | I.Nil -> I.No
+      | I.App (u_, s_) -> ( or ) (occursInExp (k, u_), occursInSpine (k, s_))
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)

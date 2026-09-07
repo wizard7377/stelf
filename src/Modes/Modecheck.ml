@@ -213,13 +213,13 @@ module MakeModeCheck
     (* ------------------------------------------- strictness check *)
     (* This repeats some code from ../typecheck/strict.fun *)
     (* Interface here is somewhat different *)
-    let rec strictExpN = function
-      | d_, _, I.Uni _ -> false
-      | d_, p, I.Lam (_, u_) -> strictExpN (I.Decl (d_, Universal), p + 1, u_)
-      | d_, p, I.Pi ((d'_, _), u_) ->
+    let rec strictExpN (d_, p, a) = match a with
+      | I.Uni _ -> false
+      | I.Lam (_, u_) -> strictExpN (I.Decl (d_, Universal), p + 1, u_)
+      | I.Pi ((d'_, _), u_) ->
           strictDecN (d_, p, d'_)
           || strictExpN (I.Decl (d_, Universal), p + 1, u_)
-      | d_, p, I.Root (h_, s_) ->
+      | I.Root (h_, s_) ->
           begin match h_ with
           | I.BVar k' ->
               begin if k' = p then isPattern (d_, k', s_)
@@ -233,12 +233,12 @@ module MakeModeCheck
           | I.Def d -> strictSpineN (d_, p, s_)
           | I.FgnConst (cs, conDec) -> strictSpineN (d_, p, s_)
           end
-      | d_, p, I.FgnExp (cs, ops) -> false
+      | I.FgnExp (cs, ops) -> false
       (* this is a hack - until we investigate this further   -rv *)
 
-    and strictSpineN = function
-      | _, _, I.Nil -> false
-      | d_, p, I.App (u_, s_) ->
+    and strictSpineN (d_, p, a) = match a with
+      | I.Nil -> false
+      | I.App (u_, s_) ->
           strictExpN (d_, p, u_) || strictSpineN (d_, p, s_)
 
     and strictDecN (d_, p, I.Dec (_, v_)) = strictExpN (d_, p, v_)

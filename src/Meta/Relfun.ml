@@ -165,9 +165,9 @@ end) : RELFUN.RELFUN = struct
       | I.Def _ -> false
       | I.FgnConst _ -> false
 
-    and occursInSpine = function
-      | _, I.Nil -> false
-      | k, I.App (u_, s_) -> occursInExpN (k, u_) || occursInSpine (k, s_)
+    and occursInSpine (k, a) = match a with
+      | I.Nil -> false
+      | I.App (u_, s_) -> occursInExpN (k, u_) || occursInSpine (k, s_)
 
     and occursInDec (k, I.Dec (_, v_)) = occursInExpN (k, v_)
     and occursInDecP (k, (d_, _)) = occursInDec (k, d_)

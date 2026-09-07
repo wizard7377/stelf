@@ -153,17 +153,17 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
             (function u_, b_ -> b_ || occursInExp (r, (u_, s)))
             false
 
-    and occursInSpine = function
-      | _, (I.Nil, _) -> false
-      | r, (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp s' s))
-      | r, (I.App (u_, s_), s) ->
+    and occursInSpine (r, a) = match a with
+      | (I.Nil, _) -> false
+      | (I.SClo (s_, s'), s) -> occursInSpine (r, (s_, I.comp s' s))
+      | (I.App (u_, s_), s) ->
           occursInExp (r, (u_, s)) || occursInSpine (r, (s_, s))
 
     and occursInDec (r, (I.Dec (_, v_), s)) = occursInExp (r, (v_, s))
 
-    let rec nonIndex = function
-      | _, [] -> true
-      | r, I.EVar (_, _, v_, _) :: ge ->
+    let rec nonIndex (r, a) = match a with
+      | [] -> true
+      | I.EVar (_, _, v_, _) :: ge ->
           (not (occursInExp (r, (v_, I.id)))) && nonIndex (r, ge)
 
     let rec selectEVar = function
@@ -300,14 +300,9 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
           else acc
           end
 
-    and matchAtom = function
-      | 0, _, _, _, _, acc -> acc
-      | ( max,
-          depth,
-          ((I.Root (ha, _), _) as ps'),
-          (C.DProg (g_, dPool) as dp),
-          sc,
-          acc ) ->
+    and matchAtom (max, depth, b, c, sc, acc) = match max, b, c with
+      | 0, _, _ -> acc
+      | max, ((I.Root (ha, _), _) as ps'), (C.DProg (g_, dPool) as dp) ->
           let rec matchSig' (a, acc') = match a with
             | [] -> acc'
             | hc :: sgn' ->
@@ -325,9 +320,9 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
                 in
                 matchSig' (sgn', acc''')
           in
-          let rec matchDProg = function
-            | I.Null, _, acc' -> matchSig' (Index.lookup (cidFromHead ha), acc')
-            | I.Decl (dPool', C.Dec (r, s, ha')), n, acc' ->
+          let rec matchDProg (a, n, acc') = match a with
+            | I.Null -> matchSig' (Index.lookup (cidFromHead ha), acc')
+            | I.Decl (dPool', C.Dec (r, s, ha')) ->
                 begin if eqHead (ha, ha') then
                   let acc''' =
                     CsManager.trail (function () ->
@@ -344,7 +339,7 @@ end) : UNIQUESEARCH.UNIQUESEARCH = struct
                   matchDProg (dPool', n + 1, acc''')
                 else matchDProg (dPool', n + 1, acc')
                 end
-            | I.Decl (dPool', parameter_), n, acc' ->
+            | I.Decl (dPool', parameter_) ->
                 matchDProg (dPool', n + 1, acc')
           in
           matchDProg (dPool, 1, acc)

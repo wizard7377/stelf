@@ -171,9 +171,9 @@ module MakeNames
   (** checkFixity (name, cidOpt, n) = () if n = 0 (no requirement on arguments)
       or name is declared and has n exactly explicit arguments, raises Error
       (msg) otherwise *)
-  let checkFixity = function
-    | name, _, 0 -> ()
-    | name, cid, n ->
+  let checkFixity (name, cid, n) = match n with
+    | 0 -> ()
+    | n ->
         begin if checkArgNumber (IntSyn.sgnLookup cid, n) then ()
         else
           raise
@@ -1108,12 +1108,12 @@ module MakeNames
        Assigns names to dependent Pi prefix of V with i implicit abstractions
        Used for implicit EVar in constant declarations after abstraction.
     *)
-  let rec pisEName' = function
-    | g_, i, IntSyn.Pi ((d_, IntSyn.Maybe), v_) when i > 0 ->
+  let rec pisEName' (g_, i, a) = match a with
+    | IntSyn.Pi ((d_, IntSyn.Maybe), v_) when i > 0 ->
         let d'_ = decEName g_ d_ in
         IntSyn.Pi
           ((d'_, IntSyn.Maybe), pisEName' (IntSyn.Decl (g_, d'_), i - 1, v_))
-    | g_, _, v_ -> v_
+    | v_ -> v_
 
   (* | pisEName' (G, i, V) = V *)
   let pisEName (i, v_) = pisEName' (IntSyn.Null, i, v_)

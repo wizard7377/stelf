@@ -250,12 +250,12 @@ end) : MEMOTABLE = struct
       | I.ADec (_, d), I.ADec (_, d') -> d = d'
       | _, _ -> false
 
-    let rec equalCtx = function
-      | I.Null, s, I.Null, s' -> true
-      | I.Decl (g_, d_), s, I.Decl (g'_, d'_), s' ->
+    let rec equalCtx (a, s, b, s') = match a, b with
+      | I.Null, I.Null -> true
+      | I.Decl (g_, d_), I.Decl (g'_, d'_) ->
           Conv.convDec (d_, s) (d'_, s')
           && equalCtx (g_, I.dot1 s, g'_, I.dot1 s')
-      | _, _, _, _ -> false
+      | _, _ -> false
 
     let rec equalEqn = function
       | T.Trivial, T.Trivial -> true

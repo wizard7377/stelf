@@ -244,9 +244,9 @@ end) : ABSMACHINESBT = struct
 
     and matchAtom
         (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
-      let rec matchDProg = function
-        | I.Null, _ -> ( ! ) mSig (ps', dp, sc)
-        | I.Decl (dPool', C.Dec (r, s, ha')), k ->
+      let rec matchDProg (a, k) = match a with
+        | I.Null -> ( ! ) mSig (ps', dp, sc)
+        | I.Decl (dPool', C.Dec (r, s, ha')) ->
             begin if eqHead (ha, ha') then begin
               CsManager.trail (function () ->
                   rSolve
@@ -258,7 +258,7 @@ end) : ABSMACHINESBT = struct
             end
             else matchDProg (dPool', k + 1)
             end
-        | I.Decl (dPool', parameter_), k -> matchDProg (dPool', k + 1)
+        | I.Decl (dPool', parameter_) -> matchDProg (dPool', k + 1)
       in
       let rec matchConstraint (solve_fn, try_) =
         let succeeded =

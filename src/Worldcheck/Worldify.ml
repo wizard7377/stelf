@@ -376,12 +376,12 @@ end) : WORLDIFY = struct
       | cid :: [] -> Block (cid, I.constBlock cid)
       | cid :: cids -> Plus (Block (cid, I.constBlock cid), worldsToReg' cids)
 
-    let init = function
-      | _, ((I.Root _, s) as vs_) -> begin
+    let init (g_, a) = match a with
+      | ((I.Root _, s) as vs_) -> begin
           Trace.success ();
           raise (Success (Whnf.normalize vs_))
         end
-      | g_, ((I.Pi (((I.Dec (_, v1_) as d1_), _), v2_) as v_), s) -> begin
+      | ((I.Pi (((I.Dec (_, v1_) as d1_), _), v2_) as v_), s) -> begin
           Trace.unmatched g_ (subGoalToDList (Whnf.normalize (v_, s)));
           ()
         end

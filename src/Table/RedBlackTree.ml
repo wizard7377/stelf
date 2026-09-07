@@ -147,12 +147,12 @@ end) : TABLE with type key = RedBlackTree__0.key' = struct
             bbZip (z, Black (x, Red (y, c, d), b))
         | z, t -> (false, zip (z, t))
       in
-      let rec delMin = function
-        | Red (y, Empty, b), z -> (y, (false, zip (z, b)))
-        | Black (y, Empty, b), z -> (y, bbZip (z, b))
-        | Black (y, a, b), z -> delMin (a, Leftb (y, b, z))
-        | Red (y, a, b), z -> delMin (a, Leftr (y, b, z))
-        | Empty, _ -> raise Match
+      let rec delMin (c, z) = match c with
+        | Red (y, Empty, b) -> (y, (false, zip (z, b)))
+        | Black (y, Empty, b) -> (y, bbZip (z, b))
+        | Black (y, a, b) -> delMin (a, Leftb (y, b, z))
+        | Red (y, a, b) -> delMin (a, Leftr (y, b, z))
+        | Empty -> raise Match
       in
       let joinRed (a, b, z) = match a, b with
         | Empty, Empty -> zip (z, Empty)

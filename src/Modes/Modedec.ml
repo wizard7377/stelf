@@ -145,9 +145,9 @@ module MakeModeDec () : MODEDEC = struct
       | _ -> raise (Error "Not enough modes specified")
 
     let abstractMode (ms, mS) =
-      let rec abstractMode' = function
-        | I.Null, mS, _ -> mS
-        | I.Decl (ms, (marg, _)), mS, k ->
+      let rec abstractMode' (a, mS, k) = match a with
+        | I.Null -> mS
+        | I.Decl (ms, (marg, _)) ->
             abstractMode' (ms, M.Mapp (marg, mS), k + 1)
       in
       abstractMode' (ms, mS, 1)

@@ -267,10 +267,10 @@ end) : ASSIGN = struct
   let firstConstArg (IntSyn.Root ((IntSyn.Const c as h), s_) as a_) s =
     let i = IntSyn.conDecImp (IntSyn.sgnLookup c) in
     let rec constExp (u_, s) = constExpW (Whnf.whnf (u_, s))
-    and constExpW = function
-      | IntSyn.Lam (d_, u_), s -> constExp (u_, s)
-      | IntSyn.Root ((IntSyn.Const cid as h_), s_), s -> Some cid
-      | _, _ -> None
+    and constExpW (a, s) = match a with
+      | IntSyn.Lam (d_, u_) -> constExp (u_, s)
+      | IntSyn.Root ((IntSyn.Const cid as h_), s_) -> Some cid
+      | _ -> None
     in
     let rec ithElem (k, a) = match a with
       | (IntSyn.App (u_, s_), s) ->

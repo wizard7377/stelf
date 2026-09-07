@@ -580,9 +580,9 @@ end) : TABLED = struct
       (* trail to undo EVar instantiations *)
       (* return indicates failure *)
     in
-    let rec matchDProg = function
-      | I.Null, I.Null, _ -> matchSig (Index.lookup (cidFromHead ha))
-      | I.Decl (g_, _), I.Decl (dPool', C.Dec (r, s, ha')), k ->
+    let rec matchDProg (a, b, k) = match a, b with
+      | I.Null, I.Null -> matchSig (Index.lookup (cidFromHead ha))
+      | I.Decl (g_, _), I.Decl (dPool', C.Dec (r, s, ha')) ->
           begin if eqHead (ha, ha') then begin
             CsManager.trail (function () ->
                 rSolve
@@ -594,7 +594,7 @@ end) : TABLED = struct
           end
           else matchDProg (g_, dPool', k + 1)
           end
-      | I.Decl (g_, _), I.Decl (dPool', parameter_), k ->
+      | I.Decl (g_, _), I.Decl (dPool', parameter_) ->
           matchDProg (g_, dPool', k + 1)
       (* dynamic program exhausted, try signature *)
     in

@@ -63,23 +63,23 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
     let rec pruneExp (g_, us_, ss, rOccur) =
       pruneExpW (g_, Whnf.whnf us_, ss, rOccur)
 
-    and pruneExpW = function
-      | g_, ((Uni _ as u_), s), _, _ -> u_
-      | g_, (Pi ((d_, p_), v_), s), ss, rOccur ->
+    and pruneExpW (g_, a, ss, rOccur) = match a with
+      | ((Uni _ as u_), s) -> u_
+      | (Pi ((d_, p_), v_), s) ->
           Pi
             ( (pruneDec (g_, (d_, s), ss, rOccur), p_),
               pruneExp (Decl (g_, decSub d_ s), (v_, dot1 s), dot1 ss, rOccur)
             )
-      | g_, (Lam (d_, v_), s), ss, rOccur ->
+      | (Lam (d_, v_), s) ->
           Lam
             ( pruneDec (g_, (d_, s), ss, rOccur),
               pruneExp (Decl (g_, decSub d_ s), (v_, dot1 s), dot1 ss, rOccur)
             )
-      | g_, (Root (h_, s_), s), ss, rOccur ->
+      | (Root (h_, s_), s) ->
           Root
             ( pruneHead (g_, h_, ss, rOccur),
               pruneSpine (g_, (s_, s), ss, rOccur) )
-      | g_, ((EVar (r, gx, v_, cnstrs) as x_), s), ss, rOccur ->
+      | ((EVar (r, gx, v_, cnstrs) as x_), s) ->
           begin if rOccur == r then raise (Match "Variable occurrence")
           else
             begin if Whnf.isPatSub s then
@@ -100,15 +100,15 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
                 y_
             end
           end
-      | g_, (FgnExp (csfe_csid, csfe_ops), s), ss, rOccur ->
+      | (FgnExp (csfe_csid, csfe_ops), s) ->
           FgnExpStd.Map.apply csfe_csid csfe_ops (function u_ ->
               pruneExp (g_, (u_, s), ss, rOccur))
-      | g_, ((AVar _ as x_), s), ss, rOccur -> raise (Match "Left-over AVar")
+      | ((AVar _ as x_), s) -> raise (Match "Left-over AVar")
 
-    and pruneDec = function
-      | g_, (Dec (name, v_), s), ss, rOccur ->
+    and pruneDec (g_, a, ss, rOccur) = match a with
+      | (Dec (name, v_), s) ->
           Dec (name, pruneExp (g_, (v_, s), ss, rOccur))
-      | g_, (NDec x, _), _, _ -> NDec x
+      | (NDec x, _) -> NDec x
 
     and pruneSpine (g_, a, ss, rOccur) = match a with
       | (Nil, s) -> Nil

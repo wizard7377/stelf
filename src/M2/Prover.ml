@@ -100,9 +100,9 @@ end) : PROVER = struct
         solvedStates := []
       end
 
-    let rec contains = function
-      | [], _ -> true
-      | x :: l_, l'_ ->
+    let rec contains (a, l'_) = match a with
+      | [] -> true
+      | x :: l_ ->
           List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
 
     let equiv l1_ l2_ = contains (l1_, l2_) && contains (l2_, l1_)

@@ -813,8 +813,8 @@ struct
     and restrictions pos =
       let member x l = List.exists (function y -> x = y) l in
       let test l = restricted l && not (dead l) in
-      let rec reachable = function
-        | (Row row as pos) :: candidates, tried, closure ->
+      let rec reachable (a, tried, closure) = match a with
+        | (Row row as pos) :: candidates ->
             begin if member pos tried then
               reachable (candidates, tried, closure)
             else
@@ -835,7 +835,7 @@ struct
               in
               reachable (new_candidates @ candidates, pos :: tried, closure')
             end
-        | (Col col as pos) :: candidates, tried, closure ->
+        | (Col col as pos) :: candidates ->
             begin if member pos tried then
               reachable (candidates, tried, closure)
             else
@@ -856,7 +856,7 @@ struct
               in
               reachable (candidates' @ candidates, pos :: tried, closure')
             end
-        | [], _, closure -> closure
+        | [] -> closure
       in
       let restrExp pos =
         let l = label pos in

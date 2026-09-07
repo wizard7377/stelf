@@ -295,19 +295,17 @@ end) : SUBTREE = struct
       and genDec (label, b, I.Dec (n_, e1_), I.Dec (n'_, e2_)) =
         I.Dec (n_, genExp (label, b, e1_, e2_))
       in
-      let rec genTop = function
-        | label, (I.Root (h1_, s1_) as t_), (I.Root (h2_, s2_) as u_) ->
+      let rec genTop (label, a, b) = match a, b with
+        | (I.Root (h1_, s1_) as t_), (I.Root (h2_, s2_) as u_) ->
             begin if eqHeads (h1_, h2_) then
               I.Root (h1_, genSpine (label, Regular, s1_, s2_))
             else raise (Generalization "Top-level function symbol not shared")
             end
-        | ( label,
-            I.Lam ((I.Dec (n_, a1_) as d1_), t1_),
-            I.Lam ((I.Dec (_, a2_) as d2_), u2_) ) ->
+        | I.Lam ((I.Dec (n_, a1_) as d1_), t1_), I.Lam ((I.Dec (_, a2_) as d2_), u2_) ->
             I.Lam
               ( I.Dec (n_, genExp (label, Regular, a1_, a2_)),
                 genTop (label, t1_, u2_) )
-        | _, _, _ ->
+        | _, _ ->
             raise (Generalization "Top-level function symbol not shared")
       in
       try Some (genTop (label, t_, u_)) with Generalization msg -> None
@@ -398,9 +396,9 @@ end) : SUBTREE = struct
       | I.Pi ((d_, p_), u_), nsub ->
           I.Pi ((normalizeNDec (d_, nsub), p_), normalizeNExp (u_, nsub))
 
-    and normalizeNSpine = function
-      | I.Nil, _ -> I.Nil
-      | I.App (u_, s_), nsub ->
+    and normalizeNSpine (a, nsub) = match a with
+      | I.Nil -> I.Nil
+      | I.App (u_, s_) ->
           I.App (normalizeNExp (u_, nsub), normalizeNSpine (s_, nsub))
 
     and normalizeNDec (I.Dec (n_, e_), nsub) =

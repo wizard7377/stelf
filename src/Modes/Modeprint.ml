@@ -51,9 +51,9 @@ module MakeModePrint (Names : NAMES) (Formatter : FORMATTER) (Print : PRINT) :
       | d_, M.Marg (_, None) -> d_
 
     let makeSpine g_ =
-      let rec makeSpine' = function
-        | I.Null, _, s_ -> s_
-        | I.Decl (g_, _), k, s_ ->
+      let rec makeSpine' (a, k, s_) = match a with
+        | I.Null -> s_
+        | I.Decl (g_, _) ->
             makeSpine' (g_, k + 1, I.App (I.Root (I.BVar k, I.Nil), s_))
       in
       makeSpine' (g_, 1, I.Nil)

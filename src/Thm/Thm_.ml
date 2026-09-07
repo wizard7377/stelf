@@ -60,10 +60,10 @@ module Make_Thm
     let error r msg = raise (Error (Paths.wrap r msg))
 
     let unique (((a, p_), r), a_) =
-      let rec unique' = function
-        | I.Uni _, [], a_ -> a_
-        | I.Pi (_, v_), None :: p_, a_ -> unique' (v_, p_, a_)
-        | I.Pi (_, v_), Some x :: p_, a_ -> begin
+      let rec unique' (b, c, a_) = match b, c with
+        | I.Uni _, [] -> a_
+        | I.Pi (_, v_), None :: p_ -> unique' (v_, p_, a_)
+        | I.Pi (_, v_), Some x :: p_ -> begin
             List.app
               (function
                 | x' ->
@@ -74,15 +74,15 @@ module Make_Thm
               a_;
             unique' (v_, p_, x :: a_)
           end
-        | I.Uni _, _, _ ->
+        | I.Uni _, _ ->
             error
               r ("Too many arguments supplied to type family "
                 ^ Names.qidToString (Names.constQid a))
-        | I.Pi (_, v_), [], _ ->
+        | I.Pi (_, v_), [] ->
             error
               r ("Too few arguments supplied to type family "
                 ^ Names.qidToString (Names.constQid a))
-        | I.Root _, _, _ ->
+        | I.Root _, _ ->
             error
               r (("Constant " ^ Names.qidToString (Names.constQid a))
                 ^ " is an object, not a type family")
@@ -201,9 +201,9 @@ module Make_Thm
       | [] -> a_
       | p_ :: l_ -> argOrderMutual (l_, k, k (p_, a_))
 
-    let rec installOrder = function
-      | _, [], _ -> ()
-      | o_, ((a, p_) as aP) :: thmsLE, thmsLT ->
+    let rec installOrder (o_, b, thmsLT) = match b with
+      | [] -> ()
+      | ((a, p_) as aP) :: thmsLE ->
           let m'_ =
             argOrderMutual
               ( thmsLE,
@@ -253,9 +253,9 @@ module Make_Thm
       | L.Leq -> O.Leq (o_, o'_)
       | L.Eq -> O.Eq (o_, o'_)
 
-    let rec installPredicate = function
-      | _, [], _ -> ()
-      | L.RedOrder (pred_, o1_, o2_), ((a, p_) as aP) :: thmsLE, thmsLT ->
+    let rec installPredicate (b, c, thmsLT) = match b, c with
+      | _, [] -> ()
+      | L.RedOrder (pred_, o1_, o2_), ((a, p_) as aP) :: thmsLE ->
           let m'_ =
             argOrderMutual
               ( thmsLE,

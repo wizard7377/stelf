@@ -363,12 +363,9 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           (I.Dot (I.Idx k, _) as s),
           I.Decl (psi, F.Block (F.CtxBlock (l1, g_))) ) ->
           let F.Block (F.CtxBlock (l2, g'_)), w = F.lfctxLFDec psi' k in
-          let rec checkSub' = function
-            | (I.Null, w1), s1, I.Null, _ -> s1
-            | ( (I.Decl (g'_, I.Dec (_, v'_)), w1),
-                I.Dot (I.Idx k', s1),
-                I.Decl (g_, I.Dec (_, v_)),
-                m ) ->
+          let rec checkSub' (a, b, c, m) = match a, b, c with
+            | (I.Null, w1), s1, I.Null -> s1
+            | (I.Decl (g'_, I.Dec (_, v'_)), w1), I.Dot (I.Idx k', s1), I.Decl (g_, I.Dec (_, v_)) ->
                 begin if k' = m then
                   begin if Conv.conv (v'_, w1) (v_, s1) then
                     checkSub' ((g'_, I.comp w1 I.shift), s1, g_, m + 1)

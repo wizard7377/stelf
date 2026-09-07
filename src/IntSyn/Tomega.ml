@@ -457,9 +457,9 @@ module MakeTomega (Whnf : WHNF) (Conv : CONV) : TOMEGA = struct
       | x, [] -> false
       | x, y :: w2_ -> x = y || exists x w2_
 
-    let rec subset = function
-      | [], _ -> true
-      | x :: w1_, w2_ -> exists x w2_ && subset (w1_, w2_)
+    let rec subset (a, w2_) = match a with
+      | [] -> true
+      | x :: w1_ -> exists x w2_ && subset (w1_, w2_)
 
     let eqWorlds (Worlds w1_) (Worlds w2_) =
       subset (w1_, w2_) && subset (w2_, w1_)

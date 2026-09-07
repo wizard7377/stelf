@@ -189,24 +189,19 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     and lt (g_, k, (us_, vs_), (us', vs'_), sc, ops) =
       ltW (g_, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ops)
 
-    and ltW = function
-      | g_, k, (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_), sc, ops ->
+    and ltW (g_, k, a, b, sc, ops) = match a, b with
+      | (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_) ->
           ltSpine
             (g_, k, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, ops)
-      | g_, k, (us_, vs_), ((I.Root (I.BVar n, s'_), s'), vs'_), sc, ops ->
+      | (us_, vs_), ((I.Root (I.BVar n, s'_), s'), vs'_) ->
           begin if n <= k then
             let (I.Dec (_, v'_)) = I.ctxDec g_ n in
             ltSpine (g_, k, (us_, vs_), ((s'_, s'), (v'_, I.id)), sc, ops)
           else ops
           end
-      | g_, _, _, ((I.EVar _, _), _), _, ops -> ops
-      | ( g_,
-          k,
-          ((u_, s1), (v_, s2)),
-          ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ),
-          sc,
-          ops ) ->
+      | _, ((I.EVar _, _), _) -> ops
+      | ((u_, s1), (v_, s2)), ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
           begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
             let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
             let sc' ops' = set_parameter (g_, x_, k, sc, ops') in
@@ -234,16 +229,11 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
     and ltSpine (g_, k, (us_, vs_), (ss'_, vs'_), sc, ops) =
       ltSpineW (g_, k, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, ops)
 
-    and ltSpineW = function
-      | g_, k, (us_, vs_), ((I.Nil, _), _), _, ops -> ops
-      | g_, k, (us_, vs_), ((I.SClo (s_, s'), s''), vs'_), sc, ops ->
+    and ltSpineW (g_, k, a, b, sc, ops) = match a, b with
+      | (us_, vs_), ((I.Nil, _), _) -> ops
+      | (us_, vs_), ((I.SClo (s_, s'), s''), vs'_) ->
           ltSpineW (g_, k, (us_, vs_), ((s_, I.comp s' s''), vs'_), sc, ops)
-      | ( g_,
-          k,
-          (us_, vs_),
-          ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')),
-          sc,
-          ops ) ->
+      | (us_, vs_), ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
           let ops' =
             le (g_, k, (us_, vs_), ((u'_, s1'), (v1', s2')), sc, ops)
           in

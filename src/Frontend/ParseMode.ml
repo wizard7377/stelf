@@ -142,8 +142,8 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
       | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected mode or `.', found " ^ L.toString t)
 
-    let rec parseFull = function
-      | LS.Cons (((L.Id (c, id), r0) as t0), s'), r1 ->
+    let rec parseFull (a, r1) = match a with
+      | LS.Cons (((L.Id (c, id), r0) as t0), s') ->
           begin match LS.expose s' with
           | LS.Cons ((L.Lbrace, r), s'') ->
               let mId = splitModeId (r0, id) in
@@ -165,20 +165,20 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
               in
               (E.Full.mroot t' (P.join r r1), f')
           end
-      | LS.Cons ((L.Lparen, r0), s'), r1 ->
+      | LS.Cons ((L.Lparen, r0), s') ->
           let t', f' = ParseTerm.parseTerm' (LS.expose s') in
           let f'', r' = stripRParen f' in
           (E.Full.mroot t' (P.join r' r1), f'')
-      | LS.Cons ((t, r), s'), _ ->
+      | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected mode or identifier, found " ^ L.toString t)
 
-    let parseMode2 = function
-      | lexid, (LS.Cons ((L.Lbrace, r), s') as bs_), r1 ->
+    let parseMode2 (lexid, f, r1) = match lexid, f with
+      | lexid, (LS.Cons ((L.Lbrace, r), s') as bs_) ->
           let t', f' =
             parseFull (LS.Cons (lexid, LS.delay (function () -> bs_)), r1)
           in
           (E.Full.toModedec t', f')
-      | (L.Id (_, name), r), f, _ ->
+      | (L.Id (_, name), r), f ->
           let mS', f' = parseShortSpine f in
           (E.Short.toModedec (E.Short.mroot ([], name, r, mS')), f')
 

@@ -147,15 +147,15 @@ module Make (Cst : Cst.CST) = struct
     | I.Dec (Some pname, _) -> pname
     | _ -> string_of_int i
 
-  let proj_name = function
-    | g_, I.Proj (I.Bidx k, i) -> (
+  let proj_name (g_, a) = match a with
+    | I.Proj (I.Bidx k, i) -> (
         match I.ctxLookup g_ k with
         | I.BDec (Some bname, (cid, _)) -> bname ^ "_" ^ parm_name (cid, i)
         | I.BDec (None, (cid, _)) -> "_" ^ parm_name (cid, i)
         | _ -> "_" ^ string_of_int i)
-    | _, I.Proj (I.LVar (_, _, (cid, _)), i) -> "_" ^ parm_name (cid, i)
-    | _, I.Proj (I.Inst _, _) -> "*"
-    | _, _ -> "*"
+    | I.Proj (I.LVar (_, _, (cid, _)), i) -> "_" ^ parm_name (cid, i)
+    | I.Proj (I.Inst _, _) -> "*"
+    | _ -> "*"
 
   (* A variable's node has to match the lexical class of its name, or the
      printer is forced to escape it as [%val] and it comes back as a constant
