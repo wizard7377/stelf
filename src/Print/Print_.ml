@@ -1,7 +1,7 @@
 open! Global.Global_
 open! Intsyn.Lambda_
 open! Names.Names_
-open! Formatter__Formatter_
+open! Formatter.Formatter_
 
 (* # 1 "src/print/Print_.sig.ml" *)
 

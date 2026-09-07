@@ -1,4 +1,4 @@
-open! Formatter__Formatter_
+open! Formatter.Formatter_
 open! Names.Names_
 open! Print.Print_
 include module type of TOMEGAPRINT

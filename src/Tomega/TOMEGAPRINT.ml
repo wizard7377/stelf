@@ -1,5 +1,5 @@
 open! Intsyn.Lambda_
-open! Formatter__Formatter_
+open! Formatter.Formatter_
 
 (* # 1 "src/tomega/Tomegaprint.sig.ml" *)
 open! Basis

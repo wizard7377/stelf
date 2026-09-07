@@ -2,7 +2,7 @@ open! Global.Global_
 open! Table
 open! Intsyn.Lambda_
 open! Names.Names_
-open! Formatter__Formatter_
+open! Formatter.Formatter_
 open! Print.Print_
 open! Timing
 

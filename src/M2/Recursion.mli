@@ -2,7 +2,7 @@ open! Global.Global_
 open! Intsyn.Lambda_
 open! Names.Names_
 open! Modes
-open! Formatter__Formatter_
+open! Formatter.Formatter_
 open! Print.Print_
 include module type of RECURSION
 

@@ -75,6 +75,34 @@ fatal (`dune-workspace`'s `-warn-error` list does not exempt it). A new dead
 `open!` is a build error. `docs/warning66-baseline.txt` is empty, following the
 `docs/warning5-baseline.txt` convention: no occurrence is accepted.
 
+## `open! Formatter__Formatter_`
+
+45 of these survived the sweep. `Formatter__Formatter_` is dune's mangled
+internal name for the `formatter` library's `Formatter_` module — a fingerprint
+of `wrapped true` being retrofitted onto code written for `wrapped false`. The
+public path is `Formatter.Formatter_`.
+
+**34 were rewritten; 11 cannot be.** `Print.Print_` exports a submodule named
+`Formatter` (`src/Print/Print_.ml:48`), so in any file whose prelude opens
+`Print.Print_` first, the bare name `Formatter` no longer refers to the library
+alias and `Formatter.Formatter_` is unbound. The 11 are in `src/Compile/`,
+`src/Terminate/` and `src/Prover/`:
+
+```
+src/Compile/Cprint.ml      src/Compile/Cprint.mli    src/Compile/Compile_.ml
+src/Compile/Subtree.ml     src/Compile/Subtree.mli   src/Terminate/Checking.ml
+src/Terminate/Checking.mli src/Terminate/Reduces.ml  src/Terminate/Reduces.mli
+src/Prover/Interactive.ml  src/Prover/Prover_.ml
+```
+
+Reordering the prelude would unshadow them, but open order is exactly what
+warning 66 cannot vouch for, so they keep the mangled name. Two `module Formatter
+= Formatter__Formatter_.Formatter` aliases (`src/M2/M2_.ml:52`,
+`src/Terminate/Terminate_.ml:32`) fail for the same reason and are also left.
+
+This is a small worked instance of the deferred "qualify the survivors" problem:
+the answer is not derivable from the text, only from resolution.
+
 ## Out of scope
 
 - `test/Print/dune` sets `(:standard -w -A)`, so its 40 `open!` lines are

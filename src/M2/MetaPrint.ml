@@ -1,6 +1,6 @@
 open! Global.Global_
 open! Intsyn.Lambda_
-open! Formatter__Formatter_
+open! Formatter.Formatter_
 open! Print
 open! Print.Print_
 

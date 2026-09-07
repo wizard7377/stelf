@@ -1,4 +1,4 @@
-open! Formatter__Formatter_
+open! Formatter.Formatter_
 include module type of STATE
 
 module State (State__0 : sig

@@ -1,7 +1,7 @@
 open! Global.Global_
 open! Intsyn
 open! Intsyn.Lambda_
-open! Formatter__Formatter_
+open! Formatter.Formatter_
 open! Names.Names_
 open! Print.Print_
 
