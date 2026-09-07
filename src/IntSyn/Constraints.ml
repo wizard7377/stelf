@@ -1,14 +1,6 @@
-open! Basis
-open! Global
-open! Global.Global_
-open! Trail
-open! Trail.Trail_
-open! Table
-open! Table.Table_
 
 (* # 1 "src/lambda/Constraints.sig.ml" *)
 
-open! Basis
 (** Constraint simplification and reporting helpers for LF terms. *)
 
 open Intsyn_

@@ -1,13 +1,8 @@
-open! Basis
-open! Intsyn
 open! Intsyn.Lambda_
 open! Table
-open! Table.Table_
-open! Global
 open! Global.Global_
 
 (* # 1 "src/index/Index_.sig.ml" *)
-open! Basis
 
 (* Indexing *)
 (* Author: Carsten Schuermann *)
@@ -126,7 +121,6 @@ end
 (* functor Index *)
 
 (* # 1 "src/index/Index_.sml.ml" *)
-open! Basis
 module Index = MakeIndex (Global) (Queue)
 include Index
 (*! structure IntSyn' = IntSyn !*)

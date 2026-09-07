@@ -1,9 +1,3 @@
-open! Basis
-open! Table
-open! Table.Table_
-open! Global
-open! Global.Global_
-open! Intsyn
 open! Intsyn.Lambda_
 
 (* # 1 "src/names/Names_.sig.ml" *)

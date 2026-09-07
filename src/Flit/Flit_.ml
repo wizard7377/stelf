@@ -1,21 +1,5 @@
-open! Basis
-open! Global
-open! Global.Global_
-open! Table
-open! Table.Table_
-open! Intsyn
-open! Intsyn.Lambda_
-open! Names
-open! Names.Names_
-open! Index
-open! Index.Index_
-open! Paths
-open! Paths.Paths_
-open! Print
-open! Print.Print_
 
 (* # 1 "src/flit/Flit_.sig.ml" *)
-open! Basis
 
 (* Flit DAG generator *)
 
@@ -25,7 +9,6 @@ include FLIT
 (* signature FLIT *)
 
 (* # 1 "src/flit/Flit_.fun.ml" *)
-open! Basis
 (* Commented out: PACK_WORD not available in basis library
 (* Flit DAG generator *);;
 (* Author: Roberto Virga *);;
@@ -1248,7 +1231,6 @@ module Flit(Flit__0: sig
 *)
 
 (* # 1 "src/flit/Flit_.sml.ml" *)
-open! Basis
 (* Commented out: PACK_WORD not available
 open! Basis;;
 module Flit = (Flit)(struct

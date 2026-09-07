@@ -1,13 +1,5 @@
-open! Basis
-open! Global
-open! Global.Global_
-open! Trail
-open! Trail.Trail_
-open! Table
-open! Table.Table_
 
 (* # 1 "src/lambda/Conv.sig.ml" *)
-open! Basis
 (** Definitional convertibility modulo beta/eta. *)
 
 open Intsyn_
@@ -19,7 +11,6 @@ include CONV
 
 (* # 1 "src/lambda/Conv.fun.ml" *)
 open! Whnf
-open! Basis
 
 (* Convertibility Modulo Beta and Eta *)
 (* Author: Frank Pfenning, Carsten Schuermann *)

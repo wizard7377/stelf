@@ -1,41 +1,23 @@
-open! Basis
-open! Global
 open! Global.Global_
-open! Intsyn
 open! Intsyn.Lambda_
-open! Names
 open! Names.Names_
 open! Paths
 open! Paths.Paths_
 open! Table
-open! Table.Table_
-open! Formatter
-open! Formatter__Formatter_
-open! Print
 open! Print.Print_
-open! Subordinate
 open! Subordinate
 open! Modes
 open! Modes.Modes_
-open! Thm
-open! Thm.Thm_
 open! Terminate
-open! Terminate.Terminate_
-open! Index
 open! Index.Index_
-open! Solvers
 open! Solvers.Solvers_
 open! Worldcheck
 open! Worldcheck.Worldcheck_
-open! Typecheck
 open! Typecheck.Typecheck_
 open! Timing
-open! Timing.Timing_
-open! Unique
 open! Unique.Unique_
 
 (* # 1 "src/cover/Cover_.sig.ml" *)
-open! Basis
 
 (* Coverage Checking *)
 
@@ -2401,7 +2383,6 @@ end
 (* functor Cover *)
 
 (* # 1 "src/cover/Cover_.sml.ml" *)
-open! Basis
 
 module Cover =
   MakeCover (Global) (Whnf) (Conv) (Abstract) (UnifyTrail) (Constraints)

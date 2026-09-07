@@ -1,10 +1,5 @@
-open! Basis
-open! Global
-open! Global.Global_
 open! Trail
 open! Trail.Trail_
-open! Table
-open! Table.Table_
 
 (* # 1 "src/lambda/Lambda_.sig.ml" *)
 
@@ -13,7 +8,6 @@ open! Table.Table_
 (* # 1 "src/lambda/Lambda_.fun.ml" *)
 
 (* # 1 "src/lambda/Lambda_.sml.ml" *)
-open! Basis
 include Fgnopn
 include Fgnopntable
 include Order

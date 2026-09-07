@@ -27,7 +27,7 @@
   unique
   basis)
  (flags
-  (:standard -w -A+5))
+  (:standard -w -A+5+66))
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show)))

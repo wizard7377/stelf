@@ -1,9 +1,6 @@
 open! Basis
-open! Table
 open! Table.Table_
-open! Global
 open! Global.Global_
-open! Intsyn
 open! Intsyn.Lambda_
 include module type of NAMES
 

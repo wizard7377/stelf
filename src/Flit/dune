@@ -8,7 +8,7 @@
  (modules FlitOldSmlnjPack Flit_ FLIT)
  (libraries display global table intsyn names index paths print basis)
  (flags
-  (:standard -w -A+5))
+  (:standard -w -A+5+66))
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

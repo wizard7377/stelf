@@ -1,10 +1,4 @@
-open! Basis
-open! Intsyn
 open! Intsyn.Lambda_
-open! Table
-open! Table.Table_
-open! Global
-open! Global.Global_
 
 (* # 1 "src/index/Index_.sig.ml" *)
 open! Basis

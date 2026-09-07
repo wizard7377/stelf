@@ -1,13 +1,5 @@
-open! Basis
-open! Global
-open! Global.Global_
-open! Trail
-open! Trail.Trail_
-open! Table
-open! Table.Table_
 
 (* # 1 "src/lambda/Abstract.sig.ml" *)
-open! Basis
 open Intsyn_
 open Tomega
 

@@ -1,20 +1,13 @@
-open! Basis
-open! Global
 open! Global.Global_
-open! Intsyn
 open! Intsyn.Lambda_
-open! Names
 open! Names.Names_
-open! Formatter
 open! Formatter__Formatter_
 open! Modes
 open! Modes__Modes_
-open! Paths
 open! Paths.Paths_
 open! Tabling
 
 (* # 1 "src/thm/Thm_.sig.ml" *)
-open! Basis
 open Thmsyn
 open Thmprint
 
@@ -552,7 +545,6 @@ end
 (* functor Thm *)
 
 (* # 1 "src/thm/Thm_.sml.ml" *)
-open! Basis
 
 module ThmSyn = ThmSyn (struct
   (*! structure IntSyn = IntSyn !*)

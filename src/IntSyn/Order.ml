@@ -1,13 +1,6 @@
-open! Basis
-open! Global
-open! Global.Global_
-open! Trail
-open! Trail.Trail_
-open! Table
 open! Table.Table_
 
 (* # 1 "src/lambda/Order.sig.ml" *)
-open! Basis
 (** Termination and reduction order declarations for LF constants. *)
 
 open Intsyn_

@@ -8,7 +8,7 @@
  (modules Syntax Strict Sgn Reductio Compress_ Rep COMPRESS SGN)
  (libraries display global intsyn basis)
  (flags
-  (:standard -w -A+5))
+  (:standard -w -A+5+66))
  (wrapped true)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord)))

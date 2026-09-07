@@ -1,15 +1,8 @@
-open! Basis
-open! Intsyn
 open! Intsyn.Lambda_
-open! Print
 open! Print.Print_
-open! Paths
-open! Paths.Paths_
-open! Names
 open! Names.Names_
 
 (* # 1 "src/typecheck/Typecheck_.sig.ml" *)
-open! Basis
 
 (* Type Checking *)
 
@@ -359,7 +352,6 @@ end
 (* functor TypeCheck *)
 
 (* # 1 "src/typecheck/Typecheck_.sml.ml" *)
-open! Basis
 
 module type STRICT = Strict.STRICT
 

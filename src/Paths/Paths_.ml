@@ -1,13 +1,5 @@
-open! Basis
-open! Intsyn
-open! Intsyn.Lambda_
-open! Global
-open! Global.Global_
-open! Table
-open! Table.Table_
 
 (* # 1 "src/paths/Paths_.sig.ml" *)
-open! Basis
 
 (* Paths, Occurrences, and Error Locations *)
 
@@ -311,7 +303,6 @@ module Paths = MakePaths (struct end)
 include Paths
 
 (* # 1 "src/paths/Paths_.sml.ml" *)
-open! Basis
 (* Now in Paths.fun *)
 (*
 structure Paths = Paths ();

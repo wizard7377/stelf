@@ -1,17 +1,8 @@
-open! Basis
-open! Global
-open! Global.Global_
-open! Intsyn
 open! Intsyn.Lambda_
-open! Names
 open! Names.Names_
 open! Table
-open! Table.Table_
-open! Msg
 open! Msg.Msg_
-open! Print
 open! Print.Print_
-open! Debug
 open ReconConDec
 open ReconMode
 open ReconModule
