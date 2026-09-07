@@ -216,7 +216,7 @@ end) : Cs.CS = struct
             begin if Whnf.isPatSub s then
               let ss = Whnf.invert s in
               let rhs = toFgn sum in
-              begin if Unify.invertible (g, (rhs, id), ss, r) then
+              begin if Unify.invertible g (rhs, id) ss r then
                 Some (g, lhs, rhs, ss)
               else None
               end

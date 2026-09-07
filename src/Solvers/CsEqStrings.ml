@@ -209,7 +209,7 @@ end) : Cs.CS = struct
         | ( Exp ((EVar (r, _, _, _) as u1), s) :: al1,
             Exp ((Root (FVar _, _) as u2), _) :: al2 ) ->
             let ss = Whnf.invert s in
-            begin if Unify.invertible (g, (u2, id), ss, r) then
+            begin if Unify.invertible g (u2, id) ss r then
               begin match unifyRigid' (al1, al2) with
               | MultAssign l -> MultAssign ((g, u1, u2, ss) :: l)
               | Failure -> Failure
@@ -219,7 +219,7 @@ end) : Cs.CS = struct
         | ( Exp ((Root (FVar _, _) as u1), _) :: al1,
             Exp ((EVar (r, _, _, _) as u2), s) :: al2 ) ->
             let ss = Whnf.invert s in
-            begin if Unify.invertible (g, (u1, id), ss, r) then
+            begin if Unify.invertible g (u1, id) ss r then
               begin match unifyRigid' (al1, al2) with
               | MultAssign l -> MultAssign ((g, u2, u1, ss) :: l)
               | Failure -> Failure
@@ -343,7 +343,7 @@ end) : Cs.CS = struct
       | Exp ((EVar (r, _, _, _) as u), s) :: [], _ ->
           begin if Whnf.isPatSub s then
             let ss = Whnf.invert s in
-            begin if Unify.invertible (g, (u2, id), ss, r) then
+            begin if Unify.invertible g (u2, id) ss r then
               MultAssign [ (g, u, u2, ss) ]
             else MultDelay ([ u1; u2 ], cnstr)
             end
@@ -352,7 +352,7 @@ end) : Cs.CS = struct
       | _, Exp ((EVar (r, _, _, _) as u), s) :: [] ->
           begin if Whnf.isPatSub s then
             let ss = Whnf.invert s in
-            begin if Unify.invertible (g, (u1, id), ss, r) then
+            begin if Unify.invertible g (u1, id) ss r then
               MultAssign [ (g, u, u1, ss) ]
             else MultDelay ([ u1; u2 ], cnstr)
             end

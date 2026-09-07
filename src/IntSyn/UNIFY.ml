@@ -47,10 +47,11 @@ module type UNIFY = sig
 
   (* raises Unify *)
   val invertible :
-    IntSyn.dctx * IntSyn.eclo * IntSyn.sub * IntSyn.exp option ref -> bool
+    IntSyn.dctx -> IntSyn.eclo -> IntSyn.sub -> IntSyn.exp option ref -> bool
 
   val invertSub :
-    IntSyn.dctx * IntSyn.sub * IntSyn.sub * IntSyn.exp option ref -> IntSyn.sub
+    IntSyn.dctx -> IntSyn.sub -> IntSyn.sub -> IntSyn.exp option ref ->
+    IntSyn.sub
 
   (* unifiable (G, Us,Us') will instantiate EVars as an effect *)
   val unifiable : IntSyn.dctx -> IntSyn.eclo -> IntSyn.eclo -> bool

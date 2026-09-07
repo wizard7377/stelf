@@ -83,7 +83,7 @@ module MakeMatch (Whnf : WHNF) (Unify : UNIFY) (Trail : TRAIL) : MATCH = struct
                   (Match "Invertible Substitution does not necessarily exist\n")
               end
             else
-              try EClo (x, Unify.invertSub (g, s, ss, rOccur))
+              try EClo (x, Unify.invertSub g s ss rOccur)
               with NotInvertible ->
                 let gy = pruneCtx (ss, g, rOccur) in
                 let v' = pruneExp (g, (v, s), ss, rOccur) in

@@ -256,7 +256,7 @@ end) : CS_EQ_FIELD with type Field.number = CSEqField__0.Field.number = struct
             begin if Whnf.isPatSub s then
               let ss = Whnf.invert s in
               let rhs = toFgn (timesSum (Sum (-inverse n, []), sum)) in
-              begin if Unify.invertible (g, (rhs, id), ss, r) then
+              begin if Unify.invertible g (rhs, id) ss r then
                 Some (g, lhs, rhs, ss)
               else None
               end

@@ -231,7 +231,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
               begin if Whnf.isId w then EClo (x, comp s ss)
               else raise NotInvertible
               end
-            else EClo (x, invertSub (g, s, ss, rOccur))
+            else EClo (x, invertSub g s ss rOccur)
             end
           end
       | (FgnExp (csfe_csid, csfe_ops), s) ->
@@ -261,7 +261,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
           begin match blockSub b ss with Bidx k' -> Proj (Bidx k', i)
           end
       | (Proj (LVar (r, sk, (l, t)), i) as h) -> begin
-          ignore (invertSub (g, t, id, rOccur));
+          ignore (invertSub g t id rOccur);
           h
         end
       | (Skonst _ as h) -> h
@@ -272,21 +272,21 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
         end
       | (FgnConst _ as h) -> h
 
-    and invertSub (g, a, ss, rOccur) = match a with
+    and invertSub g a ss rOccur = match a with
       | (Shift n as s) ->
           begin if n < ctxLength g then
-            invertSub (g, Dot (Idx (n + 1), Shift (n + 1)), ss, rOccur)
+            invertSub g (Dot (Idx (n + 1), Shift (n + 1))) ss rOccur
           else comp s ss
           end
       | Dot (Idx n, s') ->
           begin match bvarSub n ss with
           | Undef -> raise NotInvertible
-          | ft -> Dot (ft, invertSub (g, s', ss, rOccur))
+          | ft -> Dot (ft, invertSub g s' ss rOccur)
           end
       | Dot (Exp u, s') ->
           Dot
             ( Exp (invertExp (g, (u, id), ss, rOccur)),
-              invertSub (g, s', ss, rOccur) )
+              invertSub g s' ss rOccur )
 
     let rec pruneExp (g, us, ss, rOccur) =
       pruneExpW (g, Whnf.whnf us, ss, rOccur)
@@ -323,7 +323,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
                 EClo (yw, comp s ss)
               end
             else
-              try EClo (x, invertSub (g, s, ss, rOccur))
+              try EClo (x, invertSub g s ss rOccur)
               with NotInvertible ->
                 let gy = pruneCtx (ss, g, rOccur) in
                 let v' = pruneExp (g, (v, s), ss, rOccur) in
@@ -1016,7 +1016,7 @@ module MakeUnify (Whnf : WHNF) (Trail : TRAIL) : UNIFY = struct
   let unifySub = unifySub
   let unifyBlock = unifyBlock
 
-  let invertible (g, us, ss, rOccur) =
+  let invertible g us ss rOccur =
     try
       begin
         ignore (invertExp (g, us, ss, rOccur));
