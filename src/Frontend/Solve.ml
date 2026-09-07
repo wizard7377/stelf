@@ -301,11 +301,12 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
           Display.chatter_s 2 " OK\n";
           try
             begin
-              Timers.time Timers.ptrecon PtRecon.solve
-                ( skel,
-                  (g, IntSyn.id),
-                  CompSyn.DProg (IntSyn.Null, IntSyn.Null),
-                  function skel, m -> raise (Solution m) );
+              Timers.time Timers.ptrecon
+                (fun () ->
+                  PtRecon.solve skel g IntSyn.id
+                    (CompSyn.DProg (IntSyn.Null, IntSyn.Null))
+                    (function skel, m -> raise (Solution m)))
+                ();
               raise (AbortQuery "Proof reconstruction for %solve failed")
             end
           with Solution m -> finish m
@@ -462,17 +463,18 @@ end) : SOLVE with module ExtQuery = Solve__0.ReconQuery = struct
                 end
                 else ()
                 end;
-                Timers.time Timers.ptrecon PtRecon.solve
-                  ( m,
-                    (g, IntSyn.id),
-                    CompSyn.DProg (IntSyn.Null, IntSyn.Null),
-                    function
-                    | pskel, m -> begin
-                        Display.chatter_s 3
-                          (Timers.time Timers.printing evarInstToString
-                             [ (m, name) ]
-                          ^ "\n")
-                      end )
+                Timers.time Timers.ptrecon
+                  (fun () ->
+                    PtRecon.solve m g IntSyn.id
+                      (CompSyn.DProg (IntSyn.Null, IntSyn.Null))
+                      (function
+                      | pskel, m -> begin
+                          Display.chatter_s 3
+                            (Timers.time Timers.printing evarInstToString
+                               [ (m, name) ]
+                            ^ "\n")
+                        end))
+                  ()
               end
             end;
             begin
@@ -592,17 +594,18 @@ or  %querytabled <expected solutions> <max stages tried>  X : A
               | Some name -> begin
                   Display.debug
                     (Display.string (CompSyn.pskeletonToString o ^ "\n"));
-                  Timers.time Timers.ptrecon PtRecon.solve
-                    ( o,
-                      (g, IntSyn.id),
-                      CompSyn.DProg (IntSyn.Null, IntSyn.Null),
-                      function
-                      | o, m -> begin
-                          Display.chatter_s 3
-                            (Timers.time Timers.printing evarInstToString
-                               [ (m, name) ]
-                            ^ "\n")
-                        end )
+                  Timers.time Timers.ptrecon
+                    (fun () ->
+                      PtRecon.solve o g IntSyn.id
+                        (CompSyn.DProg (IntSyn.Null, IntSyn.Null))
+                        (function
+                        | o, m -> begin
+                            Display.chatter_s 3
+                              (Timers.time Timers.printing evarInstToString
+                                 [ (m, name) ]
+                              ^ "\n")
+                          end))
+                    ()
                 end
               end;
               begin

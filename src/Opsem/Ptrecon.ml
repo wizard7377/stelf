@@ -309,7 +309,7 @@ end) : PTRECON = struct
      This first tries the local assumptions in dp then
      the static signature.
   *)
-  let solve (o, (g, s), (C.DProg (g_, dPool) as dp), sc) =
+  let solve o g s (C.DProg (g_, dPool) as dp) sc =
     try solve' (o, (g, s), dp, sc) with Error msg -> print msg
 end
 (*! sharing Names.IntSyn = IntSyn' !*)

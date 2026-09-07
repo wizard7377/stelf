@@ -17,9 +17,10 @@ module type PTRECON = sig
   exception Error of string
 
   val solve :
-    CompSyn.pskeleton
-    * (CompSyn.goal * IntSyn.sub)
-    * CompSyn.dProg
-    * (CompSyn.pskeleton * IntSyn.exp -> unit) ->
+    CompSyn.pskeleton ->
+    CompSyn.goal ->
+    IntSyn.sub ->
+    CompSyn.dProg ->
+    (CompSyn.pskeleton * IntSyn.exp -> unit) ->
     unit
 end
