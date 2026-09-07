@@ -73,30 +73,30 @@ end) : SPLIT with module State = Split__0.State' = struct
 
     let rec weaken a1 b1 = match a1, b1 with
       | I.Null, a -> I.id
-      | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
-          let w' = weaken g'_ a in
-          begin if Subordinate.belowEq (I.targetFam v_) a then I.dot1 w'
+      | I.Decl (g', (I.Dec (name, v) as d)), a ->
+          let w' = weaken g' a in
+          begin if Subordinate.belowEq (I.targetFam v) a then I.dot1 w'
           else I.comp w' I.shift
           end
 
-    let createEVar (g_, v_) =
-      let w = weaken g_ (I.targetFam v_) in
+    let createEVar (g, v) =
+      let w = weaken g (I.targetFam v) in
       let iw = Whnf.invert w in
-      let g'_ = Whnf.strengthen iw g_ in
-      let x'_ = I.newEVar g'_ (I.EClo (v_, iw)) in
-      let x_ = I.EClo (x'_, w) in
-      x_
+      let g' = Whnf.strengthen iw g in
+      let x' = I.newEVar g' (I.EClo (v, iw)) in
+      let x = I.EClo (x', w) in
+      x
 
-    let rec instEVars (vs_, p, xsRev) = instEVarsW (Whnf.whnf vs_, p, xsRev)
+    let rec instEVars (vs, p, xsRev) = instEVarsW (Whnf.whnf vs, p, xsRev)
 
-    and instEVarsW (vs_, p, xsRev) = match vs_, p with
-      | vs_, 0 -> (vs_, xsRev)
-      | (I.Pi ((I.Dec (xOpt, v1_), _), v2_), s), p ->
-          let x1_ = I.newEVar I.Null (I.EClo (v1_, s)) in
-          instEVars ((v2_, I.Dot (I.Exp x1_, s)), p - 1, Some x1_ :: xsRev)
-      | (I.Pi ((I.BDec (_, (l, t)), _), v2_), s), p ->
-          let l1_ = I.newLVar (I.Shift 0) (l, I.comp t s) in
-          instEVars ((v2_, I.Dot (I.Block l1_, s)), p - 1, None :: xsRev)
+    and instEVarsW (vs, p, xsRev) = match vs, p with
+      | vs, 0 -> (vs, xsRev)
+      | (I.Pi ((I.Dec (xOpt, v1), _), v2), s), p ->
+          let x1 = I.newEVar I.Null (I.EClo (v1, s)) in
+          instEVars ((v2, I.Dot (I.Exp x1, s)), p - 1, Some x1 :: xsRev)
+      | (I.Pi ((I.BDec (_, (l, t)), _), v2), s), p ->
+          let l1 = I.newLVar (I.Shift 0) (l, I.comp t s) in
+          instEVars ((v2, I.Dot (I.Block l1, s)), p - 1, None :: xsRev)
 
     open! struct
       let caseList : (T.dec I.ctx * T.sub) list ref = ref []
@@ -106,175 +106,175 @@ end) : SPLIT with module State = Split__0.State' = struct
     let addCase (psi, t) = caseList := (psi, t) :: !caseList
     let getCases () = !caseList
 
-    let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
+    let rec createEVarSpine (g, vs) = createEVarSpineW (g, Whnf.whnf vs)
 
-    and createEVarSpineW (g_, a) = match a with
-      | ((I.Root _, s) as vs_) -> (I.Nil, vs_)
-      | (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
-          let x_ = createEVar (g_, I.EClo (v1_, s)) in
-          let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
-          (I.App (x_, s_), vs_)
+    and createEVarSpineW (g, a) = match a with
+      | ((I.Root _, s) as vs) -> (I.Nil, vs)
+      | (I.Pi (((I.Dec (_, v1) as d), _), v2), s) ->
+          let x = createEVar (g, I.EClo (v1, s)) in
+          let s_, vs = createEVarSpine (g, (v2, I.Dot (I.Exp x, s))) in
+          (I.App (x, s_), vs)
 
-    let createAtomConst g_ h_ =
+    let createAtomConst g h =
       let cid =
-        match h_ with I.Const c -> c | I.Def c -> c | _ -> assert false
+        match h with I.Const c -> c | I.Def c -> c | _ -> assert false
       in
-      let v_ = I.constType cid in
-      let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
-      (I.Root (h_, s_), vs_)
+      let v = I.constType cid in
+      let s, vs = createEVarSpine (g, (v, I.id)) in
+      (I.Root (h, s), vs)
 
-    let createAtomBVar g_ k =
-      let (I.Dec (_, v_)) = I.ctxDec g_ k in
-      let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
-      (I.Root (I.BVar k, s_), vs_)
+    let createAtomBVar g k =
+      let (I.Dec (_, v)) = I.ctxDec g k in
+      let s, vs = createEVarSpine (g, (v, I.id)) in
+      (I.Root (I.BVar k, s), vs)
 
-    let createAtomProj (g_, h_, (v_, s)) =
-      let s_, vs'_ = createEVarSpine (g_, (v_, s)) in
-      (I.Root (h_, s_), vs'_)
+    let createAtomProj (g, h, (v, s)) =
+      let s_, vs' = createEVarSpine (g, (v, s)) in
+      (I.Root (h, s_), vs')
 
-    let rec constCases (g_, vs_, a, sc) = match a with
+    let rec constCases (g, vs, a, sc) = match a with
       | [] -> ()
-      | (I.Const c as h_) :: sgn' ->
-          let u_, vs'_ = createAtomConst g_ h_ in
+      | (I.Const c as h) :: sgn' ->
+          let u, vs' = createAtomConst g h in
           ignore (CsManager.trail (function () ->
-                begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
+                begin if Unify.unifiable g vs vs' then sc u else ()
                 end));
-          constCases (g_, vs_, sgn', sc)
-      | (I.Def c as h_) :: sgn' ->
-          let u_, vs'_ = createAtomConst g_ h_ in
+          constCases (g, vs, sgn', sc)
+      | (I.Def c as h) :: sgn' ->
+          let u, vs' = createAtomConst g h in
           ignore (CsManager.trail (function () ->
-                begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
+                begin if Unify.unifiable g vs vs' then sc u else ()
                 end));
-          constCases (g_, vs_, sgn', sc)
+          constCases (g, vs, sgn', sc)
       | _ :: sgn' ->
           (* Skip other head types *)
-          constCases (g_, vs_, sgn', sc)
+          constCases (g, vs, sgn', sc)
 
-    let rec paramCases (g_, vs_, k, sc) = match k with
+    let rec paramCases (g, vs, k, sc) = match k with
       | 0 -> ()
       | k ->
-          let u_, vs'_ = createAtomBVar g_ k in
+          let u, vs' = createAtomBVar g k in
           ignore (CsManager.trail (function () ->
-                begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
+                begin if Unify.unifiable g vs vs' then sc u else ()
                 end));
-          paramCases (g_, vs_, k - 1, sc)
+          paramCases (g, vs, k - 1, sc)
 
     let rec createEVarSub = function
       | I.Null -> I.id
-      | I.Decl (g'_, (I.Dec (_, v_) as d_)) ->
-          let s = createEVarSub g'_ in
-          let v'_ = I.EClo (v_, s) in
-          let x_ = I.newEVar I.Null v'_ in
-          I.Dot (I.Exp x_, s)
+      | I.Decl (g', (I.Dec (_, v) as d)) ->
+          let s = createEVarSub g' in
+          let v' = I.EClo (v, s) in
+          let x = I.newEVar I.Null v' in
+          I.Dot (I.Exp x, s)
 
     let blockName cid = I.conDecName (I.sgnLookup cid)
 
-    let rec blockCases (g_, vs_, cid, (gsome_, piDecs), sc) =
-      let t = createEVarSub gsome_ in
-      let sk = I.Shift (I.ctxLength g_) in
+    let rec blockCases (g, vs, cid, (gsome, piDecs), sc) =
+      let t = createEVarSub gsome in
+      let sk = I.Shift (I.ctxLength g) in
       let t' = I.comp t sk in
       let lvar = I.newLVar sk (cid, t') in
-      blockCases' (g_, vs_, (lvar, 1), (t', piDecs), sc)
+      blockCases' (g, vs, (lvar, 1), (t', piDecs), sc)
 
-    and blockCases' (g_, vs_, a, b, sc) = match a, b with
+    and blockCases' (g, vs, a, b, sc) = match a, b with
       | (lvar, i), (t, []) -> ()
-      | (lvar, i), (t, I.Dec (_, v'_) :: piDecs) ->
-          let u_, vs'_ = createAtomProj (g_, I.Proj (lvar, i), (v'_, t)) in
+      | (lvar, i), (t, I.Dec (_, v') :: piDecs) ->
+          let u, vs' = createAtomProj (g, I.Proj (lvar, i), (v', t)) in
           ignore (CsManager.trail (function () ->
-                begin if Unify.unifiable g_ vs_ vs'_ then sc u_ else ()
+                begin if Unify.unifiable g vs vs' then sc u else ()
                 end));
           let t' = I.Dot (I.Exp (I.Root (I.Proj (lvar, i), I.Nil)), t) in
-          blockCases' (g_, vs_, (lvar, i + 1), (t', piDecs), sc)
+          blockCases' (g, vs, (lvar, i + 1), (t', piDecs), sc)
 
-    let rec worldCases (g_, vs_, a, sc) = match a with
+    let rec worldCases (g, vs, a, sc) = match a with
       | T.Worlds [] -> ()
       | T.Worlds (cid :: cids) -> begin
-          blockCases (g_, vs_, cid, I.constBlock cid, sc);
-          worldCases (g_, vs_, T.Worlds cids, sc)
+          blockCases (g, vs, cid, I.constBlock cid, sc);
+          worldCases (g, vs, T.Worlds cids, sc)
         end
 
-    let rec lowerSplit (g_, vs_, w_, sc) =
-      lowerSplitW (g_, Whnf.whnf vs_, w_, sc)
+    let rec lowerSplit (g, vs, w, sc) =
+      lowerSplitW (g, Whnf.whnf vs, w, sc)
 
-    and lowerSplitW (g_, ((I.Root (I.Const a, _), s) as vs_), w_, sc) =
-      ignore (constCases (g_, vs_, Index.lookup a, sc));
-      ignore (paramCases (g_, vs_, I.ctxLength g_, sc));
-      ignore (worldCases (g_, vs_, w_, sc));
+    and lowerSplitW (g, ((I.Root (I.Const a, _), s) as vs), w, sc) =
+      ignore (constCases (g, vs, Index.lookup a, sc));
+      ignore (paramCases (g, vs, I.ctxLength g, sc));
+      ignore (worldCases (g, vs, w, sc));
       ()
 
-    let splitEVar ((I.EVar (_, gx, v_, _) as x_), w_, sc) =
+    let splitEVar ((I.EVar (_, gx, v, _) as x), w, sc) =
       lowerSplit
         ( I.Null,
-          (v_, I.id),
-          w_,
+          (v, I.id),
+          w,
           function
-          | u_ ->
-              begin if Unify.unifiable I.Null (x_, I.id) (u_, I.id) then
+          | u ->
+              begin if Unify.unifiable I.Null (x, I.id) (u, I.id) then
                 sc ()
               else ()
               end )
 
     let rec createSub = function
       | I.Null -> T.id
-      | I.Decl (psi, T.UDec (I.Dec (xOpt, v1_))) ->
+      | I.Decl (psi, T.UDec (I.Dec (xOpt, v1))) ->
           let t' = createSub psi in
-          let v1', s'_ = Whnf.whnf (v1_, T.coerceSub t') in
-          let x_ = I.newEVar I.Null (I.EClo (v1', s'_)) in
-          T.Dot (T.Exp x_, t')
+          let v1', s' = Whnf.whnf (v1, T.coerceSub t') in
+          let x = I.newEVar I.Null (I.EClo (v1', s')) in
+          T.Dot (T.Exp x, t')
       | I.Decl (psi, T.UDec (I.BDec (_, (l, s)))) ->
           let t' = createSub psi in
           let l_ = I.newLVar (I.Shift 0) (l, I.comp s (T.coerceSub t')) in
           T.Dot (T.Block l_, t')
-      | I.Decl (psi, T.PDec (_, f_, tc1, tc2)) ->
+      | I.Decl (psi, T.PDec (_, f, tc1, tc2)) ->
           let t' = createSub psi in
-          let y_ = T.newEVarTC (I.Null, T.FClo (f_, t'), tc1, tc2) in
-          T.Dot (T.Prg y_, t')
+          let y = T.newEVarTC (I.Null, T.FClo (f, t'), tc1, tc2) in
+          T.Dot (T.Prg y, t')
 
-    let rec mkCases (a, f_) = match a with
+    let rec mkCases (a, f) = match a with
       | [] -> []
       | (psi, t) :: cs ->
-          let x_ = T.newEVar psi (T.FClo (f_, t)) in
-          (psi, t, x_) :: mkCases (cs, f_)
+          let x = T.newEVar psi (T.FClo (f, t)) in
+          (psi, t, x) :: mkCases (cs, f)
 
-    let split (S.Focus (T.EVar (psi, r, f_, None, None, _), w_)) =
+    let split (S.Focus (T.EVar (psi, r, f, None, None, _), w)) =
       let rec splitXs arg__1 arg__2 =
         begin match (arg__1, arg__2) with
-        | (g_, i), ([], _, _, _) -> []
-        | (g_, i), (x_ :: xs_, f_, w_, sc) ->
+        | (g, i), ([], _, _, _) -> []
+        | (g, i), (x :: xs, f, w, sc) ->
             ignore (Display.chatter_s 6
-                (("Split " ^ Print.expToString I.Null x_) ^ ".\n"));
-            let os_ = splitXs (g_, i + 1) (xs_, f_, w_, sc) in
+                (("Split " ^ Print.expToString I.Null x) ^ ".\n"));
+            let os = splitXs (g, i + 1) (xs, f, w, sc) in
             ignore (resetCases ());
-            let s = Print.expToString g_ x_ in
+            let s = Print.expToString g x in
             let os' =
               try
                 begin
-                  splitEVar (x_, w_, sc);
-                  Split (r, T.Case (T.Cases (mkCases (getCases (), f_))), s)
-                  :: os_
+                  splitEVar (x, w, sc);
+                  Split (r, T.Case (T.Cases (mkCases (getCases (), f))), s)
+                  :: os
                 end
               with Constraints.Error constrs ->
                 begin
                   Display.chatter_s 6
                     (("Inactive split:\n" ^ Print.cnstrsToString constrs) ^ "\n");
-                  os_
+                  os
                 end
             in
             os'
         end
       in
       let t = createSub psi in
-      let xs_ = State.collectLFSub t in
+      let xs = State.collectLFSub t in
       let init () = addCase (Abstract.abstractTomegaSub t) in
-      let g_ = T.coerceCtx psi in
-      let os_ = splitXs (g_, 1) (xs_, f_, w_, init) in
-      os_
+      let g = T.coerceCtx psi in
+      let os = splitXs (g, 1) (xs, f, w, init) in
+      os
 
-    let expand (S.Focus (T.EVar (psi, r, f_, None, None, _), w_) as s_) =
-      begin if Abstract.closedCTX psi then split s_ else []
+    let expand (S.Focus (T.EVar (psi, r, f, None, None, _), w) as s) =
+      begin if Abstract.closedCTX psi then split s else []
       end
 
-    let apply (Split (r, p_, s)) = r := Some p_
+    let apply (Split (r, p, s)) = r := Some p
     let menu (Split (_, _, s)) = "Split " ^ s
   end
 

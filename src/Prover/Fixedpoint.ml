@@ -29,13 +29,13 @@ end) : FIXEDPOINT with module State = FixedPoint__0.State' = struct
 
     type nonrec operator = T.prg option ref * T.prg
 
-    let expand (S.Focus (T.EVar (psi, r, f_, _, tCs, _), w_)) o_ =
+    let expand (S.Focus (T.EVar (psi, r, f, _, tCs, _), w)) o =
       let (I.NDec x) = Names.decName (T.coerceCtx psi) (I.NDec None) in
-      let d_ = T.PDec (x, f_, None, None) in
-      let x_ = T.newEVar (I.Decl (psi, d_)) (T.forSub f_ (T.Shift 1)) in
-      (r, T.Rec (d_, x_))
+      let d = T.PDec (x, f, None, None) in
+      let x = T.newEVar (I.Decl (psi, d)) (T.forSub f (T.Shift 1)) in
+      (r, T.Rec (d, x))
 
-    let apply (r, p_) = r := Some p_
+    let apply (r, p) = r := Some p
     let menu _ = "Recursion introduction"
   end
 

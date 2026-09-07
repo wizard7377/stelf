@@ -28,18 +28,18 @@ module MakeIndexSkolem (Global : GLOBAL) (Queue : QUEUE) : Index_.INDEX = struct
 
     let install arg__1 arg__2 =
       begin match (arg__1, arg__2) with
-      | fromCS, (I.Const c as h_) ->
+      | fromCS, (I.Const c as h) ->
           begin match (fromCS, I.sgnLookup c) with
-          | _, I.ConDec (_, _, _, _, a_, I.Type) ->
-              update (cidFromHead (I.targetHead a_), h_)
-          | I.Clause, I.ConDef (_, _, _, _, a_, I.Type, _) ->
-              update (cidFromHead (I.targetHead a_), I.Def c)
+          | _, I.ConDec (_, _, _, _, a, I.Type) ->
+              update (cidFromHead (I.targetHead a), h)
+          | I.Clause, I.ConDef (_, _, _, _, a, I.Type, _) ->
+              update (cidFromHead (I.targetHead a), I.Def c)
           | _ -> ()
           end
-      | fromCS, (I.Skonst c as h_) ->
+      | fromCS, (I.Skonst c as h) ->
           begin match I.sgnLookup c with
-          | I.SkoDec (_, _, _, a_, I.Type) ->
-              update (cidFromHead (I.targetHead a_), h_)
+          | I.SkoDec (_, _, _, a, I.Type) ->
+              update (cidFromHead (I.targetHead a), h)
           | _ -> ()
           end
       end
@@ -57,10 +57,10 @@ module MakeIndexSkolem (Global : GLOBAL) (Queue : QUEUE) : Index_.INDEX = struct
 
     let uninstall cid =
       begin match I.sgnLookup cid with
-      | I.ConDec (_, _, _, _, a_, I.Type) ->
-          remove (cidFromHead (I.targetHead a_), cid)
-      | I.SkoDec (_, _, _, a_, I.Type) ->
-          remove (cidFromHead (I.targetHead a_), cid)
+      | I.ConDec (_, _, _, _, a, I.Type) ->
+          remove (cidFromHead (I.targetHead a), cid)
+      | I.SkoDec (_, _, _, a, I.Type) ->
+          remove (cidFromHead (I.targetHead a), cid)
       | _ -> ()
       end
 

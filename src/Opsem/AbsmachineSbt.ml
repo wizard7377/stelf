@@ -73,12 +73,12 @@ end) : ABSMACHINESBT = struct
       | _ -> false
 
     let rec compose' = function
-      | I.Null, g_ -> g_
-      | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
+      | I.Null, g -> g
+      | IntSyn.Decl (g, d), g' -> IntSyn.Decl (compose' (g, g'), d)
 
     let rec shift (a, s) = match a with
       | I.Null -> s
-      | IntSyn.Decl (g_, d_) -> I.dot1 (shift (g_, s))
+      | IntSyn.Decl (g, d) -> I.dot1 (shift (g, s))
 
     let rec invShiftN (n, s) =
       begin if n = 0 then I.comp I.invShift s
@@ -86,8 +86,8 @@ end) : ABSMACHINESBT = struct
       end
 
     let rec raiseType a1 b1 = match a1, b1 with
-      | I.Null, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType g_ (I.Pi ((d_, I.Maybe), v_))
+      | I.Null, v -> v
+      | I.Decl (g, d), v -> raiseType g (I.Pi ((d, I.Maybe), v))
 
     let rec printSub = function
       | IntSyn.Shift n -> print (("Shift " ^ Int.toString n) ^ "\n")
@@ -122,74 +122,74 @@ end) : ABSMACHINESBT = struct
 
     let rec ctxToEVarSub (gglobal, a, s) = match a with
       | I.Null -> s
-      | I.Decl (g_, I.Dec (_, a_)) ->
-          let s' = ctxToEVarSub (gglobal, g_, s) in
-          let x_ = I.newEVar gglobal (I.EClo (a_, s')) in
-          I.Dot (I.Exp x_, s')
-      | I.Decl (g_, I.ADec (_, d)) ->
-          let x_ = I.newAVar () in
+      | I.Decl (g, I.Dec (_, a)) ->
+          let s' = ctxToEVarSub (gglobal, g, s) in
+          let x = I.newEVar gglobal (I.EClo (a, s')) in
+          I.Dot (I.Exp x, s')
+      | I.Decl (g, I.ADec (_, d)) ->
+          let x = I.newAVar () in
           I.Dot
-            (I.Exp (I.EClo (x_, I.Shift (-d))), ctxToEVarSub (gglobal, g_, s))
+            (I.Exp (I.EClo (x, I.Shift (-d))), ctxToEVarSub (gglobal, g, s))
 
     let rec solve' (a, b, sc) = match a, b with
-      | (C.Atom p, s), (C.DProg (g_, dpool) as dp) ->
+      | (C.Atom p, s), (C.DProg (g, dpool) as dp) ->
           matchAtom ((p, s), dp, sc)
-      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool) ->
-          let d'_ = I.Dec (None, I.EClo (a_, s)) in
+      | (C.Impl (r, a, ha, g), s), C.DProg (g_, dPool) ->
+          let d' = I.Dec (None, I.EClo (a, s)) in
           solve'
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
+              C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Dec (r, s, ha))),
               sc )
-      | (C.All (d_, g), s), C.DProg (g_, dPool) ->
-          let d'_ = Names.decLUName g_ (I.decSub d_ s) in
+      | (C.All (d, g), s), C.DProg (g_, dPool) ->
+          let d' = Names.decLUName g_ (I.decSub d s) in
           solve'
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
+              C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Parameter)),
               sc )
 
     and rSolve (ps', a, b, sc) = match a, b with
-      | (C.Eq q_, s), C.DProg (g_, dPool) ->
-          begin if Unify.unifiable g_ ps' (q_, s) then sc [] else ()
+      | (C.Eq q, s), C.DProg (g, dPool) ->
+          begin if Unify.unifiable g ps' (q, s) then sc [] else ()
           end
-      | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
-          begin match Assign.assignable g_ ps' (q_, s) with
+      | (C.Assign (q, eqns), s), (C.DProg (g, dPool) as dp) ->
+          begin match Assign.assignable g ps' (q, s) with
           | Some cnstr -> aSolve ((eqns, s), dp, cnstr, function () -> sc [])
           | None -> ()
           end
-      | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
-          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
+      | (C.And (r, a, g), s), (C.DProg (g_, dPool) as dp) ->
+          let x = I.newEVar g_ (I.EClo (a, s)) in
           rSolve
             ( ps',
-              (r, I.Dot (I.Exp x_, s)),
+              (r, I.Dot (I.Exp x, s)),
               dp,
               function
               | skel1 ->
                   solve' ((g, s), dp, function skel2 -> sc (skel1 @ skel2)) )
-      | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp)
+      | (C.Exists (I.Dec (_, a), r), s), (C.DProg (g, dPool) as dp)
         ->
-          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
-          rSolve (ps', (r, I.Dot (I.Exp x_, s)), dp, sc)
-      | (C.Axists (I.ADec (_, d), r), s), (C.DProg (g_, dPool) as dp)
+          let x = I.newEVar g (I.EClo (a, s)) in
+          rSolve (ps', (r, I.Dot (I.Exp x, s)), dp, sc)
+      | (C.Axists (I.ADec (_, d), r), s), (C.DProg (g, dPool) as dp)
         ->
-          let x'_ = I.newAVar () in
+          let x' = I.newAVar () in
           rSolve
-            (ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
+            (ps', (r, I.Dot (I.Exp (I.EClo (x', I.Shift (-d))), s)), dp, sc)
 
     and aSolve (a, b, cnstr, sc) = match a, b with
-      | (trivial_, s), dp ->
+      | (trivial, s), dp ->
           begin if Assign.solveCnstr cnstr then sc () else ()
           end
-      | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp) ->
-          let g''_ = compose' (g'_, g_) in
-          let s' = shift (g'_, s) in
-          begin if Assign.unifiable g''_ (n_, s') (e1, s') then
+      | (C.UnifyEq (g', e1, n, eqns), s), (C.DProg (g, dPool) as dp) ->
+          let g'' = compose' (g', g) in
+          let s' = shift (g', s) in
+          begin if Assign.unifiable g'' (n, s') (e1, s') then
             aSolve ((eqns, s), dp, cnstr, sc)
           else ()
           end
 
     and sSolve (a, b, sc) = match a, b with
       | (C.True, s), dp -> sc []
-      | (C.Conjunct (g, a_, sgoals), s), (C.DProg (g_, dPool) as dp) ->
+      | (C.Conjunct (g, a, sgoals), s), (C.DProg (g_, dPool) as dp) ->
           solve'
             ( (g, s),
               dp,
@@ -198,32 +198,32 @@ end) : ABSMACHINESBT = struct
                   sSolve
                     ((sgoals, s), dp, function skel2 -> sc (skel1 @ skel2)) )
 
-    and matchSig (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc)
+    and matchSig (((I.Root (ha, s_), s) as ps'), (C.DProg (g, dPool) as dp), sc)
         =
       let rec mSig = function
         | [] -> ()
         | (I.Const c as hc) :: sgn' ->
             let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
             CsManager.trail (function () ->
-                rSolve (ps', (r, I.id), dp, function s_ -> sc (C.Pc c :: s_)));
+                rSolve (ps', (r, I.id), dp, function s -> sc (C.Pc c :: s)));
             mSig sgn'
       in
       mSig (Index.lookup (cidFromHead ha))
 
     and matchIndexSig
-        (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
+        (((I.Root (ha, s_), s) as ps'), (C.DProg (g, dPool) as dp), sc) =
       SubTree.matchSig
         ( cidFromHead ha,
-          g_,
+          g,
           ps',
           function
           | (conjGoals, s), clauseName ->
               sSolve
-                ((conjGoals, s), dp, function s_ -> sc (C.Pc clauseName :: s_))
+                ((conjGoals, s), dp, function s -> sc (C.Pc clauseName :: s))
         )
 
     and matchAtom
-        (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
+        (((I.Root (ha, s_), s) as ps'), (C.DProg (g, dPool) as dp), sc) =
       let rec matchDProg (a, k) = match a with
         | I.Null -> ( ! ) mSig (ps', dp, sc)
         | I.Decl (dPool', C.Dec (r, s, ha')) ->
@@ -233,19 +233,19 @@ end) : ABSMACHINESBT = struct
                     ( ps',
                       (r, I.comp s (I.Shift k)),
                       dp,
-                      function s_ -> sc (C.Dc k :: s_) ));
+                      function s -> sc (C.Dc k :: s) ));
               matchDProg (dPool', k + 1)
             end
             else matchDProg (dPool', k + 1)
             end
-        | I.Decl (dPool', parameter_) -> matchDProg (dPool', k + 1)
+        | I.Decl (dPool', parameter) -> matchDProg (dPool', k + 1)
       in
       let rec matchConstraint (solve_fn, try_) =
         let succeeded =
           CsManager.trail (function () ->
-              begin match solve_fn (g_, I.SClo (s_, s), try_) with
-              | Some u_ -> begin
-                  sc [ C.Csolver u_ ];
+              begin match solve_fn (g, I.SClo (s_, s), try_) with
+              | Some u -> begin
+                  sc [ C.Csolver u ];
                   true
                 end
               | None -> false

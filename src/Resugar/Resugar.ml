@@ -26,7 +26,7 @@ module Make_Resugar (Cst : Cst.CST) : RESUGAR with module Cst = Cst = struct
     | Fgn of Cst.term list
 
   let exp = Tm.exp
-  let exp_sub opts g_ us = Tm.exp_sub opts g_ 0 us
+  let exp_sub opts g us = Tm.exp_sub opts g 0 us
   let spine = Tm.spine
   let dec = Tm.dec
   let dec_sub = Tm.dec_sub

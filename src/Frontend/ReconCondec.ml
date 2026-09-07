@@ -98,25 +98,25 @@ end) : RECON_CONDEC = struct
     | Condec_ (name, tm), Paths.Loc (fileName, r), abbFlag ->
         ignore (Names.varReset IntSyn.Null);
         ignore (ExtSyn.resetErrors fileName);
-        let (ExtSyn.JClass ((v_, oc), l_)) =
+        let (ExtSyn.JClass ((v, oc), l)) =
           Timers.time Timers.recon ExtSyn.recon (ExtSyn.jclass tm)
         in
         ignore (ExtSyn.checkErrors r);
-        let i, v'_ =
-          try Timers.time Timers.abstract Abstract.abstractDecImp v_
+        let i, v' =
+          try Timers.time Timers.abstract Abstract.abstractDecImp v
           with Abstract.Error msg ->
             raise (Abstract.Error (Paths.wrap r msg))
         in
         let cd =
           Names.nameConDec
-            (IntSyn.ConDec (name, None, i, IntSyn.Normal, v'_, l_))
+            (IntSyn.ConDec (name, None, i, IntSyn.Normal, v', l))
         in
         let ocd = Paths.dec (i, oc) in
         ignore (Display.chatter_s 3 ~kind:Display.Response
             (Timers.time Timers.printing Print.conDecToString cd ^ "\n"));
         ignore begin if !Global.doubleCheck then
             begin try
-              Timers.time Timers.checking TypeCheck.check (v'_, IntSyn.Uni l_)
+              Timers.time Timers.checking TypeCheck.check (v', IntSyn.Uni l)
             with TypeCheck.Error msg ->
               Printf.eprintf "DOUBLE-CHECK FAIL on ConDec %s: %s\n%!" name msg;
               raise (TypeCheck.Error msg)
@@ -134,16 +134,16 @@ end) : RECON_CONDEC = struct
           end
         in
         let f' = Timers.time Timers.recon ExtSyn.recon f in
-        let (u_, oc1), (v_, oc2Opt), l_ =
+        let (u, oc1), (v, oc2Opt), l =
           begin match f' with
-          | ExtSyn.JTerm ((u_, oc1), v_, l_) -> ((u_, oc1), (v_, None), l_)
-          | ExtSyn.JOf ((u_, oc1), (v_, oc2), l_) ->
-              ((u_, oc1), (v_, Some oc2), l_)
+          | ExtSyn.JTerm ((u, oc1), v, l) -> ((u, oc1), (v, None), l)
+          | ExtSyn.JOf ((u, oc1), (v, oc2), l) ->
+              ((u, oc1), (v, Some oc2), l)
           end
         in
         ignore (ExtSyn.checkErrors r);
         let i, (u'', v'') =
-          try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u_ v_) ()
+          try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u v) ()
           with Abstract.Error msg ->
             raise (Abstract.Error (Paths.wrap r msg))
         in
@@ -154,11 +154,11 @@ end) : RECON_CONDEC = struct
         let ocd = Paths.def i oc1 oc2Opt in
         let cd =
           begin if abbFlag then
-            Names.nameConDec (IntSyn.AbbrevDef (name, None, i, u'', v'', l_))
+            Names.nameConDec (IntSyn.AbbrevDef (name, None, i, u'', v'', l))
           else begin
             Strict.check ((u'', v''), Some ocd);
             Names.nameConDec
-              (IntSyn.ConDef (name, None, i, u'', v'', l_, IntSyn.ancestor u''))
+              (IntSyn.ConDef (name, None, i, u'', v'', l, IntSyn.ancestor u''))
           end
             (* stricter checking of types according to Chris Richards Fri Jul  2 16:33:46 2004 -fp *)
             (* (case optName of NONE => () | _ => Strict.checkType ((i, V''), SOME(ocd))); *)
@@ -167,7 +167,7 @@ end) : RECON_CONDEC = struct
         ignore (Display.chatter_s 3 ~kind:Display.Response
             (Timers.time Timers.printing Print.conDecToString cd ^ "\n"));
         ignore begin if !Global.doubleCheck then begin
-            (try Timers.time Timers.checking TypeCheck.check (v'', IntSyn.Uni l_)
+            (try Timers.time Timers.checking TypeCheck.check (v'', IntSyn.Uni l)
              with TypeCheck.Error msg ->
                let n = match optName with None -> "_" | Some n -> n in
                Printf.eprintf "DOUBLE-CHECK FAIL on ConDef %s (type): %s\n%!" n
@@ -187,44 +187,44 @@ end) : RECON_CONDEC = struct
           end
         in
         (optConDec, Some ocd)
-    | Blockdec (name, lsome_, lblock_), Paths.Loc (fileName, r), abbFlag ->
+    | Blockdec (name, lsome, lblock), Paths.Loc (fileName, r), abbFlag ->
         let rec makectx = function
           | [] -> IntSyn.Null
-          | d_ :: l_ -> IntSyn.Decl (makectx l_, d_)
+          | d :: l -> IntSyn.Decl (makectx l, d)
         in
         let rec ctxToList (a, acc) = match a with
           | IntSyn.Null -> acc
-          | IntSyn.Decl (g_, d_) -> ctxToList (g_, d_ :: acc)
+          | IntSyn.Decl (g, d) -> ctxToList (g, d :: acc)
         in
-        let rec ctxAppend (g_, a) = match a with
-          | IntSyn.Null -> g_
-          | IntSyn.Decl (g'_, d_) -> IntSyn.Decl (ctxAppend (g_, g'_), d_)
+        let rec ctxAppend (g, a) = match a with
+          | IntSyn.Null -> g
+          | IntSyn.Decl (g', d) -> IntSyn.Decl (ctxAppend (g, g'), d)
         in
-        let ctxBlockToString (g0_, (g1_, g2_)) =
+        let ctxBlockToString (g0, (g1, g2)) =
           ignore (Names.varReset IntSyn.Null);
-          let g0'_ = Names.ctxName g0_ in
-          let g1'_ = Names.ctxLUName g1_ in
-          let g2'_ = Names.ctxLUName g2_ in
-          (((Print.ctxToString IntSyn.Null g0'_ ^ "\n")
-           ^ begin match g1'_ with
+          let g0' = Names.ctxName g0 in
+          let g1' = Names.ctxLUName g1 in
+          let g2' = Names.ctxLUName g2 in
+          (((Print.ctxToString IntSyn.Null g0' ^ "\n")
+           ^ begin match g1' with
            | IntSyn.Null -> ""
-           | _ -> ("some " ^ Print.ctxToString g0'_ g1'_) ^ "\n"
+           | _ -> ("some " ^ Print.ctxToString g0' g1') ^ "\n"
            end)
           ^ "pi ")
-          ^ Print.ctxToString (ctxAppend (g0'_, g1'_)) g2'_
+          ^ Print.ctxToString (ctxAppend (g0', g1')) g2'
         in
-        let checkFreevars (g0_, a, r) = match g0_, a with
-          | IntSyn.Null, (g1_, g2_) -> ()
-          | g0_, (g1_, g2_) ->
+        let checkFreevars (g0, a, r) = match g0, a with
+          | IntSyn.Null, (g1, g2) -> ()
+          | g0, (g1, g2) ->
               ignore (Names.varReset IntSyn.Null);
-              let g0'_ = Names.ctxName g0_ in
-              let g1'_ = Names.ctxLUName g1_ in
-              let g2'_ = Names.ctxLUName g2_ in
+              let g0' = Names.ctxName g0 in
+              let g1' = Names.ctxLUName g1 in
+              let g2' = Names.ctxLUName g2 in
               error
                 r ("Free variables in context block after term reconstruction:\n"
-                  ^ ctxBlockToString (g0'_, (g1'_, g2'_)))
+                  ^ ctxBlockToString (g0', (g1', g2')))
         in
-        let gsome, gblock = (makectx lsome_, makectx lblock_) in
+        let gsome, gblock = (makectx lsome, makectx lblock) in
         let r' =
           begin match (ExtSyn.ctxRegion gsome, ExtSyn.ctxRegion gblock) with
           | Some r1, Some r2 -> Paths.join r1 r2
@@ -236,22 +236,22 @@ end) : RECON_CONDEC = struct
         let j =
           ExtSyn.jwithctx gsome (ExtSyn.jwithctx gblock ExtSyn.jnothing)
         in
-        let (ExtSyn.JWithCtx (gsome_, ExtSyn.JWithCtx (gblock_, _))) =
+        let (ExtSyn.JWithCtx (gsome, ExtSyn.JWithCtx (gblock, _))) =
           Timers.time Timers.recon ExtSyn.recon j
         in
         ignore (ExtSyn.checkErrors r);
-        let g0_, [ gsome'; gblock' ] =
-          try Abstract.abstractCtxs [ gsome_; gblock_ ]
-          with Constraints.Error c_ ->
+        let g0, [ gsome'; gblock' ] =
+          try Abstract.abstractCtxs [ gsome; gblock ]
+          with Constraints.Error c ->
             raise
               (error
                  r' ((("Constraints remain in context block after term \
                       reconstruction:\n"
-                    ^ ctxBlockToString (IntSyn.Null, (gsome_, gblock_)))
+                    ^ ctxBlockToString (IntSyn.Null, (gsome, gblock)))
                    ^ "\n")
-                   ^ Print.cnstrsToString c_))
+                   ^ Print.cnstrsToString c))
         in
-        ignore (checkFreevars (g0_, (gsome', gblock'), r'));
+        ignore (checkFreevars (g0, (gsome', gblock'), r'));
         let bd =
           IntSyn.BlockDec (name, None, gsome', ctxToList (gblock', []))
         in
@@ -259,9 +259,9 @@ end) : RECON_CONDEC = struct
             (Timers.time Timers.printing Print.conDecToString bd ^ "\n"));
         (Some bd, None)
         (* closed nf *)
-    | Blockdef (name, w_), Paths.Loc (fileName, r), abbFlag ->
-        let w'_ = List.map (fun (ids, id) -> Names.Qid (ids, id)) w_ in
-        let w''_ =
+    | Blockdef (name, w), Paths.Loc (fileName, r), abbFlag ->
+        let w' = List.map (fun (ids, id) -> Names.Qid (ids, id)) w in
+        let w'' =
           List.map
             (function
               | qid ->
@@ -274,9 +274,9 @@ end) : RECON_CONDEC = struct
                            ^ "."))
                   | Some cid -> cid
                   end)
-            w'_
+            w'
         in
-        let bd = IntSyn.BlockDef (name, None, w''_) in
+        let bd = IntSyn.BlockDef (name, None, w'') in
         ignore (Display.chatter_s 3 ~kind:Display.Response
             (Timers.time Timers.printing Print.conDecToString bd ^ "\n"));
         (Some bd, None)

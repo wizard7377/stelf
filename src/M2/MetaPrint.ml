@@ -43,41 +43,41 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
       end
 
     let fmtPrefix gm =
-      let rec fmtPrefix' (a, fmt_) = match a with
-        | M.Prefix (I.Null, I.Null, I.Null) -> fmt_
+      let rec fmtPrefix' (a, fmt) = match a with
+        | M.Prefix (I.Null, I.Null, I.Null) -> fmt
         | M.Prefix
-              (I.Decl (I.Null, d_), I.Decl (I.Null, mode), I.Decl (I.Null, b)) ->
+              (I.Decl (I.Null, d), I.Decl (I.Null, mode), I.Decl (I.Null, b)) ->
             [
               F.string (depthToString b);
               F.string (modeToString mode);
-              Print.formatDec I.Null d_;
+              Print.formatDec I.Null d;
             ]
-            @ fmt_
-        | M.Prefix (I.Decl (g_, d_), I.Decl (m_, mode), I.Decl (b_, b)) ->
+            @ fmt
+        | M.Prefix (I.Decl (g, d), I.Decl (m, mode), I.Decl (b_, b)) ->
             fmtPrefix'
-              ( M.Prefix (g_, m_, b_),
+              ( M.Prefix (g, m, b_),
                 [
                   F.string ",";
                   F.space;
                   F.break;
                   F.string (depthToString b);
                   F.string (modeToString mode);
-                  Print.formatDec g_ d_;
+                  Print.formatDec g d;
                 ]
-                @ fmt_ )
+                @ fmt )
       in
       F.hVbox (fmtPrefix' (gm, []))
 
     let prefixToString gm = F.makestring_fmt (fmtPrefix gm)
 
-    let stateToString (M.State (name, (M.Prefix (g_, m_, b_) as gm), v_)) =
+    let stateToString (M.State (name, (M.Prefix (g, m, b) as gm), v)) =
       ((((name ^ ":\n") ^ prefixToString gm) ^ "\n--------------\n")
-      ^ ClausePrint.clauseToString g_ v_)
+      ^ ClausePrint.clauseToString g v)
       ^ "\n\n"
 
     let rec sgnToString = function
       | sgnEmpty -> ""
-      | M.ConDec (e, s_) ->
+      | M.ConDec (e, s) ->
           begin if !Global.chatter >= 4 then Print.conDecToString e ^ "\n"
           else
             begin if !Global.chatter >= 3 then
@@ -85,7 +85,7 @@ end) : METAPRINT with module MetaSyn = MetaPrint__0.MetaSyn' = struct
             else ""
             end
           end
-          ^ sgnToString s_
+          ^ sgnToString s
   end
 
   (* depthToString is used to format splitting depth *)

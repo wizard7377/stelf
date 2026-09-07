@@ -67,10 +67,10 @@ struct
     let plusID = (ref (-1) : cid ref)
     let minusID = (ref (-1) : cid ref)
     let timesID = (ref (-1) : cid ref)
-    let unaryMinusExp u_ = Root (Const !unaryMinusID, App (u_, Nil))
-    let plusExp (u_, v_) = Root (Const !plusID, App (u_, App (v_, Nil)))
-    let minusExp (u_, v_) = Root (Const !minusID, App (u_, App (v_, Nil)))
-    let timesExp (u_, v_) = Root (Const !timesID, App (u_, App (v_, Nil)))
+    let unaryMinusExp u = Root (Const !unaryMinusID, App (u, Nil))
+    let plusExp (u, v) = Root (Const !plusID, App (u, App (v, Nil)))
+    let minusExp (u, v) = Root (Const !minusID, App (u, App (v, Nil)))
+    let timesExp (u, v) = Root (Const !timesID, App (u, App (v, Nil)))
     let numberConDec d = ConDec (toString d, None, 0, Normal, number (), Type)
     let numberExp d = Root (FgnConst (!myID, numberConDec d), Nil)
 
@@ -80,24 +80,24 @@ struct
       | None -> None
       end
 
-    let solveNumber (g_, s_, k) = Some (numberExp (fromInt k))
+    let solveNumber (g, s, k) = Some (numberExp (fromInt k))
 
-    let findMSet eq (x, l_) =
+    let findMSet eq (x, l) =
       let rec findMSet' (tried, a) = match a with
         | [] -> None
-        | y :: l_ ->
-            begin if eq (x, y) then Some (y, tried @ l_)
-            else findMSet' (y :: tried, l_)
+        | y :: l ->
+            begin if eq (x, y) then Some (y, tried @ l)
+            else findMSet' (y :: tried, l)
             end
       in
-      findMSet' ([], l_)
+      findMSet' ([], l)
 
     let equalMSet eq =
       let rec equalMSet' = function
         | [], [] -> true
-        | x :: l1'_, l2_ ->
-            begin match findMSet eq (x, l2_) with
-            | Some (y, l2'_) -> equalMSet' (l1'_, l2'_)
+        | x :: l1', l2 ->
+            begin match findMSet eq (x, l2) with
+            | Some (y, l2') -> equalMSet' (l1', l2')
             | None -> false
             end
         | _ -> false
@@ -115,27 +115,27 @@ struct
 
     and toExpMon = function
       | Mon (n, []) -> numberExp n
-      | Mon (n, us_ :: []) ->
-          begin if n = one then toExpEClo us_
-          else timesExp (toExpMon (Mon (n, [])), toExpEClo us_)
+      | Mon (n, us :: []) ->
+          begin if n = one then toExpEClo us
+          else timesExp (toExpMon (Mon (n, [])), toExpEClo us)
           end
-      | Mon (n, us_ :: usL) -> timesExp (toExpMon (Mon (n, usL)), toExpEClo us_)
+      | Mon (n, us :: usL) -> timesExp (toExpMon (Mon (n, usL)), toExpEClo us)
 
-    and toExpEClo (u_, s_) = match s_ with Shift 0 -> u_ | s_ -> EClo (u_, s_)
+    and toExpEClo (u, s) = match s with Shift 0 -> u | s -> EClo (u, s)
 
     let rec compatibleMon (Mon (_, usL1), Mon (_, usL2)) =
       equalMSet (function us1, us2 -> sameExpW (us1, us2)) (usL1, usL2)
 
     and sameExpW = function
-      | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
-          begin match (h1_, h2_) with
+      | ((Root (h1, s1_), s1) as us1), ((Root (h2, s2_), s2) as us2) ->
+          begin match (h1, h2) with
           | BVar k1, BVar k2 -> k1 = k2 && sameSpine ((s1_, s1), (s2_, s2))
           | FVar (n1, _, _), FVar (n2, _, _) ->
               n1 = n2 && sameSpine ((s1_, s1), (s2_, s2))
           | _ -> false
           end
-      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1),
-          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2) ) ->
+      | ( (((EVar (r1, g1, v1, cnstrs1) as u1), s1) as us1),
+          (((EVar (r2, g2, v2, cnstrs2) as u2), s2) as us2) ) ->
           r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
@@ -143,10 +143,10 @@ struct
 
     and sameSpine = function
       | (Nil, s1), (Nil, s2) -> true
-      | (SClo (s1_, s1'), s1), ss2_ -> sameSpine ((s1_, comp s1' s1), ss2_)
-      | ss1_, (SClo (s2_, s2'), s2) -> sameSpine (ss1_, (s2_, comp s2' s2))
-      | (App (u1_, s1_), s1), (App (u2_, s2_), s2) ->
-          sameExp ((u1_, s1), (u2_, s2)) && sameSpine ((s1_, s1), (s2_, s2))
+      | (SClo (s1_, s1'), s1), ss2 -> sameSpine ((s1_, comp s1' s1), ss2)
+      | ss1, (SClo (s2_, s2'), s2) -> sameSpine (ss1, (s2_, comp s2' s2))
+      | (App (u1, s1_), s1), (App (u2, s2_), s2) ->
+          sameExp ((u1, s1), (u2, s2)) && sameSpine ((s1_, s1), (s2_, s2))
       | _ -> false
 
     and sameSub = function
@@ -200,20 +200,20 @@ struct
     let minusSum (sum1, sum2) = plusSum (sum1, unaryMinusSum sum2)
 
     let rec fromExpW = function
-      | (FgnExp (cs, fe), _) as us_ ->
+      | (FgnExp (cs, fe), _) as us ->
           begin if cs = !myID then normalizeSum (extractSum fe)
-          else Sum (zero, [ Mon (one, [ us_ ]) ])
+          else Sum (zero, [ Mon (one, [ us ]) ])
           end
-      | (Root (FgnConst (cs, conDec), _), _) as us_ ->
+      | (Root (FgnConst (cs, conDec), _), _) as us ->
           begin if cs = !myID then
             begin match fromString (conDecName conDec) with
             | Some m -> Sum (m, [])
             end
-          else Sum (zero, [ Mon (one, [ us_ ]) ])
+          else Sum (zero, [ Mon (one, [ us ]) ])
           end
-      | us_ -> Sum (zero, [ Mon (one, [ us_ ]) ])
+      | us -> Sum (zero, [ Mon (one, [ us ]) ])
 
-    and fromExp us_ = fromExpW (Whnf.whnf us_)
+    and fromExp us = fromExpW (Whnf.whnf us)
 
     and normalizeSum = function
       | Sum (m, []) as sum -> sum
@@ -223,9 +223,9 @@ struct
 
     and normalizeMon = function
       | Mon (n, []) as mon -> Sum (n, [])
-      | Mon (n, us_ :: []) -> timesSum (Sum (n, []), fromExp us_)
-      | Mon (n, us_ :: usL) as mon ->
-          timesSum (fromExp us_, normalizeMon (Mon (n, usL)))
+      | Mon (n, us :: []) -> timesSum (Sum (n, []), fromExp us)
+      | Mon (n, us :: usL) as mon ->
+          timesSum (fromExp us, normalizeMon (Mon (n, usL)))
 
     and mapSum (f, Sum (m, monL)) =
       Sum (m, List.map (function mon -> mapMon (f, mon)) monL)
@@ -233,13 +233,13 @@ struct
     and mapMon (f, Mon (n, usL)) =
       Mon
         ( n,
-          List.map (function u_, s_ -> Whnf.whnf (f (EClo (u_, s_)), id)) usL )
+          List.map (function u, s -> Whnf.whnf (f (EClo (u, s)), id)) usL )
 
     let rec appSum (f, Sum (m, monL)) =
       List.app (function mon -> appMon (f, mon)) monL
 
     and appMon (f, Mon (n, usL)) =
-      List.app (function u_, s_ -> f (EClo (u_, s_))) usL
+      List.app (function u, s -> f (EClo (u, s))) usL
 
     let solvableSum (Sum (m, monL)) =
       let rec gcd_list = function
@@ -251,11 +251,11 @@ struct
       let g = gcd_list coeffL in
       rem (m, gcd_list coeffL) = zero
 
-    let findMon f (g_, Sum (m, monL)) =
+    let findMon f (g, Sum (m, monL)) =
       let rec findMon' (a, monL2) = match a with
         | [] -> None
         | mon :: monL1 ->
-            begin match f (g_, mon, Sum (m, monL1 @ monL2)) with
+            begin match f (g, mon, Sum (m, monL1 @ monL2)) with
             | Some _ as result -> result
             | None -> findMon' (monL1, mon :: monL2)
             end
@@ -271,24 +271,24 @@ struct
       let divideMon (Mon (n, usL)) = Mon (divide n, usL) in
       try Some (Sum (divide m, List.map divideMon monL)) with Err -> None
 
-    let rec delaySum (g_, sum) =
-      let u_ = toFgn sum in
-      let cnstr = ref (Eqn (g_, u_, numberExp zero)) in
-      Delay (u_, cnstr)
+    let rec delaySum (g, sum) =
+      let u = toFgn sum in
+      let cnstr = ref (Eqn (g, u, numberExp zero)) in
+      Delay (u, cnstr)
 
     and solveSum (g_, a) = match a with
-      | (Sum (m, Mon (n, ((EVar (r, _, _, _) as x_), s) :: []) :: []) as sum) ->
+      | (Sum (m, Mon (n, ((EVar (r, _, _, _) as x), s) :: []) :: []) as sum) ->
           begin if Whnf.isPatSub s then
-            [ Assign (g_, x_, numberExp (-quot (m, n)), Whnf.invert s) ]
+            [ Assign (g_, x, numberExp (-quot (m, n)), Whnf.invert s) ]
           else [ delaySum (g_, sum) ]
           end
       | sum ->
-          let invertMon (g_, a, sum) = match a with
+          let invertMon (g, a, sum) = match a with
             | (Mon (n, (EVar (r, _, _, _), s) :: []) as mon) ->
                 begin if Whnf.isPatSub s then
                   let ss = Whnf.invert s in
-                  let rhs_ = toFgn sum in
-                  begin if Unify.invertible (g_, (rhs_, id), ss, r) then
+                  let rhs = toFgn sum in
+                  begin if Unify.invertible (g, (rhs, id), ss, r) then
                     Some (mon, ss, sum)
                   else None
                   end
@@ -302,34 +302,34 @@ struct
               | Some (Mon (n2, (x2_, s2) :: []), ss2, sum2) ->
                   let s = Unify.intersection s1 s2 in
                   let ss = Whnf.invert s in
-                  let g'_ = Whnf.strengthen ss g_ in
+                  let g' = Whnf.strengthen ss g_ in
                   let g = gcd n1 n2 in
                   let x1, x2 = solve_gcd n1 n2 in
-                  let k_ = newEVar g'_ (number ()) in
-                  let z_ = newEVar g'_ (number ()) in
+                  let k = newEVar g' (number ()) in
+                  let z = newEVar g' (number ()) in
                   Assign
                     ( g_,
                       x1_,
                       toFgn
                         (plusSum
-                           ( Sum (zero, [ Mon (quot (n2, g), [ (k_, ss) ]) ]),
+                           ( Sum (zero, [ Mon (quot (n2, g), [ (k, ss) ]) ]),
                              timesSum
                                ( Sum (x1, []),
-                                 Sum (zero, [ Mon (one, [ (z_, ss) ]) ]) ) )),
+                                 Sum (zero, [ Mon (one, [ (z, ss) ]) ]) ) )),
                       ss1 )
                   :: Assign
                        ( g_,
                          x2_,
                          toFgn
                            (plusSum
-                              ( Sum (zero, [ Mon (-quot (n1, g), [ (k_, ss) ]) ]),
+                              ( Sum (zero, [ Mon (-quot (n1, g), [ (k, ss) ]) ]),
                                 timesSum
                                   ( Sum (x2, []),
-                                    Sum (zero, [ Mon (one, [ (z_, ss) ]) ]) ) )),
+                                    Sum (zero, [ Mon (one, [ (z, ss) ]) ]) ) )),
                          ss2 )
                   :: solveSum
                        ( g_,
-                         plusSum (Sum (zero, [ Mon (g, [ (z_, ss) ]) ]), sum2)
+                         plusSum (Sum (zero, [ Mon (g, [ (z, ss) ]) ]), sum2)
                        )
               | None ->
                   begin match divideSum (sum1, n1) with
@@ -341,13 +341,13 @@ struct
           | None -> [ delaySum (g_, sum) ]
           end
 
-    and unifySum (g_, sum1, sum2) =
-      let invertMon (g_, Mon (n, ((EVar (r, _, _, _) as lhs_), s) :: []), sum) =
+    and unifySum (g, sum1, sum2) =
+      let invertMon (g, Mon (n, ((EVar (r, _, _, _) as lhs), s) :: []), sum) =
         begin if Whnf.isPatSub s then
           let ss = Whnf.invert s in
-          let rhs_ = toFgn (timesSum (Sum (-n, []), sum)) in
-          begin if Unify.invertible (g_, (rhs_, id), ss, r) then
-            Some (g_, lhs_, rhs_, ss)
+          let rhs = toFgn (timesSum (Sum (-n, []), sum)) in
+          begin if Unify.invertible (g, (rhs, id), ss, r) then
+            Some (g, lhs, rhs, ss)
           else None
           end
         else None
@@ -358,7 +358,7 @@ struct
           begin if m = zero then Succeed [] else Fail
           end
       | sum ->
-          begin if solvableSum sum then Succeed (solveSum (g_, sum)) else Fail
+          begin if solvableSum sum then Succeed (solveSum (g, sum)) else Fail
           end
       end
 
@@ -386,8 +386,8 @@ struct
 
     let equalTo arg__7 arg__8 =
       begin match (arg__7, arg__8) with
-      | MyIntsynRep sum, u2_ ->
-          begin match minusSum (normalizeSum sum, fromExp (u2_, id)) with
+      | MyIntsynRep sum, u2 ->
+          begin match minusSum (normalizeSum sum, fromExp (u2, id)) with
           | Sum (m, []) -> m = zero
           | _ -> false
           end
@@ -396,8 +396,8 @@ struct
 
     let unifyWith arg__9 arg__10 =
       begin match (arg__9, arg__10) with
-      | MyIntsynRep sum, (g_, u2_) ->
-          unifySum (g_, normalizeSum sum, fromExp (u2_, id))
+      | MyIntsynRep sum, (g, u2) ->
+          unifySum (g, normalizeSum sum, fromExp (u2, id))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
@@ -418,31 +418,31 @@ struct
       in
       let rec makeLam arg__11 arg__12 =
         begin match (arg__11, arg__12) with
-        | e_, 0 -> e_
-        | e_, n -> Lam (Dec (None, number ()), makeLam e_ (n - 1))
+        | e, 0 -> e
+        | e, n -> Lam (Dec (None, number ()), makeLam e (n - 1))
         end
       in
       let rec expand a1 b1 = match a1, b1 with
         | (Nil, s), arity -> (makeParams arity, arity)
-        | (App (u_, s_), s), arity ->
-            let s'_, arity' = expand (s_, s) (arity - 1) in
-            (App (EClo (u_, comp s (Shift arity')), s'_), arity')
+        | (App (u, s_), s), arity ->
+            let s', arity' = expand (s_, s) (arity - 1) in
+            (App (EClo (u, comp s (Shift arity')), s'), arity')
         | (SClo (s_, s'), s), arity -> expand (s_, comp s' s) arity
       in
-      let s'_, arity' = expand (s_, id) arity in
-      makeLam (toFgn (opExp s'_)) arity'
+      let s', arity' = expand (s_, id) arity in
+      makeLam (toFgn (opExp s')) arity'
 
     let makeFgnUnary opSum =
-      makeFgn (1, function App (u_, Nil) -> opSum (fromExp (u_, id)))
+      makeFgn (1, function App (u, Nil) -> opSum (fromExp (u, id)))
 
     let makeFgnBinary opSum =
       makeFgn
         ( 2,
           function
-          | App (u1_, App (u2_, Nil)) ->
-              opSum (fromExp (u1_, id), fromExp (u2_, id)) )
+          | App (u1, App (u2, Nil)) ->
+              opSum (fromExp (u1, id), fromExp (u2, id)) )
 
-    let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
+    let arrow u v = Pi ((Dec (None, u), No), v)
 
     let init (cs, installF) =
       begin
@@ -735,16 +735,16 @@ struct
   let normalize = normalizeSum
   let compatibleMon a b = compatibleMon (a, b)
   let number = number
-  let unaryMinus u_ = toFgn (unaryMinusSum (fromExp (u_, IntSyn.id)))
+  let unaryMinus u = toFgn (unaryMinusSum (fromExp (u, IntSyn.id)))
 
-  let plus u_ v_ =
-    toFgn (plusSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
+  let plus u v =
+    toFgn (plusSum (fromExp (u, IntSyn.id), fromExp (v, IntSyn.id)))
 
-  let minus u_ v_ =
-    toFgn (minusSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
+  let minus u v =
+    toFgn (minusSum (fromExp (u, IntSyn.id), fromExp (v, IntSyn.id)))
 
-  let times u_ v_ =
-    toFgn (timesSum (fromExp (u_, IntSyn.id), fromExp (v_, IntSyn.id)))
+  let times u v =
+    toFgn (timesSum (fromExp (u, IntSyn.id), fromExp (v, IntSyn.id)))
 
   let constant = numberExp
 end

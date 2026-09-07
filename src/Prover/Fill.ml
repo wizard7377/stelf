@@ -79,90 +79,90 @@ end) : FILL with module State = Fill__0.State' = struct
 
     exception Success of int
 
-    let expand (S.FocusLF (I.EVar (r, g_, v_, _) as y_)) =
-      let rec try_ (a, fs_, o_) = match a with
-        | ((I.Root _, _) as vs_) -> (
+    let expand (S.FocusLF (I.EVar (r, g, v, _) as y)) =
+      let rec try_ (a, fs, o) = match a with
+        | ((I.Root _, _) as vs) -> (
             try
               CsManager.trail (function () ->
                   begin
-                    Unify.unify g_ vs_ (v_, I.id);
-                    o_ :: fs_
+                    Unify.unify g vs (v, I.id);
+                    o :: fs
                   end)
-            with Unify.Unify _ -> fs_)
-        | (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
-            let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
-            try_ ((v2_, I.Dot (I.Exp x_, s)), fs_, o_)
-        | (I.EClo (v_, s'), s) -> try_ ((v_, I.comp s' s), fs_, o_)
+            with Unify.Unify _ -> fs)
+        | (I.Pi ((I.Dec (_, v1), _), v2), s) ->
+            let x = I.newEVar g (I.EClo (v1, s)) in
+            try_ ((v2, I.Dot (I.Exp x, s)), fs, o)
+        | (I.EClo (v, s'), s) -> try_ ((v, I.comp s' s), fs, o)
       in
-      let rec matchCtx (a, n, fs_) = match a with
-        | I.Null -> fs_
-        | I.Decl (g_, I.Dec (x, v_)) ->
+      let rec matchCtx (a, n, fs) = match a with
+        | I.Null -> fs
+        | I.Decl (g, I.Dec (x, v)) ->
             matchCtx
-              ( g_,
+              ( g,
                 n + 1,
-                try_ ((v_, I.Shift (n + 1)), fs_, FillWithBVar (y_, n + 1)) )
-        | I.Decl (g_, I.NDec _) -> matchCtx (g_, n + 1, fs_)
+                try_ ((v, I.Shift (n + 1)), fs, FillWithBVar (y, n + 1)) )
+        | I.Decl (g, I.NDec _) -> matchCtx (g, n + 1, fs)
       in
-      let rec matchSig (a, fs_) = match a with
-        | [] -> fs_
-        | I.Const c :: l_ ->
+      let rec matchSig (a, fs) = match a with
+        | [] -> fs
+        | I.Const c :: l ->
             matchSig
-              (l_, try_ ((I.constType c, I.id), fs_, FillWithConst (y_, c)))
-        | I.Def c :: l_ ->
+              (l, try_ ((I.constType c, I.id), fs, FillWithConst (y, c)))
+        | I.Def c :: l ->
             matchSig
-              (l_, try_ ((I.constType c, I.id), fs_, FillWithConst (y_, c)))
-        | _ :: l_ -> matchSig (l_, fs_)
+              (l, try_ ((I.constType c, I.id), fs, FillWithConst (y, c)))
+        | _ :: l -> matchSig (l, fs)
       in
-      matchCtx (g_, 0, matchSig (Index.lookup (I.targetFam v_), []))
+      matchCtx (g, 0, matchSig (Index.lookup (I.targetFam v), []))
 
     let apply = function
-      | FillWithBVar ((I.EVar (r, g_, v_, _) as y_), n) ->
+      | FillWithBVar ((I.EVar (r, g, v, _) as y), n) ->
           let rec doit (a, k) = match a with
-            | ((I.Root _, _) as vs_) -> begin
-                Unify.unify g_ vs_ (v_, I.id);
+            | ((I.Root _, _) as vs) -> begin
+                Unify.unify g vs (v, I.id);
                 k I.Nil
               end
-            | (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
-                let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
+            | (I.Pi ((I.Dec (_, v1), _), v2), s) ->
+                let x = I.newEVar g (I.EClo (v1, s)) in
                 doit
-                  ( (v2_, I.Dot (I.Exp x_, s)),
-                    function s_ -> k (I.App (x_, s_)) )
-            | (I.EClo (v_, t), s) -> doit ((v_, I.comp t s), k)
+                  ( (v2, I.Dot (I.Exp x, s)),
+                    function s -> k (I.App (x, s)) )
+            | (I.EClo (v, t), s) -> doit ((v, I.comp t s), k)
           in
-          let (I.Dec (_, w_)) = I.ctxDec g_ n in
+          let (I.Dec (_, w)) = I.ctxDec g n in
           doit
-            ( (w_, I.id),
+            ( (w, I.id),
               function
-              | s_ -> Unify.unify g_ (y_, I.id) (I.Root (I.BVar n, s_), I.id)
+              | s -> Unify.unify g (y, I.id) (I.Root (I.BVar n, s), I.id)
             )
-      | FillWithConst ((I.EVar (r, g0_, v_, _) as y_), c) ->
+      | FillWithConst ((I.EVar (r, g0, v, _) as y), c) ->
           let rec doit (a, k) = match a with
-            | ((I.Root _, _) as vs_) -> begin
-                Unify.unify g0_ vs_ (v_, I.id);
+            | ((I.Root _, _) as vs) -> begin
+                Unify.unify g0 vs (v, I.id);
                 k I.Nil
               end
-            | (I.Pi ((I.Dec (_, v1_), _), v2_), s) ->
-                let x_ = I.newEVar g0_ (I.EClo (v1_, s)) in
+            | (I.Pi ((I.Dec (_, v1), _), v2), s) ->
+                let x = I.newEVar g0 (I.EClo (v1, s)) in
                 doit
-                  ( (v2_, I.Dot (I.Exp x_, s)),
-                    function s_ -> k (I.App (x_, s_)) )
+                  ( (v2, I.Dot (I.Exp x, s)),
+                    function s -> k (I.App (x, s)) )
           in
-          let w_ = I.constType c in
+          let w = I.constType c in
           doit
-            ( (w_, I.id),
+            ( (w, I.id),
               function
-              | s_ ->
-                  Unify.unify g0_ (y_, I.id) (I.Root (I.Const c, s_), I.id)
+              | s ->
+                  Unify.unify g0 (y, I.id) (I.Root (I.Const c, s), I.id)
             )
 
     let menu = function
-      | FillWithBVar ((I.EVar (_, g_, _, _) as x_), n) ->
-          begin match I.ctxLookup (Names.ctxName g_) n with
+      | FillWithBVar ((I.EVar (_, g, _, _) as x_), n) ->
+          begin match I.ctxLookup (Names.ctxName g) n with
           | I.Dec (Some x, _) ->
-              (("Fill " ^ Names.evarName g_ x_) ^ " with variable ") ^ x
+              (("Fill " ^ Names.evarName g x_) ^ " with variable ") ^ x
           end
-      | FillWithConst ((I.EVar (_, g_, _, _) as x_), c) ->
-          (("Fill " ^ Names.evarName g_ x_) ^ " with constant ")
+      | FillWithConst ((I.EVar (_, g, _, _) as x), c) ->
+          (("Fill " ^ Names.evarName g x) ^ " with constant ")
           ^ IntSyn.conDecName (IntSyn.sgnLookup c)
   end
 

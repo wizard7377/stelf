@@ -89,30 +89,30 @@ end) : RECON_MODE = struct
       let mpi (m, _) d t (g, d_) = t (I.Decl (g, d), I.Decl (d_, m))
 
       let mroot tm r (g, d_) =
-        let (T.JWithCtx (g_, T.JOf ((v_, _), _, _))) =
+        let (T.JWithCtx (g_, T.JOf ((v, _), _, _))) =
           T.recon (T.jwithctx g (T.jof tm (T.typ r)))
         in
         ignore (T.checkErrors r);
         let rec convertSpine = function
           | I.Nil -> M.Mnil
-          | I.App (u_, s_) ->
+          | I.App (u, s) ->
               let k =
-                try Whnf.etaContract u_
-                with eta_ ->
+                try Whnf.etaContract u
+                with eta ->
                   error
-                    r (("Argument " ^ Print.expToString g_ u_)
+                    r (("Argument " ^ Print.expToString g_ u)
                       ^ " not a variable")
               in
               let (I.Dec (name, _)) = I.ctxLookup g_ k in
               let mode = I.ctxLookup d_ k in
-              M.Mapp (M.Marg (mode, name), convertSpine s_)
+              M.Mapp (M.Marg (mode, name), convertSpine s)
         in
         let convertExp = function
-          | I.Root (I.Const a, s_) -> (a, convertSpine s_)
-          | I.Root (I.Def d, s_) -> (d, convertSpine s_)
+          | I.Root (I.Const a, s) -> (a, convertSpine s)
+          | I.Root (I.Def d, s) -> (d, convertSpine s)
           | _ -> error r ("Call pattern not an atomic type")
         in
-        let a, mS = convertExp (Whnf.normalize (v_, I.id)) in
+        let a, mS = convertExp (Whnf.normalize (v, I.id)) in
         ModeDec.checkFull a mS r;
         ((a, mS), r)
 

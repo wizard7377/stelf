@@ -185,22 +185,22 @@ module Make_CompSyn
   *)
   let rec goalSub a1 b1 = match a1, b1 with
     | Atom p, s -> Atom (IntSyn.EClo (p, s))
-    | Impl (d, a_, ha, g), s ->
+    | Impl (d, a, ha, g), s ->
         Impl
           ( resGoalSub d s,
-            IntSyn.EClo (a_, s),
+            IntSyn.EClo (a, s),
             ha,
             goalSub g (IntSyn.dot1 s) )
-    | All (d_, g), s -> All (IntSyn.decSub d_ s, goalSub g (IntSyn.dot1 s))
+    | All (d, g), s -> All (IntSyn.decSub d s, goalSub g (IntSyn.dot1 s))
 
   and resGoalSub a1 b1 = match a1, b1 with
     | Eq q, s -> Eq (IntSyn.EClo (q, s))
-    | And (r, a_, g), s ->
-        And (resGoalSub r (IntSyn.dot1 s), IntSyn.EClo (a_, s), goalSub g s)
-    | In (r, a_, g), s ->
-        In (resGoalSub r (IntSyn.dot1 s), IntSyn.EClo (a_, s), goalSub g s)
-    | Exists (d_, r), s ->
-        Exists (IntSyn.decSub d_ s, resGoalSub r (IntSyn.dot1 s))
+    | And (r, a, g), s ->
+        And (resGoalSub r (IntSyn.dot1 s), IntSyn.EClo (a, s), goalSub g s)
+    | In (r, a, g), s ->
+        In (resGoalSub r (IntSyn.dot1 s), IntSyn.EClo (a, s), goalSub g s)
+    | Exists (d, r), s ->
+        Exists (IntSyn.decSub d s, resGoalSub r (IntSyn.dot1 s))
 
   (* resGoalSub (r, s) = r'
 
@@ -211,10 +211,10 @@ module Make_CompSyn
   *)
   let rec pskeletonToString = function
     | [] -> " "
-    | Pc i :: o_ ->
-        (Names.qidToString (Names.constQid i) ^ " ") ^ pskeletonToString o_
-    | Dc i :: o_ -> (("(Dc " ^ Int.toString i) ^ ") ") ^ pskeletonToString o_
-    | Csolver u_ :: o_ -> "(cs _ ) " ^ pskeletonToString o_
+    | Pc i :: o ->
+        (Names.qidToString (Names.constQid i) ^ " ") ^ pskeletonToString o
+    | Dc i :: o -> (("(Dc " ^ Int.toString i) ^ ") ") ^ pskeletonToString o
+    | Csolver u :: o -> "(cs _ ) " ^ pskeletonToString o
 end
 
 open TableInstances

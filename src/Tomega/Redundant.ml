@@ -33,34 +33,34 @@ end) : REDUNDANT = struct
     else
       begin match (r1, r2) with
       | { contents = None }, { contents = None } -> true
-      | { contents = Some p1_ }, { contents = Some p2_ } -> func (p1_, p2_)
+      | { contents = Some p1 }, { contents = Some p2 } -> func (p1, p2)
       | _ -> false
       end
     end
 
   let rec convert = function
-    | T.Lam (d_, p_) -> T.Lam (d_, convert p_)
-    | T.New p_ -> T.New (convert p_)
-    | T.Choose p_ -> T.Choose (convert p_)
-    | T.PairExp (m_, p_) -> T.PairExp (m_, convert p_)
-    | T.PairBlock (rho, p_) -> T.PairBlock (rho, convert p_)
-    | T.PairPrg (p1_, p2_) -> T.PairPrg (convert p1_, convert p2_)
+    | T.Lam (d, p) -> T.Lam (d, convert p)
+    | T.New p -> T.New (convert p)
+    | T.Choose p -> T.Choose (convert p)
+    | T.PairExp (m, p) -> T.PairExp (m, convert p)
+    | T.PairBlock (rho, p) -> T.PairBlock (rho, convert p)
+    | T.PairPrg (p1, p2) -> T.PairPrg (convert p1, convert p2)
     | T.Unit -> T.Unit
     | T.Var x -> T.Var x
     | T.Const x -> T.Const x
-    | T.Redex (p_, s_) -> T.Redex (convert p_, convertSpine s_)
-    | T.Rec (d_, p_) -> T.Rec (d_, convert p_)
-    | T.Case (T.Cases o_) -> T.Case (T.Cases (convertCases o_))
-    | T.Let (d_, p1_, p2_) -> T.Let (d_, convert p1_, convert p2_)
+    | T.Redex (p, s) -> T.Redex (convert p, convertSpine s)
+    | T.Rec (d, p) -> T.Rec (d, convert p)
+    | T.Case (T.Cases o) -> T.Case (T.Cases (convertCases o))
+    | T.Let (d, p1, p2) -> T.Let (d, convert p1, convert p2)
 
   and convertSpine = function
     | T.Nil -> T.Nil
-    | T.AppExp (i_, s_) -> T.AppExp (i_, convertSpine s_)
-    | T.AppBlock (i_, s_) -> T.AppBlock (i_, convertSpine s_)
-    | T.AppPrg (p_, s_) -> T.AppPrg (convert p_, convertSpine s_)
-    | T.SClo (s_, t) -> raise (Error "SClo should not exist")
+    | T.AppExp (i, s) -> T.AppExp (i, convertSpine s)
+    | T.AppBlock (i, s) -> T.AppBlock (i, convertSpine s)
+    | T.AppPrg (p, s) -> T.AppPrg (convert p, convertSpine s)
+    | T.SClo (s, t) -> raise (Error "SClo should not exist")
 
-  and expEqual (e1_, e2_) = Conv.conv (e1_, I.id) (e2_, I.id)
+  and expEqual (e1, e2) = Conv.conv (e1, I.id) (e2, I.id)
   and isubEqual (sub1, sub2) = Conv.convSub sub1 sub2
 
   and blockEqual = function
@@ -73,14 +73,14 @@ end) : REDUNDANT = struct
     | _ -> false (* Should not occur -- ap 2/18/03 *)
 
   and decEqual = function
-    | T.UDec d1_, (T.UDec d2_, t2) ->
-        Conv.convDec d1_ I.id (d2_, T.coerceSub t2)
-    | T.PDec (_, f1_, _, _), (T.PDec (_, f2_, _, _), t2) ->
-        T.convFor f1_ T.id (f2_, t2)
+    | T.UDec d1, (T.UDec d2, t2) ->
+        Conv.convDec d1 I.id (d2, T.coerceSub t2)
+    | T.PDec (_, f1, _, _), (T.PDec (_, f2, _, _), t2) ->
+        T.convFor f1 T.id (f2, t2)
     | _ -> false
 
   and caseEqual = function
-    | (psi1, t1, p1_) :: o1_, ((psi2, t2, p2_) :: o2_, tAfter) ->
+    | (psi1, t1, p1) :: o1, ((psi2, t2, p2) :: o2, tAfter) ->
         let t2' = T.comp (T.invertSub tAfter) t2 in
         let t = Opsem.createVarSub psi1 psi2 in
         let t' = T.comp t2' t in
@@ -95,7 +95,7 @@ end) : REDUNDANT = struct
         begin if doMatch then
           let newT = T.normalizeSub t in
           let stillMatch = isSubRenamingOnly newT in
-          stillMatch && prgEqual (p1_, (p2_, cleanSub newT))
+          stillMatch && prgEqual (p1, (p2, cleanSub newT))
         else false
         end
         (* Note:  (Psi1 |- t1: Psi0) *)
@@ -107,29 +107,29 @@ end) : REDUNDANT = struct
 
   and spineEqual = function
     | T.Nil, (T.Nil, t2) -> true
-    | T.AppExp (e1_, s1_), (T.AppExp (e2_, s2_), t2) ->
-        Conv.conv (e1_, I.id) (e2_, T.coerceSub t2)
-        && spineEqual (s1_, (s2_, t2))
-    | T.AppBlock (b1_, s1_), (T.AppBlock (b2_, s2_), t2) ->
-        blockEqual (b1_, I.blockSub b2_ (T.coerceSub t2))
-        && spineEqual (s1_, (s2_, t2))
-    | T.AppPrg (p1_, s1_), (T.AppPrg (p2_, s2_), t2) ->
-        prgEqual (p1_, (p2_, t2)) && spineEqual (s1_, (s2_, t2))
+    | T.AppExp (e1, s1), (T.AppExp (e2, s2), t2) ->
+        Conv.conv (e1, I.id) (e2, T.coerceSub t2)
+        && spineEqual (s1, (s2, t2))
+    | T.AppBlock (b1, s1), (T.AppBlock (b2, s2), t2) ->
+        blockEqual (b1, I.blockSub b2 (T.coerceSub t2))
+        && spineEqual (s1, (s2, t2))
+    | T.AppPrg (p1, s1), (T.AppPrg (p2, s2), t2) ->
+        prgEqual (p1, (p2, t2)) && spineEqual (s1, (s2, t2))
     | T.SClo (s_, t1), (T.SClo (s, t2a), t2) ->
         raise (Error "SClo should not exist!")
     | _ -> false (* there are no SClo created in converter *)
 
   and prgEqual = function
-    | T.Lam (d1_, p1_), (T.Lam (d2_, p2_), t2) ->
-        decEqual (d1_, (d2_, t2)) && prgEqual (p1_, (p2_, T.dot1 t2))
-    | T.New p1_, (T.New p2_, t2) -> prgEqual (p1_, (p2_, t2))
-    | T.Choose p1_, (T.Choose p2_, t2) -> prgEqual (p1_, (p2_, t2))
-    | T.PairExp (u1_, p1_), (T.PairExp (u2_, p2_), t2) ->
-        Conv.conv (u1_, I.id) (u2_, T.coerceSub t2)
-        && prgEqual (p1_, (p2_, t2))
-    | T.PairBlock (b1_, p1_), (T.PairBlock (b2_, p2_), t2) ->
-        blockEqual (b1_, I.blockSub b2_ (T.coerceSub t2))
-        && prgEqual (p1_, (p2_, t2))
+    | T.Lam (d1, p1), (T.Lam (d2, p2), t2) ->
+        decEqual (d1, (d2, t2)) && prgEqual (p1, (p2, T.dot1 t2))
+    | T.New p1, (T.New p2, t2) -> prgEqual (p1, (p2, t2))
+    | T.Choose p1, (T.Choose p2, t2) -> prgEqual (p1, (p2, t2))
+    | T.PairExp (u1, p1), (T.PairExp (u2, p2), t2) ->
+        Conv.conv (u1, I.id) (u2, T.coerceSub t2)
+        && prgEqual (p1, (p2, t2))
+    | T.PairBlock (b1, p1), (T.PairBlock (b2, p2), t2) ->
+        blockEqual (b1, I.blockSub b2 (T.coerceSub t2))
+        && prgEqual (p1, (p2, t2))
     | T.PairPrg (p1a, p1b), (T.PairPrg (p2a, p2b), t2) ->
         prgEqual (p1a, (p2a, t2)) && prgEqual (p1b, (p2b, t2))
     | T.Unit, (T.Unit, t2) -> true
@@ -139,18 +139,18 @@ end) : REDUNDANT = struct
         | None -> false
         | Some i -> x1 = i
         end
-    | T.Redex (p1_, s1_), (T.Redex (p2_, s2_), t2) ->
-        prgEqual (p1_, (p2_, t2)) && spineEqual (s1_, (s2_, t2))
-    | T.Rec (d1_, p1_), (T.Rec (d2_, p2_), t2) ->
-        decEqual (d1_, (d2_, t2)) && prgEqual (p1_, (p2_, T.dot1 t2))
-    | T.Case (T.Cases o1_), (T.Case (T.Cases o2_), t2) ->
-        caseEqual (o1_, (o2_, t2))
-    | T.Let (d1_, p1a, p1b), (T.Let (d2_, p2a, p2b), t2) ->
-        decEqual (d1_, (d2_, t2)) && prgEqual (p1a, (p2a, t2))
-    | T.PClo (p1_, t1), (T.PClo (p2_, t2a), t2b) ->
+    | T.Redex (p1, s1), (T.Redex (p2, s2), t2) ->
+        prgEqual (p1, (p2, t2)) && spineEqual (s1, (s2, t2))
+    | T.Rec (d1, p1), (T.Rec (d2, p2), t2) ->
+        decEqual (d1, (d2, t2)) && prgEqual (p1, (p2, T.dot1 t2))
+    | T.Case (T.Cases o1), (T.Case (T.Cases o2), t2) ->
+        caseEqual (o1, (o2, t2))
+    | T.Let (d1, p1a, p1b), (T.Let (d2, p2a, p2b), t2) ->
+        decEqual (d1, (d2, t2)) && prgEqual (p1a, (p2a, t2))
+    | T.PClo (p1, t1), (T.PClo (p2, t2a), t2b) ->
         raise (Error "PClo should not exist!")
-    | ( T.EVar (psi1, p1optRef, f1_, _, _, _),
-        (T.EVar (psi2, p2optref, f2_, _, _, _), t2) ) ->
+    | ( T.EVar (psi1, p1optRef, f1, _, _, _),
+        (T.EVar (psi2, p2optref, f2, _, _, _), t2) ) ->
         raise (Error "No EVARs should exist!")
     | _ -> false
   (* there are no PClo created in converter *)
@@ -165,30 +165,30 @@ end) : REDUNDANT = struct
 *)
 
   and convertCases = function
-    | a_ :: c_ ->
-        let (psi, t, p_), c'_ = removeRedundancy (a_, c_) in
-        (psi, t, convert p_) :: convertCases c'_
-    | c_ -> c_
+    | a :: c ->
+        let (psi, t, p), c' = removeRedundancy (a, c) in
+        (psi, t, convert p) :: convertCases c'
+    | c -> c
 
-  and removeRedundancy (c_, a) = match a with
-    | [] -> (c_, [])
-    | c'_ :: rest ->
-        let (c''_ :: cs_) = mergeIfNecessary (c_, c'_) in
-        let c''', rest' = removeRedundancy (c''_, rest) in
-        (c''', cs_ @ rest')
+  and removeRedundancy (c, a) = match a with
+    | [] -> (c, [])
+    | c' :: rest ->
+        let (c'' :: cs) = mergeIfNecessary (c, c') in
+        let c''', rest' = removeRedundancy (c'', rest) in
+        (c''', cs @ rest')
 
   and getFrontIndex = function
     | T.Idx k -> Some k
-    | T.Prg p_ -> getPrgIndex p_
-    | T.Exp u_ -> getExpIndex u_
-    | T.Block b_ -> getBlockIndex b_
+    | T.Prg p -> getPrgIndex p
+    | T.Exp u -> getExpIndex u
+    | T.Block b -> getBlockIndex b
     | T.Undef -> None
 
   and getPrgIndex = function
     | T.Var k -> Some k
-    | T.Redex (p_, T.Nil) -> getPrgIndex p_
-    | T.PClo (p_, t) ->
-        begin match getPrgIndex p_ with
+    | T.Redex (p, T.Nil) -> getPrgIndex p
+    | T.PClo (p, t) ->
+        begin match getPrgIndex p with
         | None -> None
         | Some i -> getFrontIndex (T.varSub i t)
         end
@@ -197,19 +197,19 @@ end) : REDUNDANT = struct
 
   and getExpIndex = function
     | I.Root (I.BVar k, I.Nil) -> Some k
-    | I.Redex (u_, I.Nil) -> getExpIndex u_
-    | I.EClo (u_, t) ->
-        begin match getExpIndex u_ with
+    | I.Redex (u, I.Nil) -> getExpIndex u
+    | I.EClo (u, t) ->
+        begin match getExpIndex u with
         | None -> None
         | Some i -> getFrontIndex (T.revCoerceFront (I.bvarSub i t))
         end
-    | I.Lam (I.Dec (_, u1_), u2_) as u_ -> (
-        try Some (Whnf.etaContract u_) with eta_ -> None | _ -> None)
+    | I.Lam (I.Dec (_, u1), u2) as u -> (
+        try Some (Whnf.etaContract u) with eta -> None | _ -> None)
 
   and getBlockIndex = function I.Bidx k -> Some k | _ -> None
 
   and cleanSub = function
-    | T.Shift _ as s_ -> s_
+    | T.Shift _ as s -> s
     | T.Dot (ft1, s1) ->
         begin match getFrontIndex ft1 with
         | None -> T.Dot (ft1, cleanSub s1)
@@ -225,19 +225,19 @@ end) : REDUNDANT = struct
 
   and mergeSpines = function
     | T.Nil, (T.Nil, t2) -> T.Nil
-    | T.AppExp (e1_, s1_), (T.AppExp (e2_, s2_), t2) ->
-        begin if Conv.conv (e1_, I.id) (e2_, T.coerceSub t2) then
-          T.AppExp (e1_, mergeSpines (s1_, (s2_, t2)))
+    | T.AppExp (e1, s1), (T.AppExp (e2, s2), t2) ->
+        begin if Conv.conv (e1, I.id) (e2, T.coerceSub t2) then
+          T.AppExp (e1, mergeSpines (s1, (s2, t2)))
         else raise (Error "Spine not equal (AppExp)")
         end
-    | T.AppBlock (b1_, s1_), (T.AppBlock (b2_, s2_), t2) ->
-        begin if blockEqual (b1_, I.blockSub b2_ (T.coerceSub t2)) then
-          T.AppBlock (b1_, mergeSpines (s1_, (s2_, t2)))
+    | T.AppBlock (b1, s1), (T.AppBlock (b2, s2), t2) ->
+        begin if blockEqual (b1, I.blockSub b2 (T.coerceSub t2)) then
+          T.AppBlock (b1, mergeSpines (s1, (s2, t2)))
         else raise (Error "Spine not equal (AppBlock)")
         end
-    | T.AppPrg (p1_, s1_), (T.AppPrg (p2_, s2_), t2) ->
-        begin if prgEqual (p1_, (p2_, t2)) then
-          T.AppPrg (p1_, mergeSpines (s1_, (s2_, t2)))
+    | T.AppPrg (p1, s1), (T.AppPrg (p2, s2), t2) ->
+        begin if prgEqual (p1, (p2, t2)) then
+          T.AppPrg (p1, mergeSpines (s1, (s2, t2)))
         else raise (Error "Prg (in App) not equal")
         end
     | T.SClo (s_, t1), (T.SClo (s, t2a), t2) ->
@@ -246,29 +246,29 @@ end) : REDUNDANT = struct
   (* there are no SClo created in converter *)
 
   and mergePrgs = function
-    | T.Lam (d1_, p1_), (T.Lam (d2_, p2_), t2) ->
-        begin if decEqual (d1_, (d2_, t2)) && prgEqual (p1_, (p2_, T.dot1 t2))
-        then T.Lam (d1_, p1_)
+    | T.Lam (d1, p1), (T.Lam (d2, p2), t2) ->
+        begin if decEqual (d1, (d2, t2)) && prgEqual (p1, (p2, T.dot1 t2))
+        then T.Lam (d1, p1)
         else raise (Error "Lambda don't match")
         end
-    | T.New p1_, (T.New p2_, t2) ->
-        begin if prgEqual (p1_, (p2_, t2)) then T.New p1_
+    | T.New p1, (T.New p2, t2) ->
+        begin if prgEqual (p1, (p2, t2)) then T.New p1
         else raise (Error "New don't match")
         end
-    | T.Choose p1_, (T.Choose p2_, t2) ->
-        begin if prgEqual (p1_, (p2_, t2)) then T.Choose p1_
+    | T.Choose p1, (T.Choose p2, t2) ->
+        begin if prgEqual (p1, (p2, t2)) then T.Choose p1
         else raise (Error "Choose don't match")
         end
-    | T.PairExp (u1_, p1_), (T.PairExp (u2_, p2_), t2) ->
+    | T.PairExp (u1, p1), (T.PairExp (u2, p2), t2) ->
         let t2' = T.coerceSub t2 in
-        begin if Conv.conv (u1_, I.id) (u2_, t2') then
-          T.PairExp (u1_, mergePrgs (p1_, (p2_, t2)))
+        begin if Conv.conv (u1, I.id) (u2, t2') then
+          T.PairExp (u1, mergePrgs (p1, (p2, t2)))
         else raise (Error "cannot merge PairExp")
         end
-    | T.PairBlock (b1_, p1_), (T.PairBlock (b2_, p2_), t2) ->
-        let b2' = I.blockSub b2_ (T.coerceSub t2) in
-        begin if blockEqual (b1_, b2') then
-          T.PairBlock (b1_, mergePrgs (p1_, (p2_, t2)))
+    | T.PairBlock (b1, p1), (T.PairBlock (b2, p2), t2) ->
+        let b2' = I.blockSub b2 (T.coerceSub t2) in
+        begin if blockEqual (b1, b2') then
+          T.PairBlock (b1, mergePrgs (p1, (p2, t2)))
         else raise (Error "cannot merge PairBlock")
         end
     | T.PairPrg (p1a, p1b), (T.PairPrg (p2a, p2b), t2) ->
@@ -289,28 +289,28 @@ end) : REDUNDANT = struct
             else raise (Error "Variables do not Match.")
             end
         end
-    | T.Redex (p1_, s1_), (T.Redex (p2_, s2_), t2) ->
-        let newS = mergeSpines (s1_, (s2_, t2)) in
-        begin if prgEqual (p1_, (p2_, t2)) then T.Redex (p1_, newS)
+    | T.Redex (p1, s1), (T.Redex (p2, s2), t2) ->
+        let newS = mergeSpines (s1, (s2, t2)) in
+        begin if prgEqual (p1, (p2, t2)) then T.Redex (p1, newS)
         else raise (Error "Redex Prgs don't match")
         end
-    | T.Rec (d1_, p1_), (T.Rec (d2_, p2_), t2) ->
-        begin if decEqual (d1_, (d2_, t2)) && prgEqual (p1_, (p2_, T.dot1 t2))
-        then T.Rec (d1_, p1_)
+    | T.Rec (d1, p1), (T.Rec (d2, p2), t2) ->
+        begin if decEqual (d1, (d2, t2)) && prgEqual (p1, (p2, T.dot1 t2))
+        then T.Rec (d1, p1)
         else raise (Error "Rec's don't match")
         end
-    | T.Case (T.Cases o1_), (T.Case (T.Cases (c_ :: [])), t2) ->
-        T.Case (T.Cases (mergeCase (o1_, (c_, t2))))
-    | T.Case o1_, (T.Case o2_, t2) -> raise (Error "Invariant Violated")
-    | T.PClo (p1_, t1), (T.PClo (p2_, t2a), t2b) ->
+    | T.Case (T.Cases o1), (T.Case (T.Cases (c :: [])), t2) ->
+        T.Case (T.Cases (mergeCase (o1, (c, t2))))
+    | T.Case o1, (T.Case o2, t2) -> raise (Error "Invariant Violated")
+    | T.PClo (p1, t1), (T.PClo (p2, t2a), t2b) ->
         raise (Error "PClo should not exist!")
-    | T.Let (d1_, p1a, p1b), (T.Let (d2_, p2a, p2b), t2) ->
-        begin if decEqual (d1_, (d2_, t2)) && prgEqual (p1a, (p2a, t2)) then
-          T.Let (d1_, p1a, mergePrgs (p1b, (p2b, T.dot1 t2)))
+    | T.Let (d1, p1a, p1b), (T.Let (d2, p2a, p2b), t2) ->
+        begin if decEqual (d1, (d2, t2)) && prgEqual (p1a, (p2a, t2)) then
+          T.Let (d1, p1a, mergePrgs (p1b, (p2b, T.dot1 t2)))
         else raise (Error "Let don't match")
         end
-    | ( T.EVar (psi1, p1optRef, f1_, _, _, _),
-        (T.EVar (psi2, p2optref, f2_, _, _, _), t2) ) ->
+    | ( T.EVar (psi1, p1optRef, f1, _, _, _),
+        (T.EVar (psi2, p2optref, f2, _, _, _), t2) ) ->
         raise (Error "No EVARs should exist!")
     | _ ->
         raise (Error "Redundancy in cases could not automatically be removed.")
@@ -345,8 +345,8 @@ end) : REDUNDANT = struct
     let rec lookup (n, a, p) = match a with
       | T.Shift _ -> None
       | T.Dot (T.Undef, s') -> lookup (n + 1, s', p)
-      | T.Dot (ft_, s') ->
-          begin match getFrontIndex ft_ with
+      | T.Dot (ft, s') ->
+          begin match getFrontIndex ft with
           | None -> lookup (n + 1, s', p)
           | Some k ->
               begin if k = p then Some n else lookup (n + 1, s', p)
@@ -381,15 +381,15 @@ end) : REDUNDANT = struct
         print "EXP_EVAR (DOT) ";
         printSub s
       end
-    | T.Dot (T.Prg p_, s) -> begin
+    | T.Dot (T.Prg p, s) -> begin
         print "PRG (DOT) ";
         printSub s
       end
-    | T.Dot (T.Exp e_, s) -> begin
+    | T.Dot (T.Exp e, s) -> begin
         print "EXP (DOT) ";
         printSub s
       end
-    | T.Dot (T.Block b_, s) -> begin
+    | T.Dot (T.Block b, s) -> begin
         print "BLOCK (DOT) ";
         printSub s
       end
@@ -399,8 +399,8 @@ end) : REDUNDANT = struct
       end
 
   and mergeCase = function
-    | [], c_ -> raise (Error "Case incompatible, cannot merge")
-    | ((psi1, t1, p1_) :: o_ as l_), (((psi2, t2, p2_), tAfter) as c_) ->
+    | [], c -> raise (Error "Case incompatible, cannot merge")
+    | ((psi1, t1, p1) :: o as l), (((psi2, t2, p2), tAfter) as c) ->
         let tAfterInv = T.invertSub tAfter in
         let t3 = T.comp tAfterInv t2 in
         let t = Opsem.createVarSub psi1 psi2 in
@@ -417,10 +417,10 @@ end) : REDUNDANT = struct
           let newT = T.normalizeSub t in
           let stillMatch = isSubRenamingOnly newT in
           begin if stillMatch then
-            (psi1, t1, mergePrgs (p1_, (p2_, cleanSub newT))) :: o_
+            (psi1, t1, mergePrgs (p1, (p2, cleanSub newT))) :: o
           else
-            begin if length o_ = 0 then (psi2, t3, p2_) :: l_
-            else (psi1, t1, p1_) :: mergeCase (o_, c_)
+            begin if length o = 0 then (psi2, t3, p2) :: l
+            else (psi1, t1, p1) :: mergeCase (o, c)
             end
             (* We tried all the cases, and we can now add it *)
             (* Try other cases *)
@@ -431,8 +431,8 @@ end) : REDUNDANT = struct
            *)
         (* Note that tAfter and newT are both renaming substitutions *)
           else
-          begin if length o_ = 0 then (psi2, t3, p2_) :: l_
-          else (psi1, t1, p1_) :: mergeCase (o_, c_)
+          begin if length o = 0 then (psi2, t3, p2) :: l
+          else (psi1, t1, p1) :: mergeCase (o, c)
           end
           (* We tried all the cases, and we can now add it *)
           (* Try other cases *)
@@ -458,7 +458,7 @@ end) : REDUNDANT = struct
   (* Psi1 |- t : Psi2 *)
   (* Psi1 |- t' : Psi1' *)
   (* If we can get this to match, then Psi1 |- P2[t] *)
-  and mergeIfNecessary (((psi1, s1, p1_) as c_), ((psi2, s2, p2_) as c'_)) =
+  and mergeIfNecessary (((psi1, s1, p1) as c), ((psi2, s2, p2) as c')) =
     let t = Opsem.createVarSub psi1 psi2 in
     let t' = T.comp s2 t in
     let doMatch =
@@ -469,18 +469,18 @@ end) : REDUNDANT = struct
         end
       with Opsem.NoMatch -> false
     in
-    begin if not doMatch then [ c_; c'_ ]
+    begin if not doMatch then [ c; c' ]
     else
       let newT = T.normalizeSub t in
       begin if isSubRenamingOnly newT then
-        try [ (psi1, s1, mergePrgs (p1_, (p2_, cleanSub newT))) ]
+        try [ (psi1, s1, mergePrgs (p1, (p2, cleanSub newT))) ]
         with Error s ->
           raise
             (Error
                (("***WARNING*** -- redundant case automatically ANNIHILATED:  "
                ^ s)
                ^ "\n"))
-      else [ c_; c'_ ]
+      else [ c; c' ]
       end
     end
   (* Note that s1 is a substitution s.t.  Psi1 |- s1: Psi0

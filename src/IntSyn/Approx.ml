@@ -106,15 +106,15 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (* whnfUni (l) = l'
        where l = l' and l' is in whnf *)
   let rec whnfUni = function
-    | Next l_ ->
-        begin match whnfUni l_ with Level i -> Level (i + 1) | l'_ -> Next l'_
+    | Next l ->
+        begin match whnfUni l with Level i -> Level (i + 1) | l' -> Next l'
         end
-    | LVar { contents = Some l_ } -> whnfUni l_
-    | l_ -> l_
+    | LVar { contents = Some l } -> whnfUni l
+    | l -> l
 
   (* whnf (u) = u'
        where u = u' and u' is in whnf *)
-  let rec whnf = function CVar { contents = Some v_ } -> whnf v_ | v_ -> v_
+  let rec whnf = function CVar { contents = Some v } -> whnf v | v -> v
 
   open! struct
     type nonrec varEntry = (exp * exp * uni) * string
@@ -131,29 +131,29 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   let varLookupName name =
     List.find (function _, name' -> name = name') !varList
 
-  let varInsert ((u_, v_, l_), name) =
-    varList := ((u_, v_, l_), name) :: !varList
+  let varInsert ((u, v, l), name) =
+    varList := ((u, v, l), name) :: !varList
 
   exception Ambiguous = Ambiguous
 
   (* getReplacementName (u, v, l, allowed) = name
          if u : v : l
          and u is a CVar at type family or kind level *)
-  let getReplacementName ((CVar r as u_), v_, l_, allowed) =
+  let getReplacementName ((CVar r as u), v, l, allowed) =
     begin match varLookupRef r with
     | Some (_, name) -> name
     | None ->
         ignore begin if allowed then () else raise Ambiguous
           end;
         let pref =
-          begin match whnfUni l_ with Level 2 -> "A" | Level 3 -> "K"
+          begin match whnfUni l with Level 2 -> "A" | Level 3 -> "K"
           end
         in
         let rec try_ i =
           let name = (("%" ^ pref) ^ Int.toString i) ^ "%" in
           begin match varLookupName name with
           | None -> begin
-              varInsert ((u_, v_, l_), name);
+              varInsert ((u, v, l), name);
               name
             end
           | Some _ -> try_ (i + 1)
@@ -183,20 +183,20 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
      if G |- U : V
      or G |- U "":"" V = ""hyperkind"" *)
   let rec expToApx = function
-    | I.Uni l_ ->
-        let l'_ = uniToApx l_ in
-        (Uni l'_, Uni (whnfUni (Next l'_)))
-    | I.Pi ((I.Dec (_, v1_), _), v2_) ->
-        let v1', _ (* Type *) = expToApx v1_ in
-        let v2', l'_ = expToApx v2_ in
-        (Arrow (v1', v2'), l'_)
+    | I.Uni l ->
+        let l' = uniToApx l in
+        (Uni l', Uni (whnfUni (Next l')))
+    | I.Pi ((I.Dec (_, v1), _), v2) ->
+        let v1', _ (* Type *) = expToApx v1 in
+        let v2', l' = expToApx v2 in
+        (Arrow (v1', v2'), l')
     | I.Root (I.FVar (name, _, _), _) ->
-        let u_, v_, l_ = findByReplacementName name in
-        (u_, v_)
-    | I.Root (h_, _ (* Const/Def/NSDef *)) -> (Const h_, Uni type_)
-    | I.Redex (u_, _) -> expToApx u_
-    | I.Lam (_, u_) -> expToApx u_
-    | I.EClo (u_, _) -> expToApx u_
+        let u, v, l = findByReplacementName name in
+        (u, v)
+    | I.Root (h, _ (* Const/Def/NSDef *)) -> (Const h, Uni type_)
+    | I.Redex (u, _) -> expToApx u
+    | I.Lam (_, u) -> expToApx u
+    | I.EClo (u, _) -> expToApx u
 
   (* are we sure Skonst/FgnConst are never types or kinds? *)
   (* must have been created to represent a CVar *)
@@ -204,20 +204,20 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   (* classToApx (V) = (V-, L-)
      if G |- V : L
      or G |- V "":"" L = ""hyperkind"" *)
-  let classToApx v_ =
-    let v'_, l'_ = expToApx v_ in
-    let (Uni l'') = whnf l'_ in
-    (v'_, l'')
+  let classToApx v =
+    let v', l' = expToApx v in
+    let (Uni l'') = whnf l' in
+    (v', l'')
 
   (* exactToApx (U, V) = (U-, V-)
      if G |- U : V *)
-  let exactToApx u_ v_ =
-    let v'_, l'_ = classToApx v_ in
-    begin match whnfUni l'_ with
-    | Level 1 -> (Undefined, v'_, l'_)
+  let exactToApx u v =
+    let v', l' = classToApx v in
+    begin match whnfUni l' with
+    | Level 1 -> (Undefined, v', l')
     | _ ->
-        let u'_, _ (* V' *) = expToApx u_ in
-        (u'_, v'_, l'_)
+        let u', _ (* V' *) = expToApx u in
+        (u', v', l')
     end
 
   (* Type *)
@@ -227,12 +227,12 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
      if |- d = V : type *)
   let constDefApx d =
     begin match I.sgnLookup d with
-    | I.ConDef (_, _, _, u_, _, _, _) ->
-        let v'_, _ (* Uni Type *) = expToApx u_ in
-        v'_
-    | I.AbbrevDef (_, _, _, u_, _, _) ->
-        let v'_, _ (* Uni Type *) = expToApx u_ in
-        v'_
+    | I.ConDef (_, _, _, u, _, _, _) ->
+        let v', _ (* Uni Type *) = expToApx u in
+        v'
+    | I.AbbrevDef (_, _, _, u, _, _) ->
+        let v', _ (* Uni Type *) = expToApx u in
+        v'
     end
 
   (* converting approximate terms to exact terms *)
@@ -240,7 +240,7 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
   let apxToUniW = function Level 1 -> I.Type | Level 2 -> I.Kind
 
   (* others impossible by invariant *)
-  let apxToUni l_ = apxToUniW (whnfUni l_)
+  let apxToUni l = apxToUniW (whnfUni l)
 
   (* apxToClass (G, v, L-, allowed) = V
      pre: L is ground and <= Hyperkind,
@@ -248,59 +248,59 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
           of v is ground
           v : L-
      post: V is most general such that V- = v and G |- V : L *)
-  let rec apxToClassW (g_, a, b, allowed) = match a, b with
-    | Uni l_, _ (* Next L *) -> I.Uni (apxToUni l_)
-    | Arrow (v1_, v2_), l_ ->
-        let v1' = apxToClass (g_, v1_, type_, allowed) in
-        let d_ = I.Dec (None, v1') in
-        let v2' = apxToClass (I.Decl (g_, d_), v2_, l_, allowed) in
-        I.Pi ((d_, I.Maybe), v2')
-    | (CVar r as v_), l_ (* Type or Kind *) ->
-        let name = getReplacementName (v_, Uni l_, Next l_, allowed) in
-        let s = I.Shift (I.ctxLength g_) in
-        I.Root (I.FVar (name, I.Uni (apxToUni l_), s), I.Nil)
-    | Const h_, l_ (* Type *) ->
-        I.Root (h_, Whnf.newSpineVar g_ (I.conDecType (headConDec h_), I.id))
+  let rec apxToClassW (g, a, b, allowed) = match a, b with
+    | Uni l, _ (* Next L *) -> I.Uni (apxToUni l)
+    | Arrow (v1, v2), l ->
+        let v1' = apxToClass (g, v1, type_, allowed) in
+        let d = I.Dec (None, v1') in
+        let v2' = apxToClass (I.Decl (g, d), v2, l, allowed) in
+        I.Pi ((d, I.Maybe), v2')
+    | (CVar r as v), l (* Type or Kind *) ->
+        let name = getReplacementName (v, Uni l, Next l, allowed) in
+        let s = I.Shift (I.ctxLength g) in
+        I.Root (I.FVar (name, I.Uni (apxToUni l), s), I.Nil)
+    | Const h, l (* Type *) ->
+        I.Root (h, Whnf.newSpineVar g (I.conDecType (headConDec h), I.id))
   (* convert undetermined CVars to FVars *)
   (* also, does the name of the bound variable here matter? *)
   (* this is probably very bad -- it should be possible to infer
          more accurately which pis can be dependent *)
 
-  and apxToClass (g_, v_, l_, allowed) = apxToClassW (g_, whnf v_, l_, allowed)
+  and apxToClass (g, v, l, allowed) = apxToClassW (g, whnf v, l, allowed)
 
   (* Undefined case impossible *)
   (* apxToExact (G, u, (V, s), allowed) = U
      if u : V-
      and G' |- V : L and G |- s : G'
      then U- = u and G |- U : V[s] and U is the most general such *)
-  let rec apxToExactW (g_, u_, b, allowed) = match b with
-    | (I.Pi ((d_, _), v_), s) ->
-        let d'_ = I.decSub d_ s in
-        I.Lam (d'_, apxToExact (I.Decl (g_, d'_), u_, (v_, I.dot1 s), allowed))
-    | (I.Uni l_, s) -> apxToClass (g_, u_, uniToApx l_, allowed)
-    | ((I.Root (I.FVar (name, _, _), _), s) as vs_) ->
-        let v_, l_, _ (* Next L *) = findByReplacementName name in
-        let (Uni l_) = whnf l_ in
-        begin match whnfUni l_ with
+  let rec apxToExactW (g, u, b, allowed) = match b with
+    | (I.Pi ((d, _), v), s) ->
+        let d' = I.decSub d s in
+        I.Lam (d', apxToExact (I.Decl (g, d'), u, (v, I.dot1 s), allowed))
+    | (I.Uni l, s) -> apxToClass (g, u, uniToApx l, allowed)
+    | ((I.Root (I.FVar (name, _, _), _), s) as vs) ->
+        let v, l, _ (* Next L *) = findByReplacementName name in
+        let (Uni l) = whnf l in
+        begin match whnfUni l with
         | Level 1 ->
-            let vs_e, vs_s = vs_ in
-            I.newEVar g_ (I.EClo (vs_e, vs_s))
+            let vs_e, vs_s = vs in
+            I.newEVar g (I.EClo (vs_e, vs_s))
         | Level 2 ->
-            let name' = getReplacementName (whnf u_, v_, Level 2, allowed) in
-            let v'_ = apxToClass (Null, v_, Level 2, allowed) in
-            let s' = I.Shift (I.ctxLength g_) in
-            I.Root (I.FVar (name', v'_, s'), I.Nil)
+            let name' = getReplacementName (whnf u, v, Level 2, allowed) in
+            let v' = apxToClass (Null, v, Level 2, allowed) in
+            let s' = I.Shift (I.ctxLength g) in
+            I.Root (I.FVar (name', v', s'), I.Nil)
         (* NOTE: V' differs from Vs by a Shift *)
         (* probably could avoid the following call by removing the
                   substitutions in Vs instead *)
         end
         (* U must be a CVar *)
-    | vs_ (* an atomic type, not Def *) ->
-        let vs_e, vs_s = vs_ in
-        I.newEVar g_ (I.EClo (vs_e, vs_s))
+    | vs (* an atomic type, not Def *) ->
+        let vs_e, vs_s = vs in
+        I.newEVar g (I.EClo (vs_e, vs_s))
 
-  and apxToExact (g_, u_, vs_, allowed) =
-    apxToExactW (g_, u_, Whnf.whnfExpandDef vs_, allowed)
+  and apxToExact (g, u, vs, allowed) =
+    apxToExactW (g, u, Whnf.whnfExpandDef vs, allowed)
 
   (* matching for the approximate language *)
   exception Unify = Unify
@@ -309,13 +309,13 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
        iff r does not occur in l,
        otherwise raises Unify *)
   let rec occurUniW (r, a) = match a with
-    | Next l_ -> occurUniW (r, l_)
+    | Next l -> occurUniW (r, l)
     | LVar r' ->
         begin if r == r' then raise (Unify "Level circularity") else ()
         end
     | _ -> ()
 
-  let occurUni (r, l_) = occurUniW (r, whnfUni l_)
+  let occurUni (r, l) = occurUniW (r, whnfUni l)
 
   (* matchUni (l1, l2) = ()
        iff l1<I> = l2<I> for some most general instantiation I
@@ -325,42 +325,42 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
     | Level i1, Level i2 ->
         begin if i1 = i2 then () else raise (Unify "Level clash")
         end
-    | Level i1, Next l2_ ->
-        begin if i1 > 1 then matchUniW (Level (i1 - 1), l2_)
+    | Level i1, Next l2 ->
+        begin if i1 > 1 then matchUniW (Level (i1 - 1), l2)
         else raise (Unify "Level clash")
         end
-    | Next l1_, Level i2 ->
-        begin if i2 > 1 then matchUniW (l1_, Level (i2 - 1))
+    | Next l1, Level i2 ->
+        begin if i2 > 1 then matchUniW (l1, Level (i2 - 1))
         else raise (Unify "Level clash")
         end
-    | Next l1_, Next l2_ -> matchUniW (l1_, l2_)
-    | LVar r1, (LVar r2 as l2_) ->
-        begin if r1 == r2 then () else r1 := Some l2_
+    | Next l1, Next l2 -> matchUniW (l1, l2)
+    | LVar r1, (LVar r2 as l2) ->
+        begin if r1 == r2 then () else r1 := Some l2
         end
-    | LVar r1, l2_ -> begin
-        occurUniW (r1, l2_);
-        r1 := Some l2_
+    | LVar r1, l2 -> begin
+        occurUniW (r1, l2);
+        r1 := Some l2
       end
-    | l1_, LVar r2 -> begin
-        occurUniW (r2, l1_);
-        r2 := Some l1_
+    | l1, LVar r2 -> begin
+        occurUniW (r2, l1);
+        r2 := Some l1
       end
 
-  let matchUni l1_ l2_ = matchUniW (whnfUni l1_, whnfUni l2_)
+  let matchUni l1 l2 = matchUniW (whnfUni l1, whnfUni l2)
 
   (* occur (r, u) = ()
        iff r does not occur in u,
        otherwise raises Unify *)
   let rec occurW (r, a) = match a with
     | _ when !r == None -> false
-    | Arrow (v1_, v2_) -> begin occur' (r, v1_) || occur' (r, v2_) end
+    | Arrow (v1, v2) -> begin occur' (r, v1) || occur' (r, v2) end
     | CVar r' ->
         begin if r == r' then raise (Unify "Type/kind variable occurrence")
         else false
         end
     | _ -> false
 
-  and occur' (r, u_) = occurW (r, whnf u_)
+  and occur' (r, u) = occurW (r, whnf u)
 
   let occur = ignore occur'
 
@@ -369,9 +369,9 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
        effect: applies I
        otherwise raises Unify *)
   let rec matchW = function
-    | Uni l1_, Uni l2_ -> matchUni l1_ l2_
-    | (Const h1_ as v1_), (Const h2_ as v2_) ->
-        begin match (h1_, h2_) with
+    | Uni l1, Uni l2 -> matchUni l1 l2
+    | (Const h1 as v1), (Const h2 as v2) ->
+        begin match (h1, h2) with
         | I.Const c1, I.Const c2 ->
             begin if c1 = c2 then ()
             else raise (Unify "Type/kind constant clash")
@@ -379,37 +379,37 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         | I.Def d1, I.Def d2 ->
             begin if d1 = d2 then () else match_ (constDefApx d1, constDefApx d2)
             end
-        | I.Def d1, _ -> match_ (constDefApx d1, v2_)
-        | _, I.Def d2 -> match_ (v1_, constDefApx d2)
+        | I.Def d1, _ -> match_ (constDefApx d1, v2)
+        | _, I.Def d2 -> match_ (v1, constDefApx d2)
         | I.NSDef d1, I.NSDef d2 ->
             begin if d1 = d2 then () else match_ (constDefApx d1, constDefApx d2)
             end
-        | I.NSDef d1, _ -> match_ (constDefApx d1, v2_)
-        | _, I.NSDef d2 -> match_ (v1_, constDefApx d2)
+        | I.NSDef d1, _ -> match_ (constDefApx d1, v2)
+        | _, I.NSDef d2 -> match_ (v1, constDefApx d2)
         end
-    | Arrow (v1_, v2_), Arrow (v3, v4) -> begin
-        (try match_ (v1_, v3)
+    | Arrow (v1, v2), Arrow (v3, v4) -> begin
+        (try match_ (v1, v3)
          with e ->
            begin
-             match_ (v2_, v4);
+             match_ (v2, v4);
              raise e
            end);
-        match_ (v2_, v4)
+        match_ (v2, v4)
       end
-    | (Arrow _ as v1_), Const (I.Def d2) -> match_ (v1_, constDefApx d2)
-    | Const (I.Def d1), (Arrow _ as v2_) -> match_ (constDefApx d1, v2_)
-    | (Arrow _ as v1_), Const (I.NSDef d2) -> match_ (v1_, constDefApx d2)
-    | Const (I.NSDef d1), (Arrow _ as v2_) -> match_ (constDefApx d1, v2_)
-    | CVar r1, (CVar r2 as u2_) ->
-        begin if r1 == r2 then () else r1 := Some u2_
+    | (Arrow _ as v1), Const (I.Def d2) -> match_ (v1, constDefApx d2)
+    | Const (I.Def d1), (Arrow _ as v2) -> match_ (constDefApx d1, v2)
+    | (Arrow _ as v1), Const (I.NSDef d2) -> match_ (v1, constDefApx d2)
+    | Const (I.NSDef d1), (Arrow _ as v2) -> match_ (constDefApx d1, v2)
+    | CVar r1, (CVar r2 as u2) ->
+        begin if r1 == r2 then () else r1 := Some u2
         end
-    | CVar r1, u2_ -> begin
-        ignore @@ occurW (r1, u2_);
-        r1 := Some u2_
+    | CVar r1, u2 -> begin
+        ignore @@ occurW (r1, u2);
+        r1 := Some u2
       end
-    | u1_, CVar r2 -> begin
-        ignore @@ occurW (r2, u1_);
-        r2 := Some u1_
+    | u1, CVar r2 -> begin
+        ignore @@ occurW (r2, u1);
+        r2 := Some u1
       end
     | u -> begin
         Debug.(
@@ -426,20 +426,20 @@ module MakeApprox (Whnf : WHNF) : APPROX = struct
         raise (Unify "Type/kind expression clash")
       end
 
-  and match_ (u1_, u2_) = matchW (whnf u1_, whnf u2_)
+  and match_ (u1, u2) = matchW (whnf u1, whnf u2)
 
-  let matchable (u1_, u2_) =
+  let matchable (u1, u2) =
     try
       begin
-        match_ (u1_, u2_);
+        match_ (u1, u2);
         true
       end
     with Unify _ -> false
 
   let rec makeGroundUni = function
     | Level _ -> false
-    | Next l_ -> makeGroundUni l_
-    | LVar { contents = Some l_ } -> makeGroundUni l_
+    | Next l -> makeGroundUni l
+    | LVar { contents = Some l } -> makeGroundUni l
     | LVar ({ contents = None } as r) -> begin
         r := Some (Level 1);
         true

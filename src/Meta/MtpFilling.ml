@@ -64,32 +64,32 @@ end) : MTPFILLING.MTPFILLING = struct
 
     exception Success of int
 
-    let rec createEVars (g_, a) = match a with
+    let rec createEVars (g, a) = match a with
       | (F.True, s) -> ([], F.Unit)
-      | (F.Ex (I.Dec (_, v_), f_), s) ->
-          let x_ = I.newEVar g_ (I.EClo (v_, s)) in
-          let x'_ = Whnf.lowerEVar x_ in
-          let xs_, p_ = createEVars (g_, (f_, I.Dot (I.Exp x_, s))) in
-          (x'_ :: xs_, F.Inx (x_, p_))
+      | (F.Ex (I.Dec (_, v), f), s) ->
+          let x = I.newEVar g (I.EClo (v, s)) in
+          let x' = Whnf.lowerEVar x in
+          let xs, p = createEVars (g, (f, I.Dot (I.Exp x, s))) in
+          (x' :: xs, F.Inx (x, p))
 
-    let expand (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_) as s_) =
-      ignore begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g_ else ()
+    let expand (S.State (n, (g, b), (ih, oh), d, o, h, f) as s) =
+      ignore begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g else ()
         end;
-      let xs_, p_ = createEVars (g_, (f_, I.id)) in
+      let xs, p = createEVars (g, (f, I.id)) in
       function
       | () -> (
           try
             begin
               Search.searchEx
-                (!MTPGlobal.maxFill) xs_ (function
+                (!MTPGlobal.maxFill) xs (function
                   | max -> begin
                       ignore
                         begin if !Global.doubleCheck then
                           map
                             (function
-                              | I.EVar (_, g'_, v_, _) as x_ ->
-                                  TypeCheck.typeCheck g'_ (x_, v_))
-                            xs_
+                              | I.EVar (_, g', v, _) as x ->
+                                  TypeCheck.typeCheck g' (x, v))
+                            xs
                         else []
                         end;
                       raise (Success max)
@@ -99,7 +99,7 @@ end) : MTPFILLING.MTPFILLING = struct
           with Success max ->
             begin
               MTPData.maxFill := Int.max (!MTPData.maxFill, max);
-              (max, p_)
+              (max, p)
             end)
 
     let apply f = f ()

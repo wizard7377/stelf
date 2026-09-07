@@ -352,27 +352,27 @@ module Impl () = struct
        still rendered here through the Display bus; extracting them as values
        requires a solution-callback API (phase 3). *)
     let run_query loc q : int =
-      let v_, opt_name, xs_ = Recon.ReconQuery.queryToQuery q loc in
-      let g = Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null v_ in
+      let v, opt_name, xs = Recon.ReconQuery.queryToQuery q loc in
+      let g = Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null v in
       let solutions = ref 0 in
       let exception Done in
-      let sc m_ =
+      let sc m =
         incr solutions;
         if !Global.Global_.Global.chatter >= 3 then begin
           msg (Printf.sprintf "---------- Solution %d ----------\n" !solutions);
           List.app
-            (fun (e_, n) ->
+            (fun (e, n) ->
               msg
                 (n ^ " = "
-                ^ Print.Print_.expToString Intsyn.IntSyn.Null e_
+                ^ Print.Print_.expToString Intsyn.IntSyn.Null e
                 ^ "\n"))
-            xs_;
+            xs;
           match opt_name with
           | None -> ()
           | Some name ->
               msg
                 (name ^ " = "
-                ^ Print.Print_.expToString Intsyn.IntSyn.Null m_
+                ^ Print.Print_.expToString Intsyn.IntSyn.Null m
                 ^ "\n")
         end;
         raise Done
@@ -402,7 +402,7 @@ module Impl () = struct
             | _ -> cid :: flatten rest)
       in
       let block_cids = flatten (List.map resolve_block ids) in
-      let w_ = Intsyn.Lambda_.Tomega.Worlds block_cids in
+      let w = Intsyn.Lambda_.Tomega.Worlds block_cids in
       let lookup_head tm =
         match Cst.View.Term.view tm with
         | Cst.View.Term.Lowercase (_, (ns, n)) ->
@@ -424,8 +424,8 @@ module Impl () = struct
         | Some a -> a
       in
       let families = List.map resolve_family tms in
-      List.app (fun a -> WorldSyn.install a w_) families;
-      List.app (fun a -> WorldSyn.worldcheck w_ a) families
+      List.app (fun a -> WorldSyn.install a w) families;
+      List.app (fun a -> WorldSyn.worldcheck w a) families
 
     let install_condec_cmd ?(inline = false)
         ?(scope_installs : Intsyn.IntSyn.cid list ref option = None) ns condec
@@ -535,31 +535,31 @@ module Impl () = struct
       | Cst.QueryCmd_ (_n, _b, _d, (Cst.Query_ (_, qtm) as q)) ->
           [ Reply.Solutions (run_query (loc_of filename (term_loc qtm)) q) ]
       | Cst.SolveCmd_ (Cst.Solve_ (_, stm) as sol) ->
-          let v_, sc_fn =
+          let v, sc_fn =
             Recon.ReconQuery.solveToSolve
               [] sol (loc_of filename (term_loc stm))
           in
           let g =
-            Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null v_
+            Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null v
           in
           let exception Done of Intsyn.IntSyn.exp in
-          let sc m_ = raise (Done m_) in
-          let m_ =
+          let sc m = raise (Done m) in
+          let m =
             match
               try
                 Opsem.Opsem_.AbsMachine.solve
                   g Intsyn.IntSyn.id (Compile.CompSyn.CompSyn.DProg
                       (Intsyn.IntSyn.Null, Intsyn.IntSyn.Null)) sc;
                 None
-              with Done m_ -> Some m_
+              with Done m -> Some m
             with
             | None -> failwith' "%solve: no solution found"
-            | Some m_ -> m_
+            | Some m -> m
           in
           installed
             (Stdlib.List.map
                (fun (cd, _) -> install_condec ~scope_installs ns cd)
-               (sc_fn m_))
+               (sc_fn m))
       | Cst.StopCmd_ -> []
       | Cst.QuitCmd_ -> [ Reply.Quit ]
       | Cst.HelpCmd_ topic ->
@@ -687,15 +687,15 @@ module Impl () = struct
           ModeCheck.checkMode cid mS;
           []
       | Cst.TotalCmd_ (intros, body) ->
-          let t_, rrs = build_thm_tdecl "%total" intros body in
-          let la_ = ThmInst.installTotal t_ rrs in
-          List.app ThmTotal.install la_;
-          List.app ThmTotal.checkFam la_;
+          let t, rrs = build_thm_tdecl "%total" intros body in
+          let la = ThmInst.installTotal t rrs in
+          List.app ThmTotal.install la;
+          List.app ThmTotal.checkFam la;
           []
       | Cst.TerminatesCmd_ (intros, body) ->
-          let t_, rrs = build_thm_tdecl "%terminates" intros body in
-          let la_ = ThmInst.installTerminates t_ rrs in
-          ignore la_;
+          let t, rrs = build_thm_tdecl "%terminates" intros body in
+          let la = ThmInst.installTerminates t rrs in
+          ignore la;
           []
       | Cst.CoversCmd_ md ->
           let (cid__, ms__), _r = Recon.ReconMode.modeToMode md in
@@ -704,9 +704,9 @@ module Impl () = struct
       | Cst.NameCmd_ _id -> []
       | Cst.ProseCmd_ _id -> []
       | Cst.ReducesCmd_ (pred_str, body) ->
-          let r_, rrs = build_thm_rdecl pred_str body in
-          let la_ = ThmInst.installReduces r_ rrs in
-          List.app Terminate.Terminate_.Reduces.checkFamReduction la_;
+          let r, rrs = build_thm_rdecl pred_str body in
+          let la = ThmInst.installReduces r rrs in
+          List.app Terminate.Terminate_.Reduces.checkFamReduction la;
           []
       | Cst.UniqueCmd_ tm ->
           let mdec_opt =
@@ -736,11 +736,11 @@ module Impl () = struct
           install_worlds_cmd ids tms;
           []
       | Cst.QueryTabledCmd_ (numSol, try_, _d, (Cst.Query_ (_, qtm) as q)) ->
-          let a_, opt_name, xs_ =
+          let a, opt_name, xs =
             Recon.ReconQuery.queryToQuery q (loc_of filename (term_loc qtm))
           in
           let g =
-            Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null a_
+            Compile.Compile_.Compile.compileGoal Intsyn.IntSyn.Null a
           in
           let solutions = ref 0 in
           let stages = ref 1 in
@@ -754,18 +754,18 @@ module Impl () = struct
               msg
                 (Printf.sprintf "---------- Solution %d ----------\n" !solutions);
               List.app
-                (fun (e_, n) ->
+                (fun (e, n) ->
                   msg
                     (n ^ " = "
-                    ^ Print.Print_.expToString Intsyn.IntSyn.Null e_
+                    ^ Print.Print_.expToString Intsyn.IntSyn.Null e
                     ^ "\n"))
-                xs_;
+                xs;
               match opt_name with
               | None -> ()
               | Some name ->
                   msg
                     (name ^ " = "
-                    ^ Print.Print_.expToString Intsyn.IntSyn.Null a_
+                    ^ Print.Print_.expToString Intsyn.IntSyn.Null a
                     ^ "\n")
             end;
             match numSol with

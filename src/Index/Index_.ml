@@ -34,12 +34,12 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
     let update (a, c) =
       Array.update (indexArray, a, Queue.insert c (Array.sub (indexArray, a)))
 
-    let install fromCS (I.Const c as h_) =
+    let install fromCS (I.Const c as h) =
       begin match (fromCS, I.sgnLookup c) with
-      | _, I.ConDec (_, _, _, _, a_, I.Type) ->
-          update (cidFromHead (I.targetHead a_), h_)
-      | I.Clause, I.ConDef (_, _, _, _, a_, I.Type, _) ->
-          update (cidFromHead (I.targetHead a_), I.Def c)
+      | _, I.ConDec (_, _, _, _, a, I.Type) ->
+          update (cidFromHead (I.targetHead a), h)
+      | I.Clause, I.ConDef (_, _, _, _, a, I.Type, _) ->
+          update (cidFromHead (I.targetHead a), I.Def c)
       | _ -> ()
       end
 
@@ -53,10 +53,10 @@ module MakeIndex (Global : GLOBAL) (Queue : QUEUE) : INDEX = struct
 
     let uninstall cid =
       begin match I.sgnLookup cid with
-      | I.ConDec (_, _, _, _, a_, I.Type) ->
-          remove (cidFromHead (I.targetHead a_), cid)
-      | I.ConDef (_, _, _, _, a_, I.Type, _) ->
-          remove (cidFromHead (I.targetHead a_), cid)
+      | I.ConDec (_, _, _, _, a, I.Type) ->
+          remove (cidFromHead (I.targetHead a), cid)
+      | I.ConDef (_, _, _, _, a, I.Type, _) ->
+          remove (cidFromHead (I.targetHead a), cid)
       | _ -> ()
       end
 

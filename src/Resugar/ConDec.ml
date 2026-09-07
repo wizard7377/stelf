@@ -30,30 +30,30 @@ module Make (Cst : Cst.CST) = struct
   (* Skip the leading implicit binders, naming each as it goes. [decEName], not
      [decLUName]: an implicit binder stands for something the elaborator will
      infer, so it gets an existential name. *)
-  let rec skip_imp (i, g_, a) = match i, a with
-    | 0, v_ -> (g_, v_)
-    | i, I.Pi ((d_, _), v_) ->
-        skip_imp (i - 1, I.Decl (g_, N.decEName g_ d_), v_)
-    | _, v_ -> (g_, v_)
+  let rec skip_imp (i, g, a) = match i, a with
+    | 0, v -> (g, v)
+    | i, I.Pi ((d, _), v) ->
+        skip_imp (i - 1, I.Decl (g, N.decEName g d), v)
+    | _, v -> (g, v)
 
-  let rec skip_imp2 (i, g_, a, b) = match i, a, b with
-    | 0, v_, u_ -> (g_, v_, u_)
-    | i, I.Pi ((_, _), v_), I.Lam (d'_, u_) ->
-        skip_imp2 (i - 1, I.Decl (g_, N.decEName g_ d'_), v_, u_)
-    | _, v_, u_ -> (g_, v_, u_)
+  let rec skip_imp2 (i, g, a, b) = match i, a, b with
+    | 0, v, u -> (g, v, u)
+    | i, I.Pi ((_, _), v), I.Lam (d', u) ->
+        skip_imp2 (i - 1, I.Decl (g, N.decEName g d'), v, u)
+    | _, v, u -> (g, v, u)
 
   (* A kind is a chain of binders ending in [type]. The trailing universe is
      dropped: [%sort] supplies it, and there is no surface syntax for writing
      it explicitly in that position. *)
-  let rec kind_binders (opts : Options.t) g_ v_ : Cst.decl list =
-    match v_ with
+  let rec kind_binders (opts : Options.t) g v : Cst.decl list =
+    match v with
     | I.Uni _ -> []
-    | I.Pi ((d_, _), v2_) ->
-        let d'_ = N.decLUName g_ d_ in
-        Tm.dec opts g_ d'_ :: kind_binders opts (I.Decl (g_, d'_)) v2_
+    | I.Pi ((d, _), v2) ->
+        let d' = N.decLUName g d in
+        Tm.dec opts g d' :: kind_binders opts (I.Decl (g, d')) v2
     (* Not a well-formed kind. Emitting it as an anonymous binder keeps the
        function total and the output parseable. *)
-    | _ -> [ dec_of [ None ] (Tm.exp opts g_ v_) ]
+    | _ -> [ dec_of [ None ] (Tm.exp opts g v) ]
 
   let con_dec (opts : Options.t) ~(hide : bool) (d : I.conDec) : Cst.cmd =
     (* One reset for every case, not one per branch: forgetting it in a single
@@ -62,19 +62,19 @@ module Make (Cst : Cst.CST) = struct
     N.varReset I.Null;
     let name = name_of d in
     match d with
-    | I.ConDec (_, _, imp, _, v_, l_) -> (
-        let g_, v_ =
-          if hide then skip_imp (imp, I.Null, v_) else (I.Null, v_)
+    | I.ConDec (_, _, imp, _, v, l) -> (
+        let g, v =
+          if hide then skip_imp (imp, I.Null, v) else (I.Null, v)
         in
-        match l_ with
+        match l with
         | I.Kind ->
-            V.Cmd.review (V.Cmd.Sort (g_loc, [ name ], kind_binders opts g_ v_))
+            V.Cmd.review (V.Cmd.Sort (g_loc, [ name ], kind_binders opts g v))
         | I.Type ->
             V.Cmd.review
-              (V.Cmd.Term (g_loc, dec_of [ Some name ] (Tm.exp opts g_ v_))))
-    | I.ConDef (_, _, imp, u_, v_, _, _) ->
-        let g_, v_, u_ =
-          if hide then skip_imp2 (imp, I.Null, v_, u_) else (I.Null, v_, u_)
+              (V.Cmd.Term (g_loc, dec_of [ Some name ] (Tm.exp opts g v))))
+    | I.ConDef (_, _, imp, u, v, _, _) ->
+        let g, v, u =
+          if hide then skip_imp2 (imp, I.Null, v, u) else (I.Null, v, u)
         in
         (* The view's field order is (name, term, type); the surface order is
            [%def NAME TYPE TERM]. See [Modern.parse_define]. *)
@@ -85,11 +85,11 @@ module Make (Cst : Cst.CST) = struct
                  (V.Define.Define
                     ( g_loc,
                       Some name,
-                      Tm.exp opts g_ u_,
-                      Some (Tm.exp opts g_ v_) )) ))
-    | I.AbbrevDef (_, _, imp, u_, v_, _) ->
-        let g_, v_, u_ =
-          if hide then skip_imp2 (imp, I.Null, v_, u_) else (I.Null, v_, u_)
+                      Tm.exp opts g u,
+                      Some (Tm.exp opts g v) )) ))
+    | I.AbbrevDef (_, _, imp, u, v, _) ->
+        let g, v, u =
+          if hide then skip_imp2 (imp, I.Null, v, u) else (I.Null, v, u)
         in
         (* [%inline] takes a single term, so the type rides along as an
            ascription. [HasType]'s view order is (term, type). *)
@@ -98,12 +98,12 @@ module Make (Cst : Cst.CST) = struct
              ( g_loc,
                name,
                T.review
-                 (T.HasType (g_loc, Tm.exp opts g_ u_, Tm.exp opts g_ v_)) ))
-    | I.BlockDec (_, _, gsome_, lblock_) ->
+                 (T.HasType (g_loc, Tm.exp opts g u, Tm.exp opts g v)) ))
+    | I.BlockDec (_, _, gsome, lblock) ->
         (* [some] parameters are written [[x A]] and block hypotheses [{x A}];
            see [Modern.parse_block_item]. *)
-        let some = Dl.ctx opts I.Null gsome_ in
-        let block = Tm.dec_list opts gsome_ lblock_ in
+        let some = Dl.ctx opts I.Null gsome in
+        let block = Tm.dec_list opts gsome lblock in
         V.Cmd.review
           (V.Cmd.Block
              ( g_loc,
@@ -114,16 +114,16 @@ module Make (Cst : Cst.CST) = struct
                @ List.map
                    (fun d -> V.BlockItem.review (V.BlockItem.All (g_loc, d)))
                    block ))
-    | I.BlockDef (_, _, w_) ->
+    | I.BlockDef (_, _, w) ->
         V.Cmd.review
           (V.Cmd.Union
-             (g_loc, name, List.map (fun cid -> snd (Tm.const_sym opts cid)) w_))
-    | I.SkoDec (_, _, imp, v_, _) ->
+             (g_loc, name, List.map (fun cid -> snd (Tm.const_sym opts cid)) w))
+    | I.SkoDec (_, _, imp, v, _) ->
         (* There is no [%skolem] command, so this deliberately does not round
            trip; it exists so that dumping a signature containing Skolem
            constants is possible at all. *)
-        let g_, v_ =
-          if hide then skip_imp (imp, I.Null, v_) else (I.Null, v_)
+        let g, v =
+          if hide then skip_imp (imp, I.Null, v) else (I.Null, v)
         in
         V.Cmd.review
           (V.Cmd.Term
@@ -131,7 +131,7 @@ module Make (Cst : Cst.CST) = struct
                dec_of [ Some name ]
                  (T.review
                     (T.Internal
-                       (g_loc, Cst.Opaque_tag "%%skolem", [ Tm.exp opts g_ v_ ])))
+                       (g_loc, Cst.Opaque_tag "%%skolem", [ Tm.exp opts g v ])))
              ))
 
   (* [IntSyn.cnstr] is already a [cnstr_ ref]; the payload is what carries the
@@ -139,13 +139,13 @@ module Make (Cst : Cst.CST) = struct
   let cnstr (opts : Options.t) (c : I.cnstr) : cnstr_form =
     match !c with
     | I.Solved -> Solved
-    | I.Eqn (g_, u1_, u2_) ->
-        let g'_ = N.ctxLUName g_ in
-        Eqn (Tm.exp opts g'_ u1_, Tm.exp opts g'_ u2_)
+    | I.Eqn (g, u1, u2) ->
+        let g' = N.ctxLUName g in
+        Eqn (Tm.exp opts g' u1, Tm.exp opts g' u2)
     | I.FgnCnstr (cs, inner) ->
         Fgn
           (List.map
-             (fun (g_, u_) -> Tm.exp opts (N.ctxLUName g_) u_)
+             (fun (g, u) -> Tm.exp opts (N.ctxLUName g) u)
              (I.FgnCnstrStd.ToInternal.apply cs inner ()))
 
   let cnstrs opts cs = List.map (cnstr opts) cs
@@ -153,19 +153,19 @@ module Make (Cst : Cst.CST) = struct
 
   (* An existential variable's solution is only meaningful under the context it
      was created in, so it is abstracted over that context first. *)
-  let rec abstract_lam (a, u_) = match a with
-    | I.Null -> u_
-    | I.Decl (g_, d_) -> abstract_lam (g_, I.Lam (d_, u_))
+  let rec abstract_lam (a, u) = match a with
+    | I.Null -> u
+    | I.Decl (g, d) -> abstract_lam (g, I.Lam (d, u))
 
   let evar_inst (opts : Options.t) (xs : (I.exp * string) list) :
       (string * Cst.term) list =
     List.map
-      (fun (u_, name) ->
-        let u'_ =
-          match u_ with
-          | I.EVar (_, g_, _, _) -> abstract_lam (g_, u_)
-          | _ -> u_
+      (fun (u, name) ->
+        let u' =
+          match u with
+          | I.EVar (_, g, _, _) -> abstract_lam (g, u)
+          | _ -> u
         in
-        (name, Tm.exp opts I.Null u'_))
+        (name, Tm.exp opts I.Null u'))
       xs
 end

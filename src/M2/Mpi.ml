@@ -71,21 +71,21 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     let empty () = Ring.empty !openRing
     let current () = Ring.current !openRing
     let delete () = openRing := Ring.delete !openRing
-    let insertOpen s_ = openRing := Ring.insert (!openRing) s_
-    let insertSolved s_ = solvedRing := Ring.insert (!solvedRing) s_
+    let insertOpen s = openRing := Ring.insert (!openRing) s
+    let insertSolved s = solvedRing := Ring.insert (!solvedRing) s
 
-    let insert s_ =
-      begin if Qed.subgoal s_ then begin
-        insertSolved s_;
+    let insert s =
+      begin if Qed.subgoal s then begin
+        insertSolved s;
         begin
-          print (MetaPrint.stateToString s_);
+          print (MetaPrint.stateToString s);
           begin
             print "\n[Subgoal finished]\n";
             print "\n"
           end
         end
       end
-      else insertOpen s_
+      else insertOpen s
       end
 
     let collectOpen () = Ring.foldr (fun (x, acc) -> x :: acc) [] !openRing
@@ -96,10 +96,10 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     let popHistory () =
       begin match !history_ with
       | [] -> raise (Error "History stack empty")
-      | (open'_, solved') :: history' -> begin
+      | (open', solved') :: history' -> begin
           history_ := history';
           begin
-            openRing := open'_;
+            openRing := open';
             solvedRing := solved'
           end
         end
@@ -126,27 +126,27 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     let rec cLToString = function
       | [] -> ""
       | c :: [] -> I.conDecName (I.sgnLookup c)
-      | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
+      | c :: l -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l
 
     let rec splittingToMenu (a, a_) = match a with
       | [] -> a_
-      | o_ :: l_ -> splittingToMenu (l_, Splitting o_ :: a_)
+      | o :: l -> splittingToMenu (l, Splitting o :: a_)
 
     let rec fillingToMenu (a, a_) = match a with
       | [] -> a_
-      | o_ :: l_ -> fillingToMenu (l_, Filling o_ :: a_)
+      | o :: l -> fillingToMenu (l, Filling o :: a_)
 
     let rec recursionToMenu (a, a_) = match a with
       | [] -> a_
-      | o_ :: l_ -> recursionToMenu (l_, Recursion o_ :: a_)
+      | o :: l -> recursionToMenu (l, Recursion o :: a_)
 
     let menu () =
       begin if empty () then menu_ := None
       else
-        let s_ = current () in
-        let splitO = Splitting.expand s_ in
-        let recO = Recursion.expandEager s_ in
-        let fillO, fillC = Filling.expand s_ in
+        let s = current () in
+        let splitO = Splitting.expand s in
+        let recO = Recursion.expandEager s in
+        let fillO, fillC = Filling.expand s in
         menu_ :=
           Some
             (fillingToMenu
@@ -163,29 +163,29 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     let menuToString () =
       let rec menuToString' (k, a) = match a with
         | [] -> ""
-        | Splitting o_ :: m_ ->
-            ((menuToString' (k + 1, m_) ^ "\n") ^ format k) ^ Splitting.menu o_
-        | Filling o_ :: m_ ->
-            ((menuToString' (k + 1, m_) ^ "\n") ^ format k) ^ Filling.menu o_
-        | Recursion o_ :: m_ ->
-            ((menuToString' (k + 1, m_) ^ "\n") ^ format k) ^ Recursion.menu o_
+        | Splitting o :: m ->
+            ((menuToString' (k + 1, m) ^ "\n") ^ format k) ^ Splitting.menu o
+        | Filling o :: m ->
+            ((menuToString' (k + 1, m) ^ "\n") ^ format k) ^ Filling.menu o
+        | Recursion o :: m ->
+            ((menuToString' (k + 1, m) ^ "\n") ^ format k) ^ Recursion.menu o
       in
       begin match !menu_ with
       | None -> raise (Error "Menu is empty")
-      | Some m_ -> menuToString' (1, m_)
+      | Some m -> menuToString' (1, m)
       end
 
-    let makeConDec (M.State (name, M.Prefix (g_, m_, b_), v_)) =
-      let rec makeConDec' (a, v_, k) = match a with
-        | I.Null -> I.ConDec (name, None, k, I.Normal, v_, I.Type)
-        | I.Decl (g_, d_) ->
-            makeConDec' (g_, I.Pi ((d_, I.Maybe), v_), k + 1)
+    let makeConDec (M.State (name, M.Prefix (g, m, b), v)) =
+      let rec makeConDec' (a, v, k) = match a with
+        | I.Null -> I.ConDec (name, None, k, I.Normal, v, I.Type)
+        | I.Decl (g, d) ->
+            makeConDec' (g, I.Pi ((d, I.Maybe), v), k + 1)
       in
-      makeConDec' (g_, v_, 0)
+      makeConDec' (g, v, 0)
 
     let rec makeSignature = function
       | [] -> M.SgnEmpty
-      | s_ :: sl_ -> M.ConDec (makeConDec s_, makeSignature sl_)
+      | s :: sl -> M.ConDec (makeConDec s, makeSignature sl)
 
     let extract () =
       begin if empty () then makeSignature (collectSolved ())
@@ -203,10 +203,10 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         print "[QED]\n"
       end
       else
-        let s_ = current () in
+        let s = current () in
         print "\n";
         begin
-          print (MetaPrint.stateToString s_);
+          print (MetaPrint.stateToString s);
           begin
             print "\nSelect from the following menu:\n";
             begin
@@ -217,19 +217,19 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         end
       end
 
-    let rec contains (a, l'_) = match a with
+    let rec contains (a, l') = match a with
       | [] -> true
-      | x :: l_ ->
-          List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
+      | x :: l ->
+          List.exists (function x' -> x = x') l' && contains (l, l')
 
-    let equiv l1_ l2_ = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv l1 l2 = contains (l1, l2) && contains (l2, l1)
 
     let init' (k, (c :: _ as cL)) =
       ignore (MetaGlobal.maxFill := k);
       ignore (reset ());
       let cL' = try Order.closure c with Order.Error _ -> cL in
       begin if equiv cL cL' then
-        List.app (function s_ -> insert s_) (Init.init cL)
+        List.app (function s -> insert s) (Init.init cL)
       else
         raise
           (Error
@@ -272,31 +272,31 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
     let select k =
       let rec select' = function
         | k, [] -> abort "No such menu item"
-        | 1, Splitting o_ :: _ ->
-            let s'_ = Timers.time Timers.splitting Splitting.apply o_ in
+        | 1, Splitting o :: _ ->
+            let s' = Timers.time Timers.splitting Splitting.apply o in
             ignore (pushHistory ());
             ignore (delete ());
-            ignore (map insert s'_);
+            ignore (map insert s');
             begin
               menu ();
               printMenu ()
             end
-        | 1, Recursion o_ :: _ ->
-            let s'_ = Timers.time Timers.recursion Recursion.apply o_ in
+        | 1, Recursion o :: _ ->
+            let s' = Timers.time Timers.recursion Recursion.apply o in
             ignore (pushHistory ());
             ignore (delete ());
-            ignore (insert s'_);
+            ignore (insert s');
             begin
               menu ();
               printMenu ()
             end
-        | 1, Filling o_ :: _ ->
-            ignore begin match Timers.time Timers.filling Filling.apply o_ with
+        | 1, Filling o :: _ ->
+            ignore begin match Timers.time Timers.filling Filling.apply o with
               | [] -> abort "Filling unsuccessful: no object found"
-              | s_ :: _ -> begin
+              | s :: _ -> begin
                   delete ();
                   begin
-                    insert s_;
+                    insert s;
                     pushHistory ()
                   end
                 end
@@ -305,12 +305,12 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
               menu ();
               printMenu ()
             end
-        | k, _ :: m_ -> select' (k - 1, m_)
+        | k, _ :: m -> select' (k - 1, m)
       in
       try
         begin match !menu_ with
         | None -> raise (Error "No menu defined")
-        | Some m_ -> select' (k, m_)
+        | Some m -> select' (k, m)
         end
       with
       | Splitting.Error s -> abort ("Splitting Error: " ^ s)
@@ -322,7 +322,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       begin if empty () then raise (Error "Nothing to prove")
       else
         let s_ = current () in
-        let s'_ =
+        let s' =
           try
             Lemma.apply
               s_ (valOf (Names.constLookup (valOf (Names.stringToQid name))))
@@ -334,7 +334,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         in
         ignore (pushHistory ());
         ignore (delete ());
-        ignore (insert s'_);
+        ignore (insert s');
         begin
           menu ();
           printMenu ()
@@ -345,7 +345,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       begin if empty () then raise (Error "Nothing to prove")
       else
         let s_ = current () in
-        let open'_, solved' =
+        let open', solved' =
           try Strategy.run [ s_ ] with
           | Splitting.Error s -> abort ("Splitting Error: " ^ s)
           | Filling.Error s -> abort ("Filling Error: " ^ s)
@@ -354,7 +354,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
         in
         ignore (pushHistory ());
         ignore (delete ());
-        ignore (map insertOpen open'_);
+        ignore (map insertOpen open');
         ignore (map insertSolved solved');
         begin
           menu ();
@@ -363,7 +363,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       end
 
     let auto () =
-      let open'_, solved' =
+      let open', solved' =
         try Strategy.run (collectOpen ()) with
         | Splitting.Error s -> abort ("Splitting Error: " ^ s)
         | Filling.Error s -> abort ("Filling Error: " ^ s)
@@ -372,7 +372,7 @@ end) : MPI with module MetaSyn = Mpi__0.MetaSyn' = struct
       in
       ignore (pushHistory ());
       ignore (initOpen ());
-      ignore (map insertOpen open'_);
+      ignore (map insertOpen open');
       ignore (map insertSolved solved');
       begin
         menu ();

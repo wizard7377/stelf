@@ -4,5 +4,5 @@
 
 (executable
  (name refactor)
- (modules Core Pass_beginend Pass_curry Pass_defun Pass_letunit Pass_selftest Refactor)
+ (modules Core Pass_beginend Pass_curry Pass_defun Pass_rename Pass_letunit Pass_selftest Refactor)
  (libraries compiler-libs.common))

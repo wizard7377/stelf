@@ -27,7 +27,7 @@ end) : Cs.CS = struct
     let stringID = (ref (-1) : IntSyn.cid ref)
     let string () = Root (Const !stringID, Nil)
     let concatID = (ref (-1) : IntSyn.cid ref)
-    let concatExp (u_, v_) = Root (Const !concatID, App (u_, App (v_, Nil)))
+    let concatExp (u, v) = Root (Const !concatID, App (u, App (v, Nil)))
     let toString s = ("\"" ^ s) ^ "\""
 
     let stringConDec str =
@@ -49,7 +49,7 @@ end) : Cs.CS = struct
       | None -> None
       end
 
-    let solveString (g_, s_, k) = Some (stringExp (Int.toString k))
+    let solveString (g, s, k) = Some (stringExp (Int.toString k))
 
     type concat_ = Concat of atom list
     and atom = String of string | Exp of IntSyn.eclo
@@ -63,9 +63,9 @@ end) : Cs.CS = struct
     let rec toExp = function
       | Concat [] -> stringExp ""
       | Concat (String str :: []) -> stringExp str
-      | Concat (Exp (u_, Shift 0) :: []) -> u_
-      | Concat (Exp (u_, s_) :: []) -> EClo (u_, s_)
-      | Concat (a_ :: al) -> concatExp (toExp (Concat [ a_ ]), toExp (Concat al))
+      | Concat (Exp (u, Shift 0) :: []) -> u
+      | Concat (Exp (u, s) :: []) -> EClo (u, s)
+      | Concat (a :: al) -> concatExp (toExp (Concat [ a ]), toExp (Concat al))
 
     let catConcat = function
       | Concat [], concat2 -> concat2
@@ -78,41 +78,41 @@ end) : Cs.CS = struct
           end
 
     let rec fromExpW = function
-      | (FgnExp (cs, fe), _) as us_ ->
+      | (FgnExp (cs, fe), _) as us ->
           begin if cs = !myID then normalize (extractConcat fe)
-          else Concat [ Exp us_ ]
+          else Concat [ Exp us ]
           end
-      | (Root (FgnConst (cs, conDec), _), _) as us_ ->
+      | (Root (FgnConst (cs, conDec), _), _) as us ->
           begin if cs = !myID then
             begin match fromString (conDecName conDec) with
             | Some str ->
                 begin if str = "" then Concat [] else Concat [ String str ]
                 end
             end
-          else Concat [ Exp us_ ]
+          else Concat [ Exp us ]
           end
-      | us_ -> Concat [ Exp us_ ]
+      | us -> Concat [ Exp us ]
 
-    and fromExp us_ = fromExpW (Whnf.whnf us_)
+    and fromExp us = fromExpW (Whnf.whnf us)
 
     and normalize = function
       | Concat [] as concat -> concat
       | Concat (String str :: []) as concat -> concat
-      | Concat (Exp us_ :: []) -> fromExp us_
-      | Concat (a_ :: al) ->
-          catConcat (normalize (Concat [ a_ ]), normalize (Concat al))
+      | Concat (Exp us :: []) -> fromExp us
+      | Concat (a :: al) ->
+          catConcat (normalize (Concat [ a ]), normalize (Concat al))
 
     let mapConcat (f, Concat al) =
       let rec mapConcat' = function
         | [] -> []
-        | Exp (u_, s_) :: al -> Exp (f (EClo (u_, s_)), id) :: mapConcat' al
+        | Exp (u, s) :: al -> Exp (f (EClo (u, s)), id) :: mapConcat' al
         | String str :: al -> String str :: mapConcat' al
       in
       Concat (mapConcat' al)
 
     let appConcat (f, Concat al) =
       let appAtom = function
-        | Exp (u_, s_) -> f (EClo (u_, s_))
+        | Exp (u, s) -> f (EClo (u, s))
         | String _ -> ()
       in
       List.app appAtom al
@@ -154,15 +154,15 @@ end) : Cs.CS = struct
       sameConcat' (al1, al2)
 
     and sameExpW = function
-      | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
-          begin match (h1_, h2_) with
+      | ((Root (h1, s1_), s1) as us1), ((Root (h2, s2_), s2) as us2) ->
+          begin match (h1, h2) with
           | BVar k1, BVar k2 -> k1 = k2 && sameSpine ((s1_, s1), (s2_, s2))
           | FVar (n1, _, _), FVar (n2, _, _) ->
               n1 = n2 && sameSpine ((s1_, s1), (s2_, s2))
           | _ -> false
           end
-      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1),
-          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2) ) ->
+      | ( (((EVar (r1, g1, v1, cnstrs1) as u1), s1) as us1),
+          (((EVar (r2, g2, v2, cnstrs2) as u2), s2) as us2) ) ->
           r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
@@ -170,10 +170,10 @@ end) : Cs.CS = struct
 
     and sameSpine = function
       | (Nil, s1), (Nil, s2) -> true
-      | (SClo (s1_, s1'), s1), ss2_ -> sameSpine ((s1_, comp s1' s1), ss2_)
-      | ss1_, (SClo (s2_, s2'), s2) -> sameSpine (ss1_, (s2_, comp s2' s2))
-      | (App (u1_, s1_), s1), (App (u2_, s2_), s2) ->
-          sameExp ((u1_, s1), (u2_, s2)) && sameSpine ((s1_, s1), (s2_, s2))
+      | (SClo (s1_, s1'), s1), ss2 -> sameSpine ((s1_, comp s1' s1), ss2)
+      | ss1, (SClo (s2_, s2'), s2) -> sameSpine (ss1, (s2_, comp s2' s2))
+      | (App (u1, s1_), s1), (App (u2, s2_), s2) ->
+          sameExp ((u1, s1), (u2, s2)) && sameSpine ((s1_, s1), (s2_, s2))
       | _ -> false
 
     and sameSub = function
@@ -191,37 +191,37 @@ end) : Cs.CS = struct
       | Failure
 
     let toFgnUnify = function
-      | MultAssign l_ ->
+      | MultAssign l ->
           IntSyn.Succeed
             (List.map
-               (function g_, x_, u_, ss_ -> Assign (g_, x_, u_, ss_))
-               l_)
-      | MultDelay (ul_, cnstr) ->
-          IntSyn.Succeed (List.map (function u_ -> Delay (u_, cnstr)) ul_)
+               (function g, x, u, ss -> Assign (g, x, u, ss))
+               l)
+      | MultDelay (ul, cnstr) ->
+          IntSyn.Succeed (List.map (function u -> Delay (u, cnstr)) ul)
       | Failure -> Fail
 
-    and unifyRigid (g_, Concat al1, Concat al2) =
+    and unifyRigid (g, Concat al1, Concat al2) =
       let rec unifyRigid' = function
         | [], [] -> MultAssign []
         | String str1 :: al1, String str2 :: al2 ->
             begin if str1 = str2 then unifyRigid' (al1, al2) else Failure
             end
-        | ( Exp ((EVar (r, _, _, _) as u1_), s) :: al1,
-            Exp ((Root (FVar _, _) as u2_), _) :: al2 ) ->
+        | ( Exp ((EVar (r, _, _, _) as u1), s) :: al1,
+            Exp ((Root (FVar _, _) as u2), _) :: al2 ) ->
             let ss = Whnf.invert s in
-            begin if Unify.invertible (g_, (u2_, id), ss, r) then
+            begin if Unify.invertible (g, (u2, id), ss, r) then
               begin match unifyRigid' (al1, al2) with
-              | MultAssign l -> MultAssign ((g_, u1_, u2_, ss) :: l)
+              | MultAssign l -> MultAssign ((g, u1, u2, ss) :: l)
               | Failure -> Failure
               end
             else Failure
             end
-        | ( Exp ((Root (FVar _, _) as u1_), _) :: al1,
-            Exp ((EVar (r, _, _, _) as u2_), s) :: al2 ) ->
+        | ( Exp ((Root (FVar _, _) as u1), _) :: al1,
+            Exp ((EVar (r, _, _, _) as u2), s) :: al2 ) ->
             let ss = Whnf.invert s in
-            begin if Unify.invertible (g_, (u1_, id), ss, r) then
+            begin if Unify.invertible (g, (u1, id), ss, r) then
               begin match unifyRigid' (al1, al2) with
-              | MultAssign l -> MultAssign ((g_, u2_, u1_, ss) :: l)
+              | MultAssign l -> MultAssign ((g, u2, u1, ss) :: l)
               | Failure -> Failure
               end
             else Failure
@@ -240,11 +240,11 @@ end) : Cs.CS = struct
       in
       unifyRigid' (al1, al2)
 
-    let rec unifyString (g_, a, str, cnstr) = match a with
+    let rec unifyString (g, a, str, cnstr) = match a with
       | Concat (String prefix :: al) ->
           begin if String.isPrefix prefix str then
             let suffix = String.extract (str, String.size prefix, None) in
-            unifyString (g_, Concat al, suffix, cnstr)
+            unifyString (g, Concat al, suffix, cnstr)
           else Failure
           end
       | Concat al ->
@@ -256,7 +256,7 @@ end) : Cs.CS = struct
             | Exp (us1_1, us1_2) :: Exp (us2_1, us2_2) :: al, _ ->
                 ( MultDelay ([ EClo (us1_1, us1_2); EClo (us2_1, us2_2) ], cnstr),
                   [] )
-            | Exp ((EVar (r, _, _, _) as u_), s) :: al, candidates ->
+            | Exp ((EVar (r, _, _, _) as u), s) :: al, candidates ->
                 begin if Whnf.isPatSub s then
                   let rec assign arg__1 arg__2 =
                     begin match (arg__1, arg__2) with
@@ -266,32 +266,32 @@ end) : Cs.CS = struct
                           EVar (r', _, _, _),
                           Root (FgnConst (cs, conDec), Nil),
                           _ )
-                        :: l_ ) ->
+                        :: l ) ->
                         begin if r == r' then fromString (conDecName conDec)
-                        else assign r l_
+                        else assign r l
                         end
-                    | r, _ :: l_ -> assign r l_
+                    | r, _ :: l -> assign r l
                     end
                   in
                   begin match unifyString' (al, candidates) with
-                  | MultAssign l_, parsed :: parsedL ->
-                      begin match assign r l_ with
+                  | MultAssign l, parsed :: parsedL ->
+                      begin match assign r l with
                       | None ->
                           let ss = Whnf.invert s in
-                          let w_ = stringExp parsed in
-                          (MultAssign ((g_, u_, w_, ss) :: l_), parsedL)
+                          let w = stringExp parsed in
+                          (MultAssign ((g, u, w, ss) :: l), parsedL)
                       | Some parsed' ->
-                          begin if parsed = parsed' then (MultAssign l_, parsedL)
+                          begin if parsed = parsed' then (MultAssign l, parsedL)
                           else (Failure, [])
                           end
                       end
-                  | MultDelay (ul_, cnstr), _ ->
-                      (MultDelay (EClo (u_, s) :: ul_, cnstr), [])
+                  | MultDelay (ul, cnstr), _ ->
+                      (MultDelay (EClo (u, s) :: ul, cnstr), [])
                   | Failure, _ -> (Failure, [])
                   end
-                else (MultDelay ([ EClo (u_, s) ], cnstr), [])
+                else (MultDelay ([ EClo (u, s) ], cnstr), [])
                 end
-            | Exp (u_, s_) :: al, _ -> (MultDelay ([ EClo (u_, s_) ], cnstr), [])
+            | Exp (u, s) :: al, _ -> (MultDelay ([ EClo (u, s) ], cnstr), [])
             | String str :: [], candidates ->
                 let successors (Decomp (parse, parsedL)) =
                   List.mapPartial
@@ -329,10 +329,10 @@ end) : Cs.CS = struct
           | result, parsedL -> Failure
           end
 
-    let rec unifyConcat (g_, (Concat al1 as concat1), (Concat al2 as concat2)) =
-      let u1_ = toFgn concat1 in
-      let u2_ = toFgn concat2 in
-      let cnstr = ref (Eqn (g_, u1_, u2_)) in
+    let rec unifyConcat (g, (Concat al1 as concat1), (Concat al2 as concat2)) =
+      let u1 = toFgn concat1 in
+      let u2 = toFgn concat2 in
+      let cnstr = ref (Eqn (g, u1, u2)) in
       begin match (al1, al2) with
       | [], [] -> MultAssign []
       | [], _ -> Failure
@@ -340,39 +340,39 @@ end) : Cs.CS = struct
       | String str1 :: [], String str2 :: [] ->
           begin if str1 = str2 then MultAssign [] else Failure
           end
-      | Exp ((EVar (r, _, _, _) as u_), s) :: [], _ ->
+      | Exp ((EVar (r, _, _, _) as u), s) :: [], _ ->
           begin if Whnf.isPatSub s then
             let ss = Whnf.invert s in
-            begin if Unify.invertible (g_, (u2_, id), ss, r) then
-              MultAssign [ (g_, u_, u2_, ss) ]
-            else MultDelay ([ u1_; u2_ ], cnstr)
+            begin if Unify.invertible (g, (u2, id), ss, r) then
+              MultAssign [ (g, u, u2, ss) ]
+            else MultDelay ([ u1; u2 ], cnstr)
             end
-          else MultDelay ([ u1_; u2_ ], cnstr)
+          else MultDelay ([ u1; u2 ], cnstr)
           end
-      | _, Exp ((EVar (r, _, _, _) as u_), s) :: [] ->
+      | _, Exp ((EVar (r, _, _, _) as u), s) :: [] ->
           begin if Whnf.isPatSub s then
             let ss = Whnf.invert s in
-            begin if Unify.invertible (g_, (u1_, id), ss, r) then
-              MultAssign [ (g_, u_, u1_, ss) ]
-            else MultDelay ([ u1_; u2_ ], cnstr)
+            begin if Unify.invertible (g, (u1, id), ss, r) then
+              MultAssign [ (g, u, u1, ss) ]
+            else MultDelay ([ u1; u2 ], cnstr)
             end
-          else MultDelay ([ u1_; u2_ ], cnstr)
+          else MultDelay ([ u1; u2 ], cnstr)
           end
-      | String str :: [], _ -> unifyString (g_, concat2, str, cnstr)
-      | _, String str :: [] -> unifyString (g_, concat1, str, cnstr)
+      | String str :: [], _ -> unifyString (g, concat2, str, cnstr)
+      | _, String str :: [] -> unifyString (g, concat1, str, cnstr)
       | _ ->
-          begin match unifyRigid (g_, concat1, concat2) with
+          begin match unifyRigid (g, concat1, concat2) with
           | MultAssign _ as result -> result
           | Failure ->
               begin if sameConcat (concat1, concat2) then MultAssign []
-              else MultDelay ([ u1_; u2_ ], cnstr)
+              else MultDelay ([ u1; u2 ], cnstr)
               end
           end
       end
 
     and toFgn = function
       | Concat (String str :: []) as concat -> stringExp str
-      | Concat (Exp (u_, id) :: []) as concat -> u_
+      | Concat (Exp (u, id) :: []) as concat -> u
       | concat -> FgnExp (!myID, MyIntsynRep concat)
 
     let toInternal arg__3 arg__4 =
@@ -395,15 +395,15 @@ end) : Cs.CS = struct
 
     let equalTo arg__9 arg__10 =
       begin match (arg__9, arg__10) with
-      | MyIntsynRep concat, u2_ ->
-          sameConcat (normalize concat, fromExp (u2_, id))
+      | MyIntsynRep concat, u2 ->
+          sameConcat (normalize concat, fromExp (u2, id))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
     let unifyWith arg__11 arg__12 =
       begin match (arg__11, arg__12) with
-      | MyIntsynRep concat, (g_, u2_) ->
-          toFgnUnify (unifyConcat (g_, normalize concat, fromExp (u2_, id)))
+      | MyIntsynRep concat, (g, u2) ->
+          toFgnUnify (unifyConcat (g, normalize concat, fromExp (u2, id)))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
@@ -423,28 +423,28 @@ end) : Cs.CS = struct
       in
       let rec makeLam arg__13 arg__14 =
         begin match (arg__13, arg__14) with
-        | e_, 0 -> e_
-        | e_, n -> Lam (Dec (None, string ()), makeLam e_ (n - 1))
+        | e, 0 -> e
+        | e, n -> Lam (Dec (None, string ()), makeLam e (n - 1))
         end
       in
       let rec expand a1 b1 = match a1, b1 with
         | (Nil, s), arity -> (makeParams arity, arity)
-        | (App (u_, s_), s), arity ->
-            let s'_, arity' = expand (s_, s) (arity - 1) in
-            (App (EClo (u_, comp s (Shift arity')), s'_), arity')
+        | (App (u, s_), s), arity ->
+            let s', arity' = expand (s_, s) (arity - 1) in
+            (App (EClo (u, comp s (Shift arity')), s'), arity')
         | (SClo (s_, s'), s), arity -> expand (s_, comp s s') arity
       in
-      let s'_, arity' = expand (s_, id) arity in
-      makeLam (toFgn (opExp s'_)) arity'
+      let s', arity' = expand (s_, id) arity in
+      makeLam (toFgn (opExp s')) arity'
 
     let makeFgnBinary opConcat =
       makeFgn
         ( 2,
           function
-          | App (u1_, App (u2_, Nil)) ->
-              opConcat (fromExp (u1_, id), fromExp (u2_, id)) )
+          | App (u1, App (u2, Nil)) ->
+              opConcat (fromExp (u1, id), fromExp (u2, id)) )
 
-    let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
+    let arrow u v = Pi ((Dec (None, u), No), v)
 
     let init (cs, installF) =
       begin

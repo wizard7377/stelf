@@ -63,50 +63,50 @@ end) : ELIM with module State = Elim__0.State' = struct
     let stripTCOpt = function None -> None | Some tc -> Some (stripTC tc)
 
     let stripDec = function
-      | T.UDec d_ -> T.UDec d_
-      | T.PDec (name, f_, tc1, tc2) -> T.PDec (name, f_, tc1, stripTCOpt tc2)
+      | T.UDec d -> T.UDec d
+      | T.PDec (name, f, tc1, tc2) -> T.PDec (name, f, tc1, stripTCOpt tc2)
 
     let rec strip = function
       | I.Null -> I.Null
-      | I.Decl (psi, d_) -> I.Decl (strip psi, stripDec d_)
+      | I.Decl (psi, d) -> I.Decl (strip psi, stripDec d)
 
-    let expand (S.Focus ((T.EVar (psi, r, g_, v_, _, _) as y_), w_)) =
-      let rec matchCtx (a, n, fs_) = match a with
-        | I.Null -> fs_
-        | I.Decl (g_, T.PDec (x, f_, _, _)) ->
-            matchCtx (g_, n + 1, Local (y_, n) :: fs_)
-        | I.Decl (g_, T.UDec _) -> matchCtx (g_, n + 1, fs_)
+    let expand (S.Focus ((T.EVar (psi, r, g, v, _, _) as y), w)) =
+      let rec matchCtx (a, n, fs) = match a with
+        | I.Null -> fs
+        | I.Decl (g, T.PDec (x, f, _, _)) ->
+            matchCtx (g, n + 1, Local (y, n) :: fs)
+        | I.Decl (g, T.UDec _) -> matchCtx (g, n + 1, fs)
       in
       matchCtx (psi, 1, [])
 
     let rec apply = function
-      | Local ((T.EVar (psi, r, g_, None, None, _) as r_), n) ->
+      | Local ((T.EVar (psi, r, g, None, None, _) as r_), n) ->
           let (T.PDec (_, f0, _, _)) = T.ctxDec psi n in
           begin match f0 with
-          | T.All ((T.UDec (I.Dec (_, v_)), _), f_) ->
-              let x_ = I.newEVar (T.coerceCtx (strip psi)) v_ in
+          | T.All ((T.UDec (I.Dec (_, v)), _), f) ->
+              let x_ = I.newEVar (T.coerceCtx (strip psi)) v in
               let (I.NDec x) = Names.decName (T.coerceCtx psi) (I.NDec None) in
-              let d_ =
-                T.PDec (x, T.forSub f_ (T.Dot (T.Exp x_, T.id)), None, None)
+              let d =
+                T.PDec (x, T.forSub f (T.Dot (T.Exp x_, T.id)), None, None)
               in
-              let psi' = I.Decl (psi, d_) in
-              let y_ = T.newEVar (strip psi') (T.forSub g_ T.shift) in
+              let psi' = I.Decl (psi, d) in
+              let y = T.newEVar (strip psi') (T.forSub g T.shift) in
               r :=
-                Some (T.Let (d_, T.Redex (T.Var n, T.AppExp (x_, T.Nil)), y_))
-          | T.Ex ((d1_, _), f_) ->
-              let d1' = Names.decName (T.coerceCtx psi) d1_ in
+                Some (T.Let (d, T.Redex (T.Var n, T.AppExp (x_, T.Nil)), y))
+          | T.Ex ((d1, _), f) ->
+              let d1' = Names.decName (T.coerceCtx psi) d1 in
               let psi' = I.Decl (psi, T.UDec d1') in
               let (I.NDec x) = Names.decName (T.coerceCtx psi') (I.NDec None) in
-              let d2_ = T.PDec (x, f_, None, None) in
-              let psi'' = I.Decl (psi', d2_) in
-              let y_ = T.newEVar (strip psi'') (T.forSub g_ (T.Shift 2)) in
-              r := Some (T.LetPairExp (d1', d2_, T.Var n, y_))
+              let d2 = T.PDec (x, f, None, None) in
+              let psi'' = I.Decl (psi', d2) in
+              let y = T.newEVar (strip psi'') (T.forSub g (T.Shift 2)) in
+              r := Some (T.LetPairExp (d1', d2, T.Var n, y))
           | True ->
-              let y_ = T.newEVar (strip psi) g_ in
-              r := Some (T.LetUnit (T.Var n, y_))
+              let y = T.newEVar (strip psi) g in
+              r := Some (T.LetUnit (T.Var n, y))
           end
-      | Local (T.EVar (psi, r, T.FClo (f_, s), tc1, tc2, x_), n) ->
-          apply (Local (T.EVar (psi, r, T.forSub f_ s, tc1, tc2, x_), n))
+      | Local (T.EVar (psi, r, T.FClo (f, s), tc1, tc2, x), n) ->
+          apply (Local (T.EVar (psi, r, T.forSub f s, tc1, tc2, x), n))
 
     let menu (Local ((T.EVar (psi, _, _, _, _, _) as x_), n)) =
       begin match I.ctxLookup psi n with

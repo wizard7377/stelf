@@ -62,7 +62,7 @@ struct
      Invariant: G = G',D
   *)
   let ctxPop = function
-    | Decl (g_, _) -> g_
+    | Decl (g, _) -> g
     | Null -> invalid_arg "ctxPop: empty context"
 
   exception Error = Error
@@ -72,19 +72,19 @@ struct
      Invariant: 1 <= k <= |G|, where |G| is length of G
   *)
   let rec ctxLookup a1 b1 = match a1, b1 with
-    | Decl (_, d_), 1 -> d_
-    | Decl (g'_, _), k' -> ctxLookup g'_ (k' - 1)
+    | Decl (_, d), 1 -> d
+    | Decl (g', _), k' -> ctxLookup g' (k' - 1)
     | Null, _ -> invalid_arg "ctxLookup: out of bounds"
 
   (*    | ctxLookup (Null, k') = (print (""Looking up k' = "" ^ Int.toString k' ^ ""\n""); raise Error ""Out of Bounce\n"")*)
   (* ctxLookup (Null, k')  should not occur by invariant *)
   (* ctxLength G = |G|, the number of declarations in G *)
-  let ctxLength g_ =
+  let ctxLength g =
     let rec ctxLength' (a, n) = match a with
       | Null -> n
-      | Decl (g_, _) -> ctxLength' (g_, n + 1)
+      | Decl (g, _) -> ctxLength' (g, n + 1)
     in
-    ctxLength' (g_, 0)
+    ctxLength' (g, 0)
 
   type fgnExp = exn
   (** foreign expression representation *)

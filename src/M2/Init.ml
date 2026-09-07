@@ -35,12 +35,12 @@ end) : INIT with module MetaSyn = Init__0.MetaSyn' = struct
     module I = IntSyn
 
     let init' cid =
-      let v_, _ = M.createAtomConst I.Null (I.Const cid) in
+      let v, _ = M.createAtomConst I.Null (I.Const cid) in
       MetaAbstract.abstract
         (M.State
            ( ("/" ^ I.conDecName (I.sgnLookup cid)) ^ "/",
              M.Prefix (I.Null, I.Null, I.Null),
-             v_ ))
+             v ))
 
     let init cidList = map init' cidList
   end

@@ -81,55 +81,55 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
 
     type quantifier = Universal | Existential
 
-    let vectorToString (g_, o_) =
+    let vectorToString (g, o) =
       let rec fmtOrder = function
-        | Order.Arg (us_, vs_) ->
+        | Order.Arg (us, vs) ->
             [
-              F.string (Print.expToString g_ (I.EClo (fst us_, snd us_)));
+              F.string (Print.expToString g (I.EClo (fst us, snd us)));
               F.string ":";
-              F.string (Print.expToString g_ (I.EClo (fst vs_, snd vs_)));
+              F.string (Print.expToString g (I.EClo (fst vs, snd vs)));
             ]
-        | Order.Lex l_ -> [ F.string "{"; F.hVbox (fmtOrders l_); F.string "}" ]
-        | Order.Simul l_ ->
-            [ F.string "["; F.hVbox (fmtOrders l_); F.string "]" ]
+        | Order.Lex l -> [ F.string "{"; F.hVbox (fmtOrders l); F.string "}" ]
+        | Order.Simul l ->
+            [ F.string "["; F.hVbox (fmtOrders l); F.string "]" ]
       and fmtOrders = function
         | [] -> []
-        | o_ :: [] -> fmtOrder o_
-        | o_ :: l_ -> fmtOrder o_ @ (F.string " " :: fmtOrders l_)
+        | o :: [] -> fmtOrder o
+        | o :: l -> fmtOrder o @ (F.string " " :: fmtOrders l)
       in
-      F.makestring_fmt (F.hVbox (fmtOrder o_))
+      F.makestring_fmt (F.hVbox (fmtOrder o))
 
     let vector (c, (s_, s)) =
-      let vid_ = (I.constType c, I.id) in
-      let rec select' (n, (ss'_, vs'')) = select'W (n, (ss'_, Whnf.whnf vs''))
+      let vid = (I.constType c, I.id) in
+      let rec select' (n, (ss', vs'')) = select'W (n, (ss', Whnf.whnf vs''))
       and select'W = function
-        | 1, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v''), _), _), s'')) ->
-            ((u'_, s'), (v'', s''))
-        | n, ((I.SClo (s'_, s1'), s2'), vs'') ->
-            select'W (n, ((s'_, I.comp s1' s2'), vs''))
-        | n, ((I.App (u'_, s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
+        | 1, ((I.App (u', s'_), s'), (I.Pi ((I.Dec (_, v''), _), _), s'')) ->
+            ((u', s'), (v'', s''))
+        | n, ((I.SClo (s', s1'), s2'), vs'') ->
+            select'W (n, ((s', I.comp s1' s2'), vs''))
+        | n, ((I.App (u', s'_), s'), (I.Pi ((I.Dec (_, v1''), _), v2''), s''))
           ->
             select'
-              (n - 1, ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u'_, s')), s''))))
+              (n - 1, ((s'_, s'), (v2'', I.Dot (I.Exp (I.EClo (u', s')), s''))))
       in
       let rec select = function
-        | O.Arg n -> O.Arg (select' (n, ((s_, s), vid_)))
-        | O.Lex l_ -> O.Lex (map select l_)
-        | O.Simul l_ -> O.Simul (map select l_)
+        | O.Arg n -> O.Arg (select' (n, ((s_, s), vid)))
+        | O.Lex l -> O.Lex (map select l)
+        | O.Simul l -> O.Simul (map select l)
       in
       select (O.selLookup c)
 
-    let set_parameter (g_, (I.EVar (r, _, v_, _) as x_), k, sc, ops) =
+    let set_parameter (g, (I.EVar (r, _, v, _) as x), k, sc, ops) =
       let rec set_parameter' (k', ops') = match k' with
         | 0 -> ops'
         | k' ->
-            let (I.Dec (_, v'_) as d'_) = I.ctxDec g_ k' in
+            let (I.Dec (_, v') as d') = I.ctxDec g k' in
             let ops'' =
               CsManager.trail (function () ->
                   begin if
-                    Unify.unifiable g_ (v_, I.id) (v'_, I.id)
+                    Unify.unifiable g (v, I.id) (v', I.id)
                     && Unify.unifiable
-                         g_ (x_, I.id) (I.Root (I.BVar k', I.Nil), I.id)
+                         g (x, I.id) (I.Root (I.BVar k', I.Nil), I.id)
                   then sc ops'
                   else ops'
                   end)
@@ -138,262 +138,262 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       in
       set_parameter' (k, ops)
 
-    let rec ltinit (g_, k, (us_, vs_), usVs', sc, ops) =
-      ltinitW (g_, k, Whnf.whnfEta us_ vs_, usVs', sc, ops)
+    let rec ltinit (g, k, (us, vs), usVs', sc, ops) =
+      ltinitW (g, k, Whnf.whnfEta us vs, usVs', sc, ops)
 
-    and ltinitW (g_, k, a, usVs', sc, ops) = match a, usVs' with
-      | (us_, ((I.Root _, _) as vs_)), usVs' ->
-          lt (g_, k, (us_, vs_), usVs', sc, ops)
-      | ((I.Lam (d1_, u_), s1), (I.Pi (d2_, v_), s2)), ((u'_, s1'), (v'_, s2')) ->
+    and ltinitW (g, k, a, usVs', sc, ops) = match a, usVs' with
+      | (us, ((I.Root _, _) as vs)), usVs' ->
+          lt (g, k, (us, vs), usVs', sc, ops)
+      | ((I.Lam (d1, u), s1), (I.Pi (d2, v), s2)), ((u', s1'), (v', s2')) ->
           ltinit
-            ( I.Decl (g_, I.decSub d1_ s1),
+            ( I.Decl (g, I.decSub d1 s1),
               k + 1,
-              ((u_, I.dot1 s1), (v_, I.dot1 s2)),
-              ((u'_, I.comp s1' I.shift), (v'_, I.comp s2' I.shift)),
+              ((u, I.dot1 s1), (v, I.dot1 s2)),
+              ((u', I.comp s1' I.shift), (v', I.comp s2' I.shift)),
               sc,
               ops )
 
-    and lt (g_, k, (us_, vs_), (us', vs'_), sc, ops) =
-      ltW (g_, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ops)
+    and lt (g, k, (us, vs), (us', vs'), sc, ops) =
+      ltW (g, k, (us, vs), Whnf.whnfEta us' vs', sc, ops)
 
-    and ltW (g_, k, a, b, sc, ops) = match a, b with
-      | (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_) ->
+    and ltW (g, k, a, b, sc, ops) = match a, b with
+      | (us, vs), ((I.Root (I.Const c, s'_), s'), vs') ->
           ltSpine
-            (g_, k, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, ops)
-      | (us_, vs_), ((I.Root (I.BVar n, s'_), s'), vs'_) ->
+            (g, k, (us, vs), ((s'_, s'), (I.constType c, I.id)), sc, ops)
+      | (us, vs), ((I.Root (I.BVar n, s'_), s'), vs') ->
           begin if n <= k then
-            let (I.Dec (_, v'_)) = I.ctxDec g_ n in
-            ltSpine (g_, k, (us_, vs_), ((s'_, s'), (v'_, I.id)), sc, ops)
+            let (I.Dec (_, v')) = I.ctxDec g n in
+            ltSpine (g, k, (us, vs), ((s'_, s'), (v', I.id)), sc, ops)
           else ops
           end
       | _, ((I.EVar _, _), _) -> ops
-      | ((u_, s1), (v_, s2)), ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
-          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
-            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
-            let sc' ops' = set_parameter (g_, x_, k, sc, ops') in
+      | ((u, s1), (v, s2)), ( (I.Lam ((I.Dec (_, v1') as d), u'), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'), s2') ) ->
+          begin if Subordinate.equiv (I.targetFam v) (I.targetFam v1') then
+            let x = I.newEVar g (I.EClo (v1', s1')) in
+            let sc' ops' = set_parameter (g, x, k, sc, ops') in
             lt
-              ( g_,
+              ( g,
                 k,
-                ((u_, s1), (v_, s2)),
-                ((u'_, I.Dot (I.Exp x_, s1')), (v'_, I.Dot (I.Exp x_, s2'))),
+                ((u, s1), (v, s2)),
+                ((u', I.Dot (I.Exp x, s1')), (v', I.Dot (I.Exp x, s2'))),
                 sc',
                 ops )
           else
-            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
-              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v) then
+              let x = I.newEVar g (I.EClo (v1', s1')) in
               lt
-                ( g_,
+                ( g,
                   k,
-                  ((u_, s1), (v_, s2)),
-                  ((u'_, I.Dot (I.Exp x_, s1')), (v'_, I.Dot (I.Exp x_, s2'))),
+                  ((u, s1), (v, s2)),
+                  ((u', I.Dot (I.Exp x, s1')), (v', I.Dot (I.Exp x, s2'))),
                   sc,
                   ops )
             else ops
             end
           end
 
-    and ltSpine (g_, k, (us_, vs_), (ss'_, vs'_), sc, ops) =
-      ltSpineW (g_, k, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, ops)
+    and ltSpine (g, k, (us, vs), (ss', vs'), sc, ops) =
+      ltSpineW (g, k, (us, vs), (ss', Whnf.whnf vs'), sc, ops)
 
-    and ltSpineW (g_, k, a, b, sc, ops) = match a, b with
-      | (us_, vs_), ((I.Nil, _), _) -> ops
-      | (us_, vs_), ((I.SClo (s_, s'), s''), vs'_) ->
-          ltSpineW (g_, k, (us_, vs_), ((s_, I.comp s' s''), vs'_), sc, ops)
-      | (us_, vs_), ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
+    and ltSpineW (g, k, a, b, sc, ops) = match a, b with
+      | (us, vs), ((I.Nil, _), _) -> ops
+      | (us, vs), ((I.SClo (s, s'), s''), vs') ->
+          ltSpineW (g, k, (us, vs), ((s, I.comp s' s''), vs'), sc, ops)
+      | (us, vs), ((I.App (u', s'), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
           let ops' =
-            le (g_, k, (us_, vs_), ((u'_, s1'), (v1', s2')), sc, ops)
+            le (g, k, (us, vs), ((u', s1'), (v1', s2')), sc, ops)
           in
           ltSpine
-            ( g_,
+            ( g,
               k,
-              (us_, vs_),
-              ((s'_, s1'), (v2', I.Dot (I.Exp (I.EClo (u'_, s1')), s2'))),
+              (us, vs),
+              ((s', s1'), (v2', I.Dot (I.Exp (I.EClo (u', s1')), s2'))),
               sc,
               ops' )
 
-    and eq (g_, (us_, vs_), (us', vs'_), sc, ops) =
+    and eq (g, (us, vs), (us', vs'), sc, ops) =
       CsManager.trail (function () ->
           begin if
-            Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
+            Unify.unifiable g vs vs' && Unify.unifiable g us us'
           then sc ops
           else ops
           end)
 
-    and le (g_, k, (us_, vs_), (us', vs'_), sc, ops) =
-      let ops' = eq (g_, (us_, vs_), (us', vs'_), sc, ops) in
-      leW (g_, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ops')
+    and le (g, k, (us, vs), (us', vs'), sc, ops) =
+      let ops' = eq (g, (us, vs), (us', vs'), sc, ops) in
+      leW (g, k, (us, vs), Whnf.whnfEta us' vs', sc, ops')
 
-    and leW (g_, k, a, b, sc, ops) = match a, b with
-      | ((u_, s1), (v_, s2)), ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
-          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
-            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
-            let sc' ops' = set_parameter (g_, x_, k, sc, ops') in
+    and leW (g, k, a, b, sc, ops) = match a, b with
+      | ((u, s1), (v, s2)), ( (I.Lam ((I.Dec (_, v1') as d), u'), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'), s2') ) ->
+          begin if Subordinate.equiv (I.targetFam v) (I.targetFam v1') then
+            let x = I.newEVar g (I.EClo (v1', s1')) in
+            let sc' ops' = set_parameter (g, x, k, sc, ops') in
             le
-              ( g_,
+              ( g,
                 k,
-                ((u_, s1), (v_, s2)),
-                ((u'_, I.Dot (I.Exp x_, s1')), (v'_, I.Dot (I.Exp x_, s2'))),
+                ((u, s1), (v, s2)),
+                ((u', I.Dot (I.Exp x, s1')), (v', I.Dot (I.Exp x, s2'))),
                 sc',
                 ops )
           else
-            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
-              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v) then
+              let x = I.newEVar g (I.EClo (v1', s1')) in
               le
-                ( g_,
+                ( g,
                   k,
-                  ((u_, s1), (v_, s2)),
-                  ((u'_, I.Dot (I.Exp x_, s1')), (v'_, I.Dot (I.Exp x_, s2'))),
+                  ((u, s1), (v, s2)),
+                  ((u', I.Dot (I.Exp x, s1')), (v', I.Dot (I.Exp x, s2'))),
                   sc,
                   ops )
             else ops
             end
           end
-      | (us_, vs_), (us', vs'_) ->
-          lt (g_, k, (us_, vs_), (us', vs'_), sc, ops)
+      | (us, vs), (us', vs') ->
+          lt (g, k, (us, vs), (us', vs'), sc, ops)
 
-    let rec ordlt (g_, a, b, sc, ops) = match a, b with
+    let rec ordlt (g, a, b, sc, ops) = match a, b with
       | O.Arg usVs, O.Arg usVs' ->
-          ltinit (g_, 0, usVs, usVs', sc, ops)
-      | O.Lex l_, O.Lex l'_ -> ordltLex (g_, l_, l'_, sc, ops)
-      | O.Simul l_, O.Simul l'_ -> ordltSimul (g_, l_, l'_, sc, ops)
+          ltinit (g, 0, usVs, usVs', sc, ops)
+      | O.Lex l, O.Lex l' -> ordltLex (g, l, l', sc, ops)
+      | O.Simul l, O.Simul l' -> ordltSimul (g, l, l', sc, ops)
 
-    and ordltLex (g_, a, b, sc, ops) = match a, b with
+    and ordltLex (g, a, b, sc, ops) = match a, b with
       | [], [] -> ops
-      | o_ :: l_, o'_ :: l'_ ->
+      | o :: l, o' :: l' ->
           let ops' =
-            CsManager.trail (function () -> ordlt (g_, o_, o'_, sc, ops))
+            CsManager.trail (function () -> ordlt (g, o, o', sc, ops))
           in
           ordeq
-            ( g_,
-              o_,
-              o'_,
-              (function ops'' -> ordltLex (g_, l_, l'_, sc, ops'')),
+            ( g,
+              o,
+              o',
+              (function ops'' -> ordltLex (g, l, l', sc, ops'')),
               ops' )
 
-    and ordltSimul (g_, a, b, sc, ops) = match a, b with
+    and ordltSimul (g, a, b, sc, ops) = match a, b with
       | [], [] -> ops
-      | o_ :: l_, o'_ :: l'_ ->
+      | o :: l, o' :: l' ->
           let ops'' =
             CsManager.trail (function () ->
                 ordlt
-                  ( g_,
-                    o_,
-                    o'_,
-                    (function ops' -> ordleSimul (g_, l_, l'_, sc, ops')),
+                  ( g,
+                    o,
+                    o',
+                    (function ops' -> ordleSimul (g, l, l', sc, ops')),
                     ops ))
           in
           ordeq
-            ( g_,
-              o_,
-              o'_,
-              (function ops' -> ordltSimul (g_, l_, l'_, sc, ops')),
+            ( g,
+              o,
+              o',
+              (function ops' -> ordltSimul (g, l, l', sc, ops')),
               ops'' )
 
-    and ordleSimul (g_, a, b, sc, ops) = match a, b with
+    and ordleSimul (g, a, b, sc, ops) = match a, b with
       | [], [] -> sc ops
-      | o_ :: l_, o'_ :: l'_ ->
+      | o :: l, o' :: l' ->
           ordle
-            ( g_,
-              o_,
-              o'_,
-              (function ops' -> ordleSimul (g_, l_, l'_, sc, ops')),
+            ( g,
+              o,
+              o',
+              (function ops' -> ordleSimul (g, l, l', sc, ops')),
               ops )
 
-    and ordeq (g_, a, b, sc, ops) = match a, b with
-      | O.Arg (us_, vs_), O.Arg (us', vs'_) ->
+    and ordeq (g, a, b, sc, ops) = match a, b with
+      | O.Arg (us, vs), O.Arg (us', vs') ->
           begin if
-            Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
+            Unify.unifiable g vs vs' && Unify.unifiable g us us'
           then sc ops
           else ops
           end
-      | O.Lex l_, O.Lex l'_ -> ordeqs (g_, l_, l'_, sc, ops)
-      | O.Simul l_, O.Simul l'_ -> ordeqs (g_, l_, l'_, sc, ops)
+      | O.Lex l, O.Lex l' -> ordeqs (g, l, l', sc, ops)
+      | O.Simul l, O.Simul l' -> ordeqs (g, l, l', sc, ops)
 
-    and ordeqs (g_, a, b, sc, ops) = match a, b with
+    and ordeqs (g, a, b, sc, ops) = match a, b with
       | [], [] -> sc ops
-      | o_ :: l_, o'_ :: l'_ ->
+      | o :: l, o' :: l' ->
           ordeq
-            ( g_,
-              o_,
-              o'_,
-              (function ops' -> ordeqs (g_, l_, l'_, sc, ops')),
+            ( g,
+              o,
+              o',
+              (function ops' -> ordeqs (g, l, l', sc, ops')),
               ops )
 
-    and ordle (g_, o_, o'_, sc, ops) =
+    and ordle (g, o, o', sc, ops) =
       let ops' =
-        CsManager.trail (function () -> ordeq (g_, o_, o'_, sc, ops))
+        CsManager.trail (function () -> ordeq (g, o, o', sc, ops))
       in
-      ordlt (g_, o_, o'_, sc, ops')
+      ordlt (g, o, o', sc, ops')
 
     let rec createEVars = function
       | M.Prefix (I.Null, I.Null, I.Null) ->
           (M.Prefix (I.Null, I.Null, I.Null), I.id)
-      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, M.Top), I.Decl (b_, b)) ->
-          let M.Prefix (g'_, m'_, b'_), s' =
-            createEVars (M.Prefix (g_, m_, b_))
+      | M.Prefix (I.Decl (g, d), I.Decl (m, M.Top), I.Decl (b_, b)) ->
+          let M.Prefix (g', m', b'), s' =
+            createEVars (M.Prefix (g, m, b_))
           in
           ( M.Prefix
-              ( I.Decl (g'_, I.decSub d_ s'),
-                I.Decl (m'_, M.Top),
-                I.Decl (b'_, b) ),
+              ( I.Decl (g', I.decSub d s'),
+                I.Decl (m', M.Top),
+                I.Decl (b', b) ),
             I.dot1 s' )
-      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, M.Bot), I.Decl (b_, _))
+      | M.Prefix (I.Decl (g, I.Dec (_, v)), I.Decl (m, M.Bot), I.Decl (b, _))
         ->
-          let M.Prefix (g'_, m'_, b'_), s' =
-            createEVars (M.Prefix (g_, m_, b_))
+          let M.Prefix (g', m', b'), s' =
+            createEVars (M.Prefix (g, m, b))
           in
-          let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
-          (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'))
+          let x = I.newEVar g' (I.EClo (v, s')) in
+          (M.Prefix (g', m', b'), I.Dot (I.Exp x, s'))
 
-    let rec select (g_, vs_) = selectW (g_, Whnf.whnf vs_)
+    let rec select (g, vs) = selectW (g, Whnf.whnf vs)
 
-    and selectW (g_, (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s)) =
-      let rec select' (g_, (vs1, vs2)) = selectW' (g_, (vs1, Whnf.whnf vs2))
-      and selectW' (g_, a) = match a with
-        | (vs1, ((I.Root _, _) as vs2)) -> (g_, (vs1, vs2))
-        | ((v1_, s1), (I.Pi ((d_, p_), v2'), s2)) ->
+    and selectW (g, (I.Pi (((I.Dec (_, v1) as d), _), v2), s)) =
+      let rec select' (g, (vs1, vs2)) = selectW' (g, (vs1, Whnf.whnf vs2))
+      and selectW' (g, a) = match a with
+        | (vs1, ((I.Root _, _) as vs2)) -> (g, (vs1, vs2))
+        | ((v1, s1), (I.Pi ((d, p), v2'), s2)) ->
             select'
-              ( I.Decl (g_, I.decSub d_ s2),
-                ((v1_, I.comp s1 I.shift), (v2', I.dot1 s2)) )
+              ( I.Decl (g, I.decSub d s2),
+                ((v1, I.comp s1 I.shift), (v2', I.dot1 s2)) )
       in
       select'
-        ( I.Decl (g_, I.decSub d_ s),
-          ((v1_, I.comp s I.shift), (v2_, I.dot1 s)) )
+        ( I.Decl (g, I.decSub d s),
+          ((v1, I.comp s I.shift), (v2, I.dot1 s)) )
 
-    let lemma (s_, t, ops) =
-      let (M.State (name, gm, v_)) = Lemma.apply s_ t in
-      let M.Prefix (g'_, m'_, b'_), s' = createEVars gm in
-      let g''_, ((I.Root (I.Const a1, s1_), s1), (I.Root (I.Const a2, s2_), s2))
+    let lemma (s, t, ops) =
+      let (M.State (name, gm, v)) = Lemma.apply s t in
+      let M.Prefix (g', m', b'), s' = createEVars gm in
+      let g'', ((I.Root (I.Const a1, s1_), s1), (I.Root (I.Const a2, s2_), s2))
           =
-        select (g'_, (v_, s'))
+        select (g', (v, s'))
       in
-      ( g''_,
+      ( g'',
         vector (a1, (s1_, s1)),
         vector (a2, (s2_, s2)),
         (function
         | ops' ->
             MetaAbstract.abstract
-              (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
+              (M.State (name, M.Prefix (g', m', b'), I.EClo (v, s')))
             :: ops'),
         ops )
 
-    let rec expandLazy' (s_, empty_, ops) = match empty_ with
-      | empty_ -> ops
-      | O.Le (t, l_) -> expandLazy' (s_, l_, ordle (lemma (s_, t, ops)))
-      | O.Lt (t, l_) -> expandLazy' (s_, l_, ordlt (lemma (s_, t, ops)))
+    let rec expandLazy' (s, empty, ops) = match empty with
+      | empty -> ops
+      | O.Le (t, l) -> expandLazy' (s, l, ordle (lemma (s, t, ops)))
+      | O.Lt (t, l) -> expandLazy' (s, l, ordlt (lemma (s, t, ops)))
 
-    let recursionDepth v_ =
+    let recursionDepth v =
       let rec recursionDepth' (a, n) = match a with
         | I.Root _ -> n
-        | I.Pi (_, v_) -> recursionDepth' (v_, n + 1)
+        | I.Pi (_, v) -> recursionDepth' (v, n + 1)
       in
-      recursionDepth' (v_, 0)
+      recursionDepth' (v, 0)
 
-    let expandLazy (M.State (_, _, v_) as s_) =
-      begin if recursionDepth v_ > !MetaGlobal.maxRecurse then []
-      else expandLazy' (s_, O.mutLookup (I.targetFam v_), [])
+    let expandLazy (M.State (_, _, v) as s) =
+      begin if recursionDepth v > !MetaGlobal.maxRecurse then []
+      else expandLazy' (s, O.mutLookup (I.targetFam v), [])
       end
 
     let rec inputConv (vs1, vs2) = inputConvW (Whnf.whnf vs1, Whnf.whnf vs2)
@@ -409,65 +409,65 @@ end) : RECURSION.RECURSION with module MetaSyn = Recursion__0.MetaSyn' = struct
       end
 
     and inputConvSpine = function
-      | Modes.Modesyn.ModeSyn.Mnil, ((s1_, _), _), ((s2_, _), _) -> true
-      | mS, ((I.SClo (s1_, s1'), s1), vs1), (ss2_, vs2) ->
-          inputConvSpine (mS, ((s1_, I.comp s1' s1), vs1), (ss2_, vs2))
-      | mS, (ss1_, vs1), ((I.SClo (s2_, s2'), s2), vs2) ->
-          inputConvSpine (mS, (ss1_, vs1), ((s2_, I.comp s2' s2), vs2))
+      | Modes.Modesyn.ModeSyn.Mnil, ((s1, _), _), ((s2, _), _) -> true
+      | mS, ((I.SClo (s1_, s1'), s1), vs1), (ss2, vs2) ->
+          inputConvSpine (mS, ((s1_, I.comp s1' s1), vs1), (ss2, vs2))
+      | mS, (ss1, vs1), ((I.SClo (s2_, s2'), s2), vs2) ->
+          inputConvSpine (mS, (ss1, vs1), ((s2_, I.comp s2' s2), vs2))
       | ( Modes.Modesyn.ModeSyn.Mapp
             (Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Minus, _), mS),
-          ((I.App (u1_, s1_), s1), (I.Pi ((I.Dec (_, v1_), _), w1_), t1)),
-          ((I.App (u2_, s2_), s2), (I.Pi ((I.Dec (_, v2_), _), w2_), t2)) ) ->
-          Conv.conv (v1_, t1) (v2_, t2)
+          ((I.App (u1, s1_), s1), (I.Pi ((I.Dec (_, v1), _), w1), t1)),
+          ((I.App (u2, s2_), s2), (I.Pi ((I.Dec (_, v2), _), w2), t2)) ) ->
+          Conv.conv (v1, t1) (v2, t2)
           && inputConvSpine
                ( mS,
-                 ((s1_, s1), (w1_, I.Dot (I.Exp (I.EClo (u1_, s1)), t1))),
-                 ((s2_, s2), (w2_, I.Dot (I.Exp (I.EClo (u1_, s1)), t2))) )
+                 ((s1_, s1), (w1, I.Dot (I.Exp (I.EClo (u1, s1)), t1))),
+                 ((s2_, s2), (w2, I.Dot (I.Exp (I.EClo (u1, s1)), t2))) )
       | ( Modes.Modesyn.ModeSyn.Mapp
             (Modes.Modesyn.ModeSyn.Marg (Modes.Modesyn.ModeSyn.Plus, _), mS),
-          ((I.App (u1_, s1_), s1), (I.Pi ((I.Dec (_, v1_), _), w1_), t1)),
-          ((I.App (u2_, s2_), s2), (I.Pi ((I.Dec (_, v2_), _), w2_), t2)) ) ->
+          ((I.App (u1, s1_), s1), (I.Pi ((I.Dec (_, v1), _), w1), t1)),
+          ((I.App (u2, s2_), s2), (I.Pi ((I.Dec (_, v2), _), w2), t2)) ) ->
           inputConvSpine
             ( mS,
-              ((s1_, s1), (w1_, I.Dot (I.Exp (I.EClo (u1_, s1)), t1))),
-              ((s2_, s2), (w2_, I.Dot (I.Exp (I.EClo (u2_, s2)), t2))) )
+              ((s1_, s1), (w1, I.Dot (I.Exp (I.EClo (u1, s1)), t1))),
+              ((s2_, s2), (w2, I.Dot (I.Exp (I.EClo (u2, s2)), t2))) )
 
     let rec removeDuplicates = function
       | [] -> []
-      | s'_ :: ops ->
+      | s' :: ops ->
           let rec compExp (vs1, vs2) = compExpW (Whnf.whnf vs1, Whnf.whnf vs2)
           and compExpW = function
             | vs1, (I.Root _, _) -> false
-            | ((v1_, s1) as vs1), (I.Pi ((d2_, _), v2_), s2) ->
-                compDec (vs1, (d2_, s2))
-                || compExp ((v1_, I.comp s1 I.shift), (v2_, I.dot1 s2))
-          and compDec (vs1, (I.Dec (_, v2_), s2)) =
-            inputConv (vs1, (v2_, s2))
+            | ((v1, s1) as vs1), (I.Pi ((d2, _), v2), s2) ->
+                compDec (vs1, (d2, s2))
+                || compExp ((v1, I.comp s1 I.shift), (v2, I.dot1 s2))
+          and compDec (vs1, (I.Dec (_, v2), s2)) =
+            inputConv (vs1, (v2, s2))
           in
-          let rec check (M.State (name, gm, v_)) = checkW (Whnf.whnf (v_, I.id))
-          and checkW (I.Pi ((d_, _), v_), s) =
-            checkDec (d_, I.comp s I.shift) (v_, I.dot1 s)
-          and checkDec (I.Dec (_, v1_), s1) vs2 = compExp ((v1_, s1), vs2) in
-          begin if check s'_ then removeDuplicates ops
-          else s'_ :: removeDuplicates ops
+          let rec check (M.State (name, gm, v)) = checkW (Whnf.whnf (v, I.id))
+          and checkW (I.Pi ((d, _), v), s) =
+            checkDec (d, I.comp s I.shift) (v, I.dot1 s)
+          and checkDec (I.Dec (_, v1), s1) vs2 = compExp ((v1, s1), vs2) in
+          begin if check s' then removeDuplicates ops
+          else s' :: removeDuplicates ops
           end
 
     let rec fillOps = function
       | [] -> []
-      | s'_ :: ops ->
-          let fillOps' = function [] -> [] | o_ :: _ -> Filling.apply o_ in
-          let fillop, _ = Filling.expand s'_ in
+      | s' :: ops ->
+          let fillOps' = function [] -> [] | o :: _ -> Filling.apply o in
+          let fillop, _ = Filling.expand s' in
           fillOps' fillop @ fillOps ops
 
-    let expandEager s_ = removeDuplicates (fillOps (expandLazy s_))
-    let apply s_ = s_
+    let expandEager s = removeDuplicates (fillOps (expandLazy s))
+    let apply s = s
 
     let menu
-        (M.State (name, M.Prefix (g'_, m'_, b'_), I.Pi ((I.Dec (_, v_), _), _))
-         as s_) =
-      "Recursion : " ^ Print.expToString g'_ v_
+        (M.State (name, M.Prefix (g', m', b'), I.Pi ((I.Dec (_, v), _), _))
+         as s) =
+      "Recursion : " ^ Print.expToString g' v
 
-    let handleExceptions f p_ = try f p_ with Order.Error s -> raise (Error s)
+    let handleExceptions f p = try f p with Order.Error s -> raise (Error s)
   end
 
   (* Quantifier to mark parameters *)

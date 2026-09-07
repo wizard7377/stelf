@@ -78,8 +78,8 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
       end
 
     let checkVar (a, pol) = match a with
-      | I.Dec (Some n, v_) ->
-          begin match Names.getNamePref (I.targetFam v_) with
+      | I.Dec (Some n, v) ->
+          begin match Names.getNamePref (I.targetFam v) with
           | None -> Correct
           | Some (prefENames, prefUNames) ->
               begin match pol with
@@ -87,7 +87,7 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
               | Minus -> checkVariablename (n, prefUNames)
               end
           end
-      | I.Dec (None, v_) -> Correct
+      | I.Dec (None, v) -> Correct
 
     let implicitHead = function
       | I.BVar k -> 0
@@ -99,135 +99,135 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
 
     let rec checkExp arg__1 arg__2 arg__3 =
       begin match (arg__1, arg__2, arg__3) with
-      | c, ((g_, p_), I.Uni _, occ), err -> []
-      | c, ((g_, p_), I.Lam (d_, u_), occ), err ->
+      | c, ((g, p), I.Uni _, occ), err -> []
+      | c, ((g, p), I.Lam (d, u), occ), err ->
           checkDec c
-            ((g_, p_), d_, Minus, occ)
+            ((g, p), d, Minus, occ)
             err
             (function
-              | (g'_, p'_), l'_ ->
-              l'_ @ checkExp c ((g'_, p'_), u_, P.body occ) err)
-      | c, ((g_, p_), I.Root (h_, s_), occ), err ->
-          checkHead c ((g_, p_), h_, P.head occ) err
-          @ checkSpine c ((g_, p_), 1, implicitHead h_, s_, P.body occ) err
-      | c, ((g_, p_), I.FgnExp (_, _), occ), err -> []
+              | (g', p'), l' ->
+              l' @ checkExp c ((g', p'), u, P.body occ) err)
+      | c, ((g, p), I.Root (h, s), occ), err ->
+          checkHead c ((g, p), h, P.head occ) err
+          @ checkSpine c ((g, p), 1, implicitHead h, s, P.body occ) err
+      | c, ((g, p), I.FgnExp (_, _), occ), err -> []
       end
 
     and checkType arg__4 arg__5 arg__6 =
       begin match (arg__4, arg__5, arg__6) with
-      | c, ((g_, p_), I.Uni _, pol, occ), err -> []
-      | c, ((g_, p_), I.Pi ((d_, Maybe), v_), pol, occ), err ->
+      | c, ((g, p), I.Uni _, pol, occ), err -> []
+      | c, ((g, p), I.Pi ((d, Maybe), v), pol, occ), err ->
           checkDec c
-            ((g_, p_), d_, pol, occ)
+            ((g, p), d, pol, occ)
             err
             (function
-              | (g'_, p'_), l'_ ->
-              l'_ @ checkType c ((g'_, p'_), v_, pol, P.body occ) err)
-      | c, ((g_, p_), I.Pi ((d_, No), v_), pol, occ), err ->
+              | (g', p'), l' ->
+              l' @ checkType c ((g', p'), v, pol, P.body occ) err)
+      | c, ((g, p), I.Pi ((d, No), v), pol, occ), err ->
           checkDec c
-            ((g_, p_), d_, pol, occ)
+            ((g, p), d, pol, occ)
             err
             (function
-              | (g'_, p'_), l'_ ->
-              l'_ @ checkType c ((g'_, p'_), v_, pol, P.body occ) err)
-      | c, ((g_, p_), I.Root (h_, s_), pol, occ), err ->
-          checkHead c ((g_, p_), h_, P.head occ) err
-          @ checkSpine c ((g_, p_), 1, implicitHead h_, s_, P.body occ) err
-      | c, ((g_, p_), I.FgnExp (_, _), pol, occ), err -> []
+              | (g', p'), l' ->
+              l' @ checkType c ((g', p'), v, pol, P.body occ) err)
+      | c, ((g, p), I.Root (h, s), pol, occ), err ->
+          checkHead c ((g, p), h, P.head occ) err
+          @ checkSpine c ((g, p), 1, implicitHead h, s, P.body occ) err
+      | c, ((g, p), I.FgnExp (_, _), pol, occ), err -> []
       end
 
-    and checkDecImp ((g_, p_), (I.Dec (_, v_) as d_), pol) k =
-      let i_ = checkVar (d_, pol) in
-      k ((I.Decl (g_, d_), I.Decl (p_, i_)), [])
+    and checkDecImp ((g, p), (I.Dec (_, v) as d), pol) k =
+      let i = checkVar (d, pol) in
+      k ((I.Decl (g, d), I.Decl (p, i)), [])
 
-    and checkDec c ((g_, p_), (I.Dec (_, v_) as d_), pol, occ) err k =
-      let i_ = checkVar (d_, pol) in
-      let e1_ =
-        begin match i_ with
+    and checkDec c ((g, p), (I.Dec (_, v) as d), pol, occ) err k =
+      let i = checkVar (d, pol) in
+      let e1 =
+        begin match i with
         | Correct -> []
         | Incorrect (prefNames, n) -> error c (prefNames, n, occ) err
         end
       in
-      let e2_ = checkType c ((g_, p_), v_, toggle pol, P.label occ) err in
-      k ((I.Decl (g_, d_), I.Decl (p_, i_)), e1_ @ e2_)
+      let e2 = checkType c ((g, p), v, toggle pol, P.label occ) err in
+      k ((I.Decl (g, d), I.Decl (p, i)), e1 @ e2)
 
     and checkHead arg__7 arg__8 arg__9 =
       begin match (arg__7, arg__8, arg__9) with
-      | c, ((g_, p_), I.BVar k, occ), err ->
-          begin match I.ctxLookup p_ k with
+      | c, ((g, p), I.BVar k, occ), err ->
+          begin match I.ctxLookup p k with
           | Correct -> []
           | Incorrect (prefNames, n) -> error c (prefNames, n, occ) err
           end
-      | c, ((g_, p_), I.Const _, occ), err -> []
-      | c, ((g_, p_), I.Skonst k, occ), err -> []
-      | c, ((g_, p_), I.Def d, occ), err -> []
-      | c, ((g_, p_), I.NSDef d, occ), err -> []
-      | c, ((g_, p_), I.FgnConst _, occ), err -> []
+      | c, ((g, p), I.Const _, occ), err -> []
+      | c, ((g, p), I.Skonst k, occ), err -> []
+      | c, ((g, p), I.Def d, occ), err -> []
+      | c, ((g, p), I.NSDef d, occ), err -> []
+      | c, ((g, p), I.FgnConst _, occ), err -> []
       end
 
     and checkSpine arg__10 arg__11 arg__12 =
       begin match (arg__10, arg__11, arg__12) with
-      | c, ((g_, p_), n, 0, I.Nil, occ), err -> []
-      | c, ((g_, p_), n, 0, I.App (u_, s_), occ), err ->
-          checkExp c ((g_, p_), u_, P.arg n occ) err
-          @ checkSpine c ((g_, p_), n + 1, 0, s_, occ) err
-      | c, ((g_, p_), n, i, I.App (u_, s_), occ), err ->
-          checkSpine c ((g_, p_), n + 1, i - 1, s_, occ) err
+      | c, ((g, p), n, 0, I.Nil, occ), err -> []
+      | c, ((g, p), n, 0, I.App (u, s), occ), err ->
+          checkExp c ((g, p), u, P.arg n occ) err
+          @ checkSpine c ((g, p), n + 1, 0, s, occ) err
+      | c, ((g, p), n, i, I.App (u, s), occ), err ->
+          checkSpine c ((g, p), n + 1, i - 1, s, occ) err
       end
 
     let rec checkType' arg__13 arg__14 arg__15 =
       begin match (arg__13, arg__14, arg__15) with
-      | c, ((g_, p_), 0, v_, occ), err ->
-          checkType c ((g_, p_), v_, Plus, occ) err
-      | c, ((g_, p_), n, I.Pi ((d_, Maybe), v_), occ), err ->
+      | c, ((g, p), 0, v, occ), err ->
+          checkType c ((g, p), v, Plus, occ) err
+      | c, ((g, p), n, I.Pi ((d, Maybe), v), occ), err ->
           checkDecImp
-            ((g_, p_), d_, Plus)
+            ((g, p), d, Plus)
             (function
-              | (g'_, p'_), l'_ ->
-              l'_ @ checkType' c ((g'_, p'_), n - 1, v_, P.body occ) err)
+              | (g', p'), l' ->
+              l' @ checkType' c ((g', p'), n - 1, v, P.body occ) err)
       end
 
     let rec checkExp' arg__16 arg__17 arg__18 =
       begin match (arg__16, arg__17, arg__18) with
-      | c, ((g_, p_), I.Lam (d_, u_), occ), err ->
+      | c, ((g, p), I.Lam (d, u), occ), err ->
           checkDec c
-            ((g_, p_), d_, Plus, occ)
+            ((g, p), d, Plus, occ)
             err
             (function
-              | (g'_, p'_), l'_ ->
-              l'_ @ checkExp' c ((g'_, p'_), u_, P.body occ) err)
-      | c, ((g_, p_), u_, occ), err -> checkExp c ((g_, p_), u_, occ) err
+              | (g', p'), l' ->
+              l' @ checkExp' c ((g', p'), u, P.body occ) err)
+      | c, ((g, p), u, occ), err -> checkExp c ((g, p), u, occ) err
       end
 
     let rec checkDef arg__19 arg__20 arg__21 =
       begin match (arg__19, arg__20, arg__21) with
-      | c, ((g_, p_), 0, u_, occ), err -> checkExp' c ((g_, p_), u_, occ) err
-      | c, ((g_, p_), n, I.Lam (d_, u_), occ), err ->
+      | c, ((g, p), 0, u, occ), err -> checkExp' c ((g, p), u, occ) err
+      | c, ((g, p), n, I.Lam (d, u), occ), err ->
           checkDecImp
-            ((g_, p_), d_, Plus)
+            ((g, p), d, Plus)
             (function
-              | (g'_, p'_), l'_ ->
-              l'_ @ checkDef c ((g'_, p'_), n - 1, u_, P.body occ) err)
+              | (g', p'), l' ->
+              l' @ checkDef c ((g', p'), n - 1, u, P.body occ) err)
       end
 
     let checkConDec arg__22 arg__23 =
       begin match (arg__22, arg__23) with
-      | c, I.ConDec (_, _, implicit, _, u_, _) -> begin
+      | c, I.ConDec (_, _, implicit, _, u, _) -> begin
           begin if !Global.chatter > 3 then
             print (Names.qidToString (Names.constQid c) ^ " ")
           else ()
           end;
-          checkType' c ((I.Null, I.Null), implicit, u_, P.top) P.occToRegionDec
+          checkType' c ((I.Null, I.Null), implicit, u, P.top) P.occToRegionDec
         end
-      | c, I.ConDef (_, _, implicit, u_, v_, I.Type, _) -> begin
+      | c, I.ConDef (_, _, implicit, u, v, I.Type, _) -> begin
           begin if !Global.chatter > 3 then
             print (Names.qidToString (Names.constQid c) ^ " ")
           else ()
           end;
-          checkType' c ((I.Null, I.Null), implicit, v_, P.top) P.occToRegionDef2
-          @ checkDef c ((I.Null, I.Null), implicit, u_, P.top) P.occToRegionDef1
+          checkType' c ((I.Null, I.Null), implicit, v, P.top) P.occToRegionDef2
+          @ checkDef c ((I.Null, I.Null), implicit, u, P.top) P.occToRegionDef1
         end
-      | c, I.AbbrevDef (_, _, implicit, u_, v_, I.Type) -> begin
+      | c, I.AbbrevDef (_, _, implicit, u, v, I.Type) -> begin
           begin if !Global.chatter > 3 then
             print (Names.qidToString (Names.constQid c) ^ " ")
           else ()
@@ -235,9 +235,9 @@ module MakeStyleCheck (Whnf : WHNF) (Index : INDEX) (Origins : ORIGINS) :
           begin
             ignore
             @@ checkType' c
-                 ((I.Null, I.Null), implicit, v_, P.top)
+                 ((I.Null, I.Null), implicit, v, P.top)
                  P.occToRegionDef2;
-            checkDef c ((I.Null, I.Null), implicit, u_, P.top) P.occToRegionDef1
+            checkDef c ((I.Null, I.Null), implicit, u, P.top) P.occToRegionDef1
           end
         end
       | c, _ -> []

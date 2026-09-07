@@ -142,9 +142,9 @@ module MakeSubordinate
 
     let freezeList : IntSet.intset ref = ref IntSet.empty
 
-    let freeze l_ =
+    let freeze l =
       ignore (freezeList := IntSet.empty);
-      let l'_ = map expandFamilyAbbrevs l_ in
+      let l' = map expandFamilyAbbrevs l in
       ignore (List.app
           (function
             | a ->
@@ -155,13 +155,13 @@ module MakeSubordinate
                         freezeList := IntSet.insert b (!freezeList)
                       end)
                   a)
-          l'_);
+          l');
       let cids = IntSet.foldl (fun (x, acc) -> x :: acc) [] !freezeList in
       cids
 
-    let frozen l_ =
-      let l'_ = map expandFamilyAbbrevs l_ in
-      List.exists (function a -> fGet a) l'_
+    let frozen l =
+      let l' = map expandFamilyAbbrevs l in
+      List.exists (function a -> fGet a) l'
 
     let computeBelow (a, b) =
       try
@@ -232,8 +232,8 @@ module MakeSubordinate
       end
 
     let installConDec = function
-      | b, I.ConDef (_, _, _, a_, k_, I.Kind, _) ->
-          insertNewDef (b, I.targetFam a_)
+      | b, I.ConDef (_, _, _, a, k, I.Kind, _) ->
+          insertNewDef (b, I.targetFam a)
       | _ -> ()
 
     let installDef c = installConDec (c, I.sgnLookup c)
@@ -277,36 +277,36 @@ module MakeSubordinate
       end
 
     and installTypeN' (b, a) = match b with
-      | I.Pi (((I.Dec (_, v1_) as d_), _), v2_) -> begin
-          addSubord (I.targetFam v1_) a;
+      | I.Pi (((I.Dec (_, v1) as d), _), v2) -> begin
+          addSubord (I.targetFam v1) a;
           begin
-            installTypeN v1_;
-            installTypeN' (v2_, a)
+            installTypeN v1;
+            installTypeN' (v2, a)
           end
         end
-      | (I.Root (I.Def _, _) as v_) ->
-          let v'_ = Whnf.normalize (Whnf.expandDef (v_, I.id)) in
-          installTypeN' (v'_, a)
+      | (I.Root (I.Def _, _) as v) ->
+          let v' = Whnf.normalize (Whnf.expandDef (v, I.id)) in
+          installTypeN' (v', a)
       | I.Root _ -> ()
 
-    and installTypeN v_ = installTypeN' (v_, I.targetFam v_)
+    and installTypeN v = installTypeN' (v, I.targetFam v)
 
     let rec installKindN (b, a) = match b with
-      | I.Uni l_ -> ()
-      | I.Pi ((I.Dec (_, v1_), p_), v2_) -> begin
-          addSubord (I.targetFam v1_) a;
+      | I.Uni l -> ()
+      | I.Pi ((I.Dec (_, v1), p), v2) -> begin
+          addSubord (I.targetFam v1) a;
           begin
-            installTypeN v1_;
-            installKindN (v2_, a)
+            installTypeN v1;
+            installKindN (v2, a)
           end
         end
 
     let install c =
-      let v_ = I.constType c in
-      begin match I.targetFamOpt v_ with
+      let v = I.constType c in
+      begin match I.targetFamOpt v with
       | None -> begin
           insertNewFam c;
-          installKindN (v_, c)
+          installKindN (v, c)
         end
       | Some a -> begin
           begin match IntSyn.sgnLookup c with
@@ -314,23 +314,23 @@ module MakeSubordinate
           | IntSyn.SkoDec _ -> checkFreeze (c, a)
           | _ -> ()
           end;
-          installTypeN' (v_, a)
+          installTypeN' (v, a)
         end
       end
 
-    let installDec (I.Dec (_, v_)) = installTypeN v_
+    let installDec (I.Dec (_, v)) = installTypeN v
 
     let rec installSome = function
       | I.Null -> ()
-      | I.Decl (g_, d_) -> begin
-          installSome g_;
-          installDec d_
+      | I.Decl (g, d) -> begin
+          installSome g;
+          installDec d
         end
 
     let installBlock b =
-      let (I.BlockDec (_, _, g_, ds_)) = I.sgnLookup b in
-      installSome g_;
-      List.app (function d_ -> installDec d_) ds_
+      let (I.BlockDec (_, _, g, ds)) = I.sgnLookup b in
+      installSome g;
+      List.app (function d -> installDec d) ds
 
     let checkBelow (a, b) =
       begin if not (below a b) then
@@ -344,22 +344,22 @@ module MakeSubordinate
       end
 
     let rec respectsTypeN' (b, a) = match b with
-      | I.Pi (((I.Dec (_, v1_) as d_), _), v2_) -> begin
-          checkBelow (I.targetFam v1_, a);
+      | I.Pi (((I.Dec (_, v1) as d), _), v2) -> begin
+          checkBelow (I.targetFam v1, a);
           begin
-            respectsTypeN v1_;
-            respectsTypeN' (v2_, a)
+            respectsTypeN v1;
+            respectsTypeN' (v2, a)
           end
         end
-      | (I.Root (I.Def _, _) as v_) ->
-          let v'_ = Whnf.normalize (Whnf.expandDef (v_, I.id)) in
-          respectsTypeN' (v'_, a)
+      | (I.Root (I.Def _, _) as v) ->
+          let v' = Whnf.normalize (Whnf.expandDef (v, I.id)) in
+          respectsTypeN' (v', a)
       | I.Root _ -> ()
 
-    and respectsTypeN v_ = respectsTypeN' (v_, I.targetFam v_)
+    and respectsTypeN v = respectsTypeN' (v, I.targetFam v)
 
-    let respects g_ (v_, s) = respectsTypeN (Whnf.normalize (v_, s))
-    let respectsN g_ v_ = respectsTypeN v_
+    let respects g (v, s) = respectsTypeN (Whnf.normalize (v, s))
+    let respectsN g v = respectsTypeN v
 
     let famsToString (bs, msg) =
       IntSet.foldl
@@ -378,9 +378,9 @@ module MakeSubordinate
 
     let rec weaken a1 b1 = match a1, b1 with
       | I.Null, a -> I.id
-      | I.Decl (g'_, (I.Dec (name, v_) as d_)), a ->
-          let w' = weaken g'_ a in
-          begin if belowEq (I.targetFam v_) a then I.dot1 w'
+      | I.Decl (g', (I.Dec (name, v) as d)), a ->
+          let w' = weaken g' a in
+          begin if belowEq (I.targetFam v) a then I.dot1 w'
           else I.comp w' I.shift
           end
 
@@ -425,12 +425,12 @@ module MakeSubordinate
         end
 
     let analyze = function
-      | I.ConDec (_, _, _, _, _, l_) -> inc declared
-      | I.ConDef (_, _, _, _, _, l_, ancestors) -> begin
+      | I.ConDec (_, _, _, _, _, l) -> inc declared
+      | I.ConDef (_, _, _, _, _, l, ancestors) -> begin
           inc defined;
           analyzeAnc ancestors
         end
-      | I.AbbrevDef (_, _, _, _, _, l_) -> inc abbrev
+      | I.AbbrevDef (_, _, _, _, _, l) -> inc abbrev
       | _ -> inc other
 
     let showDef () =

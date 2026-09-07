@@ -122,21 +122,21 @@ end) : TABLED = struct
     | I.Def a, I.Def a' -> a = a'
     | _ -> false
 
-  let rec append (a, g_) = match a with
-    | I.Null -> g_
-    | IntSyn.Decl (g'_, d_) -> IntSyn.Decl (append (g'_, g_), d_)
+  let rec append (a, g) = match a with
+    | I.Null -> g
+    | IntSyn.Decl (g', d) -> IntSyn.Decl (append (g', g), d)
 
   let rec shift (a, s) = match a with
     | I.Null -> s
-    | IntSyn.Decl (g_, d_) -> I.dot1 (shift (g_, s))
+    | IntSyn.Decl (g, d) -> I.dot1 (shift (g, s))
 
   let rec raiseType a1 b1 = match a1, b1 with
-    | I.Null, v_ -> v_
-    | I.Decl (g_, d_), v_ -> raiseType g_ (I.Lam (d_, v_))
+    | I.Null, v -> v
+    | I.Decl (g, d), v -> raiseType g (I.Lam (d, v))
 
   let rec compose = function
-    | I.Null, g_ -> g_
-    | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose (g_, g'_), d_)
+    | I.Null, g -> g
+    | IntSyn.Decl (g, d), g' -> IntSyn.Decl (compose (g, g'), d)
 
   (* ---------------------------------------------------------------------- *)
   (* We write
@@ -164,18 +164,18 @@ end) : TABLED = struct
     *)
   let rec ctxToEVarSub (a, s) = match a with
     | I.Null -> s
-    | I.Decl (g_, I.Dec (_, a_)) ->
-        let x_ = I.newEVar I.Null a_ in
-        I.Dot (I.Exp x_, ctxToEVarSub (g_, s))
+    | I.Decl (g, I.Dec (_, a)) ->
+        let x = I.newEVar I.Null a in
+        I.Dot (I.Exp x, ctxToEVarSub (g, s))
 
   let rec ctxToAVarSub (a, s) = match a with
     | I.Null -> s
-    | I.Decl (g_, I.Dec (_, a_)) ->
-        let x_ = I.newEVar I.Null a_ in
-        I.Dot (I.Exp x_, ctxToAVarSub (g_, s))
-    | I.Decl (g_, I.ADec (_, d)) ->
-        let x_ = I.newAVar () in
-        I.Dot (I.Exp (I.EClo (x_, I.Shift (-d))), ctxToAVarSub (g_, s))
+    | I.Decl (g, I.Dec (_, a)) ->
+        let x = I.newEVar I.Null a in
+        I.Dot (I.Exp x, ctxToAVarSub (g, s))
+    | I.Decl (g, I.ADec (_, d)) ->
+        let x = I.newAVar () in
+        I.Dot (I.Exp (I.EClo (x, I.Shift (-d))), ctxToAVarSub (g, s))
 
   (* ---------------------------------------------------------------------- *)
   (* Solving  variable definitions *)
@@ -187,76 +187,76 @@ end) : TABLED = struct
        return true, if VarDefs are solvable
               false otherwise
  *)
-  let rec solveEqn (a, g_) = match a with
-    | (trivial_, s) -> true
-    | (T.Unify (g'_, e1, n_, eqns), s) ->
-        let g''_ = append (g'_, g_) in
-        let s' = shift (g''_, s) in
-        Assign.unifiable g''_ (n_, s') (e1, s') && solveEqn ((eqns, s), g_)
+  let rec solveEqn (a, g) = match a with
+    | (trivial, s) -> true
+    | (T.Unify (g', e1, n, eqns), s) ->
+        let g'' = append (g', g) in
+        let s' = shift (g'', s) in
+        Assign.unifiable g'' (n, s') (e1, s') && solveEqn ((eqns, s), g)
   (* G, G' |- s' : D, G, G' *)
   (* . |- s : D *)
   (* D, G, G' |- e1 and D, G, G' |- N and D, G |- eqns *)
 
-  let unifySub' (g_, s1, s2) =
+  let unifySub' (g, s1, s2) =
     try
       begin
-        Unify.unifySub g_ s1 s2;
+        Unify.unifySub g s1 s2;
         true
       end
     with Unify.Unify msg -> false
 
-  let unify g_ us_ us' =
+  let unify g us us' =
     try
       begin
-        Unify.unify g_ us_ us';
+        Unify.unify g us us';
         true
       end
     with Unify.Unify msg -> false
 
   let rec getHypGoal = function
     | (C.DProg _ as dp), (C.Atom p, s) -> (dp, (p, s))
-    | C.DProg (g_, dPool), (C.Impl (r, a_, ha, g), s) ->
-        let d'_ = IntSyn.Dec (None, I.EClo (a_, s)) in
+    | C.DProg (g_, dPool), (C.Impl (r, a, ha, g), s) ->
+        let d' = IntSyn.Dec (None, I.EClo (a, s)) in
         begin if !TableParam.strengthen then
-          begin match MT.memberCtx g_ (I.EClo (a_, s)) g_ with
+          begin match MT.memberCtx g_ (I.EClo (a, s)) g_ with
           | Some _ ->
               let (C.Atom p) = g in
-              let x_ = I.newEVar g_ (I.EClo (a_, s)) in
-              getHypGoal (C.DProg (g_, dPool), (g, I.Dot (I.Exp x_, s)))
+              let x = I.newEVar g_ (I.EClo (a, s)) in
+              getHypGoal (C.DProg (g_, dPool), (g, I.Dot (I.Exp x, s)))
               (* is g always atomic? *)
           | None ->
               getHypGoal
-                ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
+                ( C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Dec (r, s, ha))),
                   (g, I.dot1 s) )
           end
         else
           getHypGoal
-            ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
+            ( C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Dec (r, s, ha))),
               (g, I.dot1 s) )
         end
-    | C.DProg (g_, dPool), (C.All (d_, g), s) ->
-        let d'_ = I.decSub d_ s in
+    | C.DProg (g_, dPool), (C.All (d, g), s) ->
+        let d' = I.decSub d s in
         getHypGoal
-          ( C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
+          ( C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Parameter)),
             (g, I.dot1 s) )
 
   let updateGlobalTable goal flag =
-    let (C.DProg (g_, dPool) as dProg), (p, s) =
+    let (C.DProg (g, dPool) as dProg), (p, s) =
       getHypGoal (C.DProg (I.Null, I.Null), (goal, I.id))
     in
-    let g'_, dAVars, dEVars, u'_, eqn', s' = A.abstractEVarCtx dProg p s in
-    ignore begin if solveEqn ((eqn', s'), g'_) then ()
+    let g', dAVars, dEVars, u', eqn', s' = A.abstractEVarCtx dProg p s in
+    ignore begin if solveEqn ((eqn', s'), g') then ()
       else print "\nresidual equation not solvable!\n"
       end;
     let status =
       begin if flag then TableParam.Complete else TableParam.Incomplete
       end
     in
-    begin if TabledSyn.keepTable (IntSyn.targetFam u'_) then
-      begin match MT.callCheck (dAVars, dEVars, g'_, u'_, eqn', status) with
+    begin if TabledSyn.keepTable (IntSyn.targetFam u') then
+      begin match MT.callCheck (dAVars, dEVars, g', u', eqn', status) with
       | T.RepeatedEntry (_, answRef, _) ->
           TableParam.globalTable :=
-            (dAVars, dEVars, g'_, u'_, eqn', answRef, status)
+            (dAVars, dEVars, g', u', eqn', answRef, status)
             :: !TableParam.globalTable
       | _ -> raise (Error "Top level goal should always in the table\n")
       end
@@ -268,9 +268,9 @@ end) : TABLED = struct
   let fillTable () =
     let rec insert = function
       | [] -> ()
-      | (dAVars, dEVars, g'_, u'_, eqn', answRef, status) :: rest ->
+      | (dAVars, dEVars, g', u', eqn', answRef, status) :: rest ->
           begin match
-            MT.insertIntoTree (dAVars, dEVars, g'_, u'_, eqn', answRef, status)
+            MT.insertIntoTree (dAVars, dEVars, g', u', eqn', answRef, status)
           with
           | T.NewEntry _ -> insert rest
           | _ -> ()
@@ -307,26 +307,26 @@ end) : TABLED = struct
 
    *)
   let rec retrieve' (b, c, d, sc) = match b, c, d with
-    | (g_, u_, s), asub, [] -> ()
-    | (g_, u_, s), (esub, asub), ((d'_, s1), o1_) :: a_ ->
+    | (g, u, s), asub, [] -> ()
+    | (g, u, s), (esub, asub), ((d', s1), o1) :: a_ ->
         let s1' =
-          ctxToEVarSub (d'_, I.Shift (I.ctxLength d'_))
+          ctxToEVarSub (d', I.Shift (I.ctxLength d'))
           (* I.id *)
         in
         let scomp = I.comp s1 s1' in
-        let ss = shift (g_, s) in
-        let ss1 = shift (g_, scomp) in
+        let ss = shift (g, s) in
+        let ss1 = shift (g, scomp) in
         let a = I.comp asub s in
-        let ass = shift (g_, a) in
+        let ass = shift (g, a) in
         let easub = I.comp asub esub in
         CsManager.trail (function () ->
             begin if
-              unifySub' (g_, shift (g_, esub), ss)
-              && unifySub' (g_, shift (g_, I.comp asub esub), ss1)
-            then sc o1_
+              unifySub' (g, shift (g, esub), ss)
+              && unifySub' (g, shift (g, I.comp asub esub), ss1)
+            then sc o1
             else ()
             end);
-        retrieve' ((g_, u_, s), (esub, asub), a_, sc)
+        retrieve' ((g, u, s), (esub, asub), a_, sc)
 
   (* currently not used -- however, it may be better to not use the same retrieval function for
       subsumption and variant retrieval, and we want to revive this function *)
@@ -344,23 +344,23 @@ end) : TABLED = struct
 
    *)
   let rec retrieveV (a, b, sc) = match a, b with
-    | (g_, u_, s), [] -> ()
-    | (g_, u_, s), ((dEVars, s1), o1_) :: a_ ->
+    | (g, u, s), [] -> ()
+    | (g, u, s), ((dEVars, s1), o1) :: a ->
         let s1' =
           ctxToEVarSub (dEVars, I.Shift (I.ctxLength dEVars))
           (* I.id *)
         in
         let scomp = I.comp s1 s1' in
-        let ss = shift (g_, s) in
-        let ss1 = shift (g_, scomp) in
+        let ss = shift (g, s) in
+        let ss1 = shift (g, scomp) in
         CsManager.trail (function () ->
-            begin if unifySub' (g_, ss, ss1) then sc o1_ else ()
+            begin if unifySub' (g, ss, ss1) then sc o1 else ()
             end);
-        retrieveV ((g_, u_, s), a_, sc)
+        retrieveV ((g, u, s), a, sc)
   (* for subsumption we must combine it with asumb!!! *)
 
-  let retrieveSW ((g_, u_, s), asub, answL, sc) =
-    retrieve' ((g_, u_, s), asub, answL, sc)
+  let retrieveSW ((g, u, s), asub, answL, sc) =
+    retrieve' ((g, u, s), asub, answL, sc)
 
   (* currently not used -- however, it may be better to  not use the same retrieval function for
       subsumption and variant retrieval, and we want to revive this function *)
@@ -381,12 +381,12 @@ end) : TABLED = struct
 
      Effects: instantiation of EVars in s, and asub
    *)
-  let retrieve (k, (g_, u_, s), (asub, answRef), sc) =
+  let retrieve (k, (g, u, s), (asub, answRef), sc) =
     let lkp = T.lookup answRef in
     let asw' = List.take (rev (T.solutions answRef), T.lookup answRef) in
     let answ' = List.drop (asw', !k) in
     k := lkp;
-    retrieveSW ((g_, u_, s), asub, answ', sc)
+    retrieveSW ((g, u, s), asub, answ', sc)
 
   (* ---------------------------------------------------------------------- *)
   (* solve ((g, s), dp, sc) => ()
@@ -406,19 +406,19 @@ end) : TABLED = struct
     ref (fun _ -> failwith "solve_fn not yet initialized")
 
   let rec solve a1 a2 b2 c2 = match (a1, a2), b2, c2 with
-    | (C.Atom p, s), (C.DProg (g_, dPool) as dp), sc ->
+    | (C.Atom p, s), (C.DProg (g, dPool) as dp), sc ->
         begin if TabledSyn.tabledLookup (I.targetFam p) then
-          let g'_, dAVars, dEVars, u'_, eqn', s' =
+          let g', dAVars, dEVars, u', eqn', s' =
             A.abstractEVarCtx dp p s
           in
-          ignore begin if solveEqn ((eqn', s'), g'_) then ()
+          ignore begin if solveEqn ((eqn', s'), g') then ()
             else
               print
                 "\n\
                  residual equation not solvable! -- This should never happen! \n"
             end;
           begin match
-            MT.callCheck (dAVars, dEVars, g'_, u'_, eqn', T.Incomplete)
+            MT.callCheck (dAVars, dEVars, g', u', eqn', T.Incomplete)
           with
           | T.NewEntry answRef ->
               matchAtom
@@ -434,7 +434,7 @@ end) : TABLED = struct
               begin if T.noAnswers answRef then begin
                 suspGoals :=
                   ( Loop,
-                    (g'_, u'_, s'),
+                    (g', u', s'),
                     sc,
                     Unify.suspend (),
                     (asub, answRef),
@@ -446,22 +446,22 @@ end) : TABLED = struct
                 let le = T.lookup answRef in
                 suspGoals :=
                   ( Loop,
-                    (g'_, u'_, s'),
+                    (g', u', s'),
                     sc,
                     Unify.suspend (),
                     (asub, answRef),
                     ref le )
                   :: !suspGoals;
-                retrieve (ref 0, (g'_, u'_, s'), (asub, answRef), sc)
+                retrieve (ref 0, (g', u', s'), (asub, answRef), sc)
               end
           | T.RepeatedEntry (asub, answRef, Complete) ->
               begin if T.noAnswers answRef then ()
-              else retrieve (ref 0, (g'_, u'_, s'), (asub, answRef), sc)
+              else retrieve (ref 0, (g', u', s'), (asub, answRef), sc)
               end
           | T.DivergingEntry (asub, answRef) -> begin
               suspGoals :=
                 ( Divergence ((p, s), dp),
-                  (g'_, u'_, s'),
+                  (g', u', s'),
                   sc,
                   Unify.suspend (),
                   ((I.id, asub) (* this is a hack *), answRef),
@@ -479,112 +479,112 @@ end) : TABLED = struct
                . |- [s'](Pi G'. U')     and  G |- [s'^k]U' = [s]p *)
         else matchAtom ((p, s), dp, sc)
         end
-    | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool), sc ->
-        let d'_ = I.Dec (None, I.EClo (a_, s)) in
+    | (C.Impl (r, a, ha, g), s), C.DProg (g_, dPool), sc ->
+        let d' = I.Dec (None, I.EClo (a, s)) in
         begin if !TableParam.strengthen then
-          begin match MT.memberCtx g_ (I.EClo (a_, s)) g_ with
+          begin match MT.memberCtx g_ (I.EClo (a, s)) g_ with
           | Some _ ->
-              let x_ = I.newEVar g_ (I.EClo (a_, s)) in
+              let x = I.newEVar g_ (I.EClo (a, s)) in
               !solve_fn_ref
-                ( (g, I.Dot (I.Exp x_, s)),
+                ( (g, I.Dot (I.Exp x, s)),
                   C.DProg (g_, dPool),
-                  function o_ -> sc o_ )
+                  function o -> sc o )
           | None ->
               !solve_fn_ref
                 ( (g, I.dot1 s),
-                  C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
-                  function o_ -> sc o_ )
+                  C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Dec (r, s, ha))),
+                  function o -> sc o )
           end
         else
           !solve_fn_ref
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
-              function o_ -> sc o_ )
+              C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Dec (r, s, ha))),
+              function o -> sc o )
         end
-    | (C.All (d_, g), s), C.DProg (g_, dPool), sc ->
-        let d'_ = I.decSub d_ s in
+    | (C.All (d, g), s), C.DProg (g_, dPool), sc ->
+        let d' = I.decSub d s in
         !solve_fn_ref
           ( (g, I.dot1 s),
-            C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
-            function o_ -> sc o_ )
+            C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Parameter)),
+            function o -> sc o )
 
   and rSolve (ps', a, b, sc) = match a, b with
-    | (C.Eq q_, s), C.DProg (g_, dPool) ->
-        begin if Unify.unifiable g_ ps' (q_, s) then sc [] else ()
+    | (C.Eq q, s), C.DProg (g, dPool) ->
+        begin if Unify.unifiable g ps' (q, s) then sc [] else ()
         end
-    | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
-        begin match Assign.assignable g_ ps' (q_, s) with
-        | Some cnstr -> aSolve ((eqns, s), dp, cnstr, function s_ -> sc s_)
+    | (C.Assign (q, eqns), s), (C.DProg (g, dPool) as dp) ->
+        begin match Assign.assignable g ps' (q, s) with
+        | Some cnstr -> aSolve ((eqns, s), dp, cnstr, function s -> sc s)
         | None -> ()
         end
-    | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
-        let x_ = I.newEVar g_ (I.EClo (a_, s)) in
+    | (C.And (r, a, g), s), (C.DProg (g_, dPool) as dp) ->
+        let x = I.newEVar g_ (I.EClo (a, s)) in
         rSolve
           ( ps',
-            (r, I.Dot (I.Exp x_, s)),
+            (r, I.Dot (I.Exp x, s)),
             dp,
             function
-            | s1_ -> !solve_fn_ref ((g, s), dp, function s2_ -> sc (s1_ @ s2_))
+            | s1 -> !solve_fn_ref ((g, s), dp, function s2 -> sc (s1 @ s2))
           )
         (* is this EVar redundant? -fp *)
-    | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp) ->
-        let x_ = I.newEVar g_ (I.EClo (a_, s)) in
-        rSolve (ps', (r, I.Dot (I.Exp x_, s)), dp, function s_ -> sc s_)
-    | (C.Axists (I.ADec (Some x_, d), r), s), (C.DProg (g_, dPool) as dp) ->
-        let x'_ = I.newAVar () in
-        rSolve (ps', (r, I.Dot (I.Exp (I.EClo (x'_, I.Shift (-d))), s)), dp, sc)
+    | (C.Exists (I.Dec (_, a), r), s), (C.DProg (g, dPool) as dp) ->
+        let x = I.newEVar g (I.EClo (a, s)) in
+        rSolve (ps', (r, I.Dot (I.Exp x, s)), dp, function s -> sc s)
+    | (C.Axists (I.ADec (Some x, d), r), s), (C.DProg (g, dPool) as dp) ->
+        let x' = I.newAVar () in
+        rSolve (ps', (r, I.Dot (I.Exp (I.EClo (x', I.Shift (-d))), s)), dp, sc)
   (* we don't increase the proof term here! *)
   (* fail *)
 
   and aSolve (a, b, cnstr, sc) = match a, b with
-    | (trivial_, s), dp ->
+    | (trivial, s), dp ->
         begin if Assign.solveCnstr cnstr then sc [] else ()
         end
-    | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp)
+    | (C.UnifyEq (g', e1, n, eqns), s), (C.DProg (g, dPool) as dp)
       ->
-        let g''_ = append (g'_, g_) in
-        let s' = shift (g'_, s) in
-        begin if Assign.unifiable g''_ (n_, s') (e1, s') then
+        let g'' = append (g', g) in
+        let s' = shift (g', s) in
+        begin if Assign.unifiable g'' (n, s') (e1, s') then
           aSolve ((eqns, s), dp, cnstr, sc)
         else ()
         end
 
-  and matchAtom (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc)
+  and matchAtom (((I.Root (ha, s_), s) as ps'), (C.DProg (g, dPool) as dp), sc)
       =
     let rec matchSig = function
       | [] -> ()
       | (I.Const c as hc) :: sgn' ->
           let (C.SClause r) = C.sProgLookup (cidFromHead hc) in
           CsManager.trail (function () ->
-              rSolve (ps', (r, I.id), dp, function s_ -> sc (C.Pc c :: s_)));
+              rSolve (ps', (r, I.id), dp, function s -> sc (C.Pc c :: s)));
           matchSig sgn'
       (* trail to undo EVar instantiations *)
       (* return indicates failure *)
     in
     let rec matchDProg (a, b, k) = match a, b with
       | I.Null, I.Null -> matchSig (Index.lookup (cidFromHead ha))
-      | I.Decl (g_, _), I.Decl (dPool', C.Dec (r, s, ha')) ->
+      | I.Decl (g, _), I.Decl (dPool', C.Dec (r, s, ha')) ->
           begin if eqHead (ha, ha') then begin
             CsManager.trail (function () ->
                 rSolve
                   ( ps',
                     (r, I.comp s (I.Shift k)),
                     dp,
-                    function s_ -> sc (C.Dc k :: s_) ));
-            matchDProg (g_, dPool', k + 1)
+                    function s -> sc (C.Dc k :: s) ));
+            matchDProg (g, dPool', k + 1)
           end
-          else matchDProg (g_, dPool', k + 1)
+          else matchDProg (g, dPool', k + 1)
           end
-      | I.Decl (g_, _), I.Decl (dPool', parameter_) ->
-          matchDProg (g_, dPool', k + 1)
+      | I.Decl (g, _), I.Decl (dPool', parameter) ->
+          matchDProg (g, dPool', k + 1)
       (* dynamic program exhausted, try signature *)
     in
     let rec matchConstraint (solve_fn, try_) =
       let succeeded =
         CsManager.trail (function () ->
-            begin match solve_fn (g_, I.SClo (s_, s), try_) with
-            | Some u_ -> begin
-                sc [ C.Csolver u_ ];
+            begin match solve_fn (g, I.SClo (s_, s), try_) with
+            | Some u -> begin
+                sc [ C.Csolver u ];
                 true
               end
             | None -> false
@@ -595,7 +595,7 @@ end) : TABLED = struct
     in
     begin match I.constStatus (cidFromHead ha) with
     | I.Constraint (cs, solve_fn) -> matchConstraint (solve_fn, 0)
-    | _ -> matchDProg (g_, dPool, 1)
+    | _ -> matchDProg (g, dPool, 1)
     end
 
   (* matchSig [c1,...,cn] = ()
@@ -655,11 +655,11 @@ end) : TABLED = struct
      else fail
      *)
   let retrieval (a, b, sc, c, n) = match a, b, c with
-    | Loop, (g'_, u'_, s'), (asub, answRef) ->
+    | Loop, (g', u', s'), (asub, answRef) ->
         begin if T.noAnswers answRef then ()
-        else retrieve (n, (g'_, u'_, s'), (asub, answRef), sc)
+        else retrieve (n, (g', u', s'), (asub, answRef), sc)
         end
-    | Divergence ((p, s), dp), (g'_, u'_, s'), (asub, answRef) ->
+    | Divergence ((p, s), dp), (g', u', s'), (asub, answRef) ->
         matchAtom
           ( (p, s),
             dp,
@@ -679,20 +679,20 @@ end) : TABLED = struct
   let nextStage () =
     let rec resume = function
       | [] -> ()
-      | (susp, s, sc, trail, (asub, answRef), k) :: goals_ -> begin
+      | (susp, s, sc, trail, (asub, answRef), k) :: goals -> begin
           CsManager.trail (function () ->
               begin
                 Unify.resume trail;
                 retrieval (susp, s, sc, (asub, answRef), k)
               end);
-          resume goals_
+          resume goals
         end
     in
-    let sg_ = rev !suspGoals in
+    let sg = rev !suspGoals in
     begin if MT.updateTable () then begin
       TableParam.stageCtr := !TableParam.stageCtr + 1;
       begin
-        resume sg_;
+        resume sg;
         true
       end
     end

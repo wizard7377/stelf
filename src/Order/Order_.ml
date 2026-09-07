@@ -64,7 +64,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
     let redOrderTable : rDec Table.table = Table.new_ 0
     let reset () = Table.clear orderTable
     let resetROrder () = Table.clear redOrderTable
-    let install cid o_ = Table.insert orderTable (cid, o_)
+    let install cid o = Table.insert orderTable (cid, o)
 
     let uninstall cid =
       begin match Table.lookup orderTable cid with
@@ -75,7 +75,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
         end
       end
 
-    let installROrder cid p_ = Table.insert redOrderTable (cid, p_)
+    let installROrder cid p = Table.insert redOrderTable (cid, p)
 
     let uninstallROrder cid =
       begin match Table.lookup redOrderTable cid with
@@ -96,7 +96,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
             (Error
                ("No termination order assigned for "
                ^ I.conDecName (I.sgnLookup a)))
-      | Some (TDec (s_, _)) -> s_
+      | Some (TDec (s, _)) -> s
       end
 
     let selLookupROrder a =
@@ -107,7 +107,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
                (("No reduction order assigned for "
                 ^ I.conDecName (I.sgnLookup a))
                ^ "."))
-      | Some (RDec (p_, _)) -> p_
+      | Some (RDec (p, _)) -> p
       end
 
     let mutLookupROrder a =
@@ -116,7 +116,7 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
           raise
             (Error
                (("No order assigned for " ^ I.conDecName (I.sgnLookup a)) ^ "."))
-      | Some (RDec (_, m_)) -> m_
+      | Some (RDec (_, m)) -> m
       end
 
     let mutLookup a =
@@ -124,14 +124,14 @@ module MakeOrder (Table : TABLE with type key = int) : ORDER = struct
       | None ->
           raise
             (Error ("No order assigned for " ^ I.conDecName (I.sgnLookup a)))
-      | Some (TDec (_, m_)) -> m_
+      | Some (TDec (_, m)) -> m
       end
 
     let mutual a =
       let rec mutual' (b, a's) = match b with
         | Empty -> a's
-        | Le (a, m_) -> mutual' (m_, a :: a's)
-        | Lt (a, m_) -> mutual' (m_, a :: a's)
+        | Le (a, m) -> mutual' (m, a :: a's)
+        | Lt (a, m) -> mutual' (m, a :: a's)
       in
       mutual' (mutLookup a, [])
 

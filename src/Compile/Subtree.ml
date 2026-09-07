@@ -151,7 +151,7 @@ end) : SUBTREE = struct
   let makeTree () = ref (Node (nid (), RedBlackSet.RBSet.new_ ()))
 
   (* Test if node has any children *)
-  let noChildren c_ = RedBlackSet.RBSet.isEmpty c_
+  let noChildren c = RedBlackSet.RBSet.isEmpty c
 
   (* Index array
 
@@ -177,16 +177,16 @@ end) : SUBTREE = struct
     let rec dotn (i, s) = match i with 0 -> s | i -> dotn (i - 1, I.dot1 s)
 
     let rec compose' = function
-      | I.Null, g_ -> g_
-      | IntSyn.Decl (g_, d_), g'_ -> IntSyn.Decl (compose' (g_, g'_), d_)
+      | I.Null, g -> g
+      | IntSyn.Decl (g, d), g' -> IntSyn.Decl (compose' (g, g'), d)
 
     let rec shift (a, s) = match a with
       | I.Null -> s
-      | IntSyn.Decl (g_, d_) -> I.dot1 (shift (g_, s))
+      | IntSyn.Decl (g, d) -> I.dot1 (shift (g, s))
 
     let rec raiseType a2 b2 = match a2, b2 with
-      | I.Null, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType g_ (I.Lam (d_, v_))
+      | I.Null, v -> v
+      | I.Decl (g, d), v -> raiseType g (I.Lam (d, v))
 
     let rec printSub = function
       | IntSyn.Shift n -> print (("Shift " ^ Int.toString n) ^ "\n")
@@ -233,98 +233,98 @@ end) : SUBTREE = struct
       | I.Def k, I.Def k' -> k = k'
       | _, _ -> false
 
-    let compatible (label, t_, u_, rho_t, rho_u) =
+    let compatible (label, t, u, rho_t, rho_u) =
       let rec genExp (label, b, a, c) = match a, c with
-        | (I.NVar n as t_), (I.Root (h_, s_) as u_) -> begin
-            S.insert rho_u (n, (label, u_));
-            t_
+        | (I.NVar n as t), (I.Root (h, s) as u) -> begin
+            S.insert rho_u (n, (label, u));
+            t
           end
-        | (I.Root (h1_, s1_) as t_), (I.Root (h2_, s2_) as u_) ->
-            begin if eqHeads (h1_, h2_) then
-              I.Root (h1_, genSpine (label, b, s1_, s2_))
+        | (I.Root (h1, s1) as t), (I.Root (h2, s2) as u) ->
+            begin if eqHeads (h1, h2) then
+              I.Root (h1, genSpine (label, b, s1, s2))
             else
               begin match b with
               | Regular -> begin
-                  S.insert rho_t (!nctr + 1, (label, t_));
+                  S.insert rho_t (!nctr + 1, (label, t));
                   begin
-                    S.insert rho_u (!nctr + 1, (label, u_));
+                    S.insert rho_u (!nctr + 1, (label, u));
                     newNVar ()
                   end
                 end
               | _ -> raise (Generalization "Should never happen!")
               end
             end
-        | I.Lam ((I.Dec (n_, a1_) as d1_), t1_), I.Lam ((I.Dec (_, a2_) as d2_), u2_) ->
+        | I.Lam ((I.Dec (n, a1) as d1), t1), I.Lam ((I.Dec (_, a2) as d2), u2) ->
             I.Lam
-              ( I.Dec (n_, genExp (TypeLabel, Regular, a1_, a2_)),
-                genExp (label, b, t1_, u2_) )
-        | I.Pi (((d1_, _no1_) as dd1), e1_), I.Pi (((d2_, _no2_) as dd2), e2_) ->
+              ( I.Dec (n, genExp (TypeLabel, Regular, a1, a2)),
+                genExp (label, b, t1, u2) )
+        | I.Pi (((d1, _no1_) as dd1), e1), I.Pi (((d2, _no2_) as dd2), e2) ->
             I.Pi
-              ( (genDec (TypeLabel, Regular, d1_, d2_), I.No),
-                genExp (label, b, e1_, e2_) )
-        | I.Pi (((d1_, _maybe1_) as dd1), e1_), I.Pi (((d2_, _maybe2_) as dd2), e2_) ->
+              ( (genDec (TypeLabel, Regular, d1, d2), I.No),
+                genExp (label, b, e1, e2) )
+        | I.Pi (((d1, _maybe1_) as dd1), e1), I.Pi (((d2, _maybe2_) as dd2), e2) ->
             I.Pi
-              ( (genDec (TypeLabel, Regular, d1_, d2_), I.Maybe),
-                genExp (label, b, e1_, e2_) )
-        | I.Pi (((d1_, _meta1_) as dd1), e1_), I.Pi (((d2_, _meta2_) as dd2), e2_) ->
+              ( (genDec (TypeLabel, Regular, d1, d2), I.Maybe),
+                genExp (label, b, e1, e2) )
+        | I.Pi (((d1, _meta1_) as dd1), e1), I.Pi (((d2, _meta2_) as dd2), e2) ->
             I.Pi
-              ( (genDec (TypeLabel, Regular, d1_, d2_), I.Meta),
-                genExp (label, b, e1_, e2_) )
-        | t_, u_ ->
+              ( (genDec (TypeLabel, Regular, d1, d2), I.Meta),
+                genExp (label, b, e1, e2) )
+        | t, u ->
             raise
               (Generalization "Cases where U= EVar or EClo should never happen!")
       and genSpine (label, b, a, c) = match a, c with
         | Nil, Nil -> I.Nil
-        | I.App (t_, s1_), I.App (u_, s2_) ->
-            I.App (genExp (label, b, t_, u_), genSpine (label, b, s1_, s2_))
-      and genDec (label, b, I.Dec (n_, e1_), I.Dec (n'_, e2_)) =
-        I.Dec (n_, genExp (label, b, e1_, e2_))
+        | I.App (t, s1), I.App (u, s2) ->
+            I.App (genExp (label, b, t, u), genSpine (label, b, s1, s2))
+      and genDec (label, b, I.Dec (n, e1), I.Dec (n', e2)) =
+        I.Dec (n, genExp (label, b, e1, e2))
       in
       let rec genTop (label, a, b) = match a, b with
-        | (I.Root (h1_, s1_) as t_), (I.Root (h2_, s2_) as u_) ->
-            begin if eqHeads (h1_, h2_) then
-              I.Root (h1_, genSpine (label, Regular, s1_, s2_))
+        | (I.Root (h1, s1) as t), (I.Root (h2, s2) as u) ->
+            begin if eqHeads (h1, h2) then
+              I.Root (h1, genSpine (label, Regular, s1, s2))
             else raise (Generalization "Top-level function symbol not shared")
             end
-        | I.Lam ((I.Dec (n_, a1_) as d1_), t1_), I.Lam ((I.Dec (_, a2_) as d2_), u2_) ->
+        | I.Lam ((I.Dec (n, a1) as d1), t1), I.Lam ((I.Dec (_, a2) as d2), u2) ->
             I.Lam
-              ( I.Dec (n_, genExp (label, Regular, a1_, a2_)),
-                genTop (label, t1_, u2_) )
+              ( I.Dec (n, genExp (label, Regular, a1, a2)),
+                genTop (label, t1, u2) )
         | _, _ ->
             raise (Generalization "Top-level function symbol not shared")
       in
-      try Some (genTop (label, t_, u_)) with Generalization msg -> None
+      try Some (genTop (label, t, u)) with Generalization msg -> None
 
     let compatibleSub (nsub_t, nsub_e) =
       let sg, rho_t, rho_e = (nid (), nid (), nid ()) in
-      ignore (S.forall nsub_e (function nv, (l', e_) ->
+      ignore (S.forall nsub_e (function nv, (l', e) ->
             begin match S.lookup nsub_t nv with
-            | Some (l, t_) ->
+            | Some (l, t) ->
                 begin if l = l' then
-                  begin match compatible (l, t_, e_, rho_t, rho_e) with
+                  begin match compatible (l, t, e, rho_t, rho_e) with
                   | None -> begin
-                      S.insert rho_t (nv, (l, t_));
-                      S.insert rho_e (nv, (l, e_))
+                      S.insert rho_t (nv, (l, t));
+                      S.insert rho_e (nv, (l, e))
                     end
-                  | Some t'_ -> S.insert sg (nv, (l, t'_))
+                  | Some t' -> S.insert sg (nv, (l, t'))
                   end
                 else raise (Generalization "Labels don't agree\n")
                 end
-            | None -> S.insert rho_e (nv, (l', e_))
+            | None -> S.insert rho_e (nv, (l', e))
             end));
       begin if isId sg then None else Some (sg, rho_t, rho_e)
       end
 
     let mkNode (a, sg, rho1, b, rho2) = match a, b with
-      | Node (_, children_), ((g_, rc) as gr) ->
+      | Node (_, children), ((g, rc) as gr) ->
           let c = S.new_ () in
           S.insertList c
-            [ (1, Node (rho1, children_)); (2, Leaf (rho2, g_, rc)) ];
+            [ (1, Node (rho1, children)); (2, Leaf (rho2, g, rc)) ];
           Node (sg, c)
-      | Leaf (_, g1_, rc1), ((g2_, rc2) as gr) ->
+      | Leaf (_, g1, rc1), ((g2, rc2) as gr) ->
           let c = S.new_ () in
           S.insertList c
-            [ (1, Leaf (rho1, g1_, rc1)); (2, Leaf (rho2, g2_, rc2)) ];
+            [ (1, Leaf (rho1, g1, rc1)); (2, Leaf (rho2, g2, rc2)) ];
           Node (sg, c)
 
     let rec compareChild
@@ -332,10 +332,10 @@ end) : SUBTREE = struct
           (n, child),
           nsub_t,
           nsub_e,
-          ((g_clause2_, res_clause2_) as gr) ) =
+          ((g_clause2, res_clause2) as gr) ) =
       begin match compatibleSub (nsub_t, nsub_e) with
       | None ->
-          S.insert children (n + 1, Leaf (nsub_e, g_clause2_, res_clause2_))
+          S.insert children (n + 1, Leaf (nsub_e, g_clause2, res_clause2))
       | Some (sg, rho1, rho2) ->
           begin if isId rho1 then
             begin if isId rho2 then
@@ -347,14 +347,14 @@ end) : SUBTREE = struct
       end
 
     and insert (a, nsub_e, b) = match a, b with
-      | (Leaf (nsub_t, g_clause1_, r1_) as n_), ((g_clause2_, r2_) as gr) ->
+      | (Leaf (nsub_t, g_clause1, r1) as n), ((g_clause2, r2) as gr) ->
           begin match compatibleSub (nsub_t, nsub_e) with
           | None -> raise (Error "Leaf is not compatible substitution r")
-          | Some (sg, rho1, rho2) -> mkNode (n_, sg, rho1, gr, rho2)
+          | Some (sg, rho1, rho2) -> mkNode (n, sg, rho1, gr, rho2)
           end
-      | (Node (_, children) as n_), ((g_clause2_, rc) as gr) ->
+      | (Node (_, children) as n_), ((g_clause2, rc) as gr) ->
           begin if noChildren children then begin
-            S.insert children (1, Leaf (nsub_e, g_clause2_, rc));
+            S.insert children (1, Leaf (nsub_e, g_clause2, rc));
             n_
           end
           else
@@ -363,7 +363,7 @@ end) : SUBTREE = struct
                 compareChild (children, (n, child), nsub_t, nsub_e, gr);
                 n_
               end
-            | n, (Leaf (nsub_t, g1_, rc1) as child) -> begin
+            | n, (Leaf (nsub_t, g1, rc1) as child) -> begin
                 compareChild (children, (n, child), nsub_t, nsub_e, gr);
                 n_
               end
@@ -372,116 +372,116 @@ end) : SUBTREE = struct
 
     let rec normalizeNExp = function
       | I.NVar n, csub ->
-          let a_ = I.newAVar () in
-          S.insert csub (n, a_);
-          a_
-      | I.Root (h_, s_), nsub -> I.Root (h_, normalizeNSpine (s_, nsub))
-      | I.Lam (d_, u_), nsub ->
-          I.Lam (normalizeNDec (d_, nsub), normalizeNExp (u_, nsub))
-      | I.Pi ((d_, p_), u_), nsub ->
-          I.Pi ((normalizeNDec (d_, nsub), p_), normalizeNExp (u_, nsub))
+          let a = I.newAVar () in
+          S.insert csub (n, a);
+          a
+      | I.Root (h, s), nsub -> I.Root (h, normalizeNSpine (s, nsub))
+      | I.Lam (d, u), nsub ->
+          I.Lam (normalizeNDec (d, nsub), normalizeNExp (u, nsub))
+      | I.Pi ((d, p), u), nsub ->
+          I.Pi ((normalizeNDec (d, nsub), p), normalizeNExp (u, nsub))
 
     and normalizeNSpine (a, nsub) = match a with
       | I.Nil -> I.Nil
-      | I.App (u_, s_) ->
-          I.App (normalizeNExp (u_, nsub), normalizeNSpine (s_, nsub))
+      | I.App (u, s) ->
+          I.App (normalizeNExp (u, nsub), normalizeNSpine (s, nsub))
 
-    and normalizeNDec (I.Dec (n_, e_), nsub) =
-      I.Dec (n_, normalizeNExp (e_, nsub))
+    and normalizeNDec (I.Dec (n, e), nsub) =
+      I.Dec (n, normalizeNExp (e, nsub))
 
-    let assign (nvaronly, glocal_u1_, us1, u2_, nsub_goal, asub, csub, cnstr) =
-      let depth = I.ctxLength glocal_u1_ in
+    let assign (nvaronly, glocal_u1, us1, u2, nsub_goal, asub, csub, cnstr) =
+      let depth = I.ctxLength glocal_u1 in
       let rec assignHead
           ( nvaronly,
             depth,
-            glocal_u1_,
-            ((I.Root (h1_, s1_), s1) as us1),
-            (I.Root (h2_, s2_) as u2_),
+            glocal_u1,
+            ((I.Root (h1, s1_), s1) as us1),
+            (I.Root (h2, s2) as u2),
             cnstr ) =
-        begin match (h1_, h2_) with
+        begin match (h1, h2) with
         | I.Const c1, I.Const c2 ->
             begin if c1 = c2 then
-              assignSpine (nvaronly, depth, glocal_u1_, (s1_, s1), s2_, cnstr)
+              assignSpine (nvaronly, depth, glocal_u1, (s1_, s1), s2, cnstr)
             else raise (Assignment "Constant clash")
             end
         | I.Skonst c1, I.Skonst c2 ->
             begin if c1 = c2 then
-              assignSpine (nvaronly, depth, glocal_u1_, (s1_, s1), s2_, cnstr)
+              assignSpine (nvaronly, depth, glocal_u1, (s1_, s1), s2, cnstr)
             else raise (Assignment "Skolem constant clash")
             end
         | I.Def d1, _ ->
             assignExp
-              (nvaronly, depth, glocal_u1_, Whnf.expandDef us1, u2_, cnstr)
+              (nvaronly, depth, glocal_u1, Whnf.expandDef us1, u2, cnstr)
         | ( I.FgnConst (cs1, I.ConDec (n1, _, _, _, _, _)),
             I.FgnConst (cs2, I.ConDec (n2, _, _, _, _, _)) ) ->
             begin if cs1 = cs2 && n1 = n2 then cnstr
             else raise (Assignment "Foreign Constant clash")
             end
-        | ( I.FgnConst (cs1, I.ConDef (n1, _, _, w1_, _, _, _)),
-            I.FgnConst (cs2, I.ConDef (n2, _, _, v_, w2_, _, _)) ) ->
+        | ( I.FgnConst (cs1, I.ConDef (n1, _, _, w1, _, _, _)),
+            I.FgnConst (cs2, I.ConDef (n2, _, _, v, w2, _, _)) ) ->
             begin if cs1 = cs2 && n1 = n2 then cnstr
-            else assignExp (nvaronly, depth, glocal_u1_, (w1_, s1), w2_, cnstr)
+            else assignExp (nvaronly, depth, glocal_u1, (w1, s1), w2, cnstr)
             end
-        | I.FgnConst (_, I.ConDef (_, _, _, w1_, _, _, _)), _ ->
-            assignExp (nvaronly, depth, glocal_u1_, (w1_, s1), u2_, cnstr)
-        | _, I.FgnConst (_, I.ConDef (_, _, _, w2_, _, _, _)) ->
-            assignExp (nvaronly, depth, glocal_u1_, us1, w2_, cnstr)
+        | I.FgnConst (_, I.ConDef (_, _, _, w1, _, _, _)), _ ->
+            assignExp (nvaronly, depth, glocal_u1, (w1, s1), u2, cnstr)
+        | _, I.FgnConst (_, I.ConDef (_, _, _, w2, _, _, _)) ->
+            assignExp (nvaronly, depth, glocal_u1, us1, w2, cnstr)
         | _, _ -> raise (Assignment "Head mismatch ")
         end
-      and assignExpW (nvaronly, depth, glocal_u1_, a, b, cnstr) = match nvaronly, a, b with
-        | nvaronly, (I.Uni l1_, s1), I.Uni l2_ ->
+      and assignExpW (nvaronly, depth, glocal_u1, a, b, cnstr) = match nvaronly, a, b with
+        | nvaronly, (I.Uni l1, s1), I.Uni l2 ->
             cnstr
         | nvaronly, us1, I.NVar n -> begin
-            let u1_, s1_ = us1 in
-            S.insert nsub_goal (n, (glocal_u1_, (nvaronly, I.EClo (u1_, s1_))));
+            let u1, s1 = us1 in
+            S.insert nsub_goal (n, (glocal_u1, (nvaronly, I.EClo (u1, s1))));
             cnstr
           end
-        | Body, ((I.Root (h1_, s1_), s1) as us1), (I.Root (h2_, s2_) as u2_) ->
-            begin match h2_ with
+        | Body, ((I.Root (h1, s1_), s1) as us1), (I.Root (h2, s2) as u2) ->
+            begin match h2 with
             | I.BVar k2 ->
                 begin if k2 > depth then begin
                   S.insert asub
-                    ( k2 - I.ctxLength glocal_u1_,
-                      Assign (glocal_u1_, I.EClo (fst us1, snd us1)) );
+                    ( k2 - I.ctxLength glocal_u1,
+                      Assign (glocal_u1, I.EClo (fst us1, snd us1)) );
                   cnstr
                 end
                 else
-                  begin match h1_ with
+                  begin match h1 with
                   | I.BVar k1 ->
                       begin if k1 = k2 then
                         assignSpine
-                          (Body, depth, glocal_u1_, (s1_, s1), s2_, cnstr)
+                          (Body, depth, glocal_u1, (s1_, s1), s2, cnstr)
                       else raise (Assignment "Bound variable clash")
                       end
                   | _ -> raise (Assignment "Head mismatch")
                   end
                 end
-            | _ -> assignHead (Body, depth, glocal_u1_, us1, u2_, cnstr)
+            | _ -> assignHead (Body, depth, glocal_u1, us1, u2, cnstr)
             end
-        | TypeLabel, ((I.Root (h1_, s1_), s1) as us1), (I.Root (h2_, s2_) as u2_) ->
-            begin match h2_ with
+        | TypeLabel, ((I.Root (h1, s1_), s1) as us1), (I.Root (h2, s2) as u2) ->
+            begin match h2 with
             | I.BVar k2 ->
                 begin if k2 > depth then cnstr
                 else
-                  begin match h1_ with
+                  begin match h1 with
                   | I.BVar k1 ->
                       begin if k1 = k2 then
                         assignSpine
-                          (TypeLabel, depth, glocal_u1_, (s1_, s1), s2_, cnstr)
+                          (TypeLabel, depth, glocal_u1, (s1_, s1), s2, cnstr)
                       else raise (Assignment "Bound variable clash")
                       end
                   | _ -> raise (Assignment "Head mismatch")
                   end
                 end
-            | _ -> assignHead (TypeLabel, depth, glocal_u1_, us1, u2_, cnstr)
+            | _ -> assignHead (TypeLabel, depth, glocal_u1, us1, u2, cnstr)
             end
-        | nvaronly, us1, (I.Root (I.BVar k2, s_) as u2_) ->
+        | nvaronly, us1, (I.Root (I.BVar k2, s_) as u2) ->
             begin if k2 > depth then
               begin match nvaronly with
               | TypeLabel -> cnstr
               | Body -> begin
                   S.insert asub
-                    (k2 - depth, Assign (glocal_u1_, I.EClo (fst us1, snd us1)));
+                    (k2 - depth, Assign (glocal_u1, I.EClo (fst us1, snd us1)));
                   cnstr
                 end
               end
@@ -490,71 +490,71 @@ end) : SUBTREE = struct
               | TypeLabel -> cnstr
               | Body ->
                   begin match us1 with
-                  | I.EVar (r, _, v_, cnstrs), s ->
-                      let u2' = normalizeNExp (u2_, csub) in
-                      Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2') :: cnstr
-                  | I.EClo (u_, s'), s ->
+                  | I.EVar (r, _, v, cnstrs), s ->
+                      let u2' = normalizeNExp (u2, csub) in
+                      Eqn (glocal_u1, I.EClo (fst us1, snd us1), u2') :: cnstr
+                  | I.EClo (u, s'), s ->
                       assignExp
                         ( Body,
                           depth,
-                          glocal_u1_,
-                          (u_, I.comp s' s),
-                          u2_,
+                          glocal_u1,
+                          (u, I.comp s' s),
+                          u2,
                           cnstr )
                   | I.FgnExp (_, ops), _ ->
-                      let u2' = normalizeNExp (u2_, csub) in
-                      Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2') :: cnstr
+                      let u2' = normalizeNExp (u2, csub) in
+                      Eqn (glocal_u1, I.EClo (fst us1, snd us1), u2') :: cnstr
                   end
               end
             end
-        | nvaronly, (I.Lam ((I.Dec (_, a1_) as d1_), u1_), s1), I.Lam ((I.Dec (_, a2_) as d2_), u2_) ->
+        | nvaronly, (I.Lam ((I.Dec (_, a1) as d1), u1), s1), I.Lam ((I.Dec (_, a2) as d2), u2) ->
             let cnstr' =
-              assignExp (TypeLabel, depth, glocal_u1_, (a1_, s1), a2_, cnstr)
+              assignExp (TypeLabel, depth, glocal_u1, (a1, s1), a2, cnstr)
             in
             assignExp
               ( nvaronly,
                 depth + 1,
-                I.Decl (glocal_u1_, I.decSub d1_ s1),
-                (u1_, I.dot1 s1),
-                u2_,
+                I.Decl (glocal_u1, I.decSub d1 s1),
+                (u1, I.dot1 s1),
+                u2,
                 cnstr' )
-        | nvaronly, (I.Pi (((I.Dec (_, a1_) as d1_), _), u1_), s1), I.Pi (((I.Dec (_, a2_) as d2_), _), u2_) ->
+        | nvaronly, (I.Pi (((I.Dec (_, a1) as d1), _), u1), s1), I.Pi (((I.Dec (_, a2) as d2), _), u2) ->
             let cnstr' =
-              assignExp (TypeLabel, depth, glocal_u1_, (a1_, s1), a2_, cnstr)
+              assignExp (TypeLabel, depth, glocal_u1, (a1, s1), a2, cnstr)
             in
             assignExp
               ( nvaronly,
                 depth + 1,
-                I.Decl (glocal_u1_, I.decSub d1_ s1),
-                (u1_, I.dot1 s1),
-                u2_,
+                I.Decl (glocal_u1, I.decSub d1 s1),
+                (u1, I.dot1 s1),
+                u2,
                 cnstr' )
-        | nvaronly, ((I.EVar (r, _, v_, cnstrs), s) as us1), u2_ ->
-            let u2' = normalizeNExp (u2_, csub) in
-            Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2') :: cnstr
-        | nvaronly, ((I.EClo (u_, s'), s) as us1), u2_
+        | nvaronly, ((I.EVar (r, _, v, cnstrs), s) as us1), u2 ->
+            let u2' = normalizeNExp (u2, csub) in
+            Eqn (glocal_u1, I.EClo (fst us1, snd us1), u2') :: cnstr
+        | nvaronly, ((I.EClo (u, s'), s) as us1), u2
           ->
             assignExp
-              (nvaronly, depth, glocal_u1_, (u_, I.comp s' s), u2_, cnstr)
-        | nvaronly, ((I.FgnExp (_, ops), _) as us1), u2_ ->
-            let u2' = normalizeNExp (u2_, csub) in
-            Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2') :: cnstr
-        | nvaronly, us1, (I.FgnExp (_, ops) as u2_) ->
-            Eqn (glocal_u1_, I.EClo (fst us1, snd us1), u2_) :: cnstr
-      and assignSpine (nvaronly, depth, glocal_u1_, a, s_, cnstr) = match a, s_ with
+              (nvaronly, depth, glocal_u1, (u, I.comp s' s), u2, cnstr)
+        | nvaronly, ((I.FgnExp (_, ops), _) as us1), u2 ->
+            let u2' = normalizeNExp (u2, csub) in
+            Eqn (glocal_u1, I.EClo (fst us1, snd us1), u2') :: cnstr
+        | nvaronly, us1, (I.FgnExp (_, ops) as u2) ->
+            Eqn (glocal_u1, I.EClo (fst us1, snd us1), u2) :: cnstr
+      and assignSpine (nvaronly, depth, glocal_u1, a, s, cnstr) = match a, s with
         | (Nil, _), Nil -> cnstr
-        | (I.SClo (s1_, s1'), s1), s_ ->
+        | (I.SClo (s1_, s1'), s1), s ->
             assignSpine
-              (nvaronly, depth, glocal_u1_, (s1_, I.comp s1' s1), s_, cnstr)
-        | (I.App (u1_, s1_), s1), I.App (u2_, s2_) ->
+              (nvaronly, depth, glocal_u1, (s1_, I.comp s1' s1), s, cnstr)
+        | (I.App (u1, s1_), s1), I.App (u2, s2) ->
             let cnstr' =
-              assignExp (nvaronly, depth, glocal_u1_, (u1_, s1), u2_, cnstr)
+              assignExp (nvaronly, depth, glocal_u1, (u1, s1), u2, cnstr)
             in
-            assignSpine (nvaronly, depth, glocal_u1_, (s1_, s1), s2_, cnstr')
-      and assignExp (nvaronly, depth, glocal_u1_, us1, u2_, cnstr) =
-        assignExpW (nvaronly, depth, glocal_u1_, Whnf.whnf us1, u2_, cnstr)
+            assignSpine (nvaronly, depth, glocal_u1, (s1_, s1), s2, cnstr')
+      and assignExp (nvaronly, depth, glocal_u1, us1, u2, cnstr) =
+        assignExpW (nvaronly, depth, glocal_u1, Whnf.whnf us1, u2, cnstr)
       in
-      assignExp (nvaronly, depth, glocal_u1_, us1, u2_, cnstr)
+      assignExp (nvaronly, depth, glocal_u1, us1, u2, cnstr)
 
     let assignableLazy
         (nsub, nsub_query, assignSub, (nsub_left, cnstrSub), cnstr) =
@@ -562,23 +562,23 @@ end) : SUBTREE = struct
       let cref = ref cnstr in
       let assign' (nsub_query, nsub) =
         let nsub_query_left, nsub_left1 =
-          S.differenceModulo nsub_query nsub (function glocal_u_, (l, u_) ->
+          S.differenceModulo nsub_query nsub (function glocal_u, (l, u) ->
               (function
-              | l', t_ ->
+              | l', t ->
                   cref :=
                     assign
                       ( l,
-                        glocal_u_,
-                        (u_, I.id),
-                        t_,
+                        glocal_u,
+                        (u, I.id),
+                        t,
                         nsub_query',
                         assignSub,
                         cnstrSub,
                         !cref )))
         in
         let nsub_left' =
-          S.update nsub_left1 (function l, u_ ->
-              (l, normalizeNExp (u_, cnstrSub)))
+          S.update nsub_left1 (function l, u ->
+              (l, normalizeNExp (u, cnstrSub)))
         in
         Some
           ( S.union nsub_query_left nsub_query',
@@ -592,92 +592,92 @@ end) : SUBTREE = struct
       let cref = ref cnstr in
       let assign' (nsub_query, nsub) =
         let nsub_query_left, nsub_left =
-          S.differenceModulo nsub_query nsub (function glocal_u_, (l, u_) ->
+          S.differenceModulo nsub_query nsub (function glocal_u, (l, u) ->
               (function
-              | l', t_ ->
+              | l', t ->
                   cref :=
                     assign
                       ( l',
-                        glocal_u_,
-                        (u_, I.id),
-                        t_,
+                        glocal_u,
+                        (u, I.id),
+                        t,
                         nsub_query',
                         assignSub,
                         cnstrSub,
                         !cref )))
         in
-        ignore (S.forall nsub_left (function nv, (nvaronly, u_) ->
+        ignore (S.forall nsub_left (function nv, (nvaronly, u) ->
               begin match S.lookup cnstrSub nv with
               | None -> raise (Error "Left-over nsubstitution")
-              | Some (I.AVar a_) -> a_ := Some (normalizeNExp (u_, cnstrSub))
+              | Some (I.AVar a) -> a := Some (normalizeNExp (u, cnstrSub))
               end));
         Some (S.union nsub_query_left nsub_query', cnstrSub, !cref)
       in
       try assign' (nsub_query, nsub) with Assignment msg -> None
 
     let unifyW a3 b3 c3 = match a3, b3, c3 with
-      | g_, ((I.AVar ({ contents = None } as r) as x_), I.Shift 0), us2 ->
+      | g, ((I.AVar ({ contents = None } as r) as x), I.Shift 0), us2 ->
           r := Some (I.EClo (fst us2, snd us2))
-      | g_, ((I.AVar ({ contents = None } as r) as x_), s), ((u_, s2) as us2) ->
+      | g, ((I.AVar ({ contents = None } as r) as x), s), ((u, s2) as us2) ->
         begin
           print "unifyW -- not s = Id\n";
           begin
             print
-              (("Us2 = " ^ Print.expToString g_ (I.EClo (fst us2, snd us2)))
+              (("Us2 = " ^ Print.expToString g (I.EClo (fst us2, snd us2)))
               ^ "\n");
             r := Some (I.EClo (fst us2, snd us2))
           end
         end
-      | g_, xs1, us2 -> Unify.unifyW g_ xs1 us2
+      | g, xs1, us2 -> Unify.unifyW g xs1 us2
 
-    let unify g_ xs1 us2 = unifyW g_ (Whnf.whnf xs1) (Whnf.whnf us2)
+    let unify g xs1 us2 = unifyW g (Whnf.whnf xs1) (Whnf.whnf us2)
 
-    let unifiable g_ us1 us2 =
+    let unifiable g us1 us2 =
       try
         begin
-          unify g_ us1 us2;
+          unify g us1 us2;
           true
         end
       with Unify.Unify msg -> false
 
     let rec ctxToExplicitSub (i, gquery, a, asub) = match a with
       | I.Null -> I.id
-      | I.Decl (gclause, I.Dec (_, a_)) ->
+      | I.Decl (gclause, I.Dec (_, a)) ->
           let s = ctxToExplicitSub (i + 1, gquery, gclause, asub) in
-          let (I.EVar (x'_, _, _, _) as u'_) =
-            I.newEVar gquery (I.EClo (a_, s))
+          let (I.EVar (x', _, _, _) as u') =
+            I.newEVar gquery (I.EClo (a, s))
           in
           begin match S.lookup asub i with
           | None -> ()
-          | Some (Assign (glocal_u_, u_)) ->
-              x'_ := Some (raiseType glocal_u_ u_)
+          | Some (Assign (glocal_u, u)) ->
+              x' := Some (raiseType glocal_u u)
           end;
-          I.Dot (I.Exp u'_, s)
+          I.Dot (I.Exp u', s)
       | I.Decl (gclause, I.ADec (_, d)) ->
-          let (I.AVar x'_ as u'_) = I.newAVar () in
+          let (I.AVar x' as u') = I.newAVar () in
           begin match S.lookup asub i with
           | None -> ()
-          | Some (Assign (glocal_u_, u_)) -> x'_ := Some u_
+          | Some (Assign (glocal_u, u)) -> x' := Some u
           end;
           I.Dot
-            ( I.Exp (I.EClo (u'_, I.Shift (-d))),
+            ( I.Exp (I.EClo (u', I.Shift (-d))),
               ctxToExplicitSub (i + 1, gquery, gclause, asub) )
 
-    let rec solveAuxG (trivial_, s, gquery) = match trivial_ with
-      | trivial_ -> true
-      | C.UnifyEq (glocal, e1, n_, eqns) ->
-          let g_ = compose' (glocal, gquery) in
+    let rec solveAuxG (trivial, s, gquery) = match trivial with
+      | trivial -> true
+      | C.UnifyEq (glocal, e1, n, eqns) ->
+          let g = compose' (glocal, gquery) in
           let s' = shift (glocal, s) in
-          begin if unifiable g_ (n_, s') (e1, s') then
+          begin if unifiable g (n, s') (e1, s') then
             solveAuxG (eqns, s, gquery)
           else false
           end
 
     let rec solveCnstr (gquery, gclause, a, s) = match a with
       | [] -> true
-      | Eqn (glocal, u1_, u2_) :: cnstr ->
+      | Eqn (glocal, u1, u2) :: cnstr ->
           Unify.unifiable
-            (compose' (gquery, glocal)) (u1_, I.id) (u2_, shift (glocal, s))
+            (compose' (gquery, glocal)) (u1, I.id) (u2, shift (glocal, s))
           && solveCnstr (gquery, gclause, cnstr, s)
 
     let solveResiduals
@@ -691,7 +691,7 @@ end) : SUBTREE = struct
 
     let ithChild (CGoals (_, _, _, i), n) = i = n
 
-    let retrieveChild (num, child_, nsub_query, assignSub, cnstr, gquery, sc) =
+    let retrieveChild (num, child, nsub_query, assignSub, cnstr, gquery, sc) =
       let rec retrieve (a, nsub_query, assignSub, cnstrSub, cnstr) = match a with
         | Leaf (nsub, gclause, residuals) ->
             begin match
@@ -711,30 +711,30 @@ end) : SUBTREE = struct
                 else raise (Error "Left-over normal substitutions!")
                 end
             end
-        | Node (nsub, children_) ->
+        | Node (nsub, children) ->
             begin match
               assignableEager (nsub, nsub_query, assignSub, cnstrSub, cnstr)
             with
             | None -> ()
             | Some (nsub_query', cnstrSub', cnstr') ->
-                S.forall children_ (function n, child_ ->
+                S.forall children (function n, child ->
                     retrieve
-                      ( child_,
+                      ( child,
                         nsub_query',
                         S.copy assignSub,
                         S.copy cnstrSub',
                         cnstr' ))
             end
       in
-      retrieve (child_, nsub_query, assignSub, cnstrSubId (), cnstr)
+      retrieve (child, nsub_query, assignSub, cnstrSubId (), cnstr)
 
-    let retrieval (n, (Node (s, children_) as sTree), g_, r, sc) =
+    let retrieval (n, (Node (s, children) as sTree), g, r, sc) =
       let nsub_query, assignSub = (querySubId (), assignSubId ()) in
       S.insert nsub_query (1, (I.Null, (Body, r)));
-      S.forall children_ (function _, c_ ->
-          retrieveChild (n, c_, nsub_query, assignSub, [], g_, sc))
+      S.forall children (function _, c ->
+          retrieveChild (n, c, nsub_query, assignSub, [], g, sc))
 
-    let retrieveAll (num, child_, nsub_query, assignSub, cnstr, candSet) =
+    let retrieveAll (num, child, nsub_query, assignSub, cnstr, candSet) =
       let i = ref 0 in
       let rec retrieve (a, nsub_query, assignSub, b, cnstr) = match a, b with
         | Leaf (nsub, gclause, residuals), (nsub_left, cnstrSub) ->
@@ -761,25 +761,25 @@ end) : SUBTREE = struct
                 else raise (Error "Left-over normal substitutions!")
                 end
             end
-        | Node (nsub, children_), (nsub_left, cnstrSub) ->
+        | Node (nsub, children), (nsub_left, cnstrSub) ->
             begin match
               assignableLazy
                 (nsub, nsub_query, assignSub, (nsub_left, cnstrSub), cnstr)
             with
             | None -> ()
             | Some (nsub_query', (nsub_left', cnstrSub'), cnstr') ->
-                S.forall children_ (function n, child_ ->
+                S.forall children (function n, child ->
                     retrieve
-                      ( child_,
+                      ( child,
                         nsub_query',
                         S.copy assignSub,
                         (S.copy nsub_left', S.copy cnstrSub'),
                         cnstr' ))
             end
       in
-      retrieve (child_, nsub_query, assignSub, (nid (), cnstrSubId ()), cnstr)
+      retrieve (child, nsub_query, assignSub, (nid (), cnstrSubId ()), cnstr)
 
-    let retrieveCandidates (n, (Node (s, children_) as sTree), gquery, r, sc) =
+    let retrieveCandidates (n, (Node (s, children) as sTree), gquery, r, sc) =
       let nsub_query, assignSub = (querySubId (), assignSubId ()) in
       let candSet = S.new_ () in
       let rec solveCandidate (i, candSet) =
@@ -789,10 +789,10 @@ end) : SUBTREE = struct
           begin
             CsManager.trail (function () ->
                 begin
-                  S.forall nsub_left (function nv, (l, u_) ->
+                  S.forall nsub_left (function nv, (l, u) ->
                       begin match S.lookup cnstrSub nv with
                       | None -> raise (Error "Left-over nsubstitution")
-                      | Some (I.AVar a_) -> a_ := Some u_
+                      | Some (I.AVar a) -> a := Some u
                       end);
                   solveResiduals
                     (gquery, gclause, residuals, assignSub, cnstr, sc)
@@ -803,18 +803,18 @@ end) : SUBTREE = struct
       in
       S.insert nsub_query (1, (I.Null, (Body, r)));
       begin
-        S.forall children_ (function _, c_ ->
-            retrieveAll (n, c_, nsub_query, assignSub, [], candSet));
+        S.forall children (function _, c ->
+            retrieveAll (n, c, nsub_query, assignSub, [], candSet));
         solveCandidate (1, candSet)
       end
 
-    let matchSig (a, g_, ((I.Root (ha, s_), s) as ps), sc) =
+    let matchSig (a, g, ((I.Root (ha, s_), s) as ps), sc) =
       let n, tree = Array.sub (indexArray, a) in
-      retrieveCandidates (n, !tree, g_, I.EClo (fst ps, snd ps), sc)
+      retrieveCandidates (n, !tree, g, I.EClo (fst ps, snd ps), sc)
 
-    let matchSigIt (a, g_, ((I.Root (ha, s_), s) as ps), sc) =
+    let matchSigIt (a, g, ((I.Root (ha, s_), s) as ps), sc) =
       let n, tree = Array.sub (indexArray, a) in
-      retrieval (n, !tree, g_, I.EClo (fst ps, snd ps), sc)
+      retrieval (n, !tree, g, I.EClo (fst ps, snd ps), sc)
 
     let sProgReset () =
       begin
@@ -831,12 +831,12 @@ end) : SUBTREE = struct
           indexArray
       end
 
-    let sProgInstall (a, C.Head (e_, g_, eqs_, cid), r_) =
+    let sProgInstall (a, C.Head (e, g, eqs, cid), r) =
       let n, tree = Array.sub (indexArray, a) in
       let nsub_goal = S.new_ () in
-      S.insert nsub_goal (1, (Body, e_));
+      S.insert nsub_goal (1, (Body, e));
       begin
-        tree := insert (!tree, nsub_goal, (g_, CGoals (eqs_, cid, r_, !n + 1)));
+        tree := insert (!tree, nsub_goal, (g, CGoals (eqs, cid, r, !n + 1)));
         n := !n + 1
       end
   end

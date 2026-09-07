@@ -50,23 +50,23 @@ end) : Cs.CS = struct
     let myID = (ref (-1) : cid ref)
     let gtID = (ref (-1) : cid ref)
     let geqID = (ref (-1) : cid ref)
-    let gt (u_, v_) = Root (Const !gtID, App (u_, App (v_, Nil)))
-    let geq (u_, v_) = Root (Const !geqID, App (u_, App (v_, Nil)))
-    let gt0 u_ = gt (u_, constant zero)
-    let geq0 u_ = geq (u_, constant zero)
+    let gt (u, v) = Root (Const !gtID, App (u, App (v, Nil)))
+    let geq (u, v) = Root (Const !geqID, App (u, App (v, Nil)))
+    let gt0 u = gt (u, constant zero)
+    let geq0 u = geq (u, constant zero)
     let gtAddID = (ref (-1) : cid ref)
     let geqAddID = (ref (-1) : cid ref)
     let gtGeqID = (ref (-1) : cid ref)
     let geq00ID = (ref (-1) : cid ref)
 
-    let gtAdd (u1_, u2_, v_, w_) =
-      Root (Const !gtAddID, App (u1_, App (u2_, App (v_, App (w_, Nil)))))
+    let gtAdd (u1, u2, v, w) =
+      Root (Const !gtAddID, App (u1, App (u2, App (v, App (w, Nil)))))
 
-    let geqAdd (u1_, u2_, v_, w_) =
-      Root (Const !geqAddID, App (u1_, App (u2_, App (v_, App (w_, Nil)))))
+    let geqAdd (u1, u2, v, w) =
+      Root (Const !geqAddID, App (u1, App (u2, App (v, App (w, Nil)))))
 
-    let gtGeq (u_, v_, w_) =
-      Root (Const !gtGeqID, App (u_, App (v_, App (w_, Nil))))
+    let gtGeq (u, v, w) =
+      Root (Const !gtGeqID, App (u, App (v, App (w, Nil))))
 
     let geq00 () = Root (Const !geq00ID, Nil)
 
@@ -238,7 +238,7 @@ end) : Cs.CS = struct
       | Col j -> Array.update (tableau.clabels, j, new_)
       end
 
-    let ownerContext = function Var (g_, _mon) -> g_ | Exp (g_, _sum) -> g_
+    let ownerContext = function Var (g, _mon) -> g | Exp (g, _sum) -> g
 
     let ownerSum = function
       | Var (_g_, mon) -> Sum (zero, [ mon ])
@@ -557,15 +557,15 @@ end) : Cs.CS = struct
       end
 
     let delayMon (Mon (_n, usL), cnstr) =
-      List.app (function us_ -> Unify.delay us_ cnstr) usL
+      List.app (function us -> Unify.delay us cnstr) usL
 
-    let unifyRestr (Restr (g_, proof, _strict), proof') =
-      begin if Unify.unifiable g_ (proof, id) (proof', id) then ()
+    let unifyRestr (Restr (g, proof, _strict), proof') =
+      begin if Unify.unifiable g (proof, id) (proof', id) then ()
       else raise Error
       end
 
-    let unifySum (g_, sum, d) =
-      begin if Unify.unifiable g_ (toExp sum, id) (constant d, id) then ()
+    let unifySum (g, sum, d) =
+      begin if Unify.unifiable g (toExp sum, id) (constant d, id) then ()
       else raise Error
       end
 
@@ -574,7 +574,7 @@ end) : Cs.CS = struct
     let unaryMinusDecomp (d, wposL) =
       (-d, List.map (function d, pos -> (-d, pos)) wposL)
 
-    let rec decomposeSum (g_, Sum (m, monL)) =
+    let rec decomposeSum (g, Sum (m, monL)) =
       let monToWPos (Mon (n, usL) as mon) =
         begin match findMon mon with
         | Some pos -> (n, pos)
@@ -582,7 +582,7 @@ end) : Cs.CS = struct
             let new_ = incrNCols () in
             let l =
               {
-                owner = Var (g_, Mon (one, usL));
+                owner = Var (g, Mon (one, usL));
                 tag = ref 0;
                 restr = ref None;
                 dead = ref false;
@@ -642,9 +642,9 @@ end) : Cs.CS = struct
         end
       end
 
-    and insert g_ us_ =
-      let sum = fromExp us_ in
-      insertDecomp (decomposeSum (g_, sum), Exp (g_, sum))
+    and insert g us =
+      let sum = fromExp us in
+      insertDecomp (decomposeSum (g, sum), Exp (g, sum))
 
     and minimize row =
       let killColumn (j, (l : label)) =
@@ -787,34 +787,34 @@ end) : Cs.CS = struct
             end
           end
 
-    and insertEqual (g_, pos, sum) =
-      let m, wposL = decomposeSum (g_, sum) in
+    and insertEqual (g, pos, sum) =
+      let m, wposL = decomposeSum (g, sum) in
       let decomp' = (m, (-one, pos) :: wposL) in
-      let pos' = insertDecomp (decomp', Exp (g_, Sum (zero, []))) in
+      let pos' = insertDecomp (decomp', Exp (g, Sum (zero, []))) in
       let decomp'' = unaryMinusDecomp decomp' in
       let tag'' =
-        (label (insertDecomp (decomp'', Exp (g_, Sum (zero, []))))).tag
+        (label (insertDecomp (decomp'', Exp (g, Sum (zero, []))))).tag
       in
-      restrict (pos', Restr (g_, geq00 (), false));
+      restrict (pos', Restr (g, geq00 (), false));
       begin match findTag tag'' with
-      | Some pos'' -> restrict (pos'', Restr (g_, geq00 (), false))
+      | Some pos'' -> restrict (pos'', Restr (g, geq00 (), false))
       end
 
-    and update (g_, pos, sum) =
+    and update (g, pos, sum) =
       let l = label pos in
       Trail.log tableau.trail (UpdateOwner (pos, l.owner, l.tag));
       begin
-        setOwnership (pos, Exp (g_, sum), ref 0);
+        setOwnership (pos, Exp (g, sum), ref 0);
         begin if dead l then
           begin match pos with
           | Row row ->
-              begin if isConstant row then unifySum (g_, sum, const row)
+              begin if isConstant row then unifySum (g, sum, const row)
               else
                 begin match isSubsumed row with
-                | Some pos' -> update (g_, pos', sum)
+                | Some pos' -> update (g, pos', sum)
                 end
               end
-          | Col _col -> unifySum (g_, sum, zero)
+          | Col _col -> unifySum (g, sum, zero)
           end
         else
           let isVar = function
@@ -826,17 +826,17 @@ end) : Cs.CS = struct
           begin match isVar sum with
           | Some mon ->
               begin match findMon mon with
-              | Some _ -> insertEqual (g_, pos, sum)
+              | Some _ -> insertEqual (g, pos, sum)
               | None ->
                   let tag = ref 0 in
                   Trail.log
                     tableau.trail (UpdateOwner (pos, l.owner, l.tag));
                   begin
-                    setOwnership (pos, Var (g_, mon), tag);
+                    setOwnership (pos, Var (g, mon), tag);
                     delayMon (mon, ref (makeCnstr tag))
                   end
               end
-          | None -> insertEqual (g_, pos, sum)
+          | None -> insertEqual (g, pos, sum)
           end
         end
       end
@@ -892,11 +892,11 @@ end) : Cs.CS = struct
       let restrExp pos =
         let l = label pos in
         let owner = l.owner in
-        let g_ = ownerContext owner in
-        let u_ = toExp (ownerSum owner) in
+        let g = ownerContext owner in
+        let u = toExp (ownerSum owner) in
         begin match restriction (label pos) with
-        | Some (Restr (_, _, true)) -> (g_, gt0 u_)
-        | _ -> (g_, geq0 u_)
+        | Some (Restr (_, _, true)) -> (g, gt0 u)
+        | _ -> (g, geq0 u)
         end
       in
       List.map restrExp (reachable ([ pos ], [], []))
@@ -912,9 +912,9 @@ end) : Cs.CS = struct
         begin match findTag tag with
         | Some pos ->
             let owner = (label pos).owner in
-            let g_ = ownerContext owner in
+            let g = ownerContext owner in
             let sum = normalize (ownerSum owner) in
-            update (g_, pos, sum);
+            update (g, pos, sum);
             true
         | None -> true
         end
@@ -986,87 +986,87 @@ end) : Cs.CS = struct
     let unwind () = Trail.unwind tableau.trail undo
 
     let rec fst (a, s) = match a with
-      | App (u1_, _) -> (u1_, s)
+      | App (u1, _) -> (u1, s)
       | SClo (s_, s') -> fst (s_, comp s' s)
 
     let rec snd (a, s) = match a with
       | App (_u1_, s_) -> fst (s_, s)
       | SClo (s_, s') -> snd (s_, comp s' s)
 
-    let isConstantExp u_ =
-      begin match fromExp (u_, id) with Sum (m, []) -> Some m | _ -> None
+    let isConstantExp u =
+      begin match fromExp (u, id) with Sum (m, []) -> Some m | _ -> None
       end
 
-    let isZeroExp u_ =
-      begin match isConstantExp u_ with Some d -> d = zero | None -> false
+    let isZeroExp u =
+      begin match isConstantExp u with Some d -> d = zero | None -> false
       end
 
     let solveGt = function
-      | g_, s_, 0 -> (
-          let solveGt0 w_ =
-            begin match isConstantExp w_ with
+      | g, s, 0 -> (
+          let solveGt0 w =
+            begin match isConstantExp w with
             | Some d ->
                 begin if d > zero then gtNExp d else raise Error
                 end
             | None ->
-                let proof = newEVar g_ (gt0 w_) in
+                let proof = newEVar g (gt0 w) in
                 ignore (restrict
-                    ( insert g_ (w_, id),
-                      Restr (g_, gtGeq (w_, constant zero, proof), true) ));
+                    ( insert g (w, id),
+                      Restr (g, gtGeq (w, constant zero, proof), true) ));
                 proof
             end
           in
-          let u1_ =
-            let e_, s_' = fst (s_, id) in
-            EClo (e_, s_')
+          let u1 =
+            let e, s_' = fst (s, id) in
+            EClo (e, s_')
           in
-          let u2_ =
-            let e_, s_' = snd (s_, id) in
-            EClo (e_, s_')
+          let u2 =
+            let e, s_' = snd (s, id) in
+            EClo (e, s_')
           in
           try
-            begin if isZeroExp u2_ then Some (solveGt0 u1_)
+            begin if isZeroExp u2 then Some (solveGt0 u1)
             else
-              let w_ = minus u1_ u2_ in
-              let proof = solveGt0 w_ in
-              Some (gtAdd (w_, constant zero, u2_, proof))
+              let w = minus u1 u2 in
+              let proof = solveGt0 w in
+              Some (gtAdd (w, constant zero, u2, proof))
             end
           with Error -> None)
       | _g_, _s_, _n -> None
 
     let solveGeq = function
-      | g_, s_, 0 -> (
-          let solveGeq0 w_ =
-            begin match isConstantExp w_ with
+      | g, s, 0 -> (
+          let solveGeq0 w =
+            begin match isConstantExp w with
             | Some d ->
                 begin if d >= zero then geqN0 d else raise Error
                 end
             | None ->
-                let proof = newEVar g_ (geq0 w_) in
-                ignore (restrict (insert g_ (w_, id), Restr (g_, proof, false)));
+                let proof = newEVar g (geq0 w) in
+                ignore (restrict (insert g (w, id), Restr (g, proof, false)));
                 proof
             end
           in
-          let u1_ =
-            let e_, s_' = fst (s_, id) in
-            EClo (e_, s_')
+          let u1 =
+            let e, s_' = fst (s, id) in
+            EClo (e, s_')
           in
-          let u2_ =
-            let e_, s_' = snd (s_, id) in
-            EClo (e_, s_')
+          let u2 =
+            let e, s_' = snd (s, id) in
+            EClo (e, s_')
           in
           try
-            begin if isZeroExp u2_ then Some (solveGeq0 u1_)
+            begin if isZeroExp u2 then Some (solveGeq0 u1)
             else
-              let w_ = minus u1_ u2_ in
-              let proof = solveGeq0 w_ in
-              Some (geqAdd (w_, constant zero, u2_, proof))
+              let w = minus u1 u2 in
+              let proof = solveGeq0 w in
+              Some (geqAdd (w, constant zero, u2, proof))
             end
           with Error -> None)
       | _g_, _s_, _n -> None
 
-    let pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
-    let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
+    let pi (name, u, v) = Pi ((Dec (Some name, u), Maybe), v)
+    let arrow u v = Pi ((Dec (None, u), No), v)
 
     let installFgnCnstrOps () =
       let csid = !myID in

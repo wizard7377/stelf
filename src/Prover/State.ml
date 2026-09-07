@@ -47,115 +47,115 @@ end) : STATE = struct
     module I = IntSyn
 
     let rec findPrg = function
-      | T.Lam (_, p_) -> findPrg p_
-      | T.New p_ -> findPrg p_
-      | T.Choose p_ -> findPrg p_
-      | T.PairExp (_, p_) -> findPrg p_
-      | T.PairBlock (b_, p_) -> findPrg p_
-      | T.PairPrg (p1_, p2_) -> findPrg p1_ @ findPrg p2_
+      | T.Lam (_, p) -> findPrg p
+      | T.New p -> findPrg p
+      | T.Choose p -> findPrg p
+      | T.PairExp (_, p) -> findPrg p
+      | T.PairBlock (b, p) -> findPrg p
+      | T.PairPrg (p1, p2) -> findPrg p1 @ findPrg p2
       | Unit -> []
-      | T.Rec (_, p_) -> findPrg p_
-      | T.Case (T.Cases c_) -> findCases c_
-      | T.PClo (p_, t) -> findPrg p_ @ findSub t
-      | T.Let (d_, p1_, p2_) -> findPrg p1_ @ findPrg p2_
-      | T.LetPairExp (d1_, d2_, p1_, p2_) -> findPrg p1_ @ findPrg p2_
-      | T.LetUnit (p1_, p2_) -> findPrg p1_ @ findPrg p2_
-      | T.EVar (_, { contents = None }, _, _, _, _) as x_ -> [ x_ ]
-      | T.EVar (_, { contents = Some p_ }, _, _, _, _) as x_ -> findPrg p_
+      | T.Rec (_, p) -> findPrg p
+      | T.Case (T.Cases c) -> findCases c
+      | T.PClo (p, t) -> findPrg p @ findSub t
+      | T.Let (d, p1, p2) -> findPrg p1 @ findPrg p2
+      | T.LetPairExp (d1, d2, p1, p2) -> findPrg p1 @ findPrg p2
+      | T.LetUnit (p1, p2) -> findPrg p1 @ findPrg p2
+      | T.EVar (_, { contents = None }, _, _, _, _) as x -> [ x ]
+      | T.EVar (_, { contents = Some p }, _, _, _, _) as x -> findPrg p
       | T.Const _ -> []
       | T.Var _ -> []
-      | T.Redex (p_, s_) -> findPrg p_ @ findSpine s_
+      | T.Redex (p, s) -> findPrg p @ findSpine s
 
     and findCases = function
       | [] -> []
-      | (_, _, p_) :: c_ -> findPrg p_ @ findCases c_
+      | (_, _, p) :: c -> findPrg p @ findCases c
 
     and findSub = function
       | T.Shift _ -> []
-      | T.Dot (f_, t) -> findFront f_ @ findSub t
+      | T.Dot (f, t) -> findFront f @ findSub t
 
     and findFront = function
       | T.Idx _ -> []
-      | T.Prg p_ -> findPrg p_
+      | T.Prg p -> findPrg p
       | T.Exp _ -> []
       | T.Block _ -> []
       | T.Undef -> []
 
     and findSpine = function
       | T.Nil -> []
-      | T.AppPrg (p_, s_) -> findPrg p_ @ findSpine s_
-      | T.AppExp (_, s_) -> findSpine s_
-      | T.AppBlock (_, s_) -> findSpine s_
+      | T.AppPrg (p, s) -> findPrg p @ findSpine s
+      | T.AppExp (_, s) -> findSpine s
+      | T.AppBlock (_, s) -> findSpine s
 
     let rec findExp arg__1 arg__2 =
       begin match (arg__1, arg__2) with
-      | (psi, T.Lam (d_, p_)), k_ -> findExp (I.Decl (psi, d_), p_) k_
-      | (psi, T.New p_), k_ -> findExp (psi, p_) k_
-      | (psi, T.Choose p_), k_ -> findExp (psi, p_) k_
-      | (psi, T.PairExp (m_, p_)), k_ ->
-          findExp (psi, p_)
-            (Abstract.collectEVars (T.coerceCtx psi) (m_, I.id) k_)
-      | (psi, T.PairBlock (b_, p_)), k_ -> findExp (psi, p_) k_
-      | (psi, T.PairPrg (p1_, p2_)), k_ ->
-          findExp (psi, p2_) (findExp (psi, p1_) k_)
-      | (psi, Unit), k_ -> k_
-      | (psi, T.Rec (d_, p_)), k_ -> findExp (psi, p_) k_
-      | (psi, T.Case (T.Cases c_)), k_ -> findExpCases (psi, c_) k_
-      | (psi, T.PClo (p_, t)), k_ -> findExpSub (psi, t) (findExp (psi, p_) k_)
-      | (psi, T.Let (d_, p1_, p2_)), k_ ->
-          findExp (I.Decl (psi, d_), p2_) (findExp (psi, p1_) k_)
-      | (psi, T.LetPairExp (d1_, d2_, p1_, p2_)), k_ ->
+      | (psi, T.Lam (d, p)), k -> findExp (I.Decl (psi, d), p) k
+      | (psi, T.New p), k -> findExp (psi, p) k
+      | (psi, T.Choose p), k -> findExp (psi, p) k
+      | (psi, T.PairExp (m, p)), k ->
+          findExp (psi, p)
+            (Abstract.collectEVars (T.coerceCtx psi) (m, I.id) k)
+      | (psi, T.PairBlock (b, p)), k -> findExp (psi, p) k
+      | (psi, T.PairPrg (p1, p2)), k ->
+          findExp (psi, p2) (findExp (psi, p1) k)
+      | (psi, Unit), k -> k
+      | (psi, T.Rec (d, p)), k -> findExp (psi, p) k
+      | (psi, T.Case (T.Cases c)), k -> findExpCases (psi, c) k
+      | (psi, T.PClo (p, t)), k -> findExpSub (psi, t) (findExp (psi, p) k)
+      | (psi, T.Let (d, p1, p2)), k ->
+          findExp (I.Decl (psi, d), p2) (findExp (psi, p1) k)
+      | (psi, T.LetPairExp (d1, d2, p1, p2)), k ->
           findExp
-            (I.Decl (I.Decl (psi, T.UDec d1_), d2_), p2_)
-            (findExp (psi, p1_) k_)
-      | (psi, T.LetUnit (p1_, p2_)), k_ ->
-          findExp (psi, p2_) (findExp (psi, p1_) k_)
-      | (psi, (T.EVar _ as x_)), k_ -> k_
-      | (psi, T.Const _), k_ -> k_
-      | (psi, T.Var _), k_ -> k_
-      | (psi, T.Redex (p_, s_)), k_ -> findExpSpine (psi, s_) k_
+            (I.Decl (I.Decl (psi, T.UDec d1), d2), p2)
+            (findExp (psi, p1) k)
+      | (psi, T.LetUnit (p1, p2)), k ->
+          findExp (psi, p2) (findExp (psi, p1) k)
+      | (psi, (T.EVar _ as x)), k -> k
+      | (psi, T.Const _), k -> k
+      | (psi, T.Var _), k -> k
+      | (psi, T.Redex (p, s)), k -> findExpSpine (psi, s) k
       end
 
     and findExpSpine arg__3 arg__4 =
       begin match (arg__3, arg__4) with
-      | (psi, T.Nil), k_ -> k_
-      | (psi, T.AppPrg (_, s_)), k_ -> findExpSpine (psi, s_) k_
-      | (psi, T.AppExp (m_, s_)), k_ ->
-          findExpSpine (psi, s_)
-            (Abstract.collectEVars (T.coerceCtx psi) (m_, I.id) k_)
-      | (psi, T.AppBlock (_, s_)), k_ -> findExpSpine (psi, s_) k_
+      | (psi, T.Nil), k -> k
+      | (psi, T.AppPrg (_, s)), k -> findExpSpine (psi, s) k
+      | (psi, T.AppExp (m, s)), k ->
+          findExpSpine (psi, s)
+            (Abstract.collectEVars (T.coerceCtx psi) (m, I.id) k)
+      | (psi, T.AppBlock (_, s)), k -> findExpSpine (psi, s) k
       end
 
     and findExpCases arg__5 arg__6 =
       begin match (arg__5, arg__6) with
-      | (psi, []), k_ -> k_
-      | (psi, (_, _, p_) :: c_), k_ ->
-          findExpCases (psi, c_) (findExp (psi, p_) k_)
+      | (psi, []), k -> k
+      | (psi, (_, _, p) :: c), k ->
+          findExpCases (psi, c) (findExp (psi, p) k)
       end
 
     and findExpSub arg__7 arg__8 =
       begin match (arg__7, arg__8) with
-      | (psi, T.Shift _), k_ -> k_
-      | (psi, T.Dot (f_, t)), k_ ->
-          findExpSub (psi, t) (findExpFront (psi, f_) k_)
+      | (psi, T.Shift _), k -> k
+      | (psi, T.Dot (f, t)), k ->
+          findExpSub (psi, t) (findExpFront (psi, f) k)
       end
 
     and findExpFront arg__9 arg__10 =
       begin match (arg__9, arg__10) with
-      | (psi, T.Idx _), k_ -> k_
-      | (psi, T.Prg p_), k_ -> findExp (psi, p_) k_
-      | (psi, T.Exp m_), k_ ->
-          Abstract.collectEVars (T.coerceCtx psi) (m_, I.id) k_
-      | (psi, T.Block _), k_ -> k_
-      | (psi, T.Undef), k_ -> k_
+      | (psi, T.Idx _), k -> k
+      | (psi, T.Prg p), k -> findExp (psi, p) k
+      | (psi, T.Exp m), k ->
+          Abstract.collectEVars (T.coerceCtx psi) (m, I.id) k
+      | (psi, T.Block _), k -> k
+      | (psi, T.Undef), k -> k
       end
 
-    let init f_ w_ =
-      let x_ = T.newEVar I.Null f_ in
-      State (w_, I.Null, x_, f_)
+    let init f w =
+      let x = T.newEVar I.Null f in
+      State (w, I.Null, x, f)
 
-    let close (State (w_, _, p_, _)) =
-      begin match (findPrg p_, findExp (I.Null, p_) []) with
+    let close (State (w, _, p, _)) =
+      begin match (findPrg p, findExp (I.Null, p) []) with
       | [], [] -> true
       | _ -> false
       end
@@ -186,7 +186,7 @@ end) : STATE = struct
   let close = close
   let init = init
   let collectT = findPrg
-  let collectLF p_ = findExp (I.Null, p_) []
+  let collectLF p = findExp (I.Null, p) []
   let collectLFSub s = findExpSub (I.Null, s) []
 end
 

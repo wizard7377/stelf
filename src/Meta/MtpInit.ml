@@ -59,27 +59,27 @@ end) : MTPINIT.MTPINIT = struct
     module S = StateSyn
     module Fmt = Formatter
 
-    let init f_ of_ =
-      let rec init' (gb, a, b, ss_) = match gb, a, b with
-        | (g_, b_), S.All (_, o_), F.All (F.Prim d_, f'_) ->
-            let d'_ = Names.decName g_ d_ in
+    let init f of_ =
+      let rec init' (gb, a, b, ss) = match gb, a, b with
+        | (g, b), S.All (_, o), F.All (F.Prim d, f') ->
+            let d' = Names.decName g d in
             init'
-              ( ( I.Decl (g_, d'_),
-                  I.Decl (b_, S.Lemma (S.Splits !MTPGlobal.maxSplit)) ),
-                o_,
-                f'_,
-                ss_ )
-        | gb, S.And (o1_, o2_), F.And (f1_, f2_) ->
-            init' (gb, o1_, f1_, init' (gb, o2_, f2_, ss_))
-        | gb, o_, (F.Ex _ as f'_) ->
-            S.State (List.length ss_ + 1, gb, (f_, of_), 1, o_, [], f'_) :: ss_
-        | gb, o_, (True as f'_) ->
-            S.State (List.length ss_ + 1, gb, (f_, of_), 1, o_, [], f'_) :: ss_
+              ( ( I.Decl (g, d'),
+                  I.Decl (b, S.Lemma (S.Splits !MTPGlobal.maxSplit)) ),
+                o,
+                f',
+                ss )
+        | gb, S.And (o1, o2), F.And (f1, f2) ->
+            init' (gb, o1, f1, init' (gb, o2, f2, ss))
+        | gb, o, (F.Ex _ as f') ->
+            S.State (List.length ss + 1, gb, (f, of_), 1, o, [], f') :: ss
+        | gb, o, (True as f') ->
+            S.State (List.length ss + 1, gb, (f, of_), 1, o, [], f') :: ss
       in
       Names.varReset I.Null;
       begin
         MTPData.maxFill := 0;
-        init' ((I.Null, I.Null), of_, f_, [])
+        init' ((I.Null, I.Null), of_, f, [])
       end
   end
 

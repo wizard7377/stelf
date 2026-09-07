@@ -60,9 +60,9 @@ module MakeModeDec () : MODEDEC = struct
       | _ -> true
 
     let rec empty (k, ms, a) = match k, a with
-      | 0, v_ -> (ms, v_)
-      | k, I.Pi (_, v_) ->
-          empty (k - 1, I.Decl (ms, (M.Marg (M.Star, None), Implicit)), v_)
+      | 0, v -> (ms, v)
+      | k, I.Pi (_, v) ->
+          empty (k - 1, I.Decl (ms, (M.Marg (M.Star, None), Implicit)), v)
 
     let rec inferVar = function
       | I.Decl (ms, (M.Marg (M.Star, nameOpt), Implicit)), mode, 1 ->
@@ -84,45 +84,45 @@ module MakeModeDec () : MODEDEC = struct
       | I.Decl (ms, md), mode, k -> I.Decl (inferVar (ms, mode, k - 1), md)
 
     let rec inferExp (ms, mode, a) = match a with
-      | I.Root (I.BVar k, s_) ->
-          inferSpine (inferVar (ms, mode, k), mode, s_)
-      | I.Root (I.Const cid, s_) -> inferSpine (ms, mode, s_)
-      | I.Root (I.Def cid, s_) -> inferSpine (ms, mode, s_)
-      | I.Root (I.FgnConst (cs, conDec), s_) ->
-          inferSpine (ms, mode, s_)
-      | I.Lam ((I.Dec (nameOpt, _) as d_), u_) ->
+      | I.Root (I.BVar k, s) ->
+          inferSpine (inferVar (ms, mode, k), mode, s)
+      | I.Root (I.Const cid, s) -> inferSpine (ms, mode, s)
+      | I.Root (I.Def cid, s) -> inferSpine (ms, mode, s)
+      | I.Root (I.FgnConst (cs, conDec), s) ->
+          inferSpine (ms, mode, s)
+      | I.Lam ((I.Dec (nameOpt, _) as d), u) ->
           I.ctxPop
             (inferExp
                ( I.Decl
-                   (inferDec (ms, mode, d_), (M.Marg (mode, nameOpt), Local)),
+                   (inferDec (ms, mode, d), (M.Marg (mode, nameOpt), Local)),
                  mode,
-                 u_ ))
-      | I.Pi (((I.Dec (nameOpt, _) as d_), _), v_) ->
+                 u ))
+      | I.Pi (((I.Dec (nameOpt, _) as d), _), v) ->
           I.ctxPop
             (inferExp
                ( I.Decl
-                   (inferDec (ms, mode, d_), (M.Marg (mode, nameOpt), Local)),
+                   (inferDec (ms, mode, d), (M.Marg (mode, nameOpt), Local)),
                  mode,
-                 v_ ))
+                 v ))
       | I.FgnExp _ -> ms
 
     and inferSpine (ms, mode, a) = match a with
       | I.Nil -> ms
-      | I.App (u_, s_) ->
-          inferSpine (inferExp (ms, mode, u_), mode, s_)
+      | I.App (u, s) ->
+          inferSpine (inferExp (ms, mode, u), mode, s)
 
-    and inferDec (ms, mode, I.Dec (_, v_)) = inferExp (ms, mode, v_)
+    and inferDec (ms, mode, I.Dec (_, v)) = inferExp (ms, mode, v)
 
     let rec inferMode = function
       | (ms, I.Uni I.Type), M.Mnil -> ms
       | (_, I.Uni I.Type), _ -> raise (Error "Too many modes specified")
-      | (ms, I.Pi ((I.Dec (name, v1_), _), v2_)), M.Mapp (M.Marg (mode, _), mS)
+      | (ms, I.Pi ((I.Dec (name, v1), _), v2)), M.Mapp (M.Marg (mode, _), mS)
         ->
           I.ctxPop
             (inferMode
                ( ( I.Decl
-                     (inferExp (ms, mode, v1_), (M.Marg (mode, name), Explicit)),
-                   v2_ ),
+                     (inferExp (ms, mode, v1), (M.Marg (mode, name), Explicit)),
+                   v2 ),
                  mS ))
       | (ms, I.Root _), _ ->
           raise (Error "Expected type family, found object constant")
@@ -138,10 +138,10 @@ module MakeModeDec () : MODEDEC = struct
 
     let shortToFull a mS r =
       let calcImplicit' = function
-        | I.ConDec (_, _, k, _, v_, _) ->
-            abstractMode (inferMode (empty (k, I.Null, v_), mS), mS)
-        | I.ConDef (_, _, k, _, v_, _, _) ->
-            abstractMode (inferMode (empty (k, I.Null, v_), mS), mS)
+        | I.ConDec (_, _, k, _, v, _) ->
+            abstractMode (inferMode (empty (k, I.Null, v), mS), mS)
+        | I.ConDef (_, _, k, _, v, _, _) ->
+            abstractMode (inferMode (empty (k, I.Null, v), mS), mS)
       in
       try
         begin
@@ -155,12 +155,12 @@ module MakeModeDec () : MODEDEC = struct
         begin
           checkName mS;
           begin match I.sgnLookup a with
-          | I.ConDec (_, _, _, _, v_, _) -> begin
-              ignore (inferMode ((I.Null, v_), mS));
+          | I.ConDec (_, _, _, _, v, _) -> begin
+              ignore (inferMode ((I.Null, v), mS));
               ()
             end
-          | I.ConDef (_, _, _, _, v_, _, _) -> begin
-              ignore (inferMode ((I.Null, v_), mS));
+          | I.ConDef (_, _, _, _, v, _, _) -> begin
+              ignore (inferMode ((I.Null, v), mS));
               ()
             end
           end

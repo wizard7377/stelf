@@ -78,25 +78,25 @@ end) : MODSYN = struct
   type nonrec transform = IntSyn.cid * IntSyn.conDec -> IntSyn.conDec
 
   (* invariant: U in nf, result in nf *)
-  let rec mapExpConsts f u_ =
+  let rec mapExpConsts f u =
     let open IntSyn in
     let rec trExp = function
-      | Uni l_ -> Uni l_
-      | Pi ((d_, p_), v_) -> Pi ((trDec d_, p_), trExp v_)
-      | Root (h_, s_) -> Root (trHead h_, trSpine s_)
-      | Lam (d_, u_) -> Lam (trDec d_, trExp u_)
-      | FgnExp (csfe1, csfe2) as u_ -> FgnExpStd.Map.apply csfe1 csfe2 trExp
-    and trDec (Dec (name, v_)) = Dec (name, trExp v_)
+      | Uni l -> Uni l
+      | Pi ((d, p), v) -> Pi ((trDec d, p), trExp v)
+      | Root (h, s) -> Root (trHead h, trSpine s)
+      | Lam (d, u) -> Lam (trDec d, trExp u)
+      | FgnExp (csfe1, csfe2) as u -> FgnExpStd.Map.apply csfe1 csfe2 trExp
+    and trDec (Dec (name, v)) = Dec (name, trExp v)
     and trSpine = function
       | Nil -> Nil
-      | App (u_, s_) -> App (trExp u_, trSpine s_)
+      | App (u, s) -> App (trExp u, trSpine s)
     and trHead = function
       | BVar n -> BVar n
       | Const cid -> trConst cid
       | Skonst cid -> trConst cid
       | Def cid -> trConst cid
       | NSDef cid -> trConst cid
-      | FgnConst (csid, condec_) -> FgnConst (csid, mapConDecConsts f condec_)
+      | FgnConst (csid, condec) -> FgnConst (csid, mapConDecConsts f condec)
     and trConst cid =
       let cid' = f cid in
       begin match IntSyn.sgnLookup cid' with
@@ -106,20 +106,20 @@ end) : MODSYN = struct
       | IntSyn.AbbrevDef _ -> NSDef cid'
       end
     in
-    Whnf.normalize (trExp u_, IntSyn.id)
+    Whnf.normalize (trExp u, IntSyn.id)
 
   and mapConDecConsts arg__1 arg__2 =
     begin match (arg__1, arg__2) with
-    | f, IntSyn.ConDec (name, parent, i, status, v_, l_) ->
-        IntSyn.ConDec (name, parent, i, status, mapExpConsts f v_, l_)
-    | f, IntSyn.ConDef (name, parent, i, u_, v_, l_, anc) ->
+    | f, IntSyn.ConDec (name, parent, i, status, v, l) ->
+        IntSyn.ConDec (name, parent, i, status, mapExpConsts f v, l)
+    | f, IntSyn.ConDef (name, parent, i, u, v, l, anc) ->
         IntSyn.ConDef
-          (name, parent, i, mapExpConsts f u_, mapExpConsts f v_, l_, anc)
-    | f, IntSyn.AbbrevDef (name, parent, i, u_, v_, l_) ->
+          (name, parent, i, mapExpConsts f u, mapExpConsts f v, l, anc)
+    | f, IntSyn.AbbrevDef (name, parent, i, u, v, l) ->
         IntSyn.AbbrevDef
-          (name, parent, i, mapExpConsts f u_, mapExpConsts f v_, l_)
-    | f, IntSyn.SkoDec (name, parent, i, v_, l_) ->
-        IntSyn.SkoDec (name, parent, i, mapExpConsts f v_, l_)
+          (name, parent, i, mapExpConsts f u, mapExpConsts f v, l)
+    | f, IntSyn.SkoDec (name, parent, i, v, l) ->
+        IntSyn.SkoDec (name, parent, i, mapExpConsts f v, l)
     end
   (* reconstruct Anc?? -fp *)
 
@@ -128,38 +128,38 @@ end) : MODSYN = struct
 
   let mapConDecParent arg__3 arg__4 =
     begin match (arg__3, arg__4) with
-    | f, IntSyn.ConDec (name, parent, i, status, v_, l_) ->
-        IntSyn.ConDec (name, f parent, i, status, v_, l_)
-    | f, IntSyn.ConDef (name, parent, i, u_, v_, l_, anc) ->
-        IntSyn.ConDef (name, f parent, i, u_, v_, l_, anc)
-    | f, IntSyn.AbbrevDef (name, parent, i, u_, v_, l_) ->
-        IntSyn.AbbrevDef (name, f parent, i, u_, v_, l_)
-    | f, IntSyn.SkoDec (name, parent, i, v_, l_) ->
-        IntSyn.SkoDec (name, f parent, i, v_, l_)
+    | f, IntSyn.ConDec (name, parent, i, status, v, l) ->
+        IntSyn.ConDec (name, f parent, i, status, v, l)
+    | f, IntSyn.ConDef (name, parent, i, u, v, l, anc) ->
+        IntSyn.ConDef (name, f parent, i, u, v, l, anc)
+    | f, IntSyn.AbbrevDef (name, parent, i, u, v, l) ->
+        IntSyn.AbbrevDef (name, f parent, i, u, v, l)
+    | f, IntSyn.SkoDec (name, parent, i, v, l) ->
+        IntSyn.SkoDec (name, f parent, i, v, l)
     end
   (* reconstruct Anc?? -fp *)
 
   let strictify = function
-    | IntSyn.AbbrevDef (name, parent, i, u_, v_, I.Type) as condec -> (
+    | IntSyn.AbbrevDef (name, parent, i, u, v, I.Type) as condec -> (
         try
           begin
-            Strict.check ((u_, v_), None);
+            Strict.check ((u, v), None);
             IntSyn.ConDef
-              (name, parent, i, u_, v_, IntSyn.Type, IntSyn.ancestor u_)
+              (name, parent, i, u, v, IntSyn.Type, IntSyn.ancestor u)
           end
         with Strict.Error _ -> condec)
     | IntSyn.AbbrevDef _ as condec -> condec
 
-  let abbrevify cid condec_ =
-    begin match condec_ with
-    | I.ConDec (name, parent, i, _, v_, l_) ->
-        let u_ = Whnf.normalize (I.Root (I.Const cid, I.Nil), I.id) in
-        I.AbbrevDef (name, parent, i, u_, v_, l_)
-    | I.SkoDec (name, parent, i, v_, l_) ->
-        let u_ = Whnf.normalize (I.Root (I.Skonst cid, I.Nil), I.id) in
-        I.AbbrevDef (name, parent, i, u_, v_, l_)
-    | I.ConDef (name, parent, i, u_, v_, l_, anc) ->
-        I.AbbrevDef (name, parent, i, u_, v_, l_)
+  let abbrevify cid condec =
+    begin match condec with
+    | I.ConDec (name, parent, i, _, v, l) ->
+        let u = Whnf.normalize (I.Root (I.Const cid, I.Nil), I.id) in
+        I.AbbrevDef (name, parent, i, u, v, l)
+    | I.SkoDec (name, parent, i, v, l) ->
+        let u = Whnf.normalize (I.Root (I.Skonst cid, I.Nil), I.id) in
+        I.AbbrevDef (name, parent, i, u, v, l)
+    | I.ConDef (name, parent, i, u, v, l, anc) ->
+        I.AbbrevDef (name, parent, i, u, v, l)
     | I.AbbrevDef _ as abbrev -> abbrev
     end
 
@@ -245,7 +245,7 @@ end) : MODSYN = struct
     IntTree.app doStruct structTable;
     IntTree.app doConst constTable
 
-  let decToDef (cid, condec_) = strictify (abbrevify cid condec_)
+  let decToDef (cid, condec) = strictify (abbrevify cid condec)
 
   let installStruct (strdec, module_, nsOpt, installAction, isDef) =
     let transformConDec =

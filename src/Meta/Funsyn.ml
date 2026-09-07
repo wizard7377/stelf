@@ -160,40 +160,40 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
     let lemmaSize () = !nextLemma
 
     let listToCtx gin =
-      let rec listToCtx' (g_, a) = match a with
-        | [] -> g_
-        | d_ :: ds_ -> listToCtx' (I.Decl (g_, d_), ds_)
+      let rec listToCtx' (g, a) = match a with
+        | [] -> g
+        | d :: ds -> listToCtx' (I.Decl (g, d), ds)
       in
       listToCtx' (I.Null, gin)
 
     let ctxToList gin =
       let rec ctxToList' = function
-        | I.Null, g_ -> g_
-        | I.Decl (g_, d_), g'_ -> ctxToList' (g_, d_ :: g'_)
+        | I.Null, g -> g
+        | I.Decl (g, d), g' -> ctxToList' (g, d :: g')
       in
       ctxToList' (gin, [])
 
-    let rec union (g_, a) = match a with
-      | I.Null -> g_
-      | I.Decl (g'_, d_) -> I.Decl (union (g_, g'_), d_)
+    let rec union (g, a) = match a with
+      | I.Null -> g
+      | I.Decl (g', d) -> I.Decl (union (g, g'), d)
 
     let rec makectx = function
       | I.Null -> I.Null
-      | I.Decl (g_, Prim d_) -> I.Decl (makectx g_, d_)
-      | I.Decl (g_, Block (CtxBlock (l, g'_))) -> union (makectx g_, g'_)
+      | I.Decl (g, Prim d) -> I.Decl (makectx g, d)
+      | I.Decl (g, Block (CtxBlock (l, g'))) -> union (makectx g, g')
 
     let rec lfctxLength = function
       | I.Null -> 0
       | I.Decl (psi, Prim _) -> lfctxLength psi + 1
-      | I.Decl (psi, Block (CtxBlock (_, g_))) ->
-          lfctxLength psi + I.ctxLength g_
+      | I.Decl (psi, Block (CtxBlock (_, g))) ->
+          lfctxLength psi + I.ctxLength g
 
     let lfctxLFDec psi k =
       let rec lfctxLFDec' = function
-        | I.Decl (psi', (Prim (I.Dec (x, v'_)) as ld)), 1 -> (ld, I.Shift k)
+        | I.Decl (psi', (Prim (I.Dec (x, v')) as ld)), 1 -> (ld, I.Shift k)
         | I.Decl (psi', Prim _), k' -> lfctxLFDec' (psi', k' - 1)
-        | I.Decl (psi', (Block (CtxBlock (_, g_)) as ld)), k' ->
-            let l = I.ctxLength g_ in
+        | I.Decl (psi', (Block (CtxBlock (_, g)) as ld)), k' ->
+            let l = I.ctxLength g in
             begin if k' <= l then (ld, I.Shift (k - k' + 1))
             else lfctxLFDec' (psi', k' - l)
             end
@@ -202,54 +202,54 @@ module Make_FunSyn (Whnf : WHNF) (Conv : CONV) : FUNSYN = struct
 
     let rec dot1n a1 b1 = match a1, b1 with
       | I.Null, s -> s
-      | I.Decl (g_, _), s -> I.dot1 (dot1n g_ s)
+      | I.Decl (g, _), s -> I.dot1 (dot1n g s)
 
     let rec convFor a1 a2 b1 = match (a1, a2), b1 with
       | (True, _), (True, _) -> true
-      | (All (Prim d1_, f1_), s1), (All (Prim d2_, f2_), s2) ->
-          Conv.convDec d1_ s1 (d2_, s2)
-          && convFor f1_ (I.dot1 s1) (f2_, I.dot1 s2)
-      | ( (All (Block (CtxBlock (_, g1_)), f1_), s1),
-          (All (Block (CtxBlock (_, g2_)), f2_), s2) ) ->
-          convForBlock ((ctxToList g1_, f1_, s1), (ctxToList g1_, f2_, s2))
-      | (Ex (d1_, f1_), s1), (Ex (d2_, f2_), s2) ->
-          Conv.convDec d1_ s1 (d2_, s2)
-          && convFor f1_ (I.dot1 s1) (f2_, I.dot1 s2)
-      | (And (f1_, f1'), s1), (And (f2_, f2'), s2) ->
-          convFor f1_ s1 (f2_, s2) && convFor f1' s1 (f2', s2)
+      | (All (Prim d1, f1), s1), (All (Prim d2, f2), s2) ->
+          Conv.convDec d1 s1 (d2, s2)
+          && convFor f1 (I.dot1 s1) (f2, I.dot1 s2)
+      | ( (All (Block (CtxBlock (_, g1)), f1), s1),
+          (All (Block (CtxBlock (_, g2)), f2), s2) ) ->
+          convForBlock ((ctxToList g1, f1, s1), (ctxToList g1, f2, s2))
+      | (Ex (d1, f1), s1), (Ex (d2, f2), s2) ->
+          Conv.convDec d1 s1 (d2, s2)
+          && convFor f1 (I.dot1 s1) (f2, I.dot1 s2)
+      | (And (f1, f1'), s1), (And (f2, f2'), s2) ->
+          convFor f1 s1 (f2, s2) && convFor f1' s1 (f2', s2)
       | _ -> false
 
     and convForBlock = function
-      | ([], f1_, s1), ([], f2_, s2) -> convFor f1_ s1 (f2_, s2)
-      | (d1_ :: g1_, f1_, s1), (d2_ :: g2_, f2_, s2) ->
-          Conv.convDec d1_ s1 (d2_, s2)
-          && convForBlock ((g1_, f1_, I.dot1 s1), (g2_, f2_, I.dot1 s2))
+      | ([], f1, s1), ([], f2, s2) -> convFor f1 s1 (f2, s2)
+      | (d1 :: g1, f1, s1), (d2 :: g2, f2, s2) ->
+          Conv.convDec d1 s1 (d2, s2)
+          && convForBlock ((g1, f1, I.dot1 s1), (g2, f2, I.dot1 s2))
       | _ -> false
 
     let rec ctxSub (a, s) = match a with
       | I.Null -> (I.Null, s)
-      | I.Decl (g_, d_) ->
-          let g'_, s' = ctxSub (g_, s) in
-          (I.Decl (g'_, I.decSub d_ s'), I.dot1 s)
+      | I.Decl (g, d) ->
+          let g', s' = ctxSub (g, s) in
+          (I.Decl (g', I.decSub d s'), I.dot1 s)
 
     let rec forSub a1 b1 = match a1, b1 with
-      | All (Prim d_, f_), s ->
-          All (Prim (I.decSub d_ s), forSub f_ (I.dot1 s))
-      | All (Block (CtxBlock (name, g_)), f_), s ->
-          let g'_, s' = ctxSub (g_, s) in
-          All (Block (CtxBlock (name, g'_)), forSub f_ s')
-      | Ex (d_, f_), s -> Ex (I.decSub d_ s, forSub f_ (I.dot1 s))
+      | All (Prim d, f), s ->
+          All (Prim (I.decSub d s), forSub f (I.dot1 s))
+      | All (Block (CtxBlock (name, g)), f), s ->
+          let g', s' = ctxSub (g, s) in
+          All (Block (CtxBlock (name, g')), forSub f s')
+      | Ex (d, f), s -> Ex (I.decSub d s, forSub f (I.dot1 s))
       | True, s -> True
-      | And (f1_, f2_), s -> And (forSub f1_ s, forSub f2_ s)
+      | And (f1, f2), s -> And (forSub f1 s, forSub f2 s)
 
-    let mdecSub (MDec (name, f_)) s = MDec (name, forSub f_ s)
+    let mdecSub (MDec (name, f)) s = MDec (name, forSub f s)
 
     let rec normalizeFor a1 b1 = match a1, b1 with
-      | All (Prim d_, f_), s ->
-          All (Prim (Whnf.normalizeDec d_ s), normalizeFor f_ (I.dot1 s))
-      | Ex (d_, f_), s ->
-          Ex (Whnf.normalizeDec d_ s, normalizeFor f_ (I.dot1 s))
-      | And (f1_, f2_), s -> And (normalizeFor f1_ s, normalizeFor f2_ s)
+      | All (Prim d, f), s ->
+          All (Prim (Whnf.normalizeDec d s), normalizeFor f (I.dot1 s))
+      | Ex (d, f), s ->
+          Ex (Whnf.normalizeDec d s, normalizeFor f (I.dot1 s))
+      | And (f1, f2), s -> And (normalizeFor f1 s, normalizeFor f2 s)
       | True, _ -> True
   end
 

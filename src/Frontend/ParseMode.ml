@@ -78,9 +78,9 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
       | LS.Cons ((L.Dot, r), s') as f -> (E.Short.mnil r, f)
       | LS.Cons ((L.Rparen, r), s') as f -> (E.Short.mnil r, f)
       | LS.Cons ((L.Id (_, id), r), s') ->
-          let mode_, mname = validateMArg (r, splitModeId (r, id)) in
+          let mode, mname = validateMArg (r, splitModeId (r, id)) in
           let mS', f' = parseShortSpine (LS.expose s') in
-          (E.Short.mapp mode_ mname mS', f')
+          (E.Short.mapp mode mname mS', f')
       | LS.Cons ((t, r), s') ->
           Parsing.error r ("Expected mode or `.', found " ^ L.toString t)
 
@@ -100,10 +100,10 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
               in
               let t', f''' = parseFull (f'', r1) in
               (E.Full.mpi m dec t', f''')
-          | LS.Cons _ as ts_ ->
+          | LS.Cons _ as ts ->
               let t', (LS.Cons ((_, r), s') as f') =
                 ParseTerm.parseTerm'
-                  (LS.Cons (t0, LS.delay (function () -> ts_)))
+                  (LS.Cons (t0, LS.delay (function () -> ts)))
               in
               (E.Full.mroot t' (P.join r r1), f')
           end
@@ -115,9 +115,9 @@ end) : PARSE_MODE with module ExtModes = ParseMode__0.ExtModes' = struct
           Parsing.error r ("Expected mode or identifier, found " ^ L.toString t)
 
     let parseMode2 (lexid, f, r1) = match lexid, f with
-      | lexid, (LS.Cons ((L.Lbrace, r), s') as bs_) ->
+      | lexid, (LS.Cons ((L.Lbrace, r), s') as bs) ->
           let t', f' =
-            parseFull (LS.Cons (lexid, LS.delay (function () -> bs_)), r1)
+            parseFull (LS.Cons (lexid, LS.delay (function () -> bs)), r1)
           in
           (E.Full.toModedec t', f')
       | (L.Id (_, name), r), f ->

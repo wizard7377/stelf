@@ -287,8 +287,8 @@ end) : TWELF.STELF = struct
       ignore (TextIO.closeIn instream);
       result
 
-    let evarInstToString xs_ =
-      begin if !Global.chatter >= 3 then Print.evarInstToString xs_ else ""
+    let evarInstToString xs =
+      begin if !Global.chatter >= 3 then Print.evarInstToString xs else ""
       end
 
     let expToString gu =
@@ -483,11 +483,11 @@ end) : TWELF.STELF = struct
       ()
 
     let rec install1 a3 b3 = match a3, b3 with
-      | fileName, (Parser.ConDec condec_, r) -> (
+      | fileName, (Parser.ConDec condec, r) -> (
           try
             let optConDec, ocOpt =
               ReconConDec.condecToConDec
-                condec_ (Paths.Loc (fileName, r)) false
+                condec (Paths.Loc (fileName, r)) false
             in
             let icd = function
               | Some (IntSyn.BlockDec _ as conDec) ->
@@ -512,10 +512,10 @@ end) : TWELF.STELF = struct
             icd optConDec
           with Constraints.Error eqns ->
             raise (ReconTerm.Error (Paths.wrap r (constraintsMsg eqns))))
-      | fileName, (Parser.AbbrevDec condec_, r) -> (
+      | fileName, (Parser.AbbrevDec condec, r) -> (
           try
             let optConDec, ocOpt =
-              ReconConDec.condecToConDec condec_ (Paths.Loc (fileName, r)) true
+              ReconConDec.condecToConDec condec (Paths.Loc (fileName, r)) true
             in
             let icd = function
               | Some conDec ->
@@ -528,11 +528,11 @@ end) : TWELF.STELF = struct
             icd optConDec
           with Constraints.Error eqns ->
             raise (ReconTerm.Error (Paths.wrap r (constraintsMsg eqns))))
-      | fileName, (Parser.ClauseDec condec_, r) -> (
+      | fileName, (Parser.ClauseDec condec, r) -> (
           try
             let optConDec, ocOpt =
               ReconConDec.condecToConDec
-                condec_ (Paths.Loc (fileName, r)) false
+                condec (Paths.Loc (fileName, r)) false
             in
             let icd = function
               | Some conDec ->
@@ -545,10 +545,10 @@ end) : TWELF.STELF = struct
             icd optConDec
           with Constraints.Error eqns ->
             raise (ReconTerm.Error (Paths.wrap r (constraintsMsg eqns))))
-      | fileName, (Parser.Solve (defines, solve_), r) -> (
+      | fileName, (Parser.Solve (defines, solve), r) -> (
           try
             let conDecL =
-              try Solve.solve defines solve_ (Paths.Loc (fileName, r))
+              try Solve.solve defines solve (Paths.Loc (fileName, r))
               with Solve.AbortQuery msg ->
                 raise (Solve.AbortQuery (Paths.wrap r msg))
             in
@@ -561,19 +561,19 @@ end) : TWELF.STELF = struct
             List.app icd conDecL
           with Constraints.Error eqns ->
             raise (ReconTerm.Error (Paths.wrap r (constraintsMsg eqns))))
-      | fileName, (Parser.Query (expected, try_, query_), r) -> (
-          try Solve.query expected try_ query_ (Paths.Loc (fileName, r))
+      | fileName, (Parser.Query (expected, try_, query), r) -> (
+          try Solve.query expected try_ query (Paths.Loc (fileName, r))
           with Solve.AbortQuery msg ->
             raise (Solve.AbortQuery (Paths.wrap r msg)))
-      | fileName, (Parser.FQuery query_, r) -> (
-          try Fquery.run query_ (Paths.Loc (fileName, r))
+      | fileName, (Parser.FQuery query, r) -> (
+          try Fquery.run query (Paths.Loc (fileName, r))
           with Fquery.AbortQuery msg ->
             raise (Fquery.AbortQuery (Paths.wrap r msg)))
-      | fileName, (Parser.Querytabled (numSol, try_, query_), r) -> (
-          try Solve.querytabled numSol try_ query_ (Paths.Loc (fileName, r))
+      | fileName, (Parser.Querytabled (numSol, try_, query), r) -> (
+          try Solve.querytabled numSol try_ query (Paths.Loc (fileName, r))
           with Solve.AbortQuery msg ->
             raise (Solve.AbortQuery (Paths.wrap r msg)))
-      | fileName, (Parser.TrustMe (dec_, r'), r) ->
+      | fileName, (Parser.TrustMe (dec, r'), r) ->
           ignore begin if not !Global.unsafe then
               raise (Thm.Error "%trustme not safe: Toggle `unsafe' flag")
             else ()
@@ -586,7 +586,7 @@ end) : TWELF.STELF = struct
                       install1 fn__ dr__;
                       Ok
                     end)
-                (fileName, (dec_, r))
+                (fileName, (dec, r))
             with
             | Ok -> chmsg 3 (function () -> "trustme subject succeeded\n")
             | Abort ->
@@ -744,19 +744,19 @@ end) : TWELF.STELF = struct
           in
           let rec checkFreeOut = function
             | [] -> ()
-            | a :: la_ ->
+            | a :: la ->
                 let (Some ms) = ModeTable.modeLookup a in
                 ignore (ModeCheck.checkFreeOut a ms);
-                checkFreeOut la_
+                checkFreeOut la
           in
           ignore (checkFreeOut cids);
           let lemma, projs, sels = Converter.installPrg cids in
-          let p_ = Tomega.lemmaDef lemma in
+          let p = Tomega.lemmaDef lemma in
           let f_ = Converter.convertFor cids in
-          ignore (TomegaTypeCheck.checkPrg IntSyn.Null (p_, f_));
+          ignore (TomegaTypeCheck.checkPrg IntSyn.Null (p, f_));
           let f cid = IntSyn.conDecName (IntSyn.sgnLookup cid) in
           ignore (Display.chatter_s 2
-              (("\n" ^ TomegaPrint.funToString (map f cids) projs p_) ^ "\n"));
+              (("\n" ^ TomegaPrint.funToString (map f cids) projs p) ^ "\n"));
           ignore (Display.chatter_s 3
               ((begin if !Global.chatter >= 4 then "%" else ""
                 end
@@ -826,7 +826,7 @@ end) : TWELF.STELF = struct
                 | (a, mS), r -> (
                     try
                       begin match IntSyn.conDecStatus (IntSyn.sgnLookup a) with
-                      | normal_ -> ModeTable.installMode a mS
+                      | normal -> ModeTable.installMode a mS
                       | _ ->
                           raise
                             (ModeTable.Error
@@ -859,7 +859,7 @@ end) : TWELF.STELF = struct
                 | (a, mS), r -> (
                     try
                       begin match IntSyn.conDecStatus (IntSyn.sgnLookup a) with
-                      | normal_ -> UniqueTable.installMode a mS
+                      | normal -> UniqueTable.installMode a mS
                       | _ ->
                           raise
                             (UniqueTable.Error
@@ -906,38 +906,38 @@ end) : TWELF.STELF = struct
               ^ ".\n"));
           ()
       | fileName, (Parser.TotalDec lterm, r) ->
-          let t_, ((r, rs) as rrs) = ReconThm.tdeclTotDecl lterm in
-          let la_ = Thm.installTotal t_ rrs in
-          ignore (map Total.install la_);
-          ignore (try map Total.checkFam la_ with
+          let t, ((r, rs) as rrs) = ReconThm.tdeclTotDecl lterm in
+          let la = Thm.installTotal t rrs in
+          ignore (map Total.install la);
+          ignore (try map Total.checkFam la with
             | Total.Error msg -> raise (Total.Error msg)
             | Cover.Error msg -> raise (Cover.Error (Paths.wrap r msg))
             | Reduces.Error msg -> raise (Reduces.Error msg)
             | Subordinate.Error msg ->
                 raise (Subordinate.Error (Paths.wrap r msg)));
-          ignore (Display.chatter_s 3 (("%total " ^ ThmPrint.tDeclToString t_) ^ ".\n"));
+          ignore (Display.chatter_s 3 (("%total " ^ ThmPrint.tDeclToString t) ^ ".\n"));
           ()
       | fileName, (Parser.TerminatesDec lterm, _) ->
-          let t_, ((r, rs) as rrs) = ReconThm.tdeclTotDecl lterm in
-          let (ThmSyn.TDecl (_, ThmSyn.Callpats callpats)) = t_ in
-          let la_ = Thm.installTerminates t_ rrs in
-          ignore (map (Timers.time Timers.terminate Reduces.checkFam) la_);
+          let t, ((r, rs) as rrs) = ReconThm.tdeclTotDecl lterm in
+          let (ThmSyn.TDecl (_, ThmSyn.Callpats callpats)) = t in
+          let la = Thm.installTerminates t rrs in
+          ignore (map (Timers.time Timers.terminate Reduces.checkFam) la);
           ignore begin if !Global.autoFreeze then begin
-              ignore (Subordinate.freeze la_);
+              ignore (Subordinate.freeze la);
               ()
             end
             else ()
             end;
           ignore (Display.chatter_s 3
-              (("%terminates " ^ ThmPrint.tDeclToString t_) ^ ".\n"));
+              (("%terminates " ^ ThmPrint.tDeclToString t) ^ ".\n"));
           ()
       | fileName, (Parser.ReducesDec lterm, _) ->
           let r_, ((r, rs) as rrs) = ReconThm.rdeclTorDecl lterm in
           let (ThmSyn.RDecl (_, ThmSyn.Callpats callpats)) = r_ in
-          let la_ = Thm.installReduces r_ rrs in
-          ignore (map (Timers.time Timers.terminate Reduces.checkFamReduction) la_);
+          let la = Thm.installReduces r_ rrs in
+          ignore (map (Timers.time Timers.terminate Reduces.checkFamReduction) la);
           ignore begin if !Global.autoFreeze then begin
-              ignore (Subordinate.freeze la_);
+              ignore (Subordinate.freeze la);
               ()
             end
             else ()
@@ -948,35 +948,35 @@ end) : TWELF.STELF = struct
             end;
           ()
       | fileName, (Parser.TabledDec tdecl, _) ->
-          let t_, r = ReconThm.tableddeclTotabledDecl tdecl in
-          let la_ = Thm.installTabled t_ in
+          let t, r = ReconThm.tableddeclTotabledDecl tdecl in
+          let la = Thm.installTabled t in
           ignore (Display.chatter_s 3
-              (("%tabled " ^ ThmPrint.tabledDeclToString t_) ^ ".\n"));
+              (("%tabled " ^ ThmPrint.tabledDeclToString t) ^ ".\n"));
           ()
       | fileName, (Parser.KeepTableDec tdecl, _) ->
-          let t_, r = ReconThm.keepTabledeclToktDecl tdecl in
-          let la_ = Thm.installKeepTable t_ in
+          let t, r = ReconThm.keepTabledeclToktDecl tdecl in
+          let la = Thm.installKeepTable t in
           ignore (Display.chatter_s 3
-              (("%keeptabled " ^ ThmPrint.keepTableDeclToString t_) ^ ".\n"));
+              (("%keeptabled " ^ ThmPrint.keepTableDeclToString t) ^ ".\n"));
           ()
       | fileName, (Parser.TheoremDec tdec, r) ->
           let tname, tdecl = ReconThm.theoremDecToTheoremDec tdec in
           ignore (ReconTerm.checkErrors r);
-          let gBs, (IntSyn.ConDec (name, _, k, _, v_, l_) as e_) =
+          let gBs, (IntSyn.ConDec (name, _, k, _, v, l) as e) =
             ThmSyn.theoremDecToConDec tname tdecl r
           in
           ignore (FunSyn.labelReset ());
           ignore (List.foldr
               (function
-                | (g1_, g2_), k ->
+                | (g1, g2), k ->
                     FunSyn.labelAdd
                       (FunSyn.LabelDec
                          ( Int.toString k,
-                           FunSyn.ctxToList g1_,
-                           FunSyn.ctxToList g2_ )))
+                           FunSyn.ctxToList g1,
+                           FunSyn.ctxToList g2 )))
               0 gBs);
-          let cid = installConDec IntSyn.Ordinary (e_, (fileName, None), r) in
-          let ms_ = ThmSyn.theoremDecToModeSpine tname tdecl r in
+          let cid = installConDec IntSyn.Ordinary (e, (fileName, None), r) in
+          let ms = ThmSyn.theoremDecToModeSpine tname tdecl r in
           let convert_mode = function
             | ModeSyn.Plus -> Modes.Modesyn.ModeSyn.Plus
             | ModeSyn.Star -> Modes.Modesyn.ModeSyn.Star
@@ -990,17 +990,17 @@ end) : TWELF.STELF = struct
                   ( Modes.Modesyn.ModeSyn.Marg (convert_mode m, name),
                     convert_mode_spine tail )
           in
-          ignore (ModeTable.installMode cid (convert_mode_spine ms_));
-          ignore (Display.chatter_s 3 (("%theorem " ^ Print.conDecToString e_) ^ "\n"));
+          ignore (ModeTable.installMode cid (convert_mode_spine ms));
+          ignore (Display.chatter_s 3 (("%theorem " ^ Print.conDecToString e) ^ "\n"));
           ()
       | fileName, (Parser.ProveDec lterm, r) ->
-          let ThmSyn.PDecl (depth, t_), rrs = ReconThm.proveToProve lterm in
-          let la_ = Thm.installTerminates t_ rrs in
+          let ThmSyn.PDecl (depth, t), rrs = ReconThm.proveToProve lterm in
+          let la = Thm.installTerminates t rrs in
           ignore (Display.chatter_s 3
               (((("%prove " ^ Int.toString depth) ^ " ")
-               ^ ThmPrint.tDeclToString t_)
+               ^ ThmPrint.tDeclToString t)
               ^ ".\n"));
-          ignore (Prover.init depth la_);
+          ignore (Prover.init depth la);
           ignore (if !Global.chatter >= 3 then
               map
                 (function
@@ -1010,30 +1010,30 @@ end) : TWELF.STELF = struct
                          ^ ModePrint.modeToString
                              a (valOf (ModeTable.modeLookup a)))
                         ^ ".\n"))
-                la_
+                la
             else [ () ]);
           ignore (try Prover.auto ()
             with Prover.Error msg ->
               raise (Prover.Error (Paths.wrap (joinregion rrs) msg)));
           ignore (Display.chatter_s 3 "%QED\n");
           begin
-            Prover.install (function e_ ->
-                installConDec IntSyn.Ordinary (e_, (fileName, None), r));
-            Skolem.install la_
+            Prover.install (function e ->
+                installConDec IntSyn.Ordinary (e, (fileName, None), r));
+            Skolem.install la
           end
       | fileName, (Parser.EstablishDec lterm, r) ->
-          let ThmSyn.PDecl (depth, t_), rrs =
+          let ThmSyn.PDecl (depth, t), rrs =
             ReconThm.establishToEstablish lterm
           in
-          let la_ = Thm.installTerminates t_ rrs in
+          let la = Thm.installTerminates t rrs in
           ignore begin if !Global.chatter >= 3 then
               msg
                 (((("%prove " ^ Int.toString depth) ^ " ")
-                 ^ ThmPrint.tDeclToString t_)
+                 ^ ThmPrint.tDeclToString t)
                 ^ ".\n")
             else ()
             end;
-          ignore (Prover.init depth la_);
+          ignore (Prover.init depth la);
           ignore (if !Global.chatter >= 3 then
               map
                 (function
@@ -1043,20 +1043,20 @@ end) : TWELF.STELF = struct
                          ^ ModePrint.modeToString
                              a (valOf (ModeTable.modeLookup a)))
                         ^ ".\n"))
-                la_
+                la
             else [ () ]);
           ignore (try Prover.auto ()
             with Prover.Error msg ->
               raise (Prover.Error (Paths.wrap (joinregion rrs) msg)));
-          Prover.install (function e_ ->
-              installConDec IntSyn.Ordinary (e_, (fileName, None), r))
+          Prover.install (function e ->
+              installConDec IntSyn.Ordinary (e, (fileName, None), r))
       | fileName, (Parser.AssertDec aterm, _) ->
           ignore begin if not !Global.unsafe then
               raise (ThmSyn.Error "%assert not safe: Toggle `unsafe' flag")
             else ()
             end;
-          let (ThmSyn.Callpats l_ as cp), rrs = ReconThm.assertToAssert aterm in
-          let la_ = map (function c, p_ -> c) l_ in
+          let (ThmSyn.Callpats l as cp), rrs = ReconThm.assertToAssert aterm in
+          let la = map (function c, p -> c) l in
           ignore (Display.chatter_s 3
               (("%assert " ^ ThmPrint.callpatsToString cp) ^ ".\n"));
           ignore (if !Global.chatter >= 3 then
@@ -1068,9 +1068,9 @@ end) : TWELF.STELF = struct
                          ^ ModePrint.modeToString
                              a (valOf (ModeTable.modeLookup a)))
                         ^ ".\n"))
-                la_
+                la
             else [ () ]);
-          Skolem.install la_
+          Skolem.install la
       | fileName, (Parser.WorldDec wdecl, _) ->
           let ThmSyn.WDecl (qids, (ThmSyn.Callpats cpa as cp)), rs =
             ReconThm.wdeclTowDecl wdecl
@@ -1089,15 +1089,15 @@ end) : TWELF.STELF = struct
               (cpa, rs));
           let rec flatten arg__1 arg__2 =
             begin match (arg__1, arg__2) with
-            | [], f_ -> f_
-            | cid :: l_, f_ ->
+            | [], f -> f
+            | cid :: l, f ->
                 begin match IntSyn.sgnLookup cid with
-                | IntSyn.BlockDec _ -> flatten l_ (cid :: f_)
-                | IntSyn.BlockDef (_, _, l'_) -> flatten (l_ @ l'_) f_
+                | IntSyn.BlockDec _ -> flatten l (cid :: f)
+                | IntSyn.BlockDef (_, _, l') -> flatten (l @ l') f
                 end
             end
           in
-          let w_ =
+          let w =
             Tomega.Worlds
               (flatten
                  (List.map
@@ -1116,7 +1116,7 @@ end) : TWELF.STELF = struct
                     qids)
                  [])
           in
-          ignore (try List.app (function a, _ -> WorldSyn.install a w_) cpa
+          ignore (try List.app (function a, _ -> WorldSyn.install a w) cpa
             with WorldSyn.Error msg ->
               raise
                 (WorldSyn.Error
@@ -1128,12 +1128,12 @@ end) : TWELF.STELF = struct
             else ()
             end;
           ignore (Display.chatter_s 3
-              (((("%worlds " ^ Print.worldsToString w_) ^ " ")
+              (((("%worlds " ^ Print.worldsToString w) ^ " ")
                ^ ThmPrint.callpatsToString cp)
               ^ ".\n"));
           begin
             Timers.time Timers.worlds
-              (List.app (function a, _ -> WorldSyn.worldcheck w_ a))
+              (List.app (function a, _ -> WorldSyn.worldcheck w a))
               cpa;
             ()
           end
@@ -1314,7 +1314,7 @@ end) : TWELF.STELF = struct
             ignore (ReconTerm.resetErrors "string");
             let rec install s = install' (Timers.time Timers.parsing S.expose s)
             and install' = function
-              | empty_ -> Ok
+              | empty -> Ok
               | S.Cons ((beginSubsig, _), s') ->
                   install (installSubsig ("string", s'))
               | S.Cons (decl, s') -> begin
@@ -1464,7 +1464,7 @@ end) : TWELF.STELF = struct
               let rec install s =
                 install' (Timers.time Timers.parsing S.expose s)
               and install' = function
-                | empty_ -> Abort
+                | empty -> Abort
                 | S.Cons ((beginSubsig, _), s') -> begin
                     ignore (installSubsig ("stdIn", s'));
                     Ok

@@ -55,12 +55,12 @@ struct
     let one_int = Integers.fromInt 1
     let myID = (ref (-1) : cid ref)
     let geqID = (ref (-1) : cid ref)
-    let geq (u_, v_) = Root (Const !geqID, App (u_, App (v_, Nil)))
-    let geq0 u_ = geq (u_, constant zero_int)
+    let geq (u, v) = Root (Const !geqID, App (u, App (v, Nil)))
+    let geq0 u = geq (u, constant zero_int)
     let geqAddID = (ref (-1) : cid ref)
 
-    let geqAdd (u1_, u2_, v_, w_) =
-      Root (Const !geqAddID, App (u1_, App (u2_, App (v_, App (w_, Nil)))))
+    let geqAdd (u1, u2, v, w) =
+      Root (Const !geqAddID, App (u1, App (u2, App (v, App (w, Nil)))))
 
     let geqNConDec d =
       ConDec
@@ -228,11 +228,11 @@ struct
       | Col j -> Array.update (tableau.clabels, j, new_)
       end
 
-    let ownerContext = function Var (g_, mon) -> g_ | Exp (g_, sum) -> g_
+    let ownerContext = function Var (g, mon) -> g | Exp (g, sum) -> g
 
     let ownerSum = function
-      | Var (g_, mon) -> Sum (zero_int, [ mon ])
-      | Exp (g_, sum) -> sum
+      | Var (g, mon) -> Sum (zero_int, [ mon ])
+      | Exp (g, sum) -> sum
 
     let displayPos = function
       | Row row -> print (("row " ^ Int.toString row) ^ "\n")
@@ -329,7 +329,7 @@ struct
       let exception Found of int in
       let find (i, (l : label)) =
         begin match l.owner with
-        | Var (g_, mon') ->
+        | Var (g, mon') ->
             begin if compatibleMon mon mon' then raise (Found i) else ()
             end
         | _ -> ()
@@ -526,17 +526,17 @@ struct
       end
 
     let delayMon (Mon (n, usL), cnstr) =
-      List.app (function us_ -> Unify.delay us_ cnstr) usL
+      List.app (function us -> Unify.delay us cnstr) usL
 
-    let unifyRestr (Restr (g_, proof), proof') =
-      begin if Unify.unifiable g_ (proof, id) (proof', id) then ()
+    let unifyRestr (Restr (g, proof), proof') =
+      begin if Unify.unifiable g (proof, id) (proof', id) then ()
       else raise Error
       end
 
-    let unifySum (g_, sum, d) =
+    let unifySum (g, sum, d) =
       begin if
         begin
-          Unify.unify g_ (toExp sum, id) (constant (floor d), id);
+          Unify.unify g (toExp sum, id) (constant (floor d), id);
           true
         end
       then ()
@@ -555,7 +555,7 @@ struct
       | BranchFail
       | BranchDivide of int * branchResult * branchResult
 
-    let rec decomposeSum (g_, Sum (m, monL)) =
+    let rec decomposeSum (g, Sum (m, monL)) =
       let monToWPos (Mon (n, usL) as mon) =
         begin match findMon mon with
         | Some pos -> (fromInteger n, pos)
@@ -563,7 +563,7 @@ struct
             let new_ = incrNCols () in
             let l =
               {
-                owner = Var (g_, Mon (one_int, usL));
+                owner = Var (g, Mon (one_int, usL));
                 tag = ref 0;
                 restr = ref None;
                 dead = ref false;
@@ -642,9 +642,9 @@ struct
         end
       end
 
-    and insert g_ us_ =
-      let sum = fromExp us_ in
-      insertDecomp (decomposeSum (g_, sum), Exp (g_, sum))
+    and insert g us =
+      let sum = fromExp us in
+      insertDecomp (decomposeSum (g, sum), Exp (g, sum))
 
     and restrict (a, restr) = match a with
       | (Col col as pos) ->
@@ -731,35 +731,35 @@ struct
             end
           end
 
-    and insertEqual (g_, pos, sum) =
-      let m, wposL = decomposeSum (g_, sum) in
+    and insertEqual (g, pos, sum) =
+      let m, wposL = decomposeSum (g, sum) in
       let decomp' = (m, (-one, pos) :: wposL) in
-      let pos' = insertDecomp (decomp', Exp (g_, Sum (zero_int, []))) in
+      let pos' = insertDecomp (decomp', Exp (g, Sum (zero_int, []))) in
       let decomp'' = unaryMinusDecomp decomp' in
       let tag'' =
-        (label (insertDecomp (decomp'', Exp (g_, Sum (zero_int, []))))).tag
+        (label (insertDecomp (decomp'', Exp (g, Sum (zero_int, []))))).tag
       in
-      restrictBB (exploreBB (pos', Restr (g_, geqNExp zero_int)));
+      restrictBB (exploreBB (pos', Restr (g, geqNExp zero_int)));
       begin match findTag tag'' with
       | Some pos'' ->
-          restrictBB (exploreBB (pos'', Restr (g_, geqNExp zero_int)))
+          restrictBB (exploreBB (pos'', Restr (g, geqNExp zero_int)))
       end
 
-    and update (g_, pos, sum) =
+    and update (g, pos, sum) =
       let l = label pos in
       Trail.log tableau.trail (UpdateOwner (pos, l.owner, l.tag));
       begin
-        setOwnership (pos, Exp (g_, sum), ref 0);
+        setOwnership (pos, Exp (g, sum), ref 0);
         begin if dead l then
           begin match pos with
           | Row row ->
-              begin if isConstant row then unifySum (g_, sum, const row)
+              begin if isConstant row then unifySum (g, sum, const row)
               else
                 begin match isSubsumed row with
-                | Some pos' -> update (g_, pos', sum)
+                | Some pos' -> update (g, pos', sum)
                 end
               end
-          | Col col -> unifySum (g_, sum, zero)
+          | Col col -> unifySum (g, sum, zero)
           end
         else
           let isVar = function
@@ -771,29 +771,29 @@ struct
           begin match isVar sum with
           | Some mon ->
               begin match findMon mon with
-              | Some _ -> insertEqual (g_, pos, sum)
+              | Some _ -> insertEqual (g, pos, sum)
               | None ->
                   let tag = ref 0 in
                   Trail.log
                     tableau.trail (UpdateOwner (pos, l.owner, l.tag));
                   begin
-                    setOwnership (pos, Var (g_, mon), tag);
+                    setOwnership (pos, Var (g, mon), tag);
                     delayMon (mon, ref (makeCnstr tag))
                   end
               end
-          | None -> insertEqual (g_, pos, sum)
+          | None -> insertEqual (g, pos, sum)
           end
         end
       end
 
-    and insertRestrExp (l, ul_) =
+    and insertRestrExp (l, ul) =
       begin match restriction l with
-      | None -> ul_
+      | None -> ul
       | Some (Restr (_, _)) ->
           let owner = l.owner in
-          let g_ = ownerContext owner in
-          let u_ = toExp (ownerSum owner) in
-          (g_, geq0 u_) :: ul_
+          let g = ownerContext owner in
+          let u = toExp (ownerSum owner) in
+          (g, geq0 u) :: ul
       end
 
     and restrictions pos =
@@ -847,9 +847,9 @@ struct
       let restrExp pos =
         let l = label pos in
         let owner = l.owner in
-        let g_ = ownerContext owner in
-        let u_ = toExp (ownerSum owner) in
-        (g_, geq0 u_)
+        let g = ownerContext owner in
+        let u = toExp (ownerSum owner) in
+        (g, geq0 u)
       in
       List.map restrExp (reachable ([ pos ], [], []))
 
@@ -862,9 +862,9 @@ struct
         begin match findTag tag with
         | Some pos ->
             let owner = (label pos).owner in
-            let g_ = ownerContext owner in
+            let g = ownerContext owner in
             let sum = normalize (ownerSum owner) in
-            update (g_, pos, sum);
+            update (g, pos, sum);
             true
         | None -> true
         end
@@ -892,23 +892,23 @@ struct
         end
       with Found i -> Some i
 
-    and boundLower (g_, decomp, d) =
-      let w_ = newEVar g_ (number ()) in
-      let proof = newEVar g_ (geq0 w_) in
+    and boundLower (g, decomp, d) =
+      let w = newEVar g (number ()) in
+      let proof = newEVar g (geq0 w) in
       let d', wPosL = unaryMinusDecomp decomp in
       let pos =
-        insertDecomp ((d' + d, wPosL), Var (g_, Mon (one_int, [ (w_, id) ])))
+        insertDecomp ((d' + d, wPosL), Var (g, Mon (one_int, [ (w, id) ])))
       in
-      (pos, Restr (g_, proof))
+      (pos, Restr (g, proof))
 
-    and boundUpper (g_, decomp, d) =
-      let w_ = newEVar g_ (number ()) in
-      let proof = newEVar g_ (geq0 w_) in
+    and boundUpper (g, decomp, d) =
+      let w = newEVar g (number ()) in
+      let proof = newEVar g (geq0 w) in
       let d', wPosL = decomp in
       let pos =
-        insertDecomp ((d' - d, wPosL), Var (g_, Mon (one_int, [ (w_, id) ])))
+        insertDecomp ((d' - d, wPosL), Var (g, Mon (one_int, [ (w, id) ])))
       in
-      (pos, Restr (g_, proof))
+      (pos, Restr (g, proof))
 
     and exploreBB (pos, restr) =
       try
@@ -917,11 +917,11 @@ struct
         | Some row ->
             let value = const row in
             let decomp = (zero, [ (one, Row row) ]) in
-            let g_ = ownerContext (label (Row row)).owner in
+            let g = ownerContext (label (Row row)).owner in
             let lower = fromInteger (floor value) in
             let upper = fromInteger (ceiling value) in
-            let left () = exploreBB (boundLower (g_, decomp, lower)) in
-            let right () = exploreBB (boundUpper (g_, decomp, upper)) in
+            let left () = exploreBB (boundLower (g, decomp, lower)) in
+            let right () = exploreBB (boundUpper (g, decomp, upper)) in
             begin match (CSM.trail left, CSM.trail right) with
             | BranchFail, BranchFail -> BranchFail
             | resultL, resultR -> BranchDivide (row, resultL, resultR)
@@ -933,11 +933,11 @@ struct
     and minimizeBB row =
       let zeroColumn (j, (l : label)) =
         let decomp = (zero, [ (one, Col j) ]) in
-        let g_ = ownerContext (label (Col j)).owner in
+        let g = ownerContext (label (Col j)).owner in
         let lower = -one in
         let upper = one in
-        let left () = exploreBB (boundLower (g_, decomp, lower)) in
-        let right () = exploreBB (boundUpper (g_, decomp, upper)) in
+        let left () = exploreBB (boundLower (g, decomp, lower)) in
+        let right () = exploreBB (boundUpper (g, decomp, upper)) in
         begin if restricted l then CSM.trail right = BranchFail
         else CSM.trail left = BranchFail && CSM.trail right = BranchFail
         end
@@ -1023,14 +1023,14 @@ struct
       | BranchDivide (row, resultL, BranchFail) ->
           let value = fromInteger (floor (const row)) in
           let decomp = (zero, [ (one, Row row) ]) in
-          let g_ = ownerContext (label (Row row)).owner in
-          ignore (restrict (boundLower (g_, decomp, value)));
+          let g = ownerContext (label (Row row)).owner in
+          ignore (restrict (boundLower (g, decomp, value)));
           restrictBB resultL
       | BranchDivide (row, BranchFail, resultR) ->
           let value = fromInteger (ceiling (const row)) in
           let decomp = (zero, [ (one, Row row) ]) in
-          let g_ = ownerContext (label (Row row)).owner in
-          ignore (restrict (boundUpper (g_, decomp, value)));
+          let g = ownerContext (label (Row row)).owner in
+          ignore (restrict (boundUpper (g, decomp, value)));
           restrictBB resultR
       | BranchSucceed result ->
           begin match result with Some row -> minimizeBB row | None -> ()
@@ -1100,56 +1100,56 @@ struct
     let unwind () = Trail.unwind tableau.trail undo
 
     let rec fst (a, s) = match a with
-      | App (u1_, _) -> (u1_, s)
+      | App (u1, _) -> (u1, s)
       | SClo (s_, s') -> fst (s_, comp s' s)
 
     let rec snd (a, s) = match a with
-      | App (u1_, s_) -> fst (s_, s)
+      | App (u1, s_) -> fst (s_, s)
       | SClo (s_, s') -> snd (s_, comp s' s)
 
-    let isConstantExp u_ =
-      begin match fromExp (u_, id) with Sum (m, []) -> Some m | _ -> None
+    let isConstantExp u =
+      begin match fromExp (u, id) with Sum (m, []) -> Some m | _ -> None
       end
 
-    let isZeroExp u_ =
-      begin match isConstantExp u_ with Some d -> d = zero_int | None -> false
+    let isZeroExp u =
+      begin match isConstantExp u with Some d -> d = zero_int | None -> false
       end
 
-    let solveGeq (g_, s_, n) = match n with
+    let solveGeq (g, s, n) = match n with
       | 0 -> (
-          let solveGeq0 w_ =
-            begin match isConstantExp w_ with
+          let solveGeq0 w =
+            begin match isConstantExp w with
             | Some d ->
                 begin if Integers.( >= ) d zero_int then geqNExp d
                 else raise Error
                 end
             | None ->
-                let proof = newEVar g_ (geq0 w_) in
+                let proof = newEVar g (geq0 w) in
                 ignore (restrictBB
-                    (exploreBB (insert g_ (w_, id), Restr (g_, proof))));
+                    (exploreBB (insert g (w, id), Restr (g, proof))));
                 proof
             end
           in
-          let u1_ =
-            let e_, s_' = fst (s_, id) in
-            EClo (e_, s_')
+          let u1 =
+            let e, s_' = fst (s, id) in
+            EClo (e, s_')
           in
-          let u2_ =
-            let e_, s_' = snd (s_, id) in
-            EClo (e_, s_')
+          let u2 =
+            let e, s_' = snd (s, id) in
+            EClo (e, s_')
           in
           try
-            begin if isZeroExp u2_ then Some (solveGeq0 u1_)
+            begin if isZeroExp u2 then Some (solveGeq0 u1)
             else
-              let w_ = minus u1_ u2_ in
-              let proof = solveGeq0 w_ in
-              Some (geqAdd (w_, constant zero_int, u2_, proof))
+              let w = minus u1 u2 in
+              let proof = solveGeq0 w in
+              Some (geqAdd (w, constant zero_int, u2, proof))
             end
           with Error -> None)
       | n -> None
 
-    let pi (name, u_, v_) = Pi ((Dec (Some name, u_), Maybe), v_)
-    let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
+    let pi (name, u, v) = Pi ((Dec (Some name, u), Maybe), v)
+    let arrow u v = Pi ((Dec (None, u), No), v)
 
     let installFgnCnstrOps () =
       let csid = !myID in

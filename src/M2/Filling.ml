@@ -47,83 +47,83 @@ end) : FILLING with module MetaSyn = Filling__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    let delay search params_ () =
-      try search params_ with Search.Error s -> raise (Error s)
+    let delay search params () =
+      try search params with Search.Error s -> raise (Error s)
 
-    let makeAddressInit s_ k = (s_, k)
+    let makeAddressInit s k = (s, k)
     let makeAddressCont makeAddress k = makeAddress (k + 1)
 
-    let rec operators (g_, ge, vs_, abstractAll, abstractEx, makeAddress) =
-      operatorsW (g_, ge, Whnf.whnf vs_, abstractAll, abstractEx, makeAddress)
+    let rec operators (g, ge, vs, abstractAll, abstractEx, makeAddress) =
+      operatorsW (g, ge, Whnf.whnf vs, abstractAll, abstractEx, makeAddress)
 
-    and operatorsW (g_, ge, a, abstractAll, abstractEx, makeAddress) = match a with
-      | ((I.Root (c_, s_), _) as vs_) ->
+    and operatorsW (g, ge, a, abstractAll, abstractEx, makeAddress) = match a with
+      | ((I.Root (c, s), _) as vs) ->
           ( [],
-            (makeAddress 0, delay Search.searchEx (g_, ge, vs_, abstractEx))
+            (makeAddress 0, delay Search.searchEx (g, ge, vs, abstractEx))
           )
-      | (I.Pi (((I.Dec (_, v1_) as d_), p_), v2_), s) ->
-          let go', o_ =
+      | (I.Pi (((I.Dec (_, v1) as d), p), v2), s) ->
+          let go', o =
             operators
-              ( I.Decl (g_, I.decSub d_ s),
+              ( I.Decl (g, I.decSub d s),
                 ge,
-                (v2_, I.dot1 s),
+                (v2, I.dot1 s),
                 abstractAll,
                 abstractEx,
                 makeAddressCont makeAddress )
           in
           ( ( makeAddress 0,
-              delay Search.searchAll (g_, ge, (v1_, s), abstractAll) )
+              delay Search.searchAll (g, ge, (v1, s), abstractAll) )
             :: go',
-            o_ )
+            o )
 
     let rec createEVars = function
       | M.Prefix (I.Null, I.Null, I.Null) ->
           (M.Prefix (I.Null, I.Null, I.Null), I.id, [])
-      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, M.Top), I.Decl (b_, b)) ->
-          let M.Prefix (g'_, m'_, b'_), s', ge' =
-            createEVars (M.Prefix (g_, m_, b_))
+      | M.Prefix (I.Decl (g, d), I.Decl (m, M.Top), I.Decl (b_, b)) ->
+          let M.Prefix (g', m', b'), s', ge' =
+            createEVars (M.Prefix (g, m, b_))
           in
           ( M.Prefix
-              ( I.Decl (g'_, I.decSub d_ s'),
-                I.Decl (m'_, M.Top),
-                I.Decl (b'_, b) ),
+              ( I.Decl (g', I.decSub d s'),
+                I.Decl (m', M.Top),
+                I.Decl (b', b) ),
             I.dot1 s',
             ge' )
-      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, M.Bot), I.Decl (b_, _))
+      | M.Prefix (I.Decl (g, I.Dec (_, v)), I.Decl (m, M.Bot), I.Decl (b, _))
         ->
-          let M.Prefix (g'_, m'_, b'_), s', ge' =
-            createEVars (M.Prefix (g_, m_, b_))
+          let M.Prefix (g', m', b'), s', ge' =
+            createEVars (M.Prefix (g, m, b))
           in
-          let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
-          let x'_ = Whnf.lowerEVar x_ in
-          (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'), x'_ :: ge')
+          let x = I.newEVar g' (I.EClo (v, s')) in
+          let x' = Whnf.lowerEVar x in
+          (M.Prefix (g', m', b'), I.Dot (I.Exp x, s'), x' :: ge')
 
-    let expand (M.State (name, M.Prefix (g_, m_, b_), v_) as s_) =
-      let M.Prefix (g'_, m'_, b'_), s', ge' =
-        createEVars (M.Prefix (g_, m_, b_))
+    let expand (M.State (name, M.Prefix (g, m, b), v) as s_) =
+      let M.Prefix (g', m', b'), s', ge' =
+        createEVars (M.Prefix (g, m, b))
       in
       let abstractAll acc =
         try
           MetaAbstract.abstract
-            (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
+            (M.State (name, M.Prefix (g', m', b'), I.EClo (v, s')))
           :: acc
         with MetaAbstract.Error s -> acc
       in
       let abstractEx () =
         MetaAbstract.abstract
-          (M.State (name, M.Prefix (g'_, m'_, b'_), I.EClo (v_, s')))
+          (M.State (name, M.Prefix (g', m', b'), I.EClo (v, s')))
       in
-      operators (g'_, ge', (v_, s'), abstractAll, abstractEx, makeAddressInit s_)
+      operators (g', ge', (v, s'), abstractAll, abstractEx, makeAddressInit s_)
 
     let apply (_, f) = f ()
 
-    let menu ((M.State (name, M.Prefix (g_, m_, b_), v_), k), sl_) =
-      let rec toString (g_, a, k) = match a, k with
-        | I.Pi ((I.Dec (_, v_), _), _), 0 -> Print.expToString g_ v_
-        | (I.Root _ as v_), 0 -> Print.expToString g_ v_
-        | I.Pi ((d_, _), v_), k -> toString (I.Decl (g_, d_), v_, k - 1)
+    let menu ((M.State (name, M.Prefix (g, m, b), v), k), sl) =
+      let rec toString (g, a, k) = match a, k with
+        | I.Pi ((I.Dec (_, v), _), _), 0 -> Print.expToString g v
+        | (I.Root _ as v), 0 -> Print.expToString g v
+        | I.Pi ((d, _), v), k -> toString (I.Decl (g, d), v, k - 1)
       in
-      "Filling   : " ^ toString (g_, v_, k)
+      "Filling   : " ^ toString (g, v, k)
   end
 
   (* operators (G, GE, (V, s), abstract, makeAddress) = (OE', OL')

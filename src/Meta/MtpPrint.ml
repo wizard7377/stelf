@@ -58,42 +58,42 @@ end) : MTPPRINT.MTPRINT = struct
 
     let printFmt f = Fmt.string (PrintFmt.makestring_fmt f)
 
-    let nameState (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_)) =
+    let nameState (S.State (n, (g, b), (ih, oh), d, o, h, f)) =
       ignore (Names.varReset I.Null);
-      let g'_ = Names.ctxName g_ in
-      S.State (n, (g'_, b_), (ih_, oh), d, o_, h_, f_)
+      let g' = Names.ctxName g in
+      S.State (n, (g', b), (ih, oh), d, o, h, f)
 
-    let rec formatOrder (g_, a) = match a with
-      | S.Arg (us_, vs_) ->
-          let u1_, s1_ = us_ in
-          let u2_, s2_ = vs_ in
+    let rec formatOrder (g, a) = match a with
+      | S.Arg (us, vs) ->
+          let u1, s1 = us in
+          let u2, s2 = vs in
           [
-            printFmt (Print.formatExp g_ (I.EClo (u1_, s1_)));
+            printFmt (Print.formatExp g (I.EClo (u1, s1)));
             Fmt.string ":";
-            printFmt (Print.formatExp g_ (I.EClo (u2_, s2_)));
+            printFmt (Print.formatExp g (I.EClo (u2, s2)));
           ]
-      | S.Lex os_ ->
+      | S.Lex os ->
           [
             Fmt.string "{";
-            Fmt.hVbox0 1 0 1 (formatOrders (g_, os_));
+            Fmt.hVbox0 1 0 1 (formatOrders (g, os));
             Fmt.string "}";
           ]
-      | S.Simul os_ ->
+      | S.Simul os ->
           [
             Fmt.string "[";
-            Fmt.hVbox0 1 0 1 (formatOrders (g_, os_));
+            Fmt.hVbox0 1 0 1 (formatOrders (g, os));
             Fmt.string "]";
           ]
 
-    and formatOrders (g_, a) = match a with
+    and formatOrders (g, a) = match a with
       | [] -> []
-      | o_ :: [] -> formatOrder (g_, o_)
-      | o_ :: os_ ->
-          formatOrder (g_, o_)
+      | o :: [] -> formatOrder (g, o)
+      | o :: os ->
+          formatOrder (g, o)
           @ [ Fmt.string ","; Fmt.break_ ]
-          @ formatOrders (g_, os_)
+          @ formatOrders (g, os)
 
-    let formatTag (g_, a) = match a with
+    let formatTag (g, a) = match a with
       | S.Parameter l -> [ Fmt.string "<p>" ]
       | S.Lemma (S.Splits k) ->
           [ Fmt.string "<i"; Fmt.string (Int.toString k); Fmt.string ">" ]
@@ -101,48 +101,48 @@ end) : MTPPRINT.MTPRINT = struct
       | S.Lemma S.RLdone -> [ Fmt.string "<i*>" ]
 
     let rec formatCtx a1 b1 = match a1, b1 with
-      | I.Null, b_ -> []
-      | I.Decl (I.Null, d_), I.Decl (I.Null, t_) ->
+      | I.Null, b -> []
+      | I.Decl (I.Null, d), I.Decl (I.Null, t) ->
           begin if !Global.chatter >= 4 then
             [
               Fmt.hVbox
-                (formatTag (I.Null, t_)
-                @ [ Fmt.break_; printFmt (Print.formatDec I.Null d_) ]);
+                (formatTag (I.Null, t)
+                @ [ Fmt.break_; printFmt (Print.formatDec I.Null d) ]);
             ]
-          else [ printFmt (Print.formatDec I.Null d_) ]
+          else [ printFmt (Print.formatDec I.Null d) ]
           end
-      | I.Decl (g_, d_), I.Decl (b_, t_) ->
+      | I.Decl (g, d), I.Decl (b, t) ->
           begin if !Global.chatter >= 4 then
-            formatCtx g_ b_
+            formatCtx g b
             @ [ Fmt.string ","; Fmt.break_; Fmt.break_ ]
             @ [
                 Fmt.hVbox
-                  (formatTag (g_, t_)
-                  @ [ Fmt.break_; printFmt (Print.formatDec g_ d_) ]);
+                  (formatTag (g, t)
+                  @ [ Fmt.break_; printFmt (Print.formatDec g d) ]);
               ]
           else
-            formatCtx g_ b_
+            formatCtx g b
             @ [ Fmt.string ","; Fmt.break_ ]
-            @ [ Fmt.break_; printFmt (Print.formatDec g_ d_) ]
+            @ [ Fmt.break_; printFmt (Print.formatDec g d) ]
           end
 
-    let formatState (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_)) =
+    let formatState (S.State (n, (g, b), (ih, oh), d, o, h, f)) =
       Fmt.vbox0 0 1
         [
-          Fmt.hVbox0 1 0 1 (formatOrder (g_, o_));
+          Fmt.hVbox0 1 0 1 (formatOrder (g, o));
           Fmt.break_;
           Fmt.string "========================";
           Fmt.break_;
-          Fmt.hVbox0 1 0 1 (formatCtx g_ b_);
+          Fmt.hVbox0 1 0 1 (formatCtx g b);
           Fmt.break_;
           Fmt.string "------------------------";
           Fmt.break_;
           Fmt.string
             (FunPrint.Formatter.makestring_fmt
-               (FunPrint.formatForBare g_ f_));
+               (FunPrint.formatForBare g f));
         ]
 
-    let stateToString s_ = Fmt.makestring_fmt (formatState s_)
+    let stateToString s = Fmt.makestring_fmt (formatState s)
   end
 
   (* nameState S = S'

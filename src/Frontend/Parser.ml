@@ -436,7 +436,7 @@ end) :
     and parseTrustMe' ((LS.Cons ((_, r0), s) as f), sc) =
       let parseNextDec' = function
         | Stream.Cons ((dec, r), s') -> Stream.Cons ((TrustMe (dec, r), r0), s')
-        | empty_ -> Parsing.error r0 ("No declaration after `%trustme'")
+        | empty -> Parsing.error r0 ("No declaration after `%trustme'")
       in
       parseNextDec' (parseStream' (LS.expose s, sc))
 

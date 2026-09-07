@@ -55,7 +55,7 @@ end) : Cs.CS = struct
     let trueExp () = Root (Const !trueID, Nil)
     let falseExp () = Root (Const !falseID, Nil)
 
-    let solveBool (g_, s_, k) = match k with
+    let solveBool (g, s, k) = match k with
       | 0 -> Some (trueExp ())
       | 1 -> Some (falseExp ())
       | k -> None
@@ -66,28 +66,28 @@ end) : Cs.CS = struct
     let orID = (ref (-1) : cid ref)
     let impliesID = (ref (-1) : cid ref)
     let iffID = (ref (-1) : cid ref)
-    let notExp u_ = Root (Const !notID, App (u_, Nil))
-    let xorExp (u_, v_) = Root (Const !xorID, App (u_, App (v_, Nil)))
-    let andExp (u_, v_) = Root (Const !andID, App (u_, App (v_, Nil)))
-    let orExp (u_, v_) = Root (Const !orID, App (u_, App (v_, Nil)))
-    let impliesExp (u_, v_) = Root (Const !impliesID, App (u_, App (v_, Nil)))
-    let iffExp (u_, v_) = Root (Const !iffID, App (u_, App (v_, Nil)))
-    let member eq (x, l_) = List.exists (function y -> eq (x, y)) l_
+    let notExp u = Root (Const !notID, App (u, Nil))
+    let xorExp (u, v) = Root (Const !xorID, App (u, App (v, Nil)))
+    let andExp (u, v) = Root (Const !andID, App (u, App (v, Nil)))
+    let orExp (u, v) = Root (Const !orID, App (u, App (v, Nil)))
+    let impliesExp (u, v) = Root (Const !impliesID, App (u, App (v, Nil)))
+    let iffExp (u, v) = Root (Const !iffID, App (u, App (v, Nil)))
+    let member eq (x, l) = List.exists (function y -> eq (x, y)) l
 
-    let differenceSet eq (l1_, l2_) =
-      let l1'_ = List.filter (function x -> not (member eq (x, l2_))) l1_ in
-      let l2'_ = List.filter (function x -> not (member eq (x, l1_))) l2_ in
-      l1'_ @ l2'_
+    let differenceSet eq (l1, l2) =
+      let l1' = List.filter (function x -> not (member eq (x, l2))) l1 in
+      let l2' = List.filter (function x -> not (member eq (x, l1))) l2 in
+      l1' @ l2'
 
-    let equalSet eq (l1_, l2_) =
-      begin match differenceSet eq (l1_, l2_) with
+    let equalSet eq (l1, l2) =
+      begin match differenceSet eq (l1, l2) with
       | [] -> true
       | _ :: _ -> false
       end
 
-    let unionSet eq (l1_, l2_) =
-      let l2'_ = List.filter (function x -> not (member eq (x, l1_))) l2_ in
-      l1_ @ l2'_
+    let unionSet eq (l1, l2) =
+      let l2' = List.filter (function x -> not (member eq (x, l1))) l2 in
+      l1 @ l2'
 
     let rec toExp = function
       | Sum (m, []) ->
@@ -104,24 +104,24 @@ end) : Cs.CS = struct
           xorExp (toExp (Sum (m, monL)), toExpMon mon)
 
     and toExpMon = function
-      | Mon (us_ :: []) -> toExpEClo us_
-      | Mon (us_ :: usL) -> andExp (toExpMon (Mon usL), toExpEClo us_)
+      | Mon (us :: []) -> toExpEClo us
+      | Mon (us :: usL) -> andExp (toExpMon (Mon usL), toExpEClo us)
 
-    and toExpEClo (u_, s_) = match s_ with Shift 0 -> u_ | s_ -> EClo (u_, s_)
+    and toExpEClo (u, s) = match s with Shift 0 -> u | s -> EClo (u, s)
 
     let rec compatibleMon (Mon usL1, Mon usL2) =
       equalSet (function us1, us2 -> sameExp (us1, us2)) (usL1, usL2)
 
     and sameExpW = function
-      | ((Root (h1_, s1_), s1) as us1), ((Root (h2_, s2_), s2) as us2) ->
-          begin match (h1_, h2_) with
+      | ((Root (h1, s1_), s1) as us1), ((Root (h2, s2_), s2) as us2) ->
+          begin match (h1, h2) with
           | BVar k1, BVar k2 -> k1 = k2 && sameSpine ((s1_, s1), (s2_, s2))
           | FVar (n1, _, _), FVar (n2, _, _) ->
               n1 = n2 && sameSpine ((s1_, s1), (s2_, s2))
           | _ -> false
           end
-      | ( (((EVar (r1, g1_, v1_, cnstrs1) as u1_), s1) as us1),
-          (((EVar (r2, g2_, v2_, cnstrs2) as u2_), s2) as us2) ) ->
+      | ( (((EVar (r1, g1, v1, cnstrs1) as u1), s1) as us1),
+          (((EVar (r2, g2, v2, cnstrs2) as u2), s2) as us2) ) ->
           r1 == r2 && sameSub (s1, s2)
       | _ -> false
 
@@ -129,10 +129,10 @@ end) : Cs.CS = struct
 
     and sameSpine = function
       | (Nil, s1), (Nil, s2) -> true
-      | (SClo (s1_, s1'), s1), ss2_ -> sameSpine ((s1_, comp s1' s1), ss2_)
-      | ss1_, (SClo (s2_, s2'), s2) -> sameSpine (ss1_, (s2_, comp s2' s2))
-      | (App (u1_, s1_), s1), (App (u2_, s2_), s2) ->
-          sameExp ((u1_, s1), (u2_, s2)) && sameSpine ((s1_, s1), (s2_, s2))
+      | (SClo (s1_, s1'), s1), ss2 -> sameSpine ((s1_, comp s1' s1), ss2)
+      | ss1, (SClo (s2_, s2'), s2) -> sameSpine (ss1, (s2_, comp s2' s2))
+      | (App (u1, s1_), s1), (App (u2, s2_), s2) ->
+          sameExp ((u1, s1), (u2, s2)) && sameSpine ((s1_, s1), (s2_, s2))
       | _ -> false
 
     and sameSub = function
@@ -168,13 +168,13 @@ end) : Cs.CS = struct
     let iffSum (sum1, sum2) = notSum (xorSum (sum1, sum2))
 
     let rec fromExpW = function
-      | (FgnExp (cs, fe), _) as us_ ->
+      | (FgnExp (cs, fe), _) as us ->
           begin if cs = !myID then normalizeSum (extractSum fe)
-          else Sum (false, [ Mon [ us_ ] ])
+          else Sum (false, [ Mon [ us ] ])
           end
-      | us_ -> Sum (false, [ Mon [ us_ ] ])
+      | us -> Sum (false, [ Mon [ us ] ])
 
-    and fromExp us_ = fromExpW (Whnf.whnf us_)
+    and fromExp us = fromExpW (Whnf.whnf us)
 
     and normalizeSum = function
       | Sum (m, []) as sum -> sum
@@ -183,41 +183,41 @@ end) : Cs.CS = struct
           xorSum (normalizeMon mon, normalizeSum (Sum (m, monL)))
 
     and normalizeMon = function
-      | Mon (us_ :: []) -> fromExp us_
-      | Mon (us_ :: usL) -> andSum (fromExp us_, normalizeMon (Mon usL))
+      | Mon (us :: []) -> fromExp us
+      | Mon (us :: usL) -> andSum (fromExp us, normalizeMon (Mon usL))
 
     and mapSum (f, Sum (m, monL)) =
       Sum (m, List.map (function mon -> mapMon (f, mon)) monL)
 
     and mapMon (f, Mon usL) =
       Mon
-        (List.map (function u_, s_ -> Whnf.whnf (f (EClo (u_, s_)), id)) usL)
+        (List.map (function u, s -> Whnf.whnf (f (EClo (u, s)), id)) usL)
 
     let rec appSum (f, Sum (m, monL)) =
       List.app (function mon -> appMon (f, mon)) monL
 
     and appMon (f, Mon usL) =
-      List.app (function u_, s_ -> f (EClo (u_, s_))) usL
+      List.app (function u, s -> f (EClo (u, s))) usL
 
-    let findMon f (g_, Sum (m, monL)) =
+    let findMon f (g, Sum (m, monL)) =
       let rec findMon' (a, monL2) = match a with
         | [] -> None
         | mon :: monL1 ->
-            begin match f (g_, mon, Sum (m, monL1 @ monL2)) with
+            begin match f (g, mon, Sum (m, monL1 @ monL2)) with
             | Some _ as result -> result
             | None -> findMon' (monL1, mon :: monL2)
             end
       in
       findMon' (monL, [])
 
-    let rec unifySum (g_, sum1, sum2) =
+    let rec unifySum (g, sum1, sum2) =
       let invertMon = function
-        | g_, Mon (((EVar (r, _, _, _) as lhs_), s) :: []), sum ->
+        | g, Mon (((EVar (r, _, _, _) as lhs), s) :: []), sum ->
             begin if Whnf.isPatSub s then
               let ss = Whnf.invert s in
-              let rhs_ = toFgn sum in
-              begin if Unify.invertible (g_, (rhs_, id), ss, r) then
-                Some (g_, lhs_, rhs_, ss)
+              let rhs = toFgn sum in
+              begin if Unify.invertible (g, (rhs, id), ss, r) then
+                Some (g, lhs, rhs, ss)
               else None
               end
             else None
@@ -228,13 +228,13 @@ end) : Cs.CS = struct
       | Sum (false, []) -> Succeed []
       | Sum (true, []) -> Fail
       | sum ->
-          begin match findMon invertMon (g_, sum) with
+          begin match findMon invertMon (g, sum) with
           | Some (g_a, lhs_a, rhs_a, ss_a) ->
               Succeed [ Assign (g_a, lhs_a, rhs_a, ss_a) ]
           | None ->
-              let u_ = toFgn sum in
-              let cnstr = ref (Eqn (g_, u_, falseExp ())) in
-              Succeed [ Delay (u_, cnstr) ]
+              let u = toFgn sum in
+              let cnstr = ref (Eqn (g, u, falseExp ())) in
+              Succeed [ Delay (u, cnstr) ]
           end
       end
 
@@ -262,8 +262,8 @@ end) : Cs.CS = struct
 
     let equalTo arg__7 arg__8 =
       begin match (arg__7, arg__8) with
-      | MyIntsynRep sum, u2_ ->
-          begin match xorSum (normalizeSum sum, fromExp (u2_, id)) with
+      | MyIntsynRep sum, u2 ->
+          begin match xorSum (normalizeSum sum, fromExp (u2, id)) with
           | Sum (m, []) -> m = false
           | _ -> false
           end
@@ -272,8 +272,8 @@ end) : Cs.CS = struct
 
     let unifyWith arg__9 arg__10 =
       begin match (arg__9, arg__10) with
-      | MyIntsynRep sum, (g_, u2_) ->
-          unifySum (g_, normalizeSum sum, fromExp (u2_, id))
+      | MyIntsynRep sum, (g, u2) ->
+          unifySum (g, normalizeSum sum, fromExp (u2, id))
       | fe, _ -> raise (UnexpectedFgnExp fe)
       end
 
@@ -293,31 +293,31 @@ end) : Cs.CS = struct
       in
       let rec makeLam arg__11 arg__12 =
         begin match (arg__11, arg__12) with
-        | e_, 0 -> e_
-        | e_, n -> Lam (Dec (None, bool ()), makeLam e_ (n - 1))
+        | e, 0 -> e
+        | e, n -> Lam (Dec (None, bool ()), makeLam e (n - 1))
         end
       in
       let rec expand a1 b1 = match a1, b1 with
         | (Nil, s), arity -> (makeParams arity, arity)
-        | (App (u_, s_), s), arity ->
-            let s'_, arity' = expand (s_, s) (arity - 1) in
-            (App (EClo (u_, comp s (Shift arity')), s'_), arity')
+        | (App (u, s_), s), arity ->
+            let s', arity' = expand (s_, s) (arity - 1) in
+            (App (EClo (u, comp s (Shift arity')), s'), arity')
         | (SClo (s_, s'), s), arity -> expand (s_, comp s' s) arity
       in
-      let s'_, arity' = expand (s_, id) arity in
-      makeLam (toFgn (opExp s'_)) arity'
+      let s', arity' = expand (s_, id) arity in
+      makeLam (toFgn (opExp s')) arity'
 
     let makeFgnUnary opSum =
-      makeFgn (1, function App (u_, Nil) -> opSum (fromExp (u_, id)))
+      makeFgn (1, function App (u, Nil) -> opSum (fromExp (u, id)))
 
     let makeFgnBinary opSum =
       makeFgn
         ( 2,
           function
-          | App (u1_, App (u2_, Nil)) ->
-              opSum (fromExp (u1_, id), fromExp (u2_, id)) )
+          | App (u1, App (u2, Nil)) ->
+              opSum (fromExp (u1, id), fromExp (u2, id)) )
 
-    let arrow u_ v_ = Pi ((Dec (None, u_), No), v_)
+    let arrow u v = Pi ((Dec (None, u), No), v)
 
     let init (cs, installF) =
       begin

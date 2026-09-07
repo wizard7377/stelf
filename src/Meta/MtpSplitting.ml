@@ -108,96 +108,96 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
     module S = StateSyn
     module H = Heuristic
 
-    let makeOperator (a, l_, b, g, i_, m, d) = match a, b, d with
-      | (s_, k), S.Splits n, true ->
+    let makeOperator (a, l, b, g, i, m, d) = match a, b, d with
+      | (s, k), S.Splits n, true ->
           Operator
-            ( (s_, k),
-              l_,
-              { sd = n; ind = i_; c = List.length l_; m; r = 1; p = g + 1 } )
-      | (s_, k), S.Splits n, false ->
+            ( (s, k),
+              l,
+              { sd = n; ind = i; c = List.length l; m; r = 1; p = g + 1 } )
+      | (s, k), S.Splits n, false ->
           Operator
-            ( (s_, k),
-              l_,
-              { sd = n; ind = i_; c = List.length l_; m; r = 0; p = g + 1 } )
+            ( (s, k),
+              l,
+              { sd = n; ind = i; c = List.length l; m; r = 0; p = g + 1 } )
 
     let rec aux = function
       | I.Null, I.Null -> I.Null
-      | I.Decl (g_, d_), I.Decl (b_, S.Lemma _) ->
-          I.Decl (aux (g_, b_), F.Prim d_)
-      | (I.Decl (_, d_) as g_), (I.Decl (_, S.Parameter (Some l)) as b_) ->
-          let (F.LabelDec (name, _, g2_)) = F.labelLookup l in
-          let psi', g'_ = aux' (g_, b_, List.length g2_) in
-          I.Decl (psi', F.Block (F.CtxBlock (Some l, g'_)))
+      | I.Decl (g, d), I.Decl (b, S.Lemma _) ->
+          I.Decl (aux (g, b), F.Prim d)
+      | (I.Decl (_, d) as g), (I.Decl (_, S.Parameter (Some l)) as b) ->
+          let (F.LabelDec (name, _, g2)) = F.labelLookup l in
+          let psi', g' = aux' (g, b, List.length g2) in
+          I.Decl (psi', F.Block (F.CtxBlock (Some l, g')))
 
     and aux' = function
-      | g_, b_, 0 -> (aux (g_, b_), I.Null)
-      | I.Decl (g_, d_), I.Decl (b_, S.Parameter (Some _)), n ->
-          let psi', g'_ = aux' (g_, b_, n - 1) in
-          (psi', I.Decl (g'_, d_))
+      | g, b, 0 -> (aux (g, b), I.Null)
+      | I.Decl (g, d), I.Decl (b, S.Parameter (Some _)), n ->
+          let psi', g' = aux' (g, b, n - 1) in
+          (psi', I.Decl (g', d))
 
-    let conv gs_ gs' =
+    let conv gs gs' =
       let exception Conv in
       let rec conv a1 b1 = match a1, b1 with
         | (I.Null, s), (I.Null, s') -> (s, s')
-        | (I.Decl (g_, I.Dec (_, v_)), s), (I.Decl (g'_, I.Dec (_, v'_)), s') ->
-            let s1, s1' = conv (g_, s) (g'_, s') in
+        | (I.Decl (g, I.Dec (_, v)), s), (I.Decl (g', I.Dec (_, v')), s') ->
+            let s1, s1' = conv (g, s) (g', s') in
             let ((s2, s2') as ps) = (I.dot1 s1, I.dot1 s1') in
-            begin if Conv.conv (v_, s1) (v'_, s1') then ps else raise Conv
+            begin if Conv.conv (v, s1) (v', s1') then ps else raise Conv
             end
         | _ -> raise Conv
       in
       try
         begin
-          ignore (conv gs_ gs');
+          ignore (conv gs gs');
           true
         end
       with Conv -> false
 
-    let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
+    let rec createEVarSpine (g, vs) = createEVarSpineW (g, Whnf.whnf vs)
 
-    and createEVarSpineW (g_, a) = match a with
-      | ((I.Uni I.Type, s) as vs_) -> (I.Nil, vs_)
-      | ((I.Root _, s) as vs_) -> (I.Nil, vs_)
-      | (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
-          let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
-          let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
-          (I.App (x_, s_), vs_)
+    and createEVarSpineW (g, a) = match a with
+      | ((I.Uni I.Type, s) as vs) -> (I.Nil, vs)
+      | ((I.Root _, s) as vs) -> (I.Nil, vs)
+      | (I.Pi (((I.Dec (_, v1) as d), _), v2), s) ->
+          let x = I.newEVar g (I.EClo (v1, s)) in
+          let s_, vs = createEVarSpine (g, (v2, I.Dot (I.Exp x, s))) in
+          (I.App (x, s_), vs)
 
-    let createAtomConst g_ h_ =
+    let createAtomConst g h =
       let cid =
-        begin match h_ with
+        begin match h with
         | I.Const cid -> cid
         | I.Skonst cid -> cid
         | I.Def cid -> cid
         | _ -> assert false
         end
       in
-      let v_ = I.constType cid in
-      let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
-      (I.Root (h_, s_), vs_)
+      let v = I.constType cid in
+      let s, vs = createEVarSpine (g, (v, I.id)) in
+      (I.Root (h, s), vs)
 
-    let createAtomBVar g_ k =
-      let (I.Dec (_, v_)) = I.ctxDec g_ k in
-      let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
-      (I.Root (I.BVar k, s_), vs_)
+    let createAtomBVar g k =
+      let (I.Dec (_, v)) = I.ctxDec g k in
+      let s, vs = createEVarSpine (g, (v, I.id)) in
+      (I.Root (I.BVar k, s), vs)
 
-    let rec someEVars (g_, a, s) = match a with
+    let rec someEVars (g, a, s) = match a with
       | [] -> s
-      | I.Dec (_, v_) :: l_ ->
-          someEVars (g_, l_, I.Dot (I.Exp (I.newEVar g_ (I.EClo (v_, s))), s))
+      | I.Dec (_, v) :: l ->
+          someEVars (g, l, I.Dot (I.Exp (I.newEVar g (I.EClo (v, s))), s))
 
     let maxNumberParams a =
       let rec maxNumberParams' n =
         begin if n < 0 then 0
         else
-          let (F.LabelDec (name, g1_, g2_)) = F.labelLookup n in
+          let (F.LabelDec (name, g1, g2)) = F.labelLookup n in
           let m' =
             foldr
               (function
-                | I.Dec (_, v_), m ->
-                    begin if I.targetFam v_ = a then m + 1 else m
+                | I.Dec (_, v), m ->
+                    begin if I.targetFam v = a then m + 1 else m
                     end)
-              0 g2_
+              0 g2
           in
           maxNumberParams' (n - 1) + m'
         end
@@ -205,20 +205,20 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       maxNumberParams' (F.labelSize () - 1)
 
     let rec maxNumberLocalParams (b, a) = match b with
-      | I.Pi ((I.Dec (_, v1_), _), v2_) ->
-          let m = maxNumberLocalParams (v2_, a) in
-          begin if I.targetFam v1_ = a then m + 1 else m
+      | I.Pi ((I.Dec (_, v1), _), v2) ->
+          let m = maxNumberLocalParams (v2, a) in
+          begin if I.targetFam v1 = a then m + 1 else m
           end
       | I.Root _ -> 0
 
     let maxNumberConstCases a = List.length (Index.lookup a)
 
-    let maxNumberCases (v_, a) =
-      maxNumberParams a + maxNumberLocalParams (v_, a) + maxNumberConstCases a
+    let maxNumberCases (v, a) =
+      maxNumberParams a + maxNumberLocalParams (v, a) + maxNumberConstCases a
 
     let rec ctxSub (a, s) = match a with
       | [] -> []
-      | d_ :: g_ -> I.decSub d_ s :: ctxSub (g_, I.dot1 s)
+      | d :: g -> I.decSub d s :: ctxSub (g, I.dot1 s)
 
     let rec createTags (n, l) = match n with
       | 0 -> I.Null
@@ -226,82 +226,82 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
 
     let rec createLemmaTags = function
       | I.Null -> I.Null
-      | I.Decl (g_, d_) ->
-          I.Decl (createLemmaTags g_, S.Lemma (S.Splits !MTPGlobal.maxSplit))
+      | I.Decl (g, d) ->
+          I.Decl (createLemmaTags g, S.Lemma (S.Splits !MTPGlobal.maxSplit))
 
-    let rec constCases (g_, vs_, a, abstract, ops) = match a with
+    let rec constCases (g, vs, a, abstract, ops) = match a with
       | [] -> ops
-      | (I.Const c as h_) :: sgn_ ->
-          let u_, vs'_ = createAtomConst g_ h_ in
+      | (I.Const c as h) :: sgn ->
+          let u, vs' = createAtomConst g h in
           constCases
-            ( g_,
-              vs_,
-              sgn_,
+            ( g,
+              vs,
+              sgn,
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable g_ vs_ vs'_ then
-                       Active (abstract u_) :: ops
+                     begin if Unify.unifiable g vs vs' then
+                       Active (abstract u) :: ops
                      else ops
                      end
                    with MTPAbstract.Error _ -> InActive :: ops)) )
-      | (I.Def c as h_) :: sgn_ ->
-          let u_, vs'_ = createAtomConst g_ h_ in
+      | (I.Def c as h) :: sgn ->
+          let u, vs' = createAtomConst g h in
           constCases
-            ( g_,
-              vs_,
-              sgn_,
+            ( g,
+              vs,
+              sgn,
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable g_ vs_ vs'_ then
-                       Active (abstract u_) :: ops
+                     begin if Unify.unifiable g vs vs' then
+                       Active (abstract u) :: ops
                      else ops
                      end
                    with MTPAbstract.Error _ -> InActive :: ops)) )
-      | _ :: sgn_ ->
+      | _ :: sgn ->
           (* Skip other head types *)
-          constCases (g_, vs_, sgn_, abstract, ops)
+          constCases (g, vs, sgn, abstract, ops)
 
-    let rec paramCases (g_, vs_, k, abstract, ops) = match k with
+    let rec paramCases (g, vs, k, abstract, ops) = match k with
       | 0 -> ops
       | k ->
-          let u_, vs'_ = createAtomBVar g_ k in
+          let u, vs' = createAtomBVar g k in
           paramCases
-            ( g_,
-              vs_,
+            ( g,
+              vs,
               k - 1,
               abstract,
               CsManager.trail (function () ->
                   (try
-                     begin if Unify.unifiable g_ vs_ vs'_ then
-                       Active (abstract u_) :: ops
+                     begin if Unify.unifiable g vs vs' then
+                       Active (abstract u) :: ops
                      else ops
                      end
                    with MTPAbstract.Error _ -> InActive :: ops)) )
 
-    let constAndParamCases ops0 (c, g_, k, (v_, s'), abstract) =
+    let constAndParamCases ops0 (c, g, k, (v, s'), abstract) =
       constCases
-        ( g_,
-          (v_, s'),
+        ( g,
+          (v, s'),
           Index.lookup c,
           abstract,
-          paramCases (g_, (v_, s'), k, abstract, ops0) )
+          paramCases (g, (v, s'), k, abstract, ops0) )
 
-    let metaCases (d, ops0) (c, g_, k, vs_, abstract) =
+    let metaCases (d, ops0) (c, g_, k, vs, abstract) =
       let g = I.ctxLength g_ in
       let rec select (d', ops) = match d' with
         | 0 -> ops
         | d' ->
             let n = g - d' + 1 in
-            let (I.Dec (_, v_)) = I.ctxDec g_ n in
+            let (I.Dec (_, v)) = I.ctxDec g_ n in
             let ops' =
-              begin if I.targetFam v_ = c then
-                let u_, vs'_ = createAtomBVar g_ n in
+              begin if I.targetFam v = c then
+                let u, vs' = createAtomBVar g_ n in
                 CsManager.trail (function () ->
                     (try
-                       begin if Unify.unifiable g_ vs_ vs'_ then
-                         Active (abstract u_) :: ops
+                       begin if Unify.unifiable g_ vs vs' then
+                         Active (abstract u) :: ops
                        else ops
                        end
                      with MTPAbstract.Error _ -> InActive :: ops))
@@ -312,80 +312,80 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
       in
       select (d, ops0)
 
-    let rec lowerSplitDest (g_, k, a, abstract, cases) = match a with
-      | ((I.Root (I.Const c, _) as v_), s') ->
-          cases (c, g_, I.ctxLength g_, (v_, s'), abstract)
-      | (I.Pi ((d_, p_), v_), s') ->
-          let d'_ = I.decSub d_ s' in
+    let rec lowerSplitDest (g, k, a, abstract, cases) = match a with
+      | ((I.Root (I.Const c, _) as v), s') ->
+          cases (c, g, I.ctxLength g, (v, s'), abstract)
+      | (I.Pi ((d, p), v), s') ->
+          let d' = I.decSub d s' in
           lowerSplitDest
-            ( I.Decl (g_, d'_),
+            ( I.Decl (g, d'),
               k + 1,
-              (v_, I.dot1 s'),
-              (fun u_ -> abstract (I.Lam (d'_, u_))),
+              (v, I.dot1 s'),
+              (fun u -> abstract (I.Lam (d', u))),
               cases )
 
-    let abstractErrorLeft ((g_, b_), s) =
+    let abstractErrorLeft ((g, b), s) =
       raise (MTPAbstract.Error "Cannot split left of parameters")
 
-    let abstractErrorRight ((g_, b_), s) =
+    let abstractErrorRight ((g, b), s) =
       raise (MTPAbstract.Error "Cannot split right of parameters")
 
-    let split (((I.Dec (_, v_) as d_), t_), sc, abstract) =
+    let split (((I.Dec (_, v) as d), t_), sc, abstract) =
       let rec split' (n, cases) =
         begin if n < 0 then
-          let (g'_, b'_), s', (g0_, b0), _ = sc (I.Null, I.Null) in
-          let abstract' u'_ =
-            let ((g''_, b''), s'') : (I.dctx * S.tag I.ctx) * I.sub =
+          let (g', b'), s', (g0, b0), _ = sc (I.Null, I.Null) in
+          let abstract' u' =
+            let ((g'', b''), s'') : (I.dctx * S.tag I.ctx) * I.sub =
               Obj.magic
                 (MTPAbstract.abstractSub'
-                   g'_ b'_ (I.Dot (I.Exp u'_, s')) (I.Decl (b0, t_)))
+                   g' b' (I.Dot (I.Exp u', s')) (I.Decl (b0, t_)))
             in
             ignore begin if !Global.doubleCheck then (
-                let psi'' = aux (g''_, b'') in
+                let psi'' = aux (g'', b'') in
                 ignore (TypeCheck.typeCheckCtx (F.makectx psi''));
-                let psi = aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0, t_))) in
+                let psi = aux (Obj.magic (I.Decl (g0, d), I.Decl (b0, t_))) in
                 ignore (TypeCheck.typeCheckCtx (F.makectx psi));
                 FunTypeCheck.checkSub psi'' s'' psi)
               else ()
               end;
-            abstract ((g''_, b''), s'')
+            abstract ((g'', b''), s'')
           in
-          lowerSplitDest (g'_, 0, (v_, s'), abstract', constAndParamCases cases)
+          lowerSplitDest (g', 0, (v, s'), abstract', constAndParamCases cases)
         else
-          let (F.LabelDec (name, g1_, g2_)) = F.labelLookup n in
-          let t = someEVars (I.Null, g1_, I.id) in
-          let b1_ = createLemmaTags (F.listToCtx g1_) in
-          let g2t = ctxSub (g2_, t) in
-          let length = List.length g2_ in
-          let b2_ = createTags (length, n) in
-          let (g'_, b'_), s', (g0_, b0), p =
-            sc (Names.ctxName (F.listToCtx g2t), b2_)
+          let (F.LabelDec (name, g1, g2)) = F.labelLookup n in
+          let t = someEVars (I.Null, g1, I.id) in
+          let b1 = createLemmaTags (F.listToCtx g1) in
+          let g2t = ctxSub (g2, t) in
+          let length = List.length g2 in
+          let b2 = createTags (length, n) in
+          let (g', b'), s', (g0, b0), p =
+            sc (Names.ctxName (F.listToCtx g2t), b2)
           in
-          let abstract' u'_ =
+          let abstract' u' =
             begin if p then
               raise (MTPAbstract.Error "Cannot split right of parameters")
             else
-              let ((g''_, b''), s'') : (I.dctx * S.tag I.ctx) * I.sub =
+              let ((g'', b''), s'') : (I.dctx * S.tag I.ctx) * I.sub =
                 Obj.magic
                   ((Obj.magic MTPAbstract.abstractSub)
-                     (t, b1_, (g'_, b'_), I.Dot (I.Exp u'_, s'), I.Decl (b0, t_)))
+                     (t, b1, (g', b'), I.Dot (I.Exp u', s'), I.Decl (b0, t_)))
               in
               ignore begin if !Global.doubleCheck then (
-                  let psi'' = aux (g''_, b'') in
+                  let psi'' = aux (g'', b'') in
                   ignore (TypeCheck.typeCheckCtx (F.makectx psi''));
                   let psi =
-                    aux (Obj.magic (I.Decl (g0_, d_), I.Decl (b0, t_)))
+                    aux (Obj.magic (I.Decl (g0, d), I.Decl (b0, t_)))
                   in
                   ignore (TypeCheck.typeCheckCtx (F.makectx psi));
                   FunTypeCheck.checkSub psi'' s'' psi)
                 else ()
                 end;
-              abstract ((g''_, b''), s'')
+              abstract ((g'', b''), s'')
             end
           in
           let cases' =
             lowerSplitDest
-              (g'_, 0, (v_, s'), abstract', metaCases (length, cases))
+              (g', 0, (v, s'), abstract', metaCases (length, cases))
           in
           split' (n - 1, cases')
         end
@@ -394,13 +394,13 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
 
     let rec occursInExp (k, a) = match a with
       | I.Uni _ -> false
-      | I.Pi (dp_, v_) -> occursInDecP (k, dp_) || occursInExp (k + 1, v_)
-      | I.Root (c_, s_) -> occursInCon (k, c_) || occursInSpine (k, s_)
-      | I.Lam (d_, v_) -> occursInDec (k, d_) || occursInExp (k + 1, v_)
-      | I.FgnExp (csid_, csfe) ->
-          I.FgnExpStd.fold csid_ csfe
+      | I.Pi (dp, v) -> occursInDecP (k, dp) || occursInExp (k + 1, v)
+      | I.Root (c, s) -> occursInCon (k, c) || occursInSpine (k, s)
+      | I.Lam (d, v) -> occursInDec (k, d) || occursInExp (k + 1, v)
+      | I.FgnExp (csid, csfe) ->
+          I.FgnExpStd.fold csid csfe
             (function
-              | u_, b_ -> b_ || occursInExp (k, Whnf.normalize (u_, I.id)))
+              | u, b -> b || occursInExp (k, Whnf.normalize (u, I.id)))
             false
 
     and occursInCon (k, a) = match a with
@@ -411,207 +411,207 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
 
     and occursInSpine (k, a) = match a with
       | I.Nil -> false
-      | I.App (u_, s_) -> occursInExp (k, u_) || occursInSpine (k, s_)
+      | I.App (u, s) -> occursInExp (k, u) || occursInSpine (k, s)
 
-    and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
-    and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
+    and occursInDec (k, I.Dec (_, v)) = occursInExp (k, v)
+    and occursInDecP (k, (d, _)) = occursInDec (k, d)
 
     let isIndexInit k = false
-    let isIndexSucc (d_, isIndex) k = occursInDec (k, d_) || isIndex (k + 1)
-    let isIndexFail (d_, isIndex) k = isIndex (k + 1)
+    let isIndexSucc (d, isIndex) k = occursInDec (k, d) || isIndex (k + 1)
+    let isIndexFail (d, isIndex) k = isIndex (k + 1)
 
-    let abstractInit (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_) as s_)
-        ((g'_, b'_), s') =
+    let abstractInit (S.State (n, (g, b), (ih, oh), d, o, h, f) as s)
+        ((g', b'), s') =
       begin
-        begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g'_ else ()
+        begin if !Global.doubleCheck then TypeCheck.typeCheckCtx g' else ()
         end;
         begin
           begin if !Global.doubleCheck then
-            FunTypeCheck.isFor g'_ (F.forSub f_ s')
+            FunTypeCheck.isFor g' (F.forSub f s')
           else ()
           end;
           S.State
             ( n,
-              (g'_, b'_),
-              (ih_, oh),
+              (g', b'),
+              (ih, oh),
               d,
-              S.orderSub o_ s',
-              map (function i, f'_ -> (i, F.forSub f'_ s')) h_,
-              F.forSub f_ s' )
+              S.orderSub o s',
+              map (function i, f' -> (i, F.forSub f' s')) h,
+              F.forSub f s' )
         end
       end
 
-    let abstractCont ((d_, t_), abstract) ((g_, b_), s) =
+    let abstractCont ((d, t), abstract) ((g, b), s) =
       abstract
-        ( ( I.Decl (g_, Whnf.normalizeDec d_ s),
-            I.Decl (b_, S.normalizeTag t_ s) ),
+        ( ( I.Decl (g, Whnf.normalizeDec d s),
+            I.Decl (b, S.normalizeTag t s) ),
           I.dot1 s )
 
-    let makeAddressInit s_ k = (s_, k)
+    let makeAddressInit s k = (s, k)
     let makeAddressCont makeAddress k = makeAddress (k + 1)
 
     let rec occursInOrder (n, a, k, sc) = match a with
-      | S.Arg (us_, vt) ->
-          let u'_ = Whnf.normalize us_ in
-          begin if occursInExp (k, u'_) then Some n else sc (n + 1)
+      | S.Arg (us, vt) ->
+          let u' = Whnf.normalize us in
+          begin if occursInExp (k, u') then Some n else sc (n + 1)
           end
-      | S.Lex os_ -> occursInOrders (n, os_, k, sc)
-      | S.Simul os_ -> occursInOrders (n, os_, k, sc)
+      | S.Lex os -> occursInOrders (n, os, k, sc)
+      | S.Simul os -> occursInOrders (n, os, k, sc)
 
     and occursInOrders (n, a, k, sc) = match a with
       | [] -> sc n
-      | o_ :: os_ ->
+      | o :: os ->
           occursInOrder
-            (n, o_, k, function n' -> occursInOrders (n', os_, k, sc))
+            (n, o, k, function n' -> occursInOrders (n', os, k, sc))
 
-    let inductionInit o_ k = occursInOrder (0, o_, k, function n -> None)
+    let inductionInit o k = occursInOrder (0, o, k, function n -> None)
     let inductionCont induction k = induction (k + 1)
 
     let rec expand' (b, isIndex, abstract, makeAddress, induction) = match b with
       | ((I.Null, I.Null) as gb) ->
-          ( (fun (gp, bp_) -> ((gp, bp_), I.Shift (I.ctxLength gp), gb, false)),
+          ( (fun (gp, bp) -> ((gp, bp), I.Shift (I.ctxLength gp), gb, false)),
             [] )
-      | ((I.Decl (g_, d_), I.Decl (b_, (S.Lemma (S.Splits _ as k_) as t_))) as
+      | ((I.Decl (g, d), I.Decl (b, (S.Lemma (S.Splits _ as k) as t))) as
            gb) ->
           let sc, ops =
             expand'
-              ( (g_, b_),
-                isIndexSucc (d_, isIndex),
-                abstractCont ((d_, t_), abstract),
+              ( (g, b),
+                isIndexSucc (d, isIndex),
+                abstractCont ((d, t), abstract),
                 makeAddressCont makeAddress,
                 inductionCont induction )
           in
-          let (I.Dec (xOpt, v_)) = d_ in
-          let sc' (gp, bp_) =
-            let (g'_, b'_), s', (g0_, b0), p' = sc (gp, bp_) in
-            let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
-            ( (g'_, b'_),
-              I.Dot (I.Exp x_, s'),
-              (I.Decl (g0_, d_), I.Decl (b0, t_)),
+          let (I.Dec (xOpt, v)) = d in
+          let sc' (gp, bp) =
+            let (g', b'), s', (g0, b0), p' = sc (gp, bp) in
+            let x = I.newEVar g' (I.EClo (v, s')) in
+            ( (g', b'),
+              I.Dot (I.Exp x, s'),
+              (I.Decl (g0, d), I.Decl (b0, t)),
               p' )
           in
           let ops' =
-            begin if (not (isIndex 1)) && S.splitDepth k_ > 0 then
-              let a = I.targetFam v_ in
+            begin if (not (isIndex 1)) && S.splitDepth k > 0 then
+              let a = I.targetFam v in
               makeOperator
                 ( makeAddress 1,
-                  split ((d_, Obj.magic t_), Obj.magic sc, abstract),
-                  k_,
-                  I.ctxLength g_,
+                  split ((d, Obj.magic t), Obj.magic sc, abstract),
+                  k,
+                  I.ctxLength g,
                   induction 1,
-                  maxNumberCases (v_, a),
+                  maxNumberCases (v, a),
                   Subordinate.below a a )
               :: ops
             else ops
             end
           in
           (sc', ops')
-      | (I.Decl (g_, d_), I.Decl (b_, (S.Lemma rl_ as t_))) ->
+      | (I.Decl (g, d), I.Decl (b, (S.Lemma rl as t))) ->
           let sc, ops =
             expand'
-              ( (g_, b_),
-                isIndexSucc (d_, isIndex),
-                abstractCont ((d_, t_), abstract),
+              ( (g, b),
+                isIndexSucc (d, isIndex),
+                abstractCont ((d, t), abstract),
                 makeAddressCont makeAddress,
                 inductionCont induction )
           in
-          let (I.Dec (xOpt, v_)) = d_ in
-          let sc' (gp, bp_) =
-            let (g'_, b'_), s', (g0_, b0), p' = sc (gp, bp_) in
-            let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
-            ( (g'_, b'_),
-              I.Dot (I.Exp x_, s'),
-              (I.Decl (g0_, d_), I.Decl (b0, t_)),
+          let (I.Dec (xOpt, v)) = d in
+          let sc' (gp, bp) =
+            let (g', b'), s', (g0, b0), p' = sc (gp, bp) in
+            let x = I.newEVar g' (I.EClo (v, s')) in
+            ( (g', b'),
+              I.Dot (I.Exp x, s'),
+              (I.Decl (g0, d), I.Decl (b0, t)),
               p' )
           in
           (sc', ops)
-      | (I.Decl (g_, d_), I.Decl (b_, (S.Lemma rLdone as t_))) ->
+      | (I.Decl (g, d), I.Decl (b, (S.Lemma rLdone as t))) ->
           let sc, ops =
             expand'
-              ( (g_, b_),
-                isIndexSucc (d_, isIndex),
-                abstractCont ((d_, t_), abstract),
+              ( (g, b),
+                isIndexSucc (d, isIndex),
+                abstractCont ((d, t), abstract),
                 makeAddressCont makeAddress,
                 inductionCont induction )
           in
-          let (I.Dec (xOpt, v_)) = d_ in
-          let sc' (gp, bp_) =
-            let (g'_, b'_), s', (g0_, b0), p' = sc (gp, bp_) in
-            let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
-            ( (g'_, b'_),
-              I.Dot (I.Exp x_, s'),
-              (I.Decl (g0_, d_), I.Decl (b0, t_)),
+          let (I.Dec (xOpt, v)) = d in
+          let sc' (gp, bp) =
+            let (g', b'), s', (g0, b0), p' = sc (gp, bp) in
+            let x = I.newEVar g' (I.EClo (v, s')) in
+            ( (g', b'),
+              I.Dot (I.Exp x, s'),
+              (I.Decl (g0, d), I.Decl (b0, t)),
               p' )
           in
           (sc', ops)
-      | (I.Decl (g_, d_), I.Decl (b_, (S.Parameter (Some _) as t_))) ->
+      | (I.Decl (g, d), I.Decl (b, (S.Parameter (Some _) as t))) ->
           let sc, ops =
             expand'
-              ( (g_, b_),
-                isIndexSucc (d_, isIndex),
+              ( (g, b),
+                isIndexSucc (d, isIndex),
                 abstractErrorLeft,
                 makeAddressCont makeAddress,
                 inductionCont induction )
           in
-          let (I.Dec (xOpt, v_)) = d_ in
-          let sc' (gp, bp_) =
-            let (g'_, b'_), s', (g0_, b0), _ = sc (gp, bp_) in
-            ( ( I.Decl (g'_, Names.decName g'_ (I.decSub d_ s')),
-                I.Decl (b'_, t_) ),
+          let (I.Dec (xOpt, v)) = d in
+          let sc' (gp, bp) =
+            let (g', b'), s', (g0, b0), _ = sc (gp, bp) in
+            ( ( I.Decl (g', Names.decName g' (I.decSub d s')),
+                I.Decl (b', t) ),
               I.dot1 s',
-              (I.Decl (g0_, d_), I.Decl (b0, t_)),
+              (I.Decl (g0, d), I.Decl (b0, t)),
               true )
           in
           (sc', ops)
 
-    let expand (S.State (n, (g0_, b0), _, _, o_, _, _) as s0) =
+    let expand (S.State (n, (g0, b0), _, _, o, _, _) as s0) =
       ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s0)
         else ()
         end;
       let _, ops =
         expand'
-          ( (g0_, b0),
+          ( (g0, b0),
             isIndexInit,
             abstractInit s0,
             makeAddressInit s0,
-            inductionInit o_ )
+            inductionInit o )
       in
       ops
 
-    let index (Operator ((s_, index), sl_, { c = k })) = k
+    let index (Operator ((s, index), sl, { c = k })) = k
 
-    let compare (Operator (_, _, i1_)) (Operator (_, _, i2_)) =
-      H.compare i1_ i2_
+    let compare (Operator (_, _, i1)) (Operator (_, _, i2)) =
+      H.compare i1 i2
 
     let isInActive = function Active _ -> false | InActive -> true
-    let applicable (Operator (_, sl_, i_)) = not (List.exists isInActive sl_)
+    let applicable (Operator (_, sl, i)) = not (List.exists isInActive sl)
 
-    let apply (Operator (_, sl_, i_)) =
+    let apply (Operator (_, sl, i)) =
       map
         (function
-          | Active s_ -> begin
+          | Active s -> begin
               begin if !Global.doubleCheck then
                 FunTypeCheck.isState
-                  (Obj.magic s_ : FunTypeCheck.StateSyn.state)
+                  (Obj.magic s : FunTypeCheck.StateSyn.state)
               else ()
               end;
-              s_
+              s
             end
           | InActive -> raise (Error "Not applicable: leftover constraints"))
-        sl_
+        sl
 
     let menu
-        (Operator ((S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_), i), sl_, i_)
-         as op_) =
+        (Operator ((S.State (n, (g, b), (ih, oh), d, o, h, f), i), sl, i_)
+         as op) =
       let rec active (a, n) = match a with
         | [] -> n
-        | InActive :: l_ -> active (l_, n)
-        | Active _ :: l_ -> active (l_, n + 1)
+        | InActive :: l -> active (l, n)
+        | Active _ :: l -> active (l, n + 1)
       in
       let rec inactive (a, n) = match a with
         | [] -> n
-        | InActive :: l_ -> inactive (l_, n + 1)
-        | Active _ :: l_ -> inactive (l_, n)
+        | InActive :: l -> inactive (l, n + 1)
+        | Active _ :: l -> inactive (l, n)
       in
       let casesToString = function
         | 0 -> "zero cases"
@@ -624,9 +624,9 @@ end) : MTPSPLITTING.MTPSPLITTING = struct
             (((" [active: " ^ Int.toString n) ^ " inactive: ") ^ Int.toString m)
             ^ "]"
       in
-      (((("Splitting : " ^ Print.decToString g_ (I.ctxDec g_ i)) ^ " ")
+      (((("Splitting : " ^ Print.decToString g (I.ctxDec g i)) ^ " ")
        ^ H.indexToString i_)
-      ^ flagToString (active (sl_, 0), inactive (sl_, 0)))
+      ^ flagToString (active (sl, 0), inactive (sl, 0)))
       ^ ""
   end
 

@@ -38,59 +38,59 @@ module Strict = struct
     | _, _ -> raise EtaContract
     end
 
-  let rec pattern_spine' (d_, a) = match a with
+  let rec pattern_spine' (d, a) = match a with
     | [] -> true
     | n :: s ->
         let isn x = x = n in
         let hasn s = List.exists isn s in
-        hasn d_ && (not (hasn s)) && pattern_spine' (d_, s)
+        hasn d && (not (hasn s)) && pattern_spine' (d, s)
 
-  let pattern_spine (d_, s) =
-    try pattern_spine' (d_, map eta_contract_var s) with EtaContract -> false
+  let pattern_spine (d, s) =
+    try pattern_spine' (d, map eta_contract_var s) with EtaContract -> false
 
   let rec spine_occ arg__4 arg__5 =
     begin match (arg__4, arg__5) with
-    | n, (d_, []) -> false
-    | n, (d_, Elt t :: s) -> term_occ n (d_, t) || spine_occ n (d_, s)
-    | n, (d_, AElt t :: s) -> aterm_occ n (d_, t) || spine_occ n (d_, s)
-    | n, (d_, Ascribe (t, a) :: s) ->
-        nterm_occ n (d_, t) || type_occ n (d_, a) || spine_occ n (d_, s)
-    | n, (d_, Omit :: s) -> false
+    | n, (d, []) -> false
+    | n, (d, Elt t :: s) -> term_occ n (d, t) || spine_occ n (d, s)
+    | n, (d, AElt t :: s) -> aterm_occ n (d, t) || spine_occ n (d, s)
+    | n, (d, Ascribe (t, a) :: s) ->
+        nterm_occ n (d, t) || type_occ n (d, a) || spine_occ n (d, s)
+    | n, (d, Omit :: s) -> false
     end
 
   and term_occ arg__6 arg__7 =
     begin match (arg__6, arg__7) with
-    | n, (d_, NTerm t) -> nterm_occ n (d_, t)
-    | n, (d_, ATerm t) -> aterm_occ n (d_, t)
+    | n, (d, NTerm t) -> nterm_occ n (d, t)
+    | n, (d, ATerm t) -> aterm_occ n (d, t)
     end
 
   and nterm_occ arg__8 arg__9 =
     begin match (arg__8, arg__9) with
-    | n, (d_, Lam t) -> term_occ (n + 1) (0 :: map (function x -> x + 1) d_, t)
-    | n, (d_, NRoot (h, s)) -> root_occ n (d_, h, s)
+    | n, (d, Lam t) -> term_occ (n + 1) (0 :: map (function x -> x + 1) d, t)
+    | n, (d, NRoot (h, s)) -> root_occ n (d, h, s)
     end
 
   and aterm_occ arg__10 arg__11 =
     begin match (arg__10, arg__11) with
-    | n, (d_, ARoot (h, s)) -> root_occ n (d_, h, s)
-    | n, (d_, ERoot _) -> false
+    | n, (d, ARoot (h, s)) -> root_occ n (d, h, s)
+    | n, (d, ERoot _) -> false
     end
 
   and root_occ arg__12 arg__13 =
     begin match (arg__12, arg__13) with
-    | n, (d_, Var n', s) ->
-        begin if n = n' then pattern_spine (d_, s)
-        else List.exists (function x -> x = n') d_ && spine_occ n (d_, s)
+    | n, (d, Var n', s) ->
+        begin if n = n' then pattern_spine (d, s)
+        else List.exists (function x -> x = n') d && spine_occ n (d, s)
         end
-    | n, (d_, Const n', s) -> spine_occ n (d_, s)
+    | n, (d, Const n', s) -> spine_occ n (d, s)
     end
 
   and type_occ arg__14 arg__15 =
     begin match (arg__14, arg__15) with
-    | n, (d_, TRoot (_, s)) -> spine_occ n (d_, s)
-    | n, (d_, TPi (_, a, b)) ->
-        type_occ n (d_, a)
-        || type_occ (n + 1) (0 :: map (function x -> x + 1) d_, b)
+    | n, (d, TRoot (_, s)) -> spine_occ n (d, s)
+    | n, (d, TPi (_, a, b)) ->
+        type_occ n (d, a)
+        || type_occ (n + 1) (0 :: map (function x -> x + 1) d, b)
     (* PERF: suspend these context shifts, do them at the end *)
     end
 

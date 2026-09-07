@@ -53,7 +53,7 @@ module FgnExpStd = struct
 
   let fold (csid : csid) (fe : fgnExp) (f : exp * 'a -> 'a) (b : 'a) : 'a =
     let r = ref b in
-    let g u_ = r := f (u_, !r) in
+    let g u = r := f (u, !r) in
     App.apply csid fe g;
     !r
 end

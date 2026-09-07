@@ -50,33 +50,33 @@ module Make_MetaSyn (Whnf : WHNF) : METASYN = struct
   open! struct
     module I = IntSyn
 
-    let rec createEVarSpine (g_, vs_) = createEVarSpineW (g_, Whnf.whnf vs_)
+    let rec createEVarSpine (g, vs) = createEVarSpineW (g, Whnf.whnf vs)
 
-    and createEVarSpineW (g_, a) = match a with
-      | ((I.Uni I.Type, s) as vs_) -> (I.Nil, vs_)
-      | ((I.Root _, s) as vs_) -> (I.Nil, vs_)
-      | (I.Pi (((I.Dec (_, v1_) as d_), _), v2_), s) ->
-          let x_ = I.newEVar g_ (I.EClo (v1_, s)) in
-          let s_, vs_ = createEVarSpine (g_, (v2_, I.Dot (I.Exp x_, s))) in
-          (I.App (x_, s_), vs_)
+    and createEVarSpineW (g, a) = match a with
+      | ((I.Uni I.Type, s) as vs) -> (I.Nil, vs)
+      | ((I.Root _, s) as vs) -> (I.Nil, vs)
+      | (I.Pi (((I.Dec (_, v1) as d), _), v2), s) ->
+          let x = I.newEVar g (I.EClo (v1, s)) in
+          let s_, vs = createEVarSpine (g, (v2, I.Dot (I.Exp x, s))) in
+          (I.App (x, s_), vs)
 
-    let createAtomConst g_ h_ =
+    let createAtomConst g h =
       let cid =
-        begin match h_ with
+        begin match h with
         | I.Const cid -> cid
         | I.Skonst cid -> cid
         | I.Def cid -> cid
         | _ -> assert false
         end
       in
-      let v_ = I.constType cid in
-      let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
-      (I.Root (h_, s_), vs_)
+      let v = I.constType cid in
+      let s, vs = createEVarSpine (g, (v, I.id)) in
+      (I.Root (h, s), vs)
 
-    let createAtomBVar g_ k =
-      let (I.Dec (_, v_)) = I.ctxDec g_ k in
-      let s_, vs_ = createEVarSpine (g_, (v_, I.id)) in
-      (I.Root (I.BVar k, s_), vs_)
+    let createAtomBVar g k =
+      let (I.Dec (_, v)) = I.ctxDec g k in
+      let s, vs = createEVarSpine (g, (v, I.id)) in
+      (I.Root (I.BVar k, s), vs)
   end
 
   (* createEVarSpineW (G, (V, s)) = ((V', s') , S')

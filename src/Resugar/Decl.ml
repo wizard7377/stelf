@@ -17,8 +17,8 @@ module Make (Cst : Cst.CST) = struct
      first, so the context has to be reversed on the way out. *)
   let rec to_dec_list acc = function
     | I.Null -> acc
-    | I.Decl (g_, d_) -> to_dec_list (d_ :: acc) g_
+    | I.Decl (g, d) -> to_dec_list (d :: acc) g
 
-  let ctx (opts : Options.t) (g0_ : I.dctx) (g_ : I.dctx) : Cst.decl list =
-    T.dec_list opts g0_ (to_dec_list [] g_)
+  let ctx (opts : Options.t) (g0 : I.dctx) (g : I.dctx) : Cst.decl list =
+    T.dec_list opts g0 (to_dec_list [] g)
 end

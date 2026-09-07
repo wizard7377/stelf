@@ -49,8 +49,8 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
      formats instantiated EVars as a substitution.
      Abbreviate as empty string if chatter level is < 3.
   *)
-  let evarInstToString xs_ =
-    begin if !Global.chatter >= 3 then Print.evarInstToString xs_ else ""
+  let evarInstToString xs =
+    begin if !Global.chatter >= 3 then Print.evarInstToString xs else ""
     end
 
   (* expToString (G, U) = msg
@@ -61,27 +61,27 @@ end) : FQUERY with module ExtQuery = Fquery__0.ReconQuery = struct
     begin if !Global.chatter >= 3 then (let g__, u__ = gu in Print.expToString g__ u__) else ""
     end
 
-  let rec lower (n, g_, a) = match n, a with
-    | 0, v_ -> (g_, v_)
-    | n, I.Pi ((d_, _), v_) -> lower (n - 1, I.Decl (g_, d_), v_)
+  let rec lower (n, g, a) = match n, a with
+    | 0, v -> (g, v)
+    | n, I.Pi ((d, _), v) -> lower (n - 1, I.Decl (g, d), v)
 
   let run quy (Paths.Loc (fileName, r)) =
-    let v_, optName, xs_ =
+    let v, optName, xs =
       ReconQuery.queryToQuery quy (Paths.Loc (fileName, r))
     in
     ignore (Display.chatter_s 3 "%fquery");
     ignore (Display.chatter_s 3 " ");
     ignore (Display.chatter_s 3
-        (Timers.time Timers.printing expToString (IntSyn.Null, v_) ^ ".\n"));
-    let k, v1_ = Abstract.abstractDecImp v_ in
-    let g_, v2_ = lower (k, I.Null, v1_) in
-    let a = I.targetFam v2_ in
-    let w_ = W.lookup a in
-    let v3 = Worldify.worldifyGoal g_ v2_ in
-    ignore (TypeCheck.typeCheck g_ (v3, I.Uni I.Type));
-    let p_ = Converter.convertGoal (T.embedCtx g_) v3 in
-    let v_ = Timers.time Timers.delphin Opsem.evalPrg p_ in
-    print (("Delphin: " ^ TomegaPrint.prgToString I.Null v_) ^ "\n")
+        (Timers.time Timers.printing expToString (IntSyn.Null, v) ^ ".\n"));
+    let k, v1 = Abstract.abstractDecImp v in
+    let g, v2 = lower (k, I.Null, v1) in
+    let a = I.targetFam v2 in
+    let w = W.lookup a in
+    let v3 = Worldify.worldifyGoal g v2 in
+    ignore (TypeCheck.typeCheck g (v3, I.Uni I.Type));
+    let p = Converter.convertGoal (T.embedCtx g) v3 in
+    let v = Timers.time Timers.delphin Opsem.evalPrg p in
+    print (("Delphin: " ^ TomegaPrint.prgToString I.Null v) ^ "\n")
   (* optName = SOME(X) or NONE, Xs = free variables in query excluding X *)
   (* times itself *)
   (* G |- V'' : type *)

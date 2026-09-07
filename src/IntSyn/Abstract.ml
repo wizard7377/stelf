@@ -42,15 +42,15 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
 
     let rec collectConstraints = function
       | I.Null -> []
-      | I.Decl (g_, Fv _) -> collectConstraints g_
-      | I.Decl (g_, Ev (I.EVar (_, _, _, { contents = [] }))) ->
-          collectConstraints g_
-      | I.Decl (g_, Ev (I.EVar (_, _, _, { contents = cnstrL }))) ->
-          C.simplify cnstrL @ collectConstraints g_
-      | I.Decl (g_, Lv _) -> collectConstraints g_
+      | I.Decl (g, Fv _) -> collectConstraints g
+      | I.Decl (g, Ev (I.EVar (_, _, _, { contents = [] }))) ->
+          collectConstraints g
+      | I.Decl (g, Ev (I.EVar (_, _, _, { contents = cnstrL }))) ->
+          C.simplify cnstrL @ collectConstraints g
+      | I.Decl (g, Lv _) -> collectConstraints g
 
-    let checkConstraints k_ =
-      let constraints = collectConstraints k_ in
+    let checkConstraints k =
+      let constraints = collectConstraints k in
       ignore begin match constraints with
         | [] -> ()
         | _ -> raise (C.Error constraints)
@@ -75,12 +75,12 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
       | _, _ -> false
       end
 
-    let exists p_ k_ =
+    let exists p k =
       let rec exists' = function
         | I.Null -> false
-        | I.Decl (k'_, y_) -> p_ y_ || exists' k'_
+        | I.Decl (k', y) -> p y || exists' k'
       in
-      exists' k_
+      exists' k
 
     let ( or ) = function
       | I.Maybe, _ -> I.Maybe
@@ -91,177 +91,177 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
 
     let rec occursInExp (k, a) = match a with
       | I.Uni _ -> I.No
-      | I.Pi (dp_, v_) ->
-          ( or ) (occursInDecP (k, dp_), occursInExp (k + 1, v_))
-      | I.Root (h_, s_) -> occursInHead (k, h_, occursInSpine (k, s_))
-      | I.Lam (d_, v_) ->
-          ( or ) (occursInDec (k, d_), occursInExp (k + 1, v_))
+      | I.Pi (dp, v) ->
+          ( or ) (occursInDecP (k, dp), occursInExp (k + 1, v))
+      | I.Root (h, s) -> occursInHead (k, h, occursInSpine (k, s))
+      | I.Lam (d, v) ->
+          ( or ) (occursInDec (k, d), occursInExp (k + 1, v))
       | I.FgnExp (csfe_csid, csfe_ops) ->
           I.FgnExpStd.fold csfe_csid csfe_ops
             (function
-              | u_, dp_ ->
-                  ( or ) (dp_, occursInExp (k, Whnf.normalize (u_, I.id))))
+              | u, dp ->
+                  ( or ) (dp, occursInExp (k, Whnf.normalize (u, I.id))))
             I.No
 
-    and occursInHead (k, a, dp_) = match a, dp_ with
-      | I.BVar k', dp_ ->
-          begin if k = k' then I.Maybe else dp_
+    and occursInHead (k, a, dp) = match a, dp with
+      | I.BVar k', dp ->
+          begin if k = k' then I.Maybe else dp
           end
-      | I.Const _, dp_ -> dp_
-      | I.Def _, dp_ -> dp_
-      | I.Proj _, dp_ -> dp_
-      | I.FgnConst _, dp_ -> dp_
+      | I.Const _, dp -> dp
+      | I.Def _, dp -> dp
+      | I.Proj _, dp -> dp
+      | I.FgnConst _, dp -> dp
       | I.Skonst _, I.No -> I.No
       | I.Skonst _, I.Meta -> I.Meta
       | I.Skonst _, I.Maybe -> I.Meta
 
     and occursInSpine (k, a) = match a with
       | I.Nil -> I.No
-      | I.App (u_, s_) -> ( or ) (occursInExp (k, u_), occursInSpine (k, s_))
+      | I.App (u, s) -> ( or ) (occursInExp (k, u), occursInSpine (k, s))
 
-    and occursInDec (k, I.Dec (_, v_)) = occursInExp (k, v_)
-    and occursInDecP (k, (d_, _)) = occursInDec (k, d_)
+    and occursInDec (k, I.Dec (_, v)) = occursInExp (k, v)
+    and occursInDecP (k, (d, _)) = occursInDec (k, d)
 
     let piDepend a1 a2 b1 = match (a1, a2), b1 with
-      | (d_, I.No), v_ -> I.Pi ((d_, I.No), v_)
-      | (d_, I.Meta), v_ -> I.Pi ((d_, I.Meta), v_)
-      | (d_, I.Maybe), v_ -> I.Pi ((d_, occursInExp (1, v_)), v_)
+      | (d, I.No), v -> I.Pi ((d, I.No), v)
+      | (d, I.Meta), v -> I.Pi ((d, I.Meta), v)
+      | (d, I.Maybe), v -> I.Pi ((d, occursInExp (1, v)), v)
 
     let rec raiseType a1 b1 = match a1, b1 with
-      | I.Null, v_ -> v_
-      | I.Decl (g_, d_), v_ -> raiseType g_ (I.Pi ((d_, I.Maybe), v_))
+      | I.Null, v -> v
+      | I.Decl (g, d), v -> raiseType g (I.Pi ((d, I.Maybe), v))
 
     let rec raiseTerm a1 b1 = match a1, b1 with
-      | I.Null, u_ -> u_
-      | I.Decl (g_, d_), u_ -> raiseTerm g_ (I.Lam (d_, u_))
+      | I.Null, u -> u
+      | I.Decl (g, d), u -> raiseTerm g (I.Lam (d, u))
 
-    let rec collectExpW (g_, a, k_) = match a with
-      | (I.Uni l_, s) -> k_
-      | (I.Pi ((d_, _), v_), s) ->
+    let rec collectExpW (g, a, k) = match a with
+      | (I.Uni l, s) -> k
+      | (I.Pi ((d, _), v), s) ->
           collectExp
-            ( I.Decl (g_, I.decSub d_ s),
-              (v_, I.dot1 s),
-              collectDec (g_, (d_, s), k_) )
-      | (I.Root ((I.FVar (name, v_, s') as f_), s_), s) ->
-          begin if exists (eqFVar f_) k_ then collectSpine (g_, (s_, s), k_)
+            ( I.Decl (g, I.decSub d s),
+              (v, I.dot1 s),
+              collectDec (g, (d, s), k) )
+      | (I.Root ((I.FVar (name, v, s') as f), s_), s) ->
+          begin if exists (eqFVar f) k then collectSpine (g, (s_, s), k)
           else
             collectSpine
-              ( g_,
+              ( g,
                 (s_, s),
-                I.Decl (collectExp (I.Null, (v_, I.id), k_), Fv (name, v_)) )
+                I.Decl (collectExp (I.Null, (v, I.id), k), Fv (name, v)) )
           end
       | ( I.Root
               (I.Proj ((I.LVar ({ contents = None }, sk, (l, t)) as l_), i), s_),
             s ) ->
-          collectSpine (g_, (s_, s), collectBlock (g_, I.blockSub l_ s, k_))
-      | (I.Root (_, s_), s) -> collectSpine (g_, (s_, s), k_)
-      | (I.Lam (d_, u_), s) ->
+          collectSpine (g, (s_, s), collectBlock (g, I.blockSub l_ s, k))
+      | (I.Root (_, s_), s) -> collectSpine (g, (s_, s), k)
+      | (I.Lam (d, u), s) ->
           collectExp
-            ( I.Decl (g_, I.decSub d_ s),
-              (u_, I.dot1 s),
-              collectDec (g_, (d_, s), k_) )
-      | ((I.EVar (r, gx, v_, cnstrs) as x_), s) ->
-          begin if exists (eqEVar x_) k_ then collectSub (g_, s, k_)
+            ( I.Decl (g, I.decSub d s),
+              (u, I.dot1 s),
+              collectDec (g, (d, s), k) )
+      | ((I.EVar (r, gx, v, cnstrs) as x), s) ->
+          begin if exists (eqEVar x) k then collectSub (g, s, k)
           else
-            let v'_ = raiseType gx v_ in
-            let k'_ = collectExp (I.Null, (v'_, I.id), k_) in
-            collectSub (g_, s, I.Decl (k'_, Ev x_))
+            let v' = raiseType gx v in
+            let k' = collectExp (I.Null, (v', I.id), k) in
+            collectSub (g, s, I.Decl (k', Ev x))
           end
       | (I.FgnExp (csfe_csid, csfe_ops), s) ->
           I.FgnExpStd.fold csfe_csid csfe_ops
-            (function u_, k_ -> collectExp (g_, (u_, s), k_))
-            k_
+            (function u, k -> collectExp (g, (u, s), k))
+            k
 
-    and collectExp (g_, us_, k_) = collectExpW (g_, Whnf.whnf us_, k_)
+    and collectExp (g, us, k) = collectExpW (g, Whnf.whnf us, k)
 
-    and collectSpine (g_, a, k_) = match a with
-      | (I.Nil, _) -> k_
+    and collectSpine (g, a, k) = match a with
+      | (I.Nil, _) -> k
       | (I.SClo (s_, s'), s) ->
-          collectSpine (g_, (s_, I.comp s' s), k_)
-      | (I.App (u_, s_), s) ->
-          collectSpine (g_, (s_, s), collectExp (g_, (u_, s), k_))
+          collectSpine (g, (s_, I.comp s' s), k)
+      | (I.App (u, s_), s) ->
+          collectSpine (g, (s_, s), collectExp (g, (u, s), k))
 
-    and collectDec (g_, a, k_) = match a with
-      | (I.Dec (_, v_), s) -> collectExp (g_, (v_, s), k_)
-      | (I.BDec (_, (_, t)), s) -> collectSub (g_, I.comp t s, k_)
-      | (I.NDec _, s) -> k_
+    and collectDec (g, a, k) = match a with
+      | (I.Dec (_, v), s) -> collectExp (g, (v, s), k)
+      | (I.BDec (_, (_, t)), s) -> collectSub (g, I.comp t s, k)
+      | (I.NDec _, s) -> k
 
-    and collectSub (g_, a, k_) = match a with
-      | I.Shift _ -> k_
-      | I.Dot (I.Idx _, s) -> collectSub (g_, s, k_)
-      | I.Dot (I.Exp u_, s) ->
-          collectSub (g_, s, collectExp (g_, (u_, I.id), k_))
-      | I.Dot (I.Block b_, s) ->
-          collectSub (g_, s, collectBlock (g_, b_, k_))
+    and collectSub (g, a, k) = match a with
+      | I.Shift _ -> k
+      | I.Dot (I.Idx _, s) -> collectSub (g, s, k)
+      | I.Dot (I.Exp u, s) ->
+          collectSub (g, s, collectExp (g, (u, I.id), k))
+      | I.Dot (I.Block b, s) ->
+          collectSub (g, s, collectBlock (g, b, k))
 
-    and collectBlock (g_, a, k_) = match a with
-      | I.LVar ({ contents = Some b_ }, sk, _) ->
-          collectBlock (g_, I.blockSub b_ sk, k_)
+    and collectBlock (g, a, k) = match a with
+      | I.LVar ({ contents = Some b }, sk, _) ->
+          collectBlock (g, I.blockSub b sk, k)
       | (I.LVar (_, sk, (l, t)) as l_) ->
-          begin if exists (eqLVar l_) k_ then collectSub (g_, I.comp t sk, k_)
-          else I.Decl (collectSub (g_, I.comp t sk, k_), Lv l_)
+          begin if exists (eqLVar l_) k then collectSub (g, I.comp t sk, k)
+          else I.Decl (collectSub (g, I.comp t sk, k), Lv l_)
           end
 
-    let rec collectCtx (g0_, a, k_) = match a with
-      | I.Null -> (g0_, k_)
-      | I.Decl (g_, d_) ->
-          let g0'_, k'_ = collectCtx (g0_, g_, k_) in
-          let k''_ = collectDec (g0'_, (d_, I.id), k'_) in
-          (I.Decl (g0_, d_), k''_)
+    let rec collectCtx (g0, a, k) = match a with
+      | I.Null -> (g0, k)
+      | I.Decl (g, d) ->
+          let g0', k' = collectCtx (g0, g, k) in
+          let k'' = collectDec (g0', (d, I.id), k') in
+          (I.Decl (g0, d), k'')
 
-    let rec collectCtxs (g0_, a, k_) = match a with
-      | [] -> k_
-      | g_ :: gs_ ->
-          let g0'_, k'_ = collectCtx (g0_, g_, k_) in
-          collectCtxs (g0'_, gs_, k'_)
+    let rec collectCtxs (g0, a, k) = match a with
+      | [] -> k
+      | g :: gs ->
+          let g0', k' = collectCtx (g0, g, k) in
+          collectCtxs (g0', gs, k')
 
     let rec abstractEVar (a, depth, b) = match a, b with
-      | I.Decl (k'_, Ev (I.EVar (r', _, _, _))), (I.EVar (r, _, _, _) as x_) ->
+      | I.Decl (k', Ev (I.EVar (r', _, _, _))), (I.EVar (r, _, _, _) as x) ->
           begin if r == r' then I.BVar (depth + 1)
-          else abstractEVar (k'_, depth + 1, x_)
+          else abstractEVar (k', depth + 1, x)
           end
-      | I.Decl (k'_, _), x_ -> abstractEVar (k'_, depth + 1, x_)
+      | I.Decl (k', _), x -> abstractEVar (k', depth + 1, x)
 
     let rec abstractFVar (a, depth, b) = match a, b with
-      | I.Decl (k'_, Fv (n', _)), (I.FVar (n, _, _) as f_) ->
+      | I.Decl (k', Fv (n', _)), (I.FVar (n, _, _) as f) ->
           begin if n = n' then I.BVar (depth + 1)
-          else abstractFVar (k'_, depth + 1, f_)
+          else abstractFVar (k', depth + 1, f)
           end
-      | I.Decl (k'_, _), f_ -> abstractFVar (k'_, depth + 1, f_)
+      | I.Decl (k', _), f -> abstractFVar (k', depth + 1, f)
 
     let rec abstractLVar (a, depth, b) = match a, b with
-      | I.Decl (k'_, Lv (I.LVar (r', _, _))), (I.LVar (r, _, _) as l_) ->
+      | I.Decl (k', Lv (I.LVar (r', _, _))), (I.LVar (r, _, _) as l) ->
           begin if r == r' then I.Bidx (depth + 1)
-          else abstractLVar (k'_, depth + 1, l_)
+          else abstractLVar (k', depth + 1, l)
           end
-      | I.Decl (k'_, _), l_ -> abstractLVar (k'_, depth + 1, l_)
+      | I.Decl (k', _), l -> abstractLVar (k', depth + 1, l)
 
-    let rec abstractExpW (k_, depth, a) = match a with
-      | ((I.Uni l_ as u_), s) -> u_
-      | (I.Pi ((d_, p_), v_), s) ->
+    let rec abstractExpW (k, depth, a) = match a with
+      | ((I.Uni l as u), s) -> u
+      | (I.Pi ((d, p), v), s) ->
           piDepend
-            (abstractDec (k_, depth, (d_, s))) p_ (abstractExp (k_, depth + 1, (v_, I.dot1 s)))
-      | (I.Root ((I.FVar _ as f_), s_), s) ->
+            (abstractDec (k, depth, (d, s))) p (abstractExp (k, depth + 1, (v, I.dot1 s)))
+      | (I.Root ((I.FVar _ as f), s_), s) ->
           I.Root
-            (abstractFVar (k_, depth, f_), abstractSpine (k_, depth, (s_, s)))
-      | (I.Root (I.Proj ((I.LVar _ as l_), i), s_), s) ->
+            (abstractFVar (k, depth, f), abstractSpine (k, depth, (s_, s)))
+      | (I.Root (I.Proj ((I.LVar _ as l), i), s_), s) ->
           I.Root
-            ( I.Proj (abstractLVar (k_, depth, l_), i),
-              abstractSpine (k_, depth, (s_, s)) )
-      | (I.Root (h_, s_), s) ->
-          I.Root (h_, abstractSpine (k_, depth, (s_, s)))
-      | (I.Lam (d_, u_), s) ->
+            ( I.Proj (abstractLVar (k, depth, l), i),
+              abstractSpine (k, depth, (s_, s)) )
+      | (I.Root (h, s_), s) ->
+          I.Root (h, abstractSpine (k, depth, (s_, s)))
+      | (I.Lam (d, u), s) ->
           I.Lam
-            ( abstractDec (k_, depth, (d_, s)),
-              abstractExp (k_, depth + 1, (u_, I.dot1 s)) )
-      | ((I.EVar _ as x_), s) ->
+            ( abstractDec (k, depth, (d, s)),
+              abstractExp (k, depth + 1, (u, I.dot1 s)) )
+      | ((I.EVar _ as x), s) ->
           I.Root
-            (abstractEVar (k_, depth, x_), abstractSub (k_, depth, s, I.Nil))
+            (abstractEVar (k, depth, x), abstractSub (k, depth, s, I.Nil))
       | (I.FgnExp (csfe_csid, csfe_ops), s) ->
-          I.FgnExpStd.Map.apply csfe_csid csfe_ops (function u_ ->
-              abstractExp (k_, depth, (u_, s)))
+          I.FgnExpStd.Map.apply csfe_csid csfe_ops (function u ->
+              abstractExp (k, depth, (u, s)))
 
-    and abstractExp (k_, depth, us_) = abstractExpW (k_, depth, Whnf.whnf us_)
+    and abstractExp (k, depth, us) = abstractExpW (k, depth, Whnf.whnf us)
 
     and abstractSub (k_, depth, a, s_) = match a with
       | I.Shift k ->
@@ -271,275 +271,275 @@ module MakeAbstract (Whnf : WHNF) (Unify : UNIFY) (Constraints : CONSTRAINTS) :
           end
       | I.Dot (I.Idx k, s) ->
           abstractSub (k_, depth, s, I.App (I.Root (I.BVar k, I.Nil), s_))
-      | I.Dot (I.Exp u_, s) ->
+      | I.Dot (I.Exp u, s) ->
           abstractSub
-            (k_, depth, s, I.App (abstractExp (k_, depth, (u_, I.id)), s_))
+            (k_, depth, s, I.App (abstractExp (k_, depth, (u, I.id)), s_))
 
-    and abstractSpine (k_, depth, a) = match a with
+    and abstractSpine (k, depth, a) = match a with
       | (I.Nil, _) -> I.Nil
       | (I.SClo (s_, s'), s) ->
-          abstractSpine (k_, depth, (s_, I.comp s' s))
-      | (I.App (u_, s_), s) ->
+          abstractSpine (k, depth, (s_, I.comp s' s))
+      | (I.App (u, s_), s) ->
           I.App
-            ( abstractExp (k_, depth, (u_, s)),
-              abstractSpine (k_, depth, (s_, s)) )
+            ( abstractExp (k, depth, (u, s)),
+              abstractSpine (k, depth, (s_, s)) )
 
-    and abstractDec (k_, depth, (I.Dec (x, v_), s)) =
-      I.Dec (x, abstractExp (k_, depth, (v_, s)))
+    and abstractDec (k, depth, (I.Dec (x, v), s)) =
+      I.Dec (x, abstractExp (k, depth, (v, s)))
 
     let rec abstractSOME (k_, a) = match a with
       | I.Shift 0 -> I.Shift (I.ctxLength k_)
       | I.Shift n -> I.Shift (I.ctxLength k_)
       | I.Dot (I.Idx k, s) -> I.Dot (I.Idx k, abstractSOME (k_, s))
-      | I.Dot (I.Exp u_, s) ->
-          I.Dot (I.Exp (abstractExp (k_, 0, (u_, I.id))), abstractSOME (k_, s))
-      | I.Dot (I.Block (I.LVar _ as l_), s) ->
-          I.Dot (I.Block (abstractLVar (k_, 0, l_)), abstractSOME (k_, s))
+      | I.Dot (I.Exp u, s) ->
+          I.Dot (I.Exp (abstractExp (k_, 0, (u, I.id))), abstractSOME (k_, s))
+      | I.Dot (I.Block (I.LVar _ as l), s) ->
+          I.Dot (I.Block (abstractLVar (k_, 0, l)), abstractSOME (k_, s))
 
-    let rec abstractCtx (k_, depth, a) = match a with
+    let rec abstractCtx (k, depth, a) = match a with
       | I.Null -> (I.Null, depth)
-      | I.Decl (g_, d_) ->
-          let g'_, depth' = abstractCtx (k_, depth, g_) in
-          let d'_ = abstractDec (k_, depth', (d_, I.id)) in
-          (I.Decl (g'_, d'_), depth' + 1)
+      | I.Decl (g, d) ->
+          let g', depth' = abstractCtx (k, depth, g) in
+          let d' = abstractDec (k, depth', (d, I.id)) in
+          (I.Decl (g', d'), depth' + 1)
 
-    let rec abstractCtxlist (k_, depth, a) = match a with
+    let rec abstractCtxlist (k, depth, a) = match a with
       | [] -> []
-      | g_ :: gs_ ->
-          let g'_, depth' = abstractCtx (k_, depth, g_) in
-          let gs' = abstractCtxlist (k_, depth', gs_) in
-          g'_ :: gs'
+      | g :: gs ->
+          let g', depth' = abstractCtx (k, depth, g) in
+          let gs' = abstractCtxlist (k, depth', gs) in
+          g' :: gs'
 
-    let rec abstractKPi (a, v_) = match a with
-      | I.Null -> v_
-      | I.Decl (k'_, Ev (I.EVar (_, gx, vx, _))) ->
-          let v'_ = raiseType gx vx in
-          let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
-          abstractKPi (k'_, I.Pi ((I.Dec (None, v''), I.Maybe), v_))
-      | I.Decl (k'_, Fv (name, v'_)) ->
-          let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
-          abstractKPi (k'_, I.Pi ((I.Dec (Some name, v''), I.Maybe), v_))
-      | I.Decl (k'_, Lv (I.LVar (r, _, (l, t)))) ->
-          let t' = abstractSOME (k'_, t) in
-          abstractKPi (k'_, I.Pi ((I.BDec (None, (l, t')), I.Maybe), v_))
+    let rec abstractKPi (a, v) = match a with
+      | I.Null -> v
+      | I.Decl (k', Ev (I.EVar (_, gx, vx, _))) ->
+          let v' = raiseType gx vx in
+          let v'' = abstractExp (k', 0, (v', I.id)) in
+          abstractKPi (k', I.Pi ((I.Dec (None, v''), I.Maybe), v))
+      | I.Decl (k', Fv (name, v')) ->
+          let v'' = abstractExp (k', 0, (v', I.id)) in
+          abstractKPi (k', I.Pi ((I.Dec (Some name, v''), I.Maybe), v))
+      | I.Decl (k', Lv (I.LVar (r, _, (l, t)))) ->
+          let t' = abstractSOME (k', t) in
+          abstractKPi (k', I.Pi ((I.BDec (None, (l, t')), I.Maybe), v))
 
-    let rec abstractKLam (a, u_) = match a with
-      | I.Null -> u_
-      | I.Decl (k'_, Ev (I.EVar (_, gx, vx, _))) ->
-          let v'_ = raiseType gx vx in
+    let rec abstractKLam (a, u) = match a with
+      | I.Null -> u
+      | I.Decl (k', Ev (I.EVar (_, gx, vx, _))) ->
+          let v' = raiseType gx vx in
           abstractKLam
-            (k'_, I.Lam (I.Dec (None, abstractExp (k'_, 0, (v'_, I.id))), u_))
-      | I.Decl (k'_, Fv (name, v'_)) ->
+            (k', I.Lam (I.Dec (None, abstractExp (k', 0, (v', I.id))), u))
+      | I.Decl (k', Fv (name, v')) ->
           abstractKLam
-            ( k'_,
-              I.Lam (I.Dec (Some name, abstractExp (k'_, 0, (v'_, I.id))), u_)
+            ( k',
+              I.Lam (I.Dec (Some name, abstractExp (k', 0, (v', I.id))), u)
             )
 
     let rec abstractKCtx = function
       | I.Null -> I.Null
-      | I.Decl (k'_, Ev (I.EVar (_, gx, vx, _))) ->
-          let v'_ = raiseType gx vx in
-          let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
-          I.Decl (abstractKCtx k'_, I.Dec (None, v''))
-      | I.Decl (k'_, Fv (name, v'_)) ->
-          let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
-          I.Decl (abstractKCtx k'_, I.Dec (Some name, v''))
-      | I.Decl (k'_, Lv (I.LVar (r, _, (l, t)))) ->
-          let t' = abstractSOME (k'_, t) in
-          I.Decl (abstractKCtx k'_, I.BDec (None, (l, t')))
+      | I.Decl (k', Ev (I.EVar (_, gx, vx, _))) ->
+          let v' = raiseType gx vx in
+          let v'' = abstractExp (k', 0, (v', I.id)) in
+          I.Decl (abstractKCtx k', I.Dec (None, v''))
+      | I.Decl (k', Fv (name, v')) ->
+          let v'' = abstractExp (k', 0, (v', I.id)) in
+          I.Decl (abstractKCtx k', I.Dec (Some name, v''))
+      | I.Decl (k', Lv (I.LVar (r, _, (l, t)))) ->
+          let t' = abstractSOME (k', t) in
+          I.Decl (abstractKCtx k', I.BDec (None, (l, t')))
 
-    let abstractDecImp v_ =
-      let k_ = collectExp (I.Null, (v_, I.id), I.Null) in
-      ignore (checkConstraints k_);
-      (I.ctxLength k_, abstractKPi (k_, abstractExp (k_, 0, (v_, I.id))))
+    let abstractDecImp v =
+      let k = collectExp (I.Null, (v, I.id), I.Null) in
+      ignore (checkConstraints k);
+      (I.ctxLength k, abstractKPi (k, abstractExp (k, 0, (v, I.id))))
 
-    let abstractDef u_ v_ =
-      let k_ =
-        collectExp (I.Null, (u_, I.id), collectExp (I.Null, (v_, I.id), I.Null))
+    let abstractDef u v =
+      let k =
+        collectExp (I.Null, (u, I.id), collectExp (I.Null, (v, I.id), I.Null))
       in
-      ignore (checkConstraints k_);
-      ( I.ctxLength k_,
-        ( abstractKLam (k_, abstractExp (k_, 0, (u_, I.id))),
-          abstractKPi (k_, abstractExp (k_, 0, (v_, I.id))) ) )
+      ignore (checkConstraints k);
+      ( I.ctxLength k,
+        ( abstractKLam (k, abstractExp (k, 0, (u, I.id))),
+          abstractKPi (k, abstractExp (k, 0, (v, I.id))) ) )
 
     let abstractSpineExt (s_, s) =
-      let k_ = collectSpine (I.Null, (s_, s), I.Null) in
-      ignore (checkConstraints k_);
-      let g_ = abstractKCtx k_ in
-      let s_ = abstractSpine (k_, 0, (s_, s)) in
-      (g_, s_)
+      let k = collectSpine (I.Null, (s_, s), I.Null) in
+      ignore (checkConstraints k);
+      let g = abstractKCtx k in
+      let s_ = abstractSpine (k, 0, (s_, s)) in
+      (g, s_)
 
-    let abstractCtxs gs_ =
-      let k_ = collectCtxs (I.Null, gs_, I.Null) in
-      ignore (checkConstraints k_);
-      (abstractKCtx k_, abstractCtxlist (k_, 0, gs_))
+    let abstractCtxs gs =
+      let k = collectCtxs (I.Null, gs, I.Null) in
+      ignore (checkConstraints k);
+      (abstractKCtx k, abstractCtxlist (k, 0, gs))
 
-    let closedDec g_ (I.Dec (_, v_), s) =
-      begin match collectExp (g_, (v_, s), I.Null) with
+    let closedDec g (I.Dec (_, v), s) =
+      begin match collectExp (g, (v, s), I.Null) with
       | I.Null -> true
       | _ -> false
       end
 
     let rec closedSub a1 b1 = match a1, b1 with
-      | g_, I.Shift _ -> true
-      | g_, I.Dot (I.Idx _, s) -> closedSub g_ s
-      | g_, I.Dot (I.Exp u_, s) ->
-          begin match collectExp (g_, (u_, I.id), I.Null) with
-          | I.Null -> closedSub g_ s
+      | g, I.Shift _ -> true
+      | g, I.Dot (I.Idx _, s) -> closedSub g s
+      | g, I.Dot (I.Exp u, s) ->
+          begin match collectExp (g, (u, I.id), I.Null) with
+          | I.Null -> closedSub g s
           | _ -> false
           end
 
-    let closedExp g_ (u_, s) =
-      begin match collectExp (g_, (u_, I.id), I.Null) with
+    let closedExp g (u, s) =
+      begin match collectExp (g, (u, I.id), I.Null) with
       | I.Null -> true
       | _ -> false
       end
 
     let rec closedCtx = function
       | I.Null -> true
-      | I.Decl (g_, d_) -> closedCtx g_ && closedDec g_ (d_, I.id)
+      | I.Decl (g, d) -> closedCtx g && closedDec g (d, I.id)
 
     let rec closedFor (psi, a) = match a with
       | True -> true
-      | T.All ((d_, _), f_) ->
-          closedDEC (psi, d_) && closedFor (I.Decl (psi, d_), f_)
-      | T.Ex ((d_, _), f_) ->
-          closedDec (T.coerceCtx psi) (d_, I.id)
-          && closedFor (I.Decl (psi, T.UDec d_), f_)
+      | T.All ((d, _), f) ->
+          closedDEC (psi, d) && closedFor (I.Decl (psi, d), f)
+      | T.Ex ((d, _), f) ->
+          closedDec (T.coerceCtx psi) (d, I.id)
+          && closedFor (I.Decl (psi, T.UDec d), f)
 
     and closedDEC (psi, a) = match a with
-      | T.UDec d_ -> closedDec (T.coerceCtx psi) (d_, I.id)
-      | T.PDec (_, f_, _, _) -> closedFor (psi, f_)
+      | T.UDec d -> closedDec (T.coerceCtx psi) (d, I.id)
+      | T.PDec (_, f, _, _) -> closedFor (psi, f)
 
     let rec closedCTX = function
       | I.Null -> true
-      | I.Decl (psi, d_) -> closedCTX psi && closedDEC (psi, d_)
+      | I.Decl (psi, d) -> closedCTX psi && closedDEC (psi, d)
 
     let rec evarsToK = function
       | [] -> I.Null
-      | x_ :: xs_ -> I.Decl (evarsToK xs_, Ev x_)
+      | x :: xs -> I.Decl (evarsToK xs, Ev x)
 
     let rec kToEVars = function
       | I.Null -> []
-      | I.Decl (k_, Ev x_) -> x_ :: kToEVars k_
-      | I.Decl (k_, _) -> kToEVars k_
+      | I.Decl (k, Ev x) -> x :: kToEVars k
+      | I.Decl (k, _) -> kToEVars k
 
-    let collectEVars g_ us_ xs_ =
-      kToEVars (collectExp (g_, us_, evarsToK xs_))
+    let collectEVars g us xs =
+      kToEVars (collectExp (g, us, evarsToK xs))
 
-    let collectEVarsSpine g_ (s_, s) xs_ =
-      kToEVars (collectSpine (g_, (s_, s), evarsToK xs_))
+    let collectEVarsSpine g (s_, s) xs =
+      kToEVars (collectSpine (g, (s_, s), evarsToK xs))
 
-    let rec collectPrg (a, b, k_) = match a, b with
-      | _, (T.EVar (psi, r, f_, _, _, _) as p_) -> I.Decl (k_, Pv p_)
-      | psi, Unit -> k_
-      | psi, T.PairExp (u_, p_) ->
-          collectPrg (psi, p_, collectExp (T.coerceCtx psi, (u_, I.id), k_))
+    let rec collectPrg (a, b, k) = match a, b with
+      | _, (T.EVar (psi, r, f, _, _, _) as p) -> I.Decl (k, Pv p)
+      | psi, Unit -> k
+      | psi, T.PairExp (u, p) ->
+          collectPrg (psi, p, collectExp (T.coerceCtx psi, (u, I.id), k))
 
     let rec abstractPVar (a, depth, b) = match a, b with
-      | I.Decl (k'_, Pv (T.EVar (_, r', _, _, _, _))), (T.EVar (_, r, _, _, _, _) as p_) ->
+      | I.Decl (k', Pv (T.EVar (_, r', _, _, _, _))), (T.EVar (_, r, _, _, _, _) as p) ->
           begin if r == r' then T.Var (depth + 1)
-          else abstractPVar (k'_, depth + 1, p_)
+          else abstractPVar (k', depth + 1, p)
           end
-      | I.Decl (k'_, _), p_ -> abstractPVar (k'_, depth + 1, p_)
+      | I.Decl (k', _), p -> abstractPVar (k', depth + 1, p)
 
-    let rec abstractPrg (k_, depth, a) = match a with
-      | (T.EVar _ as x_) -> abstractPVar (k_, depth, x_)
+    let rec abstractPrg (k, depth, a) = match a with
+      | (T.EVar _ as x) -> abstractPVar (k, depth, x)
       | T.Unit -> T.Unit
-      | T.PairExp (u_, p_) ->
+      | T.PairExp (u, p) ->
           T.PairExp
-            (abstractExp (k_, depth, (u_, I.id)), abstractPrg (k_, depth, p_))
+            (abstractExp (k, depth, (u, I.id)), abstractPrg (k, depth, p))
 
     let rec collectTomegaSub = function
       | T.Shift 0 -> I.Null
-      | T.Dot (T.Exp u_, t) ->
-          collectExp (I.Null, (u_, I.id), collectTomegaSub t)
-      | T.Dot (T.Block b_, t) -> collectBlock (I.Null, b_, collectTomegaSub t)
-      | T.Dot (T.Prg p_, t) -> collectPrg (I.Null, p_, collectTomegaSub t)
+      | T.Dot (T.Exp u, t) ->
+          collectExp (I.Null, (u, I.id), collectTomegaSub t)
+      | T.Dot (T.Block b, t) -> collectBlock (I.Null, b, collectTomegaSub t)
+      | T.Dot (T.Prg p, t) -> collectPrg (I.Null, p, collectTomegaSub t)
 
-    let rec abstractOrder (k_, depth, a) = match a with
+    let rec abstractOrder (k, depth, a) = match a with
       | O.Arg (us1, us2) ->
           O.Arg
-            ( (abstractExp (k_, depth, us1), I.id),
-              (abstractExp (k_, depth, us2), I.id) )
-      | O.Simul os_ ->
-          O.Simul (map (function o_ -> abstractOrder (k_, depth, o_)) os_)
-      | O.Lex os_ ->
-          O.Lex (map (function o_ -> abstractOrder (k_, depth, o_)) os_)
+            ( (abstractExp (k, depth, us1), I.id),
+              (abstractExp (k, depth, us2), I.id) )
+      | O.Simul os ->
+          O.Simul (map (function o -> abstractOrder (k, depth, o)) os)
+      | O.Lex os ->
+          O.Lex (map (function o -> abstractOrder (k, depth, o)) os)
 
-    let rec abstractTC (k_, depth, a) = match a with
-      | T.Abs (d_, tc) ->
-          T.Abs (abstractDec (k_, depth, (d_, I.id)), abstractTC (k_, depth, tc))
+    let rec abstractTC (k, depth, a) = match a with
+      | T.Abs (d, tc) ->
+          T.Abs (abstractDec (k, depth, (d, I.id)), abstractTC (k, depth, tc))
       | T.Conj (tc1, tc2) ->
-          T.Conj (abstractTC (k_, depth, tc1), abstractTC (k_, depth, tc2))
-      | T.Base o_ -> T.Base (abstractOrder (k_, depth, o_))
+          T.Conj (abstractTC (k, depth, tc1), abstractTC (k, depth, tc2))
+      | T.Base o -> T.Base (abstractOrder (k, depth, o))
 
-    let abstractTCOpt (k_, depth, a) = match a with
+    let abstractTCOpt (k, depth, a) = match a with
       | None -> None
-      | Some tc -> Some (abstractTC (k_, depth, tc))
+      | Some tc -> Some (abstractTC (k, depth, tc))
 
-    let rec abstractMetaDec (k_, depth, a) = match a with
-      | T.UDec d_ -> T.UDec (abstractDec (k_, depth, (d_, I.id)))
-      | T.PDec (xx, f_, tc1, tc2) ->
-          T.PDec (xx, abstractFor (k_, depth, f_), tc1, tc2)
+    let rec abstractMetaDec (k, depth, a) = match a with
+      | T.UDec d -> T.UDec (abstractDec (k, depth, (d, I.id)))
+      | T.PDec (xx, f, tc1, tc2) ->
+          T.PDec (xx, abstractFor (k, depth, f), tc1, tc2)
 
-    and abstractFor (k_, depth, a) = match a with
+    and abstractFor (k, depth, a) = match a with
       | T.True -> T.True
-      | T.All ((md_, q_), f_) ->
+      | T.All ((md, q), f) ->
           T.All
-            ((abstractMetaDec (k_, depth, md_), q_), abstractFor (k_, depth, f_))
-      | T.Ex ((d_, q_), f_) ->
+            ((abstractMetaDec (k, depth, md), q), abstractFor (k, depth, f))
+      | T.Ex ((d, q), f) ->
           T.Ex
-            ( (abstractDec (k_, depth, (d_, I.id)), q_),
-              abstractFor (k_, depth, f_) )
-      | T.And (f1_, f2_) ->
-          T.And (abstractFor (k_, depth, f1_), abstractFor (k_, depth, f2_))
-      | T.World (w_, f_) -> T.World (w_, abstractFor (k_, depth, f_))
+            ( (abstractDec (k, depth, (d, I.id)), q),
+              abstractFor (k, depth, f) )
+      | T.And (f1, f2) ->
+          T.And (abstractFor (k, depth, f1), abstractFor (k, depth, f2))
+      | T.World (w, f) -> T.World (w, abstractFor (k, depth, f))
 
     let rec abstractPsi = function
       | I.Null -> I.Null
-      | I.Decl (k'_, Ev (I.EVar (_, gx, vx, _))) ->
-          let v'_ = raiseType gx vx in
-          let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
-          I.Decl (abstractPsi k'_, T.UDec (I.Dec (None, v'')))
-      | I.Decl (k'_, Fv (name, v'_)) ->
-          let v'' = abstractExp (k'_, 0, (v'_, I.id)) in
-          I.Decl (abstractPsi k'_, T.UDec (I.Dec (Some name, v'')))
-      | I.Decl (k'_, Lv (I.LVar (r, _, (l, t)))) ->
-          let t' = abstractSOME (k'_, t) in
-          I.Decl (abstractPsi k'_, T.UDec (I.BDec (None, (l, t'))))
-      | I.Decl (k'_, Pv (T.EVar (gx, _, fx_, tc1, tc2, _))) ->
-          let f'_ = abstractFor (k'_, 0, T.forSub fx_ T.id) in
-          let tc1' = abstractTCOpt (k'_, 0, tc1) in
-          let tc2' = abstractTCOpt (k'_, 0, tc2) in
-          I.Decl (abstractPsi k'_, T.PDec (None, f'_, tc1, tc2))
+      | I.Decl (k', Ev (I.EVar (_, gx, vx, _))) ->
+          let v' = raiseType gx vx in
+          let v'' = abstractExp (k', 0, (v', I.id)) in
+          I.Decl (abstractPsi k', T.UDec (I.Dec (None, v'')))
+      | I.Decl (k', Fv (name, v')) ->
+          let v'' = abstractExp (k', 0, (v', I.id)) in
+          I.Decl (abstractPsi k', T.UDec (I.Dec (Some name, v'')))
+      | I.Decl (k', Lv (I.LVar (r, _, (l, t)))) ->
+          let t' = abstractSOME (k', t) in
+          I.Decl (abstractPsi k', T.UDec (I.BDec (None, (l, t'))))
+      | I.Decl (k', Pv (T.EVar (gx, _, fx, tc1, tc2, _))) ->
+          let f' = abstractFor (k', 0, T.forSub fx T.id) in
+          let tc1' = abstractTCOpt (k', 0, tc1) in
+          let tc2' = abstractTCOpt (k', 0, tc2) in
+          I.Decl (abstractPsi k', T.PDec (None, f', tc1, tc2))
 
     let rec abstractTomegaSub t =
-      let k_ = collectTomegaSub t in
-      let t' = abstractTomegaSub' (k_, 0, t) in
-      let psi = abstractPsi k_ in
+      let k = collectTomegaSub t in
+      let t' = abstractTomegaSub' (k, 0, t) in
+      let psi = abstractPsi k in
       (psi, t')
 
-    and abstractTomegaSub' (k_, depth, a) = match a with
+    and abstractTomegaSub' (k, depth, a) = match a with
       | T.Shift 0 -> T.Shift depth
-      | T.Dot (T.Exp u_, t) ->
+      | T.Dot (T.Exp u, t) ->
           T.Dot
-            ( T.Exp (abstractExp (k_, depth, (u_, I.id))),
-              abstractTomegaSub' (k_, depth, t) )
-      | T.Dot (T.Block b_, t) ->
+            ( T.Exp (abstractExp (k, depth, (u, I.id))),
+              abstractTomegaSub' (k, depth, t) )
+      | T.Dot (T.Block b, t) ->
           T.Dot
-            ( T.Block (abstractLVar (k_, depth, b_)),
-              abstractTomegaSub' (k_, depth, t) )
-      | T.Dot (T.Prg p_, t) ->
+            ( T.Block (abstractLVar (k, depth, b)),
+              abstractTomegaSub' (k, depth, t) )
+      | T.Dot (T.Prg p, t) ->
           T.Dot
-            ( T.Prg (abstractPrg (k_, depth, p_)),
-              abstractTomegaSub' (k_, depth, t) )
+            ( T.Prg (abstractPrg (k, depth, p)),
+              abstractTomegaSub' (k, depth, t) )
 
-    let abstractTomegaPrg p_ =
-      let k_ = collectPrg (I.Null, p_, I.Null) in
-      let p'_ = abstractPrg (k_, 0, p_) in
-      let psi = abstractPsi k_ in
-      (psi, p'_)
+    let abstractTomegaPrg p =
+      let k = collectPrg (I.Null, p, I.Null) in
+      let p' = abstractPrg (k, 0, p) in
+      let psi = abstractPsi k in
+      (psi, p')
   end
 
   (* Intermediate Data Structure *)

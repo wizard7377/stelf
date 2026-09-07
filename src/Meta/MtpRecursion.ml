@@ -97,464 +97,464 @@ end) : MTPRECURSION = struct
 
     let rec closedCtx = function
       | I.Null -> ()
-      | I.Decl (g_, d_) ->
-          begin if Abstract.closedDec g_ (d_, I.id) then raise Domain
-          else closedCtx g_
+      | I.Decl (g, d) ->
+          begin if Abstract.closedDec g (d, I.id) then raise Domain
+          else closedCtx g
           end
 
     let rec spine = function
       | 0 -> I.Nil
       | n -> I.App (I.Root (I.BVar n, I.Nil), spine (n - 1))
 
-    let rec someEVars (g_, a, s) = match a with
+    let rec someEVars (g, a, s) = match a with
       | [] -> s
-      | I.Dec (_, v_) :: l_ ->
-          someEVars (g_, l_, I.Dot (I.Exp (I.newEVar g_ (I.EClo (v_, s))), s))
+      | I.Dec (_, v) :: l ->
+          someEVars (g, l, I.Dot (I.Exp (I.newEVar g (I.EClo (v, s))), s))
 
     let rec ctxSub (a, s) = match a with
       | [] -> []
-      | d_ :: g_ -> I.decSub d_ s :: ctxSub (g_, I.dot1 s)
+      | d :: g -> I.decSub d s :: ctxSub (g, I.dot1 s)
 
-    let rec appendCtx (gb1, t_, a) = match gb1, a with
+    let rec appendCtx (gb1, t, a) = match gb1, a with
       | gb1, [] -> gb1
-      | (g1_, b1_), d_ :: g2_ ->
-          appendCtx ((I.Decl (g1_, d_), I.Decl (b1_, t_)), t_, g2_)
+      | (g1, b1), d :: g2 ->
+          appendCtx ((I.Decl (g1, d), I.Decl (b1, t)), t, g2)
 
     let rec createCtx (a, b, s) = match a, b with
-      | (g_, b_), [] -> ((g_, b_), s, function af_ -> af_)
-      | (g_, b_), n :: ll -> (
-          let (F.LabelDec (l, g1_, g2_)) = F.labelLookup n in
-          let t = someEVars (g_, g1_, I.id) in
-          let g2'_ = ctxSub (g2_, t) in
-          let g'_, b'_ = appendCtx ((g_, b_), S.Parameter (Some n), g2'_) in
-          let s' = I.comp s (I.Shift (List.length g2'_)) in
-          let gb'', s'', af'' = createCtx ((g'_, b'_), ll, s') in
+      | (g, b), [] -> ((g, b), s, function af -> af)
+      | (g, b), n :: ll -> (
+          let (F.LabelDec (l, g1, g2)) = F.labelLookup n in
+          let t = someEVars (g, g1, I.id) in
+          let g2' = ctxSub (g2, t) in
+          let g', b' = appendCtx ((g, b), S.Parameter (Some n), g2') in
+          let s' = I.comp s (I.Shift (List.length g2')) in
+          let gb'', s'', af'' = createCtx ((g', b'), ll, s') in
           ( gb'',
             s'',
-            function af_ -> A.Block ((g_, t, List.length g1_, g2'_), af'' af_)
+            function af -> A.Block ((g, t, List.length g1, g2'), af'' af)
           ))
 
-    let rec createEVars (g_, a) = match a with
-      | I.Null -> I.Shift (I.ctxLength g_)
-      | I.Decl (g0_, I.Dec (_, v_)) ->
-          let s = createEVars (g_, g0_) in
-          I.Dot (I.Exp (I.newEVar g_ (I.EClo (v_, s))), s)
+    let rec createEVars (g, a) = match a with
+      | I.Null -> I.Shift (I.ctxLength g)
+      | I.Decl (g0, I.Dec (_, v)) ->
+          let s = createEVars (g, g0) in
+          I.Dot (I.Exp (I.newEVar g (I.EClo (v, s))), s)
 
-    let rec checkCtx (g_, a, b) = match a, b with
-      | [], (v2_, s) -> false
-      | (I.Dec (_, v1_) as d_) :: g2_, (v2_, s) ->
+    let rec checkCtx (g, a, b) = match a, b with
+      | [], (v2, s) -> false
+      | (I.Dec (_, v1) as d) :: g2, (v2, s) ->
           CsManager.trail (function () ->
-              Unify.unifiable g_ (v1_, I.id) (v2_, s))
-          || checkCtx (I.Decl (g_, d_), g2_, (v2_, I.comp s I.shift))
+              Unify.unifiable g (v1, I.id) (v2, s))
+          || checkCtx (I.Decl (g, d), g2, (v2, I.comp s I.shift))
 
-    let rec checkLabels ((g'_, b'_), (v_, s), ll, l) =
+    let rec checkLabels ((g', b'), (v, s), ll, l) =
       begin if l < 0 then None
       else
-        let (F.LabelDec (name, g1_, g2_)) = F.labelLookup l in
-        let s = someEVars (g'_, g1_, I.id) in
-        let g2'_ = ctxSub (g2_, s) in
-        let t = someEVars (g'_, g1_, I.id) in
-        let g2'_ = ctxSub (g2_, t) in
+        let (F.LabelDec (name, g1, g2)) = F.labelLookup l in
+        let s = someEVars (g', g1, I.id) in
+        let g2' = ctxSub (g2, s) in
+        let t = someEVars (g', g1, I.id) in
+        let g2' = ctxSub (g2, t) in
         begin if
           (not (List.exists (function l' -> l = l') ll))
-          && checkCtx (g'_, g2'_, (v_, s))
+          && checkCtx (g', g2', (v, s))
         then Some l
-        else checkLabels ((g'_, b'_), (v_, s), ll, l - 1)
+        else checkLabels ((g', b'), (v, s), ll, l - 1)
         end
       end
 
     let rec appendRL = function
-      | [], ds_ -> ds_
-      | (Lemma (n, f_) as l_) :: ds1_, ds2_ ->
-          let ds'_ = appendRL (ds1_, ds2_) in
+      | [], ds -> ds
+      | (Lemma (n, f) as l) :: ds1, ds2 ->
+          let ds' = appendRL (ds1, ds2) in
           begin if
             List.exists
               (function
-                | Lemma (n', f'_) ->
-                    n = n' && F.convFor f_ I.id (f'_, I.id))
-              ds'_
-          then ds'_
-          else l_ :: ds'_
+                | Lemma (n', f') ->
+                    n = n' && F.convFor f I.id (f', I.id))
+              ds'
+          then ds'
+          else l :: ds'
           end
 
     let rec recursion
-        ((nih, gall, fex, oex), (ncurrent, (g0_, b0), ll, ocurrent, h_, f_)) =
-      let (g'_, b'_), s', af = createCtx ((g0_, b0), ll, I.id) in
-      let t' = createEVars (g'_, gall) in
-      let af_ = af (A.Head (g'_, (fex, t'), I.ctxLength gall)) in
+        ((nih, gall, fex, oex), (ncurrent, (g0, b0), ll, ocurrent, h, f)) =
+      let (g', b'), s', af = createCtx ((g0, b0), ll, I.id) in
+      let t' = createEVars (g', gall) in
+      let af_ = af (A.Head (g', (fex, t'), I.ctxLength gall)) in
       let oex' = S.orderSub oex t' in
       let ocurrent' = S.orderSub ocurrent s' in
-      let sc ds_ =
+      let sc ds =
         let fnew = A.abstractApproxFor af_ in
         begin if
           List.exists
             (function
               | nhist, fhist ->
                   nih = nhist && F.convFor fnew I.id (fhist, I.id))
-            h_
-        then ds_
-        else Lemma (nih, fnew) :: ds_
+            h
+        then ds
+        else Lemma (nih, fnew) :: ds
         end
       in
-      let ac ((g'_, b'_), vs_, ds_) =
-        begin match checkLabels ((g'_, b'_), vs_, ll, F.labelSize () - 1) with
-        | None -> ds_
+      let ac ((g', b'), vs, ds) =
+        begin match checkLabels ((g', b'), vs, ll, F.labelSize () - 1) with
+        | None -> ds
         | Some l' ->
-            let ds'_ =
+            let ds' =
               recursion
                 ( (nih, gall, fex, oex),
-                  (ncurrent, (g0_, b0), l' :: ll, ocurrent, h_, f_) )
+                  (ncurrent, (g0, b0), l' :: ll, ocurrent, h, f) )
             in
-            appendRL (ds'_, ds_)
+            appendRL (ds', ds)
         end
       in
       begin if ncurrent < nih then
-        ordle ((g'_, b'_), oex', ocurrent', sc, ac, [])
-      else ordlt ((g'_, b'_), oex', ocurrent', sc, ac, [])
+        ordle ((g', b'), oex', ocurrent', sc, ac, [])
+      else ordlt ((g', b'), oex', ocurrent', sc, ac, [])
       end
 
     and set_parameter
-        (((g1_, b1_) as gb), (I.EVar (r, _, v_, _) as x_), k, sc, ac, ds_) =
-      let rec set_parameter' (a, k, ds_) = match a with
-        | (I.Null, I.Null) -> ds_
-        | (I.Decl (g_, d_), I.Decl (b_, S.Parameter _)) ->
-            let (I.Dec (_, v'_) as d'_) = I.decSub d_ (I.Shift k) in
-            let ds'_ =
+        (((g1, b1) as gb), (I.EVar (r, _, v, _) as x), k, sc, ac, ds) =
+      let rec set_parameter' (a, k, ds) = match a with
+        | (I.Null, I.Null) -> ds
+        | (I.Decl (g, d), I.Decl (b, S.Parameter _)) ->
+            let (I.Dec (_, v') as d') = I.decSub d (I.Shift k) in
+            let ds' =
               CsManager.trail (function () ->
                   begin if
-                    Unify.unifiable g1_ (v_, I.id) (v'_, I.id)
+                    Unify.unifiable g1 (v, I.id) (v', I.id)
                     && Unify.unifiable
-                         g1_ (x_, I.id) (I.Root (I.BVar k, I.Nil), I.id)
-                  then sc ds_
-                  else ds_
+                         g1 (x, I.id) (I.Root (I.BVar k, I.Nil), I.id)
+                  then sc ds
+                  else ds
                   end)
             in
-            set_parameter' ((g_, b_), k + 1, ds'_)
-        | (I.Decl (g_, d_), I.Decl (b_, _)) ->
-            set_parameter' ((g_, b_), k + 1, ds_)
+            set_parameter' ((g, b), k + 1, ds')
+        | (I.Decl (g, d), I.Decl (b, _)) ->
+            set_parameter' ((g, b), k + 1, ds)
       in
-      set_parameter' (gb, 1, ds_)
+      set_parameter' (gb, 1, ds)
 
-    and ltinit (gb, k, (us_, vs_), usVs', sc, ac, ds_) =
-      ltinitW (gb, k, Whnf.whnfEta us_ vs_, usVs', sc, ac, ds_)
+    and ltinit (gb, k, (us, vs), usVs', sc, ac, ds) =
+      ltinitW (gb, k, Whnf.whnfEta us vs, usVs', sc, ac, ds)
 
-    and ltinitW (gb, k, a, usVs', sc, ac, ds_) = match gb, a, usVs' with
-      | gb, (us_, ((I.Root _, _) as vs_)), usVs' ->
-          lt (gb, k, (us_, vs_), usVs', sc, ac, ds_)
-      | (g_, b_), ((I.Lam (d1_, u_), s1), (I.Pi (d2_, v_), s2)), ((u'_, s1'), (v'_, s2')) ->
+    and ltinitW (gb, k, a, usVs', sc, ac, ds) = match gb, a, usVs' with
+      | gb, (us, ((I.Root _, _) as vs)), usVs' ->
+          lt (gb, k, (us, vs), usVs', sc, ac, ds)
+      | (g, b), ((I.Lam (d1, u), s1), (I.Pi (d2, v), s2)), ((u', s1'), (v', s2')) ->
           ltinit
-            ( (I.Decl (g_, I.decSub d1_ s1), I.Decl (b_, S.Parameter None)),
+            ( (I.Decl (g, I.decSub d1 s1), I.Decl (b, S.Parameter None)),
               k + 1,
-              ((u_, I.dot1 s1), (v_, I.dot1 s2)),
-              ((u'_, I.comp s1' I.shift), (v'_, I.comp s2' I.shift)),
+              ((u, I.dot1 s1), (v, I.dot1 s2)),
+              ((u', I.comp s1' I.shift), (v', I.comp s2' I.shift)),
               sc,
               ac,
-              ds_ )
+              ds )
 
-    and lt (gb, k, (us_, vs_), (us', vs'_), sc, ac, ds_) =
-      ltW (gb, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ac, ds_)
+    and lt (gb, k, (us, vs), (us', vs'), sc, ac, ds) =
+      ltW (gb, k, (us, vs), Whnf.whnfEta us' vs', sc, ac, ds)
 
-    and ltW (a, k, b, d, sc, ac, ds_) = match a, b, d with
-      | gb, (us_, vs_), ((I.Root (I.Const c, s'_), s'), vs'_) ->
+    and ltW (a, k, b, d, sc, ac, ds) = match a, b, d with
+      | gb, (us, vs), ((I.Root (I.Const c, s'_), s'), vs') ->
           ltSpine
-            (gb, k, (us_, vs_), ((s'_, s'), (I.constType c, I.id)), sc, ac, ds_)
-      | ((g_, b_) as gb), (us_, vs_), ((I.Root (I.BVar n, s'_), s'), vs'_) ->
-          begin match I.ctxLookup b_ n with
+            (gb, k, (us, vs), ((s'_, s'), (I.constType c, I.id)), sc, ac, ds)
+      | ((g, b) as gb), (us, vs), ((I.Root (I.BVar n, s'_), s'), vs') ->
+          begin match I.ctxLookup b n with
           | S.Parameter _ ->
-              let (I.Dec (_, v'_)) = I.ctxDec g_ n in
-              ltSpine (gb, k, (us_, vs_), ((s'_, s'), (v'_, I.id)), sc, ac, ds_)
-          | S.Lemma _ -> ds_
+              let (I.Dec (_, v')) = I.ctxDec g n in
+              ltSpine (gb, k, (us, vs), ((s'_, s'), (v', I.id)), sc, ac, ds)
+          | S.Lemma _ -> ds
           end
-      | gb, _, ((I.EVar _, _), _) -> ds_
-      | ((g_, b_) as gb), ((u_, s1), (v_, s2)), ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
-          let ds'_ = ds_ in
-          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
-            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
+      | gb, _, ((I.EVar _, _), _) -> ds
+      | ((g, b) as gb), ((u, s1), (v, s2)), ( (I.Lam ((I.Dec (_, v1') as d), u'), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'), s2') ) ->
+          let ds' = ds in
+          begin if Subordinate.equiv (I.targetFam v) (I.targetFam v1') then
+            let x = I.newEVar g (I.EClo (v1', s1')) in
             let sc' = function
-              | ds'' -> set_parameter (gb, x_, k, sc, ac, ds'')
+              | ds'' -> set_parameter (gb, x, k, sc, ac, ds'')
             in
             lt
               ( gb,
                 k,
-                ((u_, s1), (v_, s2)),
-                ((u'_, I.Dot (I.Exp x_, s1')), (v'_, I.Dot (I.Exp x_, s2'))),
+                ((u, s1), (v, s2)),
+                ((u', I.Dot (I.Exp x, s1')), (v', I.Dot (I.Exp x, s2'))),
                 sc',
                 ac,
-                ds'_ )
+                ds' )
           else
-            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
-              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v) then
+              let x = I.newEVar g (I.EClo (v1', s1')) in
               lt
                 ( gb,
                   k,
-                  ((u_, s1), (v_, s2)),
-                  ((u'_, I.Dot (I.Exp x_, s1')), (v'_, I.Dot (I.Exp x_, s2'))),
+                  ((u, s1), (v, s2)),
+                  ((u', I.Dot (I.Exp x, s1')), (v', I.Dot (I.Exp x, s2'))),
                   sc,
                   ac,
-                  ds'_ )
-            else ds'_
+                  ds' )
+            else ds'
             end
           end
 
-    and ltSpine (gb, k, (us_, vs_), (ss'_, vs'_), sc, ac, ds_) =
-      ltSpineW (gb, k, (us_, vs_), (ss'_, Whnf.whnf vs'_), sc, ac, ds_)
+    and ltSpine (gb, k, (us, vs), (ss', vs'), sc, ac, ds) =
+      ltSpineW (gb, k, (us, vs), (ss', Whnf.whnf vs'), sc, ac, ds)
 
-    and ltSpineW (gb, k, a, b, sc, ac, ds_) = match a, b with
-      | (us_, vs_), ((I.Nil, _), _) -> ds_
-      | (us_, vs_), ((I.SClo (s_, s'), s''), vs'_) ->
+    and ltSpineW (gb, k, a, b, sc, ac, ds) = match a, b with
+      | (us, vs), ((I.Nil, _), _) -> ds
+      | (us, vs), ((I.SClo (s, s'), s''), vs') ->
           ltSpineW
-            (gb, k, (us_, vs_), ((s_, I.comp s' s''), vs'_), sc, ac, ds_)
-      | (us_, vs_), ((I.App (u'_, s'_), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
-          let ds'_ =
-            le (gb, k, (us_, vs_), ((u'_, s1'), (v1', s2')), sc, ac, ds_)
+            (gb, k, (us, vs), ((s, I.comp s' s''), vs'), sc, ac, ds)
+      | (us, vs), ((I.App (u', s'), s1'), (I.Pi ((I.Dec (_, v1'), _), v2'), s2')) ->
+          let ds' =
+            le (gb, k, (us, vs), ((u', s1'), (v1', s2')), sc, ac, ds)
           in
           ltSpine
             ( gb,
               k,
-              (us_, vs_),
-              ((s'_, s1'), (v2', I.Dot (I.Exp (I.EClo (u'_, s1')), s2'))),
+              (us, vs),
+              ((s', s1'), (v2', I.Dot (I.Exp (I.EClo (u', s1')), s2'))),
               sc,
               ac,
-              ds'_ )
+              ds' )
 
-    and eq ((g_, b_), (us_, vs_), (us', vs'_), sc, ac, ds_) =
+    and eq ((g, b), (us, vs), (us', vs'), sc, ac, ds) =
       CsManager.trail (function () ->
           begin if
-            Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
-          then sc ds_
-          else ds_
+            Unify.unifiable g vs vs' && Unify.unifiable g us us'
+          then sc ds
+          else ds
           end)
 
-    and le (gb, k, (us_, vs_), (us', vs'_), sc, ac, ds_) =
-      let ds'_ = eq (gb, (us_, vs_), (us', vs'_), sc, ac, ds_) in
-      leW (gb, k, (us_, vs_), Whnf.whnfEta us' vs'_, sc, ac, ds'_)
+    and le (gb, k, (us, vs), (us', vs'), sc, ac, ds) =
+      let ds' = eq (gb, (us, vs), (us', vs'), sc, ac, ds) in
+      leW (gb, k, (us, vs), Whnf.whnfEta us' vs', sc, ac, ds')
 
-    and leW (a, k, b, c, sc, ac, ds_) = match a, b, c with
-      | ((g_, b_) as gb), ((u_, s1), (v_, s2)), ( (I.Lam ((I.Dec (_, v1') as d_), u'_), s1'),
-            (I.Pi ((I.Dec (_, v2'), _), v'_), s2') ) ->
-          let ds'_ = ac (gb, (v1', s1'), ds_) in
-          begin if Subordinate.equiv (I.targetFam v_) (I.targetFam v1') then
-            let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
+    and leW (a, k, b, c, sc, ac, ds) = match a, b, c with
+      | ((g, b) as gb), ((u, s1), (v, s2)), ( (I.Lam ((I.Dec (_, v1') as d), u'), s1'),
+            (I.Pi ((I.Dec (_, v2'), _), v'), s2') ) ->
+          let ds' = ac (gb, (v1', s1'), ds) in
+          begin if Subordinate.equiv (I.targetFam v) (I.targetFam v1') then
+            let x = I.newEVar g (I.EClo (v1', s1')) in
             let sc' = function
-              | ds'' -> set_parameter (gb, x_, k, sc, ac, ds'')
+              | ds'' -> set_parameter (gb, x, k, sc, ac, ds'')
             in
             le
               ( gb,
                 k,
-                ((u_, s1), (v_, s2)),
-                ((u'_, I.Dot (I.Exp x_, s1')), (v'_, I.Dot (I.Exp x_, s2'))),
+                ((u, s1), (v, s2)),
+                ((u', I.Dot (I.Exp x, s1')), (v', I.Dot (I.Exp x, s2'))),
                 sc',
                 ac,
-                ds'_ )
+                ds' )
           else
-            begin if Subordinate.below (I.targetFam v1') (I.targetFam v_) then
-              let x_ = I.newEVar g_ (I.EClo (v1', s1')) in
+            begin if Subordinate.below (I.targetFam v1') (I.targetFam v) then
+              let x = I.newEVar g (I.EClo (v1', s1')) in
               let sc' = sc in
               let ds'' =
                 le
                   ( gb,
                     k,
-                    ((u_, s1), (v_, s2)),
-                    ((u'_, I.Dot (I.Exp x_, s1')), (v'_, I.Dot (I.Exp x_, s2'))),
+                    ((u, s1), (v, s2)),
+                    ((u', I.Dot (I.Exp x, s1')), (v', I.Dot (I.Exp x, s2'))),
                     sc',
                     ac,
-                    ds'_ )
+                    ds' )
               in
               ds''
-            else ds'_
+            else ds'
             end
           end
-      | gb, (us_, vs_), (us', vs'_) ->
-          lt (gb, k, (us_, vs_), (us', vs'_), sc, ac, ds_)
+      | gb, (us, vs), (us', vs') ->
+          lt (gb, k, (us, vs), (us', vs'), sc, ac, ds)
 
-    and ordlt (gb, a, b, sc, ac, ds_) = match a, b with
+    and ordlt (gb, a, b, sc, ac, ds) = match a, b with
       | S.Arg (usVs_a, usVs_b), S.Arg (usVs'_a, usVs'_b) ->
-          ltinit (gb, 0, (usVs_a, usVs_b), (usVs'_a, usVs'_b), sc, ac, ds_)
-      | S.Lex l_, S.Lex l'_ ->
-          ordltLex (gb, l_, l'_, sc, ac, ds_)
-      | S.Simul l_, S.Simul l'_ ->
-          ordltSimul (gb, l_, l'_, sc, ac, ds_)
+          ltinit (gb, 0, (usVs_a, usVs_b), (usVs'_a, usVs'_b), sc, ac, ds)
+      | S.Lex l, S.Lex l' ->
+          ordltLex (gb, l, l', sc, ac, ds)
+      | S.Simul l, S.Simul l' ->
+          ordltSimul (gb, l, l', sc, ac, ds)
 
-    and ordltLex (gb, a, b, sc, ac, ds_) = match a, b with
-      | [], [] -> ds_
-      | o_ :: l_, o'_ :: l'_ ->
-          let ds'_ =
-            CsManager.trail (function () -> ordlt (gb, o_, o'_, sc, ac, ds_))
+    and ordltLex (gb, a, b, sc, ac, ds) = match a, b with
+      | [], [] -> ds
+      | o :: l, o' :: l' ->
+          let ds' =
+            CsManager.trail (function () -> ordlt (gb, o, o', sc, ac, ds))
           in
           ordeq
             ( gb,
-              o_,
-              o'_,
-              (fun ds'' -> ordltLex (gb, l_, l'_, sc, ac, ds'')),
+              o,
+              o',
+              (fun ds'' -> ordltLex (gb, l, l', sc, ac, ds'')),
               ac,
-              ds'_ )
+              ds' )
 
-    and ordltSimul (gb, a, b, sc, ac, ds_) = match a, b with
-      | [], [] -> ds_
-      | o_ :: l_, o'_ :: l'_ ->
+    and ordltSimul (gb, a, b, sc, ac, ds) = match a, b with
+      | [], [] -> ds
+      | o :: l, o' :: l' ->
           let ds'' =
             CsManager.trail (function () ->
                 ordlt
                   ( gb,
-                    o_,
-                    o'_,
-                    (fun ds'_ -> ordleSimul (gb, l_, l'_, sc, ac, ds'_)),
+                    o,
+                    o',
+                    (fun ds' -> ordleSimul (gb, l, l', sc, ac, ds')),
                     ac,
-                    ds_ ))
+                    ds ))
           in
           ordeq
             ( gb,
-              o_,
-              o'_,
-              (fun ds'_ -> ordltSimul (gb, l_, l'_, sc, ac, ds'_)),
+              o,
+              o',
+              (fun ds' -> ordltSimul (gb, l, l', sc, ac, ds')),
               ac,
               ds'' )
 
-    and ordleSimul (gb, a, b, sc, ac, ds_) = match a, b with
-      | [], [] -> sc ds_
-      | o_ :: l_, o'_ :: l'_ ->
+    and ordleSimul (gb, a, b, sc, ac, ds) = match a, b with
+      | [], [] -> sc ds
+      | o :: l, o' :: l' ->
           ordle
             ( gb,
-              o_,
-              o'_,
-              (fun ds'_ -> ordleSimul (gb, l_, l'_, sc, ac, ds'_)),
+              o,
+              o',
+              (fun ds' -> ordleSimul (gb, l, l', sc, ac, ds')),
               ac,
-              ds_ )
+              ds )
 
-    and ordeq (gb, a, b, sc, ac, ds_) = match gb, a, b with
-      | (g_, b_), S.Arg (us_, vs_), S.Arg (us', vs'_) ->
+    and ordeq (gb, a, b, sc, ac, ds) = match gb, a, b with
+      | (g, b), S.Arg (us, vs), S.Arg (us', vs') ->
           begin if
-            Unify.unifiable g_ vs_ vs'_ && Unify.unifiable g_ us_ us'
-          then sc ds_
-          else ds_
+            Unify.unifiable g vs vs' && Unify.unifiable g us us'
+          then sc ds
+          else ds
           end
-      | gb, S.Lex l_, S.Lex l'_ -> ordeqs (gb, l_, l'_, sc, ac, ds_)
-      | gb, S.Simul l_, S.Simul l'_ ->
-          ordeqs (gb, l_, l'_, sc, ac, ds_)
+      | gb, S.Lex l, S.Lex l' -> ordeqs (gb, l, l', sc, ac, ds)
+      | gb, S.Simul l, S.Simul l' ->
+          ordeqs (gb, l, l', sc, ac, ds)
 
-    and ordeqs (gb, a, b, sc, ac, ds_) = match a, b with
-      | [], [] -> sc ds_
-      | o_ :: l_, o'_ :: l'_ ->
+    and ordeqs (gb, a, b, sc, ac, ds) = match a, b with
+      | [], [] -> sc ds
+      | o :: l, o' :: l' ->
           ordeq
             ( gb,
-              o_,
-              o'_,
-              (fun ds'_ -> ordeqs (gb, l_, l'_, sc, ac, ds'_)),
+              o,
+              o',
+              (fun ds' -> ordeqs (gb, l, l', sc, ac, ds')),
               ac,
-              ds_ )
+              ds )
 
-    and ordle (gb, o_, o'_, sc, ac, ds_) =
-      let ds'_ =
-        CsManager.trail (function () -> ordeq (gb, o_, o'_, sc, ac, ds_))
+    and ordle (gb, o, o', sc, ac, ds) =
+      let ds' =
+        CsManager.trail (function () -> ordeq (gb, o, o', sc, ac, ds))
       in
-      ordlt (gb, o_, o'_, sc, ac, ds'_)
+      ordlt (gb, o, o', sc, ac, ds')
 
     let rec skolem (a, gb, w, b, sc) = match a, gb, b with
       | (du, de), gb, F.True -> (gb, w)
-      | (du, de), gb, F.All (F.Prim d_, f_) ->
+      | (du, de), gb, F.All (F.Prim d, f) ->
           skolem
             ( (du + 1, de),
               gb,
               w,
-              f_,
+              f,
               function
               | s, de' ->
-                  let s', v'_, f'_ = sc (s, de') in
+                  let s', v', f' = sc (s, de') in
                   ( I.dot1 s',
-                    (fun v_ ->
-                      v'_
+                    (fun v ->
+                      v'
                         (Abstract.piDepend
-                           (Whnf.normalizeDec d_ s') I.Meta (Whnf.normalize (v_, I.id)))),
-                    fun f_ -> f'_ (F.All (F.Prim (I.decSub d_ s'), f_)) ) )
-      | (du, de), (g_, b_), F.Ex (I.Dec (name, v_), f_) ->
-          let s', v'_, f'_ = sc (w, de) in
-          let v1_ = I.EClo (v_, s') in
-          let v2_ = Whnf.normalize (v'_ v1_, I.id) in
-          let f1_ = F.Ex (I.Dec (name, v1_), F.True) in
-          let f2_ = f'_ f1_ in
-          ignore begin if !Global.doubleCheck then FunTypeCheck.isFor g_ f2_
+                           (Whnf.normalizeDec d s') I.Meta (Whnf.normalize (v, I.id)))),
+                    fun f -> f' (F.All (F.Prim (I.decSub d s'), f)) ) )
+      | (du, de), (g, b), F.Ex (I.Dec (name, v), f) ->
+          let s', v', f' = sc (w, de) in
+          let v1 = I.EClo (v, s') in
+          let v2 = Whnf.normalize (v' v1, I.id) in
+          let f1 = F.Ex (I.Dec (name, v1), F.True) in
+          let f2 = f' f1 in
+          ignore begin if !Global.doubleCheck then FunTypeCheck.isFor g f2
             else ()
             end;
-          let d2_ = I.Dec (None, v2_) in
-          let t2_ =
-            begin match f2_ with
+          let d2 = I.Dec (None, v2) in
+          let t2 =
+            begin match f2 with
             | F.All _ -> S.Lemma S.Rl
             | _ -> S.Lemma (S.Splits !MTPGlobal.maxSplit)
             end
           in
           skolem
             ( (du, de + 1),
-              (I.Decl (g_, d2_), I.Decl (b_, t2_)),
+              (I.Decl (g, d2), I.Decl (b, t2)),
               I.comp w I.shift,
-              f_,
+              f,
               function
               | s, de' ->
-                  let s', v'_, f'_ = sc (s, de') in
+                  let s', v', f' = sc (s, de') in
                   ( I.Dot
                       (I.Exp (I.Root (I.BVar (du + (de' - de)), spine du)), s'),
-                    v'_,
-                    f'_ ) )
+                    v',
+                    f' ) )
 
     let rec updateState = function
       | s_, ([], s) -> s_
-      | ( (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_) as s_),
-          (Lemma (n', frl') :: l_, s) ) ->
-          let (g''_, b''), s' =
+      | ( (S.State (n, (g, b), (ih, oh), d, o, h, f) as s_),
+          (Lemma (n', frl') :: l, s) ) ->
+          let (g'', b''), s' =
             skolem
               ( (0, 0),
-                (g_, b_),
+                (g, b),
                 I.id,
                 F.forSub frl' s,
-                function s', _ -> (s', (fun v'_ -> v'_), fun f'_ -> f'_) )
+                function s', _ -> (s', (fun v' -> v'), fun f' -> f') )
           in
           let s'' = I.comp s s' in
           updateState
             ( S.State
                 ( n,
-                  (g''_, b''),
-                  (ih_, oh),
+                  (g'', b''),
+                  (ih, oh),
                   d,
-                  S.orderSub o_ s',
+                  S.orderSub o s',
                   (n', F.forSub frl' s'')
-                  :: map (function n', f'_ -> (n', F.forSub f'_ s')) h_,
-                  F.forSub f_ s' ),
-              (l_, s'') )
+                  :: map (function n', f' -> (n', F.forSub f' s')) h,
+                  F.forSub f s' ),
+              (l, s'') )
 
     let rec selectFormula = function
-      | n, (g0_, F.All (F.Prim (I.Dec (_, v_) as d_), f_), S.All (_, o_)), s_ ->
-          selectFormula (n, (I.Decl (g0_, d_), f_, o_), s_)
-      | n, (g0_, F.And (f1_, f2_), S.And (o1_, o2_)), s_ ->
-          let n', s'_ = selectFormula (n, (g0_, f1_, o1_), s_) in
-          selectFormula (n, (g0_, f2_, o2_), s'_)
+      | n, (g0, F.All (F.Prim (I.Dec (_, v) as d), f), S.All (_, o)), s ->
+          selectFormula (n, (I.Decl (g0, d), f, o), s)
+      | n, (g0, F.And (f1, f2), S.And (o1, o2)), s ->
+          let n', s' = selectFormula (n, (g0, f1, o1), s) in
+          selectFormula (n, (g0, f2, o2), s')
       | ( nih,
           (gall, fex, oex),
-          (S.State (ncurrent, (g0_, b0), (_, _), _, ocurrent, h_, f_) as s_) )
+          (S.State (ncurrent, (g0, b0), (_, _), _, ocurrent, h, f) as s) )
         ->
-          let ds_ =
+          let ds =
             recursion
               ( (nih, gall, fex, oex),
-                (ncurrent, (g0_, b0), [], ocurrent, h_, f_) )
+                (ncurrent, (g0, b0), [], ocurrent, h, f) )
           in
-          (nih + 1, updateState (s_, (ds_, I.id)))
+          (nih + 1, updateState (s, (ds, I.id)))
 
-    let expand (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_) as s_) =
-      ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
+    let expand (S.State (n, (g, b), (ih, oh), d, o, h, f) as s) =
+      ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s)
         else ()
         end;
-      let _, s'_ = selectFormula (1, (I.Null, ih_, oh), s_) in
-      s'_
+      let _, s' = selectFormula (1, (I.Null, ih, oh), s) in
+      s'
 
-    let apply s_ =
+    let apply s =
       begin
-        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
+        begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s)
         else ()
         end;
-        s_
+        s
       end
 
     let menu _ = "Recursion (calculates ALL new assumptions & residual lemmas)"
-    let handleExceptions f p_ = try f p_ with Order.Error s -> raise (Error s)
+    let handleExceptions f p = try f p with Order.Error s -> raise (Error s)
   end
 
   (* Newly created *)

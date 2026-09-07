@@ -8,7 +8,7 @@
    as automatic. Run from the repository root -- passes filter on the literal
    prefix "src/" and read basis/lib at runtime. *)
 
-let passes = [ ("curry", Pass_curry.main); ("selftest", Pass_selftest.main); ("letunit", Pass_letunit.main); ("beginend", Pass_beginend.main); ("defun", Pass_defun.main) ]
+let passes = [ ("curry", Pass_curry.main); ("selftest", Pass_selftest.main); ("letunit", Pass_letunit.main); ("beginend", Pass_beginend.main); ("defun", Pass_defun.main); ("rename", Pass_rename.main) ]
 
 let () =
   match List.tl (Array.to_list Sys.argv) with

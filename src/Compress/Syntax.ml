@@ -383,7 +383,7 @@ module Syntax = struct
     | x -> x
 
   let ntm_eroot_elim = function Lam (ATerm t) -> Lam (eroot_elim t) | x -> x
-  let ctxLookup g_ n = subst_tp (Shift (0, n + 1)) (List.nth (g_, n))
+  let ctxLookup g n = subst_tp (Shift (0, n + 1)) (List.nth (g, n))
   let typeOf (Tclass a) = a
   let kindOf (Kclass k) = k
   let sum = foldl (fun (x__op, y__op) -> x__op + y__op) 0

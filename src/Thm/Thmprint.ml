@@ -31,62 +31,62 @@ end) : THMPRINT with module ThmSyn = ThmPrint__0.ThmSyn' = struct
     let rec fmtIds = function
       | [] -> []
       | n :: [] -> [ F.string n ]
-      | n :: l_ -> [ F.string n; F.string " " ] @ fmtIds l_
+      | n :: l -> [ F.string n; F.string " " ] @ fmtIds l
 
     let rec fmtParams = function
       | [] -> []
       | Some n :: [] -> [ F.string n ]
       | None :: [] -> [ F.string "_" ]
-      | Some n :: l_ -> [ F.string n; F.string " " ] @ fmtParams l_
-      | None :: l_ -> [ F.string "_"; F.string " " ] @ fmtParams l_
+      | Some n :: l -> [ F.string n; F.string " " ] @ fmtParams l
+      | None :: l -> [ F.string "_"; F.string " " ] @ fmtParams l
 
-    let fmtType (c, l_) =
+    let fmtType (c, l) =
       F.hVbox
         ([ F.string (I.conDecName (I.sgnLookup c)); F.string " " ]
-        @ fmtParams l_)
+        @ fmtParams l)
 
     let rec fmtCallpats = function
       | [] -> []
-      | t_ :: [] -> [ F.string "("; fmtType t_; F.string ")" ]
-      | t_ :: l_ -> [ F.string "("; fmtType t_; F.string ") " ] @ fmtCallpats l_
+      | t :: [] -> [ F.string "("; fmtType t; F.string ")" ]
+      | t :: l -> [ F.string "("; fmtType t; F.string ") " ] @ fmtCallpats l
 
     let fmtOptions = function
-      | _ :: [] as l_ -> [ F.hVbox (fmtIds l_) ]
-      | l_ -> [ F.string "("; F.hVbox (fmtIds l_); F.string ") " ]
+      | _ :: [] as l -> [ F.hVbox (fmtIds l) ]
+      | l -> [ F.string "("; F.hVbox (fmtIds l); F.string ") " ]
 
     let rec fmtOrder = function
-      | L.Varg l_ ->
-          begin match l_ with
-          | h_ :: [] -> fmtIds l_
-          | _ -> [ F.string "("; F.hVbox (fmtIds l_); F.string ")" ]
+      | L.Varg l ->
+          begin match l with
+          | h :: [] -> fmtIds l
+          | _ -> [ F.string "("; F.hVbox (fmtIds l); F.string ")" ]
           end
-      | L.Lex l_ -> [ F.string "{"; F.hVbox (fmtOrders l_); F.string "}" ]
-      | L.Simul l_ -> [ F.string "["; F.hVbox (fmtOrders l_); F.string "]" ]
+      | L.Lex l -> [ F.string "{"; F.hVbox (fmtOrders l); F.string "}" ]
+      | L.Simul l -> [ F.string "["; F.hVbox (fmtOrders l); F.string "]" ]
 
     and fmtOrders = function
       | [] -> []
-      | o_ :: [] -> fmtOrder o_
-      | o_ :: l_ -> fmtOrder o_ @ (F.string " " :: fmtOrders l_)
+      | o :: [] -> fmtOrder o
+      | o :: l -> fmtOrder o @ (F.string " " :: fmtOrders l)
 
-    let tDeclToString (L.TDecl (o_, L.Callpats l_)) =
+    let tDeclToString (L.TDecl (o, L.Callpats l)) =
       F.makestring_fmt
-        (F.hVbox (fmtOrder o_ @ (F.string " " :: fmtCallpats l_)))
+        (F.hVbox (fmtOrder o @ (F.string " " :: fmtCallpats l)))
 
-    let callpatsToString (L.Callpats l_) =
-      F.makestring_fmt (F.hVbox (fmtCallpats l_))
+    let callpatsToString (L.Callpats l) =
+      F.makestring_fmt (F.hVbox (fmtCallpats l))
 
-    let fmtROrder (L.RedOrder (p_, o_, o'_)) =
-      begin match p_ with
-      | Less -> fmtOrder o_ @ (F.string " < " :: fmtOrder o'_)
-      | Leq -> fmtOrder o_ @ (F.string " <= " :: fmtOrder o'_)
-      | Eq -> fmtOrder o_ @ (F.string " = " :: fmtOrder o'_)
+    let fmtROrder (L.RedOrder (p, o, o')) =
+      begin match p with
+      | Less -> fmtOrder o @ (F.string " < " :: fmtOrder o')
+      | Leq -> fmtOrder o @ (F.string " <= " :: fmtOrder o')
+      | Eq -> fmtOrder o @ (F.string " = " :: fmtOrder o')
       end
 
-    let rOrderToString_ r_ = F.makestring_fmt (F.hVbox (fmtROrder r_))
+    let rOrderToString_ r = F.makestring_fmt (F.hVbox (fmtROrder r))
 
-    let rDeclToString (L.RDecl (r_, L.Callpats l_)) =
+    let rDeclToString (L.RDecl (r, L.Callpats l)) =
       F.makestring_fmt
-        (F.hVbox (fmtROrder r_ @ (F.string " " :: fmtCallpats l_)))
+        (F.hVbox (fmtROrder r @ (F.string " " :: fmtCallpats l)))
 
     let tabledDeclToString (L.TabledDecl cid) =
       F.makestring_fmt (F.hVbox [ F.string (I.conDecName (I.sgnLookup cid)) ])

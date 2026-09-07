@@ -145,24 +145,24 @@ module Make_ReconModule
       | Some rl -> rl := (inst, r) :: !rl
     in
     ignore (List.app add eqns);
-    let doInst ((inst, r), conDec_) =
+    let doInst ((inst, r), conDec) =
       match inst with
       | Internal cid -> (
           try
             ModSyn.strictify
               (RT.internalInst
-                 conDec_ (ModSyn.abbrevify cid (IntSyn.sgnLookup cid)) r)
+                 conDec (ModSyn.abbrevify cid (IntSyn.sgnLookup cid)) r)
           with RT.Error msg ->
             raise
               (RT.Error
                  (msg ^ "\nin instantiation generated for "
                  ^ ModSyn.Names.qidToString (ModSyn.Names.constQid cid))))
-      | External tm -> ModSyn.strictify (RT.externalInst conDec_ tm r)
+      | External tm -> ModSyn.strictify (RT.externalInst conDec tm r)
     in
-    let transformConDec (cid, conDec_) =
+    let transformConDec (cid, conDec) =
       match IntTree.lookup table cid with
-      | None -> conDec_
-      | Some { contents = l } -> List.foldr doInst conDec_ l
+      | None -> conDec
+      | Some { contents = l } -> List.foldr doInst conDec l
     in
     transformConDec
 

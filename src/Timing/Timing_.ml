@@ -87,8 +87,8 @@ module Timing : TIMING = struct
   let sumToString (name, centers) =
     let rec sumup = function
       | [], (cPUTime, realTime) -> timesToString (name, (cPUTime, realTime))
-      | (_, { contents = c_, r_ }) :: centers, (cPUTime, realTime) ->
-          sumup (centers, (plus (cPUTime, c_), Time.( + ) realTime r_))
+      | (_, { contents = c, r }) :: centers, (cPUTime, realTime) ->
+          sumup (centers, (plus (cPUTime, c), Time.( + ) realTime r))
     in
     sumup (centers, (zero, Time.zeroTime))
 end

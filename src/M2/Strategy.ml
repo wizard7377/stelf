@@ -83,62 +83,62 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyFRS__0.MetaSyn' = struct
 
     let findMin = function
       | [] -> None
-      | o_ :: l_ ->
+      | o :: l ->
           let rec findMin' (a, k, result) = match a with
             | [] -> result
-            | o'_ :: l'_ ->
-                let k' = Splitting.index o'_ in
-                begin if Splitting.index o'_ < k then
-                  findMin' (l'_, k', Some o'_)
-                else findMin' (l'_, k, result)
+            | o' :: l' ->
+                let k' = Splitting.index o' in
+                begin if Splitting.index o' < k then
+                  findMin' (l', k', Some o')
+                else findMin' (l', k, result)
                 end
           in
-          findMin' (l_, Splitting.index o_, Some o_)
+          findMin' (l, Splitting.index o, Some o)
 
-    let rec split (s_ :: givenStates, ((openStates, solvedStates) as os)) =
+    let rec split (s :: givenStates, ((openStates, solvedStates) as os)) =
       begin match
-        findMin (Timers.time Timers.splitting Splitting.expand s_)
+        findMin (Timers.time Timers.splitting Splitting.expand s)
       with
-      | None -> fill (givenStates, (s_ :: openStates, solvedStates))
+      | None -> fill (givenStates, (s :: openStates, solvedStates))
       | Some splitOp -> (
           ignore (printSplitting ());
-          let sl_ = Timers.time Timers.splitting Splitting.apply splitOp in
+          let sl = Timers.time Timers.splitting Splitting.apply splitOp in
           ignore (printCloseBracket ());
-          try fill (sl_ @ givenStates, os)
+          try fill (sl @ givenStates, os)
           with Splitting.Error _ ->
-            fill (givenStates, (s_ :: openStates, solvedStates)))
+            fill (givenStates, (s :: openStates, solvedStates)))
       end
 
-    and recurse (s_ :: givenStates, ((openStates, solvedStates) as os)) =
-      begin match Timers.time Timers.recursion Recursion.expandEager s_ with
-      | [] -> split (s_ :: givenStates, os)
+    and recurse (s :: givenStates, ((openStates, solvedStates) as os)) =
+      begin match Timers.time Timers.recursion Recursion.expandEager s with
+      | [] -> split (s :: givenStates, os)
       | recursionOp :: _ -> (
           ignore (printRecursion ());
-          let s'_ = Timers.time Timers.recursion Recursion.apply recursionOp in
+          let s' = Timers.time Timers.recursion Recursion.apply recursionOp in
           ignore (printCloseBracket ());
-          try fill (s'_ :: givenStates, (openStates, solvedStates))
-          with Recursion.Error _ -> split (s_ :: givenStates, os))
+          try fill (s' :: givenStates, (openStates, solvedStates))
+          with Recursion.Error _ -> split (s :: givenStates, os))
       end
 
     and fill = function
       | [], os -> os
-      | s_ :: givenStates, ((openStates, solvedStates) as os) -> (
+      | s :: givenStates, ((openStates, solvedStates) as os) -> (
           let fillOp () =
-            begin match Timers.time Timers.filling Filling.expand s_ with
+            begin match Timers.time Timers.filling Filling.expand s with
             | _, fillingOp -> (
                 try
                   ignore (printFilling ());
-                  let (s'_ :: []) =
+                  let (s' :: []) =
                     Timers.time Timers.filling Filling.apply fillingOp
                   in
                   ignore (printCloseBracket ());
-                  begin if Qed.subgoal s'_ then begin
-                    printFinish s'_;
-                    fill (givenStates, (openStates, s'_ :: solvedStates))
+                  begin if Qed.subgoal s' then begin
+                    printFinish s';
+                    fill (givenStates, (openStates, s' :: solvedStates))
                   end
-                  else fill (s'_ :: givenStates, os)
+                  else fill (s' :: givenStates, os)
                   end
-                with Filling.Error _ -> recurse (s_ :: givenStates, os))
+                with Filling.Error _ -> recurse (s :: givenStates, os))
             end
           in
           try TimeLimit.timeLimit !Global.timeLimit fillOp ()
@@ -251,65 +251,65 @@ end) : STRATEGY.STRATEGY with module MetaSyn = StrategyRFS__1.MetaSyn' = struct
 
     let findMin = function
       | [] -> None
-      | o_ :: l_ ->
+      | o :: l ->
           let rec findMin' (a, k, result) = match a with
             | [] -> result
-            | o'_ :: l'_ ->
-                let k' = Splitting.index o'_ in
-                begin if Splitting.index o'_ < k then
-                  findMin' (l'_, k', Some o'_)
-                else findMin' (l'_, k, result)
+            | o' :: l' ->
+                let k' = Splitting.index o' in
+                begin if Splitting.index o' < k then
+                  findMin' (l', k', Some o')
+                else findMin' (l', k, result)
                 end
           in
-          findMin' (l_, Splitting.index o_, Some o_)
+          findMin' (l, Splitting.index o, Some o)
 
-    let rec split (s_ :: givenStates, ((openStates, solvedStates) as os)) =
+    let rec split (s :: givenStates, ((openStates, solvedStates) as os)) =
       begin match
-        findMin (Timers.time Timers.splitting Splitting.expand s_)
+        findMin (Timers.time Timers.splitting Splitting.expand s)
       with
-      | None -> recurse (givenStates, (s_ :: openStates, solvedStates))
+      | None -> recurse (givenStates, (s :: openStates, solvedStates))
       | Some splitOp -> (
           ignore (printSplitting ());
-          let sl_ = Timers.time Timers.splitting Splitting.apply splitOp in
+          let sl = Timers.time Timers.splitting Splitting.apply splitOp in
           ignore (printCloseBracket ());
-          try recurse (sl_ @ givenStates, os)
+          try recurse (sl @ givenStates, os)
           with Splitting.Error _ ->
-            recurse (givenStates, (s_ :: openStates, solvedStates)))
+            recurse (givenStates, (s :: openStates, solvedStates)))
       end
 
     and fill = function
       | [], os -> os
-      | s_ :: givenStates, ((openStates, solvedStates) as os) ->
-          begin match Timers.time Timers.filling Filling.expand s_ with
+      | s :: givenStates, ((openStates, solvedStates) as os) ->
+          begin match Timers.time Timers.filling Filling.expand s with
           | _, fillingOp -> (
               try
                 ignore (printFilling ());
-                let (s'_ :: []) =
+                let (s' :: []) =
                   Timers.time Timers.filling Filling.apply fillingOp
                 in
                 ignore (printCloseBracket ());
-                begin if Qed.subgoal s'_ then begin
-                  printFinish s'_;
-                  recurse (givenStates, (openStates, s'_ :: solvedStates))
+                begin if Qed.subgoal s' then begin
+                  printFinish s';
+                  recurse (givenStates, (openStates, s' :: solvedStates))
                 end
-                else fill (s'_ :: givenStates, os)
+                else fill (s' :: givenStates, os)
                 end
-              with Filling.Error _ -> split (s_ :: givenStates, os))
+              with Filling.Error _ -> split (s :: givenStates, os))
           end
 
     and recurse = function
       | [], os -> os
-      | s_ :: givenStates, ((openStates, solvedStates) as os) ->
-          begin match Timers.time Timers.recursion Recursion.expandEager s_ with
-          | [] -> fill (s_ :: givenStates, os)
+      | s :: givenStates, ((openStates, solvedStates) as os) ->
+          begin match Timers.time Timers.recursion Recursion.expandEager s with
+          | [] -> fill (s :: givenStates, os)
           | recursionOp :: _ -> (
               ignore (printRecursion ());
-              let s'_ =
+              let s' =
                 Timers.time Timers.recursion Recursion.apply recursionOp
               in
               ignore (printCloseBracket ());
-              try recurse (s'_ :: givenStates, (openStates, solvedStates))
-              with Recursion.Error _ -> fill (s_ :: givenStates, os))
+              try recurse (s' :: givenStates, (openStates, solvedStates))
+              with Recursion.Error _ -> fill (s :: givenStates, os))
           end
 
     let run givenStates =
@@ -362,10 +362,10 @@ end) : STRATEGY.STRATEGY with module MetaSyn = Strategy__2.MetaSyn' = struct
   open Strategy__2
   module MetaSyn = MetaSyn'
 
-  let run sl_ =
+  let run sl =
     begin match !MetaGlobal.strategy with
-    | MetaGlobal.Rfs -> StrategyRFS.run sl_
-    | MetaGlobal.Frs -> StrategyFRS.run sl_
+    | MetaGlobal.Rfs -> StrategyRFS.run sl
+    | MetaGlobal.Frs -> StrategyFRS.run sl
     end
 end
 (* functor Strategy *)

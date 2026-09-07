@@ -34,13 +34,13 @@ end) : QED with module MetaSyn = Qed__0.MetaSyn' = struct
     module M = MetaSyn
     module I = IntSyn
 
-    let subgoal (M.State (name, M.Prefix (g_, m_, b_), v_)) =
+    let subgoal (M.State (name, M.Prefix (g, m, b), v)) =
       let rec check = function
         | I.Null -> true
-        | I.Decl (m_, M.Top) -> check m_
-        | I.Decl (m_, M.Bot) -> false
+        | I.Decl (m, M.Top) -> check m
+        | I.Decl (m, M.Bot) -> false
       in
-      check m_
+      check m
   end
 
   let subgoal = subgoal

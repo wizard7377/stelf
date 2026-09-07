@@ -62,7 +62,7 @@ module MakeCompile
 
   type duplicates = Bvar of int | Fgn | Def of int
 
-  let notCS = function fromCS_ -> false | _ -> true
+  let notCS = function fromCS -> false | _ -> true
 
   type opt = CompSyn.opt
 
@@ -76,7 +76,7 @@ module MakeCompile
     | I.Const c ->
         begin match I.constStatus c with I.Constraint _ -> true | _ -> false
         end
-    | h_ -> false
+    | h -> false
 
   (* head (A) = H, the head of V
 
@@ -84,8 +84,8 @@ module MakeCompile
        G |- A : type, A enf
        A = H @ S
     *)
-  let rec head = function I.Root (h, _) -> h | I.Pi (_, a_) -> head a_
-  let seen (i, vars_) = List.exists (function d, x -> x = i) vars_
+  let rec head = function I.Root (h, _) -> h | I.Pi (_, a) -> head a
+  let seen (i, vars) = List.exists (function d, x -> x = i) vars
 
   (* etaSpine (S, n) = true
 
@@ -103,25 +103,25 @@ module MakeCompile
 *)
   let rec etaSpine (a, n) = match a with
     | I.Nil -> n = 0
-    | I.App (I.Root (I.BVar k, I.Nil), s_) -> k = n && etaSpine (s_, n - 1)
-    | I.App (a_, s_) -> false
+    | I.App (I.Root (I.BVar k, I.Nil), s) -> k = n && etaSpine (s, n - 1)
+    | I.App (a, s) -> false
 
   (* collectHead (h, K, Vars, depth) = (K', Vars', replaced)
      adds to K and Vars as in collectExp and collectSpine
    *)
-  let collectHead (a, s_, k_, vars_, depth) = match a with
+  let collectHead (a, s, k_, vars, depth) = match a with
     | (I.BVar k as h) ->
         begin if k > depth then
-          begin if etaSpine (s_, depth) then
-            begin if seen (k - depth, vars_) then
-              ((depth, Bvar (k - depth)) :: k_, vars_, true)
-            else (k_, (depth, k - depth) :: vars_, false)
+          begin if etaSpine (s, depth) then
+            begin if seen (k - depth, vars) then
+              ((depth, Bvar (k - depth)) :: k_, vars, true)
+            else (k_, (depth, k - depth) :: vars, false)
             end
-          else ((depth, Bvar (k - depth)) :: k_, vars_, true)
+          else ((depth, Bvar (k - depth)) :: k_, vars, true)
           end
-        else (k_, vars_, false)
+        else (k_, vars, false)
         end
-    | _ -> (k_, vars_, false)
+    | _ -> (k_, vars, false)
 
   (* collectExp (U, K, Vars, depth) = (K', Vars')
       collectSpine (S, K, Vars, depth) = (K', Vars')
@@ -133,23 +133,23 @@ module MakeCompile
 
       for each new variable (d, k-d) for depth wrt locally bound variables
    *)
-  let rec collectSpine (a, k_, vars_, depth) = match a with
-    | I.Nil -> (k_, vars_)
-    | I.App (u_, s_) ->
-        let k'_, vars' = collectExp (u_, k_, vars_, depth) in
-        collectSpine (s_, k'_, vars', depth)
+  let rec collectSpine (a, k, vars, depth) = match a with
+    | I.Nil -> (k, vars)
+    | I.App (u, s) ->
+        let k', vars' = collectExp (u, k, vars, depth) in
+        collectSpine (s, k', vars', depth)
 
-  and collectExp (a, k_, vars_, depth) = match a with
-    | I.Root ((I.BVar k as h), s_) ->
-        let k'_, vars', replaced = collectHead (h, s_, k_, vars_, depth) in
-        begin if replaced then (k'_, vars')
-        else collectSpine (s_, k'_, vars', depth)
+  and collectExp (a, k_, vars, depth) = match a with
+    | I.Root ((I.BVar k as h), s) ->
+        let k', vars', replaced = collectHead (h, s, k_, vars, depth) in
+        begin if replaced then (k', vars')
+        else collectSpine (s, k', vars', depth)
         end
-    | (I.Root (I.Def k, s_) as u_) ->
-        ((depth, Def k) :: k_, vars_)
-    | I.Root (h, s_) -> collectSpine (s_, k_, vars_, depth)
-    | I.Lam (d_, u_) -> collectExp (u_, k_, vars_, depth + 1)
-    | I.FgnExp (cs, fe) -> ((depth, Fgn) :: k_, vars_)
+    | (I.Root (I.Def k, s) as u) ->
+        ((depth, Def k) :: k_, vars)
+    | I.Root (h, s) -> collectSpine (s, k_, vars, depth)
+    | I.Lam (d, u) -> collectExp (u, k_, vars, depth + 1)
+    | I.FgnExp (cs, fe) -> ((depth, Fgn) :: k_, vars)
 
   (* don't collect D, since it is ignored in unification *)
   (* | collectExp (I.Uni(L), K, Vars, depth) = (K, Vars) *)
@@ -176,27 +176,27 @@ module MakeCompile
     | (I.Skonst k as h) -> h
 
   let rec shiftExp (a, depth, total) = match a with
-    | I.Root (h, s_) ->
-        I.Root (shiftHead (h, depth, total), shiftSpine (s_, depth, total))
-    | I.Uni l_ -> I.Uni l_
-    | I.Lam (d_, u_) ->
-        I.Lam (shiftDec (d_, depth, total), shiftExp (u_, depth + 1, total))
-    | I.Pi ((d_, p_), u_) ->
-        I.Pi ((shiftDec (d_, depth, total), p_), shiftExp (u_, depth + 1, total))
+    | I.Root (h, s) ->
+        I.Root (shiftHead (h, depth, total), shiftSpine (s, depth, total))
+    | I.Uni l -> I.Uni l
+    | I.Lam (d, u) ->
+        I.Lam (shiftDec (d, depth, total), shiftExp (u, depth + 1, total))
+    | I.Pi ((d, p), u) ->
+        I.Pi ((shiftDec (d, depth, total), p), shiftExp (u, depth + 1, total))
     | I.FgnExp (csfe1, csfe2) ->
-        I.FgnExpStd.Map.apply csfe1 csfe2 (function u_ ->
-            shiftExp (Whnf.normalize (u_, I.id), depth, total))
+        I.FgnExpStd.Map.apply csfe1 csfe2 (function u ->
+            shiftExp (Whnf.normalize (u, I.id), depth, total))
   (* Tue Apr  2 12:10:24 2002 -fp -bp *)
   (* this is overkill and could be very expensive for deeply nested foreign exps *)
   (* calling normalize here because U may not be normal *)
 
   and shiftSpine (a, depth, total) = match a with
     | I.Nil -> I.Nil
-    | I.App (u_, s_) ->
-        I.App (shiftExp (u_, depth, total), shiftSpine (s_, depth, total))
+    | I.App (u, s) ->
+        I.App (shiftExp (u, depth, total), shiftSpine (s, depth, total))
 
-  and shiftDec (I.Dec (x, v_), depth, total) =
-    I.Dec (x, shiftExp (v_, depth, total))
+  and shiftDec (I.Dec (x, v), depth, total) =
+    I.Dec (x, shiftExp (v, depth, total))
 
   (* linearHead (Gl, h, S, left, Vars, depth, total, eqns) = (left', Vars', N, Eqn)
 
@@ -213,24 +213,24 @@ module MakeCompile
    and
       Eqn accumulates residual equation UnifyEq(Gl, M, N)
   *)
-  let linearHead (g_, a, s_, left, vars_, depth, total) = match a with
+  let linearHead (g, a, s, left, vars, depth, total) = match a with
     | (I.BVar k as h) ->
         begin if k > depth then
-          begin if etaSpine (s_, depth) then
-            begin if seen (k - depth, vars_) then
-              (left - 1, vars_, I.BVar (left + depth), true)
-            else (left, (depth, k - depth) :: vars_, I.BVar (k + total), false)
+          begin if etaSpine (s, depth) then
+            begin if seen (k - depth, vars) then
+              (left - 1, vars, I.BVar (left + depth), true)
+            else (left, (depth, k - depth) :: vars, I.BVar (k + total), false)
             end
-          else (left - 1, vars_, I.BVar (left + depth), true)
+          else (left - 1, vars, I.BVar (left + depth), true)
           end
-        else (left, vars_, h, false)
+        else (left, vars, h, false)
         end
     | (I.Const k as h) ->
-        (left, vars_, h, false)
-    | (I.FgnConst (k, conDec_) as h) ->
-        (left, vars_, h, false)
+        (left, vars, h, false)
+    | (I.FgnConst (k, conDec) as h) ->
+        (left, vars, h, false)
     | (I.Skonst k as h) ->
-        (left, vars_, h, false)
+        (left, vars, h, false)
   (*
      | linearHead(G, (h as I.NSDef k), s, S, left, Vars, depth, total) =
          (left, Vars, h, false)
@@ -248,53 +248,53 @@ module MakeCompile
 
      ""For any U', U = U' iff (N = U' and Eqn)""
   *)
-  let rec linearExp (gl_, a, left, vars_, depth, total, eqns) = match a with
-    | (I.Root ((I.Def k as h), s_) as u_)
+  let rec linearExp (gl, a, left, vars, depth, total, eqns) = match a with
+    | (I.Root ((I.Def k as h), s) as u)
       ->
-        let n_ = I.Root (I.BVar (left + depth), I.Nil) in
-        let u'_ = shiftExp (u_, depth, total) in
-        (left - 1, vars_, n_, C.UnifyEq (gl_, u'_, n_, eqns))
-    | (I.Root (h, s_) as u_) ->
+        let n = I.Root (I.BVar (left + depth), I.Nil) in
+        let u' = shiftExp (u, depth, total) in
+        (left - 1, vars, n, C.UnifyEq (gl, u', n, eqns))
+    | (I.Root (h, s) as u) ->
         let left', vars', h', replaced =
-          linearHead (gl_, h, s_, left, vars_, depth, total)
+          linearHead (gl, h, s, left, vars, depth, total)
         in
         begin if replaced then
-          let n_ = I.Root (h', I.Nil) in
-          let u'_ = shiftExp (u_, depth, total) in
-          (left', vars_, n_, C.UnifyEq (gl_, u'_, n_, eqns))
+          let n = I.Root (h', I.Nil) in
+          let u' = shiftExp (u, depth, total) in
+          (left', vars, n, C.UnifyEq (gl, u', n, eqns))
         else
-          let left'', vars'', s'_, eqns' =
-            linearSpine (gl_, s_, left', vars', depth, total, eqns)
+          let left'', vars'', s', eqns' =
+            linearSpine (gl, s, left', vars', depth, total, eqns)
           in
-          (left'', vars'', I.Root (h', s'_), eqns')
+          (left'', vars'', I.Root (h', s'), eqns')
         end
         (* h = h' not replaced *)
-    | I.Lam (d_, u_) ->
-        let d'_ = shiftDec (d_, depth, total) in
-        let left', vars', u'_, eqns' =
-          linearExp (I.Decl (gl_, d'_), u_, left, vars_, depth + 1, total, eqns)
+    | I.Lam (d, u) ->
+        let d' = shiftDec (d, depth, total) in
+        let left', vars', u', eqns' =
+          linearExp (I.Decl (gl, d'), u, left, vars, depth + 1, total, eqns)
         in
-        (left', vars', I.Lam (d'_, u'_), eqns')
-    | (I.FgnExp (cs, ops) as u_) ->
-        let n_ = I.Root (I.BVar (left + depth), I.Nil) in
-        let u'_ = shiftExp (u_, depth, total) in
-        (left - 1, vars_, n_, C.UnifyEq (gl_, u'_, n_, eqns))
+        (left', vars', I.Lam (d', u'), eqns')
+    | (I.FgnExp (cs, ops) as u) ->
+        let n = I.Root (I.BVar (left + depth), I.Nil) in
+        let u' = shiftExp (u, depth, total) in
+        (left - 1, vars, n, C.UnifyEq (gl, u', n, eqns))
   (*
      | linearExp (Gl, U as I.Uni(L), left, Vars, depth, total, eqns) =
          (left, Vars, I.Uni(L), eqns)
      *)
 
   (* should be impossible  Mon Apr 15 14:54:42 2002 -fp *)
-  and linearSpine (gl_, a, left, vars_, depth, total, eqns) = match a with
-    | I.Nil -> (left, vars_, I.Nil, eqns)
-    | I.App (u_, s_) ->
-        let left', vars', u'_, eqns' =
-          linearExp (gl_, u_, left, vars_, depth, total, eqns)
+  and linearSpine (gl, a, left, vars, depth, total, eqns) = match a with
+    | I.Nil -> (left, vars, I.Nil, eqns)
+    | I.App (u, s) ->
+        let left', vars', u', eqns' =
+          linearExp (gl, u, left, vars, depth, total, eqns)
         in
-        let left'', vars'', s'_, eqns'' =
-          linearSpine (gl_, s_, left', vars', depth, total, eqns')
+        let left'', vars'', s', eqns'' =
+          linearSpine (gl, s, left', vars', depth, total, eqns')
         in
-        (left'', vars'', I.App (u'_, s'_), eqns'')
+        (left'', vars'', I.App (u', s'), eqns'')
 
   (* SClo(S, s') cannot occur *)
   (*  compileLinearHead (G, R as I.Root (h, S)) = r
@@ -308,10 +308,10 @@ module MakeCompile
        and of the form
            (Axists(_ , Axists( _, ....., Axists( _, Assign (E, AuxG)))))
   *)
-  let compileLinearHead (g_, (I.Root (h, s_) as r_)) =
+  let compileLinearHead (g, (I.Root (h, s) as r_)) =
     let k_, _ = collectExp (r_, [], [], 0) in
     let left = List.length k_ in
-    let left', _, r'_, eqs_ =
+    let left', _, r', eqs =
       linearExp (I.Null, r_, left, [], 0, left, C.Trivial)
     in
     let rec convertKRes (resG, a, i) = match a, i with
@@ -321,9 +321,9 @@ module MakeCompile
             ( I.ADec (Some ("A" ^ Int.toString i), d),
               convertKRes (resG, k_, i - 1) )
     in
-    let r = convertKRes (C.Assign (r'_, eqs_), List.rev k_, left) in
+    let r = convertKRes (C.Assign (r', eqs), List.rev k_, left) in
     Display.chatter_s 6 "\nClause LH Eqn";
-    Display.chatter_s 6 (CPrint.clauseToString "\t" (g_, r));
+    Display.chatter_s 6 (CPrint.clauseToString "\t" (g, r));
     r
 
   (*  compileSbtHead (G, R as I.Root (h, S)) = r
@@ -336,23 +336,23 @@ module MakeCompile
            G |- H ResGoal  and H is linear
 
   *)
-  let compileSbtHead (g_, (I.Root (h, s_) as h_)) =
+  let compileSbtHead (g, (I.Root (h, s) as h_)) =
     let k_, _ = collectExp (h_, [], [], 0) in
     let left = List.length k_ in
-    let left', _, h'_, eqs_ =
+    let left', _, h', eqs =
       linearExp (I.Null, h_, left, [], 0, left, C.Trivial)
     in
-    let rec convertKRes (g_, a, i) = match a, i with
-      | [], 0 -> g_
+    let rec convertKRes (g, a, i) = match a, i with
+      | [], 0 -> g
       | (d, k) :: k_, i ->
           convertKRes
-            (I.Decl (g_, I.ADec (Some ("AVar " ^ Int.toString i), d)), k_, i - 1)
+            (I.Decl (g, I.ADec (Some ("AVar " ^ Int.toString i), d)), k_, i - 1)
     in
-    let g'_ = convertKRes (g_, List.rev k_, left) in
+    let g' = convertKRes (g, List.rev k_, left) in
     Display.chatter_s 6 "\nClause Sbt Eqn";
     Display.chatter_s 6
-      (CPrint.clauseToString "\t" (g'_, C.Assign (h'_, eqs_)));
-    (g'_, Some (h'_, eqs_))
+      (CPrint.clauseToString "\t" (g', C.Assign (h', eqs)));
+    (g', Some (h', eqs))
   (* insert R' together with Eqs and G and sc C.True *)
 
   (* compileGoalN  fromCS A => g
@@ -371,49 +371,49 @@ module MakeCompile
   *)
   let rec compileGoalN arg__1 arg__2 =
     begin match (arg__1, arg__2) with
-    | fromCS, (g_, (I.Root _ as r_)) -> C.Atom r_
-    | fromCS, (g_, I.Pi ((I.Dec (_, a1_), I.No), a2_)) ->
-        let ha1 = I.targetHead a1_ in
-        let r_ = compileDClauseN fromCS false (g_, a1_) in
-        let goal = compileGoalN fromCS (I.Decl (g_, I.Dec (None, a1_)), a2_) in
-        C.Impl (r_, a1_, ha1, goal)
+    | fromCS, (g, (I.Root _ as r)) -> C.Atom r
+    | fromCS, (g, I.Pi ((I.Dec (_, a1), I.No), a2)) ->
+        let ha1 = I.targetHead a1 in
+        let r = compileDClauseN fromCS false (g, a1) in
+        let goal = compileGoalN fromCS (I.Decl (g, I.Dec (None, a1)), a2) in
+        C.Impl (r, a1, ha1, goal)
         (* A1 is used to build the proof term, Ha1 for indexing *)
         (* never optimize when compiling local assumptions *)
-    | fromCS, (g_, I.Pi (((I.Dec (_, a1_) as d_), I.Maybe), a2_)) ->
-        begin if notCS fromCS && isConstraint (head a1_) then
+    | fromCS, (g, I.Pi (((I.Dec (_, a1) as d), I.Maybe), a2)) ->
+        begin if notCS fromCS && isConstraint (head a1) then
           raise (Error "Constraint appears in dynamic clause position")
-        else C.All (d_, compileGoalN fromCS (I.Decl (g_, d_), a2_))
+        else C.All (d, compileGoalN fromCS (I.Decl (g, d), a2))
         end
     end
   (* A = {x:A1} A2 *)
   (* A = A1 -> A2 *)
   (* A = H @ S *)
 
-  and compileGoal fromCS (g_, (a_, s)) =
-    compileGoalN fromCS (g_, Whnf.normalize (a_, s))
+  and compileGoal fromCS (g, (a, s)) =
+    compileGoalN fromCS (g, Whnf.normalize (a, s))
 
   and compileDClauseN arg__3 arg__4 arg__5 =
     begin match (arg__3, arg__4, arg__5) with
-    | fromCS, opt, (g_, (I.Root (h, s_) as r_)) ->
-        begin if opt && !optimize = C.LinearHeads then compileLinearHead (g_, r_)
+    | fromCS, opt, (g, (I.Root (h, s) as r)) ->
+        begin if opt && !optimize = C.LinearHeads then compileLinearHead (g, r)
         else
           begin if notCS fromCS && isConstraint h then
             raise (Error "Constraint appears in dynamic clause position")
-          else C.Eq r_
+          else C.Eq r
           end
         end
-    | fromCS, opt, (g_, I.Pi (((I.Dec (_, a1_) as d_), I.No), a2_)) ->
+    | fromCS, opt, (g, I.Pi (((I.Dec (_, a1) as d), I.No), a2)) ->
         C.And
-          ( compileDClauseN fromCS opt (I.Decl (g_, d_), a2_),
-            a1_,
-            compileGoalN fromCS (g_, a1_) )
-    | fromCS, opt, (g_, I.Pi ((d_, I.Maybe), a2_)) ->
-        C.Exists (d_, compileDClauseN fromCS opt (I.Decl (g_, d_), a2_))
-    | fromCS, opt, (g_, I.Pi (((I.Dec (_, a1_) as d_), I.Meta), a2_)) ->
+          ( compileDClauseN fromCS opt (I.Decl (g, d), a2),
+            a1,
+            compileGoalN fromCS (g, a1) )
+    | fromCS, opt, (g, I.Pi ((d, I.Maybe), a2)) ->
+        C.Exists (d, compileDClauseN fromCS opt (I.Decl (g, d), a2))
+    | fromCS, opt, (g, I.Pi (((I.Dec (_, a1) as d), I.Meta), a2)) ->
         C.In
-          ( compileDClauseN fromCS opt (I.Decl (g_, d_), a2_),
-            a1_,
-            compileGoalN fromCS (g_, a1_) )
+          ( compileDClauseN fromCS opt (I.Decl (g, d), a2),
+            a1,
+            compileGoalN fromCS (g, a1) )
     end
 
   (* A = {x:A1} A2 *)
@@ -444,16 +444,16 @@ module MakeCompile
   *)
   let rec compileSubgoals arg__6 arg__7 arg__8 =
     begin match (arg__6, arg__7, arg__8) with
-    | fromCS, g'_, (n, I.Decl (stack_, I.No), I.Decl (g_, I.Dec (_, a_))) ->
-        let sg = compileSubgoals fromCS g'_ (n + 1, stack_, g_) in
+    | fromCS, g', (n, I.Decl (stack, I.No), I.Decl (g, I.Dec (_, a))) ->
+        let sg = compileSubgoals fromCS g' (n + 1, stack, g) in
         C.Conjunct
-          ( compileGoal fromCS (g'_, (a_, I.Shift (n + 1))),
-            I.EClo (a_, I.Shift (n + 1)),
+          ( compileGoal fromCS (g', (a, I.Shift (n + 1))),
+            I.EClo (a, I.Shift (n + 1)),
             sg )
         (* G |- A and G' |- A[^(n+1)] *)
-    | fromCS, g'_, (n, I.Decl (stack_, I.Maybe), I.Decl (g_, I.Dec (_, a1_))) ->
-        compileSubgoals fromCS g'_ (n + 1, stack_, g_)
-    | fromCS, g'_, (n, I.Null, I.Null) -> C.True
+    | fromCS, g', (n, I.Decl (stack, I.Maybe), I.Decl (g, I.Dec (_, a1))) ->
+        compileSubgoals fromCS g' (n + 1, stack, g)
+    | fromCS, g', (n, I.Null, I.Null) -> C.True
     end
 
   (* compileSClause (Stack, G, A) => (Head, SubGoals) (top-level)
@@ -469,25 +469,25 @@ module MakeCompile
   *)
   let rec compileSClauseN arg__9 arg__10 =
     begin match (arg__9, arg__10) with
-    | fromCS, (stack_, g_, (I.Root (h, s_) as r_)) ->
-        let g'_, head_ = compileSbtHead (g_, r_) in
-        let d = I.ctxLength g'_ - I.ctxLength g_ in
-        let sgoals = compileSubgoals fromCS g'_ (d, stack_, g_) in
-        ((g'_, head_), sgoals)
+    | fromCS, (stack, g, (I.Root (h, s) as r)) ->
+        let g', head = compileSbtHead (g, r) in
+        let d = I.ctxLength g' - I.ctxLength g in
+        let sgoals = compileSubgoals fromCS g' (d, stack, g) in
+        ((g', head), sgoals)
         (* G' |- Sgoals  and G' |- ^d : G *)
-    | fromCS, (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), I.No), a2_)) ->
-        compileSClauseN fromCS (I.Decl (stack_, I.No), I.Decl (g_, d_), a2_)
-    | fromCS, (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), meta_), a2_)) ->
-        compileSClauseN fromCS (I.Decl (stack_, I.Meta), I.Decl (g_, d_), a2_)
-    | fromCS, (stack_, g_, I.Pi (((I.Dec (_, a1_) as d_), I.Maybe), a2_)) ->
-        compileSClauseN fromCS (I.Decl (stack_, I.Maybe), I.Decl (g_, d_), a2_)
+    | fromCS, (stack, g, I.Pi (((I.Dec (_, a1) as d), I.No), a2)) ->
+        compileSClauseN fromCS (I.Decl (stack, I.No), I.Decl (g, d), a2)
+    | fromCS, (stack, g, I.Pi (((I.Dec (_, a1) as d), meta), a2)) ->
+        compileSClauseN fromCS (I.Decl (stack, I.Meta), I.Decl (g, d), a2)
+    | fromCS, (stack, g, I.Pi (((I.Dec (_, a1) as d), I.Maybe), a2)) ->
+        compileSClauseN fromCS (I.Decl (stack, I.Maybe), I.Decl (g, d), a2)
     end
 
-  let compileDClause opt (g_, a_) =
-    compileDClauseN I.Ordinary opt (g_, Whnf.normalize (a_, I.id))
+  let compileDClause opt (g, a) =
+    compileDClauseN I.Ordinary opt (g, Whnf.normalize (a, I.id))
 
-  let compileGoal g_ a_ =
-    compileGoalN I.Ordinary (g_, Whnf.normalize (a_, I.id))
+  let compileGoal g a =
+    compileGoalN I.Ordinary (g, Whnf.normalize (a, I.id))
 
   (* compileCtx G = (G, dPool)
 
@@ -496,14 +496,14 @@ module MakeCompile
      then |- G ~> dPool  (context G compile to clause pool dPool)
      and  |- dPool  dpool
   *)
-  let compileCtx opt g_ =
+  let compileCtx opt g =
     let rec compileBlock = function
       | [], s, (n, i) -> []
-      | I.Dec (_, v_) :: vs_, t, (n, i) ->
-          let vt = I.EClo (v_, t) in
-          (compileDClause opt (g_, vt), I.id, I.targetHead vt)
+      | I.Dec (_, v) :: vs, t, (n, i) ->
+          let vt = I.EClo (v, t) in
+          (compileDClause opt (g, vt), I.id, I.targetHead vt)
           :: compileBlock
-               ( vs_,
+               ( vs,
                  I.Dot (I.Exp (I.Root (I.Proj (I.Bidx n, i), I.Nil)), t),
                  (n, i + 1) )
     in
@@ -511,18 +511,18 @@ module MakeCompile
       let open CompSyn in
       function
       | I.Null -> I.Null
-      | I.Decl (g_, I.Dec (_, a_)) ->
-          let ha = I.targetHead a_ in
+      | I.Decl (g, I.Dec (_, a)) ->
+          let ha = I.targetHead a in
           I.Decl
-            (compileCtx' g_, CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha))
-      | I.Decl (g_, I.BDec (_, (c, s))) ->
-          let g_, l_ = I.constBlock c in
-          let dpool = compileCtx' g_ in
+            (compileCtx' g, CompSyn.Dec (compileDClause opt (g, a), I.id, ha))
+      | I.Decl (g, I.BDec (_, (c, s))) ->
+          let g, l = I.constBlock c in
+          let dpool = compileCtx' g in
           let n = I.ctxLength dpool in
-          I.Decl (dpool, CompSyn.BDec (compileBlock (l_, s, (n, 1))))
+          I.Decl (dpool, CompSyn.BDec (compileBlock (l, s, (n, 1))))
       (* this is inefficient! -cs *)
     in
-    C.DProg (g_, compileCtx' g_)
+    C.DProg (g, compileCtx' g)
 
   (* compile G = (G, dPool)
 
@@ -534,40 +534,40 @@ module MakeCompile
   let compilePsi opt psi =
     let rec compileBlock = function
       | [], s, (n, i) -> []
-      | I.Dec (_, v_) :: vs_, t, (n, i) ->
-          let vt = I.EClo (v_, t) in
+      | I.Dec (_, v) :: vs, t, (n, i) ->
+          let vt = I.EClo (v, t) in
           (compileDClause opt (T.coerceCtx psi, vt), I.id, I.targetHead vt)
           :: compileBlock
-               ( vs_,
+               ( vs,
                  I.Dot (I.Exp (I.Root (I.Proj (I.Bidx n, i), I.Nil)), t),
                  (n, i + 1) )
     in
     let rec compileCtx' = function
       | I.Null -> I.Null
-      | I.Decl (g_, I.Dec (_, a_)) ->
-          let ha = I.targetHead a_ in
+      | I.Decl (g, I.Dec (_, a)) ->
+          let ha = I.targetHead a in
           I.Decl
-            (compileCtx' g_, CompSyn.Dec (compileDClause opt (g_, a_), I.id, ha))
-      | I.Decl (g_, I.BDec (_, (c, s))) ->
-          let g_, l_ = I.constBlock c in
-          let dpool = compileCtx' g_ in
+            (compileCtx' g, CompSyn.Dec (compileDClause opt (g, a), I.id, ha))
+      | I.Decl (g, I.BDec (_, (c, s))) ->
+          let g, l = I.constBlock c in
+          let dpool = compileCtx' g in
           let n = I.ctxLength dpool in
-          I.Decl (dpool, CompSyn.BDec (compileBlock (l_, s, (n, 1))))
+          I.Decl (dpool, CompSyn.BDec (compileBlock (l, s, (n, 1))))
       (* this is inefficient! -cs *)
     in
     let rec compilePsi' = function
       | I.Null -> I.Null
-      | I.Decl (psi, T.UDec (I.Dec (_, a_))) ->
-          let ha = I.targetHead a_ in
+      | I.Decl (psi, T.UDec (I.Dec (_, a))) ->
+          let ha = I.targetHead a in
           I.Decl
             ( compilePsi' psi,
-              CompSyn.Dec (compileDClause opt (T.coerceCtx psi, a_), I.id, ha)
+              CompSyn.Dec (compileDClause opt (T.coerceCtx psi, a), I.id, ha)
             )
       | I.Decl (psi, T.UDec (I.BDec (_, (c, s)))) ->
-          let g_, l_ = I.constBlock c in
-          let dpool = compileCtx' g_ in
+          let g, l = I.constBlock c in
+          let dpool = compileCtx' g in
           let n = I.ctxLength dpool in
-          I.Decl (dpool, CompSyn.BDec (compileBlock (l_, s, (n, 1))))
+          I.Decl (dpool, CompSyn.BDec (compileBlock (l, s, (n, 1))))
           (* this is inefficient! -cs *)
       | I.Decl (psi, T.PDec _) -> I.Decl (compilePsi' psi, CompSyn.PDec)
     in
@@ -584,16 +584,16 @@ module MakeCompile
     | LinearHeads ->
         C.sProgInstall (a, C.SClause (compileDClauseN fromCS true (I.Null, a_)))
     | Indexing ->
-        let (g_, head_), r_ =
+        let (g, head), r =
           compileSClauseN fromCS (I.Null, I.Null, Whnf.normalize (a_, I.id))
         in
         ignore (C.sProgInstall
             (a, C.SClause (compileDClauseN fromCS true (I.Null, a_))));
-        begin match head_ with
+        begin match head with
         | None -> raise (Error "Install via normal index")
-        | Some (h_, eqs_) ->
+        | Some (h, eqs) ->
             SubTree.sProgInstall
-              (cidFromHead (I.targetHead a_), C.Head (h_, g_, eqs_, a), r_)
+              (cidFromHead (I.targetHead a_), C.Head (h, g, eqs, a), r)
         end
     end
 

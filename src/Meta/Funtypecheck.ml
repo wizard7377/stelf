@@ -62,62 +62,62 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
     module F = FunSyn
     module S = StateSyn
 
-    let conv gs_ gs' =
+    let conv gs gs' =
       let exception Conv in
       let rec conv a1 b1 = match a1, b1 with
         | (I.Null, s), (I.Null, s') -> (s, s')
-        | (I.Decl (g_, I.Dec (_, v_)), s), (I.Decl (g'_, I.Dec (_, v'_)), s') ->
-            let s1, s1' = conv (g_, s) (g'_, s') in
+        | (I.Decl (g, I.Dec (_, v)), s), (I.Decl (g', I.Dec (_, v')), s') ->
+            let s1, s1' = conv (g, s) (g', s') in
             let ((s2, s2') as ps) = (I.dot1 s1, I.dot1 s1') in
-            begin if Conv.conv (v_, s1) (v'_, s1') then ps else raise Conv
+            begin if Conv.conv (v, s1) (v', s1') then ps else raise Conv
             end
         | _ -> raise Conv
       in
       try
         begin
-          ignore (conv gs_ gs');
+          ignore (conv gs gs');
           true
         end
       with Conv -> false
 
-    let rec extend (g_, a) = match a with
-      | [] -> g_
-      | d_ :: l_ -> extend (I.Decl (g_, d_), l_)
+    let rec extend (g, a) = match a with
+      | [] -> g
+      | d :: l -> extend (I.Decl (g, d), l)
 
-    let validBlock (psi, k, (l, g_)) =
+    let validBlock (psi, k, (l, g)) =
       let rec skipBlock (a, k) = match a with
         | I.Null -> k
-        | I.Decl (g'_, _) -> skipBlock (g'_, k - 1)
+        | I.Decl (g', _) -> skipBlock (g', k - 1)
       in
       let rec validBlock' = function
-        | I.Decl (psi, F.Block (F.CtxBlock (l', g'_))), 0 ->
-            begin if l' = l && conv (g_, I.id) (g'_, I.id) then ()
+        | I.Decl (psi, F.Block (F.CtxBlock (l', g'))), 0 ->
+            begin if l' = l && conv (g, I.id) (g', I.id) then ()
             else raise (Error "Typecheck Error: Not a valid block")
             end
         | I.Decl (psi, F.Prim _), 0 ->
             raise (Error "Typecheck Error: Not a valid block")
         | I.Null, k -> raise (Error "Typecheck Error: Not a valid block")
-        | I.Decl (psi, F.Block (F.CtxBlock (l', g'_))), k ->
-            validBlock' (psi, skipBlock (g'_, k))
-        | I.Decl (psi, F.Prim d_), k -> validBlock' (psi, k - 1)
+        | I.Decl (psi, F.Block (F.CtxBlock (l', g'))), k ->
+            validBlock' (psi, skipBlock (g', k))
+        | I.Decl (psi, F.Prim d), k -> validBlock' (psi, k - 1)
       in
       validBlock' (psi, k)
 
-    let raiseSub (g_, psi') =
-      let n = I.ctxLength g_ in
+    let raiseSub (g, psi') =
+      let n = I.ctxLength g in
       let m = I.ctxLength psi' in
-      let rec args (n', a, s_) = match n' with
-        | 0 -> s_
+      let rec args (n', a, s) = match n' with
+        | 0 -> s
         | n' ->
-            let (I.Dec (_, v_)) = I.ctxDec g_ n' in
-            begin if Subordinate.belowEq (I.targetFam v_) a then
-              args (n' - 1, a, I.App (I.Root (I.BVar n', I.Nil), s_))
-            else args (n' - 1, a, s_)
+            let (I.Dec (_, v)) = I.ctxDec g n' in
+            begin if Subordinate.belowEq (I.targetFam v) a then
+              args (n' - 1, a, I.App (I.Root (I.BVar n', I.Nil), s))
+            else args (n' - 1, a, s)
             end
       in
       let term m' =
-        let (I.Dec (_, v_)) = I.ctxDec psi' m' in
-        I.Exp (I.Root (I.BVar (n + m'), args (n, I.targetFam v_, I.Nil)))
+        let (I.Dec (_, v)) = I.ctxDec psi' m' in
+        I.Exp (I.Root (I.BVar (n + m'), args (n, I.targetFam v, I.Nil)))
       in
       let rec raiseSub'' (m', s) = match m' with
         | 0 -> s
@@ -129,34 +129,34 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
       in
       raiseSub' (n, I.Shift (n + m))
 
-    let raiseType (F.CtxBlock (l, g_)) psi' =
+    let raiseType (F.CtxBlock (l, g)) psi' =
       let rec raiseType'' (b, vn, a) = match b with
         | I.Null -> vn
-        | I.Decl (g'_, (I.Dec (_, v'_) as d_)) ->
-            begin if Subordinate.belowEq (I.targetFam v'_) a then
-              raiseType'' (g'_, Abstract.piDepend d_ I.Maybe vn, a)
-            else raiseType'' (g'_, Weaken.strengthenExp vn I.shift, a)
+        | I.Decl (g', (I.Dec (_, v') as d)) ->
+            begin if Subordinate.belowEq (I.targetFam v') a then
+              raiseType'' (g', Abstract.piDepend d I.Maybe vn, a)
+            else raiseType'' (g', Weaken.strengthenExp vn I.shift, a)
             end
       in
       let rec raiseType' (psi1, b) = match b with
         | [] -> []
-        | F.Prim (I.Dec (x, v_) as d_) :: psi1' ->
-            let s = raiseSub (g_, psi1) in
-            let vn = Whnf.normalize (v_, s) in
+        | F.Prim (I.Dec (x, v) as d) :: psi1' ->
+            let s = raiseSub (g, psi1) in
+            let vn = Whnf.normalize (v, s) in
             let a = I.targetFam vn in
-            let d'_ = I.Dec (x, raiseType'' (g_, vn, a)) in
-            F.Prim d'_ :: raiseType' (I.Decl (psi1, d_), psi1')
+            let d' = I.Dec (x, raiseType'' (g, vn, a)) in
+            F.Prim d' :: raiseType' (I.Decl (psi1, d), psi1')
       in
       raiseType' (I.Null, psi')
 
-    let rec raiseM (b_, a) = match a with
+    let rec raiseM (b, a) = match a with
       | [] -> []
-      | F.MDec (xx, f_) :: l_ ->
-          F.MDec (xx, F.All (F.Block b_, f_)) :: raiseM (b_, l_)
+      | F.MDec (xx, f) :: l ->
+          F.MDec (xx, F.All (F.Block b, f)) :: raiseM (b, l)
 
     let rec psub (k, a, s) = match a with
       | I.Null -> s
-      | I.Decl (g_, _) -> psub (k - 1, g_, I.Dot (I.Idx k, s))
+      | I.Decl (g, _) -> psub (k - 1, g, I.Dot (I.Idx k, s))
 
     let rec deltaSub (a, s) = match a with
       | I.Null -> I.Null
@@ -166,137 +166,137 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
 
     let rec shifts (a, delta) = match a with
       | I.Null -> delta
-      | I.Decl (g_, _) -> shifts (g_, shift delta)
+      | I.Decl (g, _) -> shifts (g, shift delta)
 
-    let shiftBlock (F.CtxBlock (_, g_), delta) = shifts (g_, delta)
+    let shiftBlock (F.CtxBlock (_, g), delta) = shifts (g, delta)
 
     let rec shiftSub (a, s) = match a with
       | I.Null -> s
-      | I.Decl (g_, _) -> shiftSub (g_, I.comp I.shift s)
+      | I.Decl (g, _) -> shiftSub (g, I.comp I.shift s)
 
-    let shiftSubBlock (F.CtxBlock (_, g_), s) = shiftSub (g_, s)
+    let shiftSubBlock (F.CtxBlock (_, g), s) = shiftSub (g, s)
 
     let rec check = function
       | psi, delta, F.Unit, (F.True, _) -> ()
-      | psi, delta, F.Rec (dd, p_), f_ -> check (psi, I.Decl (delta, dd), p_, f_)
+      | psi, delta, F.Rec (dd, p), f -> check (psi, I.Decl (delta, dd), p, f)
       | ( psi,
           delta,
-          F.Lam ((F.Prim (I.Dec (_, v_)) as ld), p_),
-          (F.All (F.Prim (I.Dec (_, v'_)), f'_), s') ) ->
-          begin if Conv.conv (v_, I.id) (v'_, s') then
-            check (I.Decl (psi, ld), shift delta, p_, (f'_, I.dot1 s'))
+          F.Lam ((F.Prim (I.Dec (_, v)) as ld), p),
+          (F.All (F.Prim (I.Dec (_, v')), f'), s') ) ->
+          begin if Conv.conv (v, I.id) (v', s') then
+            check (I.Decl (psi, ld), shift delta, p, (f', I.dot1 s'))
           else raise (Error "Typecheck Error: Primitive Abstraction")
           end
       | ( psi,
           delta,
-          F.Lam ((F.Block (F.CtxBlock (l, g_) as b_) as ld), p_),
-          (F.All (F.Block (F.CtxBlock (l', g'_)), f'_), s') ) ->
-          begin if l = l' && conv (g_, I.id) (g'_, s') then
+          F.Lam ((F.Block (F.CtxBlock (l, g) as b) as ld), p),
+          (F.All (F.Block (F.CtxBlock (l', g')), f'), s') ) ->
+          begin if l = l' && conv (g, I.id) (g', s') then
             check
               ( I.Decl (psi, ld),
-                shiftBlock (b_, delta),
-                p_,
-                (f'_, F.dot1n g_ s') )
+                shiftBlock (b, delta),
+                p,
+                (f', F.dot1n g s') )
           else raise (Error "Typecheck Error: Block Abstraction")
           end
-      | psi, delta, F.Inx (m_, p_), (F.Ex (I.Dec (_, v'_), f'_), s') -> begin
-          TypeCheck.typeCheck (F.makectx psi) (m_, I.EClo (v'_, s'));
-          check (psi, delta, p_, (f'_, I.Dot (I.Exp m_, s')))
+      | psi, delta, F.Inx (m, p), (F.Ex (I.Dec (_, v'), f'), s') -> begin
+          TypeCheck.typeCheck (F.makectx psi) (m, I.EClo (v', s'));
+          check (psi, delta, p, (f', I.Dot (I.Exp m, s')))
         end
-      | psi, delta, F.Case (F.Opts o_), (f'_, s') ->
-          checkOpts (psi, delta, o_, (f'_, s'))
-      | psi, delta, F.Pair (p1_, p2_), (F.And (f1', f2'), s') -> begin
-          check (psi, delta, p1_, (f1', s'));
-          check (psi, delta, p2_, (f2', s'))
+      | psi, delta, F.Case (F.Opts o), (f', s') ->
+          checkOpts (psi, delta, o, (f', s'))
+      | psi, delta, F.Pair (p1, p2), (F.And (f1', f2'), s') -> begin
+          check (psi, delta, p1, (f1', s'));
+          check (psi, delta, p2, (f2', s'))
         end
-      | psi, delta, F.Let (ds_, p_), (f'_, s') ->
-          let psi', delta', s'' = assume (psi, delta, ds_) in
+      | psi, delta, F.Let (ds, p), (f', s') ->
+          let psi', delta', s'' = assume (psi, delta, ds) in
           check
             ( extend (psi, psi'),
               extend (delta, delta'),
-              p_,
-              (f'_, I.comp s' s'') )
+              p,
+              (f', I.comp s' s'') )
       | _ -> raise (Error "Typecheck Error: Term not well-typed")
 
     and infer (delta, kk) = (I.ctxLookup delta kk, I.id)
 
-    and assume (psi, delta, empty_) = match empty_ with
-      | empty_ -> ([], [], I.id)
-      | F.Split (kk, ds_) ->
+    and assume (psi, delta, empty) = match empty with
+      | empty -> ([], [], I.id)
+      | F.Split (kk, ds) ->
           begin match infer (delta, kk) with
-          | F.MDec (name, F.Ex (d_, f_)), s ->
-              let ld = F.Prim (I.decSub d_ s) in
-              let dd = F.MDec (name, F.forSub f_ (I.dot1 s)) in
+          | F.MDec (name, F.Ex (d, f)), s ->
+              let ld = F.Prim (I.decSub d s) in
+              let dd = F.MDec (name, F.forSub f (I.dot1 s)) in
               let psi', delta', s' =
-                assume (I.Decl (psi, ld), I.Decl (shift delta, dd), ds_)
+                assume (I.Decl (psi, ld), I.Decl (shift delta, dd), ds)
               in
               (ld :: psi', F.mdecSub dd s' :: delta', I.comp I.shift s')
           | _ -> raise (Error "Typecheck Error: Declaration")
           end
-      | F.New (b_, ds_) ->
+      | F.New (b, ds) ->
           ignore (TypeCheck.typeCheck
-              (F.makectx (I.Decl (psi, F.Block b_))) (I.Uni I.Type, I.Uni I.Kind));
+              (F.makectx (I.Decl (psi, F.Block b))) (I.Uni I.Type, I.Uni I.Kind));
           let psi', delta', s' =
-            assume (I.Decl (psi, F.Block b_), shiftBlock (b_, delta), ds_)
+            assume (I.Decl (psi, F.Block b), shiftBlock (b, delta), ds)
           in
-          (raiseType b_ psi', raiseM (b_, delta'), s')
-      | F.App ((kk, u_), ds_) ->
+          (raiseType b psi', raiseM (b, delta'), s')
+      | F.App ((kk, u), ds) ->
           begin match infer (delta, kk) with
-          | F.MDec (name, F.All (F.Prim (I.Dec (_, v_)), f_)), s ->
-              ignore (try TypeCheck.typeCheck (F.makectx psi) (u_, I.EClo (v_, s))
+          | F.MDec (name, F.All (F.Prim (I.Dec (_, v)), f)), s ->
+              ignore (try TypeCheck.typeCheck (F.makectx psi) (u, I.EClo (v, s))
                 with TypeCheck.Error msg ->
                   raise
                     (Error
-                       ((((((msg ^ " ") ^ Print.expToString (F.makectx psi) u_)
+                       ((((((msg ^ " ") ^ Print.expToString (F.makectx psi) u)
                           ^ " has type ")
                          ^ Print.expToString
-                             (F.makectx psi) (TypeCheck.infer' (F.makectx psi) u_))
+                             (F.makectx psi) (TypeCheck.infer' (F.makectx psi) u))
                         ^ " expected ")
-                       ^ Print.expToString (F.makectx psi) (I.EClo (v_, s)))));
-              let dd = F.MDec (name, F.forSub f_ (I.Dot (I.Exp u_, s))) in
-              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
+                       ^ Print.expToString (F.makectx psi) (I.EClo (v, s)))));
+              let dd = F.MDec (name, F.forSub f (I.Dot (I.Exp u, s))) in
+              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds) in
               (psi', F.mdecSub dd s' :: delta', s')
-          | F.MDec (name, f_), s ->
+          | F.MDec (name, f), s ->
               raise
                 (Error
                    ("Typecheck Error: Declaration App"
-                   ^ FunPrint.forToString I.Null f_ [ "x" ]))
+                   ^ FunPrint.forToString I.Null f [ "x" ]))
           end
-      | F.PApp ((kk, k), ds_) ->
+      | F.PApp ((kk, k), ds) ->
           begin match infer (delta, kk) with
-          | F.MDec (name, F.All (F.Block (F.CtxBlock (l, g_)), f_)), s ->
-              ignore (validBlock (psi, k, (l, g_)));
-              let dd = F.MDec (name, F.forSub f_ (psub (k, g_, s))) in
-              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
+          | F.MDec (name, F.All (F.Block (F.CtxBlock (l, g)), f)), s ->
+              ignore (validBlock (psi, k, (l, g)));
+              let dd = F.MDec (name, F.forSub f (psub (k, g, s))) in
+              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds) in
               (psi', F.mdecSub dd s' :: delta', s')
           | _ -> raise (Error "Typecheck Error: Declaration PApp")
           end
-      | F.Left (kk, ds_) ->
+      | F.Left (kk, ds) ->
           begin match infer (delta, kk) with
-          | F.MDec (name, F.And (f1_, f2_)), s ->
-              let dd = F.MDec (name, F.forSub f1_ s) in
-              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
+          | F.MDec (name, F.And (f1, f2)), s ->
+              let dd = F.MDec (name, F.forSub f1 s) in
+              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds) in
               (psi', F.mdecSub dd s' :: delta', s')
           | _ -> raise (Error "Typecheck Error: Declaration Left")
           end
-      | F.Right (kk, ds_) ->
+      | F.Right (kk, ds) ->
           begin match infer (delta, kk) with
-          | F.MDec (name, F.And (f1_, f2_)), s ->
-              let dd = F.MDec (name, F.forSub f2_ s) in
-              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
+          | F.MDec (name, F.And (f1, f2)), s ->
+              let dd = F.MDec (name, F.forSub f2 s) in
+              let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds) in
               (psi', F.mdecSub dd s' :: delta', s')
           | _ -> raise (Error "Typecheck Error: Declaration Left")
           end
-      | F.Lemma (cc, ds_) ->
-          let (F.LemmaDec (names, _, f_)) = F.lemmaLookup cc in
+      | F.Lemma (cc, ds) ->
+          let (F.LemmaDec (names, _, f)) = F.lemmaLookup cc in
           let name = foldr (fun (x__op, y__op) -> x__op ^ y__op) "" names in
-          let dd = F.MDec (Some name, f_) in
-          let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds_) in
+          let dd = F.MDec (Some name, f) in
+          let psi', delta', s' = assume (psi, I.Decl (delta, dd), ds) in
           (psi', F.mdecSub dd s' :: delta', s')
 
     and checkSub a1 b1 c1 = match a1, b1, c1 with
       | I.Null, I.Shift 0, I.Null -> ()
-      | I.Decl (psi, F.Prim d_), I.Shift k, I.Null ->
+      | I.Decl (psi, F.Prim d), I.Shift k, I.Null ->
           begin if k > 0 then checkSub psi (I.Shift (k - 1)) I.Null
           else raise (Error "Substitution not well-typed")
           end
@@ -307,105 +307,105 @@ end) : FUNTYPECHECK.FUNTYPECHECK = struct
           end
       | psi', I.Shift k, psi ->
           checkSub psi' (I.Dot (I.Idx (k + 1), I.Shift (k + 1))) psi
-      | psi', I.Dot (I.Idx k, s'), I.Decl (psi, F.Prim (I.Dec (_, v2_))) ->
-          let g'_ = F.makectx psi' in
-          let (I.Dec (_, v1_)) = I.ctxDec g'_ k in
-          begin if Conv.conv (v1_, I.id) (v2_, s') then
+      | psi', I.Dot (I.Idx k, s'), I.Decl (psi, F.Prim (I.Dec (_, v2))) ->
+          let g' = F.makectx psi' in
+          let (I.Dec (_, v1)) = I.ctxDec g' k in
+          begin if Conv.conv (v1, I.id) (v2, s') then
             checkSub psi' s' psi
           else
             raise
               (Error
                  ((("Substitution not well-typed \n  found: "
-                   ^ Print.expToString g'_ v1_)
+                   ^ Print.expToString g' v1)
                   ^ "\n  expected: ")
-                 ^ Print.expToString g'_ (I.EClo (v2_, s'))))
+                 ^ Print.expToString g' (I.EClo (v2, s'))))
           end
-      | psi', I.Dot (I.Exp u_, s'), I.Decl (psi, F.Prim (I.Dec (_, v2_))) ->
-          let g'_ = F.makectx psi' in
-          ignore (TypeCheck.typeCheck g'_ (u_, I.EClo (v2_, s')));
+      | psi', I.Dot (I.Exp u, s'), I.Decl (psi, F.Prim (I.Dec (_, v2))) ->
+          let g' = F.makectx psi' in
+          ignore (TypeCheck.typeCheck g' (u, I.EClo (v2, s')));
           checkSub psi' s' psi
       | ( psi',
           (I.Dot (I.Idx k, _) as s),
-          I.Decl (psi, F.Block (F.CtxBlock (l1, g_))) ) ->
-          let F.Block (F.CtxBlock (l2, g'_)), w = F.lfctxLFDec psi' k in
+          I.Decl (psi, F.Block (F.CtxBlock (l1, g))) ) ->
+          let F.Block (F.CtxBlock (l2, g')), w = F.lfctxLFDec psi' k in
           let rec checkSub' (a, b, c, m) = match a, b, c with
             | (I.Null, w1), s1, I.Null -> s1
-            | (I.Decl (g'_, I.Dec (_, v'_)), w1), I.Dot (I.Idx k', s1), I.Decl (g_, I.Dec (_, v_)) ->
+            | (I.Decl (g', I.Dec (_, v')), w1), I.Dot (I.Idx k', s1), I.Decl (g, I.Dec (_, v)) ->
                 begin if k' = m then
-                  begin if Conv.conv (v'_, w1) (v_, s1) then
-                    checkSub' ((g'_, I.comp w1 I.shift), s1, g_, m + 1)
+                  begin if Conv.conv (v', w1) (v, s1) then
+                    checkSub' ((g', I.comp w1 I.shift), s1, g, m + 1)
                   else raise (Error "ContextBlock assignment not well-typed")
                   end
                 else raise (Error "ContextBlock assignment out of order")
                 end
           in
-          checkSub psi' (checkSub' ((g'_, w), s, g_, k)) psi
+          checkSub psi' (checkSub' ((g', w), s, g, k)) psi
 
     and checkOpts (psi, delta, a, b) = match a, b with
       | [], _ -> ()
-      | (psi', t, p_) :: o_, (f'_, s') -> begin
+      | (psi', t, p) :: o, (f', s') -> begin
           checkSub psi' t psi;
           begin
-            check (psi', deltaSub (delta, t), p_, (f'_, I.comp s' t));
-            checkOpts (psi, delta, o_, (f'_, s'))
+            check (psi', deltaSub (delta, t), p, (f', I.comp s' t));
+            checkOpts (psi, delta, o, (f', s'))
           end
         end
 
-    let checkRec (p_, t_) = check (I.Null, I.Null, p_, (t_, I.id))
+    let checkRec (p, t) = check (I.Null, I.Null, p, (t, I.id))
 
     let rec isFor a1 b1 = match a1, b1 with
-      | g_, F.All (F.Prim d_, f_) -> (
+      | g, F.All (F.Prim d, f) -> (
           try
             begin
-              TypeCheck.checkDec g_ (d_, I.id);
-              isFor (I.Decl (g_, d_)) f_
+              TypeCheck.checkDec g (d, I.id);
+              isFor (I.Decl (g, d)) f
             end
           with TypeCheck.Error msg -> raise (Error msg))
-      | g_, F.All (F.Block (F.CtxBlock (_, g1_)), f_) ->
-          isForBlock (g_, F.ctxToList g1_, f_)
-      | g_, F.Ex (d_, f_) -> (
+      | g, F.All (F.Block (F.CtxBlock (_, g1)), f) ->
+          isForBlock (g, F.ctxToList g1, f)
+      | g, F.Ex (d, f) -> (
           try
             begin
-              TypeCheck.checkDec g_ (d_, I.id);
-              isFor (I.Decl (g_, d_)) f_
+              TypeCheck.checkDec g (d, I.id);
+              isFor (I.Decl (g, d)) f
             end
           with TypeCheck.Error msg -> raise (Error msg))
-      | g_, True -> ()
-      | g_, F.And (f1_, f2_) -> begin
-          isFor g_ f1_;
-          isFor g_ f2_
+      | g, True -> ()
+      | g, F.And (f1, f2) -> begin
+          isFor g f1;
+          isFor g f2
         end
 
-    and isForBlock (g_, a, f_) = match a with
-      | [] -> isFor g_ f_
-      | d_ :: g1_ -> isForBlock (I.Decl (g_, d_), g1_, f_)
+    and isForBlock (g, a, f) = match a with
+      | [] -> isFor g f
+      | d :: g1 -> isForBlock (I.Decl (g, d), g1, f)
 
     let rec checkTags' = function
-      | v_, F.Ex _ -> ()
-      | I.Pi (_, v_), F.All (_, f_) -> checkTags' (v_, f_)
+      | v, F.Ex _ -> ()
+      | I.Pi (_, v), F.All (_, f) -> checkTags' (v, f)
       | _ -> raise Domain
 
     let rec checkTags = function
       | I.Null, I.Null -> ()
-      | I.Decl (g_, I.Dec (_, v_)), I.Decl (b_, t_) -> begin
-          checkTags (g_, b_);
-          begin match t_ with S.Lemma _ -> () | _ -> ()
+      | I.Decl (g, I.Dec (_, v)), I.Decl (b, t) -> begin
+          checkTags (g, b);
+          begin match t with S.Lemma _ -> () | _ -> ()
           end
         end
 
-    let isState (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_)) =
+    let isState (S.State (n, (g, b), (ih, oh), d, o, h, f)) =
       begin
-        TypeCheck.typeCheckCtx g_;
+        TypeCheck.typeCheckCtx g;
         begin
-          checkTags (g_, b_);
+          checkTags (g, b);
           begin
-            begin if not (Abstract.closedCtx g_) then
+            begin if not (Abstract.closedCtx g) then
               raise (Error "State context not closed!")
             else ()
             end;
             begin
-              ignore (map (function n', f'_ -> isFor g_ f'_) h_);
-              isFor g_ f_
+              ignore (map (function n', f' -> isFor g f') h);
+              isFor g f
             end
           end
         end

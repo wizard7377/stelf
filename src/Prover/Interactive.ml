@@ -99,9 +99,9 @@ end) : INTERACTIVE = struct
       end
 
     let convertOneFor cid =
-      let v_ =
+      let v =
         begin match I.sgnLookup cid with
-        | I.ConDec (name, _, _, _, v_, I.Kind) -> v_
+        | I.ConDec (name, _, _, _, v, I.Kind) -> v
         | _ -> raise (Error "Type Constant declaration expected")
         end
       in
@@ -112,22 +112,22 @@ end) : INTERACTIVE = struct
         end
       in
       let rec convertFor' = function
-        | I.Pi ((d_, _), v_), M.Mapp (M.Marg (M.Plus, _), mS), w1, w2, n ->
-            let f'_, f''_ =
-              convertFor' (v_, mS, I.dot1 w1, I.Dot (I.Idx n, w2), n - 1)
+        | I.Pi ((d, _), v), M.Mapp (M.Marg (M.Plus, _), mS), w1, w2, n ->
+            let f', f'' =
+              convertFor' (v, mS, I.dot1 w1, I.Dot (I.Idx n, w2), n - 1)
             in
             ( (function
-              | f_ ->
+              | f ->
                   T.All
-                    ( (T.UDec (Weaken.strengthenDec d_ w1), T.Explicit),
-                      f'_ f_ )),
-              f''_ )
-        | I.Pi ((d_, _), v_), M.Mapp (M.Marg (M.Minus, _), mS), w1, w2, n ->
-            let f'_, f''_ =
-              convertFor' (v_, mS, I.comp w1 I.shift, I.dot1 w2, n + 1)
+                    ( (T.UDec (Weaken.strengthenDec d w1), T.Explicit),
+                      f' f )),
+              f'' )
+        | I.Pi ((d, _), v), M.Mapp (M.Marg (M.Minus, _), mS), w1, w2, n ->
+            let f', f'' =
+              convertFor' (v, mS, I.comp w1 I.shift, I.dot1 w2, n + 1)
             in
-            (f'_, T.Ex ((I.decSub d_ w2, T.Explicit), f''_))
-        | I.Uni I.Type, M.Mnil, _, _, _ -> ((function f_ -> f_), T.True)
+            (f', T.Ex ((I.decSub d w2, T.Explicit), f''))
+        | I.Uni I.Type, M.Mnil, _, _, _ -> ((function f -> f), T.True)
         | _ -> raise (Error "type family must be +/- moded")
       in
       let shiftPlus mS =
@@ -139,13 +139,13 @@ end) : INTERACTIVE = struct
         shiftPlus' (mS, 0)
       in
       let n = shiftPlus mS in
-      let f_, f'_ = convertFor' (v_, mS, I.id, I.Shift n, n) in
-      f_ f'_
+      let f, f' = convertFor' (v, mS, I.id, I.Shift n, n) in
+      f f'
 
     let rec convertFor = function
       | [] -> raise (Error "Empty theorem")
       | a :: [] -> convertOneFor a
-      | a :: l_ -> T.And (convertOneFor a, convertFor l_)
+      | a :: l -> T.And (convertOneFor a, convertFor l)
 
     type menuItem =
       | Split of Split.operator
@@ -156,13 +156,13 @@ end) : INTERACTIVE = struct
 
     let focus_ : S.state list ref = ref []
     let menu_ : menuItem list option ref = ref None
-    let splittingToMenu (o_, a_) = Split o_ :: a_
+    let splittingToMenu (o, a) = Split o :: a
     let initFocus () = focus_ := []
 
     let normalize () =
       begin match !focus_ with
-      | S.State (w_, psi, p_, f_) :: rest_ ->
-          focus_ := S.State (w_, psi, T.derefPrg p_, f_) :: rest_
+      | S.State (w, psi, p, f) :: rest ->
+          focus_ := S.State (w, psi, T.derefPrg p, f) :: rest
       | _ -> ()
       end
 
@@ -179,25 +179,25 @@ end) : INTERACTIVE = struct
     let menuToString () =
       let rec menuToString' (k, a) = match a with
         | [] -> ""
-        | Split o_ :: m_ ->
-            let s = menuToString' (k + 1, m_) in
-            ((s ^ "\n  ") ^ format k) ^ Split.menu o_
-        | Introduce o_ :: m_ ->
-            let s = menuToString' (k + 1, m_) in
-            ((s ^ "\n  ") ^ format k) ^ Introduce.menu o_
-        | Fill o_ :: m_ ->
-            let s = menuToString' (k + 1, m_) in
-            ((s ^ "\n  ") ^ format k) ^ Fill.menu o_
-        | Fix o_ :: m_ ->
-            let s = menuToString' (k + 1, m_) in
-            ((s ^ "\n  ") ^ format k) ^ FixedPoint.menu o_
-        | Elim o_ :: m_ ->
-            let s = menuToString' (k + 1, m_) in
-            ((s ^ "\n  ") ^ format k) ^ Elim.menu o_
+        | Split o :: m ->
+            let s = menuToString' (k + 1, m) in
+            ((s ^ "\n  ") ^ format k) ^ Split.menu o
+        | Introduce o :: m ->
+            let s = menuToString' (k + 1, m) in
+            ((s ^ "\n  ") ^ format k) ^ Introduce.menu o
+        | Fill o :: m ->
+            let s = menuToString' (k + 1, m) in
+            ((s ^ "\n  ") ^ format k) ^ Fill.menu o
+        | Fix o :: m ->
+            let s = menuToString' (k + 1, m) in
+            ((s ^ "\n  ") ^ format k) ^ FixedPoint.menu o
+        | Elim o :: m ->
+            let s = menuToString' (k + 1, m) in
+            ((s ^ "\n  ") ^ format k) ^ Elim.menu o
       in
       begin match !menu_ with
       | None -> raise (Error "Menu is empty")
-      | Some m_ -> menuToString' (1, m_)
+      | Some m -> menuToString' (1, m)
       end
 
     let printStats () =
@@ -215,7 +215,7 @@ end) : INTERACTIVE = struct
     let printmenu () =
       begin match !focus_ with
       | [] -> abort "QED"
-      | S.State (w_, psi, p_, f_) :: r_ -> begin
+      | S.State (w, psi, p, f) :: r -> begin
           print "\n=======================";
           begin
             print "\n= META THEOREM PROVER =\n";
@@ -224,11 +224,11 @@ end) : INTERACTIVE = struct
               begin
                 print "\n-----------------------\n";
                 begin
-                  print (TomegaPrint.forToString psi f_);
+                  print (TomegaPrint.forToString psi f);
                   begin
                     print "\n-----------------------\n";
                     begin
-                      print (TomegaPrint.prgToString psi p_);
+                      print (TomegaPrint.prgToString psi p);
                       begin
                         print "\n-----------------------";
                         begin
@@ -243,20 +243,20 @@ end) : INTERACTIVE = struct
             end
           end
         end
-      | S.StateLF (I.EVar (r, g_, v_, cs_) as x_) :: r_ -> begin
+      | S.StateLF (I.EVar (r, g, v, cs) as x) :: r_ -> begin
           print "\n=======================";
           begin
             print "\n=== THEOREM PROVER ====\n";
             begin
-              print (Print.ctxToString I.Null g_);
+              print (Print.ctxToString I.Null g);
               begin
                 print "\n-----------------------\n";
                 begin
-                  print (Print.expToString g_ v_);
+                  print (Print.expToString g v);
                   begin
                     print "\n-----------------------\n";
                     begin
-                      print (Print.expToString g_ x_);
+                      print (Print.expToString g x);
                       begin
                         print "\n-----------------------";
                         begin
@@ -276,24 +276,24 @@ end) : INTERACTIVE = struct
     let menu () =
       begin match !focus_ with
       | [] -> print "Please initialize first\n"
-      | S.State (w_, psi, p_, f_) :: _ ->
-          let xs_ = S.collectT p_ in
-          let f1_ =
+      | S.State (w, psi, p, f) :: _ ->
+          let xs = S.collectT p in
+          let f1 =
             map
               (function
-                | T.EVar (psi, r, f_, tc, tCs, x_) -> begin
+                | T.EVar (psi, r, f, tc, tCs, x) -> begin
                     Names.varReset I.Null;
                     S.Focus
-                      (T.EVar (TomegaPrint.nameCtx psi, r, f_, tc, tCs, x_), w_)
+                      (T.EVar (TomegaPrint.nameCtx psi, r, f, tc, tCs, x), w)
                   end)
-              xs_
+              xs
           in
-          let ys_ = S.collectLF p_ in
-          let f2_ = map (function y_ -> S.FocusLF y_) ys_ in
+          let ys = S.collectLF p in
+          let f2 = map (function y -> S.FocusLF y) ys in
           let rec splitMenu = function
             | [] -> []
             | operators :: l ->
-                map (function o_ -> Split o_) operators @ splitMenu l
+                map (function o -> Split o) operators @ splitMenu l
           in
           ignore (Global.doubleCheck := true);
           let rec introMenu = function
@@ -301,29 +301,29 @@ end) : INTERACTIVE = struct
             | Some oper :: l -> Introduce oper :: introMenu l
             | None :: l -> introMenu l
           in
-          let intro = introMenu (map Introduce.expand f1_) in
+          let intro = introMenu (map Introduce.expand f1) in
           let fill =
             foldr
               (function
-                | s_, l -> l @ map (function o_ -> Fill o_) (Fill.expand s_))
-              [] f2_
+                | s, l -> l @ map (function o -> Fill o) (Fill.expand s))
+              [] f2
           in
           let rec elimMenu = function
             | [] -> []
             | operators :: l ->
-                map (function o_ -> Elim o_) operators @ elimMenu l
+                map (function o -> Elim o) operators @ elimMenu l
           in
-          let elim = elimMenu (map Elim.expand f1_) in
-          let split = splitMenu (map Split.expand f1_) in
+          let elim = elimMenu (map Elim.expand f1) in
+          let split = splitMenu (map Split.expand f1) in
           menu_ := Some (intro @ split @ fill @ elim)
-      | S.StateLF y_ :: _ ->
-          let ys_ = Abstract.collectEVars I.Null (y_, I.id) [] in
-          let f2_ = map (function y_ -> S.FocusLF y_) ys_ in
+      | S.StateLF y :: _ ->
+          let ys = Abstract.collectEVars I.Null (y, I.id) [] in
+          let f2 = map (function y -> S.FocusLF y) ys in
           let fill =
             foldr
               (function
-                | s_, l -> l @ map (function o_ -> Fill o_) (Fill.expand s_))
-              [] f2_
+                | s, l -> l @ map (function o -> Fill o) (Fill.expand s))
+              [] f2
           in
           menu_ := Some fill
       end
@@ -331,18 +331,18 @@ end) : INTERACTIVE = struct
     let select k =
       let rec select' = function
         | k, [] -> abort "No such menu item"
-        | 1, Split o_ :: _ -> Timers.time Timers.splitting Split.apply o_
-        | 1, Introduce o_ :: _ -> Introduce.apply o_
-        | 1, Elim o_ :: _ -> Elim.apply o_
-        | 1, Fill o_ :: _ -> Timers.time Timers.filling Fill.apply o_
-        | k, _ :: m_ -> select' (k - 1, m_)
+        | 1, Split o :: _ -> Timers.time Timers.splitting Split.apply o
+        | 1, Introduce o :: _ -> Introduce.apply o
+        | 1, Elim o :: _ -> Elim.apply o
+        | 1, Fill o :: _ -> Timers.time Timers.filling Fill.apply o
+        | k, _ :: m -> select' (k - 1, m)
       in
       begin match !menu_ with
       | None -> raise (Error "No menu defined")
-      | Some m_ -> (
+      | Some m -> (
           try
             begin
-              select' (k, m_);
+              select' (k, m);
               begin
                 normalize ();
                 begin
@@ -363,29 +363,29 @@ end) : INTERACTIVE = struct
           names
       in
       let f_ = convertFor cL in
-      let ws_ = map W.lookup cL in
+      let ws = map W.lookup cL in
       let select c =
         try Intsyn.Order.selLookup c with _ -> Intsyn.Order.Lex []
       in
       let tc = Tomega.transformTC I.Null f_ (map select cL) in
-      let (w_ :: _) = ws_ in
-      ignore (focus_ := [ S.init f_ w_ ]);
-      let p_ =
+      let (w :: _) = ws in
+      ignore (focus_ := [ S.init f_ w ]);
+      let p =
         begin match !focus_ with
         | [] -> abort "Initialization of proof goal failed\n"
-        | S.State (w_, psi, p_, f_) :: _ -> p_
+        | S.State (w, psi, p, f) :: _ -> p
         end
       in
-      let xs_ = S.collectT p_ in
+      let xs = S.collectT p in
       let f_ =
         map
           (function
-            | T.EVar (psi, r, f_, tc, tCs, x_) -> begin
+            | T.EVar (psi, r, f, tc, tCs, x) -> begin
                 Names.varReset I.Null;
                 S.Focus
-                  (T.EVar (TomegaPrint.nameCtx psi, r, f_, tc, tCs, x_), w_)
+                  (T.EVar (TomegaPrint.nameCtx psi, r, f, tc, tCs, x), w)
               end)
-          xs_
+          xs
       in
       let (ofix :: []) = map (function f -> FixedPoint.expand f tc) f_ in
       ignore (FixedPoint.apply ofix);
@@ -397,12 +397,12 @@ end) : INTERACTIVE = struct
     let focus n =
       begin match !focus_ with
       | [] -> print "Please initialize first\n"
-      | S.State (w_, psi, p_, f_) :: _ ->
+      | S.State (w, psi, p, f) :: _ ->
           let rec findIEVar = function
             | [] -> raise (Error ("cannot focus on " ^ n))
-            | y_ :: ys_ ->
-                begin if Names.evarName (T.coerceCtx psi) y_ = n then begin
-                  focus_ := S.StateLF y_ :: !focus_;
+            | y :: ys ->
+                begin if Names.evarName (T.coerceCtx psi) y = n then begin
+                  focus_ := S.StateLF y :: !focus_;
                   begin
                     normalize ();
                     begin
@@ -411,15 +411,15 @@ end) : INTERACTIVE = struct
                     end
                   end
                 end
-                else findIEVar ys_
+                else findIEVar ys
                 end
           in
           let rec findTEVar = function
-            | [] -> findIEVar (S.collectLF p_)
-            | (T.EVar (psi, r, f_, tc, tCs, y_) as x_) :: xs_ ->
-                begin if Names.evarName (T.coerceCtx psi) y_ = n then begin
+            | [] -> findIEVar (S.collectLF p)
+            | (T.EVar (psi, r, f, tc, tCs, y) as x) :: xs ->
+                begin if Names.evarName (T.coerceCtx psi) y = n then begin
                   focus_ :=
-                    S.State (w_, TomegaPrint.nameCtx psi, x_, f_) :: !focus_;
+                    S.State (w, TomegaPrint.nameCtx psi, x, f) :: !focus_;
                   begin
                     normalize ();
                     begin
@@ -428,15 +428,15 @@ end) : INTERACTIVE = struct
                     end
                   end
                 end
-                else findTEVar xs_
+                else findTEVar xs
                 end
           in
-          findTEVar (S.collectT p_)
-      | S.StateLF u_ :: _ ->
+          findTEVar (S.collectT p)
+      | S.StateLF u :: _ ->
           begin match Names.getEVarOpt n with
           | None -> raise (Error ("cannot focus on " ^ n))
-          | Some y_ -> begin
-              focus_ := S.StateLF y_ :: !focus_;
+          | Some y -> begin
+              focus_ := S.StateLF y :: !focus_;
               begin
                 normalize ();
                 begin
@@ -450,11 +450,11 @@ end) : INTERACTIVE = struct
 
     let return () =
       begin match !focus_ with
-      | s_ :: [] ->
-          begin if S.close s_ then print "[Q.E.D.]\n" else ()
+      | s :: [] ->
+          begin if S.close s then print "[Q.E.D.]\n" else ()
           end
-      | s_ :: rest_ -> begin
-          focus_ := rest_;
+      | s :: rest -> begin
+          focus_ := rest;
           begin
             normalize ();
             begin

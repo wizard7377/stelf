@@ -113,9 +113,9 @@ end) : MTPI = struct
     let empty () = Ring.empty !open_
     let current () = Ring.current !open_
     let delete () = open_ := Ring.delete !open_
-    let insertOpen s_ = open_ := Ring.insert (!open_) s_
-    let insertSolved s_ = solved_ := Ring.insert (!solved_) s_
-    let insert s_ = insertOpen s_
+    let insertOpen s = open_ := Ring.insert (!open_) s
+    let insertSolved s = solved_ := Ring.insert (!solved_) s
+    let insert s = insertOpen s
     let collectOpen () = Ring.foldr (fun (a, b) -> a :: b) [] !open_
     let collectSolved () = Ring.foldr (fun (a, b) -> a :: b) [] !solved_
     let nextOpen () = open_ := Ring.next !open_
@@ -124,10 +124,10 @@ end) : MTPI = struct
     let popHistory () =
       begin match !history_ with
       | [] -> raise (Error "History stack empty")
-      | (open'_, solved') :: history' -> begin
+      | (open', solved') :: history' -> begin
           history_ := history';
           begin
-            open_ := open'_;
+            open_ := open';
             solved_ := solved'
           end
         end
@@ -154,49 +154,49 @@ end) : MTPI = struct
     let rec cLToString = function
       | [] -> ""
       | c :: [] -> I.conDecName (I.sgnLookup c)
-      | c :: l_ -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l_
+      | c :: l -> (I.conDecName (I.sgnLookup c) ^ ", ") ^ cLToString l
 
     let printFmt (f : Print.Formatter.format) : Fmt.format =
       Fmt.string (Print.Formatter.makestring_fmt f)
 
-    let printFillResult (_, p_) =
-      let formatTuple (g_, p_) =
+    let printFillResult (_, p) =
+      let formatTuple (g, p) =
         let rec formatTuple' = function
           | F.Unit -> []
-          | F.Inx (m_, F.Unit) -> [ printFmt (Print.formatExp g_ m_) ]
-          | F.Inx (m_, p'_) ->
-              printFmt (Print.formatExp g_ m_)
-              :: Fmt.string "," :: Fmt.break_ :: formatTuple' p'_
+          | F.Inx (m, F.Unit) -> [ printFmt (Print.formatExp g m) ]
+          | F.Inx (m, p') ->
+              printFmt (Print.formatExp g m)
+              :: Fmt.string "," :: Fmt.break_ :: formatTuple' p'
         in
-        begin match p_ with
-        | F.Inx (_, F.Unit) -> Fmt.hbox (formatTuple' p_)
+        begin match p with
+        | F.Inx (_, F.Unit) -> Fmt.hbox (formatTuple' p)
         | _ ->
             Fmt.hVbox0 1 1 1
-              ((Fmt.string "(" :: formatTuple' p_) @ [ Fmt.string ")" ])
+              ((Fmt.string "(" :: formatTuple' p) @ [ Fmt.string ")" ])
         end
       in
-      let (S.State (n, (g_, b_), (ih_, oh), d, o_, h_, f_)) = current () in
+      let (S.State (n, (g, b), (ih, oh), d, o, h, f)) = current () in
       TextIO.print
         (("Filling successful with proof term:\n"
-         ^ Formatter.makestring_fmt (formatTuple (g_, p_)))
+         ^ Formatter.makestring_fmt (formatTuple (g, p)))
         ^ "\n")
 
     let rec splittingToMenu (a, a_) = match a with
       | [] -> a_
-      | o_ :: l_ -> splittingToMenu (l_, Splitting o_ :: a_)
+      | o :: l -> splittingToMenu (l, Splitting o :: a_)
 
-    let fillingToMenu (o_, a_) = Filling o_ :: a_
-    let recursionToMenu (o_, a_) = Recursion o_ :: a_
-    let inferenceToMenu (o_, a_) = Inference o_ :: a_
+    let fillingToMenu (o, a) = Filling o :: a
+    let recursionToMenu (o, a) = Recursion o :: a
+    let inferenceToMenu (o, a) = Inference o :: a
 
     let menu () =
       begin if empty () then menu_ := None
       else
-        let s_ = current () in
-        let splitO = MTPSplitting.expand (Obj.magic s_) in
-        let infO = Inference.expand (Obj.magic s_) in
-        let recO = MTPRecursion.expand (Obj.magic s_) in
-        let fillO = MTPFilling.expand (Obj.magic s_) in
+        let s = current () in
+        let splitO = MTPSplitting.expand (Obj.magic s) in
+        let infO = Inference.expand (Obj.magic s) in
+        let recO = MTPRecursion.expand (Obj.magic s) in
+        let fillO = MTPFilling.expand (Obj.magic s) in
         menu_ :=
           Some
             (fillingToMenu
@@ -214,48 +214,48 @@ end) : MTPI = struct
       let rec menuToString' (k, a, kOopt) = match a, kOopt with
         | [], (None, _) -> (Some k, "")
         | [], ((Some _ as kopt'), _) -> (kopt', "")
-        | Splitting o_ :: m_, ((None, None) as kOopt') ->
+        | Splitting o :: m, ((None, None) as kOopt') ->
             let kOopt'' =
-              begin if MTPSplitting.applicable o_ then (Some k, Some o_)
+              begin if MTPSplitting.applicable o then (Some k, Some o)
               else kOopt'
               end
             in
-            let (Some k'' as kopt), s = menuToString' (k + 1, m_, kOopt'') in
+            let (Some k'' as kopt), s = menuToString' (k + 1, m, kOopt'') in
             ( kopt,
               begin if k = k'' then
-                ((s ^ "\n* ") ^ format k) ^ MTPSplitting.menu o_
-              else ((s ^ "\n  ") ^ format k) ^ MTPSplitting.menu o_
+                ((s ^ "\n* ") ^ format k) ^ MTPSplitting.menu o
+              else ((s ^ "\n  ") ^ format k) ^ MTPSplitting.menu o
               end )
-        | Splitting o_ :: m_, ((Some k', Some o'_) as kOopt') ->
+        | Splitting o :: m, ((Some k', Some o') as kOopt') ->
             let kOopt'' =
-              begin if MTPSplitting.applicable o_ then
-                begin match MTPSplitting.compare o_ o'_ with
-                | Less -> (Some k, Some o_)
+              begin if MTPSplitting.applicable o then
+                begin match MTPSplitting.compare o o' with
+                | Less -> (Some k, Some o)
                 | _ -> kOopt'
                 end
               else kOopt'
               end
             in
-            let (Some k'' as kopt), s = menuToString' (k + 1, m_, kOopt'') in
+            let (Some k'' as kopt), s = menuToString' (k + 1, m, kOopt'') in
             ( kopt,
               begin if k = k'' then
-                ((s ^ "\n* ") ^ format k) ^ MTPSplitting.menu o_
-              else ((s ^ "\n  ") ^ format k) ^ MTPSplitting.menu o_
+                ((s ^ "\n* ") ^ format k) ^ MTPSplitting.menu o
+              else ((s ^ "\n  ") ^ format k) ^ MTPSplitting.menu o
               end )
-        | Filling o_ :: m_, kOopt ->
-            let kopt, s = menuToString' (k + 1, m_, kOopt) in
-            (kopt, ((s ^ "\n  ") ^ format k) ^ MTPFilling.menu o_)
-        | Recursion o_ :: m_, kOopt ->
-            let kopt, s = menuToString' (k + 1, m_, kOopt) in
-            (kopt, ((s ^ "\n  ") ^ format k) ^ MTPRecursion.menu o_)
-        | Inference o_ :: m_, kOopt ->
-            let kopt, s = menuToString' (k + 1, m_, kOopt) in
-            (kopt, ((s ^ "\n  ") ^ format k) ^ Inference.menu o_)
+        | Filling o :: m, kOopt ->
+            let kopt, s = menuToString' (k + 1, m, kOopt) in
+            (kopt, ((s ^ "\n  ") ^ format k) ^ MTPFilling.menu o)
+        | Recursion o :: m, kOopt ->
+            let kopt, s = menuToString' (k + 1, m, kOopt) in
+            (kopt, ((s ^ "\n  ") ^ format k) ^ MTPRecursion.menu o)
+        | Inference o :: m, kOopt ->
+            let kopt, s = menuToString' (k + 1, m, kOopt) in
+            (kopt, ((s ^ "\n  ") ^ format k) ^ Inference.menu o)
       in
       begin match !menu_ with
       | None -> raise (Error "Menu is empty")
-      | Some m_ ->
-          let kopt, s = menuToString' (1, m_, (None, None)) in
+      | Some m ->
+          let kopt, s = menuToString' (1, m, (None, None)) in
           s
       end
 
@@ -268,14 +268,14 @@ end) : MTPI = struct
           ^ "\n")
       end
       else
-        let s_ = current () in
-        ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s_)
+        let s = current () in
+        ignore begin if !Global.doubleCheck then FunTypeCheck.isState (Obj.magic s)
           else ()
           end;
         begin
           print "\n";
           begin
-            print (MTPrint.stateToString (Obj.magic s_));
+            print (MTPrint.stateToString (Obj.magic s));
             begin
               print "\nSelect from the following menu:\n";
               begin
@@ -287,29 +287,29 @@ end) : MTPI = struct
         end
       end
 
-    let rec contains (a, l'_) = match a with
+    let rec contains (a, l') = match a with
       | [] -> true
-      | x :: l_ ->
-          List.exists (function x' -> x = x') l'_ && contains (l_, l'_)
+      | x :: l ->
+          List.exists (function x' -> x = x') l' && contains (l, l')
 
-    let equiv l1_ l2_ = contains (l1_, l2_) && contains (l2_, l1_)
+    let equiv l1 l2 = contains (l1, l2) && contains (l2, l1)
 
-    let rec transformOrder' (g_, a) = match a with
+    let rec transformOrder' (g, a) = match a with
       | Order.Arg k ->
-          let k' = I.ctxLength g_ - k + 1 in
-          let (I.Dec (_, v_)) = I.ctxDec g_ k' in
-          S.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v_, I.id))
-      | Order.Lex os_ ->
-          S.Lex (map (function o_ -> transformOrder' (g_, o_)) os_)
-      | Order.Simul os_ ->
-          S.Simul (map (function o_ -> transformOrder' (g_, o_)) os_)
+          let k' = I.ctxLength g - k + 1 in
+          let (I.Dec (_, v)) = I.ctxDec g k' in
+          S.Arg ((I.Root (I.BVar k', I.Nil), I.id), (v, I.id))
+      | Order.Lex os ->
+          S.Lex (map (function o -> transformOrder' (g, o)) os)
+      | Order.Simul os ->
+          S.Simul (map (function o -> transformOrder' (g, o)) os)
 
-    let rec transformOrder (g_, a, b) = match a, b with
-      | F.All (F.Prim d_, f_), os_ ->
-          S.All (d_, transformOrder (I.Decl (g_, d_), f_, os_))
-      | F.And (f1_, f2_), o_ :: os_ ->
-          S.And (transformOrder (g_, f1_, [ o_ ]), transformOrder (g_, f2_, os_))
-      | F.Ex _, o_ :: [] -> transformOrder' (g_, o_)
+    let rec transformOrder (g, a, b) = match a, b with
+      | F.All (F.Prim d, f), os ->
+          S.All (d, transformOrder (I.Decl (g, d), f, os))
+      | F.And (f1, f2), o :: os ->
+          S.And (transformOrder (g, f1, [ o ]), transformOrder (g, f2, os))
+      | F.Ex _, o :: [] -> transformOrder' (g, o)
 
     let select c = try Order.selLookup c with _ -> Order.Lex []
 
@@ -322,9 +322,9 @@ end) : MTPI = struct
       in
       ignore (MTPGlobal.maxFill := k);
       ignore (reset ());
-      let f_ = RelFun.convertFor cL in
-      let o_ = transformOrder (I.Null, f_, map select cL) in
-      let slist = MTPInit.init f_ (Obj.magic o_) in
+      let f = RelFun.convertFor cL in
+      let o = transformOrder (I.Null, f, map select cL) in
+      let slist = MTPInit.init f (Obj.magic o) in
       ignore begin if List.length slist = 0 then raise Domain else ()
         end;
       try
@@ -332,7 +332,7 @@ end) : MTPI = struct
           ignore
             (map
                (function
-                 | s_ -> insert (Obj.magic (MTPrint.nameState (Obj.magic s_))))
+                 | s -> insert (Obj.magic (MTPrint.nameState (Obj.magic s))))
                slist);
           begin
             menu ();
@@ -349,45 +349,45 @@ end) : MTPI = struct
     let select k =
       let rec select' = function
         | k, [] -> abort "No such menu item"
-        | 1, Splitting o_ :: _ ->
-            let s'_ = Timers.time Timers.splitting MTPSplitting.apply o_ in
+        | 1, Splitting o :: _ ->
+            let s' = Timers.time Timers.splitting MTPSplitting.apply o in
             ignore (pushHistory ());
             ignore (delete ());
             ignore (ignore
                 (map
                    (function
-                     | s_ ->
-                         insert (Obj.magic (MTPrint.nameState (Obj.magic s_))))
-                   s'_));
+                     | s ->
+                         insert (Obj.magic (MTPrint.nameState (Obj.magic s))))
+                   s'));
             begin
               menu ();
               printMenu ()
             end
-        | 1, Recursion o_ :: _ ->
-            let s'_ = Timers.time Timers.recursion MTPRecursion.apply o_ in
+        | 1, Recursion o :: _ ->
+            let s' = Timers.time Timers.recursion MTPRecursion.apply o in
             ignore (pushHistory ());
             ignore (delete ());
-            ignore (insert (Obj.magic (MTPrint.nameState (Obj.magic s'_))));
+            ignore (insert (Obj.magic (MTPrint.nameState (Obj.magic s'))));
             begin
               menu ();
               printMenu ()
             end
-        | 1, Inference o_ :: _ ->
-            let s'_ = Timers.time Timers.recursion Inference.apply o_ in
+        | 1, Inference o :: _ ->
+            let s' = Timers.time Timers.recursion Inference.apply o in
             ignore (pushHistory ());
             ignore (delete ());
-            ignore (insert (Obj.magic (MTPrint.nameState (Obj.magic s'_))));
+            ignore (insert (Obj.magic (MTPrint.nameState (Obj.magic s'))));
             begin
               menu ();
               printMenu ()
             end
-        | 1, Filling o_ :: _ ->
-            let p_ =
-              try Timers.time Timers.filling MTPFilling.apply o_
+        | 1, Filling o :: _ ->
+            let p =
+              try Timers.time Timers.filling MTPFilling.apply o
               with MTPFilling.Error _ ->
                 abort "Filling unsuccessful: no object found"
             in
-            ignore (printFillResult p_);
+            ignore (printFillResult p);
             ignore (delete ());
             ignore (print "\n[Subgoal finished]\n");
             ignore (print "\n");
@@ -395,12 +395,12 @@ end) : MTPI = struct
               menu ();
               printMenu ()
             end
-        | k, _ :: m_ -> select' (k - 1, m_)
+        | k, _ :: m -> select' (k - 1, m)
       in
       try
         begin match !menu_ with
         | None -> raise (Error "No menu defined")
-        | Some m_ -> select' (k, m_)
+        | Some m -> select' (k, m)
         end
       with
       | MTPSplitting.Error s -> abort ("MTPSplitting. Error: " ^ s)
@@ -413,7 +413,7 @@ end) : MTPI = struct
       begin if empty () then raise (Error "Nothing to prove")
       else
         let s_ = current () in
-        let open'_, solved' =
+        let open', solved' =
           try MTPStrategy.run [ Obj.magic s_ ] with
           | MTPSplitting.Error s -> abort ("MTPSplitting. Error: " ^ s)
           | MTPFilling.Error s -> abort ("Filling Error: " ^ s)
@@ -423,7 +423,7 @@ end) : MTPI = struct
         in
         ignore (pushHistory ());
         ignore (delete ());
-        ignore (ignore (map insertOpen (Obj.magic open'_)));
+        ignore (ignore (map insertOpen (Obj.magic open')));
         ignore (ignore (map insertSolved (Obj.magic solved')));
         begin
           menu ();
@@ -434,12 +434,12 @@ end) : MTPI = struct
     let check () =
       begin if empty () then raise (Error "Nothing to check")
       else
-        let s_ = current () in
-        FunTypeCheck.isState (Obj.magic s_)
+        let s = current () in
+        FunTypeCheck.isState (Obj.magic s)
       end
 
     let auto () =
-      let open'_, solved' =
+      let open', solved' =
         try MTPStrategy.run (Obj.magic (collectOpen ())) with
         | MTPSplitting.Error s -> abort ("MTPSplitting. Error: " ^ s)
         | MTPFilling.Error s -> abort ("Filling Error: " ^ s)
@@ -449,7 +449,7 @@ end) : MTPI = struct
       in
       ignore (pushHistory ());
       ignore (initOpen ());
-      ignore (ignore (map insertOpen (Obj.magic open'_)));
+      ignore (ignore (map insertOpen (Obj.magic open')));
       ignore (ignore (map insertSolved (Obj.magic solved')));
       begin
         menu ();

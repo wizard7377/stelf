@@ -30,45 +30,45 @@ end) : STRICT = struct
 
     let rec patSpine = function
       | _, I.Nil -> true
-      | k, I.App (I.Root (I.BVar k', I.Nil), s_) ->
+      | k, I.App (I.Root (I.BVar k', I.Nil), s) ->
           let rec indexDistinct = function
             | I.Nil -> true
-            | I.App (I.Root (I.BVar k'', I.Nil), s_) ->
-                k' <> k'' && indexDistinct s_
+            | I.App (I.Root (I.BVar k'', I.Nil), s) ->
+                k' <> k'' && indexDistinct s
             | _ -> false
           in
-          k' <= k && patSpine (k, s_) && indexDistinct s_
+          k' <= k && patSpine (k, s) && indexDistinct s
       | _ -> false
 
     let rec strictExp (k, p, a) = match a with
       | I.Uni _ -> false
-      | I.Lam (d_, u_) ->
-          strictDec (k, p, d_) || strictExp (k + 1, p + 1, u_)
-      | I.Pi ((d_, _), u_) ->
-          strictDec (k, p, d_) || strictExp (k + 1, p + 1, u_)
-      | I.Root (h_, s_) ->
-          begin match h_ with
+      | I.Lam (d, u) ->
+          strictDec (k, p, d) || strictExp (k + 1, p + 1, u)
+      | I.Pi ((d, _), u) ->
+          strictDec (k, p, d) || strictExp (k + 1, p + 1, u)
+      | I.Root (h, s) ->
+          begin match h with
           | I.BVar k' ->
-              begin if k' = p then patSpine (k, s_)
-              else k' <= k && strictSpine (k, p, s_)
+              begin if k' = p then patSpine (k, s)
+              else k' <= k && strictSpine (k, p, s)
               end
-          | I.Const c -> strictSpine (k, p, s_)
-          | I.Def d -> strictSpine (k, p, s_)
-          | I.FgnConst (cs, conDec) -> strictSpine (k, p, s_)
+          | I.Const c -> strictSpine (k, p, s)
+          | I.Def d -> strictSpine (k, p, s)
+          | I.FgnConst (cs, conDec) -> strictSpine (k, p, s)
           end
       | I.FgnExp (cs, ops) -> false
 
     and strictSpine (k, p, a) = match a with
       | I.Nil -> false
-      | I.App (u_, s_) -> strictExp (k, p, u_) || strictSpine (k, p, s_)
+      | I.App (u, s) -> strictExp (k, p, u) || strictSpine (k, p, s)
 
-    and strictDec (k, p, I.Dec (_, v_)) = strictExp (k, p, v_)
+    and strictDec (k, p, I.Dec (_, v)) = strictExp (k, p, v)
 
     let rec strictArgParm (p, a) = match a with
-      | (I.Root _ as u_) -> strictExp (0, p, u_)
-      | (I.Pi _ as u_) -> strictExp (0, p, u_)
-      | (I.FgnExp _ as u_) -> strictExp (0, p, u_)
-      | I.Lam (d_, u_) -> strictArgParm (p + 1, u_)
+      | (I.Root _ as u) -> strictExp (0, p, u)
+      | (I.Pi _ as u) -> strictExp (0, p, u)
+      | (I.FgnExp _ as u) -> strictExp (0, p, u)
+      | I.Lam (d, u) -> strictArgParm (p + 1, u)
 
     let occToString (a, occ) = match a with
       | Some ocd -> Paths.wrap (Paths.occToRegionDef1 ocd occ) ("")
@@ -78,7 +78,7 @@ end) : STRICT = struct
       | I.Dec (None, _) -> "implicit variable"
       | I.Dec (Some x, _) -> "variable " ^ x
 
-    let strictTop ((u_, v_), ocdOpt) =
+    let strictTop ((u, v), ocdOpt) =
       let rec strictArgParms (a, b, occ) = match a, b with
         | I.Root (I.BVar _, _), _ ->
             raise
@@ -86,37 +86,37 @@ end) : STRICT = struct
         | I.Root _, _ -> ()
         | I.Pi _, _ -> ()
         | I.FgnExp _, _ -> ()
-        | I.Lam (d_, u'_), I.Pi (_, v'_) ->
-            begin if strictArgParm (1, u'_) then
-              strictArgParms (u'_, v'_, Paths.body occ)
+        | I.Lam (d, u'), I.Pi (_, v') ->
+            begin if strictArgParm (1, u') then
+              strictArgParms (u', v', Paths.body occ)
             else
               raise
                 (Error
                    (((occToString (ocdOpt, occ) ^ "No strict occurrence of ")
-                    ^ decToVarName d_)
+                    ^ decToVarName d)
                    ^ ", use %abbrev"))
             end
-        | (I.Lam _ as u_), (I.Root (I.Def _, _) as v_) ->
-            strictArgParms (u_, Whnf.normalize (Whnf.expandDef (v_, I.id)), occ)
+        | (I.Lam _ as u), (I.Root (I.Def _, _) as v) ->
+            strictArgParms (u, Whnf.normalize (Whnf.expandDef (v, I.id)), occ)
       in
-      strictArgParms (u_, v_, Paths.top)
+      strictArgParms (u, v, Paths.top)
 
-    let occursInType ((i, v_), ocdOpt) =
+    let occursInType ((i, v), ocdOpt) =
       let rec oit = function
-        | (0, v_), occ -> ()
-        | (i, I.Pi ((d_, p_), v_)), occ ->
-            begin match Abstract.piDepend d_ p_ v_ with
-            | I.Pi ((d'_, Maybe), v_) -> oit ((i - 1, v_), Paths.body occ)
+        | (0, v), occ -> ()
+        | (i, I.Pi ((d, p), v)), occ ->
+            begin match Abstract.piDepend d p v with
+            | I.Pi ((d', Maybe), v) -> oit ((i - 1, v), Paths.body occ)
             | _ ->
                 raise
                   (Error
                      (((occToString (ocdOpt, occ) ^ "No occurrence of ")
-                      ^ decToVarName d_)
+                      ^ decToVarName d)
                      ^ " in type, use %abbrev"))
             end
         | _ -> ()
       in
-      oit ((i, v_), Paths.top)
+      oit ((i, v), Paths.top)
   end
 
   (* Definition of normal form (nf) --- see lambda/Whnf.fun *)
@@ -173,7 +173,7 @@ end) : STRICT = struct
   (* may not be sound in general *)
   (* Wed Aug 25 16:39:57 2004 -fp *)
   let check = strictTop
-  let checkType k u_ occ = occursInType ((k, u_), occ)
+  let checkType k u occ = occursInType ((k, u), occ)
 end
 (*! structure IntSyn' : INTSYN !*)
 (*! sharing Whnf.IntSyn = IntSyn' !*)

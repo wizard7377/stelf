@@ -179,19 +179,19 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
   let applyEqns wherecl namespace =
     let eqns = wherecl namespace in
     let table : eqnTable = IntTree.new_ 0 in
-    let add (cid, inst_, r) =
+    let add (cid, inst, r) =
       begin match IntTree.lookup table cid with
-      | None -> IntTree.insert table (cid, ref [ (inst_, r) ])
-      | Some rl -> rl := (inst_, r) :: !rl
+      | None -> IntTree.insert table (cid, ref [ (inst, r) ])
+      | Some rl -> rl := (inst, r) :: !rl
       end
     in
     ignore (List.app add eqns);
-    let doInst (a, conDec_) = match a with
+    let doInst (a, conDec) = match a with
       | (Internal cid, r) ->
           begin try
             ModSyn.strictify
               (ExtSyn.internalInst
-                 conDec_ (ModSyn.abbrevify cid (IntSyn.sgnLookup cid)) r)
+                 conDec (ModSyn.abbrevify cid (IntSyn.sgnLookup cid)) r)
           with ExtSyn.Error msg ->
             raise
               (ExtSyn.Error
@@ -199,12 +199,12 @@ end) : RECON_MODULE with module ModSyn = ReconModule__0.ModSyn' = struct
                  ^ Names.qidToString (Names.constQid cid)))
           end
       | (External tm, r) ->
-          ModSyn.strictify (ExtSyn.externalInst conDec_ tm r)
+          ModSyn.strictify (ExtSyn.externalInst conDec tm r)
     in
-    let transformConDec (cid, conDec_) =
+    let transformConDec (cid, conDec) =
       begin match IntTree.lookup table cid with
-      | None -> conDec_
-      | Some { contents = l } -> List.foldr doInst conDec_ l
+      | None -> conDec
+      | Some { contents = l } -> List.foldr doInst conDec l
       end
     in
     transformConDec

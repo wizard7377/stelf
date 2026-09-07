@@ -61,49 +61,49 @@ end) : SKOLEM = struct
     module I = IntSyn
     module M = Modes.Modesyn.ModeSyn
 
-    let installSkolem (name, imp, (v_, mS), l_) =
+    let installSkolem (name, imp, (v, mS), l) =
       let rec spine = function
         | 0 -> I.Nil
         | n -> I.App (I.Root (I.BVar n, I.Nil), spine (n - 1))
       in
       let rec installSkolem' (d, a, s, k) = match a with
-        | (I.Pi ((d_, dp_), v_), mS) ->
+        | (I.Pi ((d_, dp), v), mS) ->
             begin match mS with
             | M.Mapp (M.Marg (M.Plus, _), mS') ->
                 installSkolem'
                   ( d + 1,
-                    (v_, mS'),
+                    (v, mS'),
                     I.dot1 s,
                     function
-                    | v_ ->
+                    | v ->
                         k
                           (Abstract.piDepend
-                             (Whnf.normalizeDec d_ s) I.Meta v_) )
+                             (Whnf.normalizeDec d_ s) I.Meta v) )
             | M.Mapp (M.Marg (M.Minus, _), mS') ->
-                let (I.Dec (_, v'_)) = d_ in
-                let v'' = k (Whnf.normalize (v'_, s)) in
+                let (I.Dec (_, v')) = d_ in
+                let v'' = k (Whnf.normalize (v', s)) in
                 let name' = Names.skonstName (name ^ "#") in
-                let sd_ = I.SkoDec (name', None, imp, v'', l_) in
-                let sk = I.sgnAdd sd_ in
-                let h_ = I.Skonst sk in
-                ignore (IndexSkolem.install I.Ordinary h_);
+                let sd = I.SkoDec (name', None, imp, v'', l) in
+                let sk = I.sgnAdd sd in
+                let h = I.Skonst sk in
+                ignore (IndexSkolem.install I.Ordinary h);
                 ignore (Names.installConstName sk);
                 ignore (Timers.time Timers.compiling Compile.install I.Ordinary sk);
                 let s_ = spine d in
-                ignore (Display.chatter_s 3 (Print.conDecToString sd_ ^ "\n"));
+                ignore (Display.chatter_s 3 (Print.conDecToString sd ^ "\n"));
                 installSkolem'
-                  (d, (v_, mS'), I.Dot (I.Exp (I.Root (h_, s_)), s), k)
+                  (d, (v, mS'), I.Dot (I.Exp (I.Root (h, s_)), s), k)
             end
         | (I.Uni _, M.Mnil) -> ()
       in
-      installSkolem' (0, (v_, mS), I.id, function v_ -> v_)
+      installSkolem' (0, (v, mS), I.id, function v -> v)
 
     let rec install = function
       | [] -> ()
       | a :: aL ->
-          let (I.ConDec (name, _, imp, _, v_, l_)) = I.sgnLookup a in
+          let (I.ConDec (name, _, imp, _, v, l)) = I.sgnLookup a in
           let (Some mS) = ModeTable.modeLookup a in
-          ignore (installSkolem (name, imp, (v_, mS), I.Type));
+          ignore (installSkolem (name, imp, (v, mS), I.Type));
           install aL
   end
 

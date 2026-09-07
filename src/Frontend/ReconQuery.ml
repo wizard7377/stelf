@@ -81,7 +81,7 @@ end) : RECON_QUERY = struct
      iff XOpt = SOME(""Xi""), false otherwise
   *)
   let freeVar = function
-    | Some name, xs_ -> List.exists (function _, name' -> name = name') xs_
+    | Some name, xs -> List.exists (function _, name' -> name = name') xs
     | _ -> false
 
   (* queryToQuery (q) = (V, XOpt, [(X1,""X1""),...,(Xn,""Xn"")])
@@ -98,20 +98,20 @@ end) : RECON_QUERY = struct
   let queryToQuery (Query_ (optName, tm)) (Paths.Loc (fileName, r)) =
     ignore (Names.varReset IntSyn.Null);
     ignore (T.resetErrors fileName);
-    let (T.JClass ((v_, oc), l_)) =
+    let (T.JClass ((v, oc), l)) =
       Timers.time Timers.recon T.reconQuery (T.jclass tm)
     in
     ignore (T.checkErrors r);
-    ignore begin match l_ with
+    ignore begin match l with
       | IntSyn.Type -> ()
       | _ -> error r ("Query was not a type")
       end;
-    let xs_ = Names.namedEVars () in
-    ignore begin if freeVar (optName, xs_) then
+    let xs = Names.namedEVars () in
+    ignore begin if freeVar (optName, xs) then
         error r (("Proof term variable " ^ valOf optName) ^ " occurs in type")
       else ()
       end;
-    (v_, optName, xs_)
+    (v, optName, xs)
   (* construct an external term for the result of the query
         val res = (case optName
                      of NONE => T.omitted (r)
@@ -120,10 +120,10 @@ end) : RECON_QUERY = struct
            couldn't optName ""occur"" in a constraint involving the type
            without being detected by this test?  -kw *)
 
-  let finishDefine (Define_ (optName, tm, clsOpt), ((u_, oc1), (v_, oc2Opt), l_))
+  let finishDefine (Define_ (optName, tm, clsOpt), ((u, oc1), (v, oc2Opt), l))
       =
-    let i, (u'_, v'_) =
-      try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u_ v_) ()
+    let i, (u', v') =
+      try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u v) ()
       with Abstract.Error msg ->
         raise (Abstract.Error (Paths.wrap (Paths.toRegion oc1) msg))
     in
@@ -135,17 +135,17 @@ end) : RECON_QUERY = struct
     let cd =
       try
         begin
-          Strict.check ((u'_, v'_), Some ocd);
-          IntSyn.ConDef (name, None, i, u'_, v'_, l_, IntSyn.ancestor u'_)
+          Strict.check ((u', v'), Some ocd);
+          IntSyn.ConDef (name, None, i, u', v', l, IntSyn.ancestor u')
         end
-      with Strict.Error _ -> IntSyn.AbbrevDef (name, None, i, u'_, v'_, l_)
+      with Strict.Error _ -> IntSyn.AbbrevDef (name, None, i, u', v', l)
     in
     let cd = Names.nameConDec cd in
     ignore (Display.chatter_s 3
         (Timers.time Timers.printing Print.conDecToString cd ^ "\n"));
     ignore begin if !Global.doubleCheck then begin
-        Timers.time Timers.checking TypeCheck.check (v'_, IntSyn.Uni l_);
-        Timers.time Timers.checking TypeCheck.check (u'_, v'_)
+        Timers.time Timers.checking TypeCheck.check (v', IntSyn.Uni l);
+        Timers.time Timers.checking TypeCheck.check (u', v')
       end
       else ()
       end;
@@ -156,9 +156,9 @@ end) : RECON_QUERY = struct
     (conDecOpt, Some ocd)
   (* is this necessary? -kw *)
 
-  let finishSolve (Solve_ (nameOpt, tm, r), u_, v_) =
-    let i, (u'_, v'_) =
-      try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u_ v_) ()
+  let finishSolve (Solve_ (nameOpt, tm, r), u, v) =
+    let i, (u', v') =
+      try Timers.time Timers.abstract (fun () -> Abstract.abstractDef u v) ()
       with Abstract.Error msg -> raise (Abstract.Error (Paths.wrap r msg))
     in
     let name =
@@ -168,19 +168,19 @@ end) : RECON_QUERY = struct
     let cd =
       try
         begin
-          Strict.check ((u'_, v'_), None);
+          Strict.check ((u', v'), None);
           IntSyn.ConDef
-            (name, None, i, u'_, v'_, IntSyn.Type, IntSyn.ancestor u'_)
+            (name, None, i, u', v', IntSyn.Type, IntSyn.ancestor u')
         end
       with Strict.Error _ ->
-        IntSyn.AbbrevDef (name, None, i, u'_, v'_, IntSyn.Type)
+        IntSyn.AbbrevDef (name, None, i, u', v', IntSyn.Type)
     in
     let cd = Names.nameConDec cd in
     ignore (Display.chatter_s 3
         (Timers.time Timers.printing Print.conDecToString cd ^ "\n"));
     ignore begin if !Global.doubleCheck then begin
-        Timers.time Timers.checking TypeCheck.check (v'_, IntSyn.Uni IntSyn.Type);
-        Timers.time Timers.checking TypeCheck.check (u'_, v'_)
+        Timers.time Timers.checking TypeCheck.check (v', IntSyn.Uni IntSyn.Type);
+        Timers.time Timers.checking TypeCheck.check (u', v')
       end
       else ()
       end;
@@ -214,32 +214,32 @@ end) : RECON_QUERY = struct
       | [] -> T.jnothing
       | def :: defs -> T.jand (mkd def) (mkj defs)
     in
-    let (T.JAnd (defines', T.JClass ((v_, _), l_))) =
+    let (T.JAnd (defines', T.JClass ((v, _), l))) =
       Timers.time Timers.recon T.reconQuery (T.jand (mkj defines) (T.jclass tm))
     in
     ignore (T.checkErrors r);
-    ignore begin match l_ with
+    ignore begin match l with
       | IntSyn.Type -> ()
       | _ -> error r0 ("Query was not a type")
       end;
-    let rec sc (m_, a, b) = match a, b with
+    let rec sc (m, a, b) = match a, b with
       | [], _ ->
-          begin match finishSolve (sol, m_, v_) with
+          begin match finishSolve (sol, m, v) with
           | None -> []
-          | Some conDec_ -> [ (conDec_, None) ]
+          | Some conDec -> [ (conDec, None) ]
           end
-      | def :: defs, T.JAnd (T.JTerm ((u_, oc1), v_, l_), f) ->
-          begin match finishDefine (def, ((u_, oc1), (v_, None), l_)) with
-          | None, _ -> sc (m_, defs, f)
-          | Some conDec_, ocdOpt -> (conDec_, ocdOpt) :: sc (m_, defs, f)
+      | def :: defs, T.JAnd (T.JTerm ((u, oc1), v, l), f) ->
+          begin match finishDefine (def, ((u, oc1), (v, None), l)) with
+          | None, _ -> sc (m, defs, f)
+          | Some conDec, ocdOpt -> (conDec, ocdOpt) :: sc (m, defs, f)
           end
-      | def :: defs, T.JAnd (T.JOf ((u_, oc1), (v_, oc2), l_), f) ->
-          begin match finishDefine (def, ((u_, oc1), (v_, Some oc2), l_)) with
-          | None, _ -> sc (m_, defs, f)
-          | Some conDec_, ocdOpt -> (conDec_, ocdOpt) :: sc (m_, defs, f)
+      | def :: defs, T.JAnd (T.JOf ((u, oc1), (v, oc2), l), f) ->
+          begin match finishDefine (def, ((u, oc1), (v, Some oc2), l)) with
+          | None, _ -> sc (m, defs, f)
+          | Some conDec, ocdOpt -> (conDec, ocdOpt) :: sc (m, defs, f)
           end
     in
-    (v_, function m_ -> sc (m_, defines, defines'))
+    (v, function m -> sc (m, defines, defines'))
   (* val Xs = Names.namedEVars () *)
 end
 (*! sharing Print.IntSyn = IntSyn' !*)

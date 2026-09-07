@@ -57,111 +57,111 @@ end) : ABSMACHINE = struct
       | I.Def a, I.Def a' -> a = a'
       | _ -> false
 
-    let rec compose (g_, a) = match a with
-      | I.Null -> g_
-      | IntSyn.Decl (g'_, d_) -> IntSyn.Decl (compose (g_, g'_), d_)
+    let rec compose (g, a) = match a with
+      | I.Null -> g
+      | IntSyn.Decl (g', d) -> IntSyn.Decl (compose (g, g'), d)
 
     let rec shiftSub (a, s) = match a with
       | I.Null -> s
-      | IntSyn.Decl (g_, d_) -> I.dot1 (shiftSub (g_, s))
+      | IntSyn.Decl (g, d) -> I.dot1 (shiftSub (g, s))
 
     let rec subgoalNum = function
       | I.Nil -> 1
-      | I.App (u_, s_) -> 1 + subgoalNum s_
+      | I.App (u, s) -> 1 + subgoalNum s
 
     let rec goalToType (a, s) = match a with
-      | C.All (d_, g) ->
-          I.Pi ((I.decSub d_ s, I.Maybe), goalToType (g, I.dot1 s))
-      | C.Impl (_, a_, _, g) ->
-          I.Pi ((I.Dec (None, I.EClo (a_, s)), I.No), goalToType (g, I.dot1 s))
+      | C.All (d, g) ->
+          I.Pi ((I.decSub d s, I.Maybe), goalToType (g, I.dot1 s))
+      | C.Impl (_, a, _, g) ->
+          I.Pi ((I.Dec (None, I.EClo (a, s)), I.No), goalToType (g, I.dot1 s))
       | C.Atom p -> I.EClo (p, s)
 
     let rec solve' (a, b, sc) = match a, b with
-      | (C.Atom p, s), (C.DProg (g_, dPool) as dp) ->
+      | (C.Atom p, s), (C.DProg (g, dPool) as dp) ->
           matchAtom ((p, s), dp, sc)
-      | (C.Impl (r, a_, ha, g), s), C.DProg (g_, dPool) ->
-          let (I.Dec (Some x, _) as d'_) =
-            N.decUName g_ (I.Dec (None, I.EClo (a_, s)))
+      | (C.Impl (r, a, ha, g), s), C.DProg (g_, dPool) ->
+          let (I.Dec (Some x, _) as d') =
+            N.decUName g_ (I.Dec (None, I.EClo (a, s)))
           in
-          ignore (T.signal g_ (T.IntroHyp (ha, d'_)));
+          ignore (T.signal g_ (T.IntroHyp (ha, d')));
           solve'
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Dec (r, s, ha))),
+              C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Dec (r, s, ha))),
               function
-              | m_ -> begin
-                  T.signal g_ (T.DischargeHyp (ha, d'_));
-                  sc (I.Lam (d'_, m_))
+              | m -> begin
+                  T.signal g_ (T.DischargeHyp (ha, d'));
+                  sc (I.Lam (d', m))
                 end )
-      | (C.All (d_, g), s), C.DProg (g_, dPool) ->
-          let (I.Dec (Some x, v_) as d'_) = N.decUName g_ (I.decSub d_ s) in
-          let ha = I.targetHead v_ in
-          ignore (T.signal g_ (T.IntroParm (ha, d'_)));
+      | (C.All (d, g), s), C.DProg (g_, dPool) ->
+          let (I.Dec (Some x, v) as d') = N.decUName g_ (I.decSub d s) in
+          let ha = I.targetHead v in
+          ignore (T.signal g_ (T.IntroParm (ha, d')));
           solve'
             ( (g, I.dot1 s),
-              C.DProg (I.Decl (g_, d'_), I.Decl (dPool, C.Parameter)),
+              C.DProg (I.Decl (g_, d'), I.Decl (dPool, C.Parameter)),
               function
-              | m_ -> begin
-                  T.signal g_ (T.DischargeParm (ha, d'_));
-                  sc (I.Lam (d'_, m_))
+              | m -> begin
+                  T.signal g_ (T.DischargeParm (ha, d'));
+                  sc (I.Lam (d', m))
                 end )
 
     and rSolve (ps', a, b, hcHa, sc) = match a, b with
-      | (C.Eq q_, s), C.DProg (g_, dPool) -> begin
+      | (C.Eq q, s), C.DProg (g, dPool) -> begin
           T.signal
-            g_ (T.Unify (hcHa, I.EClo (q_, s), I.EClo (fst ps', snd ps')));
-          begin match Unify.unifiable' g_ (q_, s) ps' with
+            g (T.Unify (hcHa, I.EClo (q, s), I.EClo (fst ps', snd ps')));
+          begin match Unify.unifiable' g (q, s) ps' with
           | None -> begin
-              T.signal g_ (T.Resolved (fst hcHa, snd hcHa));
+              T.signal g (T.Resolved (fst hcHa, snd hcHa));
               begin
                 sc I.Nil;
                 true
               end
             end
           | Some msg -> begin
-              T.signal g_ (T.FailUnify (hcHa, msg));
+              T.signal g (T.FailUnify (hcHa, msg));
               false
             end
           end
         end
-      | (C.Assign (q_, eqns), s), (C.DProg (g_, dPool) as dp) ->
-          begin match Assign.assignable g_ ps' (q_, s) with
+      | (C.Assign (q, eqns), s), (C.DProg (g, dPool) as dp) ->
+          begin match Assign.assignable g ps' (q, s) with
           | Some cnstr ->
               aSolve ((eqns, s), dp, hcHa, cnstr, function () -> sc I.Nil)
           | None -> false
           end
-      | (C.And (r, a_, g), s), (C.DProg (g_, dPool) as dp) ->
-          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
+      | (C.And (r, a, g), s), (C.DProg (g_, dPool) as dp) ->
+          let x = I.newEVar g_ (I.EClo (a, s)) in
           rSolve
             ( ps',
-              (r, I.Dot (I.Exp x_, s)),
+              (r, I.Dot (I.Exp x, s)),
               dp,
               hcHa,
               function
               | s_ -> begin
                   T.signal g_ (T.Subgoal (hcHa, function () -> subgoalNum s_));
-                  solve' ((g, s), dp, function m_ -> sc (I.App (m_, s_)))
+                  solve' ((g, s), dp, function m -> sc (I.App (m, s_)))
                 end )
-      | (C.Exists (I.Dec (_, a_), r), s), (C.DProg (g_, dPool) as dp) ->
-          let x_ = I.newEVar g_ (I.EClo (a_, s)) in
+      | (C.Exists (I.Dec (_, a), r), s), (C.DProg (g, dPool) as dp) ->
+          let x = I.newEVar g (I.EClo (a, s)) in
           rSolve
             ( ps',
-              (r, I.Dot (I.Exp x_, s)),
+              (r, I.Dot (I.Exp x, s)),
               dp,
               hcHa,
-              function s_ -> sc (I.App (x_, s_)) )
-      | (C.Axists (I.ADec (_, d), r), s), (C.DProg (g_, dPool) as dp) ->
-          let x_ = I.newAVar () in
+              function s -> sc (I.App (x, s)) )
+      | (C.Axists (I.ADec (_, d), r), s), (C.DProg (g, dPool) as dp) ->
+          let x = I.newAVar () in
           rSolve
             ( ps',
-              (r, I.Dot (I.Exp (I.EClo (x_, I.Shift (-d))), s)),
+              (r, I.Dot (I.Exp (I.EClo (x, I.Shift (-d))), s)),
               dp,
               hcHa,
               sc )
 
     and aSolve (a, b, hcHa, cnstr, sc) = match a, b with
-      | (trivial_, s), (C.DProg (g_, dPool) as dp) ->
+      | (trivial, s), (C.DProg (g, dPool) as dp) ->
           begin if Assign.solveCnstr cnstr then begin
-            T.signal g_ (T.Resolved (fst hcHa, snd hcHa));
+            T.signal g (T.Resolved (fst hcHa, snd hcHa));
             begin
               sc ();
               true
@@ -169,23 +169,23 @@ end) : ABSMACHINE = struct
           end
           else false
           end
-      | (C.UnifyEq (g'_, e1, n_, eqns), s), (C.DProg (g_, dPool) as dp) ->
-          let g''_ = compose (g_, g'_) in
-          let s' = shiftSub (g'_, s) in
-          begin if Assign.unifiable g''_ (n_, s') (e1, s') then
+      | (C.UnifyEq (g', e1, n, eqns), s), (C.DProg (g, dPool) as dp) ->
+          let g'' = compose (g, g') in
+          let s' = shiftSub (g', s) in
+          begin if Assign.unifiable g'' (n, s') (e1, s') then
             aSolve ((eqns, s), dp, hcHa, cnstr, sc)
           else false
           end
 
     and matchAtom
-        (((I.Root (ha, s_), s) as ps'), (C.DProg (g_, dPool) as dp), sc) =
+        (((I.Root (ha, s_), s) as ps'), (C.DProg (g, dPool) as dp), sc) =
       let tag = T.tagGoal () in
-      ignore (T.signal g_ (T.SolveGoal (tag, ha, I.EClo (fst ps', snd ps'))));
+      ignore (T.signal g (T.SolveGoal (tag, ha, I.EClo (fst ps', snd ps'))));
       let deterministic = C.detTableCheck (cidFromHead ha) in
       let exception SucceedOnce of I.spine in
       let rec matchSig = function
         | [] -> begin
-            T.signal g_ (T.FailGoal (tag, ha, I.EClo (fst ps', snd ps')));
+            T.signal g (T.FailGoal (tag, ha, I.EClo (fst ps', snd ps')));
             ()
           end
         | hc :: sgn' ->
@@ -198,15 +198,15 @@ end) : ABSMACHINE = struct
                       dp,
                       (hc, ha),
                       function
-                      | s_ -> begin
+                      | s -> begin
                           T.signal
-                            g_ (T.SucceedGoal
+                            g (T.SucceedGoal
                                 (tag, (hc, ha), I.EClo (fst ps', snd ps')));
-                          sc (I.Root (hc, s_))
+                          sc (I.Root (hc, s))
                         end ))
             then begin
               T.signal
-                g_ (T.RetryGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
+                g (T.RetryGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
               ()
             end
             else ()
@@ -215,7 +215,7 @@ end) : ABSMACHINE = struct
       in
       let rec matchSigDet = function
         | [] -> begin
-            T.signal g_ (T.FailGoal (tag, ha, I.EClo (fst ps', snd ps')));
+            T.signal g (T.FailGoal (tag, ha, I.EClo (fst ps', snd ps')));
             ()
           end
         | hc :: sgn' -> (
@@ -230,26 +230,26 @@ end) : ABSMACHINE = struct
                           dp,
                           (hc, ha),
                           function
-                          | s_ -> begin
+                          | s -> begin
                               T.signal
-                                g_ (T.SucceedGoal
+                                g (T.SucceedGoal
                                     (tag, (hc, ha), I.EClo (fst ps', snd ps')));
-                              raise (SucceedOnce s_)
+                              raise (SucceedOnce s)
                             end ))
                 then begin
                   T.signal
-                    g_ (T.RetryGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
+                    g (T.RetryGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
                   ()
                 end
                 else ()
                 end;
                 matchSigDet sgn'
               end
-            with SucceedOnce s_ ->
+            with SucceedOnce s ->
               begin
                 T.signal
-                  g_ (T.CommitGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
-                sc (I.Root (hc, s_))
+                  g (T.CommitGoal (tag, (hc, ha), I.EClo (fst ps', snd ps')));
+                sc (I.Root (hc, s))
               end)
       in
       let rec matchDProg (a, k) = match a with
@@ -271,17 +271,17 @@ end) : ABSMACHINE = struct
                               dp,
                               (I.BVar k, ha),
                               function
-                              | s_ -> begin
+                              | s -> begin
                                   T.signal
-                                    g_ (T.SucceedGoal
+                                    g (T.SucceedGoal
                                         ( tag,
                                           (I.BVar k, ha),
                                           I.EClo (fst ps', snd ps') ));
-                                  raise (SucceedOnce s_)
+                                  raise (SucceedOnce s)
                                 end ))
                     then begin
                       T.signal
-                        g_ (T.RetryGoal
+                        g (T.RetryGoal
                             (tag, (I.BVar k, ha), I.EClo (fst ps', snd ps')));
                       ()
                     end
@@ -289,12 +289,12 @@ end) : ABSMACHINE = struct
                     end;
                     matchDProg (dPool', k + 1)
                   end
-                with SucceedOnce s_ ->
+                with SucceedOnce s ->
                   begin
                     T.signal
-                      g_ (T.CommitGoal
+                      g (T.CommitGoal
                           (tag, (I.BVar k, ha), I.EClo (fst ps', snd ps')));
-                    sc (I.Root (I.BVar k, s_))
+                    sc (I.Root (I.BVar k, s))
                   end
               else begin
                 begin if
@@ -305,17 +305,17 @@ end) : ABSMACHINE = struct
                           dp,
                           (I.BVar k, ha),
                           function
-                          | s_ -> begin
+                          | s -> begin
                               T.signal
-                                g_ (T.SucceedGoal
+                                g (T.SucceedGoal
                                     ( tag,
                                       (I.BVar k, ha),
                                       I.EClo (fst ps', snd ps') ));
-                              sc (I.Root (I.BVar k, s_))
+                              sc (I.Root (I.BVar k, s))
                             end ))
                 then begin
                   T.signal
-                    g_ (T.RetryGoal
+                    g (T.RetryGoal
                         (tag, (I.BVar k, ha), I.EClo (fst ps', snd ps')));
                   ()
                 end
@@ -326,14 +326,14 @@ end) : ABSMACHINE = struct
               end
             else matchDProg (dPool', k + 1)
             end
-        | I.Decl (dPool', parameter_) -> matchDProg (dPool', k + 1)
+        | I.Decl (dPool', parameter) -> matchDProg (dPool', k + 1)
       in
       let rec matchConstraint (cnstrSolve, try_) =
         let succeeded =
           CsManager.trail (function () ->
-              begin match cnstrSolve (g_, I.SClo (s_, s), try_) with
-              | Some u_ -> begin
-                  sc u_;
+              begin match cnstrSolve (g, I.SClo (s_, s), try_) with
+              | Some u -> begin
+                  sc u;
                   true
                 end
               | None -> false

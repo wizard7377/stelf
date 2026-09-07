@@ -85,23 +85,23 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   (* ------------------------------------------------------------------ *)
   (* Call-pattern helpers *)
 
-  let checkArgNumber (i, v_, args, r) =
-    let rec go i v_ args =
-      match (i, v_, args) with
+  let checkArgNumber (i, v, args, r) =
+    let rec go i v args =
+      match (i, v, args) with
       | 0, IntSyn.Uni IntSyn.Type, [] -> ()
-      | 0, IntSyn.Pi (_, v2_), _ :: rest -> go 0 v2_ rest
+      | 0, IntSyn.Pi (_, v2), _ :: rest -> go 0 v2 rest
       | 0, IntSyn.Pi (_, _), [] -> error r ("Missing arguments in call pattern")
       | 0, IntSyn.Uni IntSyn.Type, _ :: _ ->
           error r ("Extraneous arguments in call pattern")
-      | i, IntSyn.Pi (_, v2_), args -> go (i - 1) v2_ args
+      | i, IntSyn.Pi (_, v2), args -> go (i - 1) v2 args
       | _ -> ()
     in
-    go i v_ args
+    go i v args
 
-  let checkCallPat (cd, p_, r) =
+  let checkCallPat (cd, p, r) =
     match cd with
-    | IntSyn.ConDec (_, _, i, IntSyn.Normal, v_, IntSyn.Kind) ->
-        checkArgNumber (i, v_, p_, r)
+    | IntSyn.ConDec (_, _, i, IntSyn.Normal, v, IntSyn.Kind) ->
+        checkArgNumber (i, v, p, r)
     | IntSyn.ConDec (a, _, _, IntSyn.Constraint _, _, _) ->
         error r ("Illegal constraint constant " ^ a ^ " in call pattern")
     | IntSyn.ConDec (a, _, _, IntSyn.Foreign _, _, _) ->
@@ -118,7 +118,7 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
         error r ("Illegal Skolem constant " ^ a ^ " in call pattern")
     | _ -> ()
 
-  let resolveCallPat (name, p_, loc) =
+  let resolveCallPat (name, p, loc) =
     let r = Cst.loc_to_region loc in
     let qid = Names.Qid ([], name) in
     match Names.constLookup qid with
@@ -128,15 +128,15 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
             ^ Names.qidToString (valOf (Names.constUndef qid))
             ^ " in call pattern")
     | Some cid ->
-        checkCallPat (IntSyn.sgnLookup cid, p_, r);
-        ((cid, p_), r)
+        checkCallPat (IntSyn.sgnLookup cid, p, r);
+        ((cid, p), r)
 
   let resolveCallpats cps_cst =
     let module CP = Cst.View.Thm.CallPats in
     let raw =
       match CP.view cps_cst with
       | CP.CallPats cp ->
-          List.map (fun (name, p_, _) -> (name, p_, Cst.ghost)) cp
+          List.map (fun (name, p, _) -> (name, p, Cst.ghost)) cp
       | _ -> assert false
     in
     let rec go = function
@@ -157,9 +157,9 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     let ord, cps_cst =
       match TD.view td with TD.TDecl (o, cp) -> (o, cp) | _ -> assert false
     in
-    let o_, r = convertOrder ord in
-    let cp'_, rs = resolveCallpats cps_cst in
-    (ThmSyn.TDecl (o_, cp'_), (r, rs))
+    let o, r = convertOrder ord in
+    let cp', rs = resolveCallpats cps_cst in
+    (ThmSyn.TDecl (o, cp'), (r, rs))
 
   let rdeclTorDecl rd =
     let module RD = Cst.View.Thm.RDecl in
@@ -174,18 +174,18 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
       | PR.Predicate (s, l) -> (s, l)
       | _ -> assert false
     in
-    let pred_ =
+    let pred =
       match pred_str with
       | "LESS" -> ThmSyn.Less
       | "LEQ" -> ThmSyn.Leq
       | "EQUAL" -> ThmSyn.Eq
       | s -> raise (Error ("Unknown predicate: " ^ s))
     in
-    let o1_, r1 = convertOrder o1_cst in
-    let o2_, _r2 = convertOrder o2_cst in
+    let o1, r1 = convertOrder o1_cst in
+    let o2, _r2 = convertOrder o2_cst in
     let r = r1 in
-    let cp'_, rs = resolveCallpats cps_cst in
-    (ThmSyn.RDecl (ThmSyn.RedOrder (pred_, o1_, o2_), cp'_), (r, rs))
+    let cp', rs = resolveCallpats cps_cst in
+    (ThmSyn.RDecl (ThmSyn.RedOrder (pred, o1, o2), cp'), (r, rs))
 
   let tableddeclTotabledDecl td =
     let module Tab = Cst.View.Thm.TabledDecl in
@@ -248,11 +248,11 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
   (* ------------------------------------------------------------------ *)
   (* Context-block helpers (for forallG) *)
 
-  let ctxBlockToString (g0_, (g1_, g2_)) =
+  let ctxBlockToString (g0, (g1, g2)) =
     ignore (Names.varReset IntSyn.Null);
-    let g0' = Names.ctxName g0_ in
-    let g1' = Names.ctxLUName g1_ in
-    let g2' = Names.ctxLUName g2_ in
+    let g0' = Names.ctxName g0 in
+    let g1' = Names.ctxLUName g1 in
+    let g2' = Names.ctxLUName g2 in
     let some_part =
       match g1' with
       | IntSyn.Null -> ""
@@ -262,14 +262,14 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     ^ "\n" ^ some_part ^ "pi "
     ^ Print.ctxToString (ctxAppend g0' g1') g2'
 
-  let checkFreevars (g0_, (g1_, g2_), r) =
-    match g0_ with
+  let checkFreevars (g0, (g1, g2), r) =
+    match g0 with
     | IntSyn.Null -> ()
     | _ ->
         ignore (Names.varReset IntSyn.Null);
-        let g0' = Names.ctxName g0_ in
-        let g1' = Names.ctxLUName g1_ in
-        let g2' = Names.ctxLUName g2_ in
+        let g0' = Names.ctxName g0 in
+        let g1' = Names.ctxLUName g1 in
+        let g2' = Names.ctxLUName g2 in
         error
           r ("Free variables in context block after term reconstruction:\n"
             ^ ctxBlockToString (g0', (g1', g2')))
@@ -282,20 +282,20 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
       | Some r1, None -> r1
       | None, None -> Paths.Reg (0, 0)
     in
-    let (RT.JWithCtx (g1_, RT.JWithCtx (g2_, _))) =
+    let (RT.JWithCtx (g1, RT.JWithCtx (g2, _))) =
       RT.recon (RT.jwithctx g1_cst (RT.jwithctx g2_cst RT.jnothing))
     in
-    let g0_, ctxs =
-      try Abstract.abstractCtxs [ g1_; g2_ ]
-      with Constraints.Error c_ ->
+    let g0, ctxs =
+      try Abstract.abstractCtxs [ g1; g2 ]
+      with Constraints.Error c ->
         error
           r ("Constraints remain in context block after term reconstruction:\n"
-            ^ ctxBlockToString (IntSyn.Null, (g1_, g2_))
-            ^ "\n" ^ Print.cnstrsToString c_)
+            ^ ctxBlockToString (IntSyn.Null, (g1, g2))
+            ^ "\n" ^ Print.cnstrsToString c)
     in
-    let g1'_, g2'_ = match ctxs with [ a; b ] -> (a, b) | _ -> assert false in
-    ignore (checkFreevars (g0_, (g1'_, g2'_), r));
-    (g1'_, g2'_)
+    let g1', g2' = match ctxs with [ a; b ] -> (a, b) | _ -> assert false in
+    ignore (checkFreevars (g0, (g1', g2'), r));
+    (g1', g2')
 
   (* ------------------------------------------------------------------ *)
   (* theoremToTheorem — recursive traversal of Cst.Thm.theorem *)
@@ -330,8 +330,8 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
     let gbs_cst, g_cst, m_ctx, k = go t ([], IntSyn.Null, IntSyn.Null, 0) in
     ignore (Names.varReset IntSyn.Null);
     let gBs = List.map abstractCtxPair gbs_cst in
-    let (RT.JWithCtx (g_, _)) = RT.recon (RT.jwithctx g_cst RT.jnothing) in
-    ThmSyn.ThDecl (gBs, g_, m_ctx, k)
+    let (RT.JWithCtx (g, _)) = RT.recon (RT.jwithctx g_cst RT.jnothing) in
+    ThmSyn.ThDecl (gBs, g, m_ctx, k)
 
   let theoremDecToTheoremDec td =
     let module ThmDec = Cst.View.Thm.ThmDec in
@@ -353,6 +353,6 @@ module Make_ReconThm (M : S.S) (RT : RECON_TERM.RECON_TERM with module M = M) :
       | _ -> assert false
     in
     let w' = List.map (fun (ids, id) -> ThmSyn.Names.Qid (ids, id)) w_raw in
-    let cp'_, rs = resolveCallpats cps_cst in
-    (ThmSyn.WDecl (w', cp'_), rs)
+    let cp', rs = resolveCallpats cps_cst in
+    (ThmSyn.WDecl (w', cp'), rs)
 end

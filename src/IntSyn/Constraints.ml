@@ -49,15 +49,15 @@ module MakeConstraints (Conv : CONV) : CONSTRAINTS = struct
   let rec simplify = function
     | [] -> []
     | { contents = I.Solved } :: cnstrs -> simplify cnstrs
-    | ({ contents = I.Eqn (g_, u1_, u2_) } as eqn_) :: cnstrs ->
-        begin if Conv.conv (u1_, I.id) (u2_, I.id) then simplify cnstrs
-        else eqn_ :: simplify cnstrs
+    | ({ contents = I.Eqn (g, u1, u2) } as eqn) :: cnstrs ->
+        begin if Conv.conv (u1, I.id) (u2, I.id) then simplify cnstrs
+        else eqn :: simplify cnstrs
         end
-    | ({ contents = I.FgnCnstr (csfc_csid, csfc_ops) } as fgnCnstr_) :: cnstrs
+    | ({ contents = I.FgnCnstr (csfc_csid, csfc_ops) } as fgnCnstr) :: cnstrs
       ->
         begin if I.FgnCnstrStd.Simplify.apply csfc_csid csfc_ops () then
           simplify cnstrs
-        else fgnCnstr_ :: simplify cnstrs
+        else fgnCnstr :: simplify cnstrs
         end
 
   let rec names_to_string = function

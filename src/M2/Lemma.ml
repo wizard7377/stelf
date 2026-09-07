@@ -38,31 +38,31 @@ end) : LEMMA with module MetaSyn = Lemma__0.MetaSyn' = struct
     let rec createEVars = function
       | M.Prefix (I.Null, I.Null, I.Null) ->
           (M.Prefix (I.Null, I.Null, I.Null), I.id)
-      | M.Prefix (I.Decl (g_, d_), I.Decl (m_, M.Top), I.Decl (b_, b)) ->
-          let M.Prefix (g'_, m'_, b'_), s' =
-            createEVars (M.Prefix (g_, m_, b_))
+      | M.Prefix (I.Decl (g, d), I.Decl (m, M.Top), I.Decl (b_, b)) ->
+          let M.Prefix (g', m', b'), s' =
+            createEVars (M.Prefix (g, m, b_))
           in
           ( M.Prefix
-              ( I.Decl (g'_, I.decSub d_ s'),
-                I.Decl (m'_, M.Top),
-                I.Decl (b'_, b) ),
+              ( I.Decl (g', I.decSub d s'),
+                I.Decl (m', M.Top),
+                I.Decl (b', b) ),
             I.dot1 s' )
-      | M.Prefix (I.Decl (g_, I.Dec (_, v_)), I.Decl (m_, M.Bot), I.Decl (b_, _))
+      | M.Prefix (I.Decl (g, I.Dec (_, v)), I.Decl (m, M.Bot), I.Decl (b, _))
         ->
-          let M.Prefix (g'_, m'_, b'_), s' =
-            createEVars (M.Prefix (g_, m_, b_))
+          let M.Prefix (g', m', b'), s' =
+            createEVars (M.Prefix (g, m, b))
           in
-          let x_ = I.newEVar g'_ (I.EClo (v_, s')) in
-          (M.Prefix (g'_, m'_, b'_), I.Dot (I.Exp x_, s'))
+          let x = I.newEVar g' (I.EClo (v, s')) in
+          (M.Prefix (g', m', b'), I.Dot (I.Exp x, s'))
 
-    let apply (M.State (name, gm, v_)) a =
-      let (M.Prefix (g'_, m'_, b'_) as gm'), s' = createEVars gm in
-      let u'_, vs'_ = M.createAtomConst g'_ (I.Const a) in
+    let apply (M.State (name, gm, v)) a =
+      let (M.Prefix (g', m', b') as gm'), s' = createEVars gm in
+      let u', vs' = M.createAtomConst g' (I.Const a) in
       A.abstract
         (M.State
            ( name,
              gm',
-             I.Pi ((I.Dec (None, u'_), I.No), I.EClo (v_, I.comp s' I.shift))
+             I.Pi ((I.Dec (None, u'), I.No), I.EClo (v, I.comp s' I.shift))
            ))
   end
 

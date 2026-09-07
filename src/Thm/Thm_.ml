@@ -52,11 +52,11 @@ module Make_Thm
 
     let error r msg = raise (Error (Paths.wrap r msg))
 
-    let unique (((a, p_), r), a_) =
+    let unique (((a, p), r), a_) =
       let rec unique' (b, c, a_) = match b, c with
         | I.Uni _, [] -> a_
-        | I.Pi (_, v_), None :: p_ -> unique' (v_, p_, a_)
-        | I.Pi (_, v_), Some x :: p_ -> begin
+        | I.Pi (_, v), None :: p -> unique' (v, p, a_)
+        | I.Pi (_, v), Some x :: p -> begin
             List.app
               (function
                 | x' ->
@@ -65,13 +65,13 @@ module Make_Thm
                     else ()
                     end)
               a_;
-            unique' (v_, p_, x :: a_)
+            unique' (v, p, x :: a_)
           end
         | I.Uni _, _ ->
             error
               r ("Too many arguments supplied to type family "
                 ^ Names.qidToString (Names.constQid a))
-        | I.Pi (_, v_), [] ->
+        | I.Pi (_, v), [] ->
             error
               r ("Too few arguments supplied to type family "
                 ^ Names.qidToString (Names.constQid a))
@@ -80,30 +80,30 @@ module Make_Thm
               r (("Constant " ^ Names.qidToString (Names.constQid a))
                 ^ " is an object, not a type family")
       in
-      let rec skip (k, a, p_, a_) = match k, a with
-        | 0, v_ -> unique' (v_, p_, a_)
-        | k, I.Pi (_, v_) -> skip (k - 1, v_, p_, a_)
+      let rec skip (k, a, p, a_) = match k, a with
+        | 0, v -> unique' (v, p, a_)
+        | k, I.Pi (_, v) -> skip (k - 1, v, p, a_)
       in
-      skip (I.constImp a, I.constType a, p_, a_)
+      skip (I.constImp a, I.constType a, p, a_)
 
-    let uniqueCallpats (l_, rs) =
+    let uniqueCallpats (l, rs) =
       let rec uniqueCallpats' (a, a_) = match a with
         | ([], []) -> ()
-        | (aP :: l_, r :: rs) ->
-            uniqueCallpats' ((l_, rs), unique ((aP, r), a_))
+        | (aP :: l, r :: rs) ->
+            uniqueCallpats' ((l, rs), unique ((aP, r), a_))
       in
-      uniqueCallpats' ((l_, rs), [])
+      uniqueCallpats' ((l, rs), [])
 
-    let wfCallpats (l0_, c0_, r) =
+    let wfCallpats (l0, c0, r) =
       let rec makestring = function
         | [] -> ""
         | s :: [] -> s
-        | s :: l_ -> (s ^ " ") ^ makestring l_
+        | s :: l -> (s ^ " ") ^ makestring l
       in
       let rec exists' (x, a, b) = match a, b with
         | [], _ -> false
-        | None :: l_, M.Mapp (_, mS) -> exists' (x, l_, mS)
-        | Some y :: l_, M.Mapp (M.Marg (mode, _), mS) ->
+        | None :: l, M.Mapp (_, mS) -> exists' (x, l, mS)
+        | Some y :: l, M.Mapp (M.Marg (mode, _), mS) ->
             begin if x = y then
               begin match mode with
               | M.Plus -> true
@@ -112,46 +112,46 @@ module Make_Thm
                     r (((("Expected " ^ x) ^ " to have ") ^ M.modeToString M.Plus)
                       ^ " mode")
               end
-            else exists' (x, l_, mS)
+            else exists' (x, l, mS)
             end
       in
-      let rec skip (k, x, p_, a) = match k, a with
-        | 0, mS -> exists' (x, p_, mS)
-        | k, M.Mapp (_, mS) -> skip (k - 1, x, p_, mS)
+      let rec skip (k, x, p, a) = match k, a with
+        | 0, mS -> exists' (x, p, mS)
+        | k, M.Mapp (_, mS) -> skip (k - 1, x, p, mS)
       in
       let rec delete (x, b) = match b with
-        | ((a, p_) as aP) :: c_ ->
-            begin if skip (I.constImp a, x, p_, valOf (ModeTable.modeLookup a))
-            then c_
-            else aP :: delete (x, c_)
+        | ((a, p) as aP) :: c ->
+            begin if skip (I.constImp a, x, p, valOf (ModeTable.modeLookup a))
+            then c
+            else aP :: delete (x, c)
             end
         | [] -> error r (("Variable " ^ x) ^ " does not occur as argument")
       in
       let rec wfCallpats' = function
         | [], [] -> ()
-        | x :: l_, c_ -> wfCallpats' (l_, delete (x, c_))
+        | x :: l, c -> wfCallpats' (l, delete (x, c))
         | _ ->
             error
-              r (("Mutual argument (" ^ makestring l0_)
+              r (("Mutual argument (" ^ makestring l0)
                 ^ ") does not cover all call patterns")
       in
-      wfCallpats' (l0_, c0_)
+      wfCallpats' (l0, c0)
 
-    let wf ((o_, L.Callpats c_), (r, rs)) =
+    let wf ((o, L.Callpats c), (r, rs)) =
       let rec wfOrder = function
-        | L.Varg l_ -> wfCallpats (l_, c_, r)
-        | L.Lex l_ -> wfOrders l_
-        | L.Simul l_ -> wfOrders l_
+        | L.Varg l -> wfCallpats (l, c, r)
+        | L.Lex l -> wfOrders l
+        | L.Simul l -> wfOrders l
       and wfOrders = function
         | [] -> ()
-        | o_ :: l_ -> begin
-            wfOrder o_;
-            wfOrders l_
+        | o :: l -> begin
+            wfOrder o;
+            wfOrders l
           end
       in
       let rec allModed = function
         | [] -> ()
-        | (a, p_) :: cs_ -> begin
+        | (a, p) :: cs -> begin
             begin match ModeTable.modeLookup a with
             | None ->
                 error
@@ -159,20 +159,20 @@ module Make_Thm
                     ^ " to be moded")
             | Some mS -> ()
             end;
-            allModed cs_
+            allModed cs
           end
       in
-      allModed c_;
+      allModed c;
       begin
-        uniqueCallpats (c_, rs);
-        wfOrder o_
+        uniqueCallpats (c, rs);
+        wfOrder o
       end
 
     let rec argPos (x, a, n) = match a with
       | [] -> None
-      | None :: l_ -> argPos (x, l_, n + 1)
-      | Some x' :: l_ ->
-          begin if x = x' then Some n else argPos (x, l_, n + 1)
+      | None :: l -> argPos (x, l, n + 1)
+      | Some x' :: l ->
+          begin if x = x' then Some n else argPos (x, l, n + 1)
           end
 
     let rec locate (x :: vars, params, imp) =
@@ -181,149 +181,149 @@ module Make_Thm
       | Some n -> n
       end
 
-    let rec argOrder (a, p_, n) = match a with
-      | L.Varg l_ -> O.Arg (locate (l_, p_, n))
-      | L.Simul l_ -> O.Simul (argOrderL (l_, p_, n))
-      | L.Lex l_ -> O.Lex (argOrderL (l_, p_, n))
+    let rec argOrder (a, p, n) = match a with
+      | L.Varg l -> O.Arg (locate (l, p, n))
+      | L.Simul l -> O.Simul (argOrderL (l, p, n))
+      | L.Lex l -> O.Lex (argOrderL (l, p, n))
 
-    and argOrderL (a, p_, n) = match a with
+    and argOrderL (a, p, n) = match a with
       | [] -> []
-      | o_ :: l_ -> argOrder (o_, p_, n) :: argOrderL (l_, p_, n)
+      | o :: l -> argOrder (o, p, n) :: argOrderL (l, p, n)
 
     let rec argOrderMutual (a, k, a_) = match a with
       | [] -> a_
-      | p_ :: l_ -> argOrderMutual (l_, k, k (p_, a_))
+      | p :: l -> argOrderMutual (l, k, k (p, a_))
 
-    let rec installOrder (o_, b, thmsLT) = match b with
+    let rec installOrder (o, b, thmsLT) = match b with
       | [] -> ()
-      | ((a, p_) as aP) :: thmsLE ->
-          let m'_ =
+      | ((a, p) as aP) :: thmsLE ->
+          let m' =
             argOrderMutual
               ( thmsLE,
-                (function (a, _), l_ -> O.Le (a, l_)),
+                (function (a, _), l -> O.Le (a, l)),
                 argOrderMutual
                   ( aP :: thmsLT,
-                    (function (a, _), l_ -> O.Lt (a, l_)),
+                    (function (a, _), l -> O.Lt (a, l)),
                     O.Empty ) )
           in
-          let o'_ = argOrder (o_, p_, I.constImp a) in
-          let s'_ = O.install a (O.TDec (o'_, m'_)) in
-          installOrder (o_, thmsLE, aP :: thmsLT)
+          let o' = argOrder (o, p, I.constImp a) in
+          let s' = O.install a (O.TDec (o', m')) in
+          installOrder (o, thmsLE, aP :: thmsLT)
 
-    let installDecl (o_, L.Callpats l_) =
+    let installDecl (o, L.Callpats l) =
       begin
-        installOrder (o_, l_, []);
-        map (function a, _ -> a) l_
+        installOrder (o, l, []);
+        map (function a, _ -> a) l
       end
 
-    let installTerminates (L.TDecl (o_, cp_)) rrs =
+    let installTerminates (L.TDecl (o, cp)) rrs =
       begin
-        wf ((o_, cp_), rrs);
-        installDecl (o_, cp_)
+        wf ((o, cp), rrs);
+        installDecl (o, cp)
       end
 
     let uninstallTerminates cid = O.uninstall cid
 
-    let installTotal (L.TDecl (o_, cp_)) rrs =
+    let installTotal (L.TDecl (o, cp)) rrs =
       begin
-        wf ((o_, cp_), rrs);
-        installDecl (o_, cp_)
+        wf ((o, cp), rrs);
+        installDecl (o, cp)
       end
 
     let uninstallTotal cid = O.uninstall cid
 
-    let rec argROrder (a, p_, n) = match a with
-      | L.Varg l_ -> O.Arg (locate (l_, p_, n))
-      | L.Simul l_ -> O.Simul (argROrderL (l_, p_, n))
-      | L.Lex l_ -> O.Lex (argROrderL (l_, p_, n))
+    let rec argROrder (a, p, n) = match a with
+      | L.Varg l -> O.Arg (locate (l, p, n))
+      | L.Simul l -> O.Simul (argROrderL (l, p, n))
+      | L.Lex l -> O.Lex (argROrderL (l, p, n))
 
-    and argROrderL (a, p_, n) = match a with
+    and argROrderL (a, p, n) = match a with
       | [] -> []
-      | o_ :: l_ -> argROrder (o_, p_, n) :: argROrderL (l_, p_, n)
+      | o :: l -> argROrder (o, p, n) :: argROrderL (l, p, n)
 
-    let argPredicate (a, o_, o'_) = match a with
-      | L.Less -> O.Less (o_, o'_)
-      | L.Leq -> O.Leq (o_, o'_)
-      | L.Eq -> O.Eq (o_, o'_)
+    let argPredicate (a, o, o') = match a with
+      | L.Less -> O.Less (o, o')
+      | L.Leq -> O.Leq (o, o')
+      | L.Eq -> O.Eq (o, o')
 
     let rec installPredicate (b, c, thmsLT) = match b, c with
       | _, [] -> ()
-      | L.RedOrder (pred_, o1_, o2_), ((a, p_) as aP) :: thmsLE ->
-          let m'_ =
+      | L.RedOrder (pred, o1, o2), ((a, p) as aP) :: thmsLE ->
+          let m' =
             argOrderMutual
               ( thmsLE,
-                (function (a, _), l_ -> O.Le (a, l_)),
+                (function (a, _), l -> O.Le (a, l)),
                 argOrderMutual
                   ( aP :: thmsLT,
-                    (function (a, _), l_ -> O.Lt (a, l_)),
+                    (function (a, _), l -> O.Lt (a, l)),
                     O.Empty ) )
           in
-          let o1' = argROrder (o1_, p_, I.constImp a) in
-          let o2' = argROrder (o2_, p_, I.constImp a) in
-          let pr = argPredicate (pred_, o1', o2') in
-          let s''_ = O.installROrder a (O.RDec (pr, m'_)) in
-          installPredicate (L.RedOrder (pred_, o1_, o2_), thmsLE, aP :: thmsLT)
+          let o1' = argROrder (o1, p, I.constImp a) in
+          let o2' = argROrder (o2, p, I.constImp a) in
+          let pr = argPredicate (pred, o1', o2') in
+          let s'' = O.installROrder a (O.RDec (pr, m')) in
+          installPredicate (L.RedOrder (pred, o1, o2), thmsLE, aP :: thmsLT)
 
-    let installRDecl (r_, L.Callpats l_) =
+    let installRDecl (r, L.Callpats l) =
       begin
-        installPredicate (r_, l_, []);
-        map (function a, _ -> a) l_
+        installPredicate (r, l, []);
+        map (function a, _ -> a) l
       end
 
-    let wfRCallpats (l0_, c0_, r) =
+    let wfRCallpats (l0, c0, r) =
       let rec makestring = function
         | [] -> ""
         | s :: [] -> s
-        | s :: l_ -> (s ^ " ") ^ makestring l_
+        | s :: l -> (s ^ " ") ^ makestring l
       in
       let rec exists' (x, a) = match a with
         | [] -> false
-        | None :: l_ -> exists' (x, l_)
-        | Some y :: l_ -> x = y || exists' (x, l_)
+        | None :: l -> exists' (x, l)
+        | Some y :: l -> x = y || exists' (x, l)
       in
       let rec delete (x, b) = match b with
-        | ((a, p_) as aP) :: c_ ->
-            begin if exists' (x, p_) then c_ else aP :: delete (x, c_)
+        | ((a, p) as aP) :: c ->
+            begin if exists' (x, p) then c else aP :: delete (x, c)
             end
         | [] -> error r (("Variable " ^ x) ^ " does not occur as argument")
       in
       let rec wfCallpats' = function
         | [], [] -> ()
-        | x :: l_, c_ -> wfCallpats' (l_, delete (x, c_))
+        | x :: l, c -> wfCallpats' (l, delete (x, c))
         | _ ->
             error
-              r (("Mutual argument (" ^ makestring l0_)
+              r (("Mutual argument (" ^ makestring l0)
                 ^ ") does not cover all call patterns")
       in
-      wfCallpats' (l0_, c0_)
+      wfCallpats' (l0, c0)
 
-    let wfred ((L.RedOrder (pred_, o_, o'_), L.Callpats c_), (r, rs)) =
+    let wfred ((L.RedOrder (pred, o, o'), L.Callpats c), (r, rs)) =
       let rec wfOrder = function
-        | L.Varg l_ -> begin
-            wfRCallpats (l_, c_, r);
+        | L.Varg l -> begin
+            wfRCallpats (l, c, r);
             Varg
           end
-        | L.Lex l_ -> Lex (wfOrders l_)
-        | L.Simul l_ -> Simul (wfOrders l_)
+        | L.Lex l -> Lex (wfOrders l)
+        | L.Simul l -> Simul (wfOrders l)
       and wfOrders = function
         | [] -> []
-        | o_ :: l_ -> wfOrder o_ :: wfOrders l_
+        | o :: l -> wfOrder o :: wfOrders l
       in
-      uniqueCallpats (c_, rs);
-      begin if wfOrder o_ = wfOrder o'_ then ()
+      uniqueCallpats (c, rs);
+      begin if wfOrder o = wfOrder o' then ()
       else
         error
           r (("Reduction Order ("
             ^ P.rOrderToString
-                (Obj.magic (L.RedOrder (pred_, o_, o'_)) : P.ThmSyn.redOrder)
+                (Obj.magic (L.RedOrder (pred, o, o')) : P.ThmSyn.redOrder)
             )
             ^ ") requires both orders to be of the same type.")
       end
 
-    let installReduces (L.RDecl (r_, c_)) rrs =
+    let installReduces (L.RDecl (r, c)) rrs =
       begin
-        wfred ((r_, c_), rrs);
-        installRDecl (r_, c_)
+        wfred ((r, c), rrs);
+        installRDecl (r, c)
       end
 
     let uninstallReduces cid = O.uninstallROrder cid

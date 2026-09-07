@@ -99,28 +99,28 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
 
   (* ---------------------------------------------------------------- *)
 
-  let formatDec g_ d_ = to_format (P.decl (env ()) (R.dec (opts ()) g_ d_))
+  let formatDec g d = to_format (P.decl (env ()) (R.dec (opts ()) g d))
 
-  let formatDecList g_ ds =
-    to_format (P.decls (env ()) ~brackets:`Braces (R.dec_list (opts ()) g_ ds))
+  let formatDecList g ds =
+    to_format (P.decls (env ()) ~brackets:`Braces (R.dec_list (opts ()) g ds))
 
   (* The only entry point that needs a pending substitution on a declaration
      list, so it reaches past the assembled interface to [Term]. *)
-  let formatDecList' g_ (ds, s) =
+  let formatDecList' g (ds, s) =
     to_format
       (P.decls (env ()) ~brackets:`Braces
-         (Tm.dec_list_sub (opts ()) g_ (ds, s)))
+         (Tm.dec_list_sub (opts ()) g (ds, s)))
 
-  let formatExp g_ u_ = to_format (P.term (env ()) (R.exp (opts ()) g_ u_))
+  let formatExp g u = to_format (P.term (env ()) (R.exp (opts ()) g u))
 
-  let formatSpine g_ s_ =
-    List.map (fun t -> to_format (P.term (env ()) t)) (R.spine (opts ()) g_ s_)
+  let formatSpine g s =
+    List.map (fun t -> to_format (P.term (env ()) t)) (R.spine (opts ()) g s)
 
-  let formatConDec condec_ =
-    to_format (P.cmd (env ()) (R.con_dec (opts ()) ~hide:false condec_))
+  let formatConDec condec =
+    to_format (P.cmd (env ()) (R.con_dec (opts ()) ~hide:false condec))
 
-  let formatConDecI condec_ =
-    to_format (P.cmd (env ()) (R.con_dec (opts ()) ~hide:true condec_))
+  let formatConDecI condec =
+    to_format (P.cmd (env ()) (R.con_dec (opts ()) ~hide:true condec))
 
   (* [=] and [;] are not STELF surface syntax, so constraint rendering is
      assembled here rather than being forced through the CST. That is exactly
@@ -133,9 +133,9 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
     | R.Fgn [] -> "Empty Constraint"
     | R.Fgn ts -> String.concat "; " (List.map (P.term_to_string e) ts)
 
-  let formatCnstr cnstr_ =
+  let formatCnstr cnstr =
     to_format (fun fmt ->
-        Format.pp_print_string fmt (show_cnstr (R.cnstr (opts ()) (ref cnstr_))))
+        Format.pp_print_string fmt (show_cnstr (R.cnstr (opts ()) (ref cnstr))))
 
   let formatCnstrs cnstrL =
     to_format (fun fmt ->
@@ -147,16 +147,16 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
                  (List.map (fun c -> show_cnstr (R.cnstr (opts ()) c)) cnstrL)
               ^ "."))
 
-  let formatCtx g0_ g_ =
-    to_format (P.decls (env ()) ~brackets:`Braces (R.ctx (opts ()) g0_ g_))
+  let formatCtx g0 g =
+    to_format (P.decls (env ()) ~brackets:`Braces (R.ctx (opts ()) g0 g))
 
-  let decToString g_ d_ = str (P.decl (env ()) (R.dec (opts ()) g_ d_))
-  let expToString g_ u_ = str (P.term (env ()) (R.exp (opts ()) g_ u_))
+  let decToString g d = str (P.decl (env ()) (R.dec (opts ()) g d))
+  let expToString g u = str (P.term (env ()) (R.exp (opts ()) g u))
 
-  let conDecToString condec_ =
-    str (P.cmd (env ()) (R.con_dec (opts ()) ~hide:false condec_))
+  let conDecToString condec =
+    str (P.cmd (env ()) (R.con_dec (opts ()) ~hide:false condec))
 
-  let cnstrToString cnstr_ = show_cnstr (R.cnstr (opts ()) (ref cnstr_))
+  let cnstrToString cnstr = show_cnstr (R.cnstr (opts ()) (ref cnstr))
 
   let cnstrsToString cnstrL =
     match cnstrL with
@@ -166,8 +166,8 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
           (List.map (fun c -> show_cnstr (R.cnstr (opts ()) c)) cnstrL)
         ^ "."
 
-  let ctxToString g0_ g_ =
-    str (P.decls (env ()) ~brackets:`Braces (R.ctx (opts ()) g0_ g_))
+  let ctxToString g0 g =
+    str (P.decls (env ()) ~brackets:`Braces (R.ctx (opts ()) g0 g))
 
   let evarInstToString xnames =
     let e = env () in
@@ -180,11 +180,11 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
 
   (* Pure IntSyn traversals, not printing: moved across unchanged from
      [Print_]. *)
-  let rec collectEVars (a, xs_) = match a with
-    | [] -> xs_
-    | (u_, _) :: xnames ->
+  let rec collectEVars (a, xs) = match a with
+    | [] -> xs
+    | (u, _) :: xnames ->
         collectEVars
-          (xnames, Abstract.collectEVars IntSyn.Null (u_, IntSyn.id) xs_)
+          (xnames, Abstract.collectEVars IntSyn.Null (u, IntSyn.id) xs)
 
   let eqCnstr r1 r2 = r1 == r2
 
@@ -197,13 +197,13 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
 
   let rec collectConstraints = function
     | [] -> []
-    | IntSyn.EVar ({ contents = None }, _, _, cnstrs) :: xs_ ->
-        mergeConstraints (Constraints.simplify !cnstrs, collectConstraints xs_)
-    | _ :: xs_ -> collectConstraints xs_
+    | IntSyn.EVar ({ contents = None }, _, _, cnstrs) :: xs ->
+        mergeConstraints (Constraints.simplify !cnstrs, collectConstraints xs)
+    | _ :: xs -> collectConstraints xs
 
   let evarCnstrsToStringOpt xnames =
-    let ys_ = collectEVars (xnames, []) in
-    match collectConstraints ys_ with
+    let ys = collectEVars (xnames, []) in
+    match collectConstraints ys with
     | [] -> None
     | cnstrL -> Some (cnstrsToString cnstrL)
 
@@ -217,7 +217,7 @@ module Print : PRINT.PRINT with module Formatter = Formatter = struct
                Format.pp_print_string fmt (String.concat "." (ns @ [ n ]))))
           names)
 
-  let worldsToString w_ = F.makestring_fmt (formatWorlds w_)
+  let worldsToString w = F.makestring_fmt (formatWorlds w)
 
   let printSgn () =
     IntSyn.sgnApp (fun cid ->
